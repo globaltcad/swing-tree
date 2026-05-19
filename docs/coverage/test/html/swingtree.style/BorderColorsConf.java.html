@@ -72,11 +72,11 @@ final class BorderColorsConf
 
     @SuppressWarnings(&quot;ReferenceEquality&quot;)
     private boolean _isUndefined(Color c) {
-<span class="pc bpc" id="L75" title="1 of 2 branches missed.">        return c == UI.Color.UNDEFINED;</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        return c == UI.Color.UNDEFINED;</span>
     }
 
     boolean isHomogeneous() {
-<span class="pc bpc" id="L79" title="2 of 6 branches missed.">        return _top.equals(_right) &amp;&amp; _top.equals(_bottom) &amp;&amp; _top.equals(_left);</span>
+<span class="pc bpc" id="L79" title="1 of 6 branches missed.">        return _top.equals(_right) &amp;&amp; _top.equals(_bottom) &amp;&amp; _top.equals(_left);</span>
     }
 
     boolean isAnyVisible() {
@@ -90,7 +90,7 @@ final class BorderColorsConf
     boolean isFullyOpaque() {
 <span class="fc" id="L91">        return</span>
 <span class="fc bfc" id="L92" title="All 2 branches covered.">                _top.getAlpha()    == 255 &amp;&amp;</span>
-<span class="pc bpc" id="L93" title="1 of 2 branches missed.">                _right.getAlpha()  == 255 &amp;&amp;</span>
+<span class="fc bfc" id="L93" title="All 2 branches covered.">                _right.getAlpha()  == 255 &amp;&amp;</span>
 <span class="pc bpc" id="L94" title="1 of 2 branches missed.">                _bottom.getAlpha() == 255 &amp;&amp;</span>
 <span class="pc bpc" id="L95" title="1 of 2 branches missed.">                _left.getAlpha()   == 255;</span>
     }
@@ -100,19 +100,19 @@ final class BorderColorsConf
     }
 
     Optional&lt;Color&gt; top() {
-<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        return Optional.ofNullable(_isUndefined(_top) ? null : _top);</span>
+<span class="fc bfc" id="L103" title="All 2 branches covered.">        return Optional.ofNullable(_isUndefined(_top) ? null : _top);</span>
     }
 
     Optional&lt;Color&gt; right() {
-<span class="pc bpc" id="L107" title="1 of 2 branches missed.">        return Optional.ofNullable(_isUndefined(_right) ? null : _right);</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        return Optional.ofNullable(_isUndefined(_right) ? null : _right);</span>
     }
 
     Optional&lt;Color&gt; bottom() {
-<span class="pc bpc" id="L111" title="1 of 2 branches missed.">        return Optional.ofNullable(_isUndefined(_bottom) ? null : _bottom);</span>
+<span class="fc bfc" id="L111" title="All 2 branches covered.">        return Optional.ofNullable(_isUndefined(_bottom) ? null : _bottom);</span>
     }
 
     Optional&lt;Color&gt; left() {
-<span class="pc bpc" id="L115" title="1 of 2 branches missed.">        return Optional.ofNullable(_isUndefined(_left) ? null : _left);</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">        return Optional.ofNullable(_isUndefined(_left) ? null : _left);</span>
     }
 
     BorderColorsConf withTop( Color top ) {
@@ -144,7 +144,7 @@ final class BorderColorsConf
 <span class="fc" id="L144">        BorderColorsConf rhs = (BorderColorsConf) obj;</span>
 <span class="fc bfc" id="L145" title="All 2 branches covered.">        return _top.equals(rhs._top) &amp;&amp;</span>
 <span class="pc bpc" id="L146" title="1 of 2 branches missed.">               _right.equals(rhs._right) &amp;&amp;</span>
-<span class="pc bpc" id="L147" title="1 of 2 branches missed.">               _bottom.equals(rhs._bottom) &amp;&amp;</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">               _bottom.equals(rhs._bottom) &amp;&amp;</span>
 <span class="pc bpc" id="L148" title="1 of 2 branches missed.">               _left.equals(rhs._left);</span>
     }
 

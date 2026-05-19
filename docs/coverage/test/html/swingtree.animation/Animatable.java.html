@@ -43,7 +43,7 @@ public final class Animatable&lt;M&gt;
      * @return An {@link Animatable} instance that does nothing.
      */
     public static &lt;T&gt; Animatable&lt;T&gt; none() {
-<span class="nc" id="L46">        return (Animatable&lt;T&gt;) _NONE;</span>
+<span class="fc" id="L46">        return (Animatable&lt;T&gt;) _NONE;</span>
     }
 
     /**
@@ -60,8 +60,8 @@ public final class Animatable&lt;M&gt;
      * @throws NullPointerException If the supplied value is {@code null}.
      */
     public static &lt;T&gt; Animatable&lt;T&gt; of( T value ) {
-<span class="nc" id="L63">        Objects.requireNonNull(value);</span>
-<span class="nc" id="L64">        return of( LifeTime.none(), value, (state, v) -&gt; v );</span>
+<span class="fc" id="L63">        Objects.requireNonNull(value);</span>
+<span class="pc" id="L64">        return of( LifeTime.none(), value, (state, v) -&gt; v );</span>
     }
 
     /**

@@ -30,7 +30,7 @@ import java.util.List;
 final class StyleRenderer
 {
 <span class="fc" id="L32">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleRenderer.class);</span>
-<span class="fc" id="L33">    private static final Map&lt;Pooled&lt;NoiseConf&gt;, Map&lt;Point2D,NoiseGradientPaint&gt;&gt; _NOISE_PAINT_CACHE = new WeakHashMap&lt;&gt;();</span>
+<span class="fc" id="L33">    private static final Map&lt;Pooled&lt;NoiseConf&gt;, NoisePaintCache&gt; _NOISE_PAINT_CACHE = new WeakHashMap&lt;&gt;();</span>
 
     private StyleRenderer() {} // Un-instantiable!
 
@@ -216,7 +216,7 @@ final class StyleRenderer
 
 <span class="fc bfc" id="L217" title="All 2 branches covered.">        if ( shadow.isOutset() ) {</span>
 <span class="fc" id="L218">            int artifactAdjustment = 1;</span>
-<span class="fc" id="L219">            baseArea = ComponentAreas.calculateComponentBodyArea(conf.boxModel(), artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment);</span>
+<span class="fc" id="L219">            baseArea = new Area(ComponentAreas.calculateComponentBodyArea(conf.boxModel(), artifactAdjustment, artifactAdjustment, artifactAdjustment, artifactAdjustment));</span>
 <span class="fc" id="L220">        }</span>
         else
 <span class="fc" id="L222">            baseArea = new Area(conf.areas().get(UI.ComponentArea.BODY));</span>
@@ -722,57 +722,24 @@ final class StyleRenderer
         final LayerRenderConf conf,
         final Graphics2D g2d
     ) {
-<span class="fc" id="L725">        final Paint noisePaint = _createNoisePaint(conf.boxModel(), noise);</span>
-<span class="fc" id="L726">        final Shape areaToFill = conf.areas().get(noise.get().area());</span>
-<span class="fc" id="L727">        g2d.setPaint(noisePaint);</span>
-<span class="fc" id="L728">        g2d.fill(areaToFill);</span>
+<span class="fc" id="L725">        final Shape areaToFill = conf.areas().get(noise.get().area());</span>
+<span class="fc" id="L726">        final Pooled&lt;NoiseConf&gt; withoutOffset = noise.get().withoutOffsetForRenderCacheAccess();</span>
+<span class="fc" id="L727">        final NoisePaintCache noiseRenderer = _NOISE_PAINT_CACHE.computeIfAbsent(withoutOffset, k -&gt; new NoisePaintCache());</span>
+<span class="fc" id="L728">        noiseRenderer.renderNoise(conf.boxModel(), noise, areaToFill, g2d);</span>
 <span class="fc" id="L729">    }</span>
 
+    /**
+     *  Returns a {@link Paint} for the supplied noise configuration. Used where a plain
+     *  {@link Paint} object is required (e.g. font painting) and the large-tile blitting
+     *  strategy of {@link #_renderNoise} is not applicable.
+     */
     static Paint _createNoisePaint(
-        final BoxModelConf   boxModel,
+        final BoxModelConf      boxModel,
         final Pooled&lt;NoiseConf&gt; noise
     ) {
-<span class="pc bpc" id="L735" title="1 of 2 branches missed.">        if ( noise.get().colors().length == 1 ) {</span>
-<span class="nc" id="L736">            return noise.get().colors()[0];</span>
-        } else {
-<span class="fc" id="L738">            Outline insets = boxModel.insetsFor(noise.get().boundary());</span>
-<span class="fc" id="L739">            Point2D.Float corner1 = new Point2D.Float(</span>
-<span class="fc" id="L740">                                        insets.left().orElse(0f) + noise.get().offset().x(),</span>
-<span class="fc" id="L741">                                        insets.top().orElse(0f) + noise.get().offset().y()</span>
-                                    );
-
-<span class="fc" id="L744">            return _createNoisePaint(corner1, noise);</span>
-        }
-    }
-
-    private static Paint _createNoisePaint(
-        final Point2D.Float  center,
-        final Pooled&lt;NoiseConf&gt; noise
-    ) {
-<span class="fc" id="L752">        Map&lt;Point2D, NoiseGradientPaint&gt; cachedPaints = _NOISE_PAINT_CACHE.computeIfAbsent(noise, k -&gt; new HashMap&lt;&gt;());</span>
-<span class="fc" id="L753">        NoiseGradientPaint paint = cachedPaints.get(center);</span>
-<span class="fc bfc" id="L754" title="All 2 branches covered.">        if ( paint != null ) {</span>
-<span class="fc" id="L755">            return paint;</span>
-        }
-
-<span class="fc" id="L758">        final Color[] colors    = noise.get().colors();</span>
-<span class="fc" id="L759">        final float[] fractions = _fractionsFrom(colors, noise.get().fractions());</span>
-<span class="fc" id="L760">        final float rotation = noise.get().rotation();</span>
-<span class="fc" id="L761">        final Scale scale = noise.get().scale();</span>
-<span class="fc" id="L762">        final float scaleX = scale.x();</span>
-<span class="fc" id="L763">        final float scaleY = scale.y();</span>
-
-<span class="fc" id="L765">        paint = new NoiseGradientPaint(</span>
-                        center,
-                        scaleX,
-                        scaleY,
-                        rotation,
-                        fractions,
-                        colors,
-<span class="fc" id="L772">                        noise.get().function()</span>
-                    );
-<span class="fc" id="L774">        cachedPaints.put(center, paint);</span>
-<span class="fc" id="L775">        return paint;</span>
+<span class="fc" id="L740">        final Pooled&lt;NoiseConf&gt; withoutOffset = noise.get().withoutOffsetForRenderCacheAccess();</span>
+<span class="fc" id="L741">        final NoisePaintCache noiseRenderer = _NOISE_PAINT_CACHE.computeIfAbsent(withoutOffset, k -&gt; new NoisePaintCache());</span>
+<span class="fc" id="L742">        return noiseRenderer.getNoisePaint(boxModel, noise);</span>
     }
 
 
@@ -789,10 +756,10 @@ final class StyleRenderer
         final GradientConf   gradient
     ) {
         {
-<span class="fc" id="L792">            final float cx = ( corner1.x + corner2.x ) / 2;</span>
-<span class="fc" id="L793">            final float cy = ( corner1.y + corner2.y ) / 2;</span>
-<span class="fc" id="L794">            final float nx = ( corner2.x - corner1.x );</span>
-<span class="fc" id="L795">            final float ny = ( corner1.y - corner2.y );</span>
+<span class="fc" id="L759">            final float cx = ( corner1.x + corner2.x ) / 2;</span>
+<span class="fc" id="L760">            final float cy = ( corner1.y + corner2.y ) / 2;</span>
+<span class="fc" id="L761">            final float nx = ( corner2.x - corner1.x );</span>
+<span class="fc" id="L762">            final float ny = ( corner1.y - corner2.y );</span>
             /*
                 The above variables form 2 lines:
                     1. The line with direction n going through corner1.
@@ -800,49 +767,49 @@ final class StyleRenderer
             */
 
             // project the center (cx,cy) onto the lines:
-<span class="fc" id="L803">            corner1 = projectPointOntoLine(corner1, new Point2D.Float(nx, ny), new Point2D.Float(cx, cy));</span>
-<span class="fc" id="L804">            corner2 = projectPointOntoLine(corner2, new Point2D.Float(nx, ny), new Point2D.Float(cx, cy));</span>
+<span class="fc" id="L770">            corner1 = projectPointOntoLine(corner1, new Point2D.Float(nx, ny), new Point2D.Float(cx, cy));</span>
+<span class="fc" id="L771">            corner2 = projectPointOntoLine(corner2, new Point2D.Float(nx, ny), new Point2D.Float(cx, cy));</span>
         }
 
-<span class="fc" id="L807">        final UI.Cycle cycle  = gradient.cycle();</span>
-<span class="fc" id="L808">        final Color[]  colors = gradient.colors();</span>
+<span class="fc" id="L774">        final UI.Cycle cycle  = gradient.cycle();</span>
+<span class="fc" id="L775">        final Color[]  colors = gradient.colors();</span>
 
-<span class="fc" id="L810">        final float size   = gradient.size();</span>
+<span class="fc" id="L777">        final float size   = gradient.size();</span>
 
-<span class="fc" id="L812">        final float corner1X = corner1.x;</span>
-<span class="fc" id="L813">        final float corner1Y = corner1.y;</span>
-<span class="fc" id="L814">        float corner2X = corner2.x;</span>
-<span class="fc" id="L815">        float corner2Y = corner2.y;</span>
+<span class="fc" id="L779">        final float corner1X = corner1.x;</span>
+<span class="fc" id="L780">        final float corner1Y = corner1.y;</span>
+<span class="fc" id="L781">        float corner2X = corner2.x;</span>
+<span class="fc" id="L782">        float corner2Y = corner2.y;</span>
 
-<span class="fc" id="L817">        float[] fractions = _fractionsFrom(gradient);</span>
+<span class="fc" id="L784">        float[] fractions = _fractionsFrom(gradient);</span>
 
-<span class="pc bpc" id="L819" title="1 of 2 branches missed.">        if ( size &gt;= 0 ) {</span>
-<span class="nc" id="L820">            float vectorX = corner2X - corner1X;</span>
-<span class="nc" id="L821">            float vectorY = corner2Y - corner1Y;</span>
-<span class="nc" id="L822">            float vectorLength2 = (float) Math.sqrt(vectorX * vectorX + vectorY * vectorY);</span>
-<span class="nc" id="L823">            vectorX = (vectorX / vectorLength2);</span>
-<span class="nc" id="L824">            vectorY = (vectorY / vectorLength2);</span>
-<span class="nc" id="L825">            corner2X = corner1X + vectorX * size;</span>
-<span class="nc" id="L826">            corner2Y = corner1Y + vectorY * size;</span>
+<span class="pc bpc" id="L786" title="1 of 2 branches missed.">        if ( size &gt;= 0 ) {</span>
+<span class="nc" id="L787">            float vectorX = corner2X - corner1X;</span>
+<span class="nc" id="L788">            float vectorY = corner2Y - corner1Y;</span>
+<span class="nc" id="L789">            float vectorLength2 = (float) Math.sqrt(vectorX * vectorX + vectorY * vectorY);</span>
+<span class="nc" id="L790">            vectorX = (vectorX / vectorLength2);</span>
+<span class="nc" id="L791">            vectorY = (vectorY / vectorLength2);</span>
+<span class="nc" id="L792">            corner2X = corner1X + vectorX * size;</span>
+<span class="nc" id="L793">            corner2Y = corner1Y + vectorY * size;</span>
         }
 
-<span class="pc bpc" id="L829" title="1 of 2 branches missed.">        if ( gradient.rotation() % 360f != 0 ) {</span>
-<span class="nc" id="L830">            Point2D.Float p = _rotatePoint(corner1X, corner1Y, corner2X, corner2Y, gradient.rotation());</span>
-<span class="nc" id="L831">            corner2X = p.x;</span>
-<span class="nc" id="L832">            corner2Y = p.y;</span>
+<span class="pc bpc" id="L796" title="1 of 2 branches missed.">        if ( gradient.rotation() % 360f != 0 ) {</span>
+<span class="nc" id="L797">            Point2D.Float p = _rotatePoint(corner1X, corner1Y, corner2X, corner2Y, gradient.rotation());</span>
+<span class="nc" id="L798">            corner2X = p.x;</span>
+<span class="nc" id="L799">            corner2Y = p.y;</span>
         }
 
-<span class="pc bpc" id="L835" title="2 of 6 branches missed.">        if ( colors.length == 2 &amp;&amp; gradient.fractions().length == 0 &amp;&amp; cycle == UI.Cycle.NONE )</span>
-<span class="fc" id="L836">            return new GradientPaint(</span>
+<span class="pc bpc" id="L802" title="2 of 6 branches missed.">        if ( colors.length == 2 &amp;&amp; gradient.fractions().length == 0 &amp;&amp; cycle == UI.Cycle.NONE )</span>
+<span class="fc" id="L803">            return new GradientPaint(</span>
                             corner1X, corner1Y, colors[0],
                             corner2X, corner2Y, colors[1]
                         );
         else
-<span class="fc" id="L841">            return new LinearGradientPaint(</span>
+<span class="fc" id="L808">            return new LinearGradientPaint(</span>
                             corner1X, corner1Y,
                             corner2X, corner2Y,
                             fractions, colors,
-<span class="fc" id="L845">                            _cycleMethodFrom(cycle)</span>
+<span class="fc" id="L812">                            _cycleMethodFrom(cycle)</span>
                         );
     }
 
@@ -851,51 +818,51 @@ final class StyleRenderer
         Point2D.Float  corner2,
         GradientConf   gradient
     ) {
-<span class="fc" id="L854">        final UI.Cycle      cycle      = gradient.cycle();</span>
-<span class="fc" id="L855">        final Color[]       colors     = gradient.colors();</span>
+<span class="fc" id="L821">        final UI.Cycle      cycle      = gradient.cycle();</span>
+<span class="fc" id="L822">        final Color[]       colors     = gradient.colors();</span>
 
-<span class="fc" id="L857">        final float size   = gradient.size();</span>
+<span class="fc" id="L824">        final float size   = gradient.size();</span>
 
-<span class="fc" id="L859">        final float corner1X = corner1.x;</span>
-<span class="fc" id="L860">        final float corner1Y = corner1.y;</span>
-<span class="fc" id="L861">        float corner2X = corner2.x;</span>
-<span class="fc" id="L862">        float corner2Y = corner2.y;</span>
+<span class="fc" id="L826">        final float corner1X = corner1.x;</span>
+<span class="fc" id="L827">        final float corner1Y = corner1.y;</span>
+<span class="fc" id="L828">        float corner2X = corner2.x;</span>
+<span class="fc" id="L829">        float corner2Y = corner2.y;</span>
 
-<span class="pc bpc" id="L864" title="1 of 2 branches missed.">        if ( gradient.type() == UI.GradientType.LINEAR ) {</span>
-<span class="pc bpc" id="L865" title="1 of 2 branches missed.">            if ( size &gt;= 0 ) {</span>
-<span class="nc" id="L866">                float vectorX = corner2X - corner1X;</span>
-<span class="nc" id="L867">                float vectorY = corner2Y - corner1Y;</span>
-<span class="nc" id="L868">                float vectorLength = (float) Math.sqrt(vectorX * vectorX + vectorY * vectorY);</span>
-<span class="nc" id="L869">                vectorX = (vectorX / vectorLength);</span>
-<span class="nc" id="L870">                vectorY = (vectorY / vectorLength);</span>
-<span class="nc" id="L871">                corner2X = corner1X + vectorX * size;</span>
-<span class="nc" id="L872">                corner2Y = corner1Y + vectorY * size;</span>
+<span class="pc bpc" id="L831" title="1 of 2 branches missed.">        if ( gradient.type() == UI.GradientType.LINEAR ) {</span>
+<span class="pc bpc" id="L832" title="1 of 2 branches missed.">            if ( size &gt;= 0 ) {</span>
+<span class="nc" id="L833">                float vectorX = corner2X - corner1X;</span>
+<span class="nc" id="L834">                float vectorY = corner2Y - corner1Y;</span>
+<span class="nc" id="L835">                float vectorLength = (float) Math.sqrt(vectorX * vectorX + vectorY * vectorY);</span>
+<span class="nc" id="L836">                vectorX = (vectorX / vectorLength);</span>
+<span class="nc" id="L837">                vectorY = (vectorY / vectorLength);</span>
+<span class="nc" id="L838">                corner2X = corner1X + vectorX * size;</span>
+<span class="nc" id="L839">                corner2Y = corner1Y + vectorY * size;</span>
             }
         }
 
-<span class="fc bfc" id="L876" title="All 2 branches covered.">        if (</span>
+<span class="fc bfc" id="L843" title="All 2 branches covered.">        if (</span>
             colors.length == 2 &amp;&amp;
-<span class="pc bpc" id="L878" title="2 of 4 branches missed.">            gradient.fractions().length == 0 &amp;&amp;</span>
+<span class="pc bpc" id="L845" title="2 of 4 branches missed.">            gradient.fractions().length == 0 &amp;&amp;</span>
             cycle == UI.Cycle.NONE
         ) {
-<span class="fc" id="L881">            return new GradientPaint(</span>
+<span class="fc" id="L848">            return new GradientPaint(</span>
                         corner1X, corner1Y, colors[0],
                         corner2X, corner2Y, colors[1]
                     );
         } else {
-<span class="fc" id="L886">            float[] fractions = _fractionsFrom(gradient);</span>
+<span class="fc" id="L853">            float[] fractions = _fractionsFrom(gradient);</span>
 
-<span class="pc bpc" id="L888" title="1 of 2 branches missed.">            if ( gradient.rotation() % 360f != 0 ) {</span>
-<span class="nc" id="L889">                Point2D.Float p = _rotatePoint(corner1X, corner1Y, corner2X, corner2Y, gradient.rotation());</span>
-<span class="nc" id="L890">                corner2X = p.x;</span>
-<span class="nc" id="L891">                corner2Y = p.y;</span>
+<span class="pc bpc" id="L855" title="1 of 2 branches missed.">            if ( gradient.rotation() % 360f != 0 ) {</span>
+<span class="nc" id="L856">                Point2D.Float p = _rotatePoint(corner1X, corner1Y, corner2X, corner2Y, gradient.rotation());</span>
+<span class="nc" id="L857">                corner2X = p.x;</span>
+<span class="nc" id="L858">                corner2Y = p.y;</span>
             }
 
-<span class="fc" id="L894">            return new LinearGradientPaint(</span>
+<span class="fc" id="L861">            return new LinearGradientPaint(</span>
                         corner1X, corner1Y,
                         corner2X, corner2Y,
                         fractions, colors,
-<span class="fc" id="L898">                        _cycleMethodFrom(cycle)</span>
+<span class="fc" id="L865">                        _cycleMethodFrom(cycle)</span>
                     );
 
         }
@@ -906,9 +873,9 @@ final class StyleRenderer
         final Point2D.Float n,
         final Point2D.Float C
     ) {
-<span class="fc" id="L909">        Point2D.Float B = new Point2D.Float(A.x + n.x, A.y + n.y);</span>
-<span class="fc" id="L910">        float t = ((C.x - A.x) * (B.x - A.x) + (C.y - A.y) * (B.y - A.y)) / ((B.x - A.x) * (B.x - A.x) + (B.y - A.y) * (B.y - A.y));</span>
-<span class="fc" id="L911">        return new Point2D.Float(A.x + t * (B.x - A.x), A.y + t * (B.y - A.y));</span>
+<span class="fc" id="L876">        Point2D.Float B = new Point2D.Float(A.x + n.x, A.y + n.y);</span>
+<span class="fc" id="L877">        float t = ((C.x - A.x) * (B.x - A.x) + (C.y - A.y) * (B.y - A.y)) / ((B.x - A.x) * (B.x - A.x) + (B.y - A.y) * (B.y - A.y));</span>
+<span class="fc" id="L878">        return new Point2D.Float(A.x + t * (B.x - A.x), A.y + t * (B.y - A.y));</span>
     }
 
     private static Paint _createRadialGradientPaint(
@@ -916,106 +883,106 @@ final class StyleRenderer
         final Point2D.Float  corner2,
         final GradientConf   gradient
     ) {
-<span class="fc" id="L919">        final UI.Cycle cycle  = gradient.cycle();</span>
-<span class="fc" id="L920">        final Color[]  colors = gradient.colors();</span>
+<span class="fc" id="L886">        final UI.Cycle cycle  = gradient.cycle();</span>
+<span class="fc" id="L887">        final Color[]  colors = gradient.colors();</span>
 
-<span class="fc" id="L922">        final float size   = gradient.size();</span>
+<span class="fc" id="L889">        final float size   = gradient.size();</span>
 
-<span class="fc" id="L924">        final float corner1X = corner1.x;</span>
-<span class="fc" id="L925">        final float corner1Y = corner1.y;</span>
-<span class="fc" id="L926">        float corner2X = corner2.x;</span>
-<span class="fc" id="L927">        float corner2Y = corner2.y;</span>
+<span class="fc" id="L891">        final float corner1X = corner1.x;</span>
+<span class="fc" id="L892">        final float corner1Y = corner1.y;</span>
+<span class="fc" id="L893">        float corner2X = corner2.x;</span>
+<span class="fc" id="L894">        float corner2Y = corner2.y;</span>
 
 
-<span class="fc" id="L930">        final float[] fractions = _fractionsFrom(gradient);</span>
+<span class="fc" id="L897">        final float[] fractions = _fractionsFrom(gradient);</span>
 
         final float radius;
 
-<span class="fc bfc" id="L934" title="All 2 branches covered.">        if ( size &lt; 0 )</span>
-<span class="fc" id="L935">            radius = (float) Math.sqrt(</span>
+<span class="fc bfc" id="L901" title="All 2 branches covered.">        if ( size &lt; 0 )</span>
+<span class="fc" id="L902">            radius = (float) Math.sqrt(</span>
                                  (corner2X - corner1X) * (corner2X - corner1X) +
                                  (corner2Y - corner1Y) * (corner2Y - corner1Y)
                              );
         else
-<span class="fc" id="L940">            radius = size;</span>
+<span class="fc" id="L907">            radius = size;</span>
 
-<span class="fc bfc" id="L942" title="All 2 branches covered.">        if ( gradient.focus().equals(Offset.none()) ) {</span>
-<span class="fc" id="L943">            return new RadialGradientPaint(</span>
+<span class="fc bfc" id="L909" title="All 2 branches covered.">        if ( gradient.focus().equals(Offset.none()) ) {</span>
+<span class="fc" id="L910">            return new RadialGradientPaint(</span>
                     new Point2D.Float(corner1X, corner1Y),
                     radius,
                     fractions,
                     colors,
-<span class="fc" id="L948">                    _cycleMethodFrom(cycle)</span>
+<span class="fc" id="L915">                    _cycleMethodFrom(cycle)</span>
                 );
         } else {
-<span class="fc" id="L951">            float focusX = corner1X + gradient.focus().x();</span>
-<span class="fc" id="L952">            float focusY = corner1Y + gradient.focus().y();</span>
+<span class="fc" id="L918">            float focusX = corner1X + gradient.focus().x();</span>
+<span class="fc" id="L919">            float focusY = corner1Y + gradient.focus().y();</span>
 
-<span class="pc bpc" id="L954" title="1 of 2 branches missed.">            if ( gradient.rotation() % 360f != 0 ) {</span>
-<span class="nc" id="L955">                Point2D.Float p = _rotatePoint(corner1X, corner1Y, focusX, focusY, gradient.rotation());</span>
-<span class="nc" id="L956">                focusX = p.x;</span>
-<span class="nc" id="L957">                focusY = p.y;</span>
+<span class="pc bpc" id="L921" title="1 of 2 branches missed.">            if ( gradient.rotation() % 360f != 0 ) {</span>
+<span class="nc" id="L922">                Point2D.Float p = _rotatePoint(corner1X, corner1Y, focusX, focusY, gradient.rotation());</span>
+<span class="nc" id="L923">                focusX = p.x;</span>
+<span class="nc" id="L924">                focusY = p.y;</span>
             }
 
-<span class="fc" id="L960">            return new RadialGradientPaint(</span>
+<span class="fc" id="L927">            return new RadialGradientPaint(</span>
                     new Point2D.Float(corner1X, corner1Y),
                     radius,
                     new Point2D.Float(focusX, focusY),
                     fractions,
                     colors,
-<span class="fc" id="L966">                    _cycleMethodFrom(cycle)</span>
+<span class="fc" id="L933">                    _cycleMethodFrom(cycle)</span>
                 );
         }
     }
 
     private static MultipleGradientPaint.CycleMethod _cycleMethodFrom(UI.Cycle cycle) {
-<span class="pc bpc" id="L972" title="3 of 4 branches missed.">        switch (cycle) {</span>
-<span class="fc" id="L973">            case NONE:     return MultipleGradientPaint.CycleMethod.NO_CYCLE;</span>
-<span class="nc" id="L974">            case REPEAT:   return MultipleGradientPaint.CycleMethod.REPEAT;</span>
-<span class="nc" id="L975">            case REFLECT:  return MultipleGradientPaint.CycleMethod.REFLECT;</span>
+<span class="pc bpc" id="L939" title="3 of 4 branches missed.">        switch (cycle) {</span>
+<span class="fc" id="L940">            case NONE:     return MultipleGradientPaint.CycleMethod.NO_CYCLE;</span>
+<span class="nc" id="L941">            case REPEAT:   return MultipleGradientPaint.CycleMethod.REPEAT;</span>
+<span class="nc" id="L942">            case REFLECT:  return MultipleGradientPaint.CycleMethod.REFLECT;</span>
             default:
-<span class="nc" id="L977">                log.warn(SwingTree.get().logMarker(),</span>
+<span class="nc" id="L944">                log.warn(SwingTree.get().logMarker(),</span>
                         &quot;Unknown cycle method: {}&quot;,
                         cycle, new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                     );
-<span class="nc" id="L981">                return MultipleGradientPaint.CycleMethod.NO_CYCLE;</span>
+<span class="nc" id="L948">                return MultipleGradientPaint.CycleMethod.NO_CYCLE;</span>
         }
     }
 
     private static float[] _fractionsFrom( final GradientConf style ) {
-<span class="fc" id="L986">        final Color[] colors   = style.colors();</span>
-<span class="fc" id="L987">        final float[] fractions = style.fractions();</span>
-<span class="fc" id="L988">        return _fractionsFrom(colors, fractions);</span>
+<span class="fc" id="L953">        final Color[] colors   = style.colors();</span>
+<span class="fc" id="L954">        final float[] fractions = style.fractions();</span>
+<span class="fc" id="L955">        return _fractionsFrom(colors, fractions);</span>
     }
 
     private static float[] _fractionsFrom(
         final Color[] colors,
         float[] fractions
     ) {
-<span class="pc bpc" id="L995" title="1 of 2 branches missed.">        if ( fractions.length == colors.length )</span>
-<span class="nc" id="L996">            return fractions;</span>
-<span class="pc bpc" id="L997" title="1 of 2 branches missed.">        else if ( fractions.length &gt; colors.length ) {</span>
-<span class="nc" id="L998">            float[] newFractions = new float[colors.length];</span>
-<span class="nc" id="L999">            System.arraycopy(fractions, 0, newFractions, 0, colors.length);</span>
-<span class="nc" id="L1000">            return newFractions;</span>
+<span class="pc bpc" id="L962" title="1 of 2 branches missed.">        if ( fractions.length == colors.length )</span>
+<span class="nc" id="L963">            return fractions;</span>
+<span class="pc bpc" id="L964" title="1 of 2 branches missed.">        else if ( fractions.length &gt; colors.length ) {</span>
+<span class="nc" id="L965">            float[] newFractions = new float[colors.length];</span>
+<span class="nc" id="L966">            System.arraycopy(fractions, 0, newFractions, 0, colors.length);</span>
+<span class="nc" id="L967">            return newFractions;</span>
         } else {
-<span class="pc bpc" id="L1002" title="1 of 2 branches missed.">            if ( fractions.length == 0 ) {</span>
-<span class="fc" id="L1003">                fractions = new float[colors.length];</span>
-<span class="fc bfc" id="L1004" title="All 2 branches covered.">                for ( int i = 0; i &lt; colors.length; i++ )</span>
-<span class="fc" id="L1005">                    fractions[i] = (float) i / (float) (colors.length - 1);</span>
-<span class="fc" id="L1006">                return fractions;</span>
+<span class="pc bpc" id="L969" title="1 of 2 branches missed.">            if ( fractions.length == 0 ) {</span>
+<span class="fc" id="L970">                fractions = new float[colors.length];</span>
+<span class="fc bfc" id="L971" title="All 2 branches covered.">                for ( int i = 0; i &lt; colors.length; i++ )</span>
+<span class="fc" id="L972">                    fractions[i] = (float) i / (float) (colors.length - 1);</span>
+<span class="fc" id="L973">                return fractions;</span>
             } else {
-<span class="nc" id="L1008">                float[] newFractions = new float[colors.length];</span>
-<span class="nc" id="L1009">                System.arraycopy(fractions, 0, newFractions, 0, fractions.length);</span>
+<span class="nc" id="L975">                float[] newFractions = new float[colors.length];</span>
+<span class="nc" id="L976">                System.arraycopy(fractions, 0, newFractions, 0, fractions.length);</span>
                 /*
                     Now simply complete the missing fractions by linear interpolation
                     between the last fraction and 1f
                 */
-<span class="nc" id="L1014">                float lastFraction = fractions[fractions.length - 1];</span>
-<span class="nc" id="L1015">                float step = (1f - lastFraction) / (colors.length - fractions.length);</span>
-<span class="nc bnc" id="L1016" title="All 2 branches missed.">                for ( int i = fractions.length; i &lt; colors.length; i++ )</span>
-<span class="nc" id="L1017">                    newFractions[i] = lastFraction + step * (i - fractions.length + 1);</span>
-<span class="nc" id="L1018">                return newFractions;</span>
+<span class="nc" id="L981">                float lastFraction = fractions[fractions.length - 1];</span>
+<span class="nc" id="L982">                float step = (1f - lastFraction) / (colors.length - fractions.length);</span>
+<span class="nc bnc" id="L983" title="All 2 branches missed.">                for ( int i = fractions.length; i &lt; colors.length; i++ )</span>
+<span class="nc" id="L984">                    newFractions[i] = lastFraction + step * (i - fractions.length + 1);</span>
+<span class="nc" id="L985">                return newFractions;</span>
             }
         }
     }
@@ -1030,22 +997,22 @@ final class StyleRenderer
         final float p2X, final float p2Y,
         final float rotation
     ) {
-<span class="nc bnc" id="L1033" title="All 2 branches missed.">        if ( rotation == 0f )</span>
-<span class="nc" id="L1034">            return new Point2D.Float(p2X, p2Y);</span>
-<span class="nc bnc" id="L1035" title="All 2 branches missed.">        else if ( rotation % 360f == 0f )</span>
-<span class="nc" id="L1036">            return new Point2D.Float(p2X, p2Y);</span>
+<span class="nc bnc" id="L1000" title="All 2 branches missed.">        if ( rotation == 0f )</span>
+<span class="nc" id="L1001">            return new Point2D.Float(p2X, p2Y);</span>
+<span class="nc bnc" id="L1002" title="All 2 branches missed.">        else if ( rotation % 360f == 0f )</span>
+<span class="nc" id="L1003">            return new Point2D.Float(p2X, p2Y);</span>
 
-<span class="nc" id="L1038">        final double angle = Math.toRadians(rotation);</span>
-<span class="nc" id="L1039">        final double sin   = Math.sin(angle);</span>
-<span class="nc" id="L1040">        final double cos   = Math.cos(angle);</span>
+<span class="nc" id="L1005">        final double angle = Math.toRadians(rotation);</span>
+<span class="nc" id="L1006">        final double sin   = Math.sin(angle);</span>
+<span class="nc" id="L1007">        final double cos   = Math.cos(angle);</span>
 
-<span class="nc" id="L1042">        final double x = p2X - p1X;</span>
-<span class="nc" id="L1043">        final double y = p2Y - p1Y;</span>
+<span class="nc" id="L1009">        final double x = p2X - p1X;</span>
+<span class="nc" id="L1010">        final double y = p2Y - p1Y;</span>
 
-<span class="nc" id="L1045">        final double newX = x * cos - y * sin;</span>
-<span class="nc" id="L1046">        final double newY = x * sin + y * cos;</span>
+<span class="nc" id="L1012">        final double newX = x * cos - y * sin;</span>
+<span class="nc" id="L1013">        final double newY = x * sin + y * cos;</span>
 
-<span class="nc" id="L1048">        return new Point2D.Float((float) (p1X + newX), (float) (p1Y + newY));</span>
+<span class="nc" id="L1015">        return new Point2D.Float((float) (p1X + newX), (float) (p1Y + newY));</span>
     }
 
     /**
@@ -1060,9 +1027,9 @@ final class StyleRenderer
         final Point2D.Float p1,
         final Point2D.Float p2
     ){
-<span class="fc" id="L1063">        final double x = p2.x - p1.x;</span>
-<span class="fc" id="L1064">        final double y = p2.y - p1.y;</span>
-<span class="fc" id="L1065">        return (float) Math.toDegrees(Math.atan2(y, x));</span>
+<span class="fc" id="L1030">        final double x = p2.x - p1.x;</span>
+<span class="fc" id="L1031">        final double y = p2.y - p1.y;</span>
+<span class="fc" id="L1032">        return (float) Math.toDegrees(Math.atan2(y, x));</span>
     }
 
     private static void _renderImage(
@@ -1071,271 +1038,271 @@ final class StyleRenderer
         final Size        componentSize,
         final Graphics2D  g2d
     ) {
-<span class="fc bfc" id="L1074" title="All 2 branches covered.">        if ( style.primer().isPresent() ) {</span>
-<span class="fc" id="L1075">            g2d.setColor(style.primer().get());</span>
-<span class="fc" id="L1076">            g2d.fill(conf.areas().get(style.clipArea()));</span>
+<span class="fc bfc" id="L1041" title="All 2 branches covered.">        if ( style.primer().isPresent() ) {</span>
+<span class="fc" id="L1042">            g2d.setColor(style.primer().get());</span>
+<span class="fc" id="L1043">            g2d.fill(conf.areas().get(style.clipArea()));</span>
         }
 
-<span class="fc" id="L1079">        style.image().ifPresent( imageIcon -&gt; {</span>
-<span class="fc" id="L1080">            final UI.FitComponent      fit               = style.fitMode();</span>
-<span class="fc" id="L1081">            final UI.Placement         placement         = style.placement();</span>
-<span class="fc" id="L1082">            final UI.ComponentBoundary placementBoundary = style.placementBoundary();</span>
-<span class="fc" id="L1083">            final Outline              insets            = conf.boxModel().insetsFor(placementBoundary);</span>
-<span class="fc" id="L1084">            final Outline      padding         = style.padding();</span>
-<span class="fc" id="L1085">            final int          componentWidth  = componentSize.width().orElse(0f).intValue() - (insets.left().orElse(0f).intValue() + insets.right().orElse(0f).intValue());</span>
-<span class="fc" id="L1086">            final int          componentHeight = componentSize.height().orElse(0f).intValue() - (insets.top().orElse(0f).intValue()  + insets.bottom().orElse(0f).intValue());</span>
-<span class="fc" id="L1087">            final int          iconBaseWidth   = imageIcon.getIconWidth();</span>
-<span class="fc" id="L1088">            final int          iconBaseHeight  = imageIcon.getIconHeight();</span>
-<span class="fc" id="L1089">            final boolean repeat  = style.repeat();</span>
-<span class="fc" id="L1090">            final float   opacity = style.opacity();</span>
+<span class="fc" id="L1046">        style.image().ifPresent( imageIcon -&gt; {</span>
+<span class="fc" id="L1047">            final UI.FitComponent      fit               = style.fitMode();</span>
+<span class="fc" id="L1048">            final UI.Placement         placement         = style.placement();</span>
+<span class="fc" id="L1049">            final UI.ComponentBoundary placementBoundary = style.placementBoundary();</span>
+<span class="fc" id="L1050">            final Outline              insets            = conf.boxModel().insetsFor(placementBoundary);</span>
+<span class="fc" id="L1051">            final Outline      padding         = style.padding();</span>
+<span class="fc" id="L1052">            final int          componentWidth  = componentSize.width().orElse(0f).intValue() - (insets.left().orElse(0f).intValue() + insets.right().orElse(0f).intValue());</span>
+<span class="fc" id="L1053">            final int          componentHeight = componentSize.height().orElse(0f).intValue() - (insets.top().orElse(0f).intValue()  + insets.bottom().orElse(0f).intValue());</span>
+<span class="fc" id="L1054">            final int          iconBaseWidth   = imageIcon.getIconWidth();</span>
+<span class="fc" id="L1055">            final int          iconBaseHeight  = imageIcon.getIconHeight();</span>
+<span class="fc" id="L1056">            final boolean repeat  = style.repeat();</span>
+<span class="fc" id="L1057">            final float   opacity = style.opacity();</span>
 
-<span class="fc" id="L1092">            final Shape oldClip = g2d.getClip();</span>
+<span class="fc" id="L1059">            final Shape oldClip = g2d.getClip();</span>
 
-<span class="fc" id="L1094">            Shape newClip = conf.areas().get(style.clipArea());</span>
+<span class="fc" id="L1061">            Shape newClip = conf.areas().get(style.clipArea());</span>
             // We merge the new clip with the old one:
-<span class="pc bpc" id="L1096" title="1 of 2 branches missed.">            if ( oldClip != null )</span>
-<span class="fc" id="L1097">                newClip = StyleUtil.intersect( newClip, oldClip );</span>
+<span class="fc bfc" id="L1063" title="All 2 branches covered.">            if ( oldClip != null )</span>
+<span class="fc" id="L1064">                newClip = StyleUtil.intersect( newClip, oldClip );</span>
 
-<span class="fc" id="L1099">            g2d.setClip(newClip);</span>
+<span class="fc" id="L1066">            g2d.setClip(newClip);</span>
 
-<span class="fc bfc" id="L1101" title="All 2 branches covered.">            if ( imageIcon instanceof SvgIcon ) {</span>
-<span class="fc" id="L1102">                SvgIcon svgIcon = (SvgIcon) imageIcon;</span>
-<span class="fc bfc" id="L1103" title="All 2 branches covered.">                if ( style.width().isPresent() )</span>
-<span class="fc" id="L1104">                    svgIcon = svgIcon.withIconWidth(UI.unscale(style.width().get()));</span>
-<span class="fc bfc" id="L1105" title="All 2 branches covered.">                if ( style.height().isPresent() )</span>
-<span class="fc" id="L1106">                    svgIcon = svgIcon.withIconHeight(UI.unscale(style.height().get()));</span>
-<span class="fc" id="L1107">                imageIcon = svgIcon;</span>
+<span class="fc bfc" id="L1068" title="All 2 branches covered.">            if ( imageIcon instanceof SvgIcon ) {</span>
+<span class="fc" id="L1069">                SvgIcon svgIcon = (SvgIcon) imageIcon;</span>
+<span class="fc bfc" id="L1070" title="All 2 branches covered.">                if ( style.width().isPresent() )</span>
+<span class="fc" id="L1071">                    svgIcon = svgIcon.withIconWidth(UI.unscale(style.width().get()));</span>
+<span class="fc bfc" id="L1072" title="All 2 branches covered.">                if ( style.height().isPresent() )</span>
+<span class="fc" id="L1073">                    svgIcon = svgIcon.withIconHeight(UI.unscale(style.height().get()));</span>
+<span class="fc" id="L1074">                imageIcon = svgIcon;</span>
             }
-<span class="fc bfc" id="L1109" title="All 4 branches covered.">            if ( !repeat &amp;&amp; imageIcon instanceof SvgIcon ) {</span>
-<span class="fc" id="L1110">                SvgIcon svgIcon = ((SvgIcon) imageIcon);</span>
-<span class="fc" id="L1111">                int areaX = insets.left().orElse(0f).intValue();</span>
-<span class="fc" id="L1112">                int areaY = insets.top().orElse(0f).intValue();</span>
-<span class="fc bfc" id="L1113" title="All 2 branches covered.">                UI.Placement localPlacement = placement == UI.Placement.UNDEFINED ? svgIcon.getPreferredPlacement() : placement;</span>
-<span class="fc bfc" id="L1114" title="All 2 branches covered.">                localPlacement = localPlacement == UI.Placement.UNDEFINED ? UI.Placement.CENTER : localPlacement;</span>
-<span class="fc bfc" id="L1115" title="All 2 branches covered.">                UI.FitComponent localFit = fit == UI.FitComponent.UNDEFINED ? svgIcon.getFitComponent() : fit;</span>
-<span class="fc" id="L1116">                svgIcon.withOpacity(opacity)</span>
-<span class="fc" id="L1117">                        .withFitComponent(localFit)</span>
-<span class="fc" id="L1118">                        .withPreferredPlacement(localPlacement)</span>
-<span class="fc" id="L1119">                        .paintIcon(null, g2d, Bounds.of(areaX, areaY, componentWidth, componentHeight), style.offset(), padding);</span>
-<span class="fc" id="L1120">            } else {</span>
-<span class="fc" id="L1121">                int imgWidth  = style.width().orElse(iconBaseWidth);</span>
-<span class="fc" id="L1122">                int imgHeight = style.height().orElse(iconBaseHeight);</span>
+<span class="fc bfc" id="L1076" title="All 4 branches covered.">            if ( !repeat &amp;&amp; imageIcon instanceof SvgIcon ) {</span>
+<span class="fc" id="L1077">                SvgIcon svgIcon = ((SvgIcon) imageIcon);</span>
+<span class="fc" id="L1078">                int areaX = insets.left().orElse(0f).intValue();</span>
+<span class="fc" id="L1079">                int areaY = insets.top().orElse(0f).intValue();</span>
+<span class="fc bfc" id="L1080" title="All 2 branches covered.">                UI.Placement localPlacement = placement == UI.Placement.UNDEFINED ? svgIcon.getPreferredPlacement() : placement;</span>
+<span class="fc bfc" id="L1081" title="All 2 branches covered.">                localPlacement = localPlacement == UI.Placement.UNDEFINED ? UI.Placement.CENTER : localPlacement;</span>
+<span class="fc bfc" id="L1082" title="All 2 branches covered.">                UI.FitComponent localFit = fit == UI.FitComponent.UNDEFINED ? svgIcon.getFitComponent() : fit;</span>
+<span class="fc" id="L1083">                svgIcon.withOpacity(opacity)</span>
+<span class="fc" id="L1084">                        .withFitComponent(localFit)</span>
+<span class="fc" id="L1085">                        .withPreferredPlacement(localPlacement)</span>
+<span class="fc" id="L1086">                        .paintIcon(null, g2d, Bounds.of(areaX, areaY, componentWidth, componentHeight), style.offset(), padding);</span>
+<span class="fc" id="L1087">            } else {</span>
+<span class="fc" id="L1088">                int imgWidth  = style.width().orElse(iconBaseWidth);</span>
+<span class="fc" id="L1089">                int imgHeight = style.height().orElse(iconBaseHeight);</span>
 
-<span class="pc bpc" id="L1124" title="1 of 4 branches missed.">                if ( fit != UI.FitComponent.NO &amp;&amp; fit != UI.FitComponent.UNDEFINED ) {</span>
-<span class="fc bfc" id="L1125" title="All 2 branches covered.">                    if ( fit == UI.FitComponent.WIDTH_AND_HEIGHT ) {</span>
-<span class="fc" id="L1126">                        imgWidth  = style.width().orElse(componentWidth);</span>
-<span class="fc" id="L1127">                        imgHeight = style.height().orElse(componentHeight);</span>
+<span class="pc bpc" id="L1091" title="1 of 4 branches missed.">                if ( fit != UI.FitComponent.NO &amp;&amp; fit != UI.FitComponent.UNDEFINED ) {</span>
+<span class="fc bfc" id="L1092" title="All 2 branches covered.">                    if ( fit == UI.FitComponent.WIDTH_AND_HEIGHT ) {</span>
+<span class="fc" id="L1093">                        imgWidth  = style.width().orElse(componentWidth);</span>
+<span class="fc" id="L1094">                        imgHeight = style.height().orElse(componentHeight);</span>
                     }
-<span class="pc bpc" id="L1129" title="1 of 2 branches missed.">                    if ( fit == UI.FitComponent.WIDTH ) {</span>
-<span class="nc" id="L1130">                        imgWidth  = style.width().orElse(componentWidth);</span>
+<span class="pc bpc" id="L1096" title="1 of 2 branches missed.">                    if ( fit == UI.FitComponent.WIDTH ) {</span>
+<span class="nc" id="L1097">                        imgWidth  = style.width().orElse(componentWidth);</span>
                     }
-<span class="pc bpc" id="L1132" title="1 of 2 branches missed.">                    if ( fit == UI.FitComponent.HEIGHT ) {</span>
-<span class="nc" id="L1133">                        imgHeight = style.height().orElse(componentHeight);</span>
+<span class="pc bpc" id="L1099" title="1 of 2 branches missed.">                    if ( fit == UI.FitComponent.HEIGHT ) {</span>
+<span class="nc" id="L1100">                        imgHeight = style.height().orElse(componentHeight);</span>
                     }
-<span class="pc bpc" id="L1135" title="2 of 8 branches missed.">                    if (</span>
+<span class="pc bpc" id="L1102" title="2 of 8 branches missed.">                    if (</span>
                         (fit == UI.FitComponent.MAX_DIM &amp;&amp; componentWidth &gt; componentHeight)  ||
                         (fit == UI.FitComponent.MIN_DIM &amp;&amp; componentWidth &lt; componentHeight )
                     ) {
-<span class="fc" id="L1139">                        imgWidth = style.width().orElse(componentWidth);</span>
-<span class="fc" id="L1140">                        double aspectRatio = (double) iconBaseHeight / (double) iconBaseWidth;</span>
+<span class="fc" id="L1106">                        imgWidth = style.width().orElse(componentWidth);</span>
+<span class="fc" id="L1107">                        double aspectRatio = (double) iconBaseHeight / (double) iconBaseWidth;</span>
                         // We preserve the aspect ratio:
-<span class="fc" id="L1142">                        imgHeight = (int) (imgWidth * aspectRatio);</span>
+<span class="fc" id="L1109">                        imgHeight = (int) (imgWidth * aspectRatio);</span>
                     }
-<span class="pc bpc" id="L1144" title="2 of 8 branches missed.">                    if (</span>
+<span class="pc bpc" id="L1111" title="2 of 8 branches missed.">                    if (</span>
                         (fit == UI.FitComponent.MAX_DIM &amp;&amp; componentWidth &lt; componentHeight) ||
                         (fit == UI.FitComponent.MIN_DIM &amp;&amp; componentWidth &gt; componentHeight )
                     ) {
-<span class="fc" id="L1148">                        imgHeight = style.height().orElse(componentHeight);</span>
-<span class="fc" id="L1149">                        double aspectRatio = (double) iconBaseWidth / (double) iconBaseHeight;</span>
+<span class="fc" id="L1115">                        imgHeight = style.height().orElse(componentHeight);</span>
+<span class="fc" id="L1116">                        double aspectRatio = (double) iconBaseWidth / (double) iconBaseHeight;</span>
                         // We preserve the aspect ratio:
-<span class="fc" id="L1151">                        imgWidth = (int) (imgHeight * aspectRatio);</span>
+<span class="fc" id="L1118">                        imgWidth = (int) (imgHeight * aspectRatio);</span>
                     }
-<span class="pc bpc" id="L1153" title="1 of 2 branches missed.">                    imgWidth  = imgWidth  &gt;= 0 ? imgWidth  : componentWidth;</span>
-<span class="pc bpc" id="L1154" title="1 of 2 branches missed.">                    imgHeight = imgHeight &gt;= 0 ? imgHeight : componentHeight;</span>
+<span class="pc bpc" id="L1120" title="1 of 2 branches missed.">                    imgWidth  = imgWidth  &gt;= 0 ? imgWidth  : componentWidth;</span>
+<span class="pc bpc" id="L1121" title="1 of 2 branches missed.">                    imgHeight = imgHeight &gt;= 0 ? imgHeight : componentHeight;</span>
                 }
-<span class="fc" id="L1156">                int x = style.horizontalOffset() + insets.left().orElse(0f).intValue();</span>
-<span class="fc" id="L1157">                int y = style.verticalOffset() + insets.top().orElse(0f).intValue();</span>
-<span class="pc bpc" id="L1158" title="1 of 10 branches missed.">                switch ( placement ) {</span>
+<span class="fc" id="L1123">                int x = style.horizontalOffset() + insets.left().orElse(0f).intValue();</span>
+<span class="fc" id="L1124">                int y = style.verticalOffset() + insets.top().orElse(0f).intValue();</span>
+<span class="pc bpc" id="L1125" title="1 of 10 branches missed.">                switch ( placement ) {</span>
                     case TOP:
-<span class="fc" id="L1160">                        x += (componentWidth - imgWidth) / 2;</span>
-<span class="fc" id="L1161">                        break;</span>
+<span class="fc" id="L1127">                        x += (componentWidth - imgWidth) / 2;</span>
+<span class="fc" id="L1128">                        break;</span>
                     case LEFT:
-<span class="fc" id="L1163">                        y += (componentHeight - imgHeight) / 2;</span>
-<span class="fc" id="L1164">                        break;</span>
+<span class="fc" id="L1130">                        y += (componentHeight - imgHeight) / 2;</span>
+<span class="fc" id="L1131">                        break;</span>
                     case BOTTOM:
-<span class="fc" id="L1166">                        x += (componentWidth - imgWidth) / 2;</span>
-<span class="fc" id="L1167">                        y += componentHeight - imgHeight;</span>
-<span class="fc" id="L1168">                        break;</span>
+<span class="fc" id="L1133">                        x += (componentWidth - imgWidth) / 2;</span>
+<span class="fc" id="L1134">                        y += componentHeight - imgHeight;</span>
+<span class="fc" id="L1135">                        break;</span>
                     case RIGHT:
-<span class="fc" id="L1170">                        x += componentWidth - imgWidth;</span>
-<span class="fc" id="L1171">                        y += (componentHeight - imgHeight) / 2;</span>
-<span class="fc" id="L1172">                        break;</span>
-<span class="fc" id="L1173">                    case TOP_LEFT: break;</span>
+<span class="fc" id="L1137">                        x += componentWidth - imgWidth;</span>
+<span class="fc" id="L1138">                        y += (componentHeight - imgHeight) / 2;</span>
+<span class="fc" id="L1139">                        break;</span>
+<span class="fc" id="L1140">                    case TOP_LEFT: break;</span>
                     case TOP_RIGHT:
-<span class="fc" id="L1175">                        x += componentWidth - imgWidth;</span>
-<span class="fc" id="L1176">                        break;</span>
+<span class="fc" id="L1142">                        x += componentWidth - imgWidth;</span>
+<span class="fc" id="L1143">                        break;</span>
                     case BOTTOM_LEFT:
-<span class="fc" id="L1178">                        y += componentHeight - imgHeight;</span>
-<span class="fc" id="L1179">                        break;</span>
+<span class="fc" id="L1145">                        y += componentHeight - imgHeight;</span>
+<span class="fc" id="L1146">                        break;</span>
                     case BOTTOM_RIGHT:
-<span class="fc" id="L1181">                        x += componentWidth - imgWidth;</span>
-<span class="fc" id="L1182">                        y += componentHeight - imgHeight;</span>
-<span class="fc" id="L1183">                        break;</span>
+<span class="fc" id="L1148">                        x += componentWidth - imgWidth;</span>
+<span class="fc" id="L1149">                        y += componentHeight - imgHeight;</span>
+<span class="fc" id="L1150">                        break;</span>
                     case CENTER:
                     case UNDEFINED:
-<span class="fc" id="L1186">                        x += (componentWidth - imgWidth) / 2;</span>
-<span class="fc" id="L1187">                        y += (componentHeight - imgHeight) / 2;</span>
-<span class="fc" id="L1188">                        break;</span>
+<span class="fc" id="L1153">                        x += (componentWidth - imgWidth) / 2;</span>
+<span class="fc" id="L1154">                        y += (componentHeight - imgHeight) / 2;</span>
+<span class="fc" id="L1155">                        break;</span>
                     default:
-<span class="nc" id="L1190">                        throw new IllegalArgumentException(&quot;Unknown placement: &quot; + placement);</span>
+<span class="nc" id="L1157">                        throw new IllegalArgumentException(&quot;Unknown placement: &quot; + placement);</span>
                 }
 
-<span class="fc" id="L1193">                x += padding.left().orElse(0f).intValue();</span>
-<span class="fc" id="L1194">                y += padding.top().orElse(0f).intValue();</span>
-<span class="fc" id="L1195">                imgWidth  -= (padding.left().orElse(0f).intValue() + padding.right().orElse(0f).intValue());</span>
-<span class="fc" id="L1196">                imgHeight -= (padding.top().orElse(0f).intValue()  + padding.bottom().orElse(0f).intValue());</span>
+<span class="fc" id="L1160">                x += padding.left().orElse(0f).intValue();</span>
+<span class="fc" id="L1161">                y += padding.top().orElse(0f).intValue();</span>
+<span class="fc" id="L1162">                imgWidth  -= (padding.left().orElse(0f).intValue() + padding.right().orElse(0f).intValue());</span>
+<span class="fc" id="L1163">                imgHeight -= (padding.top().orElse(0f).intValue()  + padding.bottom().orElse(0f).intValue());</span>
                 Image image;
-<span class="pc bpc" id="L1198" title="1 of 2 branches missed.">                if ( imageIcon instanceof SvgIcon) {</span>
-<span class="nc" id="L1199">                    SvgIcon svgIcon = (SvgIcon) imageIcon;</span>
-<span class="nc" id="L1200">                    svgIcon = svgIcon.withIconWidth(imgWidth);</span>
-<span class="nc" id="L1201">                    svgIcon = svgIcon.withIconHeight(imgHeight);</span>
-<span class="nc" id="L1202">                    image   = svgIcon.getImage(); // This will render the SVGIcon with the new size</span>
-<span class="nc" id="L1203">                }</span>
+<span class="pc bpc" id="L1165" title="1 of 2 branches missed.">                if ( imageIcon instanceof SvgIcon) {</span>
+<span class="nc" id="L1166">                    SvgIcon svgIcon = (SvgIcon) imageIcon;</span>
+<span class="nc" id="L1167">                    svgIcon = svgIcon.withIconWidth(imgWidth);</span>
+<span class="nc" id="L1168">                    svgIcon = svgIcon.withIconHeight(imgHeight);</span>
+<span class="nc" id="L1169">                    image   = svgIcon.getImage(); // This will render the SVGIcon with the new size</span>
+<span class="nc" id="L1170">                }</span>
                 else
-<span class="fc" id="L1205">                    image = imageIcon.getImage();</span>
+<span class="fc" id="L1172">                    image = imageIcon.getImage();</span>
 
-<span class="fc" id="L1207">                Composite oldComposite = g2d.getComposite();</span>
+<span class="fc" id="L1174">                Composite oldComposite = g2d.getComposite();</span>
 
                 try {
-<span class="fc" id="L1210">                    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));</span>
-<span class="fc bfc" id="L1211" title="All 2 branches covered.">                    if (repeat) {</span>
-<span class="fc" id="L1212">                        Paint oldPaint = g2d.getPaint();</span>
+<span class="fc" id="L1177">                    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));</span>
+<span class="fc bfc" id="L1178" title="All 2 branches covered.">                    if (repeat) {</span>
+<span class="fc" id="L1179">                        Paint oldPaint = g2d.getPaint();</span>
                         try {
-<span class="fc" id="L1214">                            g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));</span>
-<span class="fc" id="L1215">                            g2d.fill(conf.areas().get(UI.ComponentArea.BODY));</span>
+<span class="fc" id="L1181">                            g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));</span>
+<span class="fc" id="L1182">                            g2d.fill(conf.areas().get(UI.ComponentArea.BODY));</span>
                         } finally {
-<span class="fc" id="L1217">                            g2d.setPaint(oldPaint);</span>
+<span class="fc" id="L1184">                            g2d.setPaint(oldPaint);</span>
                         }
-<span class="fc" id="L1219">                    }</span>
+<span class="fc" id="L1186">                    }</span>
                     else
-<span class="fc" id="L1221">                        g2d.drawImage(image, x, y, imgWidth, imgHeight, null);</span>
+<span class="fc" id="L1188">                        g2d.drawImage(image, x, y, imgWidth, imgHeight, null);</span>
 
                 } finally {
-<span class="fc" id="L1224">                    g2d.setComposite(oldComposite);</span>
+<span class="fc" id="L1191">                    g2d.setComposite(oldComposite);</span>
                 }
             }
-<span class="fc" id="L1227">            g2d.setClip(oldClip);</span>
-<span class="fc" id="L1228">        });</span>
-<span class="fc" id="L1229">    }</span>
+<span class="fc" id="L1194">            g2d.setClip(oldClip);</span>
+<span class="fc" id="L1195">        });</span>
+<span class="fc" id="L1196">    }</span>
 
     private static void _renderText(
         final TextConf        text,
         final LayerRenderConf conf,
         final Graphics2D      g2d
     ) {
-<span class="fc bfc" id="L1236" title="All 2 branches covered.">        if ( text.content().isEmpty() )</span>
-<span class="fc" id="L1237">            return;</span>
+<span class="fc bfc" id="L1203" title="All 2 branches covered.">        if ( text.content().isEmpty() )</span>
+<span class="fc" id="L1204">            return;</span>
 
-<span class="fc" id="L1239">        final BoxModelConf boxModel = conf.boxModel();</span>
+<span class="fc" id="L1206">        final BoxModelConf boxModel = conf.boxModel();</span>
 
-<span class="fc" id="L1241">        final Font initialFont = g2d.getFont();</span>
-<span class="fc" id="L1242">        final Shape oldClip = g2d.getClip();</span>
+<span class="fc" id="L1208">        final Font initialFont = g2d.getFont();</span>
+<span class="fc" id="L1209">        final Shape oldClip = g2d.getClip();</span>
 
-<span class="fc" id="L1244">        final Tuple&lt;Pooled&lt;Paragraph&gt;&gt; textToRender  = text.content();</span>
-<span class="fc" id="L1245">        final UI.ComponentArea     clipArea          = text.clipArea();</span>
-<span class="fc" id="L1246">        final UI.Placement         placement         = findDesiredPlacementFrom(text);</span>
-<span class="fc" id="L1247">        final boolean              wrapLines         = text.wrapLines();</span>
+<span class="fc" id="L1211">        final Tuple&lt;Pooled&lt;Paragraph&gt;&gt; textToRender  = text.content();</span>
+<span class="fc" id="L1212">        final UI.ComponentArea     clipArea          = text.clipArea();</span>
+<span class="fc" id="L1213">        final UI.Placement         placement         = findDesiredPlacementFrom(text);</span>
+<span class="fc" id="L1214">        final boolean              wrapLines         = text.wrapLines();</span>
         // Computing the area available for text rendering after applying the offset and insets:
-<span class="fc" id="L1249">        final Bounds textBounds = _computeTextBounds(text, boxModel);</span>
+<span class="fc" id="L1216">        final Bounds textBounds = _computeTextBounds(text, boxModel);</span>
         try {
-<span class="fc" id="L1251">            Font font = Optional.ofNullable(initialFont).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));</span>
-<span class="fc" id="L1252">            font = text.fontConf().createDerivedFrom(font, boxModel).orElse(font);</span>
-<span class="fc" id="L1253">            g2d.setFont(font);</span>
+<span class="fc" id="L1218">            Font font = Optional.ofNullable(initialFont).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));</span>
+<span class="fc" id="L1219">            font = text.fontConf().createDerivedFrom(font, boxModel).orElse(font);</span>
+<span class="fc" id="L1220">            g2d.setFont(font);</span>
             // Phase 1 - 2: Build TextLayouts for each line and calculate the total height of the text block
-<span class="fc" id="L1255">            final FontRenderContext frc = g2d.getFontRenderContext();</span>
-<span class="fc" id="L1256">            final float boundsWidth = textBounds.size().width().orElse(0f);</span>
-<span class="fc" id="L1257">            final float boundsX     = textBounds.location().x();</span>
-<span class="fc" id="L1258">            final float boundsY     = textBounds.location().y();</span>
-<span class="fc" id="L1259">            final Pair&lt;Float, List&lt;TextLayoutEngine.LayoutLine&gt;&gt; layoutResult = TextLayoutEngine._buildTextLayoutsAndPreferredHeight(font, frc, textToRender, boundsWidth, boundsX, boundsY, wrapLines, conf.boxModel(), text.obstacles(), placement);</span>
-<span class="fc" id="L1260">            final List&lt;TextLayoutEngine.LayoutLine&gt; lines    = layoutResult.second();</span>
-<span class="fc" id="L1261">            final float            totalHeight = layoutResult.first();</span>
+<span class="fc" id="L1222">            final FontRenderContext frc = g2d.getFontRenderContext();</span>
+<span class="fc" id="L1223">            final float boundsWidth = textBounds.size().width().orElse(0f);</span>
+<span class="fc" id="L1224">            final float boundsX     = textBounds.location().x();</span>
+<span class="fc" id="L1225">            final float boundsY     = textBounds.location().y();</span>
+<span class="fc" id="L1226">            final Pair&lt;Float, List&lt;TextLayoutEngine.LayoutLine&gt;&gt; layoutResult = TextLayoutEngine._buildTextLayoutsAndPreferredHeight(font, frc, textToRender, boundsWidth, boundsX, boundsY, wrapLines, conf.boxModel(), text.obstacles(), placement);</span>
+<span class="fc" id="L1227">            final List&lt;TextLayoutEngine.LayoutLine&gt; lines    = layoutResult.second();</span>
+<span class="fc" id="L1228">            final float            totalHeight = layoutResult.first();</span>
             // Phase 3 - 5: Rendering
-<span class="fc" id="L1263">            Shape newClip = conf.areas().get(clipArea);</span>
+<span class="fc" id="L1230">            Shape newClip = conf.areas().get(clipArea);</span>
             // We merge the new clip with the old one:
-<span class="pc bpc" id="L1265" title="1 of 2 branches missed.">            if ( oldClip != null )</span>
-<span class="fc" id="L1266">                newClip = StyleUtil.intersect( newClip, oldClip );</span>
-<span class="fc" id="L1267">            g2d.setClip(newClip);</span>
-<span class="fc" id="L1268">            _renderTextInternal(g2d, font, textBounds, placement, lines, totalHeight);</span>
-<span class="nc" id="L1269">        } catch (Exception e) {</span>
-<span class="nc" id="L1270">            log.error(SwingTree.get().logMarker(), &quot;Unexpected error while rendering text: '{}'\n&quot;, textToRender, e);</span>
+<span class="pc bpc" id="L1232" title="1 of 2 branches missed.">            if ( oldClip != null )</span>
+<span class="nc" id="L1233">                newClip = StyleUtil.intersect( newClip, oldClip );</span>
+<span class="fc" id="L1234">            g2d.setClip(newClip);</span>
+<span class="fc" id="L1235">            _renderTextInternal(g2d, font, textBounds, placement, lines, totalHeight);</span>
+<span class="nc" id="L1236">        } catch (Exception e) {</span>
+<span class="nc" id="L1237">            log.error(SwingTree.get().logMarker(), &quot;Unexpected error while rendering text: '{}'\n&quot;, textToRender, e);</span>
         } finally {
-<span class="fc" id="L1272">            g2d.setFont(initialFont);</span>
-<span class="fc" id="L1273">            g2d.setClip(oldClip);</span>
+<span class="fc" id="L1239">            g2d.setFont(initialFont);</span>
+<span class="fc" id="L1240">            g2d.setClip(oldClip);</span>
         }
-<span class="fc" id="L1275">    }</span>
+<span class="fc" id="L1242">    }</span>
 
     static Bounds _computeTextBounds(final TextConf text, final BoxModelConf boxModel) {
-<span class="fc" id="L1278">        final UI.ComponentBoundary placementBoundary = text.placementBoundary();</span>
-<span class="fc" id="L1279">        final Offset               offset            = text.offset();</span>
-<span class="fc" id="L1280">        final Outline              insets            = boxModel.insetsFor(placementBoundary);</span>
+<span class="fc" id="L1245">        final UI.ComponentBoundary placementBoundary = text.placementBoundary();</span>
+<span class="fc" id="L1246">        final Offset               offset            = text.offset();</span>
+<span class="fc" id="L1247">        final Outline              insets            = boxModel.insetsFor(placementBoundary);</span>
         // Computing the area available for text rendering after applying the offset and insets:
-<span class="fc" id="L1282">        final float insLeft   = insets.left().orElse(0f);</span>
-<span class="fc" id="L1283">        final float insTop    = insets.top().orElse(0f);</span>
-<span class="fc" id="L1284">        final float leftX = offset.x() + insLeft;</span>
-<span class="fc" id="L1285">        final float topY  = offset.y() + insTop;</span>
-<span class="fc" id="L1286">        final float localWidth  = Math.max(0, boxModel.size().width().orElse(0f)  - (insLeft + insets.right().orElse(0f)));</span>
-<span class="fc" id="L1287">        final float localHeight = Math.max(0, boxModel.size().height().orElse(0f) - (insTop  + insets.bottom().orElse(0f)));</span>
-<span class="fc" id="L1288">        return Bounds.of(leftX, topY, localWidth, localHeight);</span>
+<span class="fc" id="L1249">        final float insLeft   = insets.left().orElse(0f);</span>
+<span class="fc" id="L1250">        final float insTop    = insets.top().orElse(0f);</span>
+<span class="fc" id="L1251">        final float leftX = offset.x() + insLeft;</span>
+<span class="fc" id="L1252">        final float topY  = offset.y() + insTop;</span>
+<span class="fc" id="L1253">        final float localWidth  = Math.max(0, boxModel.size().width().orElse(0f)  - (insLeft + insets.right().orElse(0f)));</span>
+<span class="fc" id="L1254">        final float localHeight = Math.max(0, boxModel.size().height().orElse(0f) - (insTop  + insets.bottom().orElse(0f)));</span>
+<span class="fc" id="L1255">        return Bounds.of(leftX, topY, localWidth, localHeight);</span>
     }
 
     private static UI.Placement findDesiredPlacementFrom(TextConf text) {
-<span class="fc" id="L1292">        UI.Placement chosenPlacement = text.placement();</span>
-<span class="pc bpc" id="L1293" title="1 of 2 branches missed.">        if ( chosenPlacement == UI.Placement.UNDEFINED ) {</span>
+<span class="fc" id="L1259">        UI.Placement chosenPlacement = text.placement();</span>
+<span class="pc bpc" id="L1260" title="1 of 2 branches missed.">        if ( chosenPlacement == UI.Placement.UNDEFINED ) {</span>
             // We determine the placement of the text from the font configuration if not explicitly set:
-<span class="nc" id="L1295">            UI.HorizontalAlignment horizontalAlignment = text.fontConf().horizontalAlignment();</span>
-<span class="nc" id="L1296">            UI.VerticalAlignment verticalAlignment = text.fontConf().verticalAlignment();</span>
-<span class="nc" id="L1297">            chosenPlacement = placementOf(horizontalAlignment, verticalAlignment);</span>
+<span class="nc" id="L1262">            UI.HorizontalAlignment horizontalAlignment = text.fontConf().horizontalAlignment();</span>
+<span class="nc" id="L1263">            UI.VerticalAlignment verticalAlignment = text.fontConf().verticalAlignment();</span>
+<span class="nc" id="L1264">            chosenPlacement = placementOf(horizontalAlignment, verticalAlignment);</span>
         }
-<span class="fc" id="L1299">        return chosenPlacement;</span>
+<span class="fc" id="L1266">        return chosenPlacement;</span>
     }
 
     static UI.Placement placementOf(
         UI.HorizontalAlignment horizontalAlignment, 
         UI.VerticalAlignment verticalAlignment
     ) {
-<span class="nc" id="L1306">        UI.Placement currentPlacement = UI.Placement.UNDEFINED;</span>
-<span class="nc bnc" id="L1307" title="All 6 branches missed.">        switch (horizontalAlignment) {</span>
-<span class="nc" id="L1308">            case LEFT: currentPlacement = UI.Placement.LEFT;break;</span>
-<span class="nc" id="L1309">            case CENTER: currentPlacement = UI.Placement.CENTER;break;</span>
-<span class="nc" id="L1310">            case RIGHT: currentPlacement = UI.Placement.RIGHT;break;</span>
-<span class="nc" id="L1311">            case LEADING: currentPlacement = UI.Placement.LEFT;break; // leading means: &quot;align with the reading direction of the text&quot;. In most cases, this is equivalent to LEFT, but it can be different for right-to-left languages. For simplicity, we treat it as LEFT here.</span>
-<span class="nc" id="L1312">            case TRAILING: currentPlacement = UI.Placement.RIGHT;break;// trailing means: &quot;align with the opposite of the reading direction of the text&quot;. In most cases, this is equivalent to RIGHT, but it can be different for right-to-left languages. For simplicity, we treat it as RIGHT here.</span>
+<span class="nc" id="L1273">        UI.Placement currentPlacement = UI.Placement.UNDEFINED;</span>
+<span class="nc bnc" id="L1274" title="All 6 branches missed.">        switch (horizontalAlignment) {</span>
+<span class="nc" id="L1275">            case LEFT: currentPlacement = UI.Placement.LEFT;break;</span>
+<span class="nc" id="L1276">            case CENTER: currentPlacement = UI.Placement.CENTER;break;</span>
+<span class="nc" id="L1277">            case RIGHT: currentPlacement = UI.Placement.RIGHT;break;</span>
+<span class="nc" id="L1278">            case LEADING: currentPlacement = UI.Placement.LEFT;break; // leading means: &quot;align with the reading direction of the text&quot;. In most cases, this is equivalent to LEFT, but it can be different for right-to-left languages. For simplicity, we treat it as LEFT here.</span>
+<span class="nc" id="L1279">            case TRAILING: currentPlacement = UI.Placement.RIGHT;break;// trailing means: &quot;align with the opposite of the reading direction of the text&quot;. In most cases, this is equivalent to RIGHT, but it can be different for right-to-left languages. For simplicity, we treat it as RIGHT here.</span>
             default: break;
         }
-<span class="nc bnc" id="L1315" title="All 4 branches missed.">        switch (verticalAlignment) {</span>
+<span class="nc bnc" id="L1282" title="All 4 branches missed.">        switch (verticalAlignment) {</span>
             case TOP:
-<span class="nc bnc" id="L1317" title="All 4 branches missed.">                switch (currentPlacement) {</span>
-<span class="nc" id="L1318">                    case LEFT: return UI.Placement.TOP_LEFT;</span>
-<span class="nc" id="L1319">                    case CENTER: return UI.Placement.TOP;</span>
-<span class="nc" id="L1320">                    case RIGHT: return UI.Placement.TOP_RIGHT;</span>
-<span class="nc" id="L1321">                    default: return UI.Placement.TOP;</span>
+<span class="nc bnc" id="L1284" title="All 4 branches missed.">                switch (currentPlacement) {</span>
+<span class="nc" id="L1285">                    case LEFT: return UI.Placement.TOP_LEFT;</span>
+<span class="nc" id="L1286">                    case CENTER: return UI.Placement.TOP;</span>
+<span class="nc" id="L1287">                    case RIGHT: return UI.Placement.TOP_RIGHT;</span>
+<span class="nc" id="L1288">                    default: return UI.Placement.TOP;</span>
                 }
             case CENTER:
-<span class="nc bnc" id="L1324" title="All 4 branches missed.">                switch (currentPlacement) {</span>
-<span class="nc" id="L1325">                    case LEFT: return UI.Placement.LEFT;</span>
-<span class="nc" id="L1326">                    case CENTER: return UI.Placement.CENTER;</span>
-<span class="nc" id="L1327">                    case RIGHT: return UI.Placement.RIGHT;</span>
-<span class="nc" id="L1328">                    default: return UI.Placement.CENTER;</span>
+<span class="nc bnc" id="L1291" title="All 4 branches missed.">                switch (currentPlacement) {</span>
+<span class="nc" id="L1292">                    case LEFT: return UI.Placement.LEFT;</span>
+<span class="nc" id="L1293">                    case CENTER: return UI.Placement.CENTER;</span>
+<span class="nc" id="L1294">                    case RIGHT: return UI.Placement.RIGHT;</span>
+<span class="nc" id="L1295">                    default: return UI.Placement.CENTER;</span>
                 }
             case BOTTOM:
-<span class="nc bnc" id="L1331" title="All 4 branches missed.">                switch (currentPlacement) {</span>
-<span class="nc" id="L1332">                    case LEFT: return UI.Placement.BOTTOM_LEFT;</span>
-<span class="nc" id="L1333">                    case CENTER: return UI.Placement.BOTTOM;</span>
-<span class="nc" id="L1334">                    case RIGHT: return UI.Placement.BOTTOM_RIGHT;</span>
-<span class="nc" id="L1335">                    default: return UI.Placement.BOTTOM;</span>
+<span class="nc bnc" id="L1298" title="All 4 branches missed.">                switch (currentPlacement) {</span>
+<span class="nc" id="L1299">                    case LEFT: return UI.Placement.BOTTOM_LEFT;</span>
+<span class="nc" id="L1300">                    case CENTER: return UI.Placement.BOTTOM;</span>
+<span class="nc" id="L1301">                    case RIGHT: return UI.Placement.BOTTOM_RIGHT;</span>
+<span class="nc" id="L1302">                    default: return UI.Placement.BOTTOM;</span>
                 }
             default:
-<span class="nc" id="L1338">                return currentPlacement;</span>
+<span class="nc" id="L1305">                return currentPlacement;</span>
         }
     }
     
@@ -1347,66 +1314,60 @@ final class StyleRenderer
         final List&lt;TextLayoutEngine.LayoutLine&gt; lines,
         final float            totalHeight
     ) {
-<span class="fc" id="L1350">        final float boundsY      = textBounds.location().y();</span>
-<span class="fc" id="L1351">        final float boundsHeight = textBounds.size().height().orElse(0f);</span>
+<span class="fc" id="L1317">        final float boundsY      = textBounds.location().y();</span>
+<span class="fc" id="L1318">        final float boundsHeight = textBounds.size().height().orElse(0f);</span>
         /*
             ------------------------------------------------
             Phase 3 : Determine visible slice (overflow policy)
             ------------------------------------------------
          */
-<span class="fc" id="L1357">        final List&lt;TextLayoutEngine.LayoutLine&gt; visible = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L1358">        float accumulated = 0;</span>
-<span class="fc bfc" id="L1359" title="All 6 branches covered.">        if (</span>
+<span class="fc" id="L1324">        final List&lt;TextLayoutEngine.LayoutLine&gt; visible = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L1325">        float accumulated = 0;</span>
+<span class="fc bfc" id="L1326" title="All 6 branches covered.">        if (</span>
             placement == UI.Placement.TOP ||
             placement == UI.Placement.TOP_LEFT ||
             placement == UI.Placement.TOP_RIGHT
         ) {
-<span class="fc bfc" id="L1364" title="All 2 branches covered.">            for ( TextLayoutEngine.LayoutLine line : lines ) {</span>
-<span class="pc bpc" id="L1365" title="1 of 2 branches missed.">                float h = line.layout == null</span>
-<span class="nc" id="L1366">                            ? font.getSize2D()</span>
-<span class="fc" id="L1367">                            : line.layout.getAscent() + line.layout.getDescent() + line.layout.getLeading();</span>
-<span class="pc bpc" id="L1368" title="1 of 2 branches missed.">                if ( Math.floor(accumulated + h) &gt; boundsHeight )</span>
-<span class="nc" id="L1369">                    break;</span>
-<span class="fc" id="L1370">                visible.add(line);</span>
-<span class="fc" id="L1371">                accumulated += h;</span>
-<span class="fc" id="L1372">            }</span>
-<span class="fc bfc" id="L1373" title="All 6 branches covered.">        } else if (</span>
+<span class="fc bfc" id="L1331" title="All 2 branches covered.">            for ( TextLayoutEngine.LayoutLine line : lines ) {</span>
+<span class="fc" id="L1332">                float h = _lineHeight(line, font);</span>
+<span class="pc bpc" id="L1333" title="1 of 2 branches missed.">                if ( Math.floor(accumulated + h) &gt; boundsHeight )</span>
+<span class="nc" id="L1334">                    break;</span>
+<span class="fc" id="L1335">                visible.add(line);</span>
+<span class="fc" id="L1336">                accumulated += h;</span>
+<span class="fc" id="L1337">            }</span>
+<span class="fc bfc" id="L1338" title="All 6 branches covered.">        } else if (</span>
             placement == UI.Placement.BOTTOM ||
             placement == UI.Placement.BOTTOM_LEFT ||
             placement == UI.Placement.BOTTOM_RIGHT
         ) {
-<span class="fc" id="L1378">            final ListIterator&lt;TextLayoutEngine.LayoutLine&gt; it = lines.listIterator(lines.size());</span>
-<span class="fc bfc" id="L1379" title="All 2 branches covered.">            while ( it.hasPrevious() ) {</span>
-<span class="fc" id="L1380">                TextLayoutEngine.LayoutLine line = it.previous();</span>
-<span class="pc bpc" id="L1381" title="1 of 2 branches missed.">                float h = line.layout == null</span>
-<span class="nc" id="L1382">                        ? font.getSize2D()</span>
-<span class="fc" id="L1383">                        : line.layout.getAscent() + line.layout.getDescent() + line.layout.getLeading();</span>
-<span class="pc bpc" id="L1384" title="1 of 2 branches missed.">                if ( Math.floor(accumulated + h) &gt; boundsHeight )</span>
-<span class="nc" id="L1385">                    break;</span>
-<span class="fc" id="L1386">                visible.add(0, line);</span>
-<span class="fc" id="L1387">                accumulated += h;</span>
-<span class="fc" id="L1388">            }</span>
-<span class="fc" id="L1389">        } else {</span>
+<span class="fc" id="L1343">            final ListIterator&lt;TextLayoutEngine.LayoutLine&gt; it = lines.listIterator(lines.size());</span>
+<span class="fc bfc" id="L1344" title="All 2 branches covered.">            while ( it.hasPrevious() ) {</span>
+<span class="fc" id="L1345">                TextLayoutEngine.LayoutLine line = it.previous();</span>
+<span class="fc" id="L1346">                float h = _lineHeight(line, font);</span>
+<span class="pc bpc" id="L1347" title="1 of 2 branches missed.">                if ( Math.floor(accumulated + h) &gt; boundsHeight )</span>
+<span class="nc" id="L1348">                    break;</span>
+<span class="fc" id="L1349">                visible.add(0, line);</span>
+<span class="fc" id="L1350">                accumulated += h;</span>
+<span class="fc" id="L1351">            }</span>
+<span class="fc" id="L1352">        } else {</span>
             /*
                 CENTER / LEFT / RIGHT — overflow both directions
              */
-<span class="fc" id="L1393">            final float centerHeight = Math.min(totalHeight, boundsHeight);</span>
-<span class="fc" id="L1394">            final float targetTop    = (totalHeight - centerHeight) / 2f;</span>
-<span class="fc" id="L1395">            float cursor = 0;</span>
-<span class="fc bfc" id="L1396" title="All 2 branches covered.">            for ( TextLayoutEngine.LayoutLine line : lines ) {</span>
-<span class="pc bpc" id="L1397" title="1 of 2 branches missed.">                float h = line.layout == null</span>
-<span class="nc" id="L1398">                        ? font.getSize2D()</span>
-<span class="fc" id="L1399">                        : line.layout.getAscent() + line.layout.getDescent() + line.layout.getLeading();</span>
-<span class="pc bpc" id="L1400" title="1 of 2 branches missed.">                if ( cursor + h &lt; targetTop ) {</span>
-<span class="nc" id="L1401">                    cursor += h;</span>
-<span class="nc" id="L1402">                    continue;</span>
+<span class="fc" id="L1356">            final float centerHeight = Math.min(totalHeight, boundsHeight);</span>
+<span class="fc" id="L1357">            final float targetTop    = (totalHeight - centerHeight) / 2f;</span>
+<span class="fc" id="L1358">            float cursor = 0;</span>
+<span class="fc bfc" id="L1359" title="All 2 branches covered.">            for ( TextLayoutEngine.LayoutLine line : lines ) {</span>
+<span class="fc" id="L1360">                float h = _lineHeight(line, font);</span>
+<span class="pc bpc" id="L1361" title="1 of 2 branches missed.">                if ( cursor + h &lt; targetTop ) {</span>
+<span class="nc" id="L1362">                    cursor += h;</span>
+<span class="nc" id="L1363">                    continue;</span>
                 }
-<span class="pc bpc" id="L1404" title="1 of 2 branches missed.">                if ( Math.floor(accumulated + h) &gt; boundsHeight )</span>
-<span class="nc" id="L1405">                    break;</span>
-<span class="fc" id="L1406">                visible.add(line);</span>
-<span class="fc" id="L1407">                accumulated += h;</span>
-<span class="fc" id="L1408">                cursor += h;</span>
-<span class="fc" id="L1409">            }</span>
+<span class="pc bpc" id="L1365" title="1 of 2 branches missed.">                if ( Math.floor(accumulated + h) &gt; boundsHeight )</span>
+<span class="nc" id="L1366">                    break;</span>
+<span class="fc" id="L1367">                visible.add(line);</span>
+<span class="fc" id="L1368">                accumulated += h;</span>
+<span class="fc" id="L1369">                cursor += h;</span>
+<span class="fc" id="L1370">            }</span>
         }
 
         /*
@@ -1414,22 +1375,22 @@ final class StyleRenderer
             Phase 4 : Vertical anchor
             ------------------------------------------------
          */
-<span class="fc" id="L1417">        final float visibleHeight = accumulated;</span>
+<span class="fc" id="L1378">        final float visibleHeight = accumulated;</span>
         float y;
-<span class="fc bfc" id="L1419" title="All 6 branches covered.">        if (</span>
+<span class="fc bfc" id="L1380" title="All 6 branches covered.">        if (</span>
             placement == UI.Placement.TOP ||
             placement == UI.Placement.TOP_LEFT ||
             placement == UI.Placement.TOP_RIGHT
         ) {
-<span class="fc" id="L1424">            y = boundsY;</span>
-<span class="fc bfc" id="L1425" title="All 6 branches covered.">        } else if (</span>
+<span class="fc" id="L1385">            y = boundsY;</span>
+<span class="fc bfc" id="L1386" title="All 6 branches covered.">        } else if (</span>
             placement == UI.Placement.BOTTOM ||
             placement == UI.Placement.BOTTOM_LEFT ||
             placement == UI.Placement.BOTTOM_RIGHT
         ) {
-<span class="fc" id="L1430">            y = boundsY + boundsHeight - visibleHeight;</span>
+<span class="fc" id="L1391">            y = boundsY + boundsHeight - visibleHeight;</span>
         } else {
-<span class="fc" id="L1432">            y = boundsY + (boundsHeight - visibleHeight) / 2f;</span>
+<span class="fc" id="L1393">            y = boundsY + (boundsHeight - visibleHeight) / 2f;</span>
         }
 
         /*
@@ -1437,22 +1398,31 @@ final class StyleRenderer
             Phase 5 : Render lines
             ------------------------------------------------
          */
-<span class="fc bfc" id="L1440" title="All 2 branches covered.">        for ( TextLayoutEngine.LayoutLine line : visible ) {</span>
-<span class="pc bpc" id="L1441" title="1 of 2 branches missed.">            if ( line.layout == null ) {</span>
-<span class="nc" id="L1442">                y += font.getSize2D();</span>
-<span class="nc" id="L1443">                continue;</span>
+<span class="fc bfc" id="L1401" title="All 2 branches covered.">        for ( TextLayoutEngine.LayoutLine line : visible ) {</span>
+<span class="fc" id="L1402">            final TextLayout primary = line.primary().layout;</span>
+<span class="pc bpc" id="L1403" title="1 of 2 branches missed.">            if ( primary == null ) {</span>
+<span class="nc" id="L1404">                y += font.getSize2D();</span>
+<span class="nc" id="L1405">                continue;</span>
             }
-<span class="fc" id="L1445">            y += line.layout.getAscent();</span>
+<span class="fc" id="L1407">            y += primary.getAscent();</span>
 
-            // Draw all fragments (primary + obstacle-split extras) at the same baseline.
-            // x positioning is relative to each fragment's own obstacle-free region.
-<span class="fc" id="L1449">            _drawLineFragment(g2d, placement, line.layout, line.regionX, line.regionWidth, y);</span>
-<span class="pc bpc" id="L1450" title="1 of 2 branches missed.">            for ( TextLayoutEngine.LayoutLine.Segment seg : line.extraSegments )</span>
-<span class="nc" id="L1451">                _drawLineFragment(g2d, placement, seg.layout, seg.regionX, seg.regionWidth, y);</span>
+            // Draw all fragments at the same baseline; x positioning is relative
+            // to each fragment's own obstacle-free region.
+<span class="fc bfc" id="L1411" title="All 2 branches covered.">            for ( TextLayoutEngine.LayoutLine.Segment seg : line.segments ) {</span>
+<span class="pc bpc" id="L1412" title="1 of 2 branches missed.">                if ( seg.layout != null )</span>
+<span class="fc" id="L1413">                    _drawLineFragment(g2d, placement, seg.layout, seg.regionX, seg.regionWidth, y);</span>
+<span class="fc" id="L1414">            }</span>
 
-<span class="fc" id="L1453">            y += line.layout.getDescent() + line.layout.getLeading();</span>
-<span class="fc" id="L1454">        }</span>
-<span class="fc" id="L1455">    }</span>
+<span class="fc" id="L1416">            y += primary.getDescent() + primary.getLeading();</span>
+<span class="fc" id="L1417">        }</span>
+<span class="fc" id="L1418">    }</span>
+
+    private static float _lineHeight( TextLayoutEngine.LayoutLine line, Font font ) {
+<span class="fc" id="L1421">        final TextLayout primary = line.primary().layout;</span>
+<span class="pc bpc" id="L1422" title="1 of 2 branches missed.">        return primary == null</span>
+<span class="nc" id="L1423">                ? font.getSize2D()</span>
+<span class="fc" id="L1424">                : primary.getAscent() + primary.getDescent() + primary.getLeading();</span>
+    }
 
     /** Draws one text fragment aligned within its obstacle-free region at the given baseline y. */
     private static void _drawLineFragment(
@@ -1463,66 +1433,66 @@ final class StyleRenderer
         final float        regionWidth,
         final float        baselineY
     ) {
-<span class="fc" id="L1466">        final float advance = layout.getAdvance();</span>
+<span class="fc" id="L1436">        final float advance = layout.getAdvance();</span>
         final float x;
-<span class="fc bfc" id="L1468" title="All 3 branches covered.">        switch (placement) {</span>
+<span class="fc bfc" id="L1438" title="All 3 branches covered.">        switch (placement) {</span>
             case LEFT:
             case TOP_LEFT:
             case BOTTOM_LEFT:
-<span class="fc" id="L1472">                x = regionX;</span>
-<span class="fc" id="L1473">                break;</span>
+<span class="fc" id="L1442">                x = regionX;</span>
+<span class="fc" id="L1443">                break;</span>
             case RIGHT:
             case TOP_RIGHT:
             case BOTTOM_RIGHT:
-<span class="fc" id="L1477">                x = regionX + regionWidth - advance;</span>
-<span class="fc" id="L1478">                break;</span>
+<span class="fc" id="L1447">                x = regionX + regionWidth - advance;</span>
+<span class="fc" id="L1448">                break;</span>
             default:// UNDEFINED / CENTER / TOP / BOTTOM
-<span class="fc" id="L1480">                x = regionX + (regionWidth - advance) / 2f;</span>
+<span class="fc" id="L1450">                x = regionX + (regionWidth - advance) / 2f;</span>
         }
-<span class="fc" id="L1482">        layout.draw(g2d, x, baselineY);</span>
-<span class="fc" id="L1483">    }</span>
+<span class="fc" id="L1452">        layout.draw(g2d, x, baselineY);</span>
+<span class="fc" id="L1453">    }</span>
 
     private static void _executeUserPainters(
         final UI.Layer layer,
         final LayerRenderConf conf,
         final Graphics2D g2d
     ) {
-<span class="fc" id="L1490">        List&lt;PainterConf&gt; painters = conf.layer().painters().sortedByNames();</span>
+<span class="fc" id="L1460">        List&lt;PainterConf&gt; painters = conf.layer().painters().sortedByNames();</span>
 
-<span class="pc bpc" id="L1492" title="1 of 2 branches missed.">        if ( painters.isEmpty() )</span>
-<span class="nc" id="L1493">            return;</span>
+<span class="pc bpc" id="L1462" title="1 of 2 branches missed.">        if ( painters.isEmpty() )</span>
+<span class="nc" id="L1463">            return;</span>
 
         // We remember the current clip so that we can reset it later:
-<span class="fc" id="L1496">        final Shape currentClip = g2d.getClip();</span>
+<span class="fc" id="L1466">        final Shape currentClip = g2d.getClip();</span>
 
-<span class="fc" id="L1498">        UI.ComponentArea allowedArea = null;</span>
-<span class="fc" id="L1499">        Shape localClip = null;</span>
+<span class="fc" id="L1468">        UI.ComponentArea allowedArea = null;</span>
+<span class="fc" id="L1469">        Shape localClip = null;</span>
 
-<span class="fc bfc" id="L1501" title="All 2 branches covered.">        for ( PainterConf painterConf : painters ) {</span>
-<span class="fc" id="L1502">            Painter backgroundPainter = painterConf.painter();</span>
+<span class="fc bfc" id="L1471" title="All 2 branches covered.">        for ( PainterConf painterConf : painters ) {</span>
+<span class="fc" id="L1472">            Painter backgroundPainter = painterConf.painter();</span>
 
-<span class="fc bfc" id="L1504" title="All 2 branches covered.">            if ( backgroundPainter == Painter.none() )</span>
-<span class="fc" id="L1505">                continue;</span>
+<span class="fc bfc" id="L1474" title="All 2 branches covered.">            if ( backgroundPainter == Painter.none() )</span>
+<span class="fc" id="L1475">                continue;</span>
 
             // We remember if antialiasing was enabled before we render:
-<span class="fc bfc" id="L1508" title="All 2 branches covered.">            boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;</span>
+<span class="fc bfc" id="L1478" title="All 2 branches covered.">            boolean antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;</span>
             // We remember the current transform and clip so that we can reset them after each painter:
-<span class="fc" id="L1510">            AffineTransform currentTransform = new AffineTransform(g2d.getTransform());</span>
+<span class="fc" id="L1480">            AffineTransform currentTransform = new AffineTransform(g2d.getTransform());</span>
 
-<span class="pc bpc" id="L1512" title="3 of 4 branches missed.">            if ( allowedArea == null || allowedArea != painterConf.clipArea() ) {</span>
-<span class="fc" id="L1513">                allowedArea = painterConf.clipArea();</span>
-<span class="fc" id="L1514">                localClip = conf.areas().get(allowedArea);</span>
-<span class="fc" id="L1515">                localClip = StyleUtil.intersect(localClip, currentClip);</span>
+<span class="pc bpc" id="L1482" title="3 of 4 branches missed.">            if ( allowedArea == null || allowedArea != painterConf.clipArea() ) {</span>
+<span class="fc" id="L1483">                allowedArea = painterConf.clipArea();</span>
+<span class="fc" id="L1484">                localClip = conf.areas().get(allowedArea);</span>
+<span class="fc" id="L1485">                localClip = StyleUtil.intersect(localClip, currentClip);</span>
             }
-<span class="fc" id="L1517">            g2d.setClip(localClip);</span>
-<span class="fc" id="L1518">            float uiScale = UI.scale();</span>
-<span class="fc bfc" id="L1519" title="All 2 branches covered.">            if ( uiScale != 1f )</span>
-<span class="fc" id="L1520">                g2d.scale(uiScale, uiScale);</span>
+<span class="fc" id="L1487">            g2d.setClip(localClip);</span>
+<span class="fc" id="L1488">            float uiScale = UI.scale();</span>
+<span class="fc bfc" id="L1489" title="All 2 branches covered.">            if ( uiScale != 1f )</span>
+<span class="fc" id="L1490">                g2d.scale(uiScale, uiScale);</span>
 
             try {
-<span class="fc" id="L1523">                backgroundPainter.paint(g2d);</span>
-<span class="nc" id="L1524">            } catch (Exception e) {</span>
-<span class="nc" id="L1525">                log.warn(SwingTree.get().logMarker(),</span>
+<span class="fc" id="L1493">                backgroundPainter.paint(g2d);</span>
+<span class="nc" id="L1494">            } catch (Exception e) {</span>
+<span class="nc" id="L1495">                log.warn(SwingTree.get().logMarker(),</span>
                         &quot;An exception occurred while executing painter '{}' on layer '{}' for style '{}' &quot;,
                         backgroundPainter, layer, conf, e
                 );
@@ -1538,15 +1508,15 @@ final class StyleRenderer
                 */
             } finally {
                 // We do not know what the painter did to the graphics transform, so we reset it:
-<span class="fc" id="L1541">                g2d.setTransform(currentTransform);</span>
+<span class="fc" id="L1511">                g2d.setTransform(currentTransform);</span>
 
                 // Reset antialiasing to its previous state:
-<span class="fc bfc" id="L1544" title="All 2 branches covered.">                g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );</span>
+<span class="fc bfc" id="L1514" title="All 2 branches covered.">                g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, antialiasingWasEnabled ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF );</span>
             }
-<span class="fc" id="L1546">        }</span>
+<span class="fc" id="L1516">        }</span>
         // We are done with the painters, so we can reset the clip:
-<span class="fc" id="L1548">        g2d.setClip(currentClip);</span>
-<span class="fc" id="L1549">    }</span>
+<span class="fc" id="L1518">        g2d.setClip(currentClip);</span>
+<span class="fc" id="L1519">    }</span>
 
     static void renderParentFilter(
         final FilterConf    filterConf,
@@ -1556,86 +1526,285 @@ final class StyleRenderer
         int offsetY,
         final Pooled&lt;BoxModelConf&gt; boxModelConf
     ) {
-<span class="fc" id="L1559">        final Size       size   = boxModelConf.get().size();</span>
-<span class="fc" id="L1560">        final float      width  = size.width().orElse(0f);</span>
-<span class="fc" id="L1561">        final float      height = size.height().orElse(0f);</span>
-<span class="fc" id="L1562">        final Offset     center = filterConf.offset();</span>
-<span class="fc" id="L1563">        final Scale      scale  = filterConf.scale();</span>
-<span class="fc" id="L1564">        final KernelConf kernel = filterConf.kernel();</span>
-<span class="fc" id="L1565">        final float      blur   = filterConf.blur();</span>
+<span class="fc" id="L1529">        final Size       size   = boxModelConf.get().size();</span>
+<span class="fc" id="L1530">        final float      width  = size.width().orElse(0f);</span>
+<span class="fc" id="L1531">        final float      height = size.height().orElse(0f);</span>
+<span class="fc" id="L1532">        final Offset     center = filterConf.offset();</span>
+<span class="fc" id="L1533">        final Scale      scale  = filterConf.scale();</span>
+<span class="fc" id="L1534">        final KernelConf kernel = filterConf.kernel();</span>
+<span class="fc" id="L1535">        final float      blur   = filterConf.blur();</span>
 
-<span class="fc" id="L1567">        BufferedImage filtered = parentRendering;</span>
+<span class="fc" id="L1537">        BufferedImage filtered = parentRendering;</span>
 
-<span class="pc bpc" id="L1569" title="2 of 4 branches missed.">        if ( !center.equals(Offset.none()) || !scale.equals(Scale.none()) ) {</span>
-<span class="pc bpc" id="L1570" title="1 of 2 branches missed.">            if ( scale.equals(Scale.none()) ) {</span>
-<span class="nc" id="L1571">                offsetX += (int) center.x();</span>
-<span class="nc" id="L1572">                offsetY += (int) center.y();</span>
+<span class="pc bpc" id="L1539" title="2 of 4 branches missed.">        if ( !center.equals(Offset.none()) || !scale.equals(Scale.none()) ) {</span>
+<span class="pc bpc" id="L1540" title="1 of 2 branches missed.">            if ( scale.equals(Scale.none()) ) {</span>
+<span class="nc" id="L1541">                offsetX += (int) center.x();</span>
+<span class="nc" id="L1542">                offsetY += (int) center.y();</span>
             } else {
-<span class="fc" id="L1574">                AffineTransform at = new AffineTransform();</span>
-<span class="fc" id="L1575">                float vx = center.x() + offsetX + width / 2f;</span>
-<span class="fc" id="L1576">                float vy = center.y() + offsetY + height / 2f;</span>
-<span class="fc" id="L1577">                at.translate(vx, vy);</span>
-<span class="fc" id="L1578">                at.scale(scale.x(), scale.y());</span>
-<span class="fc" id="L1579">                at.translate(-vx, -vy);</span>
-<span class="fc" id="L1580">                AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);</span>
-<span class="fc" id="L1581">                filtered = scaleOp.filter(filtered, null);</span>
+<span class="fc" id="L1544">                AffineTransform at = new AffineTransform();</span>
+<span class="fc" id="L1545">                float vx = center.x() + offsetX + width / 2f;</span>
+<span class="fc" id="L1546">                float vy = center.y() + offsetY + height / 2f;</span>
+<span class="fc" id="L1547">                at.translate(vx, vy);</span>
+<span class="fc" id="L1548">                at.scale(scale.x(), scale.y());</span>
+<span class="fc" id="L1549">                at.translate(-vx, -vy);</span>
+<span class="fc" id="L1550">                AffineTransformOp scaleOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);</span>
+<span class="fc" id="L1551">                filtered = scaleOp.filter(filtered, null);</span>
             }
         }
 
-<span class="pc bpc" id="L1585" title="1 of 2 branches missed.">        if ( !kernel.equals(KernelConf.none()) ) {</span>
-<span class="nc" id="L1586">            Kernel awtKernel = kernel.toAwtKernel();</span>
-<span class="nc" id="L1587">            ConvolveOp convolve = new ConvolveOp(awtKernel, ConvolveOp.EDGE_NO_OP, null);</span>
-<span class="nc" id="L1588">            filtered = convolve.filter(filtered, null);</span>
+<span class="pc bpc" id="L1555" title="1 of 2 branches missed.">        if ( !kernel.equals(KernelConf.none()) ) {</span>
+<span class="nc" id="L1556">            Kernel awtKernel = kernel.toAwtKernel();</span>
+<span class="nc" id="L1557">            ConvolveOp convolve = new ConvolveOp(awtKernel, ConvolveOp.EDGE_NO_OP, null);</span>
+<span class="nc" id="L1558">            filtered = convolve.filter(filtered, null);</span>
         }
 
-<span class="pc bpc" id="L1591" title="1 of 2 branches missed.">        if ( blur &gt; 0 ) {</span>
-<span class="nc" id="L1592">            Kernel blurKernelHorizontal = _makeKernel(blur, false);</span>
-<span class="nc" id="L1593">            ConvolveOp blurOp = new ConvolveOp(blurKernelHorizontal, ConvolveOp.EDGE_NO_OP, null);</span>
-<span class="nc" id="L1594">            BufferedImage blurred = blurOp.filter(filtered, null);</span>
-<span class="nc" id="L1595">            Kernel blurKernelVertical = _makeKernel(blur, true);</span>
-<span class="nc" id="L1596">            blurOp = new ConvolveOp(blurKernelVertical, ConvolveOp.EDGE_NO_OP, null);</span>
-<span class="nc" id="L1597">            filtered = blurOp.filter(blurred, filtered);</span>
+<span class="pc bpc" id="L1561" title="1 of 2 branches missed.">        if ( blur &gt; 0 ) {</span>
+<span class="nc" id="L1562">            Kernel blurKernelHorizontal = _makeKernel(blur, false);</span>
+<span class="nc" id="L1563">            ConvolveOp blurOp = new ConvolveOp(blurKernelHorizontal, ConvolveOp.EDGE_NO_OP, null);</span>
+<span class="nc" id="L1564">            BufferedImage blurred = blurOp.filter(filtered, null);</span>
+<span class="nc" id="L1565">            Kernel blurKernelVertical = _makeKernel(blur, true);</span>
+<span class="nc" id="L1566">            blurOp = new ConvolveOp(blurKernelVertical, ConvolveOp.EDGE_NO_OP, null);</span>
+<span class="nc" id="L1567">            filtered = blurOp.filter(blurred, filtered);</span>
         }
 
-<span class="fc" id="L1600">        Shape oldClip = g2d.getClip();</span>
+<span class="fc" id="L1570">        Shape oldClip = g2d.getClip();</span>
         try {
-<span class="fc" id="L1602">            ComponentAreas areas = ComponentAreas.of(boxModelConf);</span>
-<span class="fc" id="L1603">            Shape newClip = areas.get(filterConf.area());</span>
-<span class="fc" id="L1604">            g2d.setClip(newClip);</span>
-<span class="fc" id="L1605">            g2d.drawImage(filtered, -offsetX, -offsetY, null);</span>
-<span class="nc" id="L1606">        } catch (Exception e) {</span>
-<span class="nc" id="L1607">            log.error(SwingTree.get().logMarker(), &quot;Failed to successfully render filtered parent buffer!&quot;, e);</span>
+<span class="fc" id="L1572">            ComponentAreas areas = ComponentAreas.of(boxModelConf);</span>
+<span class="fc" id="L1573">            Shape newClip = areas.get(filterConf.area());</span>
+<span class="fc" id="L1574">            g2d.setClip(newClip);</span>
+<span class="fc" id="L1575">            g2d.drawImage(filtered, -offsetX, -offsetY, null);</span>
+<span class="nc" id="L1576">        } catch (Exception e) {</span>
+<span class="nc" id="L1577">            log.error(SwingTree.get().logMarker(), &quot;Failed to successfully render filtered parent buffer!&quot;, e);</span>
         } finally {
-<span class="fc" id="L1609">            g2d.setClip(oldClip);</span>
+<span class="fc" id="L1579">            g2d.setClip(oldClip);</span>
         }
-<span class="fc" id="L1611">    }</span>
+<span class="fc" id="L1581">    }</span>
 
     private static Kernel _makeKernel( final float radius, final boolean transpose ) {
-<span class="nc" id="L1614">        final int maxRadius = (int)Math.ceil(radius);</span>
-<span class="nc" id="L1615">        final int rows = maxRadius * 2 + 1;</span>
-<span class="nc" id="L1616">        final float[] matrix = new float[rows];</span>
-<span class="nc" id="L1617">        final float sigma = radius / 3;</span>
-<span class="nc" id="L1618">        final float sigma22 = 2*sigma*sigma;</span>
-<span class="nc" id="L1619">        final float sigmaPi2 = (float) ( 2 * Math.PI * sigma );</span>
-<span class="nc" id="L1620">        final float sqrtSigmaPi2 = (float)Math.sqrt(sigmaPi2);</span>
-<span class="nc" id="L1621">        final float radius2 = radius*radius;</span>
+<span class="nc" id="L1584">        final int maxRadius = (int)Math.ceil(radius);</span>
+<span class="nc" id="L1585">        final int rows = maxRadius * 2 + 1;</span>
+<span class="nc" id="L1586">        final float[] matrix = new float[rows];</span>
+<span class="nc" id="L1587">        final float sigma = radius / 3;</span>
+<span class="nc" id="L1588">        final float sigma22 = 2*sigma*sigma;</span>
+<span class="nc" id="L1589">        final float sigmaPi2 = (float) ( 2 * Math.PI * sigma );</span>
+<span class="nc" id="L1590">        final float sqrtSigmaPi2 = (float)Math.sqrt(sigmaPi2);</span>
+<span class="nc" id="L1591">        final float radius2 = radius*radius;</span>
 
-<span class="nc" id="L1623">        float total = 0;</span>
-<span class="nc" id="L1624">        int   index = 0;</span>
+<span class="nc" id="L1593">        float total = 0;</span>
+<span class="nc" id="L1594">        int   index = 0;</span>
 
-<span class="nc bnc" id="L1626" title="All 2 branches missed.">        for (int row = -maxRadius; row &lt;= maxRadius; row++) {</span>
-<span class="nc" id="L1627">            float distance = row*row;</span>
-<span class="nc bnc" id="L1628" title="All 2 branches missed.">            if (distance &gt; radius2)</span>
-<span class="nc" id="L1629">                matrix[index] = 0;</span>
+<span class="nc bnc" id="L1596" title="All 2 branches missed.">        for (int row = -maxRadius; row &lt;= maxRadius; row++) {</span>
+<span class="nc" id="L1597">            float distance = row*row;</span>
+<span class="nc bnc" id="L1598" title="All 2 branches missed.">            if (distance &gt; radius2)</span>
+<span class="nc" id="L1599">                matrix[index] = 0;</span>
             else
-<span class="nc" id="L1631">                matrix[index] = (float)Math.exp(-distance/sigma22) / sqrtSigmaPi2;</span>
-<span class="nc" id="L1632">            total += matrix[index];</span>
-<span class="nc" id="L1633">            index++;</span>
+<span class="nc" id="L1601">                matrix[index] = (float)Math.exp(-distance/sigma22) / sqrtSigmaPi2;</span>
+<span class="nc" id="L1602">            total += matrix[index];</span>
+<span class="nc" id="L1603">            index++;</span>
         }
-<span class="nc bnc" id="L1635" title="All 2 branches missed.">        for ( int i = 0; i &lt; rows; i++ )</span>
-<span class="nc" id="L1636">            matrix[i] /= total;</span>
+<span class="nc bnc" id="L1605" title="All 2 branches missed.">        for ( int i = 0; i &lt; rows; i++ )</span>
+<span class="nc" id="L1606">            matrix[i] /= total;</span>
 
-<span class="nc bnc" id="L1638" title="All 4 branches missed.">        return new Kernel( transpose ? 1 : rows, transpose ? rows : 1, matrix );</span>
+<span class="nc bnc" id="L1608" title="All 4 branches missed.">        return new Kernel( transpose ? 1 : rows, transpose ? rows : 1, matrix );</span>
+    }
+
+    /**
+     *  Caches the work needed to render a {@link NoiseConf} layer.
+     *  &lt;p&gt;
+     *  Two strategies are used depending on the size of the area being filled:
+     *  &lt;ul&gt;
+     *      &lt;li&gt;For &lt;b&gt;small&lt;/b&gt; areas a {@link NoiseGradientPaint} is reused and the area
+     *          is filled directly through {@code g2d.fill(..)}. The {@link NoiseGradientPaint}
+     *          internally caches the 32x32 rasters Swing requests, which is optimal here.&lt;/li&gt;
+     *      &lt;li&gt;For &lt;b&gt;large&lt;/b&gt; areas (e.g. window sized backgrounds) the per-pixel
+     *          {@link Paint} pipeline becomes the bottleneck: Swing rasterizes and composites
+     *          a {@link Paint} in fixed 32x32 chunks, so a large fill turns into thousands of
+     *          tiny blits. To avoid this we pre-render the noise into large
+     *          {@value #LARGE_TILE_SIZE}x{@value #LARGE_TILE_SIZE} {@link BufferedImage} tiles
+     *          and blit those with a single {@code g2d.drawImage(..)} call per tile.&lt;/li&gt;
+     *  &lt;/ul&gt;
+     *  The large tiles are keyed in &lt;i&gt;noise space&lt;/i&gt; (device space translated so the noise
+     *  {@code center} is the origin) rather than device space. The noise pattern only depends
+     *  on these noise-space coordinates, so a tile's pixels are invariant with respect to the
+     *  component size and the noise offset. Resizing the component or scrolling merely changes
+     *  &lt;i&gt;which&lt;/i&gt; tiles are visible and &lt;i&gt;where&lt;/i&gt; they are drawn - already rendered tiles
+     *  stay valid, which keeps a dynamically resized UI responsive.
+     */
+<span class="fc" id="L1633">    private static class NoisePaintCache {</span>
+
+        /** Side length of the pre-rendered large tiles, in (unscaled) device pixels. */
+        private static final int LARGE_TILE_SIZE = 256;
+        /** Areas larger than this (in pixels) use the large-tile blitting strategy. */
+        private static final int LARGE_AREA_THRESHOLD = LARGE_TILE_SIZE * LARGE_TILE_SIZE;
+        /** Upper bound on retained large tiles (~256KiB each) to keep memory bounded. */
+<span class="fc" id="L1640">        private static final int MAX_CACHED_TILES = Math.max(1, 10 * LayerCache.DYNAMIC_CACHE_AGGRESSIVENESS());</span>
+
+<span class="fc" id="L1642">        private final Map&lt;Point2D,NoiseGradientPaint&gt; paintCache = new HashMap&lt;&gt;();</span>
+        /** Large pre-rendered tiles, keyed by noise-space tile index, evicted least-recently-used first. */
+<span class="fc" id="L1644">        private final Map&lt;Long,BufferedImage&gt; largeTileCache =</span>
+<span class="fc" id="L1645">                new LinkedHashMap&lt;Long,BufferedImage&gt;(16, 0.75f, true) {</span>
+                    @Override
+                    protected boolean removeEldestEntry( Map.Entry&lt;Long,BufferedImage&gt; eldest ) {
+<span class="pc bpc" id="L1648" title="1 of 2 branches missed.">                        return size() &gt; MAX_CACHED_TILES;</span>
+                    }
+                };
+
+
+        void renderNoise(
+            final BoxModelConf      boxModel,
+            final Pooled&lt;NoiseConf&gt; noise,
+            final Shape             areaToFill,
+            final Graphics2D        g2d
+        ) {
+<span class="fc" id="L1659">            final Color[] colors = noise.get().colors();</span>
+<span class="pc bpc" id="L1660" title="1 of 2 branches missed.">            if ( colors.length == 1 ) {</span>
+<span class="nc" id="L1661">                g2d.setPaint(colors[0]);</span>
+<span class="nc" id="L1662">                g2d.fill(areaToFill);</span>
+<span class="nc" id="L1663">                return;</span>
+            }
+
+<span class="fc" id="L1666">            final Outline insets = boxModel.insetsFor(noise.get().boundary());</span>
+<span class="fc" id="L1667">            final Point2D.Float center = new Point2D.Float(</span>
+<span class="fc" id="L1668">                    insets.left().orElse(0f) + noise.get().offset().x(),</span>
+<span class="fc" id="L1669">                    insets.top().orElse(0f) + noise.get().offset().y()</span>
+            );
+
+<span class="fc" id="L1672">            final Rectangle bounds = areaToFill.getBounds();</span>
+<span class="fc" id="L1673">            final long area = (long) bounds.width * bounds.height;</span>
+
+<span class="fc bfc" id="L1675" title="All 2 branches covered.">            if ( area &lt;= LARGE_AREA_THRESHOLD ) {</span>
+                // Small area: the per-pixel Paint pipeline is cheap enough here.
+<span class="fc" id="L1677">                g2d.setPaint(getCachedNoisePaint(center, noise));</span>
+<span class="fc" id="L1678">                g2d.fill(areaToFill);</span>
+            } else {
+                // Large area: blit pre-rendered large tiles to dodge the 32x32 Paint pipeline.
+<span class="fc" id="L1681">                _renderWithLargeTiles(center, noise, areaToFill, bounds, g2d);</span>
+            }
+<span class="fc" id="L1683">        }</span>
+
+        /**
+         *  Fills {@code areaToFill} by blitting cached large {@link BufferedImage} tiles.
+         *  The tile grid lives in noise space (device space minus {@code center}), so the
+         *  tiles survive component resizing without cache invalidation.
+         */
+        private void _renderWithLargeTiles(
+            final Point2D.Float     center,
+            final Pooled&lt;NoiseConf&gt; noise,
+            final Shape             areaToFill,
+            final Rectangle         bounds,
+            final Graphics2D        g2d
+        ) {
+<span class="fc" id="L1697">            final int size = LARGE_TILE_SIZE;</span>
+
+            // Bounds expressed in noise space (device space translated by 'center'):
+<span class="fc" id="L1700">            final double uMin = bounds.getMinX() - center.x;</span>
+<span class="fc" id="L1701">            final double uMax = bounds.getMaxX() - center.x;</span>
+<span class="fc" id="L1702">            final double vMin = bounds.getMinY() - center.y;</span>
+<span class="fc" id="L1703">            final double vMax = bounds.getMaxY() - center.y;</span>
+
+<span class="fc" id="L1705">            final int tileXMin = Math.floorDiv( (int) Math.floor(uMin), size );</span>
+<span class="fc" id="L1706">            final int tileXMax = Math.floorDiv( (int) Math.ceil(uMax) - 1, size );</span>
+<span class="fc" id="L1707">            final int tileYMin = Math.floorDiv( (int) Math.floor(vMin), size );</span>
+<span class="fc" id="L1708">            final int tileYMax = Math.floorDiv( (int) Math.ceil(vMax) - 1, size );</span>
+
+<span class="fc" id="L1710">            final Shape oldClip = g2d.getClip();</span>
+            try {
+<span class="fc" id="L1712">                g2d.clip(areaToFill); // Restricts the tile blits to the requested shape.</span>
+<span class="fc bfc" id="L1713" title="All 2 branches covered.">                for ( int tileY = tileYMin; tileY &lt;= tileYMax; tileY++ ) {</span>
+<span class="fc bfc" id="L1714" title="All 2 branches covered.">                    for ( int tileX = tileXMin; tileX &lt;= tileXMax; tileX++ ) {</span>
+<span class="fc" id="L1715">                        final long key = ((long) tileX &lt;&lt; 32) | (tileY &amp; 0xFFFFFFFFL);</span>
+<span class="fc" id="L1716">                        BufferedImage tile = largeTileCache.get(key);</span>
+<span class="pc bpc" id="L1717" title="1 of 2 branches missed.">                        if ( tile == null ) {</span>
+<span class="fc" id="L1718">                            tile = _renderLargeTile(tileX, tileY, noise);</span>
+<span class="fc" id="L1719">                            largeTileCache.put(key, tile);</span>
+                        }
+<span class="fc" id="L1721">                        final int drawX = Math.round( tileX * (float) size + center.x );</span>
+<span class="fc" id="L1722">                        final int drawY = Math.round( tileY * (float) size + center.y );</span>
+<span class="fc" id="L1723">                        g2d.drawImage(tile, drawX, drawY, null);</span>
+                    }
+                }
+<span class="nc" id="L1726">            } catch ( Exception e ) {</span>
+<span class="nc" id="L1727">                log.error(SwingTree.get().logMarker(), &quot;Failed to render noise using large tiles!&quot;, e);</span>
+            } finally {
+<span class="fc" id="L1729">                g2d.setClip(oldClip);</span>
+            }
+<span class="fc" id="L1731">        }</span>
+
+        /**
+         *  Renders a single large tile of the noise into a fresh {@link BufferedImage}.
+         *  A regular {@link NoiseGradientPaint} centered at {@code (-tileX*size, -tileY*size)}
+         *  maps image pixel {@code (px,py)} to noise-space coordinate
+         *  {@code (tileX*size + px, tileY*size + py)}, so the tile content depends only on the
+         *  tile index - never on the component size or noise offset.
+         */
+        private BufferedImage _renderLargeTile(
+            final int               tileX,
+            final int               tileY,
+            final Pooled&lt;NoiseConf&gt; noise
+        ) {
+<span class="fc" id="L1745">            final int size = LARGE_TILE_SIZE;</span>
+<span class="fc" id="L1746">            final NoiseGradientPaint paint = _createNoiseGradientPaint(</span>
+                    new Point2D.Float( -tileX * (float) size, -tileY * (float) size ),
+                    noise
+            );
+<span class="fc" id="L1750">            final BufferedImage tile = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);</span>
+<span class="fc" id="L1751">            final Graphics2D ig = tile.createGraphics();</span>
+            try {
+<span class="fc" id="L1753">                ig.setPaint(paint);</span>
+<span class="fc" id="L1754">                ig.fillRect(0, 0, size, size);</span>
+            } finally {
+<span class="fc" id="L1756">                ig.dispose();</span>
+            }
+<span class="fc" id="L1758">            return tile;</span>
+        }
+
+        Paint getNoisePaint(
+            final BoxModelConf      boxModel,
+            final Pooled&lt;NoiseConf&gt; noise
+        ) {
+<span class="fc" id="L1765">            final Color[] colors = noise.get().colors();</span>
+<span class="pc bpc" id="L1766" title="1 of 2 branches missed.">            if ( colors.length == 1 ) {</span>
+<span class="nc" id="L1767">                return colors[0];</span>
+            }
+<span class="fc" id="L1769">            final Outline insets = boxModel.insetsFor(noise.get().boundary());</span>
+<span class="fc" id="L1770">            final Point2D.Float center = new Point2D.Float(</span>
+<span class="fc" id="L1771">                    insets.left().orElse(0f) + noise.get().offset().x(),</span>
+<span class="fc" id="L1772">                    insets.top().orElse(0f) + noise.get().offset().y()</span>
+            );
+<span class="fc" id="L1774">            return getCachedNoisePaint(center, noise);</span>
+        }
+
+        private NoiseGradientPaint getCachedNoisePaint(
+            final Point2D.Float     center,
+            final Pooled&lt;NoiseConf&gt; noise
+        ) {
+<span class="fc" id="L1781">            NoiseGradientPaint paint = paintCache.get(center);</span>
+<span class="fc bfc" id="L1782" title="All 2 branches covered.">            if ( paint != null ) {</span>
+<span class="fc" id="L1783">                return paint;</span>
+            }
+<span class="fc" id="L1785">            paint = _createNoiseGradientPaint(center, noise);</span>
+<span class="fc" id="L1786">            paintCache.put(center, paint);</span>
+<span class="fc" id="L1787">            return paint;</span>
+        }
+
+        private static NoiseGradientPaint _createNoiseGradientPaint(
+            final Point2D           center,
+            final Pooled&lt;NoiseConf&gt; noise
+        ) {
+<span class="fc" id="L1794">            final Color[] colors    = noise.get().colors();</span>
+<span class="fc" id="L1795">            final float[] fractions = _fractionsFrom(colors, noise.get().fractions());</span>
+<span class="fc" id="L1796">            final Scale   scale     = noise.get().scale();</span>
+<span class="fc" id="L1797">            return new NoiseGradientPaint(</span>
+                    center,
+<span class="fc" id="L1799">                    scale.x(),</span>
+<span class="fc" id="L1800">                    scale.y(),</span>
+<span class="fc" id="L1801">                    noise.get().rotation(),</span>
+                    fractions,
+                    colors,
+<span class="fc" id="L1804">                    noise.get().function()</span>
+            );
+        }
+
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -1,10 +1,10 @@
 {
   "className":"swingtree.UI_Query_Spec",
   "title":"Swing Tree UI Query",
-  "narrative":"The Swing-Tree UI builder allows you to easily build UIs and query them for\n    specific components inside component event action lambdas!\n    This allows you to easily build UIs that are event driven and react to\n    user input in a very flexible way.\n    Note that this should be used with care as it can lead to very complex\n    UIs that are hard to maintain.\n    Please consider modelling your UIs logic using MVVM based on\n    property bindings (See the properties specification).",
+  "narrative":"The Swing-Tree API allows you to easily build UIs and query them for\n    specific components inside component event action lambdas!\n    This allows you to build event driven UIs which react to user input flexibly.\n    But note that mutating GUI state that way can lead to code where reasoning\n    about side effects is generally harder, and so such code is usually harder to maintain.\n    Therefore consider modelling your UIs state and behavior using MVI/MVL/MVVM\n    design patterns... (using property binding).\n\n    In the following specifications we explore the various `find...` methods exposed\n    on the SwingTree event delegates. These methods let you locate components by\n    their string id, by an enum based id, by a custom predicate, or by their style\n    group(s) - either restricted to a particular `JComponent` subtype or across all\n    components in the tree.",
   "subjects":[],
   "statistics":{
-    "runs":"2",
+    "runs":"7",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -18,39 +18,150 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            The most common way to look up a component in the SwingTree is by giving\n            it a unique string id (which under the hood is mapped to the Swing component's\n            `name` property) and then using the `find(Class, String)` method on the\n            event delegate (or on a `Utility.Query` instance) to look it up again later.\n\n            This is the bread-and-butter pattern for \"find another component from inside\n            an event handler\" style code. In the example below, button \"B3\" reaches\n            across the entire tree (across tabs, scroll panes and split panes) and\n            mutates a sibling button as well as a text area and a text field located\n            in a completely different branch of the UI tree.\n\n            Note that the result of `find(...)` is wrapped in an `OptionalUI` which\n            is a thread-aware variant of `Optional`. This means that you should not\n            assume the component is present and instead use methods like `ifPresent(...)`\n            to safely interact with it.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"we have a fancy UI tree:","code":["var root =","UI.panel(\"fill, insets 3\", \"[grow][shrink]\")",".add(\"grow\",","    UI.splitPane(UI.Align.HORIZONTAL)","    .withDividerAt(50)","    .add(","        UI.scrollPane()","        .add(","            UI.tabbedPane()","            .add(UI.tab(\"1\").add(UI.panel(\"fill\").add(\"grow\", UI.button(\"A\").id(\"B1\"))))","            .add(UI.tab(\"2\").add(UI.panel(\"fill\").add(\"grow\", UI.button(\"B\").id(\"B2\"))))","            .add(UI.tab(\"3\").add(","                UI.panel(\"fill\").add(\"grow\",","                    UI.button(\"C\").id(\"B3\")","                    .onClick( it -> { // The delegate lets us query the tree!","                        it.find(JButton, \"B2\").ifPresent(b -> b.setText(\"I got hacked by B3\"))","                        it.find(JTextArea, \"TA1\").ifPresent(a -> a.setText(\"I got hacked by B3\"))","                        it.find(JTextField, \"TF1\").ifPresent(a -> a.setText(\"I got hacked by B3\"))","                    })","                )","            ))","        )","    )","    .add(","        UI.scrollPane()","        .add(","            UI.panel(\"fill\")","            .add(\"grow,  wrap\",","                UI.scrollPane().add( UI.textArea(\"I am a text area!\").id(\"TA1\") )","            )","            .add(\"shrinky, growx\",","                UI.textField(\"I am a text field\").id(\"TF1\")","            )","        )","    )",")",".get(JPanel)"]},
+        {"kind":"given","text":"we have a fancy UI tree with components identified by string ids:","code":["var root =","UI.panel(\"fill, insets 3\", \"[grow][shrink]\")",".add(\"grow\",","    UI.splitPane(UI.Align.HORIZONTAL)","    .withDividerAt(50)","    .add(","        UI.scrollPane()","        .add(","            UI.tabbedPane()","            .add(UI.tab(\"1\").add(UI.panel(\"fill\").add(\"grow\", UI.button(\"A\").id(\"B1\"))))","            .add(UI.tab(\"2\").add(UI.panel(\"fill\").add(\"grow\", UI.button(\"B\").id(\"B2\"))))","            .add(UI.tab(\"3\").add(","                UI.panel(\"fill\").add(\"grow\",","                    UI.button(\"C\").id(\"B3\")","                    .onClick( it -> { // The delegate lets us query the tree!","                        it.find(JButton, \"B2\").ifPresent(b -> b.setText(\"I got hacked by B3\"))","                        it.find(JTextArea, \"TA1\").ifPresent(a -> a.setText(\"I got hacked by B3\"))","                        it.find(JTextField, \"TF1\").ifPresent(a -> a.setText(\"I got hacked by B3\"))","                    })","                )","            ))","        )","    )","    .add(","        UI.scrollPane()","        .add(","            UI.panel(\"fill\")","            .add(\"grow,  wrap\",","                UI.scrollPane().add( UI.textArea(\"I am a text area!\").id(\"TA1\") )","            )","            .add(\"shrinky, growx\",","                UI.textField(\"I am a text field\").id(\"TF1\")","            )","        )","    )",")",".get(JPanel)"]},
 
-        {"kind":"expect","text":"We can query the tree for different kinds of components.","code":["new Utility.Query(root).find(JButton, \"B1\").isPresent()","new Utility.Query(root).find(JButton, \"B2\").isPresent()","new Utility.Query(root).find(JButton, \"B3\").isPresent()","new Utility.Query(root).find(JTextArea, \"TA1\").isPresent()","new Utility.Query(root).find(JTextField, \"TF1\").isPresent()"]},
+        {"kind":"expect","text":"We can query the tree for different kinds of components by their string id.","code":["new Utility.Query(root).find(JButton, \"B1\").isPresent()","new Utility.Query(root).find(JButton, \"B2\").isPresent()","new Utility.Query(root).find(JButton, \"B3\").isPresent()","new Utility.Query(root).find(JTextArea, \"TA1\").isPresent()","new Utility.Query(root).find(JTextField, \"TF1\").isPresent()"]},
 
-        {"kind":"when","text":"We click on the button with the actions performing query actions...","code":["UI.runNow(()->new Utility.Query(root).find(JButton, \"B3\").get().doClick())"]},
+        {"kind":"when","text":"We click on the button whose action handler performs cross-tree queries...","code":["UI.runNow(()->new Utility.Query(root).find(JButton, \"B3\").get().doClick())"]},
 
-        {"kind":"then","text":"...the text fields and text areas are updated.","code":["new Utility.Query(root).find(JButton, \"B1\").get().text == \"A\"","new Utility.Query(root).find(JButton, \"B2\").get().text == \"I got hacked by B3\"","new Utility.Query(root).find(JButton, \"B3\").get().text == \"C\"","new Utility.Query(root).find(JTextArea, \"TA1\").get().text == \"I got hacked by B3\"","new Utility.Query(root).find(JTextField, \"TF1\").get().text == \"I got hacked by B3\""]}
+        {"kind":"then","text":"...the text fields and text areas reachable through `find(...)` are updated.","code":["new Utility.Query(root).find(JButton, \"B1\").get().text == \"A\"","new Utility.Query(root).find(JButton, \"B2\").get().text == \"I got hacked by B3\"","new Utility.Query(root).find(JButton, \"B3\").get().text == \"C\"","new Utility.Query(root).find(JTextArea, \"TA1\").get().text == \"I got hacked by B3\"","new Utility.Query(root).find(JTextField, \"TF1\").get().text == \"I got hacked by B3\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
   
     {
-      "id":"We cane query a swing three using the group tags of components.",
+      "id":"We can query the swing tree using an enum constant as the id of a component.",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":[]
+      "tags":{},"see":[],"extraInfo":["\n            String based ids are simple but they are also fragile because they are not\n            checked at compile time. As an alternative SwingTree allows you to use any\n            `enum` constant as the id of a component. This is much safer because the\n            compiler will catch typos and refactoring tools can rename the enum constants\n            for you.\n\n            The corresponding `find(Class, Enum)` overload mirrors the string based one\n            and is invoked here from inside the action handler of a custom event.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A few result holders, an event used to drive the action handler","code":["var saveFound  = [false]","var cancelFound= [false]","var nameFound  = [false]","var typeMismatch = [true] // We will try to find the SAVE button as a JTextField","var event = Event.create()"]},
+
+        {"kind":"and","text":"A small UI whose components are identified by enum constants:","code":["var ui =","    UI.panel(\"fill\")","    .add(UI.button(\"Save\").id(Ids.SAVE))","    .add(UI.button(\"Cancel\").id(Ids.CANCEL))","    .add(UI.textField(\"name\").id(Ids.NAME))","    .on(event, it -> {","        saveFound[0]   = it.find(JButton, Ids.SAVE).isPresent()","        cancelFound[0] = it.find(JButton, Ids.CANCEL).isPresent()","        nameFound[0]   = it.find(JTextField, Ids.NAME).isPresent()","        typeMismatch[0]= it.find(JTextField, Ids.SAVE).isPresent()","    })"]},
+
+        {"kind":"and","text":"We trigger the UI to be built:","code":["ui.get(JPanel)"]},
+
+        {"kind":"when","text":"We fire the event so the action handler runs.","code":["event.fire()"]},
+
+        {"kind":"then","text":"Each component is reachable through its corresponding enum constant.","code":["saveFound[0]","cancelFound[0]","nameFound[0]"]},
+
+        {"kind":"and","text":"A type mismatch results in an empty optional, even if a component with that id exists.","code":["!typeMismatch[0]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can find a single component using a custom predicate.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When neither a string id nor an enum based id fits your needs you can fall\n            back to the most general overload: `find(Class, Predicate)`. It traverses\n            the component tree and returns the first component of the given type for\n            which the predicate returns true.\n\n            This is particularly useful when you want to locate a component by some\n            of its already-set properties (text, tooltip, custom client property, ...)\n            rather than by an explicit identifier.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Result holders and an event to trigger the query:","code":["var world = [\"\"]","var startsWithS = [\"\"]","var notFound = [true]","var event = Event.create()"]},
+
+        {"kind":"and","text":"A small UI containing a few labels with distinct texts:","code":["var ui =","    UI.panel(\"fill, wrap 1\")","    .add(UI.label(\"Hello\"))","    .add(UI.label(\"World\"))","    .add(UI.label(\"Swing-Tree\"))","    .on(event, it -> {","        world[0]       = it.find(JLabel, l -> l.text == \"World\").map(l -> l.text).orElse(\"\")","        startsWithS[0] = it.find(JLabel, l -> l.text.startsWith(\"S\")).map(l -> l.text).orElse(\"\")","        notFound[0]    = it.find(JLabel, l -> l.text == \"Goodbye\").isPresent()","    })","ui.get(JPanel)"]},
+
+        {"kind":"when","text":"We fire the event to drive the queries.","code":["event.fire()"]},
+
+        {"kind":"then","text":"The first matching label is returned for each predicate.","code":["world[0] == \"World\"","startsWithS[0] == \"Swing-Tree\""]},
+
+        {"kind":"and","text":"A predicate without any match yields an empty `OptionalUI`.","code":["!notFound[0]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can find all components of a particular type matching a predicate.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            While `find(...)` returns the first match, `findAll(Class, Predicate)`\n            returns *every* component of the given type for which the predicate matches.\n            The result is a `Tuple` (an immutable list) which can be empty if nothing\n            matches.\n\n            This is useful for collecting groups of components without having to\n            assign explicit ids or style groups to each one. It also demonstrates\n            that the type filter is applied first, so components of an unrelated\n            type are excluded even if they would otherwise satisfy the predicate.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Result holders and an event to drive the queries:","code":["var saveButtonTexts = []","var emptyResultSize = [-1]","var event = Event.create()"]},
+
+        {"kind":"and","text":"A panel containing a mix of buttons (and a label) with different texts:","code":["var ui =","    UI.panel(\"fill, wrap 1\")","    .add(UI.button(\"Save\"))","    .add(UI.button(\"Save As\"))","    .add(UI.button(\"Save and Close\"))","    .add(UI.button(\"Discard\"))","    .add(UI.label(\"Save\")) // Same text but different type!","    .on(event, it -> {","        saveButtonTexts.addAll(","            it.findAll(JButton, b -> b.text.contains(\"Save\")).collect(b -> b.text)","        )","        emptyResultSize[0] = it.findAll(JButton, b -> b.text == \"Open\").size()","    })","ui.get(JPanel)"]},
+
+        {"kind":"when","text":"We fire the event to drive the queries.","code":["event.fire()"]},
+
+        {"kind":"then","text":"Only the three matching buttons are returned, the label is excluded by the type filter.","code":["saveButtonTexts == [\"Save\", \"Save As\", \"Save and Close\"]"]},
+
+        {"kind":"and","text":"A predicate matching no component returns an empty tuple.","code":["emptyResultSize[0] == 0"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can query a swing tree using the group tags of components.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Apart from a single string id, every SwingTree component can also be\n            assigned to one or more *style groups*. A style group is a tag intended\n            to be shared between many components, which makes group based queries\n            ideal for collecting all components related to the same feature, screen\n            or styling rule.\n\n            The `findAllByGroup(Class, String)` overload restricts the search to a\n            particular `JComponent` subtype, which is what this scenario demonstrates.\n            We attach the same style group to several labels and text fields and\n            then collect them in response to a custom event.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"","code":["var traceA = []","var traceB = []","var traceC = []","var traceD = []"]},
 
-        {"kind":"and","text":"We create a custom event which we will use th query the tree.","code":["var event = Event.create()"]},
+        {"kind":"and","text":"We create a custom event which we will use to query the tree.","code":["var event = Event.create()"]},
 
         {"kind":"and","text":"","code":["            var ui =","\t\t        UI.panel(\"fill\", \"[][grow]\")","\t\t        .withBackground(Color.WHITE)","\t\t        .add(UI.label(\"I am a generic SwingTree UI!\"))","\t\t        .add(\"grow\",","\t\t        \tUI.panel(\"fill, insets 0\",\"[grow][shrink]\")","\t\t        \t.onMouseClick( e -> {/* does something */} )","\t\t        \t.add(\"cell 0 0\",","\t\t        \t\tUI.boldLabel(\"Bold Label\")","\t\t        \t)","\t\t        \t.add(\"cell 0 1, grow, pushy\",","\t\t        \t\tUI.panel(\"fill, insets 0\",\"[grow][shrink]\")","\t\t        \t\t.add(\"cell 0 0, aligny top, grow x\",","\t\t        \t\t\tUI.panel(\"fill, insets 9\",\"grow\")","\t\t        \t\t\t.withBackground(new Color(128, 234, 255))","\t\t        \t\t\t.add( \"span\",","\t\t        \t\t\t\tUI.label(\"<html><div style=\\\"width:275px;\\\"> Hey! :) </div></html>\")","\t\t        \t\t\t)","\t\t        \t\t\t.add(\"shrink x\",      UI.label(\"First Name\").group(\"A\", \"C\"))","\t\t        \t\t\t.add(\"grow\",          UI.textField(\"John\").group(\"A\", \"B\"))","\t\t        \t\t\t.add(\"gap unrelated\", UI.label(\"Last Name\").group(\"B\", \"D\"))","\t\t        \t\t\t.add(\"wrap, grow\",    UI.textField(\"Smith\").group(\"C\"))","\t\t        \t\t\t.add(\"shrink\",        UI.label(\"Address\").group(\"C\", \"D\"))","\t\t        \t\t\t.add(\"span, grow\",    UI.textField(\"City\").group(\"A\", \"C\", \"B\"))","\t\t        \t\t\t.add( \"span, grow\",   UI.label(\"Here is a text field:\").group(\"C\", \"A\"))","\t\t        \t\t\t.add(\"span, grow\",    UI.textField(\"Field\").group(\"D\", \"B\"))","\t\t        \t\t)","\t\t        \t\t.add(\"cell 1 0\",","\t\t        \t\t\tUI.button(\"Some button!\").group(\"A\", \"B\", \"C\", \"D\")","\t\t        \t\t\t.withCursor(UI.Cursor.HAND)","\t\t        \t\t\t.makePlain()","\t\t        \t\t\t.onClick( e -> {/* does something */} )","\t\t        \t\t)","\t\t        \t\t.withBorder(BorderFactory.createMatteBorder(0,0,1,0,Color.LIGHT_GRAY))","\t\t        \t)","\t\t        \t.add(\"cell 0 2, grow\",","\t\t        \t\tUI.panel(\"fill, insets 0 0 0 0\",\"[grow][grow][grow]\")","\t\t        \t\t.withBackground(Color.WHITE)","\t\t        \t\t.add(\"cell 1 0\", UI.label(\"Label A\").group(\"C\"))","\t\t        \t\t.add(\"cell 2 0\", UI.label(\"Label B\").group(\"D\"))","\t\t        \t\t.add(\"cell 3 0\", UI.label(\"Label C\").group(\"A\"))","\t\t        \t)","\t\t        \t.add(\"cell 0 3, span 2, grow\",","\t\t        \t\tUI.label(\"...here the UI comes to an end...\").group(\"A\", \"B\", \"C\", \"D\")","                        .withForeground(Color.LIGHT_GRAY)","\t\t        \t)","\t\t        \t.withBackground(Color.WHITE)","\t\t        )","                .on(event, it -> {","                    traceA.addAll(it.findAllByGroup(JLabel, \"A\").collect(c -> c.text))","                    traceB.addAll(it.findAllByGroup(JLabel, \"B\").collect(c -> c.text))","                    traceC.addAll(it.findAllByGroup(JTextField, \"C\").collect(c -> c.text))","                    traceD.addAll(it.findAllByGroup(JTextField, \"D\").collect(c -> c.text))","                })"]},
 
-        {"kind":"and","text":"We trigger the UI to be built!","code":["\t\t\tvar panel = ui.get(JPanel)"]},
+        {"kind":"and","text":"We trigger the UI to be built!","code":["\t\t\tui.get(JPanel)"]},
 
-        {"kind":"when","text":"We fire the event and query the tree for components with the group tag \"A\".","code":["event.fire()"]},
+        {"kind":"when","text":"We fire the event and the action handler queries the tree by group tags.","code":["event.fire()"]},
 
-        {"kind":"then","text":"We get the correct components.","code":["traceA == [\"First Name\", \"Here is a text field:\", \"Label C\", \"...here the UI comes to an end...\"]","traceB == [\"Last Name\", \"...here the UI comes to an end...\"]","traceC == [\"Smith\", \"City\"]","traceD == [\"Field\"]"]}
+        {"kind":"then","text":"Only components of the requested type **and** group are returned.","code":["traceA == [\"First Name\", \"Here is a text field:\", \"Label C\", \"...here the UI comes to an end...\"]","traceB == [\"Last Name\", \"...here the UI comes to an end...\"]","traceC == [\"Smith\", \"City\"]","traceD == [\"Field\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can query a swing tree by group tag without restricting the component type.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `findAllByGroup(String)` overload is the type-agnostic counterpart of\n            `findAllByGroup(Class, String)`. It returns *every* `JComponent` belonging\n            to a given style group, regardless of its concrete type.\n\n            This is useful when a style group is used as a logical \"feature tag\"\n            spanning multiple component types - for example \"all components belonging\n            to the login form\" or \"all components belonging to the toolbar\".\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Result holders and an event to drive the queries:","code":["var loginSize  = [-1]","var actionSize = [-1]","var actionsAllButtons = [false]","var emptySize  = [-1]","var event = Event.create()"]},
+
+        {"kind":"and","text":"A small UI mixing labels, buttons and text fields under shared groups:","code":["var ui =","    UI.panel(\"fill, wrap 1\")","    .add(UI.label(\"Username\").group(\"login\"))","    .add(UI.textField(\"john\").group(\"login\"))","    .add(UI.label(\"Password\").group(\"login\"))","    .add(UI.passwordField().group(\"login\"))","    .add(UI.button(\"Login\").group(\"login\", \"actions\"))","    .add(UI.button(\"Cancel\").group(\"actions\"))","    .on(event, it -> {","        var login = it.findAllByGroup(\"login\")","        loginSize[0] = login.size()","        var actions = it.findAllByGroup(\"actions\")","        actionSize[0] = actions.size()","        actionsAllButtons[0] = actions.stream().allMatch(c -> c instanceof JButton)","        emptySize[0] = it.findAllByGroup(\"nope\").size()","    })","ui.get(JPanel)"]},
+
+        {"kind":"when","text":"We fire the event to drive the queries.","code":["event.fire()"]},
+
+        {"kind":"then","text":"All five login related components are returned, regardless of type.","code":["loginSize[0] == 5"]},
+
+        {"kind":"and","text":"Both buttons in the \"actions\" group are returned, even though one of them is also part of the login group.","code":["actionSize[0] == 2","actionsAllButtons[0]"]},
+
+        {"kind":"and","text":"A group which does not exist in the tree results in an empty tuple.","code":["emptySize[0] == 0"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"We can query a swing tree using enum constants as group tags.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Style groups can also be expressed as `enum` constants. This is the\n            type-safe equivalent of using strings and is recommended for larger\n            applications where you want the compiler to catch typos and renames.\n\n            Both the type-restricted overload `findAllByGroup(Class, Enum)` and the\n            type-agnostic overload `findAllByGroup(Enum)` accept an enum constant\n            in place of the string group name.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Result holders and an event to drive the queries:","code":["var headerLabels = [-1]","var footerButtons= [-1]","var bodyFields   = [-1]","var headerAll    = [-1]","var footerAll    = [-1]","var bodyAll      = [-1]","var unusedAll    = [-1]","var unusedTyped  = [-1]","var event = Event.create()"]},
+
+        {"kind":"and","text":"A UI where style groups are expressed as enum constants:","code":["var ui =","    UI.panel(\"fill, wrap 1\")","    .add(UI.label(\"Title\").group(Groups.HEADER))","    .add(UI.label(\"Subtitle\").group(Groups.HEADER))","    .add(UI.button(\"Submit\").group(Groups.FOOTER))","    .add(UI.button(\"Reset\").group(Groups.FOOTER))","    .add(UI.textField(\"body\").group(Groups.BODY))","    .on(event, it -> {","        headerLabels[0] = it.findAllByGroup(JLabel, Groups.HEADER).size()","        footerButtons[0]= it.findAllByGroup(JButton, Groups.FOOTER).size()","        bodyFields[0]   = it.findAllByGroup(JTextField, Groups.BODY).size()","        headerAll[0]    = it.findAllByGroup(Groups.HEADER).size()","        footerAll[0]    = it.findAllByGroup(Groups.FOOTER).size()","        bodyAll[0]      = it.findAllByGroup(Groups.BODY).size()","        unusedAll[0]    = it.findAllByGroup(Groups.UNUSED).size()","        unusedTyped[0]  = it.findAllByGroup(JLabel, Groups.UNUSED).size()","    })","ui.get(JPanel)"]},
+
+        {"kind":"when","text":"We fire the event to drive the queries.","code":["event.fire()"]},
+
+        {"kind":"then","text":"Restricting by type returns only the matching components.","code":["headerLabels[0] == 2","footerButtons[0] == 2","bodyFields[0] == 1"]},
+
+        {"kind":"and","text":"The type-agnostic overload returns all components in the group regardless of type.","code":["headerAll[0] == 2","footerAll[0] == 2","bodyAll[0] == 1"]},
+
+        {"kind":"and","text":"A non-existent group results in an empty tuple either way.","code":["unusedAll[0] == 0","unusedTyped[0] == 0"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

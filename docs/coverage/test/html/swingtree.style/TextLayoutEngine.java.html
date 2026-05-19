@@ -171,22 +171,23 @@ final class TextLayoutEngine {
          */
 <span class="fc" id="L172">        float totalHeight = 0;</span>
 <span class="fc bfc" id="L173" title="All 2 branches covered.">        for ( LayoutLine line : lines ) {</span>
-<span class="pc bpc" id="L174" title="1 of 2 branches missed.">            if ( line.layout == null )</span>
-<span class="nc" id="L175">                totalHeight += font.getSize2D();</span>
+<span class="fc" id="L174">            final TextLayout primary = line.primary().layout;</span>
+<span class="pc bpc" id="L175" title="1 of 2 branches missed.">            if ( primary == null )</span>
+<span class="nc" id="L176">                totalHeight += font.getSize2D();</span>
             else
-<span class="fc" id="L177">                totalHeight += line.layout.getAscent() + line.layout.getDescent() + line.layout.getLeading();</span>
-<span class="fc" id="L178">        }</span>
+<span class="fc" id="L178">                totalHeight += primary.getAscent() + primary.getDescent() + primary.getLeading();</span>
+<span class="fc" id="L179">        }</span>
 
-<span class="fc" id="L180">        final Pair&lt;Float, List&lt;LayoutLine&gt;&gt; result = Pair.of(totalHeight, Collections.unmodifiableList(lines));</span>
-<span class="fc" id="L181">        _LAYOUT_CACHE.put(key, result);</span>
-<span class="fc" id="L182">        return result;</span>
+<span class="fc" id="L181">        final Pair&lt;Float, List&lt;LayoutLine&gt;&gt; result = Pair.of(totalHeight, Collections.unmodifiableList(lines));</span>
+<span class="fc" id="L182">        _LAYOUT_CACHE.put(key, result);</span>
+<span class="fc" id="L183">        return result;</span>
     }
 
     private static boolean _supportsObstacles(UI.Placement placement) {
         // Obstacle avoidance relies on TOP-based vertical placement to track the current line's y-level in component coordinates.
         // When using CENTER or BOTTOM placement, the text block's y-level shifts as lines are added, so obstacle intersection
         // becomes inaccurate and may produce jumbled layouts. For simplicity, we disable obstacles entirely in these modes.
-<span class="fc bfc" id="L189" title="All 6 branches covered.">        return placement == UI.Placement.TOP_LEFT || placement == UI.Placement.TOP || placement == UI.Placement.TOP_RIGHT;</span>
+<span class="fc bfc" id="L190" title="All 6 branches covered.">        return placement == UI.Placement.TOP_LEFT || placement == UI.Placement.TOP || placement == UI.Placement.TOP_RIGHT;</span>
     }
 
     /**
@@ -236,123 +237,118 @@ final class TextLayoutEngine {
         // assumption). Used solely for obstacle intersection — a good approximation for all
         // placement modes because obstacles are typically large enough that the small vertical
         // offset introduced by CENTER/BOTTOM placement does not change which obstacle a line hits.
-<span class="fc" id="L239">        final List&lt;LayoutLine&gt; lines = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L240">        float currentY = boundsY;</span>
-<span class="fc" id="L241">        final float estLineHeight = font.getSize2D();</span>
+<span class="fc" id="L240">        final List&lt;LayoutLine&gt; lines = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L241">        float currentY = boundsY;</span>
+<span class="fc" id="L242">        final float estLineHeight = font.getSize2D();</span>
 
-<span class="fc bfc" id="L243" title="All 2 branches covered.">        for ( final Pooled&lt;Paragraph&gt; pooled : paragraphs ) {</span>
-<span class="fc" id="L244">            final Paragraph paragraph = pooled.get();</span>
-<span class="fc bfc" id="L245" title="All 2 branches covered.">            if ( paragraph.isBlankLine ) {</span>
-<span class="fc" id="L246">                lines.add(new LayoutLine(null, boundsX, boundsWidth)); // blank line</span>
-<span class="fc" id="L247">                currentY += estLineHeight;</span>
-<span class="fc" id="L248">                continue;</span>
+<span class="fc bfc" id="L244" title="All 2 branches covered.">        for ( final Pooled&lt;Paragraph&gt; pooled : paragraphs ) {</span>
+<span class="fc" id="L245">            final Paragraph paragraph = pooled.get();</span>
+<span class="fc bfc" id="L246" title="All 2 branches covered.">            if ( paragraph.isBlankLine ) {</span>
+<span class="fc" id="L247">                lines.add(LayoutLine.blank(boundsX, boundsWidth));</span>
+<span class="fc" id="L248">                currentY += estLineHeight;</span>
+<span class="fc" id="L249">                continue;</span>
             }
 
             // Borrow (or create) the ParagraphLayoutsData for this paragraph.
             // The remove → use → put borrow pattern ensures thread safety: a concurrent
             // caller that hits the same key simply constructs a fresh entry on miss.
-<span class="fc" id="L254">            ParagraphLayoutsData data = _PARAGRAPH_DATA_CACHE.remove(pooled);</span>
-<span class="fc bfc" id="L255" title="All 4 branches covered.">            if ( data == null || !data.isCompatibleWith(font) ) {</span>
-<span class="fc" id="L256">                final AttributedString attrStr = _paragraphToAttributedString(paragraph.styledStrings, font, boxModelConf);</span>
-<span class="fc" id="L257">                data = new ParagraphLayoutsData(font, attrStr);</span>
+<span class="fc" id="L255">            ParagraphLayoutsData data = _PARAGRAPH_DATA_CACHE.remove(pooled);</span>
+<span class="fc bfc" id="L256" title="All 4 branches covered.">            if ( data == null || !data.isCompatibleWith(font) ) {</span>
+<span class="fc" id="L257">                final AttributedString attrStr = _paragraphToAttributedString(paragraph.styledStrings, font, boxModelConf);</span>
+<span class="fc" id="L258">                data = new ParagraphLayoutsData(font, attrStr);</span>
             }
 
-<span class="pc bpc" id="L260" title="1 of 6 branches missed.">            if ( (wrapLines &amp;&amp; boundsWidth &gt;= 0) || !obstacles.isEmpty() ) {</span>
+<span class="pc bpc" id="L261" title="1 of 6 branches missed.">            if ( (wrapLines &amp;&amp; boundsWidth &gt;= 0) || !obstacles.isEmpty() ) {</span>
                 // LineBreakMeasurer path: word-wrapping and/or splitting around obstacles.
                 // When boundsWidth is undefined, fall back to a large practical limit so
                 // that the measurer can still advance and obstacles can still be queried.
-<span class="pc bpc" id="L264" title="1 of 2 branches missed.">                final float effectiveWidth = boundsWidth &gt;= 0 ? boundsWidth : _UNBOUNDED_LINE_WIDTH;</span>
+<span class="pc bpc" id="L265" title="1 of 2 branches missed.">                final float effectiveWidth = boundsWidth &gt;= 0 ? boundsWidth : _UNBOUNDED_LINE_WIDTH;</span>
 
                 // Check whether we already have a cached result for this paragraph at this
                 // layout context.  The key captures obstacles + paragraphY, which together
                 // determine the free intervals at every line within the paragraph — not just
                 // the first.  Using only the first line's intervals would give stale cache
                 // hits when an obstacle moves into a later line but misses the first.
-<span class="fc" id="L271">                final LineLayoutKey  layoutKey      = new LineLayoutKey(obstacles, Math.round(currentY), wrapLines, Math.round(effectiveWidth));</span>
-<span class="fc" id="L272">                final List&lt;LayoutLine&gt; cachedLines  = data.wrappedLayouts.get(layoutKey);</span>
+<span class="fc" id="L272">                final LineLayoutKey  layoutKey      = new LineLayoutKey(obstacles, Math.round(currentY), wrapLines, Math.round(effectiveWidth));</span>
+<span class="fc" id="L273">                final List&lt;LayoutLine&gt; cachedLines  = data.wrappedLayouts.get(layoutKey);</span>
 
-<span class="fc bfc" id="L274" title="All 2 branches covered.">                if ( cachedLines != null ) {</span>
-<span class="fc" id="L275">                    lines.addAll(cachedLines);</span>
-<span class="fc bfc" id="L276" title="All 2 branches covered.">                    for ( LayoutLine ll : cachedLines )</span>
-<span class="pc bpc" id="L277" title="1 of 2 branches missed.">                        currentY += ll.layout == null ? estLineHeight</span>
-<span class="fc" id="L278">                                                      : ll.layout.getAscent() + ll.layout.getDescent() + ll.layout.getLeading();</span>
+<span class="fc bfc" id="L275" title="All 2 branches covered.">                if ( cachedLines != null ) {</span>
+<span class="fc" id="L276">                    lines.addAll(cachedLines);</span>
+<span class="fc bfc" id="L277" title="All 2 branches covered.">                    for ( LayoutLine ll : cachedLines ) {</span>
+<span class="fc" id="L278">                        final TextLayout primary = ll.primary().layout;</span>
+<span class="pc bpc" id="L279" title="1 of 2 branches missed.">                        currentY += primary == null ? estLineHeight</span>
+<span class="fc" id="L280">                                                    : primary.getAscent() + primary.getDescent() + primary.getLeading();</span>
+<span class="fc" id="L281">                    }</span>
                 } else {
                     // Build from scratch and populate the per-paragraph cache.
-<span class="fc" id="L281">                    final AttributedCharacterIterator it = data.attrStr.getIterator();</span>
-<span class="fc bfc" id="L282" title="All 2 branches covered.">                    if ( data.measurer != null )</span>
-<span class="fc" id="L283">                        data.measurer.setPosition(it.getBeginIndex()); // reset to start of paragraph</span>
+<span class="fc" id="L284">                    final AttributedCharacterIterator it = data.attrStr.getIterator();</span>
+<span class="fc bfc" id="L285" title="All 2 branches covered.">                    if ( data.measurer != null )</span>
+<span class="fc" id="L286">                        data.measurer.setPosition(it.getBeginIndex()); // reset to start of paragraph</span>
                     else
-<span class="fc" id="L285">                        data.measurer = new LineBreakMeasurer(it, BreakIterator.getLineInstance(), frc);</span>
+<span class="fc" id="L288">                        data.measurer = new LineBreakMeasurer(it, BreakIterator.getLineInstance(), frc);</span>
 
-<span class="fc" id="L287">                    final List&lt;LayoutLine&gt; paraLines = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L288">                    final int end = it.getEndIndex();</span>
-<span class="fc bfc" id="L289" title="All 2 branches covered.">                    while ( data.measurer.getPosition() &lt; end ) {</span>
-<span class="fc" id="L290">                        final List&lt;Band&gt; intervals = _freeIntervalsAt(currentY, estLineHeight, boundsX, effectiveWidth, obstacles);</span>
+<span class="fc" id="L290">                    final List&lt;LayoutLine&gt; paraLines = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L291">                    final int end = it.getEndIndex();</span>
+<span class="fc bfc" id="L292" title="All 2 branches covered.">                    while ( data.measurer.getPosition() &lt; end ) {</span>
+<span class="fc" id="L293">                        final List&lt;Band&gt; intervals = _freeIntervalsAt(currentY, estLineHeight, boundsX, effectiveWidth, obstacles);</span>
 
-<span class="fc" id="L292">                        TextLayout firstLayout = null;</span>
-<span class="fc" id="L293">                        float firstX = boundsX;</span>
-<span class="fc" id="L294">                        float firstW = effectiveWidth;</span>
-<span class="fc" id="L295">                        List&lt;LayoutLine.Segment&gt; extras = Collections.emptyList();</span>
+<span class="fc" id="L295">                        final List&lt;LayoutLine.Segment&gt; segments = new ArrayList&lt;&gt;(Math.max(1, intervals.size()));</span>
 
 <span class="pc bpc" id="L297" title="1 of 2 branches missed.">                        if ( intervals.isEmpty() ) {</span>
                             // All space is blocked — advance the measurer so the loop terminates.
                             // When not wrapping, consume all remaining text in one shot.
-<span class="nc bnc" id="L300" title="All 2 branches missed.">                            firstLayout = data.measurer.nextLayout(wrapLines ? effectiveWidth : _UNBOUNDED_LINE_WIDTH);</span>
-                        } else {
-<span class="fc" id="L302">                            final int lastIdx = intervals.size() - 1;</span>
-<span class="fc bfc" id="L303" title="All 2 branches covered.">                            for ( int i = 0; i &lt;= lastIdx; i++ ) {</span>
-<span class="fc bfc" id="L304" title="All 2 branches covered.">                                if ( data.measurer.getPosition() &gt;= end ) break;</span>
-<span class="fc" id="L305">                                final Band  band = intervals.get(i);</span>
-<span class="fc" id="L306">                                final float x = band.start, w = band.size;</span>
+<span class="nc bnc" id="L300" title="All 2 branches missed.">                            final TextLayout layout = data.measurer.nextLayout(wrapLines ? effectiveWidth : _UNBOUNDED_LINE_WIDTH);</span>
+<span class="nc bnc" id="L301" title="All 2 branches missed.">                            if ( layout != null )</span>
+<span class="nc" id="L302">                                segments.add(new LayoutLine.Segment(layout, boundsX, effectiveWidth));</span>
+<span class="nc" id="L303">                        } else {</span>
+<span class="fc" id="L304">                            final int lastIdx = intervals.size() - 1;</span>
+<span class="fc bfc" id="L305" title="All 2 branches covered.">                            for ( int i = 0; i &lt;= lastIdx; i++ ) {</span>
+<span class="fc bfc" id="L306" title="All 2 branches covered.">                                if ( data.measurer.getPosition() &gt;= end ) break;</span>
+<span class="fc" id="L307">                                final Band  band = intervals.get(i);</span>
+<span class="fc" id="L308">                                final float x = band.start, w = band.size;</span>
                                 // When not wrapping, give the last band an unlimited width so all
                                 // remaining text is consumed here instead of wrapping to a new line.
-<span class="pc bpc" id="L309" title="1 of 4 branches missed.">                                final float      nextWidth = (wrapLines || i &lt; lastIdx) ? w : _UNBOUNDED_LINE_WIDTH;</span>
-<span class="fc" id="L310">                                final TextLayout layout    = data.measurer.nextLayout(nextWidth);</span>
-<span class="fc bfc" id="L311" title="All 2 branches covered.">                                if ( firstLayout == null ) {</span>
-<span class="fc" id="L312">                                    firstLayout = layout;</span>
-<span class="fc" id="L313">                                    firstX      = x;</span>
-<span class="fc" id="L314">                                    firstW      = w;</span>
-                                } else {
-<span class="pc bpc" id="L316" title="1 of 2 branches missed.">                                    if ( extras.isEmpty() ) extras = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L317">                                    extras.add(new LayoutLine.Segment(layout, x, w));</span>
-                                }
+<span class="pc bpc" id="L311" title="1 of 4 branches missed.">                                final float      nextWidth = (wrapLines || i &lt; lastIdx) ? w : _UNBOUNDED_LINE_WIDTH;</span>
+<span class="fc" id="L312">                                final TextLayout layout    = data.measurer.nextLayout(nextWidth);</span>
+<span class="fc" id="L313">                                segments.add(new LayoutLine.Segment(layout, x, w));</span>
                             }
                         }
 
-<span class="pc bpc" id="L322" title="1 of 2 branches missed.">                        if ( firstLayout != null ) {</span>
-<span class="fc" id="L323">                            paraLines.add(new LayoutLine(firstLayout, firstX, firstW, extras));</span>
-<span class="fc" id="L324">                            currentY += firstLayout.getAscent() + firstLayout.getDescent() + firstLayout.getLeading();</span>
+<span class="pc bpc" id="L317" title="1 of 2 branches missed.">                        final TextLayout primary = segments.isEmpty() ? null : segments.get(0).layout;</span>
+<span class="pc bpc" id="L318" title="1 of 2 branches missed.">                        if ( primary != null ) {</span>
+<span class="fc" id="L319">                            paraLines.add(new LayoutLine(Collections.unmodifiableList(segments)));</span>
+<span class="fc" id="L320">                            currentY += primary.getAscent() + primary.getDescent() + primary.getLeading();</span>
                         } else {
-<span class="nc" id="L326">                            currentY += estLineHeight; // all intervals had zero width — skip band</span>
+<span class="nc" id="L322">                            currentY += estLineHeight; // all intervals had zero width — skip band</span>
                         }
-<span class="fc" id="L328">                    }</span>
+<span class="fc" id="L324">                    }</span>
 
-<span class="fc" id="L330">                    final List&lt;LayoutLine&gt; immutableParaLines = Collections.unmodifiableList(paraLines);</span>
-<span class="fc" id="L331">                    data.wrappedLayouts.put(layoutKey, immutableParaLines);</span>
-<span class="fc" id="L332">                    lines.addAll(immutableParaLines);</span>
+<span class="fc" id="L326">                    final List&lt;LayoutLine&gt; immutableParaLines = Collections.unmodifiableList(paraLines);</span>
+<span class="fc" id="L327">                    data.wrappedLayouts.put(layoutKey, immutableParaLines);</span>
+<span class="fc" id="L328">                    lines.addAll(immutableParaLines);</span>
                 }
-<span class="fc" id="L334">            } else {</span>
+<span class="fc" id="L330">            } else {</span>
                 // No obstacles and no wrapping — a single TextLayout suffices.
                 // Cache it so subsequent repaints (e.g. after a bounds change that does not
                 // affect wrapping) skip the TextLayout construction entirely.
-<span class="fc bfc" id="L338" title="All 2 branches covered.">                if ( data.singleLayout == null ) {</span>
-<span class="fc" id="L339">                    final AttributedCharacterIterator it = data.attrStr.getIterator();</span>
-<span class="fc" id="L340">                    data.singleLayout = new TextLayout(it, frc);</span>
+<span class="fc bfc" id="L334" title="All 2 branches covered.">                if ( data.singleLayout == null ) {</span>
+<span class="fc" id="L335">                    final AttributedCharacterIterator it = data.attrStr.getIterator();</span>
+<span class="fc" id="L336">                    data.singleLayout = new TextLayout(it, frc);</span>
                 }
-<span class="fc" id="L342">                lines.add(new LayoutLine(data.singleLayout, boundsX, boundsWidth));</span>
-<span class="fc" id="L343">                currentY += data.singleLayout.getAscent() + data.singleLayout.getDescent() + data.singleLayout.getLeading();</span>
+<span class="fc" id="L338">                lines.add(LayoutLine.single(data.singleLayout, boundsX, boundsWidth));</span>
+<span class="fc" id="L339">                currentY += data.singleLayout.getAscent() + data.singleLayout.getDescent() + data.singleLayout.getLeading();</span>
             }
 
             // Return the entry to the cache so the next layout pass can reuse it.
-<span class="fc" id="L347">            _PARAGRAPH_DATA_CACHE.put(pooled, data);</span>
-<span class="fc" id="L348">        }</span>
+<span class="fc" id="L343">            _PARAGRAPH_DATA_CACHE.put(pooled, data);</span>
+<span class="fc" id="L344">        }</span>
 
         // Strip a trailing blank-line marker that may have been emitted for a paragraph
         // separator appearing at the very end of the text.
-<span class="pc bpc" id="L352" title="1 of 4 branches missed.">        if ( !lines.isEmpty() &amp;&amp; lines.get(lines.size() - 1).layout == null )</span>
-<span class="fc" id="L353">            lines.remove(lines.size() - 1);</span>
+<span class="pc bpc" id="L348" title="1 of 4 branches missed.">        if ( !lines.isEmpty() &amp;&amp; lines.get(lines.size() - 1).isBlank() )</span>
+<span class="fc" id="L349">            lines.remove(lines.size() - 1);</span>
 
-<span class="fc" id="L355">        return lines;</span>
+<span class="fc" id="L351">        return lines;</span>
     }
 
     /**
@@ -390,63 +386,63 @@ final class TextLayoutEngine {
         final float        boundsWidth,
         final Tuple&lt;Shape&gt; obstacles
     ) {
-<span class="fc bfc" id="L393" title="All 2 branches covered.">        if ( obstacles.isEmpty() )</span>
-<span class="fc" id="L394">            return Collections.singletonList(new Band( boundsX, boundsWidth ));</span>
+<span class="fc bfc" id="L389" title="All 2 branches covered.">        if ( obstacles.isEmpty() )</span>
+<span class="fc" id="L390">            return Collections.singletonList(new Band( boundsX, boundsWidth ));</span>
 
         // Internal representation: {start, end} pairs (converted to {start, width} on exit)
-<span class="fc" id="L397">        List&lt;Range&gt; free = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L398">        free.add(new Range( boundsX, boundsX + boundsWidth ));</span>
+<span class="fc" id="L393">        List&lt;Range&gt; free = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L394">        free.add(new Range( boundsX, boundsX + boundsWidth ));</span>
 
-<span class="fc" id="L400">        final Area lineStrip = new Area(new Rectangle2D.Float(boundsX, y, boundsWidth, lineHeight));</span>
+<span class="fc" id="L396">        final Area lineStrip = new Area(new Rectangle2D.Float(boundsX, y, boundsWidth, lineHeight));</span>
 
-<span class="fc bfc" id="L402" title="All 2 branches covered.">        for ( Shape obstacle : obstacles ) {</span>
-<span class="fc bfc" id="L403" title="All 2 branches covered.">            if ( obstacle instanceof TranslatedShape ) {</span>
+<span class="fc bfc" id="L398" title="All 2 branches covered.">        for ( Shape obstacle : obstacles ) {</span>
+<span class="fc bfc" id="L399" title="All 2 branches covered.">            if ( obstacle instanceof TranslatedShape ) {</span>
                 // Unwrap to get the actual translated geometry:
-<span class="fc" id="L405">                obstacle = ((TranslatedShape) obstacle).getTranslatedShape();</span>
+<span class="fc" id="L401">                obstacle = ((TranslatedShape) obstacle).getTranslatedShape();</span>
             }
             // Fast pre-check with the bounding box before the more expensive Area intersection
-<span class="fc" id="L408">            final Rectangle2D ob = obstacle.getBounds2D();</span>
-<span class="pc bpc" id="L409" title="1 of 4 branches missed.">            if ( ob.getMaxY() &lt;= y || ob.getMinY() &gt;= y + lineHeight )</span>
-<span class="fc" id="L410">                continue;</span>
+<span class="fc" id="L404">            final Rectangle2D ob = obstacle.getBounds2D();</span>
+<span class="pc bpc" id="L405" title="1 of 4 branches missed.">            if ( ob.getMaxY() &lt;= y || ob.getMinY() &gt;= y + lineHeight )</span>
+<span class="fc" id="L406">                continue;</span>
 
             // Intersect the exact obstacle geometry with the line strip
-<span class="fc" id="L413">            final Area intersection = new Area(obstacle);</span>
-<span class="fc" id="L414">            intersection.intersect(lineStrip);</span>
-<span class="pc bpc" id="L415" title="1 of 2 branches missed.">            if ( intersection.isEmpty() )</span>
-<span class="nc" id="L416">                continue;</span>
+<span class="fc" id="L409">            final Area intersection = new Area(obstacle);</span>
+<span class="fc" id="L410">            intersection.intersect(lineStrip);</span>
+<span class="pc bpc" id="L411" title="1 of 2 branches missed.">            if ( intersection.isEmpty() )</span>
+<span class="nc" id="L412">                continue;</span>
 
-<span class="fc" id="L418">            free = narrowDownRangesToInclude(intersection, free);</span>
-<span class="fc" id="L419">        }</span>
+<span class="fc" id="L414">            free = narrowDownRangesToInclude(intersection, free);</span>
+<span class="fc" id="L415">        }</span>
 
-<span class="pc bpc" id="L421" title="1 of 2 branches missed.">        if ( free.isEmpty() )</span>
-<span class="nc" id="L422">            return Collections.emptyList();</span>
+<span class="pc bpc" id="L417" title="1 of 2 branches missed.">        if ( free.isEmpty() )</span>
+<span class="nc" id="L418">            return Collections.emptyList();</span>
 
         // Convert {start, end} → {start, width}, filtering out zero-width gaps
-<span class="fc" id="L425">        final List&lt;Band&gt; result = new ArrayList&lt;&gt;(free.size());</span>
-<span class="fc bfc" id="L426" title="All 2 branches covered.">        for ( Range r : free ) {</span>
-<span class="fc" id="L427">            final float w = r.end - r.start;</span>
-<span class="pc bpc" id="L428" title="1 of 2 branches missed.">            if ( w &gt; 0f ) result.add(new Band( r.start, w ));</span>
-<span class="fc" id="L429">        }</span>
-<span class="fc" id="L430">        return result;</span>
+<span class="fc" id="L421">        final List&lt;Band&gt; result = new ArrayList&lt;&gt;(free.size());</span>
+<span class="fc bfc" id="L422" title="All 2 branches covered.">        for ( Range r : free ) {</span>
+<span class="fc" id="L423">            final float w = r.end - r.start;</span>
+<span class="pc bpc" id="L424" title="1 of 2 branches missed.">            if ( w &gt; 0f ) result.add(new Band( r.start, w ));</span>
+<span class="fc" id="L425">        }</span>
+<span class="fc" id="L426">        return result;</span>
     }
 
     private static List&lt;Range&gt; narrowDownRangesToInclude( Area intersection, List&lt;Range&gt; free ) {
-<span class="fc" id="L434">        final Rectangle2D ib     = intersection.getBounds2D();</span>
-<span class="fc" id="L435">        final float       oLeft  = (float) ib.getMinX();</span>
-<span class="fc" id="L436">        final float       oRight = (float) ib.getMaxX();</span>
+<span class="fc" id="L430">        final Rectangle2D ib     = intersection.getBounds2D();</span>
+<span class="fc" id="L431">        final float       oLeft  = (float) ib.getMinX();</span>
+<span class="fc" id="L432">        final float       oRight = (float) ib.getMaxX();</span>
 
         // Subtract [oLeft, oRight] from every free interval (1-D interval difference)
-<span class="fc" id="L439">        final List&lt;Range&gt; remaining = new ArrayList&lt;&gt;(free.size() + 1);</span>
-<span class="fc bfc" id="L440" title="All 2 branches covered.">        for ( Range r : free ) {</span>
-<span class="fc" id="L441">            final float a = r.start, b = r.end;</span>
-<span class="pc bpc" id="L442" title="2 of 4 branches missed.">            if ( oRight &lt;= a || oLeft &gt;= b ) {</span>
-<span class="nc" id="L443">                remaining.add(r); // no overlap</span>
+<span class="fc" id="L435">        final List&lt;Range&gt; remaining = new ArrayList&lt;&gt;(free.size() + 1);</span>
+<span class="fc bfc" id="L436" title="All 2 branches covered.">        for ( Range r : free ) {</span>
+<span class="fc" id="L437">            final float a = r.start, b = r.end;</span>
+<span class="pc bpc" id="L438" title="2 of 4 branches missed.">            if ( oRight &lt;= a || oLeft &gt;= b ) {</span>
+<span class="nc" id="L439">                remaining.add(r); // no overlap</span>
             } else {
-<span class="fc bfc" id="L445" title="All 2 branches covered.">                if ( oLeft  &gt; a ) remaining.add(new Range( a,                   Math.min(b, oLeft)  )); // left fragment</span>
-<span class="fc bfc" id="L446" title="All 2 branches covered.">                if ( oRight &lt; b ) remaining.add(new Range( Math.max(a, oRight), b                   )); // right fragment</span>
+<span class="fc bfc" id="L441" title="All 2 branches covered.">                if ( oLeft  &gt; a ) remaining.add(new Range( a,                   Math.min(b, oLeft)  )); // left fragment</span>
+<span class="fc bfc" id="L442" title="All 2 branches covered.">                if ( oRight &lt; b ) remaining.add(new Range( Math.max(a, oRight), b                   )); // right fragment</span>
             }
-<span class="fc" id="L448">        }</span>
-<span class="fc" id="L449">        return remaining;</span>
+<span class="fc" id="L444">        }</span>
+<span class="fc" id="L445">        return remaining;</span>
     }
 
     private static AttributedString _paragraphToAttributedString(
@@ -454,101 +450,104 @@ final class TextLayoutEngine {
         final Font font,
         final BoxModelConf boxModelConf // Needed for some font configs which have paints that depend on the box model (gradient offsets, etc.)
     ) {
-<span class="fc" id="L457">        final StringBuilder sb = new StringBuilder();</span>
-<span class="fc bfc" id="L458" title="All 2 branches covered.">        for ( StyledString s : paragraph )</span>
-<span class="fc" id="L459">            sb.append(s.string());</span>
-<span class="fc" id="L460">        final AttributedString attrStr = new AttributedString(sb.toString());</span>
-<span class="fc" id="L461">        int index = 0;</span>
-<span class="fc bfc" id="L462" title="All 2 branches covered.">        for ( StyledString styledString : paragraph ) {</span>
-<span class="fc" id="L463">            int styledStringLength = styledString.string().length();</span>
-<span class="pc bpc" id="L464" title="1 of 2 branches missed.">            if ( styledStringLength &lt;= 0 )</span>
-<span class="nc" id="L465">                continue; // Skip zero-length segments to avoid AttributedString IllegalArgumentException for empty ranges</span>
-<span class="fc" id="L466">            int endIndex = index + styledStringLength;</span>
-<span class="fc bfc" id="L467" title="All 2 branches covered.">            if ( styledString.fontConf().isPresent() ) {</span>
-<span class="fc" id="L468">                java.awt.Font localFont = styledString.fontConf().get().createDerivedFrom(font, boxModelConf).orElse(font);</span>
-<span class="fc" id="L469">                attrStr.addAttribute(TextAttribute.FONT, localFont, index, endIndex);</span>
-<span class="fc" id="L470">                attrStr.addAttributes(localFont.getAttributes(), index, endIndex);</span>
-<span class="fc" id="L471">            } else {</span>
-<span class="fc" id="L472">                attrStr.addAttribute(TextAttribute.FONT, font, index, endIndex);</span>
-<span class="fc" id="L473">                attrStr.addAttributes(font.getAttributes(), index, endIndex);</span>
+<span class="fc" id="L453">        final StringBuilder sb = new StringBuilder();</span>
+<span class="fc bfc" id="L454" title="All 2 branches covered.">        for ( StyledString s : paragraph )</span>
+<span class="fc" id="L455">            sb.append(s.string());</span>
+<span class="fc" id="L456">        final AttributedString attrStr = new AttributedString(sb.toString());</span>
+<span class="fc" id="L457">        int index = 0;</span>
+<span class="fc bfc" id="L458" title="All 2 branches covered.">        for ( StyledString styledString : paragraph ) {</span>
+<span class="fc" id="L459">            int styledStringLength = styledString.string().length();</span>
+<span class="pc bpc" id="L460" title="1 of 2 branches missed.">            if ( styledStringLength &lt;= 0 )</span>
+<span class="nc" id="L461">                continue; // Skip zero-length segments to avoid AttributedString IllegalArgumentException for empty ranges</span>
+<span class="fc" id="L462">            int endIndex = index + styledStringLength;</span>
+<span class="fc bfc" id="L463" title="All 2 branches covered.">            if ( styledString.fontConf().isPresent() ) {</span>
+<span class="fc" id="L464">                java.awt.Font localFont = styledString.fontConf().get().createDerivedFrom(font, boxModelConf).orElse(font);</span>
+<span class="fc" id="L465">                attrStr.addAttribute(TextAttribute.FONT, localFont, index, endIndex);</span>
+<span class="fc" id="L466">                attrStr.addAttributes(localFont.getAttributes(), index, endIndex);</span>
+<span class="fc" id="L467">            } else {</span>
+<span class="fc" id="L468">                attrStr.addAttribute(TextAttribute.FONT, font, index, endIndex);</span>
+<span class="fc" id="L469">                attrStr.addAttributes(font.getAttributes(), index, endIndex);</span>
             }
-<span class="fc" id="L475">            index += styledStringLength;</span>
-<span class="fc" id="L476">        }</span>
-<span class="fc" id="L477">        return attrStr;</span>
+<span class="fc" id="L471">            index += styledStringLength;</span>
+<span class="fc" id="L472">        }</span>
+<span class="fc" id="L473">        return attrStr;</span>
     }
 
     /**
-     *  Holds a single laid-out text line together with the obstacle-free horizontal region
-     *  it was fitted into.  Both {@code regionX} and {@code regionWidth} are in component
-     *  coordinates and are used by the renderer to position the line, including alignment
-     *  (LEFT / CENTER / RIGHT) within the available region.
+     *  Holds a laid-out text line as an ordered list of {@link Segment}s, each covering one
+     *  obstacle-free horizontal region the text was fitted into.  All segments share the same
+     *  baseline (y is not advanced between them) and only differ in their {@code regionX} and
+     *  {@code regionWidth}, which are in component coordinates and drive the renderer's
+     *  per-fragment alignment (LEFT / CENTER / RIGHT) within the available region.
      *  &lt;p&gt;
-     *  When obstacles split a visual line into more than one free interval, every interval
-     *  beyond the first is captured as an extra {@link Segment} in {@code extraSegments}.
-     *  All segments share the same baseline (y is not advanced between them).
+     *  When no obstacles split the line, {@link #segments} contains exactly one entry. When
+     *  obstacles divide the line into multiple free intervals, each interval is its own
+     *  {@link Segment} with its own {@link TextLayout}.
      *  &lt;p&gt;
-     *  A {@code null} {@code layout} represents a blank / empty line — the region fields
-     *  still carry the full text-bounds width so that the blank contributes the correct height.
+     *  A blank / empty line is represented by a single {@link Segment} whose {@code layout}
+     *  is {@code null}; the region fields still carry the full text-bounds width so that the
+     *  blank contributes the correct height. Use {@link #isBlank()} to test for this.
      */
     static final class LayoutLine {
 
-        /** A secondary text fragment placed in one of the additional free intervals on this line. */
+        /** A text fragment placed in one of the obstacle-free intervals on this line. */
         static final class Segment {
-            final TextLayout layout;
-            final float regionX;
-            final float regionWidth;
-<span class="fc" id="L500">            Segment(TextLayout layout, float regionX, float regionWidth) {</span>
-<span class="fc" id="L501">                this.layout      = layout;</span>
-<span class="fc" id="L502">                this.regionX     = regionX;</span>
-<span class="fc" id="L503">                this.regionWidth = regionWidth;</span>
-<span class="fc" id="L504">            }</span>
+            final @Nullable TextLayout layout;
+            final float                regionX;
+            final float                regionWidth;
+<span class="fc" id="L498">            Segment(@Nullable TextLayout layout, float regionX, float regionWidth) {</span>
+<span class="fc" id="L499">                this.layout      = layout;</span>
+<span class="fc" id="L500">                this.regionX     = regionX;</span>
+<span class="fc" id="L501">                this.regionWidth = regionWidth;</span>
+<span class="fc" id="L502">            }</span>
         }
 
-        final @Nullable TextLayout  layout;
-        final float                 regionX;
-        final float                 regionWidth;
-        /** Additional same-baseline fragments produced when obstacles split the line. */
-        final List&lt;Segment&gt;         extraSegments;
+        final List&lt;Segment&gt; segments;
 
-        LayoutLine(@Nullable TextLayout layout, float regionX, float regionWidth) {
-<span class="fc" id="L514">            this(layout, regionX, regionWidth, Collections.emptyList());</span>
-<span class="fc" id="L515">        }</span>
+<span class="fc" id="L507">        LayoutLine(List&lt;Segment&gt; segments) {</span>
+<span class="fc" id="L508">            this.segments = segments;</span>
+<span class="fc" id="L509">        }</span>
 
-<span class="fc" id="L517">        LayoutLine(@Nullable TextLayout layout, float regionX, float regionWidth, List&lt;Segment&gt; extraSegments) {</span>
-<span class="fc" id="L518">            this.layout        = layout;</span>
-<span class="fc" id="L519">            this.regionX       = regionX;</span>
-<span class="fc" id="L520">            this.regionWidth   = regionWidth;</span>
-<span class="fc" id="L521">            this.extraSegments = extraSegments;</span>
-<span class="fc" id="L522">        }</span>
+        static LayoutLine blank(float regionX, float regionWidth) {
+<span class="fc" id="L512">            return new LayoutLine(Collections.singletonList(new Segment(null, regionX, regionWidth)));</span>
+        }
+
+        static LayoutLine single(TextLayout layout, float regionX, float regionWidth) {
+<span class="fc" id="L516">            return new LayoutLine(Collections.singletonList(new Segment(layout, regionX, regionWidth)));</span>
+        }
+
+<span class="fc" id="L519">        Segment primary() { return segments.get(0); }</span>
+
+<span class="fc bfc" id="L521" title="All 2 branches covered.">        boolean isBlank() { return primary().layout == null; }</span>
     }
 
     private static final class Range {
         final float start, end;
-<span class="fc" id="L527">        Range(float start, float end) {</span>
-<span class="fc" id="L528">            this.start = start;</span>
-<span class="fc" id="L529">            this.end   = end;</span>
-<span class="fc" id="L530">        }</span>
+<span class="fc" id="L526">        Range(float start, float end) {</span>
+<span class="fc" id="L527">            this.start = start;</span>
+<span class="fc" id="L528">            this.end   = end;</span>
+<span class="fc" id="L529">        }</span>
     }
 
     private static final class Band {
         final float start, size;
-<span class="fc" id="L535">        Band(float start, float size) {</span>
-<span class="fc" id="L536">            this.start = start;</span>
-<span class="fc" id="L537">            this.size  = size;</span>
-<span class="fc" id="L538">        }</span>
+<span class="fc" id="L534">        Band(float start, float size) {</span>
+<span class="fc" id="L535">            this.start = start;</span>
+<span class="fc" id="L536">            this.size  = size;</span>
+<span class="fc" id="L537">        }</span>
 
         @Override
         public boolean equals( Object o ) {
-<span class="nc bnc" id="L542" title="All 2 branches missed.">            if ( this == o ) return true;</span>
-<span class="nc bnc" id="L543" title="All 2 branches missed.">            if ( !(o instanceof Band) ) return false;</span>
-<span class="nc" id="L544">            final Band other = (Band) o;</span>
-<span class="nc bnc" id="L545" title="All 2 branches missed.">            return Float.floatToIntBits(start) == Float.floatToIntBits(other.start) &amp;&amp;</span>
-<span class="nc bnc" id="L546" title="All 2 branches missed.">                    Float.floatToIntBits(size)  == Float.floatToIntBits(other.size);</span>
+<span class="nc bnc" id="L541" title="All 2 branches missed.">            if ( this == o ) return true;</span>
+<span class="nc bnc" id="L542" title="All 2 branches missed.">            if ( !(o instanceof Band) ) return false;</span>
+<span class="nc" id="L543">            final Band other = (Band) o;</span>
+<span class="nc bnc" id="L544" title="All 2 branches missed.">            return Float.floatToIntBits(start) == Float.floatToIntBits(other.start) &amp;&amp;</span>
+<span class="nc bnc" id="L545" title="All 2 branches missed.">                    Float.floatToIntBits(size)  == Float.floatToIntBits(other.size);</span>
         }
 
         @Override
         public int hashCode() {
-<span class="nc" id="L551">            return 31 * Float.floatToIntBits(start) + Float.floatToIntBits(size);</span>
+<span class="nc" id="L550">            return 31 * Float.floatToIntBits(start) + Float.floatToIntBits(size);</span>
         }
     }
 
@@ -583,40 +582,40 @@ final class TextLayoutEngine {
                 boolean                    wrapLines,
                 BoxModelConf               boxModelConf,
                 Tuple&lt;Shape&gt;               obstacles
-<span class="fc" id="L586">        ) {</span>
-<span class="fc" id="L587">            this.font         = font;</span>
-<span class="fc" id="L588">            this.paragraphs   = paragraphs;</span>
-<span class="fc" id="L589">            this.boundsWidth  = boundsWidth;</span>
-<span class="fc" id="L590">            this.boundsX      = boundsX;</span>
-<span class="fc" id="L591">            this.boundsY      = boundsY;</span>
-<span class="fc" id="L592">            this.wrapLines    = wrapLines;</span>
-<span class="fc" id="L593">            this.boxModelConf = boxModelConf;</span>
-<span class="fc" id="L594">            this.obstacles    = obstacles;</span>
-<span class="fc" id="L595">            this._hash        = Objects.hash(</span>
+<span class="fc" id="L585">        ) {</span>
+<span class="fc" id="L586">            this.font         = font;</span>
+<span class="fc" id="L587">            this.paragraphs   = paragraphs;</span>
+<span class="fc" id="L588">            this.boundsWidth  = boundsWidth;</span>
+<span class="fc" id="L589">            this.boundsX      = boundsX;</span>
+<span class="fc" id="L590">            this.boundsY      = boundsY;</span>
+<span class="fc" id="L591">            this.wrapLines    = wrapLines;</span>
+<span class="fc" id="L592">            this.boxModelConf = boxModelConf;</span>
+<span class="fc" id="L593">            this.obstacles    = obstacles;</span>
+<span class="fc" id="L594">            this._hash        = Objects.hash(</span>
                     font, paragraphs,
-<span class="fc" id="L597">                    Float.floatToIntBits(boundsWidth),</span>
-<span class="fc" id="L598">                    Float.floatToIntBits(boundsX),</span>
-<span class="fc" id="L599">                    Float.floatToIntBits(boundsY),</span>
-<span class="fc" id="L600">                    wrapLines, boxModelConf, obstacles</span>
+<span class="fc" id="L596">                    Float.floatToIntBits(boundsWidth),</span>
+<span class="fc" id="L597">                    Float.floatToIntBits(boundsX),</span>
+<span class="fc" id="L598">                    Float.floatToIntBits(boundsY),</span>
+<span class="fc" id="L599">                    wrapLines, boxModelConf, obstacles</span>
             );
-<span class="fc" id="L602">        }</span>
+<span class="fc" id="L601">        }</span>
 
         @Override
         public boolean equals( Object o ) {
-<span class="pc bpc" id="L606" title="1 of 2 branches missed.">            if ( this == o ) return true;</span>
-<span class="pc bpc" id="L607" title="1 of 2 branches missed.">            if ( !(o instanceof TextLayoutKey) ) return false;</span>
-<span class="fc" id="L608">            final TextLayoutKey other = (TextLayoutKey) o;</span>
-<span class="pc bpc" id="L609" title="1 of 2 branches missed.">            return Float.floatToIntBits(boundsWidth) == Float.floatToIntBits(other.boundsWidth) &amp;&amp;</span>
-<span class="pc bpc" id="L610" title="1 of 2 branches missed.">                    Float.floatToIntBits(boundsX)     == Float.floatToIntBits(other.boundsX)     &amp;&amp;</span>
-<span class="pc bpc" id="L611" title="2 of 4 branches missed.">                    Float.floatToIntBits(boundsY)     == Float.floatToIntBits(other.boundsY)     &amp;&amp;</span>
+<span class="pc bpc" id="L605" title="1 of 2 branches missed.">            if ( this == o ) return true;</span>
+<span class="pc bpc" id="L606" title="1 of 2 branches missed.">            if ( !(o instanceof TextLayoutKey) ) return false;</span>
+<span class="fc" id="L607">            final TextLayoutKey other = (TextLayoutKey) o;</span>
+<span class="pc bpc" id="L608" title="1 of 2 branches missed.">            return Float.floatToIntBits(boundsWidth) == Float.floatToIntBits(other.boundsWidth) &amp;&amp;</span>
+<span class="pc bpc" id="L609" title="1 of 2 branches missed.">                    Float.floatToIntBits(boundsX)     == Float.floatToIntBits(other.boundsX)     &amp;&amp;</span>
+<span class="pc bpc" id="L610" title="2 of 4 branches missed.">                    Float.floatToIntBits(boundsY)     == Float.floatToIntBits(other.boundsY)     &amp;&amp;</span>
                     wrapLines    == other.wrapLines                                               &amp;&amp;
-<span class="pc bpc" id="L613" title="1 of 2 branches missed.">                    font        .equals(other.font)                                               &amp;&amp;</span>
-<span class="pc bpc" id="L614" title="1 of 2 branches missed.">                    paragraphs  .equals(other.paragraphs)                                        &amp;&amp;</span>
-<span class="pc bpc" id="L615" title="1 of 2 branches missed.">                    boxModelConf.equals(other.boxModelConf)                                       &amp;&amp;</span>
-<span class="fc bfc" id="L616" title="All 2 branches covered.">                    obstacles   .equals(other.obstacles);</span>
+<span class="pc bpc" id="L612" title="1 of 2 branches missed.">                    font        .equals(other.font)                                               &amp;&amp;</span>
+<span class="pc bpc" id="L613" title="1 of 2 branches missed.">                    paragraphs  .equals(other.paragraphs)                                        &amp;&amp;</span>
+<span class="pc bpc" id="L614" title="1 of 2 branches missed.">                    boxModelConf.equals(other.boxModelConf)                                       &amp;&amp;</span>
+<span class="fc bfc" id="L615" title="All 2 branches covered.">                    obstacles   .equals(other.obstacles);</span>
         }
 
-<span class="fc" id="L619">        @Override public int hashCode() { return _hash; }</span>
+<span class="fc" id="L618">        @Override public int hashCode() { return _hash; }</span>
     }
 
     /**
@@ -651,26 +650,26 @@ final class TextLayoutEngine {
         final float        effectiveWidth;
         final int          _hash;
 
-<span class="fc" id="L654">        LineLayoutKey( Tuple&lt;Shape&gt; obstacles, float paragraphY, boolean wrapLines, float effectiveWidth ) {</span>
-<span class="fc" id="L655">            this.obstacles      = obstacles;</span>
-<span class="fc" id="L656">            this.paragraphY     = paragraphY;</span>
-<span class="fc" id="L657">            this.wrapLines      = wrapLines;</span>
-<span class="fc" id="L658">            this.effectiveWidth = effectiveWidth;</span>
-<span class="fc" id="L659">            this._hash          = Objects.hash(obstacles, Float.floatToIntBits(paragraphY), wrapLines, Float.floatToIntBits(effectiveWidth));</span>
-<span class="fc" id="L660">        }</span>
+<span class="fc" id="L653">        LineLayoutKey( Tuple&lt;Shape&gt; obstacles, float paragraphY, boolean wrapLines, float effectiveWidth ) {</span>
+<span class="fc" id="L654">            this.obstacles      = obstacles;</span>
+<span class="fc" id="L655">            this.paragraphY     = paragraphY;</span>
+<span class="fc" id="L656">            this.wrapLines      = wrapLines;</span>
+<span class="fc" id="L657">            this.effectiveWidth = effectiveWidth;</span>
+<span class="fc" id="L658">            this._hash          = Objects.hash(obstacles, Float.floatToIntBits(paragraphY), wrapLines, Float.floatToIntBits(effectiveWidth));</span>
+<span class="fc" id="L659">        }</span>
 
         @Override
         public boolean equals( Object o ) {
-<span class="pc bpc" id="L664" title="1 of 2 branches missed.">            if ( this == o ) return true;</span>
-<span class="pc bpc" id="L665" title="1 of 2 branches missed.">            if ( !(o instanceof LineLayoutKey) ) return false;</span>
-<span class="fc" id="L666">            final LineLayoutKey other = (LineLayoutKey) o;</span>
-<span class="pc bpc" id="L667" title="1 of 2 branches missed.">            return wrapLines == other.wrapLines &amp;&amp;</span>
-<span class="pc bpc" id="L668" title="1 of 2 branches missed.">                    Float.floatToIntBits(paragraphY)     == Float.floatToIntBits(other.paragraphY)     &amp;&amp;</span>
-<span class="pc bpc" id="L669" title="1 of 2 branches missed.">                    Float.floatToIntBits(effectiveWidth) == Float.floatToIntBits(other.effectiveWidth) &amp;&amp;</span>
-<span class="fc bfc" id="L670" title="All 2 branches covered.">                    obstacles.equals(other.obstacles);</span>
+<span class="pc bpc" id="L663" title="1 of 2 branches missed.">            if ( this == o ) return true;</span>
+<span class="pc bpc" id="L664" title="1 of 2 branches missed.">            if ( !(o instanceof LineLayoutKey) ) return false;</span>
+<span class="fc" id="L665">            final LineLayoutKey other = (LineLayoutKey) o;</span>
+<span class="pc bpc" id="L666" title="1 of 2 branches missed.">            return wrapLines == other.wrapLines &amp;&amp;</span>
+<span class="pc bpc" id="L667" title="1 of 2 branches missed.">                    Float.floatToIntBits(paragraphY)     == Float.floatToIntBits(other.paragraphY)     &amp;&amp;</span>
+<span class="pc bpc" id="L668" title="1 of 2 branches missed.">                    Float.floatToIntBits(effectiveWidth) == Float.floatToIntBits(other.effectiveWidth) &amp;&amp;</span>
+<span class="fc bfc" id="L669" title="All 2 branches covered.">                    obstacles.equals(other.obstacles);</span>
         }
 
-<span class="fc" id="L673">        @Override public int hashCode() { return _hash; }</span>
+<span class="fc" id="L672">        @Override public int hashCode() { return _hash; }</span>
     }
 
     /**
@@ -702,21 +701,21 @@ final class TextLayoutEngine {
         /** Non-null once the no-wrap, no-obstacle path has run at least once. */
         @Nullable TextLayout        singleLayout;
         /** Cached full-paragraph {@link LayoutLine} lists for the wrap/obstacle path. */
-<span class="fc" id="L705">        final Map&lt;LineLayoutKey, List&lt;LayoutLine&gt;&gt; wrappedLayouts = new LinkedHashMap&lt;LineLayoutKey, List&lt;LayoutLine&gt;&gt;(</span>
+<span class="fc" id="L704">        final Map&lt;LineLayoutKey, List&lt;LayoutLine&gt;&gt; wrappedLayouts = new LinkedHashMap&lt;LineLayoutKey, List&lt;LayoutLine&gt;&gt;(</span>
                 32 + 1, 0.75f, true /* access-order */
-<span class="fc" id="L707">        ) {</span>
+<span class="fc" id="L706">        ) {</span>
             @Override protected boolean removeEldestEntry(Map.Entry&lt;LineLayoutKey, List&lt;LayoutLine&gt;&gt; eldest) {
-<span class="pc bpc" id="L709" title="1 of 2 branches missed.">                return size() &gt; 32;</span>
+<span class="pc bpc" id="L708" title="1 of 2 branches missed.">                return size() &gt; 32;</span>
             }
         };
 
-<span class="fc" id="L713">        ParagraphLayoutsData( Font font, AttributedString attrStr ) {</span>
-<span class="fc" id="L714">            this.font         = font;</span>
-<span class="fc" id="L715">            this.attrStr      = attrStr;</span>
-<span class="fc" id="L716">        }</span>
+<span class="fc" id="L712">        ParagraphLayoutsData( Font font, AttributedString attrStr ) {</span>
+<span class="fc" id="L713">            this.font         = font;</span>
+<span class="fc" id="L714">            this.attrStr      = attrStr;</span>
+<span class="fc" id="L715">        }</span>
 
         boolean isCompatibleWith( Font font ) {
-<span class="fc" id="L719">            return this.font.equals(font);</span>
+<span class="fc" id="L718">            return this.font.equals(font);</span>
         }
     }
 
@@ -733,83 +732,83 @@ final class TextLayoutEngine {
         private final int _yOffset;
         private final Shape _sourceShape;
         private final Shape _translatedShape;
-<span class="fc" id="L736">        private final AtomicReference&lt;@Nullable Integer&gt; _hashCache = new AtomicReference&lt;&gt;(null);</span>
+<span class="fc" id="L735">        private final AtomicReference&lt;@Nullable Integer&gt; _hashCache = new AtomicReference&lt;&gt;(null);</span>
 
-<span class="fc" id="L738">        public TranslatedShape(Shape shapeArea, int xOffset, int yOffset) {</span>
-<span class="fc" id="L739">            java.awt.geom.AffineTransform translate = java.awt.geom.AffineTransform.getTranslateInstance(xOffset, yOffset);</span>
-<span class="fc" id="L740">            _xOffset = xOffset;</span>
-<span class="fc" id="L741">            _yOffset = yOffset;</span>
-<span class="fc" id="L742">            _sourceShape = shapeArea;</span>
-<span class="fc" id="L743">            _translatedShape = translate.createTransformedShape(shapeArea);</span>
-<span class="fc" id="L744">        }</span>
+<span class="fc" id="L737">        public TranslatedShape(Shape shapeArea, int xOffset, int yOffset) {</span>
+<span class="fc" id="L738">            java.awt.geom.AffineTransform translate = java.awt.geom.AffineTransform.getTranslateInstance(xOffset, yOffset);</span>
+<span class="fc" id="L739">            _xOffset = xOffset;</span>
+<span class="fc" id="L740">            _yOffset = yOffset;</span>
+<span class="fc" id="L741">            _sourceShape = shapeArea;</span>
+<span class="fc" id="L742">            _translatedShape = translate.createTransformedShape(shapeArea);</span>
+<span class="fc" id="L743">        }</span>
 
-<span class="fc" id="L746">        public Shape getTranslatedShape() { return _translatedShape; }</span>
-
-        @Override
-<span class="nc" id="L749">        public Rectangle getBounds() { return _translatedShape.getBounds(); }</span>
+<span class="fc" id="L745">        public Shape getTranslatedShape() { return _translatedShape; }</span>
 
         @Override
-<span class="nc" id="L752">        public Rectangle2D getBounds2D() { return _translatedShape.getBounds2D(); }</span>
+<span class="nc" id="L748">        public Rectangle getBounds() { return _translatedShape.getBounds(); }</span>
 
         @Override
-<span class="nc" id="L755">        public boolean contains(double x, double y) { return _translatedShape.contains(x, y); }</span>
+<span class="nc" id="L751">        public Rectangle2D getBounds2D() { return _translatedShape.getBounds2D(); }</span>
 
         @Override
-<span class="nc" id="L758">        public boolean contains(Point2D p) { return _translatedShape.contains(p); }</span>
+<span class="nc" id="L754">        public boolean contains(double x, double y) { return _translatedShape.contains(x, y); }</span>
+
+        @Override
+<span class="nc" id="L757">        public boolean contains(Point2D p) { return _translatedShape.contains(p); }</span>
 
         @Override
         public boolean intersects(double x, double y, double w, double h) {
-<span class="nc" id="L762">            return _translatedShape.intersects(x, y, w, h);</span>
+<span class="nc" id="L761">            return _translatedShape.intersects(x, y, w, h);</span>
         }
 
         @Override
         public boolean intersects(Rectangle2D r) {
-<span class="nc" id="L767">            return _translatedShape.intersects(r);</span>
+<span class="nc" id="L766">            return _translatedShape.intersects(r);</span>
         }
 
         @Override
         public boolean contains(double x, double y, double w, double h) {
-<span class="nc" id="L772">            return _translatedShape.contains(x, y, w, h);</span>
+<span class="nc" id="L771">            return _translatedShape.contains(x, y, w, h);</span>
         }
 
         @Override
         public boolean contains(Rectangle2D r) {
-<span class="nc" id="L777">            return _translatedShape.contains(r);</span>
+<span class="nc" id="L776">            return _translatedShape.contains(r);</span>
         }
 
         @Override
         public PathIterator getPathIterator(AffineTransform at) {
-<span class="nc" id="L782">            return _translatedShape.getPathIterator(at);</span>
+<span class="nc" id="L781">            return _translatedShape.getPathIterator(at);</span>
         }
 
         @Override
         public PathIterator getPathIterator(AffineTransform at, double flatness) {
-<span class="nc" id="L787">            return _translatedShape.getPathIterator(at, flatness);</span>
+<span class="nc" id="L786">            return _translatedShape.getPathIterator(at, flatness);</span>
         }
 
         @Override
         public int hashCode() {
-<span class="fc" id="L792">            Integer cachedHash = _hashCache.get();</span>
-<span class="pc bpc" id="L793" title="1 of 2 branches missed.">            if ( cachedHash != null ) {</span>
-<span class="nc" id="L794">                return cachedHash;</span>
+<span class="fc" id="L791">            Integer cachedHash = _hashCache.get();</span>
+<span class="pc bpc" id="L792" title="1 of 2 branches missed.">            if ( cachedHash != null ) {</span>
+<span class="nc" id="L793">                return cachedHash;</span>
             } else {
-<span class="fc" id="L796">                int computedHash = Objects.hash(_xOffset, _yOffset, _sourceShape);</span>
-<span class="fc" id="L797">                _hashCache.compareAndSet(null, computedHash);</span>
-<span class="fc" id="L798">                return computedHash;</span>
+<span class="fc" id="L795">                int computedHash = Objects.hash(_xOffset, _yOffset, _sourceShape);</span>
+<span class="fc" id="L796">                _hashCache.compareAndSet(null, computedHash);</span>
+<span class="fc" id="L797">                return computedHash;</span>
             }
         }
         @Override
         public boolean equals(@Nullable Object obj) {
-<span class="nc bnc" id="L803" title="All 2 branches missed.">            if ( this == obj ) return true;</span>
-<span class="nc bnc" id="L804" title="All 4 branches missed.">            if ( obj == null || getClass() != obj.getClass() ) return false;</span>
-<span class="nc" id="L805">            final TranslatedShape other = (TranslatedShape) obj;</span>
-<span class="nc bnc" id="L806" title="All 4 branches missed.">            return _xOffset == other._xOffset &amp;&amp;</span>
+<span class="pc bpc" id="L802" title="1 of 2 branches missed.">            if ( this == obj ) return true;</span>
+<span class="pc bpc" id="L803" title="2 of 4 branches missed.">            if ( obj == null || getClass() != obj.getClass() ) return false;</span>
+<span class="fc" id="L804">            final TranslatedShape other = (TranslatedShape) obj;</span>
+<span class="pc bpc" id="L805" title="2 of 4 branches missed.">            return _xOffset == other._xOffset &amp;&amp;</span>
                    _yOffset == other._yOffset &amp;&amp;
-<span class="nc bnc" id="L808" title="All 2 branches missed.">                   Objects.equals(_sourceShape, other._sourceShape);</span>
+<span class="pc bpc" id="L807" title="1 of 2 branches missed.">                   Objects.equals(_sourceShape, other._sourceShape);</span>
         }
         @Override
         public String toString() {
-<span class="nc" id="L812">            return &quot;TranslatedShape[source=&quot; + _sourceShape + &quot;, xOffset=&quot; + _xOffset + &quot;, yOffset=&quot; + _yOffset + &quot;]&quot;;</span>
+<span class="nc" id="L811">            return &quot;TranslatedShape[source=&quot; + _sourceShape + &quot;, xOffset=&quot; + _xOffset + &quot;, yOffset=&quot; + _yOffset + &quot;]&quot;;</span>
         }
     }
 

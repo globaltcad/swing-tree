@@ -28,7 +28,7 @@
      * @return The inverse of this stride.
      */
     public Stride inverse() {
-<span class="nc bnc" id="L31" title="All 2 branches missed.">        return this == PROGRESSIVE ? REGRESSIVE : PROGRESSIVE;</span>
+<span class="fc bfc" id="L31" title="All 2 branches covered.">        return this == PROGRESSIVE ? REGRESSIVE : PROGRESSIVE;</span>
     }
 
     /**
@@ -40,7 +40,7 @@
      * @return The progress value after applying this stride.
      */
     public double applyTo( double progress ) {
-<span class="nc bnc" id="L43" title="All 2 branches missed.">        return this == PROGRESSIVE ? progress : 1 - progress;</span>
+<span class="fc bfc" id="L43" title="All 2 branches covered.">        return this == PROGRESSIVE ? progress : 1 - progress;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

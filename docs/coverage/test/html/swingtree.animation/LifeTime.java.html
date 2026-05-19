@@ -101,7 +101,7 @@ public final class LifeTime
      * @return A new lifetime that will start after the given delay and run for the given duration.
      */
     public static LifeTime of( long startDelay, TimeUnit startUnit, long duration, TimeUnit durationUnit ) {
-<span class="nc" id="L104">        return new LifeTime(startUnit.toMillis(startDelay), durationUnit.toMillis(duration), SwingTree.get().getDefaultAnimationInterval());</span>
+<span class="fc" id="L104">        return new LifeTime(startUnit.toMillis(startDelay), durationUnit.toMillis(duration), SwingTree.get().getDefaultAnimationInterval());</span>
     }
 
     /**
@@ -155,8 +155,8 @@ public final class LifeTime
      * @return A new lifetime that will start after the given delay.
      */
     public LifeTime startingIn( long delay, TimeUnit unit ) {
-<span class="nc" id="L158">        long offset = unit.toMillis( delay );</span>
-<span class="nc" id="L159">        return LifeTime.of(</span>
+<span class="fc" id="L158">        long offset = unit.toMillis( delay );</span>
+<span class="fc" id="L159">        return LifeTime.of(</span>
                     offset,    TimeUnit.MILLISECONDS,
                     _duration, TimeUnit.MILLISECONDS
                 );
@@ -181,7 +181,7 @@ public final class LifeTime
      * @return A new lifetime that will start after the given delay and run for the given duration.
      */
     public LifeTime withInterval( long interval, TimeUnit unit ) {
-<span class="nc" id="L184">        return new LifeTime(_delay, _duration, unit.toMillis(interval));</span>
+<span class="fc" id="L184">        return new LifeTime(_delay, _duration, unit.toMillis(interval));</span>
     }
 
     /**
@@ -231,19 +231,19 @@ public final class LifeTime
 <span class="pc bpc" id="L231" title="1 of 2 branches missed.">        if ( this == o ) return true;</span>
 <span class="pc bpc" id="L232" title="1 of 2 branches missed.">        if ( !(o instanceof LifeTime) ) return false;</span>
 <span class="fc" id="L233">        LifeTime lifeTime = (LifeTime) o;</span>
-<span class="pc bpc" id="L234" title="4 of 6 branches missed.">        return _delay     == lifeTime._delay    &amp;&amp;</span>
+<span class="pc bpc" id="L234" title="2 of 6 branches missed.">        return _delay     == lifeTime._delay    &amp;&amp;</span>
                _duration  == lifeTime._duration &amp;&amp;
                _interval  == lifeTime._interval;
     }
 
     @Override
     public int hashCode() {
-<span class="nc" id="L241">        return Objects.hash(_delay, _duration, _interval);</span>
+<span class="fc" id="L241">        return Objects.hash(_delay, _duration, _interval);</span>
     }
 
     @Override
     public String toString() {
-<span class="nc" id="L246">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
+<span class="fc" id="L246">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
                     &quot;delay=&quot;    + _delay    + &quot;, &quot;+
                     &quot;duration=&quot; + _duration + &quot;, &quot;+
                     &quot;interval=&quot; + _interval +

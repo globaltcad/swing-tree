@@ -122,7 +122,7 @@ final class DynamicLaF
 <span class="fc" id="L122">                boolean hasBorderRadius = styleConf.border().hasAnyNonZeroArcs();</span>
 <span class="fc" id="L123">                boolean hasMargin       = styleConf.margin().isPositive();</span>
 
-<span class="pc bpc" id="L125" title="5 of 6 branches missed.">                owner.setOpaque(!hasBorderRadius &amp;&amp; !hasMargin &amp;&amp; !foundationIsTransparent);</span>
+<span class="pc bpc" id="L125" title="3 of 6 branches missed.">                owner.setOpaque(!hasBorderRadius &amp;&amp; !hasMargin &amp;&amp; !foundationIsTransparent);</span>
 <span class="fc" id="L126">                JScrollPane scrollPane = (JScrollPane) owner;</span>
 <span class="pc bpc" id="L127" title="1 of 2 branches missed.">                if ( scrollPane.getViewport() != null )</span>
 <span class="fc" id="L128">                    scrollPane.getViewport().setOpaque(owner.isOpaque());</span>

@@ -1,11 +1,15 @@
 
-# SwingTree [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) ![Java Version](https://img.shields.io/static/v1.svg?label=Java&message=8%2B&color=blue) #
+# 🌳 SwingTree [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) ![Java Version](https://img.shields.io/static/v1.svg?label=Java&message=8%2B&color=blue) #
 ## Modern Declarative UI Design for Swing ##
 
-SwingTree is a Swing based UI framework for creating boilerplate free 
-and composition based Swing UIs fluently. <br>
-Think [Jetpack Compose](https://developer.android.com/jetpack/compose), [SwiftUI](https://developer.apple.com/xcode/swiftui/) or [Flutter](https://flutter.dev) but for Swing 
-(similar to [JetBrain's UI DSL](https://plugins.jetbrains.com/docs/intellij/kotlin-ui-dsl-version-2.html#ui-dsl-basics)).
+**SwingTree lets you build Swing UIs the way you *think* about them** —
+as a tree of nested components, declared fluently, without the boilerplate.
+
+Think [Jetpack Compose](https://developer.android.com/jetpack/compose),
+[SwiftUI](https://developer.apple.com/xcode/swiftui/) or [Flutter](https://flutter.dev),
+but for plain old Swing
+(and close in spirit to [JetBrains' UI DSL](https://plugins.jetbrains.com/docs/intellij/kotlin-ui-dsl-version-2.html#ui-dsl-basics)).
+No new runtime, no rewrite — it sits right on top of the Swing you already know.
 
 <table>
 <tr>
@@ -17,36 +21,36 @@ Think [Jetpack Compose](https://developer.android.com/jetpack/compose), [SwiftUI
 <tr>
 <td> 
 
-- lightweight and intuitive HTML like GUI code
-- powerful layout declaration based on `MigLayout`
-- compatible with custom swing components and legacy Swing code
-- a functional lambda friendly API for peeking into the underlying UI tree and manipulating swing components freely
-- concise event registration through `onClick`, `onChange` methods...
-- advanced styling through a CSS like DSL API
-- [animated styling](docs/markdown/An-Advanced-Style-Animation.md)
+- 🪶 lightweight, HTML-like GUI code that reads like the UI it builds
+- 📐 powerful layout declaration powered by `MigLayout`
+- 🤝 plays nicely with custom components and legacy Swing code
+- 🔍 a functional, lambda-friendly API for peeking into the UI tree and manipulating components freely
+- ⚡ concise event handling through `onClick`, `onChange` and friends
+- 🎨 advanced styling through a CSS-like DSL API
+- 🎞️ [animated styling](docs/markdown/An-Advanced-Style-Animation.md)
 
 </td>
 <td>
 	
-<img href="https://www.flaticon.com/free-icons/swing" title="swing icons" src="docs/img/swing.png" style="width:200px;"/>
+<img href="https://www.flaticon.com/free-icons/swing" title="swing icons" alt="SwingTree logo" src="docs/img/swing.png" style="width:200px;"/>
 </td>
 </tr>
 <tr>
 <td> 
 
-- built-in [property support](https://github.com/globaltcad/sprouts) 
+- 🧩 built-in [property support](https://github.com/globaltcad/sprouts) 
   for [MVVM](docs/markdown/Advanced-MVVM.md) and [MVI](docs/markdown/Functional-MVVM.md) architecture
-  (for decoupling UI and business logic)
-- user friendly [stability oriented error handling](docs/markdown/Sane-Error-Handling.md)
-- support for [Data-Oriented programming](docs/markdown/Data-Oriented-SwingTree.md)
-- tried, tested and used extensively in production
+  (so your UI and business logic stay decoupled)
+- 🛡️ user-friendly, [stability-oriented error handling](docs/markdown/Sane-Error-Handling.md)
+- 📦 support for [Data-Oriented Programming](docs/markdown/Data-Oriented-SwingTree.md)
+- ✅ tried, tested and used extensively in production
 
 </td>
 <td>
 
-- [Motivation](docs/markdown/Motivation.md)
-- [Getting Started](docs/markdown/Climbing-Swing-Tree.md)
-- [Living Documentation](https://globaltcad.github.io/swing-tree/)
+- 💡 [Motivation](docs/markdown/Motivation.md)
+- 🚀 [Getting Started](docs/markdown/Climbing-Swing-Tree.md)
+- 📖 [Living Documentation](https://globaltcad.github.io/swing-tree/)
 
 </td>
 </tr>
@@ -55,11 +59,11 @@ Think [Jetpack Compose](https://developer.android.com/jetpack/compose), [SwiftUI
 
 ---
 
-Here an example of a simple calculator UI based on the `FlatLaF` look-and-feel:
+## ✨ A Quick Taste ##
 
-<img href="" title="example" src="docs/img/simple-example.png" style="float:right;width:200px;margin:0.5em;"/>
+Here's a simple calculator UI built with SwingTree on top of the `FlatLaF` look-and-feel:
 
-This was made using the following code:
+<img href="" title="example" alt="A calculator UI built with SwingTree" src="docs/img/simple-example.png" style="float:right;width:200px;margin:0.5em;"/>
 
 ```java
 FlatLightLaf.setup();
@@ -112,52 +116,62 @@ UI.of(this/*JPanel subtype*/).withLayout("fill, insets 10")
 );
 ```
 
-As you can see, SwingTree has a very simple API. It only requires a
-single class to be imported, the `UI` class, which can also be imported
-statically to remove any `UI.` prefixes.
+Notice how the **code mirrors the shape of the UI**. A few things worth pointing out:
 
-Also, note that there are usually 2 arguments
-added to a builder object:
-a `String` and then UI nodes.
-This first argument simply translates
-to the layout constraints which should be applied
-to the UI element(s) added.
+- 🎯 **One import to rule them all.** Everything lives on the `UI` class, which you
+  can import statically to drop the `UI.` prefixes entirely.
+- 🧱 **Builders take two kinds of arguments:** a `String` of layout constraints,
+  followed by the UI nodes it applies to.
+- 📐 Those constraints go straight to the layout manager — by default a
+  `MigLayout` instance, the most versatile general-purpose layout manager
+  (though you're free to swap in any other layout manager you like).
 
-In this example, these are passed to the default layout manager, 
-a `MigLayout` instance,
-which is the most general purpose layout manager.
-(However you can also use other layout managers of course.)
-
-For more examples take a look at the <a href="src/test/java/examples">examples folder</a> inside the test suite.
+Hungry for more? Browse the <a href="src/test/java/examples">examples folder</a> inside the test suite.
 
 ---
 
-## Getting started with Apache Maven ##
+## 🌷 One Skeleton, Many Skins ##
 
-```
+SwingTree's styling API isn't just paint on top — it's expressive enough to make
+the *same* component tree look like completely different applications.
+Here is the [**Theme Garden**](src/test/java/examples/zen/ThemeGardenView.java) example, swapping live between hand-crafted themes
+without touching a single line of layout code:
+
+<p align="center">
+  <img src="docs/img/theme-garden.gif" title="The Theme Garden example showcasing live theme switching" alt="SwingTree Theme Garden — live theme switching"/>
+</p>
+
+Every skin you see is pure SwingTree styling — colors, gradients, rounded corners,
+shadows and animations — applied declaratively over one shared UI definition.
+
+---
+
+## 📥 Getting started with Apache Maven ##
+
+```xml
 <dependency>
   <groupId>io.github.globaltcad</groupId>
   <artifactId>swing-tree</artifactId>
-  <version>0.22.0</version>
+  <version>0.23.0</version>
 </dependency>
 ```
 
 ---
 
-## Getting started with Gradle ##
+## 📥 Getting started with Gradle ##
 Groovy DSL:
-```
-implementation 'io.github.globaltcad:swing-tree:0.22.0'
+```groovy
+implementation 'io.github.globaltcad:swing-tree:0.23.0'
 ```
 Kotlin DSL:
-```
-implementation("io.github.globaltcad:swing-tree:0.22.0")
+```kotlin
+implementation("io.github.globaltcad:swing-tree:0.23.0")
 ```
 ---
 
-## Getting started with [![](https://jitpack.io/v/globaltcad/swing-tree.svg)](https://jitpack.io/#globaltcad/swing-tree) ##
+## 📥 Getting started with [![](https://jitpack.io/v/globaltcad/swing-tree.svg)](https://jitpack.io/#globaltcad/swing-tree) ##
 **1. Add the JitPack url in your root `build.gradle` at the end of `repositories`**
-```
+```groovy
 allprojects {
 	repositories {
 		//...
@@ -167,17 +181,16 @@ allprojects {
 ```
 **2. Add swing-tree as dependency**
 
-...either by specifiying the version tag:
-```
+...either by specifying the version tag:
+```groovy
 dependencies {
-	implementation 'com.github.globaltcad:swing-tree:0.22.0'
+	implementation 'com.github.globaltcad:swing-tree:0.23.0'
 }
 ```
 ...or by using a custom commit hash instead:
-```
+```groovy
 dependencies {
 	implementation 'com.github.globaltcad:swing-tree:02cbc6dc'//Any commit hash...
 }
 ```
 ---
-

@@ -4,7 +4,7 @@
   "narrative":"A basic requirement of any UI framework is the ability to create UIs\n    with layouts that adapt to different screen sizes and resolutions.\n    SwingTree is primarily based on the `MigLayout` layout manager, which\n    is a powerful and flexible layout manager that can be used to create\n    all kinds of layouts.\n\n    However, `MigLayout` is based on a rigid grid system, which can make\n    it difficult to create responsive layouts that adapt to different\n    size constraints.\n\n    To address this limitation, SwingTree provides an alternative layout\n    manager called `ResponsiveGridFlowLayout`, that is originally\n    based on the `FlowLayout` layout manager, but has been extended to\n    support responsive grid cell sizing.\n\n    In this specification, we will explore the features of the `ResponsiveGridFlowLayout`\n    as part of declarative SwingTree UI code.",
   "subjects":["swingtree.layout.ResponsiveGridFlowLayout","swingtree.layout.FlowCell","swingtree.UIFactoryMethods","swingtree.UI"],
   "statistics":{
-    "runs":"46",
+    "runs":"47",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -25,15 +25,13 @@
 
         {"kind":"and","text":"","code":["var panel =","    UI.panel().withFlowLayout()","    .add(","        UI.button(\"↑\").onClick( e -> {})","    )","    .add(","        UI.button(\"↓\").onClick( it -> {})","    )","    .add(","        UI.button(\"+\").onClick(e -> {})","    )","    .add(","        UI.button(\"−\").onClick( e -> {})","    )","    .get(JPanel.class)"]},
 
-        {"kind":"expect","text":"The panel has a `ResponsiveGridFlowLayout` layout manager attached:","code":["panel.getLayout() instanceof ResponsiveGridFlowLayout"]},
+        {"kind":"expect","text":"The panel has a `ResponsiveGridFlowLayout` layout manager attached:","code":["(panel.getLayout() instanceof ResponsiveGridFlowLayout)"]},
 
         {"kind":"and","text":"The layout manager has the correct horizontal alignment:","code":["panel.getLayout().getAlignment() == UI.HorizontalAlignment.CENTER"]},
 
-        {"kind":"and","text":"Initially, the panel does not properly fits the content.","code":["panel.getPreferredSize().width < 80","panel.getPreferredSize().width < 80"]},
-
         {"kind":"when","text":"We call the layout manager to do its job...","code":["panel.doLayout()"]},
 
-        {"kind":"then","text":"The layout manager increased the size according to the content:","code":["panel.getPreferredSize().width > 100","panel.getPreferredSize().width > 100"]}
+        {"kind":"then","text":"The layout manager increased the size according to the content:","code":["panel.getPreferredSize().width > 150"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -1161,6 +1159,31 @@
         {"kind":"cleanup","text":"","code":["SwingTree.clear()"]},
 
         {"kind":"where","text":"","code":{"uiScale":["1f","1f","1f","1f","1f","1f","1f","1f","2f","2f","2f","2f","2f","2f","2f","2f"],"layoutSize":["Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)","Size.of(120,200)"],"isFill":["false","false","false","false","true","true","true","true","false","false","false","false","true","true","true","true"],"alignInCell":["UI.VerticalAlignment.UNDEFINED","UI.VerticalAlignment.CENTER","UI.VerticalAlignment.TOP","UI.VerticalAlignment.BOTTOM","UI.VerticalAlignment.UNDEFINED","UI.VerticalAlignment.CENTER","UI.VerticalAlignment.TOP","UI.VerticalAlignment.BOTTOM","UI.VerticalAlignment.UNDEFINED","UI.VerticalAlignment.CENTER","UI.VerticalAlignment.TOP","UI.VerticalAlignment.BOTTOM","UI.VerticalAlignment.UNDEFINED","UI.VerticalAlignment.CENTER","UI.VerticalAlignment.TOP","UI.VerticalAlignment.BOTTOM"],"expectedBounds":["[[14,25,15,10],[34,20,7,20],[46,15,31,30],[82,10,23,40]]","[[14,25,15,10],[34,20,7,20],[46,15,31,30],[82,10,23,40]]","[[14,10,15,10],[34,10,7,20],[46,10,31,30],[82,10,23,40]]","[[14,40,15,10],[34,30,7,20],[46,20,31,30],[82,10,23,40]]","[[14,10,15,40],[34,10,7,40],[46,10,31,40],[82,10,23,40]]","[[14,10,15,40],[34,10,7,40],[46,10,31,40],[82,10,23,40]]","[[14,10,15,40],[34,10,7,40],[46,10,31,40],[82,10,23,40]]","[[14,10,15,40],[34,10,7,40],[46,10,31,40],[82,10,23,40]]","[[20,40,20,20],[50,30,13,40],[73,20,26,60],[43,100,33,80]]","[[20,40,20,20],[50,30,13,40],[73,20,26,60],[43,100,33,80]]","[[20,20,20,20],[50,20,13,40],[73,20,26,60],[43,100,33,80]]","[[20,60,20,20],[50,40,13,40],[73,20,26,60],[43,100,33,80]]","[[20,20,20,60],[50,20,13,60],[73,20,26,60],[43,100,33,80]]","[[20,20,20,60],[50,20,13,60],[73,20,26,60],[43,100,33,80]]","[[20,20,20,60],[50,20,13,60],[73,20,26,60],[43,100,33,80]]","[[20,20,20,60],[50,20,13,60],[73,20,26,60],[43,100,33,80]]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `preferredLayoutSize` of a responsive flow layout is based on the children' preferred sizes, not on their current actual sizes.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When a parent container asks its layout manager for its\n            `preferredLayoutSize`, the layout has to answer based on the\n            **preferred** sizes of the child components, *not* on the\n            current actual sizes returned by `Component.getSize()`.\n\n            This is important because a parent component typically queries\n            the preferred size *before* any actual layout pass has happened,\n            and at that point the children have never been sized (so their\n            `getSize()` yields `(0, 0)`). If the layout were to consult\n            `getSize()` instead of `getPreferredSize()`, the parent would\n            see a near-empty preferred size and fail to reserve room for\n            its own content.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A fixed UI scale factor of 1 so that the numbers stay deterministic.","code":["SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"and","text":"A fresh flow-layout panel whose children have explicit preferred sizes.","code":["var panel =","            UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)","            .add(UI.box().withPrefSize(30, 20))","            .add(UI.box().withPrefSize(40, 20))","            .add(UI.box().withPrefSize(50, 20))","            .get(JPanel)"]},
+
+        {"kind":"expect","text":"Before any layout pass the children have a zero actual size...","code":["panel.getComponent(0).getSize() == new Dimension(0, 0)","panel.getComponent(1).getSize() == new Dimension(0, 0)","panel.getComponent(2).getSize() == new Dimension(0, 0)"]},
+
+        {"kind":"and","text":"...but their preferred sizes are set.","code":["panel.getComponent(0).getPreferredSize() == new Dimension(30, 20)","panel.getComponent(1).getPreferredSize() == new Dimension(40, 20)","panel.getComponent(2).getPreferredSize() == new Dimension(50, 20)"]},
+
+        {"kind":"when","text":"We ask the layout manager for its preferred size directly, before any layout pass.","code":["var preferred = panel.getLayout().preferredLayoutSize(panel)"]},
+
+        {"kind":"then","text":"\n            The preferred layout size reflects the *preferred* widths of the\n            three children (30 + 40 + 50 = 120), plus the two inner and two\n            outer horizontal gaps of 5 each (→ 140), and the maximum preferred\n            height (20) plus the two outer vertical gaps of 5 each (→ 30).\n\n            Were the layout to consult `getSize()` instead of `getPreferredSize()`\n            here, every child would contribute `0` and the returned width\n            would collapse down to just the gap contribution (~20).\n        ","code":["preferred == new Dimension(140, 30)"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

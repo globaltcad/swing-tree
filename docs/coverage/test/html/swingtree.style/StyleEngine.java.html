@@ -149,7 +149,7 @@ final class StyleEngine
         // We remember if antialiasing was enabled before we render (only when we will touch the hint):
         final boolean antialiasingWasEnabled;
 <span class="fc bfc" id="L151" title="All 2 branches covered.">        if ( antialiasingEnabled ) {</span>
-<span class="pc bpc" id="L152" title="1 of 2 branches missed.">            antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;</span>
+<span class="fc bfc" id="L152" title="All 2 branches covered.">            antialiasingWasEnabled = g2d.getRenderingHint( RenderingHints.KEY_ANTIALIASING ) == RenderingHints.VALUE_ANTIALIAS_ON;</span>
 <span class="fc" id="L153">            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );</span>
         } else {
 <span class="fc" id="L155">            antialiasingWasEnabled = false;</span>
@@ -175,8 +175,8 @@ final class StyleEngine
         // Reset antialiasing to its previous state (only when we changed it):
 <span class="fc bfc" id="L176" title="All 2 branches covered.">        if ( antialiasingEnabled )</span>
 <span class="fc" id="L177">            g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING,</span>
-<span class="pc bpc" id="L178" title="1 of 2 branches missed.">                    antialiasingWasEnabled</span>
-<span class="nc" id="L179">                            ? RenderingHints.VALUE_ANTIALIAS_ON</span>
+<span class="fc bfc" id="L178" title="All 2 branches covered.">                    antialiasingWasEnabled</span>
+<span class="fc" id="L179">                            ? RenderingHints.VALUE_ANTIALIAS_ON</span>
 <span class="fc" id="L180">                            : RenderingHints.VALUE_ANTIALIAS_OFF</span>
             );
 <span class="fc" id="L182">    }</span>

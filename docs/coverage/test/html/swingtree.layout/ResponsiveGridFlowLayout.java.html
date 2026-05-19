@@ -237,9 +237,9 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
 <span class="fc bfc" id="L237" title="All 2 branches covered.">            for (int i = 0; i &lt; nmembers; i++) {</span>
 <span class="fc" id="L238">                Component m = target.getComponent(i);</span>
 <span class="pc bpc" id="L239" title="1 of 2 branches missed.">                if (m.isVisible()) {</span>
-<span class="fc" id="L240">                    Bounds childBounds = Bounds.of(Position.of(m.getLocation()), Size.of(m.getSize()).plus(hgap, vgap));</span>
-<span class="fc" id="L241">                    bounds = bounds.merge(childBounds);</span>
-<span class="fc" id="L242">                    Dimension d = m.getSize();</span>
+<span class="fc" id="L240">                    Dimension d = m.getPreferredSize();</span>
+<span class="fc" id="L241">                    Bounds childBounds = Bounds.of(Position.of(m.getLocation()), Size.of(d).plus(hgap, vgap));</span>
+<span class="fc" id="L242">                    bounds = bounds.merge(childBounds);</span>
 <span class="fc" id="L243">                    dim.height = Math.max(dim.height, d.height);</span>
 <span class="fc bfc" id="L244" title="All 2 branches covered.">                    if (firstVisibleComponent) {</span>
 <span class="fc" id="L245">                        firstVisibleComponent = false;</span>
@@ -638,7 +638,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
     @Override
     public void invalidateLayout(Container target) {
 
-<span class="fc" id="L641">    }</span>
+<span class="nc" id="L641">    }</span>
 
     public Optional&lt;Cell&gt; cellFromCellConf(
             Component parent,

@@ -4,7 +4,7 @@
   "narrative":"As part of the `UI` namespace, SwingTree ships with a custom `Font` class,\n    which is an immutable value object containing a lot of properties and methods for\n    working with fonts in Swing applications.",
   "subjects":["swingtree.UI$Font","swingtree.UI","swingtree.UIFactoryMethods"],
   "statistics":{
-    "runs":"30",
+    "runs":"36",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -619,6 +619,144 @@
         {"kind":"and","text":"","code":["var textPane1 = panel.components[0] as JTextPane","var textPane2 = panel.components[1] as JTextPane","var textPane3 = panel.components[2] as JTextPane","var textPane4 = panel.components[3] as JTextPane"]},
 
         {"kind":"expect","text":"The text panes report the correct alignment through their styled documents!","code":["getTextPaneAlignment(textPane1) == StyleConstants.ALIGN_LEFT","getTextPaneAlignment(textPane2) == StyleConstants.ALIGN_CENTER","getTextPaneAlignment(textPane3) == StyleConstants.ALIGN_RIGHT","getTextPaneAlignment(textPane4) == StyleConstants.ALIGN_JUSTIFIED"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The font style of a parent component will be inherited by its children. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The font style of a parent component will be inherited by its children.\n            Here we demonstrate this programmatically by styling a chain of nested \n            components, where the outer most parent has a custom font size, and then \n            verifying that the child components inherited that size correctly.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"A UI with a higher level of nesting:","code":["var ui =","        UI.panel(\"fill\").id(\"p1\").withSizeExactly(100, 50)","        .withStyle( it -> it","            .fontFamily(\"Ubuntu\")","            .fontSize(size)","            .fontColor(UI.Color.WHITE)","            .fontAlignment(UI.HorizontalAlignment.CENTER)","            .margin(5).padding(5)","            .borderRadius(6)","            .backgroundColor(UI.Color.BLACK)","        )","        .add(\"grow\",","            UI.panel(\"fill\").id(\"p2\")","            .withStyle( it -> it","                .margin(5).padding(5)","                .borderRadius(3)","                .backgroundColor(UI.Color.DARK_GRAY)","            )","            .add(\"grow\",","                UI.panel(\"fill\").id(\"p3\")","                .withStyle( it -> it","                    .margin(2).padding(2)","                    .borderRadius(12)","                    .backgroundColor(UI.Color.GREEN)","                )","            )","        )"]},
+
+        {"kind":"when","text":"","code":["var root = UI.runAndGet({","    var root = ui.get(JPanel)","    int width = (int) root.getPreferredSize().width","    int height = (int) root.getPreferredSize().height","    var img  = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)","    Graphics2D g = img.createGraphics()","    g.setClip(0,0, width, height)","    root.setSize(width, height)","    root.setPreferredSize(new Dimension(width, height))","    root.validate()","    root.paint(g)","    g.dispose()","    return root","})"]},
+
+        {"kind":"and","text":"","code":["int p1Size = new Utility.Query(root).find(JPanel, \"p1\").get().getFont().getSize()","int p2Size = new Utility.Query(root).find(JPanel, \"p2\").get().getFont().getSize()"]},
+
+        {"kind":"then","text":"","code":["p1Size == Math.round(size * uiScale)","p2Size == Math.round(size * uiScale)"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1f","2f","3f","1f","2f","3f"],"size":["7","7","7","42","42","42"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The font style of a parent component will be inherited by its children. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The font style of a parent component will be inherited by its children.\n            Here we demonstrate this programmatically by styling a chain of nested \n            components, where the outer most parent has a custom font size, and then \n            verifying that the child components inherited that size correctly.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"A UI with a higher level of nesting:","code":["var ui =","        UI.panel(\"fill\").id(\"p1\").withSizeExactly(100, 50)","        .withStyle( it -> it","            .fontFamily(\"Ubuntu\")","            .fontSize(size)","            .fontColor(UI.Color.WHITE)","            .fontAlignment(UI.HorizontalAlignment.CENTER)","            .margin(5).padding(5)","            .borderRadius(6)","            .backgroundColor(UI.Color.BLACK)","        )","        .add(\"grow\",","            UI.panel(\"fill\").id(\"p2\")","            .withStyle( it -> it","                .margin(5).padding(5)","                .borderRadius(3)","                .backgroundColor(UI.Color.DARK_GRAY)","            )","            .add(\"grow\",","                UI.panel(\"fill\").id(\"p3\")","                .withStyle( it -> it","                    .margin(2).padding(2)","                    .borderRadius(12)","                    .backgroundColor(UI.Color.GREEN)","                )","            )","        )"]},
+
+        {"kind":"when","text":"","code":["var root = UI.runAndGet({","    var root = ui.get(JPanel)","    int width = (int) root.getPreferredSize().width","    int height = (int) root.getPreferredSize().height","    var img  = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)","    Graphics2D g = img.createGraphics()","    g.setClip(0,0, width, height)","    root.setSize(width, height)","    root.setPreferredSize(new Dimension(width, height))","    root.validate()","    root.paint(g)","    g.dispose()","    return root","})"]},
+
+        {"kind":"and","text":"","code":["int p1Size = new Utility.Query(root).find(JPanel, \"p1\").get().getFont().getSize()","int p2Size = new Utility.Query(root).find(JPanel, \"p2\").get().getFont().getSize()"]},
+
+        {"kind":"then","text":"","code":["p1Size == Math.round(size * uiScale)","p2Size == Math.round(size * uiScale)"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1f","2f","3f","1f","2f","3f"],"size":["7","7","7","42","42","42"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The font style of a parent component will be inherited by its children. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The font style of a parent component will be inherited by its children.\n            Here we demonstrate this programmatically by styling a chain of nested \n            components, where the outer most parent has a custom font size, and then \n            verifying that the child components inherited that size correctly.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"A UI with a higher level of nesting:","code":["var ui =","        UI.panel(\"fill\").id(\"p1\").withSizeExactly(100, 50)","        .withStyle( it -> it","            .fontFamily(\"Ubuntu\")","            .fontSize(size)","            .fontColor(UI.Color.WHITE)","            .fontAlignment(UI.HorizontalAlignment.CENTER)","            .margin(5).padding(5)","            .borderRadius(6)","            .backgroundColor(UI.Color.BLACK)","        )","        .add(\"grow\",","            UI.panel(\"fill\").id(\"p2\")","            .withStyle( it -> it","                .margin(5).padding(5)","                .borderRadius(3)","                .backgroundColor(UI.Color.DARK_GRAY)","            )","            .add(\"grow\",","                UI.panel(\"fill\").id(\"p3\")","                .withStyle( it -> it","                    .margin(2).padding(2)","                    .borderRadius(12)","                    .backgroundColor(UI.Color.GREEN)","                )","            )","        )"]},
+
+        {"kind":"when","text":"","code":["var root = UI.runAndGet({","    var root = ui.get(JPanel)","    int width = (int) root.getPreferredSize().width","    int height = (int) root.getPreferredSize().height","    var img  = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)","    Graphics2D g = img.createGraphics()","    g.setClip(0,0, width, height)","    root.setSize(width, height)","    root.setPreferredSize(new Dimension(width, height))","    root.validate()","    root.paint(g)","    g.dispose()","    return root","})"]},
+
+        {"kind":"and","text":"","code":["int p1Size = new Utility.Query(root).find(JPanel, \"p1\").get().getFont().getSize()","int p2Size = new Utility.Query(root).find(JPanel, \"p2\").get().getFont().getSize()"]},
+
+        {"kind":"then","text":"","code":["p1Size == Math.round(size * uiScale)","p2Size == Math.round(size * uiScale)"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1f","2f","3f","1f","2f","3f"],"size":["7","7","7","42","42","42"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The font style of a parent component will be inherited by its children. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The font style of a parent component will be inherited by its children.\n            Here we demonstrate this programmatically by styling a chain of nested \n            components, where the outer most parent has a custom font size, and then \n            verifying that the child components inherited that size correctly.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"A UI with a higher level of nesting:","code":["var ui =","        UI.panel(\"fill\").id(\"p1\").withSizeExactly(100, 50)","        .withStyle( it -> it","            .fontFamily(\"Ubuntu\")","            .fontSize(size)","            .fontColor(UI.Color.WHITE)","            .fontAlignment(UI.HorizontalAlignment.CENTER)","            .margin(5).padding(5)","            .borderRadius(6)","            .backgroundColor(UI.Color.BLACK)","        )","        .add(\"grow\",","            UI.panel(\"fill\").id(\"p2\")","            .withStyle( it -> it","                .margin(5).padding(5)","                .borderRadius(3)","                .backgroundColor(UI.Color.DARK_GRAY)","            )","            .add(\"grow\",","                UI.panel(\"fill\").id(\"p3\")","                .withStyle( it -> it","                    .margin(2).padding(2)","                    .borderRadius(12)","                    .backgroundColor(UI.Color.GREEN)","                )","            )","        )"]},
+
+        {"kind":"when","text":"","code":["var root = UI.runAndGet({","    var root = ui.get(JPanel)","    int width = (int) root.getPreferredSize().width","    int height = (int) root.getPreferredSize().height","    var img  = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)","    Graphics2D g = img.createGraphics()","    g.setClip(0,0, width, height)","    root.setSize(width, height)","    root.setPreferredSize(new Dimension(width, height))","    root.validate()","    root.paint(g)","    g.dispose()","    return root","})"]},
+
+        {"kind":"and","text":"","code":["int p1Size = new Utility.Query(root).find(JPanel, \"p1\").get().getFont().getSize()","int p2Size = new Utility.Query(root).find(JPanel, \"p2\").get().getFont().getSize()"]},
+
+        {"kind":"then","text":"","code":["p1Size == Math.round(size * uiScale)","p2Size == Math.round(size * uiScale)"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1f","2f","3f","1f","2f","3f"],"size":["7","7","7","42","42","42"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The font style of a parent component will be inherited by its children. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The font style of a parent component will be inherited by its children.\n            Here we demonstrate this programmatically by styling a chain of nested \n            components, where the outer most parent has a custom font size, and then \n            verifying that the child components inherited that size correctly.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"A UI with a higher level of nesting:","code":["var ui =","        UI.panel(\"fill\").id(\"p1\").withSizeExactly(100, 50)","        .withStyle( it -> it","            .fontFamily(\"Ubuntu\")","            .fontSize(size)","            .fontColor(UI.Color.WHITE)","            .fontAlignment(UI.HorizontalAlignment.CENTER)","            .margin(5).padding(5)","            .borderRadius(6)","            .backgroundColor(UI.Color.BLACK)","        )","        .add(\"grow\",","            UI.panel(\"fill\").id(\"p2\")","            .withStyle( it -> it","                .margin(5).padding(5)","                .borderRadius(3)","                .backgroundColor(UI.Color.DARK_GRAY)","            )","            .add(\"grow\",","                UI.panel(\"fill\").id(\"p3\")","                .withStyle( it -> it","                    .margin(2).padding(2)","                    .borderRadius(12)","                    .backgroundColor(UI.Color.GREEN)","                )","            )","        )"]},
+
+        {"kind":"when","text":"","code":["var root = UI.runAndGet({","    var root = ui.get(JPanel)","    int width = (int) root.getPreferredSize().width","    int height = (int) root.getPreferredSize().height","    var img  = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)","    Graphics2D g = img.createGraphics()","    g.setClip(0,0, width, height)","    root.setSize(width, height)","    root.setPreferredSize(new Dimension(width, height))","    root.validate()","    root.paint(g)","    g.dispose()","    return root","})"]},
+
+        {"kind":"and","text":"","code":["int p1Size = new Utility.Query(root).find(JPanel, \"p1\").get().getFont().getSize()","int p2Size = new Utility.Query(root).find(JPanel, \"p2\").get().getFont().getSize()"]},
+
+        {"kind":"then","text":"","code":["p1Size == Math.round(size * uiScale)","p2Size == Math.round(size * uiScale)"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1f","2f","3f","1f","2f","3f"],"size":["7","7","7","42","42","42"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The font style of a parent component will be inherited by its children. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The font style of a parent component will be inherited by its children.\n            Here we demonstrate this programmatically by styling a chain of nested \n            components, where the outer most parent has a custom font size, and then \n            verifying that the child components inherited that size correctly.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            We first set a scaling factor to simulate a platform with higher DPI.\n            So when your screen has a higher pixel density then this factor\n            is used by SwingTree to ensure that the UI is upscaled accordingly! \n            Please note that the line below only exists for testing purposes, \n            SwingTree will determine a suitable \n            scaling factor for the current system automatically for you,\n            so you do not have to specify this factor manually. \n        ","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"A UI with a higher level of nesting:","code":["var ui =","        UI.panel(\"fill\").id(\"p1\").withSizeExactly(100, 50)","        .withStyle( it -> it","            .fontFamily(\"Ubuntu\")","            .fontSize(size)","            .fontColor(UI.Color.WHITE)","            .fontAlignment(UI.HorizontalAlignment.CENTER)","            .margin(5).padding(5)","            .borderRadius(6)","            .backgroundColor(UI.Color.BLACK)","        )","        .add(\"grow\",","            UI.panel(\"fill\").id(\"p2\")","            .withStyle( it -> it","                .margin(5).padding(5)","                .borderRadius(3)","                .backgroundColor(UI.Color.DARK_GRAY)","            )","            .add(\"grow\",","                UI.panel(\"fill\").id(\"p3\")","                .withStyle( it -> it","                    .margin(2).padding(2)","                    .borderRadius(12)","                    .backgroundColor(UI.Color.GREEN)","                )","            )","        )"]},
+
+        {"kind":"when","text":"","code":["var root = UI.runAndGet({","    var root = ui.get(JPanel)","    int width = (int) root.getPreferredSize().width","    int height = (int) root.getPreferredSize().height","    var img  = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)","    Graphics2D g = img.createGraphics()","    g.setClip(0,0, width, height)","    root.setSize(width, height)","    root.setPreferredSize(new Dimension(width, height))","    root.validate()","    root.paint(g)","    g.dispose()","    return root","})"]},
+
+        {"kind":"and","text":"","code":["int p1Size = new Utility.Query(root).find(JPanel, \"p1\").get().getFont().getSize()","int p2Size = new Utility.Query(root).find(JPanel, \"p2\").get().getFont().getSize()"]},
+
+        {"kind":"then","text":"","code":["p1Size == Math.round(size * uiScale)","p2Size == Math.round(size * uiScale)"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1f","2f","3f","1f","2f","3f"],"size":["7","7","7","42","42","42"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

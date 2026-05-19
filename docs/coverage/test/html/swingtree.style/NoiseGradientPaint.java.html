@@ -302,7 +302,7 @@ final class NoiseGradientPaint implements Paint
 <span class="fc" id="L302">                long index = ((long)X &lt;&lt; 32) | (long)Y;</span>
 <span class="fc" id="L303">                WritableRaster raster = cachedRasters.get(index);</span>
 
-<span class="pc bpc" id="L305" title="2 of 6 branches missed.">                if (raster == null || raster.getWidth() &lt; TILE_WIDTH || raster.getHeight() &lt; TILE_HEIGHT)</span>
+<span class="pc bpc" id="L305" title="1 of 6 branches missed.">                if (raster == null || raster.getWidth() &lt; TILE_WIDTH || raster.getHeight() &lt; TILE_HEIGHT)</span>
 <span class="fc" id="L306">                    raster = getColorModel().createCompatibleWritableRaster(TILE_WIDTH, TILE_HEIGHT);  // Create raster for given colormodel</span>
                 else
 <span class="fc" id="L308">                    return raster;</span>

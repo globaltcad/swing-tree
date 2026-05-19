@@ -3986,11 +3986,11 @@ import java.util.function.Supplier;
      * @return A builder instance for the label, which enables fluent method chaining.
      */
     public static UIForLabel&lt;JLabel&gt; html( Val&lt;String&gt; text ) {
-<span class="nc" id="L3989">        NullUtil.nullArgCheck(text, &quot;text&quot;, Val.class);</span>
-<span class="nc" id="L3990">        NullUtil.nullPropertyCheck(text, &quot;text&quot;, &quot;Please use an empty string instead of null!&quot;);</span>
-<span class="nc" id="L3991">        return _label()</span>
-<span class="nc bnc" id="L3992" title="All 2 branches missed.">                .applyIf(!text.hasNoID(), it -&gt; it.id(text.id()))</span>
-<span class="nc" id="L3993">                .withText(text.view( it -&gt; &quot;&lt;html&gt;&quot; + it + &quot;&lt;/html&gt;&quot;));</span>
+<span class="fc" id="L3989">        NullUtil.nullArgCheck(text, &quot;text&quot;, Val.class);</span>
+<span class="fc" id="L3990">        NullUtil.nullPropertyCheck(text, &quot;text&quot;, &quot;Please use an empty string instead of null!&quot;);</span>
+<span class="fc" id="L3991">        return _label()</span>
+<span class="pc bpc" id="L3992" title="1 of 2 branches missed.">                .applyIf(!text.hasNoID(), it -&gt; it.id(text.id()))</span>
+<span class="fc" id="L3993">                .withText(text.view( it -&gt; &quot;&lt;html&gt;&quot; + it + &quot;&lt;/html&gt;&quot;));</span>
     }
 
     /**

@@ -4,7 +4,7 @@
   "narrative":"The age-old `java.awt.Color` class is a bit limited in what it can do.\n    Not only are the color constants it has to offer rather limited,\n    many of them are also inconsistent with the\n    naming and RGB values of modern color palettes.\n    The `java.awt.Color.GREEN` constant for example has an RGB value of\n    `(0, 255, 0)` which is considered \"lime\" in modern color palettes.\n\n    Furthermore, there is a lack of useful wither methods on the `Color` class\n    that are expected from a modern value based type, like in this case for example\n    `withRed(double)`, `withGreen(double)`, `withBlue(double)`, `withAlpha(double)`\n    or `withBrightness(double)`, `withSaturation(double)`, `withHue(double)`.\n\n    SwingTree addresses these shortcomings by providing a custom `Color` type\n    in the `UI` namespace which is a subclass of `java.awt.Color` and has a number\n    of useful methods to manipulate colors in both the RGB and HSB color spaces.",
   "subjects":["swingtree.UI$Color"],
   "statistics":{
-    "runs":"56",
+    "runs":"90",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -648,7 +648,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for \n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for\n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
       },
       "blocks":[
         {"kind":"expect","text":"","code":["colorIn.desaturateBy(factor) == saturated"]},
@@ -663,7 +663,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for \n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for\n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
       },
       "blocks":[
         {"kind":"expect","text":"","code":["colorIn.desaturateBy(factor) == saturated"]},
@@ -678,7 +678,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for \n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for\n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
       },
       "blocks":[
         {"kind":"expect","text":"","code":["colorIn.desaturateBy(factor) == saturated"]},
@@ -693,7 +693,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for \n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for\n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
       },
       "blocks":[
         {"kind":"expect","text":"","code":["colorIn.desaturateBy(factor) == saturated"]},
@@ -708,7 +708,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for \n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for\n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
       },
       "blocks":[
         {"kind":"expect","text":"","code":["colorIn.desaturateBy(factor) == saturated"]},
@@ -723,7 +723,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for \n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for\n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
       },
       "blocks":[
         {"kind":"expect","text":"","code":["colorIn.desaturateBy(factor) == saturated"]},
@@ -738,7 +738,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for \n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for\n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
       },
       "blocks":[
         {"kind":"expect","text":"","code":["colorIn.desaturateBy(factor) == saturated"]},
@@ -753,7 +753,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for \n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for\n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
       },
       "blocks":[
         {"kind":"expect","text":"","code":["colorIn.desaturateBy(factor) == saturated"]},
@@ -768,7 +768,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for \n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for\n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
       },
       "blocks":[
         {"kind":"expect","text":"","code":["colorIn.desaturateBy(factor) == saturated"]},
@@ -783,7 +783,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for \n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for\n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
       },
       "blocks":[
         {"kind":"expect","text":"","code":["colorIn.desaturateBy(factor) == saturated"]},
@@ -798,7 +798,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for \n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for\n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
       },
       "blocks":[
         {"kind":"expect","text":"","code":["colorIn.desaturateBy(factor) == saturated"]},
@@ -813,7 +813,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for \n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for\n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
       },
       "blocks":[
         {"kind":"expect","text":"","code":["colorIn.desaturateBy(factor) == saturated"]},
@@ -828,7 +828,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for \n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for\n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
       },
       "blocks":[
         {"kind":"expect","text":"","code":["colorIn.desaturateBy(factor) == saturated"]},
@@ -843,12 +843,538 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for \n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The colors in SwingTree are modelled using a custom `Color` type which for\n            compatibility reasons is a subclass of java.awt.Color.\n            Among many other useful methods, the custom color type has a method called\n            `desaturateBy(double)` which will decrease the saturation of the color according to the HSB color space\n            (Hue, Saturation, Brightness).\n        "]
       },
       "blocks":[
         {"kind":"expect","text":"","code":["colorIn.desaturateBy(factor) == saturated"]},
 
         {"kind":"where","text":"","code":{"colorIn":["UI.Color.DEEPSKYBLUE","UI.Color.CORAL","UI.Color.LAVENDERBLUSH","UI.Color.TAN","UI.Color.LINEN","UI.Color.WHITE","UI.Color.BLACK","UI.Color.DEEPSKYBLUE","UI.Color.CORAL","UI.Color.LAVENDERBLUSH","UI.Color.TAN","UI.Color.LINEN","UI.Color.WHITE","UI.Color.BLACK"],"factor":["0.3","0.4","0.6","0.7","0.2","0.7","0.9","0.0","0.0","0.0","0.0","0.0","0.0","0.0"],"saturated":["new Color(77,210,255)","new Color(255,178,150)","new Color(255,249,251)","new Color(210,201,189)","new Color(250,242,234)","new Color(255,255,255)","new Color(0,0,0)","UI.Color.DEEPSKYBLUE","UI.Color.CORAL","UI.Color.LAVENDERBLUSH","UI.Color.TAN","UI.Color.LINEN","UI.Color.WHITE","UI.Color.BLACK"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use \"blend(Color, double)\" to linearly interpolate between two colors in the sRGB color space. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `blend(Color, double)` method on a SwingTree `UI.Color` performs a\n            linear interpolation between this color and the supplied `other` color\n            in the sRGB color space. The interpolation factor `t` controls the mix:\n            a value of `0.0` returns this color unchanged, a value of `1.0` returns\n            the other color, and intermediate values produce a smooth blend. Each\n            of the red, green, blue and alpha channels is interpolated independently.\n            This is a great building block for derived palettes — for example, mixing\n            a primary color with white to produce a soft tint, or mixing two theme\n            colors to produce a midpoint accent.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.blend(other, t) == blended"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.WHITE","UI.Color.WHITE","UI.Color.WHITE","UI.Color.RED","UI.Color.BLACK","UI.Color.RED","UI.Color.RED","UI.Color.LIME","UI.Color.LIME"],"other":["UI.Color.BLACK","UI.Color.BLACK","UI.Color.BLACK","UI.Color.BLUE","UI.Color.WHITE","UI.Color.WHITE","UI.Color.BLACK","UI.Color.RED","UI.Color.LIME"],"t":["0.0","1.0","0.5","0.5","0.25","0.5","0.5","1.0","0.5"],"blended":["new Color(255,255,255)","new Color(  0,  0,  0)","new Color(128,128,128)","new Color(128,  0,128)","new Color( 64, 64, 64)","new Color(255,128,128)","new Color(128,  0,  0)","new Color(255,  0,  0)","UI.Color.LIME"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use \"blend(Color, double)\" to linearly interpolate between two colors in the sRGB color space. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `blend(Color, double)` method on a SwingTree `UI.Color` performs a\n            linear interpolation between this color and the supplied `other` color\n            in the sRGB color space. The interpolation factor `t` controls the mix:\n            a value of `0.0` returns this color unchanged, a value of `1.0` returns\n            the other color, and intermediate values produce a smooth blend. Each\n            of the red, green, blue and alpha channels is interpolated independently.\n            This is a great building block for derived palettes — for example, mixing\n            a primary color with white to produce a soft tint, or mixing two theme\n            colors to produce a midpoint accent.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.blend(other, t) == blended"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.WHITE","UI.Color.WHITE","UI.Color.WHITE","UI.Color.RED","UI.Color.BLACK","UI.Color.RED","UI.Color.RED","UI.Color.LIME","UI.Color.LIME"],"other":["UI.Color.BLACK","UI.Color.BLACK","UI.Color.BLACK","UI.Color.BLUE","UI.Color.WHITE","UI.Color.WHITE","UI.Color.BLACK","UI.Color.RED","UI.Color.LIME"],"t":["0.0","1.0","0.5","0.5","0.25","0.5","0.5","1.0","0.5"],"blended":["new Color(255,255,255)","new Color(  0,  0,  0)","new Color(128,128,128)","new Color(128,  0,128)","new Color( 64, 64, 64)","new Color(255,128,128)","new Color(128,  0,  0)","new Color(255,  0,  0)","UI.Color.LIME"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use \"blend(Color, double)\" to linearly interpolate between two colors in the sRGB color space. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `blend(Color, double)` method on a SwingTree `UI.Color` performs a\n            linear interpolation between this color and the supplied `other` color\n            in the sRGB color space. The interpolation factor `t` controls the mix:\n            a value of `0.0` returns this color unchanged, a value of `1.0` returns\n            the other color, and intermediate values produce a smooth blend. Each\n            of the red, green, blue and alpha channels is interpolated independently.\n            This is a great building block for derived palettes — for example, mixing\n            a primary color with white to produce a soft tint, or mixing two theme\n            colors to produce a midpoint accent.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.blend(other, t) == blended"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.WHITE","UI.Color.WHITE","UI.Color.WHITE","UI.Color.RED","UI.Color.BLACK","UI.Color.RED","UI.Color.RED","UI.Color.LIME","UI.Color.LIME"],"other":["UI.Color.BLACK","UI.Color.BLACK","UI.Color.BLACK","UI.Color.BLUE","UI.Color.WHITE","UI.Color.WHITE","UI.Color.BLACK","UI.Color.RED","UI.Color.LIME"],"t":["0.0","1.0","0.5","0.5","0.25","0.5","0.5","1.0","0.5"],"blended":["new Color(255,255,255)","new Color(  0,  0,  0)","new Color(128,128,128)","new Color(128,  0,128)","new Color( 64, 64, 64)","new Color(255,128,128)","new Color(128,  0,  0)","new Color(255,  0,  0)","UI.Color.LIME"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use \"blend(Color, double)\" to linearly interpolate between two colors in the sRGB color space. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `blend(Color, double)` method on a SwingTree `UI.Color` performs a\n            linear interpolation between this color and the supplied `other` color\n            in the sRGB color space. The interpolation factor `t` controls the mix:\n            a value of `0.0` returns this color unchanged, a value of `1.0` returns\n            the other color, and intermediate values produce a smooth blend. Each\n            of the red, green, blue and alpha channels is interpolated independently.\n            This is a great building block for derived palettes — for example, mixing\n            a primary color with white to produce a soft tint, or mixing two theme\n            colors to produce a midpoint accent.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.blend(other, t) == blended"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.WHITE","UI.Color.WHITE","UI.Color.WHITE","UI.Color.RED","UI.Color.BLACK","UI.Color.RED","UI.Color.RED","UI.Color.LIME","UI.Color.LIME"],"other":["UI.Color.BLACK","UI.Color.BLACK","UI.Color.BLACK","UI.Color.BLUE","UI.Color.WHITE","UI.Color.WHITE","UI.Color.BLACK","UI.Color.RED","UI.Color.LIME"],"t":["0.0","1.0","0.5","0.5","0.25","0.5","0.5","1.0","0.5"],"blended":["new Color(255,255,255)","new Color(  0,  0,  0)","new Color(128,128,128)","new Color(128,  0,128)","new Color( 64, 64, 64)","new Color(255,128,128)","new Color(128,  0,  0)","new Color(255,  0,  0)","UI.Color.LIME"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use \"blend(Color, double)\" to linearly interpolate between two colors in the sRGB color space. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `blend(Color, double)` method on a SwingTree `UI.Color` performs a\n            linear interpolation between this color and the supplied `other` color\n            in the sRGB color space. The interpolation factor `t` controls the mix:\n            a value of `0.0` returns this color unchanged, a value of `1.0` returns\n            the other color, and intermediate values produce a smooth blend. Each\n            of the red, green, blue and alpha channels is interpolated independently.\n            This is a great building block for derived palettes — for example, mixing\n            a primary color with white to produce a soft tint, or mixing two theme\n            colors to produce a midpoint accent.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.blend(other, t) == blended"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.WHITE","UI.Color.WHITE","UI.Color.WHITE","UI.Color.RED","UI.Color.BLACK","UI.Color.RED","UI.Color.RED","UI.Color.LIME","UI.Color.LIME"],"other":["UI.Color.BLACK","UI.Color.BLACK","UI.Color.BLACK","UI.Color.BLUE","UI.Color.WHITE","UI.Color.WHITE","UI.Color.BLACK","UI.Color.RED","UI.Color.LIME"],"t":["0.0","1.0","0.5","0.5","0.25","0.5","0.5","1.0","0.5"],"blended":["new Color(255,255,255)","new Color(  0,  0,  0)","new Color(128,128,128)","new Color(128,  0,128)","new Color( 64, 64, 64)","new Color(255,128,128)","new Color(128,  0,  0)","new Color(255,  0,  0)","UI.Color.LIME"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use \"blend(Color, double)\" to linearly interpolate between two colors in the sRGB color space. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `blend(Color, double)` method on a SwingTree `UI.Color` performs a\n            linear interpolation between this color and the supplied `other` color\n            in the sRGB color space. The interpolation factor `t` controls the mix:\n            a value of `0.0` returns this color unchanged, a value of `1.0` returns\n            the other color, and intermediate values produce a smooth blend. Each\n            of the red, green, blue and alpha channels is interpolated independently.\n            This is a great building block for derived palettes — for example, mixing\n            a primary color with white to produce a soft tint, or mixing two theme\n            colors to produce a midpoint accent.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.blend(other, t) == blended"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.WHITE","UI.Color.WHITE","UI.Color.WHITE","UI.Color.RED","UI.Color.BLACK","UI.Color.RED","UI.Color.RED","UI.Color.LIME","UI.Color.LIME"],"other":["UI.Color.BLACK","UI.Color.BLACK","UI.Color.BLACK","UI.Color.BLUE","UI.Color.WHITE","UI.Color.WHITE","UI.Color.BLACK","UI.Color.RED","UI.Color.LIME"],"t":["0.0","1.0","0.5","0.5","0.25","0.5","0.5","1.0","0.5"],"blended":["new Color(255,255,255)","new Color(  0,  0,  0)","new Color(128,128,128)","new Color(128,  0,128)","new Color( 64, 64, 64)","new Color(255,128,128)","new Color(128,  0,  0)","new Color(255,  0,  0)","UI.Color.LIME"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use \"blend(Color, double)\" to linearly interpolate between two colors in the sRGB color space. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `blend(Color, double)` method on a SwingTree `UI.Color` performs a\n            linear interpolation between this color and the supplied `other` color\n            in the sRGB color space. The interpolation factor `t` controls the mix:\n            a value of `0.0` returns this color unchanged, a value of `1.0` returns\n            the other color, and intermediate values produce a smooth blend. Each\n            of the red, green, blue and alpha channels is interpolated independently.\n            This is a great building block for derived palettes — for example, mixing\n            a primary color with white to produce a soft tint, or mixing two theme\n            colors to produce a midpoint accent.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.blend(other, t) == blended"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.WHITE","UI.Color.WHITE","UI.Color.WHITE","UI.Color.RED","UI.Color.BLACK","UI.Color.RED","UI.Color.RED","UI.Color.LIME","UI.Color.LIME"],"other":["UI.Color.BLACK","UI.Color.BLACK","UI.Color.BLACK","UI.Color.BLUE","UI.Color.WHITE","UI.Color.WHITE","UI.Color.BLACK","UI.Color.RED","UI.Color.LIME"],"t":["0.0","1.0","0.5","0.5","0.25","0.5","0.5","1.0","0.5"],"blended":["new Color(255,255,255)","new Color(  0,  0,  0)","new Color(128,128,128)","new Color(128,  0,128)","new Color( 64, 64, 64)","new Color(255,128,128)","new Color(128,  0,  0)","new Color(255,  0,  0)","UI.Color.LIME"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use \"blend(Color, double)\" to linearly interpolate between two colors in the sRGB color space. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `blend(Color, double)` method on a SwingTree `UI.Color` performs a\n            linear interpolation between this color and the supplied `other` color\n            in the sRGB color space. The interpolation factor `t` controls the mix:\n            a value of `0.0` returns this color unchanged, a value of `1.0` returns\n            the other color, and intermediate values produce a smooth blend. Each\n            of the red, green, blue and alpha channels is interpolated independently.\n            This is a great building block for derived palettes — for example, mixing\n            a primary color with white to produce a soft tint, or mixing two theme\n            colors to produce a midpoint accent.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.blend(other, t) == blended"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.WHITE","UI.Color.WHITE","UI.Color.WHITE","UI.Color.RED","UI.Color.BLACK","UI.Color.RED","UI.Color.RED","UI.Color.LIME","UI.Color.LIME"],"other":["UI.Color.BLACK","UI.Color.BLACK","UI.Color.BLACK","UI.Color.BLUE","UI.Color.WHITE","UI.Color.WHITE","UI.Color.BLACK","UI.Color.RED","UI.Color.LIME"],"t":["0.0","1.0","0.5","0.5","0.25","0.5","0.5","1.0","0.5"],"blended":["new Color(255,255,255)","new Color(  0,  0,  0)","new Color(128,128,128)","new Color(128,  0,128)","new Color( 64, 64, 64)","new Color(255,128,128)","new Color(128,  0,  0)","new Color(255,  0,  0)","UI.Color.LIME"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use \"blend(Color, double)\" to linearly interpolate between two colors in the sRGB color space. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `blend(Color, double)` method on a SwingTree `UI.Color` performs a\n            linear interpolation between this color and the supplied `other` color\n            in the sRGB color space. The interpolation factor `t` controls the mix:\n            a value of `0.0` returns this color unchanged, a value of `1.0` returns\n            the other color, and intermediate values produce a smooth blend. Each\n            of the red, green, blue and alpha channels is interpolated independently.\n            This is a great building block for derived palettes — for example, mixing\n            a primary color with white to produce a soft tint, or mixing two theme\n            colors to produce a midpoint accent.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.blend(other, t) == blended"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.WHITE","UI.Color.WHITE","UI.Color.WHITE","UI.Color.RED","UI.Color.BLACK","UI.Color.RED","UI.Color.RED","UI.Color.LIME","UI.Color.LIME"],"other":["UI.Color.BLACK","UI.Color.BLACK","UI.Color.BLACK","UI.Color.BLUE","UI.Color.WHITE","UI.Color.WHITE","UI.Color.BLACK","UI.Color.RED","UI.Color.LIME"],"t":["0.0","1.0","0.5","0.5","0.25","0.5","0.5","1.0","0.5"],"blended":["new Color(255,255,255)","new Color(  0,  0,  0)","new Color(128,128,128)","new Color(128,  0,128)","new Color( 64, 64, 64)","new Color(255,128,128)","new Color(128,  0,  0)","new Color(255,  0,  0)","UI.Color.LIME"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"blend(Color, double)\" method clamps the interpolation factor into the range 0.0..1.0. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `blend(Color, double)` method clamps the interpolation factor `t`\n            into the inclusive range `0.0..1.0`. This means that a negative `t`\n            simply returns this color unchanged, and a `t` greater than `1.0`\n            returns the other color unchanged. This makes the method safe to call\n            with arbitrary user-supplied values without having to clamp them\n            yourself at the call site.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.blend(other, t) == blended"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED"],"other":["UI.Color.BLUE","UI.Color.BLUE","UI.Color.BLUE","UI.Color.BLUE"],"t":["-0.5","-1.0","1.5","42.0"],"blended":["new Color(255,  0,  0)","new Color(255,  0,  0)","new Color(  0,  0,255)","new Color(  0,  0,255)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"blend(Color, double)\" method clamps the interpolation factor into the range 0.0..1.0. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `blend(Color, double)` method clamps the interpolation factor `t`\n            into the inclusive range `0.0..1.0`. This means that a negative `t`\n            simply returns this color unchanged, and a `t` greater than `1.0`\n            returns the other color unchanged. This makes the method safe to call\n            with arbitrary user-supplied values without having to clamp them\n            yourself at the call site.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.blend(other, t) == blended"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED"],"other":["UI.Color.BLUE","UI.Color.BLUE","UI.Color.BLUE","UI.Color.BLUE"],"t":["-0.5","-1.0","1.5","42.0"],"blended":["new Color(255,  0,  0)","new Color(255,  0,  0)","new Color(  0,  0,255)","new Color(  0,  0,255)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"blend(Color, double)\" method clamps the interpolation factor into the range 0.0..1.0. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `blend(Color, double)` method clamps the interpolation factor `t`\n            into the inclusive range `0.0..1.0`. This means that a negative `t`\n            simply returns this color unchanged, and a `t` greater than `1.0`\n            returns the other color unchanged. This makes the method safe to call\n            with arbitrary user-supplied values without having to clamp them\n            yourself at the call site.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.blend(other, t) == blended"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED"],"other":["UI.Color.BLUE","UI.Color.BLUE","UI.Color.BLUE","UI.Color.BLUE"],"t":["-0.5","-1.0","1.5","42.0"],"blended":["new Color(255,  0,  0)","new Color(255,  0,  0)","new Color(  0,  0,255)","new Color(  0,  0,255)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"blend(Color, double)\" method clamps the interpolation factor into the range 0.0..1.0. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `blend(Color, double)` method clamps the interpolation factor `t`\n            into the inclusive range `0.0..1.0`. This means that a negative `t`\n            simply returns this color unchanged, and a `t` greater than `1.0`\n            returns the other color unchanged. This makes the method safe to call\n            with arbitrary user-supplied values without having to clamp them\n            yourself at the call site.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.blend(other, t) == blended"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED"],"other":["UI.Color.BLUE","UI.Color.BLUE","UI.Color.BLUE","UI.Color.BLUE"],"t":["-0.5","-1.0","1.5","42.0"],"blended":["new Color(255,  0,  0)","new Color(255,  0,  0)","new Color(  0,  0,255)","new Color(  0,  0,255)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"blend(Color, double)\" method also interpolates the alpha component.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `blend(Color, double)` method blends not only the red, green and\n            blue channels but also the alpha component. This means that mixing a\n            fully opaque color with a fully transparent color at `t = 0.5` yields\n            a half-transparent color. This is useful for fading between two layers\n            without having to handle the alpha channel separately.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A fully opaque red and a fully transparent blue.","code":["var opaqueRed       = UI.Color.RED","var transparentBlue = UI.Color.BLUE.withAlpha(0)"]},
+
+        {"kind":"when","text":"We blend them at the midpoint.","code":["var midpoint = opaqueRed.blend(transparentBlue, 0.5)"]},
+
+        {"kind":"then","text":"The resulting color has all four channels averaged.","code":["midpoint.red    == 128","midpoint.green  ==   0","midpoint.blue   == 128","midpoint.alpha  == 128"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use the \"ofHsb(double, double, double)\" factory to build a fully opaque color from HSB components. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.Color.ofHsb(double, double, double)` factory is a convenience\n            overload of `ofHsb(double, double, double, double)` that always\n            produces a fully opaque color (opacity `1.0`). The hue is given in\n            degrees (so values are normalized into the `0.0 - 360.0` range —\n            negative hues and hues `>= 360` simply wrap around), while saturation\n            and brightness are in the `0.0 - 1.0` range.\n\n            This is the canonical way to dial in colors by their perceptual\n            attributes, e.g. when computing a swatch from a single hue slider in\n            a UI.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["UI.Color.ofHsb(hue, saturation, brightness) == expected"]},
+
+        {"kind":"and","text":"It always produces a fully opaque color.","code":["UI.Color.ofHsb(hue, saturation, brightness).alpha == 255"]},
+
+        {"kind":"where","text":"","code":{"hue":["0.0","120.0","240.0","60.0","0.0","0.0","0.0","210.0"],"saturation":["1.0","1.0","1.0","1.0","0.0","0.0","0.0","0.5"],"brightness":["1.0","1.0","1.0","1.0","1.0","0.0","0.5","0.8"],"expected":["new Color(255,  0,  0)","new Color(  0,255,  0)","new Color(  0,  0,255)","new Color(255,255,  0)","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(128,128,128)","new Color(102,153,204)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use the \"ofHsb(double, double, double)\" factory to build a fully opaque color from HSB components. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.Color.ofHsb(double, double, double)` factory is a convenience\n            overload of `ofHsb(double, double, double, double)` that always\n            produces a fully opaque color (opacity `1.0`). The hue is given in\n            degrees (so values are normalized into the `0.0 - 360.0` range —\n            negative hues and hues `>= 360` simply wrap around), while saturation\n            and brightness are in the `0.0 - 1.0` range.\n\n            This is the canonical way to dial in colors by their perceptual\n            attributes, e.g. when computing a swatch from a single hue slider in\n            a UI.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["UI.Color.ofHsb(hue, saturation, brightness) == expected"]},
+
+        {"kind":"and","text":"It always produces a fully opaque color.","code":["UI.Color.ofHsb(hue, saturation, brightness).alpha == 255"]},
+
+        {"kind":"where","text":"","code":{"hue":["0.0","120.0","240.0","60.0","0.0","0.0","0.0","210.0"],"saturation":["1.0","1.0","1.0","1.0","0.0","0.0","0.0","0.5"],"brightness":["1.0","1.0","1.0","1.0","1.0","0.0","0.5","0.8"],"expected":["new Color(255,  0,  0)","new Color(  0,255,  0)","new Color(  0,  0,255)","new Color(255,255,  0)","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(128,128,128)","new Color(102,153,204)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use the \"ofHsb(double, double, double)\" factory to build a fully opaque color from HSB components. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.Color.ofHsb(double, double, double)` factory is a convenience\n            overload of `ofHsb(double, double, double, double)` that always\n            produces a fully opaque color (opacity `1.0`). The hue is given in\n            degrees (so values are normalized into the `0.0 - 360.0` range —\n            negative hues and hues `>= 360` simply wrap around), while saturation\n            and brightness are in the `0.0 - 1.0` range.\n\n            This is the canonical way to dial in colors by their perceptual\n            attributes, e.g. when computing a swatch from a single hue slider in\n            a UI.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["UI.Color.ofHsb(hue, saturation, brightness) == expected"]},
+
+        {"kind":"and","text":"It always produces a fully opaque color.","code":["UI.Color.ofHsb(hue, saturation, brightness).alpha == 255"]},
+
+        {"kind":"where","text":"","code":{"hue":["0.0","120.0","240.0","60.0","0.0","0.0","0.0","210.0"],"saturation":["1.0","1.0","1.0","1.0","0.0","0.0","0.0","0.5"],"brightness":["1.0","1.0","1.0","1.0","1.0","0.0","0.5","0.8"],"expected":["new Color(255,  0,  0)","new Color(  0,255,  0)","new Color(  0,  0,255)","new Color(255,255,  0)","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(128,128,128)","new Color(102,153,204)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use the \"ofHsb(double, double, double)\" factory to build a fully opaque color from HSB components. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.Color.ofHsb(double, double, double)` factory is a convenience\n            overload of `ofHsb(double, double, double, double)` that always\n            produces a fully opaque color (opacity `1.0`). The hue is given in\n            degrees (so values are normalized into the `0.0 - 360.0` range —\n            negative hues and hues `>= 360` simply wrap around), while saturation\n            and brightness are in the `0.0 - 1.0` range.\n\n            This is the canonical way to dial in colors by their perceptual\n            attributes, e.g. when computing a swatch from a single hue slider in\n            a UI.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["UI.Color.ofHsb(hue, saturation, brightness) == expected"]},
+
+        {"kind":"and","text":"It always produces a fully opaque color.","code":["UI.Color.ofHsb(hue, saturation, brightness).alpha == 255"]},
+
+        {"kind":"where","text":"","code":{"hue":["0.0","120.0","240.0","60.0","0.0","0.0","0.0","210.0"],"saturation":["1.0","1.0","1.0","1.0","0.0","0.0","0.0","0.5"],"brightness":["1.0","1.0","1.0","1.0","1.0","0.0","0.5","0.8"],"expected":["new Color(255,  0,  0)","new Color(  0,255,  0)","new Color(  0,  0,255)","new Color(255,255,  0)","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(128,128,128)","new Color(102,153,204)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use the \"ofHsb(double, double, double)\" factory to build a fully opaque color from HSB components. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.Color.ofHsb(double, double, double)` factory is a convenience\n            overload of `ofHsb(double, double, double, double)` that always\n            produces a fully opaque color (opacity `1.0`). The hue is given in\n            degrees (so values are normalized into the `0.0 - 360.0` range —\n            negative hues and hues `>= 360` simply wrap around), while saturation\n            and brightness are in the `0.0 - 1.0` range.\n\n            This is the canonical way to dial in colors by their perceptual\n            attributes, e.g. when computing a swatch from a single hue slider in\n            a UI.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["UI.Color.ofHsb(hue, saturation, brightness) == expected"]},
+
+        {"kind":"and","text":"It always produces a fully opaque color.","code":["UI.Color.ofHsb(hue, saturation, brightness).alpha == 255"]},
+
+        {"kind":"where","text":"","code":{"hue":["0.0","120.0","240.0","60.0","0.0","0.0","0.0","210.0"],"saturation":["1.0","1.0","1.0","1.0","0.0","0.0","0.0","0.5"],"brightness":["1.0","1.0","1.0","1.0","1.0","0.0","0.5","0.8"],"expected":["new Color(255,  0,  0)","new Color(  0,255,  0)","new Color(  0,  0,255)","new Color(255,255,  0)","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(128,128,128)","new Color(102,153,204)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use the \"ofHsb(double, double, double)\" factory to build a fully opaque color from HSB components. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.Color.ofHsb(double, double, double)` factory is a convenience\n            overload of `ofHsb(double, double, double, double)` that always\n            produces a fully opaque color (opacity `1.0`). The hue is given in\n            degrees (so values are normalized into the `0.0 - 360.0` range —\n            negative hues and hues `>= 360` simply wrap around), while saturation\n            and brightness are in the `0.0 - 1.0` range.\n\n            This is the canonical way to dial in colors by their perceptual\n            attributes, e.g. when computing a swatch from a single hue slider in\n            a UI.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["UI.Color.ofHsb(hue, saturation, brightness) == expected"]},
+
+        {"kind":"and","text":"It always produces a fully opaque color.","code":["UI.Color.ofHsb(hue, saturation, brightness).alpha == 255"]},
+
+        {"kind":"where","text":"","code":{"hue":["0.0","120.0","240.0","60.0","0.0","0.0","0.0","210.0"],"saturation":["1.0","1.0","1.0","1.0","0.0","0.0","0.0","0.5"],"brightness":["1.0","1.0","1.0","1.0","1.0","0.0","0.5","0.8"],"expected":["new Color(255,  0,  0)","new Color(  0,255,  0)","new Color(  0,  0,255)","new Color(255,255,  0)","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(128,128,128)","new Color(102,153,204)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use the \"ofHsb(double, double, double)\" factory to build a fully opaque color from HSB components. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.Color.ofHsb(double, double, double)` factory is a convenience\n            overload of `ofHsb(double, double, double, double)` that always\n            produces a fully opaque color (opacity `1.0`). The hue is given in\n            degrees (so values are normalized into the `0.0 - 360.0` range —\n            negative hues and hues `>= 360` simply wrap around), while saturation\n            and brightness are in the `0.0 - 1.0` range.\n\n            This is the canonical way to dial in colors by their perceptual\n            attributes, e.g. when computing a swatch from a single hue slider in\n            a UI.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["UI.Color.ofHsb(hue, saturation, brightness) == expected"]},
+
+        {"kind":"and","text":"It always produces a fully opaque color.","code":["UI.Color.ofHsb(hue, saturation, brightness).alpha == 255"]},
+
+        {"kind":"where","text":"","code":{"hue":["0.0","120.0","240.0","60.0","0.0","0.0","0.0","210.0"],"saturation":["1.0","1.0","1.0","1.0","0.0","0.0","0.0","0.5"],"brightness":["1.0","1.0","1.0","1.0","1.0","0.0","0.5","0.8"],"expected":["new Color(255,  0,  0)","new Color(  0,255,  0)","new Color(  0,  0,255)","new Color(255,255,  0)","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(128,128,128)","new Color(102,153,204)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use the \"ofHsb(double, double, double)\" factory to build a fully opaque color from HSB components. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `UI.Color.ofHsb(double, double, double)` factory is a convenience\n            overload of `ofHsb(double, double, double, double)` that always\n            produces a fully opaque color (opacity `1.0`). The hue is given in\n            degrees (so values are normalized into the `0.0 - 360.0` range —\n            negative hues and hues `>= 360` simply wrap around), while saturation\n            and brightness are in the `0.0 - 1.0` range.\n\n            This is the canonical way to dial in colors by their perceptual\n            attributes, e.g. when computing a swatch from a single hue slider in\n            a UI.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["UI.Color.ofHsb(hue, saturation, brightness) == expected"]},
+
+        {"kind":"and","text":"It always produces a fully opaque color.","code":["UI.Color.ofHsb(hue, saturation, brightness).alpha == 255"]},
+
+        {"kind":"where","text":"","code":{"hue":["0.0","120.0","240.0","60.0","0.0","0.0","0.0","210.0"],"saturation":["1.0","1.0","1.0","1.0","0.0","0.0","0.0","0.5"],"brightness":["1.0","1.0","1.0","1.0","1.0","0.0","0.5","0.8"],"expected":["new Color(255,  0,  0)","new Color(  0,255,  0)","new Color(  0,  0,255)","new Color(255,255,  0)","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(128,128,128)","new Color(102,153,204)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The \"ofHsb(double, double, double)\" factory normalizes the hue into the 0.0..360.0 range.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `ofHsb(...)` factories normalize the hue value, so equivalent\n            hues like `-120.0`, `240.0` and `600.0` all yield exactly the same\n            color. This makes the method safe to call with arithmetic that may\n            wrap around the color wheel.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["UI.Color.ofHsb(  240.0, 1.0, 1.0) == UI.Color.ofHsb( -120.0, 1.0, 1.0)","UI.Color.ofHsb(  240.0, 1.0, 1.0) == UI.Color.ofHsb(  600.0, 1.0, 1.0)","UI.Color.ofHsb(    0.0, 1.0, 1.0) == UI.Color.ofHsb(  360.0, 1.0, 1.0)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use \"shade(double)\" to lighten a color towards white or darken it towards black. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `shade(double)` method on a SwingTree `UI.Color` produces a tinted\n            or shaded version of the color: a positive `amount` mixes this color\n            towards `WHITE` (a lighter tint), a negative `amount` mixes it towards\n            `BLACK` (a darker shade), and a value of `0.0` returns the color\n            unchanged. The magnitude of `amount` controls how strongly the color\n            is pulled towards the target.\n\n            This is shorthand for `blend(amount < 0 ? BLACK : WHITE, Math.abs(amount))`\n            and is particularly handy for deriving subtle gradient stops from a\n            single base color — for example, painting a page background with a\n            slightly darker bottom edge by using `pageColor.shade(-0.06)`.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.shade(amount) == shaded"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.BLUE","UI.Color.BLUE","UI.Color.WHITE","UI.Color.BLACK","UI.Color.WHITE","UI.Color.BLACK"],"amount":["0.0","1.0","-1.0","0.5","-0.5","0.25","-0.25","0.5","-0.5","-1.0","1.0"],"shaded":["UI.Color.RED","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(255,128,128)","new Color(128,  0,  0)","new Color( 64, 64,255)","new Color(  0,  0,191)","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(  0,  0,  0)","new Color(255,255,255)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use \"shade(double)\" to lighten a color towards white or darken it towards black. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `shade(double)` method on a SwingTree `UI.Color` produces a tinted\n            or shaded version of the color: a positive `amount` mixes this color\n            towards `WHITE` (a lighter tint), a negative `amount` mixes it towards\n            `BLACK` (a darker shade), and a value of `0.0` returns the color\n            unchanged. The magnitude of `amount` controls how strongly the color\n            is pulled towards the target.\n\n            This is shorthand for `blend(amount < 0 ? BLACK : WHITE, Math.abs(amount))`\n            and is particularly handy for deriving subtle gradient stops from a\n            single base color — for example, painting a page background with a\n            slightly darker bottom edge by using `pageColor.shade(-0.06)`.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.shade(amount) == shaded"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.BLUE","UI.Color.BLUE","UI.Color.WHITE","UI.Color.BLACK","UI.Color.WHITE","UI.Color.BLACK"],"amount":["0.0","1.0","-1.0","0.5","-0.5","0.25","-0.25","0.5","-0.5","-1.0","1.0"],"shaded":["UI.Color.RED","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(255,128,128)","new Color(128,  0,  0)","new Color( 64, 64,255)","new Color(  0,  0,191)","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(  0,  0,  0)","new Color(255,255,255)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use \"shade(double)\" to lighten a color towards white or darken it towards black. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `shade(double)` method on a SwingTree `UI.Color` produces a tinted\n            or shaded version of the color: a positive `amount` mixes this color\n            towards `WHITE` (a lighter tint), a negative `amount` mixes it towards\n            `BLACK` (a darker shade), and a value of `0.0` returns the color\n            unchanged. The magnitude of `amount` controls how strongly the color\n            is pulled towards the target.\n\n            This is shorthand for `blend(amount < 0 ? BLACK : WHITE, Math.abs(amount))`\n            and is particularly handy for deriving subtle gradient stops from a\n            single base color — for example, painting a page background with a\n            slightly darker bottom edge by using `pageColor.shade(-0.06)`.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.shade(amount) == shaded"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.BLUE","UI.Color.BLUE","UI.Color.WHITE","UI.Color.BLACK","UI.Color.WHITE","UI.Color.BLACK"],"amount":["0.0","1.0","-1.0","0.5","-0.5","0.25","-0.25","0.5","-0.5","-1.0","1.0"],"shaded":["UI.Color.RED","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(255,128,128)","new Color(128,  0,  0)","new Color( 64, 64,255)","new Color(  0,  0,191)","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(  0,  0,  0)","new Color(255,255,255)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use \"shade(double)\" to lighten a color towards white or darken it towards black. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `shade(double)` method on a SwingTree `UI.Color` produces a tinted\n            or shaded version of the color: a positive `amount` mixes this color\n            towards `WHITE` (a lighter tint), a negative `amount` mixes it towards\n            `BLACK` (a darker shade), and a value of `0.0` returns the color\n            unchanged. The magnitude of `amount` controls how strongly the color\n            is pulled towards the target.\n\n            This is shorthand for `blend(amount < 0 ? BLACK : WHITE, Math.abs(amount))`\n            and is particularly handy for deriving subtle gradient stops from a\n            single base color — for example, painting a page background with a\n            slightly darker bottom edge by using `pageColor.shade(-0.06)`.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.shade(amount) == shaded"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.BLUE","UI.Color.BLUE","UI.Color.WHITE","UI.Color.BLACK","UI.Color.WHITE","UI.Color.BLACK"],"amount":["0.0","1.0","-1.0","0.5","-0.5","0.25","-0.25","0.5","-0.5","-1.0","1.0"],"shaded":["UI.Color.RED","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(255,128,128)","new Color(128,  0,  0)","new Color( 64, 64,255)","new Color(  0,  0,191)","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(  0,  0,  0)","new Color(255,255,255)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use \"shade(double)\" to lighten a color towards white or darken it towards black. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `shade(double)` method on a SwingTree `UI.Color` produces a tinted\n            or shaded version of the color: a positive `amount` mixes this color\n            towards `WHITE` (a lighter tint), a negative `amount` mixes it towards\n            `BLACK` (a darker shade), and a value of `0.0` returns the color\n            unchanged. The magnitude of `amount` controls how strongly the color\n            is pulled towards the target.\n\n            This is shorthand for `blend(amount < 0 ? BLACK : WHITE, Math.abs(amount))`\n            and is particularly handy for deriving subtle gradient stops from a\n            single base color — for example, painting a page background with a\n            slightly darker bottom edge by using `pageColor.shade(-0.06)`.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.shade(amount) == shaded"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.BLUE","UI.Color.BLUE","UI.Color.WHITE","UI.Color.BLACK","UI.Color.WHITE","UI.Color.BLACK"],"amount":["0.0","1.0","-1.0","0.5","-0.5","0.25","-0.25","0.5","-0.5","-1.0","1.0"],"shaded":["UI.Color.RED","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(255,128,128)","new Color(128,  0,  0)","new Color( 64, 64,255)","new Color(  0,  0,191)","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(  0,  0,  0)","new Color(255,255,255)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use \"shade(double)\" to lighten a color towards white or darken it towards black. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `shade(double)` method on a SwingTree `UI.Color` produces a tinted\n            or shaded version of the color: a positive `amount` mixes this color\n            towards `WHITE` (a lighter tint), a negative `amount` mixes it towards\n            `BLACK` (a darker shade), and a value of `0.0` returns the color\n            unchanged. The magnitude of `amount` controls how strongly the color\n            is pulled towards the target.\n\n            This is shorthand for `blend(amount < 0 ? BLACK : WHITE, Math.abs(amount))`\n            and is particularly handy for deriving subtle gradient stops from a\n            single base color — for example, painting a page background with a\n            slightly darker bottom edge by using `pageColor.shade(-0.06)`.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.shade(amount) == shaded"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.BLUE","UI.Color.BLUE","UI.Color.WHITE","UI.Color.BLACK","UI.Color.WHITE","UI.Color.BLACK"],"amount":["0.0","1.0","-1.0","0.5","-0.5","0.25","-0.25","0.5","-0.5","-1.0","1.0"],"shaded":["UI.Color.RED","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(255,128,128)","new Color(128,  0,  0)","new Color( 64, 64,255)","new Color(  0,  0,191)","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(  0,  0,  0)","new Color(255,255,255)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use \"shade(double)\" to lighten a color towards white or darken it towards black. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `shade(double)` method on a SwingTree `UI.Color` produces a tinted\n            or shaded version of the color: a positive `amount` mixes this color\n            towards `WHITE` (a lighter tint), a negative `amount` mixes it towards\n            `BLACK` (a darker shade), and a value of `0.0` returns the color\n            unchanged. The magnitude of `amount` controls how strongly the color\n            is pulled towards the target.\n\n            This is shorthand for `blend(amount < 0 ? BLACK : WHITE, Math.abs(amount))`\n            and is particularly handy for deriving subtle gradient stops from a\n            single base color — for example, painting a page background with a\n            slightly darker bottom edge by using `pageColor.shade(-0.06)`.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.shade(amount) == shaded"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.BLUE","UI.Color.BLUE","UI.Color.WHITE","UI.Color.BLACK","UI.Color.WHITE","UI.Color.BLACK"],"amount":["0.0","1.0","-1.0","0.5","-0.5","0.25","-0.25","0.5","-0.5","-1.0","1.0"],"shaded":["UI.Color.RED","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(255,128,128)","new Color(128,  0,  0)","new Color( 64, 64,255)","new Color(  0,  0,191)","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(  0,  0,  0)","new Color(255,255,255)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use \"shade(double)\" to lighten a color towards white or darken it towards black. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `shade(double)` method on a SwingTree `UI.Color` produces a tinted\n            or shaded version of the color: a positive `amount` mixes this color\n            towards `WHITE` (a lighter tint), a negative `amount` mixes it towards\n            `BLACK` (a darker shade), and a value of `0.0` returns the color\n            unchanged. The magnitude of `amount` controls how strongly the color\n            is pulled towards the target.\n\n            This is shorthand for `blend(amount < 0 ? BLACK : WHITE, Math.abs(amount))`\n            and is particularly handy for deriving subtle gradient stops from a\n            single base color — for example, painting a page background with a\n            slightly darker bottom edge by using `pageColor.shade(-0.06)`.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.shade(amount) == shaded"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.BLUE","UI.Color.BLUE","UI.Color.WHITE","UI.Color.BLACK","UI.Color.WHITE","UI.Color.BLACK"],"amount":["0.0","1.0","-1.0","0.5","-0.5","0.25","-0.25","0.5","-0.5","-1.0","1.0"],"shaded":["UI.Color.RED","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(255,128,128)","new Color(128,  0,  0)","new Color( 64, 64,255)","new Color(  0,  0,191)","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(  0,  0,  0)","new Color(255,255,255)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use \"shade(double)\" to lighten a color towards white or darken it towards black. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `shade(double)` method on a SwingTree `UI.Color` produces a tinted\n            or shaded version of the color: a positive `amount` mixes this color\n            towards `WHITE` (a lighter tint), a negative `amount` mixes it towards\n            `BLACK` (a darker shade), and a value of `0.0` returns the color\n            unchanged. The magnitude of `amount` controls how strongly the color\n            is pulled towards the target.\n\n            This is shorthand for `blend(amount < 0 ? BLACK : WHITE, Math.abs(amount))`\n            and is particularly handy for deriving subtle gradient stops from a\n            single base color — for example, painting a page background with a\n            slightly darker bottom edge by using `pageColor.shade(-0.06)`.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.shade(amount) == shaded"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.BLUE","UI.Color.BLUE","UI.Color.WHITE","UI.Color.BLACK","UI.Color.WHITE","UI.Color.BLACK"],"amount":["0.0","1.0","-1.0","0.5","-0.5","0.25","-0.25","0.5","-0.5","-1.0","1.0"],"shaded":["UI.Color.RED","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(255,128,128)","new Color(128,  0,  0)","new Color( 64, 64,255)","new Color(  0,  0,191)","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(  0,  0,  0)","new Color(255,255,255)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use \"shade(double)\" to lighten a color towards white or darken it towards black. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `shade(double)` method on a SwingTree `UI.Color` produces a tinted\n            or shaded version of the color: a positive `amount` mixes this color\n            towards `WHITE` (a lighter tint), a negative `amount` mixes it towards\n            `BLACK` (a darker shade), and a value of `0.0` returns the color\n            unchanged. The magnitude of `amount` controls how strongly the color\n            is pulled towards the target.\n\n            This is shorthand for `blend(amount < 0 ? BLACK : WHITE, Math.abs(amount))`\n            and is particularly handy for deriving subtle gradient stops from a\n            single base color — for example, painting a page background with a\n            slightly darker bottom edge by using `pageColor.shade(-0.06)`.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.shade(amount) == shaded"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.BLUE","UI.Color.BLUE","UI.Color.WHITE","UI.Color.BLACK","UI.Color.WHITE","UI.Color.BLACK"],"amount":["0.0","1.0","-1.0","0.5","-0.5","0.25","-0.25","0.5","-0.5","-1.0","1.0"],"shaded":["UI.Color.RED","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(255,128,128)","new Color(128,  0,  0)","new Color( 64, 64,255)","new Color(  0,  0,191)","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(  0,  0,  0)","new Color(255,255,255)"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use \"shade(double)\" to lighten a color towards white or darken it towards black. [10]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `shade(double)` method on a SwingTree `UI.Color` produces a tinted\n            or shaded version of the color: a positive `amount` mixes this color\n            towards `WHITE` (a lighter tint), a negative `amount` mixes it towards\n            `BLACK` (a darker shade), and a value of `0.0` returns the color\n            unchanged. The magnitude of `amount` controls how strongly the color\n            is pulled towards the target.\n\n            This is shorthand for `blend(amount < 0 ? BLACK : WHITE, Math.abs(amount))`\n            and is particularly handy for deriving subtle gradient stops from a\n            single base color — for example, painting a page background with a\n            slightly darker bottom edge by using `pageColor.shade(-0.06)`.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["colorIn.shade(amount) == shaded"]},
+
+        {"kind":"where","text":"","code":{"colorIn":["UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.RED","UI.Color.BLUE","UI.Color.BLUE","UI.Color.WHITE","UI.Color.BLACK","UI.Color.WHITE","UI.Color.BLACK"],"amount":["0.0","1.0","-1.0","0.5","-0.5","0.25","-0.25","0.5","-0.5","-1.0","1.0"],"shaded":["UI.Color.RED","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(255,128,128)","new Color(128,  0,  0)","new Color( 64, 64,255)","new Color(  0,  0,191)","new Color(255,255,255)","new Color(  0,  0,  0)","new Color(  0,  0,  0)","new Color(255,255,255)"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

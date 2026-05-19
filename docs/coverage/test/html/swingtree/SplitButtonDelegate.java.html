@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SplitButtonDelegate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">SplitButtonDelegate.java</span></div><h1>SplitButtonDelegate.java</h1><pre class="source lang-java linenums">package swingtree;
 
 import sprouts.Action;
+import sprouts.Tuple;
 import swingtree.components.JSplitButton;
 
-import javax.swing.*;
+import javax.swing.JComponent;
+import javax.swing.JMenuItem;
 import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 /**
  *  This class is a delegate for events of the {@link JSplitButton} component.
@@ -42,9 +42,9 @@ public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends Abstra
          *  This method exposes all of the {@link JMenuItem}s which are
          *  part of the {@link JSplitButton} in an immutable list.
          *
-         * @return A list of all split button items.
+         * @return A tuple (immutable list) of all split button items.
          */
-        List&lt;I&gt; getItems() {
+        Tuple&lt;I&gt; getItems() {
 <span class="nc" id="L48">            return _itemsDelegate.getSiblinghood();</span>
         }
 
@@ -62,9 +62,9 @@ public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends Abstra
          * This is contrary to the {@link #getSiblings()} method which returns all children of the parent component
          * except the current component.
          *
-         * @return A list of all the {@link JComponent} siblings of the split button, including the split button itself.
+         * @return A tuple (immutable list) of all the {@link JComponent} siblings of the split button, including the split button itself.
          */
-        public List&lt;JComponent&gt; getSiblinghood() {
+        public Tuple&lt;JComponent&gt; getSiblinghood() {
             // We make sure that only the Swing thread can access the sibling components:
 <span class="nc bnc" id="L69" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() )</span>
 <span class="nc" id="L70">                throw new IllegalStateException(</span>
@@ -78,10 +78,10 @@ public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends Abstra
          *  This is contrary to the {@link #getSiblinghood()} method which returns all children of the parent component
          *  including the current component.
          *
-         * @return A list of all the {@link JComponent} which constitute the neighbouring UI components of the split button.
+         * @return A tuple (immutable list) of all the {@link JComponent} which constitute the neighbouring UI components of the split button.
          *          except the current {@link JSplitButton} itself.
          */
-        public List&lt;JComponent&gt; getSiblings() {
+        public Tuple&lt;JComponent&gt; getSiblings() {
             // We make sure that only the Swing thread can access the sibling components:
 <span class="nc bnc" id="L86" title="All 2 branches missed.">            if ( !UI.thisIsUIThread() )</span>
 <span class="nc" id="L87">                throw new IllegalStateException(</span>
@@ -90,7 +90,7 @@ public final class SplitButtonDelegate&lt;I extends JMenuItem&gt; extends Abstra
 <span class="nc" id="L90">            return _siblingsSource()</span>
 <span class="nc" id="L91">                    .stream()</span>
 <span class="nc bnc" id="L92" title="All 2 branches missed.">                    .filter( s -&gt; s != getCurrentItem() )</span>
-<span class="nc" id="L93">                    .collect(Collectors.toList());</span>
+<span class="nc" id="L93">                    .collect(Tuple.collectorOf(JComponent.class));</span>
         }
 
         /**

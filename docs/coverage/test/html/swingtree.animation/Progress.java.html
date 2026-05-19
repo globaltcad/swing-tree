@@ -30,7 +30,7 @@ public interface Progress
      * @return The animation progress in terms of a number between {@code start} and {@code end}.
      */
     default double progress( double start, double end ) {
-<span class="nc" id="L33">        return start + (end - start) * progress();</span>
+<span class="fc" id="L33">        return start + (end - start) * progress();</span>
     }
 
     /**
@@ -53,7 +53,7 @@ public interface Progress
      * @return The animation progress in terms of a number between {@code start} and {@code end}.
      */
     default double regress( double end, double start ) {
-<span class="nc" id="L56">        return start + (end - start) * regress();</span>
+<span class="fc" id="L56">        return start + (end - start) * regress();</span>
     }
 
     /**
@@ -64,7 +64,7 @@ public interface Progress
      * @return The animation progress in terms of a number between 0 and 1, where 1 means the animation is halfway through.
      */
     default double pulse() {
-<span class="nc" id="L67">        return Math.sin(Math.PI * progress());</span>
+<span class="fc" id="L67">        return Math.sin(Math.PI * progress());</span>
     }
 
     /**
@@ -78,7 +78,7 @@ public interface Progress
      *  @return The animation progress in terms of a number between {@code start} and {@code end}, where {@code end} means the animation is halfway through.
      */
     default double pulse( double start, double peak ) {
-<span class="nc" id="L81">        return start + (peak - start) * pulse();</span>
+<span class="fc" id="L81">        return start + (peak - start) * pulse();</span>
     }
 
     /**
@@ -93,7 +93,7 @@ public interface Progress
      * @return The animation progress in the form of peaking sine wave growing from 0 to 1.
      */
     default double jumpIn() {
-<span class="nc" id="L96">        return Math.sin(Math.PI * progress() / 2);</span>
+<span class="fc" id="L96">        return Math.sin(Math.PI * progress() / 2);</span>
     }
 
     /**
@@ -110,7 +110,7 @@ public interface Progress
      * @return The animation progress in the form of peaking sine wave growing from {@code start} to {@code end}.
      */
     default double jumpIn( double start, double end ) {
-<span class="nc" id="L113">        return start + (end - start) * jumpIn();</span>
+<span class="fc" id="L113">        return start + (end - start) * jumpIn();</span>
     }
 
     /**
@@ -124,7 +124,7 @@ public interface Progress
      * @return The animation progress in the form of peaking sine wave growing from 1 to 0.
      */
     default double jumpOut() {
-<span class="nc" id="L127">        return Math.sin(Math.PI * (1 - progress()) / 2);</span>
+<span class="fc" id="L127">        return Math.sin(Math.PI * (1 - progress()) / 2);</span>
     }
 
     /**
@@ -141,7 +141,7 @@ public interface Progress
      * @return The animation progress in the form of peaking sine wave growing from {@code start} to {@code end}.
      */
     default double jumpOut( double end, double start ) {
-<span class="nc" id="L144">        return end + (start - end) * jumpOut();</span>
+<span class="fc" id="L144">        return end + (start - end) * jumpOut();</span>
     }
 
     /**
@@ -176,7 +176,7 @@ public interface Progress
      * @return The animation progress in the form of a wave growing from {@code start} to {@code end}.
      */
     default double fadeIn( double start, double end ) {
-<span class="nc" id="L179">        return start + (end - start) * fadeIn();</span>
+<span class="fc" id="L179">        return start + (end - start) * fadeIn();</span>
     }
 
     /**
@@ -192,7 +192,7 @@ public interface Progress
      * @return The animation progress in the form of wave growing from 1 to 0.
      */
     default double fadeOut() {
-<span class="nc" id="L195">        return 1 - fadeIn();</span>
+<span class="fc" id="L195">        return 1 - fadeIn();</span>
     }
 
     /**
@@ -251,7 +251,7 @@ public interface Progress
      */
     default double cyclePlus( double offset ) {
 <span class="fc" id="L253">        double progress = (progress() + offset) % 1;</span>
-<span class="pc bpc" id="L254" title="1 of 2 branches missed.">        if ( progress &lt; 0 ) progress += 1;</span>
+<span class="fc bfc" id="L254" title="All 2 branches covered.">        if ( progress &lt; 0 ) progress += 1;</span>
 <span class="fc" id="L255">        return 1 - Math.abs(2 * progress - 1);</span>
     }
 

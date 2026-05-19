@@ -675,79 +675,365 @@ public final class NoiseFunctions
 <span class="fc" id="L675">        return (float) _wave(Math.pow(Math.abs(pool*3), 0.5));</span>
     }
 
+    /*
+        ~~~ A few more procedural textures, built on the smooth value-noise toolkit below. ~~~
+    */
+
+    /**
+     *  A turbulent marble texture: a regular striped pattern is distorted by several
+     *  octaves of value noise, bending the stripes into organic, swirling veins.
+     */
+    public static float marble( float xIn, float yIn ) {
+<span class="fc" id="L687">        final float scale = 28;</span>
+<span class="fc" id="L688">        final double x = xIn / scale;</span>
+<span class="fc" id="L689">        final double y = yIn / scale;</span>
+<span class="fc" id="L690">        final double turbulence = ( _fractalNoise(x, y, 5) - 0.5 ) * 2;</span>
+<span class="fc" id="L691">        final double pattern = Math.sin( ( x + y ) * Math.PI + turbulence * 5 );</span>
+        // 'abs' puts a sharp valley at every zero-crossing, 'pow' thins it into a vein:
+<span class="fc" id="L693">        return (float) Math.pow( Math.abs( pattern ), 0.35 );</span>
+    }
+
+    /**
+     *  Concentric, slightly distorted growth rings reminiscent of a cross-cut piece
+     *  of timber. The rings are warped by fractal noise to give them a natural grain.
+     */
+    public static float wood( float xIn, float yIn ) {
+<span class="fc" id="L701">        final float scale = 48;</span>
+<span class="fc" id="L702">        final double x = xIn / scale;</span>
+<span class="fc" id="L703">        final double y = yIn / scale;</span>
+<span class="fc" id="L704">        final double distortion = _fractalNoise(x, y, 4) - 0.5;</span>
+<span class="fc" id="L705">        final double rings = Math.sqrt( x * x + y * y ) + distortion * 1.5;</span>
+<span class="fc" id="L706">        final double grain = ( rings * 5 ) % 1.0;</span>
+<span class="fc" id="L707">        return (float) ( ( Math.sin( grain * Math.PI ) + 1 ) / 2 );</span>
+    }
+
+    /**
+     *  A smooth, flowing interference pattern built from a handful of summed sine
+     *  waves - the classic &quot;plasma&quot; demo effect, great for vivid color gradients.
+     */
+    public static float plasma( float xIn, float yIn ) {
+<span class="fc" id="L715">        final double scale = 36;</span>
+<span class="fc" id="L716">        final double x = xIn / scale;</span>
+<span class="fc" id="L717">        final double y = yIn / scale;</span>
+<span class="fc" id="L718">        double v = Math.sin( x );</span>
+<span class="fc" id="L719">        v += Math.sin( y / 0.9 );</span>
+<span class="fc" id="L720">        v += Math.sin( ( x + y ) / 1.7 );</span>
+<span class="fc" id="L721">        final double cx = x + 0.5 * Math.sin( x / 3.0 );</span>
+<span class="fc" id="L722">        final double cy = y + 0.5 * Math.cos( y / 2.0 );</span>
+<span class="fc" id="L723">        v += Math.sin( Math.sqrt( cx * cx + cy * cy + 1 ) );</span>
+<span class="fc" id="L724">        return (float) ( ( Math.sin( v * Math.PI / 2 ) + 1 ) / 2 );</span>
+    }
+
+    /**
+     *  Soft, billowing clouds produced by fractal Brownian motion and a sigmoid
+     *  contrast curve which crisps the cloud edges up against the open sky.
+     */
+    public static float clouds( float xIn, float yIn ) {
+<span class="fc" id="L732">        final float scale = 64;</span>
+<span class="fc" id="L733">        final double density = _fractalNoise(xIn / scale, yIn / scale, 6);</span>
+<span class="fc" id="L734">        return (float) _sigmoid( ( density - 0.5 ) * 7 );</span>
+    }
+
+    /**
+     *  A network of thin cracks separating irregular plates, computed from the
+     *  difference between the two closest Worley (Voronoi) feature points.
+     */
+    public static float cracks( float xIn, float yIn ) {
+<span class="fc" id="L742">        final float scale = 28;</span>
+<span class="fc" id="L743">        final double[] f1f2 = _worleyF1F2(xIn / scale, yIn / scale);</span>
+<span class="fc" id="L744">        final double edge = f1f2[1] - f1f2[0];</span>
+<span class="fc" id="L745">        return (float) _sigmoid( ( edge - 0.06 ) * 30 );</span>
+    }
+
+    /**
+     *  A swirling vortex created by rotating the sampling angle as a function of
+     *  the radius and an underlying fractal noise field.
+     */
+    public static float vortex( float xIn, float yIn ) {
+<span class="fc" id="L753">        final float scale = 40;</span>
+<span class="fc" id="L754">        final double x = xIn / scale;</span>
+<span class="fc" id="L755">        final double y = yIn / scale;</span>
+<span class="fc" id="L756">        final double radius = Math.sqrt( x * x + y * y );</span>
+<span class="fc" id="L757">        final double angle = Math.atan2( y, x ) + radius * 0.8 + _fractalNoise(x, y, 4) * 3;</span>
+<span class="fc" id="L758">        final double swirl = Math.sin( angle * 3 + radius * 2 );</span>
+<span class="fc" id="L759">        return (float) ( ( swirl + 1 ) / 2 );</span>
+    }
+
+    /**
+     *  A fluid, organic flow field produced by &quot;domain warping&quot;: fractal noise is
+     *  sampled at coordinates that are themselves displaced by other fractal noise.
+     */
+    public static float flow( float xIn, float yIn ) {
+<span class="fc" id="L767">        final float scale = 56;</span>
+<span class="fc" id="L768">        final double x = xIn / scale;</span>
+<span class="fc" id="L769">        final double y = yIn / scale;</span>
+<span class="fc" id="L770">        final double warpX = _fractalNoise(x, y, 4);</span>
+<span class="fc" id="L771">        final double warpY = _fractalNoise(x + 5.2, y + 1.3, 4);</span>
+<span class="fc" id="L772">        final double warped = _fractalNoise(x + 4 * warpX, y + 4 * warpY, 5);</span>
+<span class="fc" id="L773">        return (float) _clamp01(warped);</span>
+    }
+
+    /**
+     *  Crackling electric arcs. A fractal noise field is traced along the contour
+     *  where it crosses its mid value - that contour naturally branches and loops -
+     *  while a jagged domain warp makes the arcs zig-zag like a real discharge.
+     *  &lt;p&gt;
+     *  The contour is rendered as a uniformly thin bolt by dividing the distance to
+     *  the mid value by the local gradient: {@code |field - 0.5| / |gradient|} is an
+     *  estimate of the true distance to the contour, so the bolt keeps the same
+     *  width regardless of how steep the field is (no fat blobs on flat spots).
+     */
+    public static float lightning( float xIn, float yIn ) {
+<span class="fc" id="L787">        final float scale = 110;</span>
+<span class="fc" id="L788">        double x = xIn / scale;</span>
+<span class="fc" id="L789">        double y = yIn / scale;</span>
+        // Jagged domain warp so the bolts fork and zig-zag instead of curving smoothly:
+<span class="fc" id="L791">        final double warpX = _fractalNoise(x + 1.7, y - 3.1, 4) - 0.5;</span>
+<span class="fc" id="L792">        final double warpY = _fractalNoise(x - 4.3, y + 2.9, 4) - 0.5;</span>
+<span class="fc" id="L793">        x += warpX * 1.6;</span>
+<span class="fc" id="L794">        y += warpY * 1.6;</span>
+
+<span class="fc" id="L796">        final int octaves = 3;</span>
+<span class="fc" id="L797">        final double eps = 0.012;</span>
+<span class="fc" id="L798">        final double field = _fractalNoise(x, y, octaves);</span>
+        // Central-difference gradient of the field, used to normalize the bolt width:
+<span class="fc" id="L800">        final double dx = _fractalNoise(x + eps, y, octaves) - _fractalNoise(x - eps, y, octaves);</span>
+<span class="fc" id="L801">        final double dy = _fractalNoise(x, y + eps, octaves) - _fractalNoise(x, y - eps, octaves);</span>
+<span class="fc" id="L802">        final double gradient = Math.sqrt( dx * dx + dy * dy ) / ( 2 * eps ) + 1e-3;</span>
+
+<span class="fc" id="L804">        final double distance = Math.abs( field - 0.5 ) / gradient; // ~distance to the contour</span>
+<span class="fc" id="L805">        final double bolt = Math.exp( -distance * 24 ); // razor-thin glowing filament</span>
+<span class="fc" id="L806">        final double glow = Math.exp( -distance *  5 ) * 0.25; // soft halo around it</span>
+<span class="fc" id="L807">        return (float) _clamp01( bolt + glow );</span>
+    }
+
+    /**
+     *  A leafy foliage texture. Leaves are scattered from a jittered grid - jittered
+     *  far enough that the underlying grid disappears - and layered by a random depth
+     *  so they overlap naturally. To avoid a sterile, too-perfect look, every leaf is
+     *  individually irregular: its spine bends like a banana, its outline is
+     *  asymmetric (rounded toward the base, drawn to a point at the tip) with a wavy
+     *  edge, and its surface is broken up by value-noise mottling. Each leaf carries a
+     *  lit midrib and faint herringbone side veins, and leaves further back are shaded
+     *  darker for depth.
+     */
+    public static float foliage( float xIn, float yIn ) {
+<span class="fc" id="L821">        final float scale = 72;</span>
+<span class="fc" id="L822">        final double x = xIn / scale;</span>
+<span class="fc" id="L823">        final double y = yIn / scale;</span>
+<span class="fc" id="L824">        final int cellX = (int) Math.floor(x);</span>
+<span class="fc" id="L825">        final int cellY = (int) Math.floor(y);</span>
+
+<span class="fc" id="L827">        double bestZ = -1;</span>
+<span class="fc" id="L828">        double value = 0.13 + ( _valueNoise(x * 6, y * 6) - 0.5 ) * 0.07; // mottled shade in the gaps</span>
+
+        // Leaves are jittered well beyond their own cell, so a wide neighbourhood is scanned:
+<span class="fc bfc" id="L831" title="All 2 branches covered.">        for ( int oy = -2; oy &lt;= 2; oy++ ) {</span>
+<span class="fc bfc" id="L832" title="All 2 branches covered.">            for ( int ox = -2; ox &lt;= 2; ox++ ) {</span>
+<span class="fc" id="L833">                final int gx = cellX + ox;</span>
+<span class="fc" id="L834">                final int gy = cellY + oy;</span>
+<span class="fc" id="L835">                final double z = _fastPseudoRandomDoubleFrom( gx + 7919, gy + 104729 );</span>
+<span class="fc bfc" id="L836" title="All 2 branches covered.">                if ( z &lt;= bestZ )</span>
+<span class="fc" id="L837">                    continue; // a leaf nearer to the viewer already won this pixel</span>
+
+<span class="fc" id="L839">                final double angle = _fastPseudoRandomDoubleFrom( gx + 101, gy - 57 ) * 2 * Math.PI;</span>
+<span class="fc" id="L840">                final double leafX = gx + 0.5 + ( _fastPseudoRandomDoubleFrom( gx, gy ) - 0.5 ) * 1.4;</span>
+<span class="fc" id="L841">                final double leafY = gy + 0.5 + ( _fastPseudoRandomDoubleFrom( gy, -gx ) - 0.5 ) * 1.4;</span>
+<span class="fc" id="L842">                final double dx = x - leafX;</span>
+<span class="fc" id="L843">                final double dy = y - leafY;</span>
+
+                // Rotate the offset into the leaf's own frame (u = along, v = across):
+<span class="fc" id="L846">                final double sin = Math.sin(angle);</span>
+<span class="fc" id="L847">                final double cos = Math.cos(angle);</span>
+<span class="fc" id="L848">                final double u = dx * cos - dy * sin;</span>
+<span class="fc" id="L849">                final double v = dx * sin + dy * cos;</span>
+
+<span class="fc" id="L851">                final double halfLength = 0.45 + _fastPseudoRandomDoubleFrom( gx - 1597, gy - 2749 ) * 0.6;</span>
+<span class="fc bfc" id="L852" title="All 2 branches covered.">                if ( Math.abs(u) &gt;= halfLength )</span>
+<span class="fc" id="L853">                    continue;</span>
+<span class="fc" id="L854">                final double t = u / halfLength; // -1 at the base, +1 at the tip</span>
+
+                // The spine bows like a banana, so the leaf is not a rigid symmetric lens:
+<span class="fc" id="L857">                final double curve  = ( _fastPseudoRandomDoubleFrom( gx + 53, gy + 877 ) - 0.5 ) * 0.7;</span>
+<span class="fc" id="L858">                final double spineV = curve * ( 1 - t * t );</span>
+
+                // Outline: a lens skewed toward the base, with a per-leaf wavy edge:
+<span class="fc" id="L861">                final double asym    = _fastPseudoRandomDoubleFrom( gx - 71, gy + 311 ) * 0.6;</span>
+<span class="fc" id="L862">                final double aspect  = 0.30 + _fastPseudoRandomDoubleFrom( gx + 211, gy - 19 ) * 0.16;</span>
+<span class="fc" id="L863">                final double wave    = 1 + 0.18 * Math.sin( u * ( 7 + 7 * asym ) + angle * 3 );</span>
+<span class="fc" id="L864">                final double profile = Math.max( 0, ( 1 - t * t ) * ( 1 - asym * t ) );</span>
+<span class="fc" id="L865">                final double halfWidth = aspect * halfLength * profile * wave;</span>
+
+<span class="fc" id="L867">                final double vRel = v - spineV;</span>
+<span class="pc bpc" id="L868" title="1 of 4 branches missed.">                if ( halfWidth &lt;= 0 || Math.abs(vRel) &gt;= halfWidth )</span>
+<span class="fc" id="L869">                    continue;</span>
+
+                // This leaf both covers the pixel and sits on top, so it wins:
+<span class="fc" id="L872">                bestZ = z;</span>
+<span class="fc" id="L873">                final double rim    = Math.abs(vRel) / halfWidth;       // 0 at the spine .. 1 at the edge</span>
+<span class="fc" id="L874">                final double midrib = Math.exp( -(vRel * vRel) / 0.0016 ); // glowing central vein</span>
+<span class="fc" id="L875">                final double side   = Math.pow( Math.max( 0, Math.sin( u * 9 - Math.abs(vRel) * 16 ) ), 8 );</span>
+<span class="fc" id="L876">                final double bright = _fastPseudoRandomDoubleFrom( gx - 313, gy + 191 );</span>
+<span class="fc" id="L877">                final double mottle = _valueNoise( x * 10 + gx * 7.0, y * 10 + gy * 7.0 ) - 0.5;</span>
+
+<span class="fc" id="L879">                double shade = 0.40 + bright * 0.42; // every leaf gets its own green tone</span>
+<span class="fc" id="L880">                shade += ( 1 - t ) * 0.10;           // a touch lighter toward the base</span>
+<span class="fc" id="L881">                shade -= rim * rim * 0.34;           // darker rim gives the leaves depth</span>
+<span class="fc" id="L882">                shade += midrib * 0.24;              // the midrib catches the light</span>
+<span class="fc" id="L883">                shade += side * ( 1 - rim ) * 0.11;  // faint herringbone side veins</span>
+<span class="fc" id="L884">                shade += mottle * 0.15;              // organic blotchy surface variation</span>
+<span class="fc" id="L885">                shade -= ( 1 - z ) * 0.14;           // leaves further back sit in shadow</span>
+<span class="fc" id="L886">                value = _clamp01( shade );</span>
+            }
+        }
+<span class="fc" id="L889">        return (float) value;</span>
+    }
+
+    /**
+     *  Smoothly interpolated value noise: pseudo random values are placed on an
+     *  integer lattice and blended with a smooth-step fade, giving a continuous
+     *  field in the range 0..1. This is the building block for {@link #_fractalNoise}.
+     */
+    private static double _valueNoise( double x, double y ) {
+<span class="fc" id="L898">        final int x0 = (int) Math.floor(x);</span>
+<span class="fc" id="L899">        final int y0 = (int) Math.floor(y);</span>
+<span class="fc" id="L900">        final double fx = _smoothStep( x - x0 );</span>
+<span class="fc" id="L901">        final double fy = _smoothStep( y - y0 );</span>
+<span class="fc" id="L902">        final double v00 = _fastPseudoRandomDoubleFrom( x0,     y0     );</span>
+<span class="fc" id="L903">        final double v10 = _fastPseudoRandomDoubleFrom( x0 + 1, y0     );</span>
+<span class="fc" id="L904">        final double v01 = _fastPseudoRandomDoubleFrom( x0,     y0 + 1 );</span>
+<span class="fc" id="L905">        final double v11 = _fastPseudoRandomDoubleFrom( x0 + 1, y0 + 1 );</span>
+<span class="fc" id="L906">        final double top    = v00 + ( v10 - v00 ) * fx;</span>
+<span class="fc" id="L907">        final double bottom = v01 + ( v11 - v01 ) * fx;</span>
+<span class="fc" id="L908">        return top + ( bottom - top ) * fy;</span>
+    }
+
+    /**
+     *  Fractal Brownian motion: several octaves of {@link #_valueNoise} are summed
+     *  with halving amplitude and doubling frequency. The result stays in 0..1.
+     */
+    private static double _fractalNoise( double x, double y, int octaves ) {
+<span class="fc" id="L916">        double sum = 0;</span>
+<span class="fc" id="L917">        double amplitude = 1;</span>
+<span class="fc" id="L918">        double frequency = 1;</span>
+<span class="fc" id="L919">        double totalAmplitude = 0;</span>
+<span class="fc bfc" id="L920" title="All 2 branches covered.">        for ( int i = 0; i &lt; octaves; i++ ) {</span>
+<span class="fc" id="L921">            sum += _valueNoise( x * frequency, y * frequency ) * amplitude;</span>
+<span class="fc" id="L922">            totalAmplitude += amplitude;</span>
+<span class="fc" id="L923">            amplitude *= 0.5;</span>
+<span class="fc" id="L924">            frequency *= 2;</span>
+        }
+<span class="fc" id="L926">        return sum / totalAmplitude;</span>
+    }
+
+    /**
+     *  Returns the distances to the closest and second-closest Worley feature
+     *  points around the given coordinate as a {@code [F1, F2]} pair.
+     */
+    private static double[] _worleyF1F2( double x, double y ) {
+<span class="fc" id="L934">        final int cellX = (int) Math.floor(x);</span>
+<span class="fc" id="L935">        final int cellY = (int) Math.floor(y);</span>
+<span class="fc" id="L936">        double f1 = Double.POSITIVE_INFINITY;</span>
+<span class="fc" id="L937">        double f2 = Double.POSITIVE_INFINITY;</span>
+<span class="fc bfc" id="L938" title="All 2 branches covered.">        for ( int oy = -1; oy &lt;= 1; oy++ ) {</span>
+<span class="fc bfc" id="L939" title="All 2 branches covered.">            for ( int ox = -1; ox &lt;= 1; ox++ ) {</span>
+<span class="fc" id="L940">                final int gx = cellX + ox;</span>
+<span class="fc" id="L941">                final int gy = cellY + oy;</span>
+<span class="fc" id="L942">                final double px = gx + _fastPseudoRandomDoubleFrom( gx, gy );</span>
+<span class="fc" id="L943">                final double py = gy + _fastPseudoRandomDoubleFrom( gy, -gx );</span>
+<span class="fc" id="L944">                final double distance = _distanceBetween( px, py, x, y );</span>
+<span class="fc bfc" id="L945" title="All 2 branches covered.">                if ( distance &lt; f1 ) {</span>
+<span class="fc" id="L946">                    f2 = f1;</span>
+<span class="fc" id="L947">                    f1 = distance;</span>
+<span class="pc bpc" id="L948" title="1 of 2 branches missed.">                } else if ( distance &lt; f2 ) {</span>
+<span class="nc" id="L949">                    f2 = distance;</span>
+                }
+            }
+        }
+<span class="fc" id="L953">        return new double[]{ f1, f2 };</span>
+    }
+
+    private static double _smoothStep( double t ) {
+<span class="fc" id="L957">        return t * t * ( 3 - 2 * t );</span>
+    }
+
+    private static double _clamp01( double value ) {
+<span class="pc bpc" id="L961" title="2 of 4 branches missed.">        return value &lt; 0 ? 0 : ( value &gt; 1 ? 1 : value );</span>
+    }
+
     private static double _voronoiBasedWavesSum( float xIn, float yIn ) {
-<span class="fc" id="L679">        final int minX1 = (int) Math.floor(xIn) - 1 ;</span>
-<span class="fc" id="L680">        final int minX2 = (int) Math.floor(xIn)     ;</span>
-<span class="fc" id="L681">        final int minX3 = (int) Math.floor(xIn) + 1 ;</span>
-<span class="fc" id="L682">        final int minY1 = (int) Math.floor(yIn) - 1 ;</span>
-<span class="fc" id="L683">        final int minY2 = (int) Math.floor(yIn)     ;</span>
-<span class="fc" id="L684">        final int minY3 = (int) Math.floor(yIn) + 1 ;</span>
-<span class="fc" id="L685">        final double centerX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY2);</span>
-<span class="fc" id="L686">        final double centerY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX2);</span>
-<span class="fc" id="L687">        final double randomCenter = _fastPseudoRandomDoubleFrom((float) centerX, (float) centerY);</span>
-<span class="fc" id="L688">        final double distanceCenter = _invDistanceBetween(centerX, centerY, xIn, yIn);</span>
-<span class="fc" id="L689">        final double leftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY2);</span>
-<span class="fc" id="L690">        final double leftY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX1);</span>
-<span class="fc" id="L691">        final double randomLeft = _fastPseudoRandomDoubleFrom((float) leftX, (float) leftY);</span>
-<span class="fc" id="L692">        final double distanceLeft = _invDistanceBetween(leftX, leftY, xIn, yIn);</span>
-<span class="fc" id="L693">        final double rightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY2);</span>
-<span class="fc" id="L694">        final double rightY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX3);</span>
-<span class="fc" id="L695">        final double randomRight = _fastPseudoRandomDoubleFrom((float) rightX, (float) rightY);</span>
-<span class="fc" id="L696">        final double distanceRight = _invDistanceBetween(rightX, rightY, xIn, yIn);</span>
-<span class="fc" id="L697">        final double topX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY1);</span>
-<span class="fc" id="L698">        final double topY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX2);</span>
-<span class="fc" id="L699">        final double randomTop = _fastPseudoRandomDoubleFrom((float) topX, (float) topY);</span>
-<span class="fc" id="L700">        final double distanceTop = _invDistanceBetween(topX, topY, xIn, yIn);</span>
-<span class="fc" id="L701">        final double bottomX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY3);</span>
-<span class="fc" id="L702">        final double bottomY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX2);</span>
-<span class="fc" id="L703">        final double randomBottom = _fastPseudoRandomDoubleFrom((float) bottomX, (float) bottomY);</span>
-<span class="fc" id="L704">        final double distanceBottom = _invDistanceBetween(bottomX, bottomY, xIn, yIn);</span>
-<span class="fc" id="L705">        final double topLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY1);</span>
-<span class="fc" id="L706">        final double topLeftY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX1);</span>
-<span class="fc" id="L707">        final double randomTopLeft = _fastPseudoRandomDoubleFrom((float) topLeftX, (float) topLeftY);</span>
-<span class="fc" id="L708">        final double distanceTopLeft = _invDistanceBetween(topLeftX, topLeftY, xIn, yIn);</span>
-<span class="fc" id="L709">        final double topRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY1);</span>
-<span class="fc" id="L710">        final double topRightY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX3);</span>
-<span class="fc" id="L711">        final double randomTopRight = _fastPseudoRandomDoubleFrom((float) topRightX, (float) topRightY);</span>
-<span class="fc" id="L712">        final double distanceTopRight = _invDistanceBetween(topRightX, topRightY, xIn, yIn);</span>
-<span class="fc" id="L713">        final double bottomLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY3);</span>
-<span class="fc" id="L714">        final double bottomLeftY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX1);</span>
-<span class="fc" id="L715">        final double randomBottomLeft = _fastPseudoRandomDoubleFrom((float) bottomLeftX, (float) bottomLeftY);</span>
-<span class="fc" id="L716">        final double distanceBottomLeft = _invDistanceBetween(bottomLeftX, bottomLeftY, xIn, yIn);</span>
-<span class="fc" id="L717">        final double bottomRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY3);</span>
-<span class="fc" id="L718">        final double bottomRightY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX3);</span>
-<span class="fc" id="L719">        final double randomBottomRight = _fastPseudoRandomDoubleFrom((float) bottomRightX, (float) bottomRightY);</span>
-<span class="fc" id="L720">        final double distanceBottomRight = _invDistanceBetween(bottomRightX, bottomRightY, xIn, yIn);</span>
-<span class="fc" id="L721">        double pool = 0;</span>
-<span class="fc" id="L722">        pool += _rippleAmplitude( distanceCenter     , randomCenter      );</span>
-<span class="fc" id="L723">        pool += _rippleAmplitude( distanceLeft       , randomLeft        );</span>
-<span class="fc" id="L724">        pool += _rippleAmplitude( distanceRight      , randomRight       );</span>
-<span class="fc" id="L725">        pool += _rippleAmplitude( distanceTop        , randomTop         );</span>
-<span class="fc" id="L726">        pool += _rippleAmplitude( distanceBottom     , randomBottom      );</span>
-<span class="fc" id="L727">        pool += _rippleAmplitude( distanceTopLeft    , randomTopLeft     );</span>
-<span class="fc" id="L728">        pool += _rippleAmplitude( distanceTopRight   , randomTopRight    );</span>
-<span class="fc" id="L729">        pool += _rippleAmplitude( distanceBottomLeft , randomBottomLeft  );</span>
-<span class="fc" id="L730">        pool += _rippleAmplitude( distanceBottomRight, randomBottomRight );</span>
-<span class="fc" id="L731">        return pool;</span>
+<span class="fc" id="L965">        final int minX1 = (int) Math.floor(xIn) - 1 ;</span>
+<span class="fc" id="L966">        final int minX2 = (int) Math.floor(xIn)     ;</span>
+<span class="fc" id="L967">        final int minX3 = (int) Math.floor(xIn) + 1 ;</span>
+<span class="fc" id="L968">        final int minY1 = (int) Math.floor(yIn) - 1 ;</span>
+<span class="fc" id="L969">        final int minY2 = (int) Math.floor(yIn)     ;</span>
+<span class="fc" id="L970">        final int minY3 = (int) Math.floor(yIn) + 1 ;</span>
+<span class="fc" id="L971">        final double centerX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY2);</span>
+<span class="fc" id="L972">        final double centerY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX2);</span>
+<span class="fc" id="L973">        final double randomCenter = _fastPseudoRandomDoubleFrom((float) centerX, (float) centerY);</span>
+<span class="fc" id="L974">        final double distanceCenter = _invDistanceBetween(centerX, centerY, xIn, yIn);</span>
+<span class="fc" id="L975">        final double leftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY2);</span>
+<span class="fc" id="L976">        final double leftY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX1);</span>
+<span class="fc" id="L977">        final double randomLeft = _fastPseudoRandomDoubleFrom((float) leftX, (float) leftY);</span>
+<span class="fc" id="L978">        final double distanceLeft = _invDistanceBetween(leftX, leftY, xIn, yIn);</span>
+<span class="fc" id="L979">        final double rightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY2);</span>
+<span class="fc" id="L980">        final double rightY = minY2 + _fastPseudoRandomDoubleFrom(minY2, minX3);</span>
+<span class="fc" id="L981">        final double randomRight = _fastPseudoRandomDoubleFrom((float) rightX, (float) rightY);</span>
+<span class="fc" id="L982">        final double distanceRight = _invDistanceBetween(rightX, rightY, xIn, yIn);</span>
+<span class="fc" id="L983">        final double topX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY1);</span>
+<span class="fc" id="L984">        final double topY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX2);</span>
+<span class="fc" id="L985">        final double randomTop = _fastPseudoRandomDoubleFrom((float) topX, (float) topY);</span>
+<span class="fc" id="L986">        final double distanceTop = _invDistanceBetween(topX, topY, xIn, yIn);</span>
+<span class="fc" id="L987">        final double bottomX = minX2 + _fastPseudoRandomDoubleFrom(minX2, minY3);</span>
+<span class="fc" id="L988">        final double bottomY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX2);</span>
+<span class="fc" id="L989">        final double randomBottom = _fastPseudoRandomDoubleFrom((float) bottomX, (float) bottomY);</span>
+<span class="fc" id="L990">        final double distanceBottom = _invDistanceBetween(bottomX, bottomY, xIn, yIn);</span>
+<span class="fc" id="L991">        final double topLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY1);</span>
+<span class="fc" id="L992">        final double topLeftY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX1);</span>
+<span class="fc" id="L993">        final double randomTopLeft = _fastPseudoRandomDoubleFrom((float) topLeftX, (float) topLeftY);</span>
+<span class="fc" id="L994">        final double distanceTopLeft = _invDistanceBetween(topLeftX, topLeftY, xIn, yIn);</span>
+<span class="fc" id="L995">        final double topRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY1);</span>
+<span class="fc" id="L996">        final double topRightY = minY1 + _fastPseudoRandomDoubleFrom(minY1, minX3);</span>
+<span class="fc" id="L997">        final double randomTopRight = _fastPseudoRandomDoubleFrom((float) topRightX, (float) topRightY);</span>
+<span class="fc" id="L998">        final double distanceTopRight = _invDistanceBetween(topRightX, topRightY, xIn, yIn);</span>
+<span class="fc" id="L999">        final double bottomLeftX = minX1 + _fastPseudoRandomDoubleFrom(minX1, minY3);</span>
+<span class="fc" id="L1000">        final double bottomLeftY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX1);</span>
+<span class="fc" id="L1001">        final double randomBottomLeft = _fastPseudoRandomDoubleFrom((float) bottomLeftX, (float) bottomLeftY);</span>
+<span class="fc" id="L1002">        final double distanceBottomLeft = _invDistanceBetween(bottomLeftX, bottomLeftY, xIn, yIn);</span>
+<span class="fc" id="L1003">        final double bottomRightX = minX3 + _fastPseudoRandomDoubleFrom(minX3, minY3);</span>
+<span class="fc" id="L1004">        final double bottomRightY = minY3 + _fastPseudoRandomDoubleFrom(minY3, minX3);</span>
+<span class="fc" id="L1005">        final double randomBottomRight = _fastPseudoRandomDoubleFrom((float) bottomRightX, (float) bottomRightY);</span>
+<span class="fc" id="L1006">        final double distanceBottomRight = _invDistanceBetween(bottomRightX, bottomRightY, xIn, yIn);</span>
+<span class="fc" id="L1007">        double pool = 0;</span>
+<span class="fc" id="L1008">        pool += _rippleAmplitude( distanceCenter     , randomCenter      );</span>
+<span class="fc" id="L1009">        pool += _rippleAmplitude( distanceLeft       , randomLeft        );</span>
+<span class="fc" id="L1010">        pool += _rippleAmplitude( distanceRight      , randomRight       );</span>
+<span class="fc" id="L1011">        pool += _rippleAmplitude( distanceTop        , randomTop         );</span>
+<span class="fc" id="L1012">        pool += _rippleAmplitude( distanceBottom     , randomBottom      );</span>
+<span class="fc" id="L1013">        pool += _rippleAmplitude( distanceTopLeft    , randomTopLeft     );</span>
+<span class="fc" id="L1014">        pool += _rippleAmplitude( distanceTopRight   , randomTopRight    );</span>
+<span class="fc" id="L1015">        pool += _rippleAmplitude( distanceBottomLeft , randomBottomLeft  );</span>
+<span class="fc" id="L1016">        pool += _rippleAmplitude( distanceBottomRight, randomBottomRight );</span>
+<span class="fc" id="L1017">        return pool;</span>
     }
 
     private static double _rippleAmplitude( double distance, double random ) {
-<span class="fc" id="L735">        double impactForce = ( 3 + 32 * random );</span>
-<span class="fc" id="L736">        double amplitude = distance * Math.sin( ( 1 + Math.pow( distance, 2 ) ) * impactForce );</span>
-<span class="fc" id="L737">        double fadeAway = ( 0.5 + random );</span>
-<span class="fc" id="L738">        return amplitude * fadeAway;</span>
+<span class="fc" id="L1021">        double impactForce = ( 3 + 32 * random );</span>
+<span class="fc" id="L1022">        double amplitude = distance * Math.sin( ( 1 + Math.pow( distance, 2 ) ) * impactForce );</span>
+<span class="fc" id="L1023">        double fadeAway = ( 0.5 + random );</span>
+<span class="fc" id="L1024">        return amplitude * fadeAway;</span>
     }
 
     private static double _wave(double in) {
-<span class="fc" id="L742">        return 1 - ( 1 + Math.cos(in) ) / 2;</span>
+<span class="fc" id="L1028">        return 1 - ( 1 + Math.cos(in) ) / 2;</span>
     }
 
     private static double _invDistanceBetween(double x1, double y1, double x2, double y2 ) {
-<span class="fc" id="L746">        return Math.max(0, 1 - Math.sqrt( (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) ));</span>
+<span class="fc" id="L1032">        return Math.max(0, 1 - Math.sqrt( (x1-x2)*(x1-x2) + (y1-y2)*(y1-y2) ));</span>
     }
 
     private static double _sigmoid( double x ) {
-<span class="fc" id="L750">        return 1 / (1 + Math.exp(-x));</span>
+<span class="fc" id="L1036">        return 1 / (1 + Math.exp(-x));</span>
     }
 
     /**
@@ -756,28 +1042,28 @@ public final class NoiseFunctions
      * @return A pseudo random double in the range 0.0 to 1.0
      */
     private static double _fastPseudoRandomDoubleFrom( float x, float y ) {
-<span class="fc" id="L759">        final byte randomByte = _fastPseudoRandomByteSeedFrom(x, y);</span>
+<span class="fc" id="L1045">        final byte randomByte = _fastPseudoRandomByteSeedFrom(x, y);</span>
         // The byte is in the range -128 to 127, so -128 is 0.0 and 127 is 1.0
-<span class="fc" id="L761">        return (randomByte + 128) / 255.0;</span>
+<span class="fc" id="L1047">        return (randomByte + 128) / 255.0;</span>
     }
 
     private static byte _fastPseudoRandomByteSeedFrom( float a, float b ) {
-<span class="fc" id="L765">        return _fastPseudoRandomByteSeedFrom(</span>
-<span class="fc" id="L766">                    Float.floatToRawIntBits(a),</span>
-<span class="fc" id="L767">                    Float.floatToRawIntBits(b)</span>
+<span class="fc" id="L1051">        return _fastPseudoRandomByteSeedFrom(</span>
+<span class="fc" id="L1052">                    Float.floatToRawIntBits(a),</span>
+<span class="fc" id="L1053">                    Float.floatToRawIntBits(b)</span>
                  );
     }
 
     private static byte _fastPseudoRandomByteSeedFrom( int a, int b ) {
-<span class="fc" id="L772">        long x = PRIME_1 * a;</span>
-<span class="fc" id="L773">        long y = PRIME_2 * (x + b);</span>
-<span class="fc" id="L774">        return _longSeedToByte(x ^ y);</span>
+<span class="fc" id="L1058">        long x = PRIME_1 * a;</span>
+<span class="fc" id="L1059">        long y = PRIME_2 * (x + b);</span>
+<span class="fc" id="L1060">        return _longSeedToByte(x ^ y);</span>
     }
 
     private static byte _longSeedToByte(long seed) {
-<span class="fc" id="L778">        int asInt = (int) (seed ^ (seed &gt;&gt;&gt; 32));</span>
-<span class="fc" id="L779">        short asShort = (short) (asInt ^ (asInt &gt;&gt;&gt; 16));</span>
-<span class="fc" id="L780">        return (byte) (asShort ^ (asShort &gt;&gt;&gt; 8));</span>
+<span class="fc" id="L1064">        int asInt = (int) (seed ^ (seed &gt;&gt;&gt; 32));</span>
+<span class="fc" id="L1065">        short asShort = (short) (asInt ^ (asInt &gt;&gt;&gt; 16));</span>
+<span class="fc" id="L1066">        return (byte) (asShort ^ (asShort &gt;&gt;&gt; 8));</span>
     }
 
 }

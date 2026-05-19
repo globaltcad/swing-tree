@@ -1639,9 +1639,9 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with a background noise defined by the provided styler lambda.
      */
     public ComponentStyleDelegate&lt;C&gt; noise( String noiseName, Configurator&lt;NoiseConf&gt; styler ) {
-<span class="nc" id="L1642">        Objects.requireNonNull(noiseName);</span>
-<span class="nc" id="L1643">        Objects.requireNonNull(styler);</span>
-<span class="nc" id="L1644">        return noise(NoiseConf.DEFAULT_LAYER, noiseName, styler);</span>
+<span class="fc" id="L1642">        Objects.requireNonNull(noiseName);</span>
+<span class="fc" id="L1643">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L1644">        return noise(NoiseConf.DEFAULT_LAYER, noiseName, styler);</span>
     }
 
     /**
