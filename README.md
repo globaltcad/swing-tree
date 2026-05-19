@@ -134,7 +134,7 @@ Hungry for more? Browse the <a href="src/test/java/examples">examples folder</a>
 
 SwingTree's styling API isn't just paint on top — it's expressive enough to make
 the *same* component tree look like completely different applications.
-Here is the **Theme Garden** example, swapping live between hand-crafted themes
+Here is the [**Theme Garden**](src/test/java/examples/zen/ThemeGardenView.java) example, swapping live between hand-crafted themes
 without touching a single line of layout code:
 
 <p align="center">
