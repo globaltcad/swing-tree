@@ -5,6 +5,8 @@ import examples.animated.AnimatedButtonsView
 import examples.animated.AnimatedView
 import examples.animated.FoldableExample
 import examples.animated.TransitionalAnimation
+import examples.breathing.mvi.BreathingView
+import examples.breathing.mvi.BreathingViewModel
 import examples.calculator.mvi.CalculatorView
 import examples.comparisons.comparison1.MadeWithNetBeansEditor
 import examples.comparisons.comparison1.MadeWithSwingTree
@@ -313,6 +315,14 @@ class Examples_Spec extends Specification
             var ui = new ThemeGardenView({})
         expect : 'It is rendered as shown in the image.'
             Utility.similarityBetween(ui, "views/theme-garden-UI.png", 90) > 90
+    }
+
+    def 'The breathing helper example can be instantiated correctly.'() {
+        when :
+            var vm = Var.of(new BreathingViewModel())
+            var view = new BreathingView(vm)
+        then :
+            noExceptionThrown()
     }
 
     def 'The animated buttons view examples UI defined in the examples looks as expected.'()
