@@ -1,6 +1,11 @@
 
 # Advanced UI Declarations #
 
+> **Prerequisites:** This guide picks up where
+> [Climbing the Swing Tree](./Climbing-Swing-Tree.md) leaves off. Make sure
+> you are comfortable with basic SwingTree declarations and the `peek(..)`
+> method before continuing.
+
 A common problem with declarative code is that it is often not as
 dynamic and adaptive as imperative code. 
 This is due to the fact that the declarations that this
@@ -127,6 +132,33 @@ where `I` is the type of the UI builder.
 This allows you to map the optional value to a consumer which is only executed if the value is present.
 If the optional value is present, the consumer is executed with the 
 current UI builder as a parameter, which allows you to continue building the UI as usual.
+
+## A cheat-sheet of escape hatches ##
+
+| Method | When to reach for it |
+|---|---|
+| `peek(c -> ...)` | Get a handle on the underlying Swing component for imperative tweaks (rare property, setting a `client property`, copying a reference). |
+| `apply(ui -> ...)` | Same idea, but the lambda receives the SwingTree builder itself. Useful for loops that `add(..)` many children. |
+| `applyIf(boolean, ui -> ...)` | Inline conditional sub-tree. Replace it as soon as the condition becomes property-driven (then prefer reactive bindings). |
+| `applyIfPresent(Optional<Consumer<I>>)` | Inline `Optional` sub-tree — only built if the optional contains a value. |
+| `UI.of(jcomponent)` | Wrap a hand-rolled or third-party `JComponent` so the rest of the declaration can keep flowing. |
+
+> **Reactivity beats imperative escapes.** All of the above are useful, but
+> if the condition depends on application state, you almost always want a
+> property-based binding instead — `isVisibleIf(Val<Boolean>)`,
+> `isEnabledIf(Val<Boolean>)`, `add(Var<Object>, viewSupplier)`, etc. — so
+> the UI updates automatically. The hatches above are for *static* shape
+> decisions made at construction time.
+
+## Where to next? ##
+
+- [Sane Error Handling](./Sane-Error-Handling.md) — every lambda you pass
+  to `peek`, `apply`, `applyIf`, `applyIfPresent` is wrapped in a
+  `try/catch` for you. This guide explains the catch-and-log mechanism.
+- [Functional MVVM](./Functional-MVVM.md) — for the reactive alternatives
+  mentioned in the note above.
+- [Advanced Event Handling](./Advanced-Event-Handling.md) — for custom,
+  observable-driven event hooks beyond the standard `onClick` / `onChange`.
 
 
 

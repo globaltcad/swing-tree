@@ -1,5 +1,11 @@
 
-# Font Styling # 
+# Font Styling #
+
+> **Prerequisites:** This guide assumes you are comfortable with the
+> per-component `withStyle(..)` API. If `withStyle` is new to you, start
+> with [Climbing the Swing Tree → Blooming Flowers](./Climbing-Swing-Tree.md#blooming-flowers).
+> Everything below also works inside a central
+> [style sheet](./Style-Sheets-And-Groups.md).
 
 You may have come to believe that in plain old Swing,
 the `java.awt.Font` class only supports the utter most basic styling properties
@@ -117,3 +123,14 @@ Both noise paints are configured almost the same way,
 except for the choice of colors and due to the fact that 
 the noise is generated deterministically based on the pixel positions
 you get this fascinating effect of the font growing out of the noise.
+
+## Where to next? ##
+
+- Want these styles to apply *everywhere* instead of repeating
+  `componentFont(..)` on each label? Move them into a
+  [style sheet](./Style-Sheets-And-Groups.md) keyed on
+  `type(JLabel.class).group(..)`.
+- For a sibling guide on background effects, see
+  [Background Filtering](./Background-Filtering.md).
+- To animate font properties smoothly between two states, see
+  [An Advanced Style Animation](./An-Advanced-Style-Animation.md).

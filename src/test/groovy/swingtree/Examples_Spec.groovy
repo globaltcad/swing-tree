@@ -5,6 +5,8 @@ import examples.animated.AnimatedButtonsView
 import examples.animated.AnimatedView
 import examples.animated.FoldableExample
 import examples.animated.TransitionalAnimation
+import examples.breathing.mvi.BreathingView
+import examples.breathing.mvi.BreathingViewModel
 import examples.calculator.mvi.CalculatorView
 import examples.comparisons.comparison1.MadeWithNetBeansEditor
 import examples.comparisons.comparison1.MadeWithSwingTree
@@ -151,6 +153,13 @@ class Examples_Spec extends Specification
 
     def 'The list examples UI defined in the examples can be created.'()
     {
+        reportInfo """
+            The ${Utility.link('list search example view', ListSearchView)}, together
+            with the ${Utility.link('list search example view model', ListSearchViewModel)}, is
+            a small MVVM example demonstrating how to populate a list of items
+            and filter them through a search field — both driven by observable
+            properties on the view model.
+        """
         expect : new ListSearchView(new ListSearchViewModel())
     }
 
@@ -315,6 +324,25 @@ class Examples_Spec extends Specification
             Utility.similarityBetween(ui, "views/theme-garden-UI.png", 90) > 90
     }
 
+    def 'The breathing helper example can be instantiated correctly.'() {
+        reportInfo """
+            The ${Utility.link('breathing companion view', BreathingView)}, together
+            with the ${Utility.link('breathing view model', BreathingViewModel)}, is
+            a calming demo whose whole reason for existing is to show off
+            <b>SwingTree animations</b> inside a clean
+            <i>Model-View-Lenses</i> (MVL) architecture.
+            A glowing orb swells as you breathe in, rests, shrinks as you breathe out,
+            and rests again — every frame derived from the immutable view model.
+
+            Run the ${Utility.link('view class', BreathingView)} directly to see the animation in action.
+        """
+        when :
+            var vm = Var.of(new BreathingViewModel())
+            var view = new BreathingView(vm)
+        then :
+            noExceptionThrown()
+    }
+
     def 'The animated buttons view examples UI defined in the examples looks as expected.'()
     {
         reportInfo """
@@ -336,21 +364,44 @@ class Examples_Spec extends Specification
 
     def 'The animation example view can be created.'()
     {
+        reportInfo """
+            The ${Utility.link('animated view example', AnimatedView)} demonstrates
+            several different animation techniques in one place — looping,
+            transitional and event-driven animations all driven via the
+            <code>animateFor(..)</code> API. Run the class directly to see them in action.
+        """
         expect : new AnimatedView(Mock(JFrame))
     }
 
     def 'The transitional style animation example view can be created.'()
     {
+        reportInfo """
+            The ${Utility.link('transitional style animation example', TransitionalAnimation)} shows
+            how a single boolean property can drive a smooth two-state transition
+            using the <code>withTransitionalStyle(..)</code> API.
+            See the matching "An Advanced Style Animation" wiki guide
+            for a walk-through of how the mechanism works.
+        """
         expect : new TransitionalAnimation()
     }
 
     def 'The SVG viewer example view can be created.'()
     {
+        reportInfo """
+            The ${Utility.link('SVG viewer example', SvgViewer)} demonstrates
+            how to load and render vector graphics inside a SwingTree UI —
+            useful for icons and other resolution-independent artwork.
+        """
         expect : new SvgViewer()
     }
 
     def 'The markdown text viewer example view can be created.'()
     {
+        reportInfo """
+            The ${Utility.link('markdown text viewer example', TextViewer)} shows
+            how SwingTree can render rich text content together with a custom
+            ${Utility.link('markdown parser', MarkdownParser)} into a regular Swing component.
+        """
         expect : new TextViewer()
     }
 
@@ -400,31 +451,68 @@ class Examples_Spec extends Specification
 
     def 'The spinners example UI defined in the examples can be created.'()
     {
+        reportInfo """
+            The ${Utility.link('"some components" example view', SomeComponentsView)} bundles
+            spinners, sliders and other small input components into a single
+            view that is bound to the ${Utility.link('matching view model', SomeComponentsViewModel)}.
+            It's a handy reference for property bindings on input widgets that aren't text fields.
+        """
         expect : new SomeComponentsView(new SomeComponentsViewModel())
     }
 
     def 'The list rendering example UI defined in the examples can be created.'()
     {
+        reportInfo """
+            The ${Utility.link('list rendering example', ListRendering)} demonstrates
+            how to declare a JList with a custom cell renderer using SwingTree's
+            fluent <code>withCell(..)</code> / cell-builder API — the same approach
+            shown in the "Writing Tables" wiki guide, applied to lists.
+        """
         expect : new ListRendering()
     }
 
     def 'The `NamedFieldsView` example UI defined in the examples can be created.'()
     {
+        reportInfo """
+            The ${Utility.link('named fields example', NamedFieldsView)} is
+            a tiny example of how to attach a textual <code>name(..)</code> label
+            to a form field so the resulting UI is both accessible and
+            visually consistent across a settings panel.
+        """
         expect : new NamedFieldsView()
     }
 
     def 'The `ListTestExample` class can be created.'()
     {
+        reportInfo """
+            The ${Utility.link('list test example', ListTestExample)} is
+            a sandbox for SwingTree's various list-like factories. Useful
+            when you want to compare how <code>scrollPanels</code>,
+            <code>list</code> and other list-style builders behave side by side.
+        """
         expect : new ListTestExample()
     }
 
     def 'The `TeamView` class can be created.'()
     {
+        reportInfo """
+            The ${Utility.link('team view example', TeamView)} is the
+            self-contained showcase for the MVI / MVL "addAll over a tuple lens"
+            pattern walked through in the "Functional MVVM" wiki guide.
+            Each team member is rendered through a sub-view bound to its own
+            lens property focused on a tuple item.
+        """
         expect : TeamView.createView()
     }
 
     def 'The `CalculatorView` class can be created.'()
     {
+        reportInfo """
+            The ${Utility.link('MVI calculator example', CalculatorView)} is
+            the runnable companion to the calculator walk-through in the
+            "Functional MVVM" wiki guide — three immutable records and one
+            <code>runCalculation()</code> wither produce the entire UI behavior.
+        """
         expect : CalculatorView.createView()
     }
 
@@ -576,6 +664,12 @@ class Examples_Spec extends Specification
 
     def 'The todo app UI defined in the examples has the expected state.'()
     {
+        reportInfo """
+            The ${Utility.link('todo app example', TodoApp)} is a small,
+            self-contained example of building a vertically stacked
+            list of task panels — useful as a starting point for any
+            "list of editable items" UI.
+        """
         given : 'We get the UI.'
             var ui = new TodoApp()
         expect :
@@ -586,6 +680,13 @@ class Examples_Spec extends Specification
 
     def 'The scroll pane UI defined in the examples can be instantiated without errors.'()
     {
+        reportInfo """
+            The ${Utility.link('scroll-pane configuration example', ScrollConfigExample)} demonstrates
+            the various scroll-pane construction options exposed by SwingTree —
+            including the fluent <code>scrollPane(it -&gt; ...)</code> configurator
+            and the <code>scrollPanels()</code> factory that lets you stack many
+            child panels inside a single scrolling container.
+        """
         given : 'We get the UI.'
             var ui = new ScrollConfigExample()
         expect :
@@ -594,6 +695,12 @@ class Examples_Spec extends Specification
 
     def 'The basic hover example UI defined in the examples can be instantiated without errors.'()
     {
+        reportInfo """
+            The ${Utility.link('hover example', HoverExample)} demonstrates how
+            <code>onMouseEnter</code> / <code>onMouseExit</code> can drive style or
+            content changes — the simplest possible building block for hover
+            interactions in SwingTree.
+        """
         given : 'We get the UI.'
             var ui = new HoverExample()
         expect :
@@ -602,18 +709,24 @@ class Examples_Spec extends Specification
 
     def 'The basic border hover example UI defined in the examples can be instantiated without errors.'()
     {
+        reportInfo """
+            The ${Utility.link('border hover example', BorderHoverExample)} demonstrates
+            the same hover trick as ${Utility.link('the basic hover example', HoverExample)},
+            but applied to the component's border — a nice way to highlight
+            interactive elements without disturbing their layout.
+        """
         given : 'We get the UI.'
             var ui = new BorderHoverExample()
         expect :
             ui != null
     }
 
-    def 'The ´FoldableExample´ can be created.'()
+    def 'The `FoldableExample` can be created.'()
     {
         reportInfo """
-            Check out the ´FoldableExample´ example class if you want
-            to seen an example of how to create a panel with a folding animation
-            based on the ´withTransitionalAnimation(Var,...)´ method.
+            Check out the ${Utility.link('foldable panel example', FoldableExample)} if you want
+            to see an example of how to create a panel with a folding animation
+            based on the <code>withTransitionalAnimation(Var, ...)</code> method.
         """
         given : 'We get the UI.'
             var ui = new FoldableExample()
@@ -622,6 +735,14 @@ class Examples_Spec extends Specification
     }
 
     def 'The tab selection binding examples, all start off with the third tab selected.'() {
+        reportInfo """
+            The ${Utility.link('tab selection example', TabSelectionExample1)} demonstrates
+            how to bind the currently selected tab of a <code>JTabbedPane</code>
+            to a property on the view model. Each instance of the example is
+            instantiated with a fresh view model whose initial state selects the
+            third tab — so all three instances we create below should report
+            <code>selectedIndex == 2</code>.
+        """
         given : 'We create the UI.'
             var ui1 = new TabSelectionExample1(new TabSelectionExample1.TabsViewModel())
             var ui2 = new TabSelectionExample1(new TabSelectionExample1.TabsViewModel())
@@ -633,6 +754,15 @@ class Examples_Spec extends Specification
     }
 
     def 'The tasks manager examples can be created error free.'() {
+        reportInfo """
+            We instantiate both the
+            ${Utility.link('classical MVVM tasks view', examples.tasks.mvvm.TasksView)}
+            (built on mutable properties) and the
+            ${Utility.link('functional MVI / MVL tasks view', examples.tasks.mvi.TasksView)}
+            (built on an immutable record-based view model) side by side. Comparing
+            the two implementations is a good way to see how the same UI shape
+            can be expressed in either architecture.
+        """
         when :
             new examples.tasks.mvvm.TasksView(new examples.tasks.mvvm.TasksViewModel())
             new examples.tasks.mvi.TasksView(Var.of(new examples.tasks.mvi.TasksViewModel()))
@@ -641,6 +771,16 @@ class Examples_Spec extends Specification
     }
 
     def 'The chat UI examples can be created error free.'() {
+        reportInfo """
+            We instantiate both the
+            ${Utility.link('classical MVVM chat view', examples.chat.mvvm.ChatView)}
+            and the
+            ${Utility.link('functional MVI / MVL chat view', examples.chat.mvi.ChatView)}
+            side by side. The MVI variant is the one walked through in the
+            "Functional MVVM → Dealing with Lists" wiki guide and demonstrates
+            <code>addAll(Var&lt;Tuple&lt;…&gt;&gt;, ...)</code> on a tuple lens —
+            the recommended pattern for dynamic lists of sub-views.
+        """
         when :
             new examples.chat.mvvm.ChatView(new examples.chat.mvvm.ChatViewModel())
             new examples.chat.mvi.ChatView(Var.of(new examples.chat.mvi.ChatViewModel()))

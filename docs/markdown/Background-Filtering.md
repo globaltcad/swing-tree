@@ -1,6 +1,12 @@
 
 # Background Filtering #
 
+> **Prerequisites:** This guide assumes you are comfortable with the
+> per-component `withStyle(..)` API. If `withStyle` is new to you, start
+> with [Climbing the Swing Tree → Blooming Flowers](./Climbing-Swing-Tree.md#blooming-flowers).
+> Everything below also works inside a central
+> [style sheet](./Style-Sheets-And-Groups.md).
+
 If a particular component does not have an opaque background
 color, image, gradient or procedural noise, 
 then it will be **non-opaque**,
@@ -129,4 +135,14 @@ So the additional blur needs to be reduced to compensate for that.
 
 Now the effect looks really convincing. It gets even better when
 resizing the window and seeing how the background scales dynamically.
-That really make the component feel like glass.
+That really makes the component feel like glass.
+
+## Where to next? ##
+
+- The companion [Font Styling](./Font-Styling.md) guide covers gradient
+  and noise paints applied to text.
+- Want this style to apply automatically to every "card" component in your
+  application? Lift it into a central
+  [style sheet](./Style-Sheets-And-Groups.md) keyed on a `group(..)` tag.
+- For a fancier showcase combining shadows, gradients, animation and a
+  toggle, see [An Advanced Style Animation](./An-Advanced-Style-Animation.md).

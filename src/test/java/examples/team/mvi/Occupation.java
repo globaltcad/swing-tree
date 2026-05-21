@@ -1,27 +1,19 @@
 package examples.team.mvi;
 
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.With;
+import lombok.experimental.Accessors;
+
+@With @Getter @Accessors(fluent = true) @AllArgsConstructor
 final class Occupation {
+
     private final String name;
     private final String description;
 
-    Occupation(String name, String description) {
-        this.name = name;
-        this.description = description;
-    }
+    public Occupation() { this("", ""); }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public Occupation withName(String name) {
-        return new Occupation(name, description);
-    }
-
-    public Occupation withDescription(String description) {
+    public static Occupation of(String name, String description) {
         return new Occupation(name, description);
     }
 }

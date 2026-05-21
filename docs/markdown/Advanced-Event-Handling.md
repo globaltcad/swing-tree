@@ -53,8 +53,8 @@ the view for said model might look like this:
 ```java
 UI.panel("fill, insets 3", "[grow]")
 .add("grow",
-    UI.label(vm.getName()),
-    .onView(vm.getName(), it ->{
+    UI.label(vm.getName())
+    .onView(vm.getName(), it -> {
         int length = it.get().getText().length();
         it.get().setPreferredSize(new Dimension(length * 10, 20));
     })
@@ -113,12 +113,35 @@ like for example custom user input events, like a custom touch event.
 Consider the following example:
 ```java
 UI.panel().withPrefSize(100, 100)
-.on(CustomEventSystem.touchGesture(), it -> ..some App update.. )
+.on(CustomEventSystem.touchGesture(), it -> /* ... some app update ... */ )
 ```
 In this example we use an imaginary `CustomEventSystem` to register a touch gesture event handler
 which will be called on the application thread when the touch gesture event is fired.
 Although neither Swing nor SwingTree have a touch gesture event system, this example illustrates
 how one could easily integrate such a custom event system into the SwingTree UI tree.
+
+## `on(..)` vs. `onView(..)` — a cheat sheet ##
+
+The two methods have nearly identical signatures, so it's easy to forget which
+one to reach for. Use this rule of thumb:
+
+| Method | Event handler runs on | Use it for… |
+|---|---|---|
+| `on(event, handler)`     | the **application thread** (typically a background thread). | Reacting to external/business-logic events that update *your model* — network responses, custom input devices, application-level signals. |
+| `onView(event, handler)` | the **GUI/Swing EDT**. | Reacting to model changes that update *the view directly* — resizing a label when a property changes, animating colors when a `like` event fires. |
+
+If you set Swing component properties (text, size, visibility, animations)
+in your handler, use `onView`. If you mutate your view model or kick off
+non-UI work, use `on`.
+
+## Where to next? ##
+
+- For the standard catalog of per-component events (`onClick`, `onMouseEnter`,
+  `onChange`…), revisit [Climbing the Swing Tree → Growing Leaves](./Climbing-Swing-Tree.md#growing-leaves).
+- For the property-and-lens system that makes most "custom" events
+  unnecessary in the first place, see
+  [Functional MVVM](./Functional-MVVM.md) and
+  [Data Oriented SwingTree](./Data-Oriented-SwingTree.md).
 
 
 

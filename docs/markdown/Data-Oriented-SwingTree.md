@@ -1,6 +1,11 @@
 
 # Data Oriented Programming & SwingTree
 
+> **Companion guides:** For a pragmatic, code-first walkthrough of the same
+> ideas, see the [MVI / MVL guide](./Functional-MVVM.md). For an in-depth
+> look at *why* immutability pays off in practice, see
+> [The Practical Benefits of Data Oriented Programming](./Data-Oriented-Programming-Benefits.md).
+
 ---
 SwingTree is built with modern Java features and development
 techniques in mind. More specifically: **Data Oriented Programming**
@@ -163,13 +168,13 @@ sealed interface Shape {
     record Custom(DynamicShape aTraditionalInterface) implements Shape {/*implementation*/}
 }
 
-record Cursor(double x, double x, Shape shape){}
+record Cursor(double x, double y, Shape shape){}
 
 static BufferedImage render(Cursor cursor) {
-    return switch (cursoir.shape()) {
-        case Circle c -> renderCircle(c.radiues());
+    return switch (cursor.shape()) {
+        case Circle c -> renderCircle(c.radius());
         case Rectangle r -> renderRectangle(r.width(), r.height());
-        case Line l -> renderLine(cursor.length(), cursor.width());
+        case Line l -> renderLine(l.length(), l.width());
         case Custom(var shape) -> shape.render();
     };
 }
@@ -444,7 +449,7 @@ public static void main(String... args) {
 }
 ```
 
-Note that in this example there is an important different to the previous
+Note that in this example there is an important difference to the previous
 example with respect to the `Person` type: **This time, there is a `UUID` in the person!**
 
 More specifically, the `Person` record, now implements `sprouts.HasId<UUID>`.
