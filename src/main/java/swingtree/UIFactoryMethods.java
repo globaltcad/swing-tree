@@ -2615,7 +2615,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  properties like the preferred viewport size, unit increment, block increment, and whether
      *  the entry container should fit the width or height of the viewport. <br>
      *  <p>
-     *  Here a short code snippet demonstrating how this factory method is typically used:
+     *  Here is a short code snippet demonstrating how this factory method is typically used:
      *  <pre>{@code
      *  UI.scrollPanels( conf -> conf
      *      .prefSize(300, 400)
