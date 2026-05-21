@@ -221,6 +221,36 @@ and dynamically.
 So when you remove or add a sub-view model to a view bound property list, 
 the view will automatically remove or add the corresponding sub-view.
 
+## A Worked Example: People Directory ##
+
+If you'd like to see all of this — `Var`-bound fields, sub-view models, a
+dynamically rebuilt sub-view driven by a selection property, and a `Vars`-bound
+roster — in one cohesive UI, take a look at the
+[**People Directory**](../../src/test/java/examples/team/mvvm/TeamView.java)
+example in the test suite. It models a small team:
+
+- `Team` owns a `Var<String> name`, a `Vars<Person> members` observable list,
+  a `Var<Person> lead` and a `Var<Person> selectedMember`.
+- Each `Person` is itself a view model with `Var<String> name`,
+  `Var<Integer> age`, `Var<String> bio`, a nested `Occupation` sub-view-model,
+  and a `Var<Gender> gender`.
+- The roster panel renders one card per member via
+  `addAll(Vals<Person>, viewSupplier)` — adding or removing a person mutates
+  the `Vars` list, which fires change events that SwingTree picks up.
+- The editor panel on the right is bound to `team.selectedMember()` via
+  `add(Val, viewSupplier)`; switching the selection rebuilds only that pane.
+- Each editor field binds *directly* to a `Var<X>` on the current `Person`
+  view model — no lens or `zoomTo` chain is needed because the model is
+  already mutable at every level.
+
+The same UI is also implemented in the
+[MVI / MVL flavor](../../src/test/java/examples/team/mvi/TeamView.java),
+where the entire state is one immutable `TeamViewModel` record and every
+field is reached through a `Var.zoomTo(..)` lens. Reading the two side by
+side is the fastest way to internalise the architectural contrast — the
+classical MVVM file lives entirely in `examples.team.mvvm`, its functional
+twin in `examples.team.mvi`.
+
 ## Where is the Model? ##
 
 You may have noticed that the above examples do not include model classes.

@@ -392,7 +392,7 @@ check out the following in this project:
 - [A Task Manager](../../src/test/java/examples/tasks/mvi/TasksView.java) — multi-level zooming and filtering.
 - [A Calculator](../../src/test/java/examples/calculator/mvi/CalculatorView.java) — the example expanded in this guide.
 - [A Style Picker](../../src/test/java/examples/stylepicker/mvi/BoxShadowPickerView.java) — heavy reactive styling driven from the VM.
-- [Team View](../../src/test/java/examples/team/mvi/TeamView.java) — nested records with `HasId` for stable identity.
+- [People Directory (MVI)](../../src/test/java/examples/team/mvi/TeamView.java) — a roster of nested records with `HasId` for stable identity, plus a selection-driven editor. The exact same UI is also implemented in [classical MVVM](../../src/test/java/examples/team/mvvm/TeamView.java) (`examples.team.mvvm`) — reading the two side by side is the clearest way to feel the architectural contrast.
 - [Breathing Companion](../../src/test/java/examples/breathing/mvi/BreathingView.java) — modelled animation in MVI form (see [Modelling Animations](./Modelling-Animations.md)).
 - [The Celestial Scribe](../../src/test/java/examples/scribe/CelestialScribe.java) — a reactive `Var<Layout>` driven from a tuple of stars (see [Reactive Layouts](./Reactive-Layouts.md)).
 
