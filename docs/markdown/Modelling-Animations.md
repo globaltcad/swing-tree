@@ -1,6 +1,11 @@
 
 # Animations and View Models #
 
+> **Prerequisites:** This guide is the MVI-friendly continuation of
+> [An Advanced Style Animation](./An-Advanced-Style-Animation.md) and assumes
+> you already know how to bind components to a `Var<...>` view model — if not,
+> read [Functional MVVM (MVI / MVL)](./Functional-MVVM.md) first.
+
 Animations can become rather complicated. They may consist of multiple
 stages as well as multiple elements that are animated at the same time.
 All of this requires a lot of state management, which describes what the 
@@ -173,4 +178,47 @@ to understand how the animation works:
    as well as the `vm` variable holding the mutable view model state
    and starts the animation by continuously invoking the `Animatable`
    object's lambda function and using its result to update the `vm` variable.
+
+## Chaining multi-phase animations ##
+
+The pattern above runs one animation to completion in response to a user
+event. For something more elaborate — a multi-phase loop, for example — you
+can chain `Animatable`s together by **listening for view-model phase
+changes** and re-arming the next phase from inside the listener:
+
+```java
+Viewable.cast(phase).onChange(From.VIEW_MODEL, it -> {
+    if ( vm.get().running() )
+        UI.animate(vm, BreathingViewModel::breathAnimation);
+});
+```
+
+Every time the model's `phase` field changes, the listener fires and starts
+the next phase animation. Pausing the loop is simply "stop re-arming". This
+pattern powers the
+[BreathingView](../../src/test/java/examples/breathing/mvi/BreathingView.java)
+example — a glowing orb that inhales, holds, exhales, rests, and repeats —
+entirely driven by phase transitions in the immutable view model.
+
+> **Watch out for garbage collection.** Sprouts lens and view properties
+> observe their parent property only *weakly*. SwingTree's own component
+> bindings (`label(..)`, `slider(..)`, `withRepaintOn(..)`, …) retain a
+> strong reference internally, so the lenses you hand to them are safe.
+> But a lens consumed *only* by a raw `Viewable.cast(prop).onChange(..)`
+> subscription, like `phase` above, is **not** retained by SwingTree and
+> must be held by you — typically as a field of the view. Without that
+> strong reference, the re-arming listener would be silently collected and
+> the animation would freeze after the first phase. The
+> [BreathingView source](../../src/test/java/examples/breathing/mvi/BreathingView.java)
+> documents exactly this pitfall.
+
+## Where to next? ##
+
+- [An Advanced Style Animation](./An-Advanced-Style-Animation.md) — the
+  view-only variant using `withTransitionalStyle(..)` on a `Var<Boolean>`.
+- [Functional MVVM (MVI / MVL)](./Functional-MVVM.md) — the architectural
+  foundations the model-driven animation sits on.
+- [Style Sheets and Groups](./Style-Sheets-And-Groups.md) — to share an
+  animated style across many components rather than baking it into one
+  view.
 

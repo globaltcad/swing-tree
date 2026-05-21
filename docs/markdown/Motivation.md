@@ -32,10 +32,10 @@ components as tree nodes.
 This is a very well proven concept, and it shows:
 **HTML dominates the web and consequently most of the GUIs we interact with on a daily basis.**
 
-This success story was so impactful that it even lead to the **creation of 
-custom xml like file formats** introduced by desktop application frameworks 
-emerging after the success of HTML, think of **`FXML` in JavaFX, `XAML` in WPF**.
-However, this was a bad move, as it **missed the point as to why HTML succeeded**.
+This success story was so impactful that it even led to the **creation of
+custom XML-like file formats** introduced by desktop application frameworks
+emerging after the success of HTML — think of **`FXML` in JavaFX, `XAML` in WPF**.
+However, this was a bad move, as it **missed the point of why HTML succeeded**.
 
 HTML was so successful merely because it's syntax made it so easy to construct the UIs tree like structure.
 But it may have failed in gathering traction, if it was not for combining it with a turing complete scripting 

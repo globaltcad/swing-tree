@@ -388,11 +388,13 @@ If you want to see some fully executable examples
 of the SwingTree based MVI/MVL architecture in action,
 check out the following in this project:
 
-- [A Chat App](../../src/test/java/examples/chat/mvi/ChatView.java)
-- [A Task Manager](../../src/test/java/examples/tasks/mvi/TasksView.java)
-- [A Calculator](../../src/test/java/examples/calculator/mvi/CalculatorView.java)
-- [A Style Picker](../../src/test/java/examples/stylepicker/mvi/BoxShadowPickerView.java)
-- [Team View](../../src/test/java/examples/team/mvi/TeamView.java)
+- [A Chat App](../../src/test/java/examples/chat/mvi/ChatView.java) — `Tuple` lens + `addAll` over a list of sub-models.
+- [A Task Manager](../../src/test/java/examples/tasks/mvi/TasksView.java) — multi-level zooming and filtering.
+- [A Calculator](../../src/test/java/examples/calculator/mvi/CalculatorView.java) — the example expanded in this guide.
+- [A Style Picker](../../src/test/java/examples/stylepicker/mvi/BoxShadowPickerView.java) — heavy reactive styling driven from the VM.
+- [Team View](../../src/test/java/examples/team/mvi/TeamView.java) — nested records with `HasId` for stable identity.
+- [Breathing Companion](../../src/test/java/examples/breathing/mvi/BreathingView.java) — modelled animation in MVI form (see [Modelling Animations](./Modelling-Animations.md)).
+- [The Celestial Scribe](../../src/test/java/examples/scribe/CelestialScribe.java) — a reactive `Var<Layout>` driven from a tuple of stars (see [Reactive Layouts](./Reactive-Layouts.md)).
 
 ## MVI or MVL? ##
 

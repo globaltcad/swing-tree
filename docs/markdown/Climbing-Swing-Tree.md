@@ -8,6 +8,21 @@ Here you will learn how to climb the tree, and Swing.
 
 You do not need any prior knowledge of Swing to follow this tutorial.
 
+**In this tutorial:**
+
+1. [**Planting a Seed**](#planting-a-seed) — getting SwingTree into your project.
+2. [**Growing a Stem**](#growing-a-stem) — declaring component trees with method chaining.
+3. [**Growing Branches**](#growing-branches) — laying things out with `MigLayout`.
+4. [**Growing Sprouts**](#growing-sprouts) — connecting your UI to a view model with properties.
+5. [**Growing Leaves**](#growing-leaves) — registering user events on components.
+6. [**Blooming Flowers**](#blooming-flowers) — styling components declaratively.
+7. [**Harvesting Fruit**](#harvesting-fruit) — animating components and rendering custom graphics.
+
+If you are wondering *why* SwingTree exists in the first place,
+check out the [Motivation](./Motivation.md) page before continuing.
+For a panoramic view of every guide in the wiki, see the
+[wiki index](./README.md).
+
 
 ## Planting a Seed ##
 
@@ -17,7 +32,7 @@ with a valid version number:
 
 ```groovy
  dependencies {
-     compile 'io.github.globaltcad:swing-tree:x.y.z'
+     implementation 'io.github.globaltcad:swing-tree:x.y.z'
  }
 ```
 
@@ -97,9 +112,9 @@ UI.show(
         .add(UI.textField("42"))
         .peek( p -> {
             if ( someCondition )
-                p.setBackground(Color.YELLOW)
+                p.setBackground(Color.YELLOW);
             if ( someOtherCondition )
-                ... // Some other procedural stuff    
+                // ... some other procedural stuff ...
         })
     )
     .add(UI.button("Click to Swing!"))
@@ -227,14 +242,13 @@ we can start looking at some of the more advanced features
 that Swing-Tree provides.
 
 Besides being able to build Swing UIs in a declarative fashion
-you can also do clean `MVVM`/`MVC` and `MVP` application development,
-which stands for `Model`-`View`-`ViewModel/Controller/Presenter`.
-But in this guide however we focus on the `MVI`/`MVL` pattern,
+you can also do clean `MVVM` / `MVC` / `MVP` application development —
+that is, `Model`-`View`-`ViewModel/Controller/Presenter`.
+In this guide however we focus on the `MVI` / `MVL` pattern,
 which is the recommended pattern for building SwingTree applications.
-If you want to go go deeper with the traditional `MVVM` pattern
-[check out this short little guide](./Basic-MVVM.md).
-Note however, that all these different kinds of fancy design patterns 
-exists for achieving essentially the same fundamental goal: 
+If you would prefer to start with the traditional, mutable `MVVM` flavor,
+[check out this short little guide](./Basic-MVVM.md) instead.
+Either way, all these patterns exist to achieve the same fundamental goal:
 
 **Separating the UI from the business logic!**
 
@@ -264,7 +278,7 @@ public record PersonViewModel(String firstName, String lastName, String fullName
         return new PersonViewModel(firstName, lastName, firstName + " " + lastName);
     }
     
-    public String withFullName(String fullName) {
+    public PersonViewModel withFullName(String fullName) {
         return new PersonViewModel(firstName, lastName, fullName);
     }
 }
@@ -486,8 +500,10 @@ The SwingTree style API has much more to offer than what could be covered in thi
 If you want to dive deeper into the SwingTree style API,
 you may also want to check out the following pieces of documentation:
 
-- [Font Styling](./Font-Styling.md)
-- [Background Filtering](./Background-Filtering.md)
+- [Font Styling](./Font-Styling.md) — text-specific style properties like gradient fonts and noise paints.
+- [Background Filtering](./Background-Filtering.md) — frosted-glass effects via parent-pixel filters.
+- [An Advanced Style Animation](./An-Advanced-Style-Animation.md) — transitioning a style smoothly between two states.
+- [Style Sheets and Groups](./Style-Sheets-And-Groups.md) — pulling styling out of components into a single CSS-like sheet, the foundation of the [**Theme Garden**](../../src/test/java/examples/zen/ThemeGardenView.java) example.
 
 ## Harvesting Fruit ##
 
@@ -626,14 +642,20 @@ ready to start building your own Swing UIs with Swing-Tree.
 
 Here some more reading material to get you started:
 
-- [Simple Dialogs](./Simple-Dialogs.md)
-- [Writing Tables](./Writing-Tables.md)
-- [Responsive Layouts](./Responsive-Layouts.md)
-- [Reactive Layouts](./Reactive-Layouts.md)
-- [Advanced MVVM](./Advanced-MVVM.md)
+- [Simple Dialogs](./Simple-Dialogs.md) — `JOptionPane` confirmations and messages, the SwingTree way.
+- [Writing Tables](./Writing-Tables.md) — declarative `JTable` models and cell rendering.
+- [Responsive Layouts](./Responsive-Layouts.md) — Bootstrap-style 12-column flow that adapts to size.
+- [Reactive Layouts](./Reactive-Layouts.md) — bind the panel's *layout itself* to a `Var<Layout>` property.
+- [Functional MVVM (MVI / MVL)](./Functional-MVVM.md) — the recommended pattern: immutable view models + lenses.
+- [Advanced MVVM](./Advanced-MVVM.md) — the classical, observable-property variant.
+- [Sane Error Handling](./Sane-Error-Handling.md) — how SwingTree contains exceptions thrown inside your UI declarations.
+- [Style Sheets and Groups](./Style-Sheets-And-Groups.md) — central style sheets, semantic group tags, hot-swappable themes.
+- [Modelling Animations](./Modelling-Animations.md) — putting animation state into the view model.
+- [Advanced Event Handling](./Advanced-Event-Handling.md) — custom events with `on(..)` and `onView(..)`.
 
 If you want to learn more about Swing-Tree
-check out the [API documentation](../jdocs/index.html)
+check out the [API documentation](../jdocs/index.html),
+the [wiki index](./README.md),
 and the [examples](../../src/test/java/examples/README.md).
 
 

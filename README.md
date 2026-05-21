@@ -50,6 +50,7 @@ No new runtime, no rewrite — it sits right on top of the Swing you already kno
 
 - 💡 [Motivation](docs/markdown/Motivation.md)
 - 🚀 [Getting Started](docs/markdown/Climbing-Swing-Tree.md)
+- 📚 [The Wiki — all the guides](docs/markdown/README.md)
 - 📖 [Living Documentation](https://globaltcad.github.io/swing-tree/)
 
 </td>
@@ -143,6 +144,9 @@ without touching a single line of layout code:
 
 Every skin you see is pure SwingTree styling — colors, gradients, rounded corners,
 shadows and animations — applied declaratively over one shared UI definition.
+The mechanic that makes this work — central style sheets plus semantic
+`group(..)` tags on components — is explained in the
+[Style Sheets and Groups](docs/markdown/Style-Sheets-And-Groups.md) guide.
 
 ---
 

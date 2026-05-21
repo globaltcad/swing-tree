@@ -1,18 +1,27 @@
 
 # MVVM using Sprouts #
 
+> **Prerequisites:** This guide assumes you already feel at home writing
+> GUI declarations as introduced in
+> [Climbing the Swing Tree](./Climbing-Swing-Tree.md).
+>
+> **Looking for the functional flavor instead?** If you would rather build
+> your views around immutable record-based view models, jump straight to the
+> [MVI / MVL](./Functional-MVVM.md) guide. It is the recommended pattern for
+> new SwingTree applications.
+
 If you know how to write GUI declarations in SwingTree you are not far away
-from being able to write proper business logic for you UI without it
+from being able to write proper business logic for your UI without it
 being dependent on it.
 
 Because SwingTree is not just a library for declarative GUI design, it is
-also a library for writing the necessary architectural patterns needed
-for bringing your beautiful GUIs to life.
+also a library for writing the architectural patterns needed
+to bring your beautiful GUIs to life.
 
-This is typically done through patterns often referred to as `MVVM`/`MVC` and `MVP`, which are
-shortcuts basically meaning `Model`-`View`-`ViewModel/Controller/Presenter`. <br>
-But in this little guide we focus on the tries and tested `MMVVM` pattern.
-Keep in mind though, all of these fancy patterns exist with the same main goal of:
+This is typically done through patterns often referred to as `MVVM` / `MVC` / `MVP`,
+which are shortcuts basically meaning `Model`-`View`-`ViewModel/Controller/Presenter`. <br>
+In this little guide we focus on the tried and tested `MVVM` pattern.
+Keep in mind though that all of these fancy patterns exist with the same main goal:
 
 **Separating the UI from the business logic!**
 
@@ -62,19 +71,22 @@ Let's consider the following business logic, which we will call "**view model**"
 from now on in accordance with the `MVVM` design and naming conventions:
 
 ```java
+import sprouts.From;
+import sprouts.Val;
 import sprouts.Var;
+import sprouts.Viewable;
 
 public class PersonViewModel {
     private final Var<String> firstName = Var.of("Joseph");
-    private final Var<String> lastName = Var.of("Armstrong");
+    private final Var<String> lastName  = Var.of("Armstrong");
     private final Var<String> fullName  = Var.of("");
-	
+
     public PersonViewModel() {
-        firstName.onChange(From.VIEW_MODEL, it -> fullName.set(it + " " + lastName.get()) );
-        lastName.onChange(From.VIEW_MODEL, it -> fullName.set(firstName.get() + " " + it) );
+        Viewable.cast(firstName).onChange(From.ALL, it -> fullName.set(it.currentValue().orElseThrowUnchecked() + " " + lastName.get()) );
+        Viewable.cast(lastName).onChange(From.ALL, it -> fullName.set(firstName.get() + " " + it.currentValue().orElseThrowUnchecked()) );
         fullName.set(firstName.get() + " " + lastName.get());
     }
-    
+
     public Var<String> firstName() { return firstName; }
     public Var<String> lastName()  { return lastName;  }
     public Val<String> fullName()  { return fullName;  }
@@ -128,13 +140,20 @@ actually depending on the UI at all,
 meaning that **there is not even a single reference to a Swing component**
 in the `PersonViewModel` class!
 
-Not only does this allow us to write **unit tests** for our business logic
+Not only does this allow us to write **unit tests** for our business logic,
 we can now also **easily swap out the Swing UI for a different UI**
 implementation without having to change the business logic at all!
 
 How cool is that? :)
 
-If you want to dive deeper into doing MVVM in Swing-Tree,
-check out the [MVVM tutorial](./Advanced-MVVM.md). <br>
-We **especially** recommend the [MVI/MVL](./Functional-MVVM.md) guide
-if you are interested in a more functional (side effect free) approach to MVVM.
+## Where to next? ##
+
+- For more advanced MVVM in SwingTree — including dynamic sub-views,
+  polymorphic view models and observable lists of view models —
+  jump to the [Advanced MVVM](./Advanced-MVVM.md) guide.
+- We **especially** recommend the [MVI / MVL](./Functional-MVVM.md) guide
+  if you are interested in a more functional (side-effect-free) approach
+  to MVVM based on immutable records and lens properties.
+- The companion [Data Oriented SwingTree](./Data-Oriented-SwingTree.md)
+  guide explains *why* the functional approach above scales so well in
+  practice (centralized state, structural sharing, time-travel debugging).

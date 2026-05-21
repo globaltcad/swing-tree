@@ -1,4 +1,12 @@
 
+# An Advanced Style Animation #
+
+> **Prerequisites:** This guide assumes you understand
+> [Climbing the Swing Tree → Blooming Flowers](./Climbing-Swing-Tree.md#blooming-flowers)
+> (per-component `withStyle(..)`) and
+> [Climbing the Swing Tree → Harvesting Fruit](./Climbing-Swing-Tree.md#harvesting-fruit)
+> (basic animations with `animateFor(..)`).
+
 SwingTree is not merely a GUI builder/layout library, it also provides a powerful
 styling API which allows you to create stunningly yet highly dynamic UI styles.
 
@@ -83,3 +91,31 @@ public final class TransitionalAnimation extends Panel
 ```
 
 ---
+
+## How `withTransitionalStyle` works ##
+
+The trick this example pivots on is `withTransitionalStyle(Var<Boolean>, LifeTime, BiFunction)`.
+Given a *boolean* property and a duration, SwingTree continuously interpolates
+a `progress` value between `0` (matching `false`) and `1` (matching `true`)
+over the configured `LifeTime` every time the property flips.
+
+Inside the lambda you receive that `state` plus a `ComponentStyleDelegate`
+(the familiar `it`), so you can *multiply* any style property by
+`state.progress()` — radii, padding, opacity, shadow blur, gradient size,
+offset, you name it. The result is that a single boolean toggle smoothly
+animates *every* configured property between the two extremes.
+
+This is purely view-side animation. If you want the animation state to live
+inside your view model — for testing, persistence, or coordinating multiple
+animations — see [Modelling Animations](./Modelling-Animations.md).
+
+## Where to next? ##
+
+- [Modelling Animations](./Modelling-Animations.md) — the MVI-friendly
+  alternative that puts animation state into the view model and uses
+  `UI.animate(vm, vm::someAnimation)` plus `withRepaintOn(..)`.
+- [Style Sheets and Groups](./Style-Sheets-And-Groups.md) — to share
+  styled animations across many components.
+- [Font Styling](./Font-Styling.md) and
+  [Background Filtering](./Background-Filtering.md) — sibling deep-dives
+  on specific corners of the style API.

@@ -116,3 +116,19 @@ using the `orGetUi` method.
 And then we update the view component using the `updateIf` method,
 which is only called if the view component is of the specified type.
 
+---
+
+## Where to next? ##
+
+- For dynamic *list* views (rather than tables) backed by reactive collections,
+  see the `addAll(..)` pattern explained in
+  [Functional MVVM → Dealing with Lists](./Functional-MVVM.md#dealing-with-lists).
+- For wiring the table's data to a view model, see
+  [Basic MVVM](./Basic-MVVM.md) or
+  [Functional MVVM](./Functional-MVVM.md). The `getsEntryAt` /
+  `setsEntryAt` / `updateOn` hooks above are designed to be backed by
+  properties and events from your view model rather than raw arrays.
+- For styling the table itself (gradients, rounded corners, custom borders),
+  any of the patterns from [Style Sheets and Groups](./Style-Sheets-And-Groups.md)
+  applies to a `JTable` exactly as it does to a `JButton`.
+

@@ -105,3 +105,11 @@ By utilizing the concept of size categories and span configurations,
 SwingTree optimizes the trade-off between flexibility and ease of use
 to allow you to design UIs that look great and function well on a wide range 
 of screen sizes and devices.
+
+## Where to next? ##
+
+- [Reactive Layouts](./Reactive-Layouts.md) — pair what you learned here
+  with a `Var<Layout>` to switch *layout families* at runtime (compact
+  view ↔ tablet view ↔ analytics, …) without rebuilding any components.
+- [Climbing the Swing Tree → Growing Branches](./Climbing-Swing-Tree.md#growing-branches)
+  for the underlying MigLayout basics.

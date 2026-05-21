@@ -106,3 +106,33 @@ any logging framework of your choice.
 of your application with all kinds of weird inputs, then you can be
 assured that the non-affected GUI components will still be assembled and displayed
 to the user as intended.**
+
+---
+
+## Which lambdas are caught? ##
+
+Not every part of a SwingTree declaration is exception-safe. As a rule of
+thumb, **any lambda the SwingTree builder invokes for you** is wrapped in a
+`try / catch` and logged via SLF4J. This includes:
+
+| Lambda hook | Where it appears | What happens on failure |
+|---|---|---|
+| `peek(Consumer)`             | Unwrap the underlying Swing component for imperative tweaks. | Exception is caught, logged, builder continues. |
+| `apply(Consumer)`            | Same idea, but the lambda receives the SwingTree builder itself. | Exception is caught, logged, builder continues. |
+| `applyIf(boolean, Consumer)` / `applyIfPresent(Optional)` | Conditional sub-trees. See [Advanced Declarations](./Advanced-Declarations.md). | Exception is caught, the conditional branch is skipped. |
+| `withStyle(Styler)`          | Per-component styling. | Exception is caught, the offending styler is skipped, the rest of the style is still applied. |
+| `onClick`, `onMouseEnter`, … | Event handlers. | Exception is caught, logged — the event simply does not propagate further. |
+| `Var.zoomTo(..)` map/wither lambdas | Property lenses. | Same: the lens reports an error but does not bring the property graph down. |
+
+Code that runs at the *top level* of the declaration — your own `for`-loops,
+`if`-statements and arithmetic *outside* a captured lambda — is **not**
+wrapped. Push such code inside `apply(..)` or `peek(..)` whenever the risk
+of an exception is real.
+
+## Where to next? ##
+
+- [Advanced Declarations](./Advanced-Declarations.md) — the toolbox of
+  `peek`, `apply`, `applyIf`, `applyIfPresent` that this guide leans on.
+- [Functional MVVM](./Functional-MVVM.md) — immutable view models keep your
+  business logic exception-resistant for a different reason: there is no
+  half-mutated state to recover from in the first place.
