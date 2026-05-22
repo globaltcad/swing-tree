@@ -50,7 +50,7 @@ No new runtime, no rewrite — it sits right on top of the Swing you already kno
 
 - 💡 [Motivation](docs/markdown/Motivation.md)
 - 🚀 [Getting Started](docs/markdown/Climbing-Swing-Tree.md)
-- 📚 [The Wiki — all the guides](docs/markdown/README.md)
+- 📚 [The Wiki](docs/markdown/README.md)
 - 📖 [Living Documentation](https://globaltcad.github.io/swing-tree/)
 - 🤖 [AI Agent Skill file](docs/agent-skills/SKILL.md)
 
