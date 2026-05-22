@@ -1,10 +1,18 @@
 # 📚 The SwingTree Wiki #
 
 Welcome to the SwingTree wiki — a handful of focused guides that, taken
-together, cover every major piece of the SwingTree API. If this is your
-first stop, start with [**Motivation**](./Motivation.md) and then
+together, cover every major piece of the SwingTree API. Still deciding whether
+the library is right for you? Start with
+[**Should I Use SwingTree?**](./Should-I-Use-SwingTree.md). Otherwise, if this is
+your first stop, start with [**Motivation**](./Motivation.md) and then
 [**Climbing the Swing Tree**](./Climbing-Swing-Tree.md). Everything else
 fans out from there.
+
+> 🤖 **Using an AI coding agent?** Drop
+> [`../agent-skills/SKILL.md`](../agent-skills/SKILL.md) into its context — a
+> single self-contained file that teaches the agent the whole SwingTree API,
+> the MVI/MVL & MVVM patterns, styling, animation, and the common pitfalls, so
+> it writes idiomatic SwingTree from the start.
 
 ---
 
@@ -12,6 +20,7 @@ fans out from there.
 
 | Guide | What you'll learn |
 |---|---|
+| [Should I Use SwingTree?](./Should-I-Use-SwingTree.md) | An honest decision guide — when SwingTree is a great fit, when it isn't, and how it compares to Compose, React, Vue & friends. |
 | [Motivation](./Motivation.md) | *Why* SwingTree exists and what problem declarative UI code solves. |
 | [Climbing the Swing Tree](./Climbing-Swing-Tree.md) | The end-to-end primer: declarations, layouts, properties, events, styling, animations. |
 | [Advanced Declarations](./Advanced-Declarations.md) | The escape hatches `peek`, `apply`, `applyIf`, `applyIfPresent`, and `UI.of(..)` for custom components. |
@@ -60,6 +69,7 @@ If you want a recommended order in which to read the guides:
 
 ```mermaid
 graph TD;
+    S[Should I Use SwingTree?] --> M[Motivation]
     M[Motivation] --> C[Climbing the Swing Tree]
     C --> AD[Advanced Declarations]
     C --> RL[Responsive Layouts]
