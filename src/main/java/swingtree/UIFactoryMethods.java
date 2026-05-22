@@ -2608,6 +2608,110 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Allows you to create a declarative builder for the {@link JScrollPanels} component type,
+     *  where you can also configure how the entry container of the scroll panels should behave
+     *  in the scroll pane viewport through a {@link Configurator} lambda. <br>
+     *  The configurator receives a {@link ScrollableComponentDelegate} on which you can define
+     *  properties like the preferred viewport size, unit increment, block increment, and whether
+     *  the entry container should fit the width or height of the viewport. <br>
+     *  <p>
+     *  Here is a short code snippet demonstrating how this factory method is typically used:
+     *  <pre>{@code
+     *  UI.scrollPanels( conf -> conf
+     *      .prefSize(300, 400)
+     *      .unitIncrement(30)
+     *      .blockIncrement(90)
+     *      .fitWidth(true)
+     *  )
+     *  .add(UI.label("Top entry"))
+     *  .add(UI.button("Middle entry"))
+     *  .add(UI.label("Bottom entry"))
+     *  }</pre>
+     *  Note that this is similar to {@link #scrollPane(Configurator)},
+     *  but for the {@link JScrollPanels} component type, which always
+     *  wraps its entries in an internal {@link Scrollable} container. <br>
+     *
+     * @param configurator A configurator for configuring the scrollable behavior of
+     *                     the entry container of the scroll panels.
+     * @return A builder instance for a new {@link JScrollPanels}, which enables fluent method chaining.
+     */
+    public static UIForScrollPanels<JScrollPanels> scrollPanels(
+        Configurator<ScrollableComponentDelegate> configurator
+    ) {
+        Objects.requireNonNull(configurator);
+        return new UIForScrollPanels<>(new BuilderState<>(JScrollPanels.class, ()->JScrollPanels.of(UI.Align.VERTICAL, new Dimension(100,100), configurator)));
+    }
+
+    /**
+     *  Allows you to create a declarative builder for the {@link JScrollPanels} component type,
+     *  with a custom alignment and a configurator which defines how the internal entry container
+     *  of the scroll panels should behave in the scroll pane viewport. <br>
+     *  The configurator receives a {@link ScrollableComponentDelegate} on which you can define
+     *  properties like the preferred viewport size, unit increment, block increment, and whether
+     *  the entry container should fit the width or height of the viewport. <br>
+     *  Here is a usage example:
+     *  <pre>{@code
+     *  UI.scrollPanels(UI.Align.HORIZONTAL, conf -> conf
+     *      .unitIncrement(20)
+     *      .blockIncrement(60)
+     *      .fitHeight(true)
+     *  )
+     *  .add(UI.label("Leftmost entry"))
+     *  .add(UI.button("Some entry"))
+     *  .add(UI.label("Rightmost entry"))
+     *  }</pre>
+     *
+     * @param align        The alignment of the scroll panels.
+     * @param configurator A configurator for configuring the scrollable behavior of
+     *                     the entry container of the scroll panels.
+     * @return A builder instance for a new {@link JScrollPanels}, which enables fluent method chaining.
+     */
+    public static UIForScrollPanels<JScrollPanels> scrollPanels(
+        UI.Align align,
+        Configurator<ScrollableComponentDelegate> configurator
+    ) {
+        Objects.requireNonNull(align);
+        Objects.requireNonNull(configurator);
+        return new UIForScrollPanels<>(new BuilderState<>(JScrollPanels.class, ()->JScrollPanels.of(align, null, configurator)));
+    }
+
+    /**
+     *  Allows you to create a declarative builder for the {@link JScrollPanels} component type,
+     *  with a custom alignment, a fixed entry shape and a configurator which defines how the
+     *  internal entry container of the scroll panels should behave in the scroll pane viewport. <br>
+     *  The configurator receives a {@link ScrollableComponentDelegate} on which you can define
+     *  properties like the preferred viewport size, unit increment, block increment, and whether
+     *  the entry container should fit the width or height of the viewport. <br>
+     *  Here is a usage example:
+     *  <pre>{@code
+     *  UI.scrollPanels(UI.Align.VERTICAL, new Dimension(200, 50), conf -> conf
+     *      .unitIncrement(25)
+     *      .blockIncrement(75)
+     *      .fitWidth(true)
+     *  )
+     *  .add(UI.label("Top entry"))
+     *  .add(UI.button("Some entry"))
+     *  .add(UI.label("Bottom entry"))
+     *  }</pre>
+     *
+     * @param align        The alignment of the scroll panels.
+     * @param size         The size of the scroll panels' entries.
+     * @param configurator A configurator for configuring the scrollable behavior of
+     *                     the entry container of the scroll panels.
+     * @return A builder instance for a new {@link JScrollPanels}, which enables fluent method chaining.
+     */
+    public static UIForScrollPanels<JScrollPanels> scrollPanels(
+        UI.Align align,
+        Dimension size,
+        Configurator<ScrollableComponentDelegate> configurator
+    ) {
+        Objects.requireNonNull(align);
+        Objects.requireNonNull(size);
+        Objects.requireNonNull(configurator);
+        return new UIForScrollPanels<>(new BuilderState<>(JScrollPanels.class, ()->JScrollPanels.of(align, size, configurator)));
+    }
+
+    /**
      *  Use this to create a builder for the provided {@link JSplitPane} instance.
      *
      * @param component The {@link JSplitPane} instance to create a builder for.

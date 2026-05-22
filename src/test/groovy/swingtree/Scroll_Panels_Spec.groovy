@@ -16,6 +16,8 @@ import swingtree.threading.EventProcessor
 import utility.Utility
 
 import javax.swing.JPanel
+import javax.swing.Scrollable
+import java.awt.Dimension
 
 @Title("Scroll Panels")
 @Narrative('''
@@ -479,4 +481,192 @@ class Scroll_Panels_Spec extends Specification
             updatedComps.collect({it.text}) == [natto, MISO, SEITAN, TEMPEH, TOFU, ABURAAGE].collect({it.text().get()})
     }
 
+    def 'A `UI.scrollPanels()` without a configurator preserves the default `Scrollable` behavior.'()
+    {
+        reportInfo """
+            The `JScrollPanels` widget always wraps its entries in an internal
+            container that implements the `Scrollable` interface.
+            When you use the basic `UI.scrollPanels()` factory method
+            (without supplying a configurator lambda), this internal
+            container reports the default scrollable values:
+
+            - The width and height are *not* forced to match the viewport.
+            - The unit and block increments fall back to a fixed entry-size
+              based increment computed from the configured shape.
+
+            This is the baseline behavior every existing user of the
+            `JScrollPanels` widget can rely on.
+        """
+        given : 'We create a scroll panels widget without any configurator.'
+            var ui =
+                    UI.scrollPanels()
+                    .add(UI.label("First entry"))
+                    .add(UI.label("Second entry"))
+                    .add(UI.label("Third entry"))
+        and : 'Then we build the underlying `JScrollPanels` component.'
+            var panels = ui.get(JScrollPanels)
+        and : 'We retrieve the internal `Scrollable` container.'
+            var inner = panels.getViewport().getView() as Scrollable
+        expect : 'The internal container does not force its width or height to fit the viewport.'
+            inner.getScrollableTracksViewportWidth()  == false
+            inner.getScrollableTracksViewportHeight() == false
+        and : 'The unit and block increments default to fixed values derived from the entry shape.'
+            inner.getScrollableUnitIncrement(null, javax.swing.SwingConstants.VERTICAL, 1)  > 0
+            inner.getScrollableBlockIncrement(null, javax.swing.SwingConstants.VERTICAL, 1) > 0
+    }
+
+    def 'Use a declarative configurator lambda to define the `Scrollable` behavior of a scroll panels widget.'()
+    {
+        reportInfo """
+            Just like the regular `UI.scrollPane(Configurator)` factory method,
+            the `UI.scrollPanels(Configurator)` factory takes a configurator lambda
+            which receives a `ScrollableComponentDelegate` you can use to set
+            the preferred viewport size, the unit and block increments and
+            whether the internal entry container should fit the width
+            or height of the viewport.
+
+            This enables you to fine tune the scroll behavior declaratively,
+            without having to subclass `JPanel` and implement `Scrollable`
+            on your own.
+        """
+        given : 'A scroll panels widget configured with a custom `Scrollable` behavior.'
+            var ui =
+                    UI.scrollPanels( conf -> conf
+                        .prefSize(220, 180)
+                        .unitIncrement(13)
+                        .blockIncrement(42)
+                        .fitWidth(true)
+                        .fitHeight(false)
+                    )
+                    .add(UI.label("Top entry"))
+                    .add(UI.button("Middle entry"))
+                    .add(UI.label("Bottom entry"))
+        and : 'We build the component and grab its internal Scrollable container.'
+            var panels = ui.get(JScrollPanels)
+            var inner = panels.getViewport().getView() as Scrollable
+        expect : 'The internal container reports the values we configured.'
+            inner.getPreferredScrollableViewportSize() == new Dimension(220, 180)
+            inner.getScrollableUnitIncrement(null,  javax.swing.SwingConstants.VERTICAL,   1) == 13
+            inner.getScrollableUnitIncrement(null,  javax.swing.SwingConstants.HORIZONTAL, 1) == 13
+            inner.getScrollableBlockIncrement(null, javax.swing.SwingConstants.VERTICAL,   1) == 42
+            inner.getScrollableBlockIncrement(null, javax.swing.SwingConstants.HORIZONTAL, 1) == 42
+            inner.getScrollableTracksViewportWidth()  == true
+            inner.getScrollableTracksViewportHeight() == false
+    }
+
+    def 'The `UI.scrollPanels(UI.Align, Configurator)` factory accepts a custom alignment alongside the configurator.'()
+    {
+        reportInfo """
+            Sometimes you want the scroll panels widget to lay its entries out
+            horizontally instead of vertically. The
+            `UI.scrollPanels(UI.Align, Configurator)` factory lets you do that
+            while still letting you tweak the `Scrollable` behavior
+            through a declarative lambda.
+        """
+        given : 'A horizontally aligned scroll panels widget with a custom scrollable config.'
+            var ui =
+                    UI.scrollPanels(UI.Align.HORIZONTAL, conf -> conf
+                        .unitIncrement(7)
+                        .blockIncrement(21)
+                        .fitHeight(true)
+                    )
+                    .add(UI.label("Left"))
+                    .add(UI.label("Center"))
+                    .add(UI.label("Right"))
+        and : 'We get the underlying `JScrollPanels` and its internal `Scrollable` container.'
+            var panels = ui.get(JScrollPanels)
+            var inner = panels.getViewport().getView() as Scrollable
+        expect : 'The configured values are visible through the `Scrollable` interface.'
+            inner.getScrollableUnitIncrement(null,  javax.swing.SwingConstants.HORIZONTAL, 1) == 7
+            inner.getScrollableBlockIncrement(null, javax.swing.SwingConstants.HORIZONTAL, 1) == 21
+            inner.getScrollableTracksViewportHeight() == true
+            inner.getScrollableTracksViewportWidth()  == false
+    }
+
+    def 'A `ScrollIncrementSupplier` can be used to compute per-call scroll increments for a scroll panels widget.'()
+    {
+        reportInfo """
+            For the most demanding use cases, you don't have to commit
+            to a single fixed increment value. Instead, you can plug in
+            a `ScrollIncrementSupplier` that receives the visible rectangle,
+            orientation and direction and returns a dynamically computed
+            scroll increment.
+
+            This is useful for example when the increment should depend on
+            the orientation of the scroll, or on the current view rectangle.
+        """
+        given : 'A scroll panels widget which uses a custom `ScrollIncrementSupplier`.'
+            var ui =
+                    UI.scrollPanels( conf -> conf
+                        .unitIncrement((rect, align, dir) -> align == UI.Align.VERTICAL ? 11 : 33)
+                        .blockIncrement((rect, align, dir) -> align == UI.Align.VERTICAL ? 22 : 66)
+                    )
+                    .add(UI.label("Alpha"))
+                    .add(UI.label("Beta"))
+                    .add(UI.label("Gamma"))
+        and : 'We build the component and access the internal `Scrollable`.'
+            var panels = ui.get(JScrollPanels)
+            var inner = panels.getViewport().getView() as Scrollable
+        expect : 'The vertical and horizontal increments are computed independently.'
+            inner.getScrollableUnitIncrement(null,  javax.swing.SwingConstants.VERTICAL,   1) == 11
+            inner.getScrollableUnitIncrement(null,  javax.swing.SwingConstants.HORIZONTAL, 1) == 33
+            inner.getScrollableBlockIncrement(null, javax.swing.SwingConstants.VERTICAL,   1) == 22
+            inner.getScrollableBlockIncrement(null, javax.swing.SwingConstants.HORIZONTAL, 1) == 66
+    }
+
+    def 'The `UI.scrollPanels(UI.Align, Dimension, Configurator)` factory accepts an entry shape together with the configurator.'()
+    {
+        reportInfo """
+            The most expressive overload of the `UI.scrollPanels` factory family
+            takes the alignment, a `Dimension` describing the shape of the
+            entry slots and a `Configurator` lambda for the `Scrollable`
+            behavior. This is useful when you want to set a fixed entry
+            shape and a custom scroll behavior at once.
+        """
+        given : 'A scroll panels widget with a fixed entry shape and a custom configurator.'
+            var ui =
+                    UI.scrollPanels(UI.Align.VERTICAL, new Dimension(200, 40), conf -> conf
+                        .prefSize(200, 240)
+                        .fitWidth(true)
+                    )
+                    .add(UI.label("First entry"))
+                    .add(UI.label("Second entry"))
+        and : 'We retrieve the underlying `JScrollPanels`.'
+            var panels = ui.get(JScrollPanels)
+            var inner = panels.getViewport().getView() as Scrollable
+        expect : 'The configurator-provided viewport size and width-fit are reported.'
+            inner.getPreferredScrollableViewportSize() == new Dimension(200, 240)
+            inner.getScrollableTracksViewportWidth() == true
+    }
+
+    def 'A `UI.scrollPanels(Configurator)` is dynamic - the configurator is consulted on every `Scrollable` call.'()
+    {
+        reportInfo """
+            The configurator lambda you pass to `UI.scrollPanels(Configurator)`
+            is not just invoked once. Instead, the `Scrollable` interface of the
+            internal entry container delegates back to the configurator
+            every time it is queried. This means the values you choose can
+            depend on dynamic external state captured by the lambda.
+
+            In this test, we capture a mutable property in the lambda and
+            change it between two `Scrollable` calls, observing that
+            the reported value follows along.
+        """
+        given : 'A `Var<Integer>` whose value we will read from within the configurator.'
+            var incrementProperty = Var.of(10)
+        and : 'A scroll panels widget whose unit-increment depends on the property value.'
+            var ui =
+                    UI.scrollPanels( conf -> conf.unitIncrement(incrementProperty.get()) )
+                    .add(UI.label("Anything"))
+                    .add(UI.label("In particular"))
+            var panels = ui.get(JScrollPanels)
+            var inner = panels.getViewport().getView() as Scrollable
+        expect : 'The first query returns the initial value of the property.'
+            inner.getScrollableUnitIncrement(null, javax.swing.SwingConstants.VERTICAL, 1) == 10
+
+        when : 'We update the property to a different value...'
+            incrementProperty.set(77)
+        then : 'A subsequent query through the `Scrollable` interface returns the updated value.'
+            inner.getScrollableUnitIncrement(null, javax.swing.SwingConstants.VERTICAL, 1) == 77
+    }
 }

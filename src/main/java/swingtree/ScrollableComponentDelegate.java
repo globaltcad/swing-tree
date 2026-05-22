@@ -118,6 +118,44 @@ public final class ScrollableComponentDelegate
                 );
     }
 
+    /**
+     *  An internal factory which constructs a {@link ScrollableComponentDelegate}
+     *  from a set of explicit default values. This is useful for components
+     *  (like the internal panel of {@link swingtree.components.JScrollPanels})
+     *  which already implement {@link Scrollable} but want to expose a
+     *  {@link swingtree.api.Configurator} based customization mechanism without
+     *  re-entering their own {@link Scrollable} methods to compute the defaults.
+     *
+     * @param scrollPane     The {@link JScrollPane} in which the content component is placed.
+     * @param content        The user provided content component placed inside the scroll pane.
+     * @param preferredSize  The preferred viewport size to expose as the default.
+     * @param unitIncrement  The default {@link ScrollIncrementSupplier} for unit increments.
+     * @param blockIncrement The default {@link ScrollIncrementSupplier} for block increments.
+     * @param fitWidth       Whether the viewport should force the content's width to match its own.
+     * @param fitHeight      Whether the viewport should force the content's height to match its own.
+     * @return A new {@link ScrollableComponentDelegate} populated with the supplied defaults.
+     */
+    public static ScrollableComponentDelegate of(
+        JScrollPane             scrollPane,
+        JComponent              content,
+        Size                    preferredSize,
+        ScrollIncrementSupplier unitIncrement,
+        ScrollIncrementSupplier blockIncrement,
+        boolean                 fitWidth,
+        boolean                 fitHeight
+    ) {
+        Objects.requireNonNull(scrollPane);
+        Objects.requireNonNull(content);
+        Objects.requireNonNull(preferredSize);
+        Objects.requireNonNull(unitIncrement);
+        Objects.requireNonNull(blockIncrement);
+        Component view = scrollPane.getViewport().getView();
+        return new ScrollableComponentDelegate(
+                    scrollPane, content, view, preferredSize,
+                    unitIncrement, blockIncrement, fitWidth, fitHeight
+                );
+    }
+
     private final JScrollPane             _scrollPane;
     private final JComponent              _content;
     private final Component               _view;
@@ -380,13 +418,27 @@ public final class ScrollableComponentDelegate
         return _view;
     }
 
-    // Not part of the public API below:
-
-    Size preferredSize() {
+    /**
+     * Returns the preferred viewport size configured on this delegate.
+     * This is the value reported to the scroll pane through
+     * {@link Scrollable#getPreferredScrollableViewportSize()}.
+     *
+     * @return The configured preferred viewport size of the scrollable content.
+     */
+    public Size preferredSize() {
         return _preferredSize;
     }
 
-    int unitIncrement(
+    /**
+     * Computes the unit increment value reported to the scroll pane through
+     * {@link Scrollable#getScrollableUnitIncrement(java.awt.Rectangle, int, int)}.
+     *
+     * @param viewRectangle The view area visible within the viewport.
+     * @param orientation Either {@link UI.Align#VERTICAL} or {@link UI.Align#HORIZONTAL}.
+     * @param direction Less than zero to scroll up/left, greater than zero for down/right.
+     * @return The configured unit increment for the given context.
+     */
+    public int unitIncrement(
         Bounds   viewRectangle,
         UI.Align orientation,
         int      direction
@@ -394,7 +446,16 @@ public final class ScrollableComponentDelegate
         return _unitIncrement.get(viewRectangle, orientation, direction);
     }
 
-    int blockIncrement(
+    /**
+     * Computes the block increment value reported to the scroll pane through
+     * {@link Scrollable#getScrollableBlockIncrement(java.awt.Rectangle, int, int)}.
+     *
+     * @param viewRectangle The view area visible within the viewport.
+     * @param orientation Either {@link UI.Align#VERTICAL} or {@link UI.Align#HORIZONTAL}.
+     * @param direction Less than zero to scroll up/left, greater than zero for down/right.
+     * @return The configured block increment for the given context.
+     */
+    public int blockIncrement(
         Bounds   viewRectangle,
         UI.Align orientation,
         int      direction
@@ -402,11 +463,27 @@ public final class ScrollableComponentDelegate
         return _blockIncrement.get(viewRectangle, orientation, direction);
     }
 
-    boolean fitWidth() {
+    /**
+     * Indicates whether the viewport should force the scrollable content's width
+     * to match its own. This is the value reported to the scroll pane through
+     * {@link Scrollable#getScrollableTracksViewportWidth()}.
+     *
+     * @return {@code true} if the viewport should force the width to match the viewport,
+     *         {@code false} otherwise.
+     */
+    public boolean fitWidth() {
         return _fitWidth;
     }
 
-    boolean fitHeight() {
+    /**
+     * Indicates whether the viewport should force the scrollable content's height
+     * to match its own. This is the value reported to the scroll pane through
+     * {@link Scrollable#getScrollableTracksViewportHeight()}.
+     *
+     * @return {@code true} if the viewport should force the height to match the viewport,
+     *         {@code false} otherwise.
+     */
+    public boolean fitHeight() {
         return _fitHeight;
     }
 

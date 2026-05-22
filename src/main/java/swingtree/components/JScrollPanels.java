@@ -4,13 +4,18 @@ import net.miginfocom.swing.MigLayout;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.From;
+import swingtree.ScrollableComponentDelegate;
 import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.UIForAnySwing;
+import swingtree.api.Configurator;
+import swingtree.api.ScrollIncrementSupplier;
 import swingtree.api.mvvm.EntryViewModel;
 import swingtree.api.mvvm.ViewSupplier;
 import swingtree.layout.AddConstraint;
+import swingtree.layout.Bounds;
 import swingtree.layout.ResponsiveGridFlowLayout;
+import swingtree.layout.Size;
 import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
@@ -67,12 +72,38 @@ public class JScrollPanels extends UI.ScrollPane
         UI.Align align, @Nullable Dimension size
     ) {
         Objects.requireNonNull(align);
-        return _construct(align, size, Collections.emptyList(), null, m -> UI.panel());
+        return _construct(align, size, null, Collections.emptyList(), null, m -> UI.panel());
+    }
+
+    /**
+     * Constructs a new {@link JScrollPanels} instance with the provided alignment, size
+     * and a {@link Configurator} which configures the {@link Scrollable} behavior of
+     * the entry container of this scroll panels component. <br>
+     * If the configurator is {@code null}, the default {@link Scrollable} behavior is preserved,
+     * which means that the entry container reports default unit and block increments
+     * and does not force its width or height to match the viewport.
+     *
+     * @param align        The alignment of the entries inside this {@link JScrollPanels} instance.
+     *                     The alignment can be either {@link UI.Align#HORIZONTAL} or {@link UI.Align#VERTICAL}.
+     * @param size         The size of the entries in this {@link JScrollPanels} instance.
+     * @param configurator A {@link Configurator} which configures the {@link Scrollable} behavior
+     *                     of the entry container of this scroll panels component.
+     *                     May be {@code null} to preserve the default behavior.
+     * @return A new {@link JScrollPanels} instance.
+     */
+    public static JScrollPanels of(
+        UI.Align align,
+        @Nullable Dimension size,
+        @Nullable Configurator<ScrollableComponentDelegate> configurator
+    ) {
+        Objects.requireNonNull(align);
+        return _construct(align, size, configurator, Collections.emptyList(), null, m -> UI.panel());
     }
 
     private static JScrollPanels _construct(
         UI.Align align,
         @Nullable Dimension shape,
+        @Nullable Configurator<ScrollableComponentDelegate> configurator,
         List<EntryViewModel> models,
         @Nullable AddConstraint constraints,
         ViewSupplier<EntryViewModel> viewSupplier
@@ -93,8 +124,9 @@ public class JScrollPanels extends UI.ScrollPane
                         .collect(Collectors.toList());
 
 
-        InternalPanel internalWrapperPanel = new InternalPanel(entries, shape, type);
+        InternalPanel internalWrapperPanel = new InternalPanel(entries, shape, type, configurator);
         JScrollPanels newJScrollPanels = new JScrollPanels(internalWrapperPanel);
+        internalWrapperPanel._setScrollPane(newJScrollPanels);
         forwardReference[0] = internalWrapperPanel;
 
         if ( type == UI.Align.HORIZONTAL )
@@ -500,18 +532,22 @@ public class JScrollPanels extends UI.ScrollPane
         private final int _W, _H, _horizontalGap, _verticalGap;
         private final UI.Align _type;
         private final Dimension _size;
+        private final @Nullable Configurator<ScrollableComponentDelegate> _configurator;
+        private @Nullable JScrollPane _scrollPane;
 
 
         private InternalPanel(
             List<EntryPanel> entryPanels,
             @Nullable Dimension shape,
-            UI.Align type
+            UI.Align type,
+            @Nullable Configurator<ScrollableComponentDelegate> configurator
         ) {
             shape = ( shape == null ? new Dimension(120, 100) : shape );
             int n = entryPanels.size() / 2;
             _W = (int) shape.getWidth(); // 120
             _H = (int) shape.getHeight(); // 100
             _type = type;
+            _configurator = configurator;
             LayoutManager layout;
             if ( type == UI.Align.HORIZONTAL ) {
                 ResponsiveGridFlowLayout flow = new ResponsiveGridFlowLayout();
@@ -547,7 +583,24 @@ public class JScrollPanels extends UI.ScrollPane
             setBackground(Color.PINK);
         }
 
-        @Override public Dimension getPreferredScrollableViewportSize() { return _size; }
+        void _setScrollPane(JScrollPane scrollPane) {
+            _scrollPane = scrollPane;
+        }
+
+        @Override
+        public Dimension getPreferredScrollableViewportSize() {
+            if ( _configurator == null )
+                return _size;
+            ScrollableComponentDelegate delegate = _buildDelegate();
+            if ( delegate == null )
+                return _size;
+            try {
+                return delegate.preferredSize().toDimension();
+            } catch ( Exception e ) {
+                log.error(SwingTree.get().logMarker(), "Error while calculating preferred scrollable viewport size for scroll panels.", e);
+                return _size;
+            }
+        }
 
         @Override
         public Dimension getPreferredSize() {
@@ -567,20 +620,91 @@ public class JScrollPanels extends UI.ScrollPane
         public int getScrollableUnitIncrement(
                 Rectangle visibleRect, int orientation, int direction
         ) {
-            return _incrementFrom(orientation);
+            if ( _configurator == null )
+                return _incrementFrom(orientation);
+            ScrollableComponentDelegate delegate = _buildDelegate();
+            if ( delegate == null )
+                return _incrementFrom(orientation);
+            try {
+                Bounds bounds = ( visibleRect == null ? Bounds.none() : Bounds.of(visibleRect) );
+                UI.Align align = ( orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL );
+                return delegate.unitIncrement(bounds, align, direction);
+            } catch ( Exception e ) {
+                log.error(SwingTree.get().logMarker(), "Error while calculating unit increment for scroll panels.", e);
+                return _incrementFrom(orientation);
+            }
         }
 
         @Override
         public int getScrollableBlockIncrement(
                 Rectangle visibleRect, int orientation, int direction
         ) {
-            return _incrementFrom(orientation) / 2;
+            if ( _configurator == null )
+                return _incrementFrom(orientation) / 2;
+            ScrollableComponentDelegate delegate = _buildDelegate();
+            if ( delegate == null )
+                return _incrementFrom(orientation) / 2;
+            try {
+                Bounds bounds = ( visibleRect == null ? Bounds.none() : Bounds.of(visibleRect) );
+                UI.Align align = ( orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL );
+                return delegate.blockIncrement(bounds, align, direction);
+            } catch ( Exception e ) {
+                log.error(SwingTree.get().logMarker(), "Error while calculating block increment for scroll panels.", e);
+                return _incrementFrom(orientation) / 2;
+            }
         }
 
         private int _incrementFrom(int orientation) { return orientation == JScrollBar.HORIZONTAL ? _W + _horizontalGap : _H + _verticalGap; }
 
-        @Override public boolean getScrollableTracksViewportWidth()  { return false; }
-        @Override public boolean getScrollableTracksViewportHeight() { return false; }
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            if ( _configurator == null )
+                return false;
+            ScrollableComponentDelegate delegate = _buildDelegate();
+            if ( delegate == null )
+                return false;
+            try {
+                return delegate.fitWidth();
+            } catch ( Exception e ) {
+                log.error(SwingTree.get().logMarker(), "Error while calculating fit width for scroll panels.", e);
+                return false;
+            }
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            if ( _configurator == null )
+                return false;
+            ScrollableComponentDelegate delegate = _buildDelegate();
+            if ( delegate == null )
+                return false;
+            try {
+                return delegate.fitHeight();
+            } catch ( Exception e ) {
+                log.error(SwingTree.get().logMarker(), "Error while calculating fit height for scroll panels.", e);
+                return false;
+            }
+        }
+
+        private @Nullable ScrollableComponentDelegate _buildDelegate() {
+            if ( _configurator == null || _scrollPane == null )
+                return null;
+            ScrollIncrementSupplier unitSupplier  = (rect, align, direction) ->
+                    _incrementFrom(align == UI.Align.HORIZONTAL ? JScrollBar.HORIZONTAL : JScrollBar.VERTICAL);
+            ScrollIncrementSupplier blockSupplier = (rect, align, direction) ->
+                    _incrementFrom(align == UI.Align.HORIZONTAL ? JScrollBar.HORIZONTAL : JScrollBar.VERTICAL) / 2;
+            ScrollableComponentDelegate delegate = ScrollableComponentDelegate.of(
+                    _scrollPane, this, Size.of(_size),
+                    unitSupplier, blockSupplier,
+                    false, false
+                );
+            try {
+                delegate = _configurator.configure(delegate);
+            } catch ( Exception e ) {
+                log.error(SwingTree.get().logMarker(), "Error while configuring scrollable behavior of scroll panels.", e);
+            }
+            return delegate;
+        }
     }
 
     /**
