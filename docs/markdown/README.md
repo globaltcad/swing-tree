@@ -8,6 +8,12 @@ your first stop, start with [**Motivation**](./Motivation.md) and then
 [**Climbing the Swing Tree**](./Climbing-Swing-Tree.md). Everything else
 fans out from there.
 
+> 🤖 **Using an AI coding agent?** Drop
+> [`../agent-skills/SKILL.md`](../agent-skills/SKILL.md) into its context — a
+> single self-contained file that teaches the agent the whole SwingTree API,
+> the MVI/MVL & MVVM patterns, styling, animation, and the common pitfalls, so
+> it writes idiomatic SwingTree from the start.
+
 ---
 
 ## 🌱 Start here ##

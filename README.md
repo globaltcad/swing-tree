@@ -27,7 +27,6 @@ No new runtime, no rewrite — it sits right on top of the Swing you already kno
 - 🔍 a functional, lambda-friendly API for peeking into the UI tree and manipulating components freely
 - ⚡ concise event handling through `onClick`, `onChange` and friends
 - 🎨 advanced styling through a CSS-like DSL API
-- 🎞️ [animated styling](docs/markdown/An-Advanced-Style-Animation.md)
 
 </td>
 <td>
@@ -38,6 +37,7 @@ No new runtime, no rewrite — it sits right on top of the Swing you already kno
 <tr>
 <td> 
 
+- 🎞️ [animated styling](docs/markdown/An-Advanced-Style-Animation.md)
 - 🧩 built-in [property support](https://github.com/globaltcad/sprouts) 
   for [MVVM](docs/markdown/Advanced-MVVM.md) and [MVI](docs/markdown/Functional-MVVM.md) architecture
   (so your UI and business logic stay decoupled)
@@ -52,6 +52,7 @@ No new runtime, no rewrite — it sits right on top of the Swing you already kno
 - 🚀 [Getting Started](docs/markdown/Climbing-Swing-Tree.md)
 - 📚 [The Wiki — all the guides](docs/markdown/README.md)
 - 📖 [Living Documentation](https://globaltcad.github.io/swing-tree/)
+- 🤖 [AI Agent Skill file](docs/agent-skills/SKILL.md)
 
 </td>
 </tr>
@@ -147,6 +148,23 @@ shadows and animations — applied declaratively over one shared UI definition.
 The mechanic that makes this work — central style sheets plus semantic
 `group(..)` tags on components — is explained in the
 [Style Sheets and Groups](docs/markdown/Style-Sheets-And-Groups.md) guide.
+
+---
+
+## 🤖 Building with an AI coding agent? ##
+
+If you let an AI assistant (Claude Code, Cursor, Copilot, …) write SwingTree code
+for you, drop **[`docs/agent-skills/SKILL.md`](docs/agent-skills/SKILL.md)** into
+its context first. It is a single, self-contained file that gives the agent deep
+intuition for the whole library — the builder API, MigLayout and reactive layouts,
+the Sprouts property/lens system, MVI/MVL and MVVM view models, the styling and
+animation APIs, plus the non-obvious gotchas — so it writes idiomatic SwingTree
+instead of guessing.
+
+It works as a [Claude Code Agent Skill](https://docs.claude.com/en/docs/claude-code/skills)
+out of the box, but it's just Markdown: paste it into any agent's context, project
+rules, or system prompt. We've had consistently good results having agents write
+SwingTree UIs this way.
 
 ---
 
