@@ -153,18 +153,13 @@ The mechanic that makes this work — central style sheets plus semantic
 
 ## 🤖 Building with an AI coding agent? ##
 
-If you let an AI assistant (Claude Code, Cursor, Copilot, …) write SwingTree code
-for you, drop **[`docs/agent-skills/SKILL.md`](docs/agent-skills/SKILL.md)** into
+If you let an AI assistant write SwingTree code for you, 
+drop **[`docs/agent-skills/SKILL.md`](docs/agent-skills/SKILL.md)** into
 its context first. It is a single, self-contained file that gives the agent deep
-intuition for the whole library — the builder API, MigLayout and reactive layouts,
+intuition for the whole library: the builder API, MigLayout and reactive layouts,
 the Sprouts property/lens system, MVI/MVL and MVVM view models, the styling and
 animation APIs, plus the non-obvious gotchas — so it writes idiomatic SwingTree
 instead of guessing.
-
-It works as a [Claude Code Agent Skill](https://docs.claude.com/en/docs/claude-code/skills)
-out of the box, but it's just Markdown: paste it into any agent's context, project
-rules, or system prompt. We've had consistently good results having agents write
-SwingTree UIs this way.
 
 ---
 
