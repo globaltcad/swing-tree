@@ -40,6 +40,28 @@ public class Utility
         DEFAULT, NIMBUS, FLAT_BRIGHT
     }
 
+    /**
+     *  Runs the given action while capturing everything written to {@code System.err},
+     *  and returns the captured text. SwingTree logs through SLF4J, and the test
+     *  runtime uses the {@code slf4j-simple} backend which writes to {@code System.err}
+     *  (resolved dynamically per call), so this lets a specification assert that the
+     *  framework actually communicated a problem to the developer via the logs.
+     *
+     * @param action The (typically UI-building) code whose error log output we want to inspect.
+     * @return Everything the action wrote to {@code System.err}, as a single string.
+     */
+    public static String captureSystemErr(Runnable action) {
+        java.io.PrintStream original = System.err;
+        java.io.ByteArrayOutputStream buffer = new java.io.ByteArrayOutputStream();
+        try (java.io.PrintStream capturing = new java.io.PrintStream(buffer, true, java.nio.charset.StandardCharsets.UTF_8)) {
+            System.setErr(capturing);
+            action.run();
+        } finally {
+            System.setErr(original);
+        }
+        return new String(buffer.toByteArray(), java.nio.charset.StandardCharsets.UTF_8);
+    }
+
     public static void setLaF(LaF lookAndFeel) {
         switch ( lookAndFeel ) {
             case DEFAULT: break;

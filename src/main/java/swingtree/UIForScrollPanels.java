@@ -272,6 +272,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
         _onShowDelegated( propertyOfModels, scrollPanels, (thisComponent, delegate) -> {
             Tuple<M> oldModels = delegate.oldValue().orElseThrowUnchecked();
             Tuple<M> newModels = delegate.currentValue().orElseThrowUnchecked();
+            _warnAboutDuplicateEntryIds(newModels); // debug-gated; covers every update path
             viewSupplier.rememberCurrentViewsForReuse();
             SequenceDiff diff = null;
             SequenceDiff lastDiff = lastDiffRef.get();
@@ -291,6 +292,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
             viewSupplier.clearCurrentViews();
         });
         propertyOfModels.ifPresent( (tupleOfModels) -> {
+            _warnAboutDuplicateEntryIds(tupleOfModels);
             scrollPanels.removeAllEntries();
             _addAllEntriesAt(attr, scrollPanels, 0, tupleOfModels, lensSupplier, viewSupplier);
         });

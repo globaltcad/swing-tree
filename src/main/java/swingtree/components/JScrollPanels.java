@@ -802,13 +802,29 @@ public class JScrollPanels extends UI.ScrollPane
             _viewable = provider;
             _provider = viewSupplier;
             _lastState = lastState;
-            if ( _lastState.getParent() != null ) {
-                Container parent = _lastState.getParent();
-                log.error(SwingTree.get().logMarker(),
-                            "View supplier in {} class supplied a view which is already tied to another parent {}.",
-                            JScrollPanels.class.getSimpleName(), parent,
+            Container previousParent = _lastState.getParent();
+            if ( previousParent != null ) {
+                // A previously rendered entry view that was just detached from the
+                // list is being recycled by id - this is the intended reuse path,
+                // not an error. We only complain when the view is still attached to
+                // a *live* parent, which signals genuine sharing/duplication.
+                boolean isBenignRecycle = previousParent instanceof EntryPanel
+                                       && previousParent.getParent() == null;
+                if ( !isBenignRecycle ) {
+                    log.error(SwingTree.get().logMarker(),
+                            "A view supplied to a '{}' is already attached to another, still-live parent ({}).\n" +
+                            "  This is most likely due to: (1) a view supplier that returns a cached or shared " +
+                            "component instead of building a fresh view for each entry, or (2) two entries that " +
+                            "share the same 'HasId.id()', so the entry-view cache mapped several models onto one view.\n" +
+                            "  How to fix: make the supplier build a new view per entry, and give every entry a " +
+                            "unique, stable 'HasId.id()'. The view will be force-reparented now, which can scramble " +
+                            "the layout if the duplication was unintended.",
+                            JScrollPanels.class.getSimpleName(), previousParent,
                             new Throwable("Stack trace for debugging purposes.")
                         );
+                }
+                // Either way, detach it explicitly so 'add(..)' below has a clean slate.
+                previousParent.remove(_lastState);
             }
             this.add(_lastState, constraints != null ? constraints.toConstraintForLayoutManager() : "grow" );
 
