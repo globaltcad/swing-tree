@@ -53,9 +53,11 @@ public class Utility
     public static String captureSystemErr(Runnable action) {
         java.io.PrintStream original = System.err;
         java.io.ByteArrayOutputStream buffer = new java.io.ByteArrayOutputStream();
-        try (java.io.PrintStream capturing = new java.io.PrintStream(buffer, true, java.nio.charset.StandardCharsets.UTF_8)) {
+        try (java.io.PrintStream capturing = new java.io.PrintStream(buffer, true, java.nio.charset.StandardCharsets.UTF_8.name())) {
             System.setErr(capturing);
             action.run();
+        } catch (java.io.UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
         } finally {
             System.setErr(original);
         }
