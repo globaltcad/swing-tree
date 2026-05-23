@@ -6472,11 +6472,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  another parent" message. We detect that broken state up front and explain
      *  it, because it is almost always a mistake in how the id is derived.
      *  <p>
-     *  This is a development-time sanity check: it is skipped entirely unless
+     *  This is a development-time sanity check: it runs only when
      *  {@link SwingTree#isRecordingDebugSourceTrace()} is enabled (on by default,
-     *  off in tuned production setups) <b>or</b> the number of models is above a
-     *  certain threshold, so it adds little to no cost where it is turned off.
-     *  When enabled it runs once per (re)render of a {@code HasId} list binding.
+     *  off in tuned production setups) <b>and</b> the number of models is not above
+     *  the threshold of 256. It is skipped for larger lists and whenever debug
+     *  tracing is disabled, so it adds little to no cost where it is turned off.
+     *  When it does run, it runs once per (re)render of a {@code HasId} list binding.
      */
     static void _warnAboutDuplicateEntryIds( Tuple<?> models ) {
         if ( models.size() > 256 )
