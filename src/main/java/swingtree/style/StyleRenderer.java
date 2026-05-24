@@ -635,7 +635,7 @@ final class StyleRenderer
 
         private final ShadowConf      _conf; // normalized: color + isOutset + type only
         private @Nullable Color       _innerColor;
-        private @Nullable Color  []   _transitionColors; // blended curve for sampling indices 1..n
+        private Color    @Nullable [] _transitionColors; // blended curve for sampling indices 1..n
         private final Map<Float,GradientStops> _stopsByStart =
                 new LinkedHashMap<Float,GradientStops>(16, 0.75f, true) {
                     @Override
@@ -678,17 +678,18 @@ final class StyleRenderer
             if ( cached != null )
                 return cached;
             _ensureColors();
-            final Color[] transition = Objects.requireNonNull(_transitionColors);
+            final Color   innerColor  = Objects.requireNonNull(_innerColor);
+            final Color[] transition  = Objects.requireNonNull(_transitionColors);
             final int     n           = transition.length;
             final boolean hasFlatCore = gradientStart > 0f;
             final int     lead        = hasFlatCore ? 2 : 1; // leading stops fixed at innerColor
             final float[] fractions   = new float[lead + n];
             final Color[] colors      = new Color[lead + n];
             fractions[0] = 0f;
-            colors[0]    = _innerColor;
+            colors[0]    = innerColor;
             if ( hasFlatCore ) {
                 fractions[1] = gradientStart;
-                colors[1]    = _innerColor;
+                colors[1]    = innerColor;
             }
             for ( int i = 1; i <= n; i++ ) {
                 final float p   = (float) i / n; // progress across the transition region, in (0, 1]
