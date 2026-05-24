@@ -156,11 +156,10 @@ public final class StyleTrait<C extends JComponent>
         Objects.requireNonNull(component);
         boolean typeIsCompatible = _type.isAssignableFrom(component.getClass());
         boolean idIsCompatible   = _id.isEmpty() || _id.equals(component.getName());
-        boolean belongsToApplicableGroup = ComponentExtension.from(component)
-                                              .getStyleGroups()
-                                              .any( sg -> sg.equals(_group));
-
-        boolean nameIsCompatible = _group.isEmpty() || belongsToApplicableGroup;
+        // Only resolve the component's style groups when the group actually needs matching.
+        // 'belongsToGroup' is a plain list lookup, avoiding the Tuple + Stream allocations of
+        // the former 'getStyleGroups().any(..)' on every applicability check.
+        boolean nameIsCompatible = _group.isEmpty() || ComponentExtension.from(component).belongsToGroup(_group);
         return typeIsCompatible && idIsCompatible && nameIsCompatible;
     }
 
