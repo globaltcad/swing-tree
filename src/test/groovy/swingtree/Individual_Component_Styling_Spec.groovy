@@ -809,6 +809,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .shadowColor(new Color(0,0,0,100))
                         .shadowSpreadRadius(1)
                         .shadowBlurRadius(2)
+                        .shadowType(UI.ShadowType.FLAT) // pin the pre-BLUR-default look so the snapshot stays valid
                         .font(new Font("Arial", Font.BOLD, 20))
                     )
 
@@ -974,6 +975,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .shadowBlurRadius(4)
                         .shadowSpreadRadius(-2)
                         .shadowIsInset(true)
+                        .shadowType(UI.ShadowType.FLAT) // pin the pre-BLUR-default look so the snapshot stays valid
                         .padding(6)
                         .margin(10)
                     )
@@ -1020,6 +1022,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .shadowBlurRadius(13)
                         .shadowSpreadRadius(-5)
                         .shadowIsInset(false)
+                        .shadowType(UI.ShadowType.FLAT) // pin the pre-BLUR-default look so the snapshot stays valid
                         .padding(0)
                         .margin(10)
                         .size(230, 30)

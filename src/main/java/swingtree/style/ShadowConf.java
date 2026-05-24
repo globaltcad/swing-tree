@@ -81,49 +81,54 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
 
     private static final ShadowConf _NONE = new ShadowConf(
                                                     Offset.none(),0, 0,
-                                                    null, true
+                                                    null, true, UI.ShadowType.BLUR
                                                 );
 
     public static ShadowConf none() { return _NONE; }
-    
+
     static ShadowConf of(
-        Offset          offset,
-        float           shadowBlurRadius,
-        float           shadowSpreadRadius,
-        @Nullable Color shadowColor,
-        boolean         isOutset
+        Offset              offset,
+        float               shadowBlurRadius,
+        float               shadowSpreadRadius,
+        @Nullable Color     shadowColor,
+        boolean             isOutset,
+        UI.ShadowType       type
     ) {
-        if ( 
+        if (
             offset == _NONE._offset &&
             shadowBlurRadius == _NONE._blurRadius &&
             shadowSpreadRadius == _NONE._spreadRadius &&
             shadowColor == _NONE._color &&
-            isOutset == _NONE._isOutset
+            isOutset == _NONE._isOutset &&
+            type == _NONE._type
         )
             return _NONE;
         else
-            return new ShadowConf(offset, shadowBlurRadius, shadowSpreadRadius, shadowColor, isOutset);
+            return new ShadowConf(offset, shadowBlurRadius, shadowSpreadRadius, shadowColor, isOutset, type);
     }
 
-    private final Offset          _offset;
-    private final float           _blurRadius;
-    private final float           _spreadRadius;
-    private final @Nullable Color _color;
-    private final boolean         _isOutset;
+    private final Offset              _offset;
+    private final float               _blurRadius;
+    private final float               _spreadRadius;
+    private final @Nullable Color     _color;
+    private final boolean             _isOutset;
+    private final UI.ShadowType       _type;
 
 
     private ShadowConf(
-        Offset          offset,
-        float           shadowBlurRadius,
-        float           shadowSpreadRadius,
-        @Nullable Color shadowColor,
-        boolean         isOutset
+        Offset              offset,
+        float               shadowBlurRadius,
+        float               shadowSpreadRadius,
+        @Nullable Color     shadowColor,
+        boolean             isOutset,
+        UI.ShadowType       type
     ) {
         _offset           = Objects.requireNonNull(offset);
         _blurRadius       = shadowBlurRadius;
         _spreadRadius     = shadowSpreadRadius;
         _color            = shadowColor;
         _isOutset         = isOutset;
+        _type             = Objects.requireNonNull(type);
     }
 
     float horizontalOffset() { return _offset.x(); }
@@ -140,6 +145,8 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
 
     boolean isInset() { return !_isOutset; }
 
+    UI.ShadowType type() { return _type; }
+
     /**
      *  Use this to offset the shadow position along the X axis.
      *  If the {@code horizontalShadowOffset} is positive, the shadow will move to the right,
@@ -150,7 +157,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      * @return A new {@link ShadowConf} with the specified horizontal shadow offset.
      */
     public ShadowConf horizontalOffset( double horizontalShadowOffset ) {
-        return ShadowConf.of(_offset.withX((float) horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
+        return ShadowConf.of(_offset.withX((float) horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset, _type);
     }
 
     /**
@@ -162,7 +169,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      * @return A new {@link ShadowConf} with the specified vertical shadow offset.
      */
     public ShadowConf verticalOffset( double verticalShadowOffset ) {
-        return ShadowConf.of(_offset.withY((float) verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
+        return ShadowConf.of(_offset.withY((float) verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset, _type);
     }
 
     /**
@@ -178,7 +185,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      * @return A new {@link ShadowConf} with the specified horizontal and vertical shadow offsets.
      */
     public ShadowConf offset( double horizontalShadowOffset, double verticalShadowOffset ) {
-        return ShadowConf.of(Offset.of(horizontalShadowOffset, verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
+        return ShadowConf.of(Offset.of(horizontalShadowOffset, verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset, _type);
     }
 
     /**
@@ -191,7 +198,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      * @return A new {@link ShadowConf} with the specified horizontal and vertical shadow offsets.
      */
     public ShadowConf offset( double shadowOffset ) {
-        return ShadowConf.of(Offset.of(shadowOffset, shadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);
+        return ShadowConf.of(Offset.of(shadowOffset, shadowOffset), _blurRadius, _spreadRadius, _color, _isOutset, _type);
     }
 
     /**
@@ -205,7 +212,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      * @return A new {@link ShadowConf} with the specified blur radius.
      */
     public ShadowConf blurRadius( double shadowBlurRadius ) {
-        return ShadowConf.of(_offset, (float) shadowBlurRadius, _spreadRadius, _color, _isOutset);
+        return ShadowConf.of(_offset, (float) shadowBlurRadius, _spreadRadius, _color, _isOutset, _type);
     }
 
     /**
@@ -221,7 +228,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      * @return A new {@link ShadowConf} with the specified spread radius.
      */
     public ShadowConf spreadRadius( double shadowSpreadRadius ) {
-        return ShadowConf.of(_offset, _blurRadius, (float) shadowSpreadRadius, _color, _isOutset);
+        return ShadowConf.of(_offset, _blurRadius, (float) shadowSpreadRadius, _color, _isOutset, _type);
     }
 
     /**
@@ -235,7 +242,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
             shadowColor = null;
         if ( Objects.equals(shadowColor, _color) )
             return this;
-        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, shadowColor, _isOutset);
+        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, shadowColor, _isOutset, _type);
     }
 
     /**
@@ -265,7 +272,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
             log.error(SwingTree.get().logMarker(), "Failed to parse color string: '{}'", shadowColor, e);
             return this; // We want to avoid side effects other than a wrong color
         }
-        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, newColor, _isOutset);
+        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, newColor, _isOutset, _type);
     }
 
     /**
@@ -316,7 +323,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      * @return A new {@link ShadowConf} with the specified inset/outset state.
      */
     public ShadowConf isInset(boolean shadowInset ) {
-        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, !shadowInset);
+        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, !shadowInset, _type);
     }
 
     /**
@@ -335,7 +342,29 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      * @return A new {@link ShadowConf} with the specified outset/inset state.
      */
     public ShadowConf isOutset( boolean shadowOutset ) {
-        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, shadowOutset);
+        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, shadowOutset, _type);
+    }
+
+    /**
+     *  Defines the shape of the shadow's "falloff curve", that is to say, the way in
+     *  which the shadow color fades from its full strength into full transparency across
+     *  the blur region. The default is {@link UI.ShadowType#BLUR}, which mimics the
+     *  natural soft edge of a Gaussian-blurred shadow, whereas the other types model
+     *  different real world shadow phenomena (an area-light {@link UI.ShadowType#PENUMBRA},
+     *  a {@link UI.ShadowType#CONTACT} shadow, a diffuse {@link UI.ShadowType#GLOW})
+     *  or, in the case of {@link UI.ShadowType#FLAT}, fade at a plain constant rate.
+     *  (see {@link UI.ShadowType} for a description, real world analogue and exact math
+     *  of each available type)
+     *
+     * @param type The {@link UI.ShadowType} defining how the shadow color fades
+     *             from full strength into transparency across the blur region.
+     * @return A new {@link ShadowConf} with the specified shadow type.
+     */
+    public ShadowConf type( UI.ShadowType type ) {
+        Objects.requireNonNull(type);
+        if ( type == _type )
+            return this;
+        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, _isOutset, type);
     }
 
     ShadowConf _scale( double scaleFactor ) {
@@ -344,7 +373,8 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
                             (float) (_blurRadius * scaleFactor),
                             (float) (_spreadRadius * scaleFactor),
                             _color,
-                            _isOutset
+                            _isOutset,
+                            _type
                         );
     }
 
@@ -356,6 +386,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
         hash = 31 * hash + Float.hashCode(_spreadRadius);
         hash = 31 * hash + Objects.hashCode(_color);
         hash = 31 * hash + (_isOutset ? 1 : 0);
+        hash = 31 * hash + _type.hashCode();
         return hash;
     }
 
@@ -369,7 +400,8 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
                _blurRadius       == rhs._blurRadius       &&
                _spreadRadius     == rhs._spreadRadius     &&
                Objects.equals(_color, rhs._color)         &&
-               _isOutset         == rhs._isOutset;
+               _isOutset         == rhs._isOutset         &&
+               _type       == rhs._type;
     }
 
     @Override
@@ -382,7 +414,8 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
                     "blurRadius="       + _toString(_blurRadius  ) + ", " +
                     "spreadRadius="     + _toString(_spreadRadius) + ", " +
                     "color="            + StyleUtil.toString(_color) + ", " +
-                    "isInset="          + !_isOutset +
+                    "isInset="          + !_isOutset + ", " +
+                    "type="             + _type +
                 "]";
     }
 
