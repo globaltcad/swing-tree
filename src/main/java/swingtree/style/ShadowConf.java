@@ -73,7 +73,7 @@ import java.util.Optional;
  *  effectively making it a representation of the absence of a shadow.
  */
 @Immutable
-@SuppressWarnings("ReferenceEquality")
+@SuppressWarnings({"ReferenceEquality", "Immutable"})
 public final class ShadowConf implements Simplifiable<ShadowConf>
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(ShadowConf.class);
@@ -113,6 +113,17 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
     private final @Nullable Color     _color;
     private final boolean             _isOutset;
     private final UI.ShadowType       _type;
+    private final LazyRef<Pooled<ShadowConf>> _renderCacheKey = new LazyRef<>(this, s ->
+        /*
+            The blended color stops of a shadow gradient (see StyleRenderer) depend solely on
+            the color, the inset/outset direction and the shadow type (its falloff curve) - never
+            on the offset, blur or spread, which only affect the gradient's geometry. So we strip
+            those down to a normalized key and intern it, allowing all blur/spread/offset variants
+            (e.g. an animated shadow) of an otherwise equal shadow to share one self-cleaning,
+            weakly referenced render cache entry. This mirrors NoiseConf#withoutOffsetForRenderCacheAccess.
+        */
+        new Pooled<>(ShadowConf.of(Offset.none(), 0f, 0f, s._color, s._isOutset, s._type)).intern()
+    );
 
 
     private ShadowConf(
@@ -146,6 +157,13 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
     boolean isInset() { return !_isOutset; }
 
     UI.ShadowType type() { return _type; }
+
+    /**
+     *  Returns the interned, geometry-independent key under which this shadow's
+     *  blended gradient color stops are cached during rendering (see StyleRenderer).
+     *  All shadows that differ only in offset, blur or spread share the same key.
+     */
+    Pooled<ShadowConf> renderCacheKey() { return _renderCacheKey.get(); }
 
     /**
      *  Use this to offset the shadow position along the X axis.
