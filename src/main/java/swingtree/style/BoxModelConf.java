@@ -98,6 +98,7 @@ final class BoxModelConf
     private final LazyRef<Outline[]> _boundaryInsets;
 
 
+    @SuppressWarnings("EnumOrdinal") // Enum ordinals are used intentionally to index a fixed boundary lookup table.
     private BoxModelConf(
         Arc     topLeftArc,
         Arc     topRightArc,
@@ -161,6 +162,7 @@ final class BoxModelConf
     
     public Size size() { return _size; }
 
+    @SuppressWarnings("EnumOrdinal") // Enum ordinals are used intentionally to index a fixed boundary lookup table.
     Outline insetsFor(UI.ComponentBoundary boundary) {
         return Objects.requireNonNull(_boundaryInsets.get()[boundary.ordinal()]);
     }

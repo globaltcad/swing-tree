@@ -247,7 +247,7 @@ final class StyleConfLayers
         if ( maxHeight == null )
             return OptionalDouble.empty();
         else
-            return OptionalDouble.of(Math.round(maxHeight));
+            return OptionalDouble.of((double) Math.round(maxHeight));
     }
 
     @Override

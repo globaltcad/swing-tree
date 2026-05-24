@@ -82,6 +82,7 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
     }
 
 
+    @SuppressWarnings("ReferenceEquality") // Identity comparison is deliberate so style pooling works during simplification (see below).
     public NamedConfigs<S> mapNamedStyles( Configurator<NamedConf<S>> f ) {
         Objects.requireNonNull(f);
 

@@ -84,6 +84,7 @@ import java.util.regex.Pattern;
        (the parent's font-size, which we will have rewritten if it carried
        a px/pt declaration). Scaling them too would compound.
 */
+@SuppressWarnings("AlmostJavadoc") // The block comment above is an intentional implementation note, not Javadoc (it contains raw HTML tags).
 final class LabelStyleInstallerUtility {
 
     private static final String _HTML_INJECTION_OPEN  = "<head><style data-swingtree=\"injected\">";

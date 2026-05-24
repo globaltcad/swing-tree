@@ -101,6 +101,10 @@ final class TextLayoutEngine {
                 // Basically a point. We give it a small area to avoid issues with zero-area shapes:
                 shapeArea = new Rectangle(0, 0, 1, 1);
                 break;
+            default:
+                // Any other boundary (e.g. OUTER_TO_EXTERIOR) has no dedicated area here;
+                // we leave shapeArea null and fall back to the whole component bounds below.
+                break;
         }
         if ( shapeArea == null )
             return asJComponent.getBounds(); // fallback to the whole component bounds if we failed to calculate the area for some reason
@@ -423,7 +427,8 @@ final class TextLayoutEngine {
             final float w = r.end - r.start;
             if ( w > 0f ) result.add(new Band( r.start, w ));
         }
-        return result;
+        // Returned immutable to stay consistent with the other (singletonList / emptyList) return paths.
+        return Collections.unmodifiableList(result);
     }
 
     private static List<Range> narrowDownRangesToInclude( Area intersection, List<Range> free ) {
