@@ -7,7 +7,6 @@ import swingtree.style.ComponentStyleDelegate;
 import swingtree.style.ImageConf;
 
 import java.awt.*;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -277,7 +276,8 @@ public final class Size
 
     @Override
     public int hashCode() {
-        return Objects.hash(_width, _height);
+        // Boxing-free equivalent of Objects.hash(_width, _height): identical value, no Float/array allocation.
+        return 31 * ( 31 + Float.hashCode(_width) ) + Float.hashCode(_height);
     }
 
 }

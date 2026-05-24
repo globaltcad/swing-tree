@@ -2,7 +2,6 @@ package swingtree.style;
 
 import com.google.errorprone.annotations.Immutable;
 
-import java.util.Objects;
 
 /**
  *  An immutable value object that represents a 2D scale
@@ -65,7 +64,8 @@ final class Scale
 
     @Override
     public int hashCode() {
-        return Objects.hash(_x, _y);
+        // Boxing-free equivalent of Objects.hash(_x, _y): identical value, no Float/array allocation.
+        return 31 * ( 31 + Float.hashCode(_x) ) + Float.hashCode(_y);
     }
 
     @Override
