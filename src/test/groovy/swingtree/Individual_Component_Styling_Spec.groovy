@@ -228,6 +228,7 @@ class Individual_Component_Styling_Spec extends Specification
                          .shadowSpreadRadius(10)
                          .shadowOffset(10)
                          .font("Papyrus", 42)
+                         .shadowType(UI.ShadowType.FLAT)
                      )
         and : 'We build the panel:'
             var panel = ui.get(JPanel)
@@ -315,6 +316,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .shadowSpreadRadius(10)
                             .shadowOffset(10)
                             .font("Papyrus", 42)
+                            .shadowType(UI.ShadowType.FLAT)
                         )
         and : 'We build the panel:'
             var panel = ui.get(JPanel)
@@ -413,6 +415,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .shadowSpreadRadius(-1)
                             .borderRadius(8)
                             .margin(13)
+                            .shadowType(UI.ShadowType.FLAT)
                         )
                         .add("center, push, grow",
                             UI.icon("img/two-16th-notes.svg").withSizeExactly(58,58)
@@ -423,6 +426,7 @@ class Individual_Component_Styling_Spec extends Specification
                                 .borderRadius(8)
                                 .margin(13)
                                 .padding(4)
+                                .shadowType(UI.ShadowType.FLAT)
                             )
                         )
                     )
@@ -769,6 +773,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .shadowSpreadRadius(1)
                         .shadowBlurRadius(2)
                         .font(new Font("Arial", Font.BOLD, 20))
+                        .shadowType(UI.ShadowType.FLAT)
                     )
 
         when : 'We render the label into a BufferedImage.'
@@ -932,6 +937,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .shadowBlurRadius(4)
                         .shadowIsInset(true)
                         .font(new Font("Dancing Script", Font.PLAIN, 20))
+                        .shadowType(UI.ShadowType.FLAT)
                     )
 
         when : 'We render the text area into a BufferedImage.'
