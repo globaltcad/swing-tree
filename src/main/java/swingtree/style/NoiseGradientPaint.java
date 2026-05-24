@@ -274,6 +274,14 @@ final class NoiseGradientPaint implements Paint
     {
         final private Point2D center;
         private final HashMap<Long, WritableRaster> cachedRasters;
+        /**
+         *  Reusable scratch buffer for the per-pixel sample data handed to
+         *  {@link WritableRaster#setPixels(int, int, int, int, int[])}. Reused (grow-only)
+         *  across {@link #getRaster} calls to avoid allocating a fresh array per tile.
+         *  Safe to share because access to this context is single-threaded, just like the
+         *  unsynchronized {@link #cachedRasters} mutation below.
+         */
+        private int[] scratchData = new int[0];
 
         public NoiseGradientPaintContext(final Point2D center, AffineTransform transform) {
             this.cachedRasters = new HashMap<>();
@@ -309,8 +317,14 @@ final class NoiseGradientPaint implements Paint
 
                 final int MAX = localFractions.length - 1;
 
-                // Create data array with place for red, green, blue and alpha values
-                final int[] data = new int[(TILE_WIDTH * TILE_HEIGHT * 4)];
+                // Reusable data array with place for red, green, blue and alpha values.
+                // Grown only when a larger tile is encountered; setPixels(..) below reads
+                // exactly TILE_WIDTH * TILE_HEIGHT * 4 elements from the front, so a larger
+                // backing array is harmless.
+                final int dataLength = TILE_WIDTH * TILE_HEIGHT * 4;
+                if ( scratchData.length < dataLength )
+                    scratchData = new int[dataLength];
+                final int[] data = scratchData;
 
                 for ( int tileIndex = 0; tileIndex < TILE_WIDTH * TILE_HEIGHT; tileIndex++ ) {
                     double currentRed   = 0;

@@ -22,25 +22,27 @@ public final class NoiseFunctions
 
     private static double _coordinateToGradValue( int kernelSize, float xIn, float yIn ) {
         final int maxDistance  = kernelSize / 2;
-        final int kernelPoints = kernelSize * kernelSize;
         final double sampleRate = 0.5;
         double sum = 0;
-        for ( int i = 0; i < kernelPoints; i++ ) {
-            final int x = i % kernelSize;
-            final int y = i / kernelSize;
-            final float xi = ( x - maxDistance ) + xIn;
-            final float yi = ( y - maxDistance ) + yIn;
-            final int rx = Math.round( xi );
-            final int ry = Math.round( yi );
-            final byte score = _fastPseudoRandomByteSeedFrom( ry, rx );
-            final boolean takeSample = (255 * sampleRate -128) < score;
-            if ( takeSample ) {
-                final double vx = rx - xIn;
-                final double vy = ry - yIn;
-                final double distance = Math.sqrt( vx * vx + vy * vy );
-                final double relevance = Math.max(0, 1.0 - distance / maxDistance);
-                final double frac = _fastPseudoRandomDoubleFrom(rx, ry) - 0.5;
-                sum += ( frac * (relevance*relevance) );
+        // Nested loops over (x,y) produce the exact same point sequence as the former
+        // single 'i' loop with x = i % kernelSize / y = i / kernelSize, but without the
+        // per-point integer division and modulo.
+        for ( int y = 0; y < kernelSize; y++ ) {
+            for ( int x = 0; x < kernelSize; x++ ) {
+                final float xi = ( x - maxDistance ) + xIn;
+                final float yi = ( y - maxDistance ) + yIn;
+                final int rx = Math.round( xi );
+                final int ry = Math.round( yi );
+                final byte score = _fastPseudoRandomByteSeedFrom( ry, rx );
+                final boolean takeSample = (255 * sampleRate -128) < score;
+                if ( takeSample ) {
+                    final double vx = rx - xIn;
+                    final double vy = ry - yIn;
+                    final double distance = Math.sqrt( vx * vx + vy * vy );
+                    final double relevance = Math.max(0, 1.0 - distance / maxDistance);
+                    final double frac = _fastPseudoRandomDoubleFrom(rx, ry) - 0.5;
+                    sum += ( frac * (relevance*relevance) );
+                }
             }
         }
         return sum;
@@ -154,25 +156,27 @@ public final class NoiseFunctions
 
     private static double _coordinateToRetroValue( int kernelSize, float xIn, float yIn ) {
         final int maxDistance  = kernelSize / 2;
-        final int kernelPoints = kernelSize * kernelSize;
         final double sampleRate = 0.5;
         double sum = 0;
-        for ( int i = 0; i < kernelPoints; i++ ) {
-            final int x = i % kernelSize;
-            final int y = i / kernelSize;
-            final float xi = ( x - maxDistance ) + xIn;
-            final float yi = ( y - maxDistance ) + yIn;
-            final int rx = Math.round( xi );
-            final int ry = Math.round( yi );
-            final byte score = _fastPseudoRandomByteSeedFrom( ry, rx );
-            final boolean takeSample = (255 * sampleRate -128) < score;
-            if ( takeSample ) {
-                final double vx = rx - xIn;
-                final double vy = ry - yIn;
-                final double distance = Math.sqrt( vx * vx + vy * vy );
-                final double relevance = 1-Math.max(0, 1.0 - distance / maxDistance);
-                final double frac = _fastPseudoRandomDoubleFrom(rx, ry) - 0.5;
-                sum += ( frac * (relevance*relevance) );
+        // Nested loops over (x,y) produce the exact same point sequence as the former
+        // single 'i' loop with x = i % kernelSize / y = i / kernelSize, but without the
+        // per-point integer division and modulo.
+        for ( int y = 0; y < kernelSize; y++ ) {
+            for ( int x = 0; x < kernelSize; x++ ) {
+                final float xi = ( x - maxDistance ) + xIn;
+                final float yi = ( y - maxDistance ) + yIn;
+                final int rx = Math.round( xi );
+                final int ry = Math.round( yi );
+                final byte score = _fastPseudoRandomByteSeedFrom( ry, rx );
+                final boolean takeSample = (255 * sampleRate -128) < score;
+                if ( takeSample ) {
+                    final double vx = rx - xIn;
+                    final double vy = ry - yIn;
+                    final double distance = Math.sqrt( vx * vx + vy * vy );
+                    final double relevance = 1-Math.max(0, 1.0 - distance / maxDistance);
+                    final double frac = _fastPseudoRandomDoubleFrom(rx, ry) - 0.5;
+                    sum += ( frac * (relevance*relevance) );
+                }
             }
         }
         return sum;
