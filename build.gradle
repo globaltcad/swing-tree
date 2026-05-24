@@ -28,6 +28,12 @@ version = VERSION
 compileJava.options.encoding = 'UTF-8'
 compileTestJava.options.encoding = 'UTF-8'
 
+// We deliberately target Java 8 for broad library compatibility, so we silence the
+// "source/target value 8 is obsolete" notices (it is an intentional, supported choice).
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs.add('-Xlint:-options')
+}
+
 repositories {
     mavenCentral()
     maven { url = 'https://jitpack.io' }

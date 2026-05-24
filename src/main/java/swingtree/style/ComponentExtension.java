@@ -471,6 +471,7 @@ public final class ComponentExtension<C extends JComponent>
      * @return {@code true} if a rendered cached image is currently associated with
      *         the given layer of this component, {@code false} otherwise.
      */
+    @SuppressWarnings("EnumOrdinal") // Layer ordinals are used intentionally to index the per-layer cache array.
     public boolean hasCachedRendering( UI.Layer layer ) {
         Objects.requireNonNull(layer);
         LayerCache[] caches = _styleEngine.getLayerCaches();
@@ -492,6 +493,7 @@ public final class ComponentExtension<C extends JComponent>
      * @return Number of paint calls served from the cache, since this component
      *         was constructed.
      */
+    @SuppressWarnings("EnumOrdinal") // Layer ordinals are used intentionally to index the per-layer cache array.
     public int cacheHitCount( UI.Layer layer ) {
         Objects.requireNonNull(layer);
         LayerCache[] caches = _styleEngine.getLayerCaches();
@@ -509,6 +511,7 @@ public final class ComponentExtension<C extends JComponent>
      * @return Number of paint calls that had to render fresh, since this component
      *         was constructed.
      */
+    @SuppressWarnings("EnumOrdinal") // Layer ordinals are used intentionally to index the per-layer cache array.
     public int cacheMissCount( UI.Layer layer ) {
         Objects.requireNonNull(layer);
         LayerCache[] caches = _styleEngine.getLayerCaches();

@@ -210,6 +210,7 @@ public final class StyleConf
     public FontConf font() { return _font; }
 
     /**
+     * Returns the painters of the given layer, sorted by their names in ascending alphabetical order.
      * @return An unmodifiable list of painters sorted by their names in ascending alphabetical order.
      */
     List<PainterConf> painters( UI.Layer layer ) {
