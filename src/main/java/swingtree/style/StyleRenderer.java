@@ -31,6 +31,14 @@ final class StyleRenderer
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleRenderer.class);
     private static final Map<Pooled<NoiseConf>, NoisePaintCache> _NOISE_PAINT_CACHE = new WeakHashMap<>();
+    /**
+     *  Caches the geometry-independent blended gradient color stops of a shadow, keyed by the
+     *  shadow's interned {@link ShadowConf#renderCacheKey()}. The keys are kept alive by the
+     *  {@link ShadowConf} instances held in the (style-cached) {@link StyleConfLayer}s, so this
+     *  map is self-cleaning: when a style is dropped its shadow cache entry becomes weakly
+     *  reachable and is collected. Mirrors {@link #_NOISE_PAINT_CACHE}.
+     */
+    private static final Map<Pooled<ShadowConf>, ShadowGradientCache> _SHADOW_GRADIENT_CACHE = new WeakHashMap<>();
 
     /**
      *  A shadow's gradient transition happens across the normalized region
@@ -401,7 +409,7 @@ final class StyleRenderer
         }
 
         final float effectiveStart = ( gradientStart > 1f || gradientStart < 0f ) ? 0f : gradientStart;
-        final GradientStops stops = _shadowGradientStops(shadowConf.type().getFractions(), effectiveStart, innerColor, outerColor, shadowConf.isOutset());
+        final GradientStops stops = _shadowGradientStops(shadowConf, effectiveStart);
         final RadialGradientPaint cornerPaint = new RadialGradientPaint(
                              cx, cy, cr,
                              stops.fractions,
@@ -514,16 +522,12 @@ final class StyleRenderer
 
         if ( gradStartX == gradEndX && gradStartY == gradEndY ) return;
 
-        final Color innerColor;
-        final Color outerColor;
-        // Same as shadow color but without alpha (pre-computed by the caller):
-        if (shadowConf.isOutset()) {
-            innerColor = shadowConf.color().orElse(Color.BLACK);
-            outerColor = shadowBackgroundColor;
-        } else {
-            innerColor = shadowBackgroundColor;
-            outerColor = shadowConf.color().orElse(Color.BLACK);
-        }
+        // The inner (solid) color of an edge; for an inset edge it is the transparent background
+        // (the shadow color without alpha, pre-computed by the caller). The full transition colors
+        // are handled by the cached gradient stops below:
+        final Color innerColor = shadowConf.isOutset()
+                                    ? shadowConf.color().orElse(Color.BLACK)
+                                    : shadowBackgroundColor;
         final LinearGradientPaint edgePaint;
         // distance between start and end of gradient
         final float dist = (float) Math.sqrt(
@@ -541,7 +545,7 @@ final class StyleRenderer
             return;
         }
         final float effectiveStart = ( gradientStart > 1f || gradientStart < 0f ) ? 0f : gradientStart;
-        final GradientStops stops = _shadowGradientStops(shadowConf.type().getFractions(), effectiveStart, innerColor, outerColor, shadowConf.isOutset());
+        final GradientStops stops = _shadowGradientStops(shadowConf, effectiveStart);
         edgePaint = new LinearGradientPaint(
                          gradStartX, gradStartY,
                          gradEndX, gradEndY,
@@ -597,55 +601,106 @@ final class StyleRenderer
     }
 
     /**
-     *  Builds the color stops for a shadow gradient that transitions from {@code innerColor}
-     *  (at the gradient center / fraction {@code 0}) to {@code outerColor} (at fraction {@code 1}),
-     *  following the shape of the supplied {@code falloff} fractions
-     *  (see {@link swingtree.api.ShadowFractionsSupplier}).
-     *  <p>
-     *  The {@code falloff} tuple holds the shadow intensities ({@code 1} = solid,
-     *  {@code 0} = transparent) sampled at evenly spaced positions {@code t = j / n}
-     *  for {@code j} in {@code [0, n]}, where {@code n = falloff.size() - 1}.
-     *  <p>
-     *  The region {@code [0, gradientStart]} is a flat "core" that stays at {@code innerColor},
-     *  and the actual transition happens across {@code [gradientStart, 1]}, where we map each
-     *  sampled fraction to a gradient stop so that {@link MultipleGradientPaint}'s linear
-     *  interpolation approximates the falloff curve.
+     *  Returns the {@link GradientStops} for a shadow gradient whose flat "core" spans
+     *  {@code [0, gradientStart]} and whose transition spans {@code [gradientStart, 1]}, going
+     *  via the {@link ShadowGradientCache} keyed by {@code shadow}'s geometry-independent
+     *  {@link ShadowConf#renderCacheKey()}. The cache holds the blended transition colors (a pure
+     *  function of the shadow color, inset/outset direction and type) so they are computed once
+     *  and reused across all four corners, all four edges and across repaints, instead of
+     *  re-blending up to ~65 {@link Color} stops eight times per shadow per frame.
      */
     private static GradientStops _shadowGradientStops(
-        final Tuple<Float> falloff,
-        final float        gradientStart,
-        final Color        innerColor,
-        final Color        outerColor,
-        final boolean      isOutset
+        final ShadowConf shadow,
+        final float      gradientStart
     ) {
-        // A gradient needs at least two stops, so we need at least two falloff fractions to
-        // sample. A well behaved ShadowFractionsSupplier always supplies >= 2 (see its contract),
-        // but as it is a public interface we defensively fall back to the flat falloff otherwise:
-        final Tuple<Float> curve = falloff.size() >= 2 ? falloff : ShadowFractions.flat();
-        final boolean hasFlatCore = gradientStart > 0f;
-        final int n = curve.size() - 1; // number of sampling intervals
-        final int lead = hasFlatCore ? 2 : 1; // leading stops fixed at innerColor
-        final float[] fractions = new float[lead + n];
-        final Color[] colors    = new Color[lead + n];
-        fractions[0] = 0f;
-        colors[0]    = innerColor;
-        if ( hasFlatCore ) {
-            fractions[1] = gradientStart;
-            colors[1]    = innerColor;
+        final ShadowGradientCache cache = _SHADOW_GRADIENT_CACHE.computeIfAbsent(shadow.renderCacheKey(), ShadowGradientCache::new);
+        return cache.stopsFor(gradientStart);
+    }
+
+    /**
+     *  Caches the geometry-independent parts of a shadow's gradient color stops for one
+     *  {@link ShadowConf} (normalized to its color, inset/outset direction and {@link UI.ShadowType}).
+     *  <p>
+     *  The blended transition colors do not depend on the gradient's geometry at all, so they are
+     *  blended once (lazily) and reused. Only the {@code fractions} positions depend on the
+     *  {@code gradientStart}, which is cheap float arithmetic; the fully assembled
+     *  {@link GradientStops} are additionally cached per {@code gradientStart} (bounded, LRU) so
+     *  that the symmetric corners/edges sharing a radius within a frame do not even re-allocate
+     *  the stop arrays.
+     */
+    private static final class ShadowGradientCache {
+
+        /** Upper bound on retained per-{@code gradientStart} stop arrays, evicted least-recently-used first. */
+        private static final int MAX_CACHED_STOPS = 16;
+
+        private final ShadowConf      _conf; // normalized: color + isOutset + type only
+        private @Nullable Color       _innerColor;
+        private @Nullable Color  []   _transitionColors; // blended curve for sampling indices 1..n
+        private final Map<Float,GradientStops> _stopsByStart =
+                new LinkedHashMap<Float,GradientStops>(16, 0.75f, true) {
+                    @Override
+                    protected boolean removeEldestEntry( Map.Entry<Float,GradientStops> eldest ) {
+                        return size() > MAX_CACHED_STOPS;
+                    }
+                };
+
+        ShadowGradientCache( Pooled<ShadowConf> key ) {
+            _conf = key.get();
         }
-        for ( int i = 1; i <= n; i++ ) {
-            final float p = (float) i / n; // progress across the transition region, in (0, 1]
-            final int   idx = lead - 1 + i;
-            // The falloff fractions describe the shadow intensity (1 = solid, 0 = transparent)
-            // as a function of the distance from the solid edge. For an outset shadow the
-            // solid edge is the inner color, for an inset shadow it is the outer color, so
-            // we orient the curve accordingly:
-            final float blend = isOutset ? (1f - curve.get(i)) : curve.get(n - i);
-            fractions[idx] = gradientStart + p * (1f - gradientStart);
-            colors[idx]    = _blend(innerColor, outerColor, blend);
+
+        private void _ensureColors() {
+            if ( _transitionColors != null )
+                return;
+            final boolean isOutset      = _conf.isOutset();
+            final Color   shadowColor   = _conf.color().orElse(Color.BLACK);
+            final Color   transparentBg = _transparentShadowBackground(_conf);
+            // The solid edge is the inner color for an outset shadow and the outer color for an inset one:
+            final Color innerColor = isOutset ? shadowColor   : transparentBg;
+            final Color outerColor = isOutset ? transparentBg : shadowColor;
+            // A gradient needs at least two stops; a well behaved ShadowFractionsSupplier always
+            // supplies >= 2, but as it is a public interface we defensively fall back to the flat falloff:
+            final Tuple<Float> falloff = _conf.type().getFractions();
+            final Tuple<Float> curve   = falloff.size() >= 2 ? falloff : ShadowFractions.flat();
+            final int n = curve.size() - 1; // number of sampling intervals
+            final Color[] transition = new Color[n];
+            for ( int i = 1; i <= n; i++ ) {
+                // The falloff fractions describe the shadow intensity (1 = solid, 0 = transparent)
+                // as a function of the distance from the solid edge, oriented per inset/outset:
+                final float blend = isOutset ? (1f - curve.get(i)) : curve.get(n - i);
+                transition[i - 1] = _blend(innerColor, outerColor, blend);
+            }
+            _innerColor       = innerColor;
+            _transitionColors = transition;
         }
-        fractions[lead - 1 + n] = 1f; // guard against float rounding on the last fraction
-        return new GradientStops(fractions, colors);
+
+        GradientStops stopsFor( final float gradientStart ) {
+            final GradientStops cached = _stopsByStart.get(gradientStart);
+            if ( cached != null )
+                return cached;
+            _ensureColors();
+            final Color[] transition = Objects.requireNonNull(_transitionColors);
+            final int     n           = transition.length;
+            final boolean hasFlatCore = gradientStart > 0f;
+            final int     lead        = hasFlatCore ? 2 : 1; // leading stops fixed at innerColor
+            final float[] fractions   = new float[lead + n];
+            final Color[] colors      = new Color[lead + n];
+            fractions[0] = 0f;
+            colors[0]    = _innerColor;
+            if ( hasFlatCore ) {
+                fractions[1] = gradientStart;
+                colors[1]    = _innerColor;
+            }
+            for ( int i = 1; i <= n; i++ ) {
+                final float p   = (float) i / n; // progress across the transition region, in (0, 1]
+                final int   idx = lead - 1 + i;
+                fractions[idx] = gradientStart + p * (1f - gradientStart);
+                colors[idx]    = transition[i - 1];
+            }
+            fractions[lead - 1 + n] = 1f; // guard against float rounding on the last fraction
+            final GradientStops stops = new GradientStops(fractions, colors);
+            _stopsByStart.put(gradientStart, stops);
+            return stops;
+        }
     }
 
     /**
