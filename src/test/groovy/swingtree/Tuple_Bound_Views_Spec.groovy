@@ -712,6 +712,124 @@ class Tuple_Bound_Views_Spec extends Specification
     }
 
 
+    // ──────────────────────────────────────────────────────────────────────
+    //  Diagnostics: how the framework communicates a misuse of the id-based
+    //  binding back to the developer. Good error messages are a feature, so
+    //  these scenarios are pinned here as living documentation.
+    // ──────────────────────────────────────────────────────────────────────
+
+    def 'Binding a `panel` to a tuple with duplicate `HasId` ids logs a clear, actionable error.'()
+    {
+        reportInfo """
+            Sub-views are identified and reused by their item's `HasId.id()`.
+            If two items in the bound tuple report the **same** id, the framework
+            cannot tell their views apart. Rather than failing silently — or much
+            later with a cryptic message — SwingTree detects the clash up front and
+            logs *what* is wrong, *why* it matters, and *how* to fix it.
+
+            This is a development-time sanity check, active while
+            `SwingTree.isRecordingDebugSourceTrace()` is enabled (its default), so
+            it never costs anything in a tuned production build.
+        """
+        given : 'A tuple where two tags accidentally share the id "dup".'
+            var models = Var.of(Tuple.of(
+                new Tag("dup", "First"),
+                new Tag("dup", "Second"),
+                new Tag("unique", "Third")
+            ))
+            BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.label(p.viewAsString({ it.label() })) }
+
+        when : 'We build the panel binding, capturing what is written to the error log.'
+            var log = Utility.captureSystemErr({
+                UI.panel().addAll(models, supplier).get(JPanel)
+            })
+
+        then : 'The framework names the duplicated id and points at the unique-id fix.'
+            log.contains("Detected duplicate entry id 'dup'")
+            log.contains("unique and stable id")
+    }
+
+
+    def 'Binding `scrollPanels` to a tuple with duplicate `HasId` ids logs the same clear error.'()
+    {
+        reportInfo """
+            The id-based binding (and therefore this sanity check) is shared by all
+            list-binding views, so `scrollPanels` reports a duplicate id exactly the
+            same way an ordinary `panel` does.
+        """
+        given : 'A tuple with two items that share the id "x".'
+            var models = Var.of(Tuple.of(
+                new Tag("x", "One"),
+                new Tag("x", "Two")
+            ))
+            BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.label(p.viewAsString({ it.label() })) }
+
+        when : 'We build the scroll-panels binding, capturing the error log.'
+            var log = Utility.captureSystemErr({
+                UI.scrollPanels().addAll(models, supplier).get(JScrollPanels)
+            })
+
+        then : 'The duplicate id is reported.'
+            log.contains("Detected duplicate entry id 'x'")
+    }
+
+
+    def 'Returning a shared, already-attached component from a supplier is reported by `JScrollPanels`.'()
+    {
+        reportInfo """
+            A view supplier is expected to build a **fresh** view for each entry.
+            If it instead hands back a component that is already attached to another,
+            still-live entry — for example a single component captured once and reused
+            for every item — then one view would have to live in two places at once.
+            `JScrollPanels` detects this and explains the likely cause and the fix.
+        """
+        given : 'Two items with perfectly unique ids...'
+            var models = Var.of(Tuple.of(
+                new Tag("a", "A"),
+                new Tag("b", "B")
+            ))
+        and : '...but a faulty supplier that always wraps the very same shared component.'
+            var shared = new JLabel("I am shared")
+            BoundViewSupplier<Tag> faultySupplier = { Var<Tag> p -> UI.of(shared) }
+
+        when : 'We build the scroll-panels binding, capturing the error log.'
+            var log = Utility.captureSystemErr({
+                UI.scrollPanels().addAll(models, faultySupplier).get(JScrollPanels)
+            })
+
+        then : 'The framework reports that a view is already tied to a still-live parent.'
+            log.contains("still-live parent")
+    }
+
+
+    def 'Re-rendering a tuple with the same ids recycles views silently (no error is logged).'()
+    {
+        reportInfo """
+            When the bound tuple is replaced by a *new* tuple whose items carry the
+            **same** ids — for example after reloading equivalent data — the existing
+            sub-views are recycled by id. This is the intended, efficient path, and it
+            must stay quiet: recycling a previous render's view is not an error and so
+            no "tied to another parent" message should appear.
+        """
+        given : 'A scroll-panels view bound to two uniquely-identified items.'
+            var models = Var.of(Tuple.of(new Tag("a", "A"), new Tag("b", "B")))
+            BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.label(p.viewAsString({ it.label() })) }
+            var scrollPanels = UI.scrollPanels().addAll(models, supplier).get(JScrollPanels)
+
+        when : 'We replace the tuple with a fresh one carrying the very same ids.'
+            var log = Utility.captureSystemErr({
+                models.set(Tuple.of(new Tag("a", "A-reloaded"), new Tag("b", "B-reloaded")))
+                UI.sync()
+            })
+
+        then : 'The recycle is benign: no view-parent error is logged.'
+            !log.contains("tied to another parent")
+            !log.contains("still-live parent")
+        and : 'The view is intact with both recycled rows.'
+            scrollPanels != null
+    }
+
+
     // Re-declare SelfAsId to mirror the existing test infrastructure
     @ImmutableOptions(knownImmutableClasses=[Object])
     static record SelfAsId(Object id) implements HasId<Object> {}

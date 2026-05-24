@@ -6232,10 +6232,12 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         if (models.get() instanceof SequenceDiffOwner)
             lastDiffRef.set(((SequenceDiffOwner)models.get()).differenceFromPrevious().orElse(null));
         _onShowDelegated( models, thisComponent, (component, delegate) -> {
+            _warnAboutDuplicateEntryIds(delegate.currentValue().orElseThrowUnchecked());
             viewSupplier.rememberCurrentViewsForReuse();
             _updateSubViews(component, delegate, models, attr, lastDiffRef, viewSupplier);
             viewSupplier.clearCurrentViews();
         });
+        _warnAboutDuplicateEntryIds(models.get());
         _addAllFromTuple(models, attr, viewSupplier, thisComponent);
     }
 
@@ -6458,6 +6460,58 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 // We do a simple rebuild:
                 _clearComponentsOf(c);
                 _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+        }
+    }
+
+    /**
+     *  When a list of {@link sprouts.HasId} models is bound to a view (a panel,
+     *  box or {@code scrollPanels}), SwingTree identifies and reuses each entry's
+     *  view by its {@link HasId#id()}. If two entries report the <em>same</em> id
+     *  the framework cannot tell their views apart: it binds several models onto a
+     *  single view, which later surfaces as the cryptic "view is already tied to
+     *  another parent" message. We detect that broken state up front and explain
+     *  it, because it is almost always a mistake in how the id is derived.
+     *  <p>
+     *  This is a development-time sanity check: it runs only when
+     *  {@link SwingTree#isRecordingDebugSourceTrace()} is enabled (on by default,
+     *  off in tuned production setups) <b>and</b> the number of models is not above
+     *  the threshold of 256. It is skipped for larger lists and whenever debug
+     *  tracing is disabled, so it adds little to no cost where it is turned off.
+     *  When it does run, it runs once per (re)render of a {@code HasId} list binding.
+     */
+    static void _warnAboutDuplicateEntryIds( Tuple<?> models ) {
+        if ( models.size() > 256 )
+            return; // The number of models is of a production grade size, we skip the costly sanity check.
+        if ( !SwingTree.get().isRecordingDebugSourceTrace() )
+            return; // Development-time sanity check only.
+        if ( models.size() < 2 || !(models.get(0) instanceof HasId) )
+            return;
+        Map<Object, Integer> firstIndexById = new HashMap<>();
+        for ( int i = 0; i < models.size(); i++ ) {
+            Object item = models.get(i);
+            if ( !(item instanceof HasId) )
+                continue;
+            Object id = ((HasId<?>) item).id();
+            Integer firstIndex = firstIndexById.putIfAbsent(id, i);
+            if ( firstIndex != null ) {
+                log.error(SwingTree.get().logMarker(),
+                    "Detected duplicate entry id '{}' among the models bound to a list view: " +
+                    "the items at index {} and {} both report this 'HasId.id()'.\n" +
+                    "  This is most likely due to: an id derived from a non-unique field, reusing the " +
+                    "same id instance for several items, or relying on value/record equality instead of a " +
+                    "dedicated stable key.\n" +
+                    "  Why it matters: list bindings identify and reuse entry views by 'HasId.id()', so " +
+                    "duplicate ids make several models share a single view (you may also see a follow-up " +
+                    "'view is already tied to another parent' error).\n" +
+                    "  How to fix: give every entry a unique and stable id - unique within the list and " +
+                    "consistent across re-renders (e.g. a UUID assigned at creation, or a natural primary " +
+                    "key). Note that ids must also stay unique across different data sets shown in the same " +
+                    "list view (e.g. include a parent/owner key) so a view is not wrongly recycled.",
+                    id, firstIndex, i,
+                    new Throwable("Stack trace for debugging purposes.")
+                );
+                return; // One clear report is enough; no need to spam for every duplicate.
+            }
         }
     }
 
