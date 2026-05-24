@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import sprouts.Tuple;
 
 /**
@@ -34,6 +35,21 @@ public final class ShadowFractions
     private static final int SAMPLES_FINE = 64;
 
 
+    // The falloff curves are constant, so each is sampled lazily on first use and the
+    // resulting immutable tuple is then cached here to be shared across all subsequent
+    // renders (see the accessors below). A benign data race may sample a curve more than
+    // once, but as the tuples are immutable and value-equal that is harmless.
+    private static @Nullable Tuple<Float> FLAT;
+    private static @Nullable Tuple<Float> PENUMBRA;
+    private static @Nullable Tuple<Float> BLUR;
+    private static @Nullable Tuple<Float> GLOW;
+    private static @Nullable Tuple<Float> CONTACT;
+    private static @Nullable Tuple<Float> STAIRS;
+    private static @Nullable Tuple<Float> RIPPLE;
+    private static @Nullable Tuple<Float> SAWTOOTH;
+    private static @Nullable Tuple<Float> BOUNCE;
+
+
     private ShadowFractions(){}
 
 
@@ -44,7 +60,10 @@ public final class ShadowFractions
      *  fractions and so allocates the smallest possible tuple.
      */
     public static Tuple<Float> flat() {
-        return Tuple.of(new float[] {1f, 0f});
+        Tuple<Float> fractions = FLAT;
+        if ( fractions == null )
+            FLAT = fractions = Tuple.of(new float[] {1f, 0f});
+        return fractions;
     }
 
     /**
@@ -52,7 +71,10 @@ public final class ShadowFractions
      *  <b>Falloff (the "smoothstep" function):</b> {@code f(t) = 1 - t}<sup>2</sup>{@code (3 - 2t)}.
      */
     public static Tuple<Float> penumbra() {
-        return _sample(SAMPLES, t -> 1f - (t * t * (3f - 2f * t)));
+        Tuple<Float> fractions = PENUMBRA;
+        if ( fractions == null )
+            PENUMBRA = fractions = _sample(SAMPLES, t -> 1f - (t * t * (3f - 2f * t)));
+        return fractions;
     }
 
     /**
@@ -64,9 +86,10 @@ public final class ShadowFractions
      *  {@code f(t) = (erf(k/2) - erf(k(t - 1/2))) / (2 * erf(k/2))}
      */
     public static Tuple<Float> blur() {
-        final double k = 3.6; // blur steepness
-        final double half = _erf(k * 0.5);
-        return _sample(SAMPLES, t -> (float) ((half - _erf(k * (t - 0.5))) / (2.0 * half)));
+        Tuple<Float> fractions = BLUR;
+        if ( fractions == null )
+            BLUR = fractions = _blur();
+        return fractions;
     }
 
     /**
@@ -77,9 +100,10 @@ public final class ShadowFractions
      *  {@code f(t) = (exp(-k t}<sup>2</sup>{@code ) - exp(-k)) / (1 - exp(-k))}
      */
     public static Tuple<Float> glow() {
-        final double k = 4.0; // bell width
-        final double e = Math.exp(-k);
-        return _sample(SAMPLES, t -> (float) ((Math.exp(-k * t * t) - e) / (1.0 - e)));
+        Tuple<Float> fractions = GLOW;
+        if ( fractions == null )
+            GLOW = fractions = _glow();
+        return fractions;
     }
 
     /**
@@ -90,9 +114,10 @@ public final class ShadowFractions
      *  {@code f(t) = (exp(-k t) - exp(-k)) / (1 - exp(-k))}
      */
     public static Tuple<Float> contact() {
-        final double k = 5.0; // decay rate
-        final double e = Math.exp(-k);
-        return _sample(SAMPLES, t -> (float) ((Math.exp(-k * t) - e) / (1.0 - e)));
+        Tuple<Float> fractions = CONTACT;
+        if ( fractions == null )
+            CONTACT = fractions = _contact();
+        return fractions;
     }
 
     /**
@@ -102,8 +127,10 @@ public final class ShadowFractions
      *  {@code f(t) = round((1 - t) * (N - 1)) / (N - 1)}
      */
     public static Tuple<Float> stairs() {
-        final int n = 5; // number of bands
-        return _sample(SAMPLES_FINE, t -> Math.round((1f - t) * (n - 1)) / (float) (n - 1));
+        Tuple<Float> fractions = STAIRS;
+        if ( fractions == null )
+            STAIRS = fractions = _stairs();
+        return fractions;
     }
 
     /**
@@ -113,8 +140,10 @@ public final class ShadowFractions
      *  {@code f(t) = (1 - t) * (1/2 + 1/2 * cos(2}&pi;{@code k t))}, with {@code k = 3}
      */
     public static Tuple<Float> ripple() {
-        final int k = 3; // number of ripples
-        return _sample(SAMPLES_FINE, t -> (1f - t) * (0.5f + 0.5f * (float) Math.cos(2.0 * Math.PI * k * t)));
+        Tuple<Float> fractions = RIPPLE;
+        if ( fractions == null )
+            RIPPLE = fractions = _ripple();
+        return fractions;
     }
 
     /**
@@ -124,11 +153,10 @@ public final class ShadowFractions
      *  {@code f(t) = (1 - t) * (1 - frac(k t))}, with {@code k = 4}
      */
     public static Tuple<Float> sawtooth() {
-        final int k = 4; // number of louvers
-        return _sample(SAMPLES_FINE, t -> {
-            final float saw = (float) (k * t - Math.floor(k * t)); // frac(k*t)
-            return (1f - t) * (1f - saw);
-        });
+        Tuple<Float> fractions = SAWTOOTH;
+        if ( fractions == null )
+            SAWTOOTH = fractions = _sawtooth();
+        return fractions;
     }
 
     /**
@@ -136,7 +164,46 @@ public final class ShadowFractions
      *  <b>Falloff:</b> {@code f(t) = 1 - easeOutBounce(t)}.
      */
     public static Tuple<Float> bounce() {
-        return _sample(SAMPLES_FINE, t -> 1f - _easeOutBounce(t));
+        Tuple<Float> fractions = BOUNCE;
+        if ( fractions == null )
+            BOUNCE = fractions = _sample(SAMPLES_FINE, t -> 1f - _easeOutBounce(t));
+        return fractions;
+    }
+
+    private static Tuple<Float> _blur() {
+        final double k = 3.6; // blur steepness
+        final double half = _erf(k * 0.5);
+        return _sample(SAMPLES, t -> (float) ((half - _erf(k * (t - 0.5))) / (2.0 * half)));
+    }
+
+    private static Tuple<Float> _glow() {
+        final double k = 4.0; // bell width
+        final double e = Math.exp(-k);
+        return _sample(SAMPLES, t -> (float) ((Math.exp(-k * t * t) - e) / (1.0 - e)));
+    }
+
+    private static Tuple<Float> _contact() {
+        final double k = 5.0; // decay rate
+        final double e = Math.exp(-k);
+        return _sample(SAMPLES, t -> (float) ((Math.exp(-k * t) - e) / (1.0 - e)));
+    }
+
+    private static Tuple<Float> _stairs() {
+        final int n = 5; // number of bands
+        return _sample(SAMPLES_FINE, t -> Math.round((1f - t) * (n - 1)) / (float) (n - 1));
+    }
+
+    private static Tuple<Float> _ripple() {
+        final int k = 3; // number of ripples
+        return _sample(SAMPLES_FINE, t -> (1f - t) * (0.5f + 0.5f * (float) Math.cos(2.0 * Math.PI * k * t)));
+    }
+
+    private static Tuple<Float> _sawtooth() {
+        final int k = 4; // number of louvers
+        return _sample(SAMPLES_FINE, t -> {
+            final float saw = (float) (k * t - Math.floor(k * t)); // frac(k*t)
+            return (1f - t) * (1f - saw);
+        });
     }
 
     /**
