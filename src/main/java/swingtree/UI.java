@@ -664,7 +664,7 @@ public final class UI extends UIFactoryMethods
          *  produces concentric shadow rings, like ripples spreading on water or a radar ping.
          *  <p>
          *  <b>Falloff (damped cosine, with {@code k} ripples):</b><br>
-         *  {@code f(t) = (1 - t) * (1/2 + 1/2 * cos(2}&pi;{@code k t))}, with {@code k = 3}
+         *  {@code f(t) = (1 - t) * (1/2 + 1/2 * cos(2*Math.PI*k*t))}, with {@code k = 3}
          */
         RIPPLE(ShadowFractions::ripple),
         /**
