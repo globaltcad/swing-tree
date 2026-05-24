@@ -32,6 +32,16 @@ final class StyleRenderer
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleRenderer.class);
     private static final Map<Pooled<NoiseConf>, NoisePaintCache> _NOISE_PAINT_CACHE = new WeakHashMap<>();
 
+    /**
+     *  A shadow's gradient transition happens across the normalized region
+     *  {@code [gradientStart, 1]}. When that region is narrower than this, it cannot hold the
+     *  gradient's stops as distinct {@code float} values (the fine falloff curves use up to 65
+     *  stops), which would make {@link MultipleGradientPaint} throw, and it is invisible anyway,
+     *  so we render such a degenerate shadow as a solid fill instead. See
+     *  {@link #_isDegenerateShadowGradient(float)}.
+     */
+    private static final float SHADOW_GRADIENT_MIN_SPAN = 1e-3f;
+
     private StyleRenderer() {} // Un-instantiable!
 
     public static void renderStyleOn(
@@ -376,7 +386,7 @@ final class StyleRenderer
         cornerArea.intersect(areaWhereShadowIsAllowed);
 
         // In the simplest case we don't need to do any gradient painting:
-        if ( gradientStart == 1f || gradientStart == 0f ) {
+        if ( _isDegenerateShadowGradient(gradientStart) ) {
             // Simple, we just draw a circle and clip it
             final Area circle = new Area(new Ellipse2D.Float(cx - cr, cy - cr, cr * 2, cr * 2));
             if ( shadowConf.isInset() ) {
@@ -521,7 +531,7 @@ final class StyleRenderer
                                     (gradEndY - gradStartY) * (gradEndY - gradStartY)
                                 );
         final float gradientStart = (float) gradientStartOffset / dist;
-        if ( gradientStart == 1f || gradientStart == 0f ) {
+        if ( _isDegenerateShadowGradient(gradientStart) ) {
             // The gradient does not really exist, so we can just fill the whole area and then return
             Area edgeArea = new Area(edgeBox);
             g2d.setColor(innerColor);
@@ -571,6 +581,22 @@ final class StyleRenderer
     }
 
     /**
+     *  Decides whether a shadow's gradient transition region {@code [gradientStart, 1]} is
+     *  degenerate and should be rendered as a solid fill rather than as a gradient.
+     *  <p>
+     *  This is the case when {@code gradientStart} is exactly {@code 0} (no transition at all)
+     *  or sits within {@link #SHADOW_GRADIENT_MIN_SPAN} below {@code 1}, where the transition
+     *  region is too narrow to hold the gradient's stops as distinct {@code float} values
+     *  (which would make {@link MultipleGradientPaint} throw an {@link IllegalArgumentException})
+     *  and would be invisible anyway. A {@code gradientStart > 1} is deliberately NOT treated as
+     *  degenerate here: it means the flat core is larger than the available space and is handled
+     *  by the callers by falling back to a full, core-less gradient ({@code effectiveStart == 0}).
+     */
+    private static boolean _isDegenerateShadowGradient( final float gradientStart ) {
+        return gradientStart == 0f || ( gradientStart <= 1f && gradientStart > 1f - SHADOW_GRADIENT_MIN_SPAN );
+    }
+
+    /**
      *  Builds the color stops for a shadow gradient that transitions from {@code innerColor}
      *  (at the gradient center / fraction {@code 0}) to {@code outerColor} (at fraction {@code 1}),
      *  following the shape of the supplied {@code falloff} fractions
@@ -592,8 +618,12 @@ final class StyleRenderer
         final Color        outerColor,
         final boolean      isOutset
     ) {
+        // A gradient needs at least two stops, so we need at least two falloff fractions to
+        // sample. A well behaved ShadowFractionsSupplier always supplies >= 2 (see its contract),
+        // but as it is a public interface we defensively fall back to the flat falloff otherwise:
+        final Tuple<Float> curve = falloff.size() >= 2 ? falloff : ShadowFractions.flat();
         final boolean hasFlatCore = gradientStart > 0f;
-        final int n = falloff.size() - 1; // number of sampling intervals
+        final int n = curve.size() - 1; // number of sampling intervals
         final int lead = hasFlatCore ? 2 : 1; // leading stops fixed at innerColor
         final float[] fractions = new float[lead + n];
         final Color[] colors    = new Color[lead + n];
@@ -610,7 +640,7 @@ final class StyleRenderer
             // as a function of the distance from the solid edge. For an outset shadow the
             // solid edge is the inner color, for an inset shadow it is the outer color, so
             // we orient the curve accordingly:
-            final float blend = isOutset ? (1f - falloff.get(i)) : falloff.get(n - i);
+            final float blend = isOutset ? (1f - curve.get(i)) : curve.get(n - i);
             fractions[idx] = gradientStart + p * (1f - gradientStart);
             colors[idx]    = _blend(innerColor, outerColor, blend);
         }

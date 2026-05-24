@@ -19,6 +19,10 @@ import swingtree.style.ShadowConf;
  * of supplied fractions also determines how finely the curve is sampled: smooth curves need
  * only a few fractions, while stepped or oscillating curves need many more to stay crisp.
  * <p>
+ * A gradient is built from at least two color stops, so the returned tuple <b>must contain at
+ * least two fractions</b>. The renderer treats a smaller tuple as a configuration error and
+ * defensively falls back to a plain linear falloff ({@code [1, 0]}) rather than failing.
+ * <p>
  * <b>Please take a look at {@link swingtree.UI.ShadowType} for a rich set of
  * predefined shadow falloff implementations.<br>
  * There you will most likely find a shadow type that fits your needs.</b>
@@ -33,7 +37,7 @@ public interface ShadowFractionsSupplier
      * evenly spaced positions {@code t = i / n} away from the solid edge of the shadow,
      * where {@code n} is one less than the size of the returned tuple.
      *
-     * @return A non-empty {@link Tuple} of falloff fractions, ordered from the solid edge
+     * @return A {@link Tuple} of at least two falloff fractions, ordered from the solid edge
      *          of the shadow ({@code t = 0}) to the far, transparent end of the blur ({@code t = 1}).
      */
     Tuple<Float> getFractions();
