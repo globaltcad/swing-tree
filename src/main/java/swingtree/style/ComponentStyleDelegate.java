@@ -1408,6 +1408,24 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
+     *  Defines the {@link UI.ShadowType}, the shape of the "falloff curve" that
+     *  determines how the shadow color fades from full strength into transparency across
+     *  the blur region. The various types model different real world shadow phenomena
+     *  (see {@link UI.ShadowType} for a description, real world analogue and exact math
+     *  of each). <br>
+     *  Note that this property will be applied to all shadow effects of all layers, including
+     *  the default shadow and named shadows defined using {@link #shadow(String, Configurator)}. <br>
+     *  The default value is {@link UI.ShadowType#BLUR}.
+     *
+     * @param type The {@link UI.ShadowType} defining how the shadow color fades
+     *             from full strength into transparency across the blur region.
+     * @return A new {@link ComponentStyleDelegate} with the provided shadow type.
+     */
+    public ComponentStyleDelegate<C> shadowType( UI.ShadowType type ) {
+        return _withStyle(_styleConf._withShadow(shadow -> shadow.type(type)));
+    }
+
+    /**
      *  This method makes it possible to define multiple shadows for a single component
      *  on the {@link UI.Layer#CONTENT} layer, by giving the shadow config a unique name.
      *  This is useful when you want to do advanced shadow effects, such as neumorphism a.k.a. soft UI. <br>

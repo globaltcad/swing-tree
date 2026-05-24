@@ -160,6 +160,7 @@ class Styles_Spec extends Specification
                                     .borderWidths(1, 2, 3, 4)
                                     .borderRadius(12, 18)
                                     .shadowColor("yellow")
+                                    .shadowType(UI.ShadowType.FLAT)
                                     .fontSelectionColor("cyan")
                                     .fontColor("magenta")
                                     .fontFamily("Times New Roman")
@@ -226,7 +227,8 @@ class Styles_Spec extends Specification
                                                     "blurRadius=0, " +
                                                     "spreadRadius=0, " +
                                                     "color=rgba(255,255,0,255), " +
-                                                    "isInset=false" +
+                                                    "isInset=false, " +
+                                                    "type=FLAT" +
                                                 "], " +
                                                 "painters=PainterConf[NONE], " +
                                                 "gradients=GradientConf[NONE], " +
@@ -870,6 +872,7 @@ class Styles_Spec extends Specification
                             .shadow("y", {it.color("dark red").isOutset(true)})
                             .shadow("e", {it.color("rgba(0.1,1,0.7,0%)")})
                             .shadow("f", {it.color(UI.Color.UNDEFINED).isOutset(false)})
+                            .shadowType(UI.ShadowType.FLAT)
                         )
                         .get(JLabel)
         expect : """
@@ -894,7 +897,8 @@ class Styles_Spec extends Specification
                                         "blurRadius=0, " +
                                         "spreadRadius=0, " +
                                         "color=rgba(0,0,255,255), " +
-                                        "isInset=false" +
+                                        "isInset=false, " +
+                                        "type=FLAT" +
                                     "], " +
                                     "y=ShadowConf[" +
                                         "horizontalOffset=0, " +
@@ -902,7 +906,8 @@ class Styles_Spec extends Specification
                                         "blurRadius=0, " +
                                         "spreadRadius=0, " +
                                         "color=rgba(179,0,0,255), " +
-                                        "isInset=false" +
+                                        "isInset=false, " +
+                                        "type=FLAT" +
                                     "]" +
                                 "], " +
                                 "painters=PainterConf[NONE], " +

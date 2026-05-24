@@ -32,6 +32,16 @@ final class StyleRenderer
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleRenderer.class);
     private static final Map<Pooled<NoiseConf>, NoisePaintCache> _NOISE_PAINT_CACHE = new WeakHashMap<>();
 
+    /**
+     *  A shadow's gradient transition happens across the normalized region
+     *  {@code [gradientStart, 1]}. When that region is narrower than this, it cannot hold the
+     *  gradient's stops as distinct {@code float} values (the fine falloff curves use up to 65
+     *  stops), which would make {@link MultipleGradientPaint} throw, and it is invisible anyway,
+     *  so we render such a degenerate shadow as a solid fill instead. See
+     *  {@link #_isDegenerateShadowGradient(float)}.
+     */
+    private static final float SHADOW_GRADIENT_MIN_SPAN = 1e-3f;
+
     private StyleRenderer() {} // Un-instantiable!
 
     public static void renderStyleOn(
@@ -160,7 +170,7 @@ final class StyleRenderer
         final Color shadowColor = shadow.color().orElse(null);
         if ( shadowColor == null )
             return;
-        final Size  size        = conf.boxModel().size();
+        final Size size = conf.boxModel().size();
 
         // First let's check if we need to render any shadows at all
         // Is the shadow color transparent?
@@ -376,7 +386,7 @@ final class StyleRenderer
         cornerArea.intersect(areaWhereShadowIsAllowed);
 
         // In the simplest case we don't need to do any gradient painting:
-        if ( gradientStart == 1f || gradientStart == 0f ) {
+        if ( _isDegenerateShadowGradient(gradientStart) ) {
             // Simple, we just draw a circle and clip it
             final Area circle = new Area(new Ellipse2D.Float(cx - cr, cy - cr, cr * 2, cr * 2));
             if ( shadowConf.isInset() ) {
@@ -390,18 +400,12 @@ final class StyleRenderer
             return;
         }
 
-        final RadialGradientPaint cornerPaint;
-        if ( gradientStart > 1f || gradientStart < 0f )
-            cornerPaint = new RadialGradientPaint(
+        final float effectiveStart = ( gradientStart > 1f || gradientStart < 0f ) ? 0f : gradientStart;
+        final GradientStops stops = _shadowGradientStops(shadowConf.type().getFractions(), effectiveStart, innerColor, outerColor, shadowConf.isOutset());
+        final RadialGradientPaint cornerPaint = new RadialGradientPaint(
                              cx, cy, cr,
-                             new float[] {0f, 1f},
-                             new Color[] {innerColor, outerColor}
-                         );
-        else
-            cornerPaint = new RadialGradientPaint(
-                             cx, cy, cr,
-                             new float[] {0f, gradientStart, 1f},
-                             new Color[] {innerColor, innerColor, outerColor}
+                             stops.fractions,
+                             stops.colors
                          );
 
         // We need to clip the corner paint to the corner box
@@ -520,37 +524,30 @@ final class StyleRenderer
             innerColor = shadowBackgroundColor;
             outerColor = shadowConf.color().orElse(Color.BLACK);
         }
-        LinearGradientPaint edgePaint;
+        final LinearGradientPaint edgePaint;
         // distance between start and end of gradient
         final float dist = (float) Math.sqrt(
                                     (gradEndX - gradStartX) * (gradEndX - gradStartX) +
                                     (gradEndY - gradStartY) * (gradEndY - gradStartY)
                                 );
         final float gradientStart = (float) gradientStartOffset / dist;
-        if ( gradientStart > 1f || gradientStart < 0f )
-            edgePaint = new LinearGradientPaint(
-                               gradStartX, gradStartY,
-                               gradEndX, gradEndY,
-                               new float[] {0f, 1f},
-                               new Color[] {innerColor, outerColor}
-                           );
-        else {
-            if ( gradientStart == 1f || gradientStart == 0f ) {
-                // The gradient does not really exist, so we can just fill the whole area and then return
-                Area edgeArea = new Area(edgeBox);
-                g2d.setColor(innerColor);
-                if ( shadowConf.isOutset() )
-                    edgeArea.intersect(contentArea);
-                g2d.fill(edgeArea);
-                return;
-            }
-            edgePaint = new LinearGradientPaint(
-                             gradStartX, gradStartY,
-                             gradEndX, gradEndY,
-                             new float[] {0f, gradientStart, 1f},
-                             new Color[] {innerColor, innerColor, outerColor}
-                         );
+        if ( _isDegenerateShadowGradient(gradientStart) ) {
+            // The gradient does not really exist, so we can just fill the whole area and then return
+            Area edgeArea = new Area(edgeBox);
+            g2d.setColor(innerColor);
+            if ( shadowConf.isOutset() )
+                edgeArea.intersect(contentArea);
+            g2d.fill(edgeArea);
+            return;
         }
+        final float effectiveStart = ( gradientStart > 1f || gradientStart < 0f ) ? 0f : gradientStart;
+        final GradientStops stops = _shadowGradientStops(shadowConf.type().getFractions(), effectiveStart, innerColor, outerColor, shadowConf.isOutset());
+        edgePaint = new LinearGradientPaint(
+                         gradStartX, gradStartY,
+                         gradEndX, gradEndY,
+                         stops.fractions,
+                         stops.colors
+                     );
 
         // We need to clip the edge paint to the edge box
         final Area edgeArea = new Area(edgeBox);
@@ -568,6 +565,101 @@ final class StyleRenderer
         return shadow.color()
                     .map(c -> new Color(c.getRed(), c.getGreen(), c.getBlue(), 0))
                     .orElse(new Color(0.5f, 0.5f, 0.5f, 0f));
+    }
+
+    /**
+     *  A small immutable holder for the {@code fractions} and {@code colors} arrays
+     *  that make up a {@link MultipleGradientPaint}, returned by {@link #_shadowGradientStops}.
+     */
+    private static final class GradientStops {
+        final float[] fractions;
+        final Color[] colors;
+        GradientStops(float[] fractions, Color[] colors) {
+            this.fractions = fractions;
+            this.colors    = colors;
+        }
+    }
+
+    /**
+     *  Decides whether a shadow's gradient transition region {@code [gradientStart, 1]} is
+     *  degenerate and should be rendered as a solid fill rather than as a gradient.
+     *  <p>
+     *  This is the case when {@code gradientStart} is exactly {@code 0} (no transition at all)
+     *  or sits within {@link #SHADOW_GRADIENT_MIN_SPAN} below {@code 1}, where the transition
+     *  region is too narrow to hold the gradient's stops as distinct {@code float} values
+     *  (which would make {@link MultipleGradientPaint} throw an {@link IllegalArgumentException})
+     *  and would be invisible anyway. A {@code gradientStart > 1} is deliberately NOT treated as
+     *  degenerate here: it means the flat core is larger than the available space and is handled
+     *  by the callers by falling back to a full, core-less gradient ({@code effectiveStart == 0}).
+     */
+    private static boolean _isDegenerateShadowGradient( final float gradientStart ) {
+        return gradientStart == 0f || ( gradientStart <= 1f && gradientStart > 1f - SHADOW_GRADIENT_MIN_SPAN );
+    }
+
+    /**
+     *  Builds the color stops for a shadow gradient that transitions from {@code innerColor}
+     *  (at the gradient center / fraction {@code 0}) to {@code outerColor} (at fraction {@code 1}),
+     *  following the shape of the supplied {@code falloff} fractions
+     *  (see {@link swingtree.api.ShadowFractionsSupplier}).
+     *  <p>
+     *  The {@code falloff} tuple holds the shadow intensities ({@code 1} = solid,
+     *  {@code 0} = transparent) sampled at evenly spaced positions {@code t = j / n}
+     *  for {@code j} in {@code [0, n]}, where {@code n = falloff.size() - 1}.
+     *  <p>
+     *  The region {@code [0, gradientStart]} is a flat "core" that stays at {@code innerColor},
+     *  and the actual transition happens across {@code [gradientStart, 1]}, where we map each
+     *  sampled fraction to a gradient stop so that {@link MultipleGradientPaint}'s linear
+     *  interpolation approximates the falloff curve.
+     */
+    private static GradientStops _shadowGradientStops(
+        final Tuple<Float> falloff,
+        final float        gradientStart,
+        final Color        innerColor,
+        final Color        outerColor,
+        final boolean      isOutset
+    ) {
+        // A gradient needs at least two stops, so we need at least two falloff fractions to
+        // sample. A well behaved ShadowFractionsSupplier always supplies >= 2 (see its contract),
+        // but as it is a public interface we defensively fall back to the flat falloff otherwise:
+        final Tuple<Float> curve = falloff.size() >= 2 ? falloff : ShadowFractions.flat();
+        final boolean hasFlatCore = gradientStart > 0f;
+        final int n = curve.size() - 1; // number of sampling intervals
+        final int lead = hasFlatCore ? 2 : 1; // leading stops fixed at innerColor
+        final float[] fractions = new float[lead + n];
+        final Color[] colors    = new Color[lead + n];
+        fractions[0] = 0f;
+        colors[0]    = innerColor;
+        if ( hasFlatCore ) {
+            fractions[1] = gradientStart;
+            colors[1]    = innerColor;
+        }
+        for ( int i = 1; i <= n; i++ ) {
+            final float p = (float) i / n; // progress across the transition region, in (0, 1]
+            final int   idx = lead - 1 + i;
+            // The falloff fractions describe the shadow intensity (1 = solid, 0 = transparent)
+            // as a function of the distance from the solid edge. For an outset shadow the
+            // solid edge is the inner color, for an inset shadow it is the outer color, so
+            // we orient the curve accordingly:
+            final float blend = isOutset ? (1f - curve.get(i)) : curve.get(n - i);
+            fractions[idx] = gradientStart + p * (1f - gradientStart);
+            colors[idx]    = _blend(innerColor, outerColor, blend);
+        }
+        fractions[lead - 1 + n] = 1f; // guard against float rounding on the last fraction
+        return new GradientStops(fractions, colors);
+    }
+
+    /**
+     *  Linearly interpolates between two colors (including their alpha channel)
+     *  by the supplied {@code factor} in {@code [0, 1]}, where {@code 0} yields {@code a}
+     *  and {@code 1} yields {@code b}.
+     */
+    private static Color _blend( final Color a, final Color b, float factor ) {
+        factor = factor < 0f ? 0f : ( factor > 1f ? 1f : factor );
+        final int r     = Math.round(a.getRed()   + (b.getRed()   - a.getRed())   * factor);
+        final int g     = Math.round(a.getGreen() + (b.getGreen() - a.getGreen()) * factor);
+        final int blue  = Math.round(a.getBlue()  + (b.getBlue()  - a.getBlue())  * factor);
+        final int alpha = Math.round(a.getAlpha() + (b.getAlpha() - a.getAlpha()) * factor);
+        return new Color(r, g, blue, alpha);
     }
 
     private static void _renderGradient(

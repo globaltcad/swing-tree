@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.Action;
 import sprouts.Result;
+import sprouts.Tuple;
 import sprouts.Val;
 import swingtree.api.*;
 import swingtree.api.Painter;
@@ -551,6 +552,149 @@ public final class UI extends UIFactoryMethods
         NONE,
         REFLECT,
         REPEAT
+    }
+
+    /**
+     *  Defines the shape of the "falloff curve" of a shadow, that is to say,
+     *  the way in which the shadow color fades from its full strength into full
+     *  transparency across the blur region of a {@link ShadowConf}.
+     *  Pass one of these to {@link ShadowConf#type(swingtree.UI.ShadowType)}
+     *  as part of the style API (see {@link UIForAnySwing#withStyle(Styler)}).
+     *  <p>
+     *  Real world shadows are produced by very different optical situations, and they
+     *  rarely fade in a perfectly straight line. Each transition therefore corresponds to a
+     *  particular real world phenomenon and is backed by a specific mathematical
+     *  <i>falloff function</i> {@code f(t)}, which describes the shadow intensity
+     *  ({@code 1} = full shadow color, {@code 0} = fully transparent) as a function of the
+     *  normalized distance {@code t} in {@code [0, 1]} away from the solid edge of the shadow
+     *  ({@code t = 0} at the solid edge, {@code t = 1} at the far, transparent end of the blur).
+     *  <p>
+     *  A quick guide to picking one:
+     *  <ul>
+     *      <li>For a natural soft drop shadow, use {@link #BLUR} (most authentic) or
+     *          {@link #PENUMBRA} (cheaper, visually almost identical).</li>
+     *      <li>For an object resting on a surface, use {@link #CONTACT}.</li>
+     *      <li>For a diffuse glow or light bleed, use {@link #GLOW}.</li>
+     *      <li>For the cheapest, non-physical fade, use {@link #FLAT}.</li>
+     *      <li>For stylized, decorative effects, see the eccentric transitions
+     *          {@link #STAIRS}, {@link #RIPPLE}, {@link #SAWTOOTH} and {@link #BOUNCE}.</li>
+     *  </ul>
+     *  See the individual constants below for the purpose, the real world analogue and the
+     *  exact math of each falloff. In all formulas below {@code frac(x)} denotes the
+     *  fractional part {@code x - floor(x)}.
+     *
+     * @see ShadowConf#type(swingtree.UI.ShadowType)
+     */
+    @Immutable
+    public enum ShadowType implements UIEnum<ShadowType>, ShadowFractionsSupplier
+    {
+        /**
+         *  A constant rate fade from full shadow color to transparency, producing a
+         *  perfectly straight falloff. This does not correspond to any real world shadow,
+         *  it is simply the most neutral and the cheapest transition to render: it needs only
+         *  a 2 or 3 stop gradient and no curve sampling, which is why it is the historical
+         *  default.
+         *  <p>
+         *  <b>Falloff:</b> {@code f(t) = 1 - t}
+         */
+        FLAT(ShadowFractions::flat),
+        /**
+         *  A smooth, symmetric S-curve that holds the shadow strong near the element, fades
+         *  fastest through the midpoint and then eases gently into transparency. This mimics
+         *  the <i>penumbra</i> of a shadow cast by an area light source (a window, an overcast
+         *  sky, a softbox), where the soft edge comes from the light source being partially
+         *  occluded across a finite angular width.
+         *  <p>
+         *  It is a cheap polynomial approximation of {@link #BLUR} (the two are visually
+         *  almost indistinguishable) and so makes an excellent, performant default for soft
+         *  UI shadows.
+         *  <p>
+         *  <b>Falloff (the "smoothstep" function):</b> {@code f(t) = 1 - t}<sup>2</sup>{@code (3 - 2t)}
+         */
+        PENUMBRA(ShadowFractions::penumbra),
+        /**
+         *  The exact edge profile you get by convolving a hard shadow edge with a Gaussian
+         *  blur kernel. This is what classical CSS {@code box-shadow} and design tools such as
+         *  Figma or Photoshop produce, making it the most authentic and most familiar looking
+         *  soft drop shadow.
+         *  <p>
+         *  Note that, perhaps counter-intuitively, blurring a sharp edge with a (bell shaped)
+         *  Gaussian kernel does <i>not</i> yield a bell shaped falloff but rather the
+         *  <i>integral</i> of the Gaussian, the error function {@code erf}, which is a
+         *  symmetric S-curve. (For a bell shaped falloff, see {@link #GLOW} instead.)
+         *  <p>
+         *  <b>Falloff (normalized error function, with steepness {@code k}):</b><br>
+         *  {@code f(t) = (erf(k/2) - erf(k(t - 1/2))) / (2 * erf(k/2))}
+         */
+        BLUR(ShadowFractions::blur),
+        /**
+         *  A bell-shaped falloff that holds full strength right at the element and then rolls
+         *  off following a Gaussian curve, giving a soft, diffuse, evenly spreading look. This
+         *  does not mimic a cast shadow edge (see {@link #BLUR} for that), but rather a
+         *  <i>glow</i>, a halo or light bleed radiating from the element, and works well for
+         *  neon, highlights or emissive surfaces.
+         *  <p>
+         *  <b>Falloff (normalized Gaussian bell, with width {@code k}):</b><br>
+         *  {@code f(t) = (exp(-k t}<sup>2</sup>{@code ) - exp(-k)) / (1 - exp(-k))}
+         */
+        GLOW(ShadowFractions::glow),
+        /**
+         *  A sharp drop right at the element followed by a long, faint tail. This mimics a
+         *  <i>contact shadow</i> (ambient occlusion): the darkening where an object rests on or
+         *  nearly touches a surface, which is most intense at the contact line and fades away
+         *  with distance. It gives objects a grounded, tangible feel.
+         *  <p>
+         *  <b>Falloff (normalized exponential decay, with rate {@code k}):</b><br>
+         *  {@code f(t) = (exp(-k t) - exp(-k)) / (1 - exp(-k))}
+         */
+        CONTACT(ShadowFractions::contact),
+        /**
+         *  An eccentric, non-physical transition that posterizes the falloff into a fixed
+         *  number of discrete bands ({@code N = 5}) instead of fading smoothly, producing a
+         *  stepped, "cel-shaded" or contour-map look. Useful for retro, poster or technical
+         *  drawing aesthetics.
+         *  <p>
+         *  <b>Falloff (quantized linear, with {@code N} bands):</b><br>
+         *  {@code f(t) = round((1 - t) * (N - 1)) / (N - 1)}
+         */
+        STAIRS(ShadowFractions::stairs),
+        /**
+         *  An eccentric, non-physical transition: a cosine wave under a linear decay envelope,
+         *  so the shadow oscillates between strong and transparent while fading out. This
+         *  produces concentric shadow rings, like ripples spreading on water or a radar ping.
+         *  <p>
+         *  <b>Falloff (damped cosine, with {@code k} ripples):</b><br>
+         *  {@code f(t) = (1 - t) * (1/2 + 1/2 * cos(2*Math.PI*k*t))}, with {@code k = 3}
+         */
+        RIPPLE(ShadowFractions::ripple),
+        /**
+         *  An eccentric, non-physical transition: repeating linear ramps under a decay
+         *  envelope, producing louvered, venetian-blind-like banding that fades with distance.
+         *  <p>
+         *  <b>Falloff (decaying sawtooth, with {@code k} louvers):</b><br>
+         *  {@code f(t) = (1 - t) * (1 - frac(k t))}, with {@code k = 4}
+         */
+        SAWTOOTH(ShadowFractions::sawtooth),
+        /**
+         *  An eccentric, non-physical transition: an "ease-out-bounce" where the shadow
+         *  settles toward transparency with a few diminishing rebounds, like a ball bouncing
+         *  to rest. The classic easing curve, repurposed as a shadow falloff.
+         *  <p>
+         *  <b>Falloff:</b> {@code f(t) = 1 - easeOutBounce(t)}
+         */
+        BOUNCE(ShadowFractions::bounce);
+
+
+        private final ShadowFractionsSupplier fractions;
+
+        ShadowType( ShadowFractionsSupplier fractions ) {
+            this.fractions = fractions;
+        }
+
+        @Override
+        public Tuple<Float> getFractions() {
+            return fractions.getFractions();
+        }
     }
 
     /**
