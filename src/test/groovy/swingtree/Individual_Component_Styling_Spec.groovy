@@ -119,10 +119,12 @@ class Individual_Component_Styling_Spec extends Specification
                         .shadow("bright", s -> s
                             .color(0.5, 1, 1, state.progress())
                             .offset(-6)
+                            .type(UI.ShadowType.FLAT)
                         )
                         .shadow("dark", s -> s
                             .color(0, 0, 0, state.progress()/4)
                             .offset(+6)
+                            .type(UI.ShadowType.FLAT)
                         )
                         .shadowBlurRadius(10 * state.progress())
                         .shadowSpreadRadius(-5 * state.progress())
@@ -967,10 +969,12 @@ class Individual_Component_Styling_Spec extends Specification
                         .shadow(UI.Layer.BACKGROUND,"bright", s -> s
                             .color(new Color(0.7f, 0.95f, 1f, 0.35f))
                             .offset(-11)
+                            .type(UI.ShadowType.FLAT)
                         )
                         .shadow(UI.Layer.BACKGROUND,"dark", s -> s
                             .color(new Color(0, 0.1f, 0.2f, 0.20f))
                             .offset(+4)
+                            .type(UI.ShadowType.FLAT)
                         )
                         .shadowBlurRadius(4)
                         .shadowSpreadRadius(-2)
@@ -1014,10 +1018,12 @@ class Individual_Component_Styling_Spec extends Specification
                         .shadow("bright", s -> s
                             .color(new Color(1f, 1f, 1f, 0.3f))
                             .offset(-11)
+                            .type(UI.ShadowType.FLAT)
                         )
                         .shadow("dark", s -> s
                             .color(new Color(0, 0f, 0f, 0.15f))
                             .offset(+6)
+                            .type(UI.ShadowType.FLAT)
                         )
                         .shadowBlurRadius(13)
                         .shadowSpreadRadius(-5)
