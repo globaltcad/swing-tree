@@ -3623,9 +3623,18 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     private static void _revalidate( Component comp ) {
         comp.revalidate();
-        if ( comp instanceof JScrollPane )
-            Optional.ofNullable(comp.getParent())
-                    .ifPresent(Component::revalidate); // For some reason, JScrollPane does not revalidate its parent when its preferred size changes.
+        /*
+            `revalidate()` only re-runs the layout up to the nearest "validate root"
+            (a component whose `isValidateRoot()` returns true, e.g. JScrollPane,
+            JTextField or JRootPane). If `comp` is ITSELF such a validate root, then
+            Swing lays out its internals but never informs its parent, so a change to
+            `comp`'s own preferred size would not propagate outward and the surrounding
+            layout would stay stale. We therefore also revalidate the parent in that case.
+            (This used to special-case only JScrollPane, but the issue is common to all
+            validate roots.)
+        */
+        if ( comp instanceof JComponent && ((JComponent) comp).isValidateRoot() )
+            Optional.ofNullable(comp.getParent()).ifPresent(Component::revalidate);
     }
 
     /**

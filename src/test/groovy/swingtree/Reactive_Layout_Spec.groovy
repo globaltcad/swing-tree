@@ -1067,4 +1067,65 @@ class Reactive_Layout_Spec extends Specification
         then: 'Still stacked vertically — the invariant holds even when the panel is wider than preferred:'
             panel.getComponent(1).y > panel.getComponent(0).y
     }
+
+    def 'Reactively resizing a "validate root" child (like a JTextField) re-lays-out its parent.'()
+    {
+        reportInfo """
+            When you reactively change the preferred size of a child component, the surrounding
+            layout must update so the new size actually takes effect on screen. SwingTree triggers
+            this with a `revalidate()` call.
+
+            There is a subtlety here that this test guards against: Swing's `revalidate()` only
+            re-runs the layout up to the nearest *validate root* — a component whose
+            `isValidateRoot()` returns `true`, such as a `JScrollPane`, a `JTextField` or a
+            `JRootPane`. If the resized component is *itself* a validate root, then revalidating it
+            alone lays out only its internals; its parent is never told to re-position it, so the
+            new preferred size would silently have no effect. SwingTree therefore also revalidates
+            the parent of a validate root.
+
+            We verify this with a `JTextField` (which is a validate root, yet not a `JScrollPane`):
+            after reactively changing its preferred height, the parent must lay it out at the new
+            height. To test this faithfully we briefly show a real window and then process exactly
+            the work that `revalidate()` scheduled — deliberately *without* forcing a layout pass
+            ourselves, which would mask the very behaviour under test.
+        """
+        given: 'A UI scale of 1, so that preferred heights map one-to-one to pixels:'
+            SwingTree.get().setUiScaleFactor(1f)
+        and: 'A reactive preferred height and a parent panel holding a JTextField bound to it:'
+            var prefHeight = Var.of(60)
+            var textField = null
+            var parent =
+                    UI.panel("wrap 1")
+                    .add("growx", UI.textField("text").withPrefHeight(prefHeight).peek(c -> textField = c))
+                    .get(JPanel)
+        and: 'We place it in a briefly shown window and lay it out once, establishing a clean baseline:'
+            var frame = new javax.swing.JFrame()
+            int initialHeight = 0
+            int updatedHeight = 0
+            UI.runNow {
+                frame.setContentPane(parent)
+                frame.setSize(360, 640)
+                frame.setVisible(true)
+                frame.validate()
+                initialHeight = textField.getHeight()
+            }
+        expect: 'The JTextField starts laid out at its initial preferred height:'
+            textField instanceof javax.swing.JTextField
+            initialHeight == 60
+
+        when: 'We reactively change the preferred height, then process only what `revalidate()` scheduled:'
+            UI.runNow {
+                prefHeight.set(180)
+                // The real event loop would flush the scheduled (in)validations here. We do NOT call
+                // parent.validate() ourselves, since that would re-lay-out the parent unconditionally
+                // and hide whether the parent was actually scheduled for revalidation.
+                javax.swing.RepaintManager.currentManager(parent).validateInvalidComponents()
+                updatedHeight = textField.getHeight()
+            }
+        then: 'The parent re-laid-out the validate-root JTextField to its new preferred height:'
+            updatedHeight == 180
+
+        cleanup:
+            UI.runNow { frame.dispose() }
+    }
 }
