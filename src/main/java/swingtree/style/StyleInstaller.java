@@ -75,6 +75,18 @@ final class StyleInstaller<C extends JComponent>
     private @Nullable Boolean _initialIsOpaque           = null;
     private @Nullable Boolean _initialContentAreaFilled  = null;
     private @Nullable Font    _initialFont               = null;
+    // Remember the component's minimum/maximum size from before the style engine overrode them, so
+    // that they can be restored once a (possibly animated/transitional) style stops specifying them.
+    // A 'true' ownership flag means the style engine currently holds an explicit override;
+    // the matching '_initial*' field holds the value to restore (null == "was not explicitly set").
+    // Note: we deliberately do NOT do this for the *preferred* size. The preferred size is only a
+    // hint (it cannot pin a component the way a minimum can), and it is also driven by the auto
+    // preferred height feature (see TextConf#autoPreferredHeight), which expects the last computed
+    // value to stick when it is switched off, rather than snap back to a natural size.
+    private boolean            _styleOwnsMinSize = false;
+    private boolean            _styleOwnsMaxSize = false;
+    private @Nullable Dimension _initialMinSize  = null;
+    private @Nullable Dimension _initialMaxSize  = null;
 
     void updateDynamicLookAndFeel(Configurator<DynamicLaF> updater) {
         try {
@@ -276,6 +288,7 @@ final class StyleInstaller<C extends JComponent>
                     owner.setFont(_initialFont);
                     _initialFont = null;
                 }
+                _restoreStyleOwnedSizesOf(owner);
 
                 return _updateEngine(owner, engine, newStyle);
             }
@@ -653,11 +666,39 @@ final class StyleInstaller<C extends JComponent>
         }
     }
 
+    /**
+     *  Restores the component's minimum/maximum sizes to what they were before the style engine first
+     *  overrode them. This is needed because the style engine sets these sizes additively; without an
+     *  explicit restore, a stale override (e.g. one left behind by a transitional/animated style such
+     *  as a fold animation) would keep the component from shrinking to fit its content.
+     */
+    private void _restoreStyleOwnedSizesOf( final C owner ) {
+        boolean changed = false;
+        if ( _styleOwnsMinSize ) {
+            owner.setMinimumSize(_initialMinSize);
+            _styleOwnsMinSize = false;
+            _initialMinSize = null;
+            changed = true;
+        }
+        if ( _styleOwnsMaxSize ) {
+            owner.setMaximumSize(_initialMaxSize);
+            _styleOwnsMaxSize = false;
+            _initialMaxSize = null;
+            changed = true;
+        }
+        if ( changed && owner.getParent() != null )
+            owner.getParent().revalidate();
+    }
+
     private void _applyDimensionalityStyleTo( final C owner, final StyleConf styleConf )
     {
         final DimensionalityConf dimensionalityConf = styleConf.dimensionality();
 
         if ( dimensionalityConf.minWidth().isPresent() || dimensionalityConf.minHeight().isPresent() ) {
+            if ( !_styleOwnsMinSize ) {
+                _initialMinSize = owner.isMinimumSizeSet() ? owner.getMinimumSize() : null;
+                _styleOwnsMinSize = true;
+            }
             Dimension minSize = owner.getMinimumSize();
 
             int minWidth  = dimensionalityConf.minWidth().orElse(minSize == null ? 0 : minSize.width);
@@ -668,8 +709,22 @@ final class StyleInstaller<C extends JComponent>
             if ( ! newMinSize.equals(minSize) )
                 owner.setMinimumSize(newMinSize);
         }
+        else if ( _styleOwnsMinSize ) {
+            // The style no longer specifies a minimum size, so we restore the original one.
+            // Without this, a stale override (e.g. left by a transitional/animated style)
+            // would keep the component from shrinking to fit its (possibly reduced) content.
+            owner.setMinimumSize(_initialMinSize);
+            _styleOwnsMinSize = false;
+            _initialMinSize = null;
+            if ( owner.getParent() != null )
+                owner.getParent().revalidate();
+        }
 
         if ( dimensionalityConf.maxWidth().isPresent() || dimensionalityConf.maxHeight().isPresent() ) {
+            if ( !_styleOwnsMaxSize ) {
+                _initialMaxSize = owner.isMaximumSizeSet() ? owner.getMaximumSize() : null;
+                _styleOwnsMaxSize = true;
+            }
             Dimension maxSize = owner.getMaximumSize();
 
             int maxWidth  = dimensionalityConf.maxWidth().orElse(maxSize == null  ? Integer.MAX_VALUE : maxSize.width);
@@ -679,6 +734,13 @@ final class StyleInstaller<C extends JComponent>
 
             if ( !newMaxSize.equals(maxSize) )
                 owner.setMaximumSize(newMaxSize);
+        }
+        else if ( _styleOwnsMaxSize ) {
+            owner.setMaximumSize(_initialMaxSize);
+            _styleOwnsMaxSize = false;
+            _initialMaxSize = null;
+            if ( owner.getParent() != null )
+                owner.getParent().revalidate();
         }
 
         if ( dimensionalityConf.preferredWidth().isPresent() || dimensionalityConf.preferredHeight().isPresent() ) {
@@ -695,6 +757,10 @@ final class StyleInstaller<C extends JComponent>
                 if ( owner.getParent() != null )
                     owner.getParent().revalidate();
             }
+            // Note: unlike the minimum/maximum size, we intentionally do NOT remember and restore the
+            // preferred size when the style stops specifying it. The preferred size is only a hint and
+            // is also driven by the auto preferred height feature (TextConf#autoPreferredHeight), which
+            // expects the last computed value to remain in place when it is switched off.
         }
 
         if ( dimensionalityConf.width().isPresent() || dimensionalityConf.height().isPresent() ) {

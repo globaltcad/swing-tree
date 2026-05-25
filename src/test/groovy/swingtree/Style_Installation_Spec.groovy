@@ -790,4 +790,283 @@ class Style_Installation_Spec extends Specification
              true     | { it.border(0, "black").shadow(UI.Layer.CONTENT, "s2", c->c.color("")).shadow(UI.Layer.CONTENT, "s1", c->c.color("blue").blurRadius(5)).shadow(UI.Layer.CONTENT, "s2", c->c.color("")) }
     }
 
+    def 'The style engine installs and then uninstalls a minimum size, restoring the natural minimum.'()
+    {
+        reportInfo """
+            The SwingTree style engine may override a component's minimum size
+            through the style API (e.g. `it.minHeight(120)`).
+
+            Crucially, when the style stops specifying a minimum size again, the engine
+            must **restore** the component to its natural minimum size. If it did not,
+            then a stale minimum would stick around and prevent the component from ever
+            shrinking again. This is exactly the kind of trouble that can arise with
+            transitional or animated styles (like a fold animation that temporarily
+            clamps the height of a panel), so the install/uninstall symmetry matters.
+        """
+        given: 'A simple panel whose style is only applied when a flag is set:'
+            var applyStyle = false
+            var panel =
+                    UI.panel("fill")
+                    .add(UI.label("Some content"))
+                    .withSize(200, 100)
+                    .withStyle( it -> applyStyle ? it.minHeight(120) : it )
+                    .get(JPanel)
+        and: 'We remember the natural minimum size, the one the component has before any styling:'
+            var naturalMinimum = panel.getMinimumSize()
+        expect: 'Initially the component does not have an explicit minimum size:'
+            !panel.isMinimumSizeSet()
+
+        when: 'We activate the style and let the component paint, which gathers and installs the style:'
+            applyStyle = true
+            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+        then: 'The style engine has installed an explicit, larger minimum size:'
+            panel.isMinimumSizeSet()
+            panel.getMinimumSize().height > naturalMinimum.height
+
+        when: 'We deactivate the style again and let the component paint:'
+            applyStyle = false
+            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+        then: 'The component is restored to its natural minimum size, free to shrink again:'
+            !panel.isMinimumSizeSet()
+            panel.getMinimumSize() == naturalMinimum
+    }
+
+    def 'The minimum and maximum sizes are installed and then uninstalled together with the style.'(
+        String kind, Styler<JPanel> styler, Closure<Boolean> isSet, Closure<Dimension> sizeOf
+    ){
+        reportInfo """
+            The style API can override a component's `minimum` and `maximum` sizes.
+            This data driven test verifies, for each of these two kinds of size, that
+            the style engine:
+
+            - installs the size when the style specifies it, and
+            - uninstalls it again (restoring the natural size) when the style drops it.
+
+            The '$kind' size is the one exercised in this iteration.
+
+            (The *preferred* size deliberately behaves differently and is covered by a
+            separate test, because it is only a hint and is also driven by the auto
+            preferred height feature.)
+        """
+        given: 'A panel whose style is only applied when a flag is set:'
+            var applyStyle = false
+            var panel =
+                    UI.panel("fill")
+                    .add(UI.label("Content"))
+                    .withSize(200, 100)
+                    .withStyle( it -> applyStyle ? styler(it) : it )
+                    .get(JPanel)
+        and: 'We remember the natural size of this kind, before any styling:'
+            var natural = sizeOf(panel)
+        expect: 'No explicit size of this kind is set initially:'
+            !isSet(panel)
+
+        when: 'The style is activated and the component painted:'
+            applyStyle = true
+            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+        then: 'The size of this kind is now explicitly set by the style engine:'
+            isSet(panel)
+
+        when: 'The style is removed again and the component painted:'
+            applyStyle = false
+            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+        then: 'The component returns to its natural size of this kind:'
+            !isSet(panel)
+            sizeOf(panel) == natural
+
+        where :
+            kind        | styler                    | isSet                       | sizeOf
+            'minimum'   | { it.minSize(150, 130) }  | { it.isMinimumSizeSet() }   | { it.getMinimumSize() }
+            'maximum'   | { it.maxSize(150, 130) }  | { it.isMaximumSizeSet() }   | { it.getMaximumSize() }
+    }
+
+    def 'A preferred size set through the style API is intentionally NOT reset when the style drops it.'()
+    {
+        reportInfo """
+            The preferred size is treated differently from the minimum and maximum sizes.
+
+            Unlike a minimum size (which can *pin* a component and stop it from shrinking),
+            the preferred size is only a hint to the layout manager. More importantly, the
+            preferred height is also driven by the auto preferred height feature
+            (see `TextConf#autoPreferredHeight`): SwingTree feeds the computed text height
+            into the very same preferred-size channel of the style.
+
+            The established behaviour, which applications rely on, is that switching such a
+            preferred size off again leaves the last value in place rather than snapping the
+            component back to its natural preferred size. This test pins that behaviour down,
+            so that the minimum/maximum size restoration logic never accidentally starts
+            resetting the preferred size as well.
+        """
+        given: 'A panel whose style only sometimes specifies a preferred size:'
+            var applyStyle = false
+            var panel =
+                    UI.panel("fill")
+                    .add(UI.label("Content"))
+                    .withSize(200, 100)
+                    .withStyle( it -> applyStyle ? it.prefSize(150, 130) : it )
+                    .get(JPanel)
+        expect: 'Initially there is no explicit preferred size:'
+            !panel.isPreferredSizeSet()
+
+        when: 'We activate the style and paint:'
+            applyStyle = true
+            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+        then: 'The preferred size is now explicitly set by the style engine:'
+            panel.isPreferredSizeSet()
+        and : 'We remember the preferred size that was installed:'
+            var installed = panel.getPreferredSize()
+
+        when: 'We remove the style again and paint:'
+            applyStyle = false
+            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+        then: 'The preferred size sticks at the last value, it is deliberately not reset:'
+            panel.isPreferredSizeSet()
+            panel.getPreferredSize() == installed
+    }
+
+    def 'A minimum size set on the component directly is preserved across style installation and uninstallation.'()
+    {
+        reportInfo """
+            A user may set a minimum size on a component directly, outside of the style API.
+            When the style engine temporarily overrides that minimum size and later removes
+            its override again, it must restore the user's **original** minimum size, and not
+            simply wipe it. In other words: the style engine only owns what it set itself.
+        """
+        given: 'A panel with a minimum size that was set on the component directly:'
+            var applyStyle = false
+            var panel =
+                    UI.panel("fill")
+                    .add(UI.label("Content"))
+                    .withSize(200, 100)
+                    .withStyle( it -> applyStyle ? it.minHeight(300) : it )
+                    .peek( c -> c.setMinimumSize(new Dimension(42, 84)) )
+                    .get(JPanel)
+        expect: 'The directly defined minimum size is in place:'
+            panel.isMinimumSizeSet()
+            panel.getMinimumSize() == new Dimension(42, 84)
+
+        when: 'The style overrides the minimum height and the component paints:'
+            applyStyle = true
+            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+        then: 'The styled minimum height takes effect:'
+            panel.getMinimumSize().height > 84
+
+        when: 'The style is removed again and the component paints:'
+            applyStyle = false
+            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+        then: "The component's own minimum size is faithfully restored:"
+            panel.isMinimumSizeSet()
+            panel.getMinimumSize() == new Dimension(42, 84)
+    }
+
+    def 'A temporarily clamped minimum height does not permanently pin a component. (fold animation regression)'()
+    {
+        reportInfo """
+            This is a regression test for a subtle but nasty bug.
+
+            Transitional and animated styles, like the fold animation used by collapsible
+            panels, temporarily clamp a component's height by setting `minHeight` and
+            `maxHeight` on every animation frame. When such an animation completes and the
+            style returns to its natural, unclamped form, the style engine **must** release
+            the clamped minimum and maximum sizes again.
+
+            Previously it did not: the stale minimum size stuck to the component, so a panel
+            that had been folded open could no longer shrink to fit its content (for example
+            after hiding some of its rows). A layout manager never sizes a component below its
+            minimum, so the panel stayed stubbornly tall. Notably, no amount of `revalidate()`
+            could fix that, because `revalidate()` does not touch the minimum size.
+
+            Here we simulate the tail end of such an animation: a clamping style is applied
+            and then removed. We verify that the component is no longer pinned afterwards.
+        """
+        given: 'A content panel which a "fold" style clamps to a fixed height while active:'
+            var folding = true
+            var panel =
+                    UI.panel("fill")
+                    .add(UI.label("Row A"))
+                    .add(UI.label("Row B"))
+                    .withSize(200, 100)
+                    .withStyle( it -> folding ? it.minHeight(50).maxHeight(50) : it )
+                    .get(JPanel)
+
+        when: 'The clamping (fold) style is active and the panel paints:'
+            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+        then: 'The panel is clamped: both a minimum and a maximum height are pinned:'
+            panel.isMinimumSizeSet()
+            panel.isMaximumSizeSet()
+
+        when: 'The animation completes, so the clamping style is gone, and the panel paints again:'
+            folding = false
+            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+        then: 'The clamp is fully released, so the panel is free to size to its content again:'
+            !panel.isMinimumSizeSet()
+            !panel.isMaximumSizeSet()
+    }
+
+    def 'A minimum size is uninstalled even when other, non-size, style properties remain active.'(
+        String remaining, Styler<JPanel> otherStyle
+    ){
+        reportInfo """
+            This is the important "messy" case.
+
+            A component very often keeps *some* styling while only its size clamp comes
+            and goes. The fold container in a real application, for example, keeps a
+            (transparent) background while the fold animation clamps and unclamps its height.
+            This means the component never becomes fully "un-styled" in between, so the
+            release of the size must happen on the still-styled code path, not only on the
+            "no style at all" path.
+
+            Crucially, this must hold no matter *what* the remaining styling is. Different
+            kinds of style take different installation routes through the engine: a shadow or
+            background gradient may install a custom UI, a border installs a custom border,
+            and so on. So we exercise this with a variety of leftover styles. Here the
+            remaining style is a **$remaining**.
+
+            If this ever regresses, a panel that still has e.g. a shadow or a border would
+            stay stuck at its clamped minimum size and refuse to shrink to fit its content.
+        """
+        given: 'A panel that is always styled (with some non-size style) but only sometimes clamped:'
+            var clamp = false
+            var panel =
+                    UI.panel("fill")
+                    .add(UI.label("Content"))
+                    .withSize(200, 100)
+                    .withStyle( it -> clamp ? otherStyle(it).minHeight(140) : otherStyle(it) )
+                    .get(JPanel)
+        and: 'We remember the natural minimum size:'
+            var naturalMinimum = panel.getMinimumSize()
+        and : 'The leftover style on its own is a real (non-empty) style:'
+            !clamp
+            ComponentExtension.from(panel).getStyle() != StyleConf.none()
+
+        when: 'We apply the clamp and paint:'
+            clamp = true
+            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+        then: 'The minimum height is pinned:'
+            panel.isMinimumSizeSet()
+            panel.getMinimumSize().height > naturalMinimum.height
+
+        when: 'We drop only the clamp, so the other styling stays, and paint:'
+            clamp = false
+            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+        then: 'The minimum size is restored to natural, even though the component is still styled:'
+            !panel.isMinimumSizeSet()
+            panel.getMinimumSize() == naturalMinimum
+        and: 'The component is indeed still styled (it was never fully reset to "no style"):'
+            ComponentExtension.from(panel).getStyle() != StyleConf.none()
+
+        where : 'The leftover, non-size styling takes various installation routes through the engine:'
+            remaining            | otherStyle
+            'background colour'  | { it.backgroundColor(Color.LIGHT_GRAY) }
+            'foundation colour'  | { it.foundationColor(Color.GREEN) }
+            'background shadow'  | { it.shadow(UI.Layer.BACKGROUND, "s", c->c.color("black").blurRadius(5).spreadRadius(3)) }
+            'foreground shadow'  | { it.shadow(UI.Layer.FOREGROUND, "s", c->c.color("blue").offset(2,2).blurRadius(4)) }
+            'a line border'      | { it.border(2, Color.BLACK) }
+            'a rounded border'   | { it.borderRadius(12).border(1, Color.DARK_GRAY) }
+            'a background gradient' | { it.gradient(UI.Layer.BACKGROUND, "g", c->c.colors(Color.RED, Color.BLUE)) }
+            'a border gradient'  | { it.gradient(UI.Layer.BORDER, "g", c->c.colors(Color.RED, Color.BLUE)) }
+            'a margin'           | { it.margin(7) }
+            'shadow and border'  | { it.border(2, Color.BLACK).shadow(UI.Layer.BACKGROUND, "s", c->c.color("black").blurRadius(6)) }
+    }
+
 }
