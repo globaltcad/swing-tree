@@ -417,6 +417,115 @@ class UI_Scaling_Spec extends Specification
             button.size == new Dimension(0, 0)
     }
 
+    def 'The `componentPrefWidth()` and `componentPrefHeight()` of a style delegate are unscaled to "developer pixel".'()
+    {
+        reportInfo """
+            Inside of a `Styler` lambda you have access to a `ComponentStyleDelegate`
+            which exposes the underlying component through a couple of accessor methods.
+            A raw call to `component().getPreferredSize()` would give you the preferred size
+            **already scaled** to the current `UI.scale()`, which is a common source of bugs.
+
+            To save you from that trap, the delegate offers `componentPrefWidth()` and
+            `componentPrefHeight()`, which mirror `componentWidth()` and `componentHeight()`
+            but for the *preferred* size, and which give you the size back in "developer pixel"
+            (i.e. unscaled).
+        """
+        given : 'We set the scaling factor to 2.0 so that scaling effects become observable.'
+            SwingTree.get().setUiScaleFactor(2.0f)
+        and : 'A few capture variables we read from inside the styler:'
+            int[] rawPrefSize     = new int[2]
+            int[] devPixelPrefSize = new int[2]
+
+        when : 'We build a button with a preferred size of 100 x 50 "developer pixel".'
+            var panel =
+                UI.panel()
+                .add(
+                    UI.button("Button")
+                    .withPrefSize(100, 50)
+                    .withStyle( it -> {
+                        rawPrefSize[0]      = it.component().getPreferredSize().width
+                        rawPrefSize[1]      = it.component().getPreferredSize().height
+                        devPixelPrefSize[0] = it.componentPrefWidth()
+                        devPixelPrefSize[1] = it.componentPrefHeight()
+                        return it
+                    })
+                )
+                .get(JPanel)
+        and : 'We unpack the button so that the styler has surely run:'
+            var button = panel.components[0]
+
+        then : 'The raw preferred size of the component is scaled by the factor of 2.'
+            button.preferredSize == new Dimension(200, 100)
+            rawPrefSize[0] == 200
+            rawPrefSize[1] == 100
+        and : 'But `componentPrefWidth()` and `componentPrefHeight()` are scaled back down to "developer pixel".'
+            devPixelPrefSize[0] == 100
+            devPixelPrefSize[1] == 50
+    }
+
+    def 'Feeding the preferred size back into the styling API requires `componentPrefWidth/Height()` to avoid double scaling.'()
+    {
+        reportInfo """
+            A very common pattern is to read a component's preferred size inside a `Styler`
+            and feed it back into a size related styling method, like for example when implementing
+            a fold/expand animation where the maximum height grows from `0` to the preferred height.
+
+            The methods on the styling API (like `minHeight(double)` or `maxHeight(double)`) all
+            **scale their inputs up** through `UI.scale(..)`. So if you were to read the preferred
+            size using the deprecated `component().getPreferredSize()` (which is **already scaled**)
+            and pass it straight back in, the value would be scaled **twice**!
+
+            The `componentPrefWidth()` and `componentPrefHeight()` methods solve this by giving you
+            the preferred size in "developer pixel", so that the value cleanly round-trips through
+            the styling API.
+        """
+        given : 'We set the scaling factor to 2.0 so that the double scaling becomes observable.'
+            SwingTree.get().setUiScaleFactor(2.0f)
+
+        when : """
+            We build two buttons, both with a preferred size of 100 x 50 "developer pixel".
+            The first reads its preferred height the correct way (`componentPrefHeight()`),
+            the second reads it the buggy way (`component().getPreferredSize().height`).
+        """
+            var panel =
+                UI.panel("wrap 1")
+                .add(
+                    UI.button("Correct")
+                    .withPrefSize(100, 50)
+                    .withStyle( it -> it
+                        .minHeight(it.componentPrefHeight())
+                        .maxHeight(it.componentPrefHeight())
+                    )
+                )
+                .add(
+                    UI.button("Buggy")
+                    .withPrefSize(100, 50)
+                    .withStyle( it -> it
+                        .minHeight(it.component().getPreferredSize().height)
+                        .maxHeight(it.component().getPreferredSize().height)
+                    )
+                )
+                .get(JPanel)
+        and : 'We unpack the two buttons:'
+            var correct = panel.components[0]
+            var buggy   = panel.components[1]
+
+        then : """
+            The button using `componentPrefHeight()` round-trips cleanly:
+            its min/max height matches the (scaled) preferred height of 100.
+        """
+            correct.preferredSize.height == 100
+            correct.minimumSize.height == 100
+            correct.maximumSize.height == 100
+        and : """
+            The button using the deprecated `component().getPreferredSize().height` is scaled twice:
+            its min/max height is 200 instead of the expected 100. This is the bug to avoid!
+        """
+            buggy.preferredSize.height == 100
+            buggy.minimumSize.height == 200
+            buggy.maximumSize.height == 200
+    }
+
     def 'You can get a reactive view on the current UI scale to update you components dynamically!'() {
         reportInfo """
             The UI scale factor built into the SwingTree library

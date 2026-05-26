@@ -61,6 +61,12 @@ fans out from there.
 | [Simple Dialogs](./Simple-Dialogs.md) | `UI.confirmation(..)` / `UI.message(..)` — the SwingTree wrappers around `JOptionPane`. |
 | [Writing Tables](./Writing-Tables.md) | Declarative `JTable` models, editable cells, and custom cell renderers. |
 
+## 🔍 Under the hood ##
+
+| Guide | What it covers |
+|---|---|
+| [HiDPI Scaling](./HiDPI-Scaling.md) | "Developer pixels" vs "component pixels", how SwingTree scales inputs up and outputs down for you, the scaling-aware delegate accessors, and the double-scaling trap behind the deprecated `component()`. |
+
 ---
 
 ## 🗺️ A reading path ##
@@ -88,6 +94,9 @@ graph TD;
     C --> EH[Advanced Event Handling]
     C --> SD[Simple Dialogs]
     C --> WT[Writing Tables]
+    C --> HDPI[HiDPI Scaling]
+    SS --> HDPI
+    EH --> HDPI
 ```
 
 ## 🧪 Worth keeping open while reading ##
