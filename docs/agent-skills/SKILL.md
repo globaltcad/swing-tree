@@ -503,7 +503,9 @@ button("Go")
 Useful delegate methods: `it.get()` / `it.getComponent()` (the component),
 `it.getParent()`, `it.mouseX()` / `it.mouseY()`, `it.animateFor(..)` (§9),
 `it.paint(status, g -> ...)` (custom rendering), drag deltas
-(`it.deltaXSinceStart()`, `it.initialComponentPosition()`).
+(`it.deltaXSinceStart()`, `it.initialComponentPosition()`). **All geometry these
+return is in DPI-agnostic "developer pixels"** (except `mouse*OnScreen()`, which
+is raw screen pixels) — see §13.
 
 ### Custom / model-driven events: `on(..)` vs `onView(..)`
 
@@ -549,7 +551,7 @@ Frequently used delegate methods (all chainable, all DPI/HiDPI aware):
 - Fill: `backgroundColor` / `foundationColor`, `foregroundColor`, `gradient(...)`, `noise(...)`, `image(img -> ...)`.
 - Shadow: `shadowColor`, `shadowBlurRadius`, `shadowSpreadRadius`, `shadowOffset`, `shadowIsInset`. Named shadows: `.shadow("name", s -> s.color(..).offset(..))`.
 - Layered painting: `.painter(Layer.CONTENT, g -> ...)` for raw `Graphics2D`.
-- `component()` returns the live component, so you can branch on its state (e.g. `it.component().isSelected()`).
+- `component()` returns the live component, so you can branch on its state (e.g. `it.component().isSelected()`). **Deprecated for reading geometry** — its sizes are in *component pixels* and double-scale if fed back in; use `componentWidth/Height()` / `componentPrefWidth/Height()` instead (§13).
 
 Gradients and named layers:
 
@@ -809,7 +811,57 @@ lambda) — push risky top-level code into `apply(ui -> ...)` or `peek(c -> ...)
 
 ---
 
-## 13. Hard-won gotchas (check these in any review)
+## 13. HiDPI scaling — "developer pixels" vs "component pixels"
+
+SwingTree maintains one **UI scale factor** (`UI.scale()`, a `float`, derived
+from the system font) and applies it everywhere, because vanilla Swing + the
+JDK's bundled Look-and-Feels do **not** scale for HiDPI. This creates two
+coordinate spaces:
+
+- **Developer pixels** — the DPI-agnostic numbers *you* write (`withPrefSize(100,50)`).
+- **Component pixels** — the real scaled numbers Swing lays out/paints (at scale `2.0` → `200×100`).
+
+**The symmetry you can rely on:** everything you pass *into* the SwingTree API is
+in developer pixels and gets scaled **up** for you; everything SwingTree reads
+*back* for you is scaled **down** into developer pixels. So values round-trip
+cleanly — you almost never call `UI.scale(..)` yourself.
+
+- **Inputs scaled up:** all builder dims (`withPrefSize/withMinSize/withWidth/withSizeExactly/...`)
+  and all style dims (`prefSize`, `minHeight`, `margin`, `padding`, `borderWidth`,
+  `borderRadius`, gradient/shadow offsets & sizes, …).
+- **Outputs scaled down (already in developer px):**
+  - Style delegate: `it.componentWidth()`, `it.componentHeight()`,
+    `it.componentPrefWidth()`, `it.componentPrefHeight()`.
+  - Event delegates (`onClick`, `onResize`, `onMouseMove`, `onDrag`, …):
+    `it.getX/getY/getPosition`, `it.getWidth/getHeight/getSize`, `it.getPrefSize`,
+    `it.getBounds`; setters like `it.setBounds/setPrefSize/setMinSize` take
+    developer px. Mouse: `it.mouseX()/mouseY()/mousePosition()`. Drag:
+    `it.initialComponentPosition()`, `it.dragPositions()`, `it.deltaXSinceStart()`.
+
+> **THE DOUBLE-SCALING TRAP (this is why `component()` is deprecated):** the raw
+> Swing component returns **component pixels**. If you read
+> `it.component().getPreferredSize().height` (already scaled) and pass it back
+> into a scaling method like `minHeight(..)`, it is scaled **twice** — min height
+> becomes `200` when you meant `100`, and the error grows with the scale factor.
+> **Fix:** use the developer-pixel accessor instead:
+> ```java
+> .withStyle( it -> it.minHeight(it.componentPrefHeight()) )   // ✅ round-trips; NOT it.component().getPreferredSize().height ❌
+> ```
+
+> **THE ONE EXCEPTION:** absolute on-screen coords are **raw**, not unscaled —
+> `it.mouseXOnScreen()`, `it.mouseYOnScreen()`, `it.mousePositionOnScreen()` are
+> in real screen pixels (they're desktop-absolute, possibly multi-monitor).
+
+Only call the raw helpers when working **against raw Swing** (custom `Graphics2D`
+painting, a peeked component, a third-party widget): `UI.scale(int|float|double)`
+(developer→component), `UI.unscale(int|float|Dimension)`
+(component→developer), `UI.scale(Graphics2D)` (scales a context in place),
+`UI.scale()` (the raw factor). Override the factor with
+`SwingTree.get().setUiScaleFactor(2.0f)` or
+`SwingTree.initializeUsing(cfg -> cfg.uiScaleFactor(2.0f))`. Full prose:
+`docs/markdown/HiDPI-Scaling.md`.
+
+## 14. Hard-won gotchas (check these in any review)
 
 1. **Never `setOpaque(..)`** on a styled component — the style engine controls
    opacity; manual calls fight it. Use `backgroundColor(Color.TRANSPARENT)` / a real
@@ -829,10 +881,15 @@ lambda) — push risky top-level code into `apply(ui -> ...)` or `peek(c -> ...)
 8. Use **enum** group tags and the type-safe layout constants for refactor safety.
 9. Withers must be **pure** and return **new** instances (Lombok `@With` on records
    is the cleanest path); never mutate `this`.
+10. **Never feed a raw Swing size/position back into the SwingTree API** — values
+    from `it.component().getPreferredSize()`/`getBounds()`/`getWidth()` are in
+    *component pixels* (already scaled); passing them to `minHeight(..)`/`size(..)`/etc.
+    double-scales them. Read geometry through the delegate accessors
+    (`componentPrefHeight()`, `getWidth()`, `mouseX()`, …) which give developer pixels. (§13)
 
 ---
 
-## 14. Cheat sheet
+## 15. Cheat sheet
 
 ```java
 import static swingtree.UI.*;
@@ -880,6 +937,11 @@ UI.use(sheet, () -> UI.show(f -> new View()));   // sheet.reconfigure() hot-swap
 
 // escape hatches
 .peek(c -> c.setX(..)).apply(ui -> {for(..) ui.add(..);}).applyIf(cond, ui -> ui.add(..)).get(JPanel.class)
+
+// HiDPI scaling — you write developer px (scaled up), delegates return developer px (scaled down)
+.withStyle(it -> it.minHeight(it.componentPrefHeight()))   // ✅ round-trips; NOT it.component().getPreferredSize().height ❌
+it.getWidth()/getHeight()/getBounds()/mouseX()/mouseY()    // all developer px;  mouse*OnScreen() = raw screen px
+UI.scale(int|float|double) / UI.unscale(..) / UI.scale(g2d)  // only when working against RAW Swing
 ```
 
 ### Runnable examples in this repo (read these for full context)

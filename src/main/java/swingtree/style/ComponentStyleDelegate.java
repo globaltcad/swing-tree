@@ -64,7 +64,13 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *                     A developer may want to access the dimensions of a component to perform
      *                     rendering in a custom {@link Painter}. Unfortunately, the dimensions of a component are
      *                     not in "developer pixels"! Instead, they are already scaled to the current {@link UI#scale()}.
-     *                     <b>To prevent scaling issues, use {@link #componentWidth()} and {@link #componentHeight()}. These are scaled to "developer pixel"</b>
+     *                     <b>To prevent scaling issues, use {@link #componentWidth()} and {@link #componentHeight()}
+     *                     for the current size, or {@link #componentPrefWidth()} and {@link #componentPrefHeight()}
+     *                     for the preferred size. These are all scaled down to "developer pixel".</b>
+     *                     This matters in particular when the size you read here is fed back into the styling API
+     *                     (e.g. {@link #minHeight(double)} or {@link #maxHeight(double)}), because those methods
+     *                     scale their inputs up again. Reading {@code component().getPreferredSize()} directly and
+     *                     passing it back in would scale the value <b>twice</b>.
      *                 </li>
      *             </ul>
      */
@@ -103,6 +109,52 @@ public final class ComponentStyleDelegate<C extends JComponent>
      */
     public int componentHeight() {
         return UI.unscale(_component.getHeight());
+    }
+
+    /**
+     *  This method delegates to the {@link JComponent#getPreferredSize()} property but also
+     *  scales the resulting width down to "developer pixel" by passing it through the {@link UI#unscale(int)} method.
+     *  <p>
+     *  This is the preferred way of reading a component's preferred width from within a {@link Styler}
+     *  or a custom {@link Painter}, because the raw {@link JComponent#getPreferredSize()} is already
+     *  scaled to the current {@link UI#scale()}. If you were to feed that raw value back into a
+     *  size related styling method like {@link #minWidth(double)}, {@link #maxWidth(double)} or
+     *  {@link #width(double)} (which all scale their inputs through {@link UI#scale(int)} again),
+     *  the value would be scaled <b>twice</b>, producing layouts that grow quadratically with the
+     *  UI scale factor. <br>
+     *  <b>
+     *      So whatever preferred width the component reports,
+     *      this gives it back to you in "developer pixel" so that it round-trips cleanly
+     *      through the styling API without sacrificing DPI scaling.
+     *  </b>
+     *
+     * @return The preferred width of the underlying {@link JComponent} in "developer pixel".
+     */
+    public int componentPrefWidth() {
+        return UI.unscale(_component.getPreferredSize().width);
+    }
+
+    /**
+     *  This method delegates to the {@link JComponent#getPreferredSize()} property but also
+     *  scales the resulting height down to "developer pixel" by passing it through the {@link UI#unscale(int)} method.
+     *  <p>
+     *  This is the preferred way of reading a component's preferred height from within a {@link Styler}
+     *  or a custom {@link Painter}, because the raw {@link JComponent#getPreferredSize()} is already
+     *  scaled to the current {@link UI#scale()}. If you were to feed that raw value back into a
+     *  size related styling method like {@link #minHeight(double)}, {@link #maxHeight(double)} or
+     *  {@link #height(double)} (which all scale their inputs through {@link UI#scale(int)} again),
+     *  the value would be scaled <b>twice</b>, producing layouts that grow quadratically with the
+     *  UI scale factor. <br>
+     *  <b>
+     *      So whatever preferred height the component reports,
+     *      this gives it back to you in "developer pixel" so that it round-trips cleanly
+     *      through the styling API without sacrificing DPI scaling.
+     *  </b>
+     *
+     * @return The preferred height of the underlying {@link JComponent} in "developer pixel".
+     */
+    public int componentPrefHeight() {
+        return UI.unscale(_component.getPreferredSize().height);
     }
 
     /**
