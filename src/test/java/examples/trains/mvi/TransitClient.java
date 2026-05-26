@@ -3,15 +3,16 @@ package examples.trains.mvi;
 import org.jspecify.annotations.Nullable;
 import sprouts.Tuple;
 
-import java.net.URI;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -35,15 +36,14 @@ public final class TransitClient {
 
     private static final String BASE = "https://api.transitous.org/api/v1";
 
-    private static final HttpClient HTTP = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(15))
-            .build();
+    private static final int CONNECT_TIMEOUT_MS = 15_000;
+    private static final int READ_TIMEOUT_MS    = 20_000;
 
     private TransitClient() {}
 
     /** Resolve a free-text query into matching railway stations (best match first). */
     public static List<Station> searchStations(String query) throws Exception {
-        if (query == null || query.trim().isEmpty()) return List.of();
+        if (query == null || query.trim().isEmpty()) return Collections.emptyList();
         String body = get(BASE + "/geocode?text=" + enc(query) + "&language=de");
         List<Station> out = new ArrayList<>();
         for (Object o : arr(parse(body))) {
@@ -144,19 +144,38 @@ public final class TransitClient {
     // ---- transport -----------------------------------------------------------
 
     private static String get(String url) throws Exception {
-        HttpRequest req = HttpRequest.newBuilder(URI.create(url))
-                .timeout(Duration.ofSeconds(20))
-                .header("Accept", "application/json")
-                .header("User-Agent", "SwingTree-TrainBoard-Example")
-                .GET()
-                .build();
-        HttpResponse<String> res = HTTP.send(req, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        if (res.statusCode() / 100 != 2)
-            throw new IllegalStateException("HTTP " + res.statusCode() + " from transit service");
-        return res.body();
+        HttpURLConnection con = (HttpURLConnection) new URL(url).openConnection();
+        con.setRequestMethod("GET");
+        con.setConnectTimeout(CONNECT_TIMEOUT_MS);
+        con.setReadTimeout(READ_TIMEOUT_MS);
+        con.setRequestProperty("Accept", "application/json");
+        con.setRequestProperty("User-Agent", "SwingTree-TrainBoard-Example");
+        try {
+            int status = con.getResponseCode();
+            if (status / 100 != 2)
+                throw new IllegalStateException("HTTP " + status + " from transit service");
+            try (InputStream in = con.getInputStream()) {
+                return readAll(in);
+            }
+        } finally {
+            con.disconnect();
+        }
+    }
+
+    private static String readAll(InputStream in) throws Exception {
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+        byte[] chunk = new byte[8192];
+        int read;
+        while ((read = in.read(chunk)) != -1)
+            buffer.write(chunk, 0, read);
+        return new String(buffer.toByteArray(), StandardCharsets.UTF_8);
     }
 
     private static String enc(String s) {
-        return URLEncoder.encode(s, StandardCharsets.UTF_8);
+        try {
+            return URLEncoder.encode(s, "UTF-8"); // UTF-8 is always supported, so this never fails.
+        } catch (UnsupportedEncodingException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }
