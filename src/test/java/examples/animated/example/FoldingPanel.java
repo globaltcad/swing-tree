@@ -45,10 +45,9 @@ public class FoldingPanel extends JPanel {
                 .add(label(content))
                 .withPrefHeight(HEIGHT)
                 .withTransitionalStyle(isOpen, LifeTime.of(0.5, TimeUnit.SECONDS), (status, style) -> {
-                    double h = style.component().getPreferredSize().height * status.fadeIn();
-                    style.component().setBackground(h == 0 ? Color.orange : Color.lightGray);
+                    double h = style.componentPrefHeight() * status.fadeIn();
                     System.out.printf("TransitionalStyle[%s]: h=%f\n", content, h);
-                    return style.minHeight(h).maxHeight(h);
+                    return style.minHeight(h).maxHeight(h).backgroundColor(h == 0 ? Color.orange : Color.lightGray);
                 })
             );
     }
