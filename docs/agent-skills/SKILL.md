@@ -298,6 +298,10 @@ Viewable.cast(firstName).onChange(From.ALL, it ->
     fullName.set(it.currentValue().orElseThrowUnchecked() + " " + lastName.get())
 );
 ```
+**Warning:** The approach above can lead to memory leaks due to change listeners
+never being garbage collected and still holding strong references to captured variables.
+
+→ So the prefer custom change listener registration on views instead of directly!
 
 ---
 
