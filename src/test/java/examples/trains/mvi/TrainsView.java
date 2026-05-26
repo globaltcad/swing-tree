@@ -180,11 +180,8 @@ public final class TrainsView extends JPanel {
                 .withStyle(it -> it.padding(0, 18, 6, 18))
             )
             .add(GROW.and(PUSH),
-                scrollPane(it -> it.fitWidth(true))
-                .add(
-                    scrollPanels().withStyle(it -> it.padding(0, 8, 8, 8))
-                    .addAll(board, (Var<Departure> entry) -> departureCard(entry))
-                )
+                scrollPanels().withStyle(it -> it.padding(0, 8, 8, 8))
+                .addAll(board, (Var<Departure> entry) -> departureCard(entry))
             );
     }
 
@@ -275,11 +272,8 @@ public final class TrainsView extends JPanel {
                 .withStyle(it -> it.padding(0, 18, 6, 18))
             )
             .add(GROW.and(PUSH),
-                scrollPane(it -> it.fitWidth(true))
-                .add(
-                    scrollPanels().withStyle(it -> it.padding(0, 8, 8, 8))
-                    .addAll(routeStops, (Var<RouteStop> entry) -> stopRow(entry))
-                )
+                scrollPanels().withStyle(it -> it.padding(0, 8, 8, 8))
+                .addAll(routeStops, (Var<RouteStop> entry) -> stopRow(entry))
             );
     }
 
