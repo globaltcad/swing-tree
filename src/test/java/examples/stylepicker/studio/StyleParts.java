@@ -50,7 +50,7 @@ final class Typo {
     static Typo none() { return new Typo("", 0, 1, 0, 0, null); }
 
     boolean isSet() {
-        return !family.isBlank() || size > 0 || weight != 1 || posture != 0
+        return !family.trim().isEmpty() || size > 0 || weight != 1 || posture != 0
             || spacing != 0 || color != null;
     }
 }

@@ -3359,6 +3359,22 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Creates a combo box UI builder node with a {@link Var} property as the model
+     *  for the current selection and a tuple (immutable list) of items as a dynamically sized model for the
+     *  selectable items.
+     *  <p>
+     *  Note that the provided list may be mutated by the combo box UI component
+     *
+     * @param selection The property holding the current selection.
+     * @param items The tuple (immutable list) of selectable items.
+     * @return A builder instance for the provided {@link JList}, which enables fluent method chaining.
+     * @param <E> The type of the elements in the list.
+     */
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox( Var<E> selection, Tuple<E> items ) {
+        return comboBox(selection, items.toList());
+    }
+
+    /**
      *  Creates a declarative combo box UI based on the provided selection property
      *  and the list of items as well as a custom renderer function to display the items
      *  as text in the combo box. <br>
@@ -3390,6 +3406,33 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                 .withTextRenderer( cell -> cell.entry().map(renderer).orElse("") );
     }
 
+    /**
+     *  Creates a declarative combo box UI based on the provided selection property
+     *  and the tuple (immutable list) of items as well as a custom renderer function to display the items
+     *  as text in the combo box. <br>
+     *  Here's an example of how the method can be used: <br>
+     *  <pre>{@code
+     *      // In your view model:
+     *      Tuple<String> days = Tuple.of("Monday", "Tuesday", "Wednesday");
+     *      Var<String> selectedDay = Var.of("Monday");
+     *      // In your view:
+     *      UI.comboBox(selectedDay, days, day -> "Day: " + day)
+     *      // The combo box will display the items as "Day: Monday", "Day: Tuesday", "Day: Wednesday"
+     *  }</pre>
+     *  In this example, the provided function is called for each item in the tuple to determine the text
+     *  that should be displayed in the combo box.
+     *
+     * @param selection The property holding the current selection, which will be updated whenever the user selects a new item.
+     * @param items The tuple (immutable list) of selectable items.
+     * @param renderer A function that maps each item to the text that should be displayed in the combo box.
+     * @return A builder instance for the {@link JComboBox} type, to allow for fluent method chaining.
+     * @param <E> The type of the elements in the list.
+     */
+    public static <E> UIForCombo<E,JComboBox<E>> comboBox(
+            Var<E> selection, Tuple<E> items, Function<E, String> renderer
+    ) {
+        return comboBox(selection, items.toList(), renderer);
+    }
 
     /**
      *  Use this to create a builder for a new  {@link JComboBox} instance

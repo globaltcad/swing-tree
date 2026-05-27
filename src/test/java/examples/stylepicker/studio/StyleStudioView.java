@@ -250,7 +250,7 @@ public final class StyleStudioView extends Panel {
         Var<Double> spacing = typo.zoomTo(Typo::spacing, Typo::withSpacing);
         Var<Color>  color   = typo.zoomToNullable(Color.class, Typo::color, Typo::withColor);
         return body()
-            .add("growx", comboRow("Family", comboBox(family, java.util.List.of("", "SansSerif", "Serif", "Monospaced"))))
+            .add("growx", comboRow("Family", comboBox(family, Tuple.of("", "SansSerif", "Serif", "Monospaced"))))
             .add("growx", intRow("Size",    size,    0, 48))
             .add("growx", dblRow("Weight",  weight,  0.0, 4.0))
             .add("growx", dblRow("Posture", posture, 0.0, 0.5))
@@ -381,7 +381,7 @@ public final class StyleStudioView extends Panel {
                 .add("span", label("These carry no group tag — only your type(..) rules style them.").group(Look.CAPTION))
                 .add("growx", checkBox("A check box", Var.of(true)))
                 .add("growx", button("Plain JButton"))
-                .add("span, growx", comboBox(Var.of("Combo box"), java.util.List.of("Combo box", "Item B", "Item C")))
+                .add("span, growx", comboBox(Var.of("Combo box"), Tuple.of("Combo box", "Item B", "Item C")))
                 .add("span, growx", slider(Align.HORIZONTAL, 0, 100).withValue(45))
                 .add("span, growx", textField("Plain JTextField"))
             )
