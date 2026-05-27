@@ -1,0 +1,721 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GuiDebugDevToolUtility.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.components</a> &gt; <span class="el_source">GuiDebugDevToolUtility.java</span></div><h1>GuiDebugDevToolUtility.java</h1><pre class="source lang-java linenums">package swingtree.components;
+
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sprouts.From;
+import sprouts.Tuple;
+import sprouts.Var;
+import sprouts.Viewable;
+import swingtree.SwingTree;
+import swingtree.UI;
+import swingtree.input.Keyboard;
+import swingtree.layout.Bounds;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+final class GuiDebugDevToolUtility {
+
+<span class="fc" id="L24">    private static final Logger log = LoggerFactory.getLogger(GuiDebugDevToolUtility.class);</span>
+    private static final String SWING_TREE_DEV_TOOLS_SHORTCUT_ACTION_KEY = &quot;SwingTreeDevToolsShortcut&quot;;
+<span class="fc" id="L26">    private static final UI.Color FOCUS_COLOR = UI.Color.ofRgb(0, 90, 200);</span>
+<span class="fc" id="L27">    private static final UI.Color SELECTION_COLOR = UI.Color.ofRgb(0, 142, 83);</span>
+<span class="fc" id="L28">    private static final javax.swing.Action toggleDevToolsShortcutAction = new AbstractAction() {</span>
+        @Override public void actionPerformed(ActionEvent e) {
+<span class="nc" id="L30">            SwingTree.get().setDevToolEnabled(</span>
+<span class="nc bnc" id="L31" title="All 2 branches missed.">                !SwingTree.get().isDevToolEnabled()</span>
+            );
+<span class="nc" id="L33">        }</span>
+    };
+<span class="fc" id="L35">    private static @Nullable Component focusedDebugComponent = null;</span>
+<span class="fc" id="L36">    private static @Nullable Component selectedDebugComponent = null;</span>
+<span class="fc" id="L37">    private static @Nullable DebugInfoWindow debugInfoWindow = null;</span>
+
+
+    private GuiDebugDevToolUtility() {} // A utility class can not be instantiated!
+
+    static void setupGlobalDevToolsShortcutFor(JRootPane rootPane) {
+<span class="fc" id="L43">        String keyStrokeString = SwingTree.get().getDevToolKeyStrokeShortcut();</span>
+<span class="pc bpc" id="L44" title="1 of 2 branches missed.">        if ( !keyStrokeString.isEmpty() ) {</span>
+            try {
+<span class="fc" id="L46">                KeyStroke keyStroke = KeyStroke.getKeyStroke(keyStrokeString);</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">                if (keyStroke == null) {</span>
+<span class="nc" id="L48">                    throw new IllegalArgumentException(&quot;Invalid key stroke string for dev tools shortcut: '&quot; + keyStrokeString + &quot;'&quot;);</span>
+                }
+<span class="fc" id="L50">                rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(keyStroke, SWING_TREE_DEV_TOOLS_SHORTCUT_ACTION_KEY);</span>
+<span class="fc" id="L51">                rootPane.getActionMap().put(SWING_TREE_DEV_TOOLS_SHORTCUT_ACTION_KEY, toggleDevToolsShortcutAction);</span>
+<span class="nc" id="L52">            } catch (RuntimeException e) {</span>
+<span class="nc" id="L53">                log.error(&quot;Error while setting up dev tools shortcut with key stroke '{}': {}&quot;, keyStrokeString, e.getMessage(), e);</span>
+<span class="fc" id="L54">            }</span>
+        }
+<span class="fc" id="L56">    }</span>
+
+    static void teardownGlobalDevToolsShortcutFor(JRootPane rootPane) {
+<span class="nc" id="L59">        String keyStrokeString = SwingTree.get().getDevToolKeyStrokeShortcut();</span>
+<span class="nc bnc" id="L60" title="All 2 branches missed.">        if ( !keyStrokeString.isEmpty() ) {</span>
+            try {
+<span class="nc" id="L62">                KeyStroke keyStroke = KeyStroke.getKeyStroke(keyStrokeString);</span>
+<span class="nc bnc" id="L63" title="All 2 branches missed.">                if (keyStroke == null) {</span>
+<span class="nc" id="L64">                    throw new IllegalArgumentException(&quot;Invalid key stroke string for dev tools shortcut: '&quot; + keyStrokeString + &quot;'&quot;);</span>
+                }
+<span class="nc" id="L66">                rootPane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).remove(keyStroke);</span>
+<span class="nc" id="L67">                rootPane.getActionMap().remove(SWING_TREE_DEV_TOOLS_SHORTCUT_ACTION_KEY);</span>
+<span class="nc" id="L68">            } catch (RuntimeException e) {</span>
+<span class="nc" id="L69">                log.error(&quot;Error while tearing down dev tools shortcut with key stroke '{}': {}&quot;, keyStrokeString, e.getMessage(), e);</span>
+<span class="nc" id="L70">            }</span>
+        }
+<span class="nc" id="L72">    }</span>
+
+    static void initializeDebugToolFor(JRootPane rootPane) {
+<span class="nc bnc" id="L75" title="All 2 branches missed.">        if ( !SwingTree.get().isDevToolEnabled() ) {</span>
+<span class="nc" id="L76">            return;</span>
+        }
+<span class="nc" id="L78">        Component any = rootPane.getContentPane();</span>
+<span class="nc" id="L79">        checkDebugging(any, rootPane);</span>
+<span class="nc" id="L80">        summonInfoDialog(rootPane);</span>
+<span class="nc" id="L81">    }</span>
+
+    static void processMouseMovementForLiveDebugging(JGlassPane glassPane, JRootPane rootPane, MouseEvent e) {
+<span class="nc bnc" id="L84" title="All 2 branches missed.">        if ( !SwingTree.get().isDevToolEnabled() ) {</span>
+<span class="nc" id="L85">            return;</span>
+        }
+<span class="nc" id="L87">        Component deepest = findComponentForLiveDebugging(glassPane, rootPane, e);</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        if ( checkDebugging(deepest, rootPane) ) {</span>
+<span class="nc" id="L89">            rootPane.repaint();</span>
+        }
+<span class="nc" id="L91">    }</span>
+
+    private static java.awt.@Nullable Component findComponentForLiveDebugging(
+            JGlassPane glassPane,
+            JRootPane rootPane,
+            MouseEvent e
+    ) {
+<span class="nc" id="L98">        Container content = rootPane.getContentPane();</span>
+
+        // Convert glass pane coordinates → content pane coordinates
+<span class="nc" id="L101">        Point contentPoint = SwingUtilities.convertPoint(</span>
+                glassPane,
+<span class="nc" id="L103">                e.getPoint(),</span>
+                content
+        );
+
+<span class="nc bnc" id="L107" title="All 4 branches missed.">        if (contentPoint.x &lt; 0 || contentPoint.y &lt; 0)</span>
+<span class="nc" id="L108">            return null;</span>
+
+<span class="nc" id="L110">        return SwingUtilities.getDeepestComponentAt(</span>
+                        content,
+                        contentPoint.x,
+                        contentPoint.y
+                );
+    }
+
+    private static boolean checkDebugging(java.awt.@Nullable Component deepest, JRootPane currentRootPane) {
+<span class="nc bnc" id="L118" title="All 4 branches missed.">        if (deepest != null &amp;&amp; GuiDebugDevToolUtility.focusedDebugComponent != deepest) {</span>
+<span class="nc bnc" id="L119" title="All 2 branches missed.">            if ( GuiDebugDevToolUtility.focusedDebugComponent != null ) {</span>
+<span class="nc" id="L120">                JRootPane rootPaneOfFocused = SwingUtilities.getRootPane(GuiDebugDevToolUtility.focusedDebugComponent);</span>
+<span class="nc bnc" id="L121" title="All 4 branches missed.">                if ( rootPaneOfFocused != null &amp;&amp; rootPaneOfFocused != currentRootPane ) {</span>
+                    // We are switching to a different root pane, so we need to repaint the old one to clear the debug overlay there!
+<span class="nc" id="L123">                    rootPaneOfFocused.repaint();</span>
+                }
+            }
+<span class="nc" id="L126">            GuiDebugDevToolUtility.focusedDebugComponent = deepest;</span>
+            // The debug component is being highlighted similarly as in inspector mode on a browser...
+<span class="nc bnc" id="L128" title="All 2 branches missed.">            if ( GuiDebugDevToolUtility.debugInfoWindow != null ) {</span>
+<span class="nc" id="L129">                GuiDebugDevToolUtility.debugInfoWindow.debugState.set(new ComponentDebugInfo(deepest));</span>
+            }
+<span class="nc" id="L131">            return true;</span>
+        }
+<span class="nc" id="L133">        return false;</span>
+    }
+
+    static void findAndSelectComponentForDebug(JRootPane rootPane, MouseEvent e) {
+<span class="nc bnc" id="L137" title="All 2 branches missed.">        if ( !SwingTree.get().isDevToolEnabled() ) {</span>
+<span class="nc" id="L138">            return;</span>
+        }
+<span class="nc bnc" id="L140" title="All 2 branches missed.">        if ( GuiDebugDevToolUtility.focusedDebugComponent == null ) {</span>
+<span class="nc" id="L141">            return;</span>
+        }
+<span class="nc bnc" id="L143" title="All 2 branches missed.">        if (!Keyboard.get().isPressed(Keyboard.Key.CONTROL)) {</span>
+<span class="nc" id="L144">            return;</span>
+        }
+<span class="nc" id="L146">        e.consume();// No other things should react to this event, since we are opening the debug dialog!</span>
+
+<span class="nc" id="L148">        summonInfoDialog(rootPane);</span>
+<span class="nc" id="L149">    }</span>
+
+    private static void summonInfoDialog(JRootPane rootPane) {
+<span class="nc bnc" id="L152" title="All 2 branches missed.">        if ( GuiDebugDevToolUtility.focusedDebugComponent == null ) {</span>
+<span class="nc" id="L153">            return;</span>
+        }
+<span class="nc bnc" id="L155" title="All 2 branches missed.">        if ( selectedDebugComponent != focusedDebugComponent )</span>
+<span class="nc" id="L156">            rootPane.repaint(); // Repaint to clear previous selection highlight</span>
+
+<span class="nc bnc" id="L158" title="All 2 branches missed.">        if ( GuiDebugDevToolUtility.selectedDebugComponent != null ) {</span>
+<span class="nc" id="L159">            JRootPane rootPaneOfSelected = SwingUtilities.getRootPane(GuiDebugDevToolUtility.selectedDebugComponent);</span>
+<span class="nc bnc" id="L160" title="All 4 branches missed.">            if ( rootPaneOfSelected != null &amp;&amp; rootPaneOfSelected != rootPane ) {</span>
+                // We are switching the selection to a different root pane,
+                // so we need to repaint the old one to clear the selection debug overlay there!
+<span class="nc" id="L163">                rootPaneOfSelected.repaint();</span>
+            }
+        }
+        // Select the currently focused debug component:
+<span class="nc" id="L167">        selectedDebugComponent = focusedDebugComponent;</span>
+
+<span class="nc bnc" id="L169" title="All 2 branches missed.">        if ( GuiDebugDevToolUtility.debugInfoWindow == null ) {</span>
+<span class="nc" id="L170">            DebugInfoWindow newWindow = new DebugInfoWindow(</span>
+<span class="nc" id="L171">                    Var.of(new ComponentDebugInfo(GuiDebugDevToolUtility.focusedDebugComponent)),</span>
+<span class="nc" id="L172">                    Var.of(new ComponentDebugInfo(GuiDebugDevToolUtility.selectedDebugComponent))</span>
+            );
+<span class="nc" id="L174">            newWindow.pack();</span>
+            try {
+<span class="nc" id="L176">                findGoodPlacementForDebugWindow(newWindow, rootPane);</span>
+<span class="nc" id="L177">            } catch (Exception e) {</span>
+<span class="nc" id="L178">                log.error(&quot;Failed to establish a sensible layout for the inspection debug tool!&quot;, e);</span>
+<span class="nc" id="L179">            }</span>
+<span class="nc" id="L180">            newWindow.setVisible(true);</span>
+<span class="nc" id="L181">            newWindow.addWindowListener(new WindowAdapter() {</span>
+                @Override
+                public void windowClosing(WindowEvent e) {
+<span class="nc" id="L184">                    GuiDebugDevToolUtility.debugInfoWindow = null;</span>
+<span class="nc" id="L185">                    newWindow.dispose();</span>
+                    // Disable debug mode:
+<span class="nc" id="L187">                    SwingTree.get().setDevToolEnabled(false);</span>
+<span class="nc" id="L188">                }</span>
+                @Override
+                public void windowOpened(WindowEvent e) {
+<span class="nc" id="L191">                    Window rootWindow = SwingUtilities.getWindowAncestor(rootPane);</span>
+<span class="nc bnc" id="L192" title="All 2 branches missed.">                    if ( rootWindow != null ) {</span>
+                        // When the window opens, we want to transfer focus back to the root panes window:
+<span class="nc" id="L194">                        SwingUtilities.invokeLater(rootWindow::requestFocus);</span>
+                    }
+<span class="nc" id="L196">                }</span>
+            });
+<span class="nc" id="L198">            GuiDebugDevToolUtility.debugInfoWindow = newWindow;</span>
+<span class="nc" id="L199">        } else {</span>
+<span class="nc" id="L200">            GuiDebugDevToolUtility.debugInfoWindow.selectedDebugState.set(new ComponentDebugInfo(GuiDebugDevToolUtility.selectedDebugComponent));</span>
+        }
+<span class="nc" id="L202">    }</span>
+
+    private static void findGoodPlacementForDebugWindow(DebugInfoWindow debugWindow, JRootPane rootPane) {
+        // First up, let's get an overview of the setup: Get all screen devices!
+<span class="nc" id="L206">        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();</span>
+<span class="nc" id="L207">        GraphicsDevice[] screens = ge.getScreenDevices();</span>
+<span class="nc" id="L208">        GraphicsDevice mainScreen = null;</span>
+
+        // We try to get the window of the root pane, since we want to place the debug window relative to it:
+<span class="nc" id="L211">        Window rootWindow = SwingUtilities.getWindowAncestor(rootPane);</span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">        if (rootWindow == null) {</span>
+            // We can not find the main screen based on the root pane's window, so we just pick the primary screen:
+<span class="nc" id="L214">            mainScreen = ge.getDefaultScreenDevice();</span>
+        } else {
+            // We try to find the screen device that contains the root window:
+<span class="nc bnc" id="L217" title="All 2 branches missed.">            for (GraphicsDevice screen : screens) {</span>
+<span class="nc" id="L218">                Rectangle screenBounds = screen.getDefaultConfiguration().getBounds();</span>
+<span class="nc bnc" id="L219" title="All 2 branches missed.">                if (screenBounds.contains(rootWindow.getLocation())) {</span>
+<span class="nc" id="L220">                    mainScreen = screen;</span>
+<span class="nc" id="L221">                    break;</span>
+                }
+            }
+            // If no screen contains the root window (e.g. between displays), fall back to the default screen:
+<span class="nc bnc" id="L225" title="All 2 branches missed.">            if (mainScreen == null) {</span>
+<span class="nc" id="L226">                mainScreen = ge.getDefaultScreenDevice();</span>
+            }
+        }
+<span class="nc bnc" id="L229" title="All 2 branches missed.">        if ( mainScreen != null ) {</span>
+            // Get bounds where we want to place the debug window:
+<span class="nc" id="L231">            Rectangle bounds = mainScreen.getDefaultConfiguration().getBounds();</span>
+<span class="nc" id="L232">            debugWindow.setBounds(</span>
+                    bounds.x, bounds.y,
+<span class="nc" id="L234">                    Math.max(1, debugWindow.getWidth()),</span>
+<span class="nc" id="L235">                    Math.max(debugWindow.getHeight(), bounds.height)</span>
+            );
+<span class="nc bnc" id="L237" title="All 2 branches missed.">            if ( rootWindow != null ) {</span>
+                // If the root window is in full screen mode, we make room for the debug window by resizing the root window:
+<span class="nc bnc" id="L239" title="All 4 branches missed.">                boolean isFullScreen = rootWindow instanceof Frame &amp;&amp; (((Frame)rootWindow).getExtendedState() &amp; Frame.MAXIMIZED_BOTH) == Frame.MAXIMIZED_BOTH;</span>
+<span class="nc" id="L240">                Rectangle rootBounds = rootWindow.getBounds();</span>
+<span class="nc" id="L241">                int epsilon = UI.scale(325); // To account for task bars and such, we give it some tolerance, so that the debug window can still be placed even if the root window is not exactly in full screen mode.</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">                if (</span>
+                    isFullScreen || (
+<span class="nc bnc" id="L244" title="All 2 branches missed.">                        Math.abs(rootBounds.width - bounds.width) &lt;= epsilon &amp;&amp;</span>
+<span class="nc bnc" id="L245" title="All 2 branches missed.">                        Math.abs(rootBounds.height - bounds.height) &lt;= (epsilon * 2) &amp;&amp;</span>
+<span class="nc bnc" id="L246" title="All 2 branches missed.">                        Math.abs(rootBounds.x - bounds.x) &lt;= epsilon &amp;&amp;</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">                        Math.abs(rootBounds.y - bounds.y) &lt;= (epsilon * 2)</span>
+                    )
+                ) {
+<span class="nc bnc" id="L250" title="All 2 branches missed.">                    if ( isFullScreen ) // We need to set it to normal first, otherwise the bounds change might not work correctly!</span>
+<span class="nc" id="L251">                        ((Frame)rootWindow).setExtendedState( Frame.NORMAL );</span>
+<span class="nc" id="L252">                    rootWindow.setBounds(</span>
+<span class="nc" id="L253">                            bounds.x + debugWindow.getWidth(),</span>
+                            rootBounds.y,
+<span class="nc" id="L255">                            Math.max(1, rootBounds.width - debugWindow.getWidth()),</span>
+<span class="nc" id="L256">                            Math.max(1, rootBounds.height)</span>
+                    );
+                }
+            }
+        }
+<span class="nc" id="L261">    }</span>
+
+    static void paintDebugOverlay(Graphics2D g2d, JGlassPane glassPane) {
+<span class="nc bnc" id="L264" title="All 4 branches missed.">        if (!SwingTree.get().isDevToolEnabled() || focusedDebugComponent == null)</span>
+<span class="nc" id="L265">            return;</span>
+<span class="nc bnc" id="L266" title="All 2 branches missed.">        if (!focusedDebugComponent.isShowing())</span>
+<span class="nc" id="L267">            return;</span>
+
+        // Setup font:
+        {
+<span class="nc" id="L271">            Font font = g2d.getFont();</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">            if ( font != null ) {</span>
+<span class="nc" id="L273">                g2d.setFont(</span>
+<span class="nc" id="L274">                    font.deriveFont(UI.scale(12f)) // size!</span>
+                );
+            }
+        }
+
+        // Debug information should also be allowed to look good! :)
+<span class="nc" id="L280">        g2d.setRenderingHint( RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON );</span>
+
+<span class="nc bnc" id="L282" title="All 4 branches missed.">        if ( selectedDebugComponent != focusedDebugComponent &amp;&amp; focusedDebugComponent.isShowing() ) {</span>
+<span class="nc" id="L283">            tryRenderDebugOverlayFor(g2d, glassPane, focusedDebugComponent, FOCUS_COLOR);</span>
+        }
+<span class="nc bnc" id="L285" title="All 4 branches missed.">        if ( selectedDebugComponent != null &amp;&amp; selectedDebugComponent.isShowing() ) {</span>
+<span class="nc" id="L286">            tryRenderDebugOverlayFor(g2d, glassPane, selectedDebugComponent, SELECTION_COLOR);</span>
+        }
+<span class="nc" id="L288">    }</span>
+
+    private static void tryRenderDebugOverlayFor(
+        Graphics2D g2d,
+        JGlassPane glassPane,
+        java.awt.Component inspectedComponent,
+        Color themeColor
+    ){
+        // We only render the overlay, if the inspected component has the same root pane as the glass pane:
+<span class="nc" id="L297">        JRootPane rootPaneOfInspected = SwingUtilities.getRootPane(inspectedComponent);</span>
+<span class="nc" id="L298">        JRootPane rootPaneOfGlass = SwingUtilities.getRootPane(glassPane);</span>
+<span class="nc bnc" id="L299" title="All 2 branches missed.">        if ( rootPaneOfInspected != rootPaneOfGlass ) {</span>
+<span class="nc" id="L300">            return;</span>
+        }
+<span class="nc" id="L302">        Graphics2D overlayGraphics = null;</span>
+        try {
+<span class="nc" id="L304">            overlayGraphics = (Graphics2D) g2d.create();</span>
+<span class="nc" id="L305">            renderDebugOverlayFor(overlayGraphics, glassPane, inspectedComponent, themeColor);</span>
+<span class="nc" id="L306">        } catch (RuntimeException e) {</span>
+<span class="nc bnc" id="L307" title="All 2 branches missed.">            String componentName = inspectedComponent.getName() != null ? inspectedComponent.getName() : &quot;&lt;unnamed&gt;&quot;;</span>
+<span class="nc" id="L308">            log.error(</span>
+                &quot;Error while rendering debug overlay for component '{}' ({})&quot;,
+                componentName,
+<span class="nc" id="L311">                inspectedComponent.getClass().getName(),</span>
+                e
+            );
+        } finally {
+<span class="nc bnc" id="L315" title="All 2 branches missed.">            if (overlayGraphics != null) {</span>
+<span class="nc" id="L316">                overlayGraphics.dispose();</span>
+            }
+        }
+<span class="nc" id="L319">    }</span>
+
+    private static void renderDebugOverlayFor(
+            Graphics2D g2d,
+            JGlassPane glassPane,
+            java.awt.Component inspectedComponent,
+            Color themeColor
+    ) {
+<span class="nc" id="L327">        Insets insets = new Insets(0,0,0,0);</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">        if ( inspectedComponent instanceof JComponent ) {</span>
+<span class="nc" id="L329">            insets = ((JComponent)inspectedComponent).getInsets(insets);</span>
+        }
+
+<span class="nc" id="L332">        final int entireWidth = glassPane.getWidth();</span>
+<span class="nc" id="L333">        final int entireHeight = glassPane.getHeight();</span>
+
+
+        // Convert component bounds → glass pane coordinate space
+<span class="nc" id="L337">        final Rectangle bounds = SwingUtilities.convertRectangle(</span>
+<span class="nc" id="L338">                inspectedComponent.getParent(),</span>
+<span class="nc" id="L339">                inspectedComponent.getBounds(),</span>
+                glassPane
+        );
+<span class="nc" id="L342">        final Rectangle contentBounds = new Rectangle(</span>
+                bounds.x + insets.left,
+                bounds.y + insets.top,
+                bounds.width - insets.left - insets.right,
+                bounds.height - insets.top - insets.bottom
+        );
+
+        // Use alpha composite for transparency
+<span class="nc" id="L350">        Composite oldComposite = g2d.getComposite();</span>
+<span class="nc" id="L351">        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.25f));</span>
+
+        // Fill overlay
+<span class="nc" id="L354">        Color brighter = themeColor.brighter();</span>
+<span class="nc" id="L355">        g2d.setColor(new Color(brighter.getRed(), brighter.getGreen(), brighter.getBlue(), 150));</span>
+<span class="nc" id="L356">        g2d.fill(bounds);</span>
+
+        // Restore full opacity for border
+<span class="nc" id="L359">        g2d.setComposite(oldComposite);</span>
+
+<span class="nc" id="L361">        g2d.setXORMode(Color.WHITE); // To ensure readability over all GUIs</span>
+
+<span class="nc" id="L363">        int strokeWidth = UI.scale(2);</span>
+<span class="nc" id="L364">        g2d.setStroke(new BasicStroke(strokeWidth));</span>
+<span class="nc" id="L365">        g2d.setColor(new Color(themeColor.getRed(), themeColor.getGreen(), themeColor.getBlue(), 200));</span>
+<span class="nc" id="L366">        g2d.draw(bounds);</span>
+
+<span class="nc" id="L368">        g2d.setStroke(new BasicStroke(UI.scale(1), BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{6}, 0));</span>
+<span class="nc" id="L369">        g2d.setColor(new Color(0, 0, 0, 200));</span>
+<span class="nc" id="L370">        g2d.drawLine(</span>
+                contentBounds.x, 0,
+                contentBounds.x, entireHeight
+        );
+<span class="nc" id="L374">        g2d.drawLine(</span>
+                0, contentBounds.y,
+                entireWidth, contentBounds.y
+        );
+<span class="nc" id="L378">        g2d.drawLine(</span>
+                contentBounds.x + contentBounds.width, 0,
+                contentBounds.x + contentBounds.width, entireHeight
+        );
+<span class="nc" id="L382">        g2d.drawLine(</span>
+                0, contentBounds.y + contentBounds.height,
+                entireWidth, contentBounds.y + contentBounds.height
+        );
+
+<span class="nc" id="L387">        g2d.setPaintMode(); // Reset XOR mode!!</span>
+
+        // Optional: component info label
+<span class="nc" id="L390">        String label = getClassNameWithoutPackage(inspectedComponent.getClass())</span>
+                + &quot;  &quot; + bounds.width + &quot;x&quot; + bounds.height;
+
+<span class="nc" id="L393">        FontMetrics fm = g2d.getFontMetrics();</span>
+<span class="nc" id="L394">        int textWidth = fm.stringWidth(label);</span>
+<span class="nc" id="L395">        int textHeight = fm.getHeight();</span>
+
+<span class="nc bnc" id="L397" title="All 2 branches missed.">        int labelX = 1 + ((bounds.x+textWidth) &gt;= entireWidth ? entireWidth-textWidth-UI.scale(6) : bounds.x);</span>
+<span class="nc bnc" id="L398" title="All 2 branches missed.">        int labelY = -1 + (bounds.y - textHeight &gt;= 0 ? bounds.y - 2 : bounds.y + textHeight + 2);</span>
+
+<span class="nc" id="L400">        int labelPadding = strokeWidth / 2;</span>
+<span class="nc" id="L401">        Rectangle labelBanner = new Rectangle(</span>
+                labelX - labelPadding,
+                labelY - textHeight - labelPadding,
+<span class="nc" id="L404">                textWidth + UI.scale(6) + labelPadding * 2,</span>
+                textHeight + labelPadding * 2
+        );
+<span class="nc" id="L407">        g2d.setStroke(new BasicStroke(2));</span>
+<span class="nc" id="L408">        g2d.setColor(lerp(themeColor, Color.BLACK, 0.5));</span>
+<span class="nc" id="L409">        g2d.fillRoundRect(labelBanner.x+1, labelBanner.y+1, labelBanner.width, labelBanner.height, 9, 9);</span>
+<span class="nc" id="L410">        g2d.setColor(lerp(themeColor, Color.WHITE, 0.5));</span>
+<span class="nc" id="L411">        g2d.fillRoundRect(labelBanner.x-1, labelBanner.y-1, labelBanner.width, labelBanner.height, 9, 9);</span>
+<span class="nc" id="L412">        g2d.setColor(themeColor);</span>
+<span class="nc" id="L413">        g2d.fillRoundRect(labelBanner.x, labelBanner.y, labelBanner.width, labelBanner.height, 8, 8);</span>
+
+<span class="nc" id="L415">        g2d.setColor(Color.WHITE);</span>
+<span class="nc" id="L416">        g2d.drawString(label, labelX + 3, labelY - UI.scale(4));</span>
+<span class="nc" id="L417">    }</span>
+
+    private static Color lerp(Color a, Color b, double t) {
+<span class="nc" id="L420">        int r = (int) (a.getRed() + (b.getRed() - a.getRed()) * t);</span>
+<span class="nc" id="L421">        int g = (int) (a.getGreen() + (b.getGreen() - a.getGreen()) * t);</span>
+<span class="nc" id="L422">        int bCol = (int) (a.getBlue() + (b.getBlue() - a.getBlue()) * t);</span>
+<span class="nc" id="L423">        int aCol = (int) (a.getAlpha() + (b.getAlpha() - a.getAlpha()) * t);</span>
+<span class="nc" id="L424">        return new Color(r, g, bCol, aCol);</span>
+    }
+
+    private static String stackTraceToString(Tuple&lt;StackTraceElement&gt; stackTraceElements) {
+<span class="nc" id="L428">        StringBuilder builder = new StringBuilder();</span>
+<span class="nc bnc" id="L429" title="All 2 branches missed.">        for (StackTraceElement traceElement : stackTraceElements)</span>
+<span class="nc" id="L430">            builder = builder.append(&quot;\tat &quot;).append(traceElement).append(&quot;\n&quot;);</span>
+<span class="nc" id="L431">        return builder.toString();</span>
+    }
+
+    private static String getClassNameWithoutPackage(Class&lt;?&gt; type) {
+<span class="nc" id="L435">        String name = type.getName();          // e.g. com.example.Outer$Inner</span>
+<span class="nc" id="L436">        int lastDot = name.lastIndexOf('.');</span>
+<span class="nc bnc" id="L437" title="All 2 branches missed.">        String rawName = lastDot &gt;= 0 ? name.substring(lastDot + 1) : name;</span>
+<span class="nc" id="L438">        return rawName.replace(&quot;$&quot;, &quot;.&quot;);</span>
+    }
+
+    private static class DebugInfoWindow extends JFrame {
+        @SuppressWarnings({&quot;FieldCanBeLocal&quot;, &quot;unused&quot;})
+        private final Viewable&lt;Boolean&gt; isDevToolsEnabled; // Important, we need to keep the reference to keep the binding alive! (otherwise it can get garbage collected...)
+        private final Var&lt;ComponentDebugInfo&gt; debugState;
+        private final Var&lt;ComponentDebugInfo&gt; selectedDebugState;
+
+<span class="nc" id="L447">        DebugInfoWindow(Var&lt;ComponentDebugInfo&gt; debugState, Var&lt;ComponentDebugInfo&gt; selectedDebugState) {</span>
+<span class="nc" id="L448">            this.debugState = debugState;</span>
+<span class="nc" id="L449">            this.selectedDebugState = selectedDebugState;</span>
+<span class="nc" id="L450">            this.isDevToolsEnabled = SwingTree.get().isDevToolEnabledView().onChange(From.ALL, it -&gt; {</span>
+<span class="nc bnc" id="L451" title="All 2 branches missed.">                if ( !it.currentValue().orElse(false) ) {</span>
+<span class="nc" id="L452">                    this.dispose();</span>
+<span class="nc" id="L453">                    GuiDebugDevToolUtility.debugInfoWindow = null;</span>
+                }
+<span class="nc" id="L455">            });</span>
+<span class="nc" id="L456">            setTitle(titleFromFocus(focusedDebugComponent));</span>
+<span class="nc" id="L457">            Viewable.cast(debugState).onChange(From.ALL, it -&gt;{</span>
+<span class="nc" id="L458">                setTitle(titleFromFocus(focusedDebugComponent));</span>
+<span class="nc" id="L459">            });</span>
+<span class="nc" id="L460">            this.add(</span>
+<span class="nc" id="L461">                    UI.splitPane(UI.Align.HORIZONTAL)</span>
+<span class="nc" id="L462">                    .add(</span>
+<span class="nc" id="L463">                        buildInfoDisplay(debugState, FOCUS_COLOR,</span>
+                            &quot;&lt;html&gt;&quot; +
+                            &quot;This overview shows &lt;b&gt;the component that is currently set to be in focus&lt;/b&gt; by the mouse cursor. &lt;br&gt;&quot; +
+                            &quot;You can select this component &lt;b&gt;by holding CTRL and then clicking on it&lt;/b&gt; in the application window.&quot; +
+                            &quot;&lt;/html&gt;&quot;
+                        )
+                    )
+<span class="nc" id="L470">                    .add(</span>
+<span class="nc" id="L471">                        buildInfoDisplay(selectedDebugState, SELECTION_COLOR,</span>
+                            &quot;&lt;html&gt;&quot; +
+                            &quot;This is the currently selected component. &lt;br&gt;&quot; +
+                            &quot;To select another component, &lt;b&gt;hold CTRL and click on it&lt;/b&gt; in the application window.&quot; +
+                            &quot;&lt;/html&gt;&quot;
+                        )
+                    )
+<span class="nc" id="L478">                    .get(JSplitPane.class)</span>
+            );
+<span class="nc" id="L480">        }</span>
+
+        private static String titleFromFocus(@Nullable Component component) {
+<span class="nc bnc" id="L483" title="All 2 branches missed.">            if ( component == null ) {</span>
+<span class="nc" id="L484">                return &quot;Inspecting: &lt;no frame in focus&gt;&quot;;</span>
+            }
+            // Traversing upward, we want to find the last component in the hierarchy which is not Swing/AWT or SwingTree!
+            // So we are looking for the first user based component in the hierarchy from the roots perspective...
+            // So we traverse the hierarchy from the selected component up to the root,
+            // and check if the class name of the component contains &quot;javax.swing&quot;, &quot;java.awt&quot; or &quot;swingtree&quot;.
+<span class="nc" id="L490">            Component probablyUserBasedComponent = null;</span>
+<span class="nc" id="L491">            Component current = component;</span>
+<span class="nc" id="L492">            Component root = component;</span>
+<span class="nc bnc" id="L493" title="All 2 branches missed.">            while (current != null) {</span>
+<span class="nc" id="L494">                String className = current.getClass().getName();</span>
+<span class="nc" id="L495">                if (</span>
+<span class="nc bnc" id="L496" title="All 2 branches missed.">                     !className.startsWith(&quot;javax.swing&quot;) &amp;&amp;</span>
+<span class="nc bnc" id="L497" title="All 2 branches missed.">                     !className.startsWith(&quot;java.awt&quot;) &amp;&amp;</span>
+<span class="nc bnc" id="L498" title="All 2 branches missed.">                     !className.startsWith(&quot;swingtree&quot;)</span>
+                ) {
+<span class="nc" id="L500">                    probablyUserBasedComponent = current;</span>
+                }
+<span class="nc" id="L502">                current = current.getParent();</span>
+<span class="nc bnc" id="L503" title="All 2 branches missed.">                if (current != null) {</span>
+<span class="nc" id="L504">                    root = current;</span>
+                }
+<span class="nc" id="L506">            }</span>
+<span class="nc bnc" id="L507" title="All 2 branches missed.">            if ( probablyUserBasedComponent != null ) {</span>
+<span class="nc" id="L508">                return &quot;Inspecting: &quot; + getClassNameWithoutPackage(probablyUserBasedComponent.getClass());</span>
+            }
+
+            // If we can not find any user based component, we just return the root component's class name:
+<span class="nc" id="L512">            return &quot;Inspecting: &quot; + getClassNameWithoutPackage(root.getClass());</span>
+        }
+
+        private static JPanel buildInfoDisplay(Var&lt;ComponentDebugInfo&gt; debugState, UI.Color themeColor, String toolTip) {
+<span class="nc" id="L516">            return</span>
+<span class="nc" id="L517">                UI.panel(&quot;fill, wrap 1&quot;).withPrefSize(650, 375)</span>
+<span class="nc" id="L518">                .withStyle( it -&gt; it</span>
+<span class="nc" id="L519">                    .gradient( g -&gt; g</span>
+<span class="nc" id="L520">                        .type(UI.GradientType.RADIAL)</span>
+<span class="nc" id="L521">                        .offset(-100, 30)</span>
+<span class="nc" id="L522">                        .span(UI.Span.TOP_RIGHT_TO_BOTTOM_LEFT)</span>
+<span class="nc" id="L523">                        .colors(</span>
+<span class="nc" id="L524">                            themeColor.brighterBy(0.70).desaturateBy(0.8),</span>
+<span class="nc" id="L525">                            themeColor.brighterBy(0.50).desaturateBy(0.7),</span>
+                            themeColor
+                        )
+                    )
+                )
+<span class="nc" id="L530">                .add(&quot;growx, pushx&quot;,</span>
+<span class="nc" id="L531">                    UI.box(&quot;fill, gap rel 3&quot;, &quot;[shrink][shrink][grow]&quot;)</span>
+<span class="nc" id="L532">                    .add(&quot;left&quot;,</span>
+<span class="nc" id="L533">                        UI.label(</span>
+<span class="nc" id="L534">                            debugState.viewAsString(it -&gt;</span>
+<span class="nc" id="L535">                                getClassNameWithoutPackage(it.type())</span>
+                            )
+                        )
+<span class="nc" id="L538">                        .withTooltip(toolTip)</span>
+<span class="nc" id="L539">                        .withStyle( it -&gt; it</span>
+<span class="nc" id="L540">                            .borderRadius(8)</span>
+<span class="nc" id="L541">                            .padding(4, 8, 4, 8)</span>
+<span class="nc" id="L542">                            .backgroundColor(themeColor)</span>
+<span class="nc" id="L543">                            .fontColor(UI.Color.WHITE)</span>
+<span class="nc" id="L544">                            .fontWeight(2)</span>
+                        )
+                    )
+<span class="nc" id="L547">                    .add(&quot;left&quot;,</span>
+<span class="nc" id="L548">                        UI.label(</span>
+<span class="nc" id="L549">                            debugState.viewAsString(it -&gt;</span>
+<span class="nc bnc" id="L550" title="All 2 branches missed.">                                (it.id().isEmpty() ? &quot;&quot; : &quot;id='&quot;+it.id()+&quot;'&quot;)</span>
+                            )
+                        )
+                    )
+<span class="nc" id="L554">                    .add(&quot;right&quot;,</span>
+<span class="nc" id="L555">                        UI.label(</span>
+<span class="nc" id="L556">                            debugState.viewAs(Bounds.class, ComponentDebugInfo::bounds)</span>
+<span class="nc" id="L557">                            .viewAsString(it -&gt;</span>
+<span class="nc" id="L558">                                    &quot;x=&quot;+((int)it.location().x())+&quot;, &quot; +</span>
+<span class="nc" id="L559">                                    &quot;y=&quot;+((int)it.location().y())+&quot;, &quot; +</span>
+<span class="nc" id="L560">                                    &quot;width=&quot;+it.size().width().map(Number::intValue).orElse(-1)+&quot;, &quot; +</span>
+<span class="nc" id="L561">                                    &quot;height=&quot;+it.size().height().map(Number::intValue).orElse(-1</span>
+                            )
+                        ))
+                    )
+                )
+<span class="nc" id="L566">                .add(&quot;push, grow&quot;,</span>
+<span class="nc" id="L567">                    UI.tabbedPane()</span>
+<span class="nc" id="L568">                    .withStyle( it -&gt; it</span>
+<span class="nc" id="L569">                        .borderRadiusAt(UI.Corner.TOP_LEFT, 24)</span>
+<span class="nc" id="L570">                        .borderRadiusAt(UI.Corner.TOP_RIGHT, 24)</span>
+                    )
+<span class="nc" id="L572">                    .add(</span>
+<span class="nc" id="L573">                        UI.tab(&quot;Source Trace&quot;)</span>
+<span class="nc" id="L574">                        .add(</span>
+<span class="nc" id="L575">                            UI.scrollPane().add(</span>
+<span class="nc" id="L576">                                UI.textArea(</span>
+<span class="nc" id="L577">                                    debugState.viewAsString(it -&gt; it.type().getCanonicalName() +&quot;\n&quot;+ stackTraceToString(it.sourceCodeLocation()))</span>
+                                )
+<span class="nc" id="L579">                                .isEditableIf(false)</span>
+                            )
+                        )
+                    )
+<span class="nc" id="L583">                    .add(</span>
+<span class="nc" id="L584">                        UI.tab(&quot;Style&quot;)</span>
+<span class="nc" id="L585">                        .add(</span>
+<span class="nc" id="L586">                            UI.scrollPane().add(</span>
+<span class="nc" id="L587">                                UI.textArea(</span>
+<span class="nc" id="L588">                                    debugState.viewAsString(it -&gt; {</span>
+                                        try {
+<span class="nc" id="L590">                                            return prettyRecord(it.styleConf().toString());</span>
+<span class="nc" id="L591">                                        } catch (RuntimeException e) {</span>
+<span class="nc" id="L592">                                            log.error(&quot;Error while pretty-printing style conf: {}&quot;, e.getMessage(), e);</span>
+<span class="nc" id="L593">                                            return it.styleConf().toString();</span>
+                                        }
+                                    })
+                                )
+<span class="nc" id="L597">                                .isEditableIf(false)</span>
+                            )
+                        )
+                    )
+<span class="nc" id="L601">                    .add(</span>
+<span class="nc" id="L602">                        UI.tab(&quot;Layout&quot;)</span>
+<span class="nc" id="L603">                        .add(</span>
+<span class="nc" id="L604">                            UI.scrollPane().add(</span>
+<span class="nc" id="L605">                                UI.textArea(</span>
+<span class="nc" id="L606">                                    debugState.viewAsString(ComponentDebugInfo::layoutInformation)</span>
+                                )
+<span class="nc" id="L608">                                .isEditableIf(false)</span>
+                            )
+                        )
+                    )
+<span class="nc" id="L612">                    .add(</span>
+<span class="nc" id="L613">                        UI.tab(&quot;toString&quot;)</span>
+<span class="nc" id="L614">                        .add(</span>
+<span class="nc" id="L615">                            UI.scrollPane().add(</span>
+<span class="nc" id="L616">                                UI.textArea(</span>
+<span class="nc" id="L617">                                    debugState.viewAsString(it -&gt; {</span>
+                                        try {
+<span class="nc" id="L619">                                            return prettyRecord(it.asString());</span>
+<span class="nc" id="L620">                                        } catch (RuntimeException e) {</span>
+<span class="nc" id="L621">                                            log.error(&quot;Error while pretty-printing style conf: {}&quot;, e.getMessage(), e);</span>
+<span class="nc" id="L622">                                            return it.asString();</span>
+                                        }
+                                    })
+                                )
+<span class="nc" id="L626">                                .isEditableIf(false)</span>
+                            )
+                        )
+                    )
+                )
+<span class="nc" id="L631">                .get(JPanel.class);</span>
+        }
+    }
+
+    private static String prettyRecord(String input) {
+<span class="nc bnc" id="L636" title="All 2 branches missed.">        if (input.isEmpty())</span>
+<span class="nc" id="L637">            return input;</span>
+
+<span class="nc" id="L639">        StringBuilder out = new StringBuilder(input.length() + 128);</span>
+<span class="nc" id="L640">        int depth = 0;</span>
+<span class="nc" id="L641">        boolean newLine = false;</span>
+
+<span class="nc" id="L643">        java.util.regex.Pattern colorPattern = java.util.regex.Pattern.compile(&quot;rgb[a]?\\([^)]*\\)&quot;);</span>
+<span class="nc bnc" id="L644" title="All 2 branches missed.">        for (int i = 0; i &lt; input.length(); i++) {</span>
+            try {
+<span class="nc" id="L646">                i = maybeSkip(i, input, &quot;[]&quot;, out);</span>
+<span class="nc" id="L647">                i = maybeSkip(i, input, &quot;[NONE]&quot;, out);</span>
+<span class="nc" id="L648">                i = maybeSkip(i, input, &quot;[EMPTY]&quot;, out);</span>
+<span class="nc" id="L649">                i = maybeSkipRegex(i, input, colorPattern, out);</span>
+<span class="nc" id="L650">            } catch (RuntimeException e) {</span>
+<span class="nc" id="L651">                log.error(&quot;Error while pretty-printing record: {}&quot;, e.getMessage(), e);</span>
+<span class="nc" id="L652">            }</span>
+<span class="nc" id="L653">            char c = input.charAt(i);</span>
+
+<span class="nc bnc" id="L655" title="All 4 branches missed.">            switch (c) {</span>
+                case '[' : {
+<span class="nc" id="L657">                    out.append(c);</span>
+<span class="nc" id="L658">                    depth++;</span>
+<span class="nc" id="L659">                    out.append('\n');</span>
+<span class="nc" id="L660">                    indent(out, depth);</span>
+<span class="nc" id="L661">                    newLine = true;</span>
+<span class="nc" id="L662">                    break;</span>
+                }
+                case ']' : {
+<span class="nc" id="L665">                    depth--;</span>
+<span class="nc" id="L666">                    out.append('\n');</span>
+<span class="nc" id="L667">                    indent(out, depth);</span>
+<span class="nc" id="L668">                    out.append(c);</span>
+<span class="nc" id="L669">                    newLine = false;</span>
+<span class="nc" id="L670">                    break;</span>
+                }
+                case ',' : {
+<span class="nc" id="L673">                    out.append(c);</span>
+<span class="nc" id="L674">                    out.append('\n');</span>
+<span class="nc" id="L675">                    indent(out, depth);</span>
+<span class="nc" id="L676">                    newLine = true;</span>
+<span class="nc" id="L677">                    break;</span>
+                }
+                default : {
+<span class="nc bnc" id="L680" title="All 4 branches missed.">                    if (newLine &amp;&amp; Character.isWhitespace(c)) {</span>
+                        // skip whitespace immediately after newline
+<span class="nc" id="L682">                        break;</span>
+                    }
+<span class="nc" id="L684">                    out.append(c);</span>
+<span class="nc" id="L685">                    newLine = false;</span>
+                    break;
+                }
+            }
+        }
+<span class="nc" id="L690">        return out.toString();</span>
+    }
+
+    private static int maybeSkip(int i, String input, String toMatch, StringBuilder out) {
+<span class="nc bnc" id="L694" title="All 2 branches missed.">        if ( (i+toMatch.length()) &lt;= input.length() ) {</span>
+            // Special handling for 'toMatch' to keep it compact
+<span class="nc bnc" id="L696" title="All 2 branches missed.">            if ( input.startsWith(toMatch, i) ) {</span>
+<span class="nc" id="L697">                out.append(toMatch);</span>
+<span class="nc" id="L698">                return i + toMatch.length();</span>
+            }
+        }
+<span class="nc" id="L701">        return i;</span>
+    }
+
+    private static int maybeSkipRegex(int i, String input, java.util.regex.Pattern pattern, StringBuilder out) {
+<span class="nc" id="L705">        java.util.regex.Matcher matcher = pattern.matcher(input);</span>
+<span class="nc" id="L706">        matcher.region(i, input.length());</span>
+<span class="nc bnc" id="L707" title="All 2 branches missed.">        if (matcher.lookingAt()) {</span>
+<span class="nc" id="L708">            String match = matcher.group();</span>
+<span class="nc" id="L709">            out.append(match);</span>
+<span class="nc" id="L710">            return i + match.length();</span>
+        }
+<span class="nc" id="L712">        return i;</span>
+    }
+
+    private static void indent(StringBuilder sb, int depth) {
+<span class="nc bnc" id="L716" title="All 2 branches missed.">        for (int i = 0; i &lt; Math.max(0, depth); i++) {</span>
+<span class="nc" id="L717">            sb.append(&quot;  &quot;);</span>
+        }
+<span class="nc" id="L719">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

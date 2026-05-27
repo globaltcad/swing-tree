@@ -1,0 +1,264 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>FilterConf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">FilterConf.java</span></div><h1>FilterConf.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import com.google.errorprone.annotations.Immutable;
+import swingtree.UI;
+import swingtree.layout.Size;
+
+import java.util.Objects;
+
+/**
+ *  The filter configuration object
+ *  defines if and how a filter should be applied
+ *  on the rendering of the parent of a particular component.
+ *  This may include a blur, a convolution kernel, a scale and translation
+ *  applied to the parent layer. &lt;br&gt;
+ *  Note that this configuration may only have an effect if the component
+ *  it is applied to is non-opaque, which is to say that it does
+ *  not have another other styles which would
+ *  obstruct the rendering of the parent layer. &lt;br&gt;
+ *  &lt;br&gt;
+ *  This class exposes the following properties
+ *  with their respective purpose and default values:
+ *  &lt;ul&gt;
+ *      &lt;li&gt;&lt;b&gt;Kernel&lt;/b&gt;
+ *          &lt;p&gt;
+ *              The convolution kernel to apply to the parent layer
+ *              using the {@link java.awt.image.ConvolveOp} class.
+ *              Default value is {@link KernelConf#none()}
+ *          &lt;/p&gt;
+ *      &lt;/li&gt;
+ *      &lt;li&gt;&lt;b&gt;Area&lt;/b&gt;
+ *      &lt;p&gt;
+ *          The area of the current component to which
+ *          the filter should be applied to.
+ *          Default value is {@link UI.ComponentArea#BODY},
+ *          which includes the interior and border area of the component.
+ *      &lt;/p&gt;
+ *      &lt;/li&gt;&lt;li&gt;&lt;b&gt;Offset&lt;/b&gt;
+ *      &lt;p&gt;
+ *          The translation to apply to the filtered parent layer.
+ *          Default value is {@code (0.0, 0.0)}, which means no translation.
+ *      &lt;/p&gt;
+ *      &lt;/li&gt;&lt;li&gt;&lt;b&gt;Scale&lt;/b&gt;
+ *      &lt;p&gt;
+ *          The scale to apply to the filtered parent layer.
+ *          Default value is {@code (1.0, 1.0)}, which means no scaling
+ *          is applied to the parent layer.
+ *      &lt;/p&gt;
+ *      &lt;/li&gt;&lt;li&gt;&lt;b&gt;Blur&lt;/b&gt;
+ *      &lt;p&gt;
+ *          The blur radius, which is used to apply a gaussian blur
+ *          to the parent layer using the {@link java.awt.image.ConvolveOp} class.
+ *          Default value is {@code 0.0}, which means no blur is applied.
+ *      &lt;/p&gt;
+ *      &lt;/li&gt;
+ *  &lt;/ul&gt;
+ */
+@Immutable
+@SuppressWarnings(&quot;Immutable&quot;)
+public final class FilterConf
+{
+<span class="fc" id="L61">    private static final FilterConf _NONE = new FilterConf(</span>
+<span class="fc" id="L62">                                                KernelConf.none(),</span>
+                                                UI.ComponentArea.BODY,
+<span class="fc" id="L64">                                                Offset.none(),</span>
+<span class="fc" id="L65">                                                Scale.none(),</span>
+                                                0f
+                                            );
+
+    static FilterConf none() {
+<span class="fc" id="L70">        return _NONE;</span>
+    }
+
+    private static FilterConf of(
+        KernelConf       kernel,
+        UI.ComponentArea area,
+        Offset           offset,
+        Scale            scale,
+        float            blur
+    ) {
+<span class="fc" id="L80">        blur = Math.max(0, blur);</span>
+<span class="fc" id="L81">        if (</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">            _NONE._kernel.equals(kernel) &amp;&amp;</span>
+<span class="pc bpc" id="L83" title="1 of 2 branches missed.">            _NONE._area.equals(area)     &amp;&amp;</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">            _NONE._offset.equals(offset) &amp;&amp;</span>
+<span class="fc bfc" id="L85" title="All 4 branches covered.">            _NONE._scale.equals(scale)   &amp;&amp;</span>
+            _NONE._blur == blur
+        ) {
+<span class="fc" id="L88">            return _NONE;</span>
+        }
+<span class="fc" id="L90">        return new FilterConf(kernel, area, offset, scale, blur);</span>
+    }
+
+    private final KernelConf       _kernel;
+    private final UI.ComponentArea _area;
+    private final Offset           _offset;
+    private final Scale            _scale;
+    private final float            _blur;
+
+    FilterConf(
+        KernelConf       kernel,
+        UI.ComponentArea area,
+        Offset           offset,
+        Scale            scale,
+        float            blur
+<span class="fc" id="L105">    ) {</span>
+<span class="fc" id="L106">        _kernel = Objects.requireNonNull(kernel);</span>
+<span class="fc" id="L107">        _area   = Objects.requireNonNull(area);</span>
+<span class="fc" id="L108">        _offset = Objects.requireNonNull(offset);</span>
+<span class="fc" id="L109">        _scale  = Objects.requireNonNull(scale);</span>
+<span class="fc" id="L110">        _blur   = blur;</span>
+<span class="fc" id="L111">    }</span>
+
+    KernelConf kernel() {
+<span class="fc" id="L114">        return _kernel;</span>
+    }
+
+    UI.ComponentArea area() {
+<span class="fc" id="L118">        return _area;</span>
+    }
+
+    Offset offset() {
+<span class="fc" id="L122">        return _offset;</span>
+    }
+
+    Scale scale() {
+<span class="fc" id="L126">        return _scale;</span>
+    }
+
+    float blur() {
+<span class="fc" id="L130">        return _blur;</span>
+    }
+
+    /**
+     *  Use this to configure a custom convolution kernel
+     *  based on a row major matrix represented by a width, height
+     *  and an array of values whose length is the product
+     *  of the supplied width and height.&lt;br&gt;
+     *  Note that this operation will be applied after
+     *  the parent layer was translated and scaled
+     *  and blurred.
+     *
+     * @param size The {@link Size} object representing the width and height of the matrix
+     *             to be used as the convolution kernel.
+     * @param matrix A var args array of double values
+     *               used to form a row major matrix.
+     * @return An updated filter configuration
+     *          containing the desired convolution kernel.
+     */
+    public FilterConf kernel( Size size, double... matrix ) {
+<span class="fc" id="L150">        return of(KernelConf.of(size, matrix), _area, _offset, _scale, _blur);</span>
+    }
+
+    /**
+     *  Define the component area which should display the filtered parent.
+     *  Everything outside that area will not be affected by the filter.
+     *  Take a look at the {@link UI.ComponentArea} enum documentation
+     *  for more information on the available areas.
+     *
+     * @param area A constant representing the area of the component
+     *             to which the filter should be clipped to.
+     * @return An updated filter configuration
+     *         with the desired clipping area.
+     */
+    public FilterConf area(UI.ComponentArea area) {
+<span class="fc" id="L165">        return of(_kernel, area, _offset, _scale, _blur);</span>
+    }
+
+    /**
+     *  Uses the given x and y offset values to translate the
+     *  parent layer before applying other filtering operations.
+     *
+     * @param x The amount to translate the parent layer along the x-axis before filtering.
+     * @param y The amount to translate the parent layer along the y-axis before filtering.
+     * @return An updated filter configuration having the desired translation.
+     */
+    public FilterConf offset( double x, double y ) {
+<span class="nc" id="L177">        return of(_kernel, _area, Offset.of(x, y), _scale, _blur);</span>
+    }
+
+    /**
+     *  Scales the parent layer by the given x and y factors
+     *  before applying other filtering operations.
+     *
+     * @param x The factor to scale the parent layer along the x-axis before filtering.
+     * @param y The factor to scale the parent layer along the y-axis before filtering.
+     * @return An updated filter configuration having the desired scaling.
+     */
+    public FilterConf scale( double x, double y ) {
+<span class="fc" id="L189">        return of(_kernel, _area, _offset, Scale.of(x, y), _blur);</span>
+    }
+
+    /**
+     *  Supply values greater than 0 to this to apply a gaussian blur
+     *  to the parent layer.
+     *  Note that this operation will be applied after
+     *  the parent layer was translated and scaled.
+     *
+     * @param radius The radius of the gaussian blur filter
+     *               to apply to the parent layer.
+     * @return An updated filter configuration having the desired blur radius.
+     */
+    public FilterConf blur( double radius ) {
+<span class="fc" id="L203">        return of(_kernel, _area, _offset, _scale, (float)radius);</span>
+    }
+
+    FilterConf _scale( double factor ) {
+<span class="pc bpc" id="L207" title="1 of 2 branches missed.">        if ( factor == 1 ) {</span>
+<span class="nc" id="L208">            return this;</span>
+        }
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        if ( this.equals(FilterConf.none()) ) {</span>
+<span class="fc" id="L211">            return this;</span>
+        }
+<span class="fc" id="L213">        return of(_kernel, _area, _offset.scale(factor), _scale, (float) (_blur * factor));</span>
+    }
+
+    FilterConf simplified() {
+<span class="fc" id="L217">        KernelConf kernel = _kernel.simplified();</span>
+        if (
+<span class="fc bfc" id="L219" title="All 2 branches covered.">            KernelConf.none().equals(kernel) &amp;&amp;</span>
+<span class="fc bfc" id="L220" title="All 2 branches covered.">            _scale.equals(Scale.none()) &amp;&amp;</span>
+<span class="pc bpc" id="L221" title="1 of 4 branches missed.">            _offset.equals(Offset.none()) &amp;&amp;</span>
+            _blur &lt;= 0
+        ) {
+<span class="fc" id="L224">            return _NONE;</span>
+        }
+<span class="fc" id="L226">        return of(kernel, _area, _offset, _scale, _blur);</span>
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+<span class="fc bfc" id="L231" title="All 2 branches covered.">        if (this == obj) {</span>
+<span class="fc" id="L232">            return true;</span>
+        }
+<span class="pc bpc" id="L234" title="2 of 4 branches missed.">        if (obj == null || getClass() != obj.getClass()) {</span>
+<span class="nc" id="L235">            return false;</span>
+        }
+<span class="fc" id="L237">        FilterConf other = (FilterConf) obj;</span>
+<span class="fc" id="L238">        return</span>
+<span class="fc bfc" id="L239" title="All 2 branches covered.">            _kernel.equals(other._kernel) &amp;&amp;</span>
+<span class="pc bpc" id="L240" title="1 of 2 branches missed.">            _area.equals(other._area)     &amp;&amp;</span>
+<span class="pc bpc" id="L241" title="1 of 2 branches missed.">            _offset.equals(other._offset) &amp;&amp;</span>
+<span class="fc bfc" id="L242" title="All 4 branches covered.">            _scale.equals(other._scale)   &amp;&amp;</span>
+            _blur == other._blur;
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L248">        return Objects.hash(_kernel, _area, _offset, _scale, _blur);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="pc bpc" id="L253" title="1 of 2 branches missed.">        if ( this.equals(FilterConf.none()) )</span>
+<span class="fc" id="L254">            return this.getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+<span class="nc" id="L255">        return this.getClass().getSimpleName() + &quot;[&quot;</span>
+                    + &quot;kernel=&quot; + _kernel + &quot;, &quot;
+                    + &quot;area=&quot;   + _area   + &quot;, &quot;
+                    + &quot;center=&quot; + _offset + &quot;, &quot;
+                    + &quot;scale=&quot;  + _scale  + &quot;, &quot;
+                    + &quot;blur=&quot;   + _blur
+                + &quot;]&quot;;
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

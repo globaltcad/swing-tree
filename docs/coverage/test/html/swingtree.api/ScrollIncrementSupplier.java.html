@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ScrollIncrementSupplier.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.api</a> &gt; <span class="el_source">ScrollIncrementSupplier.java</span></div><h1>ScrollIncrementSupplier.java</h1><pre class="source lang-java linenums">package swingtree.api;
+
+import swingtree.UI;
+import swingtree.layout.Bounds;
+
+import javax.swing.JScrollBar;
+import java.awt.Rectangle;
+
+/**
+ *  A supplier of scrollable increments for a {@link javax.swing.JScrollPane}.
+ *  which can be passed to the scroll pane configurator API
+ *  at {@link UI#scrollPane(Configurator)} using
+ *  {@link swingtree.ScrollableComponentDelegate#blockIncrement(ScrollIncrementSupplier)}
+ *  or {@link swingtree.ScrollableComponentDelegate#unitIncrement(ScrollIncrementSupplier)}.
+ */
+@FunctionalInterface
+public interface ScrollIncrementSupplier
+{
+    static ScrollIncrementSupplier none() {
+<span class="nc" id="L20">        return Constants.SCROLLABLE_INCREMENT_SUPPLIER_NONE;</span>
+    }
+
+    /**
+     *  Returns the scroll increment for the given view rectangle, orientation and direction.
+     *  This scroll increment may either be a unit increment or a block increment,
+     *  see {@link javax.swing.Scrollable#getScrollableUnitIncrement(Rectangle, int, int)}
+     *  and {@link javax.swing.Scrollable#getScrollableBlockIncrement(Rectangle, int, int)}
+     *  for more information about the parameters. &lt;br&gt;
+     *  &lt;b&gt;
+     *      This method is not designed to be used anywhere else than in the
+     *      {@link swingtree.ScrollableComponentDelegate#blockIncrement(ScrollIncrementSupplier)}
+     *      or {@link swingtree.ScrollableComponentDelegate#unitIncrement(ScrollIncrementSupplier)}.
+     *  &lt;/b&gt;
+     *  &lt;br&gt;
+     * Components that display logical rows or columns should compute
+     * the scroll increment that will completely expose one new row
+     * or column, depending on the value of orientation.  Ideally,
+     * components should handle a partially exposed row or column by
+     * returning the distance required to completely expose the item.
+     * &lt;p&gt;
+     * Scrolling containers, like JScrollPane, will use this method
+     * each time the user requests a unit scroll.
+     *
+     * @param visibleRectangle The view area visible within the viewport
+     * @param orientation Either UI.VERTICAL or UI.HORIZONTAL.
+     * @param direction Less than zero to scroll up/left, greater than zero for down/right.
+     * @return The &quot;unit&quot; or &quot;block&quot; increment for scrolling in the specified direction.
+     *         This value should always be positive.
+     * @see JScrollBar#setUnitIncrement
+     * @see JScrollBar#setBlockIncrement
+     */
+    int get(
+        Bounds   visibleRectangle,
+        UI.Align orientation,
+        int      direction
+    );
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
