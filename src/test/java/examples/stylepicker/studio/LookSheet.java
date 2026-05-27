@@ -90,12 +90,14 @@ public final class LookSheet extends StyleSheet {
         Typo t = s.typo();
         if (t.isSet()) {
             it = it.componentFont(f -> {
-                if (!t.family().isBlank()) f = f.family(t.family());
-                if (t.size() > 0)          f = f.size(t.size());
+                if (!t.family().trim().isEmpty()) f = f.family(t.family());
+                if (t.size() > 0)
+                    f = f.size(t.size());
                 f = f.weight((float) t.weight())
                      .posture((float) t.posture())
                      .spacing((float) t.spacing());
-                if (t.color() != null)     f = f.color(t.color());
+                if (t.color() != null)
+                    f = f.color(t.color());
                 return f;
             });
         }
