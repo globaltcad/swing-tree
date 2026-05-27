@@ -1,5 +1,7 @@
 package examples.stylepicker.studio;
 
+import sprouts.Tuple;
+
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.util.ArrayList;
@@ -56,7 +58,7 @@ public final class StyleTarget {
     }
 
     /** A broad-but-sensible cross-section of Swing widget types worth styling. */
-    static final List<Class<? extends JComponent>> TYPES = List.of(
+    static final List<Class<? extends JComponent>> TYPES = Tuple.of(
         JComponent.class,        // everything (the ultimate fallback)
         JPanel.class,
         JLabel.class,
@@ -76,7 +78,7 @@ public final class StyleTarget {
         JProgressBar.class,
         JSpinner.class,
         JSeparator.class
-    );
+    ).toList();
 
     @Override public boolean equals(Object o) {
         if (this == o) return true;
