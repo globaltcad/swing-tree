@@ -76,12 +76,12 @@ final class LookCode {
         Typo t = s.typo();
         if (t.isSet()) {
             StringBuilder f = new StringBuilder(".componentFont(f -> f");
-            if (!t.family().isBlank()) f.append(".family(\"").append(t.family()).append("\")");
-            if (t.size() > 0)          f.append(".size(").append(t.size()).append(")");
-            if (t.weight() != 1)       f.append(".weight(").append(num(t.weight())).append("f)");
-            if (t.posture() != 0)      f.append(".posture(").append(num(t.posture())).append("f)");
-            if (t.spacing() != 0)      f.append(".spacing(").append(num(t.spacing())).append("f)");
-            if (t.color() != null)     f.append(".color(").append(col(t.color())).append(")");
+            if (!t.family().trim().isEmpty()) f.append(".family(\"").append(t.family()).append("\")");
+            if (t.size() > 0)                 f.append(".size(").append(t.size()).append(")");
+            if (t.weight() != 1)              f.append(".weight(").append(num(t.weight())).append("f)");
+            if (t.posture() != 0)             f.append(".posture(").append(num(t.posture())).append("f)");
+            if (t.spacing() != 0)             f.append(".spacing(").append(num(t.spacing())).append("f)");
+            if (t.color() != null)            f.append(".color(").append(col(t.color())).append(")");
             f.append(")");
             l.add(f.toString());
         }
