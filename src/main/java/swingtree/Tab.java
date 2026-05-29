@@ -172,7 +172,7 @@ public final class Tab
     /**
      *  Binds the boolean enabled state of the tab to a specific enum value
      *  and a corresponding enum property.
-     *  When the enum property is set to the provided enum value, the tab will be selected.
+     *  When the enum property is set to the provided enum value, the tab will be enabled.
      *
      * @param state The state of the tab.
      * @param enabledState The enabled state property of the tab.
@@ -268,7 +268,7 @@ public final class Tab
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab withTip( Val<String> tip ) {
-        NullUtil.nullArgCheck(tip,"tip",String.class);
+        NullUtil.nullArgCheck(tip,"tip",Val.class);
         if ( _tip != null )
             log.warn(SwingTree.get().logMarker(), "Tip already specified!", new Throwable("Stack trace for debugging purposes."));
         return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, tip, _onSelected, _onMouseClick);
