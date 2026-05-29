@@ -905,9 +905,19 @@ public final class SwingTree
             // because even if we are on a HiDPI display it is not sure
             // that a larger font size is set by the current LaF
             // (e.g. can avoid large icons with small text)
+
+            // When the user explicitly opted out of installing the font in the UIManager
+            // (FontInstallation.NONE), the UIManager's "defaultFont" may carry stale state
+            // left over from another part of the application (e.g. an earlier LaF change or
+            // another test in the suite). In that case the user-supplied font is authoritative
+            // and must take precedence so the computed scale factor stays deterministic.
+            Font configFont = config.defaultFont().orElse(null);
+            if ( configFont != null && config.fontInstallation() == SwingTreeInitConfig.FontInstallation.NONE )
+                return configFont;
+
             Font font = UIManager.getFont( _DEFAULT_FONT );
             if ( font == null )
-                font = config.defaultFont().orElse(null);
+                font = configFont;
             if ( font == null )
                 font = UIManager.getFont( "Label.font" );
 
