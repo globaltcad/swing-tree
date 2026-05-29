@@ -296,3 +296,7 @@ listens for that.
   and you can animate transitions between themes too.
 - [Functional MVVM](./Functional-MVVM.md) explains the property and
   `Viewable.cast(..)` patterns used in the snippet above.
+- [Building a Look-and-Feel](./Building-A-Look-And-Feel.md) shows how to
+  push styling one level deeper — into a custom `LookAndFeel` that uses the
+  same style engine as `withStyle(..)` and `StyleSheet`, so an application
+  built on top of it can still override your defaults through the sheet.

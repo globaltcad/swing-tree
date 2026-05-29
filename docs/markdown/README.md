@@ -66,6 +66,7 @@ fans out from there.
 | Guide | What it covers |
 |---|---|
 | [HiDPI Scaling](./HiDPI-Scaling.md) | "Developer pixels" vs "component pixels", how SwingTree scales inputs up and outputs down for you, the scaling-aware delegate accessors, and the double-scaling trap behind the deprecated `component()`. |
+| [Building a Look-and-Feel](./Building-A-Look-And-Feel.md) | An onramp for advanced users who want to ship a custom `LookAndFeel` backed by the SwingTree style engine — the `SwingTreeStyledComponentUI` contract, the three styling layers, and what the engine handles for you vs. what you implement. |
 
 ---
 
@@ -97,6 +98,8 @@ graph TD;
     C --> HDPI[HiDPI Scaling]
     SS --> HDPI
     EH --> HDPI
+    SS --> LAF[Building a Look-and-Feel]
+    HDPI --> LAF
 ```
 
 ## 🧪 Worth keeping open while reading ##

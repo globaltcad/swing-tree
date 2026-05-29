@@ -1820,7 +1820,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  A convenient factory method for creating a declarative
-     *  builder object for a the {@link JMenuItem} component type.<br>
+     *  builder object for the {@link JMenuItem} component type.<br>
      *  Menu items are usually passed to {@link JMenu}s or {@link JPopupMenu}s
      *  like so: <br>
      *  <pre>{@code
@@ -3083,7 +3083,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
-     *  Use this to create a UI builder for a the {@link JComboBox} component type.
+     *  Use this to create a UI builder for the {@link JComboBox} component type.
      *  This is similar to {@code UI.of(new JComboBox())}.
      *
      * @param <E> The type of the elements in the {@link JComboBox}.
