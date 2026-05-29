@@ -2,7 +2,6 @@
 
 import com.google.errorprone.annotations.Immutable;
 
-import java.util.Objects;
 
 /**
  *  An immutable value object that represents an offset from a position
@@ -11,19 +10,19 @@ import java.util.Objects;
 @Immutable
 final class Offset
 {
-<span class="fc" id="L14">    private static final Offset _NONE = new Offset(0, 0);</span>
+<span class="fc" id="L13">    private static final Offset _NONE = new Offset(0, 0);</span>
 
-<span class="fc" id="L16">    public static Offset none() { return _NONE; }</span>
+<span class="fc" id="L15">    public static Offset none() { return _NONE; }</span>
 
     public static Offset of( float x, float y ) {
-<span class="fc bfc" id="L19" title="All 4 branches covered.">        if ( x == 0 &amp;&amp; y == 0 )</span>
-<span class="fc" id="L20">            return _NONE;</span>
+<span class="fc bfc" id="L18" title="All 4 branches covered.">        if ( x == 0 &amp;&amp; y == 0 )</span>
+<span class="fc" id="L19">            return _NONE;</span>
 
-<span class="fc" id="L22">        return new Offset(x, y);</span>
+<span class="fc" id="L21">        return new Offset(x, y);</span>
     }
 
     public static Offset of( double x, double y ) {
-<span class="fc" id="L26">        return Offset.of((float) x, (float) y);</span>
+<span class="fc" id="L25">        return Offset.of((float) x, (float) y);</span>
     }
 
 
@@ -31,38 +30,39 @@ final class Offset
     private final float _y;
 
 
-<span class="fc" id="L34">    private Offset( float x, float y ) {</span>
-<span class="fc" id="L35">        _x = x;</span>
-<span class="fc" id="L36">        _y = y;</span>
-<span class="fc" id="L37">    }</span>
+<span class="fc" id="L33">    private Offset( float x, float y ) {</span>
+<span class="fc" id="L34">        _x = x;</span>
+<span class="fc" id="L35">        _y = y;</span>
+<span class="fc" id="L36">    }</span>
 
-<span class="fc" id="L39">    float x() { return _x; }</span>
+<span class="fc" id="L38">    float x() { return _x; }</span>
 
-<span class="fc" id="L41">    float y() { return _y; }</span>
+<span class="fc" id="L40">    float y() { return _y; }</span>
 
-<span class="fc" id="L43">    Offset withX( float x ) { return Offset.of(x, _y); }</span>
+<span class="fc" id="L42">    Offset withX( float x ) { return Offset.of(x, _y); }</span>
 
-<span class="fc" id="L45">    Offset withY( float y ) { return Offset.of(_x, y); }</span>
+<span class="fc" id="L44">    Offset withY( float y ) { return Offset.of(_x, y); }</span>
 
     Offset scale( double scaleFactor ) {
-<span class="fc" id="L48">        return Offset.of((int) Math.round(_x * scaleFactor), (int) Math.round(_y * scaleFactor));</span>
+<span class="fc" id="L47">        return Offset.of((int) Math.round(_x * scaleFactor), (int) Math.round(_y * scaleFactor));</span>
     }
 
     @Override
     public String toString() {
-<span class="fc" id="L53">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
-<span class="fc" id="L54">                    &quot;x=&quot; + _toString(_x) + &quot;, &quot;+</span>
-<span class="fc" id="L55">                    &quot;y=&quot; + _toString(_y) +</span>
+<span class="fc" id="L52">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
+<span class="fc" id="L53">                    &quot;x=&quot; + _toString(_x) + &quot;, &quot;+</span>
+<span class="fc" id="L54">                    &quot;y=&quot; + _toString(_y) +</span>
                 &quot;]&quot;;
     }
 
     private static String _toString( float value ) {
-<span class="fc" id="L60">        return String.valueOf(value).replace(&quot;.0&quot;, &quot;&quot;);</span>
+<span class="fc" id="L59">        return String.valueOf(value).replace(&quot;.0&quot;, &quot;&quot;);</span>
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L65">        return Objects.hash(_x, _y);</span>
+        // Boxing-free equivalent of Objects.hash(_x, _y): identical value, no Float/array allocation.
+<span class="fc" id="L65">        return 31 * ( 31 + Float.hashCode(_x) ) + Float.hashCode(_y);</span>
     }
 
     @Override

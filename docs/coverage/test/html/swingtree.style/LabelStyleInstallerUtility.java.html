@@ -84,6 +84,7 @@ import java.util.regex.Pattern;
        (the parent's font-size, which we will have rewritten if it carried
        a px/pt declaration). Scaling them too would compound.
 */
+@SuppressWarnings(&quot;AlmostJavadoc&quot;) // The block comment above is an intentional implementation note, not Javadoc (it contains raw HTML tags).
 final class LabelStyleInstallerUtility {
 
     private static final String _HTML_INJECTION_OPEN  = &quot;&lt;head&gt;&lt;style data-swingtree=\&quot;injected\&quot;&gt;&quot;;
@@ -98,7 +99,7 @@ final class LabelStyleInstallerUtility {
         attributes, embedded `&lt;style&gt;` blocks, etc. Case-insensitive on the
         property name and unit. Numbers may carry a fractional part.
     */
-<span class="fc" id="L101">    private static final Pattern _INLINE_FONT_SIZE_PATTERN = Pattern.compile(</span>
+<span class="fc" id="L102">    private static final Pattern _INLINE_FONT_SIZE_PATTERN = Pattern.compile(</span>
         &quot;(font-size\\s*:\\s*)(\\d+(?:\\.\\d+)?)\\s*(px|pt)&quot;,
         Pattern.CASE_INSENSITIVE
     );
@@ -120,33 +121,33 @@ final class LabelStyleInstallerUtility {
     */
     static void _ensureHtmlTextListenerInstalled(JLabel label) {
 
-<span class="fc bfc" id="L123" title="All 2 branches covered.">        if ( label.getClientProperty(_HTML_TEXT_LISTENER_KEY) != null )</span>
-<span class="fc" id="L124">            return;</span>
+<span class="fc bfc" id="L124" title="All 2 branches covered.">        if ( label.getClientProperty(_HTML_TEXT_LISTENER_KEY) != null )</span>
+<span class="fc" id="L125">            return;</span>
 
-<span class="fc" id="L126">        label.putClientProperty(_HTML_TEXT_LISTENER_KEY, Boolean.TRUE);</span>
+<span class="fc" id="L127">        label.putClientProperty(_HTML_TEXT_LISTENER_KEY, Boolean.TRUE);</span>
 
         // Installing the text listener (once):
-<span class="fc" id="L129">        label.addPropertyChangeListener(&quot;text&quot;, evt -&gt; {</span>
+<span class="fc" id="L130">        label.addPropertyChangeListener(&quot;text&quot;, evt -&gt; {</span>
 
-<span class="fc" id="L131">            Object newValue = evt.getNewValue();</span>
-<span class="pc bpc" id="L132" title="1 of 2 branches missed.">            if ( !(newValue instanceof String) )</span>
-<span class="nc" id="L133">                return;</span>
-<span class="fc" id="L134">            String newText = (String) newValue;</span>
-<span class="fc bfc" id="L135" title="All 2 branches covered.">            if ( !BasicHTML.isHTMLString(newText) )</span>
-<span class="fc" id="L136">                return;</span>
-<span class="fc" id="L137">            Object lastInstalled = label.getClientProperty(_HTML_LAST_INSTALLED_KEY);</span>
-<span class="fc bfc" id="L138" title="All 2 branches covered.">            if ( Objects.equals(newText, lastInstalled) )</span>
-<span class="fc" id="L139">                return; // this was our own setText</span>
+<span class="fc" id="L132">            Object newValue = evt.getNewValue();</span>
+<span class="pc bpc" id="L133" title="1 of 2 branches missed.">            if ( !(newValue instanceof String) )</span>
+<span class="nc" id="L134">                return;</span>
+<span class="fc" id="L135">            String newText = (String) newValue;</span>
+<span class="fc bfc" id="L136" title="All 2 branches covered.">            if ( !BasicHTML.isHTMLString(newText) )</span>
+<span class="fc" id="L137">                return;</span>
+<span class="fc" id="L138">            Object lastInstalled = label.getClientProperty(_HTML_LAST_INSTALLED_KEY);</span>
+<span class="fc bfc" id="L139" title="All 2 branches covered.">            if ( Objects.equals(newText, lastInstalled) )</span>
+<span class="fc" id="L140">                return; // this was our own setText</span>
             /*
                 Force the cycle (force=true): the engine's stored StyleConf may
                 still match the current styler output, but the label's actual
                 text was just reset externally — so the conf-equality short
                 circuit would skip the re-injection we need.
             */
-<span class="fc" id="L146">            ComponentExtension.from(label).gatherApplyAndInstallStyle(true);</span>
+<span class="fc" id="L147">            ComponentExtension.from(label).gatherApplyAndInstallStyle(true);</span>
 
-<span class="fc" id="L148">        });</span>
-<span class="fc" id="L149">    }</span>
+<span class="fc" id="L149">        });</span>
+<span class="fc" id="L150">    }</span>
 
     /**
      *  Combined entry point that brings an HTML JLabel's text in sync with
@@ -162,46 +163,46 @@ final class LabelStyleInstallerUtility {
      *  externally.
      */
     static void _applyHtmlScalingAndStyle(JLabel label, FontConf fontConf) {
-<span class="fc" id="L165">        String currentText = label.getText();</span>
-<span class="fc bfc" id="L166" title="All 2 branches covered.">        if ( !BasicHTML.isHTMLString(currentText) ) {</span>
+<span class="fc" id="L166">        String currentText = label.getText();</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">        if ( !BasicHTML.isHTMLString(currentText) ) {</span>
             // Text became non-HTML: clear tracking state so a future HTML
             // value is treated as a fresh original (and not as something
             // we already installed).
-<span class="pc bpc" id="L170" title="1 of 2 branches missed.">            if ( label.getClientProperty(_HTML_LAST_INSTALLED_KEY) != null )</span>
-<span class="nc" id="L171">                label.putClientProperty(_HTML_LAST_INSTALLED_KEY, null);</span>
-<span class="pc bpc" id="L172" title="1 of 2 branches missed.">            if ( label.getClientProperty(_HTML_ORIGINAL_KEY) != null )</span>
-<span class="nc" id="L173">                label.putClientProperty(_HTML_ORIGINAL_KEY, null);</span>
-<span class="fc" id="L174">            return;</span>
+<span class="pc bpc" id="L171" title="1 of 2 branches missed.">            if ( label.getClientProperty(_HTML_LAST_INSTALLED_KEY) != null )</span>
+<span class="nc" id="L172">                label.putClientProperty(_HTML_LAST_INSTALLED_KEY, null);</span>
+<span class="pc bpc" id="L173" title="1 of 2 branches missed.">            if ( label.getClientProperty(_HTML_ORIGINAL_KEY) != null )</span>
+<span class="nc" id="L174">                label.putClientProperty(_HTML_ORIGINAL_KEY, null);</span>
+<span class="fc" id="L175">            return;</span>
         }
 
-<span class="fc" id="L177">        float  scale    = UI.scale();</span>
-<span class="fc" id="L178">        String original = _recoverOriginalHtml(label, currentText);</span>
-<span class="fc" id="L179">        String scaled   = _scaleInlineFontSizes(original, scale);</span>
-<span class="fc" id="L180">        String css      = _buildHtmlBodyCss(fontConf)</span>
-<span class="fc" id="L181">                        + _buildHtmlScalingDefaultsCss(label, scale, fontConf);</span>
+<span class="fc" id="L178">        float  scale    = UI.scale();</span>
+<span class="fc" id="L179">        String original = _recoverOriginalHtml(label, currentText);</span>
+<span class="fc" id="L180">        String scaled   = _scaleInlineFontSizes(original, scale);</span>
+<span class="fc" id="L181">        String css      = _buildHtmlBodyCss(fontConf)</span>
+<span class="fc" id="L182">                        + _buildHtmlScalingDefaultsCss(label, scale, fontConf);</span>
 
         @Nullable String desired;
-<span class="fc bfc" id="L184" title="All 2 branches covered.">        if ( css.isEmpty() ) {</span>
-<span class="fc" id="L185">            desired = scaled;</span>
+<span class="fc bfc" id="L185" title="All 2 branches covered.">        if ( css.isEmpty() ) {</span>
+<span class="fc" id="L186">            desired = scaled;</span>
         } else {
-<span class="fc" id="L187">            desired = _injectStyleTag(scaled, css);</span>
-<span class="pc bpc" id="L188" title="1 of 2 branches missed.">            if ( desired == null )</span>
-<span class="nc" id="L189">                desired = scaled;</span>
+<span class="fc" id="L188">            desired = _injectStyleTag(scaled, css);</span>
+<span class="pc bpc" id="L189" title="1 of 2 branches missed.">            if ( desired == null )</span>
+<span class="nc" id="L190">                desired = scaled;</span>
         }
 
-<span class="fc" id="L192">        label.putClientProperty(_HTML_ORIGINAL_KEY, original);</span>
+<span class="fc" id="L193">        label.putClientProperty(_HTML_ORIGINAL_KEY, original);</span>
 
-<span class="fc bfc" id="L194" title="All 2 branches covered.">        if ( Objects.equals(desired, currentText) ) {</span>
-<span class="fc" id="L195">            label.putClientProperty(_HTML_LAST_INSTALLED_KEY, currentText);</span>
+<span class="fc bfc" id="L195" title="All 2 branches covered.">        if ( Objects.equals(desired, currentText) ) {</span>
+<span class="fc" id="L196">            label.putClientProperty(_HTML_LAST_INSTALLED_KEY, currentText);</span>
         } else {
             // IMPORTANT: write the snapshot BEFORE setText so the listener
             // installed below can recognise this as our own change.
-<span class="fc" id="L199">            label.putClientProperty(_HTML_LAST_INSTALLED_KEY, desired);</span>
-<span class="fc" id="L200">            label.setText(desired);</span>
+<span class="fc" id="L200">            label.putClientProperty(_HTML_LAST_INSTALLED_KEY, desired);</span>
+<span class="fc" id="L201">            label.setText(desired);</span>
         }
 
-<span class="fc" id="L203">        _ensureHtmlTextListenerInstalled(label);</span>
-<span class="fc" id="L204">    }</span>
+<span class="fc" id="L204">        _ensureHtmlTextListenerInstalled(label);</span>
+<span class="fc" id="L205">    }</span>
 
     /*
        Recover the un-scaled, un-injected HTML.
@@ -217,14 +218,14 @@ final class LabelStyleInstallerUtility {
            yet. Same as (2).
     */
     private static String _recoverOriginalHtml(JLabel label, String currentText) {
-<span class="fc" id="L220">        Object lastInstalled = label.getClientProperty(_HTML_LAST_INSTALLED_KEY);</span>
-<span class="fc bfc" id="L221" title="All 2 branches covered.">        if ( Objects.equals(currentText, lastInstalled) ) {</span>
-<span class="fc" id="L222">            Object stored = label.getClientProperty(_HTML_ORIGINAL_KEY);</span>
-<span class="pc bpc" id="L223" title="1 of 2 branches missed.">            if ( stored instanceof String )</span>
-<span class="fc" id="L224">                return (String) stored;</span>
+<span class="fc" id="L221">        Object lastInstalled = label.getClientProperty(_HTML_LAST_INSTALLED_KEY);</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">        if ( Objects.equals(currentText, lastInstalled) ) {</span>
+<span class="fc" id="L223">            Object stored = label.getClientProperty(_HTML_ORIGINAL_KEY);</span>
+<span class="pc bpc" id="L224" title="1 of 2 branches missed.">            if ( stored instanceof String )</span>
+<span class="fc" id="L225">                return (String) stored;</span>
         }
-<span class="fc" id="L226">        String stripped = _stripHtmlInjection(currentText);</span>
-<span class="pc bpc" id="L227" title="1 of 2 branches missed.">        return stripped != null ? stripped : currentText;</span>
+<span class="fc" id="L227">        String stripped = _stripHtmlInjection(currentText);</span>
+<span class="pc bpc" id="L228" title="1 of 2 branches missed.">        return stripped != null ? stripped : currentText;</span>
     }
 
     /**
@@ -233,68 +234,68 @@ final class LabelStyleInstallerUtility {
      *  Returns the input unchanged when scale equals 1 or no match is found.
      */
     static String _scaleInlineFontSizes(String html, float scale) {
-<span class="pc bpc" id="L236" title="1 of 4 branches missed.">        if ( scale == 1f || html.isEmpty() )</span>
-<span class="fc" id="L237">            return html;</span>
+<span class="pc bpc" id="L237" title="1 of 4 branches missed.">        if ( scale == 1f || html.isEmpty() )</span>
+<span class="fc" id="L238">            return html;</span>
 
-<span class="fc" id="L239">        Matcher m = _INLINE_FONT_SIZE_PATTERN.matcher(html);</span>
-<span class="fc" id="L240">        StringBuffer sb = new StringBuffer(html.length() + 16);</span>
-<span class="fc" id="L241">        boolean any = false;</span>
-<span class="fc bfc" id="L242" title="All 2 branches covered.">        while ( m.find() ) {</span>
-<span class="fc" id="L243">            any = true;</span>
-<span class="fc" id="L244">            String prefix = m.group(1);</span>
-<span class="fc" id="L245">            double value  = Double.parseDouble(m.group(2));</span>
-<span class="fc" id="L246">            String unit   = m.group(3);</span>
-<span class="fc" id="L247">            double result = value * scale;</span>
+<span class="fc" id="L240">        Matcher m = _INLINE_FONT_SIZE_PATTERN.matcher(html);</span>
+<span class="fc" id="L241">        StringBuffer sb = new StringBuffer(html.length() + 16);</span>
+<span class="fc" id="L242">        boolean any = false;</span>
+<span class="fc bfc" id="L243" title="All 2 branches covered.">        while ( m.find() ) {</span>
+<span class="fc" id="L244">            any = true;</span>
+<span class="fc" id="L245">            String prefix = m.group(1);</span>
+<span class="fc" id="L246">            double value  = Double.parseDouble(m.group(2));</span>
+<span class="fc" id="L247">            String unit   = m.group(3);</span>
+<span class="fc" id="L248">            double result = value * scale;</span>
             String formatted;
-<span class="pc bpc" id="L249" title="1 of 2 branches missed.">            if ( !Double.isFinite(result) ) {</span>
-<span class="nc" id="L250">                formatted = m.group(2); // pathological scale; leave value alone</span>
-<span class="pc bpc" id="L251" title="1 of 2 branches missed.">            } else if ( result == Math.floor(result) ) {</span>
-<span class="fc" id="L252">                formatted = Long.toString((long) result);</span>
+<span class="pc bpc" id="L250" title="1 of 2 branches missed.">            if ( !Double.isFinite(result) ) {</span>
+<span class="nc" id="L251">                formatted = m.group(2); // pathological scale; leave value alone</span>
+<span class="pc bpc" id="L252" title="1 of 2 branches missed.">            } else if ( result == Math.floor(result) ) {</span>
+<span class="fc" id="L253">                formatted = Long.toString((long) result);</span>
             } else {
                 // Two decimals is plenty for sub-pixel precision and avoids
                 // dragging an exponent or a 17-digit double into the CSS.
-<span class="nc" id="L256">                formatted = String.format(Locale.ROOT, &quot;%.2f&quot;, result);</span>
+<span class="nc" id="L257">                formatted = String.format(Locale.ROOT, &quot;%.2f&quot;, result);</span>
             }
-<span class="fc" id="L258">            m.appendReplacement(sb, Matcher.quoteReplacement(prefix + formatted + unit));</span>
-<span class="fc" id="L259">        }</span>
-<span class="fc bfc" id="L260" title="All 2 branches covered.">        if ( !any )</span>
-<span class="fc" id="L261">            return html;</span>
-<span class="fc" id="L262">        m.appendTail(sb);</span>
-<span class="fc" id="L263">        return sb.toString();</span>
+<span class="fc" id="L259">            m.appendReplacement(sb, Matcher.quoteReplacement(prefix + formatted + unit));</span>
+<span class="fc" id="L260">        }</span>
+<span class="fc bfc" id="L261" title="All 2 branches covered.">        if ( !any )</span>
+<span class="fc" id="L262">            return html;</span>
+<span class="fc" id="L263">        m.appendTail(sb);</span>
+<span class="fc" id="L264">        return sb.toString();</span>
     }
 
     static @Nullable String _stripHtmlInjection( @Nullable String html ) {
-<span class="pc bpc" id="L267" title="1 of 2 branches missed.">        if ( html == null )</span>
-<span class="nc" id="L268">            return null;</span>
+<span class="pc bpc" id="L268" title="1 of 2 branches missed.">        if ( html == null )</span>
+<span class="nc" id="L269">            return null;</span>
 
-<span class="pc bpc" id="L270" title="1 of 2 branches missed.">        if ( !BasicHTML.isHTMLString(html) )</span>
-<span class="nc" id="L271">            return html;</span>
+<span class="pc bpc" id="L271" title="1 of 2 branches missed.">        if ( !BasicHTML.isHTMLString(html) )</span>
+<span class="nc" id="L272">            return html;</span>
 
-<span class="pc bpc" id="L273" title="1 of 2 branches missed.">        if ( html.length() &lt; _HTML_OPEN_TAG_LEN )</span>
-<span class="nc" id="L274">            return html;</span>
+<span class="pc bpc" id="L274" title="1 of 2 branches missed.">        if ( html.length() &lt; _HTML_OPEN_TAG_LEN )</span>
+<span class="nc" id="L275">            return html;</span>
 
-<span class="fc" id="L276">        String afterOpen = html.substring(_HTML_OPEN_TAG_LEN);</span>
-<span class="pc bpc" id="L277" title="1 of 2 branches missed.">        if ( !afterOpen.startsWith(_HTML_INJECTION_OPEN) )</span>
-<span class="fc" id="L278">            return html;</span>
+<span class="fc" id="L277">        String afterOpen = html.substring(_HTML_OPEN_TAG_LEN);</span>
+<span class="pc bpc" id="L278" title="1 of 2 branches missed.">        if ( !afterOpen.startsWith(_HTML_INJECTION_OPEN) )</span>
+<span class="fc" id="L279">            return html;</span>
 
-<span class="nc" id="L280">        int closeIdx = afterOpen.indexOf(_HTML_INJECTION_CLOSE, _HTML_INJECTION_OPEN.length());</span>
-<span class="nc bnc" id="L281" title="All 2 branches missed.">        if ( closeIdx &lt; 0 )</span>
-<span class="nc" id="L282">            return html;</span>
+<span class="nc" id="L281">        int closeIdx = afterOpen.indexOf(_HTML_INJECTION_CLOSE, _HTML_INJECTION_OPEN.length());</span>
+<span class="nc bnc" id="L282" title="All 2 branches missed.">        if ( closeIdx &lt; 0 )</span>
+<span class="nc" id="L283">            return html;</span>
 
-<span class="nc" id="L284">        return html.substring(0, _HTML_OPEN_TAG_LEN)</span>
-<span class="nc" id="L285">                + afterOpen.substring(closeIdx + _HTML_INJECTION_CLOSE.length());</span>
+<span class="nc" id="L285">        return html.substring(0, _HTML_OPEN_TAG_LEN)</span>
+<span class="nc" id="L286">                + afterOpen.substring(closeIdx + _HTML_INJECTION_CLOSE.length());</span>
     }
 
     static @Nullable String _injectStyleTag( @Nullable String html, String css ) {
-<span class="pc bpc" id="L289" title="1 of 2 branches missed.">        if ( html == null )</span>
-<span class="nc" id="L290">            return null;</span>
+<span class="pc bpc" id="L290" title="1 of 2 branches missed.">        if ( html == null )</span>
+<span class="nc" id="L291">            return null;</span>
 
-<span class="pc bpc" id="L292" title="1 of 2 branches missed.">        if ( html.length() &lt; _HTML_OPEN_TAG_LEN )</span>
-<span class="nc" id="L293">            return html;</span>
+<span class="pc bpc" id="L293" title="1 of 2 branches missed.">        if ( html.length() &lt; _HTML_OPEN_TAG_LEN )</span>
+<span class="nc" id="L294">            return html;</span>
 
-<span class="fc" id="L295">        return html.substring(0, _HTML_OPEN_TAG_LEN)</span>
+<span class="fc" id="L296">        return html.substring(0, _HTML_OPEN_TAG_LEN)</span>
                 + _HTML_INJECTION_OPEN + css + _HTML_INJECTION_CLOSE
-<span class="fc" id="L297">                + html.substring(_HTML_OPEN_TAG_LEN);</span>
+<span class="fc" id="L298">                + html.substring(_HTML_OPEN_TAG_LEN);</span>
     }
 
     /*
@@ -317,89 +318,89 @@ final class LabelStyleInstallerUtility {
         to remain text-untouched.
     */
     static String _buildHtmlScalingDefaultsCss(JLabel label, float scale, FontConf fontConf) {
-<span class="fc bfc" id="L320" title="All 2 branches covered.">        if ( scale == 1f )</span>
-<span class="fc" id="L321">            return &quot;&quot;;</span>
+<span class="fc bfc" id="L321" title="All 2 branches covered.">        if ( scale == 1f )</span>
+<span class="fc" id="L322">            return &quot;&quot;;</span>
 
         int     baseSize;
         boolean injectBody;
-<span class="fc bfc" id="L325" title="All 2 branches covered.">        if ( fontConf.size() &gt; 0 ) {</span>
-<span class="fc" id="L326">            baseSize   = fontConf.size(); // FontConf is already scaled upstream</span>
-<span class="fc" id="L327">            injectBody = false;           // _buildHtmlBodyCss already emitted body{font-size:...}</span>
+<span class="fc bfc" id="L326" title="All 2 branches covered.">        if ( fontConf.size() &gt; 0 ) {</span>
+<span class="fc" id="L327">            baseSize   = fontConf.size(); // FontConf is already scaled upstream</span>
+<span class="fc" id="L328">            injectBody = false;           // _buildHtmlBodyCss already emitted body{font-size:...}</span>
         } else {
-<span class="fc" id="L329">            Font f = label.getFont();</span>
-<span class="pc bpc" id="L330" title="2 of 4 branches missed.">            baseSize   = ( f != null &amp;&amp; f.getSize() &gt; 0 ) ? f.getSize() : 12; // We already expect SwingTree or the Look and Feel (like FlatLaF) to have the font size scaled!</span>
-<span class="fc" id="L331">            injectBody = true;</span>
+<span class="fc" id="L330">            Font f = label.getFont();</span>
+<span class="pc bpc" id="L331" title="2 of 4 branches missed.">            baseSize   = ( f != null &amp;&amp; f.getSize() &gt; 0 ) ? f.getSize() : 12; // We already expect SwingTree or the Look and Feel (like FlatLaF) to have the font size scaled!</span>
+<span class="fc" id="L332">            injectBody = true;</span>
         }
 
-<span class="fc" id="L334">        StringBuilder sb = new StringBuilder();</span>
-<span class="fc bfc" id="L335" title="All 2 branches covered.">        if ( injectBody )</span>
-<span class="fc" id="L336">            sb.append(&quot;body{font-size:&quot;).append(baseSize).append(&quot;pt;}&quot;);</span>
-<span class="fc" id="L337">        sb.append(&quot;h1{font-size:&quot;).append(Math.round(baseSize * 2.00f)).append(&quot;pt;}&quot;);</span>
-<span class="fc" id="L338">        sb.append(&quot;h2{font-size:&quot;).append(Math.round(baseSize * 1.50f)).append(&quot;pt;}&quot;);</span>
-<span class="fc" id="L339">        sb.append(&quot;h3{font-size:&quot;).append(Math.round(baseSize * 1.17f)).append(&quot;pt;}&quot;);</span>
-<span class="fc" id="L340">        sb.append(&quot;h4{font-size:&quot;).append(baseSize).append(&quot;pt;}&quot;);</span>
-<span class="fc" id="L341">        sb.append(&quot;h5{font-size:&quot;).append(Math.round(baseSize * 0.83f)).append(&quot;pt;}&quot;);</span>
-<span class="fc" id="L342">        sb.append(&quot;h6{font-size:&quot;).append(Math.round(baseSize * 0.67f)).append(&quot;pt;}&quot;);</span>
-<span class="fc" id="L343">        return sb.toString();</span>
+<span class="fc" id="L335">        StringBuilder sb = new StringBuilder();</span>
+<span class="fc bfc" id="L336" title="All 2 branches covered.">        if ( injectBody )</span>
+<span class="fc" id="L337">            sb.append(&quot;body{font-size:&quot;).append(baseSize).append(&quot;pt;}&quot;);</span>
+<span class="fc" id="L338">        sb.append(&quot;h1{font-size:&quot;).append(Math.round(baseSize * 2.00f)).append(&quot;pt;}&quot;);</span>
+<span class="fc" id="L339">        sb.append(&quot;h2{font-size:&quot;).append(Math.round(baseSize * 1.50f)).append(&quot;pt;}&quot;);</span>
+<span class="fc" id="L340">        sb.append(&quot;h3{font-size:&quot;).append(Math.round(baseSize * 1.17f)).append(&quot;pt;}&quot;);</span>
+<span class="fc" id="L341">        sb.append(&quot;h4{font-size:&quot;).append(baseSize).append(&quot;pt;}&quot;);</span>
+<span class="fc" id="L342">        sb.append(&quot;h5{font-size:&quot;).append(Math.round(baseSize * 0.83f)).append(&quot;pt;}&quot;);</span>
+<span class="fc" id="L343">        sb.append(&quot;h6{font-size:&quot;).append(Math.round(baseSize * 0.67f)).append(&quot;pt;}&quot;);</span>
+<span class="fc" id="L344">        return sb.toString();</span>
     }
 
     static String _buildHtmlBodyCss(FontConf fontConf) {
-<span class="fc" id="L347">        StringBuilder body = new StringBuilder();</span>
+<span class="fc" id="L348">        StringBuilder body = new StringBuilder();</span>
 
-<span class="fc bfc" id="L349" title="All 2 branches covered.">        if ( !fontConf.family().isEmpty() )</span>
-<span class="fc" id="L350">            body.append(&quot;font-family:\&quot;&quot;).append(_cssEscape(fontConf.family())).append(&quot;\&quot;;&quot;);</span>
+<span class="fc bfc" id="L350" title="All 2 branches covered.">        if ( !fontConf.family().isEmpty() )</span>
+<span class="fc" id="L351">            body.append(&quot;font-family:\&quot;&quot;).append(_cssEscape(fontConf.family())).append(&quot;\&quot;;&quot;);</span>
 
-<span class="fc bfc" id="L352" title="All 2 branches covered.">        if ( fontConf.size() &gt; 0 )</span>
-<span class="fc" id="L353">            body.append(&quot;font-size:&quot;).append(fontConf.size()).append(&quot;pt;&quot;);</span>
+<span class="fc bfc" id="L353" title="All 2 branches covered.">        if ( fontConf.size() &gt; 0 )</span>
+<span class="fc" id="L354">            body.append(&quot;font-size:&quot;).append(fontConf.size()).append(&quot;pt;&quot;);</span>
 
-<span class="fc" id="L355">        fontConf.posture().ifPresent( p -&gt; {</span>
-<span class="pc bpc" id="L356" title="1 of 2 branches missed.">            if ( p &gt; 0f )</span>
-<span class="fc" id="L357">                body.append(&quot;font-style:italic;&quot;);</span>
-<span class="fc" id="L358">        });</span>
+<span class="fc" id="L356">        fontConf.posture().ifPresent( p -&gt; {</span>
+<span class="pc bpc" id="L357" title="1 of 2 branches missed.">            if ( p &gt; 0f )</span>
+<span class="fc" id="L358">                body.append(&quot;font-style:italic;&quot;);</span>
+<span class="fc" id="L359">        });</span>
 
-<span class="fc" id="L360">        fontConf.weight().ifPresent( w -&gt; {</span>
+<span class="fc" id="L361">        fontConf.weight().ifPresent( w -&gt; {</span>
             // FontConf weight is on AWT's TextAttribute.WEIGHT scale where 1.0
             // is regular and 2.0 is bold. CSS font-weight uses 100..900 with
             // 400=normal and 700=bold. Map piecewise-linearly so the canonical
             // anchors land exactly, then snap to the nearest 100 since legacy
             // CSS only honors multiples of 100.
             int cssWeight;
-<span class="fc bfc" id="L367" title="All 2 branches covered.">            if ( w &lt;= 1f ) cssWeight = Math.round(w * 400f);</span>
-<span class="fc" id="L368">            else           cssWeight = Math.round(400f + (w - 1f) * 300f);</span>
-<span class="fc" id="L369">            cssWeight = Math.max(100, Math.min(900, ((cssWeight + 50) / 100) * 100));</span>
+<span class="fc bfc" id="L368" title="All 2 branches covered.">            if ( w &lt;= 1f ) cssWeight = Math.round(w * 400f);</span>
+<span class="fc" id="L369">            else           cssWeight = Math.round(400f + (w - 1f) * 300f);</span>
+<span class="fc" id="L370">            cssWeight = Math.max(100, Math.min(900, ((cssWeight + 50) / 100) * 100));</span>
             String value;
-<span class="fc bfc" id="L371" title="All 2 branches covered.">            if ( cssWeight == 400 )      value = &quot;normal&quot;;</span>
-<span class="fc bfc" id="L372" title="All 2 branches covered.">            else if ( cssWeight == 700 ) value = &quot;bold&quot;;</span>
-<span class="fc" id="L373">            else                         value = String.valueOf(cssWeight);</span>
-<span class="fc" id="L374">            body.append(&quot;font-weight:&quot;).append(value).append(&quot;;&quot;);</span>
-<span class="fc" id="L375">        });</span>
+<span class="fc bfc" id="L372" title="All 2 branches covered.">            if ( cssWeight == 400 )      value = &quot;normal&quot;;</span>
+<span class="fc bfc" id="L373" title="All 2 branches covered.">            else if ( cssWeight == 700 ) value = &quot;bold&quot;;</span>
+<span class="fc" id="L374">            else                         value = String.valueOf(cssWeight);</span>
+<span class="fc" id="L375">            body.append(&quot;font-weight:&quot;).append(value).append(&quot;;&quot;);</span>
+<span class="fc" id="L376">        });</span>
 
-<span class="fc" id="L377">        fontConf.paint().ifPresent( paint -&gt; {</span>
-<span class="pc bpc" id="L378" title="1 of 2 branches missed.">            if ( paint instanceof Color) {</span>
-<span class="fc" id="L379">                Color c = (Color) paint;</span>
-<span class="fc" id="L380">                body.append(String.format(&quot;color:#%02x%02x%02x;&quot;, c.getRed(), c.getGreen(), c.getBlue()));</span>
+<span class="fc" id="L378">        fontConf.paint().ifPresent( paint -&gt; {</span>
+<span class="pc bpc" id="L379" title="1 of 2 branches missed.">            if ( paint instanceof Color) {</span>
+<span class="fc" id="L380">                Color c = (Color) paint;</span>
+<span class="fc" id="L381">                body.append(String.format(&quot;color:#%02x%02x%02x;&quot;, c.getRed(), c.getGreen(), c.getBlue()));</span>
             }
-<span class="fc" id="L382">        });</span>
+<span class="fc" id="L383">        });</span>
 
-<span class="fc" id="L384">        fontConf.backgroundPaint().ifPresent( paint -&gt; {</span>
-<span class="pc bpc" id="L385" title="1 of 2 branches missed.">            if ( paint instanceof Color ) {</span>
-<span class="fc" id="L386">                Color c = (Color) paint;</span>
-<span class="fc" id="L387">                body.append(String.format(&quot;background-color:#%02x%02x%02x;&quot;, c.getRed(), c.getGreen(), c.getBlue()));</span>
+<span class="fc" id="L385">        fontConf.backgroundPaint().ifPresent( paint -&gt; {</span>
+<span class="pc bpc" id="L386" title="1 of 2 branches missed.">            if ( paint instanceof Color ) {</span>
+<span class="fc" id="L387">                Color c = (Color) paint;</span>
+<span class="fc" id="L388">                body.append(String.format(&quot;background-color:#%02x%02x%02x;&quot;, c.getRed(), c.getGreen(), c.getBlue()));</span>
             }
-<span class="fc" id="L389">        });</span>
+<span class="fc" id="L390">        });</span>
 
-<span class="fc" id="L391">        StringBuilder decoration = new StringBuilder();</span>
-<span class="fc bfc" id="L392" title="All 2 branches covered.">        if ( fontConf.isUnderlined() )</span>
-<span class="fc" id="L393">            decoration.append(&quot;underline &quot;);</span>
-<span class="fc bfc" id="L394" title="All 2 branches covered.">        if ( fontConf.isStrikeThrough() )</span>
-<span class="fc" id="L395">            decoration.append(&quot;line-through &quot;);</span>
-<span class="fc bfc" id="L396" title="All 2 branches covered.">        if ( decoration.length() &gt; 0 )</span>
-<span class="fc" id="L397">            body.append(&quot;text-decoration:&quot;).append(decoration.toString().trim()).append(&quot;;&quot;);</span>
+<span class="fc" id="L392">        StringBuilder decoration = new StringBuilder();</span>
+<span class="fc bfc" id="L393" title="All 2 branches covered.">        if ( fontConf.isUnderlined() )</span>
+<span class="fc" id="L394">            decoration.append(&quot;underline &quot;);</span>
+<span class="fc bfc" id="L395" title="All 2 branches covered.">        if ( fontConf.isStrikeThrough() )</span>
+<span class="fc" id="L396">            decoration.append(&quot;line-through &quot;);</span>
+<span class="fc bfc" id="L397" title="All 2 branches covered.">        if ( decoration.length() &gt; 0 )</span>
+<span class="fc" id="L398">            body.append(&quot;text-decoration:&quot;).append(decoration.toString().trim()).append(&quot;;&quot;);</span>
 
-<span class="fc bfc" id="L399" title="All 2 branches covered.">        if ( body.length() == 0 )</span>
-<span class="fc" id="L400">            return &quot;&quot;;</span>
+<span class="fc bfc" id="L400" title="All 2 branches covered.">        if ( body.length() == 0 )</span>
+<span class="fc" id="L401">            return &quot;&quot;;</span>
 
-<span class="fc" id="L402">        return &quot;body{&quot; + body + &quot;}&quot;;</span>
+<span class="fc" id="L403">        return &quot;body{&quot; + body + &quot;}&quot;;</span>
     }
 
     private static String _cssEscape(String value) {
@@ -407,10 +408,10 @@ final class LabelStyleInstallerUtility {
         // backslash escapes inside string values, so we play it safe and drop any
         // character that could let a hostile (or just quirky) value break out of
         // the surrounding &quot;...&quot; declaration.
-<span class="fc" id="L410">        StringBuilder sb = new StringBuilder(value.length());</span>
-<span class="fc bfc" id="L411" title="All 2 branches covered.">        for ( int i = 0; i &lt; value.length(); i++ ) {</span>
-<span class="fc" id="L412">            char ch = value.charAt(i);</span>
-<span class="pc bpc" id="L413" title="7 of 18 branches missed.">            if (</span>
+<span class="fc" id="L411">        StringBuilder sb = new StringBuilder(value.length());</span>
+<span class="fc bfc" id="L412" title="All 2 branches covered.">        for ( int i = 0; i &lt; value.length(); i++ ) {</span>
+<span class="fc" id="L413">            char ch = value.charAt(i);</span>
+<span class="pc bpc" id="L414" title="7 of 18 branches missed.">            if (</span>
                 ch == '&quot;'  ||
                 ch == ';'  ||
                 ch == '\\' ||
@@ -421,11 +422,11 @@ final class LabelStyleInstallerUtility {
                 ch == '\n' ||
                 ch == '\r'
             )
-<span class="fc" id="L424">                sb.append(' ');</span>
+<span class="fc" id="L425">                sb.append(' ');</span>
             else
-<span class="fc" id="L426">                sb.append(ch);</span>
+<span class="fc" id="L427">                sb.append(ch);</span>
         }
-<span class="fc" id="L428">        return sb.toString();</span>
+<span class="fc" id="L429">        return sb.toString();</span>
     }
 
 }

@@ -41,7 +41,7 @@ final class BorderConf
     ) {
 <span class="fc bfc" id="L42" title="All 2 branches covered.">        if ( topLeftArc    .equals( Arc.none()     ) &amp;&amp;</span>
 <span class="pc bpc" id="L43" title="1 of 2 branches missed.">             topRightArc   .equals( Arc.none()     ) &amp;&amp;</span>
-<span class="pc bpc" id="L44" title="1 of 2 branches missed.">             bottomLeftArc .equals( Arc.none()     ) &amp;&amp;</span>
+<span class="fc bfc" id="L44" title="All 2 branches covered.">             bottomLeftArc .equals( Arc.none()     ) &amp;&amp;</span>
 <span class="pc bpc" id="L45" title="1 of 2 branches missed.">             bottomRightArc.equals( Arc.none()     ) &amp;&amp;</span>
 <span class="fc bfc" id="L46" title="All 2 branches covered.">             borderWidths  .equals( Outline.none() ) &amp;&amp;</span>
 <span class="fc bfc" id="L47" title="All 2 branches covered.">             margin        .equals( Outline.none() ) &amp;&amp;</span>
@@ -97,7 +97,7 @@ final class BorderConf
     public boolean hasAnyNonZeroArcs() {
 <span class="pc bpc" id="L98" title="2 of 6 branches missed.">        return  ( !_topLeftArc    .equals( Arc.none() ) &amp;&amp; _topLeftArc.width()     &gt; 0 &amp;&amp; _topLeftArc.height()     &gt; 0 ) ||</span>
 <span class="pc bpc" id="L99" title="5 of 6 branches missed.">                ( !_topRightArc   .equals( Arc.none() ) &amp;&amp; _topRightArc.width()    &gt; 0 &amp;&amp; _topRightArc.height()    &gt; 0 ) ||</span>
-<span class="pc bpc" id="L100" title="5 of 6 branches missed.">                ( !_bottomLeftArc .equals( Arc.none() ) &amp;&amp; _bottomLeftArc.width()  &gt; 0 &amp;&amp; _bottomLeftArc.height()  &gt; 0 ) ||</span>
+<span class="pc bpc" id="L100" title="2 of 6 branches missed.">                ( !_bottomLeftArc .equals( Arc.none() ) &amp;&amp; _bottomLeftArc.width()  &gt; 0 &amp;&amp; _bottomLeftArc.height()  &gt; 0 ) ||</span>
 <span class="pc bpc" id="L101" title="5 of 6 branches missed.">                ( !_bottomRightArc.equals( Arc.none() ) &amp;&amp; _bottomRightArc.width() &gt; 0 &amp;&amp; _bottomRightArc.height() &gt; 0 );</span>
     }
 
@@ -359,7 +359,7 @@ final class BorderConf
 <span class="fc" id="L359">        return</span>
 <span class="fc bfc" id="L360" title="All 2 branches covered.">            _topLeftArc    .equals(rhs._topLeftArc)     &amp;&amp;</span>
 <span class="pc bpc" id="L361" title="1 of 2 branches missed.">            _topRightArc   .equals(rhs._topRightArc)    &amp;&amp;</span>
-<span class="pc bpc" id="L362" title="1 of 2 branches missed.">            _bottomLeftArc .equals(rhs._bottomLeftArc)  &amp;&amp;</span>
+<span class="fc bfc" id="L362" title="All 2 branches covered.">            _bottomLeftArc .equals(rhs._bottomLeftArc)  &amp;&amp;</span>
 <span class="fc bfc" id="L363" title="All 2 branches covered.">            _bottomRightArc.equals(rhs._bottomRightArc) &amp;&amp;</span>
 <span class="fc bfc" id="L364" title="All 2 branches covered.">            _borderWidths  .equals(rhs._borderWidths)   &amp;&amp;</span>
 <span class="fc bfc" id="L365" title="All 2 branches covered.">            _margin        .equals(rhs._margin)         &amp;&amp;</span>

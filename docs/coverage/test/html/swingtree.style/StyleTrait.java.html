@@ -156,40 +156,39 @@ public final class StyleTrait&lt;C extends JComponent&gt;
 <span class="fc" id="L156">        Objects.requireNonNull(component);</span>
 <span class="fc" id="L157">        boolean typeIsCompatible = _type.isAssignableFrom(component.getClass());</span>
 <span class="fc bfc" id="L158" title="All 4 branches covered.">        boolean idIsCompatible   = _id.isEmpty() || _id.equals(component.getName());</span>
-<span class="fc" id="L159">        boolean belongsToApplicableGroup = ComponentExtension.from(component)</span>
-<span class="fc" id="L160">                                              .getStyleGroups()</span>
-<span class="fc" id="L161">                                              .any( sg -&gt; sg.equals(_group));</span>
-
-<span class="fc bfc" id="L163" title="All 4 branches covered.">        boolean nameIsCompatible = _group.isEmpty() || belongsToApplicableGroup;</span>
-<span class="fc bfc" id="L164" title="All 6 branches covered.">        return typeIsCompatible &amp;&amp; idIsCompatible &amp;&amp; nameIsCompatible;</span>
+        // Only resolve the component's style groups when the group actually needs matching.
+        // 'belongsToGroup' is a plain list lookup, avoiding the Tuple + Stream allocations of
+        // the former 'getStyleGroups().any(..)' on every applicability check.
+<span class="fc bfc" id="L162" title="All 4 branches covered.">        boolean nameIsCompatible = _group.isEmpty() || ComponentExtension.from(component).belongsToGroup(_group);</span>
+<span class="fc bfc" id="L163" title="All 6 branches covered.">        return typeIsCompatible &amp;&amp; idIsCompatible &amp;&amp; nameIsCompatible;</span>
     }
 
     boolean thisInherits( StyleTrait&lt;?&gt; other ) {
 
-<span class="fc bfc" id="L169" title="All 4 branches covered.">        if ( !this.id().isEmpty() || !other.id().isEmpty() )</span>
-<span class="fc" id="L170">            return false;</span>
+<span class="fc bfc" id="L168" title="All 4 branches covered.">        if ( !this.id().isEmpty() || !other.id().isEmpty() )</span>
+<span class="fc" id="L169">            return false;</span>
 
-<span class="fc" id="L172">        boolean thisGroupIsExtensionOfOther = false;</span>
-<span class="fc bfc" id="L173" title="All 2 branches covered.">        for ( String superGroup : this.toInherit() )</span>
-<span class="fc bfc" id="L174" title="All 2 branches covered.">            if ( superGroup.equals( other.group() ) ) {</span>
-<span class="fc" id="L175">                thisGroupIsExtensionOfOther = true;</span>
-<span class="fc" id="L176">                break;</span>
+<span class="fc" id="L171">        boolean thisGroupIsExtensionOfOther = false;</span>
+<span class="fc bfc" id="L172" title="All 2 branches covered.">        for ( String superGroup : this.toInherit() )</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">            if ( superGroup.equals( other.group() ) ) {</span>
+<span class="fc" id="L174">                thisGroupIsExtensionOfOther = true;</span>
+<span class="fc" id="L175">                break;</span>
             }
 
-<span class="fc" id="L179">        boolean thisTypeIsSubclassOfOther = other.type().isAssignableFrom(this.type());</span>
+<span class="fc" id="L178">        boolean thisTypeIsSubclassOfOther = other.type().isAssignableFrom(this.type());</span>
 
-<span class="fc bfc" id="L181" title="All 4 branches covered.">        if ( thisGroupIsExtensionOfOther &amp;&amp; !thisTypeIsSubclassOfOther )</span>
-<span class="fc" id="L182">            throw new IllegalArgumentException(</span>
+<span class="fc bfc" id="L180" title="All 4 branches covered.">        if ( thisGroupIsExtensionOfOther &amp;&amp; !thisTypeIsSubclassOfOther )</span>
+<span class="fc" id="L181">            throw new IllegalArgumentException(</span>
                     this + &quot; is an extension of &quot; + other + &quot; but is not a subclass of it.&quot;
                 );
 
-<span class="fc bfc" id="L186" title="All 6 branches covered.">        return ( thisGroupIsExtensionOfOther || other.group().isEmpty() ) &amp;&amp; thisTypeIsSubclassOfOther;</span>
+<span class="fc bfc" id="L185" title="All 6 branches covered.">        return ( thisGroupIsExtensionOfOther || other.group().isEmpty() ) &amp;&amp; thisTypeIsSubclassOfOther;</span>
     }
 
     @Override
     public String toString() {
-<span class="fc" id="L191">        String inherits = &quot;[&quot; + _toInherit.join(&quot;, &quot;) + &quot;]&quot;;</span>
-<span class="fc" id="L192">        return &quot;StyleTrait[&quot; +</span>
+<span class="fc" id="L190">        String inherits = &quot;[&quot; + _toInherit.join(&quot;, &quot;) + &quot;]&quot;;</span>
+<span class="fc" id="L191">        return &quot;StyleTrait[&quot; +</span>
                     &quot;id='&quot;      + _id      + &quot;', &quot; +
                     &quot;group='&quot;   + _group   + &quot;', &quot; +
                     &quot;inherits=&quot; + inherits + &quot;, &quot;  +
@@ -199,19 +198,19 @@ public final class StyleTrait&lt;C extends JComponent&gt;
 
     @Override
     public int hashCode() {
-<span class="fc" id="L202">        return Objects.hash( _id, _group, _toInherit, _type );</span>
+<span class="fc" id="L201">        return Objects.hash( _id, _group, _toInherit, _type );</span>
     }
 
     @Override
     public boolean equals( Object other ) {
-<span class="pc bpc" id="L207" title="1 of 2 branches missed.">        if ( !( other instanceof StyleTrait ) )</span>
-<span class="nc" id="L208">            return false;</span>
+<span class="pc bpc" id="L206" title="1 of 2 branches missed.">        if ( !( other instanceof StyleTrait ) )</span>
+<span class="nc" id="L207">            return false;</span>
 
-<span class="fc" id="L210">        StyleTrait&lt;?&gt; that = (StyleTrait&lt;?&gt;) other;</span>
-<span class="fc bfc" id="L211" title="All 2 branches covered.">        return _id    .equals( that._id    ) &amp;&amp;</span>
-<span class="fc bfc" id="L212" title="All 2 branches covered.">               _group .equals( that._group ) &amp;&amp;</span>
-<span class="fc bfc" id="L213" title="All 2 branches covered.">               _type  .equals( that._type  ) &amp;&amp;</span>
-<span class="pc bpc" id="L214" title="1 of 2 branches missed.">               Objects.equals(_toInherit, that._toInherit);</span>
+<span class="fc" id="L209">        StyleTrait&lt;?&gt; that = (StyleTrait&lt;?&gt;) other;</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        return _id    .equals( that._id    ) &amp;&amp;</span>
+<span class="fc bfc" id="L211" title="All 2 branches covered.">               _group .equals( that._group ) &amp;&amp;</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">               _type  .equals( that._type  ) &amp;&amp;</span>
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">               Objects.equals(_toInherit, that._toInherit);</span>
     }
 
 }

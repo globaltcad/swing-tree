@@ -103,7 +103,7 @@ final class ModelToViewConverter&lt;M&gt; implements ViewSupplier&lt;M&gt; {
 <span class="fc bfc" id="L103" title="All 2 branches covered.">                if ( existingSubView instanceof JScrollPanels.EntryPanel ) {</span>
 <span class="fc" id="L104">                    JScrollPanels.EntryPanel entryPanel = (JScrollPanels.EntryPanel) existingSubView;</span>
 <span class="fc" id="L105">                    Component[] components = InternalUtil._actualComponentsFrom(entryPanel);</span>
-<span class="pc bpc" id="L106" title="2 of 4 branches missed.">                    if ( components.length == 0 || !(components[0] instanceof JComponent) )</span>
+<span class="pc bpc" id="L106" title="1 of 4 branches missed.">                    if ( components.length == 0 || !(components[0] instanceof JComponent) )</span>
 <span class="nc" id="L107">                        continue;</span>
 <span class="fc" id="L108">                    JComponent actualView = (JComponent) components[0];</span>
 <span class="fc" id="L109">                    Object foundId = actualView.getClientProperty(UNIQUE_VIEW_CACHE_KEY);</span>

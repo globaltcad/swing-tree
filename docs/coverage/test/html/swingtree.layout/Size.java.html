@@ -7,7 +7,6 @@ import swingtree.style.ComponentStyleDelegate;
 import swingtree.style.ImageConf;
 
 import java.awt.*;
-import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -21,7 +20,7 @@ import java.util.Optional;
 @Immutable
 public final class Size
 {
-<span class="fc" id="L24">    private static final Size UNKNOWN = new Size(-1, -1);</span>
+<span class="fc" id="L23">    private static final Size UNKNOWN = new Size(-1, -1);</span>
 
     /**
      *  Exposes the {@link #UNKNOWN} size instance, which is a null object
@@ -31,7 +30,7 @@ public final class Size
      * @return A {@link Size} instance that represents an unknown size.
      */
     public static Size unknown() {
-<span class="fc" id="L34">        return UNKNOWN;</span>
+<span class="fc" id="L33">        return UNKNOWN;</span>
     }
 
     /**
@@ -44,9 +43,9 @@ public final class Size
      * @return A {@link Size} instance that represents the given width and height.
      */
     public static Size of( float width, float height ) {
-<span class="fc bfc" id="L47" title="All 4 branches covered.">        if ( width &lt; 0 &amp;&amp; height &lt; 0 )</span>
-<span class="fc" id="L48">            return UNKNOWN;</span>
-<span class="fc" id="L49">        return new Size( width, height );</span>
+<span class="fc bfc" id="L46" title="All 4 branches covered.">        if ( width &lt; 0 &amp;&amp; height &lt; 0 )</span>
+<span class="fc" id="L47">            return UNKNOWN;</span>
+<span class="fc" id="L48">        return new Size( width, height );</span>
     }
 
     /**
@@ -59,9 +58,9 @@ public final class Size
      * @return A {@link Size} instance that represents the given width and height.
      */
     public static Size of( double width, double height ) {
-<span class="pc bpc" id="L62" title="1 of 4 branches missed.">        if ( width &lt; 0 &amp;&amp; height &lt; 0 )</span>
-<span class="fc" id="L63">            return UNKNOWN;</span>
-<span class="fc" id="L64">        return new Size((float) width, (float) height);</span>
+<span class="pc bpc" id="L61" title="1 of 4 branches missed.">        if ( width &lt; 0 &amp;&amp; height &lt; 0 )</span>
+<span class="fc" id="L62">            return UNKNOWN;</span>
+<span class="fc" id="L63">        return new Size((float) width, (float) height);</span>
     }
 
     /**
@@ -70,19 +69,19 @@ public final class Size
      * @return A {@link Size} instance that represents the given dimension.
      */
     public static Size of( @Nullable Dimension dimension ) {
-<span class="pc bpc" id="L73" title="1 of 2 branches missed.">        if ( dimension == null )</span>
-<span class="nc" id="L74">            return UNKNOWN;</span>
-<span class="fc" id="L75">        return of(dimension.width, dimension.height);</span>
+<span class="pc bpc" id="L72" title="1 of 2 branches missed.">        if ( dimension == null )</span>
+<span class="nc" id="L73">            return UNKNOWN;</span>
+<span class="fc" id="L74">        return of(dimension.width, dimension.height);</span>
     }
 
     final float _width;
     final float _height;
 
 
-<span class="fc" id="L82">    private Size( float width, float height ) {</span>
-<span class="fc bfc" id="L83" title="All 2 branches covered.">        _width  = width  &lt; 0 ? -1 : width;</span>
-<span class="fc bfc" id="L84" title="All 2 branches covered.">        _height = height &lt; 0 ? -1 : height;</span>
-<span class="fc" id="L85">    }</span>
+<span class="fc" id="L81">    private Size( float width, float height ) {</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        _width  = width  &lt; 0 ? -1 : width;</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        _height = height &lt; 0 ? -1 : height;</span>
+<span class="fc" id="L84">    }</span>
 
     /**
      *  The width of this {@link Size} instance may not be specified,
@@ -93,7 +92,7 @@ public final class Size
      * @return The width of this {@link Size} instance or {@link Optional#empty()} if unknown.
      */
     public Optional&lt;Float&gt; width() {
-<span class="fc bfc" id="L96" title="All 2 branches covered.">        return ( _width &lt; 0 ? Optional.empty() : Optional.of(_width) );</span>
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        return ( _width &lt; 0 ? Optional.empty() : Optional.of(_width) );</span>
     }
 
     /**
@@ -105,7 +104,7 @@ public final class Size
      * @return The height of this {@link Size} instance or {@link Optional#empty()} if unknown.
      */
     public Optional&lt;Float&gt; height() {
-<span class="fc bfc" id="L108" title="All 2 branches covered.">        return ( _height &lt; 0 ? Optional.empty() : Optional.of(_height) );</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        return ( _height &lt; 0 ? Optional.empty() : Optional.of(_height) );</span>
     }
 
     /**
@@ -115,7 +114,7 @@ public final class Size
      * @return True if the width is both specified and positive, false otherwise.
      */
     public boolean hasPositiveWidth() {
-<span class="fc bfc" id="L118" title="All 2 branches covered.">        return _width &gt; 0;</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">        return _width &gt; 0;</span>
     }
 
     /**
@@ -125,7 +124,7 @@ public final class Size
      * @return True if the height is both specified and positive, false otherwise.
      */
     public boolean hasPositiveHeight() {
-<span class="fc bfc" id="L128" title="All 2 branches covered.">        return _height &gt; 0;</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        return _height &gt; 0;</span>
     }
 
     /**
@@ -135,7 +134,7 @@ public final class Size
      * @return A new {@link Size} instance with the given width.
      */
     public Size withWidth( double width ) {
-<span class="fc" id="L138">        return new Size((float) width, _height);</span>
+<span class="fc" id="L137">        return new Size((float) width, _height);</span>
     }
 
     /**
@@ -145,7 +144,7 @@ public final class Size
      * @return A new {@link Size} instance with the given height.
      */
     public Size withHeight( double height ) {
-<span class="fc" id="L148">        return new Size(_width, (float) height);</span>
+<span class="fc" id="L147">        return new Size(_width, (float) height);</span>
     }
 
     /**
@@ -155,7 +154,7 @@ public final class Size
      * @return A new {@link Size} instance with the added size.
      */
     public Size plus( double size ) {
-<span class="nc" id="L158">        return plus(size, size);</span>
+<span class="nc" id="L157">        return plus(size, size);</span>
     }
 
     /**
@@ -166,7 +165,7 @@ public final class Size
      * @return A new {@link Size} instance with the added size.
      */
     public Size plus( double width, double height ) {
-<span class="pc bpc" id="L169" title="2 of 4 branches missed.">        return Size.of( _width &lt; 0 ? -1 : _width + width, _height &lt; 0 ? -1 : _height + height );</span>
+<span class="pc bpc" id="L168" title="2 of 4 branches missed.">        return Size.of( _width &lt; 0 ? -1 : _width + width, _height &lt; 0 ? -1 : _height + height );</span>
     }
 
     /**
@@ -177,9 +176,9 @@ public final class Size
      * @return A new {@link Size} instance with the added size.
      */
     public Size plus( Size size ) {
-<span class="fc bfc" id="L180" title="All 2 branches covered.">        double width  = size._width  &lt; 0 ? 0 : size._width;</span>
-<span class="fc bfc" id="L181" title="All 2 branches covered.">        double height = size._height &lt; 0 ? 0 : size._height;</span>
-<span class="fc" id="L182">        return Size.of(_width + width, _height + height);</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">        double width  = size._width  &lt; 0 ? 0 : size._width;</span>
+<span class="fc bfc" id="L180" title="All 2 branches covered.">        double height = size._height &lt; 0 ? 0 : size._height;</span>
+<span class="fc" id="L181">        return Size.of(_width + width, _height + height);</span>
     }
 
     /**
@@ -189,7 +188,7 @@ public final class Size
      * @return A new {@link Size} instance with the subtracted size.
      */
     public Size minus( double size ) {
-<span class="nc" id="L192">        return minus(size, size);</span>
+<span class="nc" id="L191">        return minus(size, size);</span>
     }
 
     /**
@@ -200,7 +199,7 @@ public final class Size
      * @return A new {@link Size} instance with the subtracted size.
      */
     public Size minus( double width, double height ) {
-<span class="nc bnc" id="L203" title="All 4 branches missed.">        return Size.of( _width &lt; 0 ? -1 : _width - width, _height &lt; 0 ? -1 : _height - height );</span>
+<span class="nc bnc" id="L202" title="All 4 branches missed.">        return Size.of( _width &lt; 0 ? -1 : _width - width, _height &lt; 0 ? -1 : _height - height );</span>
     }
 
     /**
@@ -211,13 +210,13 @@ public final class Size
      * @return A new {@link Size} instance with the subtracted size.
      */
     public Size minus( Size size ) {
-<span class="pc bpc" id="L214" title="1 of 2 branches missed.">        double width  = size._width  &lt; 0 ? 0 : size._width;</span>
-<span class="pc bpc" id="L215" title="1 of 2 branches missed.">        double height = size._height &lt; 0 ? 0 : size._height;</span>
-<span class="fc" id="L216">        return Size.of(_width - width, _height - height);</span>
+<span class="pc bpc" id="L213" title="1 of 2 branches missed.">        double width  = size._width  &lt; 0 ? 0 : size._width;</span>
+<span class="pc bpc" id="L214" title="1 of 2 branches missed.">        double height = size._height &lt; 0 ? 0 : size._height;</span>
+<span class="fc" id="L215">        return Size.of(_width - width, _height - height);</span>
     }
 
     public Dimension toDimension() {
-<span class="fc" id="L220">        return new Dimension((int) _width, (int) _height);</span>
+<span class="fc" id="L219">        return new Dimension((int) _width, (int) _height);</span>
     }
 
     /**
@@ -229,15 +228,15 @@ public final class Size
      * @return A new {@link Size} instance with the scaled width and height.
      */
     public Size scale( double scaleFactor ) {
-<span class="fc bfc" id="L232" title="All 2 branches covered.">        if ( this.equals(UNKNOWN) )</span>
-<span class="fc" id="L233">            return this;</span>
+<span class="fc bfc" id="L231" title="All 2 branches covered.">        if ( this.equals(UNKNOWN) )</span>
+<span class="fc" id="L232">            return this;</span>
 
-<span class="fc bfc" id="L235" title="All 2 branches covered.">        if ( scaleFactor &lt; 0 )</span>
-<span class="fc" id="L236">            return UNKNOWN;</span>
+<span class="fc bfc" id="L234" title="All 2 branches covered.">        if ( scaleFactor &lt; 0 )</span>
+<span class="fc" id="L235">            return UNKNOWN;</span>
 
-<span class="fc bfc" id="L238" title="All 2 branches covered.">        float width  = _width  &lt; 0 ? -1 : Math.round(_width  * scaleFactor);</span>
-<span class="fc bfc" id="L239" title="All 2 branches covered.">        float height = _height &lt; 0 ? -1 : Math.round(_height * scaleFactor);</span>
-<span class="fc" id="L240">        return of(width, height);</span>
+<span class="fc bfc" id="L237" title="All 2 branches covered.">        float width  = _width  &lt; 0 ? -1 : Math.round(_width  * scaleFactor);</span>
+<span class="fc bfc" id="L238" title="All 2 branches covered.">        float height = _height &lt; 0 ? -1 : Math.round(_height * scaleFactor);</span>
+<span class="fc" id="L239">        return of(width, height);</span>
     }
 
     /**
@@ -247,37 +246,38 @@ public final class Size
      * @return A {@link Size} objects whose width and height values does not have fractions.
      */
     public Size round() {
-<span class="fc bfc" id="L250" title="All 2 branches covered.">        if ( this.equals(UNKNOWN) )</span>
-<span class="fc" id="L251">            return this;</span>
+<span class="fc bfc" id="L249" title="All 2 branches covered.">        if ( this.equals(UNKNOWN) )</span>
+<span class="fc" id="L250">            return this;</span>
         else
-<span class="fc" id="L253">            return Size.of(Math.round(_width), Math.round(_height));</span>
+<span class="fc" id="L252">            return Size.of(Math.round(_width), Math.round(_height));</span>
     }
 
     @Override
     public String toString() {
-<span class="fc" id="L258">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
-<span class="fc" id="L259">                    &quot;width=&quot;  + _toString( _width  ) + &quot;, &quot;+</span>
-<span class="fc" id="L260">                    &quot;height=&quot; + _toString( _height ) +</span>
+<span class="fc" id="L257">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
+<span class="fc" id="L258">                    &quot;width=&quot;  + _toString( _width  ) + &quot;, &quot;+</span>
+<span class="fc" id="L259">                    &quot;height=&quot; + _toString( _height ) +</span>
                 &quot;]&quot;;
     }
 
     private static String _toString( float value ) {
-<span class="fc bfc" id="L265" title="All 2 branches covered.">        return value &lt; 0 ? &quot;?&quot; : String.valueOf(value).replace(&quot;.0&quot;, &quot;&quot;);</span>
+<span class="fc bfc" id="L264" title="All 2 branches covered.">        return value &lt; 0 ? &quot;?&quot; : String.valueOf(value).replace(&quot;.0&quot;, &quot;&quot;);</span>
     }
 
     @Override
     public boolean equals( Object o ) {
-<span class="fc bfc" id="L270" title="All 2 branches covered.">        if ( o == this ) return true;</span>
-<span class="pc bpc" id="L271" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
-<span class="pc bpc" id="L272" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
-<span class="fc" id="L273">        Size that = (Size)o;</span>
-<span class="fc bfc" id="L274" title="All 4 branches covered.">        return _width  == that._width &amp;&amp;</span>
+<span class="fc bfc" id="L269" title="All 2 branches covered.">        if ( o == this ) return true;</span>
+<span class="pc bpc" id="L270" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
+<span class="pc bpc" id="L271" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
+<span class="fc" id="L272">        Size that = (Size)o;</span>
+<span class="fc bfc" id="L273" title="All 4 branches covered.">        return _width  == that._width &amp;&amp;</span>
                _height == that._height;
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L280">        return Objects.hash(_width, _height);</span>
+        // Boxing-free equivalent of Objects.hash(_width, _height): identical value, no Float/array allocation.
+<span class="fc" id="L280">        return 31 * ( 31 + Float.hashCode(_width) ) + Float.hashCode(_height);</span>
     }
 
 }

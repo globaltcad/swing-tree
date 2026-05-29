@@ -247,7 +247,7 @@ final class StyleConfLayers
 <span class="fc bfc" id="L247" title="All 2 branches covered.">        if ( maxHeight == null )</span>
 <span class="fc" id="L248">            return OptionalDouble.empty();</span>
         else
-<span class="fc" id="L250">            return OptionalDouble.of(Math.round(maxHeight));</span>
+<span class="fc" id="L250">            return OptionalDouble.of((double) Math.round(maxHeight));</span>
     }
 
     @Override

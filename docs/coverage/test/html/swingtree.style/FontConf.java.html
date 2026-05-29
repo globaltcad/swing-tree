@@ -1122,13 +1122,13 @@ public final class FontConf
      */
     public java.awt.Font toAwtFont() {
 <span class="fc" id="L1124">        java.awt.Font defaultFont = UIManager.getDefaults().getFont(&quot;defaultFont&quot;);</span>
-<span class="pc bpc" id="L1125" title="1 of 2 branches missed.">        if ( defaultFont == null ) {</span>
-<span class="nc" id="L1126">            Object obj = UIManager.getLookAndFeelDefaults().get(&quot;defaultFont&quot;);</span>
-<span class="nc bnc" id="L1127" title="All 2 branches missed.">            if ( obj instanceof java.awt.Font )</span>
+<span class="fc bfc" id="L1125" title="All 2 branches covered.">        if ( defaultFont == null ) {</span>
+<span class="fc" id="L1126">            Object obj = UIManager.getLookAndFeelDefaults().get(&quot;defaultFont&quot;);</span>
+<span class="pc bpc" id="L1127" title="1 of 2 branches missed.">            if ( obj instanceof java.awt.Font )</span>
 <span class="nc" id="L1128">                defaultFont = (java.awt.Font) obj;</span>
         }
-<span class="pc bpc" id="L1130" title="1 of 2 branches missed.">        if ( defaultFont == null )</span>
-<span class="nc" id="L1131">            defaultFont = new JLabel().getFont();</span>
+<span class="fc bfc" id="L1130" title="All 2 branches covered.">        if ( defaultFont == null )</span>
+<span class="fc" id="L1131">            defaultFont = new JLabel().getFont();</span>
 <span class="fc" id="L1132">        return _createDerivedFrom(defaultFont, null)</span>
 <span class="fc" id="L1133">                .orElse(defaultFont);</span>
     }

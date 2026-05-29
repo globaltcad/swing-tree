@@ -4,7 +4,7 @@
   "narrative":"**This specification covers the behaviour of the style installation process!**\n    Which means that the contents of this may not be relevant to you.\n    Keep reading however if you are interested in some of the obscure details\n    of the SwingTree library internals.\n\n    SwingTree offers advanced styling options as part of **the style API**,\n    which is most commonly used through the `withStyle(Styler)` method\n    on any declarative builder node.\n\n    The installation of styles is a complex process that involves\n    the partial override of the component's UI delegate, the application of\n    the style's properties to the component and the installation of\n    a custom border, all depending on the style configuration.\n\n    This is a very finicky process that requires a lot of\n    testing to ensure that the styles are applied correctly.\n    Here you will find most of the tests that ensure that after the\n    installation of a style, the component has the expected plugin installed.",
   "subjects":["swingtree.UI","swingtree.api.Styler"],
   "statistics":{
-    "runs":"298",
+    "runs":"314",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -7733,6 +7733,444 @@
         {"kind":"then","text":"","code":["ComponentExtension.from(button).getStyle() == StyleConf.none()"]},
 
         {"kind":"where","text":"\n            We populate this test with various styles and \"hasEffect\" flags\n            If the flag is `false`, then this means the style produced by the lambda \n            was simplified to being no-style.\n        ","code":{"hasEffect":["false","true","true","true","true","false","true","true","true","false","true","true","true","true","false","true","true","true","true","true","true","false","true","false","false","true","true","false","true","false","true","true","true","true","true","false","true","true","true","true","true","true","true","true","true","true","true","true","true","false","true","false","false","true","false","true"],"styler":["{ it }","{ it.backgroundColor(Color.BLACK) }","{ it.foregroundColor(Color.BLUE) }","{ it.foundationColor(Color.GREEN) }","{ it.cursor(UI.Cursor.HAND) }","{ it.margin(0) }","{ it.margin(5) }","{ it.padding(5).margin(5) }","{ it.border(2, \"black\") }","{ it.border(0, \"black\") }","{ it.margin(5).border(3, \"red\").cursor(UI.Cursor.CROSS) }","{ it.shadowColor(\"green\") }","{ it.shadowColor(\"blue\").shadowBlurRadius(5) }","{ it.shadowColor(\"pink\").shadowBlurRadius(2).shadowSpreadRadius(7) }","{ it.shadowColor(\"rgba(0,0,0,0)\").shadowBlurRadius(2).shadowSpreadRadius(7) }","{ it.shadow(UI.Layer.CONTENT, \"myShadow\", conf->conf.color(\"black\").offset(1,2).blurRadius(5)) }","{ it.shadow(UI.Layer.CONTENT, \"myShadow\", conf->conf.color(\"red\").spreadRadius(7).isOutset(true)) }","{ it.shadow(UI.Layer.CONTENT, \"myShadow\", conf->conf.color(\"red\").spreadRadius(1).blurRadius(5)) }","{ it.shadow(UI.Layer.BORDER, \"myShadow\", conf->conf.color(\"black\").offset(1,2).blurRadius(5)) }","{ it.shadow(UI.Layer.BORDER, \"myShadow\", conf->conf.color(\"red\").spreadRadius(7).isOutset(true)) }","{ it.shadow(UI.Layer.BORDER, \"myShadow\", conf->conf.color(\"red\").spreadRadius(1).blurRadius(5)) }","{ it.shadow(UI.Layer.BORDER, \"myShadow\", conf->conf.color(\"\").spreadRadius(1).blurRadius(5)) }","{ it.shadow(UI.Layer.FOREGROUND, \"myShadow\", conf->conf.color(\"red\").spreadRadius(1).blurRadius(5)) }","{ it.shadow(UI.Layer.BACKGROUND, \"myShadow\", conf->conf.color(UI.Color.UNDEFINED).offset(1,2).blurRadius(5)) }","{ it.shadow(UI.Layer.BACKGROUND, \"myShadow\", conf->conf.color(UI.Color.UNDEFINED).spreadRadius(7).isOutset(true)) }","{ it.shadow(UI.Layer.BACKGROUND, \"myShadow\", conf->conf.color(\"black\").offset(1,2).blurRadius(5)) }","{ it.shadow(UI.Layer.BACKGROUND, \"myShadow\", conf->conf.color(\"red\").spreadRadius(7).isOutset(true)) }","{ it.shadow(UI.Layer.BACKGROUND, \"myShadow\", conf->conf.color(UI.Color.UNDEFINED).spreadRadius(7).blurRadius(5).isOutset(true)) }","{ it.gradient(UI.Layer.BACKGROUND, \"myGradient\", conf->conf.colors(Color.RED, Color.BLUE)) }","{ it.gradient(UI.Layer.BACKGROUND, \"myGradient\", conf->conf.colors([] as Color[])) }","{ it.gradient(UI.Layer.FOREGROUND, \"myGradient\", conf->conf.colors(Color.RED, Color.BLUE)) }","{ it.gradient(UI.Layer.CONTENT, \"myGradient\", conf->conf.colors(Color.RED, Color.BLUE)) }","{ it.gradient(UI.Layer.BORDER, \"myGradient\", conf->conf.colors(Color.RED, Color.BLUE)) }","{ it.noise(UI.Layer.BACKGROUND, \"myNoise\", conf->conf.scale(1,2).colors(Color.RED, Color.BLUE)) }","{ it.noise(UI.Layer.BACKGROUND, \"myNoise\", conf->conf.colors(Color.GREEN, Color.RED)) }","{ it.noise(UI.Layer.BACKGROUND, \"myNoise\", conf->conf.colors([] as Color[])) }","{ it.noise(UI.Layer.FOREGROUND, \"myNoise\", conf->conf.rotation(102).colors(Color.RED, Color.BLUE)) }","{ it.noise(UI.Layer.CONTENT, \"myNoise\", conf->conf.colors(Color.RED, Color.BLUE)) }","{ it.noise(UI.Layer.BORDER, \"myNoise\", conf->conf.colors(Color.RED, Color.BLUE)) }","{ it.painter(UI.Layer.BACKGROUND, \"myPainter\", g2d -> {}) }","{ it.painter(UI.Layer.FOREGROUND, \"myPainter\", g2d -> {}) }","{ it.painter(UI.Layer.CONTENT, \"myPainter\", g2d -> {}) }","{ it.painter(UI.Layer.BORDER, \"myPainter\", g2d -> {}) }","{ it.painter(UI.Layer.BACKGROUND, UI.ComponentArea.EXTERIOR, \"myPainter\", g2d -> {}) }","{ it.painter(UI.Layer.FOREGROUND, UI.ComponentArea.INTERIOR, \"myPainter\", g2d -> {}) }","{ it.painter(UI.Layer.CONTENT, UI.ComponentArea.BORDER, \"myPainter\", g2d -> {}) }","{ it.painter(UI.Layer.BORDER, UI.ComponentArea.BODY, \"myPainter\", g2d -> {}) }","{ it.parentFilter( conf -> conf.blur(1) ) }","{ it.parentFilter( conf -> conf.blur(0.75) ) }","{ it.parentFilter( conf -> conf.blur(0.0) ) }","{ it.parentFilter( conf -> conf.kernel(Size.of(2, 1), 1,0) ) }","{ it.shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"\").blurRadius(5)).gradient(UI.Layer.BACKGROUND, \"g\", c->c.colors(\"\", \"\")) }","{ it.gradient(UI.Layer.CONTENT, \"g1\", c->c.colors(\"\",\"\")).gradient(UI.Layer.CONTENT, \"g2\", c->c.colors(\"\",\"\")).gradient(UI.Layer.CONTENT, \"g3\", c->c.colors(\"\",\"\")) }","{ it.gradient(UI.Layer.CONTENT, \"g1\", c->c.colors(\"\",\"\")).gradient(UI.Layer.CONTENT, \"g2\", c->c.colors(\"blue\",\"green\")).gradient(UI.Layer.CONTENT, \"g3\", c->c.colors(\"white\",\"red\")) }","{ it.border(0, \"black\").shadow(UI.Layer.CONTENT, \"s1\", c->c.color(\"\").blurRadius(5)).shadow(UI.Layer.CONTENT, \"s2\", c->c.color(\"\")) }","{ it.border(0, \"black\").shadow(UI.Layer.CONTENT, \"s2\", c->c.color(\"\")).shadow(UI.Layer.CONTENT, \"s1\", c->c.color(\"blue\").blurRadius(5)).shadow(UI.Layer.CONTENT, \"s2\", c->c.color(\"\")) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The style engine installs and then uninstalls a minimum size, restoring the natural minimum.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The SwingTree style engine may override a component's minimum size\n            through the style API (e.g. `it.minHeight(120)`).\n\n            Crucially, when the style stops specifying a minimum size again, the engine\n            must **restore** the component to its natural minimum size. If it did not,\n            then a stale minimum would stick around and prevent the component from ever\n            shrinking again. This is exactly the kind of trouble that can arise with\n            transitional or animated styles (like a fold animation that temporarily\n            clamps the height of a panel), so the install/uninstall symmetry matters.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A simple panel whose style is only applied when a flag is set:","code":["var applyStyle = false","var panel =","        UI.panel(\"fill\")","        .add(UI.label(\"Some content\"))","        .withSize(200, 100)","        .withStyle( it -> applyStyle ? it.minHeight(120) : it )","        .get(JPanel)"]},
+
+        {"kind":"and","text":"We remember the natural minimum size, the one the component has before any styling:","code":["var naturalMinimum = panel.getMinimumSize()"]},
+
+        {"kind":"expect","text":"Initially the component does not have an explicit minimum size:","code":["!panel.isMinimumSizeSet()"]},
+
+        {"kind":"when","text":"We activate the style and let the component paint, which gathers and installs the style:","code":["applyStyle = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The style engine has installed an explicit, larger minimum size:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
+
+        {"kind":"when","text":"We deactivate the style again and let the component paint:","code":["applyStyle = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The component is restored to its natural minimum size, free to shrink again:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The minimum and maximum sizes are installed and then uninstalled together with the style. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The style API can override a component's `minimum` and `maximum` sizes.\n            This data driven test verifies, for each of these two kinds of size, that\n            the style engine:\n\n            - installs the size when the style specifies it, and\n            - uninstalls it again (restoring the natural size) when the style drops it.\n\n            The 'minimum' size is the one exercised in this iteration.\n\n            (The *preferred* size deliberately behaves differently and is covered by a\n            separate test, because it is only a hint and is also driven by the auto\n            preferred height feature.)\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel whose style is only applied when a flag is set:","code":["var applyStyle = false","var panel =","        UI.panel(\"fill\")","        .add(UI.label(\"Content\"))","        .withSize(200, 100)","        .withStyle( it -> applyStyle ? styler(it) : it )","        .get(JPanel)"]},
+
+        {"kind":"and","text":"We remember the natural size of this kind, before any styling:","code":["var natural = sizeOf(panel)"]},
+
+        {"kind":"expect","text":"No explicit size of this kind is set initially:","code":["!isSet(panel)"]},
+
+        {"kind":"when","text":"The style is activated and the component painted:","code":["applyStyle = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The size of this kind is now explicitly set by the style engine:","code":["isSet(panel)"]},
+
+        {"kind":"when","text":"The style is removed again and the component painted:","code":["applyStyle = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The component returns to its natural size of this kind:","code":["!isSet(panel)","sizeOf(panel) == natural"]},
+
+        {"kind":"where","text":"","code":{"kind":["'minimum'","'maximum'"],"styler":["{ it.minSize(150, 130) }","{ it.maxSize(150, 130) }"],"isSet":["{ it.isMinimumSizeSet() }","{ it.isMaximumSizeSet() }"],"sizeOf":["{ it.getMinimumSize() }","{ it.getMaximumSize() }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The minimum and maximum sizes are installed and then uninstalled together with the style. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The style API can override a component's `minimum` and `maximum` sizes.\n            This data driven test verifies, for each of these two kinds of size, that\n            the style engine:\n\n            - installs the size when the style specifies it, and\n            - uninstalls it again (restoring the natural size) when the style drops it.\n\n            The 'maximum' size is the one exercised in this iteration.\n\n            (The *preferred* size deliberately behaves differently and is covered by a\n            separate test, because it is only a hint and is also driven by the auto\n            preferred height feature.)\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel whose style is only applied when a flag is set:","code":["var applyStyle = false","var panel =","        UI.panel(\"fill\")","        .add(UI.label(\"Content\"))","        .withSize(200, 100)","        .withStyle( it -> applyStyle ? styler(it) : it )","        .get(JPanel)"]},
+
+        {"kind":"and","text":"We remember the natural size of this kind, before any styling:","code":["var natural = sizeOf(panel)"]},
+
+        {"kind":"expect","text":"No explicit size of this kind is set initially:","code":["!isSet(panel)"]},
+
+        {"kind":"when","text":"The style is activated and the component painted:","code":["applyStyle = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The size of this kind is now explicitly set by the style engine:","code":["isSet(panel)"]},
+
+        {"kind":"when","text":"The style is removed again and the component painted:","code":["applyStyle = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The component returns to its natural size of this kind:","code":["!isSet(panel)","sizeOf(panel) == natural"]},
+
+        {"kind":"where","text":"","code":{"kind":["'minimum'","'maximum'"],"styler":["{ it.minSize(150, 130) }","{ it.maxSize(150, 130) }"],"isSet":["{ it.isMinimumSizeSet() }","{ it.isMaximumSizeSet() }"],"sizeOf":["{ it.getMinimumSize() }","{ it.getMaximumSize() }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A preferred size set through the style API is intentionally NOT reset when the style drops it.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The preferred size is treated differently from the minimum and maximum sizes.\n\n            Unlike a minimum size (which can *pin* a component and stop it from shrinking),\n            the preferred size is only a hint to the layout manager. More importantly, the\n            preferred height is also driven by the auto preferred height feature\n            (see `TextConf#autoPreferredHeight`): SwingTree feeds the computed text height\n            into the very same preferred-size channel of the style.\n\n            The established behaviour, which applications rely on, is that switching such a\n            preferred size off again leaves the last value in place rather than snapping the\n            component back to its natural preferred size. This test pins that behaviour down,\n            so that the minimum/maximum size restoration logic never accidentally starts\n            resetting the preferred size as well.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel whose style only sometimes specifies a preferred size:","code":["var applyStyle = false","var panel =","        UI.panel(\"fill\")","        .add(UI.label(\"Content\"))","        .withSize(200, 100)","        .withStyle( it -> applyStyle ? it.prefSize(150, 130) : it )","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"Initially there is no explicit preferred size:","code":["!panel.isPreferredSizeSet()"]},
+
+        {"kind":"when","text":"We activate the style and paint:","code":["applyStyle = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The preferred size is now explicitly set by the style engine:","code":["panel.isPreferredSizeSet()"]},
+
+        {"kind":"and","text":"We remember the preferred size that was installed:","code":["var installed = panel.getPreferredSize()"]},
+
+        {"kind":"when","text":"We remove the style again and paint:","code":["applyStyle = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The preferred size sticks at the last value, it is deliberately not reset:","code":["panel.isPreferredSizeSet()","panel.getPreferredSize() == installed"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A minimum size set on the component directly is preserved across style installation and uninstallation.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A user may set a minimum size on a component directly, outside of the style API.\n            When the style engine temporarily overrides that minimum size and later removes\n            its override again, it must restore the user's **original** minimum size, and not\n            simply wipe it. In other words: the style engine only owns what it set itself.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel with a minimum size that was set on the component directly:","code":["var applyStyle = false","var panel =","        UI.panel(\"fill\")","        .add(UI.label(\"Content\"))","        .withSize(200, 100)","        .withStyle( it -> applyStyle ? it.minHeight(300) : it )","        .peek( c -> c.setMinimumSize(new Dimension(42, 84)) )","        .get(JPanel)"]},
+
+        {"kind":"expect","text":"The directly defined minimum size is in place:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize() == new Dimension(42, 84)"]},
+
+        {"kind":"when","text":"The style overrides the minimum height and the component paints:","code":["applyStyle = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The styled minimum height takes effect:","code":["panel.getMinimumSize().height > 84"]},
+
+        {"kind":"when","text":"The style is removed again and the component paints:","code":["applyStyle = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The component's own minimum size is faithfully restored:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize() == new Dimension(42, 84)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A temporarily clamped minimum height does not permanently pin a component. (fold animation regression)",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is a regression test for a subtle but nasty bug.\n\n            Transitional and animated styles, like the fold animation used by collapsible\n            panels, temporarily clamp a component's height by setting `minHeight` and\n            `maxHeight` on every animation frame. When such an animation completes and the\n            style returns to its natural, unclamped form, the style engine **must** release\n            the clamped minimum and maximum sizes again.\n\n            Previously it did not: the stale minimum size stuck to the component, so a panel\n            that had been folded open could no longer shrink to fit its content (for example\n            after hiding some of its rows). A layout manager never sizes a component below its\n            minimum, so the panel stayed stubbornly tall. Notably, no amount of `revalidate()`\n            could fix that, because `revalidate()` does not touch the minimum size.\n\n            Here we simulate the tail end of such an animation: a clamping style is applied\n            and then removed. We verify that the component is no longer pinned afterwards.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A content panel which a \"fold\" style clamps to a fixed height while active:","code":["var folding = true","var panel =","        UI.panel(\"fill\")","        .add(UI.label(\"Row A\"))","        .add(UI.label(\"Row B\"))","        .withSize(200, 100)","        .withStyle( it -> folding ? it.minHeight(50).maxHeight(50) : it )","        .get(JPanel)"]},
+
+        {"kind":"when","text":"The clamping (fold) style is active and the panel paints:","code":["panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The panel is clamped: both a minimum and a maximum height are pinned:","code":["panel.isMinimumSizeSet()","panel.isMaximumSizeSet()"]},
+
+        {"kind":"when","text":"The animation completes, so the clamping style is gone, and the panel paints again:","code":["folding = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The clamp is fully released, so the panel is free to size to its content again:","code":["!panel.isMinimumSizeSet()","!panel.isMaximumSizeSet()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A minimum size is uninstalled even when other, non-size, style properties remain active. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the important \"messy\" case.\n\n            A component very often keeps *some* styling while only its size clamp comes\n            and goes. The fold container in a real application, for example, keeps a\n            (transparent) background while the fold animation clamps and unclamps its height.\n            This means the component never becomes fully \"un-styled\" in between, so the\n            release of the size must happen on the still-styled code path, not only on the\n            \"no style at all\" path.\n\n            Crucially, this must hold no matter *what* the remaining styling is. Different\n            kinds of style take different installation routes through the engine: a shadow or\n            background gradient may install a custom UI, a border installs a custom border,\n            and so on. So we exercise this with a variety of leftover styles. Here the\n            remaining style is a **background colour**.\n\n            If this ever regresses, a panel that still has e.g. a shadow or a border would\n            stay stuck at its clamped minimum size and refuse to shrink to fit its content.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel that is always styled (with some non-size style) but only sometimes clamped:","code":["var clamp = false","var panel =","        UI.panel(\"fill\")","        .add(UI.label(\"Content\"))","        .withSize(200, 100)","        .withStyle( it -> clamp ? otherStyle(it).minHeight(140) : otherStyle(it) )","        .get(JPanel)"]},
+
+        {"kind":"and","text":"We remember the natural minimum size:","code":["var naturalMinimum = panel.getMinimumSize()"]},
+
+        {"kind":"and","text":"The leftover style on its own is a real (non-empty) style:","code":["!clamp","ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
+
+        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The minimum height is pinned:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
+
+        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The minimum size is restored to natural, even though the component is still styled:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]},
+
+        {"kind":"and","text":"The component is indeed still styled (it was never fully reset to \"no style\"):","code":["ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
+
+        {"kind":"where","text":"The leftover, non-size styling takes various installation routes through the engine:","code":{"remaining":["'background colour'","'foundation colour'","'background shadow'","'foreground shadow'","'a line border'","'a rounded border'","'a background gradient'","'a border gradient'","'a margin'","'shadow and border'"],"otherStyle":["{ it.backgroundColor(Color.LIGHT_GRAY) }","{ it.foundationColor(Color.GREEN) }","{ it.shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(5).spreadRadius(3)) }","{ it.shadow(UI.Layer.FOREGROUND, \"s\", c->c.color(\"blue\").offset(2,2).blurRadius(4)) }","{ it.border(2, Color.BLACK) }","{ it.borderRadius(12).border(1, Color.DARK_GRAY) }","{ it.gradient(UI.Layer.BACKGROUND, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.gradient(UI.Layer.BORDER, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.margin(7) }","{ it.border(2, Color.BLACK).shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(6)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A minimum size is uninstalled even when other, non-size, style properties remain active. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the important \"messy\" case.\n\n            A component very often keeps *some* styling while only its size clamp comes\n            and goes. The fold container in a real application, for example, keeps a\n            (transparent) background while the fold animation clamps and unclamps its height.\n            This means the component never becomes fully \"un-styled\" in between, so the\n            release of the size must happen on the still-styled code path, not only on the\n            \"no style at all\" path.\n\n            Crucially, this must hold no matter *what* the remaining styling is. Different\n            kinds of style take different installation routes through the engine: a shadow or\n            background gradient may install a custom UI, a border installs a custom border,\n            and so on. So we exercise this with a variety of leftover styles. Here the\n            remaining style is a **foundation colour**.\n\n            If this ever regresses, a panel that still has e.g. a shadow or a border would\n            stay stuck at its clamped minimum size and refuse to shrink to fit its content.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel that is always styled (with some non-size style) but only sometimes clamped:","code":["var clamp = false","var panel =","        UI.panel(\"fill\")","        .add(UI.label(\"Content\"))","        .withSize(200, 100)","        .withStyle( it -> clamp ? otherStyle(it).minHeight(140) : otherStyle(it) )","        .get(JPanel)"]},
+
+        {"kind":"and","text":"We remember the natural minimum size:","code":["var naturalMinimum = panel.getMinimumSize()"]},
+
+        {"kind":"and","text":"The leftover style on its own is a real (non-empty) style:","code":["!clamp","ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
+
+        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The minimum height is pinned:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
+
+        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The minimum size is restored to natural, even though the component is still styled:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]},
+
+        {"kind":"and","text":"The component is indeed still styled (it was never fully reset to \"no style\"):","code":["ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
+
+        {"kind":"where","text":"The leftover, non-size styling takes various installation routes through the engine:","code":{"remaining":["'background colour'","'foundation colour'","'background shadow'","'foreground shadow'","'a line border'","'a rounded border'","'a background gradient'","'a border gradient'","'a margin'","'shadow and border'"],"otherStyle":["{ it.backgroundColor(Color.LIGHT_GRAY) }","{ it.foundationColor(Color.GREEN) }","{ it.shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(5).spreadRadius(3)) }","{ it.shadow(UI.Layer.FOREGROUND, \"s\", c->c.color(\"blue\").offset(2,2).blurRadius(4)) }","{ it.border(2, Color.BLACK) }","{ it.borderRadius(12).border(1, Color.DARK_GRAY) }","{ it.gradient(UI.Layer.BACKGROUND, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.gradient(UI.Layer.BORDER, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.margin(7) }","{ it.border(2, Color.BLACK).shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(6)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A minimum size is uninstalled even when other, non-size, style properties remain active. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the important \"messy\" case.\n\n            A component very often keeps *some* styling while only its size clamp comes\n            and goes. The fold container in a real application, for example, keeps a\n            (transparent) background while the fold animation clamps and unclamps its height.\n            This means the component never becomes fully \"un-styled\" in between, so the\n            release of the size must happen on the still-styled code path, not only on the\n            \"no style at all\" path.\n\n            Crucially, this must hold no matter *what* the remaining styling is. Different\n            kinds of style take different installation routes through the engine: a shadow or\n            background gradient may install a custom UI, a border installs a custom border,\n            and so on. So we exercise this with a variety of leftover styles. Here the\n            remaining style is a **background shadow**.\n\n            If this ever regresses, a panel that still has e.g. a shadow or a border would\n            stay stuck at its clamped minimum size and refuse to shrink to fit its content.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel that is always styled (with some non-size style) but only sometimes clamped:","code":["var clamp = false","var panel =","        UI.panel(\"fill\")","        .add(UI.label(\"Content\"))","        .withSize(200, 100)","        .withStyle( it -> clamp ? otherStyle(it).minHeight(140) : otherStyle(it) )","        .get(JPanel)"]},
+
+        {"kind":"and","text":"We remember the natural minimum size:","code":["var naturalMinimum = panel.getMinimumSize()"]},
+
+        {"kind":"and","text":"The leftover style on its own is a real (non-empty) style:","code":["!clamp","ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
+
+        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The minimum height is pinned:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
+
+        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The minimum size is restored to natural, even though the component is still styled:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]},
+
+        {"kind":"and","text":"The component is indeed still styled (it was never fully reset to \"no style\"):","code":["ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
+
+        {"kind":"where","text":"The leftover, non-size styling takes various installation routes through the engine:","code":{"remaining":["'background colour'","'foundation colour'","'background shadow'","'foreground shadow'","'a line border'","'a rounded border'","'a background gradient'","'a border gradient'","'a margin'","'shadow and border'"],"otherStyle":["{ it.backgroundColor(Color.LIGHT_GRAY) }","{ it.foundationColor(Color.GREEN) }","{ it.shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(5).spreadRadius(3)) }","{ it.shadow(UI.Layer.FOREGROUND, \"s\", c->c.color(\"blue\").offset(2,2).blurRadius(4)) }","{ it.border(2, Color.BLACK) }","{ it.borderRadius(12).border(1, Color.DARK_GRAY) }","{ it.gradient(UI.Layer.BACKGROUND, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.gradient(UI.Layer.BORDER, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.margin(7) }","{ it.border(2, Color.BLACK).shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(6)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A minimum size is uninstalled even when other, non-size, style properties remain active. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the important \"messy\" case.\n\n            A component very often keeps *some* styling while only its size clamp comes\n            and goes. The fold container in a real application, for example, keeps a\n            (transparent) background while the fold animation clamps and unclamps its height.\n            This means the component never becomes fully \"un-styled\" in between, so the\n            release of the size must happen on the still-styled code path, not only on the\n            \"no style at all\" path.\n\n            Crucially, this must hold no matter *what* the remaining styling is. Different\n            kinds of style take different installation routes through the engine: a shadow or\n            background gradient may install a custom UI, a border installs a custom border,\n            and so on. So we exercise this with a variety of leftover styles. Here the\n            remaining style is a **foreground shadow**.\n\n            If this ever regresses, a panel that still has e.g. a shadow or a border would\n            stay stuck at its clamped minimum size and refuse to shrink to fit its content.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel that is always styled (with some non-size style) but only sometimes clamped:","code":["var clamp = false","var panel =","        UI.panel(\"fill\")","        .add(UI.label(\"Content\"))","        .withSize(200, 100)","        .withStyle( it -> clamp ? otherStyle(it).minHeight(140) : otherStyle(it) )","        .get(JPanel)"]},
+
+        {"kind":"and","text":"We remember the natural minimum size:","code":["var naturalMinimum = panel.getMinimumSize()"]},
+
+        {"kind":"and","text":"The leftover style on its own is a real (non-empty) style:","code":["!clamp","ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
+
+        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The minimum height is pinned:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
+
+        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The minimum size is restored to natural, even though the component is still styled:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]},
+
+        {"kind":"and","text":"The component is indeed still styled (it was never fully reset to \"no style\"):","code":["ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
+
+        {"kind":"where","text":"The leftover, non-size styling takes various installation routes through the engine:","code":{"remaining":["'background colour'","'foundation colour'","'background shadow'","'foreground shadow'","'a line border'","'a rounded border'","'a background gradient'","'a border gradient'","'a margin'","'shadow and border'"],"otherStyle":["{ it.backgroundColor(Color.LIGHT_GRAY) }","{ it.foundationColor(Color.GREEN) }","{ it.shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(5).spreadRadius(3)) }","{ it.shadow(UI.Layer.FOREGROUND, \"s\", c->c.color(\"blue\").offset(2,2).blurRadius(4)) }","{ it.border(2, Color.BLACK) }","{ it.borderRadius(12).border(1, Color.DARK_GRAY) }","{ it.gradient(UI.Layer.BACKGROUND, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.gradient(UI.Layer.BORDER, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.margin(7) }","{ it.border(2, Color.BLACK).shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(6)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A minimum size is uninstalled even when other, non-size, style properties remain active. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the important \"messy\" case.\n\n            A component very often keeps *some* styling while only its size clamp comes\n            and goes. The fold container in a real application, for example, keeps a\n            (transparent) background while the fold animation clamps and unclamps its height.\n            This means the component never becomes fully \"un-styled\" in between, so the\n            release of the size must happen on the still-styled code path, not only on the\n            \"no style at all\" path.\n\n            Crucially, this must hold no matter *what* the remaining styling is. Different\n            kinds of style take different installation routes through the engine: a shadow or\n            background gradient may install a custom UI, a border installs a custom border,\n            and so on. So we exercise this with a variety of leftover styles. Here the\n            remaining style is a **a line border**.\n\n            If this ever regresses, a panel that still has e.g. a shadow or a border would\n            stay stuck at its clamped minimum size and refuse to shrink to fit its content.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel that is always styled (with some non-size style) but only sometimes clamped:","code":["var clamp = false","var panel =","        UI.panel(\"fill\")","        .add(UI.label(\"Content\"))","        .withSize(200, 100)","        .withStyle( it -> clamp ? otherStyle(it).minHeight(140) : otherStyle(it) )","        .get(JPanel)"]},
+
+        {"kind":"and","text":"We remember the natural minimum size:","code":["var naturalMinimum = panel.getMinimumSize()"]},
+
+        {"kind":"and","text":"The leftover style on its own is a real (non-empty) style:","code":["!clamp","ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
+
+        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The minimum height is pinned:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
+
+        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The minimum size is restored to natural, even though the component is still styled:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]},
+
+        {"kind":"and","text":"The component is indeed still styled (it was never fully reset to \"no style\"):","code":["ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
+
+        {"kind":"where","text":"The leftover, non-size styling takes various installation routes through the engine:","code":{"remaining":["'background colour'","'foundation colour'","'background shadow'","'foreground shadow'","'a line border'","'a rounded border'","'a background gradient'","'a border gradient'","'a margin'","'shadow and border'"],"otherStyle":["{ it.backgroundColor(Color.LIGHT_GRAY) }","{ it.foundationColor(Color.GREEN) }","{ it.shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(5).spreadRadius(3)) }","{ it.shadow(UI.Layer.FOREGROUND, \"s\", c->c.color(\"blue\").offset(2,2).blurRadius(4)) }","{ it.border(2, Color.BLACK) }","{ it.borderRadius(12).border(1, Color.DARK_GRAY) }","{ it.gradient(UI.Layer.BACKGROUND, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.gradient(UI.Layer.BORDER, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.margin(7) }","{ it.border(2, Color.BLACK).shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(6)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A minimum size is uninstalled even when other, non-size, style properties remain active. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the important \"messy\" case.\n\n            A component very often keeps *some* styling while only its size clamp comes\n            and goes. The fold container in a real application, for example, keeps a\n            (transparent) background while the fold animation clamps and unclamps its height.\n            This means the component never becomes fully \"un-styled\" in between, so the\n            release of the size must happen on the still-styled code path, not only on the\n            \"no style at all\" path.\n\n            Crucially, this must hold no matter *what* the remaining styling is. Different\n            kinds of style take different installation routes through the engine: a shadow or\n            background gradient may install a custom UI, a border installs a custom border,\n            and so on. So we exercise this with a variety of leftover styles. Here the\n            remaining style is a **a rounded border**.\n\n            If this ever regresses, a panel that still has e.g. a shadow or a border would\n            stay stuck at its clamped minimum size and refuse to shrink to fit its content.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel that is always styled (with some non-size style) but only sometimes clamped:","code":["var clamp = false","var panel =","        UI.panel(\"fill\")","        .add(UI.label(\"Content\"))","        .withSize(200, 100)","        .withStyle( it -> clamp ? otherStyle(it).minHeight(140) : otherStyle(it) )","        .get(JPanel)"]},
+
+        {"kind":"and","text":"We remember the natural minimum size:","code":["var naturalMinimum = panel.getMinimumSize()"]},
+
+        {"kind":"and","text":"The leftover style on its own is a real (non-empty) style:","code":["!clamp","ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
+
+        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The minimum height is pinned:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
+
+        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The minimum size is restored to natural, even though the component is still styled:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]},
+
+        {"kind":"and","text":"The component is indeed still styled (it was never fully reset to \"no style\"):","code":["ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
+
+        {"kind":"where","text":"The leftover, non-size styling takes various installation routes through the engine:","code":{"remaining":["'background colour'","'foundation colour'","'background shadow'","'foreground shadow'","'a line border'","'a rounded border'","'a background gradient'","'a border gradient'","'a margin'","'shadow and border'"],"otherStyle":["{ it.backgroundColor(Color.LIGHT_GRAY) }","{ it.foundationColor(Color.GREEN) }","{ it.shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(5).spreadRadius(3)) }","{ it.shadow(UI.Layer.FOREGROUND, \"s\", c->c.color(\"blue\").offset(2,2).blurRadius(4)) }","{ it.border(2, Color.BLACK) }","{ it.borderRadius(12).border(1, Color.DARK_GRAY) }","{ it.gradient(UI.Layer.BACKGROUND, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.gradient(UI.Layer.BORDER, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.margin(7) }","{ it.border(2, Color.BLACK).shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(6)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A minimum size is uninstalled even when other, non-size, style properties remain active. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the important \"messy\" case.\n\n            A component very often keeps *some* styling while only its size clamp comes\n            and goes. The fold container in a real application, for example, keeps a\n            (transparent) background while the fold animation clamps and unclamps its height.\n            This means the component never becomes fully \"un-styled\" in between, so the\n            release of the size must happen on the still-styled code path, not only on the\n            \"no style at all\" path.\n\n            Crucially, this must hold no matter *what* the remaining styling is. Different\n            kinds of style take different installation routes through the engine: a shadow or\n            background gradient may install a custom UI, a border installs a custom border,\n            and so on. So we exercise this with a variety of leftover styles. Here the\n            remaining style is a **a background gradient**.\n\n            If this ever regresses, a panel that still has e.g. a shadow or a border would\n            stay stuck at its clamped minimum size and refuse to shrink to fit its content.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel that is always styled (with some non-size style) but only sometimes clamped:","code":["var clamp = false","var panel =","        UI.panel(\"fill\")","        .add(UI.label(\"Content\"))","        .withSize(200, 100)","        .withStyle( it -> clamp ? otherStyle(it).minHeight(140) : otherStyle(it) )","        .get(JPanel)"]},
+
+        {"kind":"and","text":"We remember the natural minimum size:","code":["var naturalMinimum = panel.getMinimumSize()"]},
+
+        {"kind":"and","text":"The leftover style on its own is a real (non-empty) style:","code":["!clamp","ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
+
+        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The minimum height is pinned:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
+
+        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The minimum size is restored to natural, even though the component is still styled:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]},
+
+        {"kind":"and","text":"The component is indeed still styled (it was never fully reset to \"no style\"):","code":["ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
+
+        {"kind":"where","text":"The leftover, non-size styling takes various installation routes through the engine:","code":{"remaining":["'background colour'","'foundation colour'","'background shadow'","'foreground shadow'","'a line border'","'a rounded border'","'a background gradient'","'a border gradient'","'a margin'","'shadow and border'"],"otherStyle":["{ it.backgroundColor(Color.LIGHT_GRAY) }","{ it.foundationColor(Color.GREEN) }","{ it.shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(5).spreadRadius(3)) }","{ it.shadow(UI.Layer.FOREGROUND, \"s\", c->c.color(\"blue\").offset(2,2).blurRadius(4)) }","{ it.border(2, Color.BLACK) }","{ it.borderRadius(12).border(1, Color.DARK_GRAY) }","{ it.gradient(UI.Layer.BACKGROUND, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.gradient(UI.Layer.BORDER, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.margin(7) }","{ it.border(2, Color.BLACK).shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(6)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A minimum size is uninstalled even when other, non-size, style properties remain active. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the important \"messy\" case.\n\n            A component very often keeps *some* styling while only its size clamp comes\n            and goes. The fold container in a real application, for example, keeps a\n            (transparent) background while the fold animation clamps and unclamps its height.\n            This means the component never becomes fully \"un-styled\" in between, so the\n            release of the size must happen on the still-styled code path, not only on the\n            \"no style at all\" path.\n\n            Crucially, this must hold no matter *what* the remaining styling is. Different\n            kinds of style take different installation routes through the engine: a shadow or\n            background gradient may install a custom UI, a border installs a custom border,\n            and so on. So we exercise this with a variety of leftover styles. Here the\n            remaining style is a **a border gradient**.\n\n            If this ever regresses, a panel that still has e.g. a shadow or a border would\n            stay stuck at its clamped minimum size and refuse to shrink to fit its content.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel that is always styled (with some non-size style) but only sometimes clamped:","code":["var clamp = false","var panel =","        UI.panel(\"fill\")","        .add(UI.label(\"Content\"))","        .withSize(200, 100)","        .withStyle( it -> clamp ? otherStyle(it).minHeight(140) : otherStyle(it) )","        .get(JPanel)"]},
+
+        {"kind":"and","text":"We remember the natural minimum size:","code":["var naturalMinimum = panel.getMinimumSize()"]},
+
+        {"kind":"and","text":"The leftover style on its own is a real (non-empty) style:","code":["!clamp","ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
+
+        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The minimum height is pinned:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
+
+        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The minimum size is restored to natural, even though the component is still styled:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]},
+
+        {"kind":"and","text":"The component is indeed still styled (it was never fully reset to \"no style\"):","code":["ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
+
+        {"kind":"where","text":"The leftover, non-size styling takes various installation routes through the engine:","code":{"remaining":["'background colour'","'foundation colour'","'background shadow'","'foreground shadow'","'a line border'","'a rounded border'","'a background gradient'","'a border gradient'","'a margin'","'shadow and border'"],"otherStyle":["{ it.backgroundColor(Color.LIGHT_GRAY) }","{ it.foundationColor(Color.GREEN) }","{ it.shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(5).spreadRadius(3)) }","{ it.shadow(UI.Layer.FOREGROUND, \"s\", c->c.color(\"blue\").offset(2,2).blurRadius(4)) }","{ it.border(2, Color.BLACK) }","{ it.borderRadius(12).border(1, Color.DARK_GRAY) }","{ it.gradient(UI.Layer.BACKGROUND, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.gradient(UI.Layer.BORDER, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.margin(7) }","{ it.border(2, Color.BLACK).shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(6)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A minimum size is uninstalled even when other, non-size, style properties remain active. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the important \"messy\" case.\n\n            A component very often keeps *some* styling while only its size clamp comes\n            and goes. The fold container in a real application, for example, keeps a\n            (transparent) background while the fold animation clamps and unclamps its height.\n            This means the component never becomes fully \"un-styled\" in between, so the\n            release of the size must happen on the still-styled code path, not only on the\n            \"no style at all\" path.\n\n            Crucially, this must hold no matter *what* the remaining styling is. Different\n            kinds of style take different installation routes through the engine: a shadow or\n            background gradient may install a custom UI, a border installs a custom border,\n            and so on. So we exercise this with a variety of leftover styles. Here the\n            remaining style is a **a margin**.\n\n            If this ever regresses, a panel that still has e.g. a shadow or a border would\n            stay stuck at its clamped minimum size and refuse to shrink to fit its content.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel that is always styled (with some non-size style) but only sometimes clamped:","code":["var clamp = false","var panel =","        UI.panel(\"fill\")","        .add(UI.label(\"Content\"))","        .withSize(200, 100)","        .withStyle( it -> clamp ? otherStyle(it).minHeight(140) : otherStyle(it) )","        .get(JPanel)"]},
+
+        {"kind":"and","text":"We remember the natural minimum size:","code":["var naturalMinimum = panel.getMinimumSize()"]},
+
+        {"kind":"and","text":"The leftover style on its own is a real (non-empty) style:","code":["!clamp","ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
+
+        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The minimum height is pinned:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
+
+        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The minimum size is restored to natural, even though the component is still styled:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]},
+
+        {"kind":"and","text":"The component is indeed still styled (it was never fully reset to \"no style\"):","code":["ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
+
+        {"kind":"where","text":"The leftover, non-size styling takes various installation routes through the engine:","code":{"remaining":["'background colour'","'foundation colour'","'background shadow'","'foreground shadow'","'a line border'","'a rounded border'","'a background gradient'","'a border gradient'","'a margin'","'shadow and border'"],"otherStyle":["{ it.backgroundColor(Color.LIGHT_GRAY) }","{ it.foundationColor(Color.GREEN) }","{ it.shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(5).spreadRadius(3)) }","{ it.shadow(UI.Layer.FOREGROUND, \"s\", c->c.color(\"blue\").offset(2,2).blurRadius(4)) }","{ it.border(2, Color.BLACK) }","{ it.borderRadius(12).border(1, Color.DARK_GRAY) }","{ it.gradient(UI.Layer.BACKGROUND, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.gradient(UI.Layer.BORDER, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.margin(7) }","{ it.border(2, Color.BLACK).shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(6)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A minimum size is uninstalled even when other, non-size, style properties remain active. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the important \"messy\" case.\n\n            A component very often keeps *some* styling while only its size clamp comes\n            and goes. The fold container in a real application, for example, keeps a\n            (transparent) background while the fold animation clamps and unclamps its height.\n            This means the component never becomes fully \"un-styled\" in between, so the\n            release of the size must happen on the still-styled code path, not only on the\n            \"no style at all\" path.\n\n            Crucially, this must hold no matter *what* the remaining styling is. Different\n            kinds of style take different installation routes through the engine: a shadow or\n            background gradient may install a custom UI, a border installs a custom border,\n            and so on. So we exercise this with a variety of leftover styles. Here the\n            remaining style is a **shadow and border**.\n\n            If this ever regresses, a panel that still has e.g. a shadow or a border would\n            stay stuck at its clamped minimum size and refuse to shrink to fit its content.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel that is always styled (with some non-size style) but only sometimes clamped:","code":["var clamp = false","var panel =","        UI.panel(\"fill\")","        .add(UI.label(\"Content\"))","        .withSize(200, 100)","        .withStyle( it -> clamp ? otherStyle(it).minHeight(140) : otherStyle(it) )","        .get(JPanel)"]},
+
+        {"kind":"and","text":"We remember the natural minimum size:","code":["var naturalMinimum = panel.getMinimumSize()"]},
+
+        {"kind":"and","text":"The leftover style on its own is a real (non-empty) style:","code":["!clamp","ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
+
+        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The minimum height is pinned:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
+
+        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+
+        {"kind":"then","text":"The minimum size is restored to natural, even though the component is still styled:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]},
+
+        {"kind":"and","text":"The component is indeed still styled (it was never fully reset to \"no style\"):","code":["ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
+
+        {"kind":"where","text":"The leftover, non-size styling takes various installation routes through the engine:","code":{"remaining":["'background colour'","'foundation colour'","'background shadow'","'foreground shadow'","'a line border'","'a rounded border'","'a background gradient'","'a border gradient'","'a margin'","'shadow and border'"],"otherStyle":["{ it.backgroundColor(Color.LIGHT_GRAY) }","{ it.foundationColor(Color.GREEN) }","{ it.shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(5).spreadRadius(3)) }","{ it.shadow(UI.Layer.FOREGROUND, \"s\", c->c.color(\"blue\").offset(2,2).blurRadius(4)) }","{ it.border(2, Color.BLACK) }","{ it.borderRadius(12).border(1, Color.DARK_GRAY) }","{ it.gradient(UI.Layer.BACKGROUND, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.gradient(UI.Layer.BORDER, \"g\", c->c.colors(Color.RED, Color.BLUE)) }","{ it.margin(7) }","{ it.border(2, Color.BLACK).shadow(UI.Layer.BACKGROUND, \"s\", c->c.color(\"black\").blurRadius(6)) }"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

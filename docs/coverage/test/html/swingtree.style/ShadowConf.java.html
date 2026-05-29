@@ -73,7 +73,7 @@ import java.util.Optional;
  *  effectively making it a representation of the absence of a shadow.
  */
 @Immutable
-@SuppressWarnings(&quot;ReferenceEquality&quot;)
+@SuppressWarnings({&quot;ReferenceEquality&quot;, &quot;Immutable&quot;})
 public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
 {
 <span class="fc" id="L79">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ShadowConf.class);</span>
@@ -81,64 +81,89 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
 
 <span class="fc" id="L82">    private static final ShadowConf _NONE = new ShadowConf(</span>
 <span class="fc" id="L83">                                                    Offset.none(),0, 0,</span>
-                                                    null, true
+                                                    null, true, UI.ShadowType.BLUR
                                                 );
 
 <span class="fc" id="L87">    public static ShadowConf none() { return _NONE; }</span>
-    
+
     static ShadowConf of(
-        Offset          offset,
-        float           shadowBlurRadius,
-        float           shadowSpreadRadius,
-        @Nullable Color shadowColor,
-        boolean         isOutset
+        Offset              offset,
+        float               shadowBlurRadius,
+        float               shadowSpreadRadius,
+        @Nullable Color     shadowColor,
+        boolean             isOutset,
+        UI.ShadowType       type
     ) {
-<span class="fc bfc" id="L96" title="All 10 branches covered.">        if ( </span>
+<span class="fc bfc" id="L97" title="All 12 branches covered.">        if (</span>
             offset == _NONE._offset &amp;&amp;
             shadowBlurRadius == _NONE._blurRadius &amp;&amp;
             shadowSpreadRadius == _NONE._spreadRadius &amp;&amp;
             shadowColor == _NONE._color &amp;&amp;
-            isOutset == _NONE._isOutset
+            isOutset == _NONE._isOutset &amp;&amp;
+            type == _NONE._type
         )
-<span class="fc" id="L103">            return _NONE;</span>
+<span class="fc" id="L105">            return _NONE;</span>
         else
-<span class="fc" id="L105">            return new ShadowConf(offset, shadowBlurRadius, shadowSpreadRadius, shadowColor, isOutset);</span>
+<span class="fc" id="L107">            return new ShadowConf(offset, shadowBlurRadius, shadowSpreadRadius, shadowColor, isOutset, type);</span>
     }
 
-    private final Offset          _offset;
-    private final float           _blurRadius;
-    private final float           _spreadRadius;
-    private final @Nullable Color _color;
-    private final boolean         _isOutset;
+    private final Offset              _offset;
+    private final float               _blurRadius;
+    private final float               _spreadRadius;
+    private final @Nullable Color     _color;
+    private final boolean             _isOutset;
+    private final UI.ShadowType       _type;
+<span class="fc" id="L116">    private final LazyRef&lt;Pooled&lt;ShadowConf&gt;&gt; _renderCacheKey = new LazyRef&lt;&gt;(this, s -&gt;</span>
+        /*
+            The blended color stops of a shadow gradient (see StyleRenderer) depend solely on
+            the color, the inset/outset direction and the shadow type (its falloff curve) - never
+            on the offset, blur or spread, which only affect the gradient's geometry. So we strip
+            those down to a normalized key and intern it, allowing all blur/spread/offset variants
+            (e.g. an animated shadow) of an otherwise equal shadow to share one self-cleaning,
+            weakly referenced render cache entry. This mirrors NoiseConf#withoutOffsetForRenderCacheAccess.
+        */
+<span class="fc" id="L125">        new Pooled&lt;&gt;(ShadowConf.of(Offset.none(), 0f, 0f, s._color, s._isOutset, s._type)).intern()</span>
+    );
 
 
     private ShadowConf(
-        Offset          offset,
-        float           shadowBlurRadius,
-        float           shadowSpreadRadius,
-        @Nullable Color shadowColor,
-        boolean         isOutset
-<span class="fc" id="L121">    ) {</span>
-<span class="fc" id="L122">        _offset           = Objects.requireNonNull(offset);</span>
-<span class="fc" id="L123">        _blurRadius       = shadowBlurRadius;</span>
-<span class="fc" id="L124">        _spreadRadius     = shadowSpreadRadius;</span>
-<span class="fc" id="L125">        _color            = shadowColor;</span>
-<span class="fc" id="L126">        _isOutset         = isOutset;</span>
-<span class="fc" id="L127">    }</span>
+        Offset              offset,
+        float               shadowBlurRadius,
+        float               shadowSpreadRadius,
+        @Nullable Color     shadowColor,
+        boolean             isOutset,
+        UI.ShadowType       type
+<span class="fc" id="L136">    ) {</span>
+<span class="fc" id="L137">        _offset           = Objects.requireNonNull(offset);</span>
+<span class="fc" id="L138">        _blurRadius       = shadowBlurRadius;</span>
+<span class="fc" id="L139">        _spreadRadius     = shadowSpreadRadius;</span>
+<span class="fc" id="L140">        _color            = shadowColor;</span>
+<span class="fc" id="L141">        _isOutset         = isOutset;</span>
+<span class="fc" id="L142">        _type             = Objects.requireNonNull(type);</span>
+<span class="fc" id="L143">    }</span>
 
-<span class="fc" id="L129">    float horizontalOffset() { return _offset.x(); }</span>
+<span class="fc" id="L145">    float horizontalOffset() { return _offset.x(); }</span>
 
-<span class="fc" id="L131">    float verticalOffset() { return _offset.y(); }</span>
+<span class="fc" id="L147">    float verticalOffset() { return _offset.y(); }</span>
 
-<span class="fc" id="L133">    float blurRadius() { return _blurRadius; }</span>
+<span class="fc" id="L149">    float blurRadius() { return _blurRadius; }</span>
 
-<span class="fc" id="L135">    public float spreadRadius() { return _spreadRadius; }</span>
+<span class="fc" id="L151">    public float spreadRadius() { return _spreadRadius; }</span>
 
-<span class="fc" id="L137">    Optional&lt;Color&gt; color() { return Optional.ofNullable(_color); }</span>
+<span class="fc" id="L153">    Optional&lt;Color&gt; color() { return Optional.ofNullable(_color); }</span>
 
-<span class="fc" id="L139">    boolean isOutset() { return _isOutset; }</span>
+<span class="fc" id="L155">    boolean isOutset() { return _isOutset; }</span>
 
-<span class="fc bfc" id="L141" title="All 2 branches covered.">    boolean isInset() { return !_isOutset; }</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">    boolean isInset() { return !_isOutset; }</span>
+
+<span class="fc" id="L159">    UI.ShadowType type() { return _type; }</span>
+
+    /**
+     *  Returns the interned, geometry-independent key under which this shadow's
+     *  blended gradient color stops are cached during rendering (see StyleRenderer).
+     *  All shadows that differ only in offset, blur or spread share the same key.
+     */
+<span class="fc" id="L166">    Pooled&lt;ShadowConf&gt; renderCacheKey() { return _renderCacheKey.get(); }</span>
 
     /**
      *  Use this to offset the shadow position along the X axis.
@@ -150,7 +175,7 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified horizontal shadow offset.
      */
     public ShadowConf horizontalOffset( double horizontalShadowOffset ) {
-<span class="fc" id="L153">        return ShadowConf.of(_offset.withX((float) horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);</span>
+<span class="fc" id="L178">        return ShadowConf.of(_offset.withX((float) horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset, _type);</span>
     }
 
     /**
@@ -162,7 +187,7 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified vertical shadow offset.
      */
     public ShadowConf verticalOffset( double verticalShadowOffset ) {
-<span class="fc" id="L165">        return ShadowConf.of(_offset.withY((float) verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);</span>
+<span class="fc" id="L190">        return ShadowConf.of(_offset.withY((float) verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset, _type);</span>
     }
 
     /**
@@ -178,7 +203,7 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified horizontal and vertical shadow offsets.
      */
     public ShadowConf offset( double horizontalShadowOffset, double verticalShadowOffset ) {
-<span class="fc" id="L181">        return ShadowConf.of(Offset.of(horizontalShadowOffset, verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);</span>
+<span class="fc" id="L206">        return ShadowConf.of(Offset.of(horizontalShadowOffset, verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset, _type);</span>
     }
 
     /**
@@ -191,7 +216,7 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified horizontal and vertical shadow offsets.
      */
     public ShadowConf offset( double shadowOffset ) {
-<span class="fc" id="L194">        return ShadowConf.of(Offset.of(shadowOffset, shadowOffset), _blurRadius, _spreadRadius, _color, _isOutset);</span>
+<span class="fc" id="L219">        return ShadowConf.of(Offset.of(shadowOffset, shadowOffset), _blurRadius, _spreadRadius, _color, _isOutset, _type);</span>
     }
 
     /**
@@ -205,7 +230,7 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified blur radius.
      */
     public ShadowConf blurRadius( double shadowBlurRadius ) {
-<span class="fc" id="L208">        return ShadowConf.of(_offset, (float) shadowBlurRadius, _spreadRadius, _color, _isOutset);</span>
+<span class="fc" id="L233">        return ShadowConf.of(_offset, (float) shadowBlurRadius, _spreadRadius, _color, _isOutset, _type);</span>
     }
 
     /**
@@ -221,7 +246,7 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified spread radius.
      */
     public ShadowConf spreadRadius( double shadowSpreadRadius ) {
-<span class="fc" id="L224">        return ShadowConf.of(_offset, _blurRadius, (float) shadowSpreadRadius, _color, _isOutset);</span>
+<span class="fc" id="L249">        return ShadowConf.of(_offset, _blurRadius, (float) shadowSpreadRadius, _color, _isOutset, _type);</span>
     }
 
     /**
@@ -230,12 +255,12 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified color.
      */
     public ShadowConf color( Color shadowColor ) {
-<span class="fc" id="L233">        Objects.requireNonNull(shadowColor, &quot;Use UI.Color.UNDEFINED to specify no color instead of null&quot;);</span>
-<span class="fc bfc" id="L234" title="All 2 branches covered.">        if ( shadowColor == UI.Color.UNDEFINED)</span>
-<span class="fc" id="L235">            shadowColor = null;</span>
-<span class="fc bfc" id="L236" title="All 2 branches covered.">        if ( Objects.equals(shadowColor, _color) )</span>
-<span class="fc" id="L237">            return this;</span>
-<span class="fc" id="L238">        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, shadowColor, _isOutset);</span>
+<span class="fc" id="L258">        Objects.requireNonNull(shadowColor, &quot;Use UI.Color.UNDEFINED to specify no color instead of null&quot;);</span>
+<span class="fc bfc" id="L259" title="All 2 branches covered.">        if ( shadowColor == UI.Color.UNDEFINED)</span>
+<span class="fc" id="L260">            shadowColor = null;</span>
+<span class="fc bfc" id="L261" title="All 2 branches covered.">        if ( Objects.equals(shadowColor, _color) )</span>
+<span class="fc" id="L262">            return this;</span>
+<span class="fc" id="L263">        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, shadowColor, _isOutset, _type);</span>
     }
 
     /**
@@ -257,15 +282,15 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified color.
      */
     public ShadowConf color( String shadowColor ) {
-<span class="fc" id="L260">        Objects.requireNonNull(shadowColor);</span>
+<span class="fc" id="L285">        Objects.requireNonNull(shadowColor);</span>
         Color newColor;
         try {
-<span class="fc" id="L263">            newColor = UI.color(shadowColor);</span>
-<span class="nc" id="L264">        } catch ( Exception e ) {</span>
-<span class="nc" id="L265">            log.error(SwingTree.get().logMarker(), &quot;Failed to parse color string: '{}'&quot;, shadowColor, e);</span>
-<span class="nc" id="L266">            return this; // We want to avoid side effects other than a wrong color</span>
-<span class="fc" id="L267">        }</span>
-<span class="fc" id="L268">        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, newColor, _isOutset);</span>
+<span class="fc" id="L288">            newColor = UI.color(shadowColor);</span>
+<span class="nc" id="L289">        } catch ( Exception e ) {</span>
+<span class="nc" id="L290">            log.error(SwingTree.get().logMarker(), &quot;Failed to parse color string: '{}'&quot;, shadowColor, e);</span>
+<span class="nc" id="L291">            return this; // We want to avoid side effects other than a wrong color</span>
+<span class="fc" id="L292">        }</span>
+<span class="fc" id="L293">        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, newColor, _isOutset, _type);</span>
     }
 
     /**
@@ -281,7 +306,7 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified color.
      */
     public ShadowConf color( double red, double green, double blue ) {
-<span class="nc" id="L284">        return color(red, green, blue, 1.0);</span>
+<span class="nc" id="L309">        return color(red, green, blue, 1.0);</span>
     }
 
     /**
@@ -298,7 +323,7 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified color.
      */
     public ShadowConf color( double red, double green, double blue, double alpha ) {
-<span class="fc" id="L301">        return color(new Color((float) red, (float) green, (float) blue, (float) alpha));</span>
+<span class="fc" id="L326">        return color(new Color((float) red, (float) green, (float) blue, (float) alpha));</span>
     }
 
     /**
@@ -316,7 +341,7 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified inset/outset state.
      */
     public ShadowConf isInset(boolean shadowInset ) {
-<span class="fc bfc" id="L319" title="All 2 branches covered.">        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, !shadowInset);</span>
+<span class="fc bfc" id="L344" title="All 2 branches covered.">        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, !shadowInset, _type);</span>
     }
 
     /**
@@ -335,78 +360,104 @@ public final class ShadowConf implements Simplifiable&lt;ShadowConf&gt;
      * @return A new {@link ShadowConf} with the specified outset/inset state.
      */
     public ShadowConf isOutset( boolean shadowOutset ) {
-<span class="fc" id="L338">        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, shadowOutset);</span>
+<span class="fc" id="L363">        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, shadowOutset, _type);</span>
+    }
+
+    /**
+     *  Defines the shape of the shadow's &quot;falloff curve&quot;, that is to say, the way in
+     *  which the shadow color fades from its full strength into full transparency across
+     *  the blur region. The default is {@link UI.ShadowType#BLUR}, which mimics the
+     *  natural soft edge of a Gaussian-blurred shadow, whereas the other types model
+     *  different real world shadow phenomena (an area-light {@link UI.ShadowType#PENUMBRA},
+     *  a {@link UI.ShadowType#CONTACT} shadow, a diffuse {@link UI.ShadowType#GLOW})
+     *  or, in the case of {@link UI.ShadowType#FLAT}, fade at a plain constant rate.
+     *  (see {@link UI.ShadowType} for a description, real world analogue and exact math
+     *  of each available type)
+     *
+     * @param type The {@link UI.ShadowType} defining how the shadow color fades
+     *             from full strength into transparency across the blur region.
+     * @return A new {@link ShadowConf} with the specified shadow type.
+     */
+    public ShadowConf type( UI.ShadowType type ) {
+<span class="fc" id="L382">        Objects.requireNonNull(type);</span>
+<span class="fc bfc" id="L383" title="All 2 branches covered.">        if ( type == _type )</span>
+<span class="fc" id="L384">            return this;</span>
+<span class="fc" id="L385">        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, _isOutset, type);</span>
     }
 
     ShadowConf _scale( double scaleFactor ) {
-<span class="fc" id="L342">        return ShadowConf.of(</span>
-<span class="fc" id="L343">                            _offset.scale(scaleFactor),</span>
+<span class="fc" id="L389">        return ShadowConf.of(</span>
+<span class="fc" id="L390">                            _offset.scale(scaleFactor),</span>
                             (float) (_blurRadius * scaleFactor),
                             (float) (_spreadRadius * scaleFactor),
                             _color,
-                            _isOutset
+                            _isOutset,
+                            _type
                         );
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L353">        int hash = 7;</span>
-<span class="fc" id="L354">        hash = 31 * hash + _offset.hashCode();</span>
-<span class="fc" id="L355">        hash = 31 * hash + Float.hashCode(_blurRadius);</span>
-<span class="fc" id="L356">        hash = 31 * hash + Float.hashCode(_spreadRadius);</span>
-<span class="fc" id="L357">        hash = 31 * hash + Objects.hashCode(_color);</span>
-<span class="fc bfc" id="L358" title="All 2 branches covered.">        hash = 31 * hash + (_isOutset ? 1 : 0);</span>
-<span class="fc" id="L359">        return hash;</span>
+<span class="fc" id="L401">        int hash = 7;</span>
+<span class="fc" id="L402">        hash = 31 * hash + _offset.hashCode();</span>
+<span class="fc" id="L403">        hash = 31 * hash + Float.hashCode(_blurRadius);</span>
+<span class="fc" id="L404">        hash = 31 * hash + Float.hashCode(_spreadRadius);</span>
+<span class="fc" id="L405">        hash = 31 * hash + Objects.hashCode(_color);</span>
+<span class="fc bfc" id="L406" title="All 2 branches covered.">        hash = 31 * hash + (_isOutset ? 1 : 0);</span>
+<span class="fc" id="L407">        hash = 31 * hash + _type.hashCode();</span>
+<span class="fc" id="L408">        return hash;</span>
     }
 
     @Override
     public boolean equals(Object obj) {
-<span class="pc bpc" id="L364" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
-<span class="fc bfc" id="L365" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
-<span class="pc bpc" id="L366" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
-<span class="fc" id="L367">        ShadowConf rhs = (ShadowConf) obj;</span>
-<span class="fc bfc" id="L368" title="All 6 branches covered.">        return Objects.equals(_offset, rhs._offset)       &amp;&amp;</span>
+<span class="pc bpc" id="L413" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="fc bfc" id="L414" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L415" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L416">        ShadowConf rhs = (ShadowConf) obj;</span>
+<span class="fc bfc" id="L417" title="All 6 branches covered.">        return Objects.equals(_offset, rhs._offset)       &amp;&amp;</span>
                _blurRadius       == rhs._blurRadius       &amp;&amp;
                _spreadRadius     == rhs._spreadRadius     &amp;&amp;
-<span class="fc bfc" id="L371" title="All 4 branches covered.">               Objects.equals(_color, rhs._color)         &amp;&amp;</span>
-               _isOutset         == rhs._isOutset;
+<span class="fc bfc" id="L420" title="All 6 branches covered.">               Objects.equals(_color, rhs._color)         &amp;&amp;</span>
+               _isOutset         == rhs._isOutset         &amp;&amp;
+               _type       == rhs._type;
     }
 
     @Override
     public String toString() {
-<span class="fc bfc" id="L377" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
-<span class="fc" id="L378">            return this.getClass().getSimpleName()+&quot;[NONE]&quot;;</span>
-<span class="fc" id="L379">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
-<span class="fc" id="L380">                    &quot;horizontalOffset=&quot; + _toString(_offset.x()  ) + &quot;, &quot; +</span>
-<span class="fc" id="L381">                    &quot;verticalOffset=&quot;   + _toString(_offset.y()  ) + &quot;, &quot; +</span>
-<span class="fc" id="L382">                    &quot;blurRadius=&quot;       + _toString(_blurRadius  ) + &quot;, &quot; +</span>
-<span class="fc" id="L383">                    &quot;spreadRadius=&quot;     + _toString(_spreadRadius) + &quot;, &quot; +</span>
-<span class="pc bpc" id="L384" title="1 of 2 branches missed.">                    &quot;color=&quot;            + StyleUtil.toString(_color) + &quot;, &quot; +</span>
-                    &quot;isInset=&quot;          + !_isOutset +
+<span class="fc bfc" id="L427" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L428">            return this.getClass().getSimpleName()+&quot;[NONE]&quot;;</span>
+<span class="fc" id="L429">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
+<span class="fc" id="L430">                    &quot;horizontalOffset=&quot; + _toString(_offset.x()  ) + &quot;, &quot; +</span>
+<span class="fc" id="L431">                    &quot;verticalOffset=&quot;   + _toString(_offset.y()  ) + &quot;, &quot; +</span>
+<span class="fc" id="L432">                    &quot;blurRadius=&quot;       + _toString(_blurRadius  ) + &quot;, &quot; +</span>
+<span class="fc" id="L433">                    &quot;spreadRadius=&quot;     + _toString(_spreadRadius) + &quot;, &quot; +</span>
+<span class="pc bpc" id="L434" title="1 of 2 branches missed.">                    &quot;color=&quot;            + StyleUtil.toString(_color) + &quot;, &quot; +</span>
+                    &quot;isInset=&quot;          + !_isOutset + &quot;, &quot; +
+                    &quot;type=&quot;             + _type +
                 &quot;]&quot;;
     }
 
     private static String _toString( float value ) {
-<span class="fc bfc" id="L390" title="All 2 branches covered.">        return value == 0 ? &quot;0&quot; : String.valueOf(value).replace(&quot;.0&quot;, &quot;&quot;);</span>
+<span class="fc bfc" id="L441" title="All 2 branches covered.">        return value == 0 ? &quot;0&quot; : String.valueOf(value).replace(&quot;.0&quot;, &quot;&quot;);</span>
     }
 
     @Override
     public ShadowConf simplified() {
-<span class="fc bfc" id="L395" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
-<span class="fc" id="L396">            return _NONE;</span>
+<span class="fc bfc" id="L446" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L447">            return _NONE;</span>
 
-<span class="fc bfc" id="L398" title="All 4 branches covered.">        if ( _color == null || _color.getAlpha() == 0 )</span>
-<span class="fc" id="L399">            return _NONE;</span>
+<span class="fc bfc" id="L449" title="All 4 branches covered.">        if ( _color == null || _color.getAlpha() == 0 )</span>
+<span class="fc" id="L450">            return _NONE;</span>
 
-<span class="pc bpc" id="L401" title="1 of 2 branches missed.">        if ( _color == UI.Color.UNDEFINED)</span>
-<span class="nc" id="L402">            return _NONE;</span>
+<span class="pc bpc" id="L452" title="1 of 2 branches missed.">        if ( _color == UI.Color.UNDEFINED)</span>
+<span class="nc" id="L453">            return _NONE;</span>
 
-<span class="fc" id="L404">        return this;</span>
+<span class="fc" id="L455">        return this;</span>
     }
 
     @Override
     public boolean isNone() {
-<span class="fc" id="L409">        return this.equals(_NONE);</span>
+<span class="fc" id="L460">        return this.equals(_NONE);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

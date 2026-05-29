@@ -19,6 +19,8 @@ import examples.hover.HoverExample
 import examples.lists.ListTestExample
 import examples.mvvm.*
 import examples.scrollpanes.ScrollConfigExample
+import examples.sequencer.SequencerView
+import examples.sequencer.SequencerViewModel
 import examples.simple.Form
 import examples.simple.ListRendering
 import examples.simple.NamedFieldsView
@@ -341,6 +343,33 @@ class Examples_Spec extends Specification
             var view = new BreathingView(vm)
         then :
             noExceptionThrown()
+    }
+
+    def 'The neumorphic step sequencer example can be instantiated correctly.'() {
+        reportInfo """
+            <b>PULSE</b>, the ${Utility.link('neumorphic step sequencer', SequencerView)}, together
+            with its ${Utility.link('immutable view model', SequencerViewModel)}, is a little
+            drum machine whose entire visual identity is carved out of light and shadow
+            (the "soft UI" / <i>Neumorphism</i> style): every pad is the same slate colour
+            as its surface and inverts from <i>raised</i> to <i>pressed-in</i> when toggled,
+            using SwingTree's named-shadow API.
+
+            It is also a tour of three SwingTree ideas at once: pure-data MVI with a
+            <code>Tuple&lt;Track&gt;</code> and per-track <code>ValueSet&lt;Integer&gt;</code> patterns,
+            the modelled re-armed animation pattern driving a tempo-accurate playhead, and
+            reactive styling combined with custom <code>painter(..)</code> based rotary knobs.
+
+            Run the ${Utility.link('view class', SequencerView)} directly to play with it.
+        """
+        when :
+            var vm = Var.of(new SequencerViewModel())
+            var view = new SequencerView(vm)
+        then :
+            noExceptionThrown()
+        and : 'The view model starts idle with a non-empty starter groove.'
+            !vm.get().playing()
+            vm.get().tracks().size() == 4
+            vm.get().tracks().any(t -> !t.activeSteps().isEmpty())
     }
 
     def 'The animated buttons view examples UI defined in the examples looks as expected.'()

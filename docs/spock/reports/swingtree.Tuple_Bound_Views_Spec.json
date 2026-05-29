@@ -4,7 +4,7 @@
   "narrative":"SwingTree provides a powerful `addAll` binding mechanism that connects\n    a `Var<Tuple<M>>` property to dynamically managed sub-views using a\n    `BoundViewSupplier<M>`. This is designed for **value-based, immutable view models**\n    that implement the `HasId` interface.\n\n    Unlike the simpler `ViewSupplier` based `addAll` overloads, the `BoundViewSupplier`\n    variant is **bi-directional**: each sub-view receives a `Var<M>` lens property\n    that can both read from and write back to the parent tuple. Changes to\n    individual items propagate back up through the lens to the root property.\n\n    A key design goal of this binding is **efficiency**:\n    When the tuple changes, sub-views are only rebuilt if their item's `id()`\n    (from the `HasId` interface) has changed. If an item at a given position\n    retains the same id but has different data (e.g. a text field was edited),\n    the existing sub-view is kept and its lens property simply reflects the new data.\n    This avoids expensive GUI teardown/rebuild cycles for purely data-level changes.\n\n    This specification serves as living documentation for the three overloads:\n    - `addAll(Var<Tuple<M>>, BoundViewSupplier<M>)` — no layout constraints\n    - `addAll(String, Var<Tuple<M>>, BoundViewSupplier<M>)` — with String layout constraints\n    - `addAll(AddConstraint, Var<Tuple<M>>, BoundViewSupplier<M>)` — with typed layout constraints",
   "subjects":[],
   "statistics":{
-    "runs":"39",
+    "runs":"43",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -886,6 +886,78 @@
         {"kind":"then","text":"View reuse matches model reuse exactly.","code":["whichModelsReused == whichViewReused"]},
 
         {"kind":"where","text":"We test the following transformations:","code":{"initialModels":["Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(\"a\", \"b\")","Tuple.of(1, 2, 3)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)","Tuple.of(1, 2, 3, 4, 5, 6)"],"operation":["{ Tuple.of(\"X\", \"a\", \"z\").mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ Tuple.of(-1, 2, -3, 4, 5, 42).mapTo(SelfAsId, o -> new SelfAsId(o)) }","{ it.reversed() }","{ it.reversed() }","{ it.reversed() }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeFirst(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.removeLast(1) }","{ it.setAt(1, new SelfAsId(42)) }","{ it.setAllAt(2, new SelfAsId(42), new SelfAsId(73)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Binding a `panel` to a tuple with duplicate `HasId` ids logs a clear, actionable error.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Sub-views are identified and reused by their item's `HasId.id()`.\n            If two items in the bound tuple report the **same** id, the framework\n            cannot tell their views apart. Rather than failing silently — or much\n            later with a cryptic message — SwingTree detects the clash up front and\n            logs *what* is wrong, *why* it matters, and *how* to fix it.\n\n            This is a development-time sanity check, active while\n            `SwingTree.isRecordingDebugSourceTrace()` is enabled (its default), so\n            it never costs anything in a tuned production build.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple where two tags accidentally share the id \"dup\".","code":["var models = Var.of(Tuple.of(","    new Tag(\"dup\", \"First\"),","    new Tag(\"dup\", \"Second\"),","    new Tag(\"unique\", \"Third\")","))","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.label(p.viewAsString({ it.label() })) }"]},
+
+        {"kind":"when","text":"We build the panel binding, capturing what is written to the error log.","code":["var log = Utility.captureSystemErr({","    UI.panel().addAll(models, supplier).get(JPanel)","})"]},
+
+        {"kind":"then","text":"The framework names the duplicated id and points at the unique-id fix.","code":["log.contains(\"Detected duplicate entry id 'dup'\")","log.contains(\"unique and stable id\")"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Binding `scrollPanels` to a tuple with duplicate `HasId` ids logs the same clear error.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The id-based binding (and therefore this sanity check) is shared by all\n            list-binding views, so `scrollPanels` reports a duplicate id exactly the\n            same way an ordinary `panel` does.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple with two items that share the id \"x\".","code":["var models = Var.of(Tuple.of(","    new Tag(\"x\", \"One\"),","    new Tag(\"x\", \"Two\")","))","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.label(p.viewAsString({ it.label() })) }"]},
+
+        {"kind":"when","text":"We build the scroll-panels binding, capturing the error log.","code":["var log = Utility.captureSystemErr({","    UI.scrollPanels().addAll(models, supplier).get(JScrollPanels)","})"]},
+
+        {"kind":"then","text":"The duplicate id is reported.","code":["log.contains(\"Detected duplicate entry id 'x'\")"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Returning a shared, already-attached component from a supplier is reported by `JScrollPanels`.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A view supplier is expected to build a **fresh** view for each entry.\n            If it instead hands back a component that is already attached to another,\n            still-live entry — for example a single component captured once and reused\n            for every item — then one view would have to live in two places at once.\n            `JScrollPanels` detects this and explains the likely cause and the fix.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two items with perfectly unique ids...","code":["var models = Var.of(Tuple.of(","    new Tag(\"a\", \"A\"),","    new Tag(\"b\", \"B\")","))"]},
+
+        {"kind":"and","text":"...but a faulty supplier that always wraps the very same shared component.","code":["var shared = new JLabel(\"I am shared\")","BoundViewSupplier<Tag> faultySupplier = { Var<Tag> p -> UI.of(shared) }"]},
+
+        {"kind":"when","text":"We build the scroll-panels binding, capturing the error log.","code":["var log = Utility.captureSystemErr({","    UI.scrollPanels().addAll(models, faultySupplier).get(JScrollPanels)","})"]},
+
+        {"kind":"then","text":"The framework reports that a view is already tied to a still-live parent.","code":["log.contains(\"still-live parent\")"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Re-rendering a tuple with the same ids recycles views silently (no error is logged).",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When the bound tuple is replaced by a *new* tuple whose items carry the\n            **same** ids — for example after reloading equivalent data — the existing\n            sub-views are recycled by id. This is the intended, efficient path, and it\n            must stay quiet: recycling a previous render's view is not an error and so\n            no \"tied to another parent\" message should appear.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scroll-panels view bound to two uniquely-identified items.","code":["var models = Var.of(Tuple.of(new Tag(\"a\", \"A\"), new Tag(\"b\", \"B\")))","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.label(p.viewAsString({ it.label() })) }","var scrollPanels = UI.scrollPanels().addAll(models, supplier).get(JScrollPanels)"]},
+
+        {"kind":"when","text":"We replace the tuple with a fresh one carrying the very same ids.","code":["var log = Utility.captureSystemErr({","    models.set(Tuple.of(new Tag(\"a\", \"A-reloaded\"), new Tag(\"b\", \"B-reloaded\")))","    UI.sync()","})"]},
+
+        {"kind":"then","text":"The recycle is benign: no view-parent error is logged.","code":["!log.contains(\"tied to another parent\")","!log.contains(\"still-live parent\")"]},
+
+        {"kind":"and","text":"The view is intact with both recycled rows.","code":["scrollPanels != null"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

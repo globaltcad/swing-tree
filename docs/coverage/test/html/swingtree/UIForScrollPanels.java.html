@@ -272,29 +272,31 @@ public class UIForScrollPanels&lt;P extends JScrollPanels&gt; extends UIForAnySc
 <span class="fc" id="L272">        _onShowDelegated( propertyOfModels, scrollPanels, (thisComponent, delegate) -&gt; {</span>
 <span class="fc" id="L273">            Tuple&lt;M&gt; oldModels = delegate.oldValue().orElseThrowUnchecked();</span>
 <span class="fc" id="L274">            Tuple&lt;M&gt; newModels = delegate.currentValue().orElseThrowUnchecked();</span>
-<span class="fc" id="L275">            viewSupplier.rememberCurrentViewsForReuse();</span>
-<span class="fc" id="L276">            SequenceDiff diff = null;</span>
-<span class="fc" id="L277">            SequenceDiff lastDiff = lastDiffRef.get();</span>
-<span class="pc bpc" id="L278" title="2 of 4 branches missed.">            if (newModels instanceof SequenceDiffOwner &amp;&amp; oldModels instanceof SequenceDiffOwner) {</span>
-<span class="fc" id="L279">                diff = ((SequenceDiffOwner)newModels).differenceFromPrevious().orElse(null);</span>
+<span class="fc" id="L275">            _warnAboutDuplicateEntryIds(newModels); // debug-gated; covers every update path</span>
+<span class="fc" id="L276">            viewSupplier.rememberCurrentViewsForReuse();</span>
+<span class="fc" id="L277">            SequenceDiff diff = null;</span>
+<span class="fc" id="L278">            SequenceDiff lastDiff = lastDiffRef.get();</span>
+<span class="pc bpc" id="L279" title="2 of 4 branches missed.">            if (newModels instanceof SequenceDiffOwner &amp;&amp; oldModels instanceof SequenceDiffOwner) {</span>
+<span class="fc" id="L280">                diff = ((SequenceDiffOwner)newModels).differenceFromPrevious().orElse(null);</span>
             }
-<span class="fc" id="L281">            lastDiffRef.set(diff);</span>
+<span class="fc" id="L282">            lastDiffRef.set(diff);</span>
 
-<span class="pc bpc" id="L283" title="2 of 6 branches missed.">            if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {</span>
-<span class="fc" id="L284">                thisComponent.removeAllEntries();</span>
-<span class="fc" id="L285">                _addAllEntriesAt(attr, thisComponent, 0, newModels, lensSupplier, viewSupplier);</span>
+<span class="pc bpc" id="L284" title="2 of 6 branches missed.">            if ( diff == null || ( lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) ) {</span>
+<span class="fc" id="L285">                thisComponent.removeAllEntries();</span>
+<span class="fc" id="L286">                _addAllEntriesAt(attr, thisComponent, 0, newModels, lensSupplier, viewSupplier);</span>
             } else {
-<span class="fc" id="L287">                int index = diff.index().orElse(-1);</span>
-<span class="fc" id="L288">                int count = diff.size();</span>
-<span class="fc" id="L289">                _update(thisComponent, attr, diff.change(), index, count, oldModels, newModels, lensSupplier, viewSupplier);</span>
+<span class="fc" id="L288">                int index = diff.index().orElse(-1);</span>
+<span class="fc" id="L289">                int count = diff.size();</span>
+<span class="fc" id="L290">                _update(thisComponent, attr, diff.change(), index, count, oldModels, newModels, lensSupplier, viewSupplier);</span>
             }
-<span class="fc" id="L291">            viewSupplier.clearCurrentViews();</span>
-<span class="fc" id="L292">        });</span>
-<span class="fc" id="L293">        propertyOfModels.ifPresent( (tupleOfModels) -&gt; {</span>
-<span class="fc" id="L294">            scrollPanels.removeAllEntries();</span>
-<span class="fc" id="L295">            _addAllEntriesAt(attr, scrollPanels, 0, tupleOfModels, lensSupplier, viewSupplier);</span>
-<span class="fc" id="L296">        });</span>
-<span class="fc" id="L297">    }</span>
+<span class="fc" id="L292">            viewSupplier.clearCurrentViews();</span>
+<span class="fc" id="L293">        });</span>
+<span class="fc" id="L294">        propertyOfModels.ifPresent( (tupleOfModels) -&gt; {</span>
+<span class="fc" id="L295">            _warnAboutDuplicateEntryIds(tupleOfModels);</span>
+<span class="fc" id="L296">            scrollPanels.removeAllEntries();</span>
+<span class="fc" id="L297">            _addAllEntriesAt(attr, scrollPanels, 0, tupleOfModels, lensSupplier, viewSupplier);</span>
+<span class="fc" id="L298">        });</span>
+<span class="fc" id="L299">    }</span>
 
     private &lt;M&gt; void _update(
             P c,
@@ -305,44 +307,44 @@ public class UIForScrollPanels&lt;P extends JScrollPanels&gt; extends UIForAnySc
             Tuple&lt;M&gt; tupleOfModels,
             ModelToViewConverter&lt;M&gt; viewSupplier
     ) {
-<span class="fc bfc" id="L308" title="All 2 branches covered.">        if ( index &lt; 0 ) {</span>
+<span class="fc bfc" id="L310" title="All 2 branches covered.">        if ( index &lt; 0 ) {</span>
             // We do a simple re-build
-<span class="fc" id="L310">            c.removeAllEntries();</span>
-<span class="fc" id="L311">            _addAllEntriesAt(attr, c, 0, tupleOfModels, viewSupplier);</span>
+<span class="fc" id="L312">            c.removeAllEntries();</span>
+<span class="fc" id="L313">            _addAllEntriesAt(attr, c, 0, tupleOfModels, viewSupplier);</span>
         } else {
-<span class="pc bpc" id="L313" title="2 of 7 branches missed.">            switch (change) {</span>
+<span class="pc bpc" id="L315" title="2 of 7 branches missed.">            switch (change) {</span>
                 case SET:
-<span class="fc" id="L315">                    Tuple&lt;M&gt; slice = tupleOfModels.sliceAt(index, count);</span>
-<span class="fc" id="L316">                    _setAllEntriesAt(attr, c, index, slice, viewSupplier);</span>
-<span class="fc" id="L317">                    break;</span>
+<span class="fc" id="L317">                    Tuple&lt;M&gt; slice = tupleOfModels.sliceAt(index, count);</span>
+<span class="fc" id="L318">                    _setAllEntriesAt(attr, c, index, slice, viewSupplier);</span>
+<span class="fc" id="L319">                    break;</span>
                 case ADD:
-<span class="fc" id="L319">                    _addAllEntriesAt(attr, c, index, tupleOfModels.sliceAt(index, count), viewSupplier);</span>
-<span class="fc" id="L320">                    break;</span>
+<span class="fc" id="L321">                    _addAllEntriesAt(attr, c, index, tupleOfModels.sliceAt(index, count), viewSupplier);</span>
+<span class="fc" id="L322">                    break;</span>
                 case REMOVE:
-<span class="fc" id="L322">                    c.removeEntriesAt(index, count);</span>
-<span class="fc" id="L323">                    break;</span>
+<span class="fc" id="L324">                    c.removeEntriesAt(index, count);</span>
+<span class="fc" id="L325">                    break;</span>
                 case RETAIN: // Only keep the elements in the range.
                     // Remove trailing components:
-<span class="fc" id="L326">                    c.removeEntriesAt(index + count, c.getNumberOfEntries() - (index + count));</span>
+<span class="fc" id="L328">                    c.removeEntriesAt(index + count, c.getNumberOfEntries() - (index + count));</span>
                     // Remove leading components:
-<span class="fc" id="L328">                    c.removeEntriesAt(0, index);</span>
-<span class="fc" id="L329">                    break;</span>
+<span class="fc" id="L330">                    c.removeEntriesAt(0, index);</span>
+<span class="fc" id="L331">                    break;</span>
                 case CLEAR:
-<span class="fc" id="L331">                    c.removeAllEntries();</span>
-<span class="fc" id="L332">                    break;</span>
+<span class="fc" id="L333">                    c.removeAllEntries();</span>
+<span class="fc" id="L334">                    break;</span>
                 case NONE:
-<span class="nc" id="L334">                    break;</span>
+<span class="nc" id="L336">                    break;</span>
                 default:
-<span class="nc" id="L336">                    log.error(SwingTree.get().logMarker(),</span>
+<span class="nc" id="L338">                    log.error(SwingTree.get().logMarker(),</span>
                         &quot;Unknown change type: {}&quot;,
                         change, new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                     );
                     // We do a simple rebuild:
-<span class="nc" id="L341">                    c.removeAllEntries();</span>
-<span class="nc" id="L342">                    _addAllEntriesAt(attr, c, 0, tupleOfModels, viewSupplier);</span>
+<span class="nc" id="L343">                    c.removeAllEntries();</span>
+<span class="nc" id="L344">                    _addAllEntriesAt(attr, c, 0, tupleOfModels, viewSupplier);</span>
             }
         }
-<span class="fc" id="L345">    }</span>
+<span class="fc" id="L347">    }</span>
 
     private &lt;M extends HasId&lt;?&gt;&gt; void _update(
             P c,
@@ -355,43 +357,43 @@ public class UIForScrollPanels&lt;P extends JScrollPanels&gt; extends UIForAnySc
             Function&lt;Integer, ViewHandle&lt;M&gt;&gt; lensSupplier,
             ModelToViewConverter&lt;ViewHandle&lt;M&gt;&gt; viewSupplier
     ) {
-<span class="pc bpc" id="L358" title="1 of 2 branches missed.">        if ( index &lt; 0 ) {</span>
+<span class="pc bpc" id="L360" title="1 of 2 branches missed.">        if ( index &lt; 0 ) {</span>
             // We do a simple re-build
-<span class="nc" id="L360">            c.removeAllEntries();</span>
-<span class="nc" id="L361">            _addAllEntriesAt(attr, c, 0, newModels, lensSupplier, viewSupplier);</span>
+<span class="nc" id="L362">            c.removeAllEntries();</span>
+<span class="nc" id="L363">            _addAllEntriesAt(attr, c, 0, newModels, lensSupplier, viewSupplier);</span>
         } else {
-<span class="pc bpc" id="L363" title="2 of 7 branches missed.">            switch (change) {</span>
+<span class="pc bpc" id="L365" title="2 of 7 branches missed.">            switch (change) {</span>
                 case SET:
-<span class="fc" id="L365">                    _setAllEntriesAt(attr, c, index, count, oldModels, newModels, lensSupplier, viewSupplier);</span>
-<span class="fc" id="L366">                    break;</span>
+<span class="fc" id="L367">                    _setAllEntriesAt(attr, c, index, count, oldModels, newModels, lensSupplier, viewSupplier);</span>
+<span class="fc" id="L368">                    break;</span>
                 case ADD:
-<span class="fc" id="L368">                    _addAllEntriesAt(attr, c, index, newModels.sliceAt(index, count), lensSupplier, viewSupplier);</span>
-<span class="fc" id="L369">                    break;</span>
+<span class="fc" id="L370">                    _addAllEntriesAt(attr, c, index, newModels.sliceAt(index, count), lensSupplier, viewSupplier);</span>
+<span class="fc" id="L371">                    break;</span>
                 case REMOVE:
-<span class="fc" id="L371">                    c.removeEntriesAt(index, count);</span>
-<span class="fc" id="L372">                    break;</span>
+<span class="fc" id="L373">                    c.removeEntriesAt(index, count);</span>
+<span class="fc" id="L374">                    break;</span>
                 case RETAIN: // Only keep the elements in the range.
                     // Remove trailing components:
-<span class="fc" id="L375">                    c.removeEntriesAt(index + count, c.getNumberOfEntries() - (index + count));</span>
+<span class="fc" id="L377">                    c.removeEntriesAt(index + count, c.getNumberOfEntries() - (index + count));</span>
                     // Remove leading components:
-<span class="fc" id="L377">                    c.removeEntriesAt(0, index);</span>
-<span class="fc" id="L378">                    break;</span>
+<span class="fc" id="L379">                    c.removeEntriesAt(0, index);</span>
+<span class="fc" id="L380">                    break;</span>
                 case CLEAR:
-<span class="fc" id="L380">                    c.removeAllEntries();</span>
-<span class="fc" id="L381">                    break;</span>
+<span class="fc" id="L382">                    c.removeAllEntries();</span>
+<span class="fc" id="L383">                    break;</span>
                 case NONE:
-<span class="nc" id="L383">                    break;</span>
+<span class="nc" id="L385">                    break;</span>
                 default:
-<span class="nc" id="L385">                    log.error(SwingTree.get().logMarker(),</span>
+<span class="nc" id="L387">                    log.error(SwingTree.get().logMarker(),</span>
                             &quot;Unknown change type: {}&quot;,
                             change, new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                         );
                     // We do a simple rebuild:
-<span class="nc" id="L390">                    c.removeAllEntries();</span>
-<span class="nc" id="L391">                    _addAllEntriesAt(attr, c, 0, newModels, lensSupplier, viewSupplier);</span>
+<span class="nc" id="L392">                    c.removeAllEntries();</span>
+<span class="nc" id="L393">                    _addAllEntriesAt(attr, c, 0, newModels, lensSupplier, viewSupplier);</span>
             }
         }
-<span class="fc" id="L394">    }</span>
+<span class="fc" id="L396">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
