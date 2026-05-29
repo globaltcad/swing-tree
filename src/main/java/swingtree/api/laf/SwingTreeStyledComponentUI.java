@@ -98,7 +98,7 @@ import java.util.function.Supplier;
  *      Another important aspect to consider if you want your look and feel to integrate
  *      well with SwingTree is <b>UI scaling for high DPI screens!</b>.
  *      SwingTree scales style renderings for you automatically, but when any custom painting
- *      in your <i>Look and Feel</i> must multiplied by the value returned by {@link UI#scale()}.
+ *      in your <i>Look and Feel</i> must be multiplied by the value returned by {@link UI#scale()}.
  *  </p>
  *
  * @param <C> The type of {@link JComponent} for which a particular {@link javax.swing.plaf.ComponentUI} is designed.
