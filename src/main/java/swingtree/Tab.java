@@ -92,7 +92,7 @@ public final class Tab
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab isSelectedIf( Var<Boolean> isSelected ) {
-        NullUtil.nullArgCheck(isSelected,"isSelected",Val.class);
+        NullUtil.nullArgCheck(isSelected,"isSelected",Var.class);
         if ( _isSelected != null )
             log.warn(SwingTree.get().logMarker(), "Selection flag already specified!", new Throwable("Stack trace for debugging purposes."));
 

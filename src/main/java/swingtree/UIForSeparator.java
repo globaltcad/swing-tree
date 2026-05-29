@@ -50,7 +50,7 @@ public final class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UI
      * @throws IllegalArgumentException if {@code align} is {@code null}.
      */
     public final UIForSeparator<S> withOrientation( UI.Align align ) {
-        NullUtil.nullArgCheck( align, "align", Val.class );
+        NullUtil.nullArgCheck( align, "align", UI.Align.class );
         return _with( thisComponent -> {
                     thisComponent.setOrientation( align.forSeparator() );
                 })
