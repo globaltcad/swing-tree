@@ -115,7 +115,9 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
             NamedConf<S> namedConf = newStyles[i];
             boolean isNone = namedConf.isNone();
             if ( isNone && filtered == null ) {
-                filtered = new ArrayList<>(Arrays.asList(newStyles).subList(0, i));
+                filtered = new ArrayList<>(newStyles.length - 1);
+                for ( int k = 0; k < i; k++ )
+                    filtered.add(newStyles[k]);
             }
             if ( !isNone && filtered != null ) {
                 filtered.add(namedConf);

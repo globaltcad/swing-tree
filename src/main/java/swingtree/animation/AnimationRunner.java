@@ -77,11 +77,17 @@ final class AnimationRunner
 
         long now = System.currentTimeMillis();
 
-        for ( RunningAnimation running : new ArrayList<>(_runningAnimations) )
+        // Snapshot to a typed array — user animation callbacks may add new animations
+        // back into `_runningAnimations` on this same EDT call (via AnimationRunner.add),
+        // so we must not iterate the live list directly.
+        RunningAnimation[] snapshot = _runningAnimations.toArray(new RunningAnimation[0]);
+        for ( int i = 0; i < snapshot.length; i++ ) {
+            RunningAnimation running = snapshot[i];
             if ( !_runAndCheck(running, now, event) ) {
                 _runningAnimations.remove(running);
                 running.component().ifPresent( _toBeCleaned::add );
             }
+        }
     }
 
     private void _add( RunningAnimation runningAnimation ) {
