@@ -3,6 +3,7 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
 import sprouts.Pair;
 import sprouts.Var;
 import sprouts.Viewable;
@@ -116,6 +117,33 @@ public final class SwingTree
         UI.runNow(()->{
             _INSTANCE = new LazyRef<>(()->new SwingTree(configurator));
         });
+    }
+
+    /**
+     *  Computes a sensible UI scale factor derived purely from the current platform's
+     *  default system font, <b>without any side effects</b>.<br>
+     *  This static utility never creates or accesses the {@link SwingTree} singleton,
+     *  never installs {@link java.beans.PropertyChangeListener}s on the {@link UIManager}
+     *  or its defaults, and never modifies any shared library state.<br>
+     *  <br>
+     *  It is intended for callers that need a reasonable scale factor — for example to
+     *  size a splash screen or a startup window before deciding whether to initialize
+     *  the full {@link SwingTree} library context — and that want a pure, repeatable
+     *  read without bootstrapping anything.<br>
+     *  <br>
+     *  The returned value is computed from the OS-specific system font in essentially
+     *  the same way as the regular library scale, but it does <b>not</b> apply the
+     *  {@code swingtree.uiScale} system property override and does <b>not</b> consult
+     *  the {@link UIManager}'s {@code "defaultFont"} key. On any reasonable system,
+     *  the result falls comfortably inside {@code [0.2f, 5f]}.
+     *
+     * @return A sensible UI scale factor for the current platform, typically between
+     *         {@code 0.5} and {@code 4}, computed from the OS system font with no
+     *         side effects on shared state.
+     */
+    public static float getPlatformScaleFactor() {
+        FontUIResource font = UiScale._calculatePlatformFont(MarkerFactory.getMarker(""));
+        return UiScale._normalize(UiScale._internalComputeScaleFactorFrom(font), true);
     }
 
     private SwingTreeInitConfig _config;
@@ -703,6 +731,18 @@ public final class SwingTree
 
         private Font _calculateDPIAwarePlatformFont(Marker marker)
         {
+            // increase font size if system property "swingtree.uiScale" is set
+            return _applyCustomScaleFactor( _calculatePlatformFont(marker) );
+        }
+
+        /**
+         *  Resolves the default platform UI font without any side effects on
+         *  the {@link UIManager}, the {@link SwingTree} singleton, or any other shared state.
+         *  This is intentionally package-private and static so it can be reused by
+         *  {@link SwingTree#getPlatformScaleFactor()} without creating a library context.
+         */
+        static FontUIResource _calculatePlatformFont(Marker marker)
+        {
             FontUIResource dpiAwareFont = null;
 
             // determine UI font based on operating system
@@ -767,9 +807,6 @@ public final class SwingTree
                     } );
                 }
             */
-
-            // increase font size if system property "swingtree.uiScale" is set
-            dpiAwareFont = _applyCustomScaleFactor( dpiAwareFont );
 
             return dpiAwareFont;
         }
@@ -905,9 +942,19 @@ public final class SwingTree
             // because even if we are on a HiDPI display it is not sure
             // that a larger font size is set by the current LaF
             // (e.g. can avoid large icons with small text)
+
+            // When the user explicitly opted out of installing the font in the UIManager
+            // (FontInstallation.NONE), the UIManager's "defaultFont" may carry stale state
+            // left over from another part of the application (e.g. an earlier LaF change or
+            // another test in the suite). In that case the user-supplied font is authoritative
+            // and must take precedence so the computed scale factor stays deterministic.
+            Font configFont = config.defaultFont().orElse(null);
+            if ( configFont != null && config.fontInstallation() == SwingTreeInitConfig.FontInstallation.NONE )
+                return configFont;
+
             Font font = UIManager.getFont( _DEFAULT_FONT );
             if ( font == null )
-                font = config.defaultFont().orElse(null);
+                font = configFont;
             if ( font == null )
                 font = UIManager.getFont( "Label.font" );
 
@@ -934,7 +981,7 @@ public final class SwingTree
          * @param font font to compute scale factor from
          * @return scale factor
          */
-        private float _internalComputeScaleFactorFrom( Font font ) {
+        private static float _internalComputeScaleFactorFrom( Font font ) {
             if ( SystemInfo.isWindows ) {
                 // Special handling for Windows to be compatible with OS scaling,
                 // which distinguish between "screen scaling" and "text scaling".
@@ -1047,8 +1094,12 @@ public final class SwingTree
         }
 
         private float _normalize( float scaleFactor ) {
+            return _normalize(scaleFactor, config.isUiScaleDownAllowed());
+        }
+
+        static float _normalize( float scaleFactor, boolean allowScaleDown ) {
             if ( scaleFactor < 1f ) {
-                scaleFactor = config.isUiScaleDownAllowed()
+                scaleFactor = allowScaleDown
                         ? Math.round( scaleFactor * 10f ) / 10f // round small scale factor to 1/10
                         : 1f;
             }

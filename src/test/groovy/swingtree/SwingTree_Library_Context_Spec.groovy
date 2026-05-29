@@ -39,6 +39,10 @@ class SwingTree_Library_Context_Spec extends Specification {
     def setup() {
         // Make sure to reset the library context before each test, otherwise the tests would influence each other.
         SwingTree.clear()
+        // Pin the cross-platform look and feel so prior specs that switched to Nimbus, FlatLaf,
+        // etc. cannot leak a LaF-installed "defaultFont" through `getLookAndFeelDefaults()`
+        // and skew the scale factor computation in this spec.
+        UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
         // Also, make sure the "defaultFont" in the UIManager is always `null` before each test,
         // as this is the default state before the library context is initialized and it can influence the UI scale factor computation.
         UIManager.getDefaults().put("defaultFont", null)
@@ -166,9 +170,9 @@ class SwingTree_Library_Context_Spec extends Specification {
 
     def 'You can specify a default font for the SwingTree UI scale without installing it in the `UIManager`.'() {
         reportInfo """
-            If you want SwingTree to compute its UI scale factor from a custom default font 
-            but you do not want to install this font in the `UIManager`, you can choose the "none" 
-            font installation when initializing the library context. 
+            If you want SwingTree to compute its UI scale factor from a custom default font
+            but you do not want to install this font in the `UIManager`, you can choose the "none"
+            font installation when initializing the library context.
         """
         given:
             boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win")
@@ -190,6 +194,39 @@ class SwingTree_Library_Context_Spec extends Specification {
 
         cleanup: 'Reset the library context to be `null` again internally!'
             SwingTree.clear()
+    }
+
+    def 'A NONE font installation uses the supplied font even when the `UIManager` already has a different "defaultFont".'() {
+        reportInfo """
+            The contract of `FontInstallation.NONE` is that SwingTree should compute its UI scale
+            factor from the supplied default font *and* ignore the `UIManager` state entirely.
+
+            This unit test reproduces the conditions under which other tests in the suite
+            (typically those that exercise alternative Look and Feels like Nimbus or FlatLaf)
+            can leak a non-null "defaultFont" into the `UIManager` and used to make the
+            sibling specification flaky: the previously stored font was preferred over the
+            user-supplied one, producing an unexpected scale factor.
+        """
+        given : 'A stale `UIManager` default font from a hypothetical earlier scenario:'
+            boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win")
+            var staleFont = new java.awt.Font("Serif", java.awt.Font.PLAIN, 12)
+            UIManager.getDefaults().put("defaultFont", staleFont)
+        and: 'A unique default font that we want SwingTree to scale from:'
+            var myDefaultFont = new java.awt.Font("Arial", java.awt.Font.ITALIC, 73)
+        and: 'We initialize SwingTree with the custom default font using a NONE installation:'
+            SwingTree.initializeUsing(conf -> conf
+                .defaultFont(myDefaultFont, SwingTreeInitConfig.FontInstallation.NONE)
+            )
+
+        expect: 'The scale factor is derived from our supplied font, not the leftover one in the `UIManager`:'
+            SwingTree.get().getUiScaleFactor() == (isWindows ? 6f : 4.75f)
+            UI.scale() == (isWindows ? 6f : 4.75f)
+        and: 'The `UIManager` "defaultFont" is left untouched, as documented by the NONE installation:'
+            UIManager.getDefaults().get("defaultFont") === staleFont
+
+        cleanup:
+            SwingTree.clear()
+            UIManager.getDefaults().put("defaultFont", null)
     }
 
     def 'SwingTree notices when the "defaultFont" changes in the `UIManager` and it updates its UI scale factor accordingly.'() {
@@ -303,6 +340,34 @@ class SwingTree_Library_Context_Spec extends Specification {
 
         cleanup: 'Reset the library context!'
             SwingTree.clear()
+    }
+
+    def 'The static `getPlatformScaleFactor` returns a sensible UI scale for the current platform without any side effects.'() {
+        reportInfo """
+            `SwingTree.getPlatformScaleFactor()` is a side-effect free static utility
+            that derives a sensible UI scale factor from the current platform's system
+            font. It does <i>not</i> create or access the `SwingTree` singleton, does
+            <i>not</i> register listeners on the `UIManager`, and does <i>not</i> mutate
+            any shared state.
+
+            On any reasonable platform, the returned value should always fall within
+            `[0.2f, 5f]`. Anything outside this range is almost certainly a bug
+            regardless of the operating system, look and feel, or display configuration.
+        """
+        given : 'We snapshot the `UIManager` "defaultFont" so we can check it is untouched afterwards.'
+            var defaultFontBefore = UIManager.getDefaults().get("defaultFont")
+
+        when : 'We ask SwingTree for a platform-derived scale factor.'
+            float scale = SwingTree.getPlatformScaleFactor()
+
+        then : 'The result is a finite, positive number well inside the sensible range.'
+            Float.isFinite(scale)
+            scale >= 0.2f
+            scale <= 5f
+        and : 'Calling the method again yields the exact same value (it is a pure read).'
+            SwingTree.getPlatformScaleFactor() == scale
+        and : 'The `UIManager` "defaultFont" was not modified as a side effect.'
+            UIManager.getDefaults().get("defaultFont") === defaultFontBefore
     }
 
     def 'You can configure the keystroke for summoning the dev tool in the library context!'()
