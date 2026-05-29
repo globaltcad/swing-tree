@@ -93,7 +93,7 @@ import java.util.function.Supplier;
  *        return true;
  *    }
  *  }</pre>
- *  That way, the <i>SwingTree</i>s style engine works reliably for all components!<br>
+ *  That way, the <i>SwingTree</i>'s style engine works reliably for all components!<br>
  *  <p>
  *      Another important aspect to consider if you want your look and feel to integrate
  *      well with SwingTree is <b>UI scaling for high DPI screens!</b>.
