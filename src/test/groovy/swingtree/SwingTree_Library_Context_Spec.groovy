@@ -342,6 +342,34 @@ class SwingTree_Library_Context_Spec extends Specification {
             SwingTree.clear()
     }
 
+    def 'The static `getPlatformScaleFactor` returns a sensible UI scale for the current platform without any side effects.'() {
+        reportInfo """
+            `SwingTree.getPlatformScaleFactor()` is a side-effect free static utility
+            that derives a sensible UI scale factor from the current platform's system
+            font. It does <i>not</i> create or access the `SwingTree` singleton, does
+            <i>not</i> register listeners on the `UIManager`, and does <i>not</i> mutate
+            any shared state.
+
+            On any reasonable platform, the returned value should always fall within
+            `[0.2f, 5f]`. Anything outside this range is almost certainly a bug
+            regardless of the operating system, look and feel, or display configuration.
+        """
+        given : 'We snapshot the `UIManager` "defaultFont" so we can check it is untouched afterwards.'
+            var defaultFontBefore = UIManager.getDefaults().get("defaultFont")
+
+        when : 'We ask SwingTree for a platform-derived scale factor.'
+            float scale = SwingTree.getPlatformScaleFactor()
+
+        then : 'The result is a finite, positive number well inside the sensible range.'
+            Float.isFinite(scale)
+            scale >= 0.2f
+            scale <= 5f
+        and : 'Calling the method again yields the exact same value (it is a pure read).'
+            SwingTree.getPlatformScaleFactor() == scale
+        and : 'The `UIManager` "defaultFont" was not modified as a side effect.'
+            UIManager.getDefaults().get("defaultFont") === defaultFontBefore
+    }
+
     def 'You can configure the keystroke for summoning the dev tool in the library context!'()
     {
         reportInfo """
