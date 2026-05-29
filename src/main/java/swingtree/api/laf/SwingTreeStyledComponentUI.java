@@ -3,6 +3,7 @@ package swingtree.api.laf;
 import sprouts.Observable;
 import sprouts.Val;
 import swingtree.SwingTreeConfigurator;
+import swingtree.UI;
 import swingtree.animation.LifeTime;
 import swingtree.api.AnimatedStyler;
 import swingtree.api.Styler;
@@ -92,7 +93,13 @@ import java.util.function.Supplier;
  *        return true;
  *    }
  *  }</pre>
- *  That way, the <i>SwingTree</i>s style engine works reliably for all components!
+ *  That way, the <i>SwingTree</i>s style engine works reliably for all components!<br>
+ *  <p>
+ *      Another important aspect to consider if you want your look and feel to integrate
+ *      well with SwingTree is <b>UI scaling for high DPI screens!</b>.
+ *      SwingTree scales style renderings for you automatically, but when any custom painting
+ *      in you <i>Look and Feel</i> must multiplied by the value returned by {@link UI#scale()}.
+ *  </p>
  *
  * @param <C> The type of {@link JComponent} for which a particular {@link javax.swing.plaf.ComponentUI} is designed.
  */
