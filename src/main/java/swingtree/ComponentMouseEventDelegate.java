@@ -16,7 +16,7 @@ import java.awt.event.MouseEvent;
  *  {@link UIForAnySwing#onMouseRelease(sprouts.Action)}, among others.
  *  <br>
  *  This delegate is designed to provide clutter-free access to both the
- *  concrete {@link JComponent} subtype {@code C} as well a the {@link MouseEvent}
+ *  concrete {@link JComponent} subtype {@code C} as well as the {@link MouseEvent}
  *  which triggered the action.
  *  <p>
  *  Here is an example of how this delegate is typically exposed in your {@link sprouts.Action}:

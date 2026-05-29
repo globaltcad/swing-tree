@@ -2333,7 +2333,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(condition, "condition", Val.class);
         NullUtil.nullArgCheck(color, "color", Val.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided background color!");
-        NullUtil.nullPropertyCheck(color, "color", "Null is not allowed to model the the provided background color! Please use the default color of this component instead.");
+        NullUtil.nullPropertyCheck(color, "color", "Null is not allowed to model the provided background color! Please use the default color of this component instead.");
         return _with( thisComponent -> {
                     Var<Color> baseColor = Var.of( thisComponent.getBackground() );
                     _onShow( condition, thisComponent, (c,v) -> _updateBackground( c, condition, color, baseColor ) );
@@ -2643,7 +2643,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(condition, "condition", Val.class);
         NullUtil.nullArgCheck(color, "color", Val.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided foreground color!");
-        NullUtil.nullPropertyCheck(color, "color", "Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.");
+        NullUtil.nullPropertyCheck(color, "color", "Null is not allowed to model the provided foreground color! Please use the default color of this component instead.");
         return _with( thisComponent -> {
                     Var<Color> baseColor = Var.of( thisComponent.getForeground() );
                     _onShow( condition, thisComponent, (c,v) -> _updateForeground( c, condition, color, baseColor ) );
@@ -2700,8 +2700,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(colorIfTrue, "colorIfTrue", Val.class);
         NullUtil.nullArgCheck(colorIfFalse, "colorIfFalse", Val.class);
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the usage of the provided foreground color!");
-        NullUtil.nullPropertyCheck(colorIfTrue, "colorIfTrue", "Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.");
-        NullUtil.nullPropertyCheck(colorIfFalse, "colorIfFalse", "Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.");
+        NullUtil.nullPropertyCheck(colorIfTrue, "colorIfTrue", "Null is not allowed to model the provided foreground color! Please use the default color of this component instead.");
+        NullUtil.nullPropertyCheck(colorIfFalse, "colorIfFalse", "Null is not allowed to model the provided foreground color! Please use the default color of this component instead.");
         return _withOnShow( condition, (c,v) -> {
                     _updateForeground( c, condition, colorIfTrue, Var.of(colorIfFalse.get()) );
                 })

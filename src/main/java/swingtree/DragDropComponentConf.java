@@ -186,7 +186,7 @@ public final class DragDropComponentConf<C extends JComponent>
      * gesture. The {@link DropTargetDropEvent}
      * provides a means to obtain a {@link java.awt.datatransfer.Transferable}
      * object that represents the data object(s) to
-     * be transfered.<P>
+     * be transferred.<P>
      * From this method, the <code>DropTargetListener</code>
      * shall accept or reject the drop via the
      * acceptDrop(int dropAction) or rejectDrop() methods of the
