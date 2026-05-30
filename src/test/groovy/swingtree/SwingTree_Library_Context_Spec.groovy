@@ -6,11 +6,14 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import sprouts.From
+import sprouts.Viewable
 import swingtree.style.StyleSheet
 import swingtree.threading.EventProcessor
 
 import javax.swing.UIManager
 import javax.swing.plaf.FontUIResource
+import javax.swing.plaf.basic.BasicLookAndFeel
+import java.util.concurrent.atomic.AtomicReference
 
 
 @Title('Library Context')
@@ -368,6 +371,199 @@ class SwingTree_Library_Context_Spec extends Specification {
             SwingTree.getPlatformScaleFactor() == scale
         and : 'The `UIManager` "defaultFont" was not modified as a side effect.'
             UIManager.getDefaults().get("defaultFont") === defaultFontBefore
+    }
+
+    def 'The `getDefaultFont()` method always returns a `FontUIResource`, wrapping a plain `Font` if necessary.'() {
+        reportInfo """
+            Look and Feel authors usually want a font they can drop straight into
+            `UIDefaults` keys like `Label.font` without breaking Swing's
+            LAF-replacement contract. That contract is gated on `instanceof UIResource`:
+            a plain `Font` is treated as user-set and is *preserved* across LAF swaps,
+            while a `FontUIResource` is replaceable.
+
+            `SwingTree.get().getDefaultFont()` therefore *always* returns a
+            `FontUIResource` — even when the underlying font in the `UIManager`
+            is a plain `Font`, SwingTree wraps it for you.
+        """
+        given : 'We seed the `UIManager` with a *plain* `Font` (not a `FontUIResource`) under "defaultFont":'
+            var plainFont = new java.awt.Font("Arial", java.awt.Font.PLAIN, 17)
+            assert !(plainFont instanceof FontUIResource)
+            UIManager.getDefaults().put("defaultFont", plainFont)
+        when : 'We initialize SwingTree and ask for the default font:'
+            SwingTree.initialize()
+            var resolved = SwingTree.get().getDefaultFont()
+        then : 'It is a `FontUIResource` (so it can be installed into UIDefaults directly):'
+            resolved instanceof FontUIResource
+        and : 'The wrapped font carries the same family, size and style as the original:'
+            resolved.getFamily() == plainFont.getFamily()
+            resolved.getSize()   == plainFont.getSize()
+            resolved.getStyle()  == plainFont.getStyle()
+        and : 'The method never returns `null`:'
+            resolved != null
+
+        cleanup:
+            SwingTree.clear()
+            UIManager.getDefaults().put("defaultFont", null)
+    }
+
+    def 'The `getDefaultFont()` method tracks the currently active "defaultFont" in the `UIManager`.'() {
+        reportInfo """
+            `getDefaultFont()` is the single source of truth for the active default font.
+            Whatever sits under `UIManager.get("defaultFont")` at the time of the call
+            is what comes back (wrapped in a `FontUIResource` if it wasn't one already).
+
+            That means the method always reflects the *current* state — not a snapshot
+            taken when the library was first initialized — so changes pushed through
+            the `UIManager` after bootstrap are observed immediately.
+        """
+        given : 'A custom default font installed before SwingTree initializes:'
+            var configuredFont = new FontUIResource(new java.awt.Font("Dialog", java.awt.Font.BOLD, 31))
+            UIManager.getDefaults().put("defaultFont", configuredFont)
+        and : 'SwingTree initializes:'
+            SwingTree.initialize()
+        expect : 'getDefaultFont() returns exactly the configured font (no wrapping needed):'
+            SwingTree.get().getDefaultFont() === configuredFont
+
+        when : 'We later swap the default font in the `UIManager`:'
+            var differentFont = new FontUIResource(new java.awt.Font("Serif", java.awt.Font.ITALIC, 24))
+            UIManager.getDefaults().put("defaultFont", differentFont)
+        then : 'The next call to getDefaultFont() returns the new font:'
+            SwingTree.get().getDefaultFont() === differentFont
+
+        cleanup:
+            SwingTree.clear()
+            UIManager.getDefaults().put("defaultFont", null)
+    }
+
+    def 'You can subscribe to live `defaultFont` changes through `getDefaultFontView()`.'() {
+        reportInfo """
+            SwingTree publishes the authoritative default font through a reactive
+            `Viewable<FontUIResource>` so a Look and Feel can be truly dynamic:
+            re-install its per-component `*.font` keys and refresh open windows
+            as soon as the OS, the user or another part of the application
+            flips the system font.
+
+            The view fires for every input that drives the resolved default font —
+            the `UIManager` "defaultFont" key in particular — and never delivers
+            a `null` payload.
+        """
+        given : 'A reasonable default font in place before SwingTree initializes:'
+            var firstFont = new FontUIResource(new java.awt.Font("Dialog", java.awt.Font.PLAIN, 14))
+            UIManager.getDefaults().put("defaultFont", firstFont)
+            SwingTree.initialize()
+        and : 'A view + trace list of every value the property emits:'
+            var trace = []
+            var fontView = SwingTree.get().getDefaultFontView()
+            fontView.onChange(From.ALL, it -> trace.add(it.currentValue().orElseThrow()))
+        expect : 'The initial value of the view matches the current default font:'
+            fontView.get() === firstFont
+
+        when : 'We push a new default font through the `UIManager`:'
+            var secondFont = new FontUIResource(new java.awt.Font("Serif", java.awt.Font.BOLD, 28))
+            UIManager.getDefaults().put("defaultFont", secondFont)
+        then : 'The view subscribers see the new font:'
+            trace == [secondFont]
+
+        when : 'We push yet another font:'
+            var thirdFont = new FontUIResource(new java.awt.Font("SansSerif", java.awt.Font.ITALIC, 19))
+            UIManager.getDefaults().put("defaultFont", thirdFont)
+        then : 'Subscribers see that one too:'
+            trace == [secondFont, thirdFont]
+
+        cleanup:
+            SwingTree.clear()
+            UIManager.getDefaults().put("defaultFont", null)
+    }
+
+    def 'The `getDefaultFontView()` view does NOT fire when the same font value is re-installed.'() {
+        reportInfo """
+            SwingTree's internal listener fires for *every* PropertyChangeEvent on
+            "defaultFont" — even when an application puts the same value back into the
+            `UIManager`. To prevent that low-level noise from leaking into reactive
+            subscribers, the published default-font property only signals when the
+            resolved value actually differs from the previous one (value equality,
+            not identity). That keeps Look and Feel re-installation cheap.
+        """
+        given : 'An initialized SwingTree with a baseline default font:'
+            var baseline = new FontUIResource(new java.awt.Font("Dialog", java.awt.Font.PLAIN, 14))
+            UIManager.getDefaults().put("defaultFont", baseline)
+            SwingTree.initialize()
+        and : 'A subscriber that records every emitted font:'
+            var trace = []
+            var fontView = SwingTree.get().getDefaultFontView()
+            fontView.onChange(From.ALL, it -> trace.add(it.currentValue().orElseThrow()))
+
+        when : 'We push an *equal* (but not identical) FontUIResource back into the `UIManager`:'
+            var equalCopy = new FontUIResource(new java.awt.Font("Dialog", java.awt.Font.PLAIN, 14))
+            UIManager.getDefaults().put("defaultFont", equalCopy)
+        then : 'The view subscriber does not fire — the resolved value did not change:'
+            trace == []
+
+        when : 'We push a genuinely different font:'
+            var bigger = new FontUIResource(new java.awt.Font("Dialog", java.awt.Font.PLAIN, 28))
+            UIManager.getDefaults().put("defaultFont", bigger)
+        then : 'The subscriber receives exactly one change notification:'
+            trace == [bigger]
+
+        cleanup:
+            SwingTree.clear()
+            UIManager.getDefaults().put("defaultFont", null)
+    }
+
+    def 'A custom Look and Feel can fetch `getDefaultFontView()` from its `initialize()` hook without NPE.'() {
+        reportInfo """
+            The recommended pattern for a SwingTree-aware Look and Feel is to
+            subscribe to `SwingTree.get().getDefaultFontView()` from inside the
+            LAF's own `initialize()` hook — so that runtime DPI / system-font
+            changes flow into the UI without a restart.
+
+            That timing is tricky: during `LookAndFeel.initialize()`,
+            `UIManager.getLookAndFeelDefaults()` can still be `null` because the
+            install has not yet committed the new defaults table. SwingTree
+            therefore guards each `addPropertyChangeListener` call and re-attempts
+            any skipped attach on the next `"lookAndFeel"` PropertyChangeEvent
+            (which is guaranteed to fire at the end of `UIManager.setLookAndFeel(..)`).
+
+            This test reproduces the call order and verifies both halves of the
+            contract — no NPE during init, and the listener still propagates
+            `UIManager` font changes after the install completes.
+        """
+        given : 'A trace list of fonts the view emits after install:'
+            var trace = []
+            var capturedView = new AtomicReference<Viewable<FontUIResource>>()
+        and : 'A minimal custom Look and Feel that subscribes from inside `initialize()`:'
+            var laf = new BasicLookAndFeel() {
+                @Override String getName()                 { "SelfHealTest" }
+                @Override String getID()                   { "SelfHealTest" }
+                @Override String getDescription()          { "self-heal test LAF" }
+                @Override boolean isNativeLookAndFeel()    { false }
+                @Override boolean isSupportedLookAndFeel() { true  }
+                @Override void initialize() {
+                    super.initialize()
+                    // This is exactly the call pattern that used to throw an
+                    // NPE because UIManager.getLookAndFeelDefaults() was null.
+                    var view = SwingTree.get().getDefaultFontView()
+                    view.onChange(From.ALL, it -> trace.add(it.currentValue().orElseThrow()))
+                    capturedView.set(view)
+                }
+            }
+
+        when : 'We install the LAF — the bootstrap MUST NOT throw:'
+            UIManager.setLookAndFeel(laf)
+        then : 'No exception was raised and the view was obtained successfully:'
+            noExceptionThrown()
+            capturedView.get() != null
+
+        when : 'After the install completes, we push a fresh "defaultFont" through the `UIManager`:'
+            var afterInstall = new FontUIResource(new java.awt.Font("Serif", java.awt.Font.BOLD, 33))
+            UIManager.getDefaults().put("defaultFont", afterInstall)
+        then : 'The listener that was attached during initialize self-healed: the view fires:'
+            trace.contains(afterInstall)
+
+        cleanup:
+            UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())
+            SwingTree.clear()
+            UIManager.getDefaults().put("defaultFont", null)
     }
 
     def 'You can configure the keystroke for summoning the dev tool in the library context!'()

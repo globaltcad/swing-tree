@@ -97,9 +97,51 @@ import java.util.function.Supplier;
  *  <p>
  *      Another important aspect to consider if you want your look and feel to integrate
  *      well with SwingTree is <b>UI scaling for high DPI screens!</b>.
- *      SwingTree scales style renderings for you automatically, but when any custom painting
- *      in your <i>Look and Feel</i> must be multiplied by the value returned by {@link UI#scale()}.
+ *      SwingTree scales style renderings for you automatically, but when you do custom painting
+ *      in your <i>Look and Feel</i> then positions and dimensions must be multiplied by {@link UI#scale()}.
  *  </p>
+ *
+ *  <h2>HiDPI fonts: ask SwingTree, don't hardcode</h2>
+ *  <p>
+ *      <b>The most common pitfall when porting an existing
+ *      {@link javax.swing.plaf.basic.BasicLookAndFeel} to SwingTree is to
+ *      install fixed-size fonts in
+ *      {@code javax.swing.plaf.basic.BasicLookAndFeel#initComponentDefaults(javax.swing.UIDefaults)}.</b>
+ *      SwingTree already computes a properly platform-scaled default font
+ *      for the active display (Windows screen scaling, GNOME / KDE Xft DPI,
+ *      macOS system font, …) and exposes it through
+ *      {@link swingtree.SwingTree#getDefaultFont()}. It just cannot
+ *      <i>force</i> your LAF to use it. If you put
+ *      {@code new Font(Font.DIALOG, PLAIN, 13)} into {@code Label.font},
+ *      you get a 13-pt font on a 4K screen too, which looks like six
+ *      points to a human.
+ *  </p>
+ *  The SwingTree-friendly recipe is one line: in
+ *  {@code initComponentDefaults(..)} read the platform-scaled font
+ *  through {@link swingtree.SwingTree#getDefaultFont()
+ *  SwingTree.get().getDefaultFont()} and use it for every
+ *  {@code *.font} key (including {@code "defaultFont"} itself, so the
+ *  engine and your LAF agree on the same single value). The method
+ *  returns a {@link javax.swing.plaf.FontUIResource} ready to be
+ *  installed directly into {@link javax.swing.UIDefaults}, and lazily
+ *  bootstraps the library on first call, so the order in which
+ *  {@code setLookAndFeel(..)} and {@code UI.show(..)} are invoked no
+ *  longer matters.
+ *  <p>
+ *      <i>Optional but recommended for dynamic HiDPI:</i> subscribe to
+ *      {@link swingtree.SwingTree#getDefaultFontView()} from your
+ *      {@code LookAndFeel#initialize()} hook and, on every fire, re-push
+ *      the new font into your {@code *.font} keys and call
+ *      {@link javax.swing.SwingUtilities#updateComponentTreeUI(java.awt.Component)
+ *      SwingUtilities.updateComponentTreeUI(window)} on each open
+ *      window. That makes screen text track display-DPI changes,
+ *      {@link swingtree.SwingTree#setUiScaleFactor(float)} calls and OS
+ *      system-font changes without a restart. Hold the returned
+ *      {@link sprouts.Viewable} in a strong field — Sprouts holds change
+ *      listeners weakly and the subscription is dropped otherwise.
+ *  </p>
+ *  See the {@code Building-A-Look-And-Feel.md} wiki page (section
+ *  <i>"HiDPI fonts"</i>) for the complete worked example.
  *
  * @param <C> The type of {@link JComponent} for which a particular {@link javax.swing.plaf.ComponentUI} is designed.
  */
