@@ -205,7 +205,7 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
      * @param <N> The numeric type of the {@link Val} property.
      */
     public final <N extends Number> UIForTextField<F> withNumber( Val<N> number ) {
-        NullUtil.nullArgCheck(number, "number", Var.class);
+        NullUtil.nullArgCheck(number, "number", Val.class);
         return _withOnShow( number, (thisComponent, n) -> {
                     _setTextSilently( thisComponent, n.toString() );
                })

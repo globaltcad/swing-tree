@@ -271,13 +271,14 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 		}
 		// Or a character?
 		if ( type == Character.class ) {
-			if ( o.trim().length() == 1 )
-				return type.cast(o.charAt(0));
+			String trimmed = o.trim();
+			if ( trimmed.length() == 1 )
+				return type.cast(trimmed.charAt(0));
 			// Maybe it's all repeated?
-			if ( o.trim().length() > 1 ) {
-				char c = o.charAt(0);
-				for ( int i = 1; i < o.length(); i++ )
-					if ( o.charAt(i) != c )
+			if ( trimmed.length() > 1 ) {
+				char c = trimmed.charAt(0);
+				for ( int i = 1; i < trimmed.length(); i++ )
+					if ( trimmed.charAt(i) != c )
 						return _getSelectedItemSafely();
 				return type.cast(c);
 			}

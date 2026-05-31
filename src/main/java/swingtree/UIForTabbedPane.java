@@ -308,7 +308,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
      * @return This builder node.
      */
     public final UIForTabbedPane<P> withTabPlacementAt( Val<UI.Side> side ) {
-        NullUtil.nullArgCheck(side, "side", Var.class);
+        NullUtil.nullArgCheck(side, "side", Val.class);
         return _withOnShow( side, (thisComponent,v) -> {
                     thisComponent.setTabPlacement(v.forTabbedPane());
                })
@@ -349,7 +349,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
      * @return This builder node.
      */
     public final UIForTabbedPane<P> withOverflowPolicy( Val<UI.OverflowPolicy> policy ) {
-        NullUtil.nullArgCheck(policy, "policy", Var.class);
+        NullUtil.nullArgCheck(policy, "policy", Val.class);
         return _withOnShow( policy, (thisComponent,v) -> {
                     thisComponent.setTabLayoutPolicy(v.forTabbedPane());
                })

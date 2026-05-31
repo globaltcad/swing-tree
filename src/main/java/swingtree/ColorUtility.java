@@ -135,7 +135,7 @@ final class ColorUtility {
         // First some cleanup
         final String colorString = colorAsString.trim();
 
-        if (colorAsString.isEmpty())
+        if (colorString.isEmpty())
             return UI.Color.UNDEFINED;
 
         if (colorString.startsWith("#"))
