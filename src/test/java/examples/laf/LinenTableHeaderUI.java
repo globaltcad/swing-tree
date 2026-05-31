@@ -15,7 +15,6 @@ import javax.swing.plaf.basic.BasicTableHeaderUI;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
@@ -27,8 +26,9 @@ import java.awt.Graphics2D;
  *  Header cells are flat {@link LinenPalette#SURFACE} rectangles with a
  *  small inset, bold-leaning {@link LinenPalette#TEXT_MUTED} text and a
  *  hairline {@link LinenPalette#BORDER_SOFT} divider underneath. A
- *  {@link LinenHeaderRenderer} is installed as the default renderer for
- *  every column so the look is consistent regardless of model.
+ *  {@link LinenHeaderRenderer} is installed as the table header's default
+ *  renderer so the look is consistent regardless of model; columns that
+ *  do not set their own renderer inherit it automatically.
  *  <p>
  *  The class is {@code final}; customise via stylesheet or inline
  *  {@code .withStyle(..)}.
@@ -44,20 +44,16 @@ public final class LinenTableHeaderUI
     public void installUI(JComponent c) {
         super.installUI(c);
         JTableHeader h = (JTableHeader) c;
-        TableCellRenderer linenRenderer = new LinenHeaderRenderer();
-        // Follow Swing's UIResource contract: only replace renderers that
-        // the application has *not* explicitly opted into. A renderer the
-        // app installed directly is signalled by its NON-UIResource type;
-        // we must leave those alone so they survive LAF swaps.
+        // Follow Swing's UIResource contract: only replace the header's
+        // default renderer when it is a LAF default (absent or a UIResource);
+        // a renderer the app installed directly is a NON-UIResource and must
+        // survive LAF swaps. We deliberately do NOT touch per-column header
+        // renderers: a column with a null header renderer already falls back
+        // to this default, and installing our renderer per-column would make
+        // it "stick" after switching away from Linen — other LAFs replace
+        // JTableHeader.getDefaultRenderer() but do not clear per-column ones.
         if (isReplaceableLafDefault(h.getDefaultRenderer()))
-            h.setDefaultRenderer(linenRenderer);
-        if (h.getColumnModel() != null) {
-            for (int i = 0; i < h.getColumnModel().getColumnCount(); i++) {
-                TableColumn col = h.getColumnModel().getColumn(i);
-                if (isReplaceableLafDefault(col.getHeaderRenderer()))
-                    col.setHeaderRenderer(linenRenderer);
-            }
-        }
+            h.setDefaultRenderer(new LinenHeaderRenderer());
         ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
     }
 

@@ -510,6 +510,116 @@ class SwingTree_Library_Context_Spec extends Specification {
             UIManager.getDefaults().put("defaultFont", null)
     }
 
+    def 'A configured `uiScaleFactor` is folded into the font returned by `getDefaultFont()`.'() {
+        reportInfo """
+            SwingTree can arrive at its UI scale factor in two ways: by *deriving* it
+            from the size of the default font, or by having it *dictated* explicitly
+            through the `swingtree.uiScale` system property (equivalently
+            `conf.uiScaleFactor(..)` at initialization).
+
+            When the scale is dictated this way, the raw font sitting in the
+            `UIManager` — or the active Look and Feel's `Label.font` — does **not** yet
+            carry that factor. If `getDefaultFont()` handed that raw font back, a Look
+            and Feel author installing it into `UIDefaults` keys like `Label.font`
+            would get text at the unscaled size while the rest of SwingTree's layout
+            and painting is scaled — text and chrome would visibly disagree.
+
+            So `getDefaultFont()` folds the configured factor into the font it returns,
+            honouring its documented "already scaled" contract. What scales is the font
+            *size*: doubling the configured factor doubles the returned size. That
+            relationship is platform independent, even though the absolute pixel size
+            depends on the platform's reference font size (e.g. 15 on a typical Linux
+            desktop, 12 on Windows, 13 on macOS), which is why this test asserts the
+            *ratio* rather than a hard-coded size.
+        """
+        given : 'A deliberately small raw font in the `UIManager` — its size must NOT survive verbatim:'
+            var rawFont = new java.awt.Font("Monospaced", java.awt.Font.PLAIN, 9)
+            UIManager.getDefaults().put("defaultFont", rawFont)
+        and : 'We initialize SwingTree with the scale dictated explicitly as a factor of 2:'
+            SwingTree.initializeUsing(conf -> conf
+                .isUiScaleFactorEnabled(true)
+                .uiScaleFactor(2f)
+            )
+        and : 'We capture the resolved default font:'
+            var scaledTwice = SwingTree.get().getDefaultFont()
+
+        expect : 'It is a `FontUIResource`, so a LAF can drop it straight into `UIDefaults`:'
+            scaledTwice instanceof FontUIResource
+        and : 'The font family is preserved — only the size is touched:'
+            scaledTwice.getFamily() == rawFont.getFamily()
+        and : 'The raw, unscaled size was NOT returned verbatim — the configured factor was applied:'
+            scaledTwice.getSize() != rawFont.getSize()
+            scaledTwice.getSize() > rawFont.getSize()
+
+        when : 'We re-initialize with the very same font but a factor of 1, to obtain the unscaled baseline:'
+            SwingTree.clear()
+            UIManager.getDefaults().put("defaultFont", rawFont)
+            SwingTree.initializeUsing(conf -> conf
+                .isUiScaleFactorEnabled(true)
+                .uiScaleFactor(1f)
+            )
+            var scaledOnce = SwingTree.get().getDefaultFont()
+        then : 'The returned size scales linearly with the configured factor: twice the factor, twice the size.'
+            scaledTwice.getSize() == 2 * scaledOnce.getSize()
+
+        cleanup:
+            SwingTree.clear()
+            UIManager.getDefaults().put("defaultFont", null)
+    }
+
+    def 'The `getDefaultFontView()` exposes the scaled default font when a `uiScaleFactor` is configured.'() {
+        reportInfo """
+            The reactive `getDefaultFontView()` is the hook a dynamic Look and Feel
+            subscribes to so it can re-install its `*.font` keys whenever the
+            authoritative default font changes. It must publish the *same* value that
+            `getDefaultFont()` returns — including the scaling applied for an explicitly
+            configured `uiScaleFactor`. A LAF that trusted the view but received an
+            unscaled font would render text out of step with the rest of the UI.
+
+            This test pins the scale to a factor of 2 and shows that:
+            <ul>
+                <li>the view's current value is the *scaled* font (not the raw
+                    `UIManager` font), and matches `getDefaultFont()`; and</li>
+                <li>when the application swaps the source font in the `UIManager`, the
+                    view re-publishes a value that is still governed by the configured
+                    factor — the new family flows through, but the size stays locked to
+                    the dictated scale.</li>
+            </ul>
+        """
+        given : 'A raw source font installed before SwingTree initializes:'
+            var firstRaw = new java.awt.Font("Dialog", java.awt.Font.PLAIN, 10)
+            UIManager.getDefaults().put("defaultFont", firstRaw)
+        and : 'We initialize with the scale dictated explicitly as a factor of 2:'
+            SwingTree.initializeUsing(conf -> conf
+                .isUiScaleFactorEnabled(true)
+                .uiScaleFactor(2f)
+            )
+        and : 'A view plus a trace list of every value the property emits:'
+            var trace = []
+            var fontView = SwingTree.get().getDefaultFontView()
+            fontView.onChange(From.ALL, it -> trace.add(it.currentValue().orElseThrow()))
+
+        expect : 'The view never delivers a `null` payload and its current value is a `FontUIResource`:'
+            fontView.get() instanceof FontUIResource
+        and : 'The view exposes exactly what `getDefaultFont()` resolves — the scaled font, not the raw one:'
+            fontView.get() == SwingTree.get().getDefaultFont()
+            fontView.get().getSize() != firstRaw.getSize()
+            fontView.get().getSize() > firstRaw.getSize()
+
+        when : 'The application swaps the source font in the `UIManager` for a different family:'
+            var secondRaw = new java.awt.Font("Serif", java.awt.Font.BOLD, 40)
+            UIManager.getDefaults().put("defaultFont", secondRaw)
+        then : 'The view fires once, the new family flows through, but the size stays governed by the factor:'
+            trace.size() == 1
+            trace.last().getFamily() == secondRaw.getFamily()
+            trace.last().getSize()   == SwingTree.get().getDefaultFont().getSize()
+            trace.last().getSize()   != secondRaw.getSize()
+
+        cleanup:
+            SwingTree.clear()
+            UIManager.getDefaults().put("defaultFont", null)
+    }
+
     def 'A custom Look and Feel can fetch `getDefaultFontView()` from its `initialize()` hook without NPE.'() {
         reportInfo """
             The recommended pattern for a SwingTree-aware Look and Feel is to

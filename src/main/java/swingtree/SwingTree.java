@@ -1111,11 +1111,21 @@ public final class SwingTree
             Font font = _getDefaultFont();
             if ( font == null ) {
                 int size = Math.max(8, Math.round(13f * scaleFactor.get()));
-                font = new Font(Font.DIALOG, Font.PLAIN, size);
+                return new FontUIResource(new Font(Font.DIALOG, Font.PLAIN, size));
             }
-            return ( font instanceof FontUIResource )
+            FontUIResource resource = ( font instanceof FontUIResource )
                     ? (FontUIResource) font
                     : new FontUIResource(font);
+            // When scaling is driven explicitly by "swingtree.uiScale" /
+            // uiScaleFactor (rather than derived from the font size itself),
+            // the raw UIManager / "Label.font" we just resolved does NOT carry
+            // that factor. Fold it in here so a LAF author installing this font
+            // into UIDefaults gets text scaled consistently with the rest of
+            // SwingTree's layout and painting — honouring the getDefaultFont()
+            // contract ("already scaled"). It is a no-op when no custom factor
+            // is configured, and idempotent if the font was already scaled
+            // during initialization (see _calculateDPIAwarePlatformFont).
+            return _applyCustomScaleFactor( resource );
         }
 
         void cleanup() {

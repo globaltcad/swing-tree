@@ -7,6 +7,7 @@ import swingtree.style.ComponentStyleDelegate;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.plaf.ComponentUI;
+import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.BasicScrollPaneUI;
 import java.awt.Graphics;
 
@@ -31,7 +32,13 @@ public final class LinenScrollPaneUI
     @Override
     public void installUI(JComponent c) {
         super.installUI(c);
-        ((JScrollPane) c).setBorder(null); // we draw the frame via withStyle
+        JScrollPane sp = (JScrollPane) c;
+        // SwingTree draws the frame via withStyle, so the component border
+        // should be cleared — but only when it is a LAF-installed default
+        // (UIResource). A border the application set explicitly is preserved
+        // so it survives a LAF swap, honouring Swing's UIResource contract.
+        if (sp.getBorder() instanceof UIResource)
+            sp.setBorder(null);
         ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
     }
 

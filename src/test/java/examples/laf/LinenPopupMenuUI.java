@@ -7,6 +7,7 @@ import swingtree.style.ComponentStyleDelegate;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.plaf.ComponentUI;
+import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.BasicPopupMenuUI;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -34,7 +35,13 @@ public final class LinenPopupMenuUI
     @Override
     public void installUI(JComponent c) {
         super.installUI(c);
-        ((JPopupMenu) c).setBorder(null); // SwingTree paints the frame
+        JPopupMenu menu = (JPopupMenu) c;
+        // SwingTree paints the frame, so clear the border — but only when it is
+        // a LAF-installed default (UIResource). A border the application set
+        // explicitly is preserved so it survives a LAF swap, honouring Swing's
+        // UIResource contract.
+        if (menu.getBorder() instanceof UIResource)
+            menu.setBorder(null);
         ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
     }
 

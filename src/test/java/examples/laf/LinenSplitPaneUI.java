@@ -8,6 +8,7 @@ import swingtree.style.ComponentStyleDelegate;
 import javax.swing.JComponent;
 import javax.swing.JSplitPane;
 import javax.swing.plaf.ComponentUI;
+import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.BasicSplitPaneDivider;
 import javax.swing.plaf.basic.BasicSplitPaneUI;
 import java.awt.Color;
@@ -40,7 +41,12 @@ public final class LinenSplitPaneUI
     public void installUI(JComponent c) {
         super.installUI(c);
         JSplitPane sp = (JSplitPane) c;
-        sp.setBorder(null);                            // SwingTree draws the frame
+        // SwingTree draws the frame, so clear the border — but only when it is
+        // a LAF-installed default (UIResource). A border the application set
+        // explicitly is preserved so it survives a LAF swap, honouring Swing's
+        // UIResource contract.
+        if (sp.getBorder() instanceof UIResource)
+            sp.setBorder(null);
         sp.setDividerSize(UI.scale(DIVIDER_THICKNESS));
         // BasicSplitPaneUI defaults continuousLayout to FALSE — i.e. dragging
         // the divider draws only a placeholder marker line and the actual
