@@ -380,14 +380,30 @@ public final class SwingTree
     }
 
     /**
-     *  Returns the {@link Font} that this {@link SwingTree} library context
-     *  considers <i>authoritative</i> for the active display — the same font
-     *  from which it derives the UI scale factor reported by
-     *  {@link #getUiScaleFactor()}, with a non-{@code null} fallback so the
-     *  caller never has to handle the "no font configured" case.
+     *  Returns the default UI {@link Font} that this {@link SwingTree} library
+     *  context considers <i>authoritative</i> for the active display, <b>already
+     *  resized to the current UI scale factor</b> (the factor reported by
+     *  {@link #getUiScaleFactor()}). There is always a non-{@code null} fallback,
+     *  so the caller never has to handle the "no font configured" case.
      *  <p>
-     *  The returned font is already <b>scaled for the current platform</b>.
-     *  SwingTree determines the appropriate size by reading what the host
+     *  <b>This is not a passthrough of {@code UIManager.get("defaultFont")}.</b>
+     *  It is the <i>resolved</i> base font — picked from the prioritised sources
+     *  listed below, wrapped in a {@link FontUIResource}, and sized so its point
+     *  size tracks the UI scale factor. In other words the returned size is the
+     *  platform's reference font size multiplied by the scale factor, which means:
+     *  <ul>
+     *      <li>when the scale factor is <i>derived</i> from the default font (the
+     *          usual HiDPI path), the resolved font's size is already correct and
+     *          is left untouched — it encodes the platform scaling; whereas</li>
+     *      <li>when the scale factor is <i>dictated</i> explicitly — through the
+     *          {@code swingtree.uiScale} system property or
+     *          {@link SwingTreeInitConfig#uiScaleFactor(float)} — the raw font's
+     *          size <i>does not</i> reflect that factor, so this method overrides
+     *          it. Returning the raw size there would render text from this font
+     *          out of step with the rest of SwingTree's scaled layout and painting.</li>
+     *  </ul>
+     *  <p>
+     *  SwingTree determines the platform reference size by reading what the host
      *  desktop actually says it should be — querying the relevant
      *  {@link java.awt.Toolkit#getDesktopProperty(String) desktop properties}
      *  ({@code "win.messagebox.font"} on Windows, {@code "gnome.Xft/DPI"} on
@@ -397,7 +413,8 @@ public final class SwingTree
      *  size you would have got at 100&nbsp;%; on a plain 1080p display you
      *  get the conservative system default.
      *  <p>
-     *  Lookup order:
+     *  Lookup order (for the font's family and style; its <i>size</i> is then
+     *  scaled as described above):
      *  <ol>
      *      <li>The font passed to
      *          {@link SwingTreeInitConfig#defaultFont(java.awt.Font)} when the
@@ -416,8 +433,8 @@ public final class SwingTree
      *  <b>Use this method when authoring a custom {@link javax.swing.LookAndFeel}.</b>
      *  Installing fixed-size fonts under {@code Label.font} / {@code Button.font}
      *  / {@code TextField.font} / … produces tiny text on HiDPI displays. Read
-     *  the platform-scaled font from here instead and use it everywhere you
-     *  would have used a literal {@code new Font(..)}. See the
+     *  the scaled font from here instead and use it everywhere you would have
+     *  used a literal {@code new Font(..)}. See the
      *  {@code Building-A-Look-And-Feel.md} wiki page (section
      *  <i>"HiDPI fonts"</i>) for the full pattern.
      *  <p>
@@ -431,12 +448,12 @@ public final class SwingTree
      *  swaps. Returning a {@code FontUIResource} from this method removes
      *  the need for every LAF author to wrap the result themselves.
      *
-     *  @return The currently authoritative default font, wrapped in a
-     *          {@link FontUIResource} so it can be installed directly into
-     *          {@link javax.swing.UIDefaults} entries without breaking the
-     *          LAF-replacement contract. Never {@code null}.
+     *  @return The currently authoritative default font, scaled to the UI scale
+     *          factor and wrapped in a {@link FontUIResource} so it can be
+     *          installed directly into {@link javax.swing.UIDefaults} entries
+     *          without breaking the LAF-replacement contract. Never {@code null}.
      */
-    public FontUIResource getDefaultFont() {
+    public FontUIResource getScaledDefaultFont() {
         UiScale ui = _uiScale.get();
         ui._publishDefaultFont();
         return ui.defaultFont.get();
@@ -444,12 +461,13 @@ public final class SwingTree
 
     /**
      *  Creates and returns a reactive {@link Viewable} of the library
-     *  context's currently authoritative default {@link FontUIResource} —
-     *  the same value {@link #getDefaultFont()} would return right now,
-     *  but with change notifications whenever it is replaced.
+     *  context's currently authoritative, <b>scale-factor-adjusted</b> default
+     *  {@link FontUIResource} — the same value {@link #getScaledDefaultFont()}
+     *  would return right now, but with change notifications whenever it is
+     *  replaced.
      *  <p>
-     *  The view fires whenever any of the inputs SwingTree uses to derive
-     *  the default font changes — {@code "lookAndFeel"},
+     *  The view fires whenever any of the inputs SwingTree uses to resolve
+     *  the scaled default font changes — {@code "lookAndFeel"},
      *  {@code "defaultFont"} or {@code "Label.font"} on the
      *  {@link UIManager}. That makes it the right hook for <b>dynamic
      *  HiDPI scaling</b>: a custom {@link javax.swing.LookAndFeel} can
@@ -470,10 +488,11 @@ public final class SwingTree
      *  {@link #clear()} or replaced through
      *  {@link #initialize()} / {@link #initializeUsing(SwingTreeConfigurator)}.
      *
-     *  @return A reactive property holding the authoritative default font.
+     *  @return A reactive property holding the authoritative default font,
+     *          scaled to the UI scale factor.
      *          Never {@code null}; never delivers a {@code null} payload.
      */
-    public Viewable<FontUIResource> getDefaultFontView() {
+    public Viewable<FontUIResource> getScaledDefaultFontView() {
         return _uiScale.get().createDefaultFontViewable();
     }
 
@@ -780,7 +799,7 @@ public final class SwingTree
         // display. Initialised to a placeholder; updated whenever the
         // UIManager keys we care about change (see _setScalePropertyListeners).
         // A view of this property is exposed publicly via
-        // SwingTree.getDefaultFontView() so look-and-feels and applications
+        // SwingTree.getScaledDefaultFontView() so look-and-feels and applications
         // can re-install fonts and refresh open windows on the fly.
         private final Var<FontUIResource> defaultFont = Var.of(new FontUIResource(new Font(Font.DIALOG, Font.PLAIN, 12)));
         private boolean initialized;
@@ -1075,7 +1094,7 @@ public final class SwingTree
             // UIManager.getDefaults() / getLookAndFeelDefaults() are only set
             // once setLookAndFeel(..) has finished, but UiScale#_initialize may
             // be called *from inside* a LookAndFeel.initialize(..) hook (for
-            // example, via SwingTree.get().getDefaultFontView() from a custom
+            // example, via SwingTree.get().getScaledDefaultFontView() from a custom
             // LAF). Guard against that race here; the listener we just attached
             // to UIManager itself will catch the eventual "lookAndFeel" PCE and
             // re-attempt the skipped attachments — see the case above.
@@ -1121,7 +1140,7 @@ public final class SwingTree
             // the raw UIManager / "Label.font" we just resolved does NOT carry
             // that factor. Fold it in here so a LAF author installing this font
             // into UIDefaults gets text scaled consistently with the rest of
-            // SwingTree's layout and painting — honouring the getDefaultFont()
+            // SwingTree's layout and painting — honouring the getScaledDefaultFont()
             // contract ("already scaled"). It is a no-op when no custom factor
             // is configured, and idempotent if the font was already scaled
             // during initialization (see _calculateDPIAwarePlatformFont).

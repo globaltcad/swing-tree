@@ -373,7 +373,7 @@ class SwingTree_Library_Context_Spec extends Specification {
             UIManager.getDefaults().get("defaultFont") === defaultFontBefore
     }
 
-    def 'The `getDefaultFont()` method always returns a `FontUIResource`, wrapping a plain `Font` if necessary.'() {
+    def 'The `getScaledDefaultFont()` method always returns a `FontUIResource`, wrapping a plain `Font` if necessary.'() {
         reportInfo """
             Look and Feel authors usually want a font they can drop straight into
             `UIDefaults` keys like `Label.font` without breaking Swing's
@@ -381,7 +381,7 @@ class SwingTree_Library_Context_Spec extends Specification {
             a plain `Font` is treated as user-set and is *preserved* across LAF swaps,
             while a `FontUIResource` is replaceable.
 
-            `SwingTree.get().getDefaultFont()` therefore *always* returns a
+            `SwingTree.get().getScaledDefaultFont()` therefore *always* returns a
             `FontUIResource` — even when the underlying font in the `UIManager`
             is a plain `Font`, SwingTree wraps it for you.
         """
@@ -391,7 +391,7 @@ class SwingTree_Library_Context_Spec extends Specification {
             UIManager.getDefaults().put("defaultFont", plainFont)
         when : 'We initialize SwingTree and ask for the default font:'
             SwingTree.initialize()
-            var resolved = SwingTree.get().getDefaultFont()
+            var resolved = SwingTree.get().getScaledDefaultFont()
         then : 'It is a `FontUIResource` (so it can be installed into UIDefaults directly):'
             resolved instanceof FontUIResource
         and : 'The wrapped font carries the same family, size and style as the original:'
@@ -406,9 +406,9 @@ class SwingTree_Library_Context_Spec extends Specification {
             UIManager.getDefaults().put("defaultFont", null)
     }
 
-    def 'The `getDefaultFont()` method tracks the currently active "defaultFont" in the `UIManager`.'() {
+    def 'The `getScaledDefaultFont()` method tracks the currently active "defaultFont" in the `UIManager`.'() {
         reportInfo """
-            `getDefaultFont()` is the single source of truth for the active default font.
+            `getScaledDefaultFont()` is the single source of truth for the active default font.
             Whatever sits under `UIManager.get("defaultFont")` at the time of the call
             is what comes back (wrapped in a `FontUIResource` if it wasn't one already).
 
@@ -421,21 +421,21 @@ class SwingTree_Library_Context_Spec extends Specification {
             UIManager.getDefaults().put("defaultFont", configuredFont)
         and : 'SwingTree initializes:'
             SwingTree.initialize()
-        expect : 'getDefaultFont() returns exactly the configured font (no wrapping needed):'
-            SwingTree.get().getDefaultFont() === configuredFont
+        expect : 'getScaledDefaultFont() returns exactly the configured font (no wrapping needed):'
+            SwingTree.get().getScaledDefaultFont() === configuredFont
 
         when : 'We later swap the default font in the `UIManager`:'
             var differentFont = new FontUIResource(new java.awt.Font("Serif", java.awt.Font.ITALIC, 24))
             UIManager.getDefaults().put("defaultFont", differentFont)
-        then : 'The next call to getDefaultFont() returns the new font:'
-            SwingTree.get().getDefaultFont() === differentFont
+        then : 'The next call to getScaledDefaultFont() returns the new font:'
+            SwingTree.get().getScaledDefaultFont() === differentFont
 
         cleanup:
             SwingTree.clear()
             UIManager.getDefaults().put("defaultFont", null)
     }
 
-    def 'You can subscribe to live `defaultFont` changes through `getDefaultFontView()`.'() {
+    def 'You can subscribe to live `defaultFont` changes through `getScaledDefaultFontView()`.'() {
         reportInfo """
             SwingTree publishes the authoritative default font through a reactive
             `Viewable<FontUIResource>` so a Look and Feel can be truly dynamic:
@@ -453,7 +453,7 @@ class SwingTree_Library_Context_Spec extends Specification {
             SwingTree.initialize()
         and : 'A view + trace list of every value the property emits:'
             var trace = []
-            var fontView = SwingTree.get().getDefaultFontView()
+            var fontView = SwingTree.get().getScaledDefaultFontView()
             fontView.onChange(From.ALL, it -> trace.add(it.currentValue().orElseThrow()))
         expect : 'The initial value of the view matches the current default font:'
             fontView.get() === firstFont
@@ -475,7 +475,7 @@ class SwingTree_Library_Context_Spec extends Specification {
             UIManager.getDefaults().put("defaultFont", null)
     }
 
-    def 'The `getDefaultFontView()` view does NOT fire when the same font value is re-installed.'() {
+    def 'The `getScaledDefaultFontView()` view does NOT fire when the same font value is re-installed.'() {
         reportInfo """
             SwingTree's internal listener fires for *every* PropertyChangeEvent on
             "defaultFont" — even when an application puts the same value back into the
@@ -490,7 +490,7 @@ class SwingTree_Library_Context_Spec extends Specification {
             SwingTree.initialize()
         and : 'A subscriber that records every emitted font:'
             var trace = []
-            var fontView = SwingTree.get().getDefaultFontView()
+            var fontView = SwingTree.get().getScaledDefaultFontView()
             fontView.onChange(From.ALL, it -> trace.add(it.currentValue().orElseThrow()))
 
         when : 'We push an *equal* (but not identical) FontUIResource back into the `UIManager`:'
@@ -510,7 +510,7 @@ class SwingTree_Library_Context_Spec extends Specification {
             UIManager.getDefaults().put("defaultFont", null)
     }
 
-    def 'A configured `uiScaleFactor` is folded into the font returned by `getDefaultFont()`.'() {
+    def 'A configured `uiScaleFactor` is folded into the font returned by `getScaledDefaultFont()`.'() {
         reportInfo """
             SwingTree can arrive at its UI scale factor in two ways: by *deriving* it
             from the size of the default font, or by having it *dictated* explicitly
@@ -519,12 +519,12 @@ class SwingTree_Library_Context_Spec extends Specification {
 
             When the scale is dictated this way, the raw font sitting in the
             `UIManager` — or the active Look and Feel's `Label.font` — does **not** yet
-            carry that factor. If `getDefaultFont()` handed that raw font back, a Look
+            carry that factor. If `getScaledDefaultFont()` handed that raw font back, a Look
             and Feel author installing it into `UIDefaults` keys like `Label.font`
             would get text at the unscaled size while the rest of SwingTree's layout
             and painting is scaled — text and chrome would visibly disagree.
 
-            So `getDefaultFont()` folds the configured factor into the font it returns,
+            So `getScaledDefaultFont()` folds the configured factor into the font it returns,
             honouring its documented "already scaled" contract. What scales is the font
             *size*: doubling the configured factor doubles the returned size. That
             relationship is platform independent, even though the absolute pixel size
@@ -541,7 +541,7 @@ class SwingTree_Library_Context_Spec extends Specification {
                 .uiScaleFactor(2f)
             )
         and : 'We capture the resolved default font:'
-            var scaledTwice = SwingTree.get().getDefaultFont()
+            var scaledTwice = SwingTree.get().getScaledDefaultFont()
 
         expect : 'It is a `FontUIResource`, so a LAF can drop it straight into `UIDefaults`:'
             scaledTwice instanceof FontUIResource
@@ -558,7 +558,7 @@ class SwingTree_Library_Context_Spec extends Specification {
                 .isUiScaleFactorEnabled(true)
                 .uiScaleFactor(1f)
             )
-            var scaledOnce = SwingTree.get().getDefaultFont()
+            var scaledOnce = SwingTree.get().getScaledDefaultFont()
         then : 'The returned size scales linearly with the configured factor: twice the factor, twice the size.'
             scaledTwice.getSize() == 2 * scaledOnce.getSize()
 
@@ -567,19 +567,19 @@ class SwingTree_Library_Context_Spec extends Specification {
             UIManager.getDefaults().put("defaultFont", null)
     }
 
-    def 'The `getDefaultFontView()` exposes the scaled default font when a `uiScaleFactor` is configured.'() {
+    def 'The `getScaledDefaultFontView()` exposes the scaled default font when a `uiScaleFactor` is configured.'() {
         reportInfo """
-            The reactive `getDefaultFontView()` is the hook a dynamic Look and Feel
+            The reactive `getScaledDefaultFontView()` is the hook a dynamic Look and Feel
             subscribes to so it can re-install its `*.font` keys whenever the
             authoritative default font changes. It must publish the *same* value that
-            `getDefaultFont()` returns — including the scaling applied for an explicitly
+            `getScaledDefaultFont()` returns — including the scaling applied for an explicitly
             configured `uiScaleFactor`. A LAF that trusted the view but received an
             unscaled font would render text out of step with the rest of the UI.
 
             This test pins the scale to a factor of 2 and shows that:
             <ul>
                 <li>the view's current value is the *scaled* font (not the raw
-                    `UIManager` font), and matches `getDefaultFont()`; and</li>
+                    `UIManager` font), and matches `getScaledDefaultFont()`; and</li>
                 <li>when the application swaps the source font in the `UIManager`, the
                     view re-publishes a value that is still governed by the configured
                     factor — the new family flows through, but the size stays locked to
@@ -596,13 +596,13 @@ class SwingTree_Library_Context_Spec extends Specification {
             )
         and : 'A view plus a trace list of every value the property emits:'
             var trace = []
-            var fontView = SwingTree.get().getDefaultFontView()
+            var fontView = SwingTree.get().getScaledDefaultFontView()
             fontView.onChange(From.ALL, it -> trace.add(it.currentValue().orElseThrow()))
 
         expect : 'The view never delivers a `null` payload and its current value is a `FontUIResource`:'
             fontView.get() instanceof FontUIResource
-        and : 'The view exposes exactly what `getDefaultFont()` resolves — the scaled font, not the raw one:'
-            fontView.get() == SwingTree.get().getDefaultFont()
+        and : 'The view exposes exactly what `getScaledDefaultFont()` resolves — the scaled font, not the raw one:'
+            fontView.get() == SwingTree.get().getScaledDefaultFont()
             fontView.get().getSize() != firstRaw.getSize()
             fontView.get().getSize() > firstRaw.getSize()
 
@@ -612,7 +612,7 @@ class SwingTree_Library_Context_Spec extends Specification {
         then : 'The view fires once, the new family flows through, but the size stays governed by the factor:'
             trace.size() == 1
             trace.last().getFamily() == secondRaw.getFamily()
-            trace.last().getSize()   == SwingTree.get().getDefaultFont().getSize()
+            trace.last().getSize()   == SwingTree.get().getScaledDefaultFont().getSize()
             trace.last().getSize()   != secondRaw.getSize()
 
         cleanup:
@@ -620,10 +620,10 @@ class SwingTree_Library_Context_Spec extends Specification {
             UIManager.getDefaults().put("defaultFont", null)
     }
 
-    def 'A custom Look and Feel can fetch `getDefaultFontView()` from its `initialize()` hook without NPE.'() {
+    def 'A custom Look and Feel can fetch `getScaledDefaultFontView()` from its `initialize()` hook without NPE.'() {
         reportInfo """
             The recommended pattern for a SwingTree-aware Look and Feel is to
-            subscribe to `SwingTree.get().getDefaultFontView()` from inside the
+            subscribe to `SwingTree.get().getScaledDefaultFontView()` from inside the
             LAF's own `initialize()` hook — so that runtime DPI / system-font
             changes flow into the UI without a restart.
 
@@ -652,7 +652,7 @@ class SwingTree_Library_Context_Spec extends Specification {
                     super.initialize()
                     // This is exactly the call pattern that used to throw an
                     // NPE because UIManager.getLookAndFeelDefaults() was null.
-                    var view = SwingTree.get().getDefaultFontView()
+                    var view = SwingTree.get().getScaledDefaultFontView()
                     view.onChange(From.ALL, it -> trace.add(it.currentValue().orElseThrow()))
                     capturedView.set(view)
                 }

@@ -110,7 +110,7 @@ import java.util.function.Supplier;
  *      SwingTree already computes a properly platform-scaled default font
  *      for the active display (Windows screen scaling, GNOME / KDE Xft DPI,
  *      macOS system font, …) and exposes it through
- *      {@link swingtree.SwingTree#getDefaultFont()}. It just cannot
+ *      {@link swingtree.SwingTree#getScaledDefaultFont()}. It just cannot
  *      <i>force</i> your LAF to use it. If you put
  *      {@code new Font(Font.DIALOG, PLAIN, 13)} into {@code Label.font},
  *      you get a 13-pt font on a 4K screen too, which looks like six
@@ -118,8 +118,8 @@ import java.util.function.Supplier;
  *  </p>
  *  The SwingTree-friendly recipe is one line: in
  *  {@code initComponentDefaults(..)} read the platform-scaled font
- *  through {@link swingtree.SwingTree#getDefaultFont()
- *  SwingTree.get().getDefaultFont()} and use it for every
+ *  through {@link swingtree.SwingTree#getScaledDefaultFont()
+ *  SwingTree.get().getScaledDefaultFont()} and use it for every
  *  {@code *.font} key (including {@code "defaultFont"} itself, so the
  *  engine and your LAF agree on the same single value). The method
  *  returns a {@link javax.swing.plaf.FontUIResource} ready to be
@@ -129,7 +129,7 @@ import java.util.function.Supplier;
  *  longer matters.
  *  <p>
  *      <i>Optional but recommended for dynamic HiDPI:</i> subscribe to
- *      {@link swingtree.SwingTree#getDefaultFontView()} from your
+ *      {@link swingtree.SwingTree#getScaledDefaultFontView()} from your
  *      {@code LookAndFeel#initialize()} hook and, on every fire, re-push
  *      the new font into your {@code *.font} keys and call
  *      {@link javax.swing.SwingUtilities#updateComponentTreeUI(java.awt.Component)

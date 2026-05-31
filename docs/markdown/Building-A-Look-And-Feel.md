@@ -430,15 +430,27 @@ overwrite those keys with `new Font(Font.DIALOG, PLAIN, 13)`, you get a
 13-pt font at *every* display scale — including 4K, where it looks like
 6 pt.
 
-### The fix: `SwingTree.get().getDefaultFont()`
+### The fix: `SwingTree.get().getScaledDefaultFont()`
 
-The library exposes the platform-scaled font through a single public
-method —
-[`SwingTree.getDefaultFont()`](../../src/main/java/swingtree/SwingTree.java) —
+The library exposes the scaled font through a single public method —
+[`SwingTree.getScaledDefaultFont()`](../../src/main/java/swingtree/SwingTree.java) —
 which always returns a `FontUIResource` ready to be installed into
 `UIDefaults`. Calling it also triggers SwingTree's lazy bootstrap, so
 the order in which `UIManager.setLookAndFeel(..)` and `UI.show(..)`
 are invoked no longer matters.
+
+> **This is not the same as `UIManager.get("defaultFont")`.** That key
+> is merely one of the *inputs* SwingTree resolves from. The method
+> returns the resolved base font **resized to the current UI scale
+> factor** — its point size is the platform reference size times
+> `getUiScaleFactor()`. When the scale factor is *derived from* the
+> default font (the usual HiDPI path) the size is already correct and is
+> left as-is; when the scale factor is *dictated explicitly* (via the
+> `swingtree.uiScale` property or `uiScaleFactor(..)`), the raw font's
+> size does not yet reflect it, so the method applies it for you. Either
+> way the font you get back is in step with the rest of SwingTree's
+> scaled layout and painting — which is exactly why you install *this*
+> font rather than the raw `UIManager` entry.
 
 How the size is computed: SwingTree reads what the host desktop
 actually says the default UI font should be — querying the relevant
@@ -449,7 +461,7 @@ same `UI.scale()` factor that drives the rest of the engine. On a 4K
 monitor with the OS at 200 % scaling you get a font roughly twice the
 point size you would have got at 100 %; on a plain 1080p display you
 get the conservative system default. You don't have to think about
-any of this — just use whatever `SwingTree.get().getDefaultFont()`
+any of this — just use whatever `SwingTree.get().getScaledDefaultFont()`
 hands you.
 
 So a SwingTree-friendly LAF only has to do one thing: in
@@ -470,7 +482,7 @@ public final class MyLookAndFeel extends BasicLookAndFeel {
         // It is returned as a FontUIResource so it can be installed into
         // UIDefaults directly without breaking Swing's LAF-replacement
         // contract (see the note at the end of this section).
-        FontUIResource baseFont = SwingTree.get().getDefaultFont();
+        FontUIResource baseFont = SwingTree.get().getScaledDefaultFont();
 
         // Make the engine and our LAF agree on the same single value.
         table.put("defaultFont", baseFont);
@@ -494,17 +506,17 @@ the active LAF changes. A plain `Font` is treated as "user-set"
 *preserved* across LAF swaps. So if your LAF puts a plain
 `new Font(..)` into `Label.font`, every label that inherits it
 becomes immune to later LAF changes — which is almost never what you
-want. `SwingTree.getDefaultFont()` returns a `FontUIResource` exactly
+want. `SwingTree.getScaledDefaultFont()` returns a `FontUIResource` exactly
 so you can drop it into `UIDefaults` without thinking about this.
 
-### Dynamic HiDPI: subscribe to `SwingTree.get().getDefaultFontView()`
+### Dynamic HiDPI: subscribe to `SwingTree.get().getScaledDefaultFontView()`
 
-`getDefaultFont()` reads the *current* authoritative font, but the
+`getScaledDefaultFont()` reads the *current* authoritative font, but the
 right font can change at runtime — the OS may push a new system font,
 another component in the application may install a different
 `"defaultFont"` or `"Label.font"` value, or a different LAF may take
 over. To track those changes the library also exposes
-[`SwingTree.getDefaultFontView()`](../../src/main/java/swingtree/SwingTree.java),
+[`SwingTree.getScaledDefaultFontView()`](../../src/main/java/swingtree/SwingTree.java),
 which returns a reactive `Viewable<FontUIResource>` that fires
 whenever any of the inputs SwingTree uses to derive the default font
 changes — namely the active LAF, `UIManager.get("defaultFont")` or
@@ -523,7 +535,7 @@ private Viewable<FontUIResource> _fontView;   // strong ref!
 @Override
 public void initialize() {
     super.initialize();
-    _fontView = SwingTree.get().getDefaultFontView();
+    _fontView = SwingTree.get().getScaledDefaultFontView();
     _fontView.onChange(From.ALL, it -> SwingUtilities.invokeLater(() -> {
         it.currentValue().ifPresent(font -> {
             UIManager.put("defaultFont", font);
@@ -557,7 +569,7 @@ are the reference implementation.
 - **Don't** install a fixed-pixel-size font in
   `initComponentDefaults(..)` — that's the bug this section exists to
   prevent.
-- **Don't** roll your own lookup helper. The `SwingTree.getDefaultFont()`
+- **Don't** roll your own lookup helper. The `SwingTree.getScaledDefaultFont()`
   method already does the right thing in every corner case, including
   the headless/partially-initialised JVM fallback.
 - **Don't** scale by some other display-DPI value you compute yourself.

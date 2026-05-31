@@ -142,7 +142,7 @@ public final class LinenLookAndFeel extends BasicLookAndFeel
     @Override
     public void initialize() {
         super.initialize();
-        _fontView = SwingTree.get().getDefaultFontView();
+        _fontView = SwingTree.get().getScaledDefaultFontView();
         _fontView.onChange(From.ALL, it -> SwingUtilities.invokeLater(() -> {
             it.currentValue().ifPresent(LinenLookAndFeel::_propagateFont);
         }));
@@ -245,7 +245,7 @@ public final class LinenLookAndFeel extends BasicLookAndFeel
         // Calling SwingTree.get() also bootstraps the library if it
         // hadn't been initialised yet, so this works no matter what
         // order setLookAndFeel(..) and UI.show(..) are called in.
-        FontUIResource baseFont = SwingTree.get().getDefaultFont();
+        FontUIResource baseFont = SwingTree.get().getScaledDefaultFont();
         // Pin our resolved font under "defaultFont" so that SwingTree's
         // scale-recompute listener — which fires when Label.font (or
         // defaultFont) changes — derives the SAME scale factor from
