@@ -11,6 +11,7 @@ import javax.swing.SwingConstants;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicSliderUI;
 import java.awt.BasicStroke;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -113,27 +114,54 @@ public final class LinenSliderUI
         Graphics2D g2 = (Graphics2D) g.create();
         try {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            int t   = Math.max(2, UI.scale(TRACK_THICKNESS));
-            int arc = t;
+            int     t        = Math.max(2, UI.scale(TRACK_THICKNESS));
+            int     arc      = t;
+            // BasicSliderUI exposes the inverted/non-inverted axis flag via
+            // drawInverted(); honour it so the accent fill always covers the
+            // side of the thumb that corresponds to the slider's *value*
+            // range, no matter which way the user oriented the range.
+            boolean inverted = drawInverted();
+            Color   fillColor = slider.isEnabled() ? LinenPalette.ACCENT : LinenPalette.TEXT_DISABLED;
             if (slider.getOrientation() == SwingConstants.HORIZONTAL) {
                 int y = trackRect.y + (trackRect.height - t) / 2;
                 g2.setColor(LinenPalette.BORDER_SOFT);
                 g2.fill(new RoundRectangle2D.Float(trackRect.x, y, trackRect.width, t, arc, arc));
                 int thumbCx = thumbRect.x + thumbRect.width / 2;
-                int filled  = Math.max(0, thumbCx - trackRect.x);
-                if (filled > 0) {
-                    g2.setColor(slider.isEnabled() ? LinenPalette.ACCENT : LinenPalette.TEXT_DISABLED);
-                    g2.fill(new RoundRectangle2D.Float(trackRect.x, y, filled, t, arc, arc));
+                if (!inverted) {
+                    int filled = Math.max(0, thumbCx - trackRect.x);
+                    if (filled > 0) {
+                        g2.setColor(fillColor);
+                        g2.fill(new RoundRectangle2D.Float(trackRect.x, y, filled, t, arc, arc));
+                    }
+                } else {
+                    int trackRight = trackRect.x + trackRect.width;
+                    int filled = Math.max(0, trackRight - thumbCx);
+                    if (filled > 0) {
+                        g2.setColor(fillColor);
+                        g2.fill(new RoundRectangle2D.Float(thumbCx, y, filled, t, arc, arc));
+                    }
                 }
             } else {
                 int x = trackRect.x + (trackRect.width - t) / 2;
                 g2.setColor(LinenPalette.BORDER_SOFT);
                 g2.fill(new RoundRectangle2D.Float(x, trackRect.y, t, trackRect.height, arc, arc));
                 int thumbCy = thumbRect.y + thumbRect.height / 2;
-                int filled  = Math.max(0, (trackRect.y + trackRect.height) - thumbCy);
-                if (filled > 0) {
-                    g2.setColor(slider.isEnabled() ? LinenPalette.ACCENT : LinenPalette.TEXT_DISABLED);
-                    g2.fill(new RoundRectangle2D.Float(x, thumbCy, t, filled, arc, arc));
+                // Vertical sliders default to "max at top" — the un-inverted
+                // accent fill therefore covers the area *below* the thumb
+                // (down to the bottom of the track).
+                if (!inverted) {
+                    int trackBottom = trackRect.y + trackRect.height;
+                    int filled = Math.max(0, trackBottom - thumbCy);
+                    if (filled > 0) {
+                        g2.setColor(fillColor);
+                        g2.fill(new RoundRectangle2D.Float(x, thumbCy, t, filled, arc, arc));
+                    }
+                } else {
+                    int filled = Math.max(0, thumbCy - trackRect.y);
+                    if (filled > 0) {
+                        g2.setColor(fillColor);
+                        g2.fill(new RoundRectangle2D.Float(x, trackRect.y, t, filled, arc, arc));
+                    }
                 }
             }
         } finally {

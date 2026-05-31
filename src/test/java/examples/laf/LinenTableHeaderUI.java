@@ -10,6 +10,7 @@ import javax.swing.JLabel;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.ComponentUI;
+import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.BasicTableHeaderUI;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
@@ -44,16 +45,32 @@ public final class LinenTableHeaderUI
         super.installUI(c);
         JTableHeader h = (JTableHeader) c;
         TableCellRenderer linenRenderer = new LinenHeaderRenderer();
-        h.setDefaultRenderer(linenRenderer);
-        // Also override any per-column renderer that was installed by the model.
+        // Follow Swing's UIResource contract: only replace renderers that
+        // the application has *not* explicitly opted into. A renderer the
+        // app installed directly is signalled by its NON-UIResource type;
+        // we must leave those alone so they survive LAF swaps.
+        if (isReplaceableLafDefault(h.getDefaultRenderer()))
+            h.setDefaultRenderer(linenRenderer);
         if (h.getColumnModel() != null) {
             for (int i = 0; i < h.getColumnModel().getColumnCount(); i++) {
                 TableColumn col = h.getColumnModel().getColumn(i);
-                if (col.getHeaderRenderer() == null)
+                if (isReplaceableLafDefault(col.getHeaderRenderer()))
                     col.setHeaderRenderer(linenRenderer);
             }
         }
         ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+    }
+
+    /**
+     *  @return {@code true} if {@code current} is either absent or a
+     *          {@link UIResource}, i.e. a LAF-installed default the next
+     *          LAF is allowed to overwrite. An application-supplied
+     *          renderer (a plain {@code TableCellRenderer} that does
+     *          not implement {@code UIResource}) returns {@code false}
+     *          and is preserved.
+     */
+    private static boolean isReplaceableLafDefault(TableCellRenderer current) {
+        return current == null || current instanceof UIResource;
     }
 
     @Override
@@ -81,8 +98,14 @@ public final class LinenTableHeaderUI
     /**
      *  Default header cell renderer for Linen tables: a left-padded label
      *  in {@link LinenPalette#TEXT_MUTED}.
+     *  <p>
+     *  Implements {@link UIResource} so Swing recognises it as a
+     *  LAF-installed default and lets the next LAF replace it cleanly
+     *  on {@link javax.swing.UIManager#setLookAndFeel(javax.swing.LookAndFeel)}.
+     *  Without the marker, an application that switches away from Linen
+     *  would still see this renderer "stick" on every header.
      */
-    private static final class LinenHeaderRenderer extends DefaultTableCellRenderer {
+    private static final class LinenHeaderRenderer extends DefaultTableCellRenderer implements UIResource {
         LinenHeaderRenderer() {
             setHorizontalAlignment(SwingConstants.LEADING);
         }

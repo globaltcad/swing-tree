@@ -134,11 +134,12 @@ import java.util.function.Supplier;
  *      the new font into your {@code *.font} keys and call
  *      {@link javax.swing.SwingUtilities#updateComponentTreeUI(java.awt.Component)
  *      SwingUtilities.updateComponentTreeUI(window)} on each open
- *      window. That makes screen text track display-DPI changes,
- *      {@link swingtree.SwingTree#setUiScaleFactor(float)} calls and OS
- *      system-font changes without a restart. Hold the returned
- *      {@link sprouts.Viewable} in a strong field — Sprouts holds change
- *      listeners weakly and the subscription is dropped otherwise.
+ *      window. That makes screen text track changes the host pushes
+ *      through the {@link javax.swing.UIManager} — a new "defaultFont",
+ *      a "Label.font" swap, or another LAF being installed — without a
+ *      restart. Hold the returned {@link sprouts.Viewable} in a strong
+ *      field — Sprouts holds change listeners weakly and the
+ *      subscription is dropped otherwise.
  *  </p>
  *  See the {@code Building-A-Look-And-Feel.md} wiki page (section
  *  <i>"HiDPI fonts"</i>) for the complete worked example.

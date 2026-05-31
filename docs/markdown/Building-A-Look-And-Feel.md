@@ -501,14 +501,17 @@ so you can drop it into `UIDefaults` without thinking about this.
 
 `getDefaultFont()` reads the *current* authoritative font, but the
 right font can change at runtime — the OS may push a new system font,
-the user may drag the window onto a different-DPI monitor, the app
-may call [`SwingTree.setUiScaleFactor(float)`](../../src/main/java/swingtree/SwingTree.java)
-itself. To track those changes the library also exposes
+another component in the application may install a different
+`"defaultFont"` or `"Label.font"` value, or a different LAF may take
+over. To track those changes the library also exposes
 [`SwingTree.getDefaultFontView()`](../../src/main/java/swingtree/SwingTree.java),
 which returns a reactive `Viewable<FontUIResource>` that fires
 whenever any of the inputs SwingTree uses to derive the default font
-changes (the active LAF, `UIManager.get("defaultFont")` or
-`UIManager.get("Label.font")`).
+changes — namely the active LAF, `UIManager.get("defaultFont")` or
+`UIManager.get("Label.font")`. (It does *not* fire on
+`SwingTree.setUiScaleFactor(..)` alone, because that call adjusts
+the layout scale factor — what `UI.scale()` returns — without
+touching any font key.)
 
 A truly dynamic LAF subscribes once at `initialize(..)` time, re-pushes
 the new font into every `*.font` key on each fire, and refreshes the

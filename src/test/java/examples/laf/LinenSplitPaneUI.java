@@ -79,6 +79,12 @@ public final class LinenSplitPaneUI
 
         @Override
         public void paint(Graphics g) {
+            // Paint the superclass *first* — BasicSplitPaneDivider.paint fills
+            // the divider background when the divider is opaque and lays out
+            // any child components (drag-arrow buttons in some LAFs). If we
+            // drew our decorations before this, they would be erased by that
+            // background fill on the way back up.
+            super.paint(g);
             Graphics2D g2 = (Graphics2D) g.create();
             try {
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -113,7 +119,6 @@ public final class LinenSplitPaneUI
             } finally {
                 g2.dispose();
             }
-            super.paint(g);
         }
     }
 }
