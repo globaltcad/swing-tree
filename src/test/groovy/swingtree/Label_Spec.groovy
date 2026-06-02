@@ -7,6 +7,7 @@ import swingtree.api.IconDeclaration
 
 import javax.swing.JLabel
 import javax.swing.SwingConstants
+import java.awt.Font
 
 @Title("Labels")
 @Narrative('''
@@ -152,5 +153,53 @@ class Label_Spec extends Specification
         then : 'Both text positions should be set.'
             label.horizontalTextPosition == SwingConstants.RIGHT
             label.verticalTextPosition == SwingConstants.TOP
+    }
+
+    def 'Use the `withFontStyle(UI.FontStyle)` method to control the font style of a label.'(
+        UI.FontStyle style, int expectedAwtStyle
+    ) {
+        reportInfo """
+            The `withFontStyle(UI.FontStyle)` method lets you set the style of a label's font
+            declaratively, without having to peek into the component and derive a
+            new `Font` yourself.
+            It accepts any of the four `UI.FontStyle` constants, namely
+            `PLAIN`, `BOLD`, `ITALIC` and `BOLD_ITALIC`, and applies the matching
+            style bits to the label's current font while preserving its family and size.
+        """
+        given : 'We create a label and apply the supplied font style to it.'
+            var ui =
+                    UI.label("Styled")
+                    .withFontStyle(style)
+        and : 'We build the component.'
+            var label = ui.get(JLabel)
+
+        expect : 'The label font carries exactly the requested style bits.'
+            label.font.style == expectedAwtStyle
+
+        where : 'We cover all four font styles and the AWT style flags they map to.'
+            style                    | expectedAwtStyle
+            UI.FontStyle.PLAIN       | Font.PLAIN
+            UI.FontStyle.BOLD        | Font.BOLD
+            UI.FontStyle.ITALIC      | Font.ITALIC
+            UI.FontStyle.BOLD_ITALIC | (Font.BOLD + Font.ITALIC)
+    }
+
+    def 'The `makeBold()` and `makePlain()` shorthands toggle the boldness of a label.'() {
+        reportInfo """
+            For the common case of switching a label between bold and plain,
+            the `makeBold()` and `makePlain()` methods are convenient shorthands
+            which simply flip the bold bit of the label's current font on or off.
+        """
+        when : 'We make a label bold...'
+            var bold = UI.label("Bold").makeBold().get(JLabel)
+        then : 'Its font reports the bold style.'
+            bold.font.bold
+            !bold.font.italic
+
+        when : 'We make a label plain...'
+            var plain = UI.label("Plain").makePlain().get(JLabel)
+        then : 'Its font is neither bold nor italic.'
+            !plain.font.bold
+            !plain.font.italic
     }
 }

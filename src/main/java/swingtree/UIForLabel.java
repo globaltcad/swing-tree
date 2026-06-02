@@ -54,6 +54,14 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
 
     /**
      *  Makes the wrapped {@link JLabel} font bold (!plain).
+     *  <p>
+     *  Note that this is an <i>additive</i> operation: it only switches the
+     *  bold bit of the current font on and leaves every other style bit
+     *  untouched. So a label whose font is already italic will end up
+     *  <i>bold and italic</i>. This differs from
+     *  {@link #withFontStyle(UI.FontStyle)}, which replaces the style
+     *  completely, so {@code withFontStyle(UI.FontStyle.BOLD)} would clear
+     *  the italic bit instead of preserving it.
      *
      * @return This very builder to allow for method chaining.
      */
@@ -112,8 +120,98 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
                 ._this();
     }
 
+    private void _setFontStyle( L thisComponent, UI.FontStyle style ) {
+        Font f = thisComponent.getFont();
+        if ( f != null )
+            thisComponent.setFont(f.deriveFont(style.toAWTFontStyle()));
+    }
+
+    /**
+     *  Adjusts the style bits of the wrapped {@link JLabel}'s font so that it
+     *  matches the supplied {@link UI.FontStyle}, which may be any of
+     *  {@link UI.FontStyle#PLAIN}, {@link UI.FontStyle#BOLD},
+     *  {@link UI.FontStyle#ITALIC} or {@link UI.FontStyle#BOLD_ITALIC}.
+     *  <p>
+     *  Only the style of the font is replaced; the font family and size of the
+     *  label are preserved. So for a label whose font is currently italic,
+     *  calling {@code withFontStyle(UI.FontStyle.BOLD)} will turn it into a
+     *  (non-italic) bold font, whereas {@code withFontStyle(UI.FontStyle.BOLD_ITALIC)}
+     *  would make it both bold <i>and</i> italic:
+     *  <pre>{@code
+     *      UI.label("Important!")
+     *      .withFontStyle(UI.FontStyle.BOLD_ITALIC);
+     *  }</pre>
+     *  For the common case of toggling between bold and plain you may also use
+     *  the dedicated {@link #makeBold()} and {@link #makePlain()} shorthands.
+     *  Be aware, however, that those shorthands behave <i>additively</i> (they
+     *  flip only the bold bit and preserve the rest), whereas this method
+     *  <i>replaces</i> the entire style. So {@code withFontStyle(UI.FontStyle.BOLD)}
+     *  clears a previously set italic bit, while {@link #makeBold()} would keep it.
+     *
+     * @param style The {@link UI.FontStyle} which should be applied to the font of the label.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code style} is {@code null}.
+     */
+    public UIForLabel<L> withFontStyle( UI.FontStyle style ) {
+        NullUtil.nullArgCheck( style, "style", UI.FontStyle.class );
+        return _with( thisComponent -> {
+                    _setFontStyle(thisComponent, style);
+                })
+                ._this();
+    }
+
+    /**
+     *  Dynamically adjusts the style bits of the wrapped {@link JLabel}'s font
+     *  based on the {@link UI.FontStyle} wrapped by the provided property.
+     *  When the style enum wrapped by the property changes, then so does the
+     *  style of the label's font change to match it.
+     *  This is useful for modelling the font style as part of your view model
+     *  so that the appearance of the label can react to your business logic
+     *  at runtime: <br>
+     *  <pre>{@code
+     *      // A property somewhere in your view model:
+     *      Var<UI.FontStyle> style = Var.of(UI.FontStyle.PLAIN);
+     *      // ...and in your view:
+     *      UI.label("Status")
+     *      .withFontStyle(style);
+     *      // Later on, changing the property updates the label:
+     *      style.set(UI.FontStyle.BOLD_ITALIC);
+     *  }</pre>
+     *  The supported {@link UI.FontStyle} values are
+     *  {@link UI.FontStyle#PLAIN}, {@link UI.FontStyle#BOLD},
+     *  {@link UI.FontStyle#ITALIC} and {@link UI.FontStyle#BOLD_ITALIC}.
+     *  Note that, just like with {@link #withFontStyle(UI.FontStyle)}, the style
+     *  of the font is <i>replaced</i> completely on every change (the font family
+     *  and size of the label are preserved). This is in contrast to the
+     *  {@link #makeBold()} and {@link #makePlain()} shorthands, which only flip
+     *  the bold bit additively and leave any other style bit, like italic, intact.
+     *
+     * @param style The {@link UI.FontStyle} property which should be applied to the font of the label.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code style} is {@code null}.
+     */
+    public UIForLabel<L> withFontStyle( Val<UI.FontStyle> style ) {
+        NullUtil.nullArgCheck( style, "style", Val.class );
+        NullUtil.nullPropertyCheck( style, "style", "Null is not a valid font style." );
+        return _withOnShow( style, (thisComponent, v) -> {
+                    _setFontStyle(thisComponent, v);
+                })
+                ._with( thisComponent -> {
+                    _setFontStyle(thisComponent, style.orElseThrowUnchecked());
+                })
+                ._this();
+    }
+
     /**
      *  Makes the wrapped {@link JLabel} font plain (!bold).
+     *  <p>
+     *  Note that this is an <i>additive</i> operation: it only switches the
+     *  bold bit of the current font off and leaves every other style bit
+     *  untouched. So a label whose font is bold and italic will remain
+     *  <i>italic</i> (just no longer bold). This differs from
+     *  {@link #withFontStyle(UI.FontStyle)}, which replaces the style
+     *  completely, so {@code withFontStyle(UI.FontStyle.PLAIN)} would clear
+     *  the italic bit as well, yielding a fully plain font.
      *
      * @return This very builder to allow for method chaining.
      */
