@@ -174,11 +174,9 @@ final class ComponentAreas
             float top    = insets.top().orElse(0f);
             float right  = insets.right().orElse(0f);
             float bottom = insets.bottom().orElse(0f);
-            return new Rectangle2D.Float(
-                            left, top,
-                            size.width().orElse(0f) - left - right,
-                            size.height().orElse(0f) - top - bottom
-                        );
+            float width  = size.width().orElse(0f) - left - right;
+            float height = size.height().orElse(0f) - top - bottom;
+            return _rectangularShapeFrom(left, top, width, height);
         }
 
         insTop    += outline.top().orElse(0f);
@@ -202,7 +200,7 @@ final class ComponentAreas
             arcWidth  = Math.max(0, arcWidth  - insTop * 2f);
             arcHeight = Math.max(0, arcHeight - insTop * 2f);
             if ( arcWidth == 0 || arcHeight == 0 )
-                return new Rectangle2D.Float(left, top, width - left - right, height - top - bottom);
+                return _rectangularShapeFrom(left, top, width - left - right, height - top - bottom);
 
             // We can return a simple round rectangle:
             return new RoundRectangle2D.Float(
@@ -341,6 +339,23 @@ final class ComponentAreas
                     ));
             return area;
         }
+    }
+
+    private static Shape _rectangularShapeFrom(
+        float left  ,
+        float top   ,
+        float width ,
+        float height
+    ) {
+        boolean isRound = Math.abs(left   % 1f) == 0f &&
+                          Math.abs(top    % 1f) == 0f &&
+                          Math.abs(width  % 1f) == 0f &&
+                          Math.abs(height % 1f) == 0f;
+
+        if ( isRound )
+            return new Rectangle((int) left, (int) top, (int) width, (int) height);
+        else
+            return new Rectangle2D.Float(left, top, width, height);
     }
 
 
