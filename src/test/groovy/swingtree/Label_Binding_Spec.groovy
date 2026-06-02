@@ -14,6 +14,7 @@ import javax.swing.JLabel
 import javax.swing.SwingConstants
 import java.awt.Color
 import java.awt.Dimension
+import java.awt.Font
 
 @Title("Label Binding")
 @Narrative('''
@@ -349,5 +350,45 @@ class Label_Binding_Spec extends Specification
             label.icon !== originalIcon.find().get()
             label.icon.iconHeight == 512
             label.icon.iconWidth == 512
+    }
+
+    def 'A property can dynamically define the font style of a label.'()
+    {
+        reportInfo """
+            Just like the text, color or alignment of a label, the *style* of its
+            font (plain, bold, italic or bold-italic) can be modelled as part of
+            your view model and bound to the label using the `withFontStyle(Val<UI.FontStyle>)`
+            method. Whenever the `UI.FontStyle` wrapped by the property changes,
+            the style bits of the label's font are updated accordingly,
+            while its family and size are preserved.
+        """
+        given : 'We create a property holding the initial font style.'
+            Val<UI.FontStyle> style = Var.of(UI.FontStyle.PLAIN)
+
+        when : 'We create and bind to a label UI node...'
+            var ui =
+                    UI.label("Reactive")
+                    .withFontStyle(style)
+        and : 'We build the root component of the UI tree.'
+            var label = ui.get(JLabel)
+
+        then : 'The label font starts out plain, as defined by the property.'
+            label.font.style == Font.PLAIN
+
+        when : 'We change the property to model a bold-italic font...'
+            style.set(UI.FontStyle.BOLD_ITALIC)
+        and : 'Then we wait for the EDT to complete the UI modifications...'
+            UI.sync()
+        then : 'The label font now carries both the bold and italic style bits.'
+            label.font.bold
+            label.font.italic
+
+        when : 'We finally switch the property to a plain italic font...'
+            style.set(UI.FontStyle.ITALIC)
+        and : 'Once again we let the EDT catch up...'
+            UI.sync()
+        then : 'The label font is italic but no longer bold.'
+            !label.font.bold
+            label.font.italic
     }
 }
