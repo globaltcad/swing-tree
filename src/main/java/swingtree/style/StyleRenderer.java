@@ -105,10 +105,14 @@ final class StyleRenderer
         final boolean borderIsOpaque = conf.boxModel().widths().equals(Outline.none()) || conf.baseColors().borderColor().isFullyOpaque();
         final boolean bodyIsOpaque = backgroundColor.getAlpha() == 255;
         if ( bodyIsOpaque && borderIsOpaque ) {
-            g2d.setColor(foundationColor);
-            g2d.fill(conf.areas().get(UI.ComponentArea.ALL)); // Filling everything is a bit cheaper than UI.ComponentArea.EXTERIOR!
+            Shape fullArea = conf.areas().get(UI.ComponentArea.ALL);
+            Shape bodyArea = conf.areas().get(UI.ComponentArea.BODY);
+            if ( !StyleUtil.shapesAreEqual(fullArea, bodyArea) ) {
+                g2d.setColor(foundationColor);
+                g2d.fill(fullArea); // Filling everything is a bit cheaper than UI.ComponentArea.EXTERIOR!
+            }
             g2d.setColor(backgroundColor);
-            g2d.fill(conf.areas().get(UI.ComponentArea.BODY));
+            g2d.fill(bodyArea);
         } else {
             if ( foundationColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
                 g2d.setColor(foundationColor);
