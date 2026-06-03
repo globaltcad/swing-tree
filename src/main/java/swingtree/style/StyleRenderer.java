@@ -107,7 +107,7 @@ final class StyleRenderer
         if ( bodyIsOpaque && borderIsOpaque ) {
             Shape fullArea = conf.areas().get(UI.ComponentArea.ALL);
             Shape bodyArea = conf.areas().get(UI.ComponentArea.BODY);
-            if ( !fullArea.equals(bodyArea) ) {
+            if ( !StyleUtil.shapesAreEqual(fullArea, bodyArea) ) {
                 g2d.setColor(foundationColor);
                 g2d.fill(fullArea); // Filling everything is a bit cheaper than UI.ComponentArea.EXTERIOR!
             }

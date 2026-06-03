@@ -6,6 +6,7 @@ import swingtree.api.Painter;
 
 import java.awt.*;
 import java.awt.geom.Area;
+import java.awt.geom.Rectangle2D;
 import java.util.Objects;
 
 /**
@@ -35,6 +36,45 @@ final class StyleUtil
         to.setPaint(from.getPaint());
         to.setRenderingHints(from.getRenderingHints());
         to.setStroke(from.getStroke());
+    }
+
+    /**
+     *  A symmetric, implementation-tolerant equality check for two {@link Shape} instances.
+     *  <p>
+     *  This is needed because {@link Rectangle#equals(Object)} is <i>asymmetric</i> with respect
+     *  to the other rectangular shape implementations of the AWT geometry API: a {@link Rectangle}
+     *  only considers itself equal to another {@link Rectangle}, whereas a
+     *  {@link Rectangle2D.Float} (or {@code Double}) considers itself equal to any
+     *  {@link Rectangle2D} of the same geometry. So for two shapes of identical geometry
+     *  {@code aRectangle.equals(aRectangle2D)} may return {@code false} while the reversed
+     *  {@code aRectangle2D.equals(aRectangle)} returns {@code true}. Relying on the plain
+     *  {@code equals} would therefore silently miss rendering optimizations that hinge on two
+     *  areas being the same.
+     *  <p>
+     *  This helper normalizes the comparison so that the order of the arguments does not matter
+     *  and two rectangular shapes with the same geometry are always reported as equal,
+     *  regardless of their concrete {@link Rectangle2D} sub-type.
+     *
+     * @param a The first shape, may be {@code null}.
+     * @param b The second shape, may be {@code null}.
+     * @return {@code true} if both shapes are geometrically equal (or both {@code null}).
+     */
+    static boolean shapesAreEqual( @Nullable Shape a, @Nullable Shape b ) {
+        if ( a == b )
+            return true;
+        if ( a == null || b == null )
+            return false;
+        if ( a instanceof Rectangle2D && b instanceof Rectangle2D ) {
+            // Rectangle.equals() is not symmetric across the various Rectangle2D
+            // implementations, so we compare the geometry through the Rectangle2D contract:
+            Rectangle2D ra = (Rectangle2D) a;
+            Rectangle2D rb = (Rectangle2D) b;
+            return ra.getX()      == rb.getX()
+                && ra.getY()      == rb.getY()
+                && ra.getWidth()  == rb.getWidth()
+                && ra.getHeight() == rb.getHeight();
+        }
+        return a.equals(b);
     }
 
     static @Nullable Shape intersect( @Nullable Shape clipA, @Nullable Shape clipB )
