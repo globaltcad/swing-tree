@@ -62,9 +62,9 @@ final class StyleSource&lt;C extends JComponent&gt;
     }
 
     StyleSource&lt;C&gt; withAnimationStyler( LifeSpan lifeSpan, Styler&lt;C&gt; animationStyler ) {
-<span class="fc" id="L65">        List&lt;Expirable&lt;Styler&lt;C&gt;&gt;&gt; animationStylers = new ArrayList&lt;&gt;(Arrays.asList(_animationStylers));</span>
-<span class="fc" id="L66">        animationStylers.add(new Expirable&lt;&gt;(lifeSpan, animationStyler));</span>
-<span class="fc" id="L67">        return new StyleSource&lt;&gt;(_localStyler, animationStylers.toArray(new Expirable[0]), _styleSheet);</span>
+<span class="fc" id="L65">        Expirable&lt;Styler&lt;C&gt;&gt;[] newStylers = Arrays.copyOf(_animationStylers, _animationStylers.length + 1);</span>
+<span class="fc" id="L66">        newStylers[newStylers.length - 1] = new Expirable&lt;&gt;(lifeSpan, animationStyler);</span>
+<span class="fc" id="L67">        return new StyleSource&lt;&gt;(_localStyler, newStylers, _styleSheet);</span>
     }
 
     StyleSource&lt;C&gt; withoutAnimationStylers() {

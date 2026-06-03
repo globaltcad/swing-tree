@@ -271,48 +271,49 @@ abstract class AbstractComboModel&lt;E extends @Nullable Object&gt; implements C
 		}
 		// Or a character?
 <span class="pc bpc" id="L273" title="1 of 2 branches missed.">		if ( type == Character.class ) {</span>
-<span class="nc bnc" id="L274" title="All 2 branches missed.">			if ( o.trim().length() == 1 )</span>
-<span class="nc" id="L275">				return type.cast(o.charAt(0));</span>
+<span class="nc" id="L274">			String trimmed = o.trim();</span>
+<span class="nc bnc" id="L275" title="All 2 branches missed.">			if ( trimmed.length() == 1 )</span>
+<span class="nc" id="L276">				return type.cast(trimmed.charAt(0));</span>
 			// Maybe it's all repeated?
-<span class="nc bnc" id="L277" title="All 2 branches missed.">			if ( o.trim().length() &gt; 1 ) {</span>
-<span class="nc" id="L278">				char c = o.charAt(0);</span>
-<span class="nc bnc" id="L279" title="All 2 branches missed.">				for ( int i = 1; i &lt; o.length(); i++ )</span>
-<span class="nc bnc" id="L280" title="All 2 branches missed.">					if ( o.charAt(i) != c )</span>
-<span class="nc" id="L281">						return _getSelectedItemSafely();</span>
-<span class="nc" id="L282">				return type.cast(c);</span>
+<span class="nc bnc" id="L278" title="All 2 branches missed.">			if ( trimmed.length() &gt; 1 ) {</span>
+<span class="nc" id="L279">				char c = trimmed.charAt(0);</span>
+<span class="nc bnc" id="L280" title="All 2 branches missed.">				for ( int i = 1; i &lt; trimmed.length(); i++ )</span>
+<span class="nc bnc" id="L281" title="All 2 branches missed.">					if ( trimmed.charAt(i) != c )</span>
+<span class="nc" id="L282">						return _getSelectedItemSafely();</span>
+<span class="nc" id="L283">				return type.cast(c);</span>
 			}
 			// We failed to parse the character... the input is invalid!
 			// So we cannot update the model, and simply return the old value:
-<span class="nc" id="L286">			return _getSelectedItemSafely();</span>
+<span class="nc" id="L287">			return _getSelectedItemSafely();</span>
 		}
 		// Now it's getting tricky, but we don't give up. How about arrays?
-<span class="pc bpc" id="L289" title="1 of 2 branches missed.">		if ( type.isArray() ) {</span>
+<span class="pc bpc" id="L290" title="1 of 2 branches missed.">		if ( type.isArray() ) {</span>
 			// We need to split the string into elements, and then convert each element
 			// to the correct type. We can do this recursively, but first we need to
 			// find the type of the elements:
-<span class="nc" id="L293">			Class&lt;?&gt; componentType = type.getComponentType();</span>
+<span class="nc" id="L294">			Class&lt;?&gt; componentType = type.getComponentType();</span>
 			// Now we can split the string:
-<span class="nc" id="L295">			String[] parts = o.split(&quot;,&quot;);</span>
-<span class="nc bnc" id="L296" title="All 2 branches missed.">			if ( parts.length == 1 )</span>
-<span class="nc" id="L297">				parts = o.split(&quot; &quot;);</span>
+<span class="nc" id="L296">			String[] parts = o.split(&quot;,&quot;);</span>
+<span class="nc bnc" id="L297" title="All 2 branches missed.">			if ( parts.length == 1 )</span>
+<span class="nc" id="L298">				parts = o.split(&quot; &quot;);</span>
 
 			// And convert each part to the correct type:
-<span class="nc" id="L300">			Object[] array = (Object[]) java.lang.reflect.Array.newInstance(componentType, parts.length);</span>
-<span class="nc bnc" id="L301" title="All 2 branches missed.">			for ( int i = 0; i &lt; parts.length; i++ )</span>
-<span class="nc" id="L302">				array[i] = _convert(parts[i]);</span>
+<span class="nc" id="L301">			Object[] array = (Object[]) java.lang.reflect.Array.newInstance(componentType, parts.length);</span>
+<span class="nc bnc" id="L302" title="All 2 branches missed.">			for ( int i = 0; i &lt; parts.length; i++ )</span>
+<span class="nc" id="L303">				array[i] = _convert(parts[i]);</span>
 
 			// And finally we can return the array:
-<span class="nc" id="L305">			return type.cast(array);</span>
+<span class="nc" id="L306">			return type.cast(array);</span>
 		}
 		// Uff! Still nothing?!? Ok let's be creative, maybe we can try to use the constructor:
 		try {
-<span class="fc" id="L309">			return type.getConstructor(String.class).newInstance(o);</span>
-<span class="nc" id="L310">		} catch ( Exception e ) {</span>
+<span class="fc" id="L310">			return type.getConstructor(String.class).newInstance(o);</span>
+<span class="nc" id="L311">		} catch ( Exception e ) {</span>
 			// We failed to instantiate the class... Quite a pity, but at this point, who cares?
 		}
 
 		// What else is there? We don't know, so we just return the old value:
-<span class="nc" id="L315">		return _getSelectedItemSafely();</span>
+<span class="nc" id="L316">		return _getSelectedItemSafely();</span>
 	}
 
 	/**
@@ -323,17 +324,17 @@ abstract class AbstractComboModel&lt;E extends @Nullable Object&gt; implements C
 	 * @return The selected item of the combo box, or null if nothing is selected.
 	 */
 	protected @Nullable E _getSelectedItemSafely() {
-<span class="fc" id="L326">		E item = null;</span>
+<span class="fc" id="L327">		E item = null;</span>
 		try {
-<span class="fc" id="L328">			item = _selectedItem.orElseNull();</span>
-<span class="nc" id="L329">		} catch (Exception e) {</span>
-<span class="nc" id="L330">			log.error(</span>
+<span class="fc" id="L329">			item = _selectedItem.orElseNull();</span>
+<span class="nc" id="L330">		} catch (Exception e) {</span>
+<span class="nc" id="L331">			log.error(</span>
 					&quot;Failed to fetch selected combo box item from bound property '{}', &quot; +
 					&quot;due to exception.&quot;,
 					_selectedItem, e
 				);
-<span class="fc" id="L335">		}</span>
-<span class="fc" id="L336">		return item;</span>
+<span class="fc" id="L336">		}</span>
+<span class="fc" id="L337">		return item;</span>
 	}
 
 	/**
@@ -346,24 +347,24 @@ abstract class AbstractComboModel&lt;E extends @Nullable Object&gt; implements C
 	 */
 	protected @Nullable E _setSelectedItemSafely(Channel channel, E newItem) {
 		try {
-<span class="fc" id="L349">			_selectedItem.set(channel, newItem);</span>
-<span class="fc" id="L350">			return newItem;</span>
-<span class="nc" id="L351">		} catch (Exception e) {</span>
-<span class="nc" id="L352">			log.error(</span>
+<span class="fc" id="L350">			_selectedItem.set(channel, newItem);</span>
+<span class="fc" id="L351">			return newItem;</span>
+<span class="nc" id="L352">		} catch (Exception e) {</span>
+<span class="nc" id="L353">			log.error(</span>
 					&quot;Failed to set the selected combo box item in the bound property '{}', &quot; +
 					&quot;due to exception.&quot;,
 					_selectedItem, e
 			);
 		}
-<span class="nc" id="L358">		return null;</span>
+<span class="nc" id="L359">		return null;</span>
 	}
 
 	protected int _indexOf( @Nullable Object anItem ) {
-<span class="fc bfc" id="L362" title="All 2 branches covered.">		for ( int i = 0; i &lt; getSize(); i++ )</span>
-<span class="fc bfc" id="L363" title="All 2 branches covered.">			if ( Objects.equals(anItem, getElementAt(i)) )</span>
-<span class="fc" id="L364">				return i;</span>
+<span class="fc bfc" id="L363" title="All 2 branches covered.">		for ( int i = 0; i &lt; getSize(); i++ )</span>
+<span class="fc bfc" id="L364" title="All 2 branches covered.">			if ( Objects.equals(anItem, getElementAt(i)) )</span>
+<span class="fc" id="L365">				return i;</span>
 
-<span class="fc" id="L366">		return _selectedIndex;</span>
+<span class="fc" id="L367">		return _selectedIndex;</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

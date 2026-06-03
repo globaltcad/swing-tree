@@ -2333,7 +2333,7 @@ import java.util.function.Supplier;
 <span class="fc" id="L2333">        NullUtil.nullArgCheck(condition, &quot;condition&quot;, Val.class);</span>
 <span class="fc" id="L2334">        NullUtil.nullArgCheck(color, &quot;color&quot;, Val.class);</span>
 <span class="fc" id="L2335">        NullUtil.nullPropertyCheck(condition, &quot;condition&quot;, &quot;Null is not allowed to model the usage of the provided background color!&quot;);</span>
-<span class="fc" id="L2336">        NullUtil.nullPropertyCheck(color, &quot;color&quot;, &quot;Null is not allowed to model the the provided background color! Please use the default color of this component instead.&quot;);</span>
+<span class="fc" id="L2336">        NullUtil.nullPropertyCheck(color, &quot;color&quot;, &quot;Null is not allowed to model the provided background color! Please use the default color of this component instead.&quot;);</span>
 <span class="fc" id="L2337">        return _with( thisComponent -&gt; {</span>
 <span class="fc" id="L2338">                    Var&lt;Color&gt; baseColor = Var.of( thisComponent.getBackground() );</span>
 <span class="fc" id="L2339">                    _onShow( condition, thisComponent, (c,v) -&gt; _updateBackground( c, condition, color, baseColor ) );</span>
@@ -2643,7 +2643,7 @@ import java.util.function.Supplier;
 <span class="fc" id="L2643">        NullUtil.nullArgCheck(condition, &quot;condition&quot;, Val.class);</span>
 <span class="fc" id="L2644">        NullUtil.nullArgCheck(color, &quot;color&quot;, Val.class);</span>
 <span class="fc" id="L2645">        NullUtil.nullPropertyCheck(condition, &quot;condition&quot;, &quot;Null is not allowed to model the usage of the provided foreground color!&quot;);</span>
-<span class="fc" id="L2646">        NullUtil.nullPropertyCheck(color, &quot;color&quot;, &quot;Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.&quot;);</span>
+<span class="fc" id="L2646">        NullUtil.nullPropertyCheck(color, &quot;color&quot;, &quot;Null is not allowed to model the provided foreground color! Please use the default color of this component instead.&quot;);</span>
 <span class="fc" id="L2647">        return _with( thisComponent -&gt; {</span>
 <span class="fc" id="L2648">                    Var&lt;Color&gt; baseColor = Var.of( thisComponent.getForeground() );</span>
 <span class="fc" id="L2649">                    _onShow( condition, thisComponent, (c,v) -&gt; _updateForeground( c, condition, color, baseColor ) );</span>
@@ -2700,8 +2700,8 @@ import java.util.function.Supplier;
 <span class="fc" id="L2700">        NullUtil.nullArgCheck(colorIfTrue, &quot;colorIfTrue&quot;, Val.class);</span>
 <span class="fc" id="L2701">        NullUtil.nullArgCheck(colorIfFalse, &quot;colorIfFalse&quot;, Val.class);</span>
 <span class="fc" id="L2702">        NullUtil.nullPropertyCheck(condition, &quot;condition&quot;, &quot;Null is not allowed to model the usage of the provided foreground color!&quot;);</span>
-<span class="fc" id="L2703">        NullUtil.nullPropertyCheck(colorIfTrue, &quot;colorIfTrue&quot;, &quot;Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.&quot;);</span>
-<span class="fc" id="L2704">        NullUtil.nullPropertyCheck(colorIfFalse, &quot;colorIfFalse&quot;, &quot;Null is not allowed to model the the provided foreground color! Please use the default color of this component instead.&quot;);</span>
+<span class="fc" id="L2703">        NullUtil.nullPropertyCheck(colorIfTrue, &quot;colorIfTrue&quot;, &quot;Null is not allowed to model the provided foreground color! Please use the default color of this component instead.&quot;);</span>
+<span class="fc" id="L2704">        NullUtil.nullPropertyCheck(colorIfFalse, &quot;colorIfFalse&quot;, &quot;Null is not allowed to model the provided foreground color! Please use the default color of this component instead.&quot;);</span>
 <span class="fc" id="L2705">        return _withOnShow( condition, (c,v) -&gt; {</span>
 <span class="fc" id="L2706">                    _updateForeground( c, condition, colorIfTrue, Var.of(colorIfFalse.get()) );</span>
 <span class="fc" id="L2707">                })</span>
@@ -4303,10 +4303,10 @@ import java.util.function.Supplier;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I onMouseDrag( Action&lt;ComponentDragEventDelegate&lt;C&gt;&gt; onDrag ) {
-<span class="nc" id="L4306">        NullUtil.nullArgCheck(onDrag, &quot;onDrag&quot;, Action.class);</span>
-<span class="nc" id="L4307">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L4308">                   java.util.List&lt;Pair&lt;Position, MouseEvent&gt;&gt; dragEventHistory = new ArrayList&lt;&gt;();</span>
-<span class="nc" id="L4309">                   MouseAdapter listener = new MouseAdapter() {</span>
+<span class="fc" id="L4306">        NullUtil.nullArgCheck(onDrag, &quot;onDrag&quot;, Action.class);</span>
+<span class="fc" id="L4307">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L4308">                   java.util.List&lt;Pair&lt;Position, MouseEvent&gt;&gt; dragEventHistory = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L4309">                   MouseAdapter listener = new MouseAdapter() {</span>
                        private Position positionFromEventSource(MouseEvent e) {
 <span class="nc" id="L4311">                           Object source = e.getSource();</span>
 <span class="nc bnc" id="L4312" title="All 2 branches missed.">                            if ( source instanceof Component ) {</span>
@@ -4335,10 +4335,10 @@ import java.util.function.Supplier;
 <span class="nc" id="L4335">                           });</span>
 <span class="nc" id="L4336">                       }</span>
                    };
-<span class="nc" id="L4338">                   thisComponent.addMouseListener(listener);</span>
-<span class="nc" id="L4339">                   thisComponent.addMouseMotionListener(listener);</span>
-<span class="nc" id="L4340">               })</span>
-<span class="nc" id="L4341">               ._this();</span>
+<span class="fc" id="L4338">                   thisComponent.addMouseListener(listener);</span>
+<span class="fc" id="L4339">                   thisComponent.addMouseMotionListener(listener);</span>
+<span class="fc" id="L4340">               })</span>
+<span class="fc" id="L4341">               ._this();</span>
     }
 
     /**

@@ -3,6 +3,7 @@
 import sprouts.Observable;
 import sprouts.Val;
 import swingtree.SwingTreeConfigurator;
+import swingtree.UI;
 import swingtree.animation.LifeTime;
 import swingtree.api.AnimatedStyler;
 import swingtree.api.Styler;
@@ -92,7 +93,56 @@ import java.util.function.Supplier;
  *        return true;
  *    }
  *  }&lt;/pre&gt;
- *  That way, the &lt;i&gt;SwingTree&lt;/i&gt;s style engine works reliably for all components!
+ *  That way, the &lt;i&gt;SwingTree&lt;/i&gt;'s style engine works reliably for all components!&lt;br&gt;
+ *  &lt;p&gt;
+ *      Another important aspect to consider if you want your look and feel to integrate
+ *      well with SwingTree is &lt;b&gt;UI scaling for high DPI screens!&lt;/b&gt;.
+ *      SwingTree scales style renderings for you automatically, but when you do custom painting
+ *      in your &lt;i&gt;Look and Feel&lt;/i&gt; then positions and dimensions must be multiplied by {@link UI#scale()}.
+ *  &lt;/p&gt;
+ *
+ *  &lt;h2&gt;HiDPI fonts: ask SwingTree, don't hardcode&lt;/h2&gt;
+ *  &lt;p&gt;
+ *      &lt;b&gt;The most common pitfall when porting an existing
+ *      {@link javax.swing.plaf.basic.BasicLookAndFeel} to SwingTree is to
+ *      install fixed-size fonts in
+ *      {@code javax.swing.plaf.basic.BasicLookAndFeel#initComponentDefaults(javax.swing.UIDefaults)}.&lt;/b&gt;
+ *      SwingTree already computes a properly platform-scaled default font
+ *      for the active display (Windows screen scaling, GNOME / KDE Xft DPI,
+ *      macOS system font, …) and exposes it through
+ *      {@link swingtree.SwingTree#getScaledDefaultFont()}. It just cannot
+ *      &lt;i&gt;force&lt;/i&gt; your LAF to use it. If you put
+ *      {@code new Font(Font.DIALOG, PLAIN, 13)} into {@code Label.font},
+ *      you get a 13-pt font on a 4K screen too, which looks like six
+ *      points to a human.
+ *  &lt;/p&gt;
+ *  The SwingTree-friendly recipe is one line: in
+ *  {@code initComponentDefaults(..)} read the platform-scaled font
+ *  through {@link swingtree.SwingTree#getScaledDefaultFont()
+ *  SwingTree.get().getScaledDefaultFont()} and use it for every
+ *  {@code *.font} key (including {@code &quot;defaultFont&quot;} itself, so the
+ *  engine and your LAF agree on the same single value). The method
+ *  returns a {@link javax.swing.plaf.FontUIResource} ready to be
+ *  installed directly into {@link javax.swing.UIDefaults}, and lazily
+ *  bootstraps the library on first call, so the order in which
+ *  {@code setLookAndFeel(..)} and {@code UI.show(..)} are invoked no
+ *  longer matters.
+ *  &lt;p&gt;
+ *      &lt;i&gt;Optional but recommended for dynamic HiDPI:&lt;/i&gt; subscribe to
+ *      {@link swingtree.SwingTree#getScaledDefaultFontView()} from your
+ *      {@code LookAndFeel#initialize()} hook and, on every fire, re-push
+ *      the new font into your {@code *.font} keys and call
+ *      {@link javax.swing.SwingUtilities#updateComponentTreeUI(java.awt.Component)
+ *      SwingUtilities.updateComponentTreeUI(window)} on each open
+ *      window. That makes screen text track changes the host pushes
+ *      through the {@link javax.swing.UIManager} — a new &quot;defaultFont&quot;,
+ *      a &quot;Label.font&quot; swap, or another LAF being installed — without a
+ *      restart. Hold the returned {@link sprouts.Viewable} in a strong
+ *      field — Sprouts holds change listeners weakly and the
+ *      subscription is dropped otherwise.
+ *  &lt;/p&gt;
+ *  See the {@code Building-A-Look-And-Feel.md} wiki page (section
+ *  &lt;i&gt;&quot;HiDPI fonts&quot;&lt;/i&gt;) for the complete worked example.
  *
  * @param &lt;C&gt; The type of {@link JComponent} for which a particular {@link javax.swing.plaf.ComponentUI} is designed.
  */
@@ -233,7 +283,7 @@ public interface SwingTreeStyledComponentUI&lt;C extends JComponent&gt;
      *         implementation to be used for hooking its style engine into the rendering pipeline of a component.
      */
     default boolean canForwardPaintingToSwingTree() {
-<span class="nc" id="L236">        return false;</span>
+<span class="nc" id="L286">        return false;</span>
     }
 
 }

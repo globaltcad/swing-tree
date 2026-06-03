@@ -92,7 +92,7 @@ public final class Tab
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab isSelectedIf( Var&lt;Boolean&gt; isSelected ) {
-<span class="fc" id="L95">        NullUtil.nullArgCheck(isSelected,&quot;isSelected&quot;,Val.class);</span>
+<span class="fc" id="L95">        NullUtil.nullArgCheck(isSelected,&quot;isSelected&quot;,Var.class);</span>
 <span class="pc bpc" id="L96" title="1 of 2 branches missed.">        if ( _isSelected != null )</span>
 <span class="nc" id="L97">            log.warn(SwingTree.get().logMarker(), &quot;Selection flag already specified!&quot;, new Throwable(&quot;Stack trace for debugging purposes.&quot;));</span>
 
@@ -172,7 +172,7 @@ public final class Tab
     /**
      *  Binds the boolean enabled state of the tab to a specific enum value
      *  and a corresponding enum property.
-     *  When the enum property is set to the provided enum value, the tab will be selected.
+     *  When the enum property is set to the provided enum value, the tab will be enabled.
      *
      * @param state The state of the tab.
      * @param enabledState The enabled state property of the tab.
@@ -268,7 +268,7 @@ public final class Tab
      * @return A new {@link Tab} instance with the provided argument, which enables builder-style method chaining.
      */
     public final Tab withTip( Val&lt;String&gt; tip ) {
-<span class="fc" id="L271">        NullUtil.nullArgCheck(tip,&quot;tip&quot;,String.class);</span>
+<span class="fc" id="L271">        NullUtil.nullArgCheck(tip,&quot;tip&quot;,Val.class);</span>
 <span class="pc bpc" id="L272" title="1 of 2 branches missed.">        if ( _tip != null )</span>
 <span class="nc" id="L273">            log.warn(SwingTree.get().logMarker(), &quot;Tip already specified!&quot;, new Throwable(&quot;Stack trace for debugging purposes.&quot;));</span>
 <span class="fc" id="L274">        return new Tab(_contents, _headerComponent, _title, _isSelected, _isEnabled, _icon, tip, _onSelected, _onMouseClick);</span>

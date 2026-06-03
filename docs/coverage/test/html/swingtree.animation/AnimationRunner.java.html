@@ -77,33 +77,39 @@ final class AnimationRunner
 
 <span class="fc" id="L78">        long now = System.currentTimeMillis();</span>
 
-<span class="fc bfc" id="L80" title="All 2 branches covered.">        for ( RunningAnimation running : new ArrayList&lt;&gt;(_runningAnimations) )</span>
-<span class="fc bfc" id="L81" title="All 2 branches covered.">            if ( !_runAndCheck(running, now, event) ) {</span>
-<span class="fc" id="L82">                _runningAnimations.remove(running);</span>
-<span class="fc" id="L83">                running.component().ifPresent( _toBeCleaned::add );</span>
+        // Snapshot to a typed array — user animation callbacks may add new animations
+        // back into `_runningAnimations` on this same EDT call (via AnimationRunner.add),
+        // so we must not iterate the live list directly.
+<span class="fc" id="L83">        RunningAnimation[] snapshot = _runningAnimations.toArray(new RunningAnimation[0]);</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">        for ( int i = 0; i &lt; snapshot.length; i++ ) {</span>
+<span class="fc" id="L85">            RunningAnimation running = snapshot[i];</span>
+<span class="fc bfc" id="L86" title="All 2 branches covered.">            if ( !_runAndCheck(running, now, event) ) {</span>
+<span class="fc" id="L87">                _runningAnimations.remove(running);</span>
+<span class="fc" id="L88">                running.component().ifPresent( _toBeCleaned::add );</span>
             }
-<span class="fc" id="L85">    }</span>
+        }
+<span class="fc" id="L91">    }</span>
 
     private void _add( RunningAnimation runningAnimation ) {
-<span class="fc" id="L88">        Objects.requireNonNull(runningAnimation, &quot;Null is not a valid animator!&quot;);</span>
-<span class="fc" id="L89">        _runningAnimations.add(runningAnimation);</span>
-<span class="fc bfc" id="L90" title="All 2 branches covered.">        if ( !_timer.isRunning() )</span>
-<span class="fc" id="L91">            _timer.start();</span>
-<span class="fc" id="L92">    }</span>
+<span class="fc" id="L94">        Objects.requireNonNull(runningAnimation, &quot;Null is not a valid animator!&quot;);</span>
+<span class="fc" id="L95">        _runningAnimations.add(runningAnimation);</span>
+<span class="fc bfc" id="L96" title="All 2 branches covered.">        if ( !_timer.isRunning() )</span>
+<span class="fc" id="L97">            _timer.start();</span>
+<span class="fc" id="L98">    }</span>
 
     boolean _runAndCheck( RunningAnimation runningAnimation, long now, ActionEvent event )
     {
-<span class="pc bpc" id="L96" title="1 of 2 branches missed.">        if ( now &lt; runningAnimation.lifeSpan().getStartTimeIn(TimeUnit.MILLISECONDS) )</span>
-<span class="nc" id="L97">            return true;</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">        if ( now &lt; runningAnimation.lifeSpan().getStartTimeIn(TimeUnit.MILLISECONDS) )</span>
+<span class="nc" id="L103">            return true;</span>
 
-<span class="fc" id="L99">        AnimationStatus status = AnimationStatus.of(runningAnimation.lifeSpan(), runningAnimation.stride(), event, now);</span>
-<span class="fc" id="L100">        boolean shouldContinue = false;</span>
+<span class="fc" id="L105">        AnimationStatus status = AnimationStatus.of(runningAnimation.lifeSpan(), runningAnimation.stride(), event, now);</span>
+<span class="fc" id="L106">        boolean shouldContinue = false;</span>
 
         try {
-<span class="fc" id="L103">            long duration = status.lifeSpan().lifeTime().getDurationIn(TimeUnit.MILLISECONDS);</span>
-<span class="fc bfc" id="L104" title="All 4 branches covered.">            shouldContinue = runningAnimation.condition().shouldContinue(status) &amp;&amp; duration &gt; 0;</span>
-<span class="nc" id="L105">        } catch ( Exception e ) {</span>
-<span class="nc" id="L106">            log.warn(SwingTree.get().logMarker(), &quot;An exception occurred while checking if an animation should continue!&quot;, e);</span>
+<span class="fc" id="L109">            long duration = status.lifeSpan().lifeTime().getDurationIn(TimeUnit.MILLISECONDS);</span>
+<span class="fc bfc" id="L110" title="All 4 branches covered.">            shouldContinue = runningAnimation.condition().shouldContinue(status) &amp;&amp; duration &gt; 0;</span>
+<span class="nc" id="L111">        } catch ( Exception e ) {</span>
+<span class="nc" id="L112">            log.warn(SwingTree.get().logMarker(), &quot;An exception occurred while checking if an animation should continue!&quot;, e);</span>
             /*
                  If exceptions happen in user provided animation stop conditions,
                  then we don't want to mess up the rest of the animation logic, so we catch
@@ -115,18 +121,18 @@ final class AnimationRunner
                  Hi there! If you are reading this, you are probably a developer using the SwingTree
                  library, thank you for using it! Good luck finding out what went wrong! :)
             */
-<span class="fc" id="L118">        }</span>
+<span class="fc" id="L124">        }</span>
 
-<span class="fc" id="L120">        WeakReference&lt;Component&gt; compRef = runningAnimation.compRef();</span>
-<span class="fc bfc" id="L121" title="All 2 branches covered.">        Component component = compRef == null ? null : compRef.get();</span>
+<span class="fc" id="L126">        WeakReference&lt;Component&gt; compRef = runningAnimation.compRef();</span>
+<span class="fc bfc" id="L127" title="All 2 branches covered.">        Component component = compRef == null ? null : compRef.get();</span>
 
-<span class="pc bpc" id="L123" title="1 of 4 branches missed.">        if ( compRef != null &amp;&amp; component == null )</span>
-<span class="nc" id="L124">            return false; // There was a component, but it has been garbage collected.</span>
+<span class="pc bpc" id="L129" title="1 of 4 branches missed.">        if ( compRef != null &amp;&amp; component == null )</span>
+<span class="nc" id="L130">            return false; // There was a component, but it has been garbage collected.</span>
 
-<span class="fc" id="L126">        Runnable requestComponentRepaint = () -&gt; {</span>
-<span class="fc bfc" id="L127" title="All 2 branches covered.">                                                if ( component != null ) {</span>
-<span class="pc bpc" id="L128" title="3 of 4 branches missed.">                                                    if ( component.getParent() == null || !_isVisible(component) ) {</span>
-<span class="fc" id="L129">                                                        ComponentExtension.from((JComponent) component).gatherApplyAndInstallStyle(false);</span>
+<span class="fc" id="L132">        Runnable requestComponentRepaint = () -&gt; {</span>
+<span class="fc bfc" id="L133" title="All 2 branches covered.">                                                if ( component != null ) {</span>
+<span class="pc bpc" id="L134" title="3 of 4 branches missed.">                                                    if ( component.getParent() == null || !_isVisible(component) ) {</span>
+<span class="fc" id="L135">                                                        ComponentExtension.from((JComponent) component).gatherApplyAndInstallStyle(false);</span>
                                                         /*
                                                             There will be no repaint if the component is not visible.
                                                             If the paint method encounters a component
@@ -135,22 +141,22 @@ final class AnimationRunner
                                                             So we have to regather and apply the style information manually.
                                                          */
                                                     }
-<span class="fc" id="L138">                                                    component.revalidate();</span>
-<span class="fc" id="L139">                                                    component.repaint();</span>
+<span class="fc" id="L144">                                                    component.revalidate();</span>
+<span class="fc" id="L145">                                                    component.repaint();</span>
                                                 }
-<span class="fc" id="L141">                                            };</span>
+<span class="fc" id="L147">                                            };</span>
 
-<span class="fc bfc" id="L143" title="All 2 branches covered.">        if ( !shouldContinue ) {</span>
+<span class="fc bfc" id="L149" title="All 2 branches covered.">        if ( !shouldContinue ) {</span>
             try {
-<span class="fc" id="L145">                status = AnimationStatus.endOf(status.lifeSpan(), runningAnimation.stride(), status.event(), runningAnimation.currentRepeat());</span>
-<span class="fc" id="L146">                runningAnimation.animation().run(status); // We run the animation one last time to make sure the component is in its final state.</span>
-<span class="fc" id="L147">                AnimationStatus finishingStatus = status;</span>
-<span class="fc" id="L148">                _toBeFinished.add(()-&gt;{</span>
+<span class="fc" id="L151">                status = AnimationStatus.endOf(status.lifeSpan(), runningAnimation.stride(), status.event(), runningAnimation.currentRepeat());</span>
+<span class="fc" id="L152">                runningAnimation.animation().run(status); // We run the animation one last time to make sure the component is in its final state.</span>
+<span class="fc" id="L153">                AnimationStatus finishingStatus = status;</span>
+<span class="fc" id="L154">                _toBeFinished.add(()-&gt;{</span>
                     try {
-<span class="fc" id="L150">                        runningAnimation.animation().finish(finishingStatus); // This method may or may not be overridden by the user.</span>
+<span class="fc" id="L156">                        runningAnimation.animation().finish(finishingStatus); // This method may or may not be overridden by the user.</span>
                         // An animation may want to do something when it is finished (e.g. reset the component to its original state).
-<span class="nc" id="L152">                    } catch ( Exception e ) {</span>
-<span class="nc" id="L153">                        log.error(SwingTree.get().logMarker(), &quot;An exception occurred while finishing an animation!&quot;, e);</span>
+<span class="nc" id="L158">                    } catch ( Exception e ) {</span>
+<span class="nc" id="L159">                        log.error(SwingTree.get().logMarker(), &quot;An exception occurred while finishing an animation!&quot;, e);</span>
                         /*
                              If exceptions happen in the finishing procedure of animations provided by the user,
                              then we don't want to mess up the execution of the rest of the animations,
@@ -159,11 +165,11 @@ final class AnimationRunner
                              We log as warning because exceptions during rendering are not considered
                              as harmful as elsewhere!
                         */
-<span class="fc" id="L162">                    }</span>
-<span class="fc" id="L163">                    requestComponentRepaint.run();</span>
-<span class="fc" id="L164">                });</span>
-<span class="nc" id="L165">            } catch ( Exception e ) {</span>
-<span class="nc" id="L166">                log.warn(SwingTree.get().logMarker(), &quot;An exception occurred while executing the finish procedure of an animation!&quot;, e);</span>
+<span class="fc" id="L168">                    }</span>
+<span class="fc" id="L169">                    requestComponentRepaint.run();</span>
+<span class="fc" id="L170">                });</span>
+<span class="nc" id="L171">            } catch ( Exception e ) {</span>
+<span class="nc" id="L172">                log.warn(SwingTree.get().logMarker(), &quot;An exception occurred while executing the finish procedure of an animation!&quot;, e);</span>
                 /*
                      If exceptions happen in the finishing procedure of animations provided by the user,
                      then we don't want to mess up the execution of the rest of the animations,
@@ -175,16 +181,16 @@ final class AnimationRunner
                      Hi there! If you are reading this, you are probably a developer using the SwingTree
                      library, thank you for using it! Good luck finding out what went wrong! :)
                 */
-<span class="fc" id="L178">            }</span>
-<span class="fc" id="L179">            requestComponentRepaint.run();</span>
-<span class="fc" id="L180">            return false;</span>
+<span class="fc" id="L184">            }</span>
+<span class="fc" id="L185">            requestComponentRepaint.run();</span>
+<span class="fc" id="L186">            return false;</span>
         }
 
         try {
-<span class="fc" id="L184">            runningAnimation.setCurrentRepeat(status.repeats());</span>
-<span class="fc" id="L185">            runningAnimation.animation().run(status);</span>
-<span class="nc" id="L186">        } catch ( Exception e ) {</span>
-<span class="nc" id="L187">            log.warn(SwingTree.get().logMarker(), &quot;An exception occurred while executing an animation!&quot;, e);</span>
+<span class="fc" id="L190">            runningAnimation.setCurrentRepeat(status.repeats());</span>
+<span class="fc" id="L191">            runningAnimation.animation().run(status);</span>
+<span class="nc" id="L192">        } catch ( Exception e ) {</span>
+<span class="nc" id="L193">            log.warn(SwingTree.get().logMarker(), &quot;An exception occurred while executing an animation!&quot;, e);</span>
             /*
                  If exceptions happen in the animations provided by the user,
                  then we don't want to mess up the execution of the rest of the animations,
@@ -196,10 +202,10 @@ final class AnimationRunner
                  Hi there! If you are reading this, you are probably a developer using the SwingTree
                  library, thank you for using it! Good luck finding out what went wrong! :)
             */
-<span class="fc" id="L199">        }</span>
+<span class="fc" id="L205">        }</span>
 
-<span class="fc" id="L201">        requestComponentRepaint.run();</span>
-<span class="fc" id="L202">        return true;</span>
+<span class="fc" id="L207">        requestComponentRepaint.run();</span>
+<span class="fc" id="L208">        return true;</span>
     }
 
     /**
@@ -214,18 +220,18 @@ final class AnimationRunner
      * @return True if the component is visible, false otherwise.
      */
     private static boolean _isVisible( Component component ) {
-<span class="nc bnc" id="L217" title="All 4 branches missed.">        boolean hasSize = component.getWidth() &gt; 0 &amp;&amp; component.getHeight() &gt; 0;</span>
-<span class="nc bnc" id="L218" title="All 2 branches missed.">        if ( !hasSize )</span>
-<span class="nc" id="L219">            return false;</span>
+<span class="nc bnc" id="L223" title="All 4 branches missed.">        boolean hasSize = component.getWidth() &gt; 0 &amp;&amp; component.getHeight() &gt; 0;</span>
+<span class="nc bnc" id="L224" title="All 2 branches missed.">        if ( !hasSize )</span>
+<span class="nc" id="L225">            return false;</span>
 
-<span class="nc" id="L221">        boolean isVisible = true;</span>
-<span class="nc bnc" id="L222" title="All 2 branches missed.">        for ( Component current = component; current != null; current = current.getParent() ) {</span>
-<span class="nc bnc" id="L223" title="All 2 branches missed.">            if ( !current.isVisible() ) {</span>
-<span class="nc" id="L224">                isVisible = false;</span>
-<span class="nc" id="L225">                break;</span>
+<span class="nc" id="L227">        boolean isVisible = true;</span>
+<span class="nc bnc" id="L228" title="All 2 branches missed.">        for ( Component current = component; current != null; current = current.getParent() ) {</span>
+<span class="nc bnc" id="L229" title="All 2 branches missed.">            if ( !current.isVisible() ) {</span>
+<span class="nc" id="L230">                isVisible = false;</span>
+<span class="nc" id="L231">                break;</span>
             }
         }
-<span class="nc" id="L228">        return isVisible;</span>
+<span class="nc" id="L234">        return isVisible;</span>
     }
 
 }

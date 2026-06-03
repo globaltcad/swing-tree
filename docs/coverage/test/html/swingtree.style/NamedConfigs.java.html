@@ -115,53 +115,55 @@ final class NamedConfigs&lt;S&gt; implements Simplifiable&lt;NamedConfigs&lt;S&g
 <span class="fc" id="L115">            NamedConf&lt;S&gt; namedConf = newStyles[i];</span>
 <span class="fc" id="L116">            boolean isNone = namedConf.isNone();</span>
 <span class="fc bfc" id="L117" title="All 4 branches covered.">            if ( isNone &amp;&amp; filtered == null ) {</span>
-<span class="fc" id="L118">                filtered = new ArrayList&lt;&gt;(Arrays.asList(newStyles).subList(0, i));</span>
+<span class="fc" id="L118">                filtered = new ArrayList&lt;&gt;(newStyles.length - 1);</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">                for ( int k = 0; k &lt; i; k++ )</span>
+<span class="fc" id="L120">                    filtered.add(newStyles[k]);</span>
             }
-<span class="fc bfc" id="L120" title="All 4 branches covered.">            if ( !isNone &amp;&amp; filtered != null ) {</span>
-<span class="fc" id="L121">                filtered.add(namedConf);</span>
+<span class="fc bfc" id="L122" title="All 4 branches covered.">            if ( !isNone &amp;&amp; filtered != null ) {</span>
+<span class="fc" id="L123">                filtered.add(namedConf);</span>
             }
         }
-<span class="fc bfc" id="L124" title="All 2 branches covered.">        if (filtered != null)</span>
-<span class="fc" id="L125">            return new NamedConfigs&lt;&gt;(filtered.toArray(new NamedConf[0]));</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">        if (filtered != null)</span>
+<span class="fc" id="L127">            return new NamedConfigs&lt;&gt;(filtered.toArray(new NamedConf[0]));</span>
         else
-<span class="fc" id="L127">            return new NamedConfigs&lt;&gt;(newStyles);</span>
+<span class="fc" id="L129">            return new NamedConfigs&lt;&gt;(newStyles);</span>
     }
 
     private int _findNamedStyle( String name ) {
-<span class="fc bfc" id="L131" title="All 2 branches covered.">        for ( int i = 0; i &lt; _styles.length; i++ ) {</span>
-<span class="fc bfc" id="L132" title="All 2 branches covered.">            if ( _styles[i].name().equals(name) )</span>
-<span class="fc" id="L133">                return i;</span>
+<span class="fc bfc" id="L133" title="All 2 branches covered.">        for ( int i = 0; i &lt; _styles.length; i++ ) {</span>
+<span class="fc bfc" id="L134" title="All 2 branches covered.">            if ( _styles[i].name().equals(name) )</span>
+<span class="fc" id="L135">                return i;</span>
         }
-<span class="fc" id="L135">        return -1;</span>
+<span class="fc" id="L137">        return -1;</span>
     }
 
     public @Nullable S get(String name ) {
-<span class="fc" id="L139">        Objects.requireNonNull(name);</span>
+<span class="fc" id="L141">        Objects.requireNonNull(name);</span>
 
-<span class="fc" id="L141">        int foundIndex = _findNamedStyle(name);</span>
+<span class="fc" id="L143">        int foundIndex = _findNamedStyle(name);</span>
 
-<span class="fc bfc" id="L143" title="All 2 branches covered.">        if ( foundIndex == -1 )</span>
-<span class="fc" id="L144">            return null;</span>
+<span class="fc bfc" id="L145" title="All 2 branches covered.">        if ( foundIndex == -1 )</span>
+<span class="fc" id="L146">            return null;</span>
 
-<span class="fc" id="L146">        return _styles[foundIndex].style();</span>
+<span class="fc" id="L148">        return _styles[foundIndex].style();</span>
     }
 
     public Optional&lt;S&gt; find( String name ) {
-<span class="fc" id="L150">        Objects.requireNonNull(name);</span>
-<span class="fc" id="L151">        return Optional.ofNullable(get(name));</span>
+<span class="fc" id="L152">        Objects.requireNonNull(name);</span>
+<span class="fc" id="L153">        return Optional.ofNullable(get(name));</span>
     }
 
     public List&lt;S&gt; sortedByNames() {
-<span class="pc bpc" id="L155" title="1 of 2 branches missed.">        if ( _styles.length == 0 )</span>
-<span class="nc" id="L156">            return Collections.emptyList();</span>
-<span class="fc bfc" id="L157" title="All 2 branches covered.">        if ( _styles.length == 1 ) {</span>
-<span class="fc" id="L158">            return Collections.singletonList(_styles[0].style());</span>
+<span class="pc bpc" id="L157" title="1 of 2 branches missed.">        if ( _styles.length == 0 )</span>
+<span class="nc" id="L158">            return Collections.emptyList();</span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">        if ( _styles.length == 1 ) {</span>
+<span class="fc" id="L160">            return Collections.singletonList(_styles[0].style());</span>
         }
-<span class="fc" id="L160">        return Collections.unmodifiableList(</span>
-<span class="fc" id="L161">                    namedStylesStream()</span>
-<span class="fc" id="L162">                    .sorted(Comparator.comparing(NamedConf::name))</span>
-<span class="fc" id="L163">                    .map(NamedConf::style)</span>
-<span class="fc" id="L164">                    .collect(Collectors.toList())</span>
+<span class="fc" id="L162">        return Collections.unmodifiableList(</span>
+<span class="fc" id="L163">                    namedStylesStream()</span>
+<span class="fc" id="L164">                    .sorted(Comparator.comparing(NamedConf::name))</span>
+<span class="fc" id="L165">                    .map(NamedConf::style)</span>
+<span class="fc" id="L166">                    .collect(Collectors.toList())</span>
                 );
     }
 
@@ -173,64 +175,64 @@ final class NamedConfigs&lt;S&gt; implements Simplifiable&lt;NamedConfigs&lt;S&g
      * @return True if at least one of the named styles in this instance passes the test.
      */
     public boolean any( Predicate&lt;NamedConf&lt;S&gt;&gt; namedStyleTester ) {
-<span class="fc bfc" id="L176" title="All 2 branches covered.">        for ( NamedConf&lt;S&gt; style : _styles )</span>
-<span class="fc bfc" id="L177" title="All 2 branches covered.">            if ( namedStyleTester.test(style) )</span>
-<span class="fc" id="L178">                return true;</span>
-<span class="fc" id="L179">        return false;</span>
+<span class="fc bfc" id="L178" title="All 2 branches covered.">        for ( NamedConf&lt;S&gt; style : _styles )</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">            if ( namedStyleTester.test(style) )</span>
+<span class="fc" id="L180">                return true;</span>
+<span class="fc" id="L181">        return false;</span>
     }
 
     public String toString( String defaultName, String styleType ) {
-<span class="fc bfc" id="L183" title="All 2 branches covered.">        if ( styleType.isEmpty() )</span>
-<span class="fc" id="L184">            styleType = this.getClass().getSimpleName();</span>
+<span class="fc bfc" id="L185" title="All 2 branches covered.">        if ( styleType.isEmpty() )</span>
+<span class="fc" id="L186">            styleType = this.getClass().getSimpleName();</span>
         else
-<span class="fc" id="L186">            styleType += &quot;=&quot;;</span>
-<span class="fc bfc" id="L187" title="All 2 branches covered.">        if ( this.size() == 1 )</span>
-<span class="fc" id="L188">            return stringOf(this.get(defaultName));</span>
+<span class="fc" id="L188">            styleType += &quot;=&quot;;</span>
+<span class="fc bfc" id="L189" title="All 2 branches covered.">        if ( this.size() == 1 )</span>
+<span class="fc" id="L190">            return stringOf(this.get(defaultName));</span>
         else
-<span class="fc" id="L190">            return this.namedStylesStream()</span>
-<span class="fc" id="L191">                    .map(e -&gt; e.name() + &quot;=&quot; + stringOf(e.style()))</span>
-<span class="fc" id="L192">                    .collect(Collectors.joining(&quot;, &quot;, styleType+&quot;[&quot;, &quot;]&quot;));</span>
+<span class="fc" id="L192">            return this.namedStylesStream()</span>
+<span class="fc" id="L193">                    .map(e -&gt; e.name() + &quot;=&quot; + stringOf(e.style()))</span>
+<span class="fc" id="L194">                    .collect(Collectors.joining(&quot;, &quot;, styleType+&quot;[&quot;, &quot;]&quot;));</span>
     }
 
     private String stringOf(@Nullable S style) {
-<span class="fc bfc" id="L196" title="All 2 branches covered.">        return String.valueOf(style instanceof Pooled ? ((Pooled&lt;?&gt;)style).get() : style);</span>
+<span class="fc bfc" id="L198" title="All 2 branches covered.">        return String.valueOf(style instanceof Pooled ? ((Pooled&lt;?&gt;)style).get() : style);</span>
     }
 
     @Override
     public String toString() {
-<span class="nc" id="L201">        StringBuilder sb = new StringBuilder();</span>
-<span class="nc" id="L202">        sb.append(getClass().getSimpleName()).append(&quot;[&quot;);</span>
-<span class="nc bnc" id="L203" title="All 2 branches missed.">        for ( int i = 0; i &lt; _styles.length; i++ ) {</span>
-<span class="nc" id="L204">            sb.append(_styles[i].name()).append(&quot;=&quot;).append(stringOf(_styles[i].style()));</span>
-<span class="nc bnc" id="L205" title="All 2 branches missed.">            if ( i &lt; _styles.length - 1 )</span>
-<span class="nc" id="L206">                sb.append(&quot;, &quot;);</span>
+<span class="nc" id="L203">        StringBuilder sb = new StringBuilder();</span>
+<span class="nc" id="L204">        sb.append(getClass().getSimpleName()).append(&quot;[&quot;);</span>
+<span class="nc bnc" id="L205" title="All 2 branches missed.">        for ( int i = 0; i &lt; _styles.length; i++ ) {</span>
+<span class="nc" id="L206">            sb.append(_styles[i].name()).append(&quot;=&quot;).append(stringOf(_styles[i].style()));</span>
+<span class="nc bnc" id="L207" title="All 2 branches missed.">            if ( i &lt; _styles.length - 1 )</span>
+<span class="nc" id="L208">                sb.append(&quot;, &quot;);</span>
         }
-<span class="nc" id="L208">        sb.append(&quot;]&quot;);</span>
-<span class="nc" id="L209">        return sb.toString();</span>
+<span class="nc" id="L210">        sb.append(&quot;]&quot;);</span>
+<span class="nc" id="L211">        return sb.toString();</span>
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L214">        return Arrays.hashCode(_styles);</span>
+<span class="fc" id="L216">        return Arrays.hashCode(_styles);</span>
     }
 
     @Override
     public boolean equals( Object obj ) {
-<span class="pc bpc" id="L219" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
-<span class="fc bfc" id="L220" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
-<span class="pc bpc" id="L221" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
-<span class="fc" id="L222">        NamedConfigs&lt;?&gt; rhs = (NamedConfigs&lt;?&gt;) obj;</span>
-<span class="fc" id="L223">        return Arrays.equals(_styles, rhs._styles);</span>
+<span class="pc bpc" id="L221" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="fc bfc" id="L222" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L223" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
+<span class="fc" id="L224">        NamedConfigs&lt;?&gt; rhs = (NamedConfigs&lt;?&gt;) obj;</span>
+<span class="fc" id="L225">        return Arrays.equals(_styles, rhs._styles);</span>
     }
 
     @Override
     public NamedConfigs&lt;S&gt; simplified() {
-<span class="fc" id="L228">        return mapNamedStyles(NamedConf::simplified);</span>
+<span class="fc" id="L230">        return mapNamedStyles(NamedConf::simplified);</span>
     }
 
     @Override
     public boolean isNone() {
-<span class="nc" id="L233">        return this.equals(EMPTY);</span>
+<span class="nc" id="L235">        return this.equals(EMPTY);</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

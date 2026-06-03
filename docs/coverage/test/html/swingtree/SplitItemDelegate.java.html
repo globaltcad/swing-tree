@@ -281,7 +281,7 @@ public final class SplitItemDelegate&lt;I extends JMenuItem&gt; extends Abstract
      * @return This {@link SplitItemDelegate} instance to allow for method chaining.
      */
     public SplitItemDelegate&lt;I&gt; prependToButtonText( String prefix ) {
-<span class="nc" id="L284">        NullUtil.nullArgCheck(prefix, &quot;postfix&quot;, String.class);</span>
+<span class="nc" id="L284">        NullUtil.nullArgCheck(prefix, &quot;prefix&quot;, String.class);</span>
         // We make sure that only the Swing thread can modify components:
 <span class="nc bnc" id="L286" title="All 2 branches missed.">        if (!UI.thisIsUIThread()) {</span>
 <span class="nc" id="L287">            UI.run(() -&gt; prependToButtonText(prefix));</span>

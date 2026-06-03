@@ -48,19 +48,27 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
 <span class="fc" id="L48">    }</span>
 
     private void _makePlain( L thisComponent ) {
-<span class="nc" id="L51">        Font f = thisComponent.getFont();</span>
-<span class="nc" id="L52">        thisComponent.setFont(f.deriveFont(f.getStyle() &amp; ~Font.BOLD));</span>
-<span class="nc" id="L53">    }</span>
+<span class="fc" id="L51">        Font f = thisComponent.getFont();</span>
+<span class="fc" id="L52">        thisComponent.setFont(f.deriveFont(f.getStyle() &amp; ~Font.BOLD));</span>
+<span class="fc" id="L53">    }</span>
 
     /**
      *  Makes the wrapped {@link JLabel} font bold (!plain).
+     *  &lt;p&gt;
+     *  Note that this is an &lt;i&gt;additive&lt;/i&gt; operation: it only switches the
+     *  bold bit of the current font on and leaves every other style bit
+     *  untouched. So a label whose font is already italic will end up
+     *  &lt;i&gt;bold and italic&lt;/i&gt;. This differs from
+     *  {@link #withFontStyle(UI.FontStyle)}, which replaces the style
+     *  completely, so {@code withFontStyle(UI.FontStyle.BOLD)} would clear
+     *  the italic bit instead of preserving it.
      *
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel&lt;L&gt; makeBold() {
-<span class="fc" id="L61">        return this.peek( label -&gt; {</span>
-<span class="fc" id="L62">            _makeBold(label);</span>
-<span class="fc" id="L63">        });</span>
+<span class="fc" id="L69">        return this.peek( label -&gt; {</span>
+<span class="fc" id="L70">            _makeBold(label);</span>
+<span class="fc" id="L71">        });</span>
     }
 
     /**
@@ -71,8 +79,8 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @throws IllegalArgumentException if {@code href} is {@code null}.
      */
     public UIForLabel&lt;L&gt; makeLinkTo( String href ) {
-<span class="fc" id="L74">        NullUtil.nullArgCheck( href, &quot;href&quot;, String.class );</span>
-<span class="fc" id="L75">        return makeLinkTo( Val.of(href) );</span>
+<span class="fc" id="L82">        NullUtil.nullArgCheck( href, &quot;href&quot;, String.class );</span>
+<span class="fc" id="L83">        return makeLinkTo( Val.of(href) );</span>
     }
 
     /**
@@ -86,42 +94,132 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @throws IllegalArgumentException if {@code href} is {@code null}.
      */
     public UIForLabel&lt;L&gt; makeLinkTo( Val&lt;String&gt; href ) {
-<span class="fc" id="L89">        NullUtil.nullArgCheck( href, &quot;href&quot;, Val.class );</span>
-<span class="fc" id="L90">        NullUtil.nullPropertyCheck( href, &quot;href&quot;, &quot;Use an empty String instead of null to model a link going nowhere.&quot; );</span>
-<span class="fc" id="L91">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L92">                    LazyRef&lt;String&gt; text = LazyRef.of(thisComponent::getText);</span>
-<span class="fc" id="L93">                    thisComponent.addMouseListener(new MouseAdapter() {</span>
+<span class="fc" id="L97">        NullUtil.nullArgCheck( href, &quot;href&quot;, Val.class );</span>
+<span class="fc" id="L98">        NullUtil.nullPropertyCheck( href, &quot;href&quot;, &quot;Use an empty String instead of null to model a link going nowhere.&quot; );</span>
+<span class="fc" id="L99">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L100">                    LazyRef&lt;String&gt; text = LazyRef.of(thisComponent::getText);</span>
+<span class="fc" id="L101">                    thisComponent.addMouseListener(new MouseAdapter() {</span>
                         @Override
                         public void mouseClicked(MouseEvent e) {
                             try {
-<span class="nc" id="L97">                                String ref = href.orElseThrowUnchecked().trim();</span>
-<span class="nc bnc" id="L98" title="All 2 branches missed.">                                if ( ref.isEmpty() ) return;</span>
-<span class="nc bnc" id="L99" title="All 2 branches missed.">                                if ( !ref.startsWith(&quot;http&quot;) ) ref = &quot;https://&quot; + ref;</span>
-<span class="nc" id="L100">                                Desktop.getDesktop().browse(new URI(ref));</span>
-<span class="nc" id="L101">                            } catch (IOException | URISyntaxException e1) {</span>
-<span class="nc" id="L102">                                log.error(SwingTree.get().logMarker(), &quot;Failed to open link: &quot; + href.orElseThrowUnchecked(), e1);</span>
-<span class="nc" id="L103">                            }</span>
-<span class="nc" id="L104">                        }</span>
-<span class="nc" id="L105">                        @Override  public void mouseExited(MouseEvent e) { thisComponent.setText(text.get()); }</span>
+<span class="nc" id="L105">                                String ref = href.orElseThrowUnchecked().trim();</span>
+<span class="nc bnc" id="L106" title="All 2 branches missed.">                                if ( ref.isEmpty() ) return;</span>
+<span class="nc bnc" id="L107" title="All 2 branches missed.">                                if ( !ref.startsWith(&quot;http&quot;) ) ref = &quot;https://&quot; + ref;</span>
+<span class="nc" id="L108">                                Desktop.getDesktop().browse(new URI(ref));</span>
+<span class="nc" id="L109">                            } catch (IOException | URISyntaxException e1) {</span>
+<span class="nc" id="L110">                                log.error(SwingTree.get().logMarker(), &quot;Failed to open link: &quot; + href.orElseThrowUnchecked(), e1);</span>
+<span class="nc" id="L111">                            }</span>
+<span class="nc" id="L112">                        }</span>
+<span class="nc" id="L113">                        @Override  public void mouseExited(MouseEvent e) { thisComponent.setText(text.get()); }</span>
                         @Override
                         public void mouseEntered(MouseEvent e) {
-<span class="nc" id="L108">                            thisComponent.setText(&quot;&lt;html&gt;&lt;a href=''&gt;&quot; + text.get() + &quot;&lt;/a&gt;&lt;/html&gt;&quot;);</span>
-<span class="nc" id="L109">                        }</span>
+<span class="nc" id="L116">                            thisComponent.setText(&quot;&lt;html&gt;&lt;a href=''&gt;&quot; + text.get() + &quot;&lt;/a&gt;&lt;/html&gt;&quot;);</span>
+<span class="nc" id="L117">                        }</span>
                     });
-<span class="fc" id="L111">                })</span>
-<span class="fc" id="L112">                ._this();</span>
+<span class="fc" id="L119">                })</span>
+<span class="fc" id="L120">                ._this();</span>
+    }
+
+    private void _setFontStyle( L thisComponent, UI.FontStyle style ) {
+<span class="fc" id="L124">        Font f = thisComponent.getFont();</span>
+<span class="pc bpc" id="L125" title="1 of 2 branches missed.">        if ( f != null )</span>
+<span class="fc" id="L126">            thisComponent.setFont(f.deriveFont(style.toAWTFontStyle()));</span>
+<span class="fc" id="L127">    }</span>
+
+    /**
+     *  Adjusts the style bits of the wrapped {@link JLabel}'s font so that it
+     *  matches the supplied {@link UI.FontStyle}, which may be any of
+     *  {@link UI.FontStyle#PLAIN}, {@link UI.FontStyle#BOLD},
+     *  {@link UI.FontStyle#ITALIC} or {@link UI.FontStyle#BOLD_ITALIC}.
+     *  &lt;p&gt;
+     *  Only the style of the font is replaced; the font family and size of the
+     *  label are preserved. So for a label whose font is currently italic,
+     *  calling {@code withFontStyle(UI.FontStyle.BOLD)} will turn it into a
+     *  (non-italic) bold font, whereas {@code withFontStyle(UI.FontStyle.BOLD_ITALIC)}
+     *  would make it both bold &lt;i&gt;and&lt;/i&gt; italic:
+     *  &lt;pre&gt;{@code
+     *      UI.label(&quot;Important!&quot;)
+     *      .withFontStyle(UI.FontStyle.BOLD_ITALIC);
+     *  }&lt;/pre&gt;
+     *  For the common case of toggling between bold and plain you may also use
+     *  the dedicated {@link #makeBold()} and {@link #makePlain()} shorthands.
+     *  Be aware, however, that those shorthands behave &lt;i&gt;additively&lt;/i&gt; (they
+     *  flip only the bold bit and preserve the rest), whereas this method
+     *  &lt;i&gt;replaces&lt;/i&gt; the entire style. So {@code withFontStyle(UI.FontStyle.BOLD)}
+     *  clears a previously set italic bit, while {@link #makeBold()} would keep it.
+     *
+     * @param style The {@link UI.FontStyle} which should be applied to the font of the label.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code style} is {@code null}.
+     */
+    public UIForLabel&lt;L&gt; withFontStyle( UI.FontStyle style ) {
+<span class="fc" id="L156">        NullUtil.nullArgCheck( style, &quot;style&quot;, UI.FontStyle.class );</span>
+<span class="fc" id="L157">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L158">                    _setFontStyle(thisComponent, style);</span>
+<span class="fc" id="L159">                })</span>
+<span class="fc" id="L160">                ._this();</span>
+    }
+
+    /**
+     *  Dynamically adjusts the style bits of the wrapped {@link JLabel}'s font
+     *  based on the {@link UI.FontStyle} wrapped by the provided property.
+     *  When the style enum wrapped by the property changes, then so does the
+     *  style of the label's font change to match it.
+     *  This is useful for modelling the font style as part of your view model
+     *  so that the appearance of the label can react to your business logic
+     *  at runtime: &lt;br&gt;
+     *  &lt;pre&gt;{@code
+     *      // A property somewhere in your view model:
+     *      Var&lt;UI.FontStyle&gt; style = Var.of(UI.FontStyle.PLAIN);
+     *      // ...and in your view:
+     *      UI.label(&quot;Status&quot;)
+     *      .withFontStyle(style);
+     *      // Later on, changing the property updates the label:
+     *      style.set(UI.FontStyle.BOLD_ITALIC);
+     *  }&lt;/pre&gt;
+     *  The supported {@link UI.FontStyle} values are
+     *  {@link UI.FontStyle#PLAIN}, {@link UI.FontStyle#BOLD},
+     *  {@link UI.FontStyle#ITALIC} and {@link UI.FontStyle#BOLD_ITALIC}.
+     *  Note that, just like with {@link #withFontStyle(UI.FontStyle)}, the style
+     *  of the font is &lt;i&gt;replaced&lt;/i&gt; completely on every change (the font family
+     *  and size of the label are preserved). This is in contrast to the
+     *  {@link #makeBold()} and {@link #makePlain()} shorthands, which only flip
+     *  the bold bit additively and leave any other style bit, like italic, intact.
+     *
+     * @param style The {@link UI.FontStyle} property which should be applied to the font of the label.
+     * @return This very builder to allow for method chaining.
+     * @throws IllegalArgumentException if {@code style} is {@code null}.
+     */
+    public UIForLabel&lt;L&gt; withFontStyle( Val&lt;UI.FontStyle&gt; style ) {
+<span class="fc" id="L194">        NullUtil.nullArgCheck( style, &quot;style&quot;, Val.class );</span>
+<span class="fc" id="L195">        NullUtil.nullPropertyCheck( style, &quot;style&quot;, &quot;Null is not a valid font style.&quot; );</span>
+<span class="fc" id="L196">        return _withOnShow( style, (thisComponent, v) -&gt; {</span>
+<span class="fc" id="L197">                    _setFontStyle(thisComponent, v);</span>
+<span class="fc" id="L198">                })</span>
+<span class="fc" id="L199">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L200">                    _setFontStyle(thisComponent, style.orElseThrowUnchecked());</span>
+<span class="fc" id="L201">                })</span>
+<span class="fc" id="L202">                ._this();</span>
     }
 
     /**
      *  Makes the wrapped {@link JLabel} font plain (!bold).
+     *  &lt;p&gt;
+     *  Note that this is an &lt;i&gt;additive&lt;/i&gt; operation: it only switches the
+     *  bold bit of the current font off and leaves every other style bit
+     *  untouched. So a label whose font is bold and italic will remain
+     *  &lt;i&gt;italic&lt;/i&gt; (just no longer bold). This differs from
+     *  {@link #withFontStyle(UI.FontStyle)}, which replaces the style
+     *  completely, so {@code withFontStyle(UI.FontStyle.PLAIN)} would clear
+     *  the italic bit as well, yielding a fully plain font.
      *
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel&lt;L&gt; makePlain() {
-<span class="nc" id="L121">        return _with( label -&gt; {</span>
-<span class="nc" id="L122">                    _makePlain(label);</span>
-<span class="nc" id="L123">                })</span>
-<span class="nc" id="L124">                ._this();</span>
+<span class="fc" id="L219">        return _with( label -&gt; {</span>
+<span class="fc" id="L220">                    _makePlain(label);</span>
+<span class="fc" id="L221">                })</span>
+<span class="fc" id="L222">                ._this();</span>
     }
 
     /**
@@ -131,11 +229,11 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @return This very builder to allow for method chaining.
      */
     public final UIForLabel&lt;L&gt; toggleBold() {
-<span class="nc" id="L134">        return _with( label -&gt; {</span>
-<span class="nc" id="L135">                    Font f = label.getFont();</span>
-<span class="nc" id="L136">                    label.setFont(f.deriveFont(f.getStyle() ^ Font.BOLD));</span>
-<span class="nc" id="L137">                })</span>
-<span class="nc" id="L138">                ._this();</span>
+<span class="nc" id="L232">        return _with( label -&gt; {</span>
+<span class="nc" id="L233">                    Font f = label.getFont();</span>
+<span class="nc" id="L234">                    label.setFont(f.deriveFont(f.getStyle() ^ Font.BOLD));</span>
+<span class="nc" id="L235">                })</span>
+<span class="nc" id="L236">                ._this();</span>
     }
 
     /**
@@ -147,10 +245,10 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @return This very builder to allow for method chaining.
      */
     public final UIForLabel&lt;L&gt; isBoldIf( boolean isBold ) {
-<span class="nc bnc" id="L150" title="All 2 branches missed.">        if ( isBold )</span>
-<span class="nc" id="L151">            return makeBold();</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">        if ( isBold )</span>
+<span class="nc" id="L249">            return makeBold();</span>
         else
-<span class="nc" id="L153">            return makePlain();</span>
+<span class="nc" id="L251">            return makePlain();</span>
     }
 
     /**
@@ -162,21 +260,21 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @throws IllegalArgumentException if {@code isBold} is {@code null}.
      */
     public final UIForLabel&lt;L&gt; isBoldIf( Val&lt;Boolean&gt; isBold ) {
-<span class="nc" id="L165">        NullUtil.nullArgCheck( isBold, &quot;isBold&quot;, Val.class );</span>
-<span class="nc" id="L166">        NullUtil.nullPropertyCheck( isBold, &quot;isBold&quot;, &quot;You can not use null to model if a label is bold or not.&quot; );</span>
-<span class="nc" id="L167">        return _withOnShow( isBold, (thisComponent,v) -&gt; {</span>
-<span class="nc bnc" id="L168" title="All 2 branches missed.">                    if ( v )</span>
-<span class="nc" id="L169">                        _makeBold(thisComponent);</span>
+<span class="nc" id="L263">        NullUtil.nullArgCheck( isBold, &quot;isBold&quot;, Val.class );</span>
+<span class="nc" id="L264">        NullUtil.nullPropertyCheck( isBold, &quot;isBold&quot;, &quot;You can not use null to model if a label is bold or not.&quot; );</span>
+<span class="nc" id="L265">        return _withOnShow( isBold, (thisComponent,v) -&gt; {</span>
+<span class="nc bnc" id="L266" title="All 2 branches missed.">                    if ( v )</span>
+<span class="nc" id="L267">                        _makeBold(thisComponent);</span>
                     else
-<span class="nc" id="L171">                        _makePlain(thisComponent);</span>
-<span class="nc" id="L172">                })</span>
-<span class="nc" id="L173">                ._with( thisComponent -&gt; {</span>
-<span class="nc bnc" id="L174" title="All 2 branches missed.">                    if ( isBold.orElseThrowUnchecked() )</span>
-<span class="nc" id="L175">                        _makeBold(thisComponent);</span>
+<span class="nc" id="L269">                        _makePlain(thisComponent);</span>
+<span class="nc" id="L270">                })</span>
+<span class="nc" id="L271">                ._with( thisComponent -&gt; {</span>
+<span class="nc bnc" id="L272" title="All 2 branches missed.">                    if ( isBold.orElseThrowUnchecked() )</span>
+<span class="nc" id="L273">                        _makeBold(thisComponent);</span>
                     else
-<span class="nc" id="L177">                        _makePlain(thisComponent);</span>
-<span class="nc" id="L178">                })</span>
-<span class="nc" id="L179">                ._this();</span>
+<span class="nc" id="L275">                        _makePlain(thisComponent);</span>
+<span class="nc" id="L276">                })</span>
+<span class="nc" id="L277">                ._this();</span>
     }
 
     /**
@@ -191,11 +289,11 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @throws IllegalArgumentException if {@code text} is {@code null}.
      */
     public final UIForLabel&lt;L&gt; withText( String text ) {
-<span class="fc" id="L194">        NullUtil.nullArgCheck( text, &quot;text&quot;, String.class );</span>
-<span class="fc" id="L195">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L196">                    thisComponent.setText(text);</span>
-<span class="fc" id="L197">                })</span>
-<span class="fc" id="L198">                ._this();</span>
+<span class="fc" id="L292">        NullUtil.nullArgCheck( text, &quot;text&quot;, String.class );</span>
+<span class="fc" id="L293">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L294">                    thisComponent.setText(text);</span>
+<span class="fc" id="L295">                })</span>
+<span class="fc" id="L296">                ._this();</span>
     }
 
     /**
@@ -209,15 +307,15 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @throws IllegalArgumentException if {@code text} is {@code null}.
      */
     public final UIForLabel&lt;L&gt; withText( Val&lt;String&gt; text ) {
-<span class="fc" id="L212">        NullUtil.nullArgCheck( text, &quot;text&quot;, Val.class );</span>
-<span class="fc" id="L213">        NullUtil.nullPropertyCheck( text, &quot;text&quot;, &quot;Please use an empty String instead of null.&quot; );</span>
-<span class="fc" id="L214">        return _withOnShow( text, (thisComponent,v) -&gt; {</span>
-<span class="fc" id="L215">                    thisComponent.setText(v);</span>
-<span class="fc" id="L216">                })</span>
-<span class="fc" id="L217">                ._with( thisComponent -&gt; {</span>
-<span class="fc" id="L218">                    thisComponent.setText( text.orElseThrowUnchecked() );</span>
-<span class="fc" id="L219">                })</span>
-<span class="fc" id="L220">                ._this();</span>
+<span class="fc" id="L310">        NullUtil.nullArgCheck( text, &quot;text&quot;, Val.class );</span>
+<span class="fc" id="L311">        NullUtil.nullPropertyCheck( text, &quot;text&quot;, &quot;Please use an empty String instead of null.&quot; );</span>
+<span class="fc" id="L312">        return _withOnShow( text, (thisComponent,v) -&gt; {</span>
+<span class="fc" id="L313">                    thisComponent.setText(v);</span>
+<span class="fc" id="L314">                })</span>
+<span class="fc" id="L315">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L316">                    thisComponent.setText( text.orElseThrowUnchecked() );</span>
+<span class="fc" id="L317">                })</span>
+<span class="fc" id="L318">                ._this();</span>
     }
 
     /**
@@ -233,11 +331,11 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public UIForLabel&lt;L&gt; withHorizontalAlignment( UI.HorizontalAlignment horizontalAlign ) {
-<span class="fc" id="L236">        NullUtil.nullArgCheck( horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class );</span>
-<span class="fc" id="L237">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L238">                    horizontalAlign.forSwing().ifPresent(thisComponent::setHorizontalAlignment);</span>
-<span class="fc" id="L239">                })</span>
-<span class="fc" id="L240">                ._this();</span>
+<span class="fc" id="L334">        NullUtil.nullArgCheck( horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class );</span>
+<span class="fc" id="L335">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L336">                    horizontalAlign.forSwing().ifPresent(thisComponent::setHorizontalAlignment);</span>
+<span class="fc" id="L337">                })</span>
+<span class="fc" id="L338">                ._this();</span>
     }
 
 
@@ -251,15 +349,15 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public UIForLabel&lt;L&gt; withHorizontalAlignment(Val&lt;UI.HorizontalAlignment&gt; horizontalAlign ) {
-<span class="fc" id="L254">        NullUtil.nullArgCheck( horizontalAlign, &quot;horizontalAlign&quot;, Val.class );</span>
-<span class="fc" id="L255">        NullUtil.nullPropertyCheck( horizontalAlign, &quot;horizontalAlign&quot;, &quot;Null is not a valid alignment.&quot; );</span>
-<span class="fc" id="L256">        return _withOnShow( horizontalAlign, (thisComponent,v) -&gt; {</span>
-<span class="fc" id="L257">                    v.forSwing().ifPresent(thisComponent::setHorizontalAlignment);</span>
-<span class="fc" id="L258">                })</span>
-<span class="fc" id="L259">                ._with( thisComponent -&gt; {</span>
-<span class="fc" id="L260">                    horizontalAlign.orElseThrowUnchecked().forSwing().ifPresent(thisComponent::setHorizontalAlignment);</span>
-<span class="fc" id="L261">                })</span>
-<span class="fc" id="L262">                ._this();</span>
+<span class="fc" id="L352">        NullUtil.nullArgCheck( horizontalAlign, &quot;horizontalAlign&quot;, Val.class );</span>
+<span class="fc" id="L353">        NullUtil.nullPropertyCheck( horizontalAlign, &quot;horizontalAlign&quot;, &quot;Null is not a valid alignment.&quot; );</span>
+<span class="fc" id="L354">        return _withOnShow( horizontalAlign, (thisComponent,v) -&gt; {</span>
+<span class="fc" id="L355">                    v.forSwing().ifPresent(thisComponent::setHorizontalAlignment);</span>
+<span class="fc" id="L356">                })</span>
+<span class="fc" id="L357">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L358">                    horizontalAlign.orElseThrowUnchecked().forSwing().ifPresent(thisComponent::setHorizontalAlignment);</span>
+<span class="fc" id="L359">                })</span>
+<span class="fc" id="L360">                ._this();</span>
     }
 
     /**
@@ -275,11 +373,11 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public UIForLabel&lt;L&gt; withVerticalAlignment( UI.VerticalAlignment verticalAlign ) {
-<span class="fc" id="L278">        NullUtil.nullArgCheck( verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class );</span>
-<span class="fc" id="L279">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L280">                    verticalAlign.forSwing().ifPresent(thisComponent::setVerticalAlignment);</span>
-<span class="fc" id="L281">                })</span>
-<span class="fc" id="L282">                ._this();</span>
+<span class="fc" id="L376">        NullUtil.nullArgCheck( verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class );</span>
+<span class="fc" id="L377">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L378">                    verticalAlign.forSwing().ifPresent(thisComponent::setVerticalAlignment);</span>
+<span class="fc" id="L379">                })</span>
+<span class="fc" id="L380">                ._this();</span>
     }
 
     /**
@@ -292,15 +390,15 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public UIForLabel&lt;L&gt; withVerticalAlignment( Val&lt;UI.VerticalAlignment&gt; verticalAlign ) {
-<span class="fc" id="L295">        NullUtil.nullArgCheck( verticalAlign, &quot;verticalAlign&quot;, Val.class );</span>
-<span class="fc" id="L296">        NullUtil.nullPropertyCheck( verticalAlign, &quot;verticalAlign&quot;, &quot;Null is not a valid alignment.&quot; );</span>
-<span class="fc" id="L297">        return _withOnShow( verticalAlign, (thisComponent,v) -&gt; {</span>
-<span class="fc" id="L298">                    v.forSwing().ifPresent(thisComponent::setVerticalAlignment);</span>
-<span class="fc" id="L299">                })</span>
-<span class="fc" id="L300">                ._with( thisComponent -&gt; {</span>
-<span class="fc" id="L301">                    verticalAlign.orElseThrowUnchecked().forSwing().ifPresent(thisComponent::setVerticalAlignment);</span>
-<span class="fc" id="L302">                })</span>
-<span class="fc" id="L303">                ._this();</span>
+<span class="fc" id="L393">        NullUtil.nullArgCheck( verticalAlign, &quot;verticalAlign&quot;, Val.class );</span>
+<span class="fc" id="L394">        NullUtil.nullPropertyCheck( verticalAlign, &quot;verticalAlign&quot;, &quot;Null is not a valid alignment.&quot; );</span>
+<span class="fc" id="L395">        return _withOnShow( verticalAlign, (thisComponent,v) -&gt; {</span>
+<span class="fc" id="L396">                    v.forSwing().ifPresent(thisComponent::setVerticalAlignment);</span>
+<span class="fc" id="L397">                })</span>
+<span class="fc" id="L398">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L399">                    verticalAlign.orElseThrowUnchecked().forSwing().ifPresent(thisComponent::setVerticalAlignment);</span>
+<span class="fc" id="L400">                })</span>
+<span class="fc" id="L401">                ._this();</span>
     }
 
     /**
@@ -316,12 +414,12 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @throws IllegalArgumentException if {@code alignment} is {@code null}.
      */
     public UIForLabel&lt;L&gt; withAlignment( UI.Alignment alignment ) {
-<span class="fc" id="L319">        NullUtil.nullArgCheck( alignment, &quot;alignment&quot;, UI.Alignment.class );</span>
-<span class="fc" id="L320">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L321">                    alignment.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);</span>
-<span class="fc" id="L322">                    alignment.getVertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);</span>
-<span class="fc" id="L323">                })</span>
-<span class="fc" id="L324">                ._this();</span>
+<span class="fc" id="L417">        NullUtil.nullArgCheck( alignment, &quot;alignment&quot;, UI.Alignment.class );</span>
+<span class="fc" id="L418">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L419">                    alignment.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);</span>
+<span class="fc" id="L420">                    alignment.getVertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);</span>
+<span class="fc" id="L421">                })</span>
+<span class="fc" id="L422">                ._this();</span>
     }
 
     /**
@@ -334,18 +432,18 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @throws IllegalArgumentException if {@code alignment} is {@code null}.
      */
     public UIForLabel&lt;L&gt; withAlignment( Val&lt;UI.Alignment&gt; alignment ) {
-<span class="nc" id="L337">        NullUtil.nullArgCheck( alignment, &quot;alignment&quot;, Val.class );</span>
-<span class="nc" id="L338">        NullUtil.nullPropertyCheck( alignment, &quot;alignment&quot;, &quot;Null is not a valid alignment.&quot; );</span>
-<span class="nc" id="L339">        return _withOnShow( alignment, (thisComponent,v) -&gt; {</span>
-<span class="nc" id="L340">                    v.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);</span>
-<span class="nc" id="L341">                    v.getVertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);</span>
-<span class="nc" id="L342">                })</span>
-<span class="nc" id="L343">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L344">                    UI.Alignment a = alignment.orElseThrowUnchecked();</span>
-<span class="nc" id="L345">                    a.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);</span>
-<span class="nc" id="L346">                    a.getVertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);</span>
-<span class="nc" id="L347">                })</span>
-<span class="nc" id="L348">                ._this();</span>
+<span class="nc" id="L435">        NullUtil.nullArgCheck( alignment, &quot;alignment&quot;, Val.class );</span>
+<span class="nc" id="L436">        NullUtil.nullPropertyCheck( alignment, &quot;alignment&quot;, &quot;Null is not a valid alignment.&quot; );</span>
+<span class="nc" id="L437">        return _withOnShow( alignment, (thisComponent,v) -&gt; {</span>
+<span class="nc" id="L438">                    v.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);</span>
+<span class="nc" id="L439">                    v.getVertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);</span>
+<span class="nc" id="L440">                })</span>
+<span class="nc" id="L441">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L442">                    UI.Alignment a = alignment.orElseThrowUnchecked();</span>
+<span class="nc" id="L443">                    a.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);</span>
+<span class="nc" id="L444">                    a.getVertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);</span>
+<span class="nc" id="L445">                })</span>
+<span class="nc" id="L446">                ._this();</span>
     }
 
 
@@ -362,11 +460,11 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public UIForLabel&lt;L&gt; withHorizontalTextPosition( UI.HorizontalAlignment horizontalAlign ) {
-<span class="fc" id="L365">        NullUtil.nullArgCheck( horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class );</span>
-<span class="fc" id="L366">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L367">                    horizontalAlign.forSwing().ifPresent(thisComponent::setHorizontalTextPosition);</span>
-<span class="fc" id="L368">                })</span>
-<span class="fc" id="L369">                ._this();</span>
+<span class="fc" id="L463">        NullUtil.nullArgCheck( horizontalAlign, &quot;horizontalAlign&quot;, UI.HorizontalAlignment.class );</span>
+<span class="fc" id="L464">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L465">                    horizontalAlign.forSwing().ifPresent(thisComponent::setHorizontalTextPosition);</span>
+<span class="fc" id="L466">                })</span>
+<span class="fc" id="L467">                ._this();</span>
     }
 
     /**
@@ -379,15 +477,15 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @throws IllegalArgumentException if {@code horizontalAlign} is {@code null}.
      */
     public UIForLabel&lt;L&gt; withHorizontalTextPosition( Val&lt;UI.HorizontalAlignment&gt; horizontalAlign ) {
-<span class="fc" id="L382">        NullUtil.nullArgCheck( horizontalAlign, &quot;horizontalAlign&quot;, Val.class );</span>
-<span class="fc" id="L383">        NullUtil.nullPropertyCheck( horizontalAlign, &quot;horizontalAlign&quot;, &quot;Null is not a valid alignment.&quot; );</span>
-<span class="fc" id="L384">        return _withOnShow( horizontalAlign, (thisComponent, v) -&gt; {</span>
-<span class="fc" id="L385">                    v.forSwing().ifPresent(thisComponent::setHorizontalTextPosition);</span>
-<span class="fc" id="L386">                })</span>
-<span class="fc" id="L387">                ._with( thisComponent -&gt; {</span>
-<span class="fc" id="L388">                    horizontalAlign.orElseThrowUnchecked().forSwing().ifPresent(thisComponent::setHorizontalTextPosition);</span>
-<span class="fc" id="L389">                })</span>
-<span class="fc" id="L390">                ._this();</span>
+<span class="fc" id="L480">        NullUtil.nullArgCheck( horizontalAlign, &quot;horizontalAlign&quot;, Val.class );</span>
+<span class="fc" id="L481">        NullUtil.nullPropertyCheck( horizontalAlign, &quot;horizontalAlign&quot;, &quot;Null is not a valid alignment.&quot; );</span>
+<span class="fc" id="L482">        return _withOnShow( horizontalAlign, (thisComponent, v) -&gt; {</span>
+<span class="fc" id="L483">                    v.forSwing().ifPresent(thisComponent::setHorizontalTextPosition);</span>
+<span class="fc" id="L484">                })</span>
+<span class="fc" id="L485">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L486">                    horizontalAlign.orElseThrowUnchecked().forSwing().ifPresent(thisComponent::setHorizontalTextPosition);</span>
+<span class="fc" id="L487">                })</span>
+<span class="fc" id="L488">                ._this();</span>
     }
 
     /**
@@ -403,11 +501,11 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public UIForLabel&lt;L&gt; withVerticalTextPosition( UI.VerticalAlignment verticalAlign ) {
-<span class="fc" id="L406">        NullUtil.nullArgCheck( verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class );</span>
-<span class="fc" id="L407">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L408">                    verticalAlign.forSwing().ifPresent(thisComponent::setVerticalTextPosition);</span>
-<span class="fc" id="L409">                })</span>
-<span class="fc" id="L410">                ._this();</span>
+<span class="fc" id="L504">        NullUtil.nullArgCheck( verticalAlign, &quot;verticalAlign&quot;, UI.VerticalAlignment.class );</span>
+<span class="fc" id="L505">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L506">                    verticalAlign.forSwing().ifPresent(thisComponent::setVerticalTextPosition);</span>
+<span class="fc" id="L507">                })</span>
+<span class="fc" id="L508">                ._this();</span>
     }
 
     /**
@@ -420,15 +518,15 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @throws IllegalArgumentException if {@code verticalAlign} is {@code null}.
      */
     public UIForLabel&lt;L&gt; withVerticalTextPosition( Val&lt;UI.VerticalAlignment&gt; verticalAlign ) {
-<span class="fc" id="L423">        NullUtil.nullArgCheck( verticalAlign, &quot;verticalAlign&quot;, Val.class );</span>
-<span class="fc" id="L424">        NullUtil.nullPropertyCheck( verticalAlign, &quot;verticalAlign&quot;, &quot;Null is not a valid alignment.&quot; );</span>
-<span class="fc" id="L425">        return _withOnShow( verticalAlign, (thisComponent,v) -&gt; {</span>
-<span class="fc" id="L426">                    v.forSwing().ifPresent(thisComponent::setVerticalTextPosition);</span>
-<span class="fc" id="L427">                })</span>
-<span class="fc" id="L428">                ._with( thisComponent -&gt; {</span>
-<span class="fc" id="L429">                    verticalAlign.orElseThrowUnchecked().forSwing().ifPresent(thisComponent::setVerticalTextPosition);</span>
-<span class="fc" id="L430">                })</span>
-<span class="fc" id="L431">                ._this();</span>
+<span class="fc" id="L521">        NullUtil.nullArgCheck( verticalAlign, &quot;verticalAlign&quot;, Val.class );</span>
+<span class="fc" id="L522">        NullUtil.nullPropertyCheck( verticalAlign, &quot;verticalAlign&quot;, &quot;Null is not a valid alignment.&quot; );</span>
+<span class="fc" id="L523">        return _withOnShow( verticalAlign, (thisComponent,v) -&gt; {</span>
+<span class="fc" id="L524">                    v.forSwing().ifPresent(thisComponent::setVerticalTextPosition);</span>
+<span class="fc" id="L525">                })</span>
+<span class="fc" id="L526">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L527">                    verticalAlign.orElseThrowUnchecked().forSwing().ifPresent(thisComponent::setVerticalTextPosition);</span>
+<span class="fc" id="L528">                })</span>
+<span class="fc" id="L529">                ._this();</span>
     }
 
     /**
@@ -444,12 +542,12 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @throws IllegalArgumentException if {@code alignment} is {@code null}.
      */
     public UIForLabel&lt;L&gt; withTextPosition( UI.Alignment alignment ) {
-<span class="fc" id="L447">        NullUtil.nullArgCheck( alignment, &quot;alignment&quot;, UI.Alignment.class );</span>
-<span class="fc" id="L448">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L449">                    alignment.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalTextPosition);</span>
-<span class="fc" id="L450">                    alignment.getVertical().forSwing().ifPresent(thisComponent::setVerticalTextPosition);</span>
-<span class="fc" id="L451">                })</span>
-<span class="fc" id="L452">                ._this();</span>
+<span class="fc" id="L545">        NullUtil.nullArgCheck( alignment, &quot;alignment&quot;, UI.Alignment.class );</span>
+<span class="fc" id="L546">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L547">                    alignment.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalTextPosition);</span>
+<span class="fc" id="L548">                    alignment.getVertical().forSwing().ifPresent(thisComponent::setVerticalTextPosition);</span>
+<span class="fc" id="L549">                })</span>
+<span class="fc" id="L550">                ._this();</span>
     }
 
     /**
@@ -465,10 +563,10 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel&lt;L&gt; withIcon( Icon icon ) {
-<span class="fc" id="L468">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L469">                    thisComponent.setIcon(icon);</span>
-<span class="fc" id="L470">                })</span>
-<span class="fc" id="L471">                ._this();</span>
+<span class="fc" id="L566">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L567">                    thisComponent.setIcon(icon);</span>
+<span class="fc" id="L568">                })</span>
+<span class="fc" id="L569">                ._this();</span>
     }
 
     /**
@@ -484,11 +582,11 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @return This very builder to allow for method chaining.
      */
     public UIForLabel&lt;L&gt; withIcon( IconDeclaration icon ) {
-<span class="fc" id="L487">        Objects.requireNonNull(icon,&quot;icon&quot;);</span>
-<span class="fc" id="L488">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L489">                    icon.find().ifPresent( i -&gt; thisComponent.setIcon(i) );</span>
-<span class="fc" id="L490">                })</span>
-<span class="fc" id="L491">                ._this();</span>
+<span class="fc" id="L585">        Objects.requireNonNull(icon,&quot;icon&quot;);</span>
+<span class="fc" id="L586">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L587">                    icon.find().ifPresent( i -&gt; thisComponent.setIcon(i) );</span>
+<span class="fc" id="L588">                })</span>
+<span class="fc" id="L589">                ._this();</span>
     }
 
     /**
@@ -517,14 +615,14 @@ public final class UIForLabel&lt;L extends JLabel&gt; extends UIForAnySwing&lt;U
      * @throws IllegalArgumentException if {@code icon} is {@code null}.
      */
     public UIForLabel&lt;L&gt; withIcon( Val&lt;IconDeclaration&gt; icon ) {
-<span class="fc" id="L520">        NullUtil.nullArgCheck(icon,&quot;icon&quot;,Val.class);</span>
-<span class="fc" id="L521">        return _withOnShow( icon, (thisComponent,v) -&gt; {</span>
-<span class="fc" id="L522">                    v.find().ifPresent(thisComponent::setIcon);</span>
-<span class="fc" id="L523">                })</span>
-<span class="fc" id="L524">                ._with( thisComponent -&gt; {</span>
-<span class="fc" id="L525">                    icon.orElseThrowUnchecked().find().ifPresent(thisComponent::setIcon);</span>
-<span class="fc" id="L526">                })</span>
-<span class="fc" id="L527">                ._this();</span>
+<span class="fc" id="L618">        NullUtil.nullArgCheck(icon,&quot;icon&quot;,Val.class);</span>
+<span class="fc" id="L619">        return _withOnShow( icon, (thisComponent,v) -&gt; {</span>
+<span class="fc" id="L620">                    v.find().ifPresent(thisComponent::setIcon);</span>
+<span class="fc" id="L621">                })</span>
+<span class="fc" id="L622">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L623">                    icon.orElseThrowUnchecked().find().ifPresent(thisComponent::setIcon);</span>
+<span class="fc" id="L624">                })</span>
+<span class="fc" id="L625">                ._this();</span>
     }
 
 }

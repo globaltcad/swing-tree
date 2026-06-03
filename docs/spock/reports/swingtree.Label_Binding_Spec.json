@@ -4,7 +4,7 @@
   "narrative":"As a developer, I want to bind a label to a property so\n    that the label is updated when the property changes.\n    Binding is a powerful feature that allows us to create\n    UIs which are not only decoupled from the business logic of\n    an application, but also make it easy to create UIs which\n    are dynamic and reactive.",
   "subjects":[],
   "statistics":{
-    "runs":"11",
+    "runs":"12",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -298,6 +298,37 @@
         {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
 
         {"kind":"then","text":"The label should be a different one.","code":["label.icon != null","label.icon !== originalIcon.find().get()","label.icon.iconHeight == 512","label.icon.iconWidth == 512"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A property can dynamically define the font style of a label.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Just like the text, color or alignment of a label, the *style* of its\n            font (plain, bold, italic or bold-italic) can be modelled as part of\n            your view model and bound to the label using the `withFontStyle(Val<UI.FontStyle>)`\n            method. Whenever the `UI.FontStyle` wrapped by the property changes,\n            the style bits of the label's font are updated accordingly,\n            while its family and size are preserved.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We create a property holding the initial font style.","code":["Val<UI.FontStyle> style = Var.of(UI.FontStyle.PLAIN)"]},
+
+        {"kind":"when","text":"We create and bind to a label UI node...","code":["var ui =","        UI.label(\"Reactive\")","        .withFontStyle(style)"]},
+
+        {"kind":"and","text":"We build the root component of the UI tree.","code":["var label = ui.get(JLabel)"]},
+
+        {"kind":"then","text":"The label font starts out plain, as defined by the property.","code":["label.font.style == Font.PLAIN"]},
+
+        {"kind":"when","text":"We change the property to model a bold-italic font...","code":["style.set(UI.FontStyle.BOLD_ITALIC)"]},
+
+        {"kind":"and","text":"Then we wait for the EDT to complete the UI modifications...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label font now carries both the bold and italic style bits.","code":["label.font.bold","label.font.italic"]},
+
+        {"kind":"when","text":"We finally switch the property to a plain italic font...","code":["style.set(UI.FontStyle.ITALIC)"]},
+
+        {"kind":"and","text":"Once again we let the EDT catch up...","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The label font is italic but no longer bold.","code":["!label.font.bold","label.font.italic"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

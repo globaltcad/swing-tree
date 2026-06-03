@@ -4,7 +4,7 @@
   "narrative":"SwingTree is a feature rich library in which the\n    default behavior does not fit every use case.\n    This is why you can initialize the library with a custom\n    start configuration expressing your needs.\n\n    This library context is a singleton called `SwingTree` and\n    it can be initialized with a `SwingTreeInitConfig`\n    inside of a configurator lambda like so:\n\n    ```\n        SwingTree.initializeUsing( conf -> conf\n            .uiScaleFactor(2f)\n            .styleSheet(myStyleSheet)\n            .defaultAnimationInterval(42)\n        )\n    ```",
   "subjects":["swingtree.SwingTree","swingtree.SwingTreeInitConfig"],
   "statistics":{
-    "runs":"8",
+    "runs":"17",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -97,7 +97,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            If you want SwingTree to compute its UI scale factor from a custom default font \n            but you do not want to install this font in the `UIManager`, you can choose the \"none\" \n            font installation when initializing the library context. \n        "]
+      "tags":{},"see":[],"extraInfo":["\n            If you want SwingTree to compute its UI scale factor from a custom default font\n            but you do not want to install this font in the `UIManager`, you can choose the \"none\"\n            font installation when initializing the library context.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"","code":["boolean isWindows = System.getProperty(\"os.name\").toLowerCase().contains(\"win\")"]},
@@ -113,6 +113,29 @@
         {"kind":"and","text":"The default font is not installed in the UIManager.","code":["UIManager.getDefaults().get(\"defaultFont\") !== myDefaultFont","UIManager.getDefaults().get(\"defaultFont\") === originalDefaultFont"]},
 
         {"kind":"cleanup","text":"Reset the library context to be `null` again internally!","code":["SwingTree.clear()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A NONE font installation uses the supplied font even when the `UIManager` already has a different \"defaultFont\".",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The contract of `FontInstallation.NONE` is that SwingTree should compute its UI scale\n            factor from the supplied default font *and* ignore the `UIManager` state entirely.\n\n            This unit test reproduces the conditions under which other tests in the suite\n            (typically those that exercise alternative Look and Feels like Nimbus or FlatLaf)\n            can leak a non-null \"defaultFont\" into the `UIManager` and used to make the\n            sibling specification flaky: the previously stored font was preferred over the\n            user-supplied one, producing an unexpected scale factor.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A stale `UIManager` default font from a hypothetical earlier scenario:","code":["boolean isWindows = System.getProperty(\"os.name\").toLowerCase().contains(\"win\")","var staleFont = new java.awt.Font(\"Serif\", java.awt.Font.PLAIN, 12)","UIManager.getDefaults().put(\"defaultFont\", staleFont)"]},
+
+        {"kind":"and","text":"A unique default font that we want SwingTree to scale from:","code":["var myDefaultFont = new java.awt.Font(\"Arial\", java.awt.Font.ITALIC, 73)"]},
+
+        {"kind":"and","text":"We initialize SwingTree with the custom default font using a NONE installation:","code":["SwingTree.initializeUsing(conf -> conf","    .defaultFont(myDefaultFont, SwingTreeInitConfig.FontInstallation.NONE)",")"]},
+
+        {"kind":"expect","text":"The scale factor is derived from our supplied font, not the leftover one in the `UIManager`:","code":["SwingTree.get().getUiScaleFactor() == (isWindows ? 6f : 4.75f)","UI.scale() == (isWindows ? 6f : 4.75f)"]},
+
+        {"kind":"and","text":"The `UIManager` \"defaultFont\" is left untouched, as documented by the NONE installation:","code":["UIManager.getDefaults().get(\"defaultFont\") === staleFont"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()","UIManager.getDefaults().put(\"defaultFont\", null)"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -202,6 +225,206 @@
         {"kind":"then","text":"The property view receives the new value again:","code":["trace == [true, false]"]},
 
         {"kind":"cleanup","text":"Reset the library context!","code":["SwingTree.clear()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The static `getPlatformScaleFactor` returns a sensible UI scale for the current platform without any side effects.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `SwingTree.getPlatformScaleFactor()` is a side-effect free static utility\n            that derives a sensible UI scale factor from the current platform's system\n            font. It does <i>not</i> create or access the `SwingTree` singleton, does\n            <i>not</i> register listeners on the `UIManager`, and does <i>not</i> mutate\n            any shared state.\n\n            On any reasonable platform, the returned value should always fall within\n            `[0.2f, 5f]`. Anything outside this range is almost certainly a bug\n            regardless of the operating system, look and feel, or display configuration.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We snapshot the `UIManager` \"defaultFont\" so we can check it is untouched afterwards.","code":["var defaultFontBefore = UIManager.getDefaults().get(\"defaultFont\")"]},
+
+        {"kind":"when","text":"We ask SwingTree for a platform-derived scale factor.","code":["float scale = SwingTree.getPlatformScaleFactor()"]},
+
+        {"kind":"then","text":"The result is a finite, positive number well inside the sensible range.","code":["Float.isFinite(scale)","scale >= 0.2f","scale <= 5f"]},
+
+        {"kind":"and","text":"Calling the method again yields the exact same value (it is a pure read).","code":["SwingTree.getPlatformScaleFactor() == scale"]},
+
+        {"kind":"and","text":"The `UIManager` \"defaultFont\" was not modified as a side effect.","code":["UIManager.getDefaults().get(\"defaultFont\") === defaultFontBefore"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `getScaledDefaultFont()` method always returns a `FontUIResource`, wrapping a plain `Font` if necessary.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Look and Feel authors usually want a font they can drop straight into\n            `UIDefaults` keys like `Label.font` without breaking Swing's\n            LAF-replacement contract. That contract is gated on `instanceof UIResource`:\n            a plain `Font` is treated as user-set and is *preserved* across LAF swaps,\n            while a `FontUIResource` is replaceable.\n\n            `SwingTree.get().getScaledDefaultFont()` therefore *always* returns a\n            `FontUIResource` — even when the underlying font in the `UIManager`\n            is a plain `Font`, SwingTree wraps it for you.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We seed the `UIManager` with a *plain* `Font` (not a `FontUIResource`) under \"defaultFont\":","code":["var plainFont = new java.awt.Font(\"Arial\", java.awt.Font.PLAIN, 17)","assert !(plainFont instanceof FontUIResource)","UIManager.getDefaults().put(\"defaultFont\", plainFont)"]},
+
+        {"kind":"when","text":"We initialize SwingTree and ask for the default font:","code":["SwingTree.initialize()","var resolved = SwingTree.get().getScaledDefaultFont()"]},
+
+        {"kind":"then","text":"It is a `FontUIResource` (so it can be installed into UIDefaults directly):","code":["resolved instanceof FontUIResource"]},
+
+        {"kind":"and","text":"The wrapped font carries the same family, size and style as the original:","code":["resolved.getFamily() == plainFont.getFamily()","resolved.getSize()   == plainFont.getSize()","resolved.getStyle()  == plainFont.getStyle()"]},
+
+        {"kind":"and","text":"The method never returns `null`:","code":["resolved != null"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()","UIManager.getDefaults().put(\"defaultFont\", null)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `getScaledDefaultFont()` method tracks the currently active \"defaultFont\" in the `UIManager`.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `getScaledDefaultFont()` is the single source of truth for the active default font.\n            Whatever sits under `UIManager.get(\"defaultFont\")` at the time of the call\n            is what comes back (wrapped in a `FontUIResource` if it wasn't one already).\n\n            That means the method always reflects the *current* state — not a snapshot\n            taken when the library was first initialized — so changes pushed through\n            the `UIManager` after bootstrap are observed immediately.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A custom default font installed before SwingTree initializes:","code":["var configuredFont = new FontUIResource(new java.awt.Font(\"Dialog\", java.awt.Font.BOLD, 31))","UIManager.getDefaults().put(\"defaultFont\", configuredFont)"]},
+
+        {"kind":"and","text":"SwingTree initializes:","code":["SwingTree.initialize()"]},
+
+        {"kind":"expect","text":"getScaledDefaultFont() returns exactly the configured font (no wrapping needed):","code":["SwingTree.get().getScaledDefaultFont() === configuredFont"]},
+
+        {"kind":"when","text":"We later swap the default font in the `UIManager`:","code":["var differentFont = new FontUIResource(new java.awt.Font(\"Serif\", java.awt.Font.ITALIC, 24))","UIManager.getDefaults().put(\"defaultFont\", differentFont)"]},
+
+        {"kind":"then","text":"The next call to getScaledDefaultFont() returns the new font:","code":["SwingTree.get().getScaledDefaultFont() === differentFont"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()","UIManager.getDefaults().put(\"defaultFont\", null)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"You can subscribe to live `defaultFont` changes through `getScaledDefaultFontView()`.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            SwingTree publishes the authoritative default font through a reactive\n            `Viewable<FontUIResource>` so a Look and Feel can be truly dynamic:\n            re-install its per-component `*.font` keys and refresh open windows\n            as soon as the OS, the user or another part of the application\n            flips the system font.\n\n            The view fires for every input that drives the resolved default font —\n            the `UIManager` \"defaultFont\" key in particular — and never delivers\n            a `null` payload.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A reasonable default font in place before SwingTree initializes:","code":["var firstFont = new FontUIResource(new java.awt.Font(\"Dialog\", java.awt.Font.PLAIN, 14))","UIManager.getDefaults().put(\"defaultFont\", firstFont)","SwingTree.initialize()"]},
+
+        {"kind":"and","text":"A view + trace list of every value the property emits:","code":["var trace = []","var fontView = SwingTree.get().getScaledDefaultFontView()","fontView.onChange(From.ALL, it -> trace.add(it.currentValue().orElseThrow()))"]},
+
+        {"kind":"expect","text":"The initial value of the view matches the current default font:","code":["fontView.get() === firstFont"]},
+
+        {"kind":"when","text":"We push a new default font through the `UIManager`:","code":["var secondFont = new FontUIResource(new java.awt.Font(\"Serif\", java.awt.Font.BOLD, 28))","UIManager.getDefaults().put(\"defaultFont\", secondFont)"]},
+
+        {"kind":"then","text":"The view subscribers see the new font:","code":["trace == [secondFont]"]},
+
+        {"kind":"when","text":"We push yet another font:","code":["var thirdFont = new FontUIResource(new java.awt.Font(\"SansSerif\", java.awt.Font.ITALIC, 19))","UIManager.getDefaults().put(\"defaultFont\", thirdFont)"]},
+
+        {"kind":"then","text":"Subscribers see that one too:","code":["trace == [secondFont, thirdFont]"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()","UIManager.getDefaults().put(\"defaultFont\", null)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `getScaledDefaultFontView()` view does NOT fire when the same font value is re-installed.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            SwingTree's internal listener fires for *every* PropertyChangeEvent on\n            \"defaultFont\" — even when an application puts the same value back into the\n            `UIManager`. To prevent that low-level noise from leaking into reactive\n            subscribers, the published default-font property only signals when the\n            resolved value actually differs from the previous one (value equality,\n            not identity). That keeps Look and Feel re-installation cheap.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"An initialized SwingTree with a baseline default font:","code":["var baseline = new FontUIResource(new java.awt.Font(\"Dialog\", java.awt.Font.PLAIN, 14))","UIManager.getDefaults().put(\"defaultFont\", baseline)","SwingTree.initialize()"]},
+
+        {"kind":"and","text":"A subscriber that records every emitted font:","code":["var trace = []","var fontView = SwingTree.get().getScaledDefaultFontView()","fontView.onChange(From.ALL, it -> trace.add(it.currentValue().orElseThrow()))"]},
+
+        {"kind":"when","text":"We push an *equal* (but not identical) FontUIResource back into the `UIManager`:","code":["var equalCopy = new FontUIResource(new java.awt.Font(\"Dialog\", java.awt.Font.PLAIN, 14))","UIManager.getDefaults().put(\"defaultFont\", equalCopy)"]},
+
+        {"kind":"then","text":"The view subscriber does not fire — the resolved value did not change:","code":["trace == []"]},
+
+        {"kind":"when","text":"We push a genuinely different font:","code":["var bigger = new FontUIResource(new java.awt.Font(\"Dialog\", java.awt.Font.PLAIN, 28))","UIManager.getDefaults().put(\"defaultFont\", bigger)"]},
+
+        {"kind":"then","text":"The subscriber receives exactly one change notification:","code":["trace == [bigger]"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()","UIManager.getDefaults().put(\"defaultFont\", null)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A configured `uiScaleFactor` is folded into the font returned by `getScaledDefaultFont()`.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            SwingTree can arrive at its UI scale factor in two ways: by *deriving* it\n            from the size of the default font, or by having it *dictated* explicitly\n            through the `swingtree.uiScale` system property (equivalently\n            `conf.uiScaleFactor(..)` at initialization).\n\n            When the scale is dictated this way, the raw font sitting in the\n            `UIManager` — or the active Look and Feel's `Label.font` — does **not** yet\n            carry that factor. If `getScaledDefaultFont()` handed that raw font back, a Look\n            and Feel author installing it into `UIDefaults` keys like `Label.font`\n            would get text at the unscaled size while the rest of SwingTree's layout\n            and painting is scaled — text and chrome would visibly disagree.\n\n            So `getScaledDefaultFont()` folds the configured factor into the font it returns,\n            honouring its documented \"already scaled\" contract. What scales is the font\n            *size*: doubling the configured factor doubles the returned size. That\n            relationship is platform independent, even though the absolute pixel size\n            depends on the platform's reference font size (e.g. 15 on a typical Linux\n            desktop, 12 on Windows, 13 on macOS), which is why this test asserts the\n            *ratio* rather than a hard-coded size.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A deliberately small raw font in the `UIManager` — its size must NOT survive verbatim:","code":["var rawFont = new java.awt.Font(\"Monospaced\", java.awt.Font.PLAIN, 9)","UIManager.getDefaults().put(\"defaultFont\", rawFont)"]},
+
+        {"kind":"and","text":"We initialize SwingTree with the scale dictated explicitly as a factor of 2:","code":["SwingTree.initializeUsing(conf -> conf","    .isUiScaleFactorEnabled(true)","    .uiScaleFactor(2f)",")"]},
+
+        {"kind":"and","text":"We capture the resolved default font:","code":["var scaledTwice = SwingTree.get().getScaledDefaultFont()"]},
+
+        {"kind":"expect","text":"It is a `FontUIResource`, so a LAF can drop it straight into `UIDefaults`:","code":["scaledTwice instanceof FontUIResource"]},
+
+        {"kind":"and","text":"The font family is preserved — only the size is touched:","code":["scaledTwice.getFamily() == rawFont.getFamily()"]},
+
+        {"kind":"and","text":"The raw, unscaled size was NOT returned verbatim — the configured factor was applied:","code":["scaledTwice.getSize() != rawFont.getSize()","scaledTwice.getSize() > rawFont.getSize()"]},
+
+        {"kind":"when","text":"We re-initialize with the very same font but a factor of 1, to obtain the unscaled baseline:","code":["SwingTree.clear()","UIManager.getDefaults().put(\"defaultFont\", rawFont)","SwingTree.initializeUsing(conf -> conf","    .isUiScaleFactorEnabled(true)","    .uiScaleFactor(1f)",")","var scaledOnce = SwingTree.get().getScaledDefaultFont()"]},
+
+        {"kind":"then","text":"The returned size scales linearly with the configured factor: twice the factor, twice the size.","code":["scaledTwice.getSize() == 2 * scaledOnce.getSize()"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()","UIManager.getDefaults().put(\"defaultFont\", null)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `getScaledDefaultFontView()` exposes the scaled default font when a `uiScaleFactor` is configured.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The reactive `getScaledDefaultFontView()` is the hook a dynamic Look and Feel\n            subscribes to so it can re-install its `*.font` keys whenever the\n            authoritative default font changes. It must publish the *same* value that\n            `getScaledDefaultFont()` returns — including the scaling applied for an explicitly\n            configured `uiScaleFactor`. A LAF that trusted the view but received an\n            unscaled font would render text out of step with the rest of the UI.\n\n            This test pins the scale to a factor of 2 and shows that:\n            <ul>\n                <li>the view's current value is the *scaled* font (not the raw\n                    `UIManager` font), and matches `getScaledDefaultFont()`; and</li>\n                <li>when the application swaps the source font in the `UIManager`, the\n                    view re-publishes a value that is still governed by the configured\n                    factor — the new family flows through, but the size stays locked to\n                    the dictated scale.</li>\n            </ul>\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A raw source font installed before SwingTree initializes:","code":["var firstRaw = new java.awt.Font(\"Dialog\", java.awt.Font.PLAIN, 10)","UIManager.getDefaults().put(\"defaultFont\", firstRaw)"]},
+
+        {"kind":"and","text":"We initialize with the scale dictated explicitly as a factor of 2:","code":["SwingTree.initializeUsing(conf -> conf","    .isUiScaleFactorEnabled(true)","    .uiScaleFactor(2f)",")"]},
+
+        {"kind":"and","text":"A view plus a trace list of every value the property emits:","code":["var trace = []","var fontView = SwingTree.get().getScaledDefaultFontView()","fontView.onChange(From.ALL, it -> trace.add(it.currentValue().orElseThrow()))"]},
+
+        {"kind":"expect","text":"The view never delivers a `null` payload and its current value is a `FontUIResource`:","code":["fontView.get() instanceof FontUIResource"]},
+
+        {"kind":"and","text":"The view exposes exactly what `getScaledDefaultFont()` resolves — the scaled font, not the raw one:","code":["fontView.get() == SwingTree.get().getScaledDefaultFont()","fontView.get().getSize() != firstRaw.getSize()","fontView.get().getSize() > firstRaw.getSize()"]},
+
+        {"kind":"when","text":"The application swaps the source font in the `UIManager` for a different family:","code":["var secondRaw = new java.awt.Font(\"Serif\", java.awt.Font.BOLD, 40)","UIManager.getDefaults().put(\"defaultFont\", secondRaw)"]},
+
+        {"kind":"then","text":"The view fires once, the new family flows through, but the size stays governed by the factor:","code":["trace.size() == 1","trace.last().getFamily() == secondRaw.getFamily()","trace.last().getSize()   == SwingTree.get().getScaledDefaultFont().getSize()","trace.last().getSize()   != secondRaw.getSize()"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.clear()","UIManager.getDefaults().put(\"defaultFont\", null)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A custom Look and Feel can fetch `getScaledDefaultFontView()` from its `initialize()` hook without NPE.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The recommended pattern for a SwingTree-aware Look and Feel is to\n            subscribe to `SwingTree.get().getScaledDefaultFontView()` from inside the\n            LAF's own `initialize()` hook — so that runtime DPI / system-font\n            changes flow into the UI without a restart.\n\n            That timing is tricky: during `LookAndFeel.initialize()`,\n            `UIManager.getLookAndFeelDefaults()` can still be `null` because the\n            install has not yet committed the new defaults table. SwingTree\n            therefore guards each `addPropertyChangeListener` call and re-attempts\n            any skipped attach on the next `\"lookAndFeel\"` PropertyChangeEvent\n            (which is guaranteed to fire at the end of `UIManager.setLookAndFeel(..)`).\n\n            This test reproduces the call order and verifies both halves of the\n            contract — no NPE during init, and the listener still propagates\n            `UIManager` font changes after the install completes.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A trace list of fonts the view emits after install:","code":["var trace = []","var capturedView = new AtomicReference<Viewable<FontUIResource>>()"]},
+
+        {"kind":"and","text":"A minimal custom Look and Feel that subscribes from inside `initialize()`:","code":["var laf = new BasicLookAndFeel() {","    @Override String getName()                 { \"SelfHealTest\" }","    @Override String getID()                   { \"SelfHealTest\" }","    @Override String getDescription()          { \"self-heal test LAF\" }","    @Override boolean isNativeLookAndFeel()    { false }","    @Override boolean isSupportedLookAndFeel() { true  }","    @Override void initialize() {","        super.initialize()","        // This is exactly the call pattern that used to throw an","        // NPE because UIManager.getLookAndFeelDefaults() was null.","        var view = SwingTree.get().getScaledDefaultFontView()","        view.onChange(From.ALL, it -> trace.add(it.currentValue().orElseThrow()))","        capturedView.set(view)","    }","}"]},
+
+        {"kind":"when","text":"We install the LAF — the bootstrap MUST NOT throw:","code":["UIManager.setLookAndFeel(laf)"]},
+
+        {"kind":"then","text":"No exception was raised and the view was obtained successfully:","code":["noExceptionThrown()","capturedView.get() != null"]},
+
+        {"kind":"when","text":"After the install completes, we push a fresh \"defaultFont\" through the `UIManager`:","code":["var afterInstall = new FontUIResource(new java.awt.Font(\"Serif\", java.awt.Font.BOLD, 33))","UIManager.getDefaults().put(\"defaultFont\", afterInstall)"]},
+
+        {"kind":"then","text":"The listener that was attached during initialize self-healed: the view fires:","code":["trace.contains(afterInstall)"]},
+
+        {"kind":"cleanup","text":"","code":["UIManager.setLookAndFeel(UIManager.getCrossPlatformLookAndFeelClassName())","SwingTree.clear()","UIManager.getDefaults().put(\"defaultFont\", null)"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
