@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForScrollPane.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForScrollPane.java</span></div><h1>UIForScrollPane.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import swingtree.api.Configurator;
+import swingtree.components.JScrollPanels;
+import swingtree.components.listener.NestedJScrollPanelScrollCorrection;
+import swingtree.layout.AddConstraint;
+import swingtree.layout.Bounds;
+import swingtree.layout.Size;
+
+import javax.swing.*;
+import java.awt.*;
+import java.util.Objects;
+
+/**
+ *  A SwingTree builder node designed for configuring {@link JScrollPane} instances. &lt;br&gt;
+ *  Use {@link UI#scrollPane()} or {@link UI#scrollPane(Configurator)} to create a new instance
+ *  of this builder type.
+ *
+ * @param &lt;P&gt; The type of {@link JScrollPane} that this {@link UIForScrollPane} is configuring.
+ */
+public final class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAnyScrollPane&lt;UIForScrollPane&lt;P&gt;,P&gt;
+{
+<span class="fc" id="L25">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(UIForScrollPane.class);</span>
+
+    private final BuilderState&lt;P&gt; _state;
+    private final @Nullable Configurator&lt;ScrollableComponentDelegate&gt; _configurator;
+
+    /**
+     * {@link UIForAnySwing} (sub)types always wrap
+     * a single component for which they are responsible.
+     *
+     * @param state The {@link BuilderState} modelling how the underlying component is build.
+     */
+    UIForScrollPane( BuilderState&lt;P&gt; state ) {
+<span class="fc" id="L37">        this(state, null);</span>
+<span class="fc" id="L38">    }</span>
+
+    /**
+     * {@link UIForAnySwing} (sub)types always wrap
+     * a single component for which they are responsible.
+     *
+     * @param state The {@link BuilderState} modelling how the underlying component is build.
+     * @param configurator A {@link Configurator} that can be used to configure how the content
+     *                     of the {@link JScrollPane} relates to the {@link JScrollPane} itself.
+     */
+<span class="fc" id="L48">    UIForScrollPane( BuilderState&lt;P&gt; state, @Nullable Configurator&lt;ScrollableComponentDelegate&gt; configurator ) {</span>
+<span class="fc" id="L49">        Objects.requireNonNull(state);</span>
+<span class="fc" id="L50">        _state = state.withMutator(thisComponent -&gt; {</span>
+<span class="pc bpc" id="L51" title="3 of 4 branches missed.">           if ( !(thisComponent instanceof UI.ScrollPane) &amp;&amp; !(thisComponent instanceof JScrollPanels) )</span>
+<span class="nc" id="L52">               thisComponent.addMouseWheelListener(new NestedJScrollPanelScrollCorrection(thisComponent));</span>
+<span class="fc" id="L53">        });</span>
+<span class="fc" id="L54">        _configurator = configurator;</span>
+<span class="fc" id="L55">    }</span>
+
+    @Override
+    protected BuilderState&lt;P&gt; _state() {
+<span class="fc" id="L59">        return _state;</span>
+    }
+    
+    @Override
+    protected UIForScrollPane&lt;P&gt; _newBuilderWithState( BuilderState&lt;P&gt; newState ) {
+<span class="fc" id="L64">        return new UIForScrollPane&lt;&gt;(newState, _configurator);</span>
+    }
+
+    /**
+     *  We override this method to wrap the added component in a {@link ScrollableBox} instance
+     *  in case a {@link Configurator} for {@link ScrollableComponentDelegate} instances was provided.
+     *  We then use the continuously supplied {@link ScrollableComponentDelegate} objects
+     *  to satisfy the needs of the {@link Scrollable} implementation of the {@link ScrollableBox}. &lt;br&gt;
+     *  &lt;b&gt;
+     *      This way the user can take advantage of the Scrollable
+     *      interface without the need for a custom implementation
+     *  &lt;/b&gt;
+     *
+     * @param thisComponent  The component which is wrapped by this builder.
+     * @param addedComponent A component instance which ought to be added to the wrapped component type.
+     * @param constraints    The layout constraint which ought to be used to add the component to the wrapped component type.
+     */
+    @Override
+    protected void _addComponentTo( P thisComponent, JComponent addedComponent, @Nullable AddConstraint constraints ) {
+<span class="fc bfc" id="L83" title="All 2 branches covered.">        if ( _configurator != null ) {</span>
+<span class="pc bpc" id="L84" title="1 of 2 branches missed.">            if ( addedComponent instanceof JTable ) {</span>
+                /*
+                    Note that we cannot delegate the table like we do in
+                    the below case. This is because a table only installs itself
+                    properly in a scroll pane (with header) if its DIRECT parent is the
+                    scroll pane. (with indirection, the header will be missing)
+                */
+<span class="nc" id="L91">                JTable jTable = (JTable)addedComponent;</span>
+<span class="nc" id="L92">                ScrollableComponentDelegate conf = _createNewScrollableConf(thisComponent, jTable, _configurator);</span>
+<span class="nc" id="L93">                jTable.setPreferredScrollableViewportSize(conf.preferredSize().toDimension());</span>
+<span class="nc" id="L94">                jTable.setFillsViewportHeight(conf.fitHeight());</span>
+<span class="nc bnc" id="L95" title="All 2 branches missed.">                int newMode = conf.fitWidth() ? JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS : JTable.AUTO_RESIZE_OFF;</span>
+<span class="nc" id="L96">                jTable.setAutoResizeMode(newMode);</span>
+<span class="nc" id="L97">                super._addComponentTo(thisComponent, addedComponent, constraints);</span>
+<span class="pc bpc" id="L98" title="1 of 2 branches missed.">            } else if ( addedComponent instanceof Scrollable ) {</span>
+<span class="nc" id="L99">                log.warn(SwingTree.get().logMarker(),</span>
+                    &quot;Trying to add a 'Scrollable' component to a declarative scroll pane UI which is already &quot; +
+                    &quot;configured with a SwingTree based Scrollable through the 'UI.scrollPane(Configurator)' method. &quot; +
+                    &quot;The provided component of type '{}' is most likely not intended to be used this way.&quot;,
+<span class="nc" id="L103">                    addedComponent.getClass().getName(),</span>
+                    new Throwable(&quot;Stack trace for debugging purposes.&quot;)
+                );
+            } else {
+<span class="fc" id="L107">                ScrollableBox wrapper = new ScrollableBox(thisComponent, addedComponent, _configurator);</span>
+<span class="pc bpc" id="L108" title="1 of 2 branches missed.">                if ( constraints != null ) {</span>
+<span class="nc" id="L109">                    wrapper.add(addedComponent, constraints.toConstraintForLayoutManager());</span>
+                } else {
+<span class="fc" id="L111">                    wrapper.add(addedComponent, &quot;grow&quot;);</span>
+                    /*
+                        If we do not use a Scrollable panel and add the component directly
+                        it will be placed and sized to fill the viewport by default.
+                        But when using a Scrollable wrapper, we have an indirection which causes the
+                        content to NOT fill out the viewport.
+
+                        This &quot;grow&quot; keyword ensures that MigLayout produces a layout
+                        that mimics what is expected...
+                    */
+                }
+<span class="fc" id="L122">                super._addComponentTo(thisComponent, wrapper, null);</span>
+<span class="fc" id="L123">            }</span>
+        }
+        else
+<span class="fc" id="L126">            super._addComponentTo(thisComponent, addedComponent, constraints);</span>
+<span class="fc" id="L127">    }</span>
+
+    /**
+     *  A simple internal wrapper type for {@link JComponent} instances that are to be used as the content
+     *  of a {@link JScrollPane} and that should have a special scroll behaviour defined
+     *  by a {@link ScrollableComponentDelegate} instance whose configuration is
+     *  delivered to the scroll pane through this class implementing the {@link Scrollable} interface.
+     */
+    private static class ScrollableBox extends ThinDelegationBox implements Scrollable
+    {
+        private final JScrollPane _parent;
+        private final Configurator&lt;ScrollableComponentDelegate&gt; _configurator;
+
+        ScrollableBox( JScrollPane parent, JComponent child, Configurator&lt;ScrollableComponentDelegate&gt; configurator ) {
+<span class="fc" id="L141">            super(child);</span>
+<span class="fc" id="L142">            _parent       = parent;</span>
+<span class="fc" id="L143">            _configurator = configurator;</span>
+<span class="fc" id="L144">        }</span>
+
+        @Override
+        public Dimension getPreferredScrollableViewportSize() {
+<span class="fc" id="L148">            ScrollableComponentDelegate delegate = _createNewScrollableConf(_parent, _child, _configurator);</span>
+            try {
+<span class="fc" id="L150">                return delegate.preferredSize().toDimension();</span>
+<span class="nc" id="L151">            } catch ( Exception e ) {</span>
+<span class="nc" id="L152">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating preferred size for scrollable component.&quot;, e);</span>
+<span class="nc" id="L153">                return new Dimension(0, 0);</span>
+            }
+        }
+
+        @Override
+        public int getScrollableUnitIncrement( java.awt.@Nullable Rectangle visibleRect, int orientation, int direction ) {
+<span class="fc" id="L159">            ScrollableComponentDelegate delegate = _createNewScrollableConf(_parent, _child, _configurator);</span>
+            try {
+<span class="fc" id="L161">                Bounds bounds = Bounds.none();</span>
+<span class="pc bpc" id="L162" title="1 of 2 branches missed.">                if ( visibleRect != null )</span>
+<span class="nc" id="L163">                    bounds = Bounds.of(visibleRect);</span>
+<span class="pc bpc" id="L164" title="1 of 2 branches missed.">                UI.Align align = (orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL);</span>
+<span class="fc" id="L165">                return delegate.unitIncrement(bounds, align, direction);</span>
+<span class="nc" id="L166">            } catch ( Exception e ) {</span>
+<span class="nc" id="L167">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating unit increment for scrollable component.&quot;, e);</span>
+<span class="nc" id="L168">                return 0;</span>
+            }
+        }
+
+        @Override
+        public int getScrollableBlockIncrement( java.awt.@Nullable Rectangle visibleRect, int orientation, int direction ) {
+<span class="fc" id="L174">            ScrollableComponentDelegate delegate = _createNewScrollableConf(_parent, _child, _configurator);</span>
+            try {
+<span class="fc" id="L176">                Bounds bounds = Bounds.none();</span>
+<span class="pc bpc" id="L177" title="1 of 2 branches missed.">                if ( visibleRect != null )</span>
+<span class="nc" id="L178">                    bounds = Bounds.of(visibleRect);</span>
+<span class="pc bpc" id="L179" title="1 of 2 branches missed.">                UI.Align align = (orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL);</span>
+<span class="fc" id="L180">                return delegate.blockIncrement(bounds, align, direction);</span>
+<span class="nc" id="L181">            } catch ( Exception e ) {</span>
+<span class="nc" id="L182">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating block increment for scrollable component.&quot;, e);</span>
+<span class="nc" id="L183">                return 0;</span>
+            }
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportWidth() {
+            try {
+<span class="fc" id="L190">                ScrollableComponentDelegate delegate = _createNewScrollableConf(_parent, _child, _configurator);</span>
+<span class="fc" id="L191">                return delegate.fitWidth();</span>
+<span class="nc" id="L192">            } catch ( Exception e ) {</span>
+<span class="nc" id="L193">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating fit width for scrollable component.&quot;, e);</span>
+<span class="nc" id="L194">                return false;</span>
+            }
+        }
+
+        @Override
+        public boolean getScrollableTracksViewportHeight() {
+            try {
+<span class="fc" id="L201">                ScrollableComponentDelegate delegate = _createNewScrollableConf(_parent, _child, _configurator);</span>
+<span class="fc" id="L202">                return delegate.fitHeight();</span>
+<span class="nc" id="L203">            } catch ( Exception e ) {</span>
+<span class="nc" id="L204">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating fit height for scrollable component.&quot;, e);</span>
+<span class="nc" id="L205">                return false;</span>
+            }
+        }
+    }
+
+    private static ScrollableComponentDelegate _createNewScrollableConf(
+            JScrollPane parent, JComponent child, Configurator&lt;ScrollableComponentDelegate&gt; configurator
+    ) {
+<span class="fc" id="L213">        ScrollableComponentDelegate delegate = ScrollableComponentDelegate.of(</span>
+<span class="fc" id="L214">                                                    parent, child, Size.of(child.getPreferredSize())</span>
+                                                );
+        try {
+<span class="fc" id="L217">            delegate = configurator.configure(delegate);</span>
+<span class="nc" id="L218">        } catch ( Exception e ) {</span>
+<span class="nc" id="L219">            log.error(SwingTree.get().logMarker(), &quot;Error while configuring scrollable component.&quot;, e);</span>
+<span class="fc" id="L220">        }</span>
+<span class="fc" id="L221">        return delegate;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
