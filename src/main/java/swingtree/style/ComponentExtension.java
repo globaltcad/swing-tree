@@ -519,6 +519,72 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
+     *  Returns {@code true} if this component currently has at least one piece of its
+     *  text rasterised into SwingTree's shared <em>text-render cache</em> and ready to
+     *  be blitted instead of re-rendered. This is the observable signal that the text
+     *  caching optimisation (see {@link swingtree.SwingTreeInitConfig#withTextCaching(boolean)})
+     *  has "kicked in" for this component.
+     *  <p>
+     *  Text caching is independent of the per-layer style caching exposed by
+     *  {@link #hasCachedRendering(UI.Layer)}: it intercepts the actual {@code drawString}
+     *  calls a look-and-feel makes (for labels, buttons, text fields, …), rasterises a
+     *  given <em>appearance</em> of a string (text + font + colour + antialiasing hints
+     *  + HiDPI scale) once, and blits the resulting image on subsequent paints. It only
+     *  reports {@code true} after the appearance has been drawn enough times to be
+     *  promoted from direct rendering to a cached image (a short warm-up), and it
+     *  reverts to {@code false} once the component stops drawing that appearance (e.g.
+     *  its text changes) and the entry is reclaimed.
+     *
+     * @return {@code true} if cached, blittable text exists for this component right now.
+     */
+    public boolean hasCachedText() {
+        return TextRenderCache.hasMaterialisedText(_owner);
+    }
+
+    /**
+     *  Returns how many distinct text appearances this component retained during its
+     *  most recent paint. For a plain label this is typically {@code 1} (its single
+     *  string) once it has been painted with text caching enabled, and {@code 0} when
+     *  text caching is disabled or the component was never painted / draws no text.
+     *  <p>
+     *  Note that an appearance is <em>retained</em> (counted here) from the very first
+     *  paint, i.e. before it has been promoted to an actual cached image — use
+     *  {@link #hasCachedText()} to tell whether a blittable image already exists.
+     *
+     * @return Number of text appearances this component is keeping alive in the cache.
+     */
+    public int cachedTextEntryCount() {
+        return TextRenderCache.retainedKeyCount(_owner);
+    }
+
+    /**
+     *  Returns the total number of entries currently living in SwingTree's <em>global</em>
+     *  text-render cache, across all components. Because entries are keyed by the text
+     *  appearance itself and shared between components (so a row of identical buttons
+     *  uses a single image), and because they are held weakly and reclaimed once no
+     *  component draws that appearance any more, this count reflects the set of
+     *  <em>live</em> text appearances in the whole UI.
+     *  <p>
+     *  This is primarily useful for documentation and tests that want to observe
+     *  sharing and automatic cleanup.
+     *
+     * @return The number of live entries in the shared text-render cache.
+     */
+    public static int totalTextCacheSize() {
+        return TextRenderCache.globalEntryCount();
+    }
+
+    /**
+     *  Clears SwingTree's global text-render cache, dropping every cached text image
+     *  and per-component bookkeeping. The cache repopulates lazily on subsequent
+     *  paints; this never affects correctness, only the warm-up state. Mainly intended
+     *  for tests that need a deterministic starting point.
+     */
+    public static void clearTextCache() {
+        TextRenderCache.clearForTesting();
+    }
+
+    /**
      *  Allows for the retrieval of a specific {@link Shape} which represents
      *  a specific area of the component identified by the given {@link UI.ComponentArea}.
      *  The following areas are available:
@@ -839,24 +905,47 @@ public final class ComponentExtension<C extends JComponent>
 
                 contentClip = StyleUtil.intersect( contentClip, _outerBaseClip );
 
+                final Consumer<Graphics> lafPaint = lookAndFeelPainting;
                 paintWithClip(internalGraphics, contentClip, () -> {
+                    boolean proxied = TextRenderCache.isProxyable(_owner.getClass());
+                    if ( proxied && internalGraphics instanceof CachingTextGraphics2D ) {
+                        log.error(SwingTree.get().logMarker(),
+                            "Detected an already text-cache-proxied graphics while painting '{}'. " +
+                            "This is a double-wrap bug; reusing the existing proxy without re-wrapping.",
+                            _owner.getClass(), new Throwable("Stack trace for debugging the double-wrap."));
+                        proxied = false;
+                    }
+                    Graphics2D lafGraphics = proxied
+                            ? new CachingTextGraphics2D(internalGraphics, _owner, TextRenderCache.beginPaint(_owner))
+                            : internalGraphics;
                     try {
-                        lookAndFeelPainting.accept(internalGraphics);
-                    } catch (Exception e) {
-                        String componentAsString = "?";
-                        try {
-                            // Anything can happen in client code...
-                            componentAsString = _owner.toString();
-                        } catch (Exception e2) {
-                            log.error(SwingTree.get().logMarker(), "Error while converting component to string!", e2);
+                        lafPaint.accept(lafGraphics);
+                    } catch (RuntimeException e) {
+                        _logLafPaintError(e);
+                        if ( proxied ) {
+                            TextRenderCache.markUnsafe(_owner.getClass());
+                            try { lafPaint.accept(internalGraphics); }   // retry without the proxy
+                            catch (Exception e2) { _logLafPaintError(e2); }
                         }
-                        log.error(SwingTree.get().logMarker(), "Error while painting look and feel of component '"+componentAsString+"'!", e);
+                    } catch (Exception e) {
+                        _logLafPaintError(e);
                     }
                 });
             }
 
             internalGraphics.setClip(baseClip);
         });
+    }
+
+    private void _logLafPaintError(Exception e) {
+        String componentAsString = "?";
+        try {
+            // Anything can happen in client code...
+            componentAsString = _owner.toString();
+        } catch (Exception e2) {
+            log.error(SwingTree.get().logMarker(), "Error while converting component to string!", e2);
+        }
+        log.error(SwingTree.get().logMarker(), "Error while painting look and feel of component '"+componentAsString+"'!", e);
     }
 
     private static Color findBackgroundColorForWiping(Container owner, ComponentConf componentConf) {
