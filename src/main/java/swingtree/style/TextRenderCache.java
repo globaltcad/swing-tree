@@ -3,8 +3,7 @@ package swingtree.style;
 import org.jspecify.annotations.Nullable;
 import swingtree.SwingTree;
 
-import javax.swing.JComponent;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -84,7 +83,26 @@ final class TextRenderCache {
 
     /** Whether painting through the given former-UI class may be proxied for text caching. */
     static boolean isProxyable(Class<?> formerUiClass) {
-        return SwingTree.get().isTextCachingEnabled() && !UNSAFE.contains(formerUiClass);
+        if ( !SwingTree.get().isTextCachingEnabled() || UNSAFE.contains(formerUiClass) )
+            return false;
+        if ( JLabel.class.isAssignableFrom(formerUiClass) )
+            return true;
+        if ( JTextField.class.isAssignableFrom(formerUiClass) )
+            return true;
+        if ( JButton.class.isAssignableFrom(formerUiClass) )
+            return true;
+        if ( JComboBox.class.isAssignableFrom(formerUiClass) )
+            return true;
+        if ( JCheckBox.class.isAssignableFrom(formerUiClass) )
+            return true;
+        if ( JRadioButton.class.isAssignableFrom(formerUiClass) )
+            return true;
+        if ( JToggleButton.class.isAssignableFrom(formerUiClass) )
+            return true;
+        if ( JMenuItem.class.isAssignableFrom(formerUiClass) )
+            return true;
+
+        return false;
     }
 
     /** Permanently disables proxying for a former-UI class after it failed once. */
