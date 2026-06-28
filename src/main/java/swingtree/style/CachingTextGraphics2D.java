@@ -64,6 +64,19 @@ final class CachingTextGraphics2D extends Graphics2D {
 
     // ── create()/dispose() must keep the wrapper in place for nested paints ──
 
+    /*
+        NOTE: create() returns another proxy so that text drawn through a derived
+        graphics (nested LaF paints) is still cached. This is also why the proxy must
+        only ever wrap *leaf* text components (see TextRenderCache.isProxyable): Swing
+        derives each child's graphics via parent.create(), so wrapping a container
+        propagates this proxy across its whole descendant subtree. We observed that
+        this much larger blast radius — handing a non-native Graphics2D to arbitrary
+        descendant paint code — causes flaky, single-frame render dropouts. We did not
+        isolate the exact foreign code that misbehaves, but containers with children
+        reliably triggered it while leaves never did. Proxying a textless container
+        like a JPanel also buys nothing, so we keep this feature scoped to the few
+        component types that actually draw cacheable text.
+    */
     @Override public Graphics create() {
         Graphics copy = _g.create();
         return (copy instanceof Graphics2D)
