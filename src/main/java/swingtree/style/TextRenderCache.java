@@ -33,18 +33,26 @@ import java.util.WeakHashMap;
  *  glyphs and composites each one in software, every frame. This cache renders a
  *  given <i>appearance</i> of a string once and then blits the resulting image.
  *
- *  <h2>Lifecycle and why it never needs a size cap</h2>
+ *  <h2>Lifecycle: weak references do the real work, the budget is a backstop</h2>
  *  Entries are keyed by a {@link Pooled}-interned {@link TextKey}; equal keys
  *  collapse to one canonical instance. The canonical key is kept alive only by a
- *  {@link KeyHolder} the component stores on itself as a client property (keyed by
- *  the package-private {@link KeyHolder} class, so it is invisible from outside).
- *  While a component keeps drawing the same text it retains that key, keeping the
- *  image alive; the moment the text/font/colour changes it retains a different key
- *  and the stale image becomes weakly reachable and is collected. When the component
- *  itself is collected, its client properties — and therefore its {@link KeyHolder}
- *  and the keys it held — go with it. Two components drawing identical text share one
- *  image until the last of them stops. So the cache tracks live appearance exactly —
- *  no cap to tune, no invalidation to wire.
+ *  {@link KeyHolder} the component keeps in its {@link ComponentExtension} extra-state
+ *  store (which is itself a client property of the component, so it stays invisible
+ *  from outside). While a component keeps drawing the same text it retains that key,
+ *  keeping the image alive; the moment the text/font/colour changes it retains a
+ *  different key and the stale image becomes weakly reachable and is collected. When
+ *  the component itself is collected, its {@link ComponentExtension} — and therefore
+ *  its {@link KeyHolder} and the keys it held — go with it. Two components drawing
+ *  identical text share one image until the last of them stops. So the cache tracks
+ *  live appearance exactly, with no invalidation to wire.
+ *
+ *  <p>On top of that self-clearing lifecycle sits a coarse memory-budget cap, shared
+ *  with the style {@link LayerCache} via {@link LayerCache#DYNAMIC_CACHE_AGGRESSIVENESS()}
+ *  (derived from system RAM): it bounds both the number of cached appearances
+ *  ({@link #maxEntries()}) and the device-pixel size of any single cached image
+ *  ({@link #maxImageArea()}). This never affects correctness — anything not cached is
+ *  simply drawn directly — it only caps worst-case memory on machines with little of
+ *  it, and lets a constrained device opt out of text caching entirely (budget 0).
  *
  *  <h2>Conservative by construction</h2>
  *  Only plain {@code drawString} with a solid {@link Color} paint and an
@@ -68,8 +76,39 @@ final class TextRenderCache {
      *  overhang and antialiasing bleed so nothing is clipped by the image edge). */
     private static final int PAD = 2;
 
-    /** Per-image device-pixel sanity limit (not a cache-size cap). */
+    /** Per unit of the shared {@link LayerCache#DYNAMIC_CACHE_AGGRESSIVENESS()} memory
+     *  budget, the device-pixel area a single cached text image may occupy. Text is
+     *  thin but can be wide, so a unit buys a generous strip of pixels. */
+    private static final long PIXELS_PER_AGGRESSIVENESS = 512L * 256L; // 131072 device px / unit
+
+    /** Absolute device-pixel ceiling for one cached text image, independent of how
+     *  aggressively caching is configured (a final sanity guard against pathological text). */
     private static final long MAX_IMAGE_AREA = 2048L * 2048L;
+
+    /** Per unit of the shared {@link LayerCache#DYNAMIC_CACHE_AGGRESSIVENESS()} memory
+     *  budget, how many distinct text appearances may be materialised in the global
+     *  cache. Text images are far cheaper than full style-layer images (a thin glyph
+     *  strip vs. a filled component rectangle), so a unit buys many more entries than
+     *  the style {@link LayerCache} grants. */
+    private static final int ENTRIES_PER_AGGRESSIVENESS = 64;
+
+    /** Absolute ceiling on the number of cached text entries, independent of aggressiveness. */
+    private static final int MAX_ENTRIES = 4096;
+
+    /** Maximum device-pixel area a single cached text image may occupy, scaled by the
+     *  shared {@link LayerCache#DYNAMIC_CACHE_AGGRESSIVENESS()} budget so that
+     *  memory-constrained machines cache more conservatively. */
+    private static long maxImageArea() {
+        return Math.min(MAX_IMAGE_AREA, PIXELS_PER_AGGRESSIVENESS * LayerCache.DYNAMIC_CACHE_AGGRESSIVENESS());
+    }
+
+    /** Maximum number of distinct text appearances the global cache will hold, scaled
+     *  by the shared {@link LayerCache#DYNAMIC_CACHE_AGGRESSIVENESS()} budget. Once this
+     *  is reached new appearances are drawn directly (never cached) until the
+     *  weak-reference lifecycle frees room again. */
+    private static int maxEntries() {
+        return Math.min(MAX_ENTRIES, ENTRIES_PER_AGGRESSIVENESS * LayerCache.DYNAMIC_CACHE_AGGRESSIVENESS());
+    }
 
     private static final AffineTransform IDENTITY = new AffineTransform();
 
@@ -81,28 +120,59 @@ final class TextRenderCache {
     private static final java.util.Set<Class<?>> UNSAFE = java.util.Collections.newSetFromMap(new java.util.concurrent.ConcurrentHashMap<>());
 
 
-    /** Whether painting through the given former-UI class may be proxied for text caching. */
-    static boolean isProxyable(Class<?> formerUiClass) {
-        if ( !SwingTree.get().isTextCachingEnabled() || UNSAFE.contains(formerUiClass) )
+    /**
+     *  Whether the given component's paint may be wrapped in the text-caching proxy.
+     *  We deliberately keep the set of proxied components as small as it can be while
+     *  still covering essentially all real text rendering — proxying more than that
+     *  only adds cost and risk for no gain:
+     *  <ol>
+     *      <li><b>Globally enabled &amp; not self-healed away.</b> A component class
+     *          whose paint once broke under the proxy is recorded in {@link #UNSAFE}
+     *          (keyed by class) and is never proxied again.</li>
+     *      <li><b>Leaf text components only.</b> Only components that paint their own
+     *          text are eligible, so the proxy can never propagate across a child
+     *          subtree (see {@link CachingTextGraphics2D#create()}); proxying a
+     *          container was observed to cause flaky single-frame render dropouts.</li>
+     *      <li><b>It must actually have text right now.</b> An icon-only label or an
+     *          empty text field draws no cacheable {@code drawString}, so wrapping its
+     *          paint would pay the proxy cost for nothing. This is re-checked on every
+     *          paint, so a component that gains or loses text is picked up immediately.</li>
+     *  </ol>
+     *  The one exception to rule&nbsp;3 is {@link JComboBox}: it paints its display
+     *  value through a <em>renderer</em> component (typically a {@link JLabel}) on a
+     *  graphics derived from its own, so the proxy reaches that text via
+     *  {@link CachingTextGraphics2D#create() create()}-propagation rather than the
+     *  combo's own {@code getText()}. Gating it on the combo's text would wrongly
+     *  disable it, so it is allowed unconditionally (subject only to rule&nbsp;1).
+     *
+     * @param c The component about to be painted.
+     * @return {@code true} if its paint should be routed through the text-caching proxy.
+     */
+    static boolean isProxyable(JComponent c) {
+        final Class<?> uiClass = c.getClass();
+
+        // Rule 1: global switch + per-class self-healing opt-out.
+        if ( !SwingTree.get().isTextCachingEnabled() || UNSAFE.contains(uiClass) )
             return false;
-        if ( JLabel.class.isAssignableFrom(formerUiClass) )
-            return true;
-        if ( JTextField.class.isAssignableFrom(formerUiClass) )
-            return true;
-        if ( JButton.class.isAssignableFrom(formerUiClass) )
-            return true;
-        if ( JComboBox.class.isAssignableFrom(formerUiClass) )
-            return true;
-        if ( JCheckBox.class.isAssignableFrom(formerUiClass) )
-            return true;
-        if ( JRadioButton.class.isAssignableFrom(formerUiClass) )
-            return true;
-        if ( JToggleButton.class.isAssignableFrom(formerUiClass) )
-            return true;
-        if ( JMenuItem.class.isAssignableFrom(formerUiClass) )
+
+        // Exception to rule 3: a combo box's text is painted by a propagated renderer,
+        // not by its own getText(), so we never apply the has-text gate to it.
+        if ( c instanceof JComboBox )
             return true;
 
-        return false;
+        // Rule 2: recognise the leaf text components and grab the text each paints itself.
+        final String ownText;
+        if ( c instanceof JLabel )
+            ownText = ((JLabel) c).getText();
+        else if ( c instanceof AbstractButton )   // JButton, JToggleButton, JCheckBox, JRadioButton, JMenuItem, ...
+            ownText = ((AbstractButton) c).getText();
+        else if ( c instanceof JTextField )       // incl. JPasswordField, JFormattedTextField
+            ownText = ((JTextField) c).getText();
+        else
+            return false;                         // not a recognised leaf text component -> never proxy
+
+        // Rule 3: only worth wrapping while there is actually text to draw.
+        return ownText != null && !ownText.isEmpty();
     }
 
     /** Permanently disables proxying for a former-UI class after it failed once. */
@@ -132,39 +202,36 @@ final class TextRenderCache {
 
     /** Total number of live entries in the global text cache. Stale, garbage-collected
      *  keys are expunged by {@link WeakHashMap#size()} before counting. No bookkeeping
-     *  poke is needed: a component's {@link KeyHolder} lives on the component itself
-     *  (as a client property), so it is collected together with the component, which
+     *  poke is needed: a component's {@link KeyHolder} lives in its
+     *  {@link ComponentExtension}, so it is collected together with the component, which
      *  releases its keys and lets their cache entries become reclaimable directly. */
     static int globalEntryCount() {
         return CACHE.size();
     }
 
     /** Drops every cached entry. Intended for tests that need a clean, deterministic
-     *  starting point. (Per-component {@link KeyHolder}s live on the components as
-     *  client properties and simply repopulate on the next paint.) */
+     *  starting point. (Per-component {@link KeyHolder}s live in each component's
+     *  {@link ComponentExtension} and simply repopulate on the next paint.) */
     static void clearForTesting() {
         CACHE.clear();
     }
 
-    /** The {@link KeyHolder} a component stores on itself, or {@code null} if it has
-     *  never been painted with text caching active. */
+    /** The {@link KeyHolder} a component keeps in its {@link ComponentExtension}
+     *  extra-state store, or {@code null} if it has never been painted with text
+     *  caching active. */
     private static @Nullable KeyHolder holderOf(JComponent c) {
-        Object h = c.getClientProperty(KeyHolder.class);
-        return (h instanceof KeyHolder) ? (KeyHolder) h : null;
+        return ComponentExtension.from(c).get(KeyHolder.class).orElse(null);
     }
 
     /**
      *  Returns the component's {@link KeyHolder}, reset for a fresh paint pass.
-     *  The holder is stored on the component itself as a client property (keyed by the
-     *  package-private {@link KeyHolder} class), so it lives and dies with the component
-     *  and keeps this paint's cache entries alive while the component still draws them.
+     *  The holder lives in the component's {@link ComponentExtension} extra-state store
+     *  (which is itself a client property of the component), so it lives and dies with
+     *  the component and keeps this paint's cache entries alive while the component
+     *  still draws them.
      */
     static KeyHolder beginPaint(JComponent c) {
-        KeyHolder h = holderOf(c);
-        if ( h == null ) {
-            h = new KeyHolder();
-            c.putClientProperty(KeyHolder.class, h);
-        }
+        KeyHolder h = ComponentExtension.from(c).getOrSet(KeyHolder.class, KeyHolder::new);
         h.reset();
         return h;
     }
@@ -193,11 +260,17 @@ final class TextRenderCache {
 
         long visualHash = visualHash(delegate, tx, font, color);
         Pooled<TextKey> key = new Pooled<>(new TextKey(text, visualHash)).intern();
-        holder.retain(key);
 
         Entry entry = CACHE.get(key);
-        if ( entry == null ) { entry = new Entry(); CACHE.put(key, entry); }
-        entry.hits++;
+        if ( entry == null ) {
+            if ( CACHE.size() >= maxEntries() )
+                return false;   // global cache is at its memory-budget cap -> draw directly, don't grow
+            entry = new Entry();
+            CACHE.put(key, entry);
+        }
+        holder.retain(key);     // an existing appearance is always retained; a new one only once admitted
+        if ( entry.image == null )
+            entry.hits++;       // 'hits' is purely the warm-up counter; stop once an image exists (no overflow)
 
         FontMetrics fm = delegate.getFontMetrics(font);
         int ascent = fm.getAscent();
@@ -228,14 +301,21 @@ final class TextRenderCache {
         int h = boundsH + 2 * PAD;
         int imgW = Math.max(1, (int) Math.ceil(w * sx));
         int imgH = Math.max(1, (int) Math.ceil(h * sy));
-        if ( (long) imgW * imgH > MAX_IMAGE_AREA ) return null;
+        if ( (long) imgW * imgH > maxImageArea() ) return null;
 
         BufferedImage image = newCompatibleImage(delegate, imgW, imgH);
         Graphics2D bg = image.createGraphics();
         try {
             bg.setRenderingHints(delegate.getRenderingHints());        // inherit fractional metrics etc.
-            bg.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,  // force grayscale to avoid LCD fringing
-                                RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            // Subpixel/LCD text AA assumes a known opaque backdrop, which our transparent
+            // buffer (composited later over an arbitrary background) does not have, so we
+            // downgrade to plain grayscale AA to avoid colour fringing. But an *explicit*
+            // "AA off" is honoured, otherwise we would blit antialiased pixels where the
+            // look-and-feel asked for crisp, aliased text.
+            Object textAA = delegate.getRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING);
+            if ( !RenderingHints.VALUE_TEXT_ANTIALIAS_OFF.equals(textAA) )
+                bg.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING,
+                                    RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             bg.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
                                 RenderingHints.VALUE_ANTIALIAS_ON);
             bg.scale(sx, sy);

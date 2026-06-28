@@ -64,6 +64,21 @@ import java.awt.Color
 @Timeout(value = 25, unit = TimeUnit.SECONDS)
 class Text_Render_Caching_Spec extends Specification
 {
+    def setupSpec() {
+        // The text cache shares the style cache's memory budget
+        // (`LayerCache.DYNAMIC_CACHE_AGGRESSIVENESS()`), which is otherwise derived
+        // from system RAM at class-load time and would make the size-related
+        // scenarios flaky across CI runners. We pin it to a generous, deterministic
+        // value so that none of the *ordinary* scenarios below ever brush against
+        // the cap. The one scenario that deliberately exercises the cap overrides
+        // this locally and restores it again.
+        swingtree.style.LayerCache.CACHE_AGGRESSIVENESS_OVERRIDE = 10
+    }
+
+    def cleanupSpec() {
+        swingtree.style.LayerCache.CACHE_AGGRESSIVENESS_OVERRIDE = -1
+    }
+
     def setup() {
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         SwingTree.get().setUiScaleFactor(1f)
@@ -266,6 +281,39 @@ class Text_Render_Caching_Spec extends Specification
             ComponentExtension.totalTextCacheSize() == 0
     }
 
+    def 'A label begins caching only once it actually has text, and that is re-checked every paint.'()
+    {
+        reportInfo """
+            Wrapping a component's paint in the text-caching proxy only pays off if the
+            component actually draws text. An icon-only or as-yet-empty label has
+            nothing to rasterise, so SwingTree does not bother wrapping its paint at
+            all. Crucially this is decided *afresh on every paint*, so a label that is
+            given text later transparently starts being cached from then on (and would
+            stop again, freeing its entry, if its text were cleared).
+
+            This is the dynamic counterpart to the empty-label control case above: same
+            "no text, nothing cached" outcome to begin with, but here we watch caching
+            switch on the moment real text appears.
+        """
+        given : 'A label created without any text yet.'
+            var label = UI.label("").get(JLabel)
+            var ext   = ComponentExtension.from(label)
+
+        when : 'We paint the still-empty label well past the warm-up threshold.'
+            4.times { paint(label) }
+        then : 'Nothing is tracked or cached: there was no text worth wrapping the paint for.'
+            ext.cachedTextEntryCount() == 0
+            !ext.hasCachedText()
+            ComponentExtension.totalTextCacheSize() == 0
+
+        when : 'The label is later given some text, which we then warm up.'
+            label.setText("Now visible")
+            3.times { paint(label) }
+        then : 'From now on it caches its text exactly like any other label.'
+            ext.hasCachedText()
+            ext.cachedTextEntryCount() == 1
+    }
+
     def 'When a component changes its text, the stale entry is reclaimed automatically.'()
     {
         reportInfo """
@@ -363,6 +411,44 @@ class Text_Render_Caching_Spec extends Specification
             b = null
         then : 'Only now is the shared entry reclaimed.'
             eventually(10, { ComponentExtension.totalTextCacheSize() == 0 })
+    }
+
+    def 'On a machine with no spare memory budget, text caching backs off entirely.'()
+    {
+        reportInfo """
+            The text cache does not allocate without regard for the host machine:
+            it shares the very same memory budget as the style render cache
+            (`LayerCache`'s dynamic *cache aggressiveness*, which is derived from
+            the amount of system RAM). That budget bounds both how many distinct
+            text appearances may be held and how large any single cached image may
+            be.
+
+            At the extreme – a budget of zero, i.e. a machine SwingTree considers
+            too memory-constrained to spend anything on caching – the text cache
+            turns itself off completely: appearances are drawn directly, exactly
+            as if the feature were disabled, and nothing is ever tracked or
+            allocated. Crucially this never changes *what* is drawn, only whether
+            it is cached, so correctness is unaffected.
+
+            We simulate such a machine by pinning the shared budget to zero and
+            confirm that no amount of repainting populates the cache.
+        """
+        given : 'We pin the shared cache memory budget to zero (a maximally constrained machine).'
+            swingtree.style.LayerCache.CACHE_AGGRESSIVENESS_OVERRIDE = 0
+        and : 'An ordinary label that would normally be cached after warm-up.'
+            var label = UI.label("Departure 14:25").get(JLabel)
+            var ext   = ComponentExtension.from(label)
+
+        when : 'We paint it well past the usual warm-up threshold.'
+            5.times { paint(label) }
+
+        then : 'Nothing was tracked, nothing was cached, the global cache stayed empty.'
+            ext.cachedTextEntryCount() == 0
+            !ext.hasCachedText()
+            ComponentExtension.totalTextCacheSize() == 0
+
+        cleanup : 'Restore the generous, deterministic budget for the remaining scenarios.'
+            swingtree.style.LayerCache.CACHE_AGGRESSIVENESS_OVERRIDE = 10
     }
 
     def 'Buttons are cached the same way labels are.'()

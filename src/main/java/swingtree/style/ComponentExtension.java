@@ -277,6 +277,26 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
+     *  Looks up an extra-state object of the given type previously attached to this
+     *  component extension (see {@link #getOrSet(Class, Supplier)}), without creating
+     *  or attaching anything. This is the pure-read companion to
+     *  {@link #getOrSet(Class, Supplier)}: it never has side effects and simply tells
+     *  you whether a plugin of the given type is currently present, and what it is.
+     *
+     * @param type The type of the extra state to look up.
+     * @return An {@link Optional} holding the attached object of the given type,
+     *         or an empty {@link Optional} if none is currently attached.
+     * @param <P> The type of the extra state.
+     */
+    public <P> Optional<P> get( Class<P> type ) {
+        for ( Object plugin : _extraState )
+            if ( type.isInstance(plugin) )
+                return Optional.of(type.cast(plugin));
+
+        return Optional.empty();
+    }
+
+    /**
      *   This method is used by {@link swingtree.UIForAnySwing#group(String...)} to attach
      *   so called <i>group tags</i> to a component. <br>
      *   They are used by the SwingTree style engine to apply
@@ -907,7 +927,7 @@ public final class ComponentExtension<C extends JComponent>
 
                 final Consumer<Graphics> lafPaint = lookAndFeelPainting;
                 paintWithClip(internalGraphics, contentClip, () -> {
-                    boolean proxied = TextRenderCache.isProxyable(_owner.getClass());
+                    boolean proxied = TextRenderCache.isProxyable(_owner);
                     if ( proxied && internalGraphics instanceof CachingTextGraphics2D ) {
                         log.error(SwingTree.get().logMarker(),
                             "Detected an already text-cache-proxied graphics while painting '{}'. " +
