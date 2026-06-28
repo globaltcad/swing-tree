@@ -148,12 +148,6 @@ final class LayerCache
         _localCache = bufferedImage;
     }
 
-    private void _freeLocalCache() {
-        _localCache               = null;
-        _cacheHitsUntilAllocation = -1;
-        _isInitialized            = false;
-    }
-
     public final void validate( ComponentConf oldConf, ComponentConf newConf )
     {
         if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) ) {
@@ -175,7 +169,9 @@ final class LayerCache
         }
 
         if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
-            _freeLocalCache();
+            _cacheHitsUntilAllocation = -1;
+            _localCache               = null;
+            _isInitialized            = false;
             _layerRenderData = new Pooled<>(newState);
             return;
         }
@@ -216,8 +212,15 @@ final class LayerCache
             return;
         }
 
-        if ( _localCache == null )
+        if ( _localCache == null ) {
+            renderer.accept(_layerRenderData.get(), g);
+            log.error(
+                "Cache hit on layer '{}', but the local buffer is null! " +
+                "Count down number until allocation is '{}'.",
+                _layer, _cacheHitsUntilAllocation
+            );
             return;
+        }
 
         if ( !_localCache.isRendered() ) {
             Graphics2D g2 = _localCache.createGraphics();
