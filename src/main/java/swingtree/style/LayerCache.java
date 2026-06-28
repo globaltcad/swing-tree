@@ -214,9 +214,10 @@ final class LayerCache
 
         if ( _localCache == null ) {
             renderer.accept(_layerRenderData.get(), g);
+            _paintCacheMissCount++;
             log.error(
-                "Cache hit on layer '{}', but the local buffer is null! " +
-                "Count down number until allocation is '{}'.",
+                "Caching enabled for layer '{}', but the local buffer is null; rendered without cache. " +
+                "Hit countdown until allocation is '{}'.",
                 _layer, _cacheHitsUntilAllocation
             );
             return;
