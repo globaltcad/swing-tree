@@ -269,25 +269,42 @@ final class TextRenderCache {
             CACHE.put(key, entry);
         }
         holder.retain(key);     // an existing appearance is always retained; a new one only once admitted
-        if ( entry.image == null )
-            entry.hits++;       // 'hits' is purely the warm-up counter; stop once an image exists (no overflow)
 
+        /*
+            Fast path — the appearance is already materialised, so just blit it.
+            We deliberately keep FontMetrics OUT of this path: FontMetrics.stringWidth(text)
+            builds a TextLayout to measure the glyph advances and, per real benchmarks, costs
+            several times more than the blit itself. We don't need it here: the cached image
+            already encodes the text's width and height, and to position the blit we only need
+            the ascent (a font-level constant, so it is the same on every paint of this entry
+            because the font is part of the cache key) which we captured when materialising.
+        */
+        if ( entry.image != null ) {
+            int boundsX = (int) Math.floor(x);
+            int boundsY = (int) Math.floor(y - entry.ascent);
+            blit(delegate, tx, entry.image, boundsX - PAD, boundsY - PAD);
+            return true;
+        }
+
+        // Warm-up — draw directly (no measuring) until the appearance proves stable.
+        if ( ++entry.hits < MATERIALISE_AT ) return false;
+
+        // Materialise — runs once per appearance; this is the only place we measure the string.
         FontMetrics fm = delegate.getFontMetrics(font);
-        int ascent = fm.getAscent();
+        int ascent  = fm.getAscent();
         int boundsX = (int) Math.floor(x);
         int boundsY = (int) Math.floor(y - ascent);
         int boundsW = fm.stringWidth(text);
         int boundsH = fm.getHeight();
         if ( boundsW <= 0 || boundsH <= 0 ) return false;
 
-        if ( entry.image == null ) {
-            if ( entry.hits < MATERIALISE_AT ) return false;            // still warming up
-            BufferedImage img = materialise(delegate, tx, font, color, text,
-                                            x, y, boundsX, boundsY, boundsW, boundsH);
-            if ( img == null ) return false;                            // too large -> stay direct
-            entry.image = img;
-        }
-        blit(delegate, tx, entry.image, boundsX - PAD, boundsY - PAD);
+        BufferedImage img = materialise(delegate, tx, font, color, text,
+                                        x, y, boundsX, boundsY, boundsW, boundsH);
+        if ( img == null ) return false;                            // too large -> stay direct
+        entry.image  = img;
+        entry.ascent = ascent;                                      // captured for the fast path above
+
+        blit(delegate, tx, img, boundsX - PAD, boundsY - PAD);
         return true;
     }
 
@@ -395,6 +412,7 @@ final class TextRenderCache {
     private static final class Entry {
         int                                  hits;
         @Nullable BufferedImage              image;
+        int                                  ascent; // font ascent captured at materialise time; positions the blit
     }
 
     /** Holds the keys used during the current paint of one component, so their
