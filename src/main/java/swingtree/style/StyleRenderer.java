@@ -1867,7 +1867,7 @@ final class StyleRenderer
                         final long key = ((long) tileX << 32) | (tileY & 0xFFFFFFFFL);
                         BufferedImage tile = largeTileCache.get(key);
                         if ( tile == null ) {
-                            tile = _renderLargeTile(tileX, tileY, noise);
+                            tile = _renderLargeTile(tileX, tileY, noise, g2d.getDeviceConfiguration());
                             largeTileCache.put(key, tile);
                         }
                         final int drawX = Math.round( tileX * (float) size + center.x );
@@ -1890,16 +1890,25 @@ final class StyleRenderer
          *  tile index - never on the component size or noise offset.
          */
         private BufferedImage _renderLargeTile(
-            final int               tileX,
-            final int               tileY,
-            final Pooled<NoiseConf> noise
+            final int                             tileX,
+            final int                             tileY,
+            final Pooled<NoiseConf>               noise,
+            final @Nullable GraphicsConfiguration gc
         ) {
             final int size = LARGE_TILE_SIZE;
             final NoiseGradientPaint paint = _createNoiseGradientPaint(
                     new Point2D.Float( -tileX * (float) size, -tileY * (float) size ),
                     noise
             );
-            final BufferedImage tile = new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+            // Derive the tile from the device config so it uses the device colour model
+            // (premultiplied INT_ARGB_PRE -> faster compositing) and so Java2D keeps an
+            // accelerated copy in video memory: each tile is rendered once and then blitted
+            // on every repaint and never read back -> the managed-image pattern that gets
+            // texture-cached. Max acceleration priority keeps that copy resident.
+            final BufferedImage tile = ( gc != null )
+                    ? gc.createCompatibleImage(size, size, Transparency.TRANSLUCENT)
+                    : new BufferedImage(size, size, BufferedImage.TYPE_INT_ARGB);
+            tile.setAccelerationPriority(1.0f);
             final Graphics2D ig = tile.createGraphics();
             try {
                 ig.setPaint(paint);
