@@ -343,9 +343,20 @@ final class TextRenderCache {
 
     private static BufferedImage newCompatibleImage(Graphics2D g, int w, int h) {
         GraphicsConfiguration gc = g.getDeviceConfiguration();
-        if ( gc != null )
-            return gc.createCompatibleImage(w, h, Transparency.TRANSLUCENT);
-        return new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage image = ( gc != null )
+                ? gc.createCompatibleImage(w, h, Transparency.TRANSLUCENT) // device color model -> no per-blit conversion
+                : new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        /*
+            This image is rendered once and then blitted on every repaint (e.g. every
+            frame of a resize), and its pixels are never modified or read back again.
+            That is exactly the managed-image pattern Java2D accelerates: it keeps a
+            copy of the image in video memory (an OpenGL/D3D texture or an X11 pixmap)
+            and serves the repeated drawImage calls from there. Raising the acceleration
+            priority from the 0.5 default to the maximum tells Java2D to prioritise
+            keeping that accelerated copy resident when video memory is contended.
+        */
+        image.setAccelerationPriority(1.0f);
+        return image;
     }
 
     private static boolean isAxisAligned(AffineTransform tx) {
