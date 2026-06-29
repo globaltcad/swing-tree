@@ -6715,12 +6715,12 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         if ( !size.hasPositiveWidth() && !size.hasPositiveHeight() )
             size = Size.of(actualWidth, actualHeight);
         if  ( !size.hasPositiveWidth() )
-            size = size.withWidth((float) (size.height().orElse(1f) * actualWidth / actualHeight));
+            size = size.withWidth((float) (size.heightOrElse(1f) * actualWidth / actualHeight));
         if ( !size.hasPositiveHeight() )
-            size = size.withHeight((float) (size.width().orElse(1f) * actualHeight / actualWidth));
+            size = size.withHeight((float) (size.widthOrElse(1f) * actualHeight / actualWidth));
 
-        int width  = size.width().map(Float::intValue).orElse(0);
-        int height = size.height().map(Float::intValue).orElse(0);
+int width  = (int) size.widthOrElse(0f);
+int height = (int) size.heightOrElse(0f);
 
         if ( width < 1 || height < 1 ) {
             log.warn(SwingTree.get().logMarker(),

@@ -320,8 +320,8 @@ public final class SvgIcon extends ImageIcon
         if ( _widthUnit != Unit.PERCENTAGE && _heightUnit != Unit.PERCENTAGE )
             return _size;
         return Size.of(
-                _widthUnit == Unit.PERCENTAGE ? -1 : _size.width().orElse(-1f),
-                _heightUnit == Unit.PERCENTAGE ? -1 : _size.height().orElse(-1f)
+                _widthUnit == Unit.PERCENTAGE ? -1 : _size.widthOrElse(-1f),
+                _heightUnit == Unit.PERCENTAGE ? -1 : _size.heightOrElse(-1f)
             );
     }
 

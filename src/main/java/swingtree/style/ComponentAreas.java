@@ -84,8 +84,8 @@ final class ComponentAreas
         Area contentArea = new Area(new Rectangle2D.Float(
                 insets.left().orElse(0f),
                 insets.top().orElse(0f),
-                size.width().orElse(0f) - insets.left().orElse(0f) - insets.right().orElse(0f),
-                size.height().orElse(0f) - insets.top().orElse(0f) - insets.bottom().orElse(0f)
+                size.widthOrElse(0f) - insets.left().orElse(0f) - insets.right().orElse(0f),
+                size.heightOrElse(0f) - insets.top().orElse(0f) - insets.bottom().orElse(0f)
         ));
         contentArea.intersect(new Area(interiorArea.get()));
         return contentArea;
@@ -145,8 +145,8 @@ final class ComponentAreas
 
     private static Area _produceExteriorArea(BoxModelConf currentState, LazyRef<Shape> bodyArea) {
         Size size = currentState.size();
-        float width  = size.width().orElse(0f);
-        float height = size.height().orElse(0f);
+        float width  = size.widthOrElse(0f);
+        float height = size.heightOrElse(0f);
         Area exteriorComponentArea = new Area(new Rectangle2D.Float(0, 0, width, height));
         exteriorComponentArea.subtract(new Area(bodyArea.get()));
         return exteriorComponentArea;
@@ -174,8 +174,8 @@ final class ComponentAreas
             float top    = insets.top().orElse(0f);
             float right  = insets.right().orElse(0f);
             float bottom = insets.bottom().orElse(0f);
-            float width  = size.width().orElse(0f) - left - right;
-            float height = size.height().orElse(0f) - top - bottom;
+            float width  = size.widthOrElse(0f) - left - right;
+            float height = size.heightOrElse(0f) - top - bottom;
             return _rectangularShapeFrom(left, top, width, height);
         }
 
@@ -189,8 +189,8 @@ final class ComponentAreas
         float top    = Math.max(margin.top().orElse(0f), 0)    + insTop   ;
         float right  = Math.max(margin.right().orElse(0f), 0)  + insRight ;
         float bottom = Math.max(margin.bottom().orElse(0f), 0) + insBottom;
-        float width  = size.width().orElse(0f);
-        float height = size.height().orElse(0f);
+        float width  = size.widthOrElse(0f);
+        float height = size.heightOrElse(0f);
 
         boolean insAllTheSame = insTop == insLeft && insLeft == insBottom && insBottom == insRight;
 
@@ -375,8 +375,8 @@ final class ComponentAreas
         final Size    size   = boxModel.size();
         final Outline margin = boxModel.margin();
         final Outline widths = boxModel.widths();
-        final float   width  = size.width().orElse(0f);
-        final float   height = size.height().orElse(0f);
+        final float   width  = size.widthOrElse(0f);
+        final float   height = size.heightOrElse(0f);
 
         final float topLeftX     = margin.left().orElse(0f);
         final float topLeftY     = margin.top().orElse(0f);

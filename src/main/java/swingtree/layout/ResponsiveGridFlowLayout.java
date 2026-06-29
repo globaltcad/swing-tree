@@ -260,8 +260,8 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
                 dim.height = Math.max(maxAscent + maxDescent, dim.height);
             }
             Insets insets = target.getInsets();
-            dim.width  = Math.max( dim.width  + hgap * 2, bounds.size().width().orElse(0f).intValue() );
-            dim.height = Math.max( dim.height + vgap * 2, bounds.size().height().orElse(0f).intValue() );
+            dim.width  = Math.max( dim.width  + hgap * 2, (int) bounds.size().widthOrElse(0f) );
+            dim.height = Math.max( dim.height + vgap * 2, (int) bounds.size().heightOrElse(0f) );
             dim.width  += insets.left + insets.right;
             dim.height += insets.top  + insets.bottom;
             return dim;

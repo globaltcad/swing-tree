@@ -59,13 +59,13 @@ public final class ScalableImageIcon extends ImageIcon
             double originalIconHeight = original.getIconHeight();
             double ratio = originalIconWidth / originalIconHeight;
             if (size.hasPositiveWidth() && size.hasPositiveHeight()) {
-                targetWidth = size.width().orElse(0.0f);
-                targetHeight = size.height().orElse(0.0f);
+                targetWidth = size.widthOrElse(0.0f);
+                targetHeight = size.heightOrElse(0.0f);
             } else if (size.hasPositiveWidth()) {
-                targetWidth = size.width().orElse(0.0f);
+                targetWidth = size.widthOrElse(0.0f);
                 targetHeight = targetWidth / ratio;
             } else if (size.hasPositiveHeight()) {
-                targetHeight = size.height().orElse(0.0f);
+                targetHeight = size.heightOrElse(0.0f);
                 targetWidth = targetHeight * ratio;
             } else {
                 targetWidth = originalIconWidth;
@@ -86,8 +86,8 @@ public final class ScalableImageIcon extends ImageIcon
         if ( !_relativeScale.hasPositiveWidth() || !_relativeScale.hasPositiveHeight() )
             return original;
         try {
-            int width  = Math.round(original.getIconWidth()  * scale * relativeScale.width().orElse(0.0f));
-            int height = Math.round(original.getIconHeight() * scale * relativeScale.height().orElse(0.0f));
+            int width  = Math.round(original.getIconWidth()  * scale * relativeScale.widthOrElse(0.0f));
+            int height = Math.round(original.getIconHeight() * scale * relativeScale.heightOrElse(0.0f));
             Image originalImage = original.getImage();
             if ( width == original.getIconWidth() && height == original.getIconHeight() )
                 return original;

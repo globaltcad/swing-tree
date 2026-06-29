@@ -429,8 +429,8 @@ class Icon_Spec extends Specification
             icon.getIconWidth() == expectedSize.width().map(UI::scale).map(Math::round).orElse(-1)
             icon.getIconHeight() == expectedSize.height().map(UI::scale).map(Math::round).orElse(-1)
         and : 'The base size reflects the percentages:'
-            icon.getBaseWidth() == expectedSize.width().orElse(-1)
-            icon.getBaseHeight() == expectedSize.height().orElse(-1)
+            icon.getBaseWidth() == expectedSize.widthOrElse(-1)
+            icon.getBaseHeight() == expectedSize.heightOrElse(-1)
         and : 'The icon should be an SvgIcon.'
             (icon instanceof swingtree.style.SvgIcon)
 
@@ -442,8 +442,8 @@ class Icon_Spec extends Specification
             icon.getIconWidth() == expectedSize.width().map(UI::scale).map(Math::round).orElse(-1)
             icon.getIconHeight() == expectedSize.height().map(UI::scale).map(Math::round).orElse(-1)
         and : 'The base size reflects the percentages:'
-            icon.getBaseWidth() == expectedSize.width().orElse(-1)
-            icon.getBaseHeight() == expectedSize.height().orElse(-1)
+            icon.getBaseWidth() == expectedSize.widthOrElse(-1)
+            icon.getBaseHeight() == expectedSize.heightOrElse(-1)
         and : 'The icon should be an SvgIcon.'
             (icon instanceof swingtree.style.SvgIcon)
 

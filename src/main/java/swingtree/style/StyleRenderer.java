@@ -203,8 +203,8 @@ final class StyleRenderer
         final float bottomRightRadius = Math.max(conf.boxModel().bottomRightRadius(), 0);
         final float bottomLeftRadius  = Math.max(conf.boxModel().bottomLeftRadius(), 0);
 
-        final float width     = size.width().orElse(0f);
-        final float height    = size.height().orElse(0f);
+        final float width     = size.widthOrElse(0f);
+        final float height    = size.heightOrElse(0f);
 
         // Calculate the shadow box bounds based on the padding and border thickness
         final float x = left + shadow.horizontalOffset();
@@ -749,8 +749,8 @@ final class StyleRenderer
         Outline insets;
         if ( gradient.boundary() == UI.ComponentBoundary.CENTER_TO_CONTENT ) {
             final Outline contentIns = boxModel.insetsFor(UI.ComponentBoundary.INTERIOR_TO_CONTENT);
-            final float verticalInset = dimensions.height().orElse(0f) / 2f;
-            final float horizontalInset = dimensions.width().orElse(0f) / 2f;
+            final float verticalInset = dimensions.heightOrElse(0f) / 2f;
+            final float horizontalInset = dimensions.widthOrElse(0f) / 2f;
             insets = Outline.of(verticalInset, horizontalInset);
             switch ( gradient.span() ) {
                 case TOP_TO_BOTTOM:
@@ -792,8 +792,8 @@ final class StyleRenderer
         final float insTop    = insets.top().orElse(0f);
         final float insRight  = insets.right().orElse(0f);
         final float insBottom = insets.bottom().orElse(0f);
-        final float width  = dimensions.width().orElse(0f)  - ( insRight  + insLeft );
-        final float height = dimensions.height().orElse(0f) - ( insBottom + insTop );
+        final float width  = dimensions.widthOrElse(0f)  - ( insRight  + insLeft );
+        final float height = dimensions.heightOrElse(0f) - ( insBottom + insTop );
         final float realX  = insLeft + gradient.offset().x();
         final float realY  = insTop  + gradient.offset().y();
 
@@ -1372,7 +1372,7 @@ final class StyleRenderer
             g2d.setFont(font);
             // Phase 1 - 2: Build TextLayouts for each line and calculate the total height of the text block
             final FontRenderContext frc = g2d.getFontRenderContext();
-            final float boundsWidth = textBounds.size().width().orElse(0f);
+            final float boundsWidth = textBounds.size().widthOrElse(0f);
             final float boundsX     = textBounds.location().x();
             final float boundsY     = textBounds.location().y();
             final Pair<Float, List<TextLayoutEngine.LayoutLine>> layoutResult = TextLayoutEngine._buildTextLayoutsAndPreferredHeight(font, frc, textToRender, boundsWidth, boundsX, boundsY, wrapLines, conf.boxModel(), text.obstacles(), placement);
@@ -1402,8 +1402,8 @@ final class StyleRenderer
         final float insTop    = insets.top().orElse(0f);
         final float leftX = offset.x() + insLeft;
         final float topY  = offset.y() + insTop;
-        final float localWidth  = Math.max(0, boxModel.size().width().orElse(0f)  - (insLeft + insets.right().orElse(0f)));
-        final float localHeight = Math.max(0, boxModel.size().height().orElse(0f) - (insTop  + insets.bottom().orElse(0f)));
+        final float localWidth  = Math.max(0, boxModel.size().widthOrElse(0f)  - (insLeft + insets.right().orElse(0f)));
+        final float localHeight = Math.max(0, boxModel.size().heightOrElse(0f) - (insTop  + insets.bottom().orElse(0f)));
         return Bounds.of(leftX, topY, localWidth, localHeight);
     }
 
@@ -1467,7 +1467,7 @@ final class StyleRenderer
         final float            totalHeight
     ) {
         final float boundsY      = textBounds.location().y();
-        final float boundsHeight = textBounds.size().height().orElse(0f);
+        final float boundsHeight = textBounds.size().heightOrElse(0f);
         /*
             ------------------------------------------------
             Phase 3 : Determine visible slice (overflow policy)
@@ -1679,8 +1679,8 @@ final class StyleRenderer
         final Pooled<BoxModelConf> boxModelConf
     ) {
         final Size       size   = boxModelConf.get().size();
-        final float      width  = size.width().orElse(0f);
-        final float      height = size.height().orElse(0f);
+        final float      width  = size.widthOrElse(0f);
+        final float      height = size.heightOrElse(0f);
         final Offset     center = filterConf.offset();
         final Scale      scale  = filterConf.scale();
         final KernelConf kernel = filterConf.kernel();

@@ -145,6 +145,33 @@ class Primitives_Spec extends Specification
             !size2.height().isPresent()
     }
 
+    def 'Use `widthOrElse(float)` and `heightOrElse(float)` to read a `Size` with a fallback for unknown dimensions.'()
+    {
+        reportInfo """
+            Sometimes you just want the raw `float` width or height of a `Size`
+            together with a sensible default for when a dimension is unknown
+            (negative), without unwrapping the `Optional` returned by `width()`
+            and `height()`. The `widthOrElse(float)` and `heightOrElse(float)`
+            methods do exactly that: they return the specified dimension, or the
+            supplied fallback if it is unknown. They are the allocation-free
+            equivalent of `width().orElse(fallback)` and `height().orElse(fallback)`.
+        """
+        given : 'A fully specified size and a completely unknown one.'
+            var size    = Size.of(42, 189)
+            var unknown = Size.unknown()
+        expect : 'When a dimension is specified, its value is returned and the fallback is ignored.'
+            size.widthOrElse(7)  == 42
+            size.heightOrElse(7) == 189
+        and : 'When a dimension is unknown, the supplied fallback is returned instead.'
+            unknown.widthOrElse(7)   == 7
+            unknown.heightOrElse(13) == 13
+        and : 'The fallback only ever substitutes the missing dimension, never the present one.'
+            Size.of(42, -1).widthOrElse(7)   == 42
+            Size.of(42, -1).heightOrElse(7)  == 7
+            Size.of(-1, 189).widthOrElse(7)  == 7
+            Size.of(-1, 189).heightOrElse(7) == 189
+    }
+
     def 'You can use `scale(float)` to scale a `Size` object by a given factor.'()
     {
         given:

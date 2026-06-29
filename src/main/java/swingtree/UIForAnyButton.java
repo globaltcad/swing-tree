@@ -1690,8 +1690,8 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
     }
 
     private static Icon _fitTo(Size size, Icon icon) {
-        float width = size.width().orElse(0f);
-        float height = size.height().orElse(0f);
+        float width = size.widthOrElse(0f);
+        float height = size.heightOrElse(0f);
         if ( icon instanceof SvgIcon ) {
             SvgIcon svgIcon = (SvgIcon) icon;
             svgIcon = svgIcon.withIconWidth((int) width);

@@ -203,7 +203,7 @@ final class LayerCache
     {
         Size size = _layerRenderData.get().boxModel().size();
 
-        if ( size.width().orElse(0f) == 0f || size.height().orElse(0f) == 0f )
+        if ( size.widthOrElse(0f) == 0f || size.heightOrElse(0f) == 0f )
             return;
 
         if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
@@ -339,7 +339,7 @@ final class LayerCache
         final int eagerAllocationLimit = (int) (maxSizeLimit * EAGER_ALLOCATION_FRIENDLINESS);
         final int cacheHitCountLimit   = (int) (maxSizeLimit * (1 - EAGER_ALLOCATION_FRIENDLINESS));
 
-        final int pixelCount = (int) (size.width().orElse(0f) * size.height().orElse(0f));
+        final int pixelCount = (int) (size.widthOrElse(0f) * size.heightOrElse(0f));
         final int score      = pixelCount / Math.min(heavyStyleCount, 5); // Heavier styles get cached more easily!
 
         if ( score > maxSizeLimit )
