@@ -14,7 +14,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.WeakHashMap;
 import java.util.function.BiConsumer;
-import java.util.function.Supplier;
 
 /**
  *  A {@link BufferedImage} based cache for the rendering of a particular layer of a component's style. <br>
@@ -224,7 +223,7 @@ final class LayerCache
         }
 
         if ( !_localCache.isRendered() ) {
-            Graphics2D g2 = _localCache.createGraphics();
+            Graphics2D g2 = _localCache.createGraphics(g.getDeviceConfiguration());
             if ( g2 == null ) {
                 /*
                     The cache is not yet ready to render into!
@@ -366,7 +365,8 @@ final class LayerCache
      */
     private static final class CachedImage
     {
-        private final Supplier<BufferedImage>  _imageAllocator;
+        private final int                      _width;
+        private final int                      _height;
         private @Nullable BufferedImage        _image;
         private boolean                        _isRendered;
         private int                            _numberOfHitsUntilAllocation;
@@ -374,9 +374,29 @@ final class LayerCache
 
         CachedImage( Size size, int numberOfHitsUntilAllocation ) {
             _isRendered                  = false;
-            _imageAllocator              = () -> new BufferedImage(size.width().map(Number::intValue).orElse(1), size.height().map(Number::intValue).orElse(1), BufferedImage.TYPE_INT_ARGB);
+            _width                       = Math.max(1, size.width().map(Number::intValue).orElse(1));
+            _height                      = Math.max(1, size.height().map(Number::intValue).orElse(1));
             _image                       = null;
             _numberOfHitsUntilAllocation = numberOfHitsUntilAllocation;
+        }
+
+        /**
+         *  Allocates the backing buffer. We derive it from the supplied
+         *  {@link GraphicsConfiguration} when one is available, so it uses the device
+         *  color model (typically premultiplied {@code INT_ARGB_PRE}, faster to
+         *  composite) and so Java2D can keep an accelerated copy of it in video memory:
+         *  this image is rendered once and then blitted on every repaint and never read
+         *  back, which is exactly the managed-image pattern that gets texture-cached.
+         *  The maximum acceleration priority keeps that copy resident under memory
+         *  pressure. Falls back to a plain {@code INT_ARGB} buffer when there is no
+         *  device configuration (e.g. headless rendering).
+         */
+        private BufferedImage _allocate( @Nullable GraphicsConfiguration gc ) {
+            BufferedImage img = ( gc != null )
+                    ? gc.createCompatibleImage(_width, _height, Transparency.TRANSLUCENT)
+                    : new BufferedImage(_width, _height, BufferedImage.TYPE_INT_ARGB);
+            img.setAccelerationPriority(1.0f);
+            return img;
         }
 
         public void updateNumberOfHitsUntilAllocation( int latestNumberOfHitsUntilAllocation ) {
@@ -400,7 +420,7 @@ final class LayerCache
          *         the image is not yet allocated. Continuous calls to this method will eventually
          *         allocate the image.
          */
-        public @Nullable Graphics2D createGraphics() {
+        public @Nullable Graphics2D createGraphics( @Nullable GraphicsConfiguration gc ) {
             if ( _isRendered )
                 throw new IllegalStateException("This image has already been rendered into!");
             if ( _numberOfHitsUntilAllocation > 0 ) {
@@ -408,7 +428,7 @@ final class LayerCache
                 return null;
             }
             if ( _image == null )
-                _image = _imageAllocator.get();
+                _image = _allocate(gc);
             _isRendered = true;
             return _image.createGraphics();
         }
