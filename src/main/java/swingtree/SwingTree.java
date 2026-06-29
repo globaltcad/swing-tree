@@ -682,6 +682,8 @@ public final class SwingTree
      * @param enabled Whether the text-rendering cache should be enabled.
      */
     public void setTextCachingEnabled( boolean enabled ) {
+        if ( !enabled )
+            swingtree.style.ComponentExtension.clearTextCache();
         _config = _config.withTextCaching(enabled);
     }
 
