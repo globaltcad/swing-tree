@@ -374,8 +374,8 @@ final class LayerCache
 
         CachedImage( Size size, int numberOfHitsUntilAllocation ) {
             _isRendered                  = false;
-            _width                       = size.width().map(Number::intValue).orElse(1);
-            _height                      = size.height().map(Number::intValue).orElse(1);
+            _width                       = Math.max(1, size.width().map(Number::intValue).orElse(1));
+            _height                      = Math.max(1, size.height().map(Number::intValue).orElse(1));
             _image                       = null;
             _numberOfHitsUntilAllocation = numberOfHitsUntilAllocation;
         }
