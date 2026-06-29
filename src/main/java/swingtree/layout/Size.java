@@ -96,6 +96,20 @@ public final class Size
     }
 
     /**
+     *  Returns the width of this {@link Size} instance, or the supplied
+     *  {@code fallback} value if the width is not specified (i.e. negative).
+     *  This is a convenient, allocation-free equivalent of
+     *  {@code width().orElse(fallback)} that avoids boxing the {@code float}
+     *  into an {@link Optional}.
+     *
+     * @param fallback The width to fall back to if this {@link Size} has no specified width.
+     * @return The width of this {@link Size} instance, or {@code fallback} if the width is unknown.
+     */
+    public float widthOrElse(float fallback) {
+        return ( _width < 0 ? fallback : _width );
+    }
+
+    /**
      *  The height of this {@link Size} instance may not be specified,
      *  in which case this method returns {@link Optional#empty()}
      *  and the thing that this configuration is applied to should
@@ -105,6 +119,20 @@ public final class Size
      */
     public Optional<Float> height() {
         return ( _height < 0 ? Optional.empty() : Optional.of(_height) );
+    }
+
+    /**
+     *  Returns the height of this {@link Size} instance, or the supplied
+     *  {@code fallback} value if the height is not specified (i.e. negative).
+     *  This is a convenient, allocation-free equivalent of
+     *  {@code height().orElse(fallback)} that avoids boxing the {@code float}
+     *  into an {@link Optional}.
+     *
+     * @param fallback The height to fall back to if this {@link Size} has no specified height.
+     * @return The height of this {@link Size} instance, or {@code fallback} if the height is unknown.
+     */
+    public float heightOrElse(float fallback) {
+        return ( _height < 0 ? fallback : _height );
     }
 
     /**

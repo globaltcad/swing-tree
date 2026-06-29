@@ -213,7 +213,7 @@ final class StyleConfLayers
                                 return totalHeight;
                             }
                             final Bounds textBounds = StyleRenderer._computeTextBounds(textConf, predictedBoxModel);
-                            final float boundsWidth = textBounds.size().width().orElse(0f);
+                            final float boundsWidth = textBounds.size().widthOrElse(0f);
                             final float boundsX     = textBounds.location().x();
                             final float boundsY     = textBounds.location().y();
                             if ( boundsWidth <= 0 )

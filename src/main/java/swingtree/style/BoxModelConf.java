@@ -180,8 +180,8 @@ final class BoxModelConf
                 return boxModel.margin().plus(boxModel.widths()).plus(boxModel.padding());
             case CENTER_TO_CONTENT:
                 insets = boxModel.margin().plus(boxModel.widths()).plus(boxModel.padding());
-                float deltaWidth = boxModel.size().width().orElse(0f) - insets.left().orElse(0f) - insets.right().orElse(0f);
-                float deltaHeight = boxModel.size().height().orElse(0f) - insets.top().orElse(0f) - insets.bottom().orElse(0f);
+                float deltaWidth = boxModel.size().widthOrElse(0f) - insets.left().orElse(0f) - insets.right().orElse(0f);
+                float deltaHeight = boxModel.size().heightOrElse(0f) - insets.top().orElse(0f) - insets.bottom().orElse(0f);
                 float halfWidth = deltaWidth / 2f;
                 float halfHeight = deltaHeight / 2f;
                 return insets.plus(Outline.of(halfHeight, halfWidth, halfHeight, halfWidth));
