@@ -1812,7 +1812,23 @@ final class StyleRenderer
             return CacheBudget.maxEntriesFor(CacheBudget.Kind.NOISE_TILE);
         }
 
-        private final Map<Point2D,NoiseGradientPaint> paintCache = new HashMap<>();
+        /** Absolute ceiling on retained per-{@code center} {@link NoiseGradientPaint}s. A static
+         *  noise needs a single entry, so this never evicts in the common case; it exists purely
+         *  to bound an animated/panning offset, which produces a fresh {@code center} per frame. */
+        private static final int MAX_CACHED_PAINTS = 32;
+        /** Per-{@code center} paints, evicted least-recently-used first. Unlike the large-tile grid
+         *  (which lives in offset-independent noise space and so survives offset animation as-is),
+         *  these are keyed by the offset-dependent {@code center}, so without a cap an animated
+         *  offset would grow this map without bound. This path is also the fallback used when tile
+         *  caching is off (incl. the {@code DISABLED} cache mode), so it must stay functional
+         *  regardless of the byte budget — hence a fixed LRU cap rather than a budget-derived one. */
+        private final Map<Point2D,NoiseGradientPaint> paintCache =
+                new LinkedHashMap<Point2D,NoiseGradientPaint>(16, 0.75f, true) {
+                    @Override
+                    protected boolean removeEldestEntry( Map.Entry<Point2D,NoiseGradientPaint> eldest ) {
+                        return size() > MAX_CACHED_PAINTS;
+                    }
+                };
         /** Large pre-rendered tiles, keyed by noise-space tile index, evicted least-recently-used first. */
         private final Map<Long,BufferedImage> largeTileCache =
                 new LinkedHashMap<Long,BufferedImage>(16, 0.75f, true) {
