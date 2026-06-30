@@ -175,7 +175,16 @@ final class TextRenderCache {
             ownText = ((JLabel) c).getText();
         else if ( c instanceof AbstractButton )   // JButton, JToggleButton, JCheckBox, JRadioButton, JMenuItem, ...
             ownText = ((AbstractButton) c).getText();
-        else if ( c instanceof JTextField )       // incl. JPasswordField, JFormattedTextField
+        else if ( c instanceof JPasswordField ) { // a JTextField subtype handled before the generic branch below
+            // JPasswordField.getText() is deprecated and would materialise the cleartext
+            // password into a lingering String just to answer "is there text?"; the
+            // document length answers it without ever copying the password content.
+            // (getDocument() is effectively always non-null, but this gate runs outside
+            // the self-healing try/catch in ComponentExtension, so we never risk an NPE.)
+            javax.swing.text.Document doc = ((JPasswordField) c).getDocument();
+            return doc != null && doc.getLength() > 0;
+        }
+        else if ( c instanceof JTextField )       // incl. JFormattedTextField
             ownText = ((JTextField) c).getText();
         else
             return false;                         // not a recognised leaf text component -> never proxy

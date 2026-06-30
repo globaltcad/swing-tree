@@ -36,9 +36,10 @@ import java.util.Map;
  *  untouched.
  *
  *  <p><b>Type fragility:</b> a non-native {@code Graphics2D} can break LaF code
- *  that casts the graphics to a concrete type. {@link DynamicLaF} guards against
- *  this — if a proxied paint throws, it records the offending UI class and never
- *  proxies it again, repainting with the real graphics.
+ *  that casts the graphics to a concrete type. SwingTree's paint pipeline guards
+ *  against this — if a proxied paint throws, {@link ComponentExtension} records the
+ *  offending <em>component</em> class (via {@link TextRenderCache#markUnsafe(Class)})
+ *  and never proxies it again, repainting with the real graphics.
  */
 final class CachingTextGraphics2D extends Graphics2D {
 
