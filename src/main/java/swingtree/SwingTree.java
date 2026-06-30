@@ -299,6 +299,20 @@ public final class SwingTree
     }
 
     /**
+     *  Returns whether SwingTree's text-rendering cache is enabled. When enabled,
+     *  label / button / text-field text is rasterised once and then blitted on
+     *  subsequent repaints instead of being re-rendered by the look-and-feel on
+     *  every frame, which can dramatically reduce paint cost for text-heavy UIs
+     *  under load (e.g. while a window is being resized). Enabled by default.
+     *
+     * @return true if the text-rendering cache is enabled, false otherwise.
+     * @see SwingTreeInitConfig#withTextCaching(boolean)
+     */
+    public boolean isTextCachingEnabled() {
+        return this._config.isTextCachingEnabled();
+    }
+
+    /**
      *  Enables or disables the <i>SwingTree</i> dev-tool, which is a classical inspector tool that
      *  creates an overlay on top of the UI and summons an additional dialog showing debug information
      *  about the component under the mouse cursor.<br>
@@ -660,6 +674,18 @@ public final class SwingTree
             ex.printStackTrace();
         }
 	}
+
+    /**
+     *  Enables or disables SwingTree's text-rendering cache at runtime
+     *  (see {@link #isTextCachingEnabled()} and {@link SwingTreeInitConfig#withTextCaching(boolean)}).
+     *
+     * @param enabled Whether the text-rendering cache should be enabled.
+     */
+    public void setTextCachingEnabled( boolean enabled ) {
+        if ( !enabled )
+            swingtree.style.ComponentExtension.clearTextCache();
+        _config = _config.withTextCaching(enabled);
+    }
 
 	/**
      *  The {@link StyleSheet} is an abstract class whose extensions are used to declare

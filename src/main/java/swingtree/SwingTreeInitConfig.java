@@ -91,7 +91,8 @@ public final class SwingTreeInitConfig
                         SystemProperties.getLong(SystemProperties.ANIMATION_INTERVAL,        16    ),
                         MarkerFactory.getMarker(""),
                         SystemProperties.getBool(SystemProperties.RECORD_DEBUG_SOURCE_TRACE, true ),
-                        System.getProperty(SystemProperties.ENABLE_DEV_TOOL_KEY_STROKE,"ctrl shift I")
+                        System.getProperty(SystemProperties.ENABLE_DEV_TOOL_KEY_STROKE,"ctrl shift I"),
+                        SystemProperties.getBool(SystemProperties.TEXT_CACHE,                true  )
                     );
                     /*
                         Note that we want the refresh rate to be as high as possible so that the animation
@@ -123,6 +124,7 @@ public final class SwingTreeInitConfig
     private final Marker           _logMarker;
     private final boolean          _recordDebugSourceTrace;
     private final String           _devToolKeyStrokeShortcut;
+    private final boolean          _textCachingEnabled;
 
 
     private SwingTreeInitConfig(
@@ -136,7 +138,8 @@ public final class SwingTreeInitConfig
         long                defaultAnimationInterval,
         Marker              logMarker,
         boolean             recordDebugSourceTrace,
-        String              devToolKeyStroke
+        String              devToolKeyStroke,
+        boolean             textCachingEnabled
     ) {
         _defaultFont              = defaultFont;
         _fontInstallation         = Objects.requireNonNull(fontInstallation);
@@ -149,6 +152,7 @@ public final class SwingTreeInitConfig
         _logMarker                = logMarker;
         _recordDebugSourceTrace   = recordDebugSourceTrace;
         _devToolKeyStrokeShortcut = Objects.requireNonNull(devToolKeyStroke);
+        _textCachingEnabled       = textCachingEnabled;
     }
 
     /**
@@ -303,7 +307,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 newDefaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut
+                _devToolKeyStrokeShortcut, _textCachingEnabled
         );
     }
 
@@ -327,7 +331,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 newDefaultFont, newFontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut
+                _devToolKeyStrokeShortcut, _textCachingEnabled
         );
     }
 
@@ -345,7 +349,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, newEventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut
+                _devToolKeyStrokeShortcut, _textCachingEnabled
         );
     }
 
@@ -360,7 +364,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, newStyleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut
+                _devToolKeyStrokeShortcut, _textCachingEnabled
         );
     }
 
@@ -383,7 +387,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, newUiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut
+                _devToolKeyStrokeShortcut, _textCachingEnabled
         );
     }
 
@@ -401,7 +405,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, newUiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut
+                _devToolKeyStrokeShortcut, _textCachingEnabled
         );
     }
 
@@ -419,7 +423,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 newUiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut
+                _devToolKeyStrokeShortcut, _textCachingEnabled
         );
     }
 
@@ -443,7 +447,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, newDefaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut
+                _devToolKeyStrokeShortcut, _textCachingEnabled
         );
     }
 
@@ -461,7 +465,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, newLogMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut
+                _devToolKeyStrokeShortcut, _textCachingEnabled
         );
     }
 
@@ -485,7 +489,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, isEnabled,
-                _devToolKeyStrokeShortcut
+                _devToolKeyStrokeShortcut, _textCachingEnabled
         );
     }
 
@@ -509,7 +513,42 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                keyStroke
+                keyStroke, _textCachingEnabled
+        );
+    }
+
+    /**
+     *  Returns whether SwingTree's experimental text-rendering cache is enabled
+     *  (see {@link #withTextCaching(boolean)}).
+     */
+    boolean isTextCachingEnabled() {
+        return _textCachingEnabled;
+    }
+
+    /**
+     *  Enables or disables SwingTree's text-rendering cache, an optimization which
+     *  rasterises a piece of label / button / text-field text once and then blits the
+     *  resulting image on subsequent repaints, instead of letting the look-and-feel
+     *  re-shape and re-render the glyphs on every frame. For text-heavy UIs this can
+     *  dramatically reduce paint cost under load (e.g. while a window is being resized).
+     *  <p>
+     *  The optimization is hooked into the painting of every SwingTree component
+     *  irrespective of the installed look-and-feel, and conservatively falls back to
+     *  direct rendering whenever it cannot reproduce a draw faithfully. It can also be
+     *  toggled through the system property {@code "swingtree.textCache"}.
+     *  <p>
+     *  <strong>Allowed Values</strong> {@code false} and {@code true}<br>
+     *  <strong>Default</strong> {@code true}
+     *
+     * @param isEnabled Whether the text-rendering cache should be enabled.
+     * @return A new {@link SwingTreeInitConfig} instance with the new text-caching mode.
+     * @see SwingTree#isTextCachingEnabled()
+     */
+    public SwingTreeInitConfig withTextCaching( boolean isEnabled ) {
+        return new SwingTreeInitConfig(
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut, isEnabled
         );
     }
 
@@ -578,6 +617,17 @@ public final class SwingTreeInitConfig
          * Because this is the mode that creates the source code trace in the first place. <br>
          */
         String ENABLE_DEV_TOOL_KEY_STROKE = "swingtree.devTool.keyStrokeShortcut";
+
+        /**
+         * Specifies whether SwingTree's text-rendering cache is enabled. When enabled,
+         * label / button / text-field text is rasterised once and then blitted on
+         * subsequent repaints instead of being re-shaped and re-rendered by the
+         * look-and-feel on every frame — a large saving for text-heavy UIs under load.
+         * <p>
+         * <strong>Allowed Values</strong> {@code false} and {@code true}<br>
+         * <strong>Default</strong> {@code true}
+         */
+        String TEXT_CACHE = "swingtree.textCache";
 
         /**
          * Checks whether a system property is set and returns {@code true} if its value
