@@ -25,13 +25,22 @@ final class TextLayoutEngine {
     private TextLayoutEngine() {}
 
     /**
-     *  LRU cache capped at {@value #_CACHE_MAX_SIZE} entries.
+     *  Absolute ceiling on {@link #_LAYOUT_CACHE} entries. The effective cap
+     *  (see {@link #_maxLayoutCacheSize()}) only drops below this on a constrained byte
+     *  budget, and is {@code 0} when caching is disabled.
      *  Uses an access-order {@link LinkedHashMap} so the least-recently-used entry is
      *  evicted once the cap is reached.  The map is wrapped in
      *  {@link Collections#synchronizedMap} so concurrent callers on different Swing
      *  repaint threads do not corrupt it.
      */
     private static final int _CACHE_MAX_SIZE = 128;
+
+    /** Live cap on {@link #_LAYOUT_CACHE}, derived from this cache's slice of the shared
+     *  {@link CacheBudget} byte budget and clamped to {@link #_CACHE_MAX_SIZE}. Read live so
+     *  a runtime cache-mode change takes effect at once; {@code 0} disables layout caching. */
+    private static int _maxLayoutCacheSize() {
+        return Math.min(_CACHE_MAX_SIZE, CacheBudget.maxEntriesFor(CacheBudget.Kind.TEXT_LAYOUT));
+    }
 
     /**
      *  Weak-reference cache of {@link ParagraphLayoutsData} entries, keyed by interned
@@ -74,7 +83,7 @@ final class TextLayoutEngine {
                         protected boolean removeEldestEntry(
                                 Map.Entry<TextLayoutKey, Pair<Float, List<LayoutLine>>> eldest
                         ) {
-                            return size() > _CACHE_MAX_SIZE;
+                            return size() > _maxLayoutCacheSize();
                         }
                     }
             );
@@ -183,8 +192,17 @@ final class TextLayoutEngine {
         }
 
         final Pair<Float, List<LayoutLine>> result = Pair.of(totalHeight, Collections.unmodifiableList(lines));
-        _LAYOUT_CACHE.put(key, result);
+        if ( _maxLayoutCacheSize() > 0 )
+            _LAYOUT_CACHE.put(key, result);
         return result;
+    }
+
+    /** Drops every cached text layout and paragraph-layout datum. Called when the library
+     *  cache configuration changes (see {@link ComponentExtension#updateAllCachesFromLibraryConfig()})
+     *  so memory shrinks immediately; both caches repopulate lazily under the new budget. */
+    static void clearGlobalCaches() {
+        _LAYOUT_CACHE.clear();
+        _PARAGRAPH_DATA_CACHE.clear();
     }
 
     private static boolean _supportsObstacles(UI.Placement placement) {

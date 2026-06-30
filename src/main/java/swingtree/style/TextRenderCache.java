@@ -46,13 +46,13 @@ import java.util.WeakHashMap;
  *  identical text share one image until the last of them stops. So the cache tracks
  *  live appearance exactly, with no invalidation to wire.
  *
- *  <p>On top of that self-clearing lifecycle sits a coarse memory-budget cap, shared
- *  with the style {@link LayerCache} via {@link LayerCache#DYNAMIC_CACHE_AGGRESSIVENESS()}
- *  (derived from system RAM): it bounds both the number of cached appearances
- *  ({@link #maxEntries()}) and the device-pixel size of any single cached image
- *  ({@link #maxImageArea()}). This never affects correctness — anything not cached is
- *  simply drawn directly — it only caps worst-case memory on machines with little of
- *  it, and lets a constrained device opt out of text caching entirely (budget 0).
+ *  <p>On top of that self-clearing lifecycle sits a coarse memory-budget cap, drawn from
+ *  the shared {@link CacheBudget} (derived from the configured cache mode and system RAM):
+ *  it bounds both the number of cached appearances ({@link #maxEntries()}) and the
+ *  device-pixel size of any single cached image ({@link #maxImageArea()}). This never
+ *  affects correctness — anything not cached is simply drawn directly — it only caps
+ *  worst-case memory on machines with little of it, and lets a constrained device (or the
+ *  {@code DISABLED} cache mode) opt out of text caching entirely (budget 0).
  *
  *  <h2>Conservative by construction</h2>
  *  Only plain {@code drawString} with a solid {@link Color} paint and an
@@ -76,38 +76,32 @@ final class TextRenderCache {
      *  overhang and antialiasing bleed so nothing is clipped by the image edge). */
     private static final int PAD = 2;
 
-    /** Per unit of the shared {@link LayerCache#DYNAMIC_CACHE_AGGRESSIVENESS()} memory
-     *  budget, the device-pixel area a single cached text image may occupy. Text is
-     *  thin but can be wide, so a unit buys a generous strip of pixels. */
+    /** Per unit of the shared {@link CacheBudget#units()} scalar, the device-pixel area a
+     *  single cached text image may occupy. Text is thin but can be wide, so a unit buys a
+     *  generous strip of pixels. Kept in pixel form (rather than bytes) so that, at the
+     *  default mode, <em>which</em> strings qualify for caching is exactly as it always was. */
     private static final long PIXELS_PER_AGGRESSIVENESS = 512L * 256L; // 131072 device px / unit
 
     /** Absolute device-pixel ceiling for one cached text image, independent of how
      *  aggressively caching is configured (a final sanity guard against pathological text). */
     private static final long MAX_IMAGE_AREA = 2048L * 2048L;
 
-    /** Per unit of the shared {@link LayerCache#DYNAMIC_CACHE_AGGRESSIVENESS()} memory
-     *  budget, how many distinct text appearances may be materialised in the global
-     *  cache. Text images are far cheaper than full style-layer images (a thin glyph
-     *  strip vs. a filled component rectangle), so a unit buys many more entries than
-     *  the style {@link LayerCache} grants. */
-    private static final int ENTRIES_PER_AGGRESSIVENESS = 64;
-
     /** Absolute ceiling on the number of cached text entries, independent of aggressiveness. */
     private static final int MAX_ENTRIES = 4096;
 
     /** Maximum device-pixel area a single cached text image may occupy, scaled by the
-     *  shared {@link LayerCache#DYNAMIC_CACHE_AGGRESSIVENESS()} budget so that
-     *  memory-constrained machines cache more conservatively. */
+     *  shared {@link CacheBudget#units()} scalar so that memory-constrained machines cache
+     *  more conservatively. */
     private static long maxImageArea() {
-        return Math.min(MAX_IMAGE_AREA, PIXELS_PER_AGGRESSIVENESS * LayerCache.DYNAMIC_CACHE_AGGRESSIVENESS());
+        return Math.min(MAX_IMAGE_AREA, (long) (CacheBudget.units() * PIXELS_PER_AGGRESSIVENESS));
     }
 
-    /** Maximum number of distinct text appearances the global cache will hold, scaled
-     *  by the shared {@link LayerCache#DYNAMIC_CACHE_AGGRESSIVENESS()} budget. Once this
-     *  is reached new appearances are drawn directly (never cached) until the
-     *  weak-reference lifecycle frees room again. */
+    /** Maximum number of distinct text appearances the global cache will hold, derived from
+     *  this cache's slice of the shared {@link CacheBudget} byte budget. Once this is reached
+     *  new appearances are drawn directly (never cached) until the weak-reference lifecycle
+     *  frees room again. */
     private static int maxEntries() {
-        return Math.min(MAX_ENTRIES, ENTRIES_PER_AGGRESSIVENESS * LayerCache.DYNAMIC_CACHE_AGGRESSIVENESS());
+        return Math.min(MAX_ENTRIES, CacheBudget.maxEntriesFor(CacheBudget.Kind.TEXT_IMAGE));
     }
 
     private static final AffineTransform IDENTITY = new AffineTransform();
@@ -227,10 +221,11 @@ final class TextRenderCache {
         return CACHE.size();
     }
 
-    /** Drops every cached entry. Intended for tests that need a clean, deterministic
-     *  starting point. (Per-component {@link KeyHolder}s live in each component's
+    /** Drops every cached entry. Used both by tests needing a clean, deterministic starting
+     *  point and by {@link ComponentExtension#updateAllCachesFromLibraryConfig()} when the
+     *  cache configuration changes. (Per-component {@link KeyHolder}s live in each component's
      *  {@link ComponentExtension} and simply repopulate on the next paint.) */
-    static void clearForTesting() {
+    static void clearGlobalCache() {
         CACHE.clear();
     }
 
