@@ -113,7 +113,7 @@ final class CacheBudget {
      *  deterministic figure independent of the CI machine's RAM. The value is expressed in
      *  {@code 4 MiB} units (so {@code units() == UNITS_OVERRIDE}); {@code 0} simulates a
      *  maximally constrained machine (all caching off). */
-    static double UNITS_OVERRIDE = -1;
+    static volatile double UNITS_OVERRIDE = -1;
 
     /** Total physical RAM in bytes, queried once. The expensive query is never repeated. */
     private static final double _SYSTEM_RAM_BYTES;
@@ -156,6 +156,8 @@ final class CacheBudget {
      *  {@code LayerCache.DYNAMIC_CACHE_AGGRESSIVENESS()} scalar; the image caches multiply it
      *  by a pixels-per-unit constant to decide which images are small enough to cache. */
     static double units() {
+        if ( UNITS_OVERRIDE >= 0 )
+            return UNITS_OVERRIDE;                       // honour the test hook exactly, without byte-conversion drift
         return totalBudgetBytes() / (double) BYTES_PER_UNIT;
     }
 

@@ -31,9 +31,12 @@ import java.awt.Color
     startup or changed at runtime, in which case the caches drop their now-excess
     memory immediately and repopulate under the new budget.
 
-    These scenarios pin down that contract through the *public* API only
+    These scenarios pin the contract down through the *public* API
     (`SwingTree.get().getCacheMode()` / `setCacheMode(..)` and the
-    `ComponentExtension` cache observers), so they survive internal refactors.
+    `ComponentExtension` cache observers) so they survive internal refactors; the
+    one non-public touch-point is the `CacheBudget.UNITS_OVERRIDE` test hook, used
+    purely to make the otherwise RAM-dependent budget deterministic regardless of
+    the runner's physical memory.
 
 ''')
 @Subject([SwingTree, SwingTreeInitConfig, ComponentExtension])

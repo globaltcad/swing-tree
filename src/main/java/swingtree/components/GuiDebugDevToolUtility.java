@@ -466,8 +466,9 @@ final class GuiDebugDevToolUtility {
         private final Viewable<Boolean> isDevToolsEnabled; // Important, we need to keep the reference to keep the binding alive! (otherwise it can get garbage collected...)
         private final Var<ComponentDebugInfo> debugState;
         private final Var<ComponentDebugInfo> selectedDebugState;
-        // The live, two-way bound mirror of the SwingTree library configuration the
-        // settings panel exposes. Kept as fields so their component bindings stay alive.
+        // The settings-panel properties: each is seeded from the current SwingTree library
+        // configuration and writes user edits back to it (one-way, on change). Kept as fields
+        // so their component bindings stay alive.
         private final Var<SwingTreeInitConfig.CacheMode> cacheMode;
         private final Var<Boolean> textCachingEnabled;
         private final Var<Double>  uiScaleFactor;
@@ -570,10 +571,11 @@ final class GuiDebugDevToolUtility {
         }
 
         /**
-         *  The collapsible settings panel at the top of the dev-tool window. It exposes a
-         *  live, two-way bound GUI for the runtime-configurable properties of the
-         *  {@link SwingTree} library context, so their effect can be observed on the running
-         *  UI during a debugging session.
+         *  The collapsible settings panel at the top of the dev-tool window. It seeds its
+         *  controls from the current {@link SwingTree} library context and writes user edits
+         *  straight back to it, so their effect can be observed on the running UI during a
+         *  debugging session. Changes flow from the panel to the library; a timer keeps the
+         *  read-only cache statistic fresh.
          */
         private JComponent buildLibrarySettingsPanel() {
             Tuple<Double> scaleOptions = Tuple.of(1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0);
