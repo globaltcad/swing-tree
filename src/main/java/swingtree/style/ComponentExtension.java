@@ -595,10 +595,13 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
-     *  Clears SwingTree's global text-render cache, dropping every cached text image
-     *  and per-component bookkeeping. The cache repopulates lazily on subsequent
-     *  paints; this never affects correctness, only the warm-up state. Mainly intended
-     *  for tests that need a deterministic starting point.
+     *  Clears SwingTree's global text-render cache, dropping every cached text image.
+     *  Per-component bookkeeping is not touched directly: each component's retained-key
+     *  list lives in its own extra-state and is simply reset and repopulated on its next
+     *  paint (any keys it still holds now point at dropped entries, which are re-created
+     *  on demand). The cache therefore repopulates lazily on subsequent paints; this never
+     *  affects correctness, only the warm-up state. Mainly intended for tests that need a
+     *  deterministic starting point.
      */
     public static void clearTextCache() {
         TextRenderCache.clearForTesting();

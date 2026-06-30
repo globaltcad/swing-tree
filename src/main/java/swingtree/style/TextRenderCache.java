@@ -114,9 +114,11 @@ final class TextRenderCache {
 
     private static final Map<Pooled<TextKey>, Entry>  CACHE = new WeakHashMap<>();
 
-    /** Look-and-feel UI classes whose paint code broke when handed the proxy
+    /** Component classes whose look-and-feel paint code broke when handed the proxy
      *  graphics (typically a cast to a concrete graphics type). They are never
-     *  proxied again — graceful, self-healing degradation. */
+     *  proxied again — graceful, self-healing degradation. Keyed by the painted
+     *  component's own class ({@code c.getClass()}), which is what both
+     *  {@link #isProxyable(JComponent)} and {@link #markUnsafe(Class)} use. */
     private static final java.util.Set<Class<?>> UNSAFE = java.util.Collections.newSetFromMap(new java.util.concurrent.ConcurrentHashMap<>());
 
 
@@ -149,10 +151,17 @@ final class TextRenderCache {
      * @return {@code true} if its paint should be routed through the text-caching proxy.
      */
     static boolean isProxyable(JComponent c) {
-        final Class<?> uiClass = c.getClass();
+        // Off-EDT paints (printing, image export) bypass the cache anyway (see
+        // paintString), and installing the proxy would still mutate the component's
+        // extra-state via beginPaint(), which is not safe off the EDT. So we never
+        // proxy off the EDT: such a paint uses the original graphics untouched.
+        if ( !SwingUtilities.isEventDispatchThread() )
+            return false;
 
-        // Rule 1: global switch + per-class self-healing opt-out.
-        if ( !SwingTree.get().isTextCachingEnabled() || UNSAFE.contains(uiClass) )
+        final Class<?> componentClass = c.getClass();
+
+        // Rule 1: global switch + per-class self-healing opt-out (keyed by component class).
+        if ( !SwingTree.get().isTextCachingEnabled() || UNSAFE.contains(componentClass) )
             return false;
 
         // Exception to rule 3: a combo box's text is painted by a propagated renderer,
@@ -175,8 +184,8 @@ final class TextRenderCache {
         return ownText != null && !ownText.isEmpty();
     }
 
-    /** Permanently disables proxying for a former-UI class after it failed once. */
-    static void markUnsafe(Class<?> formerUiClass) { UNSAFE.add(formerUiClass); }
+    /** Permanently disables proxying for a component class after its paint failed once. */
+    static void markUnsafe(Class<?> componentClass) { UNSAFE.add(componentClass); }
 
     // ─────────────────────────── introspection (for tests / living documentation) ──
 
@@ -243,7 +252,7 @@ final class TextRenderCache {
      *         if the caller should perform the original {@code drawString} itself.
      */
     static boolean paintString(
-            Graphics2D delegate, KeyHolder holder, String text, float x, float y
+            Graphics2D delegate, KeyHolder holder, @Nullable String text, float x, float y
     ) {
         // No enabled-check needed: the proxy is only created when isProxyable() was true.
         if ( text == null || text.isEmpty() )          return false;
@@ -350,6 +359,11 @@ final class TextRenderCache {
         Point2D p = tx.transform(new Point2D.Double(userX, userY), null);
         int devX = (int) Math.round(p.getX());
         int devY = (int) Math.round(p.getY());
+        // The clip is unaffected by this temporary identity transform: Java2D holds the
+        // active clip in *device* space, so setTransform only changes how future user-space
+        // coordinates map to it — it does not move the existing clipped region. Drawing the
+        // image at the device coordinates of the glyph box is therefore clipped by exactly
+        // the same pixels the original drawString(text, x, y) would have been.
         g.setTransform(IDENTITY);                                       // 1:1 device blit (no resample)
         try {
             g.drawImage(image, devX, devY, null);
@@ -415,12 +429,17 @@ final class TextRenderCache {
         int                                  ascent; // font ascent captured at materialise time; positions the blit
     }
 
-    /** Holds the keys used during the current paint of one component, so their
-     *  cache entries are not collected while that component is still painting them. */
+    /** Holds the <i>distinct</i> keys used during the current paint of one component,
+     *  so their cache entries are not collected while that component is still painting
+     *  them. {@link #retain(Pooled)} is idempotent: a look-and-feel that issues the same
+     *  appearance more than once in a single paint (the cache key ignores position, so
+     *  the same text/font/colour at two spots is one appearance) is recorded once, which
+     *  is what {@link #retainedKeyCount(JComponent)} reports as the distinct count. The
+     *  list is tiny (typically one entry), so the linear de-duplication is negligible. */
     static final class KeyHolder {
         private final List<Pooled<TextKey>> _keys = new ArrayList<>(2);
         void reset()                          { _keys.clear(); }
-        void retain(Pooled<TextKey> key)      { _keys.add(key); }
+        void retain(Pooled<TextKey> key)      { if ( !_keys.contains(key) ) _keys.add(key); }
     }
 
     /** The value-object cache key: the exact string plus a 64-bit hash of all of

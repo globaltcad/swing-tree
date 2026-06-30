@@ -54,11 +54,11 @@ final class CachingTextGraphics2D extends Graphics2D {
 
     // ── the whole point: intercept plain text ───────────────────────────────
 
-    @Override public void drawString(String str, float x, float y) {
+    @Override public void drawString(@Nullable String str, float x, float y) {
         if ( !TextRenderCache.paintString(_g, _holder, str, x, y) )
             _g.drawString(str, x, y);
     }
-    @Override public void drawString(String str, int x, int y) {
+    @Override public void drawString(@Nullable String str, int x, int y) {
         drawString(str, (float) x, (float) y);
     }
 
