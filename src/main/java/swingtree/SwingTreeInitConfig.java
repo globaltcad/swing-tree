@@ -79,6 +79,57 @@ public final class SwingTreeInitConfig
         FROM_SYSTEM_FONT
     }
 
+    /**
+     *  Defines how aggressively SwingTree trades memory for CPU time across <i>all</i>
+     *  of its internal rendering caches (style layer images, rasterised text, noise
+     *  tiles, shadow gradients and text layouts). Higher modes keep more rendered
+     *  results in memory so that subsequent repaints can blit them instead of
+     *  re-rendering, which is a large saving for complex or text-heavy UIs under load
+     *  (e.g. while a window is being resized) — at the cost of more heap and video
+     *  memory. The chosen mode is combined with the amount of system RAM to derive a
+     *  concrete memory budget, so the same mode scales sensibly across machines.
+     *  <p>
+     *  This can also be selected through the system property {@code "swingtree.cacheMode"}
+     *  (the enum constant name, case-insensitive), and changed at runtime through
+     *  {@link SwingTree#setCacheMode(CacheMode)}.
+     *
+     *  @see SwingTreeInitConfig#withCacheMode(CacheMode)
+     */
+    public enum CacheMode
+    {
+        /**
+         *  Caching is turned off entirely: every cache is emptied and bypassed,
+         *  regardless of how much RAM the machine has. Painting always re-renders
+         *  from scratch — the lowest memory footprint, the highest CPU cost.
+         */
+        DISABLED,
+
+        /**
+         *  A small, cautious memory footprint. Only the cheapest and most reused
+         *  rendering results are kept. Good for memory-constrained environments.
+         */
+        CONSERVATIVE,
+
+        /**
+         *  The default: a balanced trade-off between memory and CPU that reproduces
+         *  SwingTree's historical, RAM-scaled caching behaviour.
+         */
+        BALANCED,
+
+        /**
+         *  Leans towards caching more: keeps noticeably more rendered results in
+         *  memory to further reduce repaint cost on machines that can spare the RAM.
+         */
+        GENEROUS,
+
+        /**
+         *  Caches as much as the memory budget allows, trading the most memory for the
+         *  least CPU time. Intended for powerful machines running heavy, animated or
+         *  frequently-repainted UIs.
+         */
+        AGGRESSIVE
+    }
+
     public static SwingTreeInitConfig defaults() {
         return new SwingTreeInitConfig(
                         tryToFindDefaultFontInUIManager(),
@@ -92,7 +143,8 @@ public final class SwingTreeInitConfig
                         MarkerFactory.getMarker(""),
                         SystemProperties.getBool(SystemProperties.RECORD_DEBUG_SOURCE_TRACE, true ),
                         System.getProperty(SystemProperties.ENABLE_DEV_TOOL_KEY_STROKE,"ctrl shift I"),
-                        SystemProperties.getBool(SystemProperties.TEXT_CACHE,                true  )
+                        SystemProperties.getBool(SystemProperties.TEXT_CACHE,                true  ),
+                        SystemProperties.getEnum(SystemProperties.CACHE_MODE, CacheMode.class, CacheMode.BALANCED)
                     );
                     /*
                         Note that we want the refresh rate to be as high as possible so that the animation
@@ -125,6 +177,7 @@ public final class SwingTreeInitConfig
     private final boolean          _recordDebugSourceTrace;
     private final String           _devToolKeyStrokeShortcut;
     private final boolean          _textCachingEnabled;
+    private final CacheMode        _cacheMode;
 
 
     private SwingTreeInitConfig(
@@ -139,7 +192,8 @@ public final class SwingTreeInitConfig
         Marker              logMarker,
         boolean             recordDebugSourceTrace,
         String              devToolKeyStroke,
-        boolean             textCachingEnabled
+        boolean             textCachingEnabled,
+        CacheMode           cacheMode
     ) {
         _defaultFont              = defaultFont;
         _fontInstallation         = Objects.requireNonNull(fontInstallation);
@@ -153,6 +207,7 @@ public final class SwingTreeInitConfig
         _recordDebugSourceTrace   = recordDebugSourceTrace;
         _devToolKeyStrokeShortcut = Objects.requireNonNull(devToolKeyStroke);
         _textCachingEnabled       = textCachingEnabled;
+        _cacheMode                = Objects.requireNonNull(cacheMode);
     }
 
     /**
@@ -307,7 +362,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 newDefaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut, _textCachingEnabled
+                _devToolKeyStrokeShortcut, _textCachingEnabled, _cacheMode
         );
     }
 
@@ -331,7 +386,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 newDefaultFont, newFontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut, _textCachingEnabled
+                _devToolKeyStrokeShortcut, _textCachingEnabled, _cacheMode
         );
     }
 
@@ -349,7 +404,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, newEventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut, _textCachingEnabled
+                _devToolKeyStrokeShortcut, _textCachingEnabled, _cacheMode
         );
     }
 
@@ -364,7 +419,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, newStyleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut, _textCachingEnabled
+                _devToolKeyStrokeShortcut, _textCachingEnabled, _cacheMode
         );
     }
 
@@ -387,7 +442,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, newUiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut, _textCachingEnabled
+                _devToolKeyStrokeShortcut, _textCachingEnabled, _cacheMode
         );
     }
 
@@ -405,7 +460,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, newUiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut, _textCachingEnabled
+                _devToolKeyStrokeShortcut, _textCachingEnabled, _cacheMode
         );
     }
 
@@ -423,7 +478,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 newUiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut, _textCachingEnabled
+                _devToolKeyStrokeShortcut, _textCachingEnabled, _cacheMode
         );
     }
 
@@ -447,7 +502,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, newDefaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut, _textCachingEnabled
+                _devToolKeyStrokeShortcut, _textCachingEnabled, _cacheMode
         );
     }
 
@@ -465,7 +520,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, newLogMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut, _textCachingEnabled
+                _devToolKeyStrokeShortcut, _textCachingEnabled, _cacheMode
         );
     }
 
@@ -489,7 +544,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, isEnabled,
-                _devToolKeyStrokeShortcut, _textCachingEnabled
+                _devToolKeyStrokeShortcut, _textCachingEnabled, _cacheMode
         );
     }
 
@@ -513,7 +568,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                keyStroke, _textCachingEnabled
+                keyStroke, _textCachingEnabled, _cacheMode
         );
     }
 
@@ -548,7 +603,38 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut, isEnabled
+                _devToolKeyStrokeShortcut, isEnabled, _cacheMode
+        );
+    }
+
+    /**
+     *  Returns the {@link CacheMode} governing how aggressively SwingTree's rendering
+     *  caches trade memory for CPU time (see {@link #withCacheMode(CacheMode)}).
+     */
+    CacheMode cacheMode() {
+        return _cacheMode;
+    }
+
+    /**
+     *  Selects how aggressively SwingTree trades memory for CPU time across all of its
+     *  internal rendering caches (style layers, rasterised text, noise tiles, shadow
+     *  gradients and text layouts). The mode is combined with the amount of system RAM
+     *  to derive a concrete total memory budget which is then partitioned across the
+     *  caches, so the same mode scales sensibly across machines. It can also be selected
+     *  through the system property {@code "swingtree.cacheMode"} and changed at runtime
+     *  through {@link SwingTree#setCacheMode(CacheMode)}.
+     *  <p>
+     *  <strong>Default</strong> {@link CacheMode#BALANCED}
+     *
+     * @param cacheMode The {@link CacheMode} to use.
+     * @return A new {@link SwingTreeInitConfig} instance with the new cache mode.
+     * @see SwingTree#getCacheMode()
+     */
+    public SwingTreeInitConfig withCacheMode( CacheMode cacheMode ) {
+        return new SwingTreeInitConfig(
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut, _textCachingEnabled, Objects.requireNonNull(cacheMode)
         );
     }
 
@@ -630,6 +716,17 @@ public final class SwingTreeInitConfig
         String TEXT_CACHE = "swingtree.textCache";
 
         /**
+         * Selects how aggressively SwingTree's rendering caches trade memory for CPU time
+         * (see {@link CacheMode}). The value is the name of a {@link CacheMode} constant,
+         * matched case-insensitively.
+         * <p>
+         * <strong>Allowed Values</strong> {@code DISABLED}, {@code CONSERVATIVE},
+         * {@code BALANCED}, {@code GENEROUS}, {@code AGGRESSIVE}<br>
+         * <strong>Default</strong> {@code BALANCED}
+         */
+        String CACHE_MODE = "swingtree.cacheMode";
+
+        /**
          * Checks whether a system property is set and returns {@code true} if its value
          * is {@code "true"} (case-insensitive), otherwise it returns {@code false}.
          * If the system property is not set, {@code defaultValue} is returned.
@@ -679,6 +776,22 @@ public final class SwingTreeInitConfig
             } catch( NumberFormatException ex ) {
                 return defaultValue;
             }
+        }
+
+        /**
+         * Resolves a system property to one of the constants of the given enum type,
+         * matching the property value against the constant names case-insensitively.
+         * If the property is unset or does not name a valid constant, {@code defaultValue}
+         * is returned.
+         */
+        static <E extends Enum<E>> E getEnum( String key, Class<E> type, E defaultValue ) {
+            String s = System.getProperty( key );
+            if ( s == null )
+                return defaultValue;
+            for ( E constant : type.getEnumConstants() )
+                if ( constant.name().equalsIgnoreCase( s.trim() ) )
+                    return constant;
+            return defaultValue;
         }
     }
 }

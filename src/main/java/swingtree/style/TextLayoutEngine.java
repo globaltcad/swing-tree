@@ -25,13 +25,22 @@ final class TextLayoutEngine {
     private TextLayoutEngine() {}
 
     /**
-     *  LRU cache capped at {@value #_CACHE_MAX_SIZE} entries.
+     *  Absolute ceiling on {@link #_LAYOUT_CACHE} entries. The effective cap
+     *  (see {@link #_maxLayoutCacheSize()}) only drops below this on a constrained byte
+     *  budget, and is {@code 0} when caching is disabled.
      *  Uses an access-order {@link LinkedHashMap} so the least-recently-used entry is
-     *  evicted once the cap is reached.  The map is wrapped in
-     *  {@link Collections#synchronizedMap} so concurrent callers on different Swing
-     *  repaint threads do not corrupt it.
+     *  evicted once the cap is reached. Like every SwingTree rendering cache it is confined
+     *  to the Event Dispatch Thread (SwingTree is built on single-threaded Swing), so it is a
+     *  plain unsynchronized map.
      */
     private static final int _CACHE_MAX_SIZE = 128;
+
+    /** Live cap on {@link #_LAYOUT_CACHE}, derived from this cache's slice of the shared
+     *  {@link CacheBudget} byte budget and clamped to {@link #_CACHE_MAX_SIZE}. Read live so
+     *  a runtime cache-mode change takes effect at once; {@code 0} disables layout caching. */
+    private static int _maxLayoutCacheSize() {
+        return Math.min(_CACHE_MAX_SIZE, CacheBudget.maxEntriesFor(CacheBudget.Kind.TEXT_LAYOUT));
+    }
 
     /**
      *  Weak-reference cache of {@link ParagraphLayoutsData} entries, keyed by interned
@@ -47,11 +56,14 @@ final class TextLayoutEngine {
      *  been replaced are automatically evicted without a fixed size cap.
      *  <p>
      *  <b>Borrow semantics:</b> an entry is {@link Map#remove removed} from this cache
-     *  before use and {@link Map#put returned} afterwards.  This ensures at most one
-     *  thread mutates a given entry at any time; a concurrent caller that hits the same
-     *  key simply constructs a fresh entry on cache-miss.
+     *  before use and {@link Map#put returned} afterwards. Each entry wraps a <em>stateful</em>
+     *  {@link LineBreakMeasurer} (it carries a traversal position), so taking it out of the
+     *  cache for the duration of use guarantees a re-entrant layout of the same paragraph can
+     *  never share a measurer mid-traversal — it just builds its own entry on the miss. All
+     *  access is confined to the Event Dispatch Thread, so this is about re-entrancy, not
+     *  threads, and the map needs no synchronization.
      */
-    private static final Map<Pooled<Paragraph>, ParagraphLayoutsData> _PARAGRAPH_DATA_CACHE = Collections.synchronizedMap(new WeakHashMap<>());
+    private static final Map<Pooled<Paragraph>, ParagraphLayoutsData> _PARAGRAPH_DATA_CACHE = new WeakHashMap<>();
 
     /**
      *  A large but geometrically safe line-width cap used when no explicit
@@ -66,18 +78,16 @@ final class TextLayoutEngine {
     private static final float _UNBOUNDED_LINE_WIDTH = Short.MAX_VALUE;
     @SuppressWarnings("serial")
     private static final Map<TextLayoutKey, Pair<Float, List<LayoutLine>>> _LAYOUT_CACHE =
-            Collections.synchronizedMap(
-                    new LinkedHashMap<TextLayoutKey, Pair<Float, List<LayoutLine>>>(
-                            _CACHE_MAX_SIZE + 1, 0.75f, true /* access-order */
-                    ) {
-                        @Override
-                        protected boolean removeEldestEntry(
-                                Map.Entry<TextLayoutKey, Pair<Float, List<LayoutLine>>> eldest
-                        ) {
-                            return size() > _CACHE_MAX_SIZE;
-                        }
-                    }
-            );
+            new LinkedHashMap<TextLayoutKey, Pair<Float, List<LayoutLine>>>(
+                    _CACHE_MAX_SIZE + 1, 0.75f, true /* access-order */
+            ) {
+                @Override
+                protected boolean removeEldestEntry(
+                        Map.Entry<TextLayoutKey, Pair<Float, List<LayoutLine>>> eldest
+                ) {
+                    return size() > _maxLayoutCacheSize();
+                }
+            };
 
 
     static Shape childShapeForArea( Component child, UI.ComponentBoundary area ) {
@@ -183,8 +193,17 @@ final class TextLayoutEngine {
         }
 
         final Pair<Float, List<LayoutLine>> result = Pair.of(totalHeight, Collections.unmodifiableList(lines));
-        _LAYOUT_CACHE.put(key, result);
+        if ( _maxLayoutCacheSize() > 0 )
+            _LAYOUT_CACHE.put(key, result);
         return result;
+    }
+
+    /** Drops every cached text layout and paragraph-layout datum. Called when the library
+     *  cache configuration changes (see {@link ComponentExtension#updateAllCachesFromLibraryConfig()})
+     *  so memory shrinks immediately; both caches repopulate lazily under the new budget. */
+    static void clearGlobalCaches() {
+        _LAYOUT_CACHE.clear();
+        _PARAGRAPH_DATA_CACHE.clear();
     }
 
     private static boolean _supportsObstacles(UI.Placement placement) {
@@ -253,9 +272,9 @@ final class TextLayoutEngine {
                 continue;
             }
 
-            // Borrow (or create) the ParagraphLayoutsData for this paragraph.
-            // The remove → use → put borrow pattern ensures thread safety: a concurrent
-            // caller that hits the same key simply constructs a fresh entry on miss.
+            // Borrow (or create) the ParagraphLayoutsData for this paragraph: it is taken
+            // out of the cache for the duration of use (and put back below) so that a
+            // re-entrant layout of the same paragraph never shares its stateful measurer.
             ParagraphLayoutsData data = _PARAGRAPH_DATA_CACHE.remove(pooled);
             if ( data == null || !data.isCompatibleWith(font) ) {
                 final AttributedString attrStr = _paragraphToAttributedString(paragraph.styledStrings, font, boxModelConf);
@@ -686,8 +705,8 @@ final class TextLayoutEngine {
      *    <li>{@link #attrStr} — the {@link AttributedString} built once from the styled
      *        strings and their font attributes; avoids repeating the O(n) attribute-setup
      *        work on every repaint.</li>
-     *    <li>{@link #measurer} — reusable {@link LineBreakMeasurer} ({@code null} while
-     *        borrowed by a concurrent caller or not yet created).</li>
+     *    <li>{@link #measurer} — reusable {@link LineBreakMeasurer} ({@code null} while the
+     *        entry is borrowed by the in-flight layout call, or not yet created).</li>
      *    <li>{@link #singleLayout} — cached {@link TextLayout} for the no-wrap,
      *        no-obstacle path.  {@code null} until first computed.</li>
      *    <li>{@link #wrappedLayouts} — cached {@link LayoutLine} lists for the
@@ -701,7 +720,7 @@ final class TextLayoutEngine {
     private static final class ParagraphLayoutsData {
         final Font             font;
         final AttributedString attrStr;
-        /** {@code null} while borrowed by a caller or not yet created. */
+        /** {@code null} while the entry is borrowed by the in-flight layout call, or not yet created. */
         @Nullable LineBreakMeasurer measurer;
         /** Non-null once the no-wrap, no-obstacle path has run at least once. */
         @Nullable TextLayout        singleLayout;

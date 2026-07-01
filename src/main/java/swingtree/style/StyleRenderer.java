@@ -40,6 +40,14 @@ final class StyleRenderer
      */
     private static final Map<Pooled<ShadowConf>, ShadowGradientCache> _SHADOW_GRADIENT_CACHE = new WeakHashMap<>();
 
+    /** Drops the globally cached noise paints/tiles and shadow gradient stops. Called when the
+     *  library cache configuration changes (see {@link ComponentExtension#updateAllCachesFromLibraryConfig()})
+     *  so memory shrinks immediately; both maps repopulate lazily under the new budget. */
+    static void clearGlobalRenderCaches() {
+        _NOISE_PAINT_CACHE.clear();
+        _SHADOW_GRADIENT_CACHE.clear();
+    }
+
     /**
      *  A shadow's gradient transition happens across the normalized region
      *  {@code [gradientStart, 1]}. When that region is narrower than this, it cannot hold the
@@ -634,8 +642,16 @@ final class StyleRenderer
      */
     private static final class ShadowGradientCache {
 
-        /** Upper bound on retained per-{@code gradientStart} stop arrays, evicted least-recently-used first. */
+        /** Absolute ceiling on retained per-{@code gradientStart} stop arrays. The live cap
+         *  (see {@link #maxCachedStops()}) only drops below this on a constrained byte budget. */
         private static final int MAX_CACHED_STOPS = 16;
+
+        /** Upper bound on retained per-{@code gradientStart} stop arrays, derived from this
+         *  cache's slice of the shared {@link CacheBudget} byte budget and clamped to
+         *  {@link #MAX_CACHED_STOPS}. {@code 0} disables stop caching. */
+        private static int maxCachedStops() {
+            return Math.min(MAX_CACHED_STOPS, CacheBudget.maxEntriesFor(CacheBudget.Kind.SHADOW_GRADIENT));
+        }
 
         private final ShadowConf      _conf; // normalized: color + isOutset + type only
         private @Nullable Color       _innerColor;
@@ -644,7 +660,7 @@ final class StyleRenderer
                 new LinkedHashMap<Float,GradientStops>(16, 0.75f, true) {
                     @Override
                     protected boolean removeEldestEntry( Map.Entry<Float,GradientStops> eldest ) {
-                        return size() > MAX_CACHED_STOPS;
+                        return size() > maxCachedStops();
                     }
                 };
 
@@ -703,7 +719,8 @@ final class StyleRenderer
             }
             fractions[lead - 1 + n] = 1f; // guard against float rounding on the last fraction
             final GradientStops stops = new GradientStops(fractions, colors);
-            _stopsByStart.put(gradientStart, stops);
+            if ( maxCachedStops() > 0 )
+                _stopsByStart.put(gradientStart, stops);
             return stops;
         }
     }
@@ -1788,16 +1805,36 @@ final class StyleRenderer
         private static final int LARGE_TILE_SIZE = 256;
         /** Areas larger than this (in pixels) use the large-tile blitting strategy. */
         private static final int LARGE_AREA_THRESHOLD = LARGE_TILE_SIZE * LARGE_TILE_SIZE;
-        /** Upper bound on retained large tiles (~256KiB each) to keep memory bounded. */
-        private static final int MAX_CACHED_TILES = Math.max(1, 10 * LayerCache.DYNAMIC_CACHE_AGGRESSIVENESS());
+        /** Upper bound on retained large tiles (~256 KiB each), from this cache's slice of
+         *  the shared {@link CacheBudget} byte budget. {@code 0} disables tile caching.
+         *  Read live (not snapshotted) so a runtime cache-mode change takes effect at once. */
+        private static int maxCachedTiles() {
+            return CacheBudget.maxEntriesFor(CacheBudget.Kind.NOISE_TILE);
+        }
 
-        private final Map<Point2D,NoiseGradientPaint> paintCache = new HashMap<>();
+        /** Absolute ceiling on retained per-{@code center} {@link NoiseGradientPaint}s. A static
+         *  noise needs a single entry, so this never evicts in the common case; it exists purely
+         *  to bound an animated/panning offset, which produces a fresh {@code center} per frame. */
+        private static final int MAX_CACHED_PAINTS = 32;
+        /** Per-{@code center} paints, evicted least-recently-used first. Unlike the large-tile grid
+         *  (which lives in offset-independent noise space and so survives offset animation as-is),
+         *  these are keyed by the offset-dependent {@code center}, so without a cap an animated
+         *  offset would grow this map without bound. This path is also the fallback used when tile
+         *  caching is off (incl. the {@code DISABLED} cache mode), so it must stay functional
+         *  regardless of the byte budget — hence a fixed LRU cap rather than a budget-derived one. */
+        private final Map<Point2D,NoiseGradientPaint> paintCache =
+                new LinkedHashMap<Point2D,NoiseGradientPaint>(16, 0.75f, true) {
+                    @Override
+                    protected boolean removeEldestEntry( Map.Entry<Point2D,NoiseGradientPaint> eldest ) {
+                        return size() > MAX_CACHED_PAINTS;
+                    }
+                };
         /** Large pre-rendered tiles, keyed by noise-space tile index, evicted least-recently-used first. */
         private final Map<Long,BufferedImage> largeTileCache =
                 new LinkedHashMap<Long,BufferedImage>(16, 0.75f, true) {
                     @Override
                     protected boolean removeEldestEntry( Map.Entry<Long,BufferedImage> eldest ) {
-                        return size() > MAX_CACHED_TILES;
+                        return size() > maxCachedTiles();
                     }
                 };
 
@@ -1824,8 +1861,8 @@ final class StyleRenderer
             final Rectangle bounds = areaToFill.getBounds();
             final long area = (long) bounds.width * bounds.height;
 
-            if ( area <= LARGE_AREA_THRESHOLD ) {
-                // Small area: the per-pixel Paint pipeline is cheap enough here.
+            if ( area <= LARGE_AREA_THRESHOLD || maxCachedTiles() <= 0 ) {
+                // Small area (or tile caching disabled): the per-pixel Paint pipeline is fine here.
                 g2d.setPaint(getCachedNoisePaint(center, noise));
                 g2d.fill(areaToFill);
             } else {
