@@ -2,25 +2,15 @@ package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
 import swingtree.SwingTree;
+import swingtree.SwingTreeInitConfig;
 
 import javax.swing.*;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
-import java.awt.Paint;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Transparency;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.WeakHashMap;
 
 /**
  *  A self-clearing, HiDPI-correct cache for rasterised label/button text, shared
@@ -152,9 +142,12 @@ final class TextRenderCache {
         if ( !SwingUtilities.isEventDispatchThread() )
             return false;
 
-        final Class<?> componentClass = c.getClass();
+        // Rule 0: Is caching enabled in SwingTree
+        if ( SwingTree.get().getCacheMode() == SwingTreeInitConfig.CacheMode.DISABLED )
+            return false;
 
         // Rule 1: global switch + per-class self-healing opt-out (keyed by component class).
+        final Class<?> componentClass = c.getClass();
         if ( !SwingTree.get().isTextCachingEnabled() || UNSAFE.contains(componentClass) )
             return false;
 
