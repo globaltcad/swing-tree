@@ -6,13 +6,16 @@ import javax.swing.JComponent;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
+import java.awt.font.LineMetrics;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ImageObserver;
 import java.awt.image.RenderedImage;
 import java.awt.image.renderable.RenderableImage;
 import java.text.AttributedCharacterIterator;
+import java.text.CharacterIterator;
 import java.util.Map;
 
 /**
@@ -129,7 +132,7 @@ final class CachingTextGraphics2D extends Graphics2D {
     @Override public void setXORMode(Color c) { _g.setXORMode(c); }
     @Override public Font getFont() { return _g.getFont(); }
     @Override public void setFont(Font font) { _g.setFont(font); }
-    @Override public FontMetrics getFontMetrics(Font f) { return _g.getFontMetrics(f); }
+    @Override public FontMetrics getFontMetrics(Font f) { return new CachingFontMetrics(_g.getFontMetrics(f)); }
     @Override public Rectangle getClipBounds() { return _g.getClipBounds(); }
     @Override public void clipRect(int x, int y, int w, int h) { _g.clipRect(x, y, w, h); }
     @Override public void setClip(int x, int y, int w, int h) { _g.setClip(x, y, w, h); }
@@ -178,7 +181,7 @@ final class CachingTextGraphics2D extends Graphics2D {
     @Override public void fillPolygon(Polygon p) { _g.fillPolygon(p); }
     @Override public void drawChars(char[] data, int offset, int length, int x, int y) { _g.drawChars(data, offset, length, x, y); }
     @Override public void drawBytes(byte[] data, int offset, int length, int x, int y) { _g.drawBytes(data, offset, length, x, y); }
-    @Override public FontMetrics getFontMetrics() { return _g.getFontMetrics(); }
+    @Override public FontMetrics getFontMetrics() { return new CachingFontMetrics(_g.getFontMetrics()); }
 
     @Override public @Nullable GraphicsConfiguration getDeviceConfiguration() {
         GraphicsConfiguration gc = _g.getDeviceConfiguration();
@@ -186,5 +189,75 @@ final class CachingTextGraphics2D extends Graphics2D {
             gc = GraphicsEnvironment.getLocalGraphicsEnvironment()
                                     .getDefaultScreenDevice().getDefaultConfiguration();
         return gc;
+    }
+
+    /** Wraps the given real metrics in the width-caching proxy. This is the bridge SwingTree's own
+     *  text components call (via {@link ComponentExtension#getFontMetricsCacheBacked(FontMetrics)})
+     *  so that the {@code stringWidth} a look-and-feel issues through {@code component.getFontMetrics(font)}
+     *  — the path {@code SwingUtilities2} actually takes, bypassing the graphics — is intercepted too.
+     *  Gating (cache mode / text-caching toggle) is done by the caller. */
+    static FontMetrics cacheBacked(FontMetrics real) {
+        return new CachingFontMetrics(real);
+    }
+
+    /**
+     *  A transparent {@link FontMetrics} decorator that forwards <b>every</b> query to a
+     *  wrapped delegate unchanged — except {@link #stringWidth(String)}, which it routes
+     *  through {@link TextRenderCache#stringWidth}. A look-and-feel measures a string (to lay
+     *  it out, clip or centre it) <i>before</i> it draws it, and that measurement builds a
+     *  {@link java.awt.font.TextLayout}, which — once text rasterisation is cached — becomes
+     *  the dominant per-paint cost of a text component. The advance is cached on the shared
+     *  {@code text + font} entry, costing a single {@code int} per entry.
+     *
+     *  <p>Every non-intercepted method is delegated explicitly rather than left to
+     *  {@link FontMetrics}' own (mutually-recursive, default) implementations, so the proxy is an
+     *  exact mirror of the real metrics for everything but {@code stringWidth}.
+     *
+     *  <p><b>Note — no self-heal here.</b> Unlike the graphics proxy (whose paint is wrapped so a
+     *  throwing down-cast records the class via {@link TextRenderCache#markUnsafe(Class)} and stops
+     *  proxying it), this metrics proxy is installed unconditionally by the component's
+     *  {@code getFontMetrics} override and is also consulted during layout — outside any paint
+     *  try/catch — so a fault could not be recovered the same way. It is safe because look-and-feels
+     *  use only the public {@link FontMetrics} API to measure (e.g. {@code SwingUtilities2}) and do
+     *  not down-cast it to a concrete metrics type.
+     */
+    private static final class CachingFontMetrics extends FontMetrics {
+        private final FontMetrics _fm;    // the real, delegate metrics
+
+        CachingFontMetrics(FontMetrics fm) {
+            super(fm.getFont());
+            _fm = fm;
+        }
+
+        // ── the whole point: intercept string measurement ───────────────────
+        @Override public int stringWidth(String str) { return TextRenderCache.stringWidth(_fm, str); }
+
+        // ── everything else: pure delegation ────────────────────────────────
+        @Override public Font getFont() { return _fm.getFont(); }
+        @Override public FontRenderContext getFontRenderContext() { return _fm.getFontRenderContext(); }
+        @Override public int getLeading() { return _fm.getLeading(); }
+        @Override public int getAscent() { return _fm.getAscent(); }
+        @Override public int getDescent() { return _fm.getDescent(); }
+        @Override public int getHeight() { return _fm.getHeight(); }
+        @Override public int getMaxAscent() { return _fm.getMaxAscent(); }
+        @Override public int getMaxDescent() { return _fm.getMaxDescent(); }
+        @Override @Deprecated @SuppressWarnings("deprecation") public int getMaxDecent() { return _fm.getMaxDescent(); }
+        @Override public int getMaxAdvance() { return _fm.getMaxAdvance(); }
+        @Override public int charWidth(int codePoint) { return _fm.charWidth(codePoint); }
+        @Override public int charWidth(char ch) { return _fm.charWidth(ch); }
+        @Override public int charsWidth(char[] data, int off, int len) { return _fm.charsWidth(data, off, len); }
+        @Override public int bytesWidth(byte[] data, int off, int len) { return _fm.bytesWidth(data, off, len); }
+        @Override public int[] getWidths() { return _fm.getWidths(); }
+        @Override public boolean hasUniformLineMetrics() { return _fm.hasUniformLineMetrics(); }
+        @Override public LineMetrics getLineMetrics(String str, Graphics context) { return _fm.getLineMetrics(str, context); }
+        @Override public LineMetrics getLineMetrics(String str, int beginIndex, int limit, Graphics context) { return _fm.getLineMetrics(str, beginIndex, limit, context); }
+        @Override public LineMetrics getLineMetrics(char[] chars, int beginIndex, int limit, Graphics context) { return _fm.getLineMetrics(chars, beginIndex, limit, context); }
+        @Override public LineMetrics getLineMetrics(CharacterIterator ci, int beginIndex, int limit, Graphics context) { return _fm.getLineMetrics(ci, beginIndex, limit, context); }
+        @Override public Rectangle2D getStringBounds(String str, Graphics context) { return _fm.getStringBounds(str, context); }
+        @Override public Rectangle2D getStringBounds(String str, int beginIndex, int limit, Graphics context) { return _fm.getStringBounds(str, beginIndex, limit, context); }
+        @Override public Rectangle2D getStringBounds(char[] chars, int beginIndex, int limit, Graphics context) { return _fm.getStringBounds(chars, beginIndex, limit, context); }
+        @Override public Rectangle2D getStringBounds(CharacterIterator ci, int beginIndex, int limit, Graphics context) { return _fm.getStringBounds(ci, beginIndex, limit, context); }
+        @Override public Rectangle2D getMaxCharBounds(Graphics context) { return _fm.getMaxCharBounds(context); }
+        @Override public String toString() { return _fm.toString(); }
     }
 }

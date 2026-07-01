@@ -578,6 +578,64 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
+     *  Returns whether this component currently has a cached string <em>width</em> for its
+     *  text. Besides rasterising {@code drawString}, SwingTree's {@link CachingTextGraphics2D}
+     *  also intercepts the {@link java.awt.FontMetrics#stringWidth(String) stringWidth} calls a
+     *  look-and-feel makes to lay text out <em>before</em> drawing it — the dominant per-paint
+     *  cost once the pixels themselves are cached. The measured advance width is stored in the
+     *  very same {@code text + font} cache entry as the (eventual) image.
+     *  <p>
+     *  It becomes available one paint <em>earlier</em> than the image ({@link #hasCachedText()}),
+     *  which needs a short warm-up: the entry is created by a component's first paint, and the width
+     *  is filled and served from the second paint onward (a layout measurement runs before the entry
+     *  exists on that very first paint). It reverts to {@code false} once the component stops drawing
+     *  that appearance and the entry is reclaimed.
+     *
+     * @return {@code true} if a cached string width exists for this component right now.
+     */
+    public boolean hasCachedTextWidth() {
+        return TextRenderCache.hasCachedWidth(_owner);
+    }
+
+    /**
+     *  Returns how many distinct <em>pixel variants</em> of this component's text are tracked in the
+     *  cache (including any still warming up towards a blittable image). Entries are keyed coarsely
+     *  by {@code text + font}, and each such entry holds a small, capped set of variants that differ
+     *  only in pixel-affecting properties (colour, antialiasing, LCD contrast, fractional metrics,
+     *  HiDPI scale). Two components with the same string and font therefore share a single
+     *  {@link #totalTextCacheSize() entry} while still getting their own correct pixels — this count
+     *  exposes those inner variants, which is mainly useful for documentation and tests that want to
+     *  observe that separation.
+     *
+     * @return The number of distinct pixel variants tracked for this component's current text appearance.
+     */
+    public int renderedTextVariantCount() {
+        return TextRenderCache.renderedVariantCount(_owner);
+    }
+
+    /**
+     *  Bridges a SwingTree text component's {@link JComponent#getFontMetrics(Font)} into the
+     *  text-render cache. Swing's look-and-feels measure a string through
+     *  {@code component.getFontMetrics(font)} (via {@code SwingUtilities2}) rather than through
+     *  the graphics, so this is the only hook that can serve a cached {@code stringWidth}. The
+     *  SwingTree component subclasses (e.g. {@link UI.Label}, {@link UI.Button}, {@link UI.TextField})
+     *  override {@code getFontMetrics} to return {@code getFontMetricsCacheBacked(super.getFontMetrics(f))}.
+     *  <p>
+     *  When text caching is off (or the library cache mode is {@code DISABLED}) the real metrics
+     *  are returned untouched; otherwise a lightweight proxy is returned whose {@code stringWidth}
+     *  is a pure cache lookup (see {@link TextRenderCache#stringWidth}) that falls back to the real
+     *  measurement on a miss, so behaviour is never altered — only accelerated.
+     *
+     * @param realMetrics The component's genuine {@link FontMetrics} (typically {@code super.getFontMetrics(font)}).
+     * @return Either {@code realMetrics} unchanged, or a cache-backed proxy of it.
+     */
+    public FontMetrics getFontMetricsCacheBacked(FontMetrics realMetrics) {
+        if ( !TextRenderCache.isTextCachingActive() )
+            return realMetrics;
+        return CachingTextGraphics2D.cacheBacked(realMetrics);
+    }
+
+    /**
      *  Returns the total number of entries currently living in SwingTree's <em>global</em>
      *  text-render cache, across all components. Because entries are keyed by the text
      *  appearance itself and shared between components (so a row of identical buttons

@@ -23,26 +23,46 @@ import java.util.List;
  *  glyphs and composites each one in software, every frame. This cache renders a
  *  given <i>appearance</i> of a string once and then blits the resulting image.
  *
+ *  <h2>Two layers behind one coarse key</h2>
+ *  Entries are keyed coarsely by {@link TextKey text + font} only — nothing
+ *  pixel-specific. Each {@link Entry} then holds two things:
+ *  <ul>
+ *    <li>the string's one layout <b>width</b> — a colour/scale-independent {@code int},
+ *        filled the first time a look-and-feel measures the string (see
+ *        {@link #stringWidth}); this is the cheap second layer that spares the
+ *        per-paint {@code FontMetrics.stringWidth}/{@code TextLayout} the look-and-feel
+ *        issues while laying text out; and</li>
+ *    <li>a small fixed array of rasterised <b>image</b> variants ({@link SubEntry},
+ *        up to {@link #MAX_SUBS}), one per distinct pixel appearance — colour,
+ *        antialiasing, LCD contrast, fractional metrics, HiDPI scale — matched inside
+ *        the entry by {@link #visualHash}.</li>
+ *  </ul>
+ *  So the cheap width lookup and the expensive glyph rasterisation share one entry;
+ *  re-colouring a label reuses its width and merely adds an image variant.
+ *
  *  <h2>Lifecycle: weak references do the real work, the budget is a backstop</h2>
- *  Entries are keyed by a {@link Pooled}-interned {@link TextKey}; equal keys
- *  collapse to one canonical instance. The canonical key is kept alive only by a
- *  {@link KeyHolder} the component keeps in its {@link ComponentExtension} extra-state
- *  store (which is itself a client property of the component, so it stays invisible
- *  from outside). While a component keeps drawing the same text it retains that key,
- *  keeping the image alive; the moment the text/font/colour changes it retains a
- *  different key and the stale image becomes weakly reachable and is collected. When
- *  the component itself is collected, its {@link ComponentExtension} — and therefore
- *  its {@link KeyHolder} and the keys it held — go with it. Two components drawing
- *  identical text share one image until the last of them stops. So the cache tracks
- *  live appearance exactly, with no invalidation to wire.
+ *  Each coarse key is a {@link Pooled}-interned {@link TextKey}; equal keys collapse to
+ *  one canonical instance. The canonical key is kept alive only by a {@link KeyHolder}
+ *  the component keeps in its {@link ComponentExtension} extra-state store (which is
+ *  itself a client property of the component, so it stays invisible from outside). While
+ *  a component keeps drawing the same text in the same font it retains that key, keeping
+ *  the entry alive; the moment the text or font changes it retains a different key and the
+ *  stale entry becomes weakly reachable and is collected (a colour or other pixel-only
+ *  change keeps the same key and only adds a variant inside the entry). When the component
+ *  itself is collected, its {@link ComponentExtension} — and therefore its {@link KeyHolder}
+ *  and the keys it held — go with it. Two components drawing identical text in the same font
+ *  share one entry until the last of them stops. So the cache tracks live appearance exactly,
+ *  with no invalidation to wire.
  *
  *  <p>On top of that self-clearing lifecycle sits a coarse memory-budget cap, drawn from
  *  the shared {@link CacheBudget} (derived from the configured cache mode and system RAM):
- *  it bounds both the number of cached appearances ({@link #maxEntries()}) and the
- *  device-pixel size of any single cached image ({@link #maxImageArea()}). This never
- *  affects correctness — anything not cached is simply drawn directly — it only caps
- *  worst-case memory on machines with little of it, and lets a constrained device (or the
- *  {@code DISABLED} cache mode) opt out of text caching entirely (budget 0).
+ *  it bounds the number of cached {@code text + font} entries ({@link #maxEntries()}) and the
+ *  device-pixel size of any single cached image ({@link #maxImageArea()}). Because each entry may
+ *  hold up to {@link #MAX_SUBS} rendered variants, peak image memory can in principle be a small
+ *  multiple of the entry count (in practice a string appears in one or two colours). This never
+ *  affects correctness — anything not cached is simply drawn directly — it only caps worst-case
+ *  memory on machines with little of it, and lets a constrained device (or the {@code DISABLED}
+ *  cache mode) opt out of text caching entirely (budget 0).
  *
  *  <h2>Conservative by construction</h2>
  *  Only plain {@code drawString} with a solid {@link Color} paint and an
@@ -52,7 +72,7 @@ import java.util.List;
  *  transparent buffer composited over an arbitrary background does not have).
  *
  *  <p>EDT-confined: any paint arriving off the Event Dispatch Thread (printing,
- *  image export) bypasses the cache, so the plain {@link WeakHashMap}s are never
+ *  image export) bypasses the cache, so the plain {@link WeakHashMap} is never
  *  touched concurrently.
  */
 final class TextRenderCache {
@@ -61,6 +81,13 @@ final class TextRenderCache {
 
     /** Paint number at which an appearance is promoted from direct drawing to a cached image. */
     private static final int MATERIALISE_AT = 3;
+
+    /** How many distinct rendered variants (colour/AA/LCD/fractional-metrics/scale) a single
+     *  {@code text + font} {@link Entry} keeps side by side; once full it behaves as a ring buffer,
+     *  the newest variant evicting the oldest. A real UI shows a given string in only a handful of
+     *  appearances (normal, selected, disabled, …), so a tiny fixed array beats a per-entry map on
+     *  both footprint and lookup cost, while eviction keeps a shifting appearance from going stale. */
+    private static final int MAX_SUBS = 4;
 
     /** User-space padding around the glyph box (absorbs left-side bearing, glyph
      *  overhang and antialiasing bleed so nothing is clipped by the image edge). */
@@ -183,6 +210,16 @@ final class TextRenderCache {
     /** Permanently disables proxying for a component class after its paint failed once. */
     static void markUnsafe(Class<?> componentClass) { UNSAFE.add(componentClass); }
 
+    /** Whether text caching is switched on at all (library cache mode + the text-caching toggle).
+     *  Gates the {@link CachingTextGraphics2D} FontMetrics proxy that SwingTree's own text
+     *  components install via {@link ComponentExtension#getFontMetricsCacheBacked(FontMetrics)};
+     *  when off, {@code getFontMetrics} returns the real metrics untouched. */
+    static boolean isTextCachingActive() {
+        if ( SwingTree.get().getCacheMode() == SwingTreeInitConfig.CacheMode.DISABLED )
+            return false;
+        return SwingTree.get().isTextCachingEnabled();
+    }
+
     // ─────────────────────────── introspection (for tests / living documentation) ──
 
     /** Number of distinct text appearances the given component retained during its
@@ -200,9 +237,40 @@ final class TextRenderCache {
         if ( h == null ) return false;
         for ( Pooled<TextKey> key : h._keys ) {
             Entry e = CACHE.get(key);
-            if ( e != null && e.image != null ) return true;
+            if ( e != null && e.hasImage() ) return true;
         }
         return false;
+    }
+
+    /** {@code true} if at least one of the component's currently retained {@code text + font}
+     *  entries carries a cached string width (served to the look-and-feel through the
+     *  {@link CachingTextGraphics2D} FontMetrics proxy instead of being re-measured). The width is
+     *  filled once a paint has established the entry, so it appears one paint before
+     *  {@link #hasMaterialisedText} (whose image needs a longer warm-up). */
+    static boolean hasCachedWidth(JComponent c) {
+        KeyHolder h = holderOf(c);
+        if ( h == null ) return false;
+        for ( Pooled<TextKey> key : h._keys ) {
+            Entry e = CACHE.get(key);
+            if ( e != null && e.width >= 0 ) return true;
+        }
+        return false;
+    }
+
+    /** The number of distinct pixel renderings (colour / AA / LCD / fractional-metrics / scale
+     *  variants) tracked across the component's currently retained {@code text + font} entries.
+     *  Two components showing the same string in the same font share <em>one</em> entry (so
+     *  {@link #globalEntryCount} counts it once), yet each visual variant is rendered separately
+     *  inside it — which is what guarantees a red and a blue label never blit each other's pixels. */
+    static int renderedVariantCount(JComponent c) {
+        KeyHolder h = holderOf(c);
+        if ( h == null ) return 0;
+        int n = 0;
+        for ( Pooled<TextKey> key : h._keys ) {
+            Entry e = CACHE.get(key);
+            if ( e != null ) n += e.subCount;
+        }
+        return n;
     }
 
     /** Total number of live entries in the global text cache. Stale, garbage-collected
@@ -264,8 +332,10 @@ final class TextRenderCache {
         Font font = delegate.getFont();
         Color color = (Color) paint;
 
-        long visualHash = visualHash(delegate, tx, font, color);
-        Pooled<TextKey> key = new Pooled<>(new TextKey(text, visualHash)).intern();
+        // Coarse key: text + font only. The width path reconstructs this identically from the
+        // component's metrics, so both paths meet at one Entry; the pixel-specific variants
+        // (colour/AA/LCD/fractional-metrics/scale) are distinguished inside it by SubEntry.
+        Pooled<TextKey> key = coarseKey(font, text).intern();
 
         Entry entry = CACHE.get(key);
         if ( entry == null ) {
@@ -276,26 +346,32 @@ final class TextRenderCache {
         }
         holder.retain(key);     // an existing appearance is always retained; a new one only once admitted
 
+        long visualHash = visualHash(delegate, tx, font, color);   // this exact rendering's pixel signature
+        SubEntry sub = entry.findSub(visualHash);
+
         /*
-            Fast path — the appearance is already materialised, so just blit it.
+            Fast path — this exact rendering is already materialised, so just blit it.
             We deliberately keep FontMetrics OUT of this path: FontMetrics.stringWidth(text)
             builds a TextLayout to measure the glyph advances and, per real benchmarks, costs
             several times more than the blit itself. We don't need it here: the cached image
             already encodes the text's width and height, and to position the blit we only need
-            the ascent (a font-level constant, so it is the same on every paint of this entry
+            the ascent (a font-level constant, so it is the same on every paint of this rendering
             because the font is part of the cache key) which we captured when materialising.
         */
-        if ( entry.image != null ) {
+        if ( sub != null && sub.image != null ) {
             int boundsX = (int) Math.floor(x);
-            int boundsY = (int) Math.floor(y - entry.ascent);
-            blit(delegate, tx, entry.image, boundsX - PAD, boundsY - PAD);
+            int boundsY = (int) Math.floor(y - sub.ascent);
+            blit(delegate, tx, sub.image, boundsX - PAD, boundsY - PAD);
             return true;
         }
 
-        // Warm-up — draw directly (no measuring) until the appearance proves stable.
-        if ( ++entry.hits < MATERIALISE_AT ) return false;
+        if ( sub == null )
+            sub = entry.addSub(visualHash);   // ring buffer: always admits, evicting the oldest variant if full
 
-        // Materialise — runs once per appearance; this is the only place we measure the string.
+        // Warm-up — draw directly (no measuring) until this rendering proves stable.
+        if ( ++sub.hits < MATERIALISE_AT ) return false;
+
+        // Materialise — runs once per rendering; this is the only place the image path measures the string.
         FontMetrics fm = delegate.getFontMetrics(font);
         int ascent  = fm.getAscent();
         int boundsX = (int) Math.floor(x);
@@ -307,11 +383,50 @@ final class TextRenderCache {
         BufferedImage img = materialise(delegate, tx, font, color, text,
                                         x, y, boundsX, boundsY, boundsW, boundsH);
         if ( img == null ) return false;                            // too large -> stay direct
-        entry.image  = img;
-        entry.ascent = ascent;                                      // captured for the fast path above
+        sub.image  = img;
+        sub.ascent = ascent;                                        // captured for the fast path above
 
         blit(delegate, tx, img, boundsX - PAD, boundsY - PAD);
         return true;
+    }
+
+    /**
+     *  Attempts to satisfy {@code fontMetrics.stringWidth(text)} from the cache — the other
+     *  major per-paint text cost besides the {@code drawString} itself. A look-and-feel
+     *  measures a string (to lay it out, clip it or centre it) <i>before</i> drawing it, and
+     *  {@link FontMetrics#stringWidth(String)} builds a {@link java.awt.font.TextLayout} to do
+     *  so, which per benchmarks dominates the paint of a text component once its pixels are cached.
+     *
+     *  <p><b>This is the second cache layer, and it deliberately never creates an {@link Entry}.</b>
+     *  Width depends only on the text and font (plus the component's stable fractional-metrics
+     *  setting), <em>not</em> on colour or the pixel-only hints — so it is keyed by the same coarse
+     *  {@code text + font} {@link #coarseKey key} the image path uses. We probe for the entry a paint
+     *  has already established; if none exists yet, we just measure directly (the very first paint of
+     *  a string has not created its entry at layout time). Crucially the width itself must be measured
+     *  in <em>this</em> (component) context, not taken from the paint cycle: the image path measures
+     *  with the graphics' metrics (typically fractional-metrics ON), whereas the look-and-feel lays
+     *  out with the component's metrics (fractional-metrics OFF), and the two give different advances.
+     *  So on the first miss we measure once via {@code realFm} and cache <em>that</em> value on the
+     *  shared entry; every later paint of the same string is then a field read. No entry is created,
+     *  nothing is retained (the image path already keeps the entry alive), and a miss is always a
+     *  correct direct measure — so this can only accelerate, never diverge.
+     *
+     *  <p>The probe key is <em>not</em> interned: {@link Pooled#equals} compares by value, so it finds
+     *  the interned entry without touching the object pool.
+     *
+     * @return the string's advance width, served from the cached measurement once established, and
+     *         otherwise measured directly via {@code realFm}.
+     */
+    static int stringWidth(FontMetrics realFm, @Nullable String text) {
+        if ( text == null || text.isEmpty() )          return 0;                        // nothing to measure
+        if ( !SwingUtilities.isEventDispatchThread() ) return realFm.stringWidth(text); // never touch the map off-EDT
+
+        Entry entry = CACHE.get(coarseKey(realFm.getFont(), text)); // probe (no intern needed for a read)
+        if ( entry == null )       return realFm.stringWidth(text); // no paint has established this text+font yet
+        if ( entry.width >= 0 )    return entry.width;              // already measured in this (component) context
+        int w = realFm.stringWidth(text);                          // first miss: measure once...
+        entry.width = w;                                           // ...and cache it on the shared entry (no new entry)
+        return w;
     }
 
     private static @Nullable BufferedImage materialise(
@@ -394,7 +509,20 @@ final class TextRenderCache {
         return (tx.getType() & ~allowed) == 0;
     }
 
-    /** All pixel-affecting inputs of a {@code drawString} call folded into a well-mixed 64-bit value. */
+    /** The coarse cache key shared by the image path ({@link #paintString}) and the width path
+     *  ({@link #stringWidth}): exactly the text and its font, and nothing pixel-specific. Both paths
+     *  reconstruct it identically — the image path from the graphics font, the width path from the
+     *  metrics' font — so they meet at one {@link Entry}; the per-rendering pixel variants live in
+     *  that entry's {@link SubEntry} array, keyed by {@link #visualHash}. Returned un-interned; the
+     *  image path interns it before caching, the width path uses it as a by-value probe. */
+    private static Pooled<TextKey> coarseKey(Font font, String text) {
+        return new Pooled<>(new TextKey(text, font));
+    }
+
+    /** All pixel-affecting inputs of a {@code drawString} call folded into a well-mixed 64-bit value.
+     *  Computed and compared only on the paint side (to pick a {@link SubEntry}), so it may draw on
+     *  anything the graphics exposes; the font is redundant here (the {@link #coarseKey} already pins
+     *  it) but is left in for defence in depth. */
     private static long visualHash(Graphics2D g, AffineTransform tx, Font font, Color color) {
         long h = 1469598103934665603L;                                  // FNV-1a offset basis
         h = (h ^ font.hashCode())                              * 1099511628211L;
@@ -419,11 +547,50 @@ final class TextRenderCache {
         return z ^ (z >>> 31);
     }
 
-    /** Mutable per-appearance slot. EDT-confined, so no synchronisation. */
+    /** Mutable per-{@code text+font} slot. EDT-confined, so no synchronisation. Holds the one
+     *  layout {@link #width} (colour/AA/LCD/scale-independent, filled by the width path) and a small
+     *  fixed array of pixel {@link SubEntry renderings} (filled by the image path). */
     private static final class Entry {
-        int                                  hits;
-        @Nullable BufferedImage              image;
-        int                                  ascent; // font ascent captured at materialise time; positions the blit
+        int            width = -1;                        // cached component-context stringWidth; -1 until measured
+        final SubEntry[] subs = new SubEntry[MAX_SUBS];   // rendered variants; linear-scanned (MAX_SUBS is tiny)
+        int            subCount;                          // slots in use (grows to MAX_SUBS, then stays)
+        int            evict;                             // ring-buffer cursor: index of the oldest variant
+
+        /** The rendering matching this pixel signature, or {@code null} if not present yet. */
+        @Nullable SubEntry findSub(long visualHash) {
+            for ( int i = 0; i < subCount; i++ )
+                if ( subs[i].visualHash == visualHash ) return subs[i];
+            return null;
+        }
+        /** Admits a new rendering. Once {@link #MAX_SUBS} are held this is a ring buffer: the
+         *  oldest variant is overwritten (its image, if any, is dropped and so falls out of the
+         *  image budget), so a component that keeps changing appearance keeps its most recent ones. */
+        SubEntry addSub(long visualHash) {
+            SubEntry s = new SubEntry(visualHash);
+            if ( subCount < MAX_SUBS ) {
+                subs[subCount++] = s;
+            } else {
+                subs[evict] = s;                          // overwrite the oldest variant
+                evict = (evict + 1) % MAX_SUBS;
+            }
+            return s;
+        }
+        /** Whether any of this text+font's renderings has been promoted to a blittable image. */
+        boolean hasImage() {
+            for ( int i = 0; i < subCount; i++ )
+                if ( subs[i].image != null ) return true;
+            return false;
+        }
+    }
+
+    /** One rendered variant of a {@link Entry}'s text+font: a pixel signature plus, once warmed up,
+     *  the rasterised image and the ascent that positions its blit. */
+    private static final class SubEntry {
+        final long                  visualHash; // colour + AA + LCD + fractional-metrics + transform scale
+        int                         hits;       // warm-up counter; promoted to an image at MATERIALISE_AT
+        int                         ascent;     // font ascent captured at materialise time; positions the blit
+        @Nullable BufferedImage     image;
+        SubEntry(long visualHash) { this.visualHash = visualHash; }
     }
 
     /** Holds the <i>distinct</i> keys used during the current paint of one component,
@@ -439,18 +606,20 @@ final class TextRenderCache {
         void retain(Pooled<TextKey> key)      { if ( !_keys.contains(key) ) _keys.add(key); }
     }
 
-    /** The value-object cache key: the exact string plus a 64-bit hash of all of
-     *  its visual properties. The string is compared exactly, so a wrong cache hit
-     *  would require two identical strings whose visual hashes also collide. */
+    /** The coarse value-object cache key: the exact string and its {@link Font}, and nothing
+     *  pixel-specific. Both are compared by value ({@code String.equals}/{@code Font.equals}), so a
+     *  wrong hit would require two equal strings in two equal fonts — i.e. it cannot happen. Pixel
+     *  differences (colour, AA, LCD, fractional metrics, scale) are resolved <em>within</em> the
+     *  matched {@link Entry} by its {@link SubEntry} array, not by the key. */
     static final class TextKey {
         private final String text;
-        private final long   visualHash;
+        private final Font   font;
         private final int    hash;
 
-        TextKey(String text, long visualHash) {
-            this.text       = text;
-            this.visualHash = visualHash;
-            this.hash       = text.hashCode() * 31 + Long.hashCode(visualHash);
+        TextKey(String text, Font font) {
+            this.text = text;
+            this.font = font;
+            this.hash = text.hashCode() * 31 + font.hashCode();
         }
 
         @Override public boolean equals(@Nullable Object o) {
@@ -458,8 +627,8 @@ final class TextRenderCache {
             if ( !(o instanceof TextKey) ) return false;
             TextKey other = (TextKey) o;
             return this.hash == other.hash
-                && this.visualHash == other.visualHash
-                && this.text.equals(other.text);
+                && this.text.equals(other.text)
+                && this.font.equals(other.font);
         }
         @Override public int hashCode() { return hash; }
     }

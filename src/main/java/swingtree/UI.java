@@ -1657,6 +1657,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public FontMetrics getFontMetrics(java.awt.Font f) { return ComponentExtension.from(this).getFontMetricsCacheBacked(super.getFontMetrics(f)); }
     }
     /** {inheritDoc} */
     public static class TextField extends JTextField implements StylableComponent {
@@ -1675,24 +1676,28 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public FontMetrics getFontMetrics(java.awt.Font f) { return ComponentExtension.from(this).getFontMetricsCacheBacked(super.getFontMetrics(f)); }
     }
     /** {inheritDoc} */
     public static class Button extends JButton implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public FontMetrics getFontMetrics(java.awt.Font f) { return ComponentExtension.from(this).getFontMetricsCacheBacked(super.getFontMetrics(f)); }
     }
     /** {inheritDoc} */
     public static class ToggleButton extends JToggleButton implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public FontMetrics getFontMetrics(java.awt.Font f) { return ComponentExtension.from(this).getFontMetricsCacheBacked(super.getFontMetrics(f)); }
     }
     /** {inheritDoc} */
     public static class RadioButton extends JRadioButton implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public FontMetrics getFontMetrics(java.awt.Font f) { return ComponentExtension.from(this).getFontMetricsCacheBacked(super.getFontMetrics(f)); }
     }
     /** {inheritDoc} */
     public static class ComboBox<E> extends JComboBox<E> implements StylableComponent {
@@ -1778,24 +1783,28 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public FontMetrics getFontMetrics(java.awt.Font f) { return ComponentExtension.from(this).getFontMetricsCacheBacked(super.getFontMetrics(f)); }
     }
     /** {inheritDoc} */
     public static class RadioButtonMenuItem extends JRadioButtonMenuItem implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public FontMetrics getFontMetrics(java.awt.Font f) { return ComponentExtension.from(this).getFontMetricsCacheBacked(super.getFontMetrics(f)); }
     }
     /** {inheritDoc} */
      public static class CheckBoxMenuItem extends JCheckBoxMenuItem implements StylableComponent {
          @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
          @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public FontMetrics getFontMetrics(java.awt.Font f) { return ComponentExtension.from(this).getFontMetricsCacheBacked(super.getFontMetrics(f)); }
      }
     /** {inheritDoc} */
     public static class Menu extends JMenu implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public FontMetrics getFontMetrics(java.awt.Font f) { return ComponentExtension.from(this).getFontMetricsCacheBacked(super.getFontMetrics(f)); }
     }
     /** {inheritDoc} */
     public static class MenuBar extends JMenuBar implements StylableComponent {

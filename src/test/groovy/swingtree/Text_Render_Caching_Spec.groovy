@@ -168,6 +168,74 @@ class Text_Render_Caching_Spec extends Specification
             ext.cachedTextEntryCount() == 1
     }
 
+    def 'A label\'s text width is cached too, ready a paint before the rasterised image.'()
+    {
+        reportInfo """
+            Rasterising `drawString` is only half the per-paint cost of a text
+            component. Before a look-and-feel draws a string it *measures* it –
+            `FontMetrics.stringWidth(text)` – to lay it out, clip it or centre it,
+            and that measurement builds a `TextLayout`, which becomes the dominant
+            cost once the pixels themselves are cached.
+
+            SwingTree therefore also serves that width from the *same* `text + font`
+            cache entry, as a second, lighter layer: the entry stores one advance
+            width alongside its rasterised image variants. The entry is created by
+            the first paint, so the width is filled and served from the **second**
+            paint onward – one paint *before* the image, which needs the usual
+            three-paint warm-up before it is promoted to a blittable image.
+
+            We can watch the two layers switch on in turn: nothing after one paint,
+            a cached *width* after two (`hasCachedTextWidth()`), and finally a cached
+            *image* too after three (`hasCachedText()`).
+        """
+        given : 'A plain label.'
+            var label = UI.label("Departure 14:25").get(JLabel)
+            var ext   = ComponentExtension.from(label)
+
+        when : 'We paint it once – this establishes the cache entry.'
+            paint(label)
+        then : 'Neither layer is populated yet (the width was measured before the entry existed).'
+            !ext.hasCachedTextWidth()
+            !ext.hasCachedText()
+
+        when : 'We paint it a second time.'
+            paint(label)
+        then : 'The width layer is now populated and served...'
+            ext.hasCachedTextWidth()
+        and  : '...while the image is still warming up.'
+            !ext.hasCachedText()
+
+        when : 'We paint it a third time to complete the image warm-up.'
+            paint(label)
+        then : 'Now both layers are cached, sharing one entry.'
+            ext.hasCachedTextWidth()
+            ext.hasCachedText()
+            ext.cachedTextEntryCount() == 1
+            ComponentExtension.totalTextCacheSize() == 1
+    }
+
+    def 'With text caching turned off, neither image nor width is ever cached.'()
+    {
+        reportInfo """
+            The same single switch that disables image caching also disables the
+            `stringWidth` interception: with text caching off SwingTree never
+            installs its proxy at all, so no width is measured into the cache either.
+        """
+        given : 'Text caching is switched off.'
+            SwingTree.get().setTextCachingEnabled(false)
+        and : 'An ordinary label.'
+            var label = UI.label("Departure 14:25").get(JLabel)
+            var ext   = ComponentExtension.from(label)
+
+        when : 'We paint it several times.'
+            5.times { paint(label) }
+
+        then : 'Neither a cached image nor a cached width was ever produced.'
+            !ext.hasCachedText()
+            !ext.hasCachedTextWidth()
+            ComponentExtension.totalTextCacheSize() == 0
+    }
+
     def 'With text caching turned off, nothing is ever cached.'()
     {
         reportInfo """
@@ -233,16 +301,22 @@ class Text_Render_Caching_Spec extends Specification
             ComponentExtension.totalTextCacheSize() == 1
     }
 
-    def 'Text that looks different is cached separately, even for the same string.'()
+    def 'Text that looks different shares one entry but is rendered as separate variants.'()
     {
         reportInfo """
-            The cache key is the full visual appearance, not just the
-            characters. Two labels showing the same string but in a different
-            colour (or font, or at a different HiDPI scale) are genuinely
-            different pixels, so they get separate cache entries. This is what
-            guarantees the cache can never blit the wrong-looking text.
+            The cache is two-layered. The **outer** key is coarse – just the string
+            and its font – so two labels showing the same string in the same font
+            meet at a *single* entry. The pixel-affecting differences (colour,
+            antialiasing, LCD contrast, fractional metrics, HiDPI scale) are resolved
+            *inside* that entry, which keeps a small set of rendered **variants**.
+
+            This is what lets the width layer (which does not depend on colour) be
+            shared, while still guaranteeing the image layer can never blit the
+            wrong-looking text: a red and a blue label sharing one entry each get
+            their own rendered variant. We observe exactly that – one entry, two
+            variants, both blittable.
         """
-        given : 'Two labels with the same text but different foreground colours.'
+        given : 'Two labels with the same text and font but different foreground colours.'
             var red  = UI.label("Total").get(JLabel)
             var blue = UI.label("Total").get(JLabel)
             red.setForeground(Color.RED)
@@ -252,11 +326,14 @@ class Text_Render_Caching_Spec extends Specification
             3.times { paint(red)  }
             3.times { paint(blue) }
 
-        then : 'Both are cached...'
+        then : 'Both have a blittable image...'
             ComponentExtension.from(red).hasCachedText()
             ComponentExtension.from(blue).hasCachedText()
-        and  : '...but as two distinct entries, because their appearance differs.'
-            ComponentExtension.totalTextCacheSize() == 2
+        and  : '...they share a single coarse (text + font) entry...'
+            ComponentExtension.totalTextCacheSize() == 1
+        and  : '...but that entry holds two distinct rendered variants, one per colour.'
+            ComponentExtension.from(red).renderedTextVariantCount()  == 2
+            ComponentExtension.from(blue).renderedTextVariantCount() == 2
     }
 
     def 'A component that draws no text never populates the cache.'()
@@ -468,5 +545,213 @@ class Text_Render_Caching_Spec extends Specification
         then : 'Its text is cached, just like a label\'s.'
             ext.hasCachedText()
             ext.cachedTextEntryCount() >= 1
+    }
+
+    def 'Buttons get the cheaper width layer as well.'()
+    {
+        reportInfo """
+            The width layer is not label-specific either. Any SwingTree leaf text
+            component that a look-and-feel lays out via `component.getFontMetrics(..)`
+            – labels, buttons, checkboxes, radio buttons, menu items – gets its
+            `stringWidth` served from the cache once its entry is established.
+        """
+        given : 'A plain button.'
+            var button = UI.button("Save").get(JButton)
+            var ext    = ComponentExtension.from(button)
+
+        when : 'We paint it a couple of times so the entry and its width are established.'
+            2.times { paint(button) }
+
+        then : 'Its text width is now served from the cache, sharing the one entry.'
+            ext.hasCachedTextWidth()
+            ComponentExtension.totalTextCacheSize() == 1
+    }
+
+    def 'The cached width is colour-independent: recolouring adds a render variant but keeps the width.'()
+    {
+        reportInfo """
+            A string's advance width depends on its glyphs and font, never on its
+            colour. That is exactly why the two layers split the way they do: the
+            width lives once on the coarse `text + font` entry, while colour only
+            multiplies the *image* variants inside it.
+
+            So when a label is recoloured, its cached width is untouched – no
+            re-measuring, no second entry – and only a new rendered variant appears
+            for the new colour.
+        """
+        given : 'A fully warmed-up label.'
+            var label = UI.label("Balance").get(JLabel)
+            var ext   = ComponentExtension.from(label)
+            3.times { paint(label) }
+        expect : 'It has a cached width and image, one entry, one rendered variant.'
+            ext.hasCachedTextWidth()
+            ext.hasCachedText()
+            ComponentExtension.totalTextCacheSize()  == 1
+            ext.renderedTextVariantCount()           == 1
+
+        when : 'We change only its colour and warm that up.'
+            label.setForeground(Color.RED)
+            3.times { paint(label) }
+
+        then : 'The width is still cached on the very same single entry...'
+            ext.hasCachedTextWidth()
+            ComponentExtension.totalTextCacheSize() == 1
+        and  : '...but a second rendered variant now exists for the new colour.'
+            ext.renderedTextVariantCount() == 2
+    }
+
+    def 'A second component reuses the shared width immediately, with no warm-up.'()
+    {
+        reportInfo """
+            Because the width sits on the shared coarse entry, the moment one
+            component has established it, every other component drawing the same
+            string in the same font gets that width served on its *first* paint –
+            it never has to measure the string itself.
+        """
+        given : 'A first label, fully warmed so its text+font entry carries a width.'
+            var first  = UI.label("Reuse me").get(JLabel)
+            3.times { paint(first) }
+            ComponentExtension.from(first).hasCachedTextWidth()
+
+        when : 'A second, identical label is painted just once.'
+            var second = UI.label("Reuse me").get(JLabel)
+            paint(second)
+
+        then : 'It already serves the width from the shared entry – no per-component warm-up.'
+            ComponentExtension.from(second).hasCachedTextWidth()
+        and  : 'And still just one entry backs both.'
+            ComponentExtension.totalTextCacheSize() == 1
+    }
+
+    def 'The same string in a different font is a different entry (font is part of the key).'()
+    {
+        reportInfo """
+            The coarse key is `text + font`, so while colour and the pixel-only
+            hints collapse into variants of one entry, a genuinely different *font*
+            is a genuinely different entry – its glyphs, and therefore its width and
+            its pixels, differ.
+        """
+        given : 'Two labels with the same string but different fonts.'
+            var small = UI.label("Zoom").get(JLabel)
+            var big   = UI.label("Zoom").get(JLabel)
+            big.setFont(big.getFont().deriveFont(28f))
+
+        when : 'We warm both of them up.'
+            3.times { paint(small) }
+            3.times { paint(big) }
+
+        then : 'They do not share: two distinct text+font entries exist.'
+            ComponentExtension.from(small).hasCachedText()
+            ComponentExtension.from(big).hasCachedText()
+            ComponentExtension.totalTextCacheSize() == 2
+    }
+
+    def 'A single string keeps only a bounded number of rendered variants.'()
+    {
+        reportInfo """
+            The rendered variants inside an entry live in a tiny fixed-size array,
+            not a growing map: a real UI shows a string in only a handful of
+            appearances (normal, selected, disabled, …). Once that small cap is
+            reached, any further appearance is simply drawn directly instead of
+            cached – it is never *wrong*, just not accelerated – so a pathological
+            component cycling through many colours can never blow up the cache.
+        """
+        given : 'One label we will repaint in many different colours.'
+            var label  = UI.label("Chameleon").get(JLabel)
+            var ext    = ComponentExtension.from(label)
+            var colours = [Color.RED, Color.GREEN, Color.BLUE, Color.ORANGE, Color.MAGENTA, Color.CYAN]
+
+        when : 'We paint it once in each of six distinct colours.'
+            colours.each { c -> label.setForeground(c); paint(label) }
+
+        then : 'It is still a single text+font entry...'
+            ComponentExtension.totalTextCacheSize() == 1
+        and  : '...whose rendered-variant count is capped well below the six colours we used.'
+            ext.renderedTextVariantCount() == 4
+            ext.renderedTextVariantCount() < colours.size()
+    }
+
+    def 'Caching never changes the measured width, it only accelerates it.'()
+    {
+        reportInfo """
+            The width layer is a transparent fast path: on a hit it returns the
+            exact value the component's own `FontMetrics` would have computed, and
+            on a miss it measures directly. We prove it by comparing the width a
+            fully warmed, cache-backed component reports against the width a plain,
+            un-cached Swing component reports for the same string and font – they
+            are identical.
+        """
+        given : 'A warmed-up SwingTree label (its width is now served from the cache).'
+            var text  = "Pixel-perfect 123"
+            var label = UI.label(text).get(JLabel)
+            3.times { paint(label) }
+            var font  = label.getFont()
+
+        when : 'We measure the string through the cache-backed metrics and through plain metrics.'
+            int cached = label.getFontMetrics(font).stringWidth(text)  // proxied -> cache lookup
+            int raw    = new JLabel().getFontMetrics(font).stringWidth(text) // plain Swing, no proxy
+
+        then : 'The cached width is exactly the true width.'
+            cached == raw
+    }
+
+    def 'Clearing the global cache drops both the image and the width layer.'()
+    {
+        reportInfo """
+            `clearTextCache()` empties the whole shared cache – images and widths
+            alike – and both simply repopulate on the next few paints. This is the
+            deterministic reset the other scenarios rely on in their setup.
+        """
+        given : 'A fully warmed-up label.'
+            var label = UI.label("Refresh").get(JLabel)
+            var ext   = ComponentExtension.from(label)
+            3.times { paint(label) }
+        expect : 'Both layers are populated.'
+            ext.hasCachedText()
+            ext.hasCachedTextWidth()
+            ComponentExtension.totalTextCacheSize() == 1
+
+        when : 'We clear the global text cache.'
+            ComponentExtension.clearTextCache()
+
+        then : 'Both layers are gone.'
+            !ext.hasCachedText()
+            !ext.hasCachedTextWidth()
+            ComponentExtension.totalTextCacheSize() == 0
+
+        when : 'We paint it again to warm it back up.'
+            3.times { paint(label) }
+
+        then : 'Both layers repopulate.'
+            ext.hasCachedText()
+            ext.hasCachedTextWidth()
+            ComponentExtension.totalTextCacheSize() == 1
+    }
+
+    def 'With a zero memory budget, neither the image nor the width layer engages.'()
+    {
+        reportInfo """
+            The zero-budget back-off covers both layers: with nothing to spend, no
+            entry is ever created, so there is nothing for the width layer to attach
+            to either – every paint draws directly and every measure falls straight
+            through to the real `FontMetrics`.
+        """
+        given : 'We pin the shared cache budget to zero.'
+            swingtree.style.CacheBudget.UNITS_OVERRIDE = 0
+        and : 'An ordinary label.'
+            var label = UI.label("Constrained").get(JLabel)
+            var ext   = ComponentExtension.from(label)
+
+        when : 'We paint it well past the warm-up threshold.'
+            5.times { paint(label) }
+
+        then : 'Neither layer engaged and the global cache stayed empty.'
+            !ext.hasCachedText()
+            !ext.hasCachedTextWidth()
+            ext.renderedTextVariantCount() == 0
+            ComponentExtension.totalTextCacheSize() == 0
+
+        cleanup : 'Restore the generous, deterministic budget.'
+            swingtree.style.CacheBudget.UNITS_OVERRIDE = 10
     }
 }
