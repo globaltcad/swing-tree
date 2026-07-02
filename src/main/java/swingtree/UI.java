@@ -3708,6 +3708,26 @@ public final class UI extends UIFactoryMethods
         }
 
         /**
+         *  Converts this font to a {@link java.awt.Font} <b>without color attributes</b> —
+         *  the variant intended for fonts you install on components yourself. The quirk this
+         *  exists for: AWT fonts describe glyph geometry, while text color natively belongs to
+         *  the component's <em>foreground</em> property. A color embedded in the font (which
+         *  {@link #toAwtFont()} does, faithfully to this font's configuration) flips
+         *  {@link java.awt.Font#hasLayoutAttributes()} — putting every text measurement and
+         *  drawing of that font on the JDK's expensive {@code TextLayout} path — and overrides
+         *  the look-and-feel's disabled/selected state colors. Use this method plus
+         *  {@code component.setForeground(color)} to get the same look through Swing's native
+         *  channels (which is what SwingTree's style engine does for styled components).
+         *  Also scaled according to the current DPI settings, like {@link #toAwtFont()}.
+         *
+         *  @return The {@link java.awt.Font} representing this font, guaranteed free of
+         *          color attributes.
+         */
+        public java.awt.Font toAwtFontWithoutColor() {
+            return SwingTree.get().scale(this.conf.toAwtFontWithoutColor());
+        }
+
+        /**
          *  Returns the configuration of this font which
          *  encapsulates all properties of the font and can
          *  be used to convert to a {@link java.awt.Font} object
