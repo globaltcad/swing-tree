@@ -103,25 +103,17 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
     private final float[]              _fractions;
     private final AtomicReference<@Nullable Integer> _hashCodeCache = new AtomicReference<>();
     private final LazyRef<Pooled<NoiseConf>> _renderCacheKey = new LazyRef<>(this, n -> {
+        if ( n.offset().equals(Offset.none()) )
+            return new Pooled<>(n);
+        else
+            return new Pooled<>(n.offset(0,0)).intern();
         /*
             Caching in SwingTree is based on weak hash maps whose entries
             are being kept alive by pooled objects (shared immutable value objects).
             When rendering, the offset of a noise gradient may be animated or multiple
             components exist which have noise gradient textures with different offsets.
             We want these to share the same base conf and a common cache!
-
-            The key MUST be interned in *both* branches: the offset-stripped value of an
-            offset-none conf and of an animated, offset-bearing sibling are equal
-            (Offset.none() == Offset.of(0,0)), so they share one weak-map entry. Interning
-            makes the map hold the single canonical key that *every* sharer references
-            strongly via this field; if the offset-none branch returned an un-interned key,
-            the entry would be held by only one sharer and could be collected out from under
-            the others the moment that one sharer was dropped — defeating the shared cache.
         */
-        if ( n.offset().equals(Offset.none()) )
-            return new Pooled<>(n).intern();              // already offset-free; intern in place (no realloc)
-        else
-            return new Pooled<>(n.offset(0,0)).intern();  // strip the (possibly animated) offset, then intern
     });
 
 
