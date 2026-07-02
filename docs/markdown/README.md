@@ -65,7 +65,6 @@ fans out from there.
 
 | Guide | What it covers |
 |---|---|
-| [Snappy Rendering](./Snappy-Rendering.md) | How SwingTree keeps resizes and animations smooth where plain Swing stutters — the internal render caches, and the one `CacheMode` knob that tunes the memory ⇄ CPU trade-off (and scales it to the machine's RAM). |
 | [HiDPI Scaling](./HiDPI-Scaling.md) | "Developer pixels" vs "component pixels", how SwingTree scales inputs up and outputs down for you, the scaling-aware delegate accessors, and the double-scaling trap behind the deprecated `component()`. |
 | [Building a Look-and-Feel](./Building-A-Look-And-Feel.md) | An onramp for advanced users who want to ship a custom `LookAndFeel` backed by the SwingTree style engine — the `SwingTreeStyledComponentUI` contract, the three styling layers, and what the engine handles for you vs. what you implement. |
 
@@ -99,9 +98,6 @@ graph TD;
     C --> HDPI[HiDPI Scaling]
     SS --> HDPI
     EH --> HDPI
-    C --> SR[Snappy Rendering]
-    SS --> SR
-    ASA --> SR
     SS --> LAF[Building a Look-and-Feel]
     HDPI --> LAF
 ```

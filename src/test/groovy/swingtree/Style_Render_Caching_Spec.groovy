@@ -42,9 +42,9 @@ import java.awt.Color
     survive aggressive internal refactors.
 
     A note on the single fixture poke we still do: the `setupSpec` block
-    pins `CacheBudget.UNITS_OVERRIDE` to a deterministic value. That global
-    controls how eagerly small images get allocated and is otherwise derived
-    from the configured cache mode and system RAM, which
+    pins `LayerCache.CACHE_AGGRESSIVENESS_OVERRIDE` to a deterministic
+    value. That global controls how eagerly small images get allocated
+    and is otherwise derived from system RAM at class-load time, which
     would make tests flaky across CI runners. Pinning it removes the
     *only* coupling and is purely a fixture concern – nothing in the
     actual scenarios below speaks to internal classes.
@@ -55,11 +55,11 @@ class Style_Render_Caching_Spec extends Specification
 {
     def setupSpec() {
         // Pin caching to a deterministic level, see narrative above.
-        swingtree.style.CacheBudget.UNITS_OVERRIDE = 10
+        swingtree.style.LayerCache.CACHE_AGGRESSIVENESS_OVERRIDE = 10
     }
 
     def cleanupSpec() {
-        swingtree.style.CacheBudget.UNITS_OVERRIDE = -1
+        swingtree.style.LayerCache.CACHE_AGGRESSIVENESS_OVERRIDE = -1
     }
 
     def setup() {

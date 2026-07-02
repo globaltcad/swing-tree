@@ -604,32 +604,7 @@ public final class ComponentExtension<C extends JComponent>
      *  deterministic starting point.
      */
     public static void clearTextCache() {
-        TextRenderCache.clearGlobalCache();
-    }
-
-    /**
-     *  The single bridge through which the {@code swingtree} package tells the rendering
-     *  caches in the {@code swingtree.style} package that the library configuration may have
-     *  changed (see {@link SwingTree#setCacheMode(swingtree.SwingTreeInitConfig.CacheMode)}).
-     *  It does two things, in this order:
-     *  <ol>
-     *      <li>marks the shared {@link CacheBudget} as needing to re-resolve the current
-     *          {@link swingtree.SwingTreeInitConfig.CacheMode} (on the next paint), and</li>
-     *      <li>empties every global rendering cache — style layers, rasterised text, noise
-     *          tiles, shadow gradients and text layouts — so that memory is released
-     *          <em>immediately</em> rather than only as old entries are evicted.</li>
-     *  </ol>
-     *  Each cache then repopulates lazily under the new budget. This is deliberately
-     *  recursion-safe: it never reads {@link SwingTree#get()} itself (so it is safe to call
-     *  while the {@link SwingTree} singleton is still being constructed); the budget is only
-     *  resolved later, lazily, from the painting thread.
-     */
-    public static void updateAllCachesFromLibraryConfig() {
-        CacheBudget.markUnresolved();
-        TextRenderCache.clearGlobalCache();
-        LayerCache.clearGlobalCache();
-        StyleRenderer.clearGlobalRenderCaches();
-        TextLayoutEngine.clearGlobalCaches();
+        TextRenderCache.clearForTesting();
     }
 
     /**

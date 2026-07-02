@@ -65,17 +65,18 @@ import java.awt.Color
 class Text_Render_Caching_Spec extends Specification
 {
     def setupSpec() {
-        // The text cache shares the unified memory budget (`CacheBudget`, scaled by the
-        // configured cache mode and system RAM), which would otherwise make the
-        // size-related scenarios flaky across CI runners. We pin it to a generous, deterministic
+        // The text cache shares the style cache's memory budget
+        // (`LayerCache.DYNAMIC_CACHE_AGGRESSIVENESS()`), which is otherwise derived
+        // from system RAM at class-load time and would make the size-related
+        // scenarios flaky across CI runners. We pin it to a generous, deterministic
         // value so that none of the *ordinary* scenarios below ever brush against
         // the cap. The one scenario that deliberately exercises the cap overrides
         // this locally and restores it again.
-        swingtree.style.CacheBudget.UNITS_OVERRIDE = 10
+        swingtree.style.LayerCache.CACHE_AGGRESSIVENESS_OVERRIDE = 10
     }
 
     def cleanupSpec() {
-        swingtree.style.CacheBudget.UNITS_OVERRIDE = -1
+        swingtree.style.LayerCache.CACHE_AGGRESSIVENESS_OVERRIDE = -1
     }
 
     def setup() {
@@ -433,7 +434,7 @@ class Text_Render_Caching_Spec extends Specification
             confirm that no amount of repainting populates the cache.
         """
         given : 'We pin the shared cache memory budget to zero (a maximally constrained machine).'
-            swingtree.style.CacheBudget.UNITS_OVERRIDE = 0
+            swingtree.style.LayerCache.CACHE_AGGRESSIVENESS_OVERRIDE = 0
         and : 'An ordinary label that would normally be cached after warm-up.'
             var label = UI.label("Departure 14:25").get(JLabel)
             var ext   = ComponentExtension.from(label)
@@ -447,7 +448,7 @@ class Text_Render_Caching_Spec extends Specification
             ComponentExtension.totalTextCacheSize() == 0
 
         cleanup : 'Restore the generous, deterministic budget for the remaining scenarios.'
-            swingtree.style.CacheBudget.UNITS_OVERRIDE = 10
+            swingtree.style.LayerCache.CACHE_AGGRESSIVENESS_OVERRIDE = 10
     }
 
     def 'Buttons are cached the same way labels are.'()

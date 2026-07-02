@@ -160,10 +160,6 @@ public final class SwingTree
         _config = _resolveConfiguration(configurator);
         _uiScale = new LazyRef<>( () -> new UiScale(_config) );
         _establishMainFont(_config);
-        // Let the rendering caches pick up the configured cache mode and start from a clean
-        // slate matching it. This is recursion-safe: it never reads SwingTree.get() (which is
-        // mid-construction here); the budget is resolved later, lazily, from the paint thread.
-        swingtree.style.ComponentExtension.updateAllCachesFromLibraryConfig();
     }
 
     private SwingTreeInitConfig _resolveConfiguration( SwingTreeConfigurator configurator ) {
@@ -314,22 +310,6 @@ public final class SwingTree
      */
     public boolean isTextCachingEnabled() {
         return this._config.isTextCachingEnabled();
-    }
-
-    /**
-     *  Returns the {@link SwingTreeInitConfig.CacheMode} that governs how aggressively
-     *  SwingTree's internal rendering caches (style layers, rasterised text, noise tiles,
-     *  shadow gradients and text layouts) trade memory for CPU time. The mode is combined
-     *  with the amount of system RAM to derive a concrete, partitioned memory budget, so the
-     *  same mode scales sensibly across machines. Defaults to
-     *  {@link SwingTreeInitConfig.CacheMode#BALANCED}.
-     *
-     * @return The current cache mode.
-     * @see #setCacheMode(SwingTreeInitConfig.CacheMode)
-     * @see SwingTreeInitConfig#withCacheMode(SwingTreeInitConfig.CacheMode)
-     */
-    public SwingTreeInitConfig.CacheMode getCacheMode() {
-        return this._config.cacheMode();
     }
 
     /**
@@ -705,20 +685,6 @@ public final class SwingTree
         if ( !enabled )
             swingtree.style.ComponentExtension.clearTextCache();
         _config = _config.withTextCaching(enabled);
-    }
-
-    /**
-     *  Selects how aggressively SwingTree's rendering caches trade memory for CPU time, at
-     *  runtime (see {@link #getCacheMode()} and {@link SwingTreeInitConfig#withCacheMode(SwingTreeInitConfig.CacheMode)}).
-     *  Lowering the mode (e.g. to {@link SwingTreeInitConfig.CacheMode#DISABLED}) takes
-     *  effect immediately: every rendering cache is emptied so the freed memory is released
-     *  right away, and subsequent paints repopulate the caches under the new budget.
-     *
-     * @param cacheMode The new cache mode.
-     */
-    public void setCacheMode( SwingTreeInitConfig.CacheMode cacheMode ) {
-        _config = _config.withCacheMode(Objects.requireNonNull(cacheMode));
-        swingtree.style.ComponentExtension.updateAllCachesFromLibraryConfig();
     }
 
 	/**
