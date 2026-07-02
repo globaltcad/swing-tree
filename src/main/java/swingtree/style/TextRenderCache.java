@@ -171,13 +171,13 @@ final class TextRenderCache {
         if ( !SwingUtilities.isEventDispatchThread() )
             return false;
 
-        // Rule 0: Is caching enabled in SwingTree
-        if ( SwingTree.get().getCacheMode() == SwingTreeInitConfig.CacheMode.DISABLED )
+        // Rule 0: text caching must be switched on at all (cache mode, toggle, non-zero budget).
+        if ( !isTextCachingActive() )
             return false;
 
-        // Rule 1: global switch + per-class self-healing opt-out (keyed by component class).
+        // Rule 1: per-class self-healing opt-out (keyed by component class).
         final Class<?> componentClass = c.getClass();
-        if ( !SwingTree.get().isTextCachingEnabled() || UNSAFE.contains(componentClass) )
+        if ( UNSAFE.contains(componentClass) )
             return false;
 
         // Exception to rule 3: a combo box's text is painted by a propagated renderer,
@@ -212,14 +212,19 @@ final class TextRenderCache {
     /** Permanently disables proxying for a component class after its paint failed once. */
     static void markUnsafe(Class<?> componentClass) { UNSAFE.add(componentClass); }
 
-    /** Whether text caching is switched on at all (library cache mode + the text-caching toggle).
-     *  Gates the {@link CachingTextGraphics2D} FontMetrics proxy that SwingTree's own text
-     *  components install via {@link ComponentExtension#getFontMetricsCacheBacked(FontMetrics)};
-     *  when off, {@code getFontMetrics} returns the real metrics untouched. */
+    /** Whether text caching is switched on at all: library cache mode, the text-caching toggle,
+     *  and a non-zero memory budget (a budget of {@code 0} opts out of text caching entirely, so
+     *  installing any proxy would be pure overhead — {@link #paintString} could never admit an
+     *  entry anyway). Gates both the graphics proxy ({@link #isProxyable(JComponent)}) and the
+     *  FontMetrics proxy SwingTree's own text components install via
+     *  {@link ComponentExtension#getFontMetricsCacheBacked(FontMetrics)}; when off,
+     *  {@code getFontMetrics} returns the real metrics untouched. */
     static boolean isTextCachingActive() {
         if ( SwingTree.get().getCacheMode() == SwingTreeInitConfig.CacheMode.DISABLED )
             return false;
-        return SwingTree.get().isTextCachingEnabled();
+        if ( !SwingTree.get().isTextCachingEnabled() )
+            return false;
+        return maxEntries() > 0;
     }
 
     // ─────────────────────────── introspection (for tests / living documentation) ──

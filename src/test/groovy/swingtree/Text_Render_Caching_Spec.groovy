@@ -776,6 +776,11 @@ class Text_Render_Caching_Spec extends Specification
             entry is ever created, so there is nothing for the width layer to attach
             to either – every paint draws directly and every measure falls straight
             through to the real `FontMetrics`.
+
+            And it goes further than merely never *hitting*: with a zero budget the
+            metrics proxy is not even installed, so a constrained device pays no
+            per-call proxy or probe overhead at all – `getFontMetrics` hands out
+            the plain platform metrics, exactly as in `DISABLED` cache mode.
         """
         given : 'We pin the shared cache budget to zero.'
             swingtree.style.CacheBudget.UNITS_OVERRIDE = 0
@@ -791,6 +796,8 @@ class Text_Render_Caching_Spec extends Specification
             !ext.hasCachedTextWidth()
             ext.renderedTextVariantCount() == 0
             ComponentExtension.totalTextCacheSize() == 0
+        and : 'The metrics proxy was never even installed – the label hands out the plain platform metrics.'
+            !label.getFontMetrics(label.getFont()).getClass().getName().startsWith("swingtree")
 
         cleanup : 'Restore the generous, deterministic budget.'
             swingtree.style.CacheBudget.UNITS_OVERRIDE = 10
