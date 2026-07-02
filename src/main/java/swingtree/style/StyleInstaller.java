@@ -289,7 +289,7 @@ final class StyleInstaller<C extends JComponent>
                     owner.setFont(_initialFont);
                     _initialFont = null;
                 }
-                _restoreForegroundIfFontColorWasInstalled(owner);
+                _restoreForegroundIfFontColorWasInstalled(owner, newStyle);
                 _restoreStyleOwnedSizesOf(owner);
 
                 return _updateEngine(owner, engine, newStyle);
@@ -791,7 +791,7 @@ final class StyleInstaller<C extends JComponent>
                 owner.setFont(_initialFont);
                 _initialFont = null;
             }
-            _restoreForegroundIfFontColorWasInstalled(owner);
+            _restoreForegroundIfFontColorWasInstalled(owner, styleConf);
             return;
         } else if ( _initialFont == null ) {
             _initialFont = owner.getFont();
@@ -828,16 +828,26 @@ final class StyleInstaller<C extends JComponent>
                 owner.setForeground(solidFontColor);
         }
         else
-            _restoreForegroundIfFontColorWasInstalled(owner);
+            _restoreForegroundIfFontColorWasInstalled(owner, styleConf);
 
         _installLayoutInfoFromFontConf(fontConf, owner);
     }
 
-    private void _restoreForegroundIfFontColorWasInstalled( C owner ) {
+    /** Ends the solid font color's ownership of the foreground property. If the current style
+     *  still defines a base 'foregroundColor', that base color — already applied earlier in this
+     *  very installation cycle by _applyGenericBaseStyleTo — takes over the channel, so restoring
+     *  the remembered pre-style value here would wrongly override it; the memory is just dropped
+     *  (matching the base color's own set-only semantics). Only when nothing else claims the
+     *  channel is the pre-style foreground actually restored. */
+    private void _restoreForegroundIfFontColorWasInstalled( C owner, StyleConf styleConf ) {
         if ( _initialForeground != null ) {
-            if ( !Objects.equals(owner.getForeground(), _initialForeground) )
-                owner.setForeground(_initialForeground);
-            _initialForeground = null;
+            if ( styleConf.base().foregroundColor().isPresent() )
+                _initialForeground = null; // the base style owns the foreground now
+            else {
+                if ( !Objects.equals(owner.getForeground(), _initialForeground) )
+                    owner.setForeground(_initialForeground);
+                _initialForeground = null;
+            }
         }
     }
 

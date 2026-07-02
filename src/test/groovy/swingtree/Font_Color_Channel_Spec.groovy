@@ -230,6 +230,45 @@ class Font_Color_Channel_Spec extends Specification
             label.getFont().getAttributes().get(TextAttribute.UNDERLINE) == TextAttribute.UNDERLINE_ON
     }
 
+    def 'When the font color goes away but a base foreground color remains, the base color takes over.'(
+        String description, Closure<Object> withdrawnFontStyle
+    ) {
+        reportInfo """
+            Regression guard for an installation-cycle ordering bug: within one style
+            pass, the base 'foregroundColor' is applied BEFORE the font styles. When a
+            previously active solid font color is withdrawn while a base foreground
+            color remains, the engine used to restore the remembered pre-style
+            foreground AFTER the base color had already been applied — silently
+            overriding it in the same cycle. The contract: once the font color lets go
+            of the channel, a present base color owns it (no stale restore), and the
+            pre-style value is only restored when nothing else claims the channel.
+            Both withdrawal shapes are covered: the font style losing just its color,
+            and the font style disappearing entirely.
+        """
+        given : 'A label styled with a base foreground color AND a switchable font color.'
+            var useFontColor = Var.of(true)
+            var label = UI.label("Handover")
+                          .withStyle({ it
+                              .foregroundColor(Color.BLUE)
+                              .componentFont(f -> useFontColor.get() ? f.color(Color.RED) : withdrawnFontStyle(f))
+                          })
+                          .get(JLabel)
+            paint(label)
+        expect : 'While active, the font color wins the channel.'
+            label.getForeground() == Color.RED
+
+        when : 'The font color is withdrawn while the base color remains.'
+            useFontColor.set(false)
+            paint(label)
+        then : 'The base foreground color owns the channel now — no stale restore overrides it.'
+            label.getForeground() == Color.BLUE
+
+        where :
+            description                        | withdrawnFontStyle
+            "font style keeps other properties"| { f -> f.size(20) }
+            "font style disappears entirely"   | { f -> f }
+    }
+
     // ── helpers ──────────────────────────────────────────────────────────────
 
     /** Sizes the component to its preferred size and paints it, returning the image. */
