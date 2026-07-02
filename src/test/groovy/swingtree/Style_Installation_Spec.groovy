@@ -671,20 +671,20 @@ class Style_Installation_Spec extends Specification
              false      | { it.parentFilter( conf -> conf.kernel(Size.of(2, 1), 1,0) ) }
 
              true       | { it.fontColor("oak").fontBackgroundColor("orange") }
-             true       | { it.backgroundColor(Color.BLACK).fontColor("oak") }
+             false      | { it.backgroundColor(Color.BLACK).fontColor("oak") }  // solid font color -> foreground channel, font untouched! (see Font_Color_Channel_Spec)
              true       | { it.foregroundColor(Color.BLUE).fontSize(42) }
              true       | { it.cursor(UI.Cursor.HAND).fontSize(42) }
              true       | { it.margin(5).fontWeight(73).fontColor("oak") }
              true       | { it.border(2, "black").fontBackgroundColor("orange") }
              true       | { it.margin(5).border(3, "red").cursor(UI.Cursor.CROSS).fontBackgroundColor("orange") }
-             true       | { it.shadow(UI.Layer.FOREGROUND, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)).fontColor("oak") }
-             true       | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)).fontColor("oak") }
+             false      | { it.shadow(UI.Layer.FOREGROUND, "myShadow", conf->conf.color("red").spreadRadius(1).blurRadius(5)).fontColor("oak") }  // solid font color -> foreground channel, font untouched! (see Font_Color_Channel_Spec)
+             false      | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)).fontColor("oak") }  // solid font color -> foreground channel, font untouched! (see Font_Color_Channel_Spec)
              true       | { it.gradient(UI.Layer.BACKGROUND, "myGradient", conf->conf.colors([] as Color[])).fontSize(42) }
-             true       | { it.gradient(UI.Layer.BORDER, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)).fontColor("oak") }
-             true       | { it.noise(UI.Layer.FOREGROUND, "myNoise", conf->conf.rotation(102).colors(Color.RED, Color.BLUE)).fontColor("oak") }
-             true       | { it.painter(UI.Layer.BACKGROUND, "myPainter", g2d -> {}).fontColor("oak") }
+             false      | { it.gradient(UI.Layer.BORDER, "myGradient", conf->conf.colors(Color.RED, Color.BLUE)).fontColor("oak") }  // solid font color -> foreground channel, font untouched! (see Font_Color_Channel_Spec)
+             false      | { it.noise(UI.Layer.FOREGROUND, "myNoise", conf->conf.rotation(102).colors(Color.RED, Color.BLUE)).fontColor("oak") }  // solid font color -> foreground channel, font untouched! (see Font_Color_Channel_Spec)
+             false      | { it.painter(UI.Layer.BACKGROUND, "myPainter", g2d -> {}).fontColor("oak") }  // solid font color -> foreground channel, font untouched! (see Font_Color_Channel_Spec)
              true       | { it.parentFilter( conf -> conf.kernel(Size.of(2, 1), 1,0) ).fontBackgroundColor("orange") }
-             true       | { it.painter(UI.Layer.BORDER, "myPainter", g2d -> {}).fontColor("oak") }
+             false      | { it.painter(UI.Layer.BORDER, "myPainter", g2d -> {}).fontColor("oak") }  // solid font color -> foreground channel, font untouched! (see Font_Color_Channel_Spec)
 
              true       | { it.parentFilter( conf -> conf.blur(0.0) ).fontWeight(73) }
              true       | { it.padding(5).margin(5).fontWeight(73) }

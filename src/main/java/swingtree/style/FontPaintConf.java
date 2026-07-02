@@ -134,6 +134,21 @@ final class FontPaintConf
         return new FontPaint(this, new WeakReference<>(component));
     }
 
+    /** The one plain, geometry-independent {@link Color} this conf consists of, or {@code null}
+     *  if it is empty or needs the paint machinery (custom paint, noise, gradient). A solid
+     *  color is special because it is the only font paint that can be rendered through the
+     *  component <em>foreground</em> channel instead of a {@code TextAttribute.FOREGROUND}
+     *  font attribute — see the color-channel documentation on {@link FontConf}. */
+    @Nullable Color solidColor() {
+        if ( _noise == null && _gradient == null ) {
+            if ( _paint == null )
+                return _color;
+            if ( _color == null && _paint instanceof Color )
+                return (Color) _paint; // a Color supplied through the generic paint API is still just a solid color
+        }
+        return null;
+    }
+
     public boolean representsColor( @Nullable Color color ) {
         return Objects.equals(color, _color) &&
                 _paint    == null &&

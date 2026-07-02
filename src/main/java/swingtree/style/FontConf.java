@@ -167,6 +167,28 @@ import java.util.Optional;
  *  This means that you can not modify a font style instance directly, but you can
  *  easily create a modified copy of it by calling one of the wither-like methods.
  *
+ *  <h2>Where the font color lives — read this before touching the color code!</h2>
+ *  This config has a {@link #color(java.awt.Color) color}, yet the font it derives for a
+ *  <b>styled component</b> deliberately does <b>not</b> carry that color — do not "fix" that!
+ *  In AWT's model a {@link java.awt.Font} describes glyph geometry only; text color belongs
+ *  to the component's <em>foreground</em> property, which is the channel every look-and-feel
+ *  actually consults when painting text. A color <em>can</em> be embedded in a font (as
+ *  {@code TextAttribute.FOREGROUND}), but doing so has two severe consequences:
+ *  <ol>
+ *      <li>it flips {@link java.awt.Font#hasLayoutAttributes()}, which makes the JDK build a
+ *          {@code TextLayout} for <b>every</b> {@code stringWidth} and {@code drawString} —
+ *          benchmarked as the dominant text cost of heavily styled UIs; and</li>
+ *      <li>it silently overrides the look-and-feel's <em>state</em> colors — disabled or
+ *          selected text keeps the embedded color instead of graying out properly.</li>
+ *  </ol>
+ *  Therefore: a <b>solid</b> font color is routed through {@code component.setForeground(..)}
+ *  by the {@link StyleInstaller} (see {@link #createDerivedWithoutSolidColorFrom(Font, JComponent)}
+ *  and {@link #solidColor()}), while gradient/noise/custom paints — which no foreground channel
+ *  can express — stay in the font as attributes and knowingly pay the {@code TextLayout} price.
+ *  The context-free conversions behave accordingly: {@link #toAwtFont()} is full-fidelity
+ *  (color included, cost documented), {@link #toAwtFontWithoutColor()} is the
+ *  component-installation variant.
+ *
  * @author Daniel Nepp
  */
 @Immutable
@@ -1117,6 +1139,18 @@ public final class FontConf
     /**
      * Creates a new {@link Font} instance based on this font config,
      * using the default system font as the base font.
+     *  <p>
+     *  <b>This conversion is full-fidelity where possible:</b> a solid font color is included
+     *  as a {@code TextAttribute.FOREGROUND} attribute, so the returned font really renders in
+     *  that color. Be aware of what that means in AWT: any color attribute flips
+     *  {@link java.awt.Font#hasLayoutAttributes()}, which makes the JDK build a
+     *  {@code TextLayout} for <em>every</em> {@code stringWidth} and {@code drawString} of the
+     *  font (expensive), and the attribute color overrides whatever color the look-and-feel
+     *  chooses (including disabled/selected state colors). If you intend to install the font
+     *  on a component, prefer {@link #toAwtFontWithoutColor()} plus
+     *  {@code component.setForeground(color)} — or simply let the style engine do exactly that
+     *  for you. Gradient/noise font paints depend on component geometry and cannot be included
+     *  in a context-free conversion like this.
      *
      * @return A new {@link Font} instance based on this font config.
      */
@@ -1133,8 +1167,53 @@ public final class FontConf
                 .orElse(defaultFont);
     }
 
-    Optional<Font> createDerivedFrom( Font existingFont, JComponent component ) {
+    /**
+     *  Converts this font config to an AWT font <b>without any color attributes</b> —
+     *  the variant of {@link #toAwtFont()} designed for fonts that will be installed on
+     *  components. Here is the quirk this exists for: in AWT's model a {@code Font}
+     *  describes glyph geometry only, and text color belongs to the <em>foreground</em>
+     *  property (that is why {@code setForeground} exists). Colors <em>can</em> be smuggled
+     *  into a font as {@code TextAttribute.FOREGROUND}/{@code BACKGROUND}, but that flips
+     *  {@link java.awt.Font#hasLayoutAttributes()}, putting every measure and draw of the
+     *  font on the expensive {@code TextLayout} path and silently overriding the
+     *  look-and-feel's state colors (disabled text stays colored). So: use this method to
+     *  get the geometric font, and apply this config's {@link #color(java.awt.Color) color}
+     *  via {@code component.setForeground(..)} — which is precisely what SwingTree's style
+     *  engine does when it installs styled fonts.
+     *
+     * @return A new {@link Font} like {@link #toAwtFont()}, but guaranteed to carry no
+     *         color attributes (its {@code hasLayoutAttributes()} is not flipped by color).
+     */
+    public java.awt.Font toAwtFontWithoutColor() {
+        java.awt.Font full = toAwtFont();
+        Map<TextAttribute, Object> strippedColors = new HashMap<>();
+        strippedColors.put(TextAttribute.FOREGROUND, null);
+        strippedColors.put(TextAttribute.BACKGROUND, null);
+        return full.deriveFont(strippedColors);
+    }
+
+    /**
+     *  Derives the font to be installed on a styled component — <b>deliberately without a
+     *  solid font color</b>. A plain color placed into a font (as
+     *  {@code TextAttribute.FOREGROUND}) flips {@link Font#hasLayoutAttributes()}, which makes
+     *  the JDK route every {@code stringWidth} <em>and</em> every {@code drawString} of that
+     *  component through a freshly built {@code TextLayout} — measured to be the dominant text
+     *  cost of styled UIs — and it also overrides the look-and-feel's state colors (disabled
+     *  text would keep the styled color). The solid color is therefore applied through the
+     *  component's <em>foreground</em> property by the {@link StyleInstaller} instead (see
+     *  {@link #solidColor()}), which every look-and-feel honours natively and cheaply.
+     *  Gradient/noise/custom paints cannot travel that channel and stay in the font.
+     */
+    Optional<Font> createDerivedWithoutSolidColorFrom( Font existingFont, JComponent component ) {
         return _createDerivedFrom(existingFont, component);
+    }
+
+    /** The style's font color if (and only if) it is a plain, solid {@link java.awt.Color} —
+     *  the case the {@link StyleInstaller} routes through the component foreground channel
+     *  instead of the font (see {@link #createDerivedWithoutSolidColorFrom(Font, JComponent)}).
+     *  {@code null} for no color or for gradient/noise/custom paints. */
+    @Nullable Color solidColor() {
+        return _paint.solidColor();
     }
 
     Optional<Font> createDerivedFrom( Font existingFont, BoxModelConf boxModel ) {
@@ -1177,12 +1256,16 @@ public final class FontConf
             attributes.put(TextAttribute.TRACKING, Math.max(-1,Math.min(_spacing, 10))); // Valid if:  tracking >= -1 && tracking <= 10
         }
         if ( _isUnderlined != null ) {
-            isChange = isChange || !Objects.equals(_isUnderlined, currentAttributes.get(TextAttribute.UNDERLINE));
-            attributes.put(TextAttribute.UNDERLINE, _isUnderlined);
+            // AWT expects the Integer TextAttribute.UNDERLINE_ON here — a raw Boolean is
+            // silently DROPPED by Font.deriveFont (a long-standing bug this used to have).
+            Object underline = _isUnderlined ? TextAttribute.UNDERLINE_ON : null;
+            isChange = isChange || !Objects.equals(underline, currentAttributes.get(TextAttribute.UNDERLINE));
+            attributes.put(TextAttribute.UNDERLINE, underline);
         }
         if ( _isStrike != null ) {
-            isChange = isChange || !Objects.equals(_isStrike, currentAttributes.get(TextAttribute.STRIKETHROUGH));
-            attributes.put(TextAttribute.STRIKETHROUGH, _isStrike);
+            Object strike = _isStrike ? TextAttribute.STRIKETHROUGH_ON : null;
+            isChange = isChange || !Objects.equals(strike, currentAttributes.get(TextAttribute.STRIKETHROUGH));
+            attributes.put(TextAttribute.STRIKETHROUGH, strike);
         }
         if ( _transform != null ) {
             isChange = isChange || !Objects.equals(_transform, currentAttributes.get(TextAttribute.TRANSFORM));
@@ -1197,8 +1280,22 @@ public final class FontConf
                 Paint paint = null;
                 if ( boxModelOrComponent instanceof BoxModelConf )
                     paint = _paint.getFor((BoxModelConf) boxModelOrComponent);
-                else if ( boxModelOrComponent instanceof JComponent )
-                    paint = _paint.getFor((JComponent) boxModelOrComponent);
+                else if ( boxModelOrComponent instanceof JComponent ) {
+                    /*
+                        Component fonts deliberately do NOT carry a solid color!
+                        A plain color renders through the component's *foreground* channel
+                        (applied by the StyleInstaller), which every look-and-feel honours
+                        natively — see the "Where the font color lives" section of this
+                        class' javadoc. Only paints that genuinely need the TextLayout
+                        pipeline to render (gradients, noise, custom paints) stay in the
+                        font, and only those pay its per-measure/per-draw cost.
+                    */
+                    if ( _paint.solidColor() == null )
+                        paint = _paint.getFor((JComponent) boxModelOrComponent);
+                }
+                else
+                    paint = _paint.solidColor(); // context-free conversion (toAwtFont): only a
+                                                 // geometry-independent solid color is resolvable here
 
                 isChange = isChange || !Objects.equals(paint, currentAttributes.get(TextAttribute.FOREGROUND));
                 attributes.put(TextAttribute.FOREGROUND, paint);
@@ -1213,6 +1310,10 @@ public final class FontConf
                     backgroundPaint = _backgroundPaint.getFor((BoxModelConf) boxModelOrComponent);
                 else if ( boxModelOrComponent instanceof JComponent )
                     backgroundPaint = _backgroundPaint.getFor((JComponent) boxModelOrComponent);
+                else
+                    backgroundPaint = _backgroundPaint.solidColor(); // context-free conversion: solid colors only
+                // (Unlike the foreground, a text-run BACKGROUND has no component-level channel,
+                // so on component fonts it stays an attribute and honestly pays the layout regime.)
 
                 isChange = isChange || !Objects.equals(backgroundPaint, currentAttributes.get(TextAttribute.BACKGROUND));
                 attributes.put(TextAttribute.BACKGROUND, backgroundPaint);
