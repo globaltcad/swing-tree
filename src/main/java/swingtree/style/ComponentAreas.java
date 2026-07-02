@@ -31,6 +31,7 @@ final class ComponentAreas
     private final LazyRef<Shape>   _bodyArea;
     private final LazyRef<Shape>   _contentArea;
     private final LazyRef<Area[]>  _borderEdgeAreas;
+    private final LazyRef<Area[]>  _clippedBorderEdgeAreas;
 
     static ComponentAreas of( Pooled<BoxModelConf> state ) {
         return _CACHE.computeIfAbsent(state, conf -> new ComponentAreas(state.get()));
@@ -45,6 +46,7 @@ final class ComponentAreas
         _exteriorArea    = new LazyRef<>(Pair.of(_boxModel, _bodyArea), s->ComponentAreas._produceExteriorArea(s.first(),s.second()));
         _contentArea     = new LazyRef<>(Pair.of(_boxModel, _interiorArea), s->ComponentAreas._produceContentArea(s.first(), s.second()));
         _borderEdgeAreas = new LazyRef<>(_boxModel, ComponentAreas::calculateEdgeBorderAreas);
+        _clippedBorderEdgeAreas = new LazyRef<>(Pair.of(_borderArea, _borderEdgeAreas), s->ComponentAreas._produceClippedBorderEdgeAreas(s.first(), s.second()));
     }
 
     public Shape get( UI.ComponentArea areaType ) {
@@ -93,6 +95,35 @@ final class ComponentAreas
 
     public Area[] getEdgeAreas() {
         return _borderEdgeAreas.get();
+    }
+
+    /**
+     *  Returns the four border-edge areas already clipped to the border area, i.e. the actual shapes
+     *  filled for a per-edge (non-homogeneous) border, in the order top, right, bottom, left. These
+     *  are the intersection of the {@link UI.ComponentArea#BORDER} area with each of the
+     *  {@link #getEdgeAreas() edge regions}. Because both inputs are a pure function of the immutable
+     *  {@link BoxModelConf}, the (expensive) {@link Area#intersect(Area) intersections} are computed
+     *  once and then reused on every subsequent paint of any component with an equal box model,
+     *  instead of being recomputed on every repaint.
+     *
+     * @return An array of 4 {@link Area} objects: the border area clipped to the top, right, bottom
+     *         and left edge regions respectively. The array and its areas are shared/cached — callers
+     *         must only read from them (e.g. {@link Graphics2D#fill(Shape)}), never mutate them.
+     */
+    public Area[] getClippedEdgeAreas() {
+        return _clippedBorderEdgeAreas.get();
+    }
+
+    private static Area[] _produceClippedBorderEdgeAreas( LazyRef<Shape> borderAreaRef, LazyRef<Area[]> edgeAreasRef ) {
+        Shape  borderArea = borderAreaRef.get();
+        Area[] edgeAreas  = edgeAreasRef.get();
+        Area[] clipped    = new Area[4];
+        for ( int i = 0; i < 4; i++ ) {
+            Area edgeBorder = new Area(borderArea);
+            edgeBorder.intersect(edgeAreas[i]);
+            clipped[i] = edgeBorder;
+        }
+        return clipped;
     }
 
     public boolean areaExists(UI.ComponentArea area) {

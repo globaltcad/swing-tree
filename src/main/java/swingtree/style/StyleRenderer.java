@@ -141,25 +141,19 @@ final class StyleRenderer
                     g2d.setColor(colors.bottom().orElse(UI.Color.BLACK));
                     g2d.fill(borderArea);
                 } else {
-                    Area[] borderEdgeRegions = conf.areas().getEdgeAreas();
-                    // We created clipped border areas:
-                    Area topBorderArea = new Area(borderArea);
-                    topBorderArea.intersect(borderEdgeRegions[0]);
-                    Area rightBorderArea = new Area(borderArea);
-                    rightBorderArea.intersect(borderEdgeRegions[1]);
-                    Area bottomBorderArea = new Area(borderArea);
-                    bottomBorderArea.intersect(borderEdgeRegions[2]);
-                    Area leftBorderArea = new Area(borderArea);
-                    leftBorderArea.intersect(borderEdgeRegions[3]);
-                    // Now we can draw the borders:
+                    // The border area clipped to each edge region. These intersections are a pure
+                    // function of the (immutable) box model, so they are computed once and cached in
+                    // ComponentAreas rather than recomputed on every repaint (Area.intersect is a hot,
+                    // expensive operation for this per-edge border path).
+                    Area[] edgeBorders = conf.areas().getClippedEdgeAreas();
                     g2d.setColor(colors.top().orElse(UI.Color.BLACK));
-                    g2d.fill(topBorderArea);
+                    g2d.fill(edgeBorders[0]);
                     g2d.setColor(colors.right().orElse(UI.Color.BLACK));
-                    g2d.fill(rightBorderArea);
+                    g2d.fill(edgeBorders[1]);
                     g2d.setColor(colors.bottom().orElse(UI.Color.BLACK));
-                    g2d.fill(bottomBorderArea);
+                    g2d.fill(edgeBorders[2]);
                     g2d.setColor(colors.left().orElse(UI.Color.BLACK));
-                    g2d.fill(leftBorderArea);
+                    g2d.fill(edgeBorders[3]);
                 }
             } catch ( Exception e ) {
                 log.warn(SwingTree.get().logMarker(),
