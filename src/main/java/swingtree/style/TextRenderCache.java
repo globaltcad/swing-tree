@@ -83,10 +83,12 @@ final class TextRenderCache {
     private static final int MATERIALISE_AT = 3;
 
     /** How many distinct rendered variants (colour/AA/LCD/fractional-metrics/scale) a single
-     *  {@code text + font} {@link Entry} keeps side by side; once full it behaves as a ring buffer,
-     *  the newest variant evicting the oldest. A real UI shows a given string in only a handful of
-     *  appearances (normal, selected, disabled, …), so a tiny fixed array beats a per-entry map on
-     *  both footprint and lookup cost, while eviction keeps a shifting appearance from going stale. */
+     *  {@code text + font} {@link Entry} keeps side by side; once full, a newcomer replaces the
+     *  least-warmed <em>un-materialised</em> variant, and only when all slots hold rasterised
+     *  images does it rotate the oldest image out (see {@link Entry#addSub}). A real UI shows a
+     *  given string in only a handful of appearances (normal, selected, disabled, …), so a tiny
+     *  fixed array beats a per-entry map on both footprint and lookup cost, while eviction keeps
+     *  a genuinely shifted appearance from going stale. */
     private static final int MAX_SUBS = 4;
 
     /** User-space padding around the glyph box (absorbs left-side bearing, glyph
@@ -366,7 +368,7 @@ final class TextRenderCache {
         }
 
         if ( sub == null )
-            sub = entry.addSub(visualHash);   // ring buffer: always admits, evicting the oldest variant if full
+            sub = entry.addSub(visualHash);   // always admits; evicts an un-warmed variant first, a materialised image only as a last resort
 
         // Warm-up — draw directly (no measuring) until this rendering proves stable.
         if ( ++sub.hits < MATERIALISE_AT ) return false;
@@ -562,17 +564,29 @@ final class TextRenderCache {
                 if ( subs[i].visualHash == visualHash ) return subs[i];
             return null;
         }
-        /** Admits a new rendering. Once {@link #MAX_SUBS} are held this is a ring buffer: the
-         *  oldest variant is overwritten (its image, if any, is dropped and so falls out of the
-         *  image budget), so a component that keeps changing appearance keeps its most recent ones. */
+        /** Admits a new rendering. While there is room it simply appends. Once {@link #MAX_SUBS}
+         *  are held, it overwrites the least-warmed slot that has <em>not</em> been materialised
+         *  yet, so a burst of one-off transient appearances (hover shades, a drag highlight, an
+         *  animated colour) only churns among itself and can never destroy an already rasterised
+         *  image — without this preference, five recurring appearances would evict each other on
+         *  every paint and nothing would ever warm up. Only when every slot holds a materialised
+         *  image (a genuine appearance shift, e.g. a theme change) does the ring cursor rotate
+         *  the oldest image out (it is dropped and so falls out of the image budget). */
         SubEntry addSub(long visualHash) {
             SubEntry s = new SubEntry(visualHash);
             if ( subCount < MAX_SUBS ) {
                 subs[subCount++] = s;
-            } else {
-                subs[evict] = s;                          // overwrite the oldest variant
+                return s;
+            }
+            int victim = -1;
+            for ( int i = 0; i < MAX_SUBS; i++ )          // prefer the least-warmed, un-materialised slot
+                if ( subs[i].image == null && (victim < 0 || subs[i].hits < subs[victim].hits) )
+                    victim = i;
+            if ( victim < 0 ) {                           // all slots materialised -> rotate the oldest out
+                victim = evict;
                 evict = (evict + 1) % MAX_SUBS;
             }
+            subs[victim] = s;
             return s;
         }
         /** Whether any of this text+font's renderings has been promoted to a blittable image. */

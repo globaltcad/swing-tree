@@ -652,9 +652,10 @@ class Text_Render_Caching_Spec extends Specification
             The rendered variants inside an entry live in a tiny fixed-size array,
             not a growing map: a real UI shows a string in only a handful of
             appearances (normal, selected, disabled, …). Once that small cap is
-            reached, any further appearance is simply drawn directly instead of
-            cached – it is never *wrong*, just not accelerated – so a pathological
-            component cycling through many colours can never blow up the cache.
+            reached, a further appearance replaces one of the still-warming slots
+            (never a rasterised image, see the next scenario) – it is never *wrong*,
+            just not accelerated – so a pathological component cycling through many
+            colours can never blow up the cache.
         """
         given : 'One label we will repaint in many different colours.'
             var label  = UI.label("Chameleon").get(JLabel)
@@ -669,6 +670,46 @@ class Text_Render_Caching_Spec extends Specification
         and  : '...whose rendered-variant count is capped well below the six colours we used.'
             ext.renderedTextVariantCount() == 4
             ext.renderedTextVariantCount() < colours.size()
+    }
+
+    def 'A materialised rendering survives a burst of one-off transient appearances.'()
+    {
+        reportInfo """
+            Real UIs flash text through short-lived appearances all the time: a
+            hover shade, a drag highlight, a pulsing animation frame. Such one-hit
+            variants must never destroy the expensive, fully rasterised image of
+            the component's *normal* appearance – otherwise every burst would be
+            followed by a full re-warm-up (and a component cycling through five or
+            more appearances would thrash the cache forever, never materialising
+            anything).
+
+            So eviction inside an entry is warmth-aware: a newcomer replaces the
+            least-warmed variant that has **no** image yet, and a materialised
+            image is only rotated out when *every* slot holds one (a genuine
+            appearance shift, like a theme change).
+        """
+        given : 'A label warmed up until its normal appearance is a blittable image.'
+            var label = UI.label("Stable").get(JLabel)
+            var ext   = ComponentExtension.from(label)
+            var normalColour = label.getForeground()
+            3.times { paint(label) }
+        expect : 'The normal appearance is materialised.'
+            ext.hasCachedText()
+
+        when : 'The label flashes through six one-off colours, each painted just once.'
+            [Color.RED, Color.GREEN, Color.BLUE, Color.ORANGE, Color.MAGENTA, Color.CYAN].each { c ->
+                label.setForeground(c)
+                paint(label)
+            }
+        and : 'Then returns to its normal appearance.'
+            label.setForeground(normalColour)
+            paint(label)
+
+        then : 'The normal appearance kept its rasterised image through the whole burst...'
+            ext.hasCachedText()
+        and  : '...still within the single entry and the small variant cap.'
+            ComponentExtension.totalTextCacheSize() == 1
+            ext.renderedTextVariantCount() == 4
     }
 
     def 'Caching never changes the measured width, it only accelerates it.'()
