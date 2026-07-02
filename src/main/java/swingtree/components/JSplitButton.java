@@ -132,6 +132,11 @@ public class JSplitButton extends JButton implements Serializable, StylableCompo
     /** {@inheritDoc} */
     @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
 
+    /** {@inheritDoc} */
+    @Override public FontMetrics getFontMetrics( Font f ) {
+        return swingtree.style.ComponentExtension.from(this).getFontMetricsCacheBacked(super.getFontMetrics(f));
+    }
+
     /**
      * Returns the JPopupMenu if set, null otherwise.
      *

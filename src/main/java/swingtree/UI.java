@@ -1664,12 +1664,16 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public FontMetrics getFontMetrics(java.awt.Font f) { return ComponentExtension.from(this).getFontMetricsCacheBacked(super.getFontMetrics(f)); }
     }
     /** {inheritDoc} */
     public static class TextArea extends JTextArea implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        // No cache-backed getFontMetrics here: the multiline text family (JTextArea, JEditorPane,
+        // JTextPane) is not text-cache-proxied at all (see TextRenderCache.isProxyable), and its
+        // views measure via charsWidth/getStringBounds, which the width layer does not intercept.
     }
     /** {inheritDoc} */
     public static class CheckBox extends JCheckBox implements StylableComponent {
@@ -1704,6 +1708,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public FontMetrics getFontMetrics(java.awt.Font f) { return ComponentExtension.from(this).getFontMetricsCacheBacked(super.getFontMetrics(f)); }
     }
     /** {inheritDoc} */
     public static class ListView<E> extends JList<E> implements StylableComponent {
@@ -1871,6 +1876,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public FontMetrics getFontMetrics(java.awt.Font f) { return ComponentExtension.from(this).getFontMetricsCacheBacked(super.getFontMetrics(f)); }
     }
     /** {inheritDoc} */
     public static class ProgressBar extends JProgressBar implements StylableComponent {
@@ -1889,6 +1895,7 @@ public final class UI extends UIFactoryMethods
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g){ paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
+        @Override public FontMetrics getFontMetrics(java.awt.Font f) { return ComponentExtension.from(this).getFontMetricsCacheBacked(super.getFontMetrics(f)); }
     }
     /** {inheritDoc} */
     public static class Box extends JBox {/* Already implemented */}

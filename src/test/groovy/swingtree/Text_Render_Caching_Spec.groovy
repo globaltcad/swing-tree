@@ -803,4 +803,43 @@ class Text_Render_Caching_Spec extends Specification
         cleanup : 'Restore the generous, deterministic budget.'
             swingtree.style.CacheBudget.UNITS_OVERRIDE = 10
     }
+
+    def 'Every component type the cache proxies also installs the width-layer metrics proxy.'()
+    {
+        reportInfo """
+            The image layer decides per component *type* what it may proxy (see
+            `TextRenderCache.isProxyable`): labels, buttons and their menu-item
+            relatives, single-line text fields, and combo boxes. The width layer
+            has to be wired separately, as a `getFontMetrics` override on each of
+            SwingTree's component subclasses – an interface default method cannot
+            override a `JComponent` method, so this cannot live in one place.
+
+            This scenario is the guard rail for that hand-wired list: it sweeps
+            all SwingTree component subclasses reflectively and asserts that every
+            type the image layer would proxy also declares (or inherits from a
+            SwingTree class) the `getFontMetrics` override. A newly added
+            component type that misses the width layer fails here instead of
+            silently painting slower than its siblings.
+        """
+        given : 'The component families the image layer proxies (mirrors TextRenderCache.isProxyable).'
+            var proxiedLeafTextTypes = [
+                javax.swing.JLabel, javax.swing.AbstractButton,
+                javax.swing.JTextField, javax.swing.JComboBox  // JPasswordField/JFormattedTextField are JTextField subtypes
+            ]
+        and : 'All concrete SwingTree component subclasses of those families (plus the ones living outside UI).'
+            var swingTreeComponentTypes = (UI.class.declaredClasses.toList() + [swingtree.components.JSplitButton])
+                .findAll { javax.swing.JComponent.isAssignableFrom(it) }
+                .findAll { type -> proxiedLeafTextTypes.any { it.isAssignableFrom(type) } }
+
+        expect : 'The sweep actually caught the known families (guarding the guard).'
+            swingTreeComponentTypes.size() >= 15
+
+        when : 'We look up where the public getFontMetrics(Font) of each type is declared.'
+            var missingWidthLayer = swingTreeComponentTypes.findAll { type ->
+                !type.getMethod("getFontMetrics", java.awt.Font).declaringClass.name.startsWith("swingtree")
+            }
+
+        then : 'Every proxied type routes getFontMetrics through the cache-backed proxy.'
+            missingWidthLayer.isEmpty()
+    }
 }
