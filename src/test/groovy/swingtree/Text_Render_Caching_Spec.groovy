@@ -608,9 +608,10 @@ class Text_Render_Caching_Spec extends Specification
             string in the same font gets that width served on its *first* paint –
             it never has to measure the string itself.
         """
-        given : 'A first label, fully warmed so its text+font entry carries a width.'
+        given : 'A first label, painted three times so it is fully warmed.'
             var first  = UI.label("Reuse me").get(JLabel)
             3.times { paint(first) }
+        expect : 'Its text+font entry carries a width.'
             ComponentExtension.from(first).hasCachedTextWidth()
 
         when : 'A second, identical label is painted just once.'
