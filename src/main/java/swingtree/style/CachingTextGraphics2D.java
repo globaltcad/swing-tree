@@ -132,7 +132,17 @@ final class CachingTextGraphics2D extends Graphics2D {
     @Override public void setXORMode(Color c) { _g.setXORMode(c); }
     @Override public Font getFont() { return _g.getFont(); }
     @Override public void setFont(Font font) { _g.setFont(font); }
-    @Override public FontMetrics getFontMetrics(Font f) { return new CachingFontMetrics(_g.getFontMetrics(f)); }
+    /*
+        NOTE: getFontMetrics()/getFontMetrics(Font) deliberately return the delegate's
+        metrics UNWRAPPED. The width cache stores a single advance per text+font entry,
+        and that advance must always come from the *component* measurement context (see
+        TextRenderCache.stringWidth): graphics metrics typically differ (fractional
+        metrics ON vs. the component's OFF), so intercepting them here would let
+        whichever context measures first poison the shared width for the other.
+        Only the component-side bridge (cacheBacked, via the getFontMetrics overrides
+        of SwingTree's component subclasses) installs the caching proxy.
+    */
+    @Override public FontMetrics getFontMetrics(Font f) { return _g.getFontMetrics(f); }
     @Override public Rectangle getClipBounds() { return _g.getClipBounds(); }
     @Override public void clipRect(int x, int y, int w, int h) { _g.clipRect(x, y, w, h); }
     @Override public void setClip(int x, int y, int w, int h) { _g.setClip(x, y, w, h); }
@@ -181,7 +191,7 @@ final class CachingTextGraphics2D extends Graphics2D {
     @Override public void fillPolygon(Polygon p) { _g.fillPolygon(p); }
     @Override public void drawChars(char[] data, int offset, int length, int x, int y) { _g.drawChars(data, offset, length, x, y); }
     @Override public void drawBytes(byte[] data, int offset, int length, int x, int y) { _g.drawBytes(data, offset, length, x, y); }
-    @Override public FontMetrics getFontMetrics() { return new CachingFontMetrics(_g.getFontMetrics()); }
+    @Override public FontMetrics getFontMetrics() { return _g.getFontMetrics(); } // unwrapped on purpose, see getFontMetrics(Font)
 
     @Override public @Nullable GraphicsConfiguration getDeviceConfiguration() {
         GraphicsConfiguration gc = _g.getDeviceConfiguration();
@@ -194,8 +204,11 @@ final class CachingTextGraphics2D extends Graphics2D {
     /** Wraps the given real metrics in the width-caching proxy. This is the bridge SwingTree's own
      *  text components call (via {@link ComponentExtension#getFontMetricsCacheBacked(FontMetrics)})
      *  so that the {@code stringWidth} a look-and-feel issues through {@code component.getFontMetrics(font)}
-     *  — the path {@code SwingUtilities2} actually takes, bypassing the graphics — is intercepted too.
-     *  Gating (cache mode / text-caching toggle) is done by the caller. */
+     *  — the path {@code SwingUtilities2} actually takes — is served from the cache. It is the
+     *  <b>only</b> place the proxy is installed: this graphics decorator's own
+     *  {@link #getFontMetrics()} stays unwrapped, because the cached width must come exclusively
+     *  from the component measurement context (see {@link TextRenderCache#stringWidth}).
+     *  Gating (cache mode / text-caching toggle / budget) is done by the caller. */
     static FontMetrics cacheBacked(FontMetrics real) {
         return new CachingFontMetrics(real);
     }
@@ -208,6 +221,13 @@ final class CachingTextGraphics2D extends Graphics2D {
      *  {@link java.awt.font.TextLayout}, which — once text rasterisation is cached — becomes
      *  the dominant per-paint cost of a text component. The advance is cached on the shared
      *  {@code text + font} entry, costing a single {@code int} per entry.
+     *
+     *  <p><b>Component metrics only.</b> This proxy is installed exclusively around metrics
+     *  obtained from {@code component.getFontMetrics(font)} — never around a graphics'
+     *  metrics (see the note on {@link #getFontMetrics(Font)}). All component metrics share
+     *  the same default {@link FontRenderContext}, so every reader and writer of the one
+     *  cached width agrees on what it means; a graphics context (fractional metrics
+     *  typically ON) measures differently and must keep measuring for itself.
      *
      *  <p>Every non-intercepted method is delegated explicitly rather than left to
      *  {@link FontMetrics}' own (mutually-recursive, default) implementations, so the proxy is an

@@ -579,8 +579,10 @@ public final class ComponentExtension<C extends JComponent>
 
     /**
      *  Returns whether this component currently has a cached string <em>width</em> for its
-     *  text. Besides rasterising {@code drawString}, SwingTree's {@link CachingTextGraphics2D}
-     *  also intercepts the {@link java.awt.FontMetrics#stringWidth(String) stringWidth} calls a
+     *  text. Besides rasterising {@code drawString}, SwingTree's cache-backed metrics proxy
+     *  (installed by the component's {@code getFontMetrics} override, see
+     *  {@link #getFontMetricsCacheBacked(FontMetrics)}) also intercepts the
+     *  {@link java.awt.FontMetrics#stringWidth(String) stringWidth} calls a
      *  look-and-feel makes to lay text out <em>before</em> drawing it — the dominant per-paint
      *  cost once the pixels themselves are cached. The measured advance width is stored in the
      *  very same {@code text + font} cache entry as the (eventual) image.
