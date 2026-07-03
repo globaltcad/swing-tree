@@ -37,7 +37,7 @@ No new runtime, no rewrite — it sits right on top of the Swing you already kno
 <tr>
 <td> 
 
-- 🎞️ [animated styling](docs/markdown/An-Advanced-Style-Animation.md)
+- 🎞️ [animated styling](docs/markdown/An-Advanced-Style-Animation.md) & [buttery-smooth refreshing](docs/markdown/Snappy-Rendering.md) 🏎️
 - 🧩 built-in [property support](https://github.com/globaltcad/sprouts) 
   for [MVVM](docs/markdown/Advanced-MVVM.md) and [MVI](docs/markdown/Functional-MVVM.md) architecture
   (so your UI and business logic stay decoupled)

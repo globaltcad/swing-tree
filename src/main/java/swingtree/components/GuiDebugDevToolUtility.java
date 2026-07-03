@@ -8,9 +8,11 @@ import sprouts.Tuple;
 import sprouts.Var;
 import sprouts.Viewable;
 import swingtree.SwingTree;
+import swingtree.SwingTreeInitConfig;
 import swingtree.UI;
 import swingtree.input.Keyboard;
 import swingtree.layout.Bounds;
+import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
 import java.awt.*;
@@ -431,6 +433,27 @@ final class GuiDebugDevToolUtility {
         return builder.toString();
     }
 
+    /** Turns an enum constant name like {@code CONSERVATIVE} into a human-friendly
+     *  {@code "Conservative"} for display in the settings combo boxes. */
+    private static String prettyEnumName(Enum<?> value) {
+        String raw = value.name();
+        StringBuilder out = new StringBuilder(raw.length());
+        boolean capitaliseNext = true;
+        for ( int i = 0; i < raw.length(); i++ ) {
+            char c = raw.charAt(i);
+            if ( c == '_' ) {
+                out.append(' ');
+                capitaliseNext = true;
+            } else if ( capitaliseNext ) {
+                out.append(Character.toUpperCase(c));
+                capitaliseNext = false;
+            } else {
+                out.append(Character.toLowerCase(c));
+            }
+        }
+        return out.toString();
+    }
+
     private static String getClassNameWithoutPackage(Class<?> type) {
         String name = type.getName();          // e.g. com.example.Outer$Inner
         int lastDot = name.lastIndexOf('.');
@@ -443,10 +466,17 @@ final class GuiDebugDevToolUtility {
         private final Viewable<Boolean> isDevToolsEnabled; // Important, we need to keep the reference to keep the binding alive! (otherwise it can get garbage collected...)
         private final Var<ComponentDebugInfo> debugState;
         private final Var<ComponentDebugInfo> selectedDebugState;
+        // The settings-panel properties: each is seeded from the current SwingTree library
+        // configuration and writes user edits back to it (one-way, on change). Kept as fields
+        // so their component bindings stay alive.
+        private final Var<SwingTreeInitConfig.CacheMode> cacheMode;
+        private final Var<Double>  uiScaleFactor;
 
         DebugInfoWindow(Var<ComponentDebugInfo> debugState, Var<ComponentDebugInfo> selectedDebugState) {
             this.debugState = debugState;
             this.selectedDebugState = selectedDebugState;
+            this.cacheMode          = Var.of(SwingTree.get().getCacheMode());
+            this.uiScaleFactor      = Var.of((double) UI.scale());
             this.isDevToolsEnabled = SwingTree.get().isDevToolEnabledView().onChange(From.ALL, it -> {
                 if ( !it.currentValue().orElse(false) ) {
                     this.dispose();
@@ -458,25 +488,42 @@ final class GuiDebugDevToolUtility {
                 setTitle(titleFromFocus(focusedDebugComponent));
             });
             this.add(
-                    UI.splitPane(UI.Align.HORIZONTAL)
+                    UI.splitPane(UI.Align.VERTICAL)
+                    .withDivisionOf(0.0)
                     .add(
-                        buildInfoDisplay(debugState, FOCUS_COLOR,
-                            "<html>" +
-                            "This overview shows <b>the component that is currently set to be in focus</b> by the mouse cursor. <br>" +
-                            "You can select this component <b>by holding CTRL and then clicking on it</b> in the application window." +
-                            "</html>"
-                        )
+                        UI.scrollPane()
+                        .add( buildLibrarySettingsPanel() )
+                        .withMinSize(0, 0) // let the divider collapse fully to the top
                     )
                     .add(
-                        buildInfoDisplay(selectedDebugState, SELECTION_COLOR,
-                            "<html>" +
-                            "This is the currently selected component. <br>" +
-                            "To select another component, <b>hold CTRL and click on it</b> in the application window." +
-                            "</html>"
+                        UI.splitPane(UI.Align.HORIZONTAL)
+                        .add(
+                            buildInfoDisplay(debugState, FOCUS_COLOR,
+                                "<html>" +
+                                "This overview shows <b>the component that is currently set to be in focus</b> by the mouse cursor. <br>" +
+                                "You can select this component <b>by holding CTRL and then clicking on it</b> in the application window." +
+                                "</html>"
+                            )
+                        )
+                        .add(
+                            buildInfoDisplay(selectedDebugState, SELECTION_COLOR,
+                                "<html>" +
+                                "This is the currently selected component. <br>" +
+                                "To select another component, <b>hold CTRL and click on it</b> in the application window." +
+                                "</html>"
+                            )
                         )
                     )
                     .get(JSplitPane.class)
             );
+
+            // Keep the read-only cache statistics in the settings panel fresh while the
+            // window is open, so configuration changes can be observed taking effect live.
+        }
+
+        @Override
+        public void dispose() {
+            super.dispose();
         }
 
         private static String titleFromFocus(@Nullable Component component) {
@@ -510,6 +557,54 @@ final class GuiDebugDevToolUtility {
 
             // If we can not find any user based component, we just return the root component's class name:
             return "Inspecting: " + getClassNameWithoutPackage(root.getClass());
+        }
+
+        /**
+         *  The collapsible settings panel at the top of the dev-tool window. It seeds its
+         *  controls from the current {@link SwingTree} library context and writes user edits
+         *  straight back to it, so their effect can be observed on the running UI during a
+         *  debugging session. Changes flow from the panel to the library; a timer keeps the
+         *  read-only cache statistic fresh.
+         */
+        private JComponent buildLibrarySettingsPanel() {
+            Tuple<Double> scaleOptions = Tuple.of(1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0);
+            if ( !scaleOptions.contains(uiScaleFactor.get()) ) { // make sure the current factor is selectable
+                scaleOptions = scaleOptions.add(uiScaleFactor.get()).sort();
+            }
+            return
+                UI.panel("fillx, insets 24, gap 18")
+                .add("span, growx",
+                    UI.label(
+                        "<html><h1>SwingTree Library Settings</h1> " +
+                        "These apply globally and immediately.</html>"
+                    )
+                )
+                .add("span, growx, wrap", UI.separator())
+                .add(
+                    UI.panel("fillx, wrap 1")
+                    .add(
+                        UI.label("Cache mode:")
+                        .withTooltip("How aggressively SwingTree's rendering caches trade memory for CPU time.")
+                    )
+                    .add("growx",
+                        UI.comboBox(cacheMode, GuiDebugDevToolUtility::prettyEnumName).withStyle(it->it.marginLeft(24))
+                        .withMaxWidth(160)
+                        .withTooltip("DISABLED turns every rendering cache off; higher modes keep more rendered results in memory.")
+                        .onSelection( it -> SwingTree.get().setCacheMode(cacheMode.get()) )
+                    )
+                )
+                .add("wrap",
+                    UI.panel("fillx, wrap 1")
+                    .add(UI.label("UI scale factor:"))
+                    .add("growx",
+                        UI.comboBox(uiScaleFactor, scaleOptions).withStyle(it->it.marginLeft(24))
+                        .withMaxWidth(160)
+                        .withTooltip("The HiDPI scale factor SwingTree applies to every component.")
+                        .onSelection( it -> SwingTree.get().setUiScaleFactor(uiScaleFactor.get().floatValue()) )
+                    )
+                )
+                .add("span, growx", UI.separator())
+                .get(JPanel.class);
         }
 
         private static JPanel buildInfoDisplay(Var<ComponentDebugInfo> debugState, UI.Color themeColor, String toolTip) {
@@ -550,6 +645,7 @@ final class GuiDebugDevToolUtility {
                                 (it.id().isEmpty() ? "" : "id='"+it.id()+"'")
                             )
                         )
+                        .withStyle( it -> it.fontColor(UI.Color.BLACK))
                     )
                     .add("right",
                         UI.label(
@@ -561,6 +657,7 @@ final class GuiDebugDevToolUtility {
                                     "height="+it.size().height().map(Number::intValue).orElse(-1
                             )
                         ))
+                        .withStyle( it -> it.fontColor(UI.Color.BLACK))
                     )
                 )
                 .add("push, grow",
@@ -574,7 +671,10 @@ final class GuiDebugDevToolUtility {
                         .add(
                             UI.scrollPane().add(
                                 UI.textArea(
-                                    debugState.viewAsString(it -> it.type().getCanonicalName() +"\n"+ stackTraceToString(it.sourceCodeLocation()))
+                                    debugState.viewAsString(it ->
+                                        it.type().getCanonicalName() +"\n"+
+                                        stackTraceToString(it.sourceCodeLocation())
+                                    )
                                 )
                                 .isEditableIf(false)
                             )
