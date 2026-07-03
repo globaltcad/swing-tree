@@ -538,8 +538,8 @@ final class GuiDebugDevToolUtility {
 
         private static String formattedCacheStats() {
             StringBuilder text = new StringBuilder("<html>");
-            swingtree.style.ComponentExtension.globalRenderCacheEntryCounts().forEach( (name, count) ->
-                text.append(name).append(": ").append(count).append("<br>")
+            swingtree.style.ComponentExtension.globalRenderCacheEntryCounts().forEach( pair ->
+                text.append(pair.first()).append(": ").append(pair.second()).append("<br>")
             );
             return text.append("</html>").toString();
         }

@@ -117,13 +117,13 @@ class Cache_Configuration_Spec extends Specification
                           .get(javax.swing.JLabel)
             5.times { paint(label) }
         expect : 'Nothing was admitted to the style-layer cache while the budget was zero.'
-            ComponentExtension.globalRenderCacheEntryCounts()["style layers"] == 0
+            ComponentExtension.globalRenderCacheEntryCounts().toMap()["style layers"] == 0
 
         when : 'We raise the budget at runtime and paint a few more times.'
             CacheBudget.UNITS_OVERRIDE = 10
             5.times { paint(label) }
         then : 'Caching kicks in — the live limit reacted to the runtime change.'
-            ComponentExtension.globalRenderCacheEntryCounts()["style layers"] > 0
+            ComponentExtension.globalRenderCacheEntryCounts().toMap()["style layers"] > 0
     }
 
     def 'The live cache monitoring snapshot covers every global rendering cache.'()
@@ -135,8 +135,7 @@ class Cache_Configuration_Spec extends Specification
             inventory of SwingTree's global rendering caches.
         """
         expect : 'One entry per global rendering cache, in stable order, never negative.'
-            ComponentExtension.globalRenderCacheEntryCounts().keySet() as List ==
-                ["style layers", "text layouts", "noise paints", "shadow gradients"]
+            ComponentExtension.globalRenderCacheEntryCounts().keySet().toList() == ["style layers", "text layouts", "noise paints", "shadow gradients"]
             ComponentExtension.globalRenderCacheEntryCounts().values().every { it >= 0 }
     }
 }
