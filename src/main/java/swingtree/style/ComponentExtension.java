@@ -538,9 +538,24 @@ public final class ComponentExtension<C extends JComponent>
         return caches[layer.ordinal()].paintCacheMissCount();
     }
 
-
-
-
+    /**
+     *  A live snapshot of SwingTree's global rendering caches: one entry per cache with its
+     *  current number of cached items, in a stable, display-friendly order. The counts react
+     *  to painting, to garbage collection (the caches are weakly keyed), and to configuration
+     *  changes like {@link swingtree.SwingTree#setCacheMode(swingtree.SwingTreeInitConfig.CacheMode)} —
+     *  which makes this the observation point for monitoring (the dev tool displays it live)
+     *  and for tests pinning the cache-budget contract.
+     *
+     * @return An ordered map from cache display name to its live entry count.
+     */
+    public static Map<String, Integer> globalRenderCacheEntryCounts() {
+        Map<String, Integer> counts = new LinkedHashMap<>();
+        counts.put("style layers",     LayerCache.globalEntryCount());
+        counts.put("text layouts",     TextLayoutEngine.globalEntryCount());
+        counts.put("noise paints",     StyleRenderer.noisePaintCacheSize());
+        counts.put("shadow gradients", StyleRenderer.shadowGradientCacheSize());
+        return counts;
+    }
 
     /**
      *  The single bridge through which the {@code swingtree} package tells the rendering

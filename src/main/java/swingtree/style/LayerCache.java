@@ -53,6 +53,11 @@ final class LayerCache
     /** Drops every globally cached layer image. Called when the library cache configuration
      *  changes (see {@link ComponentExtension#updateAllCachesFromLibraryConfig()}) so memory
      *  shrinks immediately; the cache repopulates lazily under the new budget. */
+    /** Live number of cached style-layer renderings (for monitoring/tests). */
+    static int globalEntryCount() {
+        return _CACHE.size();
+    }
+
     static void clearGlobalCache() {
         _CACHE.clear();
     }

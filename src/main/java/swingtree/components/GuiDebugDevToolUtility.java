@@ -470,6 +470,8 @@ final class GuiDebugDevToolUtility {
         // configuration and writes user edits back to it (one-way, on change). Kept as fields
         // so their component bindings stay alive.
         private final Var<SwingTreeInitConfig.CacheMode> cacheMode;
+        private final Var<String> liveCacheStats;
+        private final javax.swing.Timer liveStatsTimer;
         private final Var<Double>  uiScaleFactor;
 
         DebugInfoWindow(Var<ComponentDebugInfo> debugState, Var<ComponentDebugInfo> selectedDebugState) {
@@ -477,6 +479,12 @@ final class GuiDebugDevToolUtility {
             this.selectedDebugState = selectedDebugState;
             this.cacheMode          = Var.of(SwingTree.get().getCacheMode());
             this.uiScaleFactor      = Var.of((double) UI.scale());
+            this.liveCacheStats     = Var.of(formattedCacheStats());
+            // Read-only readout, refreshed while the window is open, so configuration
+            // changes (e.g. switching the cache mode to DISABLED) can be watched taking
+            // effect on the live caches immediately.
+            this.liveStatsTimer     = new javax.swing.Timer(750, e -> liveCacheStats.set(formattedCacheStats()));
+            this.liveStatsTimer.start();
             this.isDevToolsEnabled = SwingTree.get().isDevToolEnabledView().onChange(From.ALL, it -> {
                 if ( !it.currentValue().orElse(false) ) {
                     this.dispose();
@@ -523,7 +531,17 @@ final class GuiDebugDevToolUtility {
 
         @Override
         public void dispose() {
+            liveStatsTimer.stop();
             super.dispose();
+        }
+
+
+        private static String formattedCacheStats() {
+            StringBuilder text = new StringBuilder("<html>");
+            swingtree.style.ComponentExtension.globalRenderCacheEntryCounts().forEach( (name, count) ->
+                text.append(name).append(": ").append(count).append("<br>")
+            );
+            return text.append("</html>").toString();
         }
 
         private static String titleFromFocus(@Nullable Component component) {
@@ -591,6 +609,12 @@ final class GuiDebugDevToolUtility {
                         .withMaxWidth(160)
                         .withTooltip("DISABLED turns every rendering cache off; higher modes keep more rendered results in memory.")
                         .onSelection( it -> SwingTree.get().setCacheMode(cacheMode.get()) )
+                    )
+                    .add(UI.label("Live cache entries:"))
+                    .add("growx",
+                        UI.label(liveCacheStats).withStyle(it->it.marginLeft(24))
+                        .withTooltip("Live entry counts of SwingTree's global rendering caches. " +
+                                     "Watch them drop to 0 when you set the cache mode to DISABLED.")
                     )
                 )
                 .add("wrap",

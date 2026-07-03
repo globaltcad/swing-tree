@@ -65,6 +65,12 @@ final class TextLayoutEngine {
      */
     private static final Map<Pooled<Paragraph>, ParagraphLayoutsData> _PARAGRAPH_DATA_CACHE = new WeakHashMap<>();
 
+    /** Live number of cached text layouts (for monitoring/tests). */
+    static int globalEntryCount() {
+        return _LAYOUT_CACHE.size();
+    }
+
+
     /**
      *  A large but geometrically safe line-width cap used when no explicit
      *  {@code boundsWidth} is available and as the "do not wrap" width passed

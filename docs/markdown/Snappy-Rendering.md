@@ -131,19 +131,14 @@ the budget. A small app on a big machine therefore costs very little even though
 its ceiling is high — the budget just prevents a large or animation-heavy UI from
 growing without bound.
 
-## Text caching, specifically
+## What about text rendering?
 
-Re-rasterising text is the heaviest repeated cost in most UIs, so it has its own
-on/off switch independent of the cache mode (it is on by default):
-
-```java
-SwingTree.get().setTextCachingEnabled(false);   // draw all text directly
-boolean on = SwingTree.get().isTextCachingEnabled();
-```
-
-It is deliberately conservative: only plain, solid-colour, axis-aligned text is
-cached; anything fancier (gradient-painted text, rotated text, printing) is drawn
-directly so the result is always pixel-faithful.
+Text needs no cache of its own: SwingTree keeps component fonts free of layout
+attributes (a solid font color travels through the component *foreground*, not
+the font), which keeps every measure and draw on the JDK's fast glyph-cache
+path. Only genuinely layout-hungry text — gradient-painted, letter-spaced,
+underlined — pays the slower `TextLayout` route, and such text is a decorative
+accent in real UIs, not the bulk.
 
 ## Tune it live in the dev tools
 
@@ -152,10 +147,11 @@ You don't have to guess. SwingTree ships browser-style developer tools: press
 configurable, and you can also enable them with
 `SwingTree.get().setDevToolEnabled(true)`). At the very top of the dev-tool window
 is a collapsed **SwingTree Library Settings** panel — drag the divider down to
-reveal it. There you'll find a live **Cache mode** selector and a **cached text
-appearances** counter, so you can flip between modes and watch the effect on a
-running UI in real time (set the mode to `DISABLED` and watch the counter drop to
-zero).
+reveal it. There you'll find a live **Cache mode** selector and a **live cache
+entries** readout covering every global rendering cache (style layers, text
+layouts, noise paints, shadow gradients), so you can flip between modes and
+watch the effect on a running UI in real time (set the mode to `DISABLED` and
+watch the counts drop to zero).
 
 ## Choosing a mode
 

@@ -101,7 +101,42 @@ class Cache_Configuration_Spec extends Specification
             !ext.hasCachedRendering(UI.Layer.BACKGROUND)
     }
 
-    // TODO: re-add a scenario proving the budget reacts to runtime raises, observed through
-    //       a surviving budget-consuming cache (noise/style layers); the text-cache-based
-    //       version was removed together with the text render cache.
+    def 'Raising the budget at runtime takes effect without re-initializing the library.'()
+    {
+        reportInfo """
+            Cache size limits are read *live* on every paint, not snapshotted once at
+            class-load time. Observed through the style-layer cache: with a zero budget
+            nothing is admitted, and raising the budget at runtime makes subsequent
+            paints start caching — no re-initialization required.
+        """
+        given : 'A zero budget (a maximally constrained machine) and a styled label painted repeatedly.'
+            CacheBudget.UNITS_OVERRIDE = 0
+            ComponentExtension.updateAllCachesFromLibraryConfig() // clears every global rendering cache
+            var label = UI.label("Platform 9")
+                          .withStyle({ it.backgroundColor(java.awt.Color.BLUE).borderRadius(8) })
+                          .get(javax.swing.JLabel)
+            5.times { paint(label) }
+        expect : 'Nothing was admitted to the style-layer cache while the budget was zero.'
+            ComponentExtension.globalRenderCacheEntryCounts()["style layers"] == 0
+
+        when : 'We raise the budget at runtime and paint a few more times.'
+            CacheBudget.UNITS_OVERRIDE = 10
+            5.times { paint(label) }
+        then : 'Caching kicks in — the live limit reacted to the runtime change.'
+            ComponentExtension.globalRenderCacheEntryCounts()["style layers"] > 0
+    }
+
+    def 'The live cache monitoring snapshot covers every global rendering cache.'()
+    {
+        reportInfo """
+            `ComponentExtension.globalRenderCacheEntryCounts()` is the observation point
+            for cache monitoring — the dev tool displays it live, and tests pin the
+            budget contract through it. Its keys are a stable, display-friendly
+            inventory of SwingTree's global rendering caches.
+        """
+        expect : 'One entry per global rendering cache, in stable order, never negative.'
+            ComponentExtension.globalRenderCacheEntryCounts().keySet() as List ==
+                ["style layers", "text layouts", "noise paints", "shadow gradients"]
+            ComponentExtension.globalRenderCacheEntryCounts().values().every { it >= 0 }
+    }
 }
