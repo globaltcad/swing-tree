@@ -694,14 +694,11 @@ public final class SwingTree
      */
 public void setCacheMode( SwingTreeInitConfig.CacheMode cacheMode ) {
     Objects.requireNonNull(cacheMode);
-    if ( UI.thisIsUIThread() ) {
+    if ( !UI.thisIsUIThread() ) {
+        UI.runNow(() -> setCacheMode(cacheMode));
+    } else {
         _config = _config.withCacheMode(cacheMode);
         swingtree.style.ComponentExtension.updateAllCachesFromLibraryConfig();
-    } else {
-        UI.runNow(() -> {
-            _config = _config.withCacheMode(cacheMode);
-            swingtree.style.ComponentExtension.updateAllCachesFromLibraryConfig();
-        });
     }
 }
 
