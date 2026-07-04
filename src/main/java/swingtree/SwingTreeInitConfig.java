@@ -668,16 +668,6 @@ public final class SwingTreeInitConfig
         String ENABLE_DEV_TOOL_KEY_STROKE = "swingtree.devTool.keyStrokeShortcut";
 
         /**
-         * Specifies whether SwingTree's text-rendering cache is enabled. When enabled,
-         * label / button / text-field text is rasterised once and then blitted on
-         * subsequent repaints instead of being re-shaped and re-rendered by the
-         * look-and-feel on every frame — a large saving for text-heavy UIs under load.
-         * <p>
-         * <strong>Allowed Values</strong> {@code false} and {@code true}<br>
-         * <strong>Default</strong> {@code true}
-         */
-
-        /**
          * Selects how aggressively SwingTree's rendering caches trade memory for CPU time
          * (see {@link CacheMode}). The value is the name of a {@link CacheMode} constant,
          * matched case-insensitively.
