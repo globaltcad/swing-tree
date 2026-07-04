@@ -692,10 +692,18 @@ public final class SwingTree
      *
      * @param cacheMode The new cache mode.
      */
-    public void setCacheMode( SwingTreeInitConfig.CacheMode cacheMode ) {
-        _config = _config.withCacheMode(Objects.requireNonNull(cacheMode));
+public void setCacheMode( SwingTreeInitConfig.CacheMode cacheMode ) {
+    Objects.requireNonNull(cacheMode);
+    if ( UI.thisIsUIThread() ) {
+        _config = _config.withCacheMode(cacheMode);
         swingtree.style.ComponentExtension.updateAllCachesFromLibraryConfig();
+    } else {
+        UI.runNow(() -> {
+            _config = _config.withCacheMode(cacheMode);
+            swingtree.style.ComponentExtension.updateAllCachesFromLibraryConfig();
+        });
     }
+}
 
 	/**
      *  The {@link StyleSheet} is an abstract class whose extensions are used to declare
