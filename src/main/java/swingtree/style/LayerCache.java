@@ -262,8 +262,9 @@ final class LayerCache
      */
     private int _cachingMakesSenseFor( LayerRenderConf state )
     {
-        if ( _CACHE.size() > _maxCacheEntries() )
-            return -1; // The cache is already too full, we don't want to add more entries to it!
+        final int maxEntries = _maxCacheEntries();
+        if ( maxEntries <= 0 || _CACHE.size() >= maxEntries )
+            return -1; // Caching disabled or cache already too full, don't admit more entries.
 
         final Size size = state.boxModel().size();
 
