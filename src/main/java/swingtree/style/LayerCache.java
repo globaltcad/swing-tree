@@ -50,14 +50,14 @@ final class LayerCache
 
     private static final Map<Pooled<LayerRenderConf>, CachedImage> _CACHE = new WeakHashMap<>();
 
-    /** Drops every globally cached layer image. Called when the library cache configuration
-     *  changes (see {@link ComponentExtension#updateAllCachesFromLibraryConfig()}) so memory
-     *  shrinks immediately; the cache repopulates lazily under the new budget. */
     /** Live number of cached style-layer renderings (for monitoring/tests). */
     static int globalEntryCount() {
         return _CACHE.size();
     }
 
+    /** Drops every globally cached layer image. Called when the library cache configuration
+     *  changes (see {@link ComponentExtension#updateAllCachesFromLibraryConfig()}) so memory
+     *  shrinks immediately; the cache repopulates lazily under the new budget. */
     static void clearGlobalCache() {
         _CACHE.clear();
     }
