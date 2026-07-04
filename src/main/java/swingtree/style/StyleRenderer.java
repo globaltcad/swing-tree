@@ -40,9 +40,6 @@ final class StyleRenderer
      */
     private static final Map<Pooled<ShadowConf>, ShadowGradientCache> _SHADOW_GRADIENT_CACHE = new WeakHashMap<>();
 
-    /** Drops the globally cached noise paints/tiles and shadow gradient stops. Called when the
-     *  library cache configuration changes (see {@link ComponentExtension#updateAllCachesFromLibraryConfig()})
-     *  so memory shrinks immediately; both maps repopulate lazily under the new budget. */
     /** Live number of cached noise paints (for monitoring/tests). */
     static int noisePaintCacheSize() { return _NOISE_PAINT_CACHE.size(); }
 
