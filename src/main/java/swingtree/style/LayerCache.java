@@ -29,53 +29,38 @@ final class LayerCache
 {
     private static final Logger log = LoggerFactory.getLogger(LayerCache.class);
 
-    private static final int    MAX_CACHE_ENTRIES                    = 1024; // There can never be more entries!
-    private static final int    MAX_CACHE_ENTRIES_PER_AGGRESSIVENESS = 32; // for every dynamic cache aggressiveness unit, we get more entries!
-    private static final int    PIXELS_PER_UNIT_OF_AGGRESSIVENESS    = 256 * 256; // Determines how many pixels a single unit of cache aggressiveness can cache
-    private static final double EAGER_ALLOCATION_FRIENDLINESS        = 0.1; // Has to be between 0 and 1!
-    private static final int    MAX_CACHE_HIT_COUNT                  = 12;
+    private static final int    MAX_CACHE_ENTRIES                 = 1024; // There can never be more entries!
+    private static final int    PIXELS_PER_UNIT_OF_AGGRESSIVENESS = 256 * 256; // Determines how many pixels a single unit of cache aggressiveness can cache
+    private static final double EAGER_ALLOCATION_FRIENDLINESS     = 0.1; // Has to be between 0 and 1!
+    private static final int    MAX_CACHE_HIT_COUNT               = 12;
 
-    static int CACHE_AGGRESSIVENESS_OVERRIDE = -1;
-
-    // Pre-computed once at class load time (expensive Runtime call avoided on every use)
-    private static final int _COMPUTED_CACHE_AGGRESSIVENESS;
-    private static final int _COMPUTED_CACHE_CAP;
-    static {
-        double availableGiB = _detectSystemRamGiB();
-        _COMPUTED_CACHE_AGGRESSIVENESS = (int) Math.round( 4 * Math.log(Math.max(1, availableGiB-1)) );
-        _COMPUTED_CACHE_CAP = Math.min(MAX_CACHE_ENTRIES, MAX_CACHE_ENTRIES_PER_AGGRESSIVENESS * _COMPUTED_CACHE_AGGRESSIVENESS);
+    /** The largest device-pixel area a single style-layer image may occupy to still be
+     *  cached. Expressed in {@link CacheBudget#units()} so that, at the default mode,
+     *  <em>which</em> components qualify for caching is exactly as it always was. */
+    private static int _maxCacheableImageArea() {
+        return (int) (CacheBudget.units() * PIXELS_PER_UNIT_OF_AGGRESSIVENESS);
     }
 
-    private static double _detectSystemRamGiB() {
-        try {
-            java.lang.management.OperatingSystemMXBean os = java.lang.management.ManagementFactory.getOperatingSystemMXBean();
-            if ( os instanceof com.sun.management.OperatingSystemMXBean ) {
-                long totalBytes = ((com.sun.management.OperatingSystemMXBean) os).getTotalPhysicalMemorySize();
-                if ( totalBytes > 0 )
-                    return totalBytes / (double) (1L << 30);
-            }
-        } catch ( Throwable t ) {
-            log.debug("Could not query system RAM, falling back to JVM max heap.", t);
-        }
-        // Fallback: JVM max heap (usually a fraction of physical RAM)
-        double maxHeap = Runtime.getRuntime().maxMemory() / (double) (1L << 30);
-        // We multiply by 4, since system will have a lot more RAM:
-        return maxHeap * 4;
-    }
-
-    // Higher means more memory usage but better performance
-    static int DYNAMIC_CACHE_AGGRESSIVENESS() {
-        if ( CACHE_AGGRESSIVENESS_OVERRIDE >= 0 )
-            return CACHE_AGGRESSIVENESS_OVERRIDE;
-        return _COMPUTED_CACHE_AGGRESSIVENESS;
-    }
-    private static int DYNAMIC_CACHE_CAP() {
-        if ( CACHE_AGGRESSIVENESS_OVERRIDE >= 0 )
-            return Math.min(MAX_CACHE_ENTRIES, MAX_CACHE_ENTRIES_PER_AGGRESSIVENESS * CACHE_AGGRESSIVENESS_OVERRIDE);
-        return _COMPUTED_CACHE_CAP;
+    /** The backstop on how many style-layer images the global cache retains, derived from
+     *  this cache's slice of the shared {@link CacheBudget} byte budget (so the total
+     *  footprint is tangible) and clamped to an absolute ceiling. */
+    private static int _maxCacheEntries() {
+        return Math.min(MAX_CACHE_ENTRIES, CacheBudget.maxEntriesFor(CacheBudget.Kind.STYLE_LAYER));
     }
 
     private static final Map<Pooled<LayerRenderConf>, CachedImage> _CACHE = new WeakHashMap<>();
+
+    /** Live number of cached style-layer renderings (for monitoring/tests). */
+    static int globalEntryCount() {
+        return _CACHE.size();
+    }
+
+    /** Drops every globally cached layer image. Called when the library cache configuration
+     *  changes (see {@link ComponentExtension#updateAllCachesFromLibraryConfig()}) so memory
+     *  shrinks immediately; the cache repopulates lazily under the new budget. */
+    static void clearGlobalCache() {
+        _CACHE.clear();
+    }
 
 
     private final UI.Layer          _layer;
@@ -277,8 +262,9 @@ final class LayerCache
      */
     private int _cachingMakesSenseFor( LayerRenderConf state )
     {
-        if ( _CACHE.size() > DYNAMIC_CACHE_CAP() )
-            return -1; // The cache is already too full, we don't want to add more entries to it!
+        final int maxEntries = _maxCacheEntries();
+        if ( maxEntries <= 0 || _CACHE.size() >= maxEntries )
+            return -1; // Caching disabled or cache already too full, don't admit more entries.
 
         final Size size = state.boxModel().size();
 
@@ -334,7 +320,7 @@ final class LayerCache
         if ( heavyStyleCount < 1 )
             return -1;
 
-        final int maxSizeLimit         = DYNAMIC_CACHE_AGGRESSIVENESS() * PIXELS_PER_UNIT_OF_AGGRESSIVENESS;
+        final int maxSizeLimit         = _maxCacheableImageArea();
         final int eagerAllocationLimit = (int) (maxSizeLimit * EAGER_ALLOCATION_FRIENDLINESS);
         final int cacheHitCountLimit   = (int) (maxSizeLimit * (1 - EAGER_ALLOCATION_FRIENDLINESS));
 

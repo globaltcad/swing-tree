@@ -10,6 +10,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  *  An immutable config API for specifying a gradient style.
@@ -206,6 +207,10 @@ public final class GradientConf implements Simplifiable<GradientConf>
     private final float                _rotation;
     private final float[]              _fractions;
     private final UI.Cycle             _cycle;
+
+    /** Memoized {@link #hashCode()}; this is deeply immutable value data used pervasively
+     *  as a cache key, so its (array-deep) hash is computed once and reused. */
+    private final AtomicReference<@Nullable Integer> _hashCodeCache = new AtomicReference<>();
 
 
     private GradientConf(
@@ -581,7 +586,10 @@ public final class GradientConf implements Simplifiable<GradientConf>
 
     @Override
     public int hashCode() {
-        return Objects.hash(
+        Integer foundHashCode = _hashCodeCache.get();
+        if ( foundHashCode != null )
+            return foundHashCode;
+        int hashCode = Objects.hash(
                 _span,
                 _type,
                 Arrays.hashCode(_colors),
@@ -594,6 +602,8 @@ public final class GradientConf implements Simplifiable<GradientConf>
                 Arrays.hashCode(_fractions),
                 _cycle
             );
+        _hashCodeCache.set(hashCode);
+        return hashCode;
     }
 
     @Override

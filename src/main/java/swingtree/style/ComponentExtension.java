@@ -2,10 +2,8 @@ package swingtree.style;
 
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
-import sprouts.From;
+import sprouts.*;
 import sprouts.Observable;
-import sprouts.Tuple;
-import sprouts.Viewable;
 import swingtree.DragAwayComponentConf;
 import swingtree.SwingTree;
 import swingtree.UI;
@@ -277,6 +275,26 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
+     *  Looks up an extra-state object of the given type previously attached to this
+     *  component extension (see {@link #getOrSet(Class, Supplier)}), without creating
+     *  or attaching anything. This is the pure-read companion to
+     *  {@link #getOrSet(Class, Supplier)}: it never has side effects and simply tells
+     *  you whether a plugin of the given type is currently present, and what it is.
+     *
+     * @param type The type of the extra state to look up.
+     * @return An {@link Optional} holding the attached object of the given type,
+     *         or an empty {@link Optional} if none is currently attached.
+     * @param <P> The type of the extra state.
+     */
+    public <P> Optional<P> get( Class<P> type ) {
+        for ( Object plugin : _extraState )
+            if ( type.isInstance(plugin) )
+                return Optional.of(type.cast(plugin));
+
+        return Optional.empty();
+    }
+
+    /**
      *   This method is used by {@link swingtree.UIForAnySwing#group(String...)} to attach
      *   so called <i>group tags</i> to a component. <br>
      *   They are used by the SwingTree style engine to apply
@@ -516,6 +534,48 @@ public final class ComponentExtension<C extends JComponent>
         Objects.requireNonNull(layer);
         LayerCache[] caches = _styleEngine.getLayerCaches();
         return caches[layer.ordinal()].paintCacheMissCount();
+    }
+
+    /**
+     *  A live snapshot of SwingTree's global rendering caches: one entry per cache with its
+     *  current number of cached items, in a stable, display-friendly order. The counts react
+     *  to painting, to garbage collection (the caches are weakly keyed), and to configuration
+     *  changes like {@link swingtree.SwingTree#setCacheMode(swingtree.SwingTreeInitConfig.CacheMode)} —
+     *  which makes this the observation point for monitoring (the dev tool displays it live)
+     *  and for tests pinning the cache-budget contract.
+     *
+     * @return An ordered association (immutable map) from cache display name to its live entry count.
+     */
+    public static Association<String, Integer> globalRenderCacheEntryCounts() {
+        return Association.betweenLinked(String.class, Integer.class)
+                .put("style layers",     LayerCache.globalEntryCount())
+                .put("text layouts",     TextLayoutEngine.globalEntryCount())
+                .put("noise paints",     StyleRenderer.noisePaintCacheSize())
+                .put("shadow gradients", StyleRenderer.shadowGradientCacheSize());
+    }
+
+    /**
+     *  The single bridge through which the {@code swingtree} package tells the rendering
+     *  caches in the {@code swingtree.style} package that the library configuration may have
+     *  changed (see {@link SwingTree#setCacheMode(swingtree.SwingTreeInitConfig.CacheMode)}).
+     *  It does two things, in this order:
+     *  <ol>
+     *      <li>marks the shared {@link CacheBudget} as needing to re-resolve the current
+     *          {@link swingtree.SwingTreeInitConfig.CacheMode} (on the next paint), and</li>
+     *      <li>empties every global rendering cache — style layers, rasterised text, noise
+     *          tiles, shadow gradients and text layouts — so that memory is released
+     *          <em>immediately</em> rather than only as old entries are evicted.</li>
+     *  </ol>
+     *  Each cache then repopulates lazily under the new budget. This is deliberately
+     *  recursion-safe: it never reads {@link SwingTree#get()} itself (so it is safe to call
+     *  while the {@link SwingTree} singleton is still being constructed); the budget is only
+     *  resolved later, lazily, from the painting thread.
+     */
+    public static void updateAllCachesFromLibraryConfig() {
+        CacheBudget.markUnresolved();
+        LayerCache.clearGlobalCache();
+        StyleRenderer.clearGlobalRenderCaches();
+        TextLayoutEngine.clearGlobalCaches();
     }
 
     /**
@@ -839,24 +899,30 @@ public final class ComponentExtension<C extends JComponent>
 
                 contentClip = StyleUtil.intersect( contentClip, _outerBaseClip );
 
+                final Consumer<Graphics> lafPaint = lookAndFeelPainting;
                 paintWithClip(internalGraphics, contentClip, () -> {
                     try {
-                        lookAndFeelPainting.accept(internalGraphics);
+                        lafPaint.accept(internalGraphics);
+
                     } catch (Exception e) {
-                        String componentAsString = "?";
-                        try {
-                            // Anything can happen in client code...
-                            componentAsString = _owner.toString();
-                        } catch (Exception e2) {
-                            log.error(SwingTree.get().logMarker(), "Error while converting component to string!", e2);
-                        }
-                        log.error(SwingTree.get().logMarker(), "Error while painting look and feel of component '"+componentAsString+"'!", e);
+                        _logLafPaintError(e);
                     }
                 });
             }
 
             internalGraphics.setClip(baseClip);
         });
+    }
+
+    private void _logLafPaintError(Exception e) {
+        String componentAsString = "?";
+        try {
+            // Anything can happen in client code...
+            componentAsString = _owner.toString();
+        } catch (Exception e2) {
+            log.error(SwingTree.get().logMarker(), "Error while converting component to string!", e2);
+        }
+        log.error(SwingTree.get().logMarker(), "Error while painting look and feel of component '"+componentAsString+"'!", e);
     }
 
     private static Color findBackgroundColorForWiping(Container owner, ComponentConf componentConf) {
