@@ -217,12 +217,16 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
 
     /**
      *  Sets the selected tab based on the given index.
+     *  Note that the index is allowed to point to a tab which does not (yet) exist,
+     *  in which case the selection index is merely stored and then automatically applied
+     *  as soon as a matching tab is added to the tabbed pane.
      * @param index The index of the tab to select.
      * @return This builder node.
      */
     public final UIForTabbedPane<P> withSelectedIndex( int index ) {
         return _with( thisComponent -> {
-                   thisComponent.setSelectedIndex(index);
+                   _bindSelectedIndex(thisComponent, Val.of(index));
+                   _reconcileSelection(thisComponent);
                })
                ._this();
     }
@@ -230,18 +234,18 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
     /**
      *  Dynamically sets the selected tab based on the given index property.
      *  So when the index property changes, the selected tab will change accordingly.
+     *  Note that the index is allowed to point to a tab which does not (yet) exist,
+     *  in which case the selection index is merely stored and then automatically applied
+     *  as soon as a matching tab is added to the tabbed pane.
      * @param index The index property of the tab to select.
      * @return This builder node.
      */
     public final UIForTabbedPane<P> withSelectedIndex( Val<Integer> index ) {
         NullUtil.nullArgCheck( index, "index", Val.class );
         NullUtil.nullPropertyCheck( index, "index", "Null is not a valid state for modelling a selected index." );
-        return _withOnShow( index, (thisComponent,i) -> {
-                    thisComponent.setSelectedIndex(i);
-               })
-                ._with( thisComponent -> {
-                    thisComponent.setSelectedIndex(index.get());
-                })
+        return _with( thisComponent -> _bindSelectedIndex(thisComponent, index) )
+               ._withOnShow( index, (thisComponent,i) -> _reconcileSelection(thisComponent) )
+               ._with( thisComponent -> _reconcileSelection(thisComponent) )
                ._this();
     }
 
@@ -255,33 +259,52 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
     public final UIForTabbedPane<P> withSelectedIndex( Var<Integer> index ) {
         NullUtil.nullArgCheck( index, "index", Var.class );
         NullUtil.nullPropertyCheck( index, "index", "Null is not a valid state for modelling a selected index." );
-        return _with( thisComponent -> {
-                    ExtraState state = ExtraState.of(thisComponent);
-                    if ( state.selectedTabIndex != null && state.selectedTabIndex != index )
-                        log.warn(SwingTree.get().logMarker(),
-                                "Trying to bind a new property '{}' to the index of tabbed pane '{}' even " +
-                                "though the previously specified property '{}' is already bound to it. " +
-                                "The previous property will be replaced now!",
-                                index, thisComponent, state.selectedTabIndex,
-                                new Throwable("Stack trace for debugging purposes.")
-                            );
-
-                    state.selectedTabIndex = index;
-               })
-               ._withOnShow( index, (thisComponent,i) -> {
-                   ExtraState state = ExtraState.of(thisComponent);
-                   thisComponent.setSelectedIndex(i);
-                   state.selectionListeners.forEach( l -> l.accept(i) );
-               })
-               ._with( thisComponent -> {
-                   _onChange(thisComponent, e -> _runInApp(()->{
-                       ExtraState state = ExtraState.of(thisComponent);
-                       index.set(From.VIEW, thisComponent.getSelectedIndex());
-                       state.selectionListeners.forEach(l -> l.accept(thisComponent.getSelectedIndex()) );
-                   }));
-                   thisComponent.setSelectedIndex(index.get());
-               })
+        return _with( thisComponent -> _bindSelectedIndex(thisComponent, index) )
+               ._withOnShow( index, (thisComponent,i) -> _reconcileSelection(thisComponent) )
+               ._with( thisComponent -> _reconcileSelection(thisComponent) )
                ._this();
+    }
+
+    /**
+     *  Registers the given property as the single source of the <i>desired</i> selection
+     *  index of the tabbed pane. All three {@code withSelectedIndex(..)} overloads funnel
+     *  through here, so a plain {@code int} is simply wrapped in a constant {@link Val}.
+     *  Whether the actual selection is written back to this property is decided later
+     *  based on whether it is a mutable {@link Var} (see {@link ExtraState#setBothDesiredAndActualSelectionIndex(int, boolean)}).
+     *
+     * @param pane The tabbed pane to configure.
+     * @param index The property holding the desired selection index (may point to a not-yet-existing tab).
+     */
+    private void _bindSelectedIndex( P pane, Val<Integer> index ) {
+        ExtraState state = ExtraState.of(pane);
+        if ( state.selectedIndex != null && state.selectedIndex != index )
+            log.warn(SwingTree.get().logMarker(),
+                    "Trying to bind a new property '{}' to the selection index of tabbed pane '{}' even " +
+                    "though the previously specified property '{}' is already bound to it. " +
+                    "The previous property will be replaced now!",
+                    index, pane, state.selectedIndex,
+                    new Throwable("Stack trace for debugging purposes.")
+                );
+        state.selectedIndex = index;
+    }
+
+    /**
+     *  Reconciles the actual (visual) selection of the tabbed pane with the desired
+     *  selection index held by the bound property. If the desired index points to a tab
+     *  which does not exist (yet), then <b>nothing</b> is selected (effective index
+     *  {@code -1}) and all tab {@code isSelectedIf(..)} booleans resolve to {@code false},
+     *  until a matching tab is added - at which point this method is called again (from the
+     *  tab-adding code) and applies the now valid index automatically.
+     *  <p>
+     *  This is the property {@literal ->} view direction, so the effective selection is
+     *  applied <b>without</b> writing anything back to the bound property, which must keep
+     *  holding the (possibly deferred) desired value.
+     *
+     * @param pane The tabbed pane whose selection should be reconciled with the desired index.
+     */
+    private void _reconcileSelection( P pane ) {
+        ExtraState state = ExtraState.of(pane);
+        state.reconcileEffectiveSelection(pane);
     }
 
     /**
@@ -453,6 +476,9 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                         _buildTabHeader( tab, mouseListener )
                     )
                 );
+
+            // A selection index may have been bound before this tab existed, so we try to apply it now:
+            _reconcileSelection(thisComponent);
         })
         ._this();
     }
@@ -718,12 +744,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
     private void _selectTab( P thisComponent, int tabIndex, boolean isSelected ) {
         ExtraState state = ExtraState.of(thisComponent);
         int selectedIndex = ( isSelected ? tabIndex : thisComponent.getSelectedIndex() );
-        if ( state.selectedTabIndex != null )
-            state.selectedTabIndex.set(From.VIEW, selectedIndex);
-        else if ( isSelected )
-            thisComponent.setSelectedIndex(selectedIndex);
-
-        state.selectionListeners.forEach(l -> l.accept(selectedIndex));
+        state.setBothDesiredAndActualSelectionIndex(selectedIndex, true);
     }
 
     private void _selectTabFromModelling( P thisComponent, int tabIndex, boolean isSelected ) {
@@ -911,13 +932,18 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         TabMouseClickListener mouseListener = new TabMouseClickListener(p, indexFinder, tab.onMouseClick().orElse(null));
 
         // Initial tab setup:
-        p.insertTab(
-            tab.title().map(Val::orElseNull).orElse(null),
-            tab.icon().map(Val::orElseNull).orElse(null),
-            tab.contents().orElse(dummyContent),
-            tab.tip().map(Val::orElseNull).orElse(null),
-            index
-        );
+        _doWithoutListeners(p, ()-> {
+            boolean hasSelectionBoolProp = tab.isSelected().isPresent();
+            ExtraState.of(p).doSilentlyIfAlreadyHasSelectionOrIf(hasSelectionBoolProp, ()->{
+                p.insertTab(
+                    tab.title().map(Val::orElseNull).orElse(null),
+                    tab.icon().map(Val::orElseNull).orElse(null),
+                    tab.contents().orElse(dummyContent),
+                    tab.tip().map(Val::orElseNull).orElse(null),
+                    index
+                );
+            });
+        });
         tab.isEnabled().ifPresent(isEnabled -> p.setEnabledAt(indexFinder.get(), isEnabled.get()));
         tab.isSelected().ifPresent(isSelected -> {
             ExtraState state = ExtraState.of(p);
@@ -943,6 +969,9 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         tab.isSelected().ifPresent(isSelected -> _onShow(isSelected, p, (c, s) -> _selectTab(c, indexFinder.get(), s)));
 
         tab.headerContents().ifPresent(c -> p.setTabComponentAt(index, _buildTabHeader(tab, mouseListener)));
+
+        // A selection index may have been bound before this tab existed, so we try to apply it now:
+        _reconcileSelection(p);
     }
 
     private static final class OnSelectionMultiplexer implements ChangeListener {
@@ -1025,28 +1054,79 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         }
 
         final List<Consumer<Integer>> selectionListeners = new ArrayList<>();
-        private @Nullable Var<Integer> selectedTabIndex = null;
+        /**
+         *  The single source of the <i>desired</i> selection index, as configured through
+         *  any of the {@code withSelectedIndex(..)} overloads (a plain {@code int} is wrapped
+         *  in a constant {@link Val}). It may point to a tab that does not (yet) exist, in
+         *  which case the effective selection stays at {@code -1} until a matching tab is
+         *  added. {@code null} means no selection preference was configured at all, so the
+         *  tabbed pane behaves like a plain Swing {@link JTabbedPane}.
+         *  <p>
+         *  When it is a mutable {@link Var}, user driven selection changes are written back
+         *  to it (see {@link #setBothDesiredAndActualSelectionIndex(int, boolean)}).
+         */
+        private @Nullable Val<Integer> selectedIndex = null;
+        /**
+         *  When {@code true}, actual tab selection changes are fully ignored. This is used
+         *  while a tab is being inserted, because Swing auto-selects the first inserted tab,
+         *  which would otherwise override the desired selection and write back to the bound
+         *  property. The correct selection is (re)applied right after insertion by
+         *  {@code _reconcileSelection(..)}.
+         */
         private boolean ignoreChanges = false;
+        /**
+         *  When {@code true}, changes to the actual tab selection are <b>not</b> written
+         *  back to the bound selection index property. This is used while applying the
+         *  desired index in the property {@literal ->} view direction (see
+         *  {@link #reconcileEffectiveSelection(JTabbedPane)}), where a write-back would be
+         *  redundant at best and, when the desired target tab does not exist yet (effective
+         *  index {@code -1}), would even destroy the desired value the property must keep.
+         */
+        private boolean applyingDesiredIndex = false;
+
+        void reconcileEffectiveSelection( JTabbedPane pane ) {
+            if ( selectedIndex == null )
+                return; // No selection preference was configured.
+            int desired = selectedIndex.get();
+            boolean isApplicable = ( desired == -1 ) || ( desired >= 0 && desired < pane.getTabCount() );
+            int effectiveIndex = isApplicable ? desired : -1;
+            boolean wasApplying = applyingDesiredIndex;
+            applyingDesiredIndex = true;
+            try {
+                if ( pane.getSelectedIndex() != effectiveIndex )
+                    pane.setSelectedIndex(effectiveIndex);
+                else
+                    selectionListeners.forEach(l -> l.accept(effectiveIndex));
+            } finally {
+                applyingDesiredIndex = wasApplying;
+            }
+        }
 
         @Override public void setSelectedIndex(int index) {
             if ( ignoreChanges )
                 return;
-            super.setSelectedIndex(index);
-            if ( selectedTabIndex != null )
-                selectedTabIndex.set(From.VIEW, index);
-
-            selectionListeners.forEach(l -> l.accept(index));
+            setBothDesiredAndActualSelectionIndex(index, true);
         }
         @Override public void clearSelection() {
             if ( ignoreChanges )
                 return;
-            super.clearSelection();
-            if ( selectedTabIndex != null )
-                selectedTabIndex.set(From.VIEW, -1);
+            setBothDesiredAndActualSelectionIndex(-1, false);
+        }
+
+        public void setBothDesiredAndActualSelectionIndex(int index, boolean fireListeners) {
+            super.setSelectedIndex(index);
+            Var<Integer> writableIndex = null;
+            if ( selectedIndex instanceof Var && selectedIndex.isMutable() )
+                writableIndex = (Var<Integer>) selectedIndex;
+            if ( writableIndex != null && !applyingDesiredIndex )
+                writableIndex.set(From.VIEW, index);
+            if ( fireListeners ) {
+                selectionListeners.forEach(l -> l.accept(index));
+            }
         }
 
         private void doSilentlyIfAlreadyHasSelectionOrIf(boolean condition, Runnable action) {
-            ignoreChanges = ( condition || this.selectedTabIndex != null );
+            ignoreChanges = ( condition || this.selectedIndex != null );
             try {
                 action.run();
             } finally {
