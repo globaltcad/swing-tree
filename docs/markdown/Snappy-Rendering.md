@@ -2,7 +2,7 @@
 # Snappy Rendering — Caching & the Memory ⇄ CPU Trade-off #
 
 > **TL;DR:** SwingTree renders the expensive, *stable* parts of your UI — styled
-> backgrounds, borders, shadows, gradients, noise, and text — **once**, keeps the
+> backgrounds, borders, shadows, gradients, and noise — **once**, keeps the
 > result in (often GPU-accelerated) image memory, and **blits** it on subsequent
 > repaints instead of re-rendering from scratch. That is what keeps resizes and
 > animations smooth where plain Swing stutters. It is **on by default** (the
@@ -41,7 +41,6 @@ manage them. They are:
 | Cache | What it stores | Why it's expensive to recompute |
 |---|---|---|
 | **Style layers** | the fully rendered background/border/foundation image of a styled component | rounded corners, multiple gradient/shadow/image layers composited per paint |
-| **Rasterised text** | the pixels of a label/button/text-field's text in a given font & colour | re-shaping glyphs and software-compositing antialiased text is the single biggest per-frame cost under load |
 | **Noise tiles** | pre-rendered tiles of a procedural noise paint, in offset-independent *noise space* | per-pixel noise sampling through the `Paint` pipeline |
 | **Shadow gradients** | the blended colour-stop arrays of a drop/inner shadow | blending the falloff curve into dozens of gradient stops |
 | **Text layouts** | `TextLayout`s and paragraph line-break data for rich/wrapped text | line-breaking and attribute setup over the whole paragraph |
@@ -103,7 +102,7 @@ Or without touching code at all, via a system property:
 The mode does not pick a fixed number of megabytes — it picks a **fraction of
 physical RAM, clamped between a floor and a cap**, so the same mode scales
 sensibly from a 2 GB tablet to a 256 GB workstation. That total budget is then
-partitioned across the five caches.
+partitioned across the four caches.
 
 | Mode | Share of RAM | Floor | Cap (real-world anchor) |
 |---|---|---|---|
