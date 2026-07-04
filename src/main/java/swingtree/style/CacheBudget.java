@@ -55,15 +55,15 @@ import swingtree.SwingTreeInitConfig.CacheMode;
  *  </pre>
  *
  *  <h2>Reference: where the default ({@code BALANCED}) budget goes, per cache (MB)</h2>
- *  The total is partitioned across the five caches by the {@link Kind} weights below
- *  (style layers 40%, noise tiles 25%, text images 20%, text layouts 10%, shadows 5%):
+ *  The total is partitioned across the four caches by the {@link Kind} weights below
+ *  (style layers 45%, noise tiles 30%, text layouts 15%, shadows 10%):
  *  <pre>
- *    RAM      Total   Layers   Noise   Text   Layouts   Shadows
- *    2 GiB      16      6.4      4.0    3.2      1.6       0.8
- *    4 GiB      20      8.2      5.1    4.1      2.0       1.0
- *    8 GiB      41     16.4     10.2    8.2      4.1       2.0
- *   16 GiB      82     32.8     20.5   16.4      8.2       4.1
- *  &gt;=32 GiB    128     51.2     32.0   25.6     12.8       6.4   (at cap)
+ *    RAM      Total   Layers   Noise   Layouts   Shadows
+ *    2 GiB      16      7.2      4.8      2.4       1.6
+ *    4 GiB      20      9.2      6.1      3.1       2.0
+ *    8 GiB      41     18.4     12.3      6.1       4.1
+ *   16 GiB      82     36.9     24.6     12.3       8.2
+ *  &gt;=32 GiB    128     57.6     38.4     19.2      12.8   (at cap)
  *  </pre>
  *  These are <em>ceilings on retention</em>, not pre-allocations: a cache only ever holds
  *  what the painted components actually produce, up to its slice. A small app on a big
@@ -126,11 +126,10 @@ final class CacheBudget {
      *  the kind's byte slice into a native entry/tile count. The per-entry costs are real
      *  estimates (a 256² tile really is ~256 KiB), which is what makes the budget tangible. */
     enum Kind {
-        STYLE_LAYER    (0.40, 64L  * 1024),        // representative style layer image (~128² ARGB)
-        TEXT_IMAGE     (0.20, 16L  * 1024),        // representative rasterised glyph strip
-        NOISE_TILE     (0.25, 256L * 256 * 4),     // exact: one 256² ARGB noise tile (256 KiB)
-        SHADOW_GRADIENT(0.05, 1L   * 1024),        // a blended gradient-stop array
-        TEXT_LAYOUT    (0.10, 2L   * 1024);        // a cached paragraph layout
+        STYLE_LAYER    (0.45, 64L  * 1024),        // representative style layer image (~128² ARGB)
+        NOISE_TILE     (0.30, 256L * 256 * 4),     // exact: one 256² ARGB noise tile (256 KiB)
+        SHADOW_GRADIENT(0.10, 1L   * 1024),        // a blended gradient-stop array
+        TEXT_LAYOUT    (0.15, 2L   * 1024);        // a cached paragraph layout
 
         final double weight;
         final long   bytesPerEntry;

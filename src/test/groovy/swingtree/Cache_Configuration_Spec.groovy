@@ -21,7 +21,7 @@ import java.awt.Color
 @Narrative('''
 
     Every one of SwingTree's internal rendering caches – style layer images,
-    rasterised text, noise tiles, shadow gradients and text layouts – draws its
+    noise tiles, shadow gradients and text layouts – draws its
     memory budget from a single, unified source: the `CacheMode` configured on
     the `SwingTree` library context, combined with the amount of system RAM.
 
