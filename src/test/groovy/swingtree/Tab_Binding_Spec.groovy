@@ -525,6 +525,110 @@ class Tab_Binding_Spec extends Specification
             index.get() == 2
     }
 
+    def 'A fixed selection index does not override a newer user selection when more tabs are added.'()
+    {
+        reportInfo """
+            The `withSelectedIndex(int)` overload configures an **initial** selection index.
+            It is a one-time preference, not a permanent constraint: once it has been honored,
+            the user is free to select a different tab, and adding further tabs must **not**
+            snap the selection back to the originally configured index.
+        """
+        given : 'A growing tab list and a fixed initial selection index of 0.'
+            var models = Vars.of("Tab 1", "Tab 2")
+            TabSupplier<String> supplier = (String title) -> UI.tab(title)
+        and : 'A tabbed pane whose tabs come from the list and whose initial selection is fixed to index 0.'
+            def pane =
+                UI.tabbedPane().withSelectedIndex(0)
+                .addAll(models, supplier)
+                .get(JTabbedPane)
+
+        expect : 'The fixed index selected the first tab.'
+            pane.getTabCount() == 2
+            pane.getSelectedIndex() == 0
+
+        when : 'The user selects the second tab.'
+            UI.runNow(()->{ pane.selectedIndex = 1 })
+
+        then : 'The selection follows the user.'
+            pane.getSelectedIndex() == 1
+
+        when : 'More tabs are added afterwards.'
+            models.addAll("Tab 3", "Tab 4")
+            UI.sync()
+
+        then : 'The fixed index does NOT snap the selection back to 0; the user selection is preserved.'
+            pane.getTabCount() == 4
+            pane.getSelectedIndex() == 1
+    }
+
+    def 'A boolean tab selection binding is not overridden by a fixed selection index.'()
+    {
+        reportInfo """
+            When a fixed selection index (`withSelectedIndex(int)`) is combined with a tab
+            whose selected state is bound to a boolean property (`isSelectedIf(..)`), the
+            boolean binding, being the more specific and later applied preference, must win.
+            The fixed index must not silently override it.
+        """
+        given : 'Two boolean selection properties, the second one requesting its tab to be selected.'
+            var tab1Selected = Var.of(false)
+            var tab2Selected = Var.of(true)
+        and : 'A tabbed pane with a fixed index 0, but tab 2 bound to a TRUE selection boolean.'
+            def pane =
+                UI.tabbedPane().withSelectedIndex(0)
+                .add(UI.tab("Tab 1").isSelectedIf(tab1Selected))
+                .add(UI.tab("Tab 2").isSelectedIf(tab2Selected))
+                .get(JTabbedPane)
+
+        expect : 'The boolean-driven selection (tab 2) is respected, not overwritten by the fixed index 0.'
+            pane.getSelectedIndex() == 1
+            tab2Selected.get() == true
+            tab1Selected.get() == false
+    }
+
+    def 'A fixed selection index does not override a boolean selection change made before more tabs are added.'()
+    {
+        reportInfo """
+            A more dynamic variant of the previous scenario: after a fixed selection index has
+            been honored, changing a tab's bound selection boolean must move the selection, and
+            a subsequent tab addition must not snap it back to the fixed index.
+        """
+        given : 'Per-tab boolean selection properties and a growing tab list.'
+            var tab1Selected = Var.of(false)
+            var tab2Selected = Var.of(false)
+            var tab3Selected = Var.of(false)
+            var booleans = [tab1Selected, tab2Selected, tab3Selected]
+            var models = Vars.of("Tab 1", "Tab 2")
+            TabSupplier<String> supplier = (String title) ->
+                UI.tab(title).isSelectedIf(booleans[Integer.parseInt(title.substring(4)) - 1])
+        and : 'A tabbed pane with a fixed initial selection index of 0 and boolean-bound, list-driven tabs.'
+            def pane =
+                UI.tabbedPane().withSelectedIndex(0)
+                .addAll(models, supplier)
+                .get(JTabbedPane)
+
+        expect : 'The fixed index selected the first tab.'
+            pane.getSelectedIndex() == 0
+            tab1Selected.get() == true
+
+        when : 'We select the second tab through its boolean property.'
+            tab2Selected.set(true)
+            UI.sync()
+
+        then : 'The second tab becomes selected.'
+            pane.getSelectedIndex() == 1
+            tab1Selected.get() == false
+            tab2Selected.get() == true
+
+        when : 'A third tab is added afterwards through the bound list.'
+            models.add("Tab 3")
+            UI.sync()
+
+        then : 'The fixed index does NOT snap the selection back to 0; the boolean selection is preserved.'
+            pane.getTabCount() == 3
+            pane.getSelectedIndex() == 1
+            tab2Selected.get() == true
+    }
+
     def 'An unbound tabbed pane has the expect initial state.'()
     {
         given : 'We create a tabbed pane UI node and attach tabs with custom tab header components to it.'

@@ -308,6 +308,19 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
     }
 
     /**
+     *  Applies a deferred selection index after a tab was added, but only if the desired
+     *  selection has not been honored yet (nothing is currently selected). Unlike
+     *  {@link #_reconcileSelection(JTabbedPane)}, this never overrides a newer selection
+     *  (made by the user or a bound {@code isSelectedIf(..)} boolean) with the originally
+     *  configured index. See {@link ExtraState#applyDeferredSelectionAfterStructuralChange(JTabbedPane)}.
+     *
+     * @param pane The tabbed pane whose deferred selection should be applied if still pending.
+     */
+    private void _applyDeferredSelectionAfterTabAddition( P pane ) {
+        ExtraState.of(pane).applyDeferredSelectionAfterStructuralChange(pane);
+    }
+
+    /**
      *  Defines the tab placement side based on the given {@link swingtree.UI.Side} enum,
      *  which maps directly to the {@link JTabbedPane#setTabPlacement(int)} method.
      *
@@ -477,8 +490,9 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                     )
                 );
 
-            // A selection index may have been bound before this tab existed, so we try to apply it now:
-            _reconcileSelection(thisComponent);
+            // A selection index may have been bound before this tab existed, so we try to apply it now
+            // (but only if it is still pending, so we do not override a newer selection):
+            _applyDeferredSelectionAfterTabAddition(thisComponent);
         })
         ._this();
     }
@@ -970,8 +984,9 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
 
         tab.headerContents().ifPresent(c -> p.setTabComponentAt(index, _buildTabHeader(tab, mouseListener)));
 
-        // A selection index may have been bound before this tab existed, so we try to apply it now:
-        _reconcileSelection(p);
+        // A selection index may have been bound before this tab existed, so we try to apply it now
+        // (but only if it is still pending, so we do not override a newer selection):
+        _applyDeferredSelectionAfterTabAddition(p);
     }
 
     private static final class OnSelectionMultiplexer implements ChangeListener {
@@ -1100,6 +1115,25 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             } finally {
                 applyingDesiredIndex = wasApplying;
             }
+        }
+
+        /**
+         *  Applies the desired selection index after the tab structure changed (a tab was
+         *  added), but <b>only to fulfil a pending deferral</b>: if a tab is already selected
+         *  (by the user, a bound {@code isSelectedIf(..)} boolean, or a previous application),
+         *  the selection is left untouched. This is what distinguishes the configured index
+         *  from a permanent constraint - it is applied as soon as its tab first exists, but it
+         *  must never override a newer selection when further tabs are added afterwards.
+         *  <p>
+         *  This relies on the fact that while a desired index is deferred (its tab does not
+         *  exist yet), the actual selection is kept at {@code -1}, because Swing's auto-select
+         *  on tab insertion is suppressed (see {@link #doSilentlyIfAlreadyHasSelectionOrIf}).
+         *  So {@code -1} reliably means "nothing has been selected yet".
+         */
+        void applyDeferredSelectionAfterStructuralChange( JTabbedPane pane ) {
+            if ( pane.getSelectedIndex() != -1 )
+                return; // A tab is already selected; do not re-impose the configured index.
+            reconcileEffectiveSelection(pane);
         }
 
         @Override public void setSelectedIndex(int index) {
