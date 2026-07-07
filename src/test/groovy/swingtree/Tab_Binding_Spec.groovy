@@ -4,9 +4,11 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import sprouts.From
 import sprouts.Tuple
 import sprouts.Var
 import sprouts.Vars
+import sprouts.Viewable
 import swingtree.api.IconDeclaration
 import swingtree.api.mvvm.TabSupplier
 import swingtree.threading.EventProcessor
@@ -704,6 +706,142 @@ class Tab_Binding_Spec extends Specification
             selectionFlags["Tab 0"].get() == false
             selectionFlags["Tab 1"].get() == true
             selectionFlags["Tab 2"].get() == false
+    }
+
+    def 'Replacing the tuple item behind the selected tab neither moves the selection nor writes to the bound index.'()
+    {
+        reportInfo """
+            When a tab model inside a bound tuple is replaced through `setAt(..)`,
+            the corresponding tab is rebuilt in place. This is a same-size, same-position
+            replacement, so the selection must not move — historically the naive
+            remove + insert first shifted the selection off the removed tab and then
+            past the inserted one, bumping it to the neighbouring tab and leaking
+            these spurious intermediate indices into the bound selection property.
+        """
+        given : 'A tuple of tab models, a selection index property and a trace of every write to it.'
+            var models = Var.of(Tuple.of("Alpha", "Beta", "Gamma"))
+            var selectedIndex = Var.of(1)
+            var trace = []
+            Viewable.cast(selectedIndex).onChange(From.ALL, it -> trace << it.currentValue().orElseThrowUnchecked())
+        and : 'A tabbed pane bound to both.'
+            TabSupplier<String> supplier = model -> UI.tab(model).add(UI.label("content of " + model))
+            def pane =
+                UI.tabbedPane().withSelectedIndex(selectedIndex)
+                .addAll(models, supplier)
+                .get(JTabbedPane)
+            UI.sync()
+        expect : 'The second tab is selected, as requested by the property.'
+            pane.getSelectedIndex() == 1
+            pane.getTitleAt(1) == "Beta"
+
+        when : 'We replace the model of the selected tab.'
+            models.update( tuple -> tuple.setAt(1, "Beta 2.0") )
+            UI.sync()
+
+        then : 'The tab was rebuilt in place and is still the selected one.'
+            pane.getTabCount() == 3
+            pane.getTitleAt(1) == "Beta 2.0"
+            pane.getSelectedIndex() == 1
+        and : 'The bound index property never received a single write.'
+            selectedIndex.get() == 1
+            trace == []
+
+        when : 'We also replace the model of a tab before the selection.'
+            models.update( tuple -> tuple.setAt(0, "Alpha 2.0") )
+            UI.sync()
+
+        then : 'Again, the selection and the bound property are completely untouched.'
+            pane.getTitleAt(0) == "Alpha 2.0"
+            pane.getSelectedIndex() == 1
+            selectedIndex.get() == 1
+            trace == []
+    }
+
+    def 'An enum based tab selection stays consistent when jumping between distant tabs.'()
+    {
+        reportInfo """
+            The enum overload `isSelectedIf(E, Var<E>)` bridges an enum property
+            into the boolean selection flags of the individual tabs.
+            Historically, changing the enum could bounce between the flag of the
+            previously selected tab and the newly selected one, because the
+            "deselect" event re-asserted the still current tab's flag, resurrecting
+            the old enum value — a feedback loop which corrupted the property with
+            stale view writes and could escalate into a StackOverflowError.
+            Here we ensure that jumps across the tab strip settle in one
+            consistent state, without any stale write backs to the enum property.
+        """
+        given : 'An enum property, a trace of all view-channel writes to it, and one tab per enum state.'
+            var day = Var.of(DayOfWeek.MONDAY)
+            var viewChannelWrites = []
+            Viewable.cast(day).onChange(From.VIEW, it -> viewChannelWrites << it.currentValue().orElseThrowUnchecked())
+            def pane =
+                UI.tabbedPane()
+                .add(UI.tab("Mon").isSelectedIf(DayOfWeek.MONDAY,    day))
+                .add(UI.tab("Tue").isSelectedIf(DayOfWeek.TUESDAY,   day))
+                .add(UI.tab("Wed").isSelectedIf(DayOfWeek.WEDNESDAY, day))
+                .get(JTabbedPane)
+        expect : 'The initial enum value selected the first tab.'
+            pane.getSelectedIndex() == 0
+
+        when : 'We jump from the first to the last state, on the UI thread.'
+            UI.runNow(() -> day.set(DayOfWeek.WEDNESDAY))
+            UI.sync()
+
+        then : 'The pane and the property agree...'
+            pane.getSelectedIndex() == 2
+            day.get() == DayOfWeek.WEDNESDAY
+        and : '...and the property never received a stale view write.'
+            viewChannelWrites == []
+
+        when : 'We jump all the way back.'
+            UI.runNow(() -> day.set(DayOfWeek.MONDAY))
+            UI.sync()
+
+        then : 'Everything agrees again, still without stale writes.'
+            pane.getSelectedIndex() == 0
+            day.get() == DayOfWeek.MONDAY
+            viewChannelWrites == []
+
+        when : 'The user selects the middle tab in the view.'
+            UI.runNow(() -> pane.setSelectedIndex(1))
+            UI.sync()
+
+        then : 'The property follows, and it was updated through the view channel exactly once.'
+            day.get() == DayOfWeek.TUESDAY
+            viewChannelWrites == [DayOfWeek.TUESDAY]
+    }
+
+    def 'Setting the selection flag of the currently selected tab to false deselects the whole pane.'()
+    {
+        reportInfo """
+            A boolean selection flag is a two-way binding: `true` selects the tab,
+            so `false` on the currently selected tab deselects it — leaving the
+            pane with no selection at all instead of silently flipping the
+            property back to `true`.
+        """
+        given : 'A tabbed pane with a boolean selection flag on the second tab.'
+            var tab2Selected = Var.of(false)
+            def pane =
+                UI.tabbedPane()
+                .add(UI.tab("Tab 1"))
+                .add(UI.tab("Tab 2").isSelectedIf(tab2Selected))
+                .add(UI.tab("Tab 3"))
+                .get(JTabbedPane)
+
+        when : 'We select the second tab through its flag.'
+            tab2Selected.set(true)
+            UI.sync()
+
+        then : 'It is selected.'
+            pane.getSelectedIndex() == 1
+
+        when : 'We set the flag of that very tab to false.'
+            tab2Selected.set(false)
+            UI.sync()
+
+        then : 'Nothing is selected anymore, and the flag stays false.'
+            pane.getSelectedIndex() == -1
+            tab2Selected.get() == false
     }
 
     def 'An unbound tabbed pane has the expect initial state.'()
