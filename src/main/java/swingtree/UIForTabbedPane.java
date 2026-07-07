@@ -315,12 +315,19 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
      *  selection has not been honored yet (nothing is currently selected). Unlike
      *  {@link #_reconcileSelection(JTabbedPane)}, this never overrides a newer selection
      *  (made by the user or a bound {@code isSelectedIf(..)} boolean) with the originally
-     *  configured index. See {@link ExtraState#applyDeferredSelectionAfterStructuralChange(JTabbedPane)}.
+     *  configured index.
+     *  <p>
+     *  This relies on the fact that while a desired index is deferred (its tab does not
+     *  exist yet), the actual selection is kept at {@code -1}, because Swing's auto-select
+     *  on tab insertion is suppressed (see {@link ExtraState#doSilentlyIfSelectionIsManaged}).
+     *  So {@code -1} reliably means "nothing has been selected yet".
      *
      * @param pane The tabbed pane whose deferred selection should be applied if still pending.
      */
     private void _applyDeferredSelectionAfterTabAddition( P pane ) {
-        ExtraState.of(pane).applyDeferredSelectionAfterStructuralChange(pane);
+        if ( pane.getSelectedIndex() != -1 )
+            return; // A tab is already selected; do not re-impose the configured index.
+        ExtraState.of(pane).reconcileEffectiveSelection(pane);
     }
 
     /**
@@ -1125,25 +1132,6 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             } finally {
                 applyingDesiredIndex = wasApplying;
             }
-        }
-
-        /**
-         *  Applies the desired selection index after the tab structure changed (a tab was
-         *  added), but <b>only to fulfil a pending deferral</b>: if a tab is already selected
-         *  (by the user, a bound {@code isSelectedIf(..)} boolean, or a previous application),
-         *  the selection is left untouched. This is what distinguishes the configured index
-         *  from a permanent constraint - it is applied as soon as its tab first exists, but it
-         *  must never override a newer selection when further tabs are added afterwards.
-         *  <p>
-         *  This relies on the fact that while a desired index is deferred (its tab does not
-         *  exist yet), the actual selection is kept at {@code -1}, because Swing's auto-select
-         *  on tab insertion is suppressed (see {@link #doSilentlyIfSelectionIsManaged}).
-         *  So {@code -1} reliably means "nothing has been selected yet".
-         */
-        void applyDeferredSelectionAfterStructuralChange( JTabbedPane pane ) {
-            if ( pane.getSelectedIndex() != -1 )
-                return; // A tab is already selected; do not re-impose the configured index.
-            reconcileEffectiveSelection(pane);
         }
 
         @Override public void setSelectedIndex(int index) {
