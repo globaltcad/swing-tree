@@ -629,6 +629,81 @@ class Tab_Binding_Spec extends Specification
             tab2Selected.get() == true
     }
 
+    def 'Inserting a tab before the current selection keeps the same tab selected and updates the bound index.'()
+    {
+        reportInfo """
+            When a tab is inserted at or before the currently selected tab, Swing shifts
+            the selection index so that the same tab stays selected. With a selection
+            index property bound to the tabbed pane, this shift must not be suppressed:
+            the selected tab must keep its selection and the bound property must be
+            updated to the new index of that tab.
+        """
+        given : 'A selection index property pointing at the second tab and a three element tab list.'
+            var index = Var.of(1)
+            var models = Vars.of("Tab 1", "Tab 2", "Tab 3")
+            TabSupplier<String> supplier = (String title) -> UI.tab(title)
+        and : 'A tabbed pane whose selection index is bound and whose tabs come from the property list.'
+            def pane =
+                UI.tabbedPane().withSelectedIndex(index)
+                .addAll(models, supplier)
+                .get(JTabbedPane)
+
+        expect : 'The second tab is selected.'
+            pane.getSelectedIndex() == 1
+            pane.getTitleAt(pane.getSelectedIndex()) == "Tab 2"
+
+        when : 'We insert a new tab at the front, before the selection.'
+            models.addAt(0, "Tab 0")
+            UI.sync()
+
+        then : 'The same tab is still selected, now at its shifted index.'
+            pane.getTabCount() == 4
+            pane.getSelectedIndex() == 2
+            pane.getTitleAt(pane.getSelectedIndex()) == "Tab 2"
+        and : 'The bound property was updated to the new index of the selected tab.'
+            index.get() == 2
+    }
+
+    def 'Inserting a tab before the current selection keeps the tab selection booleans in sync.'()
+    {
+        reportInfo """
+            When a tab is inserted at or before the currently selected tab, Swing shifts
+            the selection index so that the same tab stays selected. Tabs whose selected
+            state is bound to a boolean property must stay in sync with this shift:
+            the boolean of the selected tab remains true, all others remain false.
+        """
+        given : 'Per-tab boolean selection properties and a two element tab list.'
+            var selectionFlags = [
+                    "Tab 0" : Var.of(false),
+                    "Tab 1" : Var.of(true),
+                    "Tab 2" : Var.of(false)
+                ]
+            var models = Vars.of("Tab 1", "Tab 2")
+            TabSupplier<String> supplier = (String title) -> UI.tab(title).isSelectedIf(selectionFlags[title])
+        and : 'A tabbed pane with boolean-bound, list-driven tabs, where the first tab starts out selected.'
+            def pane =
+                UI.tabbedPane()
+                .addAll(models, supplier)
+                .get(JTabbedPane)
+
+        expect : 'The first tab is selected, as requested by its boolean property.'
+            pane.getSelectedIndex() == 0
+            pane.getTitleAt(pane.getSelectedIndex()) == "Tab 1"
+
+        when : 'We insert a new tab at the front, before the selection.'
+            models.addAt(0, "Tab 0")
+            UI.sync()
+
+        then : 'The same tab is still selected, now at its shifted index.'
+            pane.getTabCount() == 3
+            pane.getSelectedIndex() == 1
+            pane.getTitleAt(pane.getSelectedIndex()) == "Tab 1"
+        and : 'The boolean properties still reflect which tab is selected.'
+            selectionFlags["Tab 0"].get() == false
+            selectionFlags["Tab 1"].get() == true
+            selectionFlags["Tab 2"].get() == false
+    }
+
     def 'An unbound tabbed pane has the expect initial state.'()
     {
         given : 'We create a tabbed pane UI node and attach tabs with custom tab header components to it.'
