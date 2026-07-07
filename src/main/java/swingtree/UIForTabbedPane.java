@@ -253,6 +253,9 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
      *  Binds the given index property to the selection index of the tabbed pane,
      *  which means that when the index property changes, the selected tab will change accordingly
      *  and when the user selects a different tab, the index property will be updated accordingly.
+     *  Note that the index is allowed to point to a tab which does not (yet) exist,
+     *  in which case the selection index is merely stored and then automatically applied
+     *  as soon as a matching tab is added to the tabbed pane.
      * @param index The index property of the tab to select.
      * @return This builder node.
      */
@@ -449,7 +452,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             // Initial tab setup:
             _doWithoutListeners(thisComponent, ()-> {
                 boolean hasSelectionBoolProp = tab.isSelected().isPresent();
-                ExtraState.of(thisComponent).doSilentlyIfAlreadyHasSelectionOrIf(hasSelectionBoolProp, ()->{
+                ExtraState.of(thisComponent).doSilentlyIfSelectionIsManaged(hasSelectionBoolProp, ()->{
                     thisComponent.addTab(
                         tab.title().map(Val::orElseNull).orElse(null),
                         tab.icon().map(Val::orElseNull).orElse(null),
@@ -948,7 +951,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         // Initial tab setup:
         _doWithoutListeners(p, ()-> {
             boolean hasSelectionBoolProp = tab.isSelected().isPresent();
-            ExtraState.of(p).doSilentlyIfAlreadyHasSelectionOrIf(hasSelectionBoolProp, ()->{
+            ExtraState.of(p).doSilentlyIfSelectionIsManaged(hasSelectionBoolProp, ()->{
                 p.insertTab(
                     tab.title().map(Val::orElseNull).orElse(null),
                     tab.icon().map(Val::orElseNull).orElse(null),
@@ -1086,7 +1089,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
          *  while a tab is being inserted, because Swing auto-selects the first inserted tab,
          *  which would otherwise override the desired selection and write back to the bound
          *  property. The correct selection is (re)applied right after insertion by
-         *  {@code _reconcileSelection(..)}.
+         *  {@code _applyDeferredSelectionAfterTabAddition(..)}.
          */
         private boolean ignoreChanges = false;
         /**
@@ -1127,7 +1130,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
          *  <p>
          *  This relies on the fact that while a desired index is deferred (its tab does not
          *  exist yet), the actual selection is kept at {@code -1}, because Swing's auto-select
-         *  on tab insertion is suppressed (see {@link #doSilentlyIfAlreadyHasSelectionOrIf}).
+         *  on tab insertion is suppressed (see {@link #doSilentlyIfSelectionIsManaged}).
          *  So {@code -1} reliably means "nothing has been selected yet".
          */
         void applyDeferredSelectionAfterStructuralChange( JTabbedPane pane ) {
@@ -1147,7 +1150,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             setBothDesiredAndActualSelectionIndex(-1, false);
         }
 
-        public void setBothDesiredAndActualSelectionIndex(int index, boolean fireListeners) {
+        void setBothDesiredAndActualSelectionIndex(int index, boolean fireListeners) {
             super.setSelectedIndex(index);
             Var<Integer> writableIndex = null;
             if ( selectedIndex instanceof Var && selectedIndex.isMutable() )
@@ -1159,10 +1162,24 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             }
         }
 
-        private void doSilentlyIfAlreadyHasSelectionOrIf(boolean condition, Runnable action) {
-            ignoreChanges = ( condition || this.selectedIndex != null );
+        /**
+         *  Runs the given tab insertion with Swing's automatic selection of the first
+         *  inserted tab suppressed, which is necessary whenever the selection is managed
+         *  by SwingTree (through a bound selection index property or a tab selection
+         *  boolean), because the auto-select would override the desired selection and
+         *  write back to the bound property.
+         *  <p>
+         *  The suppression only applies while nothing is selected yet: once a tab is
+         *  selected, the only selection change an insertion can cause is Swing shifting
+         *  the selection index to keep the same tab selected (when inserting at or
+         *  before the selection), which must pass through normally so that the view,
+         *  the bound index property and the tab selection booleans stay consistent.
+         */
+        private void doSilentlyIfSelectionIsManaged(boolean hasSelectionBoolProperty, Runnable insertion) {
+            boolean nothingSelectedYet = ( getSelectedIndex() < 0 );
+            ignoreChanges = nothingSelectedYet && ( hasSelectionBoolProperty || this.selectedIndex != null );
             try {
-                action.run();
+                insertion.run();
             } finally {
                 ignoreChanges = false;
             }
