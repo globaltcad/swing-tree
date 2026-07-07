@@ -1042,9 +1042,32 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         return newIndex >= 0 && Objects.equals(newIndex, indexOfCurrent.get());
     }
 
+    /**
+     *  Replaces the tab at the given index with a freshly built one, because the
+     *  bound tab model at that position was set to a new item. This is a same-size,
+     *  same-position replacement, so the selection state cannot possibly need to
+     *  change — but a naive remove + insert would first shift the selection off the
+     *  removed tab and then past the inserted one, bumping it to the neighbouring
+     *  tab and (worse) writing these spurious intermediate indices into any bound
+     *  selection property. The whole replacement therefore runs silently, and the
+     *  layout is then just told to show the rebuilt content.
+     */
     private <M> void _updateTabAt(int index, @Nullable M m, TabSupplier<M> tabSupplier, P p) {
-        _removeTabAt(index, p);
-        _addTabAt(index, m, tabSupplier, p);
+        ExtraState state = ExtraState.of(p);
+        boolean wasSelected = ( p.getSelectedIndex() == index );
+        state.doSilently(() -> {
+            _removeTabAt(index, p);
+            _addTabAt(index, m, tabSupplier, p);
+        });
+        if ( wasSelected ) {
+            // The selection model still points at this index, but Swing never saw a
+            // selection event, so it did not make the new tab body visible itself.
+            java.awt.Component contents = p.getSelectedComponent();
+            if ( contents != null && !contents.isVisible() )
+                contents.setVisible(true);
+            p.revalidate();
+            p.repaint();
+        }
     }
 
     private void _removeTabAt(int index, P p) {
@@ -1158,6 +1181,23 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         }
 
         /**
+         *  Runs the given action with all selection changes fully suppressed, for
+         *  compound tab mutations which are known to leave the selection exactly
+         *  where it already is — like replacing a tab in place — so that neither
+         *  Swing's intermediate selection juggling nor any bound property ever
+         *  sees the transient states. Nesting safe.
+         */
+        private void doSilently( Runnable action ) {
+            boolean wasIgnoringChanges = ignoreChanges;
+            ignoreChanges = true;
+            try {
+                action.run();
+            } finally {
+                ignoreChanges = wasIgnoringChanges;
+            }
+        }
+
+        /**
          *  Runs the given tab insertion with Swing's automatic selection of the first
          *  inserted tab suppressed, which is necessary whenever the selection is managed
          *  by SwingTree (through a bound selection index property or a tab selection
@@ -1172,11 +1212,12 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
          */
         private void doSilentlyIfSelectionIsManaged(boolean hasSelectionBoolProperty, Runnable insertion) {
             boolean nothingSelectedYet = ( getSelectedIndex() < 0 );
-            ignoreChanges = nothingSelectedYet && ( hasSelectionBoolProperty || this.selectedIndex != null );
+            boolean wasIgnoringChanges = ignoreChanges;
+            ignoreChanges = wasIgnoringChanges || ( nothingSelectedYet && ( hasSelectionBoolProperty || this.selectedIndex != null ) );
             try {
                 insertion.run();
             } finally {
-                ignoreChanges = false;
+                ignoreChanges = wasIgnoringChanges;
             }
         }
     }
