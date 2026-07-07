@@ -1106,6 +1106,13 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             if ( selectedIndex == null )
                 return; // No selection preference was configured.
             int desired = selectedIndex.get();
+            if ( desired < -1 ) {
+                log.error(SwingTree.get().logMarker(),
+                    "Integer property '{}' bound to selected index of 'JTabbedPane' " +
+                    "has an invalid value of '{}'. Deselecting now...", selectedIndex, selectedIndex.get(),
+                    new Throwable()
+                );
+            }
             boolean isApplicable = ( desired == -1 ) || ( desired >= 0 && desired < pane.getTabCount() );
             int effectiveIndex = isApplicable ? desired : -1;
             boolean wasApplying = applyingDesiredIndex;
