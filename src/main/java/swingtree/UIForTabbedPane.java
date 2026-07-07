@@ -490,7 +490,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             tab.icon()      .ifPresent( icon       -> _onShow(icon,       thisComponent, (c,i) -> c.setIconAt(indexFinder.get(), i)) );
             tab.tip()       .ifPresent( tip        -> _onShow(tip,        thisComponent, (c,t) -> c.setToolTipTextAt(indexFinder.get(), t)) );
             tab.isEnabled() .ifPresent( enabled    -> _onShow(enabled,    thisComponent, (c,e) -> c.setEnabledAt(indexFinder.get(), e)) );
-            tab.isSelected().ifPresent( isSelected -> _onShow(isSelected, thisComponent, (c,s) -> _selectTab(c, indexFinder.get(), s) ));
+            tab.isSelected().ifPresent( isSelected -> _bindSelectionFlag(isSelected, thisComponent, indexFinder) );
 
             tab.headerContents().ifPresent( c ->
                     thisComponent
@@ -765,10 +765,39 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         */
     }
 
+    /**
+     *  Reacts to changes of a tab's selection flag (a boolean property, possibly the
+     *  internal bridge model of an enum based binding) in the model {@literal ->} view
+     *  direction. Changes on the {@link From#VIEW} channel are ignored, because those
+     *  are the tabbed pane's own write backs (see
+     *  {@link ExtraState#setBothDesiredAndActualSelectionIndex(int, boolean)}) — reacting
+     *  to them again would form a feedback loop in which a "deselect" event re-asserts
+     *  the still current tab's flag and thereby resurrects a stale selection state
+     *  (historically escalating into a {@link StackOverflowError} for enum bindings).
+     */
+    private void _bindSelectionFlag( Val<Boolean> isSelected, P pane, Supplier<Integer> indexFinder ) {
+        _onShowDelegated(isSelected, pane, (c, delegate) -> {
+            if ( delegate.channel() != From.VIEW )
+                _selectTab(c, indexFinder.get(), Boolean.TRUE.equals(delegate.currentValue().orElseNull()));
+        });
+    }
+
     private void _selectTab( P thisComponent, int tabIndex, boolean isSelected ) {
         ExtraState state = ExtraState.of(thisComponent);
-        int selectedIndex = ( isSelected ? tabIndex : thisComponent.getSelectedIndex() );
-        state.setBothDesiredAndActualSelectionIndex(selectedIndex, true);
+        if ( !isSelected ) {
+            if ( thisComponent.getSelectedIndex() != tabIndex )
+                return; // The pane already agrees with the flag, there is nothing to apply.
+            /*
+                The flag of the currently selected tab was set to false, so the pane
+                is left without any selection. Note that we must not re-assert the
+                current selection here (as was done historically), because firing the
+                selection listeners with the current index would flip this very flag
+                back to true and resurrect stale state.
+            */
+            state.setBothDesiredAndActualSelectionIndex(-1, true);
+            return;
+        }
+        state.setBothDesiredAndActualSelectionIndex(tabIndex, true);
     }
 
     private void _selectTabFromModelling( P thisComponent, int tabIndex, boolean isSelected ) {
@@ -990,7 +1019,7 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         tab.icon().ifPresent(icon -> _onShow(icon, p, (c, i) -> c.setIconAt(indexFinder.get(), i)));
         tab.tip().ifPresent(tip -> _onShow(tip, p, (c, t) -> c.setToolTipTextAt(indexFinder.get(), t)));
         tab.isEnabled().ifPresent(enabled -> _onShow(enabled, p, (c, e) -> c.setEnabledAt(indexFinder.get(), e)));
-        tab.isSelected().ifPresent(isSelected -> _onShow(isSelected, p, (c, s) -> _selectTab(c, indexFinder.get(), s)));
+        tab.isSelected().ifPresent(isSelected -> _bindSelectionFlag(isSelected, p, indexFinder));
 
         tab.headerContents().ifPresent(c -> p.setTabComponentAt(index, _buildTabHeader(tab, mouseListener)));
 

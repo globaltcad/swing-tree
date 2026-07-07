@@ -134,7 +134,13 @@ public final class Tab
 
         Var<Boolean> isSelectedModel = Var.of(state == selectedState.get());
         Viewable.cast(selectedState).onChange(From.ALL, it -> {
-            isSelectedModel.set(it.channel(), state == it.currentValue().orElseThrowUnchecked());
+            /*
+                Propagating the enum into the tab's selection flag is a model -> view
+                flow no matter which channel changed the enum, so we emit on the
+                VIEW_MODEL channel. This matters because the tabbed pane deliberately
+                ignores VIEW channel changes of the flag (they are its own write backs).
+            */
+            isSelectedModel.set(From.VIEW_MODEL, state == it.currentValue().orElseThrowUnchecked());
         });
         Viewable.cast(isSelectedModel).onChange(From.ALL,  it -> {
             if ( it.currentValue().orElseThrowUnchecked() )
