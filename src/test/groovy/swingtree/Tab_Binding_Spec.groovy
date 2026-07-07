@@ -2,6 +2,7 @@ package swingtree
 
 import spock.lang.Narrative
 import spock.lang.Specification
+import spock.lang.Subject
 import spock.lang.Title
 import sprouts.Tuple
 import sprouts.Var
@@ -24,6 +25,7 @@ import java.time.DayOfWeek
     whether it is enabled, visible, or has a tooltip.
 
 ''')
+@Subject([UIForTabbedPane])
 class Tab_Binding_Spec extends Specification
 {
     def setupSpec() {
