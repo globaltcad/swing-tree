@@ -264,7 +264,7 @@ public final class AlmanackView extends JPanel {
                         scrollPane().withStyle( it -> it.borderWidth(0) )
                         .add(
                             label(ink.viewAsString( text -> renderPreview(page, text) ))
-                            .peek( l -> l.setVerticalAlignment(javax.swing.SwingConstants.TOP) )
+                            .withVerticalAlignment(VerticalAlignment.TOP)
                             .withStyle( it -> it.padding(18, 22, 18, 22).backgroundColor(CARD) )
                         )
                     )
