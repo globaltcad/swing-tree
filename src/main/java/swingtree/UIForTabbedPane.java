@@ -475,6 +475,8 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                 if ( isSelected instanceof Var && isSelected.isMutable() ) {
                     Var<Boolean> isSelectedMut = (Var<Boolean>) isSelected;
                     state.selectionListeners.add(i -> {
+                        if ( indexFinder.get() < 0 )
+                            return; // The tab was removed; its flag must not be touched anymore.
                         boolean isNowSelected = _isSuppliedTabIndexSelected(indexFinder, i);
                         isSelectedMut.set(From.VIEW, isNowSelected);
                     });
@@ -486,10 +488,10 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             });
 
             // Now on to binding:
-            tab.title()     .ifPresent( title      -> _onShow(title,      thisComponent, (c,t) -> c.setTitleAt(indexFinder.get(), t)) );
-            tab.icon()      .ifPresent( icon       -> _onShow(icon,       thisComponent, (c,i) -> c.setIconAt(indexFinder.get(), i)) );
-            tab.tip()       .ifPresent( tip        -> _onShow(tip,        thisComponent, (c,t) -> c.setToolTipTextAt(indexFinder.get(), t)) );
-            tab.isEnabled() .ifPresent( enabled    -> _onShow(enabled,    thisComponent, (c,e) -> c.setEnabledAt(indexFinder.get(), e)) );
+            tab.title()     .ifPresent( title      -> _bindToTabAt(title,   thisComponent, indexFinder, JTabbedPane::setTitleAt) );
+            tab.icon()      .ifPresent( icon       -> _bindToTabAt(icon,    thisComponent, indexFinder, JTabbedPane::setIconAt) );
+            tab.tip()       .ifPresent( tip        -> _bindToTabAt(tip,     thisComponent, indexFinder, JTabbedPane::setToolTipTextAt) );
+            tab.isEnabled() .ifPresent( enabled    -> _bindToTabAt(enabled, thisComponent, indexFinder, JTabbedPane::setEnabledAt) );
             tab.isSelected().ifPresent( isSelected -> _bindSelectionFlag(isSelected, thisComponent, indexFinder) );
 
             tab.headerContents().ifPresent( c ->
@@ -777,9 +779,35 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
      */
     private void _bindSelectionFlag( Val<Boolean> isSelected, P pane, Supplier<Integer> indexFinder ) {
         _onShowDelegated(isSelected, pane, (c, delegate) -> {
-            if ( delegate.channel() != From.VIEW )
-                _selectTab(c, indexFinder.get(), Boolean.TRUE.equals(delegate.currentValue().orElseNull()));
+            if ( delegate.channel() == From.VIEW )
+                return;
+            int index = indexFinder.get();
+            if ( index < 0 )
+                return; // The tab was removed while its flag lives on - a zombie update we must ignore.
+            _selectTab(c, index, Boolean.TRUE.equals(delegate.currentValue().orElseNull()));
         });
+    }
+
+    /**
+     *  Binds a tab property (title, icon, tooltip or enabled flag) to the tab at the
+     *  index resolved by the given index finder <b>at change time</b>, skipping the
+     *  update when the index resolves to {@code -1}. Properties bound to a tab may
+     *  outlive the tab itself — most commonly when tabs are bound to a tuple or
+     *  property list and a model is removed while its properties remain part of the
+     *  application state. Such zombie updates used to be applied to index {@code -1}
+     *  and throw an {@link IndexOutOfBoundsException}; now they are simply ignored.
+     */
+    private <T> void _bindToTabAt( Val<T> property, P pane, Supplier<Integer> indexFinder, TabPropertySetter<T> setter ) {
+        _onShow(property, pane, (c, v) -> {
+            int index = indexFinder.get();
+            if ( index >= 0 )
+                setter.setAt(c, index, v);
+        });
+    }
+
+    /** One of the index based {@link JTabbedPane} setters, like {@link JTabbedPane#setTitleAt(int, String)}. */
+    private interface TabPropertySetter<T> {
+        void setAt( JTabbedPane pane, int index, T value );
     }
 
     private void _selectTab( P thisComponent, int tabIndex, boolean isSelected ) {
@@ -1004,6 +1032,8 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             if (isSelected instanceof Var && isSelected.isMutable()) {
                 Var<Boolean> isSelectedMut = (Var<Boolean>) isSelected;
                 state.selectionListeners.add(i -> {
+                    if ( indexFinder.get() < 0 )
+                        return; // The tab was removed; its flag must not be touched anymore.
                     boolean isNowSelected = _isSuppliedTabIndexSelected(indexFinder, i);
                     isSelectedMut.set(From.VIEW, isNowSelected);
                 });
@@ -1015,10 +1045,10 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         });
 
         // Now on to binding:
-        tab.title().ifPresent(title -> _onShow(title, p, (c, t) -> c.setTitleAt(indexFinder.get(), t)));
-        tab.icon().ifPresent(icon -> _onShow(icon, p, (c, i) -> c.setIconAt(indexFinder.get(), i)));
-        tab.tip().ifPresent(tip -> _onShow(tip, p, (c, t) -> c.setToolTipTextAt(indexFinder.get(), t)));
-        tab.isEnabled().ifPresent(enabled -> _onShow(enabled, p, (c, e) -> c.setEnabledAt(indexFinder.get(), e)));
+        tab.title().ifPresent(title -> _bindToTabAt(title, p, indexFinder, JTabbedPane::setTitleAt));
+        tab.icon().ifPresent(icon -> _bindToTabAt(icon, p, indexFinder, JTabbedPane::setIconAt));
+        tab.tip().ifPresent(tip -> _bindToTabAt(tip, p, indexFinder, JTabbedPane::setToolTipTextAt));
+        tab.isEnabled().ifPresent(enabled -> _bindToTabAt(enabled, p, indexFinder, JTabbedPane::setEnabledAt));
         tab.isSelected().ifPresent(isSelected -> _bindSelectionFlag(isSelected, p, indexFinder));
 
         tab.headerContents().ifPresent(c -> p.setTabComponentAt(index, _buildTabHeader(tab, mouseListener)));

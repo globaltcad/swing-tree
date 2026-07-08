@@ -844,6 +844,95 @@ class Tab_Binding_Spec extends Specification
             tab2Selected.get() == false
     }
 
+    def 'Properties bound to a removed tab are harmless zombies which neither throw nor affect the pane.'()
+    {
+        reportInfo """
+            Properties bound to a tab (its title, tooltip, icon, enabled state or
+            selection flag) may outlive the tab itself. This happens naturally when
+            tabs are bound to a tuple or property list and one of the models is
+            removed while its properties remain part of the application state —
+            for example when a tab hosts a little "close" button in its header
+            whose click removes the model, after which the model change makes
+            derived views (like a title view) fire one last time.
+
+            Historically these zombie bindings resolved their tab index to -1 and
+            then blew up: title/tooltip/icon/enabled updates threw an
+            `IndexOutOfBoundsException` (logged to the error output), and a
+            selection flag update would even deselect the entire pane, while a
+            full deselection of the pane would flip the removed tab's flag back
+            to true. All of these must simply be ignored instead.
+        """
+        given : 'We remember the real error stream, so the cleanup block can always restore it.'
+            var realErr = System.err
+        and : 'Three tab models, each with its own title and selection flag property.'
+            var models = Vars.of("A", "B", "C")
+            var titles = [ "A": Var.of("Tab A"), "B": Var.of("Tab B"), "C": Var.of("Tab C") ]
+            var flags  = [ "A": Var.of(false),   "B": Var.of(false),   "C": Var.of(false)   ]
+        and : 'A tabbed pane bound to the models, where every tab binds its title and selection flag.'
+            TabSupplier<String> supplier = model ->
+                                                UI.tab(titles[model])
+                                                .isSelectedIf(flags[model])
+                                                .add(UI.label("content of " + model))
+            def pane = UI.tabbedPane().addAll(models, supplier).get(JTabbedPane)
+        and : 'The second tab is selected by the user.'
+            UI.runNow(() -> pane.setSelectedIndex(1))
+        expect :
+            pane.getTabCount() == 3
+            flags["B"].get() == true
+
+        when : 'The first tab model is removed, its title and flag properties staying alive.'
+            models.remove("A")
+            UI.sync()
+
+        then : 'The previously selected tab is still the selected one, at its shifted index.'
+            pane.getTabCount() == 2
+            pane.getSelectedIndex() == 0
+            pane.getTitleAt(0) == "Tab B"
+
+        when : 'The zombie title property fires again, while we capture the error output.'
+            var errorOutput = new ByteArrayOutputStream()
+            System.setErr(new PrintStream(errorOutput))
+            try {
+                titles["A"].set("Zombie A")
+                UI.sync()
+            } finally {
+                System.setErr(realErr)
+            }
+
+        then : 'No IndexOutOfBoundsException was logged and the remaining tabs are untouched.'
+            !errorOutput.toString().contains("IndexOutOfBoundsException")
+            pane.getTitleAt(0) == "Tab B"
+            pane.getTitleAt(1) == "Tab C"
+
+        when : 'The zombie selection flag is set to true.'
+            flags["A"].set(true)
+            UI.sync()
+
+        then : 'It does not hijack the pane: the selection and the other flags are unaffected.'
+            pane.getSelectedIndex() == 0
+            flags["B"].get() == true
+
+        when : 'The user deselects everything (and we reset the zombie flag first).'
+            flags["A"].set(false)
+            UI.sync()
+            UI.runNow(() -> pane.setSelectedIndex(-1))
+
+        then : 'The zombie flag is not flipped back to true by the pane wide deselection.'
+            pane.getSelectedIndex() == -1
+            flags["A"].get() == false
+            flags["B"].get() == false
+
+        when : 'The title binding of a surviving tab is used.'
+            titles["B"].set("Tab B (renamed)")
+            UI.sync()
+
+        then : 'It still works as usual.'
+            pane.getTitleAt(0) == "Tab B (renamed)"
+
+        cleanup : 'The global error stream is restored no matter how this feature ends.'
+            System.setErr(realErr)
+    }
+
     def 'An unbound tabbed pane has the expect initial state.'()
     {
         given : 'We create a tabbed pane UI node and attach tabs with custom tab header components to it.'
