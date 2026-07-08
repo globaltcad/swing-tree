@@ -2,10 +2,13 @@ package swingtree
 
 import spock.lang.Narrative
 import spock.lang.Specification
+import spock.lang.Subject
 import spock.lang.Title
+import sprouts.From
 import sprouts.Tuple
 import sprouts.Var
 import sprouts.Vars
+import sprouts.Viewable
 import swingtree.api.IconDeclaration
 import swingtree.api.mvvm.TabSupplier
 import swingtree.threading.EventProcessor
@@ -24,6 +27,7 @@ import java.time.DayOfWeek
     whether it is enabled, visible, or has a tooltip.
 
 ''')
+@Subject([UIForTabbedPane])
 class Tab_Binding_Spec extends Specification
 {
     def setupSpec() {
@@ -143,6 +147,790 @@ class Tab_Binding_Spec extends Specification
             tab1Selected.get() == false
             tab2Selected.get() == false
             tab3Selected.get() == true
+    }
+
+    def 'A tabbed pane may be bound to a selection index property whose value does not yet match any tab.'()
+    {
+        reportInfo """
+            The `withSelectedIndex(Var)` method allows you to bind an integer property
+            to the selection index of a tabbed pane even before the tabs it points to
+            exist. The selection index is stored by the underlying selection model and
+            applied automatically as soon as a matching tab is added.
+            This means you may declare the selection index binding before adding any tabs
+            at all, without running into an `IndexOutOfBoundsException`.
+        """
+        given : 'A selection index property pointing at the first tab, before any tab exists.'
+            var index = Var.of(0)
+
+        when : 'We build a tabbed pane whose selection index is bound before its tabs are added.'
+            def tabbedPane =
+                UI.tabbedPane().withSelectedIndex(index)
+                .add(UI.tab("tab 1"))
+                .add(UI.tab("tab 2"))
+                .get(JTabbedPane)
+
+        then : 'Building the tabbed pane does not throw an exception.'
+            noExceptionThrown()
+        and : 'The tabbed pane has the two tabs we added.'
+            tabbedPane.getTabCount() == 2
+        and : 'The selection index property was applied to the first, now existing, tab.'
+            tabbedPane.getSelectedIndex() == 0
+            index.get() == 0
+    }
+
+    def 'A selection index binding is applied only once the tab it points to actually exists.'()
+    {
+        reportInfo """
+            When you bind a selection index property whose value points to a tab
+            that does not exist yet, the selection is deferred until a tab with a
+            matching index is added. Adding tabs with smaller indices does not
+            select anything until the desired index becomes valid.
+        """
+        given : 'A selection index property pointing at the third tab.'
+            var index = Var.of(2)
+        and : 'A tabbed pane with the binding declared before any tab is added, and only two tabs added.'
+            def tabbedPane =
+                UI.tabbedPane().withSelectedIndex(index)
+                .add(UI.tab("tab 1"))
+                .add(UI.tab("tab 2"))
+                .get(JTabbedPane)
+
+        expect : 'With only two tabs present, the desired index (2) is not valid yet, so nothing is selected.'
+            tabbedPane.getTabCount() == 2
+            tabbedPane.getSelectedIndex() == -1
+        and : 'The selection index property still holds the desired (not yet applicable) index.'
+            index.get() == 2
+
+        when : 'We build another tabbed pane, this time with a third tab that makes the desired index valid.'
+            var completedIndex = Var.of(2)
+            def completedPane =
+                UI.tabbedPane().withSelectedIndex(completedIndex)
+                .add(UI.tab("tab 1"))
+                .add(UI.tab("tab 2"))
+                .add(UI.tab("tab 3"))
+                .get(JTabbedPane)
+
+        then : 'The previously stored selection index is applied automatically to the matching tab.'
+            completedPane.getTabCount() == 3
+            completedPane.getSelectedIndex() == 2
+            completedIndex.get() == 2
+    }
+
+    def 'A deferred selection index works together with tabs bound to a tuple property.'()
+    {
+        reportInfo """
+            The selection index binding also cooperates with tabs which are dynamically
+            generated from a `Tuple` based `Val` property through the `addAll(Val,..)` method.
+            If the bound selection index points to a tab that does not exist yet, it is
+            stored and applied automatically as soon as the tuple grows enough for the
+            index to become valid.
+        """
+        given : 'A selection index property pointing at the 5th tab (index 4).'
+            var index = Var.of(4)
+        and : 'A tuple property initially holding only two tab models.'
+            var models = Var.of(Tuple.of("Tab 1", "Tab 2"))
+            TabSupplier<String> supplier = (String title) -> UI.tab(title)
+        and : 'A tabbed pane whose selection index is bound and whose tabs come from the tuple property.'
+            def pane =
+                UI.tabbedPane().withSelectedIndex(index)
+                .addAll(models, supplier)
+                .get(JTabbedPane)
+
+        expect : 'Only two tabs exist, so the desired index (4) is not valid yet and nothing is selected.'
+            pane.getTabCount() == 2
+            pane.getSelectedIndex() == -1
+        and : 'The selection index property still holds the desired (not yet applicable) index.'
+            index.get() == 4
+
+        when : 'We expand the tuple to six tab models, so that index 4 becomes valid.'
+            models.update( it -> it.addAll("Tab 3", "Tab 4", "Tab 5", "Tab 6") )
+            UI.sync()
+
+        then : 'The tabbed pane now has six tabs and the stored selection index was applied automatically.'
+            pane.getTabCount() == 6
+            pane.getSelectedIndex() == 4
+            index.get() == 4
+    }
+
+    def 'A deferred selection index works together with tabs bound to a property list.'()
+    {
+        reportInfo """
+            The selection index binding also cooperates with tabs which are dynamically
+            generated from a `Vars` property list through the `addAll(Vals,..)` method.
+            If the bound selection index points to a tab that does not exist yet, it is
+            stored and applied automatically as soon as the list grows enough for the
+            index to become valid.
+        """
+        given : 'A selection index property pointing at the 5th tab (index 4).'
+            var index = Var.of(4)
+        and : 'A property list initially holding only two tab models.'
+            var models = Vars.of("Tab 1", "Tab 2")
+            TabSupplier<String> supplier = (String title) -> UI.tab(title)
+        and : 'A tabbed pane whose selection index is bound and whose tabs come from the property list.'
+            def pane =
+                UI.tabbedPane().withSelectedIndex(index)
+                .addAll(models, supplier)
+                .get(JTabbedPane)
+
+        expect : 'Only two tabs exist, so the desired index (4) is not valid yet and nothing is selected.'
+            pane.getTabCount() == 2
+            pane.getSelectedIndex() == -1
+        and : 'The selection index property still holds the desired (not yet applicable) index.'
+            index.get() == 4
+
+        when : 'We add four more tab models, so that index 4 becomes valid.'
+            models.addAll("Tab 3", "Tab 4", "Tab 5", "Tab 6")
+            UI.sync()
+
+        then : 'The tabbed pane now has six tabs and the stored selection index was applied automatically.'
+            pane.getTabCount() == 6
+            pane.getSelectedIndex() == 4
+            index.get() == 4
+    }
+
+    def 'Changing a bound selection index to a not-yet-existing tab at runtime defers the selection.'()
+    {
+        reportInfo """
+            The deferral mechanism does not only apply at build time. If, at runtime, you
+            set a bound selection index property to a value which points to a tab that does
+            not exist yet, the tabbed pane deselects everything (since the targeted tab does
+            not exist) while the desired index is stored and then applied automatically
+            once the tabs (here coming from a property list) grow enough for the index to
+            become valid.
+        """
+        given : 'A selection index property pointing at the first tab and a two element tab list.'
+            var index = Var.of(0)
+            var models = Vars.of("Tab 1", "Tab 2")
+            TabSupplier<String> supplier = (String title) -> UI.tab(title)
+        and : 'A tabbed pane whose selection index is bound and whose tabs come from the property list.'
+            def pane =
+                UI.tabbedPane().withSelectedIndex(index)
+                .addAll(models, supplier)
+                .get(JTabbedPane)
+
+        expect : 'Both tabs exist and the first one is selected right away.'
+            pane.getTabCount() == 2
+            pane.getSelectedIndex() == 0
+            index.get() == 0
+
+        when : 'At runtime we set the selection index to the 5th tab (index 4), which does not exist yet.'
+            index.set(4)
+            UI.sync()
+
+        then : 'The targeted tab does not exist yet, so nothing is selected.'
+            pane.getTabCount() == 2
+            pane.getSelectedIndex() == -1
+        and : 'The selection index property still holds the desired (deferred) index.'
+            index.get() == 4
+
+        when : 'We add four more tab models, so that index 4 becomes valid.'
+            models.addAll("Tab 3", "Tab 4", "Tab 5", "Tab 6")
+            UI.sync()
+
+        then : 'The deferred selection index is now applied automatically.'
+            pane.getTabCount() == 6
+            pane.getSelectedIndex() == 4
+            index.get() == 4
+    }
+
+    def 'Setting a bound selection index to a not-yet-existing tab deselects everything until it exists.'()
+    {
+        reportInfo """
+            When you set a bound selection index property to a value which points to a
+            tab that does not exist (yet), the targeted selection simply does not exist,
+            so the tabbed pane resolves to "nothing selected" (index `-1`) and all tab
+            `isSelectedIf(..)` booleans become `false`. The selection index property
+            itself keeps the (deferred) desired value, which is applied automatically
+            once a matching tab is added.
+        """
+        given : 'Three boolean selection properties, one per tab, and a selection index property.'
+            var tab1Selected = Var.of(false)
+            var tab2Selected = Var.of(false)
+            var tab3Selected = Var.of(false)
+            var selectedIndex = Var.of(0)
+        and : 'A tabbed pane binding the index and the three tab selection booleans.'
+            def tabbedPane =
+                UI.tabbedPane(UI.Side.TOP).withSelectedIndex(selectedIndex)
+                .add(UI.tab("Tab 1").isSelectedIf(tab1Selected))
+                .add(UI.tab("Tab 2").isSelectedIf(tab2Selected))
+                .add(UI.tab("Tab 3").isSelectedIf(tab3Selected))
+                .get(JTabbedPane)
+        expect : 'Initially the first tab is selected, reflected by the boolean properties.'
+            tabbedPane.getSelectedIndex() == 0
+            tab1Selected.get() == true
+            tab2Selected.get() == false
+            tab3Selected.get() == false
+
+        when : 'We set the selection index to a value that is out of range (no such tab exists).'
+            selectedIndex.set(4)
+            UI.sync()
+
+        then : 'Nothing is selected, because the targeted tab does not exist yet...'
+            tabbedPane.getSelectedIndex() == -1
+        and : '...all tab selection booleans resolve to false...'
+            tab1Selected.get() == false
+            tab2Selected.get() == false
+            tab3Selected.get() == false
+        and : '...and the selection index property keeps the (deferred) desired value.'
+            selectedIndex.get() == 4
+    }
+
+    def 'Binding a selection index of -1 before adding tabs keeps the tabbed pane unselected.'()
+    {
+        reportInfo """
+            The value `-1` is a meaningful selection index denoting "no tab selected".
+            When you specify it explicitly (even before any tabs exist) the tabbed pane
+            should honor it and stay unselected, instead of Swing auto-selecting the
+            first tab as soon as it is added.
+        """
+        given : 'A tabbed pane whose selection index is fixed to -1 ("no selection") before adding tabs.'
+            def tabbedPane =
+                UI.tabbedPane().withSelectedIndex(-1)
+                .add(UI.tab("Tab 1"))
+                .add(UI.tab("Tab 2"))
+                .add(UI.tab("Tab 3"))
+                .get(JTabbedPane)
+
+        expect : 'Even though tabs were added, no tab is selected.'
+            tabbedPane.getTabCount() == 3
+            tabbedPane.getSelectedIndex() == -1
+    }
+
+    def 'A deferred selection index is applied only once and does not override later selection.'()
+    {
+        reportInfo """
+            A selection index bound before its tab exists is applied exactly once, as
+            soon as the matching tab appears. Afterwards the selection remains free to
+            change (for example through the user), and adding further tabs will not snap
+            the selection back to the originally deferred index.
+        """
+        given : 'A selection index property pointing at the third tab (index 2) and a growing tab list.'
+            var index = Var.of(2)
+            var models = Vars.of("Tab 1", "Tab 2")
+            TabSupplier<String> supplier = (String title) -> UI.tab(title)
+        and : 'A tabbed pane whose selection index is bound and whose tabs come from the property list.'
+            def pane =
+                UI.tabbedPane().withSelectedIndex(index)
+                .addAll(models, supplier)
+                .get(JTabbedPane)
+
+        expect : 'The desired index (2) is not valid yet, so nothing is selected.'
+            pane.getTabCount() == 2
+            pane.getSelectedIndex() == -1
+
+        when : 'We grow the list so the desired index becomes valid.'
+            models.addAll("Tab 3", "Tab 4")
+            UI.sync()
+
+        then : 'The deferred selection index is applied to the now existing third tab.'
+            pane.getSelectedIndex() == 2
+            index.get() == 2
+
+        when : 'A different tab is selected...'
+            UI.runNow(()->{ pane.selectedIndex = 0 })
+
+        then : 'the selection and the bound property follow along.'
+            pane.getSelectedIndex() == 0
+            index.get() == 0
+
+        when : 'We add yet more tabs.'
+            models.addAll("Tab 5", "Tab 6")
+            UI.sync()
+
+        then : 'The originally deferred index (2) does not snap back; the current selection is preserved.'
+            pane.getSelectedIndex() == 0
+            index.get() == 0
+    }
+
+    def 'Re-applying an already valid bound index does not let a later tab addition override a newer selection.'()
+    {
+        reportInfo """
+            When a bound selection index is applied to a value which already points to an
+            existing tab, the tabbed pane must not keep it around as a "desired" index to be
+            re-applied later. Otherwise a subsequent tab addition would snap the selection
+            back to that now outdated index, wrongly overriding a selection made in the
+            meantime.
+        """
+        given : 'A selection index property and a growing tab list.'
+            var index = Var.of(0)
+            var models = Vars.of("Tab 1", "Tab 2")
+            TabSupplier<String> supplier = (String title) -> UI.tab(title)
+        and : 'A tabbed pane whose selection index is bound and whose tabs come from the property list.'
+            def pane =
+                UI.tabbedPane().withSelectedIndex(index)
+                .addAll(models, supplier)
+                .get(JTabbedPane)
+
+        expect : 'Both tabs exist and the first one is selected.'
+            pane.getTabCount() == 2
+            pane.getSelectedIndex() == 0
+
+        when : 'We apply a valid index through the bound property while all targeted tabs already exist.'
+            index.set(1)
+            UI.sync()
+
+        then : 'The second tab is selected accordingly.'
+            pane.getSelectedIndex() == 1
+            index.get() == 1
+
+        when : 'A different tab is then selected...'
+            UI.runNow(()->{ pane.selectedIndex = 0 })
+
+        then : '...the selection and the bound property follow along.'
+            pane.getSelectedIndex() == 0
+            index.get() == 0
+
+        when : 'We now add more tabs to the pane.'
+            models.addAll("Tab 3", "Tab 4")
+            UI.sync()
+
+        then : 'The previously applied index (1) does not snap back; the newer selection is preserved.'
+            pane.getTabCount() == 4
+            pane.getSelectedIndex() == 0
+            index.get() == 0
+    }
+
+    def 'A deferred selection index keeps the isSelectedIf boolean of its target tab in sync when it becomes valid.'()
+    {
+        reportInfo """
+            When a bound selection index points to a tab that does not exist yet, it is
+            applied automatically as soon as a matching tab is added. This application must
+            go through the selection model's dedicated reconciliation path so that the tab
+            `isSelectedIf(..)` booleans are kept in sync, while the bound selection index
+            property keeps holding the desired value (no spurious write-back).
+        """
+        given : 'A selection index property pointing at the (not yet existing) third tab and a boolean for it.'
+            var index = Var.of(2)
+            var thirdSelected = Var.of(false)
+            var models = Vars.of("Tab 1", "Tab 2")
+            TabSupplier<String> supplier = (String title) ->
+                title == "Tab 3" ? UI.tab(title).isSelectedIf(thirdSelected) : UI.tab(title)
+        and : 'A tabbed pane whose selection index is bound and whose tabs come from the property list.'
+            def pane =
+                UI.tabbedPane().withSelectedIndex(index)
+                .addAll(models, supplier)
+                .get(JTabbedPane)
+
+        expect : 'The desired index (2) is not valid yet, so nothing is selected and the boolean is false.'
+            pane.getTabCount() == 2
+            pane.getSelectedIndex() == -1
+            thirdSelected.get() == false
+            index.get() == 2
+
+        when : 'We add the third tab, making the desired index valid.'
+            models.add("Tab 3")
+            UI.sync()
+
+        then : 'The deferred index is applied and the target tab boolean is now in sync.'
+            pane.getTabCount() == 3
+            pane.getSelectedIndex() == 2
+            thirdSelected.get() == true
+        and : 'The bound selection index property still holds the (now applied) desired value.'
+            index.get() == 2
+    }
+
+    def 'A fixed selection index does not override a newer user selection when more tabs are added.'()
+    {
+        reportInfo """
+            The `withSelectedIndex(int)` overload configures an **initial** selection index.
+            It is a one-time preference, not a permanent constraint: once it has been honored,
+            the user is free to select a different tab, and adding further tabs must **not**
+            snap the selection back to the originally configured index.
+        """
+        given : 'A growing tab list and a fixed initial selection index of 0.'
+            var models = Vars.of("Tab 1", "Tab 2")
+            TabSupplier<String> supplier = (String title) -> UI.tab(title)
+        and : 'A tabbed pane whose tabs come from the list and whose initial selection is fixed to index 0.'
+            def pane =
+                UI.tabbedPane().withSelectedIndex(0)
+                .addAll(models, supplier)
+                .get(JTabbedPane)
+
+        expect : 'The fixed index selected the first tab.'
+            pane.getTabCount() == 2
+            pane.getSelectedIndex() == 0
+
+        when : 'The user selects the second tab.'
+            UI.runNow(()->{ pane.selectedIndex = 1 })
+
+        then : 'The selection follows the user.'
+            pane.getSelectedIndex() == 1
+
+        when : 'More tabs are added afterwards.'
+            models.addAll("Tab 3", "Tab 4")
+            UI.sync()
+
+        then : 'The fixed index does NOT snap the selection back to 0; the user selection is preserved.'
+            pane.getTabCount() == 4
+            pane.getSelectedIndex() == 1
+    }
+
+    def 'A boolean tab selection binding is not overridden by a fixed selection index.'()
+    {
+        reportInfo """
+            When a fixed selection index (`withSelectedIndex(int)`) is combined with a tab
+            whose selected state is bound to a boolean property (`isSelectedIf(..)`), the
+            boolean binding, being the more specific and later applied preference, must win.
+            The fixed index must not silently override it.
+        """
+        given : 'Two boolean selection properties, the second one requesting its tab to be selected.'
+            var tab1Selected = Var.of(false)
+            var tab2Selected = Var.of(true)
+        and : 'A tabbed pane with a fixed index 0, but tab 2 bound to a TRUE selection boolean.'
+            def pane =
+                UI.tabbedPane().withSelectedIndex(0)
+                .add(UI.tab("Tab 1").isSelectedIf(tab1Selected))
+                .add(UI.tab("Tab 2").isSelectedIf(tab2Selected))
+                .get(JTabbedPane)
+
+        expect : 'The boolean-driven selection (tab 2) is respected, not overwritten by the fixed index 0.'
+            pane.getSelectedIndex() == 1
+            tab2Selected.get() == true
+            tab1Selected.get() == false
+    }
+
+    def 'A fixed selection index does not override a boolean selection change made before more tabs are added.'()
+    {
+        reportInfo """
+            A more dynamic variant of the previous scenario: after a fixed selection index has
+            been honored, changing a tab's bound selection boolean must move the selection, and
+            a subsequent tab addition must not snap it back to the fixed index.
+        """
+        given : 'Per-tab boolean selection properties and a growing tab list.'
+            var tab1Selected = Var.of(false)
+            var tab2Selected = Var.of(false)
+            var tab3Selected = Var.of(false)
+            var booleans = [tab1Selected, tab2Selected, tab3Selected]
+            var models = Vars.of("Tab 1", "Tab 2")
+            TabSupplier<String> supplier = (String title) ->
+                UI.tab(title).isSelectedIf(booleans[Integer.parseInt(title.substring(4)) - 1])
+        and : 'A tabbed pane with a fixed initial selection index of 0 and boolean-bound, list-driven tabs.'
+            def pane =
+                UI.tabbedPane().withSelectedIndex(0)
+                .addAll(models, supplier)
+                .get(JTabbedPane)
+
+        expect : 'The fixed index selected the first tab.'
+            pane.getSelectedIndex() == 0
+            tab1Selected.get() == true
+
+        when : 'We select the second tab through its boolean property.'
+            tab2Selected.set(true)
+            UI.sync()
+
+        then : 'The second tab becomes selected.'
+            pane.getSelectedIndex() == 1
+            tab1Selected.get() == false
+            tab2Selected.get() == true
+
+        when : 'A third tab is added afterwards through the bound list.'
+            models.add("Tab 3")
+            UI.sync()
+
+        then : 'The fixed index does NOT snap the selection back to 0; the boolean selection is preserved.'
+            pane.getTabCount() == 3
+            pane.getSelectedIndex() == 1
+            tab2Selected.get() == true
+    }
+
+    def 'Inserting a tab before the current selection keeps the same tab selected and updates the bound index.'()
+    {
+        reportInfo """
+            When a tab is inserted at or before the currently selected tab, Swing shifts
+            the selection index so that the same tab stays selected. With a selection
+            index property bound to the tabbed pane, this shift must not be suppressed:
+            the selected tab must keep its selection and the bound property must be
+            updated to the new index of that tab.
+        """
+        given : 'A selection index property pointing at the second tab and a three element tab list.'
+            var index = Var.of(1)
+            var models = Vars.of("Tab 1", "Tab 2", "Tab 3")
+            TabSupplier<String> supplier = (String title) -> UI.tab(title)
+        and : 'A tabbed pane whose selection index is bound and whose tabs come from the property list.'
+            def pane =
+                UI.tabbedPane().withSelectedIndex(index)
+                .addAll(models, supplier)
+                .get(JTabbedPane)
+
+        expect : 'The second tab is selected.'
+            pane.getSelectedIndex() == 1
+            pane.getTitleAt(pane.getSelectedIndex()) == "Tab 2"
+
+        when : 'We insert a new tab at the front, before the selection.'
+            models.addAt(0, "Tab 0")
+            UI.sync()
+
+        then : 'The same tab is still selected, now at its shifted index.'
+            pane.getTabCount() == 4
+            pane.getSelectedIndex() == 2
+            pane.getTitleAt(pane.getSelectedIndex()) == "Tab 2"
+        and : 'The bound property was updated to the new index of the selected tab.'
+            index.get() == 2
+    }
+
+    def 'Inserting a tab before the current selection keeps the tab selection booleans in sync.'()
+    {
+        reportInfo """
+            When a tab is inserted at or before the currently selected tab, Swing shifts
+            the selection index so that the same tab stays selected. Tabs whose selected
+            state is bound to a boolean property must stay in sync with this shift:
+            the boolean of the selected tab remains true, all others remain false.
+        """
+        given : 'Per-tab boolean selection properties and a two element tab list.'
+            var selectionFlags = [
+                    "Tab 0" : Var.of(false),
+                    "Tab 1" : Var.of(true),
+                    "Tab 2" : Var.of(false)
+                ]
+            var models = Vars.of("Tab 1", "Tab 2")
+            TabSupplier<String> supplier = (String title) -> UI.tab(title).isSelectedIf(selectionFlags[title])
+        and : 'A tabbed pane with boolean-bound, list-driven tabs, where the first tab starts out selected.'
+            def pane =
+                UI.tabbedPane()
+                .addAll(models, supplier)
+                .get(JTabbedPane)
+
+        expect : 'The first tab is selected, as requested by its boolean property.'
+            pane.getSelectedIndex() == 0
+            pane.getTitleAt(pane.getSelectedIndex()) == "Tab 1"
+
+        when : 'We insert a new tab at the front, before the selection.'
+            models.addAt(0, "Tab 0")
+            UI.sync()
+
+        then : 'The same tab is still selected, now at its shifted index.'
+            pane.getTabCount() == 3
+            pane.getSelectedIndex() == 1
+            pane.getTitleAt(pane.getSelectedIndex()) == "Tab 1"
+        and : 'The boolean properties still reflect which tab is selected.'
+            selectionFlags["Tab 0"].get() == false
+            selectionFlags["Tab 1"].get() == true
+            selectionFlags["Tab 2"].get() == false
+    }
+
+    def 'Replacing the tuple item behind the selected tab neither moves the selection nor writes to the bound index.'()
+    {
+        reportInfo """
+            When a tab model inside a bound tuple is replaced through `setAt(..)`,
+            the corresponding tab is rebuilt in place. This is a same-size, same-position
+            replacement, so the selection must not move — historically the naive
+            remove + insert first shifted the selection off the removed tab and then
+            past the inserted one, bumping it to the neighbouring tab and leaking
+            these spurious intermediate indices into the bound selection property.
+        """
+        given : 'A tuple of tab models, a selection index property and a trace of every write to it.'
+            var models = Var.of(Tuple.of("Alpha", "Beta", "Gamma"))
+            var selectedIndex = Var.of(1)
+            var trace = []
+            Viewable.cast(selectedIndex).onChange(From.ALL, it -> trace << it.currentValue().orElseThrowUnchecked())
+        and : 'A tabbed pane bound to both.'
+            TabSupplier<String> supplier = model -> UI.tab(model).add(UI.label("content of " + model))
+            def pane =
+                UI.tabbedPane().withSelectedIndex(selectedIndex)
+                .addAll(models, supplier)
+                .get(JTabbedPane)
+            UI.sync()
+        expect : 'The second tab is selected, as requested by the property.'
+            pane.getSelectedIndex() == 1
+            pane.getTitleAt(1) == "Beta"
+
+        when : 'We replace the model of the selected tab.'
+            models.update( tuple -> tuple.setAt(1, "Beta 2.0") )
+            UI.sync()
+
+        then : 'The tab was rebuilt in place and is still the selected one.'
+            pane.getTabCount() == 3
+            pane.getTitleAt(1) == "Beta 2.0"
+            pane.getSelectedIndex() == 1
+        and : 'The bound index property never received a single write.'
+            selectedIndex.get() == 1
+            trace == []
+
+        when : 'We also replace the model of a tab before the selection.'
+            models.update( tuple -> tuple.setAt(0, "Alpha 2.0") )
+            UI.sync()
+
+        then : 'Again, the selection and the bound property are completely untouched.'
+            pane.getTitleAt(0) == "Alpha 2.0"
+            pane.getSelectedIndex() == 1
+            selectedIndex.get() == 1
+            trace == []
+    }
+
+    def 'An enum based tab selection stays consistent when jumping between distant tabs.'()
+    {
+        reportInfo """
+            The enum overload `isSelectedIf(E, Var<E>)` bridges an enum property
+            into the boolean selection flags of the individual tabs.
+            Historically, changing the enum could bounce between the flag of the
+            previously selected tab and the newly selected one, because the
+            "deselect" event re-asserted the still current tab's flag, resurrecting
+            the old enum value — a feedback loop which corrupted the property with
+            stale view writes and could escalate into a StackOverflowError.
+            Here we ensure that jumps across the tab strip settle in one
+            consistent state, without any stale write backs to the enum property.
+        """
+        given : 'An enum property, a trace of all view-channel writes to it, and one tab per enum state.'
+            var day = Var.of(DayOfWeek.MONDAY)
+            var viewChannelWrites = []
+            Viewable.cast(day).onChange(From.VIEW, it -> viewChannelWrites << it.currentValue().orElseThrowUnchecked())
+            def pane =
+                UI.tabbedPane()
+                .add(UI.tab("Mon").isSelectedIf(DayOfWeek.MONDAY,    day))
+                .add(UI.tab("Tue").isSelectedIf(DayOfWeek.TUESDAY,   day))
+                .add(UI.tab("Wed").isSelectedIf(DayOfWeek.WEDNESDAY, day))
+                .get(JTabbedPane)
+        expect : 'The initial enum value selected the first tab.'
+            pane.getSelectedIndex() == 0
+
+        when : 'We jump from the first to the last state, on the UI thread.'
+            UI.runNow(() -> day.set(DayOfWeek.WEDNESDAY))
+            UI.sync()
+
+        then : 'The pane and the property agree...'
+            pane.getSelectedIndex() == 2
+            day.get() == DayOfWeek.WEDNESDAY
+        and : '...and the property never received a stale view write.'
+            viewChannelWrites == []
+
+        when : 'We jump all the way back.'
+            UI.runNow(() -> day.set(DayOfWeek.MONDAY))
+            UI.sync()
+
+        then : 'Everything agrees again, still without stale writes.'
+            pane.getSelectedIndex() == 0
+            day.get() == DayOfWeek.MONDAY
+            viewChannelWrites == []
+
+        when : 'The user selects the middle tab in the view.'
+            UI.runNow(() -> pane.setSelectedIndex(1))
+            UI.sync()
+
+        then : 'The property follows, and it was updated through the view channel exactly once.'
+            day.get() == DayOfWeek.TUESDAY
+            viewChannelWrites == [DayOfWeek.TUESDAY]
+    }
+
+    def 'Setting the selection flag of the currently selected tab to false deselects the whole pane.'()
+    {
+        reportInfo """
+            A boolean selection flag is a two-way binding: `true` selects the tab,
+            so `false` on the currently selected tab deselects it — leaving the
+            pane with no selection at all instead of silently flipping the
+            property back to `true`.
+        """
+        given : 'A tabbed pane with a boolean selection flag on the second tab.'
+            var tab2Selected = Var.of(false)
+            def pane =
+                UI.tabbedPane()
+                .add(UI.tab("Tab 1"))
+                .add(UI.tab("Tab 2").isSelectedIf(tab2Selected))
+                .add(UI.tab("Tab 3"))
+                .get(JTabbedPane)
+
+        when : 'We select the second tab through its flag.'
+            tab2Selected.set(true)
+            UI.sync()
+
+        then : 'It is selected.'
+            pane.getSelectedIndex() == 1
+
+        when : 'We set the flag of that very tab to false.'
+            tab2Selected.set(false)
+            UI.sync()
+
+        then : 'Nothing is selected anymore, and the flag stays false.'
+            pane.getSelectedIndex() == -1
+            tab2Selected.get() == false
+    }
+
+    def 'Properties bound to a removed tab are harmless zombies which neither throw nor affect the pane.'()
+    {
+        reportInfo """
+            Properties bound to a tab (its title, tooltip, icon, enabled state or
+            selection flag) may outlive the tab itself. This happens naturally when
+            tabs are bound to a tuple or property list and one of the models is
+            removed while its properties remain part of the application state —
+            for example when a tab hosts a little "close" button in its header
+            whose click removes the model, after which the model change makes
+            derived views (like a title view) fire one last time.
+
+            Historically these zombie bindings resolved their tab index to -1 and
+            then blew up: title/tooltip/icon/enabled updates threw an
+            `IndexOutOfBoundsException` (logged to the error output), and a
+            selection flag update would even deselect the entire pane, while a
+            full deselection of the pane would flip the removed tab's flag back
+            to true. All of these must simply be ignored instead.
+        """
+        given : 'We remember the real error stream, so the cleanup block can always restore it.'
+            var realErr = System.err
+        and : 'Three tab models, each with its own title and selection flag property.'
+            var models = Vars.of("A", "B", "C")
+            var titles = [ "A": Var.of("Tab A"), "B": Var.of("Tab B"), "C": Var.of("Tab C") ]
+            var flags  = [ "A": Var.of(false),   "B": Var.of(false),   "C": Var.of(false)   ]
+        and : 'A tabbed pane bound to the models, where every tab binds its title and selection flag.'
+            TabSupplier<String> supplier = model ->
+                                                UI.tab(titles[model])
+                                                .isSelectedIf(flags[model])
+                                                .add(UI.label("content of " + model))
+            def pane = UI.tabbedPane().addAll(models, supplier).get(JTabbedPane)
+        and : 'The second tab is selected by the user.'
+            UI.runNow(() -> pane.setSelectedIndex(1))
+        expect :
+            pane.getTabCount() == 3
+            flags["B"].get() == true
+
+        when : 'The first tab model is removed, its title and flag properties staying alive.'
+            models.remove("A")
+            UI.sync()
+
+        then : 'The previously selected tab is still the selected one, at its shifted index.'
+            pane.getTabCount() == 2
+            pane.getSelectedIndex() == 0
+            pane.getTitleAt(0) == "Tab B"
+
+        when : 'The zombie title property fires again, while we capture the error output.'
+            var errorOutput = new ByteArrayOutputStream()
+            System.setErr(new PrintStream(errorOutput))
+            try {
+                titles["A"].set("Zombie A")
+                UI.sync()
+            } finally {
+                System.setErr(realErr)
+            }
+
+        then : 'No IndexOutOfBoundsException was logged and the remaining tabs are untouched.'
+            !errorOutput.toString().contains("IndexOutOfBoundsException")
+            pane.getTitleAt(0) == "Tab B"
+            pane.getTitleAt(1) == "Tab C"
+
+        when : 'The zombie selection flag is set to true.'
+            flags["A"].set(true)
+            UI.sync()
+
+        then : 'It does not hijack the pane: the selection and the other flags are unaffected.'
+            pane.getSelectedIndex() == 0
+            flags["B"].get() == true
+
+        when : 'The user deselects everything (and we reset the zombie flag first).'
+            flags["A"].set(false)
+            UI.sync()
+            UI.runNow(() -> pane.setSelectedIndex(-1))
+
+        then : 'The zombie flag is not flipped back to true by the pane wide deselection.'
+            pane.getSelectedIndex() == -1
+            flags["A"].get() == false
+            flags["B"].get() == false
+
+        when : 'The title binding of a surviving tab is used.'
+            titles["B"].set("Tab B (renamed)")
+            UI.sync()
+
+        then : 'It still works as usual.'
+            pane.getTitleAt(0) == "Tab B (renamed)"
+
+        cleanup : 'The global error stream is restored no matter how this feature ends.'
+            System.setErr(realErr)
     }
 
     def 'An unbound tabbed pane has the expect initial state.'()

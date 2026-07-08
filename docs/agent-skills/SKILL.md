@@ -1068,6 +1068,7 @@ UI.scale(int|float|double) / UI.unscale(..) / UI.scale(g2d)  // only when workin
 - `examples/zen/ThemeGardenView.java` (+ `ThemedStyleSheet`) — style sheets, groups, runtime theme swap.
 - `examples/scribe/CelestialScribe.java` — `Layout.none()` derived from data, styled text flowing around children.
 - `examples/dashboard/SalesDashboard.java` — reactive `Var<Layout>` reflow.
+- `examples/almanack/mvi/AlmanackView.java` (+ `AlmanackViewModel`) — every tab binding mechanism in one field-notebook app: a two-way `Var<Integer>` selection index that may point at tabs which don't exist yet (deferred selection), `addAll(Val<Tuple<M>>, TabSupplier)` dynamic tabs, enum⇄index lenses, bound tab titles/tooltips/enabled flags.
 - `examples/stylish/SoftUIView.java`, `SvgViewer.java` — style sheets, SVG, custom paint.
 - `examples/simple/ResponsiveLayout*.java` — `AUTO_SPAN` responsive flow.
 
