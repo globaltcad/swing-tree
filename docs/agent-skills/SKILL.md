@@ -5,7 +5,7 @@ description: >
   library Sprouts. Use this skill whenever you are building, editing, reviewing,
   or debugging Java Swing GUI code that imports `swingtree.UI` or `sprouts.*` —
   declarative component trees, MigLayout/responsive/reactive layouts, the
-  functional style API, animations, and MVI/MVL or MVVM view models.
+  functional style API, SVG icons, animations, and MVI/MVL or MVVM view models.
 ---
 
 # Writing SwingTree Applications
@@ -20,8 +20,8 @@ debuggable.
 
 This document gives you the intuition to write *any* SwingTree app: the builder,
 layout, properties & lenses, the two architecture patterns (MVI/MVL and classic
-MVVM), events, styling, animation, tables, dialogs, and the non-obvious gotchas
-that bite people. Read it top to bottom once; thereafter use the cheat sheet at
+MVVM), events, styling, animation, tables, icons & SVG, dialogs, and the
+non-obvious gotchas that bite people. Read it top to bottom once; thereafter use the cheat sheet at
 the end.
 
 ---
@@ -858,11 +858,61 @@ UI.table().withModel(m -> m
 ```
 Custom cell rendering: `.withCell(cell -> cell.view(c -> c.orGetUi(() -> textField()).updateIf(JTextField.class, tf -> { tf.setText(cell.entryAsString()); return tf; })))`.
 
-### SVG / icons
+### Icons & SVG (first-class, HiDPI-crisp)
 
-`icon("path.svg")`, `findIcon("path")` (returns `Optional<Icon>`, classpath + cache,
-SVG-aware), `SvgIcon.of(svgString).withFitComponent(..).withPreferredPlacement(..)`,
-and in the style API: `.image(img -> img.svg(svgText).fitMode(..).placement(..))`.
+SVG works **everywhere an icon can appear** (icons, buttons, labels, tabs,
+menus, dialogs, style-API images), rendered via JSVG + Java2D, re-rendered at
+the current UI scale — never blurry. All icon sizes are developer px (§13).
+
+**`IconDeclaration` — the right type for view models.** A lightweight immutable
+value (path or SVG text + preferred size); loading is lazy + cached, and a
+missing resource logs instead of throwing. It is a functional interface over
+`source()`:
+
+```java
+IconDeclaration funnel = () -> "img/funnel.svg";        // simplest: lambda
+enum Icons implements IconDeclaration {                  // idiomatic: constants
+    FUNNEL("img/funnel.svg"), SEED("img/seed.png");
+    private final String path;
+    Icons(String p){ this.path = p; }
+    @Override public String source(){ return path; }
+}
+Icons.FUNNEL.withSize(24, 24) / .withWidth(24)           // sizing withers
+IconDeclaration.ofSvg(svgText)                           // SVG string; reports the size declared in the SVG
+IconDeclaration.ofAutoScaledSvg(svgText)                 // SVG string; size -1 -> stretches to its component
+```
+
+**Using them:** `icon(decl)`, `icon(48, 48, decl)`, `button(decl)`,
+`label("x").withIcon(decl)`, `tab("t").withIcon(decl)`. **Dynamic:** bind a
+`Var<IconDeclaration>` — `icon(iconProp)`, `labelWithIcon(iconProp)`,
+`buttonWithIcon(iconProp)`, `menuItem("Connect", iconProp)`; set the property
+and the icon swaps. View models hold `IconDeclaration`s, never `ImageIcon`s.
+
+**Loading by hand:** `UI.findIcon("path")` → `Optional<ImageIcon>` (classpath →
+file system → cache; returns an `SvgIcon` for `.svg`); `UI.findSvgIcon(..)` →
+`Optional<SvgIcon>`. Cache lives in `SwingTree.get().getIconCache()`, keyed by
+declaration — prefer declarations over hand-built `SvgIcon`s so equal
+declarations share one instance.
+
+**`SvgIcon`** (`swingtree.style`) — immutable `ImageIcon` subclass; construct
+directly only when the SVG text is dynamic (editors, server-sent graphics):
+`SvgIcon.of(svgString | stream | document)` / `SvgIcon.at(path | url)`, then
+`.withIconSize(w,h)`, `.withIconSizeFromWidth(w)` (height from aspect ratio),
+`.withOpacity(f)`, `.withFitComponent(..)`, `.withPreferredPlacement(..)`.
+Without a fixed size, `getIconWidth()/getIconHeight()` return **-1** and the
+icon adapts to its component via two policies (only active while size is
+unknown): `UI.FitComponent` — `NO`, `WIDTH`, `HEIGHT`, `WIDTH_AND_HEIGHT`
+(these three may distort), `MIN_DIM`/`MAX_DIM` (fit smaller/larger dimension,
+keep aspect ratio — usually what you want) — and `UI.Placement` (`CENTER`,
+`TOP_LEFT`, … 9 positions). `.getImage()` rasterizes to a `BufferedImage`
+(loses scalability — visibly blurry when stretched).
+
+**Style API images:** `.image(img -> img.svg(svgText).fitMode(..).placement(..))`
+or `img.image(iconDeclOrImageIcon)`; plus `opacity`, `size`, `offset`, `repeat`,
+`primer(color)`, `clipTo(ComponentArea.BODY|BORDER|INTERIOR|..)`. Layer via the
+outer overload `image(Layer.BACKGROUND, img -> ..)`. If the SVG text/config is
+dynamic, add `withRepaintOn(props)` (§8). Playground example covering all of
+this: `examples/stylish/SvgViewer.java`.
 
 ### Dialogs (`JOptionPane` wrappers)
 
@@ -1008,7 +1058,8 @@ UI.of(this).withLayout(FILL.and(WRAP(1)).and(INS(16))).add(GROW, child);
 // state
 Var<T> v = Var.of(value);  v.get(); v.set(x); v.update(fn);  Val<U> d = v.viewAsString(fn);
 v.isEnabledIf / isVisibleIf / isSelectedIf / isEditableIf (Val<Boolean>)
-Viewable<R> c = Viewable.of(a, b, (x,y) -> combine);     // derived from 2 sources (recomputes on either)
+Viewable<T> c = Viewable.of(a, b, (x,y) -> combine);     // derived from 2 sources; result type = a's type
+Viewable<R> r = Viewable.of(R.class, a, b, (x,y) -> ..); // ...or with an explicitly different result type
 Viewable<T> w = v.view();                                // weakly-held listenable view (store in a field!)
 
 // sprouts immutable collections (persistent; every op returns a new instance)
@@ -1045,6 +1096,15 @@ UI.animate(vm, ViewModel::someAnimatable);
 Var<Layout> L = Var.of(Layout.class, Layout.mig("fill, wrap 1"));
 panel(L)...;  L.set(Layout.mig("fill, wrap 2").withChildConstraints(MigAddConstraint.of("growx, span 2")));
 
+// icons & SVG (crisp at any DPI; sizes in developer px)
+IconDeclaration ic = () -> "img/x.svg";                  // value object -> belongs in view models
+IconDeclaration.ofSvg(svgText) / .ofAutoScaledSvg(svgText) / ic.withSize(24,24)
+icon(ic) / button(ic) / label("x").withIcon(ic) / tab("t").withIcon(ic)
+icon(iconProp) / labelWithIcon(iconProp) / buttonWithIcon(iconProp)   // Val<IconDeclaration> -> swaps live
+UI.findIcon("img/x.svg") / UI.findSvgIcon(..)            // Optional<..>, classpath + cache
+SvgIcon.of(svgText).withIconSizeFromWidth(64).withFitComponent(FitComponent.MIN_DIM)
+.withStyle(it -> it.image(img -> img.svg(svgText).fitMode(..).placement(..)))
+
 // style sheet + theme
 UI.use(sheet, () -> UI.show(f -> new View()));   // sheet.reconfigure() hot-swaps
 
@@ -1069,7 +1129,8 @@ UI.scale(int|float|double) / UI.unscale(..) / UI.scale(g2d)  // only when workin
 - `examples/scribe/CelestialScribe.java` — `Layout.none()` derived from data, styled text flowing around children.
 - `examples/dashboard/SalesDashboard.java` — reactive `Var<Layout>` reflow.
 - `examples/almanack/mvi/AlmanackView.java` (+ `AlmanackViewModel`) — every tab binding mechanism in one field-notebook app: a two-way `Var<Integer>` selection index that may point at tabs which don't exist yet (deferred selection), `addAll(Val<Tuple<M>>, TabSupplier)` dynamic tabs, enum⇄index lenses, bound tab titles/tooltips/enabled flags.
-- `examples/stylish/SoftUIView.java`, `SvgViewer.java` — style sheets, SVG, custom paint.
+- `examples/stylish/SoftUIView.java` — soft-UI style sheet, custom paint.
+- `examples/stylish/SvgViewer.java` — SVG playground: one SVG rendered through four pipelines (`SvgIcon` in style API, `img.svg(..)` string, rasterized `getImage()`, component icon) with live `Placement`/`FitComponent` switching.
 - `examples/simple/ResponsiveLayout*.java` — `AUTO_SPAN` responsive flow.
 
 The wiki (`docs/markdown/`) is the prose companion; start at `README.md` →
