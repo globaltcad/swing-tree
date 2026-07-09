@@ -183,10 +183,10 @@ for example an SVG editor, or server-delivered graphics:
 ```java
   import swingtree.style.SvgIcon;
 
-  SvgIcon icon = SvgIcon.of(svgTextString);      // from a String
-  SvgIcon icon = SvgIcon.at("img/dandelion.svg"); // from a classpath resource
-  SvgIcon icon = SvgIcon.at(someUrl);             // from a URL
-  SvgIcon icon = SvgIcon.of(inputStream);         // from a stream
+  SvgIcon fromText   = SvgIcon.of(svgTextString);        // from a String
+  SvgIcon fromRes    = SvgIcon.at("/img/dandelion.svg"); // from a classpath resource
+  SvgIcon fromUrl    = SvgIcon.at(someUrl);              // from a URL
+  SvgIcon fromStream = SvgIcon.of(inputStream);          // from a stream
 ```
 
 Like everything in SwingTree, an `SvgIcon` is an **immutable value** — all
