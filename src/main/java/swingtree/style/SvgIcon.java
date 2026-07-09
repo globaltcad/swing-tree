@@ -29,26 +29,44 @@ import java.util.function.Function;
 
 /**
  *   A specialized {@link ImageIcon} subclass that allows you to use SVG based icon images in your GUI.
- *   This in essence just a wrapper around the <a href="https://github.com/weisJ/jsvg">JSVG library</a>,
+ *   This is in essence just a wrapper around the <a href="https://github.com/weisJ/jsvg">JSVG library</a>,
  *   which renders SVG images using the Java2D graphics API.
  *   <p>
  *   You may use this like a regular {@link ImageIcon}, but have to keep in mind that SVG documents
- *   do not really have a fixed size, meaning that the {@link #getIconWidth()} and {@link #getIconHeight()}
- *   on a freshly loaded {@link SvgIcon} will return -1 which causes the icon to be rendered according to the
- *   width and height of the component it is rendered into (see {@link #paintIcon(Component, java.awt.Graphics, int, int)}).
- *   <p>
- *   If you want to render the icon with a fixed size, you can use the {@link #withIconWidth(int)} and
- *   {@link #withIconHeight(int)} or {@link #withIconSize(int, int)} methods to create a new {@link SvgIcon}
- *   with the given width and height.
+ *   do not necessarily have a fixed size, meaning that {@link #getIconWidth()} and {@link #getIconHeight()}
+ *   may report {@code -1} for an unknown dimension. Which size an icon reports depends on
+ *   how it was created:
+ *   <ul>
+ *       <li>An explicitly supplied size always wins — either passed to one of the factory
+ *       methods directly, or set later through withers like {@link #withIconSize(int, int)},
+ *       {@link #withIconWidth(int)} and {@link #withIconHeight(int)}
+ *       (remember: this class is an immutable value object, so these return new instances).</li>
+ *       <li>Without an explicit size, the factory methods {@link #at(String)}, {@link #at(URL)},
+ *       {@link #of(String)} and {@link #of(InputStream)} adopt the pixel based
+ *       {@code width}/{@code height} attributes declared inside the SVG document, if present.</li>
+ *       <li>A dimension is reported as {@code -1} when the SVG document does not declare it,
+ *       declares it as a percentage, or uses a unit that SwingTree does not resolve
+ *       (like {@code pt} or {@code em}).</li>
+ *       <li>Icons loaded through the {@link swingtree.api.IconDeclaration} pipeline
+ *       ({@link UI#findIcon(String)} and friends) follow the size of the declaration,
+ *       where the default of {@link swingtree.layout.Size#unknown()} deliberately
+ *       resets both dimensions to {@code -1} so that the icon scales with its context.</li>
+ *   </ul>
+ *   An unknown ({@code -1}) dimension causes the icon to be rendered according to the
+ *   width and height of the component it is rendered into
+ *   (see {@link #paintIcon(Component, java.awt.Graphics, int, int)}).
+ *   Also note that {@link #getIconWidth()} and {@link #getIconHeight()} report the size
+ *   scaled to the current DPI settings (component pixel space), whereas {@link #getBaseWidth()}
+ *   and {@link #getBaseHeight()} expose the unscaled size (developer pixel space).
  *   <p>
  *   An {@link SvgIcon} with an undefined width or height will also be using the {@link UI.FitComponent}
  *   and {@link UI.Placement} policies to determine how the icon should be placed and sized within a component.
  *   Use the {@link #withFitComponent(UI.FitComponent)} and {@link #withPreferredPlacement(UI.Placement)}
  *   methods to create a new {@link SvgIcon} with the given policies and use the {@link #getFitComponent()}
  *   and {@link #getPreferredPlacement()} methods to retrieve the current policies
- *   (Not that these will not have any effect if the width and height are both defined).
+ *   (Note that these will not have any effect if the width and height are both defined).
  *   <p>
- *   <b>Also note that the direct use of this class and it's API is discouraged in favour of simply
+ *   <b>Also note that the direct use of this class and its API is discouraged in favour of simply
  *   calling the {@link UI#findIcon(String)} or {@link UI#findSvgIcon(String)} methods, which
  *   will automatically load and cache all the icons for you.</b>
  */

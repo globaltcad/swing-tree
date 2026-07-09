@@ -60,6 +60,7 @@ fans out from there.
 |---|---|
 | [Simple Dialogs](./Simple-Dialogs.md) | `UI.confirmation(..)` / `UI.message(..)` — the SwingTree wrappers around `JOptionPane`. |
 | [Writing Tables](./Writing-Tables.md) | Declarative `JTable` models, editable cells, and custom cell renderers. |
+| [SVG Icons and Images](./SVG-Icons-And-Images.md) | First-class SVG support — view-model-friendly `IconDeclaration`s, the cached `UI.findIcon(..)` loaders, the `SvgIcon` fit/placement policies, and SVG in the style API's image layers. |
 
 ## 🔍 Under the hood ##
 
@@ -96,6 +97,8 @@ graph TD;
     C --> EH[Advanced Event Handling]
     C --> SD[Simple Dialogs]
     C --> WT[Writing Tables]
+    C --> SVG[SVG Icons and Images]
+    SVG --> HDPI
     C --> HDPI[HiDPI Scaling]
     SS --> HDPI
     EH --> HDPI
@@ -118,3 +121,4 @@ illustrative ones:
 - [**SalesDashboard**](../../src/test/java/examples/dashboard/SalesDashboard.java) — a single dashboard reflowed by toggling a `Var<Layout>`. See [Reactive Layouts](./Reactive-Layouts.md).
 - [**CalculatorView**](../../src/test/java/examples/calculator/mvi/CalculatorView.java) — the canonical MVI / MVL walk-through. See [Functional MVVM](./Functional-MVVM.md).
 - [**TeamView**](../../src/test/java/examples/team/mvi/TeamView.java) (MVI / MVL) and its [classical MVVM twin](../../src/test/java/examples/team/mvvm/TeamView.java) — the *same* People Directory UI implemented in both architectures, side by side. The clearest way to feel the contrast between immutable-record + lenses and mutable `Var`-fields. See [Advanced MVVM](./Advanced-MVVM.md) and [Functional MVVM](./Functional-MVVM.md).
+- [**SvgViewer**](../../src/test/java/examples/stylish/SvgViewer.java) — a live SVG playground: type SVG text, tweak `Placement` / `FitComponent`, and watch four different rendering pipelines (SvgIcon, style-API SVG, rasterized image, component icon) side by side. See [SVG Icons and Images](./SVG-Icons-And-Images.md).
