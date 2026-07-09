@@ -899,13 +899,18 @@ directly only when the SVG text is dynamic (editors, server-sent graphics):
 `SvgIcon.of(svgString | stream | document)` / `SvgIcon.at(path | url)`, then
 `.withIconSize(w,h)`, `.withIconSizeFromWidth(w)` (height from aspect ratio),
 `.withOpacity(f)`, `.withFitComponent(..)`, `.withPreferredPlacement(..)`.
-Without a fixed size, `getIconWidth()/getIconHeight()` return **-1** and the
-icon adapts to its component via two policies (only active while size is
-unknown): `UI.FitComponent` — `NO`, `WIDTH`, `HEIGHT`, `WIDTH_AND_HEIGHT`
-(these three may distort), `MIN_DIM`/`MAX_DIM` (fit smaller/larger dimension,
-keep aspect ratio — usually what you want) — and `UI.Placement` (`CENTER`,
-`TOP_LEFT`, … 9 positions). `.getImage()` rasterizes to a `BufferedImage`
-(loses scalability — visibly blurry when stretched).
+Reported size (`getIconWidth()/getIconHeight()`, DPI-scaled): an explicit size
+wins; else a **directly constructed** `SvgIcon.at/of(..)` adopts the px
+`width`/`height` declared in the SVG text; **-1** (= unknown → icon adapts to
+its component) when those are missing, `%`-based, or non-px units — **and for
+every declaration-pipeline load** (`findIcon`, `icon(path)`,
+`IconDeclaration.of(path)`): the declaration's default `Size.unknown()`
+deliberately resets the icon to flexible. While a dimension is unknown, two
+policies control rendering: `UI.FitComponent` — `NO`, `WIDTH`, `HEIGHT`,
+`WIDTH_AND_HEIGHT` (these three may distort), `MIN_DIM`/`MAX_DIM` (fit
+smaller/larger dimension, keep aspect ratio — usually what you want) — and
+`UI.Placement` (`CENTER`, `TOP_LEFT`, … 9 positions). `.getImage()` rasterizes
+to a `BufferedImage` (loses scalability — visibly blurry when stretched).
 
 **Style API images:** `.image(img -> img.svg(svgText).fitMode(..).placement(..))`
 or `img.image(iconDeclOrImageIcon)`; plus `opacity`, `size`, `offset`, `repeat`,

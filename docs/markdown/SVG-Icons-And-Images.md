@@ -43,7 +43,7 @@ then the file system:
 
 ```java
   UI.panel("wrap 1")
-  .add(UI.icon("img/dandelion.svg"))                  // a JIcon, natural SVG size
+  .add(UI.icon("img/dandelion.svg"))                  // a JIcon; the SVG scales with the component
   .add(UI.icon(48, 48, "img/dandelion.svg"))          // fixed size (in developer pixels)
   .add(UI.label("Seeds").withIcon(() -> "img/seed.png"))
   .add(UI.button("Filter").withIcon(() -> "img/funnel.svg"));
@@ -205,10 +205,25 @@ configuration happens through withers that return new instances:
 ### The "no size" superpower ###
 
 An SVG document has no inherently fixed size, and `SvgIcon` embraces that:
-a freshly loaded icon (without explicit size) returns `-1` from
-`getIconWidth()` / `getIconHeight()`, which tells SwingTree to render it
-**according to the size of the component it appears in**. Two policies
-control how that happens:
+a dimension can be *unknown*, in which case `getIconWidth()` /
+`getIconHeight()` return `-1` and the icon is rendered **according to the
+size of the component it appears in**. What a given icon reports:
+
+- An **explicit size** always wins — set through the withers below or
+  through a declaration's `withSize(..)`.
+- Constructed **directly** via `SvgIcon.at(..)` / `SvgIcon.of(..)`, the icon
+  adopts the pixel-based `width`/`height` declared inside the SVG text and
+  reports that (DPI-scaled). It reports `-1` only when those attributes are
+  missing, percentage-based, or use units SwingTree does not resolve
+  (`pt`, `em`, ...).
+- Loaded through the **declaration pipeline** (`UI.icon(path)`,
+  `UI.findIcon(..)`, `IconDeclaration.of(path)`), the icon is *reset to
+  flexible*: a declaration's default preferred size is `Size.unknown()`,
+  which deliberately clears the SVG's declared size so the icon reports
+  `-1` and scales with its component. (This is also the difference between
+  `IconDeclaration.ofSvg(..)` and `ofAutoScaledSvg(..)` from earlier.)
+
+While a dimension is unknown, two policies control the rendering:
 
 - **`UI.FitComponent`** — *how* the SVG stretches to the component:
   `NO` (natural size), `WIDTH`, `HEIGHT`, `WIDTH_AND_HEIGHT` (each may
