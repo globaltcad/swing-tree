@@ -5,6 +5,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import swingtree.api.IconDeclaration
+import swingtree.components.JBox
 import swingtree.layout.Size
 import swingtree.style.SvgIcon
 import utility.Utility
@@ -420,6 +421,99 @@ class SvgIcon_Spec extends Specification
               2   | 'blue-circle-2'           || "<svg width=\"100%\" height=\"100%\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"blue\"/>\n</svg>"
               1   | 'green-stretched-circle-1'|| "<svg width=\"200px\" height=\"100px\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"green\"/>\n</svg>"
               2   | 'green-stretched-circle-2'|| "<svg width=\"100px\" height=\"200px\" viewBox=\"0 0 100 100\">\n<circle cx=\"50\" cy=\"50\" r=\"40\" fill=\"green\"/>\n</svg>"
+    }
+
+    def 'An SVG passed to the style API is rendered onto the component according to placement, fit mode and its declared size.'(
+        float uiScale, String imgToMatch, String svgWidth, String svgHeight, String viewBox, UI.Placement placement, UI.FitComponent fitMode
+    ) {
+        reportInfo """
+            Instead of creating an `SvgIcon` yourself, you can also pass raw SVG document code
+            directly to the style API using the `svg(String)` method of the "image" sub-style.
+            There you can also configure how the SVG is placed and stretched
+            inside the component through the `placement(UI.Placement)`
+            and `fitMode(UI.FitComponent)` methods.
+
+            In this example we render an SVG document declaring a single orange rectangle
+            which covers the entire SVG viewport except for a 5 pixel wide margin on each side.
+            The SVG is rendered onto a light gray `JBox` sized 90x60 pixels,
+            which produces the following image:
+
+            ${Utility.linkSnapshot("svgInBox/${imgToMatch}.png")}
+
+            Note that when the aspect ratio formed by the SVG's width and height
+            differs from the aspect ratio of its view box, then the rectangle
+            is distorted accordingly, exactly like in a browser.
+            The fit mode based scaling on the other hand, stretches the
+            SVG viewport relative to the size of the component.
+        """
+        given : 'We initialize SwingTree with the UI scaling factor of the current data table row:'
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )
+        and : """
+            We construct the SVG document from the width, height and view box parameters.
+            The rectangle is derived from the view box so that it always covers the
+            entire viewport except for a margin of 5 pixels on each of its sides.
+        """
+            var viewBoxParts = viewBox.split(" ")
+            var rectWidth  = (viewBoxParts[2] as int) - 10
+            var rectHeight = (viewBoxParts[3] as int) - 10
+            var svg = "<svg width=\"$svgWidth\" height=\"$svgHeight\" viewBox=\"$viewBox\">\n" +
+                      "  <rect x=\"5\" y=\"5\" width=\"$rectWidth\" height=\"$rectHeight\" fill=\"orange\"/>\n" +
+                      "</svg>"
+        and : 'A `JBox` which receives the SVG code together with the current placement and fit mode through the style API:'
+            var ui =
+                    UI.box().withStyle( it -> it
+                        .size(90, 60)
+                        .backgroundColor(UI.Color.LIGHTGRAY)
+                        .image( conf -> conf
+                            .svg(svg)
+                            .placement(placement)
+                            .fitMode(fitMode)
+                        )
+                    )
+
+        when : 'We render the box into a buffered image...'
+            var img = Utility.renderSingleComponent(ui.get(JBox))
+        then : 'It matches the PNG stored in the test snapshots folder!'
+            Utility.similarityBetween(img, "svgInBox/${imgToMatch}.png", 99.9) > 99.9
+
+        cleanup :
+            SwingTree.clear()
+
+        where :
+            uiScale | imgToMatch               | svgWidth | svgHeight | viewBox       | placement                 | fitMode
+            // A small square SVG placed at the various placement locations:
+            1       | 'square-center-1'        | "30"     | "30"      | "0 0 100 100" | UI.Placement.CENTER       | UI.FitComponent.NO
+            1       | 'square-top-left-1'      | "30"     | "30"      | "0 0 100 100" | UI.Placement.TOP_LEFT     | UI.FitComponent.NO
+            1       | 'square-top-1'           | "30"     | "30"      | "0 0 100 100" | UI.Placement.TOP          | UI.FitComponent.NO
+            1       | 'square-top-right-1'     | "30"     | "30"      | "0 0 100 100" | UI.Placement.TOP_RIGHT    | UI.FitComponent.NO
+            1       | 'square-right-1'         | "30"     | "30"      | "0 0 100 100" | UI.Placement.RIGHT        | UI.FitComponent.NO
+            1       | 'square-bottom-right-1'  | "30"     | "30"      | "0 0 100 100" | UI.Placement.BOTTOM_RIGHT | UI.FitComponent.NO
+            1       | 'square-bottom-1'        | "30"     | "30"      | "0 0 100 100" | UI.Placement.BOTTOM       | UI.FitComponent.NO
+            1       | 'square-bottom-left-1'   | "30"     | "30"      | "0 0 100 100" | UI.Placement.BOTTOM_LEFT  | UI.FitComponent.NO
+            1       | 'square-left-1'          | "30"     | "30"      | "0 0 100 100" | UI.Placement.LEFT         | UI.FitComponent.NO
+            2       | 'square-center-2'        | "30"     | "30"      | "0 0 100 100" | UI.Placement.CENTER       | UI.FitComponent.NO
+            // A width/height aspect ratio different from the view box aspect ratio distorts the rectangle:
+            1       | 'squashed-flat-1'        | "60"     | "20"      | "0 0 100 100" | UI.Placement.CENTER       | UI.FitComponent.NO
+            1       | 'stretched-tall-1'       | "20"     | "50"      | "0 0 100 100" | UI.Placement.CENTER       | UI.FitComponent.NO
+            1       | 'stretched-wide-1'       | "40"     | "40"      | "0 0 50 100"  | UI.Placement.CENTER       | UI.FitComponent.NO
+            2       | 'squashed-flat-2'        | "60"     | "20"      | "0 0 100 100" | UI.Placement.CENTER       | UI.FitComponent.NO
+            // Distorted rectangles can of course also be placed anywhere in the component:
+            1       | 'squashed-flat-top-left-1'      | "40" | "14"   | "0 0 100 100" | UI.Placement.TOP_LEFT     | UI.FitComponent.NO
+            1       | 'squashed-flat-top-right-1'     | "40" | "14"   | "0 0 100 100" | UI.Placement.TOP_RIGHT    | UI.FitComponent.NO
+            1       | 'squashed-flat-bottom-1'        | "40" | "14"   | "0 0 100 100" | UI.Placement.BOTTOM       | UI.FitComponent.NO
+            1       | 'stretched-tall-left-1'         | "14" | "40"   | "0 0 100 100" | UI.Placement.LEFT         | UI.FitComponent.NO
+            1       | 'stretched-tall-top-1'          | "14" | "40"   | "0 0 100 100" | UI.Placement.TOP          | UI.FitComponent.NO
+            1       | 'stretched-tall-bottom-right-1' | "14" | "40"   | "0 0 100 100" | UI.Placement.BOTTOM_RIGHT | UI.FitComponent.NO
+            2       | 'squashed-flat-bottom-left-2'   | "40" | "14"   | "0 0 100 100" | UI.Placement.BOTTOM_LEFT  | UI.FitComponent.NO
+            // The fit mode determines how the SVG viewport is stretched onto the 90x60 component:
+            1       | 'fit-width-and-height-1' | "30"     | "30"      | "0 0 100 100" | UI.Placement.CENTER       | UI.FitComponent.WIDTH_AND_HEIGHT
+            1       | 'fit-min-dim-1'          | "30"     | "30"      | "0 0 100 100" | UI.Placement.CENTER       | UI.FitComponent.MIN_DIM
+            1       | 'fit-max-dim-1'          | "30"     | "30"      | "0 0 100 100" | UI.Placement.CENTER       | UI.FitComponent.MAX_DIM
+            1       | 'fit-width-1'            | "30"     | "30"      | "0 0 100 100" | UI.Placement.CENTER       | UI.FitComponent.WIDTH
+            1       | 'fit-height-1'           | "30"     | "30"      | "0 0 100 100" | UI.Placement.CENTER       | UI.FitComponent.HEIGHT
+            2       | 'fit-min-dim-2'          | "30"     | "30"      | "0 0 100 100" | UI.Placement.CENTER       | UI.FitComponent.MIN_DIM
+            // An SVG with percentage based dimensions has no inherent size and so it always stretches over the component:
+            1       | 'percent-size-no-fit-1'  | "100%"   | "100%"    | "0 0 100 100" | UI.Placement.CENTER       | UI.FitComponent.NO
     }
 
     def 'The `withIconSizeFromHeight` method converts percentage-based icons to pixel-based icons and maintains aspect ratio.'(
