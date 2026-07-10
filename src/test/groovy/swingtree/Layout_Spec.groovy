@@ -5,6 +5,8 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import swingtree.layout.FlowCell
+import swingtree.layout.FlowCellConf
+import swingtree.layout.ParentSizeClass
 import swingtree.layout.ResponsiveGridFlowLayout
 import swingtree.layout.Size
 import swingtree.threading.EventProcessor
@@ -36,7 +38,7 @@ import java.awt.Rectangle
     as part of declarative SwingTree UI code.
 
 """)
-@Subject([ResponsiveGridFlowLayout, FlowCell, UIFactoryMethods, UI])
+@Subject([ResponsiveGridFlowLayout, FlowCell, FlowCellConf, UIFactoryMethods, UI])
 class Layout_Spec extends Specification
 {
     def setup() {
@@ -440,6 +442,139 @@ class Layout_Spec extends Specification
             preferred == new Dimension(140, 30)
         cleanup :
             SwingTree.clear()
+    }
+
+    def 'The `UI.AUTO_SPAN` configurator receives detailed context about the parent container.'(
+        int parentWidth, ParentSizeClass expectedCategory
+    ) {
+        reportInfo """
+            The configurator lambda you pass to `UI.AUTO_SPAN(..)` is not
+            merely a builder for span policies, it is also an information
+            carrier. It is invoked on every layout pass and exposes
+            the current context of the parent container:
+
+            - `maxCellsToFill()` tells you the total number of grid cells in a row (12).
+            - `parentSize()` reports the current width and height of the parent container.
+            - `parentSizeCategory()` classifies the parent width relative to its
+              preferred width into one of the `ParentSizeClass` categories, ranging
+              from `VERY_SMALL` (less than 1/5 of the preferred width) over `MEDIUM`
+              (between 2/5 and 3/5) all the way up to `OVERSIZE`
+              (larger than the preferred width).
+
+            You can use this to make layout decisions which go beyond
+            the predefined size category methods like `small(int)` or `large(int)`.
+        """
+        given : 'We first set a UI scale factor of 1 to keep the numbers deterministic.'
+            SwingTree.get().setUiScaleFactor(1f)
+        and : 'A variable for capturing the configuration object passed to the configurator.'
+            var FlowCellConf captured = null
+        and : 'A flow layout panel with a preferred width of 100 and a single cell spanning child.'
+            var panel =
+                        UI.panel().withFlowLayout(UI.HorizontalAlignment.CENTER, 0, 0)
+                        .withPrefSize(100, 50)
+                        .add(UI.AUTO_SPAN({ captured = it; return it.medium(6) }),
+                            UI.box().withPrefHeight(10)
+                        )
+                        .get(JPanel)
+
+        when : 'We size the panel to the currently examined width and let the layout do its job.'
+            panel.setSize(parentWidth, 50)
+            panel.doLayout()
+        then : 'The configurator was invoked with the full context of the parent container:'
+            captured != null
+            captured.maxCellsToFill() == 12
+            captured.parentSize() == Size.of(parentWidth, 50)
+            captured.parentSizeCategory() == expectedCategory
+
+        where : 'The size category corresponds to the parent width relative to its preferred width of 100.'
+            parentWidth || expectedCategory
+                 10     || ParentSizeClass.VERY_SMALL
+                 30     || ParentSizeClass.SMALL
+                 50     || ParentSizeClass.MEDIUM
+                 70     || ParentSizeClass.LARGE
+                100     || ParentSizeClass.VERY_LARGE
+                150     || ParentSizeClass.OVERSIZE
+    }
+
+    def 'Cell spans outside of the valid range are clamped to the nearest valid span.'()
+    {
+        reportInfo """
+            The number of cells a component may span ranges from 0 to
+            `maxCellsToFill()`, which is 12 by default.
+            If you accidentally declare a span outside of this range, then
+            the `ResponsiveGridFlowLayout` does not blow up your UI.
+            Instead, it clamps the span to the nearest valid value
+            and logs a warning so that the mistake does not go unnoticed.
+        """
+        given : 'A fixed UI scale factor of 1 for deterministic numbers.'
+            SwingTree.get().setUiScaleFactor(1f)
+        and : 'Two flow layout panels whose children declare out of range spans.'
+            var panel1 =
+                        UI.panel().withFlowLayout(UI.HorizontalAlignment.CENTER, 0, 0)
+                        .withPrefSize(100, 50)
+                        .add(UI.AUTO_SPAN({ it.medium(20) }), // <- too large!
+                            UI.box().withPrefHeight(10)
+                        )
+                        .get(JPanel)
+            var panel2 =
+                        UI.panel().withFlowLayout(UI.HorizontalAlignment.CENTER, 0, 0)
+                        .withPrefSize(100, 50)
+                        .add(UI.AUTO_SPAN({ it.medium(-4) }), // <- negative!
+                            UI.box().withPrefHeight(10)
+                        )
+                        .get(JPanel)
+
+        when : 'We size both panels to half their preferred width, the "medium" category.'
+            panel1.setSize(50, 50)
+            panel1.doLayout()
+            panel2.setSize(50, 50)
+            panel2.doLayout()
+        then : 'The span of 20 was clamped down to the full row of 12 cells, so the component fills the entire width.'
+            panel1.getComponent(0).getWidth() == 50
+        and : 'The negative span was clamped up to 0 cells, which means the component receives no width at all.'
+            panel2.getComponent(0).getWidth() == 0
+    }
+
+    def 'You do not need to define a span for every size category, the closest one is used.'()
+    {
+        reportInfo """
+            The span policies of a flow cell do not have to cover all
+            `ParentSizeClass` categories. When the layout encounters a parent
+            size category for which no span was defined, it simply looks for
+            the policy of the nearest neighbouring size category and uses that one.
+
+            So in the most extreme case, defining a single span policy,
+            like `medium(6)` in this example, is equivalent to defining
+            the same span for all size categories.
+        """
+        given : 'A fixed UI scale factor of 1 for deterministic numbers.'
+            SwingTree.get().setUiScaleFactor(1f)
+        and : 'A panel with a preferred width of 100 whose only child defines a span solely for the medium category.'
+            var panel =
+                        UI.panel().withFlowLayout(UI.HorizontalAlignment.CENTER, 0, 0)
+                        .withPrefSize(100, 50)
+                        .add(UI.AUTO_SPAN({ it.medium(6) }),
+                            UI.box().withPrefHeight(10)
+                        )
+                        .get(JPanel)
+
+        when : 'The panel is sized far below the medium range, into the "very small" category.'
+            panel.setSize(10, 50)
+            panel.doLayout()
+        then : 'The child still spans 6 of 12 cells, so half of the available width.'
+            panel.getComponent(0).getWidth() == 5
+
+        when : 'The panel is sized exactly into the medium category.'
+            panel.setSize(50, 50)
+            panel.doLayout()
+        then : 'The child spans half of the available width, as declared.'
+            panel.getComponent(0).getWidth() == 25
+
+        when : 'The panel is sized beyond its preferred width, into the "oversize" category.'
+            panel.setSize(150, 50)
+            panel.doLayout()
+        then : 'The child again spans 6 of 12 cells of the now much larger width.'
+            panel.getComponent(0).getWidth() == 75
     }
 
 }
