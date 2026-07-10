@@ -1,0 +1,18 @@
+<configuration>
+    <!--
+        Test logging configuration. Mirrors the plain console output we used to
+        get from slf4j-simple. We use logback here (instead of slf4j-simple)
+        because it allows test code to attach appenders programmatically,
+        which specs like the decoupled threading specs use to assert
+        that no errors were silently swallowed and logged during a test.
+    -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>[%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+</configuration>
