@@ -433,7 +433,7 @@ class Individual_Component_Styling_Spec extends Specification
                     .get(JPanel)
 
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "components/icon-in-a-box-with-nested-shadows.png", 98) > 98
+            Utility.similarityBetween(ui, "components/icon-in-a-box-with-nested-shadows.png", 99) > 99
 
         where : """
             We use the following integer scaling factors simulating different high DPI scenarios.
@@ -780,7 +780,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.get(JLabel))
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/rounded-green-JLabel.png", 98.4) > 98.4
+            Utility.similarityBetween(image, "components/rounded-green-JLabel.png", 98.5) > 98.5
     }
 
     def 'This is how you can create a JPanel with a gradient border.'()
