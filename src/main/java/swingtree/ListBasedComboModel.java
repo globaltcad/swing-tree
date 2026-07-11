@@ -6,6 +6,20 @@ import sprouts.Var;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ *  A combo box model based on a plain {@link List} of items which is read live,
+ *  meaning that the {@link javax.swing.JComboBox} always sees the current
+ *  content of the list whenever it is rendered.
+ *  <p>
+ *  Note that a plain list is shared mutable state without any change events,
+ *  so unlike the property based combo box models, there is no way for this
+ *  model to maintain a properly synchronized UI thread owned snapshot of it.
+ *  This live read contract is convenient for static or UI thread managed
+ *  option lists, but if your options change dynamically on an application
+ *  thread (see {@link swingtree.threading.EventProcessor#DECOUPLED}), prefer
+ *  modelling them as a {@link sprouts.Vars} list or a {@link sprouts.Tuple}
+ *  based property, which are fully thread safe.
+ */
 final class ListBasedComboModel<E extends @Nullable Object> extends AbstractComboModel<E>
 {
 	private final List<E> _items;
