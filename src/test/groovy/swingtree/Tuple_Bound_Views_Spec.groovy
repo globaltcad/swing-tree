@@ -740,7 +740,7 @@ class Tuple_Bound_Views_Spec extends Specification
             BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.label(p.viewAsString({ it.label() })) }
 
         when : 'We build the panel binding, capturing what is written to the error log.'
-            var log = Utility.captureSystemErr({
+            var log = Utility.captureErrorLog({
                 UI.panel().addAll(models, supplier).get(JPanel)
             })
 
@@ -765,7 +765,7 @@ class Tuple_Bound_Views_Spec extends Specification
             BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.label(p.viewAsString({ it.label() })) }
 
         when : 'We build the scroll-panels binding, capturing the error log.'
-            var log = Utility.captureSystemErr({
+            var log = Utility.captureErrorLog({
                 UI.scrollPanels().addAll(models, supplier).get(JScrollPanels)
             })
 
@@ -793,7 +793,7 @@ class Tuple_Bound_Views_Spec extends Specification
             BoundViewSupplier<Tag> faultySupplier = { Var<Tag> p -> UI.of(shared) }
 
         when : 'We build the scroll-panels binding, capturing the error log.'
-            var log = Utility.captureSystemErr({
+            var log = Utility.captureErrorLog({
                 UI.scrollPanels().addAll(models, faultySupplier).get(JScrollPanels)
             })
 
@@ -817,7 +817,7 @@ class Tuple_Bound_Views_Spec extends Specification
             var scrollPanels = UI.scrollPanels().addAll(models, supplier).get(JScrollPanels)
 
         when : 'We replace the tuple with a fresh one carrying the very same ids.'
-            var log = Utility.captureSystemErr({
+            var log = Utility.captureErrorLog({
                 models.set(Tuple.of(new Tag("a", "A-reloaded"), new Tag("b", "B-reloaded")))
                 UI.sync()
             })

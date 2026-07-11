@@ -497,8 +497,20 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
     }
 
     private void _setModel( ComboBoxModel<E> model, JComboBox<E> thisComponent ) {
-        if ( model instanceof AbstractComboModel )
-            _bindComboModelToEditor(thisComponent, (AbstractComboModel<E>) model );
+        if ( model instanceof AbstractComboModel ) {
+            AbstractComboModel<E> comboModel = (AbstractComboModel<E>) model;
+            comboModel._setEventProcessor(_state().eventProcessor());
+            /*
+                The bound selection property belongs to the application thread,
+                so the model maintains a UI thread owned copy of its state.
+                Whenever the property changes, the new state is dispatched
+                to the UI thread and applied to that copy here:
+            */
+            _onShow( comboModel._getSelectedItemVar(), thisComponent, (c, v) ->
+                comboModel._updateSelectionFromProperty(v)
+            );
+            _bindComboModelToEditor(thisComponent, comboModel);
+        }
         thisComponent.setModel(model);
     }
 
@@ -798,7 +810,12 @@ public final class UIForCombo<E,C extends JComboBox<E>> extends UIForAnySwing<UI
             if ( strongModel != null ) {
                 strongModel.doQuietly(() -> {
                     combo.getEditor().setItem(newItem);
-                    strongModel.fireListeners();
+                    /*
+                        Note that the combo box itself is notified about the new
+                        selection state by `_updateSelectionFromProperty(..)`,
+                        which runs before this editor sync. Here we only need
+                        to keep the editor component in line.
+                    */
                 });
             }
         }

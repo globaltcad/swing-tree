@@ -6,6 +6,7 @@ import spock.lang.Subject
 import spock.lang.Title
 import sprouts.Event
 import sprouts.Var
+import swingtree.api.model.BasicTableModel
 import swingtree.threading.EventProcessor
 
 import javax.swing.*
@@ -19,7 +20,7 @@ import java.awt.*
     API allows you to supply simple collection based data as a data source for your table.
     
 """)
-@Subject([UIForTable])
+@Subject([UIForTable, BasicTableModel])
 class Declarative_Tables_Spec extends Specification
 {
     def setupSpec() {
@@ -78,7 +79,7 @@ class Declarative_Tables_Spec extends Specification
     {
         reportInfo """
             Note that in this example we use a lambda based table model
-            through the `UI.tableModel()` factory method. This is a convenient
+            through the `withModel(Configurator)` method. This is a convenient
             way to create a table model without having to implement the TableModel
             interface yourself.
         """
@@ -295,6 +296,158 @@ class Declarative_Tables_Spec extends Specification
             success == true
             editor.getEditorComponent() instanceof JTextField
             editor.getEditorComponent().background == Color.MAGENTA
+    }
+
+    def 'Fixed column names declared through `colNames(..)` also determine the column count.'()
+    {
+        reportInfo """
+            When you declare a fixed array of column names using the
+            `colNames(String...)` method, you usually do not have to
+            declare a `colCount(..)` lambda anymore, because the number
+            of column names already implies the number of columns.
+        """
+        given : 'Some row major table data.'
+            var data = [
+                            ["Joey",   34],
+                            ["Fabian", 28],
+                        ]
+        and : 'A table with a model that declares fixed column names, but no explicit column count.'
+            var table =
+                    UI.table().withModel( m -> m
+                        .colNames("Name", "Age")
+                        .rowCount( () -> data.size() )
+                        .getsEntryAt( (r, c) -> data[r][c] )
+                    )
+                    .get(JTable)
+
+        expect : 'The column count is inferred from the two column names.'
+            table.columnCount == 2
+            table.rowCount == 2
+        and : 'The columns have the declared names.'
+            table.getColumnName(0) == "Name"
+            table.getColumnName(1) == "Age"
+        and : 'The cells resolve against the data as expected.'
+            table.getValueAt(0, 0) == "Joey"
+            table.getValueAt(1, 1) == 28
+        and : 'Asking the model for a name outside of the declared range yields an empty string rather than an error.'
+            table.getModel().getColumnName(42) == ""
+    }
+
+    def 'Fixed column classes declared through `colClasses(..)` imply the column count and default names.'()
+    {
+        reportInfo """
+            The `colClasses(Class...)` method defines the types of the
+            individual columns, which a `JTable` uses to pick appropriate
+            renderers and editors (a checkbox for booleans for example).
+
+            Just like with `colNames(..)`, the number of declared classes
+            implies the column count if you do not specify one.
+            And if you do not declare any column names either, the simple
+            names of the column classes serve as default column names.
+        """
+        given : 'A table model with two typed columns and nothing else but data.'
+            var data = [ [42, "meaning of life"] ]
+            var table =
+                    UI.table().withModel( m -> m
+                        .colClasses(Integer, String)
+                        .rowCount( () -> data.size() )
+                        .getsEntryAt( (r, c) -> data[r][c] )
+                    )
+                    .get(JTable)
+
+        expect : 'The column count is inferred from the two column classes.'
+            table.columnCount == 2
+        and : 'The model reports the declared classes to the table.'
+            table.getModel().getColumnClass(0) == Integer
+            table.getModel().getColumnClass(1) == String
+        and : 'The default column names are derived from the class names.'
+            table.getColumnName(0) == "Integer"
+            table.getColumnName(1) == "String"
+    }
+
+    def 'Use `setsEntryAt(..)` to receive the edits a user makes through the table.'()
+    {
+        reportInfo """
+            The `getsEntryAt(..)` lambda feeds data into the table, and the
+            `setsEntryAt(..)` lambda is its counterpart which channels user
+            edits back out of the table and into your data structure.
+            Note that for edits to reach the setter in a real application,
+            the cells also have to be declared editable using `isEditableIf(..)`.
+        """
+        given : 'A mutable matrix of data.'
+            var data = [
+                            [1, 2],
+                            [3, 4],
+                        ]
+        and : 'A fully editable table model with both a getter and a setter lambda.'
+            var table =
+                    UI.table().withModel( m -> m
+                        .colNames("A", "B")
+                        .rowCount( () -> data.size() )
+                        .getsEntryAt( (r, c) -> data[r][c] )
+                        .setsEntryAt( (r, c, v) -> data[r][c] = v )
+                        .isEditableIf( (r, c) -> true )
+                    )
+                    .get(JTable)
+
+        when : 'The value of a particular cell is set through the standard `JTable` API.'
+            table.setValueAt(42, 1, 0)
+        then : 'The edit was channeled through the setter lambda into our data structure.'
+            data == [
+                        [1,  2],
+                        [42, 4],
+                    ]
+        and : 'The table of course displays the new value.'
+            table.getValueAt(1, 0) == 42
+    }
+
+    def 'A table model without any configuration is empty, but does not blow up.'()
+    {
+        reportInfo """
+            All aspects of the lambda based table model are optional.
+            Whatever you do not declare falls back to a sensible default:
+            no rows, no columns, `null` entries, no editability and
+            silently ignored edits.
+        """
+        given : 'A table with a model that was not configured at all.'
+            var table = UI.table().withModel( m -> m ).get(JTable)
+            var model = table.getModel()
+
+        expect : 'The model is empty.'
+            model.getRowCount() == 0
+            model.getColumnCount() == 0
+        and : 'Entries are reported as null and cells are not editable.'
+            model.getValueAt(0, 0) == null
+            !model.isCellEditable(0, 0)
+
+        when : 'We try to store a value despite there being no setter lambda...'
+            model.setValueAt(42, 0, 0)
+        then : '...the call is simply ignored.'
+            noExceptionThrown()
+            model.getValueAt(0, 0) == null
+    }
+
+    def 'Every aspect of a lambda based table model may only be declared once.'()
+    {
+        reportInfo """
+            The `BasicTableModel.Builder` fails fast when you accidentally
+            declare the same model aspect twice, because the second declaration
+            would silently override the first one, which is most likely a bug
+            in the declaration. So instead of guessing which lambda you meant,
+            it throws an `IllegalStateException` right away.
+        """
+        given : 'A table model builder with a row count already defined.'
+            var builder = new BasicTableModel.Builder<>(Object).rowCount( () -> 2 )
+
+        when : 'We try to define a second row count lambda...'
+            builder.rowCount( () -> 42 )
+        then : '...the builder complains immediately.'
+            thrown(IllegalStateException)
+
+        when : 'A null lambda on the other hand is reported as an invalid argument.'
+            builder.colCount(null)
+        then :
+            thrown(IllegalArgumentException)
     }
 
 }

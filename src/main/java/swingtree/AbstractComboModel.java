@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import sprouts.Channel;
 import sprouts.From;
 import sprouts.Var;
+import swingtree.threading.EventProcessor;
 
 import javax.swing.*;
 import javax.swing.event.ListDataEvent;
@@ -18,6 +19,18 @@ import java.util.Objects;
  *  property binding to the selection state of the model.
  *  This model wraps a {@link sprouts.Var} instance which is used
  *  to dynamically model the selection state of the model.
+ *  <p>
+ *  Note that the bound property is never accessed by the UI thread directly!
+ *  This model maintains its own UI thread owned copy of the current selection,
+ *  which the {@link JComboBox} reads through {@link #getSelectedItem()}.
+ *  When the user changes the selection, the new state is first applied to this
+ *  UI owned copy and then handed over to the application thread through the
+ *  current {@link EventProcessor}, which writes it into the property.
+ *  Conversely, a property change coming from the application thread is
+ *  dispatched to the UI thread, where it is applied to the UI owned copy
+ *  through {@link #_updateSelectionFromProperty(Object)}.
+ *  This is the same threading convention that all other property bound
+ *  widget states in SwingTree follow.
  *
  * @param <E> The type of the elements which will be stored in this model.
  */
@@ -27,6 +40,8 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 
 	protected int _selectedIndex = -1;
 	private final Var<E> _selectedItem;
+	private @Nullable E _currentSelection; // The UI thread owned copy of the selection state of `_selectedItem`.
+	private EventProcessor _eventProcessor = EventProcessor.COUPLED;
 	private final java.util.List<ListDataListener> listeners = new ArrayList<>();
 
 	private boolean _acceptsEditorChanges = true; // This is important to prevent getting feedback loops!
@@ -53,6 +68,7 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 
 	AbstractComboModel( Var<E> selectedItem ) {
 		_selectedItem = Objects.requireNonNull(selectedItem);
+		_currentSelection = _readPropertyItemSafely();
 	}
 
 	final boolean acceptsEditorChanges() {
@@ -60,6 +76,45 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 	}
 
 	final Var<E> _getSelectedItemVar() { return _selectedItem; }
+
+	/**
+	 *  Gives this model the {@link EventProcessor} of the UI declaration it is
+	 *  installed in, which it uses to hand selection changes made by the user
+	 *  over to the application thread, where they are written into the bound property.
+	 */
+	final void _setEventProcessor( EventProcessor eventProcessor ) {
+		_eventProcessor = Objects.requireNonNull(eventProcessor);
+	}
+
+	/**
+	 *  This is called by the UI thread when the bound selection property changed,
+	 *  so that the state of the property is applied to the UI owned copy
+	 *  of the selection, followed by a notification of the combo box.
+	 *  Note that this must never write back into the property,
+	 *  otherwise updates would echo back and forth between the threads.
+	 *
+	 * @param newItem The new selection state, as carried by the property change event.
+	 */
+	final void _updateSelectionFromProperty( @Nullable E newItem ) {
+		boolean changed = !Objects.equals(_currentSelection, newItem);
+		_currentSelection = newItem;
+		_selectedIndex = _indexOf(newItem);
+		if ( changed )
+			doQuietly(this::fireListeners);
+	}
+
+	/**
+	 *  Applies a selection change made by the user in the view to the UI owned
+	 *  selection copy, and then hands the new state over to the application
+	 *  thread, which writes it into the bound property.
+	 *  This is the exact inverse of {@link #_updateSelectionFromProperty(Object)}.
+	 */
+	private void _sendSelectionToProperty( @Nullable E newItem ) {
+		_currentSelection = newItem;
+		_eventProcessor.registerAppEvent(
+			() -> _setSelectedItemSafely(From.VIEW, NullUtil.fakeNonNull(newItem))
+		);
+	}
 
 	abstract AbstractComboModel<E> withVar( Var<E> newVar );
 
@@ -91,31 +146,25 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 					anItem = convertedItem;
 			}
 		}
-        E old = _getSelectedItemSafely();
+        E old = _currentSelection;
 		Object finalAnItem = anItem;
 		doQuietly(()-> {
-			E newItemInModel = _setSelectedItemSafely(From.VIEW, (E) NullUtil.fakeNonNull(finalAnItem));
-			_selectedIndex = _indexOf(newItemInModel);
-			if ( !Objects.equals(old, newItemInModel) )
+			E newItem = (E) NullUtil.fakeNonNull(finalAnItem);
+			_sendSelectionToProperty(newItem);
+			_selectedIndex = _indexOf(newItem);
+			if ( !Objects.equals(old, newItem) )
 				fireListeners();
 		});
 	}
 
 	/** {@inheritDoc} */
 	@Override public @Nullable Object getSelectedItem() {
-		try {
-			return _selectedItem.orElseNull();
-			/*
-				The property type is an interface, it can have any kind of faulty implementation.
-				So we need to protect the GUI's control flow from any possible exceptions.
-			 */
-		} catch (Exception e) {
-			log.error(SwingTree.get().logMarker(),
-					"Failed to fetch selected combo box item from bound property '{}', due to exception.",
-					_selectedItem, e
-				);
-		}
-		return null;
+		return _currentSelection;
+		/*
+			Note that this deliberately does not read the bound property!
+			The property belongs to the application thread, whereas this method
+			is called by the UI thread, which only ever sees the UI owned copy.
+		 */
 	}
 
 	/** {@inheritDoc} */
@@ -164,8 +213,8 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 			try {
 				E newItemToStore = _convert(o);
 				this.setAt( _selectedIndex, newItemToStore );
-				boolean stateChanged = !Objects.equals(_getSelectedItemSafely(),newItemToStore);
-				_setSelectedItemSafely(From.VIEW, NullUtil.fakeNonNull(newItemToStore));
+				boolean stateChanged = !Objects.equals(_currentSelection, newItemToStore);
+				_sendSelectionToProperty(newItemToStore);
 				if ( stateChanged )
 					doQuietly(this::fireListeners);
 
@@ -317,13 +366,26 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 	}
 
 	/**
-	 *  The property type is an interface, it can have any kind of faulty implementation.
-	 *  So we need to protect the GUI's control flow from any possible exceptions.
-	 *  An exception in the property means the item is now null!
+	 *  Exposes the UI thread owned copy of the selection state of the bound property.
+	 *  This is what the UI thread works with instead of the property itself,
+	 *  which belongs to the application thread and must not be accessed here.
 	 *
 	 * @return The selected item of the combo box, or null if nothing is selected.
 	 */
 	protected @Nullable E _getSelectedItemSafely() {
+		return _currentSelection;
+	}
+
+	/**
+	 *  The property type is an interface, it can have any kind of faulty implementation.
+	 *  So we need to protect the control flow from any possible exceptions.
+	 *  An exception in the property means the item is now null!
+	 *  This is only used to initialize the UI owned selection copy
+	 *  when this model is first created.
+	 *
+	 * @return The item of the bound selection property, or null if the property failed to deliver it.
+	 */
+	private @Nullable E _readPropertyItemSafely() {
 		E item = null;
 		try {
 			item = _selectedItem.orElseNull();

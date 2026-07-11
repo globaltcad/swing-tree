@@ -265,13 +265,19 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
             ModelToViewConverter<ViewHandle<M>> viewSupplier,
             P scrollPanels
     ) {
-        Function<Integer, ViewHandle<M>> lensSupplier = index -> ViewHandle.of(propertyOfModels, index, scrollPanels);
         AtomicReference<@Nullable SequenceDiff> lastDiffRef = new AtomicReference<>(null);
         if (propertyOfModels.get() instanceof SequenceDiffOwner)
             lastDiffRef.set(((SequenceDiffOwner)propertyOfModels.get()).differenceFromPrevious().orElse(null));
         _onShowDelegated( propertyOfModels, scrollPanels, (thisComponent, delegate) -> {
             Tuple<M> oldModels = delegate.oldValue().orElseThrowUnchecked();
             Tuple<M> newModels = delegate.currentValue().orElseThrowUnchecked();
+            /*
+                Note that the id of an item is captured from `newModels`, the tuple this
+                update is based on, instead of the current value of `propertyOfModels`,
+                which may already have advanced further by the time the UI thread
+                gets around to processing this update.
+            */
+            Function<Integer, ViewHandle<M>> lensSupplier = index -> ViewHandle.of(propertyOfModels, newModels, index);
             _warnAboutDuplicateEntryIds(newModels); // debug-gated; covers every update path
             viewSupplier.rememberCurrentViewsForReuse();
             SequenceDiff diff = null;
@@ -292,6 +298,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
             viewSupplier.clearCurrentViews();
         });
         propertyOfModels.ifPresent( (tupleOfModels) -> {
+            Function<Integer, ViewHandle<M>> lensSupplier = index -> ViewHandle.of(propertyOfModels, tupleOfModels, index);
             _warnAboutDuplicateEntryIds(tupleOfModels);
             scrollPanels.removeAllEntries();
             _addAllEntriesAt(attr, scrollPanels, 0, tupleOfModels, lensSupplier, viewSupplier);

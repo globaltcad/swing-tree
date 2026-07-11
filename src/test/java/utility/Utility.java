@@ -41,27 +41,33 @@ public class Utility
     }
 
     /**
-     *  Runs the given action while capturing everything written to {@code System.err},
-     *  and returns the captured text. SwingTree logs through SLF4J, and the test
-     *  runtime uses the {@code slf4j-simple} backend which writes to {@code System.err}
-     *  (resolved dynamically per call), so this lets a specification assert that the
-     *  framework actually communicated a problem to the developer via the logs.
+     *  Runs the given action while recording everything the code under test logs,
+     *  and returns the recorded log messages as a single string.
+     *  SwingTree logs through SLF4J, and the test runtime uses the {@code logback}
+     *  backend, which allows us to attach a recording appender programmatically.
+     *  This lets a specification assert that the framework actually communicated
+     *  a problem to the developer via the logs.
      *
-     * @param action The (typically UI-building) code whose error log output we want to inspect.
-     * @return Everything the action wrote to {@code System.err}, as a single string.
+     * @param action The (typically UI-building) code whose log output we want to inspect.
+     * @return All messages the action logged, joined into a single string.
      */
-    public static String captureSystemErr(Runnable action) {
-        java.io.PrintStream original = System.err;
-        java.io.ByteArrayOutputStream buffer = new java.io.ByteArrayOutputStream();
-        try (java.io.PrintStream capturing = new java.io.PrintStream(buffer, true, java.nio.charset.StandardCharsets.UTF_8.name())) {
-            System.setErr(capturing);
+    public static String captureErrorLog(Runnable action) {
+        ch.qos.logback.classic.Logger root = (ch.qos.logback.classic.Logger)
+                org.slf4j.LoggerFactory.getLogger(org.slf4j.Logger.ROOT_LOGGER_NAME);
+        ch.qos.logback.core.read.ListAppender<ch.qos.logback.classic.spi.ILoggingEvent> recorder =
+                new ch.qos.logback.core.read.ListAppender<>();
+        recorder.start();
+        root.addAppender(recorder);
+        try {
             action.run();
-        } catch (java.io.UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
         } finally {
-            System.setErr(original);
+            root.detachAppender(recorder);
+            recorder.stop();
         }
-        return new String(buffer.toByteArray(), java.nio.charset.StandardCharsets.UTF_8);
+        StringBuilder log = new StringBuilder();
+        for (ch.qos.logback.classic.spi.ILoggingEvent event : recorder.list)
+            log.append(event.getFormattedMessage()).append('\n');
+        return log.toString();
     }
 
     public static void setLaF(LaF lookAndFeel) {
