@@ -74,10 +74,6 @@ final class ModelToViewConverter<M> implements ViewSupplier<M> {
                 UIForAnySwing<?,?> newView = viewCreator.createViewFor(model);
                 Objects.requireNonNull(newView);
                 JComponent viewComponent = newView.get((Class) newView.getType());
-                if ( model instanceof UIForAnySwing.ViewHandle ) {
-                    UIForAnySwing.ViewHandle handle = (UIForAnySwing.ViewHandle) model;
-                    handle.setChild(viewComponent);
-                }
                 viewComponent.putClientProperty(UNIQUE_VIEW_CACHE_KEY, _idFrom(model));
                 return viewComponent;
             }

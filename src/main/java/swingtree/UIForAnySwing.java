@@ -6098,92 +6098,111 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     static class ViewHandle<M> {
         private @Nullable Var<M> property;
-        private final WeakReference<JComponent> parent;
-        private @Nullable WeakReference<JComponent> child = null;
 
-        ViewHandle( JComponent parent ) {
-            this.parent = new WeakReference<>(parent);
-        }
-        static <M> ViewHandle<M> of( Var<Tuple<M>> models, int initialIndex, JComponent parent ) {
-            ViewHandle<M> handle = new ViewHandle<>(Objects.requireNonNull(parent));
-            Supplier<Integer> indexSupplier = ()->UI.runAndGet(()->{
-                JComponent currentParent = handle.parent.get();
-                JComponent currentSubView = handle.child();
-                if ( currentParent instanceof JScrollPanels) {
-                    currentParent = ((JScrollPanels) currentParent).getContentPanel();
-                }
-                if ( currentSubView == null || currentParent == null ) {
-                    return initialIndex;
-                }
-                int componentCount = InternalUtil._actualComponentCountFrom(currentParent);
-                for ( int i = 0; i < componentCount; i++ ) {
-                    try {
-                        Component child = InternalUtil._actualGetComponentAt(i, currentParent);
-                        if (child instanceof JScrollPanels.EntryPanel) {
-                            child = ((JScrollPanels.EntryPanel) child).getComponent(0);
-                        }
-                        if (child == currentSubView)
-                            return i;
-                    } catch (Exception e) {
-                        log.error(SwingTree.get().logMarker(), "Failed to check if child component is current.", e);
-                    }
-                }
-                return -1;
-            });
-            TupleLens<M> lens = new TupleLens<>(models, indexSupplier, initialIndex);
+        private ViewHandle() {}
+
+        /**
+         *  Creates a handle holding an item property (a lens based {@link Var})
+         *  for the sub-view of the item found in the supplied tuple at the given index.
+         *  Note that the identity of the focused item is its {@link HasId#id()},
+         *  which is captured here, at creation time, from the supplied tuple snapshot.
+         *  This snapshot must be the tuple state the current view update is based on,
+         *  which is not necessarily the current state of the {@code models} property,
+         *  because the property may already have advanced further by the time
+         *  the UI thread gets around to processing an update.
+         *
+         * @param models The tuple property this handle's item property is a lens on.
+         * @param tupleSnapshot The tuple state the current view update is based on.
+         * @param initialIndex The index of the focused item within {@code tupleSnapshot}.
+         * @return A new handle whose {@link #property()} focuses on the item by its id.
+         */
+        static <M> ViewHandle<M> of( Var<Tuple<M>> models, Tuple<M> tupleSnapshot, int initialIndex ) {
+            ViewHandle<M> handle = new ViewHandle<>();
+            TupleLens<M> lens = new TupleLens<>(tupleSnapshot, initialIndex);
             if ( lens.allowsNull() )
-                handle.property = models.zoomToNullable(models.orElseThrowUnchecked().type(), lens);
+                handle.property = models.zoomToNullable(tupleSnapshot.type(), lens);
             else
                 handle.property = models.zoomTo(lens);
             return handle;
         }
         public Var<M> property() {return Objects.requireNonNull(property);}
-        public @Nullable JComponent parent() {return parent.get();}
-        public @Nullable JComponent child() {return child == null ? null : child.get();}
-        public void setChild( JComponent child ) {this.child = new WeakReference<>(child);}
-
     }
 
+    /**
+     *  A lens which focuses on a single item within a tuple of {@link HasId} based
+     *  view models, identified by its {@link HasId#id()}. The id is captured when
+     *  the lens is created and never changes, mirroring the fact that bound
+     *  sub-views also live and die with the id of their item.
+     *  <p>
+     *  Identifying the item by its id (rather than by the position of its sub-view
+     *  in the component tree, as was done historically) has two crucial advantages:
+     *  the lens stays correct when items are shifted around by structural updates,
+     *  and more importantly, resolving the focus requires nothing but the tuple
+     *  value itself. So this lens never touches the UI and may therefore be
+     *  evaluated safely and without blocking on <b>any</b> thread, which matters
+     *  because it runs whenever the parent tuple property changes, typically
+     *  on the application thread of a decoupled UI.
+     */
     private static class TupleLens<M> implements Lens<Tuple<M>, M> {
 
-        private final Supplier<Integer> indexSupplier;
+        private final @Nullable Object id;
         private final AtomicReference<M> lastFetchedItem;
         private final boolean allowsNull;
         private final Class<M> type;
 
         public TupleLens(
-            Var<Tuple<M>> models,
-            Supplier<Integer> indexSupplier,
+            Tuple<M> tuple,
             int initialIndex
         ) {
-            Tuple<M> tuple = models.orElseThrowUnchecked();
-            this.indexSupplier = indexSupplier;
             this.lastFetchedItem = new AtomicReference<>(null);
             this.allowsNull = tuple.allowsNull();
             this.type = tuple.type();
+            Object initialId = null;
             if ( initialIndex >= 0 && initialIndex < tuple.size() ) {
-                lastFetchedItem.set(tuple.get(initialIndex));
+                M initialItem = tuple.get(initialIndex);
+                lastFetchedItem.set(initialItem);
+                initialId = _idOf(initialItem);
             }
+            this.id = initialId;
+            /*
+                Note that a null id makes this lens inert: reads yield the initially
+                fetched item and writes are ignored. This can only happen for a null
+                item in a null permitting tuple, because the public API requires
+                the item type to implement `HasId`.
+            */
         }
 
         public boolean allowsNull() {
             return allowsNull;
         }
 
+        private static @Nullable Object _idOf( @Nullable Object item ) {
+            return item instanceof HasId ? ((HasId<?>) item).id() : null;
+        }
+
+        private int _indexOfIdIn( Tuple<M> tuple ) {
+            if ( id == null )
+                return -1;
+            for ( int i = 0; i < tuple.size(); i++ )
+                if ( id.equals(_idOf(tuple.get(i))) )
+                    return i;
+            return -1;
+        }
+
         @Override
         public M getter(Tuple<M> parentValue) throws Exception {
             try {
-                // We get the index of the subview in the parent:
-                int index = indexSupplier.get();
+                // We find the item this lens is focusing on by its id:
+                int index = _indexOfIdIn(parentValue);
                 if ( index < 0 ) {
                     return tryAvoidNull(lastFetchedItem.get());
                 }
-                M currentItemAtIndex = parentValue.get(index);
-                lastFetchedItem.set(currentItemAtIndex);
-                return tryAvoidNull(currentItemAtIndex);
+                M currentItem = parentValue.get(index);
+                lastFetchedItem.set(currentItem);
+                return tryAvoidNull(currentItem);
             } catch (Exception ignored) {
                 /*
-                    Lenses on a position in a tuple are a tricky thing!
+                    Lenses on an item in a tuple are a tricky thing!
                     They can very easily break. Do we care? No, why should we?
                     This lens may still be bound to an old GUI, which we do not want to disturb.
                 */
@@ -6194,8 +6213,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         @Override
         public Tuple<M> wither(Tuple<M> parentValue, M newValue) throws Exception {
             try {
-                // We get the index of the subview in the parent:
-                int index = indexSupplier.get();
+                // We find the item this lens is focusing on by its id:
+                int index = _indexOfIdIn(parentValue);
                 if ( index < 0 ) {
                     return parentValue;
                 }
@@ -6246,8 +6265,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             _updateSubViews(component, delegate, models, attr, lastDiffRef, viewSupplier);
             viewSupplier.clearCurrentViews();
         });
-        _warnAboutDuplicateEntryIds(models.get());
-        _addAllFromTuple(models, attr, viewSupplier, thisComponent);
+        Tuple<M> initialTuple = models.get();
+        _warnAboutDuplicateEntryIds(initialTuple);
+        _addAllFromTuple(models, initialTuple, attr, viewSupplier, thisComponent);
     }
 
     private <M> void _updateSubViews(
@@ -6380,8 +6400,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             }
         }
         if ( !success ) {
+            Tuple<M> currentTuple = changeDelegate.currentValue().orElseThrowUnchecked();
             _clearComponentsOf(innerComponent);
-            _addAllFromTuple(tupleOfModels, attr, viewSupplier, innerComponent);
+            _addAllFromTuple(tupleOfModels, currentTuple, attr, viewSupplier, innerComponent);
         }
         _checkForTupleBindingConsistencyAfterUpdate(innerComponent, changeDelegate);
     }
@@ -6414,30 +6435,30 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             case SET:
                 if ( index < 0 ) {
                     _clearComponentsOf(c); // We do a simple re-build
-                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                    _addAllFromTuple(tupleOfModels, newTuple, attr, viewSupplier, c);
                 } else {
                     Tuple<Component> componentSnapshot = Tuple.of(Component.class, InternalUtil._actualComponentsFrom(c));
                     List<Integer> alreadyRemoved = new ArrayList<>();
                     for ( int i = index; i < (index + count); i++ ) {
                         boolean hasDifferentIds = !Objects.equals(oldTuple.get(i).id(), newTuple.get(i).id());
                         if ( hasDifferentIds )
-                            _updateComponentAt(i, tupleOfModels, viewSupplier, attr, c, componentSnapshot, alreadyRemoved);
+                            _updateComponentAt(i, tupleOfModels, newTuple, viewSupplier, attr, c, componentSnapshot, alreadyRemoved);
                     }
                 }
                 break;
             case ADD:
                 if ( index < 0 ) {
                     _clearComponentsOf(c); // We do a simple re-build
-                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                    _addAllFromTuple(tupleOfModels, newTuple, attr, viewSupplier, c);
                 } else {
                     for ( int i = index; i < (index + count); i++ )
-                        _addComponentAt(i, tupleOfModels, viewSupplier, attr, c);
+                        _addComponentAt(i, tupleOfModels, newTuple, viewSupplier, attr, c);
                 }
                 break;
             case REMOVE:
                 if ( index < 0 ) {
                     _clearComponentsOf(c); // We do a simple re-build
-                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                    _addAllFromTuple(tupleOfModels, newTuple, attr, viewSupplier, c);
                 } else {
                     for ( int i = (index + count - 1); i >= index; i-- )
                         _removeComponentAt(i, c);
@@ -6446,7 +6467,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
             case RETAIN: // Only keep the elements in the range.
                 if ( index < 0 ) {
                     _clearComponentsOf(c); // We do a simple re-build
-                    _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                    _addAllFromTuple(tupleOfModels, newTuple, attr, viewSupplier, c);
                 } else {
                     // Remove trailing components:
                     int componentCount = InternalUtil._actualComponentCountFrom(c);
@@ -6468,7 +6489,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     );
                 // We do a simple rebuild:
                 _clearComponentsOf(c);
-                _addAllFromTuple(tupleOfModels, attr, viewSupplier, c);
+                _addAllFromTuple(tupleOfModels, newTuple, attr, viewSupplier, c);
         }
     }
 
@@ -6542,13 +6563,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         }
     }
 
-    private <M> void _addAllFromTuple( Var<Tuple<M>> tupleOfModels, @Nullable AddConstraint attr, ViewSupplier<ViewHandle<M>> viewSupplier, C thisComponent ) {
-        for ( int i = 0; i < tupleOfModels.get().size(); i++ ) {
+    private <M> void _addAllFromTuple( Var<Tuple<M>> tupleOfModels, Tuple<M> tupleSnapshot, @Nullable AddConstraint attr, ViewSupplier<ViewHandle<M>> viewSupplier, C thisComponent ) {
+        for ( int i = 0; i < tupleSnapshot.size(); i++ ) {
             UIForAnySwing<?, ?> view = null;
             try {
-                view = viewSupplier.createViewFor(ViewHandle.of(tupleOfModels, i, thisComponent));
+                view = viewSupplier.createViewFor(ViewHandle.of(tupleOfModels, tupleSnapshot, i));
             } catch ( Exception e ) {
-                log.error(SwingTree.get().logMarker(), "Error while creating view for '"+tupleOfModels.get().get(i)+"'.", e);
+                log.error(SwingTree.get().logMarker(), "Error while creating view for '"+tupleSnapshot.get(i)+"'.", e);
             }
             if ( view == null )
                 view = UI.box(); // We add a dummy component to the list of children.
@@ -6651,6 +6672,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     private <M> void _updateComponentAt(
         int index,
         Var<Tuple<M>> v,
+        Tuple<M> tupleSnapshot,
         ViewSupplier<ViewHandle<M>> viewSupplier,
         @Nullable AddConstraint attr,
         C c,
@@ -6663,7 +6685,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         } else {
             UIForAnySwing<?, ?> view = null;
             try {
-                view = viewSupplier.createViewFor(ViewHandle.of(v, index, c));
+                view = viewSupplier.createViewFor(ViewHandle.of(v, tupleSnapshot, index));
             } catch ( Exception e ) {
                 log.error(SwingTree.get().logMarker(), "Error while creating view for '"+v+"'.", e);
             }
@@ -6724,15 +6746,15 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     private <M> void _addComponentAt(
-        int index, Var<Tuple<M>> v, ViewSupplier<ViewHandle<M>> viewSupplier, @Nullable AddConstraint attr, C thisComponent
+        int index, Var<Tuple<M>> v, Tuple<M> tupleSnapshot, ViewSupplier<ViewHandle<M>> viewSupplier, @Nullable AddConstraint attr, C thisComponent
     ) {
         JComponent newComponent;
-        if ( v.isEmpty() || v.get().isEmpty() ) {
+        if ( tupleSnapshot.isEmpty() ) {
             newComponent = new JBox();
         } else {
             UIForAnySwing<?, ?> view = null;
             try {
-                view = viewSupplier.createViewFor(ViewHandle.of(v, index, thisComponent));
+                view = viewSupplier.createViewFor(ViewHandle.of(v, tupleSnapshot, index));
             } catch ( Exception e ) {
                 log.error(SwingTree.get().logMarker(), "Error while creating view for '"+v+"'.", e);
             }

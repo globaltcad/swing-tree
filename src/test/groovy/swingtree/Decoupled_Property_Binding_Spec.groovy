@@ -569,13 +569,14 @@ class Decoupled_Property_Binding_Spec extends Specification
             channels the new state into it through its item property.
             All of it crosses the thread boundary in the decoupled mode.
 
-            One caveat is important to know: because the identity of a
-            sub-view lives in the component tree, mutating the bound tuple
-            from the application thread internally consults the UI thread
-            *synchronously*. This works fine as long as the UI thread is
-            responsive, which is why (unlike in the other features) we do
-            not park the UI thread here — an application thread should
-            never block the UI thread while it updates such a binding.
+            Note that just like in the other features, we park the UI thread
+            while firing a burst of updates from the application thread.
+            This proves two things at once: the updates are applied
+            asynchronously and in order, and mutating the bound tuple never
+            requires the application thread to wait for the UI thread.
+            (Historically it did! The item properties used to locate their
+            items by consulting the component tree, so a mere `update(..)`
+            call could block on, or even deadlock with, the UI thread.)
         """
         given : 'A tuple property of little view models, rendered as labels inside a panel.'
             var models = Var.of(Tuple.of(
@@ -593,16 +594,65 @@ class Decoupled_Property_Binding_Spec extends Specification
             panel.componentCount == 3
             _textsOf(panel) == ["Alpha", "Beta", "Gamma"]
 
-        when : 'We fire a burst of structural changes and item updates from this thread, playing the application thread.'
-            models.update( it -> it.removeAt(1) )
-            models.update( it -> it.addAll(new Item("d", "Delta"), new Item("e", "Epsilon")) )
-            models.update( it -> it.setAt(0, new Item("a", "Alef")) ) // <- same id, new text!
-        and : 'We wait for the UI thread to finish applying the updates.'
+        when : 'We remember the sub-view of item "a" and then park the UI thread while firing a burst of updates from this thread.'
+            var viewOfItemA = panel.getComponent(0)
+            var gate = new CountDownLatch(1)
+            UI.run({ gate.await() })
+            try {
+                models.update( it -> it.removeAt(1) )
+                models.update( it -> it.addAll(new Item("d", "Delta"), new Item("e", "Epsilon")) )
+                models.update( it -> it.setAt(0, new Item("a", "Alef")) ) // <- same id, new text!
+            } finally {
+                gate.countDown()
+            }
             UI.sync()
         then : 'The panel replayed all changes in order and matches the final tuple state.'
             panel.componentCount == models.get().size()
             _textsOf(panel) == ["Alef", "Gamma", "Delta", "Epsilon"]
             models.get().toList().collect({ it.text() }) == ["Alef", "Gamma", "Delta", "Epsilon"]
+        and : 'The update of item "a" was channeled into its already existing sub-view, no new view was created for it.'
+            panel.getComponent(0).is(viewOfItemA)
+    }
+
+    def 'The `scrollPanels` component handles cross-thread tuple updates just like a plain panel.'()
+    {
+        reportInfo """
+            The `UI.scrollPanels()` component is the scrollable sibling of a
+            tuple bound panel: it wraps each generated sub-view in its own
+            internal entry panel. It shares the id based item binding with
+            the plain panel, so the same threading contract applies, which
+            this feature verifies with the same parked burst of updates
+            fired from the application thread.
+        """
+        given : 'A tuple property of view models, rendered as labels inside scroll panels.'
+            var models = Var.of(Tuple.of(
+                new Item("a", "Alpha"),
+                new Item("b", "Beta"),
+                new Item("c", "Gamma")
+            ))
+            BoundViewSupplier<Item> supplier = { Var<Item> model -> UI.label(model.viewAsString({ it.text() })) }
+            var panels = UI.runAndGet({
+                UI.use(EventProcessor.DECOUPLED, ()->
+                    UI.scrollPanels().addAll(models, supplier)
+                ).get(swingtree.components.JScrollPanels)
+            })
+        expect : 'The component renders one entry per item.'
+            panels.numberOfEntries == 3
+
+        when : 'We park the UI thread and fire a burst of structural changes and item updates from this thread.'
+            var gate = new CountDownLatch(1)
+            UI.run({ gate.await() })
+            try {
+                models.update( it -> it.removeAt(1) )
+                models.update( it -> it.addAll(new Item("d", "Delta"), new Item("e", "Epsilon")) )
+                models.update( it -> it.setAt(0, new Item("a", "Alef")) ) // <- same id, new text!
+            } finally {
+                gate.countDown()
+            }
+            UI.sync()
+        then : 'The entries replayed all changes in order and match the final tuple state.'
+            panels.numberOfEntries == models.get().size()
+            _entryTextsOf(panels) == ["Alef", "Gamma", "Delta", "Epsilon"]
     }
 
     /**
@@ -625,6 +675,15 @@ class Decoupled_Property_Binding_Spec extends Specification
 
     private static List<String> _textsOf( JPanel panel ) {
         return (0..<panel.componentCount).collect({ ((JLabel) panel.getComponent(it)).text })
+    }
+
+    private static List<String> _entryTextsOf( swingtree.components.JScrollPanels panels ) {
+        // Scroll panels wrap every generated sub-view in an internal entry panel:
+        var content = panels.getContentPanel()
+        return (0..<content.componentCount).collect({
+            var entryPanel = (java.awt.Container) content.getComponent(it)
+            return ((JLabel) entryPanel.getComponent(0)).text
+        })
     }
 }
 
