@@ -446,6 +446,9 @@ class Decoupled_Property_Binding_Spec extends Specification
         when : 'We park the UI thread, add an option from this thread, and peek at the combo box before releasing the UI thread.'
             var gate = new CountDownLatch(1)
             UI.run({ gate.await() })
+            // The EDT may not have reached the `await` yet, but that does not matter:
+            // `invokeLater` tasks run in FIFO order, so the snapshot update published
+            // by the mutation below is fenced behind the gate task either way.
             var itemCountWhileParked = -1
             try {
                 options.update( it -> it.add("D") )
@@ -485,6 +488,9 @@ class Decoupled_Property_Binding_Spec extends Specification
         when : 'We park the UI thread, add an option from this thread, and peek at the combo box before releasing the UI thread.'
             var gate = new CountDownLatch(1)
             UI.run({ gate.await() })
+            // The EDT may not have reached the `await` yet, but that does not matter:
+            // `invokeLater` tasks run in FIFO order, so the snapshot update published
+            // by the mutation below is fenced behind the gate task either way.
             var itemCountWhileParked = -1
             try {
                 options.add("D")

@@ -94,6 +94,9 @@ class Combo_Box_Threading_Spec extends Specification
         when : 'We park the UI thread and add an option from this thread, peeking at the combo box before releasing the UI thread.'
             var gate = new CountDownLatch(1)
             UI.run({ gate.await() })
+            // The EDT may not have reached the `await` yet, but that does not matter:
+            // `invokeLater` tasks run in FIFO order, so the snapshot update published
+            // by the mutation below is fenced behind the gate task either way.
             var itemCountWhileParked = -1
             try {
                 addOption()
@@ -140,6 +143,9 @@ class Combo_Box_Threading_Spec extends Specification
         when : 'We park the UI thread and mutate the raw collection from this thread.'
             var gate = new CountDownLatch(1)
             UI.run({ gate.await() })
+            // Whether the EDT has reached the `await` yet is irrelevant here: a plain
+            // collection mutation involves no UI thread task at all, the parked EDT
+            // merely demonstrates that visibility does not depend on it.
             var firstItemWhileParked = null
             try {
                 mutate()

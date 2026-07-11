@@ -6146,7 +6146,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     private static class TupleLens<M> implements Lens<Tuple<M>, M> {
 
         private final @Nullable Object id;
-        private final AtomicReference<M> lastFetchedItem;
+        private final AtomicReference<@Nullable M> lastFetchedItem;
         private final boolean allowsNull;
         private final Class<M> type;
 
