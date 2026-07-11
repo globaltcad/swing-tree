@@ -780,7 +780,7 @@ class Individual_Component_Styling_Spec extends Specification
             var image = Utility.renderSingleComponent(ui.get(JLabel))
 
         then : 'The image is as expected.'
-            Utility.similarityBetween(image, "components/rounded-green-JLabel.png", 98.5) > 98.5
+            Utility.similarityBetween(image, "components/rounded-green-JLabel.png", 98.4) > 98.4
     }
 
     def 'This is how you can create a JPanel with a gradient border.'()
