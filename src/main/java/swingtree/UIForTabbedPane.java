@@ -9,6 +9,7 @@ import sprouts.impl.SequenceDiff;
 import sprouts.impl.SequenceDiffOwner;
 import swingtree.api.mvvm.TabSupplier;
 import swingtree.style.ComponentExtension;
+import swingtree.threading.EventProcessor;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -244,7 +245,10 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         NullUtil.nullArgCheck( index, "index", Val.class );
         NullUtil.nullPropertyCheck( index, "index", "Null is not a valid state for modelling a selected index." );
         return _with( thisComponent -> _bindSelectedIndex(thisComponent, index) )
-               ._withOnShow( index, (thisComponent,i) -> _reconcileSelection(thisComponent) )
+               ._withOnShow( index, (thisComponent,i) -> {
+                   ExtraState.of(thisComponent).desiredSelectionIndex = i; // Refresh the UI owned copy from the captured event value.
+                   _reconcileSelection(thisComponent);
+               })
                ._with( thisComponent -> _reconcileSelection(thisComponent) )
                ._this();
     }
@@ -263,7 +267,10 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         NullUtil.nullArgCheck( index, "index", Var.class );
         NullUtil.nullPropertyCheck( index, "index", "Null is not a valid state for modelling a selected index." );
         return _with( thisComponent -> _bindSelectedIndex(thisComponent, index) )
-               ._withOnShow( index, (thisComponent,i) -> _reconcileSelection(thisComponent) )
+               ._withOnShow( index, (thisComponent,i) -> {
+                   ExtraState.of(thisComponent).desiredSelectionIndex = i; // Refresh the UI owned copy from the captured event value.
+                   _reconcileSelection(thisComponent);
+               })
                ._with( thisComponent -> _reconcileSelection(thisComponent) )
                ._this();
     }
@@ -289,6 +296,8 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                     new Throwable("Stack trace for debugging purposes.")
                 );
         state.selectedIndex = index;
+        state.desiredSelectionIndex = index.get(); // Read at declaration time; refreshed through change events after that.
+        state.eventProcessor = _state().eventProcessor();
     }
 
     /**
@@ -478,7 +487,8 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                         if ( indexFinder.get() < 0 )
                             return; // The tab was removed; its flag must not be touched anymore.
                         boolean isNowSelected = _isSuppliedTabIndexSelected(indexFinder, i);
-                        isSelectedMut.set(From.VIEW, isNowSelected);
+                        // The write is handed over to the application thread, which owns the property.
+                        _runInApp( () -> isSelectedMut.set(From.VIEW, isNowSelected) );
                     });
                 }
             /*
@@ -1035,7 +1045,8 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
                     if ( indexFinder.get() < 0 )
                         return; // The tab was removed; its flag must not be touched anymore.
                     boolean isNowSelected = _isSuppliedTabIndexSelected(indexFinder, i);
-                    isSelectedMut.set(From.VIEW, isNowSelected);
+                    // The write is handed over to the application thread, which owns the property.
+                    _runInApp( () -> isSelectedMut.set(From.VIEW, isNowSelected) );
                 });
             }
             /*
@@ -1174,6 +1185,18 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
          */
         private @Nullable Val<Integer> selectedIndex = null;
         /**
+         *  The UI thread owned copy of the desired selection index held by {@link #selectedIndex}.
+         *  The property belongs to the application thread and must not be read by the UI thread,
+         *  so this copy is refreshed through the property change events, as well as through user
+         *  driven selection changes (which are also written back to the property asynchronously).
+         */
+        private int desiredSelectionIndex = -1;
+        /**
+         *  Hands user driven selection changes over to the application thread, which owns the
+         *  bound selection index property. This is installed together with {@link #selectedIndex}.
+         */
+        private EventProcessor eventProcessor = EventProcessor.COUPLED;
+        /**
          *  When {@code true}, actual tab selection changes are fully ignored. This is used
          *  while a tab is being inserted, because Swing auto-selects the first inserted tab,
          *  which would otherwise override the desired selection and write back to the bound
@@ -1194,11 +1217,11 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
         void reconcileEffectiveSelection( JTabbedPane pane ) {
             if ( selectedIndex == null )
                 return; // No selection preference was configured.
-            int desired = selectedIndex.get();
+            int desired = desiredSelectionIndex; // The UI owned copy; the property itself belongs to the application thread.
             if ( desired < -1 ) {
                 log.error(SwingTree.get().logMarker(),
                     "Integer property '{}' bound to selected index of 'JTabbedPane' " +
-                    "has an invalid value of '{}'. Deselecting now...", selectedIndex, selectedIndex.get(),
+                    "has an invalid value of '{}'. Deselecting now...", selectedIndex, desired,
                     new Throwable()
                 );
             }
@@ -1232,8 +1255,13 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
             Var<Integer> writableIndex = null;
             if ( selectedIndex instanceof Var && selectedIndex.isMutable() )
                 writableIndex = (Var<Integer>) selectedIndex;
-            if ( writableIndex != null && !applyingDesiredIndex )
-                writableIndex.set(From.VIEW, index);
+            if ( writableIndex != null && !applyingDesiredIndex ) {
+                // The UI owned copy of the desired index advances immediately, while the
+                // write is handed over to the application thread, which owns the property.
+                desiredSelectionIndex = index;
+                Var<Integer> target = writableIndex;
+                eventProcessor.registerAppEvent( () -> target.set(From.VIEW, index) );
+            }
             if ( fireListeners ) {
                 selectionListeners.forEach(l -> l.accept(index));
             }
