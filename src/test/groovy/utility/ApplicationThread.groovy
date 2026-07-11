@@ -58,10 +58,17 @@ final class ApplicationThread
 
     /**
      *  Interrupts the drainer thread and waits for it to die.
+     *  This is robust against the calling thread itself being interrupted
+     *  (which happens when a test trips its timeout and Spock interrupts it),
+     *  so that this cleanup step never masks the actual test failure.
      */
     void stop() {
         _thread.interrupt()
-        _thread.join(5_000)
+        try {
+            _thread.join(5_000)
+        } catch (InterruptedException ignored) {
+            Thread.currentThread().interrupt() // Preserve the interrupt for whoever interrupted us.
+        }
     }
 
     /**

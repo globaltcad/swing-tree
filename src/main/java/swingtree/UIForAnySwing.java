@@ -6217,8 +6217,24 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 int index = _indexOfIdIn(parentValue);
                 if ( index < 0 ) {
                     return parentValue;
+                    /*
+                        The write is dropped, so `lastFetchedItem` must NOT be updated here,
+                        because that would fabricate a state which never reached the model.
+                    */
                 }
-                return parentValue.setAt(index, newValue);
+                Tuple<M> updatedParent = parentValue.setAt(index, newValue);
+                lastFetchedItem.set(newValue);
+                /*
+                    Remembering a successfully written item gives this lens read-your-own-write
+                    coherence even in the exotic case of the write changing the item's id
+                    (which orphans this lens, because views and lenses live and die
+                    with the id of their item, so a new view with a new lens
+                    takes over from here).
+                    For ordinary writes, which keep the id, this makes no observable
+                    difference, because the next `getter(..)` call finds the id
+                    and remembers the same item anyway.
+                */
+                return updatedParent;
             } catch (Exception ignored) {
                 // The lens is no longer relevant! We do not care.
             }
