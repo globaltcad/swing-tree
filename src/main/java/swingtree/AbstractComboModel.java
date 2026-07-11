@@ -41,7 +41,7 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 	protected int _selectedIndex = -1;
 	private final Var<E> _selectedItem;
 	private volatile @Nullable E _currentSelection; // The UI thread owned copy of the selection state of `_selectedItem`.
-	private EventProcessor _eventProcessor = EventProcessor.COUPLED;
+	private volatile EventProcessor _eventProcessor = EventProcessor.COUPLED;
 	private final java.util.List<ListDataListener> listeners = new ArrayList<>();
 
 	private boolean _acceptsEditorChanges = true; // This is important to prevent getting feedback loops!
