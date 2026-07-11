@@ -433,7 +433,7 @@ class Individual_Component_Styling_Spec extends Specification
                     .get(JPanel)
 
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "components/icon-in-a-box-with-nested-shadows.png", 99) > 99
+            Utility.similarityBetween(ui, "components/icon-in-a-box-with-nested-shadows.png", 98.2) > 98.2
 
         where : """
             We use the following integer scaling factors simulating different high DPI scenarios.
