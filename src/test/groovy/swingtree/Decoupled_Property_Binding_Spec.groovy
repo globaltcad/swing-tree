@@ -6,6 +6,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Timeout
 import spock.lang.Title
+import sprouts.From
 import sprouts.Tuple
 import sprouts.Var
 import swingtree.api.mvvm.BoundViewSupplier
@@ -367,51 +368,55 @@ class Decoupled_Property_Binding_Spec extends Specification
             'JSlider value'              | Var.of(10)             | 90            | { p -> UI.slider(UI.Align.HORIZONTAL).withMin(0).withMax(100).withValue(p).get(JSlider) } | { c -> c.value }
             'JProgressBar value'         | Var.of(10)             | 90            | { p -> UI.progressBar(0, 100, p).get(JProgressBar) }                                    | { c -> c.value }
             'JSpinner value'             | Var.of(5)              | 42            | { p -> UI.spinner(p).get(JSpinner) }                                                    | { c -> c.value }
+            'JComboBox selection'        | Var.of("B")            | "C"           | { p -> UI.comboBox(p, ["A", "B", "C"]).get(JComboBox) }                                 | { c -> c.selectedItem }
             'JTabbedPane selected index' | Var.of(0)              | 1             | { p -> UI.tabbedPane().add(UI.tab("One")).add(UI.tab("Two")).withSelectedIndex(p).get(JTabbedPane) } | { c -> c.selectedIndex }
             'enabled flag'               | Var.of(true)           | false         | { p -> UI.button("Button").isEnabledIf(p).get(JButton) }                                | { c -> c.enabled }
             'visible flag'               | Var.of(true)           | false         | { p -> UI.button("Button").isVisibleIf(p).get(JButton) }                                | { c -> c.visible }
             'background color'           | Var.of(UI.Color.RED)   | UI.Color.BLUE | { p -> UI.label("Colorful!").withBackground(p).get(JLabel) }                            | { c -> c.background }
     }
 
-    def 'The selection of a combo box is a live window onto the bound property, not an asynchronous copy.'()
+    def 'A combo box selection made by the user travels to the application thread before it reaches the bound property.'()
     {
         reportInfo """
-            The previous feature showed that most bound widget state is a
-            *copy* of the property value which is updated asynchronously
-            on the UI thread. The selection of a combo box built with
-            `UI.comboBox(Var, ...)` works differently, by design: the property
-            itself becomes part of the data model of the `JComboBox`, so
-            `getSelectedItem()` is a live window onto the property, from any
-            thread and without any delay. There is no second copy of the
-            selection which could lag behind or fall out of sync.
+            The selection state of a combo box follows the same threading
+            convention as every other bound widget state: the `JComboBox`
+            works with a UI thread owned copy of the selection, and the bound
+            property is only ever read and written by the application thread.
 
-            Only the Swing listener notifications, which repaint the widget
-            and inform dependent components, are dispatched to the UI thread.
+            So when the user picks an item, the combo box updates its own
+            state immediately, but the new selection reaches the property
+            asynchronously, through the application event queue. This has
+            an important consequence for your view models: the `onChange`
+            listeners of the selection property are guaranteed to run on
+            the application thread, never on the UI thread, so your business
+            logic cannot accidentally block or corrupt the UI.
         """
-        given : 'A selection property and a combo box built around it in decoupled mode.'
+        given : 'A selection property with a change listener which records the thread it runs on.'
+            var trace = new CopyOnWriteArrayList<String>()
             var selection = Var.of("B")
+            selection.onChange(From.VIEW, it ->
+                trace << "changed to '${it.currentValue().orElseThrowUnchecked()}' on '${Thread.currentThread().name}'".toString()
+            )
+        and : 'A combo box built around the property in decoupled mode.'
             var combo = UI.runAndGet({
                 UI.use(EventProcessor.DECOUPLED, ()-> UI.comboBox(selection, ["A", "B", "C"])).get(JComboBox)
             })
         expect : 'The combo box reports the initial selection.'
             combo.selectedItem == "B"
 
-        when : 'We park the UI thread and change the property from this thread.'
-            var gate = new CountDownLatch(1)
-            UI.run({ gate.await() })
-            var selectionWhileUIWasParked = null
-            try {
-                selection.set("C")
-                selectionWhileUIWasParked = combo.selectedItem
-            } finally {
-                gate.countDown()
-            }
-            UI.sync()
-        then : 'Even while the UI thread was still parked, the combo box already reported the new selection.'
-            selectionWhileUIWasParked == "C"
-        and : 'After the UI thread caught up, everything of course still agrees.'
+        when : 'The user selects "C", on the UI thread.'
+            UI.runNow({ combo.selectedItem = "C" })
+        then : 'The combo box itself shows the new selection right away, it is UI owned state...'
             combo.selectedItem == "C"
+        and : '...but the property has not been touched yet! The write is waiting in the application event queue.'
+            selection.is("B")
+            trace.isEmpty()
+
+        when : 'This test thread, playing the application thread, processes the event queue.'
+            EventProcessor.DECOUPLED.joinUntilDoneOrException()
+        then : 'Now the property was updated, and its change listener ran on the application thread.'
             selection.is("C")
+            trace == ["changed to 'C' on '${Thread.currentThread().name}'".toString()]
     }
 
     def 'A tuple of tab models bound to a tabbed pane is kept in sync from the application thread.'()
