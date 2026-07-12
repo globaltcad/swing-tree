@@ -123,17 +123,14 @@ public class TodoApp extends Panel {
     private static UIForButton<JButton> filterChip(String label, TodoModel.Filter value, Var<TodoModel.Filter> filter) {
         Val<Boolean> active = filter.viewAs(Boolean.class, f -> f == value);
         return UI.button(label)
-            .withRepaintOn(active)
-            .withStyle( it -> {
-                boolean on = active.get();
-                return it
-                    .backgroundColor(on ? new Color(120, 176, 238, 55) : new Color(255, 255, 255, 12))
-                    .foregroundColor(on ? Color.WHITE : INK)
-                    .borderRadius(14)
-                    .padding(4, 14, 4, 14)
-                    .margin(0)
-                    .componentFont( f -> f.family("SansSerif").size(12).weight(on ? 2 : 1) );
-            })
+            .withStyle( active, (on, it) -> it
+                .backgroundColor(on ? new Color(120, 176, 238, 55) : new Color(255, 255, 255, 12))
+                .foregroundColor(on ? Color.WHITE : INK)
+                .borderRadius(14)
+                .padding(4, 14, 4, 14)
+                .margin(0)
+                .componentFont( f -> f.family("SansSerif").size(12).weight(on ? 2 : 1) )
+            )
             .onClick( it -> filter.set(value) );
     }
 
@@ -157,10 +154,9 @@ public class TodoApp extends Panel {
             .add(
                 UI.button("＋  Add")
                 .isEnabledIf(canAdd)
-                .withRepaintOn(canAdd)
-                .withStyle( it -> it
-                    .backgroundColor(canAdd.get() ? ACCENT : new Color(80, 90, 120, 100))
-                    .foregroundColor(canAdd.get() ? Color.WHITE : new Color(180, 190, 210))
+                .withStyle( canAdd, (mayAdd, it) -> it
+                    .backgroundColor(mayAdd ? ACCENT : new Color(80, 90, 120, 100))
+                    .foregroundColor(mayAdd ? Color.WHITE : new Color(180, 190, 210))
                     .borderRadius(10)
                     .padding(8, 16, 8, 16)
                     .margin(0)
@@ -194,11 +190,10 @@ public class TodoApp extends Panel {
 
         return UI.panel("fill, insets 0, gap 10").id("task-" + seq)
             .isVisibleIf(visible)
-            .withRepaintOn(done)
-            .withStyle( it -> it
-                .backgroundColor(done.get() ? BG_CARD : BG_CARD_HI)
+            .withStyle( done, (isDone, it) -> it
+                .backgroundColor(isDone ? BG_CARD : BG_CARD_HI)
                 .borderRadius(12)
-                .borderAt(Edge.LEFT, 3, done.get() ? ACCENT_DONE : ACCENT)
+                .borderAt(Edge.LEFT, 3, isDone ? ACCENT_DONE : ACCENT)
                 .margin(0, 0, 8, 0)
                 .padding(10, 14, 10, 14)
             )
@@ -207,10 +202,9 @@ public class TodoApp extends Panel {
             )
             .add("grow, push",
                 UI.textField(text)
-                .withRepaintOn(done)
-                .withStyle( it -> it
+                .withStyle( done, (isDone, it) -> it
                     .backgroundColor(new Color(0,0,0,0))
-                    .foregroundColor(done.get() ? INK_DONE : INK)
+                    .foregroundColor(isDone ? INK_DONE : INK)
                     .borderRadius(0)
                     .border(0, new Color(0,0,0,0))
                     .padding(2, 4, 2, 4)

@@ -131,8 +131,8 @@ public final class TrainsView extends JPanel {
             .add(RIGHT,
                 button(theme.viewAsString(t -> t.isDark() ? "☀  Light mode" : "☾  Dark mode"))
                 .onClick(it -> theme.set(theme.get().toggled()))
-                .withStyle(it -> {
-                    Theme.Palette p = theme.get().palette();
+                .withStyle(theme, (t, it) -> {
+                    Theme.Palette p = t.palette();
                     return it
                         .backgroundColor(p.row)
                         .border(1, p.border)
@@ -141,7 +141,6 @@ public final class TrainsView extends JPanel {
                         .componentFont(f -> f.family("SansSerif").size(13).weight(2f).color(p.text))
                         .cursor(UI.Cursor.HAND);
                 })
-                .withRepaintOn(theme)
             );
     }
 
@@ -195,18 +194,17 @@ public final class TrainsView extends JPanel {
             panel(FILL).withLayout("fill, ins 10 12 10 12", "[shrink]14[grow]12[shrink]")
             // time
             .add(GROW_Y,
-                label(d.clock()).withStyle(it -> it
+                label(d.clock()).withStyle(theme, (t, it) -> it
                     .componentFont(f -> f.family("SansSerif").size(20).weight(2f)
-                    .color(theme.get().palette().text))
+                    .color(t.palette().text))
                 )
-                .withRepaintOn(theme)
             )
             // line badge + headsign
             .add(GROW,
                 box(FILL.and(WRAP(1)).and(INS(0)))
                 .add(LEFT,
-                    label(" " + d.line() + " ").withStyle(it -> {
-                        Theme.Palette p = theme.get().palette();
+                    label(" " + d.line() + " ").withStyle(theme, (t, it) -> {
+                        Theme.Palette p = t.palette();
                         return it
                             .backgroundColor(p.modeColor(d.mode()))
                             .foregroundColor(java.awt.Color.WHITE)
@@ -214,31 +212,32 @@ public final class TrainsView extends JPanel {
                             .padding(2, 8, 2, 8)
                             .componentFont(f -> f.family("SansSerif").size(12).weight(2f)
                                 .color(java.awt.Color.WHITE));
-                    }).withRepaintOn(theme)
+                    })
                 )
                 .add(LEFT,
                     label((mode.get().isArrivals() ? "from  " : "→  ") + d.headsign())
-                    .withStyle(it -> it.padding(4, 1, 0, 0)
+                    .withStyle(theme, (t, it) -> it.padding(4, 1, 0, 0)
                         .componentFont(f -> f.family("SansSerif").size(14)
-                            .color(theme.get().palette().text)))
-                    .withRepaintOn(theme)
+                            .color(t.palette().text)))
                 )
             )
             // platform + punctuality
             .add(GROW_Y,
                 box(FILL.and(WRAP(1)).and(INS(0)))
-                .add(RIGHT, label(trackText).withStyle(it -> it
+                .add(RIGHT, label(trackText).withStyle(theme, (t, it) -> it
                     .componentFont(f -> f.family("SansSerif").size(13).weight(2f)
-                        .color(theme.get().palette().subtext))).withRepaintOn(theme))
-                .add(RIGHT, label(noteText).withStyle(it -> {
-                    Theme.Palette p = theme.get().palette();
+                        .color(t.palette().subtext))))
+                .add(RIGHT, label(noteText).withStyle(theme, (t, it) -> {
+                    Theme.Palette p = t.palette();
                     java.awt.Color c = d.cancelled() || d.isDelayed() ? p.accent : p.onTime;
                     return it.componentFont(f -> f.family("SansSerif").size(11).color(c));
-                }).withRepaintOn(theme))
+                }))
             )
-            .withStyle(it -> {
-                Theme.Palette p = theme.get().palette();
-                boolean sel = selectedTripId.get().equals(d.id());
+            // The row look depends on both the theme and the selection, so we
+            // simply bind the whole view model and read both from its item:
+            .withStyle(vm, (m, it) -> {
+                Theme.Palette p = m.theme().palette();
+                boolean sel = m.selectedTripId().equals(d.id());
                 return it
                     .backgroundColor(sel ? p.currentStop : p.row)
                     .borderRadius(10)
@@ -246,7 +245,6 @@ public final class TrainsView extends JPanel {
                     .borderAt(UI.Edge.LEFT, 4, p.modeColor(d.mode()))
                     .margin(4, 2, 4, 2);
             })
-            .withRepaintOn(theme, selectedTripId)
             .peek(comp -> makeClickable(comp, () -> loadRoute(d.id())));
     }
 
@@ -288,31 +286,30 @@ public final class TrainsView extends JPanel {
 
         return
             panel(FILL).withLayout("fill, ins 7 14 7 12", "[shrink]18[grow]10[shrink]")
-            .add(GROW_Y, label(timeText).withStyle(it -> it
+            .add(GROW_Y, label(timeText).withStyle(theme, (t, it) -> it
                 .componentFont(f -> f.family("Monospaced").size(13)
                     .weight(s.current() ? 2f : 1f)
-                    .color(theme.get().palette().text))).withRepaintOn(theme))
+                    .color(t.palette().text))))
             .add(GROW,
                 label((s.current() ? "● " : "") + s.name())
-                .withStyle(it -> {
-                    Theme.Palette p = theme.get().palette();
+                .withStyle(theme, (t, it) -> {
+                    Theme.Palette p = t.palette();
                     return it.componentFont(f -> f.family("SansSerif").size(14)
                         .weight(s.current() ? 2f : 1f)
                         .color(s.current() ? p.accent : p.text)
                 );
-            }).withRepaintOn(theme))
-            .add(GROW_Y, label(trackText).withStyle(it -> it
+            }))
+            .add(GROW_Y, label(trackText).withStyle(theme, (t, it) -> it
                 .componentFont(f -> f.family("SansSerif").size(12)
-                    .color(theme.get().palette().subtext))).withRepaintOn(theme))
-            .withStyle(it -> {
-                Theme.Palette p = theme.get().palette();
+                    .color(t.palette().subtext))))
+            .withStyle(theme, (t, it) -> {
+                Theme.Palette p = t.palette();
                 return it
                     .backgroundColor(s.current() ? p.currentStop : p.card)
                     .borderAt(UI.Edge.LEFT, 3, s.current() ? p.accent : p.border)
                     .borderAt(UI.Edge.BOTTOM, 1, p.border)
                     .margin(0);
-            })
-            .withRepaintOn(theme);
+            });
     }
 
     // ════════════════════════════════════════════════════════════════════════

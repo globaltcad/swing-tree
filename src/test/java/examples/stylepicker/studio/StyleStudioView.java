@@ -500,14 +500,13 @@ public final class StyleStudioView extends Panel {
                 .onContentChange(it -> parseHex(it.get().getText()).ifPresent(c -> color.set(From.VIEW, c)))
             )
             .add(
-                box().withPrefSize(24, 18).withRepaintOn(color)
+                box().withPrefSize(24, 18)
                 .withCursor(UI.Cursor.HAND)
-                .withStyle(it -> {
-                    Color c = color.orElseNull();
-                    return c == null
+                .withStyle(color, (c, it) ->
+                    c == null
                         ? it.backgroundColor(new Color(0,0,0,0)).border(1, Color.GRAY).borderRadius(4)
-                        : it.backgroundColor(c).border(1, new Color(0,0,0,80)).borderRadius(4);
-                })
+                        : it.backgroundColor(c).border(1, new Color(0,0,0,80)).borderRadius(4)
+                )
                 .onMouseClick(it -> {
                     Color cur = color.orElseNull();
                     int alpha = cur == null ? 255 : cur.getAlpha();

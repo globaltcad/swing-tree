@@ -85,7 +85,6 @@ public class ModelledAnimationView extends Panel
 {
     public ModelledAnimationView(Var<ModelledAnimationViewModel> vm) {
         Val<String> buttonText = vm.viewAsString(ModelledAnimationViewModel::buttonText);
-        Val<Double> borderWidth = vm.viewAsDouble(ModelledAnimationViewModel::borderWidth);
         Val<Double> borderOpacity = vm.viewAsDouble(ModelledAnimationViewModel::borderOpacity);
         UI.of(this).withLayout(WRAP(1), "[grow]", "[grow]")
         .add(CENTER,
@@ -97,12 +96,11 @@ public class ModelledAnimationView extends Panel
             .add(CENTER,
                 box().add(
                     label("Toggle the switch to see the animation!")
-                    .withRepaintOn(borderOpacity, borderWidth)
-                    .withStyle( it -> it
-                        .padding(26 - vm.get().borderWidth()/2)
-                        .margin(42 - vm.get().borderWidth()/2)
+                    .withStyle( vm, (m, it) -> it
+                        .padding(26 - m.borderWidth()/2)
+                        .margin(42 - m.borderWidth()/2)
                         .borderRadius( 38 )
-                        .border(vm.get().borderWidth(), color(0.5,1,1, vm.get().borderOpacity()))
+                        .border(m.borderWidth(), color(0.5,1,1, m.borderOpacity()))
                         .backgroundColor(200/255d, 210/255d, 220/255d, 0.5 )
                         .shadow("bright", s -> s.color(0.5, 1, 1, 0.5).offset(-6) )
                         .shadow("dark", s -> s.color(0, 0, 0, 0.5/4).offset(+6) )
@@ -161,16 +159,18 @@ to understand how the animation works:
 1. In the beginning we zoom to individual properties of the view model
    using the `viewAs...` methods. These properties are then used 
    to define the label text and its style.
-2. We use `withRepaintOn` to tell the view to repaint the label
-   whenever the border width or opacity changes. This is important
-   because the view model is updated continuously by the animation
-   and the view needs to reflect these changes.
-3. The label is styled using the `withStyle` method. This method
-   takes a lambda function that defines the style of the label,
-   in our case the border width and opacity. 
-   The lambda function is called every time the view is repainted.
-   This is important because so that it can use the current
-   state of the view model to determine the style of the label.
+2. The label is styled using the property bound `withStyle(vm, (m, it) -> ...)`
+   method. It receives the current view model item `m` as an explicit argument
+   and recalculates the style and repaints the label automatically whenever
+   the view model changes — which happens continuously during the animation.
+3. This property bound flavour of `withStyle` is the thread safe and preferred
+   way to use property state in a style: the item is captured from the property
+   change event on the property's owning thread and handed to the style lambda,
+   which is evaluated by the UI thread. So the style never reads the property
+   itself (as in the older `withRepaintOn(props) + withStyle(it -> vm.get()...)`
+   pattern), which matters when your application uses the decoupled
+   threading mode (`EventProcessor.DECOUPLED`), where properties are owned
+   by the application thread.
 4. And finally the place where the animation is triggered is the
    `onClick` method of the toggle button, which calls the expression
    `UI.animate(vm, ModelledAnimationViewModel::borderAnimation)`.

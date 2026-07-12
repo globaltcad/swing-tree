@@ -131,29 +131,31 @@ public final class CelestialScribe extends Panel {
                 scrollPane().add(
                     box().withPrefSize(680, 1120)
                     .withLayout(parchmentLayout)
-                    .withRepaintOn(stars, manuscript, mood)
-                    .withStyle( it -> it
+                    // The parchment look depends on the mood, the manuscript and
+                    // (through the layout) the stars — all slices of the same view
+                    // model, so we simply bind the whole thing and read its item:
+                    .withStyle( vm, (m, it) -> it
                         .margin(8)
                         .padding(40, 46, 40, 46)
-                        .backgroundColor(pageColor(mood.get()))
+                        .backgroundColor(pageColor(m.mood()))
                         .borderRadius(14)
                         .shadowColor(new Color(0, 0, 0, 140))
                         .shadowBlurRadius(22)
                         .shadowSpreadRadius(-4)
                         .shadowOffset(0, 8)
                         .gradient("grain", g -> g
-                            .colors(pageColor(mood.get()), pageColor(mood.get()).shade(-0.06))
+                            .colors(pageColor(m.mood()), pageColor(m.mood()).shade(-0.06))
                             .span(Span.TOP_TO_BOTTOM)
                             .clipTo(ComponentArea.BODY)
                         )
                         .text( t -> t
-                            .content(buildStyledManuscript(manuscript.get(), mood.get()))
+                            .content(buildStyledManuscript(m.manuscript(), m.mood()))
                             .placement(Placement.TOP_LEFT)
                             .placementBoundary(ComponentBoundary.INTERIOR_TO_CONTENT)
                             .wrapLines(true)
                             .autoPreferredHeight(false)
                             .obstaclesFromChildren(ComponentBoundary.EXTERIOR_TO_BORDER)
-                            .font( f -> f.size(14).color(inkColor(mood.get())).family("Serif") )
+                            .font( f -> f.size(14).color(inkColor(m.mood())).family("Serif") )
                         )
                     )
                     .addAll(stars, (Var<Star> starVar) -> starPanel(vm, starVar))
@@ -166,48 +168,50 @@ public final class CelestialScribe extends Panel {
     private static UIForAnySwing<?,?> starPanel( Var<CosmosViewModel> vm, Var<Star> starVar ) {
 
         UUID id = starVar.get().id();
-        Val<Double> hue = starVar.viewAsDouble(Star::hue);
-        Val<Double> brightness = starVar.viewAsDouble(Star::brightness);
-        Val<String> name = starVar.viewAsString(Star::name);
+        Val<Boolean> selected = vm.viewAs(Boolean.class, v -> id.equals(v.selectedStarId()));
 
         return panel().id("star-" + id)
             // Seed the component with the VM's current bounds. From that moment
             // on, the Val<Layout> on the parent keeps it in sync.
             .withBounds(starVar.get().bounds())
             .withCursor(Cursor.MOVE)
-            .withRepaintOn(hue, brightness)
-            .withStyle( it -> {
-                double   hueDeg = hue.get() * 360;
+            // The star look is driven by two independent bindings which compose
+            // by chaining: the star item paints the corona, and the selection
+            // flag (a slice of the root view model) overrides the border.
+            .withStyle( starVar, (star, it) -> {
+                double   hueDeg = star.hue() * 360;
                 UI.Color core   = UI.Color.ofHsb(hueDeg, 0.35, 1.00);
                 Color    mid    = UI.Color.ofHsb(hueDeg, 0.65, 0.90);
                 Color    rim    = UI.Color.ofHsb(hueDeg, 0.80, 0.70);
-                boolean selected = id.equals(vm.get().selectedStarId());
                 return it
                     .borderRadius(1000)
                     .backgroundColor(new Color(0, 0, 0, 0))
-                    .shadowColor(withAlpha(mid, (int) (120 + 100 * brightness.get())))
-                    .shadowBlurRadius((int) (14 + 22 * brightness.get()))
+                    .shadowColor(withAlpha(mid, (int) (120 + 100 * star.brightness())))
+                    .shadowBlurRadius((int) (14 + 22 * star.brightness()))
                     .shadowSpreadRadius(2)
                     .shadowIsInset(false)
                     .gradient(Layer.BACKGROUND, "corona", g -> g
                         .type(GradientType.RADIAL)
                         .boundary(ComponentBoundary.BORDER_TO_INTERIOR)
                         .clipTo(ComponentArea.BODY)
-                        .size(Math.min(it.componentWidth(), it.componentHeight()) * brightness.get() + 12)
+                        .size(Math.min(it.componentWidth(), it.componentHeight()) * star.brightness() + 12)
                         .colors(
-                            core.blend(Color.WHITE, 0.15 * brightness.get()),
-                            withAlpha(mid, (int) (200 * brightness.get())),
+                            core.blend(Color.WHITE, 0.15 * star.brightness()),
+                            withAlpha(mid, (int) (200 * star.brightness())),
                             withAlpha(rim, 0)
                         )
                     )
-                    .border(selected ? 2.5 : 1.0, selected ? Color.WHITE : withAlpha(rim, 180))
+                    .border(1.0, withAlpha(rim, 180))
                     .text( t -> t
-                        .content(name.get())
+                        .content(star.name())
                         .placement(Placement.CENTER)
                         .clipTo(ComponentArea.BODY)
                         .font( f -> f.size(11).weight(2).color(Color.WHITE).family("Serif") )
                     );
             })
+            .withStyle( selected, (isSelected, it) ->
+                isSelected ? it.border(2.5, Color.WHITE) : it
+            )
             .onMousePress( e -> {
                 e.forComponent(Component::repaint);
                 vm.update( v -> v.selectStar(id) );

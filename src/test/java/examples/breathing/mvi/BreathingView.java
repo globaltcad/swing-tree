@@ -37,14 +37,15 @@ import static swingtree.UI.*;
  *          bi-directionally bound and firing change events only when its own
  *          slice actually changes.</li>
  *      <li><b>Reactive styling.</b> The orb is drawn entirely from view-model
- *          state inside {@code withStyle(..)}, repainted via
- *          {@code withRepaintOn(..)} on its two animated properties.</li>
+ *          state through the property bound {@code withStyle(vm, (m, it) -> ..)},
+ *          which hands the current view model item to the style lambda and
+ *          repaints the orb automatically on every change.</li>
  *  </ol>
  *  <p>
  *  <b>Why is {@link #phase} a field?</b> Sprouts lenses and views observe
  *  their parent property only <i>weakly</i>, so an unreferenced lens may be
  *  garbage-collected and silently stop updating. SwingTree's own component
- *  bindings (e.g. {@code label(..)}, {@code slider(..)}, {@code withRepaintOn(..)})
+ *  bindings (e.g. {@code label(..)}, {@code slider(..)}, {@code withStyle(prop, ..)})
  *  keep a strong reference internally, so the lenses passed to them are safe.
  *  The {@link #phase} lens, however, is consumed by a <i>raw</i>
  *  {@code Viewable.cast(phase).onChange(..)} subscription — SwingTree never
@@ -72,10 +73,9 @@ public final class BreathingView extends Panel {
 
         // ── Property lenses / views ──────────────────────────────────────────
         // These are safe as locals: each is handed to a SwingTree binding
-        // (label / progressBar / withRepaintOn), which keeps a strong reference.
+        // (label / progressBar), which keeps a strong reference.
         Val<String> instruction   = vm.viewAsString(BreathingView::instructionFor);
         Val<String> cycleInfo     = vm.viewAsString(m -> "Cycle " + m.currentCycle() + " of " + m.settings().totalCycles());
-        Val<Double> orbScale      = vm.viewAsDouble(BreathingViewModel::orbScale);
         Val<Double> phaseProgress = vm.viewAsDouble(BreathingViewModel::phaseProgress);
         Val<Double> sessionDone   = vm.viewAsDouble(BreathingViewModel::sessionProgress);
 
@@ -105,7 +105,7 @@ public final class BreathingView extends Panel {
         .add("grow, push",
             panel("fill, insets 0").withStyle( it -> it.backgroundColor(new Color(0, 0, 0, 0)) )
             .add("grow, push",
-                orbStage(instruction, cycleInfo, orbScale, phaseProgress, sessionDone)
+                orbStage(instruction, cycleInfo, phaseProgress, sessionDone)
             )
             .add("growy, width 340!",
                 controlPanel()
@@ -132,7 +132,6 @@ public final class BreathingView extends Panel {
     private UIForAnySwing<?,?> orbStage(
         Val<String> instruction,
         Val<String> cycleInfo,
-        Val<Double> orbScale,
         Val<Double> phaseProgress,
         Val<Double> sessionDone
     ) {
@@ -145,7 +144,7 @@ public final class BreathingView extends Panel {
                 )
             )
             .add("center, push",
-                breathingOrb(orbScale, phaseProgress)
+                breathingOrb()
             )
             .add("center, gaptop 4",
                 label(cycleInfo)
@@ -168,14 +167,12 @@ public final class BreathingView extends Panel {
 
     // ── The breathing orb itself — pure reactive styling ─────────────────────
 
-    private UIForAnySwing<?,?> breathingOrb( Val<Double> orbScale, Val<Double> phaseProgress ) {
+    private UIForAnySwing<?,?> breathingOrb() {
         return box().withPrefSize(ORB_BOX, ORB_BOX)
-            // Repaint the orb whenever either animated property changes. During
-            // a hold the scale is constant, so the phase-progress view is what
-            // keeps the countdown and the colour morph alive.
-            .withRepaintOn(orbScale, phaseProgress)
-            .withStyle( it -> {
-                BreathingViewModel m = vm.get();
+            // The orb is styled straight from the view model item, which also
+            // repaints it automatically on every change — including the animated
+            // scale and phase progress driving the breathing motion.
+            .withStyle( vm, (m, it) -> {
                 double  s      = m.orbScale();
                 double  cx     = it.componentWidth()  * 0.5;
                 double  cy     = it.componentHeight() * 0.5;

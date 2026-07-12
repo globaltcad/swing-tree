@@ -112,8 +112,10 @@ animations — see [Modelling Animations](./Modelling-Animations.md).
 ## Where to next? ##
 
 - [Modelling Animations](./Modelling-Animations.md) — the MVI-friendly
-  alternative that puts animation state into the view model and uses
-  `UI.animate(vm, vm::someAnimation)` plus `withRepaintOn(..)`.
+  alternative that puts animation state into the view model and renders
+  it through `UI.animate(vm, vm::someAnimation)` plus the property bound
+  `withStyle(vm, (m, it) -> ..)`, which is the thread safe and preferred
+  way to use property state in styles.
 - [Style Sheets and Groups](./Style-Sheets-And-Groups.md) — to share
   styled animations across many components.
 - [Font Styling](./Font-Styling.md) and

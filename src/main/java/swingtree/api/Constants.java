@@ -9,6 +9,8 @@ final class Constants
     static final Logger LOG = org.slf4j.LoggerFactory.getLogger("swingtree");
     static final Styler<?> STYLER_NONE = delegate -> delegate;
     static final AnimatedStyler<?> ANIMATED_STYLER_NONE = (state, delegate) -> delegate;
+    static final ItemStyler<?,?> ITEM_STYLER_NONE = (item, delegate) -> delegate;
+    static final AnimatedItemStyler<?,?> ANIMATED_ITEM_STYLER_NONE = (item, state, delegate) -> delegate;
     static final Layout UNSPECIFIC_LAYOUT_CONSTANT = new Layout.Unspecific();
     static final Layout NONE_LAYOUT_CONSTANT = new Layout.None();
     static final Configurator<?> CONFIGURATOR_NONE = delegate -> delegate;

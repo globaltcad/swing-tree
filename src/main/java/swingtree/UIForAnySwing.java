@@ -102,9 +102,18 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  to the {@link JComponent#repaint()} method of the component represented by this builder.
      *  This means that the component will be repainted whenever
      *  the source of the observable is fired or changed.
+     *  <p>
+     *  <b>Note:</b> if the reason you are binding a repaint trigger is that a
+     *  {@link #withStyle(Styler)} lambda reads the state of a property, use
+     *  {@link #withStyle(Val, ItemStyler)} instead: it hands the property item to the
+     *  styler as an explicit argument and repaints automatically on every change,
+     *  which (unlike reading the property inside the style lambda) is thread safe
+     *  in the decoupled threading mode
+     *  (see {@link swingtree.threading.EventProcessor#DECOUPLED}).
      *
      * @param observable The observable to which the repaint method of the component will be bound.
      * @return This declarative builder instance, which enables builder-style method chaining.
+     * @see #withStyle(Val, ItemStyler) For property driven styles with automatic repaints.
      */
     public final I withRepaintOn( Observable observable ) {
         return _with( thisComponent -> _bindRepaintOn(thisComponent, observable) )._this();
@@ -2416,17 +2425,134 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *    take a look at the {@link swingtree.style.StyleSheet} class,
      *    which exposes an API for defining style rules similar to CSS
      *    but based on declarative source code instead of a text file.
+     *    <p>
+     *    <b>An important note on threading:</b> the {@link Styler} lambda is evaluated
+     *    by the UI thread (as part of the style and paint cycle of the component).
+     *    So if your application uses the decoupled threading mode
+     *    (see {@link swingtree.threading.EventProcessor#DECOUPLED}), do not read
+     *    application thread owned properties inside the lambda (through {@code myProperty.get()}).
+     *    Use {@link #withStyle(Val, ItemStyler)} instead, which hands the property item
+     *    to the styler as an explicit argument, captured safely on the property's owning thread.
      *
      * @param styler A {@link Styler} lambda can define a set of style rules for the component wrapped by this builder
      *               by receiving a {@link swingtree.style.ComponentStyleDelegate} and returning
      *               an updated version with the desired style rules applied.
      *
      * @return This very instance, which allows for builder-style method chaining.
+     * @see #withStyle(Val, ItemStyler) For styling based on the item of a property, in a thread safe fashion.
      */
     public final I withStyle( Styler<C> styler ) {
         NullUtil.nullArgCheck(styler, "styler", Styler.class);
         return _with( c -> {
                     ComponentExtension.from(c).addStyler( styler );
+                })
+                ._this();
+    }
+
+    /**
+     *    Allows you to configure how the component wrapped by this builder looks,
+     *    based on the item of the supplied {@link Val} property: the {@link ItemStyler}
+     *    lambda receives the current property item together with a
+     *    {@link swingtree.style.ComponentStyleDelegate} and returns an updated version
+     *    with the desired style rules applied. Whenever the property changes, the style
+     *    is recalculated with the new item and the component is repainted automatically,
+     *    so no additional {@link #withRepaintOn(Observable)} binding is needed. <br>
+     *    Here the avatar dot of a contact card, whose color follows a person property:
+     *    <pre>{@code
+     *        UI.label(initials)
+     *        .withStyle( person, (p, it) -> it
+     *            .prefSize(38, 38)
+     *            .backgroundColor(p.color())
+     *            .borderRadius(1000)
+     *        )
+     *    }</pre>
+     *    <p>
+     *    <b>This is the thread safe and therefore preferred way to use property state
+     *    in a style.</b> Style gathering is owned by the UI thread, but in the decoupled
+     *    threading mode (see {@link swingtree.threading.EventProcessor#DECOUPLED})
+     *    your properties are owned by the application thread, so a plain
+     *    {@link #withStyle(Styler)} lambda reading {@code person.get()} would leak the
+     *    UI thread into application state. This method closes that leak: the item is
+     *    captured from the property change event on the property's owning thread,
+     *    published to a UI thread owned copy, and handed to your {@link ItemStyler}
+     *    as an explicit argument. Never read the property itself inside the lambda! <br>
+     *    Note that styles based on multiple properties compose naturally by simply
+     *    chaining multiple {@code withStyle(property, styler)} calls.
+     *
+     * @param item The property whose item should drive the style of the component.
+     *             Its change events also trigger the recalculation of the style
+     *             and a repaint of the component.
+     * @param styler An {@link ItemStyler} lambda which defines a set of style rules based
+     *               on the supplied property item, by receiving the item together with a
+     *               {@link swingtree.style.ComponentStyleDelegate} and returning
+     *               an updated version with the desired style rules applied.
+     * @param <T> The type of the item of the supplied property.
+     * @return This very instance, which allows for builder-style method chaining.
+     * @see #withStyle(Styler) For styles which do not depend on property state.
+     * @see #withStyle(Val, LifeTime, AnimatedItemStyler) For styles which animate towards the new item.
+     */
+    public final <T> I withStyle( Val<T> item, ItemStyler<T, C> styler ) {
+        NullUtil.nullArgCheck(item, "item", Val.class);
+        NullUtil.nullArgCheck(styler, "styler", ItemStyler.class);
+        return _with( c -> {
+                    // The UI thread owns this copy of the property item. It is refreshed through
+                    // the property change events, so the styler never touches the property itself,
+                    // which belongs to the application thread.
+                    AtomicReference<@Nullable T> shownItem = new AtomicReference<>(item.orElseNull());
+                    ComponentExtension.from(c).addStyler( delegate -> styler.style(NullUtil.fakeNonNull(shownItem.get()), delegate) );
+                    _onShow( item, c, (comp, v) -> {
+                        shownItem.set(v);
+                        ComponentExtension.from(comp).gatherApplyAndInstallStyle(false);
+                        comp.repaint();
+                    });
+                })
+                ._this();
+    }
+
+    /**
+     *    Allows you to configure a style which not only follows the item of the supplied
+     *    {@link Val} property, but <i>animates towards it</i>: every change of the property
+     *    item restarts a transition animation whose {@link AnimationStatus#progress()}
+     *    runs from {@code 0} to {@code 1} over the given {@link LifeTime}, during which the
+     *    supplied {@link AnimatedItemStyler} is invoked with the new item and the current
+     *    animation status on every repaint. <br>
+     *    Here an example fading the background towards the color of a status item:
+     *    <pre>{@code
+     *        UI.label("status")
+     *        .withStyle( status, LifeTime.of(0.5, TimeUnit.SECONDS), (s, anim, it) -> it
+     *            .backgroundColor(fadeTowards(s.color(), anim.progress()))
+     *        )
+     *    }</pre>
+     *    <p>
+     *    Just like {@link #withStyle(Val, ItemStyler)}, this is thread safe in the decoupled
+     *    threading mode (see {@link swingtree.threading.EventProcessor#DECOUPLED}), because
+     *    the item is captured from the property change event on the property's owning thread
+     *    and handed to the styler as an explicit argument. Never read the property itself
+     *    inside the lambda!
+     *
+     * @param item The property whose item should drive the style of the component and whose
+     *             change events restart the transition animation towards the new item.
+     * @param transitionLifeTime The {@link LifeTime} of the transition animation, defining how long
+     *                           the {@link AnimationStatus#progress()} takes to run from {@code 0} to {@code 1}
+     *                           after each item change.
+     * @param styler An {@link AnimatedItemStyler} lambda which defines a set of style rules based on
+     *               the supplied property item and the {@link AnimationStatus} of the transition
+     *               towards it, by receiving both together with a
+     *               {@link swingtree.style.ComponentStyleDelegate} and returning
+     *               an updated version with the desired style rules applied.
+     * @param <T> The type of the item of the supplied property.
+     * @return This very instance, which allows for builder-style method chaining.
+     * @see #withStyle(Val, ItemStyler) For property driven styles without a transition animation.
+     * @see #withTransitionalStyle(Val, LifeTime, AnimatedStyler) For bidirectional transitions driven by a boolean property.
+     */
+    public final <T> I withStyle( Val<T> item, LifeTime transitionLifeTime, AnimatedItemStyler<T, C> styler ) {
+        NullUtil.nullArgCheck(item, "item", Val.class);
+        NullUtil.nullArgCheck(transitionLifeTime, "transitionLifeTime", LifeTime.class);
+        NullUtil.nullArgCheck(styler, "styler", AnimatedItemStyler.class);
+        return _with( c -> {
+                    ItemTransitionStyler<T, C> transition = new ItemTransitionStyler<>(item.orElseNull(), c, transitionLifeTime, styler);
+                    ComponentExtension.from(c).addStyler(transition::style);
+                    _onShow( item, c, (comp, v) -> transition.set(v) );
                 })
                 ._this();
     }

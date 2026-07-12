@@ -740,20 +740,37 @@ UI.use(sheet, () -> of(this).group(Skin.FRAME). ... .add(comboBox(theme)));
 
 ---
 
-## 8. Repainting on state — `withRepaintOn`
+## 8. Property-driven styles — `withStyle(prop, styler)` (and `withRepaintOn`)
 
-Because `withStyle` reads live state, you must tell SwingTree **when** to repaint a
-styled component whose appearance depends on a property that the component isn't
-otherwise bound to:
+Style lambdas are evaluated by the **UI thread**, as part of the paint cycle. So when
+a style depends on property state, don't read the property inside a plain `withStyle`
+lambda — hand the property to the style and receive its item as an argument:
 
 ```java
-box().withRepaintOn(orbScale, phaseProgress)   // repaint whenever either Val changes
-.withStyle(it -> it.shadowBlurRadius((int)(16 + 78 * orbScale.get())). ...)
+box()
+.withStyle(orbScale, (scale, it) -> it.shadowBlurRadius((int)(16 + 78 * scale)). ...)
 ```
 
-Without `withRepaintOn`, a style that reads `someVal.get()` won't refresh when that
-val changes (unless the value also drives a binding like `label(..)`). This is the
-standard pattern for model-driven styling and animation.
+The item is captured on the property's owning thread and passed to the lambda
+explicitly, and the component re-styles and repaints **automatically** on every
+change. This is the thread-safe and preferred way to use property state in styles:
+a plain `withStyle(it -> ... someVal.get() ...)` reads application-thread state from
+the UI thread (unsafe under `EventProcessor.DECOUPLED`) and doesn't refresh by
+itself either. Styles driven by several properties compose by chaining:
+`.withStyle(a, ..).withStyle(b, ..)`.
+
+An animated flavor transitions towards each new item over a `LifeTime`
+(`anim.progress()` runs 0→1 on every item change):
+
+```java
+label("status")
+.withStyle(status, LifeTime.of(0.5, TimeUnit.SECONDS), (s, anim, it) -> it
+    .backgroundColor(mix(s.color(), anim.progress())))
+```
+
+`withRepaintOn(observableOrEvent, ...)` remains the right tool for repaint triggers
+that are *not* property-item-driven styles — e.g. repainting a custom painter when
+an `Event` fires, or a bound custom layout (§5) whose inputs changed.
 
 ---
 
@@ -785,8 +802,8 @@ text, or custom rendering via `it.paint(status, g -> ...)`:
 
 `UI.animateFor(dur, unit).go(s -> someVar.set(s.progress()))` runs an animation not
 tied to an event; `.asLongAs(s -> true).go(...)` loops forever (ambient effects).
-A common idiom: animate a `Var<Double>` and let `withRepaintOn` + `withStyle`
-render the frames.
+A common idiom: animate a `Var<Double>` and let a property-bound
+`withStyle(progress, (p, it) -> ..)` (§8) render the frames.
 
 ### 9b. View-side transition between two states (`withTransitionalStyle`)
 
@@ -915,9 +932,9 @@ to a `BufferedImage` (loses scalability — visibly blurry when stretched).
 **Style API images:** `.image(img -> img.svg(svgText).fitMode(..).placement(..))`
 or `img.image(iconDeclOrImageIcon)`; plus `opacity`, `size`, `offset`, `repeat`,
 `primer(color)`, `clipTo(ComponentArea.BODY|BORDER|INTERIOR|..)`. Layer via the
-outer overload `image(Layer.BACKGROUND, img -> ..)`. If the SVG text/config is
-dynamic, add `withRepaintOn(props)` (§8). Playground example covering all of
-this: `examples/stylish/SvgViewer.java`.
+outer overload `image(Layer.BACKGROUND, img -> ..)`. If the SVG text/config comes
+from a property, use the property-bound `withStyle(prop, (svg, it) -> ..)` (§8).
+Playground example covering all of this: `examples/stylish/SvgViewer.java`.
 
 ### Dialogs (`JOptionPane` wrappers)
 
@@ -1028,8 +1045,10 @@ painting, a peeked component, a third-party widget): `UI.scale(int|float|double)
    need no `HasId` (§5.2).
 3. **Hold a strong reference (a view field) to any lens used only by a raw
    `onChange` subscription** — weak observation will GC it and silently break (§9c).
-4. **Add `withRepaintOn(props...)`** to styled components whose `withStyle` reads
-   property values that aren't otherwise bound on that component.
+4. **Never read property values inside a plain `withStyle` lambda** — use the
+   property-bound `withStyle(prop, (item, it) -> ..)` (§8), which captures the item
+   thread-safely and repaints automatically. (`withRepaintOn(props) + prop.get()`
+   is the legacy version of this pattern.)
 5. **Pick the right thread:** `onView` for view-touching handlers, `on` for
    model/business handlers; respect `From.VIEW` vs `From.VIEW_MODEL` to avoid
    feedback loops.
@@ -1089,7 +1108,8 @@ panel.addAll(roTuple, (Item it) -> itemView(it));         // read-only value ⇒
 .withStyle(it -> it.padding(8).borderRadius(12).backgroundColor(c).shadowBlurRadius(6)
                    .gradient(Layer.BACKGROUND,"g",g->g.type(GradientType.RADIAL).colors(a,b))
                    .componentFont(fc -> fc.size(14).family("Serif")))
-.withRepaintOn(propA, propB)
+.withStyle(prop, (item, it) -> it.backgroundColor(item.color()))  // property-driven, auto-repaint (§8)
+.withRepaintOn(eventA, eventB)
 .withTransitionalStyle(boolVar, LifeTime.of(0.4, SECONDS), (state, it) -> it. ...progress()...)
 
 // animation
