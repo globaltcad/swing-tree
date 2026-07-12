@@ -40,8 +40,8 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 
 	protected int _selectedIndex = -1;
 	private final Var<E> _selectedItem;
-	private @Nullable E _currentSelection; // The UI thread owned copy of the selection state of `_selectedItem`.
-	private EventProcessor _eventProcessor = EventProcessor.COUPLED;
+	private volatile @Nullable E _currentSelection; // The UI thread owned copy of the selection state of `_selectedItem`.
+	private volatile EventProcessor _eventProcessor = EventProcessor.COUPLED;
 	private final java.util.List<ListDataListener> listeners = new ArrayList<>();
 
 	private boolean _acceptsEditorChanges = true; // This is important to prevent getting feedback loops!
@@ -111,9 +111,29 @@ abstract class AbstractComboModel<E extends @Nullable Object> implements ComboBo
 	 */
 	private void _sendSelectionToProperty( @Nullable E newItem ) {
 		_currentSelection = newItem;
-		_eventProcessor.registerAppEvent(
+		_publishToAppThread(
 			() -> _setSelectedItemSafely(From.VIEW, NullUtil.fakeNonNull(newItem))
 		);
+	}
+
+	/**
+	 *  Hands a task over to the UI thread of the current {@link EventProcessor}.
+	 *  Subclasses use this to apply a state change coming from the application
+	 *  thread (like a change to the bound item source) to their UI thread
+	 *  owned snapshot of that state.
+	 */
+	protected final void _publishToUIThread( Runnable uiStateUpdate ) {
+		_eventProcessor.registerUIEvent(uiStateUpdate);
+	}
+
+	/**
+	 *  Hands a task over to the application thread of the current {@link EventProcessor}.
+	 *  This is used to write state changes made by the user in the view
+	 *  (like the selection, or an edited item) into the bound properties,
+	 *  which belong to the application thread.
+	 */
+	protected final void _publishToAppThread( Runnable propertyUpdate ) {
+		_eventProcessor.registerAppEvent(propertyUpdate);
 	}
 
 	abstract AbstractComboModel<E> withVar( Var<E> newVar );

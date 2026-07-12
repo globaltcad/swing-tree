@@ -9,6 +9,7 @@ import spock.lang.Title
 import sprouts.From
 import sprouts.Tuple
 import sprouts.Var
+import sprouts.Vars
 import swingtree.api.mvvm.BoundViewSupplier
 import swingtree.api.mvvm.TabSupplier
 import swingtree.threading.EventProcessor
@@ -417,6 +418,92 @@ class Decoupled_Property_Binding_Spec extends Specification
         then : 'Now the property was updated, and its change listener ran on the application thread.'
             selection.is("C")
             trace == ["changed to 'C' on '${Thread.currentThread().name}'".toString()]
+    }
+
+    def 'The selectable options of a combo box, modelled as a tuple property, update asynchronously on the UI thread.'()
+    {
+        reportInfo """
+            Not only the selection, but also the *options* of a combo box may
+            live in your view model, for example as a `Var<Tuple<E>>` property
+            bound through `withItems(selection, options)`.
+            Since a `Tuple` is deeply immutable, the two threads simply publish
+            their state to each other: the combo box works with a UI thread
+            owned snapshot of the tuple, which is refreshed asynchronously
+            whenever the property changes on the application thread.
+        """
+        given : 'A selection property and a tuple property of options.'
+            var selection = Var.of("B")
+            var options = Var.of(Tuple.of("A", "B", "C"))
+        and : 'A combo box bound to both, built in decoupled mode.'
+            var combo = UI.runAndGet({
+                UI.use(EventProcessor.DECOUPLED, ()->
+                    UI.comboBox().withItems(selection, options)
+                ).get(JComboBox)
+            })
+        expect : 'The combo box offers the initial options.'
+            combo.itemCount == 3
+
+        when : 'We park the UI thread, add an option from this thread, and peek at the combo box before releasing the UI thread.'
+            var gate = new CountDownLatch(1)
+            UI.run({ gate.await() })
+            // The EDT may not have reached the `await` yet, but that does not matter:
+            // `invokeLater` tasks run in FIFO order, so the snapshot update published
+            // by the mutation below is fenced behind the gate task either way.
+            var itemCountWhileParked = -1
+            try {
+                options.update( it -> it.add("D") )
+                itemCountWhileParked = combo.itemCount
+            } finally {
+                gate.countDown()
+            }
+            UI.sync()
+        then : 'While the UI thread was parked, the combo box still offered the old options...'
+            itemCountWhileParked == 3
+        and : '...but once it caught up, the new option appeared.'
+            combo.itemCount == 4
+            combo.getItemAt(3) == "D"
+    }
+
+    def 'The selectable options of a combo box, modelled as a `Vars` property list, update asynchronously on the UI thread.'()
+    {
+        reportInfo """
+            The options of a combo box may also be modelled as a `Vars`
+            property list, whose change events keep the UI thread owned
+            snapshot of the combo box in sync, following the same
+            asynchronous publication protocol as all other property
+            based widget state.
+        """
+        given : 'A selection property and a property list of options.'
+            var selection = Var.of("B")
+            var options = Vars.of("A", "B", "C")
+        and : 'A combo box bound to both, built in decoupled mode.'
+            var combo = UI.runAndGet({
+                UI.use(EventProcessor.DECOUPLED, ()->
+                    UI.comboBox(selection, options)
+                ).get(JComboBox)
+            })
+        expect : 'The combo box offers the initial options.'
+            combo.itemCount == 3
+
+        when : 'We park the UI thread, add an option from this thread, and peek at the combo box before releasing the UI thread.'
+            var gate = new CountDownLatch(1)
+            UI.run({ gate.await() })
+            // The EDT may not have reached the `await` yet, but that does not matter:
+            // `invokeLater` tasks run in FIFO order, so the snapshot update published
+            // by the mutation below is fenced behind the gate task either way.
+            var itemCountWhileParked = -1
+            try {
+                options.add("D")
+                itemCountWhileParked = combo.itemCount
+            } finally {
+                gate.countDown()
+            }
+            UI.sync()
+        then : 'While the UI thread was parked, the combo box still offered the old options...'
+            itemCountWhileParked == 3
+        and : '...but once it caught up, the new option appeared.'
+            combo.itemCount == 4
+            combo.getItemAt(3) == "D"
     }
 
     def 'A tuple of tab models bound to a tabbed pane is kept in sync from the application thread.'()
