@@ -41,22 +41,30 @@ import java.util.stream.IntStream;
  *  A {@link JScrollPanels} instance can arrange its entries in a vertical or horizontal manner
  *  based on the {@link UI.Align} parameter.
  *  <br><br>
- *  Instances of this store view model implementations in a view model property list
- *  so that they can dynamically be turned into views by a {@link ViewSupplier} lambda
- *  when the list changes its state. <br>
- *  Here a simple example demonstrating the usage of the {@link JScrollPanels} class
- *  through the Swing-Tree API:
+ *  The recommended way to populate this component is the tuple based binding,
+ *  where the entries live in a {@link sprouts.Var} property holding an immutable
+ *  {@link sprouts.Tuple} of value objects implementing {@link sprouts.HasId}:
  *  <pre>{@code
  *    UI.scrollPanels()
- *    .addAll(viewModel.entries(), entry ->
- *        UI.panel().add(UI.button("Click me! :)"))
+ *    .addAll(viewModel.entries(), entry ->  // entry is a Var<Entry> lens into the tuple
+ *        UI.panel().add(UI.label(entry.viewAsString(Entry::text)))
  *    )
  *  }</pre>
- *  ...where {@code entries()} is a method returning a {@link sprouts.Vars} instance
- *  which contains a list of your sub-view models.
- *  The second parameter of the {@link swingtree.UIForScrollPanels#addAll(sprouts.Vals, ViewSupplier)} method is a lambda
- *  which takes a single view model from the list of view models and turns it into a view.
+ *  ...where {@code entries()} is a method returning a {@code Var<Tuple<Entry>>} property.
+ *  Every entry is handed to the view supplier as a property of its own, structural
+ *  tuple changes add and remove sub-views incrementally, and replacing an entry
+ *  carrying the same {@link sprouts.HasId#id()} recycles its existing sub-view.
+ *  All entry state, including a selection flag if you need one, is simply data in
+ *  your value objects, owned by the application thread — which is what makes this
+ *  pathway fully compatible with the decoupled threading mode
+ *  (see {@link swingtree.threading.EventProcessor#DECOUPLED}).
+ *  <br><br>
+ *  The older {@link EntryViewModel} based methods of this class remain functional,
+ *  but they are deprecated: their contract requires the UI thread to write position
+ *  and selection state directly into your view models, which cannot be made thread
+ *  safe. See the {@link EntryViewModel} javadoc for the migration pattern.
  */
+@SuppressWarnings("deprecation") // This component hosts the deprecated EntryViewModel pathway.
 public class JScrollPanels extends UI.ScrollPane
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(JScrollPanels.class);
@@ -428,7 +436,11 @@ public class JScrollPanels extends UI.ScrollPane
      * @param type The component type which ought to be found.
      * @param <T> The component type which ought to be found.
      * @return The found entry panel matching the provided type class and predicate lambda.
+     * @deprecated This is part of the {@link EntryViewModel} based selection machinery,
+     *             which is deprecated in favour of modelling the selection as plain data
+     *             in tuple bound entries. See {@link EntryViewModel} for the migration pattern.
      */
+    @Deprecated
     public <T extends JComponent> Optional<T> getSelected( Class<T> type ) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(type);
@@ -470,7 +482,11 @@ public class JScrollPanels extends UI.ScrollPane
      * @param type The type of the entry which ought to be selected.
      * @param condition The condition which ought to be met for the entry to be selected.
      * @param <T> The type of the entry which ought to be selected.
+     * @deprecated This is part of the {@link EntryViewModel} based selection machinery,
+     *             which is deprecated in favour of modelling the selection as plain data
+     *             in tuple bound entries. See {@link EntryViewModel} for the migration pattern.
      */
+    @Deprecated
     public <T extends JComponent> void setSelectedFor(Class<T> type, Predicate<T> condition) {
         forEachEntry( e -> e.setEntrySelected(false) );
         forEachEntry(type, e -> {
@@ -854,8 +870,22 @@ public class JScrollPanels extends UI.ScrollPane
          */
         public JComponent getLastState() { return _lastState; }
 
+        /**
+         * @return The truth value determining if this entry is currently selected.
+         * @deprecated This is part of the {@link EntryViewModel} based selection machinery,
+         *             which is deprecated in favour of modelling the selection as plain data
+         *             in tuple bound entries. See {@link EntryViewModel} for the migration pattern.
+         */
+        @Deprecated
         public boolean isEntrySelected() { return _isSelected; }
 
+        /**
+         * @param isHighlighted The truth value determining if this entry should be selected.
+         * @deprecated This is part of the {@link EntryViewModel} based selection machinery,
+         *             which is deprecated in favour of modelling the selection as plain data
+         *             in tuple bound entries. See {@link EntryViewModel} for the migration pattern.
+         */
+        @Deprecated
         public void setEntrySelected(Boolean isHighlighted) {
             if ( _isSelected != isHighlighted ) {
                 this.remove(_lastState);

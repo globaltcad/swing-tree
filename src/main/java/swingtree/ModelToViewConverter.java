@@ -5,6 +5,7 @@ import sprouts.HasId;
 import sprouts.Var;
 import swingtree.api.mvvm.ViewSupplier;
 import swingtree.components.JScrollPanels;
+import swingtree.threading.EventProcessor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,15 +20,17 @@ final class ModelToViewConverter<M> implements ViewSupplier<M> {
 
     static <M, C extends JComponent> ModelToViewConverter<M> of(
         C parent,
+        EventProcessor eventProcessor,
         ViewSupplier<M> viewSupplier,
         BiFunction<M, Exception, JComponent> errorViewCreator
     ) {
-        return new ModelToViewConverter<>(parent, viewSupplier, errorViewCreator);
+        return new ModelToViewConverter<>(parent, eventProcessor, viewSupplier, errorViewCreator);
     }
 
     private static final Object UNIQUE_VIEW_CACHE_KEY = UUID.randomUUID();
 
     private final WeakReference<JComponent>            parentRef;
+    private final EventProcessor                       eventProcessor;
     private final ViewSupplier<M>                      viewCreator;
     private final BiFunction<M, Exception, JComponent> errorViewCreator;
 
@@ -36,10 +39,12 @@ final class ModelToViewConverter<M> implements ViewSupplier<M> {
 
     ModelToViewConverter(
         JComponent parent,
+        EventProcessor eventProcessor,
         ViewSupplier<M> viewCreator,
         BiFunction<M, Exception, JComponent> errorViewCreator
     ) {
         this.parentRef        = new WeakReference<>(Objects.requireNonNull(parent));
+        this.eventProcessor   = Objects.requireNonNull(eventProcessor);
         this.viewCreator      = Objects.requireNonNull(viewCreator);
         this.errorViewCreator = Objects.requireNonNull(errorViewCreator);
     }
@@ -71,7 +76,7 @@ final class ModelToViewConverter<M> implements ViewSupplier<M> {
             if ( existingView != null )
                 return existingView;
             else {
-                UIForAnySwing<?,?> newView = viewCreator.createViewFor(model);
+                UIForAnySwing<?,?> newView = _createNewViewWithDeclaredProcessorFor(model);
                 Objects.requireNonNull(newView);
                 JComponent viewComponent = newView.get((Class) newView.getType());
                 viewComponent.putClientProperty(UNIQUE_VIEW_CACHE_KEY, _idFrom(model));
@@ -79,6 +84,26 @@ final class ModelToViewConverter<M> implements ViewSupplier<M> {
             }
         } catch (Exception e) {
             return errorViewCreator.apply(model, e);
+        }
+    }
+
+    /**
+     *  Sub-views are created lazily, whenever the bound models demand it, which is
+     *  usually long after the UI declaration (and its {@link UI#use(EventProcessor, java.util.function.Supplier)}
+     *  scope) has ended. So without further ado, the builders created by the view supplier
+     *  would capture whatever event processor happens to be installed globally at that
+     *  moment, instead of the one their enclosing declaration was made with.
+     *  This method therefore re-establishes the declaration's event processor
+     *  for the duration of the view creation.
+     */
+    private UIForAnySwing<?,?> _createNewViewWithDeclaredProcessorFor(M model) throws Exception {
+        SwingTree context = SwingTree.get();
+        EventProcessor globalProcessor = context.getEventProcessor();
+        context.setEventProcessor(eventProcessor);
+        try {
+            return viewCreator.createViewFor(model);
+        } finally {
+            context.setEventProcessor(globalProcessor);
         }
     }
 

@@ -13,6 +13,7 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import java.awt.Component;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -139,12 +140,16 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
     public final UIForList<E, L> withSelection( Var<E> selection ) {
         return _with( thisComponent -> {
                      thisComponent.addListSelectionListener( e -> {
-                         if ( !e.getValueIsAdjusting() )
+                         if ( !e.getValueIsAdjusting() ) {
+                             // We capture the new selection while still on the UI thread and then
+                             // hand the write over to the application thread, which owns the property.
                              // Necessary because Java 8 does not check if index is out of bounds.
-                             if (thisComponent.getMinSelectionIndex() >= thisComponent.getModel().getSize())
-                                 selection.set( From.VIEW, NullUtil.fakeNonNull(null) );
-                             else
-                                 selection.set( From.VIEW,  thisComponent.getSelectedValue() );
+                             @Nullable E newSelection =
+                                 ( thisComponent.getMinSelectionIndex() >= thisComponent.getModel().getSize() )
+                                     ? null
+                                     : thisComponent.getSelectedValue();
+                             _runInApp( () -> selection.set( From.VIEW, NullUtil.fakeNonNull(newSelection) ) );
+                         }
                      });
                 })
                 ._withOnShow( selection, (thisComponent,v) -> {
@@ -357,25 +362,44 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
         return withCells( it -> it.when((Class)Object.class).as(cellConfigurator) );
     }
 
+    /**
+     *  A list model based on a {@link Vals} property list. Note that the UI thread
+     *  never accesses the property list itself, because it belongs to the application
+     *  thread! Instead, this model works with a UI thread owned snapshot of the items,
+     *  which is refreshed through the change events of the property list.
+     *  This is the same threading convention that the combo box models follow.
+     */
     private static class ValsListModel<E> extends AbstractListModel<E>
     {
-        private final Vals<E> _entries;
+        private volatile List<E> _entriesSnapshot; // The UI thread owned copy of the state of the bound property list.
 
         public ValsListModel( Vals<E> entries ) {
-            _entries = Objects.requireNonNull(entries, "entries");
+            Objects.requireNonNull(entries, "entries");
+            _entriesSnapshot = _snapshotOf(entries.toList());
+        }
+
+        private static <E> List<E> _snapshotOf( List<E> entries ) {
+            return Collections.unmodifiableList(new ArrayList<>(entries));
         }
 
         @Override public int getSize() {
-            return _entries.size();
+            return _entriesSnapshot.size();
         }
         @Override public @Nullable E getElementAt(int i ) {
-            return _entries.at( i ).orElseNull();
+            List<E> snapshot = _entriesSnapshot;
+            if ( i < 0 || i >= snapshot.size() )
+                return null;
+            return snapshot.get(i);
         }
 
         public void fire( ValsDelegate<E> v ) {
+            // The delegate values are deep copies captured at change time,
+            // so they may be safely adopted as the new UI owned snapshot here.
+            List<E> newSnapshot = _snapshotOf(v.currentValues().toList());
+            _entriesSnapshot = newSnapshot;
             int index = v.index().orElse(-1);
             if ( index < 0 ) {
-                fireContentsChanged( this, 0, _entries.size() );
+                fireContentsChanged( this, 0, newSnapshot.size() );
                 return;
             }
             switch ( v.change() ) {
@@ -383,7 +407,7 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
                 case REMOVE: fireIntervalRemoved( this, index, index + v.oldValues().size() ); break;
                 case SET:    fireContentsChanged( this, index, index + v.newValues().size() ); break;
                 default:
-                    fireContentsChanged( this, 0, _entries.size() );
+                    fireContentsChanged( this, 0, newSnapshot.size() );
             }
         }
     }

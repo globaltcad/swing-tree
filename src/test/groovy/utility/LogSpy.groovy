@@ -69,6 +69,17 @@ final class LogSpy
                 }
     }
 
+    /**
+     *  @return All events logged at WARN level since this spy was attached,
+     *          rendered as human readable strings, so that specifications can
+     *          assert that (or that no) warnings were emitted.
+     */
+    List<String> warnings() {
+        return _appender.list
+                .findAll { it.level == Level.WARN }
+                .collect { it.formattedMessage }
+    }
+
     private static Logger _rootLogger() {
         return (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)
     }

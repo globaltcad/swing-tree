@@ -55,9 +55,10 @@ public abstract class UIForAnyToggleButton<I, B extends JToggleButton> extends U
                    // But only if the button is selected, otherwise we'll ignore the click.
                    // And we also trigger "set" events for the button, so that other buttons
                    // can be updated to reflect the new selection state.
+                   // The write itself is handed over to the application thread, which owns the property.
                    _onChange(button, event -> {
                        if ( button.isSelected() )
-                           selection.set(From.VIEW,  state ).fireChange(From.VIEW_MODEL);
+                           _runInApp( () -> selection.set(From.VIEW,  state ).fireChange(From.VIEW_MODEL) );
                    });
                })
                ._this();

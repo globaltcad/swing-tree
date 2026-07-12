@@ -67,6 +67,12 @@ class Decoupled_Property_Binding_Spec extends Specification
      */
     static record Item(String id, String text) implements sprouts.HasId<String> {}
 
+    /**
+     *  A tiny enum used to model an exclusive choice, bound to radio buttons
+     *  through the `isSelectedIf(state, property)` binding.
+     */
+    static enum Step { ONE, TWO, THREE }
+
     def setupSpec() {
         SwingTree.initializeUsing(SwingTreeTestConfigurator.get())
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
@@ -740,6 +746,200 @@ class Decoupled_Property_Binding_Spec extends Specification
         then : 'The entries replayed all changes in order and match the final tuple state.'
             panels.numberOfEntries == models.get().size()
             _entryTextsOf(panels) == ["Alef", "Gamma", "Delta", "Epsilon"]
+    }
+
+    def 'An enum selection made through a radio button waits in the application event queue instead of touching the property directly.'()
+    {
+        reportInfo """
+            The `isSelectedIf(state, property)` binding selects a toggle
+            button whenever the bound property is equal to the given
+            reference value, and conversely writes that reference value
+            into the property when the user selects the button.
+
+            The write direction must follow the same threading convention
+            as every other view-to-model communication: the UI thread hands
+            the new value over to the application event queue instead of
+            writing into the property directly, so that view model listeners
+            never run on the UI thread.
+        """
+        given : 'An enum property with a change listener which records the thread it runs on.'
+            var trace = new CopyOnWriteArrayList<String>()
+            var step = Var.of(Step.ONE)
+            step.onChange(From.VIEW, it ->
+                trace << "changed to '${it.currentValue().orElseThrowUnchecked()}' on '${Thread.currentThread().name}'".toString()
+            )
+        and : 'Two radio buttons bound to the property, built in decoupled mode.'
+            var buttons = UI.runAndGet({
+                UI.use(EventProcessor.DECOUPLED, ()->
+                    UI.panel()
+                    .add(UI.radioButton("one").isSelectedIf(Step.ONE, step))
+                    .add(UI.radioButton("two").isSelectedIf(Step.TWO, step))
+                ).get(JPanel)
+            }).components as List<JRadioButton>
+        expect : 'The first button starts out selected, as the property demands.'
+            buttons[0].selected
+            !buttons[1].selected
+
+        when : 'The user selects the second button, on the UI thread.'
+            UI.runNow({ buttons[1].setSelected(true) })
+        then : 'The button itself shows the new selection right away, it is UI owned state...'
+            buttons[1].selected
+        and : '...but the property has not been touched yet! The write is waiting in the application event queue.'
+            step.is(Step.ONE)
+            trace.isEmpty()
+
+        when : 'This test thread, playing the application thread, processes the event queue, and both worlds settle.'
+            letBothWorldsSettle()
+        then : 'The property was updated, and its change listener ran on the application thread.'
+            step.is(Step.TWO)
+            trace == ["changed to 'TWO' on '${Thread.currentThread().name}'".toString()]
+        and : 'The rebroadcast of the new property value also deselected the first button.'
+            !buttons[0].selected
+            buttons[1].selected
+    }
+
+    def 'A divider moved by the user in a split pane waits in the application event queue instead of touching the property directly.'()
+    {
+        reportInfo """
+            The `withDivisionOf(Var)` binding of a split pane keeps a double
+            property in sync with the divider location, expressed as a
+            percentage of the pane size. When the user drags the divider,
+            the new percentage must travel through the application event
+            queue instead of being written into the property directly,
+            because the property belongs to the application thread.
+            This matters twice over here, because divider drags fire a
+            continuous stream of location updates.
+        """
+        given : 'A percentage property and a split pane bound to it in decoupled mode.'
+            var percentage = Var.of(0.5d)
+            var pane = UI.runAndGet({
+                UI.use(EventProcessor.DECOUPLED, ()->
+                    UI.splitPane(UI.Align.HORIZONTAL).withDivisionOf(percentage)
+                ).get(JSplitPane)
+            })
+        and : 'The pane receives a concrete size, and we let the resulting resize event settle.'
+            UI.runNow({ pane.setSize(200, 200) })
+            letBothWorldsSettle()
+
+        when : 'The user drags the divider to the three quarter mark, on the UI thread.'
+            UI.runNow({ pane.setDividerLocation(150) })
+        then : 'The pane itself shows the new divider location right away, it is UI owned state...'
+            UI.runAndGet({ pane.dividerLocation }) == 150
+        and : '...but the property has not been touched yet! The write is waiting in the application event queue.'
+            percentage.is(0.5d)
+
+        when : 'This test thread, playing the application thread, processes the event queue.'
+            EventProcessor.DECOUPLED.joinUntilDoneOrException()
+        then : 'Now the new percentage arrived in the view model.'
+            Math.abs(percentage.get() - 0.75d) < 0.05d
+    }
+
+    def 'A tab selected by the user waits in the application event queue instead of touching the index property directly.'()
+    {
+        reportInfo """
+            The `withSelectedIndex(Var)` binding of a tabbed pane writes the
+            index of the tab selected by the user back into the bound
+            property. Like every other view-to-model communication, this
+            write must travel through the application event queue, so that
+            the listeners of the index property are guaranteed to run on
+            the application thread, never on the UI thread.
+        """
+        given : 'An index property with a change listener which records the thread it runs on.'
+            var trace = new CopyOnWriteArrayList<String>()
+            var selectedIndex = Var.of(0)
+            selectedIndex.onChange(From.VIEW, it ->
+                trace << "changed to '${it.currentValue().orElseThrowUnchecked()}' on '${Thread.currentThread().name}'".toString()
+            )
+        and : 'A tabbed pane with three tabs, bound to the property in decoupled mode.'
+            var pane = UI.runAndGet({
+                UI.use(EventProcessor.DECOUPLED, ()->
+                    UI.tabbedPane()
+                    .withSelectedIndex(selectedIndex)
+                    .add(UI.tab("Overview"))
+                    .add(UI.tab("Details"))
+                    .add(UI.tab("Settings"))
+                ).get(JTabbedPane)
+            })
+        expect : 'The first tab starts out selected, as the property demands.'
+            pane.selectedIndex == 0
+
+        when : 'The user selects the third tab, on the UI thread.'
+            UI.runNow({ pane.selectedIndex = 2 })
+        then : 'The pane itself shows the new selection right away, it is UI owned state...'
+            UI.runAndGet({ pane.selectedIndex }) == 2
+        and : '...but the property has not been touched yet! The write is waiting in the application event queue.'
+            selectedIndex.is(0)
+            trace.isEmpty()
+
+        when : 'This test thread, playing the application thread, processes the event queue.'
+            EventProcessor.DECOUPLED.joinUntilDoneOrException()
+        then : 'Now the property was updated, and its change listener ran on the application thread.'
+            selectedIndex.is(2)
+            trace == ["changed to '2' on '${Thread.currentThread().name}'".toString()]
+    }
+
+    def 'The knob of a slider bound to fractional min, max and value properties moves asynchronously, on the UI thread.'()
+    {
+        reportInfo """
+            When a slider is bound to fractional number properties, the
+            integer range of the underlying `JSlider` is derived from all
+            three properties together: min and max determine a scale factor,
+            and the value is mapped into the resulting integer range.
+
+            Because of that coupling, the UI thread must never read the
+            properties directly, otherwise it could observe a min from one
+            update and a max from another, and derive an inconsistent range.
+            Instead it works with UI thread owned copies of all three values,
+            refreshed through the property change events in their original
+            order. This feature updates the whole triple from the application
+            thread while the UI thread is parked, and checks that the slider
+            ends up in a state consistent with the final triple.
+        """
+        given : 'Three fractional properties and a slider bound to all of them in decoupled mode.'
+            var min = Var.of(0d)
+            var max = Var.of(1d)
+            var current = Var.of(0.5d)
+            var slider = UI.runAndGet({
+                UI.use(EventProcessor.DECOUPLED, ()->
+                    UI.slider(UI.Align.HORIZONTAL, min, max, current)
+                ).get(JSlider)
+            })
+        expect : 'The knob starts out in the middle of the integer range.'
+            _fractionOf(slider) == 0.5d
+
+        when : 'We park the UI thread and update the whole triple from this thread, peeking at the slider before releasing the UI thread.'
+            var gate = new CountDownLatch(1)
+            UI.run({ gate.await() })
+            var fractionWhileParked = -1d
+            try {
+                min.set(-1d)
+                max.set(3d)
+                current.set(1d)
+                fractionWhileParked = _fractionOf(slider)
+            } finally {
+                gate.countDown()
+            }
+            UI.sync()
+        then : 'While the UI thread was parked, the knob had not moved yet...'
+            fractionWhileParked == 0.5d
+        and : '...but once the UI thread replayed the updates, the knob sits at the position of the final triple.'
+            _fractionOf(slider) == 0.5d // (1 - (-1)) / (3 - (-1))
+            slider.minimum < slider.value
+            slider.value < slider.maximum
+
+        when : 'The user then drags the knob all the way to the maximum, on the UI thread.'
+            UI.runNow({ slider.value = slider.maximum })
+        then : 'The value property has not been touched yet! The write is waiting in the application event queue.'
+            current.is(1d)
+
+        when : 'This test thread, playing the application thread, processes the event queue.'
+            EventProcessor.DECOUPLED.joinUntilDoneOrException()
+        then : 'Now the property holds the exact maximum of the bound range.'
+            current.is(3d)
+    }
+
+    private static double _fractionOf( JSlider slider ) {
+        return (slider.value - slider.minimum) / (double) (slider.maximum - slider.minimum)
     }
 
     /**

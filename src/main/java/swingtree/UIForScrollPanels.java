@@ -10,6 +10,7 @@ import swingtree.api.mvvm.EntryViewModel;
 import swingtree.api.mvvm.ViewSupplier;
 import swingtree.components.JScrollPanels;
 import swingtree.layout.AddConstraint;
+import swingtree.threading.DecoupledEventProcessor;
 
 import javax.swing.*;
 import java.util.List;
@@ -24,10 +25,17 @@ import java.util.stream.StreamSupport;
  *  A builder node for {@link JScrollPanels}, a custom SwingTree component,
  *  which is similar to a {@link JList} but with the ability to interact with
  *  the individual components in the list.
+ *  <p>
+ *  Prefer binding the entries through a {@code Var<Tuple<M extends HasId<ID>>>}
+ *  property (see {@link UIForAnySwing#addAll(sprouts.Var, swingtree.api.mvvm.BoundViewSupplier)}),
+ *  which is fully thread safe in the decoupled threading mode. The older
+ *  {@link EntryViewModel} based binding is deprecated — see the
+ *  {@link EntryViewModel} javadoc for the migration pattern.
  *
  * @param <P> The type of the component which this builder node wraps.
  * @author Daniel Nepp
  */
+@SuppressWarnings("deprecation") // This builder hosts the deprecated EntryViewModel pathway alongside the tuple based one.
 public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPane<UIForScrollPanels<P>, P>
 {
     private static final Logger log = LoggerFactory.getLogger(UIForScrollPanels.class);
@@ -65,6 +73,35 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
             thisComponent.addEntry( constraints, entry, m -> UI.of(addedComponent) );
     }
 
+    /**
+     *  The deprecated {@link EntryViewModel} pathway requires the UI thread to write
+     *  position and selection state directly into the bound view models while building
+     *  their views, which cannot be reconciled with the decoupled threading mode, where
+     *  view model state belongs exclusively to the application thread.
+     *  So when user supplied {@link EntryViewModel}s meet a decoupled event processor,
+     *  the least we can do is to warn loudly, once, at declaration time.
+     */
+    private <M> void _warnIfEntryViewModelsAreBoundInDecoupledMode( Vals<M> models ) {
+        if ( !(_state().eventProcessor() instanceof DecoupledEventProcessor) )
+            return;
+        if ( models.stream().noneMatch( m -> m instanceof EntryViewModel ) )
+            return;
+        log.warn(SwingTree.get().logMarker(),
+                "Binding deprecated 'EntryViewModel' based entries to a '{}' in a UI declaration " +
+                "which uses a DECOUPLED event processor! This combination is NOT thread safe and " +
+                "cannot be made thread safe: the UI thread writes the position and selection state " +
+                "directly into your 'EntryViewModel' implementations while building their entry views, " +
+                "so your view model state will be accessed and mutated by the UI thread, and change " +
+                "listeners on 'isSelected()' and 'position()' will run on the UI thread. " +
+                "Please migrate to the tuple based binding, where the entries live in a " +
+                "'Var<Tuple<M extends HasId<ID>>>' property and all entry state, including the " +
+                "selection, is modelled as immutable data owned by the application thread. " +
+                "See the 'EntryViewModel' javadoc for the migration pattern.",
+                JScrollPanels.class.getSimpleName(),
+                new Throwable("Stack trace for debugging purposes.")
+            );
+    }
+
     private static EntryViewModel _entryModel() {
         Var<Boolean> selected = Var.of(false);
         Var<Integer> position = Var.of(0);
@@ -89,6 +126,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
     protected <M> void _addViewableProps(
             Vals<M> models, @Nullable AddConstraint attr, ModelToViewConverter<M> viewSupplier, P thisComponent
     ) {
+        _warnIfEntryViewModelsAreBoundInDecoupledMode(models);
         BiConsumer<Integer, Vals<M>> addAllAt = (index, vals) -> {
             boolean allAreEntries = vals.stream().allMatch( v -> v instanceof EntryViewModel );
             if ( allAreEntries ) {

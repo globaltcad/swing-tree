@@ -5949,7 +5949,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     private <M> void _bindTo( Vals<M> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
         _checkComponentStateBeforeBinding(thisComponent);
-        _addViewableProps(models, attr, ModelToViewConverter.of(thisComponent, viewSupplier, (model, exception)->{
+        _addViewableProps(models, attr, ModelToViewConverter.of(thisComponent, _state().eventProcessor(), viewSupplier, (model, exception)->{
                 log.error(SwingTree.get().logMarker(), "Error while creating view for '"+model+"'.", exception);
                 return UI.box().get(JBox.class);
             }), thisComponent);
@@ -6063,7 +6063,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     private <M> void _bindTo( Val<Tuple<M>> models, @Nullable AddConstraint attr, ViewSupplier<M> viewSupplier, C thisComponent ) {
         _checkComponentStateBeforeBinding(thisComponent);
-        _addViewableProps(models, attr, ModelToViewConverter.of(thisComponent, viewSupplier, (model, exception)->{
+        _addViewableProps(models, attr, ModelToViewConverter.of(thisComponent, _state().eventProcessor(), viewSupplier, (model, exception)->{
             log.error(SwingTree.get().logMarker(), "Error while creating view for '"+model+"'.", exception);
             return UI.box().get(JBox.class);
         }), thisComponent);
@@ -6071,7 +6071,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     private <M extends HasId<?>> void _bindTo(Var<Tuple<M>> models, @Nullable AddConstraint attr, BoundViewSupplier<M> viewSupplier, C thisComponent ) {
         _checkComponentStateBeforeBinding(thisComponent);
-        _addViewableProps(models, attr, ModelToViewConverter.of(thisComponent, (ViewHandle<M> handle)->viewSupplier.createViewFor(handle.property()), (model, exception)->{
+        _addViewableProps(models, attr, ModelToViewConverter.of(thisComponent, _state().eventProcessor(), (ViewHandle<M> handle)->viewSupplier.createViewFor(handle.property()), (model, exception)->{
             log.error(SwingTree.get().logMarker(), "Error while creating view for '"+model+"'.", exception);
             return UI.box().get(JBox.class);
         }), thisComponent);

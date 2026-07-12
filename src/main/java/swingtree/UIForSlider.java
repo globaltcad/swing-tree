@@ -141,7 +141,7 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
     public final UIForSlider<S> withMin( Val<Integer> min ) {
         NullUtil.nullArgCheck( min, "min", Val.class );
         return _withOnShow( min, (thisComponent,v) -> {
-                    _setMin(thisComponent, min.orElseThrowUnchecked());
+                    _setMin(thisComponent, v); // Note: the captured event value is used, never the property itself, which belongs to the application thread.
                 })
                 ._with( thisComponent -> {
                     _setMin(thisComponent, min.orElseThrowUnchecked());
@@ -179,7 +179,7 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
     public final UIForSlider<S> withMax( Val<Integer> max ) {
         NullUtil.nullArgCheck( max, "max", Val.class );
         return _withOnShow( max, (thisComponent,v) -> {
-                    _setMax(thisComponent, max.orElseThrowUnchecked());
+                    _setMax(thisComponent, v); // Note: the captured event value is used, never the property itself, which belongs to the application thread.
                 })
                 ._with( thisComponent -> {
                     _setMax(thisComponent, max.orElseThrowUnchecked());
@@ -220,7 +220,7 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
     public final UIForSlider<S> withValue( Val<Integer> val ) {
         NullUtil.nullArgCheck( val, "val", Val.class );
         return _withOnShow( val, (thisComponent,v) -> {
-                    _setValue(thisComponent, val.orElseThrowUnchecked());
+                    _setValue(thisComponent, v); // Note: the captured event value is used, never the property itself, which belongs to the application thread.
                 })
                 ._with( thisComponent -> {
                     _setValue(thisComponent, val.orElseThrowUnchecked());
@@ -246,18 +246,25 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
             // The scale factor depends on both userMin and userMax, so whenever either of them changes,
             // the slider's min, max and value all need to be recomputed together — otherwise the user
             // could drag the knob into a position whose inverse-scaled value falls outside [userMin, userMax].
-            return _withOnShow( userMin, (thisComponent, v) ->
-                        _updateScaledSliderRange(thisComponent, userMin, userMax, userCurrent)
-                    )
-                    ._withOnShow( userMax, (thisComponent, v) ->
-                        _updateScaledSliderRange(thisComponent, userMin, userMax, userCurrent)
-                    )
-                    ._withOnShow( userCurrent, (thisComponent, v) -> {
-                        int newVal = _scale(Integer.class, v, userMin.orElseThrowUnchecked(), userMax.orElseThrowUnchecked(), false);
-                        _setValue(thisComponent, newVal);
-                    })
-                    ._with( thisComponent -> {
-                        _updateScaledSliderRange(thisComponent, userMin, userMax, userCurrent);
+            return _with( thisComponent -> {
+                        // The UI thread must not read the properties directly, because they belong to
+                        // the application thread. So the UI thread works with these copies of min, max
+                        // and current value, which are refreshed through the property change events,
+                        // replayed in their original order.
+                        Number[] shown = { userMin.orElseThrowUnchecked(), userMax.orElseThrowUnchecked(), userCurrent.orElseThrowUnchecked() };
+                        _onShow( userMin, thisComponent, (c, v) -> {
+                            shown[0] = v;
+                            _updateScaledSliderRange(c, shown[0], shown[1], shown[2]);
+                        });
+                        _onShow( userMax, thisComponent, (c, v) -> {
+                            shown[1] = v;
+                            _updateScaledSliderRange(c, shown[0], shown[1], shown[2]);
+                        });
+                        _onShow( userCurrent, thisComponent, (c, v) -> {
+                            shown[2] = v;
+                            _updateScaledSliderRange(c, shown[0], shown[1], shown[2]);
+                        });
+                        _updateScaledSliderRange(thisComponent, shown[0], shown[1], shown[2]);
                         if ( biDirectional ) {
                             Var<N> target = (Var<N>) userCurrent;
                             _onChange(thisComponent,
@@ -298,12 +305,9 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
                 );
     }
 
-    private <N extends Number> void _updateScaledSliderRange(
-        S thisComponent, Val<N> userMin, Val<N> userMax, Val<N> userCurrent
+    private void _updateScaledSliderRange(
+        S thisComponent, Number minVal, Number maxVal, Number currentVal
     ) {
-        N minVal = userMin.orElseThrowUnchecked();
-        N maxVal = userMax.orElseThrowUnchecked();
-        N currentVal = userCurrent.orElseThrowUnchecked();
         int newMin = _scale(Integer.class, minVal, minVal, maxVal, false);
         int newMax = _scale(Integer.class, maxVal, minVal, maxVal, false);
         int newVal = _scale(Integer.class, currentVal, minVal, maxVal, false);
@@ -319,13 +323,13 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
         Val<N> min, Val<N> max, Val<N> current, @Nullable Var<T> target, Function<Integer,T> scaling
     ) {
         return _withOnShow( min, (thisComponent,v) -> {
-                    _setMin(thisComponent, min.orElseThrowUnchecked().intValue());
+                    _setMin(thisComponent, v.intValue()); // Note: the captured event value is used, never the property itself, which belongs to the application thread.
                 })
                 ._withOnShow( max, (thisComponent,v) -> {
-                    _setMax(thisComponent, max.orElseThrowUnchecked().intValue());
+                    _setMax(thisComponent, v.intValue());
                 })
                 ._withOnShow( current, (thisComponent,v) -> {
-                    _setValue(thisComponent, current.orElseThrowUnchecked().intValue());
+                    _setValue(thisComponent, v.intValue());
                 })
                 ._with( thisComponent -> {
                     _setMin(thisComponent, min.orElseThrowUnchecked().intValue());

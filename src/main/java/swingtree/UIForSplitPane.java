@@ -256,19 +256,24 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
     public final UIForSplitPane<P> withDivisionOf( Val<Double> percentage ) {
         NullUtil.nullArgCheck( percentage, "percentage", Val.class );
         NullUtil.nullPropertyCheck( percentage, "percentage", "Null is not a valid percentage." );
-        return _withOnShow( percentage, (thisComponent,v) -> {
-                    _calculateDividerLocationFrom(thisComponent, v);
-               })
-                ._with( thisComponent -> {
+        return _with( thisComponent -> {
+                    // The UI thread must not read the property directly, because it belongs to the
+                    // application thread. So the UI thread works with this copy of the percentage,
+                    // which is refreshed through the property change events.
+                    double[] shownPercentage = { percentage.orElseThrowUnchecked() };
+                    _onShow( percentage, thisComponent, (c,v) -> {
+                        shownPercentage[0] = v;
+                        _calculateDividerLocationFrom(c, v);
+                    });
                     // Now we need to register a listener to the split pane's size, so that we can recalculate the divider location
                     // when the split pane is resized:
                     thisComponent.addComponentListener(new ComponentAdapter() {
                         @Override
                         public void componentResized( ComponentEvent e ) {
-                            _calculateDividerLocationFrom(thisComponent, percentage.orElseThrowUnchecked());
+                            _calculateDividerLocationFrom(thisComponent, shownPercentage[0]);
                         }
                     });
-                    _calculateDividerLocationFrom(thisComponent, percentage.orElseThrowUnchecked());
+                    _calculateDividerLocationFrom(thisComponent, shownPercentage[0]);
                 })
                 ._this();
     }
@@ -302,24 +307,31 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
     public final UIForSplitPane<P> withDivisionOf( Var<Double> percentage ) {
         NullUtil.nullArgCheck( percentage, "percentage", Var.class );
         NullUtil.nullPropertyCheck( percentage, "percentage", "Null is not a valid percentage." );
-        return _withOnShow( percentage, (thisComponent,v) -> {
-                    _calculateDividerLocationFrom(thisComponent, v);
-               })
-                ._with( thisComponent -> {
-                    _calculateDividerLocationFrom(thisComponent, percentage.orElseThrowUnchecked());
+        return _with( thisComponent -> {
+                    // The UI thread must not read the property directly, because it belongs to the
+                    // application thread. So the UI thread works with this copy of the percentage,
+                    // which is refreshed through the property change events as well as divider movements.
+                    double[] shownPercentage = { percentage.orElseThrowUnchecked() };
+                    _onShow( percentage, thisComponent, (c,v) -> {
+                        shownPercentage[0] = v;
+                        _calculateDividerLocationFrom(c, v);
+                    });
+                    _calculateDividerLocationFrom(thisComponent, shownPercentage[0]);
                     // Now we need to register a listener to the split pane's size, so that we can recalculate the divider location
                     // when the split pane is resized:
                     thisComponent.addComponentListener(new ComponentAdapter() {
                         @Override
                         public void componentResized( ComponentEvent e ) {
-                            _calculateDividerLocationFrom(thisComponent, percentage.orElseThrowUnchecked());
+                            _calculateDividerLocationFrom(thisComponent, shownPercentage[0]);
                         }
                     });
                     // We listen for slider movement as well, so that we can recalculate the divider location
                     thisComponent.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, evt -> {
                         if ( evt.getNewValue() != null ) {
                             double newPercentage = _calculatePercentageFrom(thisComponent);
-                            percentage.set(From.VIEW, newPercentage);
+                            shownPercentage[0] = newPercentage;
+                            // The write is handed over to the application thread, which owns the property.
+                            _runInApp( () -> percentage.set(From.VIEW, newPercentage) );
                         }
                     });
                 })
