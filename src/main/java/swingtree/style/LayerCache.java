@@ -65,7 +65,20 @@ final class LayerCache
 
     private final UI.Layer          _layer;
     private @Nullable CachedImage   _localCache;
-    private Pooled<LayerRenderConf> _layerRenderData; // The key must be referenced strongly so that the value is not garbage collected (the cached image)
+    /**
+     *  The render input of this component's layer: always the <b>actual</b>
+     *  {@link LayerRenderConf} (with the real component size), used for the
+     *  direct-render fallbacks in {@link #paint(Graphics2D, BiConsumer)} and
+     *  for the destination geometry of the final cache blit.
+     */
+    private Pooled<LayerRenderConf> _layerRenderData;
+    /**
+     *  The key of this cache's entry in the global {@link #_CACHE}: the interned
+     *  <b>canonical</b> form of {@code _layerRenderData}. This strong reference is
+     *  what keeps the weakly keyed cache entry (and thereby the shared image) alive.
+     *  The renderer is invoked with this configuration when filling the cached image.
+     */
+    private Pooled<LayerRenderConf> _cacheKey;
     private int                     _cacheHitsUntilAllocation;
     private boolean                 _isInitialized;
     /*
@@ -83,6 +96,7 @@ final class LayerCache
     public LayerCache( UI.Layer layer ) {
         _layer                    = Objects.requireNonNull(layer);
         _layerRenderData          = new Pooled<>(LayerRenderConf.none());
+        _cacheKey                 = _layerRenderData;
         _cacheHitsUntilAllocation = -1;
         _isInitialized            = false;
     }
@@ -114,7 +128,7 @@ final class LayerCache
             bufferedImage = new CachedImage(size, _cacheHitsUntilAllocation);
             CACHE.put(layerRenderConf, bufferedImage);
         }
-        _layerRenderData = layerRenderConf;
+        _cacheKey = layerRenderConf;
 
         _localCache = bufferedImage;
     }
@@ -123,18 +137,31 @@ final class LayerCache
     {
         if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) ) {
             _layerRenderData = new Pooled<>(LayerRenderConf.none());
+            _cacheKey        = _layerRenderData;
             return;
         }
 
-        final LayerRenderConf oldState = oldConf.renderConfFor(_layer);
         final LayerRenderConf newState = newConf.renderConfFor(_layer);
+        /*
+            The render input (what the renderer sees, at the real component size)
+            and the cache key (what the global cache is looked up with) are two
+            different things: eligible configurations are canonicalized onto a
+            size independent key so that a resize does not invalidate the cache.
+            For everything else canonicalization is the identity and this whole
+            method behaves exactly as it did when key and input were one.
+        */
+        final LayerRenderConf newCacheState = newState;
 
-        boolean validationNeeded = ( !_isInitialized || !oldState.equals(newState) );
+        final boolean cacheStateChanged = !_cacheKey.get().equals(newCacheState);
+        final boolean validationNeeded  = !_isInitialized || cacheStateChanged;
 
         _isInitialized = true;
 
+        if ( !_layerRenderData.get().equals(newState) )
+            _layerRenderData = new Pooled<>(newState);
+
         if ( validationNeeded ) {
-            _cacheHitsUntilAllocation = _cachingMakesSenseFor(newState);
+            _cacheHitsUntilAllocation = _cachingMakesSenseFor(newCacheState);
             if ( _localCache != null )
                 _localCache.updateNumberOfHitsUntilAllocation(_cacheHitsUntilAllocation);
         }
@@ -143,31 +170,19 @@ final class LayerCache
             _cacheHitsUntilAllocation = -1;
             _localCache               = null;
             _isInitialized            = false;
-            _layerRenderData = new Pooled<>(newState);
+            _cacheKey                 = _layerRenderData;
             return;
         }
 
-        boolean cacheIsInvalid = true;
-
-        boolean newBufferNeeded = false;
-
-        if ( _localCache == null )
-            newBufferNeeded = true;
-        else
-            cacheIsInvalid = !oldState.equals(newState);
-
-        if ( cacheIsInvalid ) {
+        if ( _localCache == null || cacheStateChanged ) {
             // We only drop the local cached image here – we deliberately do not
             // reset `_cacheHitsUntilAllocation` and `_isInitialized` (as
             // `_freeLocalCache()` does), because we just computed the correct
             // `_cacheHitsUntilAllocation` for the new state above and we want
             // it to be used by the upcoming `_allocateOrGetCachedBuffer` call.
-            _localCache    = null;
-            newBufferNeeded = true;
+            _localCache = null;
+            _allocateOrGetCachedBuffer(new Pooled<>(newCacheState));
         }
-
-        if ( newBufferNeeded )
-            _allocateOrGetCachedBuffer(new Pooled<>(newState));
     }
 
     public void paint( Graphics2D g, BiConsumer<LayerRenderConf, Graphics2D> renderer )
@@ -213,7 +228,14 @@ final class LayerCache
                 log.debug(SwingTree.get().logMarker(), "Error while transferring configurations to the cached image graphics context.");
             }
             finally {
-                renderer.accept(_layerRenderData.get(), g2);
+                /*
+                    Note the deliberate asymmetry: the image shared through the global
+                    cache is filled by rendering the *cache key* configuration (which
+                    may be the size independent canonical form), whereas all the
+                    direct-render fallbacks above render `_layerRenderData` (the
+                    actual configuration at the real component size).
+                */
+                renderer.accept(_cacheKey.get(), g2);
                 g2.dispose();
             }
             _paintCacheMissCount++;
