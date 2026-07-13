@@ -15,61 +15,74 @@ import java.util.Optional;
 /**
  *  A purely static utility which decides if and how the rendering of a
  *  particular {@link LayerRenderConf} can be cached <b>independently of the
- *  component size</b> using a "nine slice" (also known as "stretch tiling") scheme. <br>
+ *  component size</b> using a "nine slice" (also known as "stretch tiling") scheme —
+ *  the same technique behind Android's 9-patch drawables and CSS {@code border-image}. <br>
+ *  <br>
+ *  <b>In plain terms:</b> instead of caching a full sized rendering of the
+ *  component (which becomes garbage the moment the component resizes), we render
+ *  and cache a <b>minimal exemplar</b> of the style — the smallest component at
+ *  which every size dependent pixel still exists. This tiny rendering acts like
+ *  a texture atlas that any component size can be reassembled from:
+ *  <ul>
+ *      <li>the four <b>corner tiles</b> are copied 1:1 — corner pixels are
+ *          identical at every component size,</li>
+ *      <li>the four <b>edge tiles</b> are stretched along their edge — legal
+ *          because every pixel row/column of the band repeats its neighbor,</li>
+ *      <li>the <b>center tile</b> is stretched in both directions — it is
+ *          one homogeneous fill.</li>
+ *  </ul>
+ *  This reconstruction is <i>exact</i>, not an approximation — but only for
+ *  styles which satisfy the invariant it rests on: <b>the body must be
+ *  homogeneous, and each edge must be homogeneous along its own axis</b>.
+ *  Flat background/foundation fills, borders and shadows satisfy it; anything
+ *  whose pixels depend on the full component bounds or the absolute pixel
+ *  position (gradients, noises, images, texts, custom painters) does not, and
+ *  {@link #isEligible(LayerRenderConf)} therefore rejects it — such styles fall
+ *  back to classic exact-size caching, bit-identical to the behavior before
+ *  this class existed. Great care must be taken to keep that predicate
+ *  conservative: an over-eager eligibility rule produces subtly wrong pixels,
+ *  not a crash. (One subtle exclusion of this kind: per-edge border colors
+ *  combined with corner arcs, because the diagonal color seam between two
+ *  differently colored edges runs towards the component center, so inside a
+ *  rounded corner its slope — and thereby the corner pixels — depends on the
+ *  component aspect ratio.)<br>
  *  <br>
  *  <b>The problem this solves:</b> The {@link LayerCache} is keyed by the full
  *  {@link LayerRenderConf}, whose {@link BoxModelConf} includes the exact component
- *  {@link Size}. So while a component is being resized (think of a user dragging
- *  the window edge), every single paint produces a brand new cache key, every
- *  frame is a cache miss and the style is rasterized from scratch, which is
+ *  {@link Size}. While a component is being resized (think of a user dragging
+ *  the window edge), every paint would produce a brand new cache key, every
+ *  frame a cache miss, and the style would be rasterized from scratch — which is
  *  extremely expensive for antialiased rounded corners and shadows. <br>
  *  <br>
- *  <b>The key insight:</b> {@link Size} is the <i>only</i> size dependent
- *  property in the entire render configuration. Corner arcs, border widths,
- *  margins, paddings and shadow parameters are all fixed pixel values.
- *  For style content whose pixels are <i>constant along the edges</i> of the
- *  component (flat background/foundation fills, borders, shadows), the rendering
- *  at any size can be reconstructed exactly from a single small "canonical"
- *  rendering by cutting it into nine tiles:
- *  <ul>
- *      <li>the four corner tiles are copied 1:1 (their pixels never change),</li>
- *      <li>the four edge tiles are stretched along their edge
- *          (their pixels are constant in the stretch direction),</li>
- *      <li>the center tile is stretched in both directions
- *          (its pixels are one constant color).</li>
- *  </ul>
- *  So the {@link #canonicalize(LayerRenderConf)} method maps every eligible
- *  render configuration of every size onto <b>one shared, size independent
- *  cache key</b>: the same configuration with its size replaced by the minimal
- *  {@link #canonicalSize(Outline)}. The canonical configuration is a perfectly
- *  valid {@link LayerRenderConf}, which means the regular {@link StyleRenderer}
- *  renders the canonical image without knowing about any of this. <br>
- *  <br>
+ *  <b>The trick that makes it cheap to integrate:</b> {@link Size} is the
+ *  <i>only</i> size dependent property in the entire render configuration
+ *  (corner arcs, border widths, margins, paddings and shadow parameters are all
+ *  fixed pixel values). So {@link #canonicalize(LayerRenderConf)} simply
+ *  replaces the size with the minimal exemplar size — the resulting
+ *  configuration is simultaneously
+ *  <ol>
+ *      <li>a <b>size independent cache key</b> (all sizes of a style collapse
+ *          onto the same value), and</li>
+ *      <li>a complete, honest <b>recipe for rendering the exemplar</b>: it is
+ *          exactly what the {@link StyleRenderer} would receive from a real
+ *          component of that small size. The renderer never rasterizes a crop
+ *          or a tile and never learns that tiling exists.</li>
+ *  </ol>
  *  <b>Where the cut lines are:</b> {@link #sliceInsets(LayerRenderConf)} computes,
- *  for each side, how far the size dependent (non-constant) pixels reach into the
+ *  for each side, how far the size dependent (non-repeating) pixels reach into the
  *  component: margin + base outline + border width + the adjacent corner arc
  *  extents + the shadow reach (blur + spread + gradient fade distance + offset),
  *  plus a small safety margin for antialiasing bleed and rendering artifact
- *  adjustments. Everything between opposite cut lines is constant along the
+ *  adjustments. Everything between opposite cut lines repeats along the
  *  respective axis and may be stretched freely. <br>
  *  <br>
- *  <b>Why the canonical size is symmetric per axis:</b> Some rendering internals
+ *  <b>Why the exemplar size is symmetric per axis:</b> Some rendering internals
  *  split their work at the component <i>center</i> (corner shadow clip boxes as
  *  well as the border edge polygons both meet in the middle). By making the
- *  canonical size {@code 2 * max(insetA, insetB) + STRETCH_BAND} per axis, the
- *  canonical center line is guaranteed to fall into the constant band, so these
+ *  size {@code 2 * max(insetA, insetB) + STRETCH_BAND} per axis, the exemplar's
+ *  center line is guaranteed to fall into the repeating band, so these
  *  center-splitting artifacts are pixel-identical to a real rendering of any
- *  larger size. <br>
- *  <br>
- *  <b>What is not eligible (v1):</b> gradients, noises, images, texts and
- *  painters all produce pixels which depend on the full component size or on the
- *  absolute pixel position, so configurations containing any of these fall back
- *  to the classic exact-size caching (canonicalization returns the configuration
- *  unchanged, and everything behaves exactly as it did before this class existed).
- *  Non-homogeneous (per-edge) border colors are only eligible without corner
- *  arcs, because the diagonal color seam between two differently colored edges
- *  runs towards the component center, so inside a rounded corner its slope
- *  (and therefore the corner pixels) depends on the component aspect ratio.
+ *  larger size.
  */
 final class StretchTiling
 {

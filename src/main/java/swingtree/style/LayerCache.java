@@ -92,9 +92,13 @@ final class LayerCache
     private Pooled<LayerRenderConf> _layerRenderData;
     /**
      *  The key of this cache's entry in the global {@link #_CACHE}: the interned
-     *  <b>canonical</b> form of {@code _layerRenderData}. This strong reference is
-     *  what keeps the weakly keyed cache entry (and thereby the shared image) alive.
-     *  The renderer is invoked with this configuration when filling the cached image.
+     *  <b>canonical</b> form of {@code _layerRenderData} — for stretch tiling
+     *  eligible styles this is the configuration of the <i>minimal exemplar</i>
+     *  (the same style at the smallest size at which every size dependent pixel
+     *  still exists, see {@link StretchTiling}), for everything else it simply
+     *  equals the render input. This strong reference is what keeps the weakly
+     *  keyed cache entry (and thereby the shared image) alive. The renderer is
+     *  invoked with this configuration when filling the cached image.
      */
     private Pooled<LayerRenderConf> _cacheKey;
     private int                     _cacheHitsUntilAllocation;
