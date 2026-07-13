@@ -1,9 +1,13 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.layout.Size;
 
+import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
 import java.awt.RenderingHints;
+import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.Optional;
@@ -254,7 +258,7 @@ final class StretchTiling
      *  caller must fall back to direct rendering.
      *
      * @param transform The destination graphics transform to check.
-     * @return True if {@link #blit(Graphics2D, LayerRenderConf, BufferedImage, Size)} may be used.
+     * @return True if {@link #blit(Graphics2D, LayerRenderConf, BufferedImage, BufferedImage[], Size)} may be used.
      */
     static boolean isBlitCompatible( AffineTransform transform ) {
         return transform.getShearX() == 0 &&
@@ -263,11 +267,84 @@ final class StretchTiling
                transform.getScaleY() >  0;
     }
 
+    /** Indices into the stretch tile array produced by {@link #extractStretchTiles}. */
+    private static final int TOP = 0, LEFT = 1, CENTER = 2, RIGHT = 3, BOTTOM = 4;
+
+    /**
+     *  Copies the five stretchable regions of the canonical rendering (the four
+     *  edge bands and the center) into dedicated, exactly-fitting images. <br>
+     *  <br>
+     *  <b>Why this is necessary:</b> the stretched tiles could in principle be
+     *  drawn straight out of the canonical image with sub-rectangle
+     *  {@code drawImage} calls — and on software surfaces that is pixel perfect.
+     *  But on accelerated pipelines (notably XRender on Linux) a scaled blit
+     *  whose source is an <i>interior sub-rectangle</i> of a larger texture is
+     *  executed as a transformed composite whose fixed-point sampling breaks
+     *  down at large stretch ratios: beyond a few hundred times the band either
+     *  samples entirely outside the source band or produces nothing at all,
+     *  which visually manifested as long component edges losing their shadows.
+     *  A scaled blit whose source is a <i>whole image</i> takes the ordinary,
+     *  well-trodden scale path and measures pixel perfect even at extreme
+     *  ratios — so each stretched tile gets its own image, while the corner
+     *  tiles (copied 1:1, never transformed) keep sourcing the canonical image
+     *  directly.
+     *
+     * @param gc The graphics configuration used to allocate compatible (managed) images,
+     *           or null (headless), in which case plain ARGB buffers are used.
+     * @param canonicalConf The canonical configuration the image was rendered from.
+     * @param canonicalImage The canonical rendering to extract the stretchable regions from.
+     * @return The five stretch tiles: top band, left band, center, right band, bottom band.
+     */
+    static BufferedImage[] extractStretchTiles(
+        final @Nullable GraphicsConfiguration gc,
+        final LayerRenderConf                 canonicalConf,
+        final BufferedImage                   canonicalImage
+    ) {
+        final Outline insets = sliceInsets(canonicalConf);
+        final int insetTop    = (int) _positive(insets.top());
+        final int insetRight  = (int) _positive(insets.right());
+        final int insetBottom = (int) _positive(insets.bottom());
+        final int insetLeft   = (int) _positive(insets.left());
+        final int width  = canonicalImage.getWidth();
+        final int height = canonicalImage.getHeight();
+
+        final BufferedImage[] tiles = new BufferedImage[5];
+        tiles[TOP]    = _copyRegion(gc, canonicalImage, insetLeft,          0,                    width - insetRight, insetTop           );
+        tiles[LEFT]   = _copyRegion(gc, canonicalImage, 0,                  insetTop,             insetLeft,          height - insetBottom);
+        tiles[CENTER] = _copyRegion(gc, canonicalImage, insetLeft,          insetTop,             width - insetRight, height - insetBottom);
+        tiles[RIGHT]  = _copyRegion(gc, canonicalImage, width - insetRight, insetTop,             width,              height - insetBottom);
+        tiles[BOTTOM] = _copyRegion(gc, canonicalImage, insetLeft,          height - insetBottom, width - insetRight, height             );
+        return tiles;
+    }
+
+    private static BufferedImage _copyRegion(
+        final @Nullable GraphicsConfiguration gc,
+        final BufferedImage source,
+        final int x1, final int y1, final int x2, final int y2
+    ) {
+        final int width  = Math.max(1, x2 - x1);
+        final int height = Math.max(1, y2 - y1);
+        final BufferedImage region = ( gc != null )
+                    ? gc.createCompatibleImage(width, height, Transparency.TRANSLUCENT)
+                    : new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        region.setAccelerationPriority(1.0f);
+        final Graphics2D g = region.createGraphics();
+        try {
+            g.setComposite(AlphaComposite.Src); // exact pixel copy, including alpha
+            g.drawImage(source, 0, 0, width, height, x1, y1, x2, y2, null);
+        } finally {
+            g.dispose();
+        }
+        return region;
+    }
+
     /**
      *  Reconstructs the rendering of the supplied canonical image at the
      *  supplied actual component size by drawing nine tiles: the four corners
-     *  1:1 (in user space), the four edge bands stretched along their edge and
-     *  the center stretched in both directions. <br>
+     *  1:1 (in user space) straight from the canonical image, the four edge
+     *  bands stretched along their edge and the center stretched in both
+     *  directions — the latter five from their dedicated tile images
+     *  (see {@link #extractStretchTiles} for why they must be dedicated). <br>
      *  <br>
      *  The tiles are drawn in <b>integer device space</b>: the cut lines are
      *  transformed to device pixels once and shared between adjacent tiles, so
@@ -287,13 +364,15 @@ final class StretchTiling
      *                      used to recompute the slice insets (a pure function,
      *                      so it is guaranteed to be consistent with the
      *                      canonicalization that produced the image).
-     * @param canonicalImage The canonical rendering to cut into nine tiles.
+     * @param canonicalImage The canonical rendering, sourcing the four corner tiles.
+     * @param stretchTiles The dedicated stretchable tiles from {@link #extractStretchTiles}.
      * @param actualSize The actual component size to reconstruct.
      */
     static void blit(
         final Graphics2D      g,
         final LayerRenderConf canonicalConf,
         final BufferedImage   canonicalImage,
+        final BufferedImage[] stretchTiles,
         final Size            actualSize
     ) {
         final Outline insets = sliceInsets(canonicalConf);
@@ -315,40 +394,59 @@ final class StretchTiling
 
         // The horizontal and vertical cut lines in integer device space,
         // shared between adjacent tiles (no seams, no overlaps):
-        final int[] destinationX = {
+        final int[] dx = {
                         (int) Math.round(translateX),
                         (int) Math.round(translateX + insetLeft * scaleX),
                         (int) Math.round(translateX + (actualWidth - insetRight) * scaleX),
                         (int) Math.round(translateX + actualWidth * scaleX)
                     };
-        final int[] destinationY = {
+        final int[] dy = {
                         (int) Math.round(translateY),
                         (int) Math.round(translateY + insetTop * scaleY),
                         (int) Math.round(translateY + (actualHeight - insetBottom) * scaleY),
                         (int) Math.round(translateY + actualHeight * scaleY)
                     };
         // The corresponding cut lines in the canonical source image:
-        final int[] sourceX = { 0, insetLeft, canonicalWidth  - insetRight,  canonicalWidth  };
-        final int[] sourceY = { 0, insetTop,  canonicalHeight - insetBottom, canonicalHeight };
+        final int[] sx = { 0, insetLeft, canonicalWidth  - insetRight,  canonicalWidth  };
+        final int[] sy = { 0, insetTop,  canonicalHeight - insetBottom, canonicalHeight };
 
         final Graphics2D g2 = (Graphics2D) g.create();
         try {
             g2.setTransform(new AffineTransform()); // We draw in device space.
             g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-            for ( int row = 0; row < 3; row++ )
-                for ( int col = 0; col < 3; col++ ) {
-                    if ( destinationX[col+1] <= destinationX[col] || destinationY[row+1] <= destinationY[row] )
-                        continue; // Degenerate tile, nothing to draw (a negative span would mirror the image!).
-                    g2.drawImage(
-                        canonicalImage,
-                        destinationX[col], destinationY[row], destinationX[col+1], destinationY[row+1],
-                        sourceX[col],      sourceY[row],      sourceX[col+1],      sourceY[row+1],
-                        null
-                    );
-                }
+            // The four corners, 1:1 sub-rectangle copies from the canonical image:
+            _drawRegion(g2, canonicalImage, dx[0], dy[0], dx[1], dy[1], sx[0], sy[0], sx[1], sy[1]); // top-left
+            _drawRegion(g2, canonicalImage, dx[2], dy[0], dx[3], dy[1], sx[2], sy[0], sx[3], sy[1]); // top-right
+            _drawRegion(g2, canonicalImage, dx[0], dy[2], dx[1], dy[3], sx[0], sy[2], sx[1], sy[3]); // bottom-left
+            _drawRegion(g2, canonicalImage, dx[2], dy[2], dx[3], dy[3], sx[2], sy[2], sx[3], sy[3]); // bottom-right
+            // The stretched bands and center, each a whole dedicated image:
+            _drawStretched(g2, stretchTiles[TOP],    dx[1], dy[0], dx[2], dy[1]);
+            _drawStretched(g2, stretchTiles[LEFT],   dx[0], dy[1], dx[1], dy[2]);
+            _drawStretched(g2, stretchTiles[CENTER], dx[1], dy[1], dx[2], dy[2]);
+            _drawStretched(g2, stretchTiles[RIGHT],  dx[2], dy[1], dx[3], dy[2]);
+            _drawStretched(g2, stretchTiles[BOTTOM], dx[1], dy[2], dx[2], dy[3]);
         } finally {
             g2.dispose();
         }
+    }
+
+    private static void _drawRegion(
+        final Graphics2D g2, final BufferedImage source,
+        final int dx1, final int dy1, final int dx2, final int dy2,
+        final int sx1, final int sy1, final int sx2, final int sy2
+    ) {
+        if ( dx2 <= dx1 || dy2 <= dy1 )
+            return; // Degenerate tile, nothing to draw (a negative span would mirror the image!).
+        g2.drawImage(source, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);
+    }
+
+    private static void _drawStretched(
+        final Graphics2D g2, final BufferedImage tile,
+        final int dx1, final int dy1, final int dx2, final int dy2
+    ) {
+        if ( dx2 <= dx1 || dy2 <= dy1 )
+            return; // Degenerate tile, nothing to draw.
+        g2.drawImage(tile, dx1, dy1, dx2, dy2, 0, 0, tile.getWidth(), tile.getHeight(), null);
     }
 
     private static float _positive( Optional<Float> value ) {

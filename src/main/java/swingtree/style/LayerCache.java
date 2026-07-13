@@ -281,9 +281,14 @@ final class LayerCache
         if ( cachedImage == null )
             return; // Cannot happen (the count-down path returned above), but let's be defensive.
 
-        if ( isTiled )
-            StretchTiling.blit(g, _cacheKey.get(), cachedImage, size);
-        else
+        if ( isTiled ) {
+            BufferedImage[] stretchTiles = _localCache.getStretchTiles();
+            if ( stretchTiles == null ) {
+                stretchTiles = StretchTiling.extractStretchTiles(g.getDeviceConfiguration(), _cacheKey.get(), cachedImage);
+                _localCache.initStretchTiles(stretchTiles);
+            }
+            StretchTiling.blit(g, _cacheKey.get(), cachedImage, stretchTiles, size);
+        } else
             g.drawImage(cachedImage, 0, 0, null);
     }
 
@@ -404,6 +409,13 @@ final class LayerCache
         private final int                      _width;
         private final int                      _height;
         private @Nullable BufferedImage        _image;
+        /**
+         *  The dedicated stretchable tiles (edge bands + center) extracted from the
+         *  rendered image on the first stretch tiled paint, shared by all components
+         *  using this cache entry (see {@link StretchTiling#extractStretchTiles} for
+         *  why the stretched tiles cannot be blitted straight out of {@link #_image}).
+         */
+        private BufferedImage @Nullable []     _stretchTiles;
         private boolean                        _isRendered;
         private int                            _numberOfHitsUntilAllocation;
 
@@ -442,6 +454,14 @@ final class LayerCache
 
         public @Nullable BufferedImage getImage() {
             return _image;
+        }
+
+        public BufferedImage @Nullable [] getStretchTiles() {
+            return _stretchTiles;
+        }
+
+        public void initStretchTiles( BufferedImage[] stretchTiles ) {
+            _stretchTiles = stretchTiles;
         }
 
         /**

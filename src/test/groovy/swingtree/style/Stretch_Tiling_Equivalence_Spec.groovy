@@ -70,10 +70,11 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
         var canonical = StretchTiling.canonicalize(conf)
         assert !canonical.is(conf) : "The test style must be eligible for stretch tiling!"
         var canonicalImage = renderDirectly(layer, canonical)
+        var stretchTiles = StretchTiling.extractStretchTiles(null, canonical, canonicalImage)
         var size = conf.boxModel().size()
         var image = Utility.createDeterministicImage((int) size.widthOrElse(0f), (int) size.heightOrElse(0f))
         var g = Utility.createDeterministicGraphics(image)
-        StretchTiling.blit(g, canonical, canonicalImage, size)
+        StretchTiling.blit(g, canonical, canonicalImage, stretchTiles, size)
         g.dispose()
         return image
     }
@@ -193,6 +194,67 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             "rounded border"        | UI.Layer.BORDER     | { it.border(4, "#454545").borderRadius(18) }
             "offset outset shadow"  | UI.Layer.CONTENT    | { it.shadowColor("#050505").shadowBlurRadius(7).shadowSpreadRadius(3).shadowOffset(3, 2).borderRadius(12) }
             "inset shadow"          | UI.Layer.CONTENT    | { it.shadowColor("#333344").shadowBlurRadius(5).shadowIsInset(true).borderRadius(16) }
+    }
+
+    def 'Reconstruction survives the accelerated graphics pipeline, even for extremely long edges.'()
+    {
+        reportInfo """
+            Software rendering is not the whole story: in a real application the
+            destination is an accelerated window surface and the cached images are
+            managed images with GPU-resident copies. On the XRender pipeline (Linux),
+            a scaled blit whose source is an *interior sub-rectangle* of a larger
+            texture silently breaks down at large stretch ratios - long component
+            edges simply lost their shadows, while software-surface tests stayed
+            pixel perfect. This is why the stretched tiles are extracted into
+            dedicated whole images (whose scaled blits are reliable at any ratio).
+
+            This scenario replays that exact failure setup: a compatible (managed,
+            acceleration-priority 1) canonical image blitted repeatedly onto a
+            VolatileImage - repetition matters, because Java2D only promotes
+            managed images to the accelerated blit path after a few paints - at a
+            size whose edge stretch ratio is far beyond where the bug bit.
+        """
+        given : 'The soft-UI recipe that revealed the bug: inset penumbra shadows on a large panel.'
+            int W = 3000, H = 900
+            var conf = renderConfOf(UI.Layer.CONTENT, W, H, {
+                            it.borderRadius(28).margin(10)
+                              .shadow("bright", s -> s.color(new Color(255,255,255,40)).offset(-8, -8).type(UI.ShadowType.PENUMBRA))
+                              .shadow("dark",   s -> s.color(new Color(0,0,0,110)).offset(4, 4).type(UI.ShadowType.PENUMBRA))
+                              .shadowBlurRadius(17).shadowSpreadRadius(-5).shadowIsInset(true)
+                        })
+            var direct = renderDirectly(UI.Layer.CONTENT, conf)
+            var canonical = StretchTiling.canonicalize(conf)
+
+        and : 'A managed canonical image and its stretch tiles, allocated like the real cache does.'
+            var gc = java.awt.GraphicsEnvironment.localGraphicsEnvironment.defaultScreenDevice.defaultConfiguration
+            var canonicalImage = gc.createCompatibleImage(
+                                    (int) canonical.boxModel().size().widthOrElse(0f),
+                                    (int) canonical.boxModel().size().heightOrElse(0f),
+                                    java.awt.Transparency.TRANSLUCENT)
+            canonicalImage.setAccelerationPriority(1.0f)
+            var cg = canonicalImage.createGraphics()
+            cg.drawImage(renderDirectly(UI.Layer.CONTENT, canonical), 0, 0, null)
+            cg.dispose()
+            var stretchTiles = StretchTiling.extractStretchTiles(gc, canonical, canonicalImage)
+
+        when : 'We blit onto an accelerated VolatileImage repeatedly, like a live resize would.'
+            var volatileDst = gc.createCompatibleVolatileImage(W, H, java.awt.Transparency.TRANSLUCENT)
+            BufferedImage accelerated = null
+            8.times {
+                var vg = volatileDst.createGraphics()
+                vg.setComposite(java.awt.AlphaComposite.Clear)
+                vg.fillRect(0, 0, W, H)
+                vg.setComposite(java.awt.AlphaComposite.SrcOver)
+                StretchTiling.blit(vg, canonical, canonicalImage, stretchTiles, conf.boxModel().size())
+                vg.dispose()
+                accelerated = volatileDst.getSnapshot()
+            }
+
+        then : 'The accelerated reconstruction matches the direct software rendering.'
+            Utility.similarityBetween(direct, accelerated) >= 99.9
+        and : 'The long top edge really contains its shadow (the exact pixels the bug used to erase).'
+            var insetTop = StretchTiling.sliceInsets(canonical).top().get() as int
+            (11..insetTop-60).any { y -> ((accelerated.getRGB((int)(W/2), y) >>> 24) > 0) }
     }
 
     def 'The regular component paint pipeline with stretch tiled caching reproduces the uncached painting.'()
