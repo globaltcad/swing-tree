@@ -2,6 +2,10 @@ package swingtree.style;
 
 import swingtree.layout.Size;
 
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.util.Optional;
 
 /**
@@ -240,6 +244,111 @@ final class StretchTiling
                     2 * maxHorizontal + STRETCH_BAND,
                     2 * maxVertical   + STRETCH_BAND
                 );
+    }
+
+    /**
+     *  Determines if the supplied transform allows for reconstructing the
+     *  component rendering through nine tile blits. Anything beyond a positive
+     *  scale and a translation (rotation, shear, flips) would require the tiles
+     *  to be resampled in ways this class does not support, in which case the
+     *  caller must fall back to direct rendering.
+     *
+     * @param transform The destination graphics transform to check.
+     * @return True if {@link #blit(Graphics2D, LayerRenderConf, BufferedImage, Size)} may be used.
+     */
+    static boolean isBlitCompatible( AffineTransform transform ) {
+        return transform.getShearX() == 0 &&
+               transform.getShearY() == 0 &&
+               transform.getScaleX() >  0 &&
+               transform.getScaleY() >  0;
+    }
+
+    /**
+     *  Reconstructs the rendering of the supplied canonical image at the
+     *  supplied actual component size by drawing nine tiles: the four corners
+     *  1:1 (in user space), the four edge bands stretched along their edge and
+     *  the center stretched in both directions. <br>
+     *  <br>
+     *  The tiles are drawn in <b>integer device space</b>: the cut lines are
+     *  transformed to device pixels once and shared between adjacent tiles, so
+     *  that under fractional HiDPI scales the independent rounding of nine
+     *  user space rectangles can never produce one pixel gaps or double
+     *  blended overlaps. Nearest neighbor interpolation ensures that
+     *  stretching a constant source band produces an exactly constant
+     *  destination band and that sampling never bleeds across tile boundaries. <br>
+     *  <br>
+     *  The caller must ensure {@link #isBlitCompatible(AffineTransform)}
+     *  holds for the graphics transform and that the actual size is strictly
+     *  larger than the canonical image in both dimensions
+     *  (which {@link #canonicalize(LayerRenderConf)} guarantees).
+     *
+     * @param g The destination graphics to draw the tiles into.
+     * @param canonicalConf The canonical configuration the image was rendered from,
+     *                      used to recompute the slice insets (a pure function,
+     *                      so it is guaranteed to be consistent with the
+     *                      canonicalization that produced the image).
+     * @param canonicalImage The canonical rendering to cut into nine tiles.
+     * @param actualSize The actual component size to reconstruct.
+     */
+    static void blit(
+        final Graphics2D      g,
+        final LayerRenderConf canonicalConf,
+        final BufferedImage   canonicalImage,
+        final Size            actualSize
+    ) {
+        final Outline insets = sliceInsets(canonicalConf);
+        final int insetTop    = (int) _positive(insets.top());
+        final int insetRight  = (int) _positive(insets.right());
+        final int insetBottom = (int) _positive(insets.bottom());
+        final int insetLeft   = (int) _positive(insets.left());
+
+        final int canonicalWidth  = canonicalImage.getWidth();
+        final int canonicalHeight = canonicalImage.getHeight();
+        final float actualWidth  = actualSize.widthOrElse(0f);
+        final float actualHeight = actualSize.heightOrElse(0f);
+
+        final AffineTransform transform = g.getTransform();
+        final double scaleX     = transform.getScaleX();
+        final double scaleY     = transform.getScaleY();
+        final double translateX = transform.getTranslateX();
+        final double translateY = transform.getTranslateY();
+
+        // The horizontal and vertical cut lines in integer device space,
+        // shared between adjacent tiles (no seams, no overlaps):
+        final int[] destinationX = {
+                        (int) Math.round(translateX),
+                        (int) Math.round(translateX + insetLeft * scaleX),
+                        (int) Math.round(translateX + (actualWidth - insetRight) * scaleX),
+                        (int) Math.round(translateX + actualWidth * scaleX)
+                    };
+        final int[] destinationY = {
+                        (int) Math.round(translateY),
+                        (int) Math.round(translateY + insetTop * scaleY),
+                        (int) Math.round(translateY + (actualHeight - insetBottom) * scaleY),
+                        (int) Math.round(translateY + actualHeight * scaleY)
+                    };
+        // The corresponding cut lines in the canonical source image:
+        final int[] sourceX = { 0, insetLeft, canonicalWidth  - insetRight,  canonicalWidth  };
+        final int[] sourceY = { 0, insetTop,  canonicalHeight - insetBottom, canonicalHeight };
+
+        final Graphics2D g2 = (Graphics2D) g.create();
+        try {
+            g2.setTransform(new AffineTransform()); // We draw in device space.
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+            for ( int row = 0; row < 3; row++ )
+                for ( int col = 0; col < 3; col++ ) {
+                    if ( destinationX[col+1] <= destinationX[col] || destinationY[row+1] <= destinationY[row] )
+                        continue; // Degenerate tile, nothing to draw (a negative span would mirror the image!).
+                    g2.drawImage(
+                        canonicalImage,
+                        destinationX[col], destinationY[row], destinationX[col+1], destinationY[row+1],
+                        sourceX[col],      sourceY[row],      sourceX[col+1],      sourceY[row+1],
+                        null
+                    );
+                }
+        } finally {
+            g2.dispose();
+        }
     }
 
     private static float _positive( Optional<Float> value ) {
