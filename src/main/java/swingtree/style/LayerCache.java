@@ -20,7 +20,25 @@ import java.util.function.BiConsumer;
  *  So if the {@link LayerRenderConf} of a component changes, the cache is invalidated and the layer
  *  is rendered again. <br>
  *  This is made possible by the fact that the {@link LayerRenderConf} is deeply immutable and can be used
- *  as a key data structure for caching.
+ *  as a key data structure for caching. <br>
+ *  <br>
+ *  Two related but distinct configurations are managed here, and telling them apart is
+ *  essential for understanding this class:
+ *  <ul>
+ *      <li><b>the render input</b> ({@code _layerRenderData}) - the actual configuration at the
+ *          real component size. It is what the renderer receives in all direct-render fallbacks
+ *          (caching disabled, allocation count-down still running, incompatible transform) and
+ *          what determines the destination geometry of the final cache blit.</li>
+ *      <li><b>the cache key</b> ({@code _cacheKey}) - the {@link StretchTiling#canonicalize(LayerRenderConf)}
+ *          form of the render input, keying the entry in the global cache. For stretch tiling
+ *          eligible styles this key is <b>size independent</b>, so all components sharing a style
+ *          share one small cached rendering across all their sizes, and resizing produces cache
+ *          hits (reconstructed via {@link StretchTiling#blit}) instead of misses. For everything
+ *          else the key simply equals the render input and painting blits the image 1:1.</li>
+ *  </ul>
+ *  Note the deliberate asymmetry when filling the cache: the shared image is rendered from the
+ *  <i>cache key</i> configuration (possibly canonical, i.e. small), while a paint that cannot
+ *  use the cache renders the <i>render input</i> (full size) directly. <br>
  *  <br>
  *  Instances of this exist for every component (inside their style engine) and are used to
  *  safely do cache based rendering of the component's style.
@@ -150,7 +168,9 @@ final class LayerCache
             For everything else canonicalization is the identity and this whole
             method behaves exactly as it did when key and input were one.
         */
-        final LayerRenderConf newCacheState = StretchTiling.canonicalize(newState);
+        final LayerRenderConf newCacheState = CacheBudget.tilingEnabled()
+                                                ? StretchTiling.canonicalize(newState)
+                                                : newState;
 
         final boolean cacheStateChanged = !_cacheKey.get().equals(newCacheState);
         final boolean validationNeeded  = !_isInitialized || cacheStateChanged;
