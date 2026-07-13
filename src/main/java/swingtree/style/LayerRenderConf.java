@@ -76,6 +76,17 @@ final class LayerRenderConf
 
     BoxModelConf boxModel() { return _boxModelConf.get(); }
 
+    /**
+     *  Returns a new {@link LayerRenderConf} with the supplied box model
+     *  and everything else unchanged. Used by {@link StretchTiling} to derive
+     *  a size independent canonical render configuration from this one.
+     */
+    LayerRenderConf withBoxModel( BoxModelConf boxModelConf ) {
+        if ( boxModelConf.equals(_boxModelConf.get()) )
+            return this;
+        return of(boxModelConf, _baseColor, _layer);
+    }
+
     BaseColorConf baseColors() { return _baseColor; }
 
     StyleConfLayer layer() { return _layer; }
