@@ -150,7 +150,7 @@ final class LayerCache
             For everything else canonicalization is the identity and this whole
             method behaves exactly as it did when key and input were one.
         */
-        final LayerRenderConf newCacheState = newState;
+        final LayerRenderConf newCacheState = StretchTiling.canonicalize(newState);
 
         final boolean cacheStateChanged = !_cacheKey.get().equals(newCacheState);
         final boolean validationNeeded  = !_isInitialized || cacheStateChanged;
@@ -193,6 +193,20 @@ final class LayerCache
             return;
 
         if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
+            renderer.accept(_layerRenderData.get(), g);
+            _paintCacheMissCount++;
+            return;
+        }
+
+        /*
+            When the cache key is the size independent canonical form (its size differs
+            from the actual render input size), painting means reconstructing the actual
+            size from the canonical image through nine tile blits. That is only possible
+            for plain scaling transforms; under anything more exotic (rotation, shear,
+            flips) we render directly instead of using the cache for this paint.
+        */
+        final boolean isTiled = !_cacheKey.get().boxModel().size().equals(size);
+        if ( isTiled && !StretchTiling.isBlitCompatible(g.getTransform()) ) {
             renderer.accept(_layerRenderData.get(), g);
             _paintCacheMissCount++;
             return;
@@ -243,7 +257,14 @@ final class LayerCache
             _paintCacheHitCount++;
         }
 
-        g.drawImage(_localCache.getImage(), 0, 0, null);
+        final BufferedImage cachedImage = _localCache.getImage();
+        if ( cachedImage == null )
+            return; // Cannot happen (the count-down path returned above), but let's be defensive.
+
+        if ( isTiled )
+            StretchTiling.blit(g, _cacheKey.get(), cachedImage, size);
+        else
+            g.drawImage(cachedImage, 0, 0, null);
     }
 
     /**

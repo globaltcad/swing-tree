@@ -13,6 +13,8 @@ import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
 import utility.Utility
 
+import javax.swing.JButton
+import java.awt.Color
 import java.awt.image.BufferedImage
 
 @Title("Stretch Tiling Pixel Equivalence")
@@ -191,6 +193,47 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             "rounded border"        | UI.Layer.BORDER     | { it.border(4, "#454545").borderRadius(18) }
             "offset outset shadow"  | UI.Layer.CONTENT    | { it.shadowColor("#050505").shadowBlurRadius(7).shadowSpreadRadius(3).shadowOffset(3, 2).borderRadius(12) }
             "inset shadow"          | UI.Layer.CONTENT    | { it.shadowColor("#333344").shadowBlurRadius(5).shadowIsInset(true).borderRadius(16) }
+    }
+
+    def 'The regular component paint pipeline with stretch tiled caching reproduces the uncached painting.'()
+    {
+        reportInfo """
+            The previous features exercise the renderer and the blit in
+            isolation. This one goes through the entire public paint pipeline
+            (JComponent.paint) twice: once with all caching disabled, and once
+            with the cache warm - where eligible layers are keyed canonically
+            and reconstructed through tile blits on every paint. Whatever the
+            machinery does internally, the pixels that reach the screen must
+            be the same.
+        """
+        given : 'Two identical, heavily styled buttons (flat colors + shadow: fully stretch tileable).'
+            def styler = { it
+                .size(260, 90)
+                .borderRadius(18)
+                .backgroundColor(new Color(90, 140, 40))
+                .foundationColor(new Color(24, 24, 28))
+                .shadowColor(new Color(0, 0, 0, 120))
+                .shadowBlurRadius(5)
+            }
+            var uncachedButton = UI.button("Same").withStyle(styler as swingtree.api.Styler).get(JButton)
+            var cachedButton   = UI.button("Same").withStyle(styler as swingtree.api.Styler).get(JButton)
+
+        when : 'One is painted with caching disabled entirely...'
+            CacheBudget.UNITS_OVERRIDE = 0
+            var uncachedImage = Utility.renderSingleComponent(uncachedButton)
+        and : '...the other with caching enabled, twice, so the second paint is served from the cache.'
+            CacheBudget.UNITS_OVERRIDE = 10
+            Utility.renderSingleComponent(cachedButton)
+            var cachedImage = Utility.renderSingleComponent(cachedButton)
+
+        then : 'The cached button really is being served from the cache.'
+            ComponentExtension.from(cachedButton).hasCachedRendering(UI.Layer.BACKGROUND)
+            ComponentExtension.from(cachedButton).cacheHitCount(UI.Layer.BACKGROUND) >= 1
+        and : 'Both pipelines produced practically identical pixels.'
+            Utility.similarityBetween(uncachedImage, cachedImage) >= 99.9
+
+        cleanup :
+            CacheBudget.UNITS_OVERRIDE = -1
     }
 
     def 'Device space snapping of the tile cut lines produces no seams under scaling transforms. (scale #scale)'(
