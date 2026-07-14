@@ -206,11 +206,6 @@ final class StyleRenderer
         final float top    = Math.max(conf.boxModel().margin().top().orElse(0f),    0) + ( shadow.isInset() ? topBorderWidth    : 0 );
         final float right  = Math.max(conf.boxModel().margin().right().orElse(0f),  0) + ( shadow.isInset() ? rightBorderWidth  : 0 );
         final float bottom = Math.max(conf.boxModel().margin().bottom().orElse(0f), 0) + ( shadow.isInset() ? bottomBorderWidth : 0 );
-        final float topLeftRadius     = Math.max(conf.boxModel().topLeftRadius(), 0);
-        final float topRightRadius    = Math.max(conf.boxModel().topRightRadius(), 0);
-        final float bottomRightRadius = Math.max(conf.boxModel().bottomRightRadius(), 0);
-        final float bottomLeftRadius  = Math.max(conf.boxModel().bottomLeftRadius(), 0);
-
         final float width     = size.widthOrElse(0f);
         final float height    = size.heightOrElse(0f);
 
@@ -230,10 +225,7 @@ final class StyleRenderer
                                         h + blurRadius * 2 - spreadRadius * 2
                                     );
 
-        final int averageCornerRadius = ((int) ( topLeftRadius + topRightRadius + bottomRightRadius + bottomLeftRadius )) / 4;
-        final int averageBorderWidth  = (int) (( leftBorderWidth + topBorderWidth + rightBorderWidth +  bottomBorderWidth ) / 4);
-        final int shadowCornerRadius  = (int) Math.max( 0, averageCornerRadius + (shadow.isOutset() ? -spreadRadius-blurRadius*2 : -Math.max(averageBorderWidth,spreadRadius)) );
-        final int gradientStartOffset = 1 + (int)((shadowCornerRadius * 2) / ( shadow.isInset() ? 4.5 : 3.79) );
+        final int gradientStartOffset = shadowGradientStartOffset(conf.boxModel(), shadow);
 
         Rectangle2D.Float innerShadowRect = new Rectangle2D.Float(
                                         x + blurRadius + gradientStartOffset + spreadRadius,
@@ -278,6 +270,32 @@ final class StyleRenderer
         // If the base rectangle and the outer shadow box are not equal, then we need to fill the area of the base rectangle that is not covered by the outer shadow box!
         _renderShadowBody(shadow, baseArea, innerShadowRect, outerMostArea, g2d);
 
+    }
+
+    /**
+     *  Calculates the distance from the outer bounds of a shadow towards its center,
+     *  after which the shadow gradients have fully faded into the solid shadow color.
+     *  Beyond this offset (plus blur and spread) the shadow is a uniform fill.
+     *  Note that this is a pure function of size independent style properties, namely
+     *  the corner radii and border widths of the box model as well as the blur/spread
+     *  radii of the shadow configuration.
+     */
+    static int shadowGradientStartOffset( final BoxModelConf boxModel, final ShadowConf shadow )
+    {
+        final float blurRadius   = Math.max(shadow.blurRadius(), 0);
+        final float spreadRadius = !shadow.isOutset() ? shadow.spreadRadius() : -shadow.spreadRadius();
+        final float leftBorderWidth   = boxModel.widths().left().orElse(0f);
+        final float topBorderWidth    = boxModel.widths().top().orElse(0f);
+        final float rightBorderWidth  = boxModel.widths().right().orElse(0f);
+        final float bottomBorderWidth = boxModel.widths().bottom().orElse(0f);
+        final float topLeftRadius     = Math.max(boxModel.topLeftRadius(), 0);
+        final float topRightRadius    = Math.max(boxModel.topRightRadius(), 0);
+        final float bottomRightRadius = Math.max(boxModel.bottomRightRadius(), 0);
+        final float bottomLeftRadius  = Math.max(boxModel.bottomLeftRadius(), 0);
+        final int averageCornerRadius = ((int) ( topLeftRadius + topRightRadius + bottomRightRadius + bottomLeftRadius )) / 4;
+        final int averageBorderWidth  = (int) (( leftBorderWidth + topBorderWidth + rightBorderWidth +  bottomBorderWidth ) / 4);
+        final int shadowCornerRadius  = (int) Math.max( 0, averageCornerRadius + (shadow.isOutset() ? -spreadRadius-blurRadius*2 : -Math.max(averageBorderWidth,spreadRadius)) );
+        return 1 + (int)((shadowCornerRadius * 2) / ( shadow.isInset() ? 4.5 : 3.79) );
     }
 
     private static void _renderShadowBody(

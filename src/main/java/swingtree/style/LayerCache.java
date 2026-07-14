@@ -87,24 +87,11 @@ final class LayerCache
         _isInitialized            = false;
     }
 
-    LayerRenderConf getCurrentRenderInputData() {
-        return _layerRenderData.get();
-    }
-
-    public boolean hasBufferedImage() {
-        return _localCache != null;
-    }
-
-    /**
-     *  Tells whether this layer cache has a fully rendered cached image ready to be
-     *  blitted on the next paint call. This is stronger than {@link #hasBufferedImage()}
-     *  in that it also waits for the lazy allocation count-down to have reached zero
-     *  and for the renderer to have actually filled the image once.
-     *
-     * @return {@code true} when subsequent paint calls will use the cache, otherwise {@code false}.
-     */
-    public boolean hasRenderedImage() {
-        return _localCache != null && _localCache.isRendered();
+    /** The fully rendered cached image which subsequent paint calls will be served from,
+     *  or null while there is none (caching not worthwhile, or the lazy allocation
+     *  count-down has not finished yet). */
+    public @Nullable BufferedImage renderedImage() {
+        return _localCache != null && _localCache.isRendered() ? _localCache.getImage() : null;
     }
 
     private void _allocateOrGetCachedBuffer( Pooled<LayerRenderConf> layerRenderConf )
