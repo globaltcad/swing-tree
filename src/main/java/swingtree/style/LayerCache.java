@@ -98,7 +98,7 @@ final class LayerCache
      *  changes (see {@link ComponentExtension#updateAllCachesFromLibraryConfig()}) so memory
      *  shrinks immediately; the cache repopulates lazily under the new budget. <br>
      *  Note that living {@link LayerCache} instances keep holding their {@code _localCache}
-     *  image until their next {@link #validate(ComponentConf, ComponentConf)}, so a component
+     *  image until their next {@link #validate(ComponentConf)}, so a component
      *  which revalidates afterwards may briefly mint a second image for a key another component
      *  is still painting from. This costs a little duplicated memory until the stragglers
      *  revalidate; it is never a correctness problem (the images are equal by construction),
@@ -165,7 +165,7 @@ final class LayerCache
         _localCache = bufferedImage;
     }
 
-    public final void validate( ComponentConf oldConf, ComponentConf newConf )
+    public final void validate( ComponentConf newConf )
     {
         if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) ) {
             _layerRenderData = new Pooled<>(LayerRenderConf.none());

@@ -82,7 +82,7 @@ final class StyleEngine
 
         final LayerCache[] layerCaches = engine.getLayerCaches();
         for ( LayerCache layerCache : layerCaches )
-            layerCache.validate(currentConf, newConf);
+            layerCache.validate(newConf);
 
         return new StyleEngine(new Pooled<>(newBoxModelConf), new Pooled<>(newConf), _layerCaches);
     }
