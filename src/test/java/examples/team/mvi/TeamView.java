@@ -164,11 +164,10 @@ public final class TeamView {
         Val<String> bio  = personVar.viewAsString(Person::bio);
 
         return UI.panel("fill, insets 0, gap 0")
-            .withRepaintOn(selected, isLead)
-            .withStyle( it -> it
-                .backgroundColor(selected.get() ? BG_CARD_HI : BG_CARD)
+            .withStyle( selected, (isSelected, it) -> it
+                .backgroundColor(isSelected ? BG_CARD_HI : BG_CARD)
                 .borderRadius(12)
-                .borderAt(Edge.LEFT, 3, selected.get() ? ACCENT : new Color(0,0,0,0))
+                .borderAt(Edge.LEFT, 3, isSelected ? ACCENT : new Color(0,0,0,0))
                 .margin(0, 12, 8, 12)
                 .padding(0)
                 .cursor(Cursor.HAND)
@@ -223,10 +222,9 @@ public final class TeamView {
     private static UIForAnySwing<?,?> avatarDot(Var<Person> personVar) {
         Val<String> initials = personVar.viewAsString(Person::initials);
         return UI.label(initials)
-            .withRepaintOn(personVar)
-            .withStyle( it -> it
+            .withStyle( personVar, (person, it) -> it
                 .prefSize(38, 38)
-                .backgroundColor(personVar.get().gender().accent())
+                .backgroundColor(person.gender().accent())
                 .foregroundColor(Color.WHITE)
                 .borderRadius(1000)
                 .componentFont( f -> f.family("SansSerif").size(13).weight(2) )

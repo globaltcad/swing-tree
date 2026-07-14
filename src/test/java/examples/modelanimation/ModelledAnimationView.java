@@ -11,7 +11,6 @@ public class ModelledAnimationView extends Panel
 {
     public ModelledAnimationView(Var<ModelledAnimationViewModel> vm) {
         Val<String> buttonText = vm.viewAsString(ModelledAnimationViewModel::buttonText);
-        Val<Double> borderWidth = vm.viewAsDouble(ModelledAnimationViewModel::borderWidth);
         Val<Double> borderOpacity = vm.viewAsDouble(ModelledAnimationViewModel::borderOpacity);
         UI.of(this).withLayout(WRAP(1), "[grow]", "[grow]")
         .add(CENTER,
@@ -23,12 +22,11 @@ public class ModelledAnimationView extends Panel
             .add(CENTER,
                 box().add(
                     label("Toggle the switch to see the animation!")
-                    .withRepaintOn(borderOpacity, borderWidth)
-                    .withStyle( it -> it
-                        .padding(26 - vm.get().borderWidth()/2)
-                        .margin(42 - vm.get().borderWidth()/2)
+                    .withStyle( vm, (m, it) -> it
+                        .padding(26 - m.borderWidth()/2)
+                        .margin(42 - m.borderWidth()/2)
                         .borderRadius( 38 )
-                        .border(vm.get().borderWidth(), color(0.5,1,1, vm.get().borderOpacity()))
+                        .border(m.borderWidth(), color(0.5,1,1, m.borderOpacity()))
                         .backgroundColor(200/255d, 210/255d, 220/255d, 0.5 )
                         .shadow("bright", s -> s
                             .color(0.5, 1, 1, 0.5)

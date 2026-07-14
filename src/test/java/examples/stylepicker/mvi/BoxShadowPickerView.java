@@ -180,36 +180,35 @@ public class BoxShadowPickerView extends Panel
                 .withPrefHeight(350)
                 .add(GROW,
                     panel(FILL.and(INS(0)))
-                    .withRepaintOn(vm)
-                    .withStyle( it -> it
-                         .backgroundColor(backgroundColor.get())
-                         .foundationColor(foundationColor.get())
+                    .withStyle( vm, (m, it) -> it
+                         .backgroundColor(m.backgroundColor())
+                         .foundationColor(m.foundationColor())
                          .painter(Layer.BACKGROUND, g2d -> {
-                             if ( drawSmiley.is(false) ) return;
-                             int w = it.componentWidth() - marginLeft.get() - marginRight.get() - 100;
-                             int h = it.componentHeight() - marginTop.get() - marginBottom.get() - 100;
-                             int x = marginLeft.get() + 50;
-                             int y = marginTop.get() + 50;
+                             if ( !m.drawSmiley() ) return;
+                             int w = it.componentWidth() - m.marginLeft() - m.marginRight() - 100;
+                             int h = it.componentHeight() - m.marginTop() - m.marginBottom() - 100;
+                             int x = m.marginLeft() + 50;
+                             int y = m.marginTop() + 50;
                              drawASmiley(g2d, x, y, w, h);
                          })
-                         .padding(paddingTop.get(), paddingRight.get(), paddingBottom.get(), paddingLeft.get())
-                         .margin(marginTop.get(), marginRight.get(), marginBottom.get(), marginLeft.get())
-                         .borderRadiusAt(Corner.TOP_LEFT, vm.get().arcWidthAt(Corner.TOP_LEFT), vm.get().arcHeightAt(Corner.TOP_LEFT))
-                         .borderRadiusAt(Corner.TOP_RIGHT, vm.get().arcWidthAt(Corner.TOP_RIGHT), vm.get().arcHeightAt(Corner.TOP_RIGHT))
-                         .borderRadiusAt(Corner.BOTTOM_RIGHT, vm.get().arcWidthAt(Corner.BOTTOM_RIGHT), vm.get().arcHeightAt(Corner.BOTTOM_RIGHT))
-                         .borderRadiusAt(Corner.BOTTOM_LEFT, vm.get().arcWidthAt(Corner.BOTTOM_LEFT), vm.get().arcHeightAt(Corner.BOTTOM_LEFT))
-                         .shadowColor(shadowColor.get())
-                         .shadowHorizontalOffset(horizontalShadowOffset.get())
-                         .shadowVerticalOffset(verticalShadowOffset.get())
-                         .shadowBlurRadius(shadowBlurRadius.get())
-                         .shadowSpreadRadius(shadowSpreadRadius.get())
-                         .shadowIsInset(shadowInset.get())
-                         .borderWidths(vm.get().topBorderWidth(), vm.get().rightBorderWidth(), vm.get().bottomBorderWidth(), vm.get().leftBorderWidth())
-                         .borderColors(vm.get().topBorderColor(), vm.get().rightBorderColor(), vm.get().bottomBorderColor(), vm.get().leftBorderColor())
+                         .padding(m.paddingTop(), m.paddingRight(), m.paddingBottom(), m.paddingLeft())
+                         .margin(m.marginTop(), m.marginRight(), m.marginBottom(), m.marginLeft())
+                         .borderRadiusAt(Corner.TOP_LEFT, m.arcWidthAt(Corner.TOP_LEFT), m.arcHeightAt(Corner.TOP_LEFT))
+                         .borderRadiusAt(Corner.TOP_RIGHT, m.arcWidthAt(Corner.TOP_RIGHT), m.arcHeightAt(Corner.TOP_RIGHT))
+                         .borderRadiusAt(Corner.BOTTOM_RIGHT, m.arcWidthAt(Corner.BOTTOM_RIGHT), m.arcHeightAt(Corner.BOTTOM_RIGHT))
+                         .borderRadiusAt(Corner.BOTTOM_LEFT, m.arcWidthAt(Corner.BOTTOM_LEFT), m.arcHeightAt(Corner.BOTTOM_LEFT))
+                         .shadowColor(m.shadowColor())
+                         .shadowHorizontalOffset(m.horizontalShadowOffset())
+                         .shadowVerticalOffset(m.verticalShadowOffset())
+                         .shadowBlurRadius(m.shadowBlurRadius())
+                         .shadowSpreadRadius(m.shadowSpreadRadius())
+                         .shadowIsInset(m.shadowInset())
+                         .borderWidths(m.topBorderWidth(), m.rightBorderWidth(), m.bottomBorderWidth(), m.leftBorderWidth())
+                         .borderColors(m.topBorderColor(), m.rightBorderColor(), m.bottomBorderColor(), m.leftBorderColor())
                          .noise( noiseConf -> noiseConf
-                             .function(noise.get())
-                             .colors(noiseColors.get().split(","))
-                             .clipTo(noiseArea.get())
+                             .function(m.noise())
+                             .colors(m.noiseColors().split(","))
+                             .clipTo(m.noiseArea())
                          )
                     )
                     .add(TOP.and(SPAN).and(ALIGN_CENTER), label("Label"))

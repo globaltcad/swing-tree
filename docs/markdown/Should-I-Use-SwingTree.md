@@ -170,7 +170,9 @@ There are also a few **sharp edges** that exist precisely *because* SwingTree is
 small library and not a bookkeeping runtime. They are easy to learn but worth
 knowing up front: dynamic list items need a stable identity (`HasId`), some lens
 subscriptions must be held by a strong reference to avoid garbage collection, and
-model-driven styles need an explicit `withRepaintOn(..)`. A diffing/recomposition
+model-driven styles should bind their property through
+`withStyle(property, (item, it) -> ..)` (which is thread safe and repaints
+automatically) instead of reading it inside a plain style lambda. A diffing/recomposition
 engine hides all three for you — SwingTree trades that automation for the
 transparency described above. (Each is documented where it matters, e.g. in
 [Functional MVVM](./Functional-MVVM.md) and [Modelling Animations](./Modelling-Animations.md).)

@@ -122,18 +122,15 @@ public final class AnimatedView extends Panel
     private static UIForAnySwing<?,?> recipeButton(Recipe recipe, Var<Recipe> selected) {
         Val<Boolean> active = selected.viewAs(Boolean.class, r -> r == recipe);
         return button(recipe.label)
-            .withRepaintOn(active)
-            .withStyle( it -> {
-                boolean on = active.get();
-                return it
-                    .backgroundColor(on ? new Color(120, 176, 238, 55) : new Color(255, 255, 255, 10))
-                    .foregroundColor(on ? Color.WHITE : INK)
-                    .borderRadius(10)
-                    .padding(10, 14, 10, 14)
-                    .margin(0)
-                    .borderAt(Edge.LEFT, 3, on ? ACCENT : new Color(0, 0, 0, 0))
-                    .componentFont( f -> f.family("SansSerif").size(13).weight(on ? 2 : 1) );
-            })
+            .withStyle( active, (on, it) -> it
+                .backgroundColor(on ? new Color(120, 176, 238, 55) : new Color(255, 255, 255, 10))
+                .foregroundColor(on ? Color.WHITE : INK)
+                .borderRadius(10)
+                .padding(10, 14, 10, 14)
+                .margin(0)
+                .borderAt(Edge.LEFT, 3, on ? ACCENT : new Color(0, 0, 0, 0))
+                .componentFont( f -> f.family("SansSerif").size(13).weight(on ? 2 : 1) )
+            )
             .onClick( it -> selected.set(recipe) );
     }
 
@@ -387,9 +384,8 @@ public final class AnimatedView extends Panel
             )
             .add("grow, push",
                 box().withPrefHeight(28)
-                .withRepaintOn(rawProgress)
-                .withStyle( it -> {
-                    double eased = curve.applyAsDouble(rawProgress.get());
+                .withStyle( rawProgress, (progress, it) -> {
+                    double eased = curve.applyAsDouble(progress);
                     int w = it.componentWidth();
                     int dot = 22;
                     double x = (w - dot) * eased;
@@ -414,9 +410,7 @@ public final class AnimatedView extends Panel
             panel("fill, wrap 1, insets 0").withStyle( it -> it.backgroundColor(new Color(0,0,0,0)) )
             .add("center, push",
                 box().withPrefSize(180, 180)
-                .withRepaintOn(p)
-                .withStyle( it -> {
-                    double prog = p.get();
+                .withStyle( p, (prog, it) -> {
                     // Phase 1 (0.0–0.35): grow from 0 to full
                     double growT  = clamp((prog - 0.00) / 0.35);
                     // Phase 2 (0.35–0.75): full-size pulse + hue shift
@@ -464,9 +458,7 @@ public final class AnimatedView extends Panel
         return centeredStage(
             label("This loop has no off-switch — that's the point").withStyle(AnimatedView::stageSubtitle),
             box().withPrefSize(260, 260)
-            .withRepaintOn(phase)
-            .withStyle( it -> {
-                double t = phase.get();
+            .withStyle( phase, (t, it) -> {
                 double cx = it.componentWidth()  * 0.5;
                 double cy = it.componentHeight() * 0.5;
                 double radius = 60 + 40 * t;
@@ -590,10 +582,11 @@ public final class AnimatedView extends Panel
                 "    UI.animateFor(1.6, SECONDS).go( s -> p.set(s.progress()) )",
                 ");",
                 "",
-                "// Each row picks its own curve from the same progress value:",
-                "box().withRepaintOn(p).withStyle( it -> it",
+                "// Each row picks its own curve from the same progress value,",
+                "// bound to the style so it repaints automatically:",
+                "box().withStyle( p, (progress, it) -> it",
                 "    .painter(Layer.CONTENT, g -> {",
-                "        double eased = curve.applyAsDouble(p.get());",
+                "        double eased = curve.applyAsDouble(progress);",
                 "        int x = (int) ((it.componentWidth() - 22) * eased);",
                 "        g.setColor(rowColor);",
                 "        g.fillOval(x, 3, 22, 22);",
@@ -608,10 +601,10 @@ public final class AnimatedView extends Panel
                 "    UI.animateFor(2.0, SECONDS).go( s -> p.set(s.progress()) )",
                 ");",
                 "",
-                "box().withRepaintOn(p).withStyle( it -> {",
-                "    double growT  = clamp((p.get() - 0.00) / 0.35);  // phase 1",
-                "    double pulseT = clamp((p.get() - 0.35) / 0.40);  // phase 2",
-                "    double fadeT  = clamp((p.get() - 0.75) / 0.25);  // phase 3",
+                "box().withStyle( p, (prog, it) -> {",
+                "    double growT  = clamp((prog - 0.00) / 0.35);  // phase 1",
+                "    double pulseT = clamp((prog - 0.35) / 0.40);  // phase 2",
+                "    double fadeT  = clamp((prog - 0.75) / 0.25);  // phase 3",
                 "    double scale  = easeOutBack(growT) * (1 - 0.15 * Math.sin(pulseT * Math.PI));",
                 "    int    alpha  = (int) (255 * (1 - fadeT));",
                 "    Color  core   = blend(ACCENT, ACCENT_HOT, pulseT);",
@@ -627,11 +620,11 @@ public final class AnimatedView extends Panel
                 "  .asLongAs( s -> true )",
                 "  .go( s -> phase.set(s.cycle()) );",
                 "",
-                "// Any styled component bound with withRepaintOn(phase)",
-                "// will breathe along with the timer:",
-                "box().withRepaintOn(phase).withStyle( it -> it",
-                "    .shadowBlurRadius((int) (12 + 40 * phase.get()))",
-                "    .shadowColor(blend(ACCENT, ACCENT_WARM, phase.get()))",
+                "// Any style bound to the phase property will",
+                "// breathe along with the timer:",
+                "box().withStyle( phase, (t, it) -> it",
+                "    .shadowBlurRadius((int) (12 + 40 * t))",
+                "    .shadowColor(blend(ACCENT, ACCENT_WARM, t))",
                 ");"
             );
         }

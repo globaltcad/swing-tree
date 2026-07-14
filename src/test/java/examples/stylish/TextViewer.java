@@ -38,6 +38,11 @@ import static swingtree.UI.*;
  * schedules a repaint whenever {@code someText} changes, and the {@code withStyle}
  * lambda re-invokes {@code MarkdownParser.parse(someText.get())} fresh on each
  * paint pass, keeping the wiring minimal.
+ * <b>Note</b> that this only works safely in the coupled threading modes, where
+ * this playground lives! An application using {@code EventProcessor.DECOUPLED}
+ * should use the property bound {@code withStyle(property, (item, it) -> ..)}
+ * instead, which receives the item thread safely and repaints automatically
+ * (see {@link swingtree.UIForAnySwing#withStyle(sprouts.Val, swingtree.api.ItemStyler)}).
  *
  * <h2>Rendering controls</h2>
  * Three controls in the preview pane let you inspect how SwingTree's text-layout

@@ -496,6 +496,27 @@ The `ComponentStyleDelegate` also exposes the current component through the `com
 so you can use it to query the component's state and properties
 (like for example checking if a toggle button is selected or not and then styling according to that information).
 
+One thing to keep in mind however: because `Styler` lambdas run as part
+of the paint cycle, they are evaluated **by the UI thread**. So when a style
+should be based on the state of one of your **properties**, do not read the
+property inside a plain `Styler` lambda — bind the property to the style
+instead, which is the thread safe and preferred way to use property state
+in styles:
+
+```java
+label(initials)
+.withStyle( person, (p, it) -> it   // <- `p` is the current item of the property
+    .backgroundColor(p.color())
+    .borderRadius(1000)
+)
+```
+
+The current property item is captured on the property's owning thread and
+handed to the lambda as an explicit argument, and the component re-styles
+and repaints automatically whenever the property changes.
+Styles based on multiple properties compose by simply chaining
+multiple `withStyle(property, styler)` calls.
+
 The SwingTree style API has much more to offer than what could be covered in this tutorial.
 If you want to dive deeper into the SwingTree style API,
 you may also want to check out the following pieces of documentation:

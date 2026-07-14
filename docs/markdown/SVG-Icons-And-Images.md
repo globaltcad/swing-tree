@@ -284,9 +284,11 @@ overloads: `image(UI.Layer.BACKGROUND, img -> ...)`, and named images
 (`image("my-image", img -> ...)`) let a later style rule override an
 earlier one.
 
-If the style reads state that can change at runtime (like the SVG text in
-an editor), remember to add `withRepaintOn(property...)` so the component
-re-renders when that state changes.
+If the style depends on property state that can change at runtime (like the
+SVG text in an editor), bind the property through
+`withStyle(property, (svgText, it) -> ..)` — it hands the current item to the
+style lambda and re-renders the component automatically on every change,
+in a thread safe fashion.
 
 ---
 

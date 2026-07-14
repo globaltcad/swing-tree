@@ -37,7 +37,7 @@ public final class KanaPickerView extends Panel
                     label("Which symbol is this?").withFont(new java.awt.Font("Arial", java.awt.Font.BOLD, 24))
                 )
                 .add(ALIGN_X_CENTER,
-                    panel(FILL.and(INS(48))).withRepaintOn(vm)
+                    panel(FILL.and(INS(48)))
                     .withStyle( it ->
                         it.backgroundColor(BACKGROUND.brighter())
                           .foundationColor(new java.awt.Color(255,255,255, 0))

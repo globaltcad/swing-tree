@@ -90,8 +90,8 @@ public class NoteGuesserView extends Panel
             label("Which note is this?").withFont(Font.of("Arial", FontStyle.BOLD, 24))
         )
         .add(PUSH.and(GROW),
-            panel(FILL).withRepaintOn(vm)
-            .withStyle( it ->
+            panel(FILL)
+            .withStyle( vm, (m, it) ->
                 it
                  .backgroundColor(OLD_SHEET_MUSIC_COLOR.brighter())
                  .foundationColor(color(255,255,255, 0))
@@ -111,7 +111,7 @@ public class NoteGuesserView extends Panel
                      int h = it.componentHeight() - 20 - 20 - 30;
                      int x = 25 + 50;
                      int y = 15 + 15;
-                     noteLines(vm.get(), g2d, x, y, w, h);
+                     noteLines(m, g2d, x, y, w, h);
                  })
             )
         )

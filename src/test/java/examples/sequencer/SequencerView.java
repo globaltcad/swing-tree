@@ -187,11 +187,9 @@ public final class SequencerView extends Panel {
     private UIForAnySwing<?, ?> roundButton(Val<String> glyph, Val<Boolean> lit, UI.Color accent, int size, Runnable onClick) {
         return button(glyph)
             .withPrefSize(size, size)
-            .withRepaintOn(lit)
             .withCursor(Cursor.HAND)
-            .withStyle(it -> {
+            .withStyle(lit, (on, it) -> {
                 final double w = it.componentWidth(), h = it.componentHeight();
-                boolean on = lit.get();
                 it = raisedOrInset(it, 999, 7, 14, on);
                 // A radial cap, brightest toward the top-left, domes the face so
                 // the button reads as a rounded physical cap rather than a flat disc.
@@ -227,13 +225,12 @@ public final class SequencerView extends Panel {
         return box().withLayout("wrap 1, ins 0, gap 3", "[center]")
             .add("center",
                 box().withPrefSize(dia, dia)
-                .withRepaintOn(value)
                 .withCursor(Cursor.HAND)
-                .withStyle(it -> {
+                .withStyle(value, (v, it) -> {
                     final double w = it.componentWidth(), h = it.componentHeight();
                     final double cx = w / 2.0, cy = h / 2.0;
                     final double r  = Math.min(w, h) / 2.0;
-                    final double frac = (value.get() - min) / (max - min);
+                    final double frac = (v - min) / (max - min);
                     final double ang  = Math.toRadians(135 + frac * 270);
                     // The groove/arc are kept well inside the body so the rounded
                     // BODY clip never bites into them (that was the "pixely" edge).
@@ -325,19 +322,19 @@ public final class SequencerView extends Panel {
     }
 
     private UIForAnySwing<?, ?> trackHeader(Var<Track> entry, UI.Color accent, UI.Color accentLit, Val<Boolean> muted) {
-        return box().withRepaintOn(muted).withCursor(Cursor.HAND)
+        return box().withCursor(Cursor.HAND)
             .withLayout("fill, ins 0 16 0 14, gap 11", "[]12[grow]", "[center]")
-            .withStyle(it -> raisedOrInset(it, 16, 5, 11, muted.get()))
+            .withStyle(muted, (isMuted, it) -> raisedOrInset(it, 16, 5, 11, isMuted))
             .add("aligny center",
-                box().withPrefSize(16, 16).withStyle(it -> it
+                box().withPrefSize(16, 16).withStyle(muted, (isMuted, it) -> it
                     .borderRadius(999).margin(2)
-                    .backgroundColor(muted.get() ? withAlpha(accent, 90) : accent)
-                    .border(1, withAlpha(accentLit, muted.get() ? 80 : 180))
+                    .backgroundColor(isMuted ? withAlpha(accent, 90) : accent)
+                    .border(1, withAlpha(accentLit, isMuted ? 80 : 180))
                 )
             )
             .add("growx, aligny center",
-                label(entry.get().name()).withRepaintOn(muted).withStyle(it -> it
-                    .foregroundColor(muted.get() ? DIM : TEXT)
+                label(entry.get().name()).withStyle(muted, (isMuted, it) -> it
+                    .foregroundColor(isMuted ? DIM : TEXT)
                     .componentFont(f -> f.size(15).weight(2f).family("SansSerif"))
                 )
             )
