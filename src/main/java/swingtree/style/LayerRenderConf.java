@@ -78,7 +78,7 @@ final class LayerRenderConf
 
     /**
      *  Returns a new {@link LayerRenderConf} with the supplied box model
-     *  and everything else unchanged. Used by {@link StretchTiling} to derive
+     *  and everything else unchanged. Used by {@link LayerCache} to derive
      *  a size independent canonical render configuration from this one.
      */
     LayerRenderConf withBoxModel( BoxModelConf boxModelConf ) {
