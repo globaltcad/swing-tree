@@ -32,7 +32,7 @@ import java.awt.Color
       1. Building components the way an application would (`UI.button(...).withStyle(...)`),
       2. Painting them with the regular paint pipeline (`Utility.renderSingleComponent(...)`
          which ultimately calls `JComponent.paint(g)`),
-      3. Observing the resulting cache state via `ComponentExtension.hasCachedRendering(layer)`,
+      3. Observing the resulting cache state via `ComponentExtension.cachedRendering(layer).isPresent()`,
          `ComponentExtension.cacheHitCount(layer)` and `ComponentExtension.cacheMissCount(layer)`.
 
     Crucially, this spec does **not** instantiate any of SwingTree's internal
@@ -103,7 +103,7 @@ class Style_Render_Caching_Spec extends Specification
         when : 'We render the component once through the regular paint pipeline.'
             Utility.renderSingleComponent(button)
         then : 'The background layer has produced a cached rendering after that first paint.'
-            ext.hasCachedRendering(UI.Layer.BACKGROUND)
+            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
         and  : 'The renderer was invoked at least once to produce the cached image.'
             ext.cacheMissCount(UI.Layer.BACKGROUND) >= 1
             ext.cacheHitCount(UI.Layer.BACKGROUND)  == 0
@@ -116,7 +116,7 @@ class Style_Render_Caching_Spec extends Specification
         and  : 'And the miss counter did *not* increase – no fresh rendering was needed.'
             ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeRepaint
         and  : 'The cached rendering is, of course, still there.'
-            ext.hasCachedRendering(UI.Layer.BACKGROUND)
+            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
     }
 
     def 'A plain, undecorated component is *never* cached.'()
@@ -144,10 +144,10 @@ class Style_Render_Caching_Spec extends Specification
             Utility.renderSingleComponent(label)
             Utility.renderSingleComponent(label)
         then : 'No layer ever produced a cached rendering.'
-            !ext.hasCachedRendering(UI.Layer.BACKGROUND)
-            !ext.hasCachedRendering(UI.Layer.CONTENT)
-            !ext.hasCachedRendering(UI.Layer.BORDER)
-            !ext.hasCachedRendering(UI.Layer.FOREGROUND)
+            !ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            !ext.cachedRendering(UI.Layer.CONTENT).isPresent()
+            !ext.cachedRendering(UI.Layer.BORDER).isPresent()
+            !ext.cachedRendering(UI.Layer.FOREGROUND).isPresent()
         and  : 'And the cache hit counter for the background never increased.'
             ext.cacheHitCount(UI.Layer.BACKGROUND)  == 0
     }
@@ -186,7 +186,7 @@ class Style_Render_Caching_Spec extends Specification
             buttons.each { Utility.renderSingleComponent(it) }
 
         then : 'Every button reports that its background layer is cached.'
-            exts.every { it.hasCachedRendering(UI.Layer.BACKGROUND) }
+            exts.every { it.cachedRendering(UI.Layer.BACKGROUND).isPresent() }
 
         and : """
             The first button to render had to actually invoke the style
@@ -246,7 +246,7 @@ class Style_Render_Caching_Spec extends Specification
             Utility.renderSingleComponent(button)
             Utility.renderSingleComponent(button)
         then : 'The cache is now populated and the second paint counted as a hit.'
-            ext.hasCachedRendering(UI.Layer.BACKGROUND)
+            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
             ext.cacheHitCount(UI.Layer.BACKGROUND)  >= 1
 
         when : 'The view model produces a new tint and we paint again.'
@@ -266,7 +266,7 @@ class Style_Render_Caching_Spec extends Specification
         then : 'It is served from the cache again – the cache repopulated after invalidation.'
             ext.cacheHitCount(UI.Layer.BACKGROUND)  > hitsBeforeBlit
             ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeBlit
-            ext.hasCachedRendering(UI.Layer.BACKGROUND)
+            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
     }
 
     def 'Caching is per-layer: a heavy background does not imply a cached foreground.'()
@@ -302,9 +302,9 @@ class Style_Render_Caching_Spec extends Specification
             Utility.renderSingleComponent(button)
 
         then : 'The background layer is cached, just like in the other scenarios.'
-            ext.hasCachedRendering(UI.Layer.BACKGROUND)
+            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
 
         and : 'But the foreground layer was skipped by the cache because it carries no heavy ingredients.'
-            !ext.hasCachedRendering(UI.Layer.FOREGROUND)
+            !ext.cachedRendering(UI.Layer.FOREGROUND).isPresent()
     }
 }
