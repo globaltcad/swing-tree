@@ -495,9 +495,12 @@ public final class ComponentExtension<C extends JComponent>
             return Optional.empty();
         BufferedImage copy = new BufferedImage(cached.getWidth(), cached.getHeight(), BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = copy.createGraphics();
-        g.setComposite(AlphaComposite.Src);
-        g.drawImage(cached, 0, 0, null);
-        g.dispose();
+        try {
+            g.setComposite(AlphaComposite.Src);
+            g.drawImage(cached, 0, 0, null);
+        } finally {
+            g.dispose();
+        }
         return Optional.of(copy);
     }
 
