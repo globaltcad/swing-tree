@@ -477,6 +477,13 @@ public final class ComponentExtension<C extends JComponent>
      *  painted text, sized icons); other layers permanently report an empty optional because
      *  caching them would not pay for itself.
      *  <p>
+     *  The dimensions of the returned image reveal <em>how</em> the style is cached: styles
+     *  whose pixels are constant along the component edges (flat colours, borders, shadows)
+     *  are stored as a small, size independent exemplar rendering which may be much smaller
+     *  than the component itself (it is stretch tiled back to any actual size on paint,
+     *  see {@link swingtree.SwingTree#setCacheTilingEnabled(boolean)}), while all other
+     *  styles are cached at exactly the component size.
+     *  <p>
      *  The returned image is a defensive copy: the cached rendering is shared by all
      *  components with an equal style, so callers may examine (or even modify) the copy
      *  freely without corrupting anyone's painting.

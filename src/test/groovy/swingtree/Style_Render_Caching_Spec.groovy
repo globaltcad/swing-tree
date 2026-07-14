@@ -299,7 +299,7 @@ class Style_Render_Caching_Spec extends Specification
             Utility.renderSingleComponent(button)
             Utility.renderSingleComponent(button)
         expect : 'The cache is warm.'
-            ext.hasCachedRendering(UI.Layer.BACKGROUND)
+            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
             ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
 
         when : 'The component grows substantially and is painted again.'
@@ -312,7 +312,7 @@ class Style_Render_Caching_Spec extends Specification
         and : 'The paint was served from the cache - no fresh rendering despite the new size!'
             ext.cacheHitCount(UI.Layer.BACKGROUND)  > hitsBeforeResize
             ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeResize
-            ext.hasCachedRendering(UI.Layer.BACKGROUND)
+            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
 
         when : 'The component shrinks to yet another size and is painted again.'
             int missesBeforeShrink = ext.cacheMissCount(UI.Layer.BACKGROUND)
@@ -320,7 +320,7 @@ class Style_Render_Caching_Spec extends Specification
             Utility.renderSingleComponent(button)
         then : 'Still no fresh rendering - every size maps onto the same cached rendering.'
             ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeShrink
-            ext.hasCachedRendering(UI.Layer.BACKGROUND)
+            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
     }
 
     def 'Components of different sizes but the same style share a single cached rendering.'()
@@ -352,7 +352,7 @@ class Style_Render_Caching_Spec extends Specification
 
         then : 'The first paint of the first button populated the shared cache entry.'
             firstExt.cacheMissCount(UI.Layer.BACKGROUND) >= 1
-            firstExt.hasCachedRendering(UI.Layer.BACKGROUND)
+            firstExt.cachedRendering(UI.Layer.BACKGROUND).isPresent()
         and : 'The second button was served from the cache on its very first paint, despite its different size.'
             secondExt.cacheMissCount(UI.Layer.BACKGROUND) == 0
             secondExt.cacheHitCount(UI.Layer.BACKGROUND)  >= 1
@@ -380,7 +380,7 @@ class Style_Render_Caching_Spec extends Specification
             Utility.renderSingleComponent(button)
             Utility.renderSingleComponent(button)
         expect : 'The gradient is cached and served from the cache at a stable size.'
-            ext.hasCachedRendering(UI.Layer.BACKGROUND)
+            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
             ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
 
         when : 'The component is resized and painted again.'

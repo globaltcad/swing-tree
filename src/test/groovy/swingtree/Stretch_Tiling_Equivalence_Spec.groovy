@@ -284,7 +284,7 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             }
 
         expect : 'The repeated paints really were served from the cache.'
-            ComponentExtension.from(box).hasCachedRendering(UI.Layer.CONTENT)
+            ComponentExtension.from(box).cachedRendering(UI.Layer.CONTENT).isPresent()
             ComponentExtension.from(box).cacheHitCount(UI.Layer.CONTENT) >= 1
         and : 'The accelerated painting matches the classic software rendering.'
             Utility.similarityBetween(classic, accelerated) >= 99.9

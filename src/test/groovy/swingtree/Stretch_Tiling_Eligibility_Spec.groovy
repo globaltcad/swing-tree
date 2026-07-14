@@ -11,6 +11,7 @@ import utility.Utility
 
 import javax.swing.ImageIcon
 import javax.swing.JButton
+import java.awt.Color
 import java.util.concurrent.TimeUnit
 
 @Title("Stretch Tiling Eligibility")
@@ -35,7 +36,7 @@ import java.util.concurrent.TimeUnit
     API: it builds ordinary styled components, paints them through the
     regular paint pipeline and observes the cache through
     `ComponentExtension.cacheHitCount(layer)` / `cacheMissCount(layer)` /
-    `hasCachedRendering(layer)`. Which styles resize for free and which
+    `cachedRendering(layer).isPresent()`. Which styles resize for free and which
     re-render is the user visible requirement; how the machinery decides
     is deliberately not referenced anywhere in here.
 
@@ -94,7 +95,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             2.times { Utility.renderSingleComponent(button) }
         expect : 'The size stuck, the cache is populated and the second paint already hit it.'
             button.width == 220 && button.height == 160
-            ext.hasCachedRendering(layer)
+            ext.cachedRendering(layer).isPresent()
             ext.cacheHitCount(layer) >= 1
 
         when : 'The button grows substantially and is painted again.'
@@ -107,7 +108,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         and : '...and the paint at the new size was still served from the cache.'
             ext.cacheMissCount(layer) == missesBeforeResize
             ext.cacheHitCount(layer)  >  hitsBeforeResize
-            ext.hasCachedRendering(layer)
+            ext.cachedRendering(layer).isPresent()
 
         where :
             description                               | layer               | styler
@@ -143,7 +144,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             2.times { Utility.renderSingleComponent(button) }
         expect : 'The cache is populated and serving hits at this stable size.'
             button.width == 220 && button.height == 160
-            ext.hasCachedRendering(layer)
+            ext.cachedRendering(layer).isPresent()
             ext.cacheHitCount(layer) >= 1
 
         when : 'The button is resized and painted again.'
@@ -187,8 +188,8 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             2.times { Utility.renderSingleComponent(square) }
             2.times { Utility.renderSingleComponent(rounded) }
         expect : 'Both are cached and serving hits at their initial size.'
-            squareExt.hasCachedRendering(UI.Layer.BORDER)  && squareExt.cacheHitCount(UI.Layer.BORDER)  >= 1
-            roundedExt.hasCachedRendering(UI.Layer.BORDER) && roundedExt.cacheHitCount(UI.Layer.BORDER) >= 1
+            squareExt.cachedRendering(UI.Layer.BORDER).isPresent()  && squareExt.cacheHitCount(UI.Layer.BORDER)  >= 1
+            roundedExt.cachedRendering(UI.Layer.BORDER).isPresent() && roundedExt.cacheHitCount(UI.Layer.BORDER) >= 1
 
         when : 'Both buttons are resized and painted again.'
             int squareMisses  = squareExt.cacheMissCount(UI.Layer.BORDER)
@@ -222,7 +223,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             2.times { Utility.renderSingleComponent(button) }
         expect :
             button.width == 40 && button.height == 40
-            ext.hasCachedRendering(UI.Layer.BACKGROUND)
+            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
             ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
 
         when : 'The tiny button is resized ever so slightly, staying tiny.'
@@ -260,7 +261,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             var ext = ComponentExtension.from(button)
             2.times { Utility.renderSingleComponent(button) }
         expect :
-            ext.hasCachedRendering(UI.Layer.BACKGROUND)
+            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
             ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
 
         when : 'The button is dragged through wildly different sizes and painted at every one of them.'
@@ -273,6 +274,105 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             }
         then : 'Not a single one of those paints re-rendered the style.'
             ext.cacheMissCount(UI.Layer.BACKGROUND) == missesWhenWarm
-            ext.hasCachedRendering(UI.Layer.BACKGROUND)
+            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+    }
+
+    def 'The dimensions of the cached rendering reveal how a style is cached: compressed atlas or full size. (#description)'(
+        String description, UI.Layer layer, String cachedAs, Closure styler
+    ) {
+        reportInfo """
+            `cachedRendering(layer)` hands out a copy of the actual cached
+            image, and its dimensions tell the whole caching story from the
+            outside: a stretch tileable style is stored as a small exemplar
+            rendering - a compressed texture atlas whose size depends only on
+            the style - while every other style is cached at exactly the
+            component size. We pin both aspects by painting the same style on
+            two differently sized components and comparing the two cached
+            images: atlases must be identical in size (and much smaller than
+            either component), full size renderings must each track their
+            own component.
+        """
+        given : 'The same style, painted on two differently sized components.'
+            var first  = buttonWith(styler)
+            var second = buttonWith(styler)
+            first.setSize(400, 300)
+            second.setSize(500, 350)
+            5.times { Utility.renderSingleComponent(first) }  // Large full-size renderings only get
+            5.times { Utility.renderSingleComponent(second) } // allocated after a few warm-up paints.
+        and : 'The two cached renderings.'
+            var firstImage  = ComponentExtension.from(first).cachedRendering(layer).get()
+            var secondImage = ComponentExtension.from(second).cachedRendering(layer).get()
+
+        expect : 'Atlases are size independent and compressed, full size renderings track their component:'
+            if ( cachedAs == "compressed atlas" ) {
+                assert firstImage.width == secondImage.width && firstImage.height == secondImage.height
+                assert firstImage.width < 400 && firstImage.height < 300
+            } else {
+                assert firstImage.width  == 400 && firstImage.height  == 300
+                assert secondImage.width == 500 && secondImage.height == 350
+            }
+
+        where :
+            description                                    | layer               | cachedAs           | styler
+            "flat rounded background"                      | UI.Layer.BACKGROUND | "compressed atlas" | { it.borderRadius(16).backgroundColor("#175d38") }
+            "background, foundation and margin"            | UI.Layer.BACKGROUND | "compressed atlas" | { it.borderRadius(20).margin(8).backgroundColor("#5d1738").foundationColor("#f0ead6") }
+            "arcless flat colors with a margin"            | UI.Layer.BACKGROUND | "compressed atlas" | { it.margin(6).backgroundColor("#38175d").foundationColor("#e6f0d6") }
+            "a different arc for every corner"             | UI.Layer.BACKGROUND | "compressed atlas" | { it.backgroundColor("#5d3817")
+                                                                                                            .borderRadiusAt(UI.Corner.TOP_LEFT, 0, 0)
+                                                                                                            .borderRadiusAt(UI.Corner.TOP_RIGHT, 8, 8)
+                                                                                                            .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 16, 16)
+                                                                                                            .borderRadiusAt(UI.Corner.BOTTOM_RIGHT, 24, 24) }
+            "uniformly colored rounded border"             | UI.Layer.BORDER     | "compressed atlas" | { it.border(3, "#17385d").borderRadius(14) }
+            "per-edge border widths, one color, rounded"   | UI.Layer.BORDER     | "compressed atlas" | { it.borderWidths(1, 2, 3, 4).borderColor("#0f2f4f").borderRadius(12) }
+            "per-edge border colors, square corners"       | UI.Layer.BORDER     | "compressed atlas" | { it.borderWidths(2, 2, 2, 2).borderColors("#7a2020", "#207a20", "#20207a", "#7a7a20") }
+            "an outset drop shadow"                        | UI.Layer.CONTENT    | "compressed atlas" | { it.shadowColor("#0a0a14").shadowBlurRadius(6).shadowSpreadRadius(2).borderRadius(12) }
+            "an inset shadow"                              | UI.Layer.CONTENT    | "compressed atlas" | { it.shadowColor("#141414").shadowBlurRadius(5).shadowIsInset(true).borderRadius(10) }
+            "an offset shadow"                             | UI.Layer.CONTENT    | "compressed atlas" | { it.shadowColor("#101018").shadowBlurRadius(4).shadowOffset(3, 5).borderRadius(8) }
+            "two named shadows, one in, one out"           | UI.Layer.CONTENT    | "compressed atlas" | { it.borderRadius(14)
+                                                                                                            .shadow("out", s -> s.color("#26264a").blurRadius(7).isOutset(true))
+                                                                                                            .shadow("in",  s -> s.color("#0e0e16").blurRadius(4).isInset(true)) }
+            "soft-UI penumbra shadows"                     | UI.Layer.CONTENT    | "compressed atlas" | { it.borderRadius(28).margin(10)
+                                                                                                            .shadow("bright", s -> s.color(new Color(255, 255, 255, 40)).offset(-8, -8).type(UI.ShadowType.PENUMBRA))
+                                                                                                            .shadow("dark",   s -> s.color(new Color(0, 0, 0, 110)).offset(4, 4).type(UI.ShadowType.PENUMBRA))
+                                                                                                            .shadowBlurRadius(17).shadowSpreadRadius(-5).shadowIsInset(true) }
+            "asymmetric margins, widths and arcs"          | UI.Layer.BACKGROUND | "compressed atlas" | { it.backgroundColor("#4f2f0f").margin(1, 2, 3, 4)
+                                                                                                            .borderWidths(5, 6, 7, 8).borderColor("#2f4f0f")
+                                                                                                            .borderRadiusAt(UI.Corner.TOP_LEFT, 10, 11)
+                                                                                                            .borderRadiusAt(UI.Corner.TOP_RIGHT, 12, 13)
+                                                                                                            .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 14, 15)
+                                                                                                            .borderRadiusAt(UI.Corner.BOTTOM_RIGHT, 16, 17) }
+            "a gradient"                                   | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(10).gradient(g -> g.colors("#b02050", "#2050b0")) }
+            "a noise texture"                              | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(10).noise(n -> n.colors("#202020", "#dedede")) }
+            "a background image"                           | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(10).image(img -> img.image(ICON)) }
+            "styled text"                                  | UI.Layer.CONTENT    | "full size"        | { it.text(t -> t.content("Full size")) }
+            "per-edge border colors with rounded corners"  | UI.Layer.BORDER     | "full size"        | { it.borderWidths(2, 3, 4, 5).borderColors("#6a1010", "#106a10", "#10106a", "#6a6a10").borderRadius(16) }
+            "a rounded background poisoned by a gradient"  | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(16).backgroundColor("#0f4f2f").gradient(g -> g.colors("#903060", "#309060")) }
+    }
+
+    def 'The compressed atlas is a faithful miniature of the style.'()
+    {
+        reportInfo """
+            The exemplar rendering is not some encoded artifact - it is a plain
+            rendering of the very same style on a minimal component, which we
+            can verify pixel by pixel through the copy that `cachedRendering`
+            hands out: the center must carry the background color and the
+            margin band along the outside must carry the foundation color,
+            exactly like on the full sized component.
+        """
+        given : 'A button with an opaque background, foundation and margin, warmed up.'
+            var button = buttonWith({ it.borderRadius(10).margin(6).backgroundColor("#204080").foundationColor("#d0c8b8") })
+            button.setSize(400, 300)
+            2.times { Utility.renderSingleComponent(button) }
+        and : 'Its compressed atlas.'
+            var atlas = ComponentExtension.from(button).cachedRendering(UI.Layer.BACKGROUND).get()
+        expect : 'The atlas really is the compressed rendering, not the component sized one.'
+            atlas.width < 60 && atlas.height < 60
+        and : 'Its center pixel carries the background color.'
+            new Color(atlas.getRGB((int)(atlas.width/2), (int)(atlas.height/2))) == new Color(0x20, 0x40, 0x80)
+        and : 'The outer margin band carries the foundation color, all the way around.'
+            new Color(atlas.getRGB((int)(atlas.width/2), 1))              == new Color(0xd0, 0xc8, 0xb8)
+            new Color(atlas.getRGB((int)(atlas.width/2), atlas.height-2)) == new Color(0xd0, 0xc8, 0xb8)
+            new Color(atlas.getRGB(1, (int)(atlas.height/2)))             == new Color(0xd0, 0xc8, 0xb8)
+            new Color(atlas.getRGB(atlas.width-2, (int)(atlas.height/2))) == new Color(0xd0, 0xc8, 0xb8)
     }
 }
