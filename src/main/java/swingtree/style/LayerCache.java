@@ -298,13 +298,13 @@ final class LayerCache
     int paintCacheMissCount() { return _paintCacheMissCount; }
 
     /**
-     *  Determines if caching makes sense for the given rendering configuration of the layer
-     *  represented as a number indicating the number of cache hits until allocation and rendering
-     *  should happen, or -1 if caching does not make sense for the given rendering configuration.
-     *
-     * @param state The rendering configuration of the layer.
-     * @return A number indicating the number of cache hits until allocation and rendering should happen,
-     *         or -1 if caching does not make sense for the given rendering configuration.
+     *  Scores whether caching pays off for the supplied configuration: -1 means never
+     *  cache, otherwise the number of cache hits to wait before allocating and rendering
+     *  (0 = eagerly). The supplied state is the <i>cache key</i>, which for stretch
+     *  tileable styles is the small exemplar configuration - so the size based gates
+     *  (maximum cacheable image area, allocation warm-up) measure the memory that will
+     *  actually be allocated, not the component size. This is what makes arbitrarily
+     *  large components cacheable (and typically eagerly so) when their style tiles.
      */
     private int _cachingMakesSenseFor( LayerRenderConf state )
     {

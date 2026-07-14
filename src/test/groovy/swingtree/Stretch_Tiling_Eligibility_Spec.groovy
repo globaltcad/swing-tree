@@ -349,6 +349,43 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             "a rounded background poisoned by a gradient"  | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(16).backgroundColor("#0f4f2f").gradient(g -> g.colors("#903060", "#309060")) }
     }
 
+    def 'Enormous components are cached eagerly when their style fits a compressed atlas.'()
+    {
+        reportInfo """
+            The memory gates of the render cache - the maximum image area worth
+            caching and the lazy allocation warm-up which shields short-lived
+            styles from paying for an image - are applied to what will actually
+            be *allocated*. The compressed atlas turns this on its head: for a
+            stretch tileable style the allocation is the small exemplar no
+            matter how large the component, so a component far beyond the
+            classic size limit is cached immediately, on its very first paint.
+            Before stretch tiling, such a component could never be cached at
+            all, and its equally sized gradient sibling still cannot: a
+            full size rendering of it would blow the memory budget.
+        """
+        given : 'Two gigantic buttons: one with a tileable style, one with a gradient.'
+            var tileable = buttonWith({ it.borderRadius(24).margin(8).backgroundColor("#0b3d2e").foundationColor("#efe8d8") })
+            var gradient = buttonWith({ it.borderRadius(24).gradient(g -> g.colors("#803060", "#306080")) })
+            tileable.setSize(3000, 1500)
+            gradient.setSize(3000, 1500)
+
+        when : 'Both are painted a single time.'
+            Utility.renderSingleComponent(tileable)
+            Utility.renderSingleComponent(gradient)
+        then : 'The tileable style is already cached - as a tiny atlas, allocated eagerly on the first paint.'
+            ComponentExtension.from(tileable).cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ComponentExtension.from(tileable).cachedRendering(UI.Layer.BACKGROUND).get().width < 100
+
+        when : 'Both are painted several more times.'
+            6.times { Utility.renderSingleComponent(tileable) }
+            6.times { Utility.renderSingleComponent(gradient) }
+        then : 'Every one of those paints of the tileable button was served from the cache...'
+            ComponentExtension.from(tileable).cacheHitCount(UI.Layer.BACKGROUND) >= 6
+        and : '...while the multi-megapixel gradient rendering is over budget and is never cached.'
+            !ComponentExtension.from(gradient).cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ComponentExtension.from(gradient).cacheHitCount(UI.Layer.BACKGROUND) == 0
+    }
+
     def 'The compressed atlas is a faithful miniature of the style.'()
     {
         reportInfo """
