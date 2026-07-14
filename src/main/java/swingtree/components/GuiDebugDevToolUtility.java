@@ -600,6 +600,15 @@ final class GuiDebugDevToolUtility {
                 .add("span, growx, wrap", UI.separator())
                 .add(
                     UI.panel("fillx, wrap 1")
+                    .add(UI.label("Live cache entries:"))
+                    .add("growx",
+                        UI.label(liveCacheStats).withStyle(it->it.marginLeft(24))
+                        .withTooltip("Live entry counts of SwingTree's global rendering caches. " +
+                                     "Watch them drop to 0 when you set the cache mode to DISABLED.")
+                    )
+                )
+                .add(
+                    UI.panel("fillx, wrap 1")
                     .add(
                         UI.label("Cache mode:")
                         .withTooltip("How aggressively SwingTree's rendering caches trade memory for CPU time.")
@@ -610,11 +619,11 @@ final class GuiDebugDevToolUtility {
                         .withTooltip("DISABLED turns every rendering cache off; higher modes keep more rendered results in memory.")
                         .onSelection( it -> SwingTree.get().setCacheMode(cacheMode.get()) )
                     )
-                    .add(UI.label("Live cache entries:"))
                     .add("growx",
-                        UI.label(liveCacheStats).withStyle(it->it.marginLeft(24))
-                        .withTooltip("Live entry counts of SwingTree's global rendering caches. " +
-                                     "Watch them drop to 0 when you set the cache mode to DISABLED.")
+                        UI.checkBox("9 patch tiling").withStyle(it->it.marginLeft(24))
+                        .withMaxWidth(190)
+                        .isSelectedIf(SwingTree.get().isCacheTilingEnabled())
+                        .onClick( it -> SwingTree.get().setCacheTilingEnabled(it.get().isSelected()))
                     )
                 )
                 .add("wrap",
