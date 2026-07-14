@@ -6,12 +6,14 @@ import spock.lang.Subject
 import spock.lang.Timeout
 import spock.lang.Title
 import swingtree.components.JBox
+import swingtree.style.CacheBudget
 import swingtree.style.ComponentExtension
 import swingtree.threading.EventProcessor
 import utility.Utility
 
 import java.awt.AlphaComposite
 import java.awt.Color
+import java.awt.Graphics2D
 import java.awt.GraphicsEnvironment
 import java.awt.Transparency
 import java.awt.image.BufferedImage
@@ -236,6 +238,95 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             scale << [1.0d, 1.25d, 1.5d, 2.0d]
     }
 
+    def 'A rotated or sheared graphics context is painted directly, never reconstructed. (#description)'(
+        String description, Closure transformer
+    ) {
+        reportInfo """
+            Reassembling a component from nine tiles only makes sense while the
+            destination axes still line up with the component's own: the tiles
+            are rectangles, and they are placed by snapping their edges to whole
+            device pixels. Under a rotation, a shear or a flip that placement is
+            meaningless - a naive implementation would happily paint the nine
+            rectangles axis aligned and the component would come out *unrotated*.
+
+            So whenever the graphics transform is not a plain positive scale and
+            translation, SwingTree quietly abandons the cache for that paint and
+            renders the style directly at the real component size. We pin this by
+            painting through such a transform and demanding the result be
+            *bit identical* to the same paint with caching switched off entirely -
+            which is only possible if the very same direct rendering ran.
+        """
+        given : 'The reference: the transformed component painted with all caching switched off.'
+            var styler = { it.backgroundColor("#3f6fa1").foundationColor("#1c2026").borderRadius(14).margin(5) }
+            CacheBudget.UNITS_OVERRIDE = 0 // no cache budget at all -> always render directly
+            var uncached = paintTransformed(boxWith(300, 200, styler), transformer)
+
+        when : 'The same component is painted through that transform with stretch tiling fully enabled.'
+            CacheBudget.UNITS_OVERRIDE = 10
+            SwingTree.get().setCacheTilingEnabled(true)
+            ComponentExtension.updateAllCachesFromLibraryConfig()
+            var box = boxWith(300, 200, styler)
+            var ext = ComponentExtension.from(box)
+            paintTransformed(box, transformer)
+            var tiled = paintTransformed(box, transformer)
+
+        then : 'Not a single one of those paints was served from the cache - the fallback engaged every time.'
+            ext.cacheHitCount(UI.Layer.BACKGROUND) == 0
+            ext.cacheMissCount(UI.Layer.BACKGROUND) >= 2
+
+        and : 'And the pixels are bit identical to the uncached direct rendering.'
+            for ( int y = 0; y < uncached.getHeight(); y++ )
+                for ( int x = 0; x < uncached.getWidth(); x++ )
+                    assert uncached.getRGB(x, y) == tiled.getRGB(x, y)
+
+        cleanup :
+            CacheBudget.UNITS_OVERRIDE = 10
+
+        where :
+            description  | transformer
+            "rotation"   | { Graphics2D g -> g.rotate(Math.toRadians(20), 150, 100) }
+            "shear"      | { Graphics2D g -> g.shear(0.2d, 0d) }
+            "vertical flip" | { Graphics2D g -> g.translate(0, 200); g.scale(1d, -1d) }
+    }
+
+    def 'A component which shrinks back below the reconstructable size returns to exact size rendering.'()
+    {
+        reportInfo """
+            A component only gets reconstructed from tiles while it is strictly
+            larger than the style's minimal exemplar. But a component does not
+            only *grow* - a split pane divider or a collapsing panel can drag it
+            back down below that threshold, and it has to survive the trip back
+            without painting garbage (the tiles would have to overlap to fit).
+
+            So we take a component up into stretch tiled territory, then shrink
+            it far below the threshold, and demand that its pixels still match
+            the classic rendering of that small size exactly - and that it is now
+            cached at its real size again, not as an atlas.
+        """
+        given : 'A styled box which is first grown large (so it gets stretch tiled)...'
+            var styler = { it.backgroundColor("#7a4ab1").foundationColor("#efe6d8").borderRadius(16).margin(6) }
+            SwingTree.get().setCacheTilingEnabled(true)
+            var box = boxWith(400, 300, styler)
+            var ext = ComponentExtension.from(box)
+            2.times { Utility.renderSingleComponent(box) }
+        expect : 'It really is cached as a small atlas at this point.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).get().width < 400
+
+        when : '...and is then dragged back down to a size far below the reconstructable minimum.'
+            box.setSize(30, 24)
+            Utility.renderSingleComponent(box)
+            var shrunk = Utility.renderSingleComponent(box)
+        then : 'The size took effect, and the style is cached at that real size again - the atlas is gone.'
+            box.width == 30 && box.height == 24
+            ext.cachedRendering(UI.Layer.BACKGROUND).get().width  == 30
+            ext.cachedRendering(UI.Layer.BACKGROUND).get().height == 24
+        and : 'Its pixels are exactly the classic rendering of a component which was never anything else.'
+            var classic = renderedClassically(30, 24, styler)
+            for ( int y = 0; y < classic.getHeight(); y++ )
+                for ( int x = 0; x < classic.getWidth(); x++ )
+                    assert classic.getRGB(x, y) == shrunk.getRGB(x, y)
+    }
+
     def 'Stretch tiled painting survives the accelerated graphics pipeline, even for extremely long edges.'()
     {
         reportInfo """
@@ -290,6 +381,19 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             Utility.similarityBetween(classic, accelerated) >= 99.9
         and : 'The long top edge really contains shadow pixels (exactly what the XRender defect used to erase).'
             (12..44).any { y -> ((accelerated.getRGB((int) (W / 2), y) >> 24) & 0xFF) > 0 }
+    }
+
+    /** Paints the component through an arbitrary graphics transform, applied by the
+     *  supplied closure right before the component paints itself. */
+    private static BufferedImage paintTransformed( java.awt.Component component, Closure transformer ) {
+        var image = Utility.createDeterministicImage(400, 300)
+        UI.runNow {
+            var g = Utility.createDeterministicGraphics(image)
+            transformer(g)
+            component.paint(g)
+            g.dispose()
+        }
+        return image
     }
 
     /** Paints the component onto a device sized buffer through a `scale` transform,

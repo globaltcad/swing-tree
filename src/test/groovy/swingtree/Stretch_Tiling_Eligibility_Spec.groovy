@@ -386,6 +386,95 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             ComponentExtension.from(gradient).cacheHitCount(UI.Layer.BACKGROUND) == 0
     }
 
+    def 'Eligibility is decided per layer, not per component.'()
+    {
+        reportInfo """
+            A style is not tileable or non-tileable as a whole - each *layer* is
+            judged on its own content. A panel with a gradient background and a
+            drop shadow is the everyday case: the gradient spans the component
+            and cannot be reconstructed, but the shadow lives on its own layer
+            and can. So the very same component gets a full size cached rendering
+            for its background and a compressed atlas for its shadow, and a
+            resize re-renders only the former.
+        """
+        given : 'One button carrying a gradient background *and* a shadow, warmed up.'
+            var button = buttonWith({ it.borderRadius(18)
+                                        .gradient(g -> g.colors("#a02050", "#2050a0"))
+                                        .shadowColor("#0a0a12").shadowBlurRadius(7).shadowSpreadRadius(2) })
+            button.setSize(300, 200)
+            var ext = ComponentExtension.from(button)
+            3.times { Utility.renderSingleComponent(button) }
+
+        expect : 'The gradient background is cached at the full component size...'
+            ext.cachedRendering(UI.Layer.BACKGROUND).get().width  == 300
+            ext.cachedRendering(UI.Layer.BACKGROUND).get().height == 200
+        and : '...while the shadow on the content layer is a small atlas.'
+            ext.cachedRendering(UI.Layer.CONTENT).get().width  < 300
+            ext.cachedRendering(UI.Layer.CONTENT).get().height < 200
+
+        when : 'The button is resized and painted again.'
+            int backgroundMisses = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            int shadowMisses     = ext.cacheMissCount(UI.Layer.CONTENT)
+            button.setSize(420, 260)
+            Utility.renderSingleComponent(button)
+        then : 'Only the gradient had to be re-rendered; the shadow was reconstructed for free.'
+            ext.cacheMissCount(UI.Layer.BACKGROUND) > backgroundMisses
+            ext.cacheMissCount(UI.Layer.CONTENT)   == shadowMisses
+    }
+
+    def 'A style animation churning through cache keys does not starve other components of caching.'()
+    {
+        reportInfo """
+            Because a tileable style is cached as a tiny atlas, it always clears
+            the memory gates and is allocated eagerly, on the very first paint.
+            That is exactly what we want for a *stable* style - but an animation
+            which shifts a color a little on every frame produces a brand new
+            style configuration, and therefore a brand new cache entry, sixty
+            times a second.
+
+            The global cache must not fill up with that debris: its keys are held
+            weakly, so a frame's entry dies the moment the animation moves on.
+            This scenario hammers a component with a hundred distinct styles and
+            then checks the two things that would actually hurt - that the entry
+            count did not run away, and that an ordinary, stable component can
+            still get itself cached afterwards.
+        """
+        given : 'A button whose background color is read from a variable the "animation" nudges every frame.'
+            var frame  = new java.util.concurrent.atomic.AtomicInteger(0)
+            var button = buttonWith({ it.borderRadius(16).backgroundColor(new Color(10 + frame.get(), 80, 160)) })
+            button.setSize(240, 120)
+            var ext = ComponentExtension.from(button)
+
+        when : 'A hundred frames, each with its own unique style configuration, are painted.'
+            (1..100).each { i ->
+                frame.set(i)
+                Utility.renderSingleComponent(button)
+            }
+        then : 'Every frame was a fresh rendering (a new style is a new key, by definition).'
+            ext.cacheMissCount(UI.Layer.BACKGROUND) >= 100
+
+        when : 'The garbage collector gets a chance to run.'
+            System.gc()
+            Thread.sleep(200)
+            System.gc()
+        then : """
+            The debris is gone: a frame's entry is held only by the component which
+            painted it, so once the animation moves on to the next frame the entry
+            becomes unreachable and the weakly keyed global cache reclaims it. Had
+            these entries been strongly held, a long animation would eventually fill
+            the cache to its entry ceiling and lock every other component out of it.
+        """
+            ComponentExtension.globalRenderCacheEntryCounts().toMap()["style layers"] < 100
+
+        when : 'An ordinary component with a stable style is painted afterwards.'
+            var stable = buttonWith({ it.borderRadius(12).margin(4).backgroundColor("#1e5a8a").foundationColor("#efe9dc") })
+            stable.setSize(260, 140)
+            2.times { Utility.renderSingleComponent(stable) }
+        then : 'It is cached and served from the cache, just as if no animation had ever run.'
+            ComponentExtension.from(stable).cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ComponentExtension.from(stable).cacheHitCount(UI.Layer.BACKGROUND) >= 1
+    }
+
     def 'The compressed atlas is a faithful miniature of the style.'()
     {
         reportInfo """

@@ -96,7 +96,13 @@ final class LayerCache
 
     /** Drops every globally cached layer image. Called when the library cache configuration
      *  changes (see {@link ComponentExtension#updateAllCachesFromLibraryConfig()}) so memory
-     *  shrinks immediately; the cache repopulates lazily under the new budget. */
+     *  shrinks immediately; the cache repopulates lazily under the new budget. <br>
+     *  Note that living {@link LayerCache} instances keep holding their {@code _localCache}
+     *  image until their next {@link #validate(ComponentConf, ComponentConf)}, so a component
+     *  which revalidates afterwards may briefly mint a second image for a key another component
+     *  is still painting from. This costs a little duplicated memory until the stragglers
+     *  revalidate; it is never a correctness problem (the images are equal by construction),
+     *  and it only ever happens on the rare library configuration change. */
     static void clearGlobalCache() {
         _CACHE.clear();
     }
@@ -304,7 +310,18 @@ final class LayerCache
      *  tileable styles is the small exemplar configuration - so the size based gates
      *  (maximum cacheable image area, allocation warm-up) measure the memory that will
      *  actually be allocated, not the component size. This is what makes arbitrarily
-     *  large components cacheable (and typically eagerly so) when their style tiles.
+     *  large components cacheable (and typically eagerly so) when their style tiles. <br>
+     *  <br>
+     *  Note the second order effect on the warm-up gate, which exists to stop short-lived
+     *  configurations (a style animation mints a fresh one every frame) from paying for an
+     *  image: a tileable style always scores small enough to be allocated eagerly, so an
+     *  animated tileable style now does allocate an exemplar per frame. This is a deliberate
+     *  trade: the exemplar is a few kilobytes and is rendered far more cheaply than the full
+     *  sized component the direct fallback would otherwise rasterize, and because the keys
+     *  are held weakly the debris is reclaimed as soon as the animation moves on (pinned by
+     *  {@code Stretch_Tiling_Eligibility_Spec}). What must not regress is that weak
+     *  reclamation - were a frame's key ever strongly retained, a long animation would fill
+     *  the cache to {@link #_maxCacheEntries()} and lock every other component out of it.
      */
     private int _cachingMakesSenseFor( LayerRenderConf state )
     {
