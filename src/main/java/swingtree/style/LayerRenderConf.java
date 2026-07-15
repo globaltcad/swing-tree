@@ -14,6 +14,15 @@ import java.util.Objects;
  *  When the config changes compared to the previous one, the image buffer based
  *  render cache is being invalidated and the component is rendered again
  *  (potentially with a new cached image buffer).
+ *  <p>
+ *  <b>Warning to maintainers:</b> the component {@link swingtree.layout.Size} carried by the
+ *  {@link #boxModel()} must remain the <i>only</i> size dependent property reachable from here.
+ *  {@link LayerCache} relies on it: for stretch tileable styles it derives a size independent
+ *  cache key by swapping in a smaller size through {@link #withBoxModel(BoxModelConf)} and
+ *  reconstructs any actual size from the resulting rendering. A newly added field whose value
+ *  (or whose rendering) depends on the component size would silently break that reconstruction,
+ *  producing subtly wrong pixels rather than a failure. Should such a field become necessary,
+ *  it must also be rejected by {@code LayerCache._isStretchTileable}.
  */
 @Immutable
 @SuppressWarnings("Immutable")
@@ -75,6 +84,17 @@ final class LayerRenderConf
     }
 
     BoxModelConf boxModel() { return _boxModelConf.get(); }
+
+    /**
+     *  Returns a new {@link LayerRenderConf} with the supplied box model
+     *  and everything else unchanged. Used by {@link LayerCache} to derive
+     *  a size independent canonical render configuration from this one.
+     */
+    LayerRenderConf withBoxModel( BoxModelConf boxModelConf ) {
+        if ( boxModelConf.equals(_boxModelConf.get()) )
+            return this;
+        return of(boxModelConf, _baseColor, _layer);
+    }
 
     BaseColorConf baseColors() { return _baseColor; }
 

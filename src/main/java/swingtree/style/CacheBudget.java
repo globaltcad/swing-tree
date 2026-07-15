@@ -171,10 +171,37 @@ final class CacheBudget {
         return (int) Math.max(0, bytesFor(kind) / kind.bytesPerEntry);
     }
 
+    /** Lazily resolved "is stretch tiling allowed" flag from the library configuration,
+     *  cached here (like the byte budget) so the per-paint hot path never touches the
+     *  {@link SwingTree} singleton. {@code null} means "not resolved yet". */
+    private static volatile @org.jspecify.annotations.Nullable Boolean _tilingEnabled = null;
+
+    /** Whether eligible style renderings may be cached independently of the component
+     *  size using stretch tiling (see {@link SwingTree#setCacheTilingEnabled(boolean)}).
+     *  Resolved lazily from the library configuration, like the byte budget. */
+    static boolean tilingEnabled() {
+        Boolean enabled = _tilingEnabled;
+        if ( enabled == null ) {
+            enabled = _resolveTilingEnabled();
+            _tilingEnabled = enabled;
+        }
+        return enabled;
+    }
+
+    private static boolean _resolveTilingEnabled() {
+        try {
+            return SwingTree.get().isCacheTilingEnabled();
+        } catch ( Throwable t ) {
+            log.debug("Could not resolve the cache tiling flag from the SwingTree context; assuming enabled.", t);
+            return true;
+        }
+    }
+
     /** Forces the next budget read to re-resolve the mode from the live library
      *  configuration. Called whenever the configuration may have changed. */
     static void markUnresolved() {
         _budgetBytes = UNRESOLVED;
+        _tilingEnabled = null;
     }
 
     private static CacheMode _currentMode() {

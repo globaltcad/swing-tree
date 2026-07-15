@@ -702,6 +702,39 @@ public void setCacheMode( SwingTreeInitConfig.CacheMode cacheMode ) {
     }
 }
 
+    /**
+     *  Tells whether SwingTree may cache the rendering of eligible component styles
+     *  independently of the component size using stretch tiling ("nine slice" rendering),
+     *  which makes resizing styled components cheap because it does not invalidate
+     *  their render caches (see {@link #setCacheTilingEnabled(boolean)}).
+     *
+     * @return True if size independent (stretch tiled) render caching is allowed.
+     */
+    public boolean isCacheTilingEnabled() {
+        return _config.isCacheTilingEnabled();
+    }
+
+    /**
+     *  Enables or disables size independent (stretch tiled / "nine slice") caching of
+     *  eligible component style renderings at runtime (see {@link #isCacheTilingEnabled()}
+     *  and {@link SwingTreeInitConfig#withCacheTilingEnabled(boolean)}). This flag exists
+     *  as a safety hatch; there should rarely be a reason to turn it off. Changing it
+     *  takes effect immediately: every rendering cache is emptied and subsequent paints
+     *  repopulate the caches under the new policy. Note that components whose style and
+     *  bounds do not change afterwards may keep serving their previously populated local
+     *  cache until their next style revalidation; rendering stays correct either way.
+     *
+     * @param enabled Whether size independent (stretch tiled) render caching is allowed.
+     */
+    public void setCacheTilingEnabled( boolean enabled ) {
+        if ( !UI.thisIsUIThread() ) {
+            UI.runNow(() -> setCacheTilingEnabled(enabled));
+        } else {
+            _config = _config.withCacheTilingEnabled(enabled);
+            swingtree.style.ComponentExtension.updateAllCachesFromLibraryConfig();
+        }
+    }
+
 	/**
      *  The {@link StyleSheet} is an abstract class whose extensions are used to declare
      *  component styles through a CSS like DSL API.

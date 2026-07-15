@@ -600,6 +600,15 @@ final class GuiDebugDevToolUtility {
                 .add("span, growx, wrap", UI.separator())
                 .add(
                     UI.panel("fillx, wrap 1")
+                    .add(UI.label("Live cache entries:"))
+                    .add("growx",
+                        UI.label(liveCacheStats).withStyle(it->it.marginLeft(24))
+                        .withTooltip("Live entry counts of SwingTree's global rendering caches. " +
+                                     "Watch them drop to 0 when you set the cache mode to DISABLED.")
+                    )
+                )
+                .add(
+                    UI.panel("fillx, wrap 1")
                     .add(
                         UI.label("Cache mode:")
                         .withTooltip("How aggressively SwingTree's rendering caches trade memory for CPU time.")
@@ -610,11 +619,27 @@ final class GuiDebugDevToolUtility {
                         .withTooltip("DISABLED turns every rendering cache off; higher modes keep more rendered results in memory.")
                         .onSelection( it -> SwingTree.get().setCacheMode(cacheMode.get()) )
                     )
-                    .add(UI.label("Live cache entries:"))
                     .add("growx",
-                        UI.label(liveCacheStats).withStyle(it->it.marginLeft(24))
-                        .withTooltip("Live entry counts of SwingTree's global rendering caches. " +
-                                     "Watch them drop to 0 when you set the cache mode to DISABLED.")
+                        UI.checkBox("9 patch tiling").withStyle(it->it.marginLeft(24))
+                        .withMaxWidth(190)
+                        .isSelectedIf(SwingTree.get().isCacheTilingEnabled())
+                        .withTooltip(
+                            "<html>" +
+                            "Caches styles made of flat colors, borders and shadows <b>independently of the component size</b>:<br>" +
+                            "the style is rendered once into a small image, from which any size is reassembled by copying<br>" +
+                            "the four corners and stretching the four edges and the center (like an Android 9-patch or<br>" +
+                            "CSS <code>border-image</code>). Resizing such a component then costs nothing to re-render, and all<br>" +
+                            "its differently sized siblings share the one small image.<br>" +
+                            "<br>" +
+                            "Styles whose pixels depend on the full bounds (gradients, noises, images, text, custom painters,<br>" +
+                            "and per-edge border colors on rounded corners) are never tiled and keep their exact-size cache.<br>" +
+                            "<br>" +
+                            "Unchecking this is a <b>safety hatch</b>: it makes every style fall back to exact-size caching,<br>" +
+                            "so a resize re-renders. Use it to confirm whether a suspicious rendering artifact comes from the<br>" +
+                            "reconstruction. Rendering stays correct either way, only slower." +
+                            "</html>"
+                        )
+                        .onClick( it -> SwingTree.get().setCacheTilingEnabled(it.get().isSelected()))
                     )
                 )
                 .add("wrap",

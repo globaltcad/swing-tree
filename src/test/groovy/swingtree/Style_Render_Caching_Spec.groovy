@@ -269,6 +269,180 @@ class Style_Render_Caching_Spec extends Specification
             ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
     }
 
+    def 'Resizing a styled component does not invalidate its cached rendering.'()
+    {
+        reportInfo """
+            The component size is part of the style configuration, so naively
+            the cache would miss on every single frame of a live resize (think
+            of a user dragging the window edge) - historically the most
+            expensive repaint scenario for styled components.
+
+            SwingTree avoids this through *stretch tiling*: for styles whose
+            pixels are constant along the component edges (flat colours,
+            borders, shadows - which is the vast majority of real styles),
+            the cache key is made size independent and any component size is
+            reconstructed from one small cached rendering by copying the
+            corners and stretching the edges. The observable consequence,
+            documented here: resizing produces cache *hits*, not misses.
+        """
+        given : 'A button with a rounded background, warmed up at its initial size.'
+            var button =
+                UI.button("Resize me")
+                  .withStyle( it -> it
+                        .borderRadius(20)
+                        .backgroundColor(new Color(10, 80, 160))
+                        .foundationColor(new Color(245, 245, 240))
+                  )
+                  .get(JButton)
+            button.setSize(120, 60) // Size set on the component itself, so resizing below actually takes effect.
+            var ext = ComponentExtension.from(button)
+            Utility.renderSingleComponent(button)
+            Utility.renderSingleComponent(button)
+        expect : 'The cache is warm.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
+
+        when : 'The component grows substantially and is painted again.'
+            int missesBeforeResize = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            int hitsBeforeResize   = ext.cacheHitCount(UI.Layer.BACKGROUND)
+            button.setSize(300, 90)
+            Utility.renderSingleComponent(button)
+        then : 'The resize actually took effect (the style engine did not override it).'
+            button.width == 300 && button.height == 90
+        and : 'The paint was served from the cache - no fresh rendering despite the new size!'
+            ext.cacheHitCount(UI.Layer.BACKGROUND)  > hitsBeforeResize
+            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeResize
+            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+
+        when : 'The component shrinks to yet another size and is painted again.'
+            int missesBeforeShrink = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            button.setSize(150, 70)
+            Utility.renderSingleComponent(button)
+        then : 'Still no fresh rendering - every size maps onto the same cached rendering.'
+            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeShrink
+            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+    }
+
+    def 'Shrinking a styled component to a zero size releases its cached rendering.'()
+    {
+        reportInfo """
+            A cached style-layer image is only worth keeping while the component
+            can actually be rendered. When a component collapses to a zero width
+            or height - because a layout hid it, a split pane divider was dragged
+            all the way over, a tab was deselected, ... - it is effectively
+            non-renderable, and holding on to its (potentially large) cached
+            `BufferedImage` for as long as the component lives would be a pure
+            memory cost with no payoff.
+
+            SwingTree therefore drops the local reference to the cached rendering
+            the moment a component validates at a zero size, so the image can be
+            reclaimed promptly. The observable consequence, documented here: after
+            a component shrinks to `0` in either dimension, `cachedRendering(..)`
+            reports that there is no cached image anymore. Should the component
+            regain a real size later on, the cache simply repopulates from scratch.
+        """
+        given : 'A button with a rounded background, warmed up at a real size.'
+            var button =
+                UI.button("Collapse me")
+                  .withStyle( it -> it
+                        .borderRadius(20)
+                        .backgroundColor(new Color(10, 80, 160))
+                        .foundationColor(new Color(245, 245, 240))
+                  )
+                  .get(JButton)
+            button.setSize(120, 60) // Size set on the component itself, so collapsing below actually takes effect.
+            var ext = ComponentExtension.from(button)
+            Utility.renderSingleComponent(button)
+        expect : 'The cache is warm - the background layer produced a cached rendering.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+
+        when : '''
+            The component collapses to a zero height and its style is re-validated -
+            exactly what happens when a layout resizes it to nothing (a paint alone
+            would not do, since `JComponent.paint` bails out at a zero size).
+        '''
+            button.setSize(120, 0)
+            ext.gatherApplyAndInstallStyle(true)
+        then : 'The cached rendering was released - nothing keeps the image reachable through this component anymore.'
+            !ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+
+        when : 'The component regains a real size and is painted once more.'
+            button.setSize(120, 60)
+            Utility.renderSingleComponent(button)
+        then : 'The cache repopulates from scratch - the rendering is available again.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+    }
+
+    def 'Components of different sizes but the same style share a single cached rendering.'()
+    {
+        reportInfo """
+            Cache sharing between equally styled components used to require
+            them to also have exactly equal sizes. With size independent
+            (stretch tiled) cache keys, a whole toolbar of differently sized
+            buttons with one common style shares one single cached rendering:
+            only the very first one to paint invokes the style renderer,
+            every other one goes straight to a cache hit on its first paint.
+        """
+        given : 'Two buttons sharing a styler but deliberately sized differently.'
+            def common = { conf -> conf
+                .borderRadius(14)
+                .backgroundColor(new Color(120, 60, 10))
+                .foundationColor(new Color(250, 248, 244))
+            }
+            var first  = UI.button("First").withStyle(common as swingtree.api.Styler).get(JButton)
+            var second = UI.button("Second").withStyle(common as swingtree.api.Styler).get(JButton)
+            first.setSize(200, 80)
+            second.setSize(340, 120)
+            var firstExt  = ComponentExtension.from(first)
+            var secondExt = ComponentExtension.from(second)
+
+        when : 'Both are rendered once, the differently sized one second.'
+            Utility.renderSingleComponent(first)
+            Utility.renderSingleComponent(second)
+
+        then : 'The first paint of the first button populated the shared cache entry.'
+            firstExt.cacheMissCount(UI.Layer.BACKGROUND) >= 1
+            firstExt.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+        and : 'The second button was served from the cache on its very first paint, despite its different size.'
+            secondExt.cacheMissCount(UI.Layer.BACKGROUND) == 0
+            secondExt.cacheHitCount(UI.Layer.BACKGROUND)  >= 1
+    }
+
+    def 'Styles which cannot be stretch tiled still re-render on every resize.'()
+    {
+        reportInfo """
+            Not every style survives being cut into nine stretchable tiles:
+            a gradient for example spans the full component, so its pixels
+            genuinely differ at every size. Such styles keep the classic
+            exact-size cache key, and resizing them re-renders - exactly
+            the behaviour all styles had before stretch tiling existed.
+        """
+        given : 'A button with a gradient background (heavy, cacheable, but not tileable).'
+            var button =
+                UI.button("Gradient")
+                  .withStyle( it -> it
+                        .borderRadius(10)
+                        .gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
+                  )
+                  .get(JButton)
+            button.setSize(120, 60) // Size set on the component itself, so resizing below actually takes effect.
+            var ext = ComponentExtension.from(button)
+            Utility.renderSingleComponent(button)
+            Utility.renderSingleComponent(button)
+        expect : 'The gradient is cached and served from the cache at a stable size.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
+
+        when : 'The component is resized and painted again.'
+            int missesBeforeResize = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            int hitsBeforeResize   = ext.cacheHitCount(UI.Layer.BACKGROUND)
+            button.setSize(300, 90)
+            Utility.renderSingleComponent(button)
+        then : 'The new size required a fresh rendering (a miss), not a cache hit.'
+            ext.cacheMissCount(UI.Layer.BACKGROUND) > missesBeforeResize
+            ext.cacheHitCount(UI.Layer.BACKGROUND)  == hitsBeforeResize
+    }
+
     def 'Caching is per-layer: a heavy background does not imply a cached foreground.'()
     {
         reportInfo """

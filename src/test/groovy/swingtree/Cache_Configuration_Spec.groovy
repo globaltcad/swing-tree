@@ -126,6 +126,66 @@ class Cache_Configuration_Spec extends Specification
             ComponentExtension.globalRenderCacheEntryCounts().toMap()["style layers"] > 0
     }
 
+    def 'Stretch tiling can be turned off at runtime, restoring exact-size cache keys.'()
+    {
+        reportInfo """
+            Size independent (stretch tiled) render caching is what makes
+            resizing styled components cheap: eligible styles share one cached
+            rendering across all sizes. Because it reconstructs pixels rather
+            than re-rendering them, it also ships with a safety hatch:
+            `SwingTree.get().setCacheTilingEnabled(false)` (or the system
+            property `swingtree.cacheMode.tiling=false`) restores the classic
+            exact-size cache keying, where every resize re-renders. This
+            scenario pins the whole round trip: on -> off -> on again.
+        """
+        given : 'A deterministic budget and a styled button (flat colors: stretch tileable).'
+            CacheBudget.UNITS_OVERRIDE = 10
+            ComponentExtension.updateAllCachesFromLibraryConfig()
+            var button =
+                UI.button("Switch")
+                  .withStyle( it -> it
+                        .borderRadius(16)
+                        .backgroundColor(new Color(60, 130, 90))
+                        .foundationColor(new Color(240, 240, 235))
+                  )
+                  .get(JButton)
+            button.setSize(140, 60)
+            var ext = ComponentExtension.from(button)
+
+        expect : 'Stretch tiling is enabled by default.'
+            SwingTree.get().isCacheTilingEnabled()
+
+        when : 'We warm the cache and then resize, with tiling enabled.'
+            2.times { Utility.renderSingleComponent(button) }
+            int missesWhileTiled = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            button.setSize(280, 90)
+            Utility.renderSingleComponent(button)
+        then : 'The resize did not require any fresh rendering.'
+            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesWhileTiled
+
+        when : 'We flip the safety hatch and resize twice more.'
+            SwingTree.get().setCacheTilingEnabled(false)
+            button.setSize(310, 100)
+            Utility.renderSingleComponent(button)
+            int missesAfterFirstUntiledPaint = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            button.setSize(340, 110)
+            Utility.renderSingleComponent(button)
+        then : 'The flag is off, and now every new size requires a fresh rendering - the classic behavior.'
+            !SwingTree.get().isCacheTilingEnabled()
+            ext.cacheMissCount(UI.Layer.BACKGROUND) > missesAfterFirstUntiledPaint
+
+        when : 'We re-enable tiling, let one paint repopulate the canonical rendering, and resize again.'
+            SwingTree.get().setCacheTilingEnabled(true)
+            button.setSize(360, 120)
+            Utility.renderSingleComponent(button)
+            int missesAfterRepopulation = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            button.setSize(400, 130)
+            Utility.renderSingleComponent(button)
+        then : 'Resizing is miss-resistant again.'
+            SwingTree.get().isCacheTilingEnabled()
+            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesAfterRepopulation
+    }
+
     def 'The live cache monitoring snapshot covers every global rendering cache.'()
     {
         reportInfo """

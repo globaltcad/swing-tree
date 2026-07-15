@@ -143,7 +143,8 @@ public final class SwingTreeInitConfig
                         MarkerFactory.getMarker(""),
                         SystemProperties.getBool(SystemProperties.RECORD_DEBUG_SOURCE_TRACE, true ),
                         System.getProperty(SystemProperties.ENABLE_DEV_TOOL_KEY_STROKE,"ctrl shift I"),
-                        SystemProperties.getEnum(SystemProperties.CACHE_MODE, CacheMode.class, CacheMode.BALANCED)
+                        SystemProperties.getEnum(SystemProperties.CACHE_MODE, CacheMode.class, CacheMode.BALANCED),
+                        SystemProperties.getBool(SystemProperties.CACHE_TILING, true)
                     );
                     /*
                         Note that we want the refresh rate to be as high as possible so that the animation
@@ -176,6 +177,7 @@ public final class SwingTreeInitConfig
     private final boolean          _recordDebugSourceTrace;
     private final String           _devToolKeyStrokeShortcut;
     private final CacheMode        _cacheMode;
+    private final boolean          _isCacheTilingEnabled;
 
 
     private SwingTreeInitConfig(
@@ -190,7 +192,8 @@ public final class SwingTreeInitConfig
         Marker              logMarker,
         boolean             recordDebugSourceTrace,
         String              devToolKeyStroke,
-        CacheMode           cacheMode
+        CacheMode           cacheMode,
+        boolean             isCacheTilingEnabled
     ) {
         _defaultFont              = defaultFont;
         _fontInstallation         = Objects.requireNonNull(fontInstallation);
@@ -204,6 +207,7 @@ public final class SwingTreeInitConfig
         _recordDebugSourceTrace   = recordDebugSourceTrace;
         _devToolKeyStrokeShortcut = Objects.requireNonNull(devToolKeyStroke);
         _cacheMode                = Objects.requireNonNull(cacheMode);
+        _isCacheTilingEnabled     = isCacheTilingEnabled;
     }
 
     /**
@@ -358,7 +362,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 newDefaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut, _cacheMode
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -382,7 +386,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 newDefaultFont, newFontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut, _cacheMode
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -400,7 +404,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, newEventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut, _cacheMode
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -415,7 +419,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, newStyleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut, _cacheMode
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -438,7 +442,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, newUiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut, _cacheMode
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -456,7 +460,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, newUiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut, _cacheMode
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -474,7 +478,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 newUiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut, _cacheMode
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -498,7 +502,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, newDefaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut, _cacheMode
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -516,7 +520,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, newLogMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut, _cacheMode
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -540,7 +544,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, isEnabled,
-                _devToolKeyStrokeShortcut, _cacheMode
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -564,7 +568,7 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                keyStroke, _cacheMode
+                keyStroke, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -597,7 +601,46 @@ public final class SwingTreeInitConfig
         return new SwingTreeInitConfig(
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut, Objects.requireNonNull(cacheMode)
+                _devToolKeyStrokeShortcut, Objects.requireNonNull(cacheMode), _isCacheTilingEnabled
+        );
+    }
+
+    /**
+     *  Tells whether SwingTree may cache the rendering of eligible component styles
+     *  <b>independently of the component size</b> using stretch tiling (also known
+     *  as "nine slice" rendering), so that resizing a styled component does not
+     *  invalidate its cached rendering (see {@link #withCacheTilingEnabled(boolean)}).
+     */
+    boolean isCacheTilingEnabled() {
+        return _isCacheTilingEnabled;
+    }
+
+    /**
+     *  SwingTree caches the rendered output of component styles keyed by their style
+     *  configuration, which includes the component size. For styles whose pixels are
+     *  constant along the component edges (flat colors, borders, shadows), SwingTree
+     *  additionally makes the cache key <b>size independent</b> through stretch tiling
+     *  (also known as "nine slice" rendering): the style is rendered once at a small
+     *  canonical size and any component size is reconstructed by copying the corner
+     *  tiles and stretching the edge bands. This makes live-resizing styled components
+     *  dramatically cheaper, because no re-rendering happens at all.
+     *  <p>
+     *  This flag exists as a safety hatch: disabling it makes every style fall back to
+     *  the classic exact-size cache keying. It can also be set through the system
+     *  property {@code "swingtree.cacheMode.tiling"} and changed at runtime through
+     *  {@link SwingTree#setCacheTilingEnabled(boolean)}.
+     *  <p>
+     *  <strong>Default</strong> {@code true}
+     *
+     * @param enabled Whether size independent (stretch tiled) render caching is allowed.
+     * @return A new {@link SwingTreeInitConfig} instance with the new flag.
+     * @see SwingTree#isCacheTilingEnabled()
+     */
+    public SwingTreeInitConfig withCacheTilingEnabled( boolean enabled ) {
+        return new SwingTreeInitConfig(
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut, _cacheMode, enabled
         );
     }
 
@@ -677,6 +720,17 @@ public final class SwingTreeInitConfig
          * <strong>Default</strong> {@code BALANCED}
          */
         String CACHE_MODE = "swingtree.cacheMode";
+
+        /**
+         * Enables or disables size independent (stretch tiled / "nine slice") caching
+         * of eligible component style renderings, which makes resizing styled
+         * components cheap because it no longer invalidates their render caches
+         * (see {@link SwingTreeInitConfig#withCacheTilingEnabled(boolean)}).
+         * <p>
+         * <strong>Allowed Values</strong> {@code true} or {@code false}<br>
+         * <strong>Default</strong> {@code true}
+         */
+        String CACHE_TILING = "swingtree.cacheMode.tiling";
 
         /**
          * Checks whether a system property is set and returns {@code true} if its value
