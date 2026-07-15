@@ -168,8 +168,18 @@ final class LayerCache
     public final void validate( ComponentConf newConf )
     {
         if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) ) {
-            _layerRenderData = new Pooled<>(LayerRenderConf.none());
-            _cacheKey        = _layerRenderData;
+            /*
+                The component is (currently) non-renderable - collapsed or hidden.
+                We drop our reference to any previously cached image so it can be
+                reclaimed promptly instead of being pinned for as long as this
+                component lives, and we reset the initialization state so that a
+                later non-zero size revalidates and re-allocates from scratch.
+            */
+            _localCache               = null;
+            _cacheHitsUntilAllocation = -1;
+            _isInitialized            = false;
+            _layerRenderData          = new Pooled<>(LayerRenderConf.none());
+            _cacheKey                 = _layerRenderData;
             return;
         }
 
@@ -207,11 +217,12 @@ final class LayerCache
         }
 
         if ( _localCache == null || cacheStateChanged ) {
-            // We only drop the local cached image here – we deliberately do not
-            // reset `_cacheHitsUntilAllocation` and `_isInitialized` (as
-            // `_freeLocalCache()` does), because we just computed the correct
-            // `_cacheHitsUntilAllocation` for the new state above and we want
-            // it to be used by the upcoming `_allocateOrGetCachedBuffer` call.
+            // We only drop the stale local image here so the call below re-attaches
+            // to the entry for the new cache key. Unlike the caching-disabled branch
+            // above, we deliberately keep `_cacheHitsUntilAllocation` and
+            // `_isInitialized`, because we just computed the correct
+            // `_cacheHitsUntilAllocation` for the new state above and want it to be
+            // used by the upcoming `_allocateOrGetCachedBuffer` call.
             _localCache = null;
             _allocateOrGetCachedBuffer(new Pooled<>(newCacheState));
         }

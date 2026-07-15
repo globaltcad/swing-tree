@@ -323,6 +323,56 @@ class Style_Render_Caching_Spec extends Specification
             ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
     }
 
+    def 'Shrinking a styled component to a zero size releases its cached rendering.'()
+    {
+        reportInfo """
+            A cached style-layer image is only worth keeping while the component
+            can actually be rendered. When a component collapses to a zero width
+            or height - because a layout hid it, a split pane divider was dragged
+            all the way over, a tab was deselected, ... - it is effectively
+            non-renderable, and holding on to its (potentially large) cached
+            `BufferedImage` for as long as the component lives would be a pure
+            memory cost with no payoff.
+
+            SwingTree therefore drops the local reference to the cached rendering
+            the moment a component validates at a zero size, so the image can be
+            reclaimed promptly. The observable consequence, documented here: after
+            a component shrinks to `0` in either dimension, `cachedRendering(..)`
+            reports that there is no cached image anymore. Should the component
+            regain a real size later on, the cache simply repopulates from scratch.
+        """
+        given : 'A button with a rounded background, warmed up at a real size.'
+            var button =
+                UI.button("Collapse me")
+                  .withStyle( it -> it
+                        .borderRadius(20)
+                        .backgroundColor(new Color(10, 80, 160))
+                        .foundationColor(new Color(245, 245, 240))
+                  )
+                  .get(JButton)
+            button.setSize(120, 60) // Size set on the component itself, so collapsing below actually takes effect.
+            var ext = ComponentExtension.from(button)
+            Utility.renderSingleComponent(button)
+        expect : 'The cache is warm - the background layer produced a cached rendering.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+
+        when : '''
+            The component collapses to a zero height and its style is re-validated -
+            exactly what happens when a layout resizes it to nothing (a paint alone
+            would not do, since `JComponent.paint` bails out at a zero size).
+        '''
+            button.setSize(120, 0)
+            ext.gatherApplyAndInstallStyle(true)
+        then : 'The cached rendering was released - nothing keeps the image reachable through this component anymore.'
+            !ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+
+        when : 'The component regains a real size and is painted once more.'
+            button.setSize(120, 60)
+            Utility.renderSingleComponent(button)
+        then : 'The cache repopulates from scratch - the rendering is available again.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+    }
+
     def 'Components of different sizes but the same style share a single cached rendering.'()
     {
         reportInfo """
