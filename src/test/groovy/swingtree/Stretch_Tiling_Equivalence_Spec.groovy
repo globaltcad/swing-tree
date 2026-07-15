@@ -86,15 +86,23 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
         return image
     }
 
-    /** Paints a fresh component with stretch tiling on, twice, and returns the
-     *  second image — which is served purely from the warm cache. */
-    private static BufferedImage renderedTiled( int width, int height, Closure styler ) {
+    /** Paints a fresh box with stretch tiling on, twice, so it warms the shared exemplar
+     *  and any further paint of it is served purely from that cache. Returns the *live box*
+     *  on purpose: the exemplar lives in a weakly keyed global pool and survives only while
+     *  a component still holds its cache key, so the caller must keep this box referenced for
+     *  as long as it relies on the entry being warm (e.g. while a sibling reads it). */
+    private static JBox tiledAndWarmed( int width, int height, Closure styler ) {
         SwingTree.get().setCacheTilingEnabled(true)
         var box = boxWith(width, height, styler)
         Utility.renderSingleComponent(box)
-        var image = Utility.renderSingleComponent(box)
+        Utility.renderSingleComponent(box)
         assert box.width == width && box.height == height
-        return image
+        return box
+    }
+
+    /** The warm, cache-served rendering of a stretch-tiled box (see {@link #tiledAndWarmed}). */
+    private static BufferedImage renderedTiled( int width, int height, Closure styler ) {
+        return Utility.renderSingleComponent(tiledAndWarmed(width, height, styler))
     }
 
     def 'Stretch tiled painting is pixel equivalent to classic painting. (#description)'(
@@ -109,11 +117,11 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
         """
         given : 'The component painted the classic way, with stretch tiling disabled:'
             var classic = renderedClassically(width, height, styler)
-        and : 'An identically styled and sized component painted with stretch tiling enabled:'
-            var tiled = renderedTiled(width, height, styler)
+        and : 'An identically styled box painted with stretch tiling enabled and warmed into the shared cache:'
+            var tiledBox = tiledAndWarmed(width, height, styler)
         and : """
             Proof that the comparison is not vacuous, i.e. that the style really
-            is being cached size independently and not just re-rendered: a third,
+            is being cached size independently and not just re-rendered: a
             differently sized sibling finds the shared cache entry already
             populated and is served from it on its very first paint.
         """
@@ -123,6 +131,10 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1
 
         expect : 'Both switch positions produced practically identical pixels:'
+            // `tiledBox` is deliberately painted here, *after* the sibling check: this keeps
+            // it (and thus the weakly held shared exemplar the sibling relies on) reachable
+            // across that check, so the sibling can never race a GC into a cache miss.
+            var tiled = Utility.renderSingleComponent(tiledBox)
             Utility.similarityBetween(classic, tiled) >= 99.9
 
         where :
