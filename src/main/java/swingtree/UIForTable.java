@@ -4,10 +4,13 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.Event;
 import sprouts.Observable;
+import sprouts.Tuple;
+import sprouts.Val;
 import sprouts.Vals;
 import sprouts.Var;
 import swingtree.api.Buildable;
 import swingtree.api.Configurator;
+import swingtree.api.model.AbstractSnapshotTableModel;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
@@ -608,9 +611,57 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     public final UIForTable<T> withModel( BasicTableModel model ) {
         NullUtil.nullArgCheck(model, "model", BasicTableModel.class);
         return _with( thisComponent -> {
-                    thisComponent.setModel(model);
+                    _installModel(thisComponent, model);
                 })
                 ._this();
+    }
+
+    /**
+     *  Binds the table to a {@link Tuple} based, fully thread safe and reactive
+     *  row major data source, where the outer {@link Tuple} holds the rows and
+     *  each inner {@link Tuple} holds the cells of a row.
+     *  <p>
+     *  This is the recommended way to model dynamic, application thread owned
+     *  table data: because a {@link Tuple} is deeply immutable, the table works
+     *  with a UI thread owned snapshot of it (so the AWT Event Dispatch Thread
+     *  never reads application thread owned mutable state), and because the
+     *  tuple carries a change diff, row insertions, removals and updates are
+     *  synced to the {@link JTable} incrementally instead of rebuilding the
+     *  whole table. The table updates itself automatically whenever the property
+     *  changes, so no {@code updateTableOn(..)} binding is needed.
+     *  <p>
+     *  If the supplied property is a mutable {@link Var}, user edits (for cells
+     *  you make editable) are written back into it on the application thread.
+     *  <pre>{@code
+     *  var rows = Var.of(Tuple.of(
+     *      Tuple.of("Alice", "30"),
+     *      Tuple.of("Bob",   "42")
+     *  ));
+     *  UI.table().withModel(rows);
+     *  }</pre>
+     *
+     * @param rows A property holding a row major {@link Tuple} of {@link Tuple}s of cell values.
+     * @return This builder node, to allow for method chaining.
+     * @param <E> The common type of the cell values.
+     */
+    public final <E> UIForTable<T> withModel( Val<Tuple<Tuple<E>>> rows ) {
+        Objects.requireNonNull(rows);
+        return _with( thisComponent -> {
+                    _installModel(thisComponent, new TuplePropertyTableModel<>(rows));
+                })
+                ._this();
+    }
+
+    /**
+     *  Installs a table model on the given table, first handing our thread safe
+     *  {@link AbstractSnapshotTableModel}s the current {@link swingtree.threading.EventProcessor}
+     *  (which they need to decide whether to snapshot across threads or read live)
+     *  before the {@link JTable} starts querying the model.
+     */
+    private void _installModel( T thisComponent, TableModel model ) {
+        if ( model instanceof AbstractSnapshotTableModel )
+            ((AbstractSnapshotTableModel) model)._setEventProcessor(_state().eventProcessor());
+        thisComponent.setModel(model);
     }
 
     /**
@@ -633,19 +684,19 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         boolean isEditable = mode.isEditable();
         if ( isRowMajor )
             return _with( thisComponent ->
-                    thisComponent.setModel(new ListBasedTableModel<E>(isEditable, dataSource)
+                    _installModel(thisComponent, new ListBasedTableModel<E>(isEditable, dataSource)
                     {
-                        @Override public int getRowCount() { return getData().size(); }
-                        @Override public int getColumnCount() {
+                        @Override protected int _liveRowCount() { return getData().size(); }
+                        @Override protected int _liveColumnCount() {
                             List<List<E>> data = getData();
                             return ( data.isEmpty() ? 0 : data.get(0).size() );
                         }
-                        @Override public @Nullable Object getValueAt(int rowIndex, int columnIndex) {
+                        @Override protected @Nullable Object _liveValueAt(int rowIndex, int columnIndex) {
                             List<List<E>> data = getData();
                             if (isNotWithinBounds(rowIndex, columnIndex)) return null;
                             return data.get(rowIndex).get(columnIndex);
                         }
-                        @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+                        @Override protected void _liveSetValueAt(@Nullable Object aValue, int rowIndex, int columnIndex) {
                             List<List<E>> data = getData();
                             if ( !isEditable || isNotWithinBounds(rowIndex, columnIndex) ) return;
                             data.get(rowIndex).set(columnIndex, (E)aValue);
@@ -655,19 +706,19 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
                 ._this();
         else // isColumnMajor
             return _with( thisComponent ->
-                    thisComponent.setModel(new ListBasedTableModel<E>(isEditable, dataSource)
+                    _installModel(thisComponent, new ListBasedTableModel<E>(isEditable, dataSource)
                     {
-                        @Override public int getRowCount() {
+                        @Override protected int _liveRowCount() {
                             List<List<E>> data = getData();
                             return (data.isEmpty() ? 0 : data.get(0).size());
                         }
-                        @Override public int getColumnCount() { return getData().size(); }
-                        @Override public @Nullable Object getValueAt( int rowIndex, int columnIndex ) {
+                        @Override protected int _liveColumnCount() { return getData().size(); }
+                        @Override protected @Nullable Object _liveValueAt( int rowIndex, int columnIndex ) {
                             List<List<E>> data = getData();
                             if ( isNotWithinBounds(rowIndex, columnIndex) ) return null;
                             return data.get(columnIndex).get(rowIndex);
                         }
-                        @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+                        @Override protected void _liveSetValueAt(@Nullable Object aValue, int rowIndex, int columnIndex) {
                             List<List<E>> data = getData();
                             if ( !isEditable || isNotWithinBounds(rowIndex, columnIndex) ) return;
                             data.get(columnIndex).set(rowIndex, (E)aValue);
@@ -693,7 +744,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      */
     public final <E> UIForTable<T> withModel( UI.MapData mode, TableMapDataSource<E> dataSource ) {
         return _with( thisComponent -> {
-                    thisComponent.setModel(new MapBasedColumnMajorTableModel<>(mode.isEditable(), dataSource));
+                    _installModel(thisComponent, new MapBasedColumnMajorTableModel<>(mode.isEditable(), dataSource));
                 })
                 ._this();
     }
@@ -730,30 +781,42 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         return _with( thisComponent -> {
                     WeakReference<T> thisComponentRef = new WeakReference<>(thisComponent);
                     ComponentExtension.from(thisComponent).storeBoundObservable(
-                        observable.subscribe(()->
-                            _runInUI(()->{
-                                T innerComponent = thisComponentRef.get();
-                                if (innerComponent == null)
-                                    return;
-                                TableModel model = innerComponent.getModel();
-                                if ( model instanceof AbstractTableModel ) {
-                                    // We want the table model update to be as thorough as possible, so we
-                                    // will fire a table structure changed event, followed by a table data
-                                    // changed event.
-                                    ((AbstractTableModel)model).fireTableStructureChanged();
-                                    ((AbstractTableModel)model).fireTableDataChanged();
-                                }
-                                else
-                                    throw new IllegalStateException("The table model is not an AbstractTableModel instance.");
-                            })
-                        )
+                        observable.subscribe(()-> {
+                            T innerComponent = thisComponentRef.get();
+                            if (innerComponent == null)
+                                return;
+                            TableModel model = innerComponent.getModel();
+                            if ( model instanceof AbstractSnapshotTableModel ) {
+                                // Our own thread safe models own the threading of the refresh:
+                                // under the decoupled protocol they snapshot on this (application)
+                                // thread and then publish the swap to the UI thread, whereas under
+                                // the coupled protocol they simply fire the change events on the UI thread.
+                                ((AbstractSnapshotTableModel)model).refresh();
+                            }
+                            else
+                                _runInUI(()->{
+                                    T inner = thisComponentRef.get();
+                                    if (inner == null)
+                                        return;
+                                    TableModel innerModel = inner.getModel();
+                                    if ( innerModel instanceof AbstractTableModel ) {
+                                        // We want the table model update to be as thorough as possible, so we
+                                        // will fire a table structure changed event, followed by a table data
+                                        // changed event.
+                                        ((AbstractTableModel)innerModel).fireTableStructureChanged();
+                                        ((AbstractTableModel)innerModel).fireTableDataChanged();
+                                    }
+                                    else
+                                        throw new IllegalStateException("The table model is not an AbstractTableModel instance.");
+                                });
+                        })
                     );
                 })
                 ._this();
     }
 
 
-    private static abstract class ListBasedTableModel<E> extends AbstractTableModel
+    private static abstract class ListBasedTableModel<E> extends AbstractSnapshotTableModel
     {
         private final TableListDataSource<E> dataSource;
         private final boolean isEditable;
@@ -763,7 +826,9 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
             this.dataSource = dataSource;
         }
 
-        @Override public boolean isCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }
+        @Override protected boolean _liveCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }
+        @Override protected @Nullable String _liveColumnName( int columnIndex ) { return null; }
+        @Override protected Class<?> _liveColumnClass( int columnIndex ) { return Object.class; }
 
         protected List<List<E>> getData() {
             List<List<E>> data = dataSource.get();
@@ -778,7 +843,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     }
 
 
-    private abstract static class MapBasedTableModel<E> extends AbstractTableModel
+    private abstract static class MapBasedTableModel<E> extends AbstractSnapshotTableModel
     {
         private final TableMapDataSource<E> dataSource;
         private final boolean isEditable;
@@ -795,13 +860,14 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         }
 
         @Override
-        public @Nullable String getColumnName(int column) {
+        protected @Nullable String _liveColumnName(int column) {
             List<String> columnNames = new ArrayList<>(getData().keySet());
             if ( column < 0 || column >= columnNames.size() ) return null;
             return columnNames.get(column);
         }
 
-        @Override public boolean isCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }
+        @Override protected Class<?> _liveColumnClass( int columnIndex ) { return Object.class; }
+        @Override protected boolean _liveCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }
 
 
         protected boolean isNotWithinBounds(int rowIndex, int colIndex) {
@@ -819,7 +885,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         }
 
         @Override
-        public int getRowCount() {
+        protected int _liveRowCount() {
             Map<String, List<E>> data = getData();
             return data.values()
                         .stream()
@@ -830,10 +896,10 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         }
 
         @Override
-        public int getColumnCount() { return getData().size(); }
+        protected int _liveColumnCount() { return getData().size(); }
 
         @Override
-        public @Nullable Object getValueAt( int rowIndex, int columnIndex ) {
+        protected @Nullable Object _liveValueAt( int rowIndex, int columnIndex ) {
             if ( isNotWithinBounds(rowIndex, columnIndex) )
                 return null;
             List<E> column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);
@@ -845,7 +911,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         }
 
         @Override
-        public void setValueAt( Object aValue, int rowIndex, int columnIndex ) {
+        protected void _liveSetValueAt( @Nullable Object aValue, int rowIndex, int columnIndex ) {
             if ( isNotWithinBounds(rowIndex, columnIndex) )
                 return;
             List<E> column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);

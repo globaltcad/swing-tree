@@ -4,11 +4,9 @@ import org.jspecify.annotations.Nullable;
 import sprouts.Observable;
 import sprouts.Event;
 import sprouts.Tuple;
-import swingtree.UI;
 import swingtree.api.Buildable;
 
 import javax.swing.event.TableModelListener;
-import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableModel;
 import java.util.Objects;
 
@@ -284,19 +282,20 @@ public interface BasicTableModel extends TableModel
         @Override public BasicTableModel build() {
             FunTableModel tm = new FunTableModel();
             if ( observableEvent != null )
-                observableEvent.subscribe(()-> UI.run(()->{
-                    // We want the table model update to be as thorough as possible, so we
-                    // will fire a table structure changed event, followed by a table data
-                    // changed event.
-                    tm.fireTableStructureChanged();
-                    tm.fireTableDataChanged();
-                }));
+                observableEvent.subscribe(()->
+                    // The model itself decides how to thread and fire the refresh,
+                    // based on the event processor it was installed with. Under the
+                    // decoupled protocol it snapshots on this (application) thread and
+                    // then publishes the swap to the UI thread; under the coupled
+                    // protocol it simply fires the change events on the UI thread.
+                    tm.refresh()
+                );
             return tm;
         }
 
-         private class FunTableModel extends AbstractTableModel implements BasicTableModel {
-             @Override public int getRowCount() { return rowCount == null ? 0 : rowCount.get(); }
-             @Override public int getColumnCount() {
+         private class FunTableModel extends AbstractSnapshotTableModel implements BasicTableModel {
+             @Override protected int _liveRowCount() { return rowCount == null ? 0 : rowCount.get(); }
+             @Override protected int _liveColumnCount() {
                  if (colCount == null) {
                      if ( columnClass instanceof FixedColumnClasses ) {
                          return ((FixedColumnClasses)columnClass).classes.size();
@@ -307,17 +306,18 @@ public interface BasicTableModel extends TableModel
                  }
                  return colCount == null ? 0 : colCount.get();
              }
-             @Override public Object getValueAt(int rowIndex, int colIndex) { return entryGetter == null ? null : entryGetter.get(rowIndex, colIndex); }
-             @Override public void setValueAt(Object value, int rowIndex, int colIndex) { if ( entrySetter != null ) entrySetter.set(rowIndex, colIndex, (E) value); }
-             @Override public Class<?> getColumnClass(int colIndex) { return columnClass == null ? super.getColumnClass(colIndex) : columnClass.get(colIndex); }
-             @Override public boolean isCellEditable(int rowIndex, int colIndex) { return cellEditable != null && cellEditable.is(rowIndex, colIndex); }
-             @Override public String getColumnName(int colIndex) {
+             @Override protected @Nullable Object _liveValueAt(int rowIndex, int colIndex) { return entryGetter == null ? null : entryGetter.get(rowIndex, colIndex); }
+             @Override protected void _liveSetValueAt(@Nullable Object value, int rowIndex, int colIndex) { if ( entrySetter != null ) entrySetter.set(rowIndex, colIndex, (E) value); }
+             @Override protected Class<?> _liveColumnClass(int colIndex) { return columnClass == null ? Object.class : columnClass.get(colIndex); }
+             @Override protected boolean _liveCellEditable(int rowIndex, int colIndex) { return cellEditable != null && cellEditable.is(rowIndex, colIndex); }
+             @Override protected @Nullable String _liveColumnName(int colIndex) {
                  if (columnName == null) {
                      if ( columnClass instanceof FixedColumnClasses ) {
                          return ((FixedColumnClasses)columnClass).get(colIndex).getSimpleName();
                      }
+                     return null; // A null name lets the base fall back to the default (spreadsheet style) column name.
                  }
-                 return columnName == null ? super.getColumnName(colIndex) : columnName.get(colIndex);
+                 return columnName.get(colIndex);
              }
          }
 

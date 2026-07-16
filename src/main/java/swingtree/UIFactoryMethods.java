@@ -5698,6 +5698,35 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Creates a declarative UI builder for a {@link JTable} bound to a fully
+     *  thread safe, reactive {@link Tuple} based row major data source, where the
+     *  outer {@link Tuple} holds the rows and each inner {@link Tuple} holds the
+     *  cells of a row.
+     *  <p>
+     *  This is the recommended factory for dynamic, application thread owned table
+     *  data: the table works with a UI thread owned snapshot of the immutable
+     *  tuple (so the AWT Event Dispatch Thread never touches application thread
+     *  owned mutable state), and row changes are synced to the table incrementally
+     *  through the change diff carried by the tuple. The table updates itself
+     *  automatically whenever the property changes.
+     *  <pre>{@code
+     *  var rows = Var.of(Tuple.of(
+     *      Tuple.of("Alice", "30"),
+     *      Tuple.of("Bob",   "42")
+     *  ));
+     *  UI.table(rows);
+     *  }</pre>
+     *
+     * @param rows A property holding a row major {@link Tuple} of {@link Tuple}s of cell values.
+     * @return A fluent builder instance for a new {@link JTable}.
+     * @param <E> The common type of the cell values.
+     */
+    public static <E> UIForTable<JTable> table( Val<Tuple<Tuple<E>>> rows ) {
+        NullUtil.nullArgCheck(rows, "rows", Val.class);
+        return table().withModel(rows);
+    }
+
+    /**
      *  Use this to create a new {@link JTable} with a table model whose data can be represented based
      *  on a {@link java.util.List} of {@link java.util.List}s of entries.  <br>
      *  This method will automatically create a {@link AbstractTableModel} instance for you.

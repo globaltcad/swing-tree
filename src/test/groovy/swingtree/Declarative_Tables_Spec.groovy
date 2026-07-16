@@ -10,6 +10,8 @@ import swingtree.api.model.BasicTableModel
 import swingtree.threading.EventProcessor
 
 import javax.swing.*
+import javax.swing.event.TableModelEvent
+import javax.swing.event.TableModelListener
 import java.awt.*
 
 @Title("Creating Tables")
@@ -425,6 +427,80 @@ class Declarative_Tables_Spec extends Specification
         then : '...the call is simply ignored.'
             noExceptionThrown()
             model.getValueAt(0, 0) == null
+    }
+
+    def 'Firing the `updateOn` event notifies the table model listeners and refreshes the values.'()
+    {
+        reportInfo """
+            This is a regression guard for the lambda based table model update path.
+            When the bound `updateOn` event fires, the model must notify its
+            registered `TableModelListener`s (so a `JTable` repaints) and the
+            values served afterwards must reflect the new state of the data.
+        """
+        given : 'Some mutable data and an update event.'
+            var data = [10, 20, 30]
+            var update = Event.create()
+        and : 'A lambda based table model bound to the update event.'
+            var model =
+                    UI.table().withModel( m -> m
+                        .colNames("V")
+                        .rowCount( () -> data.size() )
+                        .getsEntryAt( (r, c) -> data[r] )
+                        .updateOn(update)
+                    )
+                    .get(JTable).getModel()
+        and : 'A listener recording the events it receives.'
+            var events = []
+            model.addTableModelListener({ TableModelEvent e -> events << e } as TableModelListener)
+
+        expect : 'The model starts with the initial data.'
+            model.getRowCount() == 3
+            model.getValueAt(0, 0) == 10
+            model.getValueAt(2, 0) == 30
+
+        when : 'We change the data and fire the update event.'
+            data = [11, 22, 33, 44]
+            update.fire()
+            UI.sync()
+        then : 'The listeners were notified...'
+            !events.isEmpty()
+        and : '...and the model now serves the new data.'
+            model.getRowCount() == 4
+            model.getValueAt(0, 0) == 11
+            model.getValueAt(3, 0) == 44
+    }
+
+    def 'Firing `updateTableOn` notifies the listeners of a list based table model.'()
+    {
+        reportInfo """
+            The same regression guard as above, but for the collection based
+            table models installed through `updateTableOn(Event)`.
+        """
+        given : 'A mutable matrix and an update event.'
+            var data = [[1, 2], [3, 4]]
+            var event = Event.create()
+        and : 'A row major list based table bound to the update event.'
+            var model =
+                    UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data })
+                    .updateTableOn(event as Event)
+                    .get(JTable).getModel()
+        and : 'A listener recording the events it receives.'
+            var events = []
+            model.addTableModelListener({ TableModelEvent e -> events << e } as TableModelListener)
+
+        expect : 'The model starts with the initial data.'
+            model.getRowCount() == 2
+            model.getValueAt(1, 1) == 4
+
+        when : 'We grow the data and fire the event.'
+            data = [[5, 6], [7, 8], [9, 10]]
+            event.fire()
+            UI.sync()
+        then : 'The listeners were notified and the values reflect the new data.'
+            !events.isEmpty()
+            model.getRowCount() == 3
+            model.getValueAt(2, 0) == 9
+            model.getValueAt(2, 1) == 10
     }
 
     def 'Every aspect of a lambda based table model may only be declared once.'()
