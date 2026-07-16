@@ -5,8 +5,11 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import sprouts.Event
+import sprouts.Tuple
+import sprouts.Val
 import sprouts.Var
 import swingtree.api.model.BasicTableModel
+import swingtree.api.model.TableSnapshot
 import swingtree.threading.EventProcessor
 
 import javax.swing.*
@@ -524,6 +527,308 @@ class Declarative_Tables_Spec extends Specification
             builder.colCount(null)
         then :
             thrown(IllegalArgumentException)
+    }
+
+    def 'A property of a `Tuple` of `Tuple`s can be used as a data source for tables.'()
+    {
+        reportInfo """
+            The most convenient way to model the data of a table is a property
+            holding a `Tuple` of `Tuple`s of cell values, a matrix of rows.
+            Because a `Tuple` is immutable, such a table is thread safe by
+            construction, and because the property is observable, the table
+            updates itself whenever the property changes. So unlike for the
+            collection based data sources, you do not need to bind an update
+            `Event` through `updateTableOn(..)`.
+        """
+        given : 'A property holding a row major matrix of cell values.'
+            var rows = Var.of(Tuple.of(
+                                Tuple.of("Alice", "30"),
+                                Tuple.of("Bob",   "42")
+                            ))
+        and : 'A table built from this property:'
+            var table = UI.table(rows).get(JTable)
+
+        expect : 'The table displays the rows of the property.'
+            table.getRowCount() == 2
+            table.getColumnCount() == 2
+            table.getValueAt(0, 0) == "Alice"
+            table.getValueAt(0, 1) == "30"
+            table.getValueAt(1, 0) == "Bob"
+            table.getValueAt(1, 1) == "42"
+        and : 'The columns have the default (spreadsheet style) names.'
+            table.getColumnName(0) == "A"
+            table.getColumnName(1) == "B"
+        and : 'The cells are read only, because we did not ask for an editable layout.'
+            !table.isCellEditable(0, 0)
+
+        when : 'We change the property by adding a row...'
+            rows.update({ it.add(Tuple.of("Carol", "27")) })
+            UI.sync()
+        then : '...the table updates itself, no update event needed.'
+            table.getRowCount() == 3
+            table.getValueAt(2, 0) == "Carol"
+
+        when : 'We replace the entire tuple with a completely different one...'
+            rows.set(Tuple.of(Tuple.of("Dave", "51", "extra")))
+            UI.sync()
+        then : '...the table follows, including the new column count.'
+            table.getRowCount() == 1
+            table.getColumnCount() == 3
+            table.getValueAt(0, 2) == "extra"
+    }
+
+    def 'The layout of a `Tuple` based table can be configured to be column major.'()
+    {
+        reportInfo """
+            Just like for the list based data sources, you may tell the table
+            how to interpret the matrix you hand it, through one of the
+            `UI.ListData` constants. In a column major layout the outer `Tuple`
+            holds the columns of the table and each inner `Tuple` the cells of
+            a column, which the table transposes for you.
+        """
+        given : 'A property holding a column major matrix of cell values.'
+            var columns = Var.of(Tuple.of(
+                                Tuple.of("a", "b", "c"),
+                                Tuple.of("x", "y", "z")
+                            ))
+        and : 'A table built from this property, declared to be column major:'
+            var table = UI.table(UI.ListData.COLUMN_MAJOR, columns).get(JTable)
+
+        expect : 'The two tuples are displayed as the two columns of a 3 row table.'
+            table.getRowCount() == 3
+            table.getColumnCount() == 2
+            table.getValueAt(0, 0) == "a"
+            table.getValueAt(0, 1) == "x"
+            table.getValueAt(1, 0) == "b"
+            table.getValueAt(1, 1) == "y"
+            table.getValueAt(2, 0) == "c"
+            table.getValueAt(2, 1) == "z"
+
+        when : 'We add another column to the property...'
+            columns.update({ it.add(Tuple.of("1", "2", "3")) })
+            UI.sync()
+        then : '...the table displays a third column.'
+            table.getRowCount() == 3
+            table.getColumnCount() == 3
+            table.getValueAt(0, 2) == "1"
+    }
+
+    def 'The cells of an editable `Tuple` based table are written back into the property.'()
+    {
+        reportInfo """
+            If you declare one of the editable `UI.ListData` layouts and hand the
+            table a mutable `Var`, then the user may edit the cells of the table.
+            Such an edit is written back into the property, which means your
+            application state stays the single source of truth for the table.
+        """
+        given : 'A property holding a matrix of cell values, in the given layout.'
+            var cells = Var.of(Tuple.of(
+                                Tuple.of("a", "b"),
+                                Tuple.of("x", "y")
+                            ))
+        and : 'A table built from this property, declared to be editable:'
+            var table = UI.table(layout, cells).get(JTable)
+
+        expect : 'The table considers its cells editable.'
+            table.isCellEditable(0, 0)
+
+        when : 'The user edits a cell through the regular `JTable` API...'
+            table.setValueAt("!", 1, 0)
+            UI.sync()
+        then : '...the edit landed in the property, at the place the layout dictates.'
+            cells.get() == Tuple.of(expectedFirst, expectedSecond)
+        and : 'The table of course displays the new value.'
+            table.getValueAt(1, 0) == "!"
+
+        where : 'We check this for both editable layouts.'
+            layout                            || expectedFirst          | expectedSecond
+            UI.ListData.ROW_MAJOR_EDITABLE    || Tuple.of("a", "b")     | Tuple.of("!", "y")
+            UI.ListData.COLUMN_MAJOR_EDITABLE || Tuple.of("a", "!")     | Tuple.of("x", "y")
+    }
+
+    def 'A `Tuple` based table is read only if either its layout or its property is read only.'()
+    {
+        reportInfo """
+            Editability of a tuple based table needs two things: an editable
+            layout, and a property which can actually receive the edit. A read
+            only `Val` cannot, which is why it always yields a read only table,
+            even if you ask for an editable layout. Any edit which sneaks in
+            through the model API anyway is silently ignored instead of
+            corrupting the table.
+        """
+        given : 'A tuple of cells, wrapped in the given kind of property.'
+            var tuple = Tuple.of(Tuple.of("a", "b"))
+            var property = ( mutable ? Var.of(tuple) : Val.of(tuple) )
+        and : 'A table built from this property, with the given layout:'
+            var table = UI.table(layout, property).get(JTable)
+
+        expect : 'The table is only editable if both the layout and the property allow it.'
+            table.isCellEditable(0, 0) == isEditable
+
+        when : 'We push an edit through the model API regardless...'
+            table.getModel().setValueAt("!", 0, 0)
+            UI.sync()
+        then : '...it is only honored if the table is actually editable.'
+            noExceptionThrown()
+            table.getValueAt(0, 0) == ( isEditable ? "!" : "a" )
+
+        where : 'We check every combination of layout and property mutability.'
+            layout                         | mutable || isEditable
+            UI.ListData.ROW_MAJOR_EDITABLE | true    || true
+            UI.ListData.ROW_MAJOR_EDITABLE | false   || false
+            UI.ListData.ROW_MAJOR          | true    || false
+            UI.ListData.ROW_MAJOR          | false   || false
+    }
+
+    def 'A `Tuple` based table survives empty, ragged and out of bounds data.'()
+    {
+        reportInfo """
+            A table is queried by Swing at times you do not control, which is why
+            a tuple based table never throws at its data source boundaries:
+            an empty tuple is simply an empty table, a ragged matrix is as wide
+            as its longest row (with the missing cells reading as `null`), and
+            any out of bounds read is answered with `null`.
+        """
+        given : 'A property holding a ragged matrix, including an empty row.'
+            var rows = Var.of(Tuple.of(
+                                Tuple.of("a", "b", "c"),
+                                Tuple.of("d"),
+                                Tuple.of(String)
+                            ))
+        and : 'A table built from this property:'
+            var table = UI.table(rows).get(JTable)
+            var model = table.getModel()
+
+        expect : 'The table is as wide as the longest row.'
+            model.getRowCount() == 3
+            model.getColumnCount() == 3
+        and : 'The cells the shorter rows do not have are reported as null.'
+            model.getValueAt(1, 0) == "d"
+            model.getValueAt(1, 2) == null
+            model.getValueAt(2, 0) == null
+        and : 'Reads beyond the bounds of the table are answered with null instead of an exception.'
+            model.getValueAt(3, 0) == null
+            model.getValueAt(0, 3) == null
+            model.getValueAt(-1, -1) == null
+
+        when : 'We empty the property completely...'
+            rows.set(Tuple.of(Tuple.classTyped(String)))
+            UI.sync()
+        then : '...the table is empty, and still does not blow up when read.'
+            model.getRowCount() == 0
+            model.getColumnCount() == 0
+            model.getValueAt(0, 0) == null
+            noExceptionThrown()
+    }
+
+    def 'A `Tuple` based table translates a change of its property into the most targeted table events possible.'()
+    {
+        reportInfo """
+            A `Tuple` does not merely tell you that it changed, it also tells you
+            *how* it changed. A tuple based table exploits this: instead of
+            blindly rebuilding itself on every change, it translates a row
+            insertion into a `fireTableRowsInserted`, a removal into a
+            `fireTableRowsDeleted` and an in place change into a
+            `fireTableRowsUpdated`, which is what keeps updates to large tables
+            cheap. Only a change which cannot be expressed as a single row range,
+            or one which changes the shape of the table, makes it fall back to a
+            full rebuild (a structure change followed by a data change).
+        """
+        given : 'A property holding 3 rows of 2 cells each, and a table bound to it.'
+            var rows = Var.of(Tuple.of(
+                                Tuple.of("A", "1"),
+                                Tuple.of("B", "2"),
+                                Tuple.of("C", "3")
+                            ))
+            var table = UI.table(rows).get(JTable)
+        and : 'A listener recording the table model events in a readable form.'
+            var events = []
+            table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)
+
+        when : 'We apply the given change to the property...'
+            rows.update({ change(it) })
+            UI.sync()
+        then : '...the table fired exactly the expected events...'
+            events == expectedEvents
+        and : '...and it displays exactly the expected rows.'
+            (0..<table.rowCount).collect({ r ->
+                (0..<table.columnCount).collect({ c -> table.getValueAt(r, c) })
+            }) == expectedRows
+
+        where : 'We cover every kind of change a tuple of rows may undergo.'
+            change                                                      || expectedEvents            | expectedRows
+            ({ it.add(Tuple.of("D", "4")) })                            || ["INSERT[3..3]"]          | [["A","1"], ["B","2"], ["C","3"], ["D","4"]]
+            ({ it.addAt(1, Tuple.of("X", "9")) })                       || ["INSERT[1..1]"]          | [["A","1"], ["X","9"], ["B","2"], ["C","3"]]
+            ({ it.addAllAt(1, Tuple.of("X","9"), Tuple.of("Y","8")) })   || ["INSERT[1..2]"]          | [["A","1"], ["X","9"], ["Y","8"], ["B","2"], ["C","3"]]
+            ({ it.removeAt(1) })                                        || ["DELETE[1..1]"]          | [["A","1"], ["C","3"]]
+            ({ it.removeFirst(2) })                                     || ["DELETE[0..1]"]          | [["C","3"]]
+            ({ it.setAt(2, Tuple.of("Z", "9")) })                       || ["UPDATE[2..2]"]          | [["A","1"], ["B","2"], ["Z","9"]]
+            ({ it.setAllAt(0, Tuple.of("X","7"), Tuple.of("Y","8")) })   || ["UPDATE[0..1]"]          | [["X","7"], ["Y","8"], ["C","3"]]
+            ({ it.setAt(0, Tuple.of("A", "1")) })                       || []                        | [["A","1"], ["B","2"], ["C","3"]]
+            ({ it.reversed() })                                         || ["STRUCTURE", "ALL_DATA"] | [["C","3"], ["B","2"], ["A","1"]]
+            ({ it.clear() })                                            || ["STRUCTURE", "ALL_DATA"] | []
+            ({ it.add(Tuple.of("D", "4", "!")) })                       || ["STRUCTURE", "ALL_DATA"] | [["A","1",null], ["B","2",null], ["C","3",null], ["D","4","!"]]
+    }
+
+    /**
+     *  Turns a raw {@link TableModelEvent} into a readable description,
+     *  so that the expectations of a feature can be written down as plain strings.
+     */
+    private static String describe( TableModelEvent event ) {
+        if ( event.firstRow == TableModelEvent.HEADER_ROW )
+            return "STRUCTURE"
+        if ( event.firstRow == 0 && event.lastRow == Integer.MAX_VALUE )
+            return "ALL_DATA"
+        var type = [
+                (TableModelEvent.INSERT) : "INSERT",
+                (TableModelEvent.DELETE) : "DELETE",
+                (TableModelEvent.UPDATE) : "UPDATE",
+            ][event.type]
+        return "$type[$event.firstRow..$event.lastRow]"
+    }
+
+    def 'The `TableSnapshot` of a table model is a value.'()
+    {
+        reportInfo """
+            The immutable `TableSnapshot` is what a SwingTree table model hands
+            from the application thread to the UI thread, and it has proper value
+            semantics: two snapshots with the same layout, dimensions and cells
+            are equal to each other (and have the same hash code), whereas a
+            snapshot which merely holds the same cells in a different layout is
+            a different value. This is what allows a model to tell whether
+            something actually changed.
+        """
+        given : 'Two identically built row major snapshots, and a column major one with the same cells.'
+            var cells = Tuple.of(Tuple.ofNullable(Object, "a", "b"), Tuple.ofNullable(Object, "c", "d"))
+            var snapshot1 = TableSnapshot.of(UI.ListData.ROW_MAJOR, cells)
+            var snapshot2 = TableSnapshot.of(UI.ListData.ROW_MAJOR, cells)
+            var transposed = TableSnapshot.of(UI.ListData.COLUMN_MAJOR, cells)
+
+        expect : 'The two identically built snapshots are equal and have the same hash code.'
+            snapshot1 == snapshot2
+            snapshot1.hashCode() == snapshot2.hashCode()
+        and : 'They also have a useful string representation, which tells you what they hold.'
+            snapshot1.toString() == "TableSnapshot[layout=ROW_MAJOR, rowCount=2, columnCount=2, " +
+                                        "columnNames=Tuple<String?>[], " +
+                                        "cells=Tuple<TupleWithDiff>[Tuple<Object?>[a, b], Tuple<Object?>[c, d]]]"
+        and : 'The transposed snapshot is a different value, even though it holds the very same cells.'
+            snapshot1 != transposed
+            transposed.getValueAt(0, 1) == "c"
+            snapshot1.getValueAt(0, 1) == "b"
+
+        when : 'We derive a new snapshot by changing a single cell...'
+            var changed = snapshot1.withValueAt(1, 0, "!")
+        then : '...the original is untouched and the derived one is a different value.'
+            snapshot1.getValueAt(1, 0) == "c"
+            changed.getValueAt(1, 0) == "!"
+            changed != snapshot1
+        and : 'Changing a cell to the value it already has, or out of bounds, yields the very same snapshot.'
+            snapshot1.withValueAt(1, 0, "c") === snapshot1
+            snapshot1.withValueAt(7, 7, "?") === snapshot1
+        and : 'The empty snapshot is empty, no matter how you ask it.'
+            TableSnapshot.empty().getRowCount() == 0
+            TableSnapshot.empty().getColumnCount() == 0
+            TableSnapshot.empty().getValueAt(0, 0) == null
     }
 
 }

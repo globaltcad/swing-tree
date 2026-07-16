@@ -620,6 +620,9 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  Binds the table to a {@link Tuple} based, fully thread safe and reactive
      *  row major data source, where the outer {@link Tuple} holds the rows and
      *  each inner {@link Tuple} holds the cells of a row.
+     *  The cells of such a table are read only, use
+     *  {@link #withModel(UI.ListData, Val)} if you want to configure the layout
+     *  of the data or make the cells editable.
      *  <p>
      *  This is the recommended way to model dynamic, application thread owned
      *  table data: because a {@link Tuple} is deeply immutable, the table works
@@ -629,9 +632,6 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  synced to the {@link JTable} incrementally instead of rebuilding the
      *  whole table. The table updates itself automatically whenever the property
      *  changes, so no {@code updateTableOn(..)} binding is needed.
-     *  <p>
-     *  If the supplied property is a mutable {@link Var}, user edits (for cells
-     *  you make editable) are written back into it on the application thread.
      *  <pre>{@code
      *  var rows = Var.of(Tuple.of(
      *      Tuple.of("Alice", "30"),
@@ -645,9 +645,50 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * @param <E> The common type of the cell values.
      */
     public final <E> UIForTable<T> withModel( Val<Tuple<Tuple<E>>> rows ) {
-        Objects.requireNonNull(rows);
+        NullUtil.nullArgCheck(rows, "rows", Val.class);
+        return withModel(UI.ListData.ROW_MAJOR, rows);
+    }
+
+    /**
+     *  Binds the table to a {@link Tuple} based, fully thread safe and reactive
+     *  data source, whose layout is described by the supplied {@link UI.ListData}
+     *  constant: for a {@code ROW_MAJOR*} layout the outer {@link Tuple} holds the
+     *  rows and each inner {@link Tuple} the cells of a row, whereas for a
+     *  {@code COLUMN_MAJOR*} layout the outer {@link Tuple} holds the columns and
+     *  each inner {@link Tuple} the cells of a column.
+     *  <p>
+     *  This is the recommended way to model dynamic, application thread owned
+     *  table data: because a {@link Tuple} is deeply immutable, the table works
+     *  with a UI thread owned snapshot of it (so the AWT Event Dispatch Thread
+     *  never reads application thread owned mutable state). The table updates
+     *  itself automatically whenever the property changes, so no
+     *  {@code updateTableOn(..)} binding is needed. For a row major layout, the
+     *  change diff carried by the tuple is furthermore used to sync row
+     *  insertions, removals and updates to the {@link JTable} incrementally,
+     *  instead of rebuilding the whole table.
+     *  <p>
+     *  If you pass one of the {@code *_EDITABLE} constants <i>and</i> a mutable
+     *  {@link Var}, then the user may edit the cells of the table, in which case
+     *  the edits are written back into the property on the application thread.
+     *  A read only {@link Val} always yields a read only table.
+     *  <pre>{@code
+     *  var rows = Var.of(Tuple.of(
+     *      Tuple.of("Alice", "30"),
+     *      Tuple.of("Bob",   "42")
+     *  ));
+     *  UI.table().withModel(UI.ListData.ROW_MAJOR_EDITABLE, rows);
+     *  }</pre>
+     *
+     * @param dataFormat The layout of the supplied cells, see {@link UI.ListData}.
+     * @param cells A property holding a {@link Tuple} of {@link Tuple}s of cell values.
+     * @return This builder node, to allow for method chaining.
+     * @param <E> The common type of the cell values.
+     */
+    public final <E> UIForTable<T> withModel( UI.ListData dataFormat, Val<Tuple<Tuple<E>>> cells ) {
+        NullUtil.nullArgCheck(dataFormat, "dataFormat", UI.ListData.class);
+        NullUtil.nullArgCheck(cells, "cells", Val.class);
         return _with( thisComponent -> {
-                    _installModel(thisComponent, new TuplePropertyTableModel<>(rows));
+                    _installModel(thisComponent, new TuplePropertyTableModel<>(dataFormat, cells));
                 })
                 ._this();
     }

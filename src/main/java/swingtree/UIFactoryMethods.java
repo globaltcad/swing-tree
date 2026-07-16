@@ -5709,6 +5709,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  owned mutable state), and row changes are synced to the table incrementally
      *  through the change diff carried by the tuple. The table updates itself
      *  automatically whenever the property changes.
+     *  The cells of such a table are read only, use
+     *  {@link #table(UI.ListData, Val)} if you want to configure the layout of
+     *  the data or make the cells editable.
      *  <pre>{@code
      *  var rows = Var.of(Tuple.of(
      *      Tuple.of("Alice", "30"),
@@ -5724,6 +5727,46 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static <E> UIForTable<JTable> table( Val<Tuple<Tuple<E>>> rows ) {
         NullUtil.nullArgCheck(rows, "rows", Val.class);
         return table().withModel(rows);
+    }
+
+    /**
+     *  Creates a declarative UI builder for a {@link JTable} bound to a fully
+     *  thread safe, reactive {@link Tuple} based data source, whose layout is
+     *  described by the supplied {@link UI.ListData} constant: for a
+     *  {@code ROW_MAJOR*} layout the outer {@link Tuple} holds the rows and each
+     *  inner {@link Tuple} the cells of a row, whereas for a {@code COLUMN_MAJOR*}
+     *  layout the outer {@link Tuple} holds the columns and each inner
+     *  {@link Tuple} the cells of a column.
+     *  <p>
+     *  This is the recommended factory for dynamic, application thread owned table
+     *  data: the table works with a UI thread owned snapshot of the immutable
+     *  tuple (so the AWT Event Dispatch Thread never touches application thread
+     *  owned mutable state), and it updates itself automatically whenever the
+     *  property changes. For a row major layout, row changes are furthermore
+     *  synced to the table incrementally, through the change diff carried by the
+     *  tuple.
+     *  <p>
+     *  If you pass one of the {@code *_EDITABLE} constants <i>and</i> a mutable
+     *  {@link sprouts.Var}, then the user may edit the cells of the table, in
+     *  which case the edits are written back into the property on the application
+     *  thread. A read only {@link Val} always yields a read only table.
+     *  <pre>{@code
+     *  var rows = Var.of(Tuple.of(
+     *      Tuple.of("Alice", "30"),
+     *      Tuple.of("Bob",   "42")
+     *  ));
+     *  UI.table(UI.ListData.ROW_MAJOR_EDITABLE, rows);
+     *  }</pre>
+     *
+     * @param dataFormat The layout of the supplied cells, see {@link UI.ListData}.
+     * @param cells A property holding a {@link Tuple} of {@link Tuple}s of cell values.
+     * @return A fluent builder instance for a new {@link JTable}.
+     * @param <E> The common type of the cell values.
+     */
+    public static <E> UIForTable<JTable> table( UI.ListData dataFormat, Val<Tuple<Tuple<E>>> cells ) {
+        NullUtil.nullArgCheck(dataFormat, "dataFormat", UI.ListData.class);
+        NullUtil.nullArgCheck(cells, "cells", Val.class);
+        return table().withModel(dataFormat, cells);
     }
 
     /**

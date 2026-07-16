@@ -2,6 +2,7 @@ package swingtree.api.model;
 
 import org.jspecify.annotations.Nullable;
 import sprouts.Tuple;
+import swingtree.UI;
 import swingtree.threading.DecoupledEventProcessor;
 import swingtree.threading.EventProcessor;
 
@@ -133,6 +134,10 @@ public abstract class AbstractSnapshotTableModel extends AbstractTableModel
      *  thread that owns the data (the application thread under the decoupled
      *  protocol). Subclasses whose data source is already immutable (like a
      *  {@link Tuple}) may override this to avoid the per-cell copy.
+     *  <p>
+     *  Note that the {@code _liveXxx} accessors already speak in {@code (row, column)}
+     *  terms (a column major data source transposes in its accessors), which is why
+     *  the snapshot taken here is always {@link swingtree.UI.ListData#ROW_MAJOR}.
      *
      * @return A new immutable snapshot of the current table contents.
      */
@@ -154,6 +159,8 @@ public abstract class AbstractSnapshotTableModel extends AbstractTableModel
             rowTuples.add(Tuple.ofNullable(Object.class, cells));
         }
         return TableSnapshot.of(
+            UI.ListData.ROW_MAJOR,
+            rows,
             cols,
             Tuple.ofNullable(String.class, names),
             Tuple.of((Class<Class<?>>)(Class<?>) Class.class, classes),
