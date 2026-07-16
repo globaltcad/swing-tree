@@ -100,13 +100,22 @@ public abstract class AbstractSnapshotTableModel extends AbstractTableModel
      *  data source signalled a change.
      *  <ul>
      *      <li>Decoupled: a fresh snapshot is taken on the calling (application)
-     *          thread, then swapped in and fired on the UI thread.</li>
+     *          thread, then swapped in and fired on the UI thread. If this is
+     *          called by the UI thread instead (because the update signal was
+     *          raised in UI code), then the snapshot is first handed to the
+     *          application thread, which owns the data source.</li>
      *      <li>Coupled: the model reads live, so it merely fires the change
      *          events on the UI thread.</li>
      *  </ul>
      */
     public void refresh() {
         if ( _isDecoupled() ) {
+            if ( UI.thisIsUIThread() ) {
+                // The data source belongs to the application thread, so we do not
+                // read it here. Note that this does not wait for that thread.
+                _publishToAppThread(this::refresh);
+                return;
+            }
             TableSnapshot next = takeLiveSnapshot();
             _publishToUIThread(() -> {
                 _snapshot = next;
@@ -205,11 +214,24 @@ public abstract class AbstractSnapshotTableModel extends AbstractTableModel
 
     @Override public void setValueAt( @Nullable Object value, int rowIndex, int columnIndex ) {
         if ( _isDecoupled() ) {
+            /*
+                A cell edit made by the user is applied to the UI thread owned snapshot
+                right away, so that the table does not flicker back to the old value
+                while the application thread catches up. We only do this for an edit
+                which the data source will actually accept, and only on the UI thread,
+                which is the thread owning both the snapshot and the events below.
+                Any other write (a programmatic one, say) simply travels to the data
+                source, whose change signal then refreshes the snapshot as usual.
+             */
             TableSnapshot snap = _snapshot;
-            if ( snap != null )
-                _snapshot = snap.withValueAt(rowIndex, columnIndex, value);
+            if ( snap != null && UI.thisIsUIThread() && _liveCellEditable(rowIndex, columnIndex) ) {
+                TableSnapshot next = snap.withValueAt(rowIndex, columnIndex, value);
+                if ( next != snap ) {
+                    _snapshot = next;
+                    fireTableCellUpdated(rowIndex, columnIndex);
+                }
+            }
             _publishToAppThread(() -> _liveSetValueAt(value, rowIndex, columnIndex));
-            fireTableCellUpdated(rowIndex, columnIndex);
         } else {
             _liveSetValueAt(value, rowIndex, columnIndex);
         }

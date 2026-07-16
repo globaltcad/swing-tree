@@ -42,6 +42,12 @@ import java.util.concurrent.CountDownLatch
     threads that ever sneaks back into the table machinery fails this
     specification loudly instead of hanging the build.
 
+    Some of the features below park the UI thread behind a latch, and then peek
+    at the table from this thread before releasing it. This needs no handshake
+    to be deterministic: the UI thread works off its tasks in the order they were
+    handed to it, so a table update published after the latch task can never run
+    before it, no matter how the threads are scheduled.
+
 ''')
 @Subject([UIForTable, AbstractSnapshotTableModel, EventProcessor])
 @Timeout(60)
@@ -277,6 +283,77 @@ class Table_Threading_Spec extends Specification
         then : 'The edit arrived in the property, and the table still displays it.'
             rows.get() == Tuple.of(Tuple.of("Alice", "31"), Tuple.of("Bob", "42"))
             table.getValueAt(0, 1) == "31"
+    }
+
+    def 'A write to a read only `Tuple` based table does not leave a phantom edit in the UI.'()
+    {
+        reportInfo """
+            The UI thread owned snapshot of a table must never show something the
+            data source never accepted. So when a write reaches a read only model
+            (which the user cannot trigger, but application code may), the model
+            must not apply it to its snapshot optimistically, because the data
+            source will drop it and nothing would ever correct the table again.
+        """
+        given : 'A property of rows and a read only table built in decoupled mode.'
+            var rows = Var.of(Tuple.of(
+                                Tuple.of("Alice", "30"),
+                                Tuple.of("Bob",   "42")
+                            ))
+            var table = UI.runAndGet({
+                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(rows)).get(JTable)
+            })
+        expect : 'The table is read only, because we did not ask for an editable layout.'
+            UI.runAndGet({ !table.isCellEditable(0, 1) })
+
+        when : 'A write sneaks into the model through the model API on the UI thread anyway...'
+            UI.runNow({ table.getModel().setValueAt("31", 0, 1) })
+            letBothWorldsSettle()
+        then : '...it left no trace, neither in the table nor in the property.'
+            table.getValueAt(0, 1) == "30"
+            rows.get() == Tuple.of(Tuple.of("Alice", "30"), Tuple.of("Bob", "42"))
+    }
+
+    def 'A refresh triggered from the UI thread does not read the data source on the UI thread.'()
+    {
+        reportInfo """
+            An update signal may well be raised in UI code, which means a table
+            model can be asked to refresh itself while it is on the UI thread.
+            Even then it must not touch the application thread owned data source
+            from that thread: the snapshot is taken on the application thread
+            first, and only the finished snapshot travels back to the UI thread.
+        """
+        given : 'A mutable list, an update event, and a record of every thread reading the list.'
+            var data = new CopyOnWriteArrayList<Integer>([1, 2, 3])
+            var update = Event.create()
+            var uiThreadReads = new CopyOnWriteArrayList<String>()
+            Closure<Integer> readRowCount = {
+                if ( UI.thisIsUIThread() )
+                    uiThreadReads.add("Row count read on the UI thread!")
+                return data.size()
+            }
+        and : 'A lambda based table in decoupled mode, reading the list through that record.'
+            var table = UI.runAndGet({
+                UI.use(EventProcessor.DECOUPLED, ()->
+                    UI.table().withModel( m -> m
+                        .colNames("V")
+                        .rowCount( () -> readRowCount() )
+                        .getsEntryAt( (r, c) -> data.get(r) )
+                        .updateOn(update)
+                    )
+                ).get(JTable)
+            })
+        and : 'We forget the reads of the declaration itself, which legitimately happen at build time.'
+            uiThreadReads.clear()
+
+        when : 'We grow the data and fire the update event from the UI thread...'
+            data.addAll([4, 5])
+            UI.runNow({ update.fire() })
+            letBothWorldsSettle()
+        then : '...the table caught up with the new data...'
+            table.rowCount == 5
+            table.getValueAt(4, 0) == 5
+        and : '...without ever reading the application thread owned list on the UI thread.'
+            uiThreadReads.isEmpty()
     }
 
     def 'Row mutations racing from the application thread while the UI thread reads always converge.'(int run)
