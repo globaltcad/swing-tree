@@ -98,7 +98,7 @@ Rules of `.add(..)`:
 | `textField(text)`, `textArea(text)`, `passwordField()`, `numericTextField(var)` | text inputs |
 | `comboBox(...)`, `slider(Align, min, max)`, `spinner(...)`, `progressBar(...)` | value pickers |
 | `separator()`, `scrollPane()`, `scrollPanels()`, `splitPane(Align)`, `tabbedPane()` | structure |
-| `table()`, `list(...)`, `menu(...)`, `menuItem(...)`, `splitButton(text)` | data / menus |
+| `table(Var<TableData>)`, `table()`, `list(...)`, `menu(...)`, `menuItem(...)`, `splitButton(text)` | data / menus (bind a `TableData` value — see §10) |
 | `icon(path)`, `icon(w,h,path)` | `JIcon` (supports SVG, see §10) |
 
 `box(...)` vs `panel(...)`: a `JBox` is non-opaque with zero default insets — use it
@@ -862,18 +862,79 @@ button.onClick(it -> { vm.update(BreathingViewModel::begin); UI.animate(vm, Brea
 
 ## 10. Tables, lists, icons, dialogs
 
-### Tables — lambda-defined model, no `TableModel` subclass
+### Tables — model them as **data** (`TableData`), never as a `TableModel`
+
+`TableData` (`swingtree.api.model`) is an **immutable value describing a whole
+table**: cells + column names + column classes + a `UI.ListData` layout. Put it in a
+`Var`, bind it, done — no model subclass, no `updateTableOn(..)`, no event to fire,
+and thread-safe by construction (§11). **This is the preferred way to build tables.**
 
 ```java
-UI.table().withModel(m -> m
-    .colName(i -> headers[i]).colCount(() -> headers.length).rowCount(() -> data.length)
-    .getsEntryAt((r,c) -> data[r][c])
-    .setsEntryAt((r,c,val) -> data[r][c] = (int) val)
-    .isEditableIf(() -> true)
-    .updateOn(dataChangedEvent)        // an Event.create(); call dataChangedEvent.fire() to refresh
+Var<TableData> data = Var.of(
+    TableData.of(UI.ListData.ROW_MAJOR, "Name", "Age")   // columns first, no rows yet
+        .addRow("Alice", 30)
+        .addRow("Bob",   42)
 );
+
+UI.table(data);                                // that's the whole binding
+data.update(it -> it.addRow("Carol", 55));     // ...and the table follows
 ```
+
+Every method returns a **new** `TableData` (verbs mirror `Tuple`, §4):
+
+| | |
+|---|---|
+| read | `getValueAt(r,c)`, `getRow(r)`, `getColumn(c)`, `getRowCount()`, `getColumnCount()`, `isEmpty()`, `indexOfColumn(name)`, `getColumnName(i)`, `getColumnClass(i)`, `isEditable()`, `layout()`, `cells()`, `columnNames()`, `columnClasses()` |
+| cell | `setCellAt(r, c, value)` — **not** `setValueAt` (that is `TableModel`'s *mutator*) |
+| rows | `addRow(vals…)`, `addRowAt(i, vals…)`, `addRows(t)`, `addRowsAt(i, t)`, `setRowAt(i, vals…)`, `setRowsAt(i, t)`, `removeRowAt(i)`, `removeRowsAt(i, n)`, `removeAllRows()` |
+| columns | `addColumn(name, cls, vals)`, `addColumnAt(i, ..)`, `setColumnAt(i, vals)`, `removeColumnAt(i)`, `removeColumnsAt(i, n)`, `setColumnNameAt(i, name)`, `setColumnClassAt(i, cls)`, `setColumnNames(..)`, `setColumnClasses(..)` |
+| whole | `setCells(t)`, `withLayout(listData)`, `TableData.empty()`, `TableData.row(vals…)` |
+
+Rows, columns, names, classes and both counts may **all change at any time** —
+reshaping a table is just another value, not a special case. Indices rot when columns
+move, so address columns by meaning: `it.setCellAt(0, it.indexOfColumn("Age"), 31)`.
+
+**Performance — do not hand-roll around it.** `Tuple`s are persistent (structural
+sharing: adding a row to a 1000-row table copies no rows), and a `ROW_MAJOR` table
+forwards the tuple's change-diff to the `JTable` as **targeted** row events — a row
+add repaints that row, not the table. **Prefer range ops**: `addRows(..)` /
+`removeRowsAt(..)` / `setRowsAt(..)` emit **one** event instead of N.
+(`COLUMN_MAJOR` stores columns, so a change never maps onto a row range and it must
+rebuild — use `ROW_MAJOR` for big/lively tables. All methods still speak
+`(row, column)` in either layout.)
+
+**Editable needs BOTH** a `*_EDITABLE` layout **and** a mutable `Var` — a `Val`, or a
+`Var` with a non-editable layout, yields a read-only table. Edits flow back into the
+property as a new value. Flip it live with `it.withLayout(ROW_MAJOR_EDITABLE)`.
+
+`getColumnClass` drives the `JTable`'s renderer/editor, so
+`setColumnClassAt(i, Boolean.class)` buys you check boxes for free.
+
 Custom cell rendering: `.withCell(cell -> cell.view(c -> c.orGetUi(() -> textField()).updateIf(JTextField.class, tf -> { tf.setText(cell.entryAsString()); return tf; })))`.
+
+#### Legacy table sources — still supported, but prefer `TableData`
+
+All of these are **pull-based**: they need `updateTableOn(..)`/`updateOn(..)`, they
+cannot say *what* changed (so every refresh rebuilds the whole table), and they are
+read live — which forces SwingTree to copy the whole table on every refresh under
+`DECOUPLED`.
+
+```java
+UI.table().withModel(m -> m.colName(i -> headers[i]).colCount(() -> headers.length)
+    .rowCount(() -> data.length).getsEntryAt((r,c) -> data[r][c])
+    .setsEntryAt((r,c,val) -> data[r][c] = (int) val)
+    .isEditableIf(() -> true).updateOn(dataChangedEvent));   // must .fire() by hand
+UI.table(UI.ListData.ROW_MAJOR_EDITABLE, () -> listOfRows).updateTableOn(evt);
+UI.table(UI.MapData.EDITABLE, () -> mapOfColumns).updateTableOn(evt);
+UI.table(UI.ListData.ROW_MAJOR, tupleVar);   // Var<Tuple<Tuple<E>>>: TableData minus the
+                                             // column metadata; keeps the diff fast-path
+```
+`BasicTableModel` is only a *description of where the data lives* — SwingTree wraps it
+in a thread-safe model of its own, so `JTable.getModel()` does **not** return the
+object you passed to `withModel(..)`.
+
+Full prose: `docs/markdown/Writing-Tables.md`. Executable catalogue of the whole
+`TableData` API: `src/test/groovy/swingtree/Table_Data_Spec.groovy`.
 
 ### Icons & SVG (first-class, HiDPI-crisp)
 
@@ -954,6 +1015,11 @@ UI.message("Saved.").showAsInfo();              // no return value
 - `UI.run(r)` runs on EDT now; `UI.runLater(r)` / `runLater(delay, r)` defer to EDT.
 - In a `main`, after `UI.show(...)`, call `EventProcessor.DECOUPLED.join()` to keep
   the (decoupled) application thread alive so the program doesn't exit.
+- **Under `DECOUPLED`, never let the EDT read mutable application state.** Bind
+  *values* (immutable records, `Tuple`s, `TableData` — §10) rather than live data
+  sources: an immutable value cannot be seen half-updated, so no locking, no torn
+  reads. Pull-based sources (lambda/collection table models, §10) force SwingTree to
+  copy the whole thing on every refresh to get the same guarantee.
 - Set a Look-and-Feel before showing if desired (examples use FlatLaf:
   `FlatDarkLaf.setup();` / `FlatLightLaf.setup();`).
 
@@ -1045,20 +1111,25 @@ painting, a peeked component, a third-party widget): `UI.scale(int|float|double)
    need no `HasId` (§5.2).
 3. **Hold a strong reference (a view field) to any lens used only by a raw
    `onChange` subscription** — weak observation will GC it and silently break (§9c).
-4. **Never read property values inside a plain `withStyle` lambda** — use the
+4. **Tables: bind a `Var<TableData>`; don't reach for a `TableModel` or a pull-based
+   data source** (§10). An editable table needs **both** a `*_EDITABLE` layout **and**
+   a mutable `Var` — either alone is silently read-only. Use **`ROW_MAJOR`** (the
+   diff-driven, incremental path) and **range ops** (`addRows`/`removeRowsAt`/
+   `setRowsAt`) for bulk changes; per-row loops emit one event each.
+5. **Never read property values inside a plain `withStyle` lambda** — use the
    property-bound `withStyle(prop, (item, it) -> ..)` (§8), which captures the item
    thread-safely and repaints automatically. (`withRepaintOn(props) + prop.get()`
    is the legacy version of this pattern.)
-5. **Pick the right thread:** `onView` for view-touching handlers, `on` for
+6. **Pick the right thread:** `onView` for view-touching handlers, `on` for
    model/business handlers; respect `From.VIEW` vs `From.VIEW_MODEL` to avoid
    feedback loops.
-6. **View models import zero Swing classes.** If you find a `JComponent` in a view
+7. **View models import zero Swing classes.** If you find a `JComponent` in a view
    model, the architecture is wrong.
-7. Expose **`Val`** (not `Var`) from a view model for fields the view must not write.
-8. Use **enum** group tags and the type-safe layout constants for refactor safety.
-9. Withers must be **pure** and return **new** instances (Lombok `@With` on records
+8. Expose **`Val`** (not `Var`) from a view model for fields the view must not write.
+9. Use **enum** group tags and the type-safe layout constants for refactor safety.
+10. Withers must be **pure** and return **new** instances (Lombok `@With` on records
    is the cleanest path); never mutate `this`.
-10. **Never feed a raw Swing size/position back into the SwingTree API** — values
+11. **Never feed a raw Swing size/position back into the SwingTree API** — values
     from `it.component().getPreferredSize()`/`getBounds()`/`getWidth()` are in
     *component pixels* (already scaled); passing them to `minHeight(..)`/`size(..)`/etc.
     double-scales them. Read geometry through the delegate accessors
@@ -1099,6 +1170,13 @@ Var<V> e = root.zoomTo(c -> c.get(k).orElse(d), (c,x) -> c.put(k,x));  // lens i
 Var<Tuple<Item>> items = root.zoomTo(Root::items, Root::withItems);
 panel.addAll(items, (Var<Item> it) -> itemView(it));      // per-item lens ⇒ Item implements HasId<UUID>!
 panel.addAll(roTuple, (Item it) -> itemView(it));         // read-only value ⇒ no HasId needed
+
+// tables (§10) — an immutable value describing the WHOLE table; bind it and it follows
+Var<TableData> d = Var.of(TableData.of(UI.ListData.ROW_MAJOR, "Name","Age").addRow("Alice",30));
+UI.table(d);  d.update(it -> it.addRow("Bob", 42));      // no updateTableOn/Event needed
+it.setCellAt(r,c,v) / .addRowAt(i,vals…) / .removeRowAt(i) / .setColumnClassAt(i,Boolean.class)
+it.addRows(t) / .removeRowsAt(i,n) / .setRowsAt(i,t)     // range ops ⇒ ONE table event, not N
+// editable ⇔ *_EDITABLE layout AND a mutable Var; ROW_MAJOR ⇒ incremental (diff) updates
 
 // events
 .onClick / .onMouseEnter / .onMouseClick / .onKeyPress / .onResize (it -> ...)
