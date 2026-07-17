@@ -1,8 +1,8 @@
-package swingtree.api.model;
+package swingtree;
 
 import org.jspecify.annotations.Nullable;
 import sprouts.Tuple;
-import swingtree.UI;
+import swingtree.api.model.TableSnapshot;
 import swingtree.threading.DecoupledEventProcessor;
 import swingtree.threading.EventProcessor;
 
@@ -14,7 +14,12 @@ import java.util.Objects;
 /**
  *  A {@link javax.swing.table.TableModel} base class which makes SwingTree tables
  *  thread safe by following the same snapshot protocol as the combo box models
- *  (see {@code swingtree.AbstractComboModel}).
+ *  (see {@link AbstractComboModel}).
+ *  <p>
+ *  This class is deliberately package private: SwingTree favours composition over
+ *  inheritance, which is why a user supplied data source is always <i>wrapped</i> by
+ *  one of the concrete models in this package (see {@link BasicTableModelAdapter})
+ *  instead of the user being asked to extend anything.
  *  <p>
  *  The problem this solves: a plain lambda or collection based table model reads
  *  its application thread owned data source live, whenever the UI thread (the AWT
@@ -39,7 +44,7 @@ import java.util.Objects;
  *  Which of the two behaviours is active is decided by the {@link EventProcessor}
  *  handed to this model at install time through {@link #_setEventProcessor(EventProcessor)}.
  */
-public abstract class AbstractSnapshotTableModel extends AbstractTableModel
+abstract class AbstractSnapshotTableModel extends AbstractTableModel
 {
     /**
      *  The UI thread owned snapshot of the table contents. It is {@code null}
@@ -59,7 +64,7 @@ public abstract class AbstractSnapshotTableModel extends AbstractTableModel
      *
      * @param eventProcessor The event processor of the enclosing UI declaration.
      */
-    public final void _setEventProcessor( EventProcessor eventProcessor ) {
+    final void _setEventProcessor( EventProcessor eventProcessor ) {
         _eventProcessor = Objects.requireNonNull(eventProcessor);
         if ( _isDecoupled() && _snapshot == null )
             _snapshot = takeLiveSnapshot();
@@ -108,7 +113,7 @@ public abstract class AbstractSnapshotTableModel extends AbstractTableModel
      *          events on the UI thread.</li>
      *  </ul>
      */
-    public void refresh() {
+    void refresh() {
         if ( _isDecoupled() ) {
             if ( UI.thisIsUIThread() ) {
                 // The data source belongs to the application thread, so we do not
@@ -146,7 +151,7 @@ public abstract class AbstractSnapshotTableModel extends AbstractTableModel
      *  <p>
      *  Note that the {@code _liveXxx} accessors already speak in {@code (row, column)}
      *  terms (a column major data source transposes in its accessors), which is why
-     *  the snapshot taken here is always {@link swingtree.UI.ListData#ROW_MAJOR}.
+     *  the snapshot taken here is always {@link UI.ListData#ROW_MAJOR}.
      *
      * @return A new immutable snapshot of the current table contents.
      */

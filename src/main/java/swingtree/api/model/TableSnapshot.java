@@ -212,6 +212,24 @@ public final class TableSnapshot
     }
 
     /**
+     *  The column names of this snapshot, where a {@code null} entry means that
+     *  the table should fall back to the default (spreadsheet style) column name.
+     *  @return The immutable tuple of column names.
+     */
+    public Tuple<@Nullable String> columnNames() {
+        return _columnNames;
+    }
+
+    /**
+     *  The column classes of this snapshot, which a {@link javax.swing.JTable}
+     *  consults to pick a renderer and editor for each column.
+     *  @return The immutable tuple of column classes.
+     */
+    public Tuple<Class<?>> columnClasses() {
+        return _columnClasses;
+    }
+
+    /**
      *  Produces a new snapshot in which a single cell has a new value,
      *  reusing the immutable structure of this snapshot for everything else.
      *  This is used to apply a user edit to the UI thread owned snapshot right

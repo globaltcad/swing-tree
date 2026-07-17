@@ -16,6 +16,7 @@ import swingtree.api.SwingBuilder;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
+import swingtree.api.model.TableSnapshot;
 import swingtree.components.*;
 import swingtree.dialogs.ConfirmAnswer;
 import swingtree.dialogs.ConfirmDialog;
@@ -5698,35 +5699,57 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
-     *  Creates a declarative UI builder for a {@link JTable} bound to a fully
-     *  thread safe, reactive {@link Tuple} based row major data source, where the
-     *  outer {@link Tuple} holds the rows and each inner {@link Tuple} holds the
-     *  cells of a row.
+     *  Creates a declarative UI builder for a {@link JTable} bound to a read only
+     *  property holding an immutable {@link TableSnapshot} value, which is the most
+     *  complete way of describing the contents of a table: it carries the cells, the
+     *  column names, the column classes and the {@link UI.ListData} layout of the
+     *  data, all in a single value.
      *  <p>
-     *  This is the recommended factory for dynamic, application thread owned table
-     *  data: the table works with a UI thread owned snapshot of the immutable
-     *  tuple (so the AWT Event Dispatch Thread never touches application thread
-     *  owned mutable state), and row changes are synced to the table incrementally
-     *  through the change diff carried by the tuple. The table updates itself
-     *  automatically whenever the property changes.
-     *  The cells of such a table are read only, use
-     *  {@link #table(UI.ListData, Val)} if you want to configure the layout of
-     *  the data or make the cells editable.
+     *  Because a {@link TableSnapshot} is deeply immutable, the table works with the
+     *  property value itself as its UI thread owned snapshot (so the AWT Event
+     *  Dispatch Thread never touches application thread owned mutable state), and it
+     *  updates itself automatically whenever the property changes. For a row major
+     *  snapshot, row changes are furthermore synced to the table incrementally,
+     *  through the change diff carried by the cells.
+     *  <p>
+     *  The cells of a table bound like this are read only, use {@link #table(Var)}
+     *  together with one of the {@code *_EDITABLE} layouts if you want the user to
+     *  be able to edit them.
      *  <pre>{@code
-     *  var rows = Var.of(Tuple.of(
-     *      Tuple.of("Alice", "30"),
-     *      Tuple.of("Bob",   "42")
-     *  ));
-     *  UI.table(rows);
+     *  Val<TableSnapshot> model = vm.tableModel();
+     *  UI.table(model);
      *  }</pre>
      *
-     * @param rows A property holding a row major {@link Tuple} of {@link Tuple}s of cell values.
+     * @param model A read only property holding the {@link TableSnapshot} describing the table.
      * @return A fluent builder instance for a new {@link JTable}.
-     * @param <E> The common type of the cell values.
      */
-    public static <E> UIForTable<JTable> table( Val<Tuple<Tuple<E>>> rows ) {
-        NullUtil.nullArgCheck(rows, "rows", Val.class);
-        return table().withModel(rows);
+    public static UIForTable<JTable> table( Val<TableSnapshot> model ) {
+        NullUtil.nullArgCheck(model, "model", Val.class);
+        return table().withModel(model);
+    }
+
+    /**
+     *  Creates a declarative UI builder for a {@link JTable} bound to a mutable
+     *  property holding an immutable {@link TableSnapshot} value, which, in addition
+     *  to what {@link #table(Val)} does, allows the user to edit the cells of the
+     *  table: an edit is applied to the UI thread owned snapshot right away (so that
+     *  the table does not flicker) and then written back into the property on the
+     *  application thread.
+     *  <p>
+     *  Note that the cells only actually become editable if the
+     *  {@link TableSnapshot#layout()} of the bound value is one of the
+     *  {@code *_EDITABLE} constants of {@link UI.ListData}.
+     *  <pre>{@code
+     *  Var<TableSnapshot> model = vm.tableModel();
+     *  UI.table(model);
+     *  }</pre>
+     *
+     * @param model A mutable property holding the {@link TableSnapshot} describing the table.
+     * @return A fluent builder instance for a new {@link JTable}.
+     */
+    public static UIForTable<JTable> table( Var<TableSnapshot> model ) {
+        NullUtil.nullArgCheck(model, "model", Var.class);
+        return table().withModel(model);
     }
 
     /**

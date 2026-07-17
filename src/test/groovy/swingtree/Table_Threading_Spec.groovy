@@ -9,7 +9,6 @@ import spock.lang.Title
 import sprouts.Event
 import sprouts.Tuple
 import sprouts.Var
-import swingtree.api.model.AbstractSnapshotTableModel
 import swingtree.threading.EventProcessor
 import utility.ApplicationThread
 import utility.LogSpy
@@ -90,7 +89,7 @@ class Table_Threading_Spec extends Specification
                                 Tuple.of("Bob",   "42")
                             ))
             var table = UI.runAndGet({
-                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(rows)).get(JTable)
+                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.ListData.ROW_MAJOR, rows)).get(JTable)
             })
         expect : 'The table offers the two initial rows.'
             table.rowCount == 2
@@ -130,7 +129,7 @@ class Table_Threading_Spec extends Specification
         and : 'A `Tuple` based table under mutation pressure, in decoupled mode.'
             var rows = Var.of(Tuple.of(Tuple.of("A", "1"), Tuple.of("B", "2")))
             var table = UI.runAndGet({
-                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(rows)).get(JTable)
+                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.ListData.ROW_MAJOR, rows)).get(JTable)
             })
         and : 'A list collecting every inconsistency a render pass may observe.'
             var violations = new CopyOnWriteArrayList<String>()
@@ -183,7 +182,7 @@ class Table_Threading_Spec extends Specification
                                 Tuple.of("C", "3")
                             ))
             var table = UI.runAndGet({
-                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(rows)).get(JTable)
+                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.ListData.ROW_MAJOR, rows)).get(JTable)
             })
         and : 'A listener recording the raw table model events.'
             var events = new CopyOnWriteArrayList<TableModelEvent>()
@@ -300,7 +299,7 @@ class Table_Threading_Spec extends Specification
                                 Tuple.of("Bob",   "42")
                             ))
             var table = UI.runAndGet({
-                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(rows)).get(JTable)
+                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.ListData.ROW_MAJOR, rows)).get(JTable)
             })
         expect : 'The table is read only, because we did not ask for an editable layout.'
             UI.runAndGet({ !table.isCellEditable(0, 1) })
@@ -371,7 +370,7 @@ class Table_Threading_Spec extends Specification
         and : 'A property of rows and a table in decoupled mode.'
             var rows = Var.of(Tuple.of(Tuple.of("start", "0")))
             var table = UI.runAndGet({
-                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(rows)).get(JTable)
+                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.ListData.ROW_MAJOR, rows)).get(JTable)
             })
 
         when : 'We enqueue 100 row mutations for the application thread, while the UI thread performs 50 renderer style read passes.'

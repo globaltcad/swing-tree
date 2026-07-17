@@ -6,9 +6,12 @@ import sprouts.Event;
 import sprouts.Tuple;
 import swingtree.api.Buildable;
 
+import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
+import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  *  This interface defines a basic table model which can be used to create a table model using lambda expressions.
@@ -23,6 +26,15 @@ import java.util.Objects;
  *          )
  *      )
  *  }</pre>
+ *  Note that an implementation of this is merely a <i>description of where the table
+ *  data lives</i>, it is not the model which the {@link javax.swing.JTable} ends up
+ *  talking to. SwingTree always wraps it in a thread safe model of its own, which
+ *  reads through the methods declared here and, under the
+ *  {@link swingtree.threading.EventProcessor#DECOUPLED} protocol, keeps a UI thread
+ *  owned snapshot of them so that the AWT Event Dispatch Thread never reads your
+ *  application thread owned state while it paints. This is also why you should not
+ *  expect {@link javax.swing.JTable#getModel()} to return the very object you passed
+ *  to {@code withModel(..)}.
  */
 public interface BasicTableModel extends TableModel
 {
@@ -40,10 +52,29 @@ public interface BasicTableModel extends TableModel
     @Override default String getColumnName(int columnIndex) { return null; }
     /** {@inheritDoc} */
     @Override default boolean isCellEditable(int rowIndex, int columnIndex) { return false; }
-    /** {@inheritDoc} */
-    @Override default void addTableModelListener(TableModelListener l) {throw new IllegalStateException("Not implemented");}
-    /** {@inheritDoc} */
-    @Override default void removeTableModelListener(TableModelListener l) {throw new IllegalStateException("Not implemented");}
+    /**
+     *  Registers a listener which wants to be told when the data of this model changed.
+     *  <p>
+     *  A {@link BasicTableModel} is a plain description of where the table data comes
+     *  from, which SwingTree wraps in a thread safe model of its own before handing it
+     *  to a {@link javax.swing.JTable}. That wrapper is the only listener you will ever
+     *  see here, and it uses this to learn that it has to re-read the data.
+     *  The default implementation ignores the listener, which is what you want for a
+     *  model that never signals changes on its own (use {@code updateTableOn(..)} on
+     *  the table builder, or {@link Builder#updateOn(Observable)}, in that case).
+     *
+     * @param l The listener which wants to be told about changes to the data of this model.
+     */
+    @Override default void addTableModelListener(TableModelListener l) {}
+    /**
+     *  Unregisters a listener previously registered through
+     *  {@link #addTableModelListener(TableModelListener)}.
+     *  The default implementation does nothing, mirroring the default of
+     *  {@link #addTableModelListener(TableModelListener)}.
+     *
+     * @param l The listener which no longer wants to be told about changes to the data of this model.
+     */
+    @Override default void removeTableModelListener(TableModelListener l) {}
 
     /**
      *  Implementations of this functional interface translate to the {@link TableModel#getRowCount()} method.
@@ -283,19 +314,26 @@ public interface BasicTableModel extends TableModel
             FunTableModel tm = new FunTableModel();
             if ( observableEvent != null )
                 observableEvent.subscribe(()->
-                    // The model itself decides how to thread and fire the refresh,
-                    // based on the event processor it was installed with. Under the
-                    // decoupled protocol it snapshots on this (application) thread and
-                    // then publishes the swap to the UI thread; under the coupled
-                    // protocol it simply fires the change events on the UI thread.
-                    tm.refresh()
+                    // We merely tell whoever reads this model that the data changed.
+                    // The thread safe model which SwingTree wraps around this listens
+                    // in, and it is that model which decides how to thread and fire the
+                    // refresh, based on the event processor it was installed with.
+                    tm.fireDataChanged()
                 );
             return tm;
         }
 
-         private class FunTableModel extends AbstractSnapshotTableModel implements BasicTableModel {
-             @Override protected int _liveRowCount() { return rowCount == null ? 0 : rowCount.get(); }
-             @Override protected int _liveColumnCount() {
+         private class FunTableModel implements BasicTableModel {
+             /*
+                A table built through this builder is a plain data source, so the only
+                change signal it has is the one configured through 'updateOn(..)'.
+                The list is copy on write because the signal above may be raised on the
+                application thread while the UI thread installs the table.
+              */
+             private final List<TableModelListener> listeners = new CopyOnWriteArrayList<>();
+
+             @Override public int getRowCount() { return rowCount == null ? 0 : rowCount.get(); }
+             @Override public int getColumnCount() {
                  if (colCount == null) {
                      if ( columnClass instanceof FixedColumnClasses ) {
                          return ((FixedColumnClasses)columnClass).classes.size();
@@ -306,18 +344,26 @@ public interface BasicTableModel extends TableModel
                  }
                  return colCount == null ? 0 : colCount.get();
              }
-             @Override protected @Nullable Object _liveValueAt(int rowIndex, int colIndex) { return entryGetter == null ? null : entryGetter.get(rowIndex, colIndex); }
-             @Override protected void _liveSetValueAt(@Nullable Object value, int rowIndex, int colIndex) { if ( entrySetter != null ) entrySetter.set(rowIndex, colIndex, (E) value); }
-             @Override protected Class<?> _liveColumnClass(int colIndex) { return columnClass == null ? Object.class : columnClass.get(colIndex); }
-             @Override protected boolean _liveCellEditable(int rowIndex, int colIndex) { return cellEditable != null && cellEditable.is(rowIndex, colIndex); }
-             @Override protected @Nullable String _liveColumnName(int colIndex) {
+             @Override public @Nullable Object getValueAt(int rowIndex, int colIndex) { return entryGetter == null ? null : entryGetter.get(rowIndex, colIndex); }
+             @Override public void setValueAt(@Nullable Object value, int rowIndex, int colIndex) { if ( entrySetter != null ) entrySetter.set(rowIndex, colIndex, (E) value); }
+             @Override public Class<?> getColumnClass(int colIndex) { return columnClass == null ? Object.class : columnClass.get(colIndex); }
+             @Override public boolean isCellEditable(int rowIndex, int colIndex) { return cellEditable != null && cellEditable.is(rowIndex, colIndex); }
+             @Override public @Nullable String getColumnName(int colIndex) {
                  if (columnName == null) {
                      if ( columnClass instanceof FixedColumnClasses ) {
                          return ((FixedColumnClasses)columnClass).get(colIndex).getSimpleName();
                      }
-                     return null; // A null name lets the base fall back to the default (spreadsheet style) column name.
+                     return null; // A null name lets the table fall back to the default (spreadsheet style) column name.
                  }
                  return columnName.get(colIndex);
+             }
+             @Override public void addTableModelListener(TableModelListener l) { listeners.add(l); }
+             @Override public void removeTableModelListener(TableModelListener l) { listeners.remove(l); }
+
+             private void fireDataChanged() {
+                 TableModelEvent event = new TableModelEvent(this);
+                 for ( TableModelListener listener : listeners )
+                     listener.tableChanged(event);
              }
          }
 

@@ -546,7 +546,7 @@ class Declarative_Tables_Spec extends Specification
                                 Tuple.of("Bob",   "42")
                             ))
         and : 'A table built from this property:'
-            var table = UI.table(rows).get(JTable)
+            var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)
 
         expect : 'The table displays the rows of the property.'
             table.getRowCount() == 2
@@ -696,7 +696,7 @@ class Declarative_Tables_Spec extends Specification
                                 Tuple.of(String)
                             ))
         and : 'A table built from this property:'
-            var table = UI.table(rows).get(JTable)
+            var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)
             var model = table.getModel()
 
         expect : 'The table is as wide as the longest row.'
@@ -740,7 +740,7 @@ class Declarative_Tables_Spec extends Specification
                                 Tuple.of("B", "2"),
                                 Tuple.of("C", "3")
                             ))
-            var table = UI.table(rows).get(JTable)
+            var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)
         and : 'A listener recording the table model events in a readable form.'
             var events = []
             table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)
@@ -829,6 +829,155 @@ class Declarative_Tables_Spec extends Specification
             TableSnapshot.empty().getRowCount() == 0
             TableSnapshot.empty().getColumnCount() == 0
             TableSnapshot.empty().getValueAt(0, 0) == null
+    }
+
+    def 'A property of a `TableSnapshot` can be used as a data source for tables.'()
+    {
+        reportInfo """
+            A `TableSnapshot` is the most complete description of the contents of
+            a table: it carries the cells, the column names, the column classes and
+            the layout of the data, all in a single immutable value. So if you hold
+            such a value in a property, then that property alone describes your
+            whole table, which is why you may bind it directly.
+            Note that no `updateTableOn(..)` binding is needed here, because the
+            table listens to the property itself.
+        """
+        given : 'A property holding a fully described table snapshot.'
+            var model = Var.of(TableSnapshot.of(
+                                UI.ListData.ROW_MAJOR, 2, 2,
+                                Tuple.ofNullable(String, "Name", "Age"),
+                                Tuple.of(Class, String, Integer),
+                                Tuple.of(
+                                    Tuple.ofNullable(Object, "Alice", 30),
+                                    Tuple.ofNullable(Object, "Bob",   42)
+                                )
+                            ))
+        and : 'A table built from this property:'
+            var table = UI.table(model).get(JTable)
+
+        expect : 'The table displays everything the snapshot describes.'
+            table.getRowCount() == 2
+            table.getColumnCount() == 2
+            table.getValueAt(0, 0) == "Alice"
+            table.getValueAt(1, 1) == 42
+        and : 'The column names and classes of the snapshot reach the table as well.'
+            table.getColumnName(0) == "Name"
+            table.getColumnName(1) == "Age"
+            table.getModel().getColumnClass(1) == Integer
+
+        when : 'We change the property to a snapshot with an additional row...'
+            model.update({ snapshot -> TableSnapshot.of(
+                                UI.ListData.ROW_MAJOR, 3, 2,
+                                snapshot.columnNames(), snapshot.columnClasses(),
+                                snapshot.cells().add(Tuple.ofNullable(Object, "Carol", 55))
+                            ) })
+            UI.sync()
+        then : '...the table shows the new row.'
+            table.getRowCount() == 3
+            table.getValueAt(2, 0) == "Carol"
+    }
+
+    def 'A `TableSnapshot` property based table is read only if either its layout or its property is read only.'()
+    {
+        reportInfo """
+            Just like for a `Tuple` based table, two conditions have to be met before
+            the user may edit the cells of a `TableSnapshot` based table: the layout
+            of the snapshot has to be one of the `*_EDITABLE` constants, and the
+            property has to be a mutable `Var` which can actually receive the edit.
+            If either is missing, then the table is simply read only.
+        """
+        given : 'A snapshot with the given layout, held by a property of the given mutability.'
+            var cells = Tuple.of(Tuple.ofNullable(Object, "a", "b"))
+            var snapshot = TableSnapshot.of(layout, cells)
+            var model = mutable ? Var.of(snapshot) : Val.of(snapshot)
+        and : 'A table bound to that property:'
+            var table = UI.table(model).get(JTable)
+
+        expect : 'The table only lets the user edit if both conditions are met.'
+            table.isCellEditable(0, 0) == editable
+
+        where :
+            layout                          | mutable || editable
+            UI.ListData.ROW_MAJOR_EDITABLE  | true    || true
+            UI.ListData.ROW_MAJOR_EDITABLE  | false   || false
+            UI.ListData.ROW_MAJOR           | true    || false
+            UI.ListData.ROW_MAJOR           | false   || false
+    }
+
+    def 'The cells of an editable `TableSnapshot` based table are written back into the property.'()
+    {
+        reportInfo """
+            A `Var` holding an editable `TableSnapshot` is a two way binding: an edit
+            made through the table model finds its way back into the property, and the
+            property in turn is what the table reads. Note that the snapshot is a value,
+            so the property receives a new snapshot rather than a mutated one.
+        """
+        given : 'A property holding an editable snapshot, and a table bound to it.'
+            var model = Var.of(TableSnapshot.of(
+                                UI.ListData.ROW_MAJOR_EDITABLE,
+                                Tuple.of(
+                                    Tuple.ofNullable(Object, "a", "b"),
+                                    Tuple.ofNullable(Object, "c", "d")
+                                )
+                            ))
+            var table = UI.table(model).get(JTable)
+        and : 'We remember the initial snapshot, so that we can tell it was not mutated.'
+            var initial = model.get()
+
+        when : 'The user edits a cell of the table...'
+            table.getModel().setValueAt("!", 1, 0)
+            UI.sync()
+        then : '...the edit is written back into the property.'
+            model.get().getValueAt(1, 0) == "!"
+        and : 'The table displays the new value as well.'
+            table.getValueAt(1, 0) == "!"
+        and : 'The snapshot the property held before the edit is untouched.'
+            initial.getValueAt(1, 0) == "c"
+    }
+
+    def 'A change of the column names of a `TableSnapshot` property reaches the table.'()
+    {
+        reportInfo """
+            The columns of a table are not just its cells: a `TableSnapshot` also
+            describes the name and class of every column. A `JTable` can only pick
+            those up through a table structure change, so the model has to recognize
+            a change of the columns as being structural.
+            <p>
+            Note how deliberate this is: below we rename a column and edit a row in
+            one and the same change. The row edit alone would be synced through a
+            targeted row update (the cells carry a diff which says so), and a row
+            update would leave the table sitting on its old header. Recognizing the
+            renamed column is what makes the model fall back to a full rebuild here.
+        """
+        given : 'A property holding a named snapshot, and a table bound to it.'
+            var cells = Tuple.of(Tuple.ofNullable(Object, "a", "b"))
+            var model = Var.of(TableSnapshot.of(
+                                UI.ListData.ROW_MAJOR, 1, 2,
+                                Tuple.ofNullable(String, "First", "Second"),
+                                Tuple.of(Class, Object, Object),
+                                cells
+                            ))
+            var table = UI.table(model).get(JTable)
+        and : 'A listener recording the table model events in a readable form.'
+            var events = []
+            table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)
+
+        expect : 'The table starts out with the initial column names.'
+            table.getColumnName(0) == "First"
+
+        when : 'We rename a column and change a cell of the only row, both at once...'
+            model.set(TableSnapshot.of(
+                        UI.ListData.ROW_MAJOR, 1, 2,
+                        Tuple.ofNullable(String, "Renamed", "Second"),
+                        Tuple.of(Class, Object, Object),
+                        cells.setAt(0, Tuple.ofNullable(Object, "x", "b"))
+                    ))
+            UI.sync()
+        then : '...the table rebuilds itself entirely, instead of merely updating the row.'
+            events.contains("STRUCTURE")
+        and : 'Both the renamed column and the changed cell arrive in the table.'
+            table.getColumnName(0) == "Renamed"
+            table.getValueAt(0, 0) == "x"
     }
 
 }
