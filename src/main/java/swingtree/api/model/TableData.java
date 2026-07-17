@@ -586,7 +586,10 @@ public final class TableData
         Tuple<Tuple<@Nullable Object>> cells =
                 _layout.isRowMajor()
                     ? _insertMinors(columnIndex, Tuple.of(LINE_TYPE, values), _columnCount)
-                    : _cells.addAllAt(Math.min(columnIndex, _cells.size()), Tuple.of(LINE_TYPE, values));
+                    // Metadata may describe more columns than the cells fill, so the
+                    // cells are padded up to the insertion point first - clamping the
+                    // index instead would land the new cells under the wrong column.
+                    : _padLines(columnIndex).addAllAt(columnIndex, Tuple.of(LINE_TYPE, values));
         return new TableData(_layout, names, classes, cells);
     }
 
@@ -846,17 +849,21 @@ public final class TableData
     }
 
     private Tuple<@Nullable String> _padNamesTo( int length ) {
-        Tuple<@Nullable String> names = _columnNames;
-        while ( names.size() < length )
-            names = names.add(null);
-        return names;
+        if ( _columnNames.size() >= length )
+            return _columnNames;
+        List<@Nullable String> padding = new ArrayList<>(length - _columnNames.size());
+        for ( int i = _columnNames.size(); i < length; i++ )
+            padding.add(null);
+        return _columnNames.addAll(Tuple.ofNullable(String.class, padding));
     }
 
     private Tuple<Class<?>> _padClassesTo( int length ) {
-        Tuple<Class<?>> classes = _columnClasses;
-        while ( classes.size() < length )
-            classes = classes.add(Object.class);
-        return classes;
+        if ( _columnClasses.size() >= length )
+            return _columnClasses;
+        List<Class<?>> padding = new ArrayList<>(length - _columnClasses.size());
+        for ( int i = _columnClasses.size(); i < length; i++ )
+            padding.add(Object.class);
+        return _columnClasses.addAll(Tuple.of(CLASS_TYPE, padding));
     }
 
     private static <T extends @Nullable Object> Tuple<T> _removeFrom( Tuple<T> tuple, int index, int count ) {

@@ -739,6 +739,44 @@ class Declarative_Tables_Spec extends Specification
             noExceptionThrown()
     }
 
+    def 'A `Tuple` based table tolerates a property which currently holds no tuple at all.'()
+    {
+        reportInfo """
+            A nullable property is a natural way to model table data which has not
+            arrived yet (or which went away again). Binding such a property must
+            yield an empty table rather than an exception, no matter whether the
+            property is mutable or read only, and the table must fill up as soon
+            as the data arrives.
+        """
+        given : 'A mutable and a read only nullable property, neither holding a tuple yet.'
+            var rows = Var.ofNullable(Tuple, null)
+            var readOnlyRows = Val.ofNullable(Tuple, null)
+        and : 'A table bound to each of them:'
+            var table = UI.table(UI.ListData.ROW_MAJOR_EDITABLE, rows).get(JTable)
+            var readOnlyTable = UI.table(UI.ListData.ROW_MAJOR, readOnlyRows).get(JTable)
+
+        expect : 'Both tables read as empty instead of being broken.'
+            table.getRowCount() == 0
+            table.getColumnCount() == 0
+            readOnlyTable.getRowCount() == 0
+            readOnlyTable.getColumnCount() == 0
+
+        when : 'The data arrives in the mutable property...'
+            rows.set(Tuple.of(Tuple.of("a", "b"), Tuple.of("c", "d")))
+            UI.sync()
+        then : '...the table fills up.'
+            table.getRowCount() == 2
+            table.getColumnCount() == 2
+            table.getValueAt(1, 0) == "c"
+
+        when : 'The data goes away again...'
+            rows.set(null)
+            UI.sync()
+        then : '...the table empties out, again without any drama.'
+            table.getRowCount() == 0
+            table.getColumnCount() == 0
+    }
+
     def 'A `Tuple` based table translates a change of its property into the most targeted table events possible.'()
     {
         reportInfo """

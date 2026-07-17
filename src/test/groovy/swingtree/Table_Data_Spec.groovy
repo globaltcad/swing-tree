@@ -211,6 +211,41 @@ class Table_Data_Spec extends Specification
             recoloured.getColumn(0) == Tuple.ofNullable(Object, "Alice", "Bob")
     }
 
+    def 'A column inserted into a column major table lines its cells up with its header.'()
+    {
+        reportInfo """
+            The column metadata of a table takes part in deciding how wide it is,
+            so a column major table may well describe more columns than its cells
+            tuple holds lines for. Inserting a column into such a table must place
+            the new cells under the inserted header, and not under whichever column
+            happens to hold cells already.
+        """
+        given : 'A column major table whose two columns exist only as metadata so far.'
+            var data = TableData.of(UI.ListData.COLUMN_MAJOR, "A", "B")
+
+        when : 'We insert a column, with cells, between the two...'
+            var grown = data.addColumnAt(1, "X", String, TableData.row("x1", "x2"))
+
+        then : '...the new cells sit exactly under the new header...'
+            grown.getColumnName(1) == "X"
+            grown.getColumn(1) == TableData.row("x1", "x2")
+        and : '...while the metadata only columns to its left and right stay empty.'
+            grown.getColumnName(0) == "A"
+            grown.getColumn(0) == TableData.row(null, null)
+            grown.getColumnName(2) == "B"
+            grown.getColumn(2) == TableData.row(null, null)
+        and : 'A row major table built the very same way agrees on every single cell.'
+            var rowMajorTwin = TableData.of(UI.ListData.ROW_MAJOR, "A", "B")
+                                    .addColumnAt(1, "X", String, TableData.row("x1", "x2"))
+            grown.getRowCount() == rowMajorTwin.getRowCount()
+            grown.getColumnCount() == rowMajorTwin.getColumnCount()
+            (0..<grown.getRowCount()).every { r ->
+                (0..<grown.getColumnCount()).every { c ->
+                    grown.getValueAt(r, c) == rowMajorTwin.getValueAt(r, c)
+                }
+            }
+    }
+
     def 'A table can be reshaped fundamentally: its rows, columns and types may all change.'()
     {
         reportInfo """

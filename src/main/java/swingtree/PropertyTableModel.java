@@ -49,14 +49,21 @@ final class PropertyTableModel extends AbstractSnapshotTableModel
 
     PropertyTableModel( Val<TableData> model ) {
         _model = Objects.requireNonNull(model);
-        TableData initial = _modelOrEmpty();
-        _lastDiff = _diffOf(initial);
-        _setSnapshot(initial);
         _modelView = _model.view();
         _modelView.onChange(From.ALL, it -> {
             TableData next = it.currentValue().orElseGet(TableData::empty);
             _publishToUIThread(() -> _applyNewSnapshot(next));
         });
+        /*
+            The initial value is read only AFTER the change listener above is in
+            place: a change racing in from the application thread while this
+            constructor runs is then either seen by this read or caught by the
+            listener, instead of slipping through the gap and leaving the table
+            stale until the next change.
+         */
+        TableData initial = _modelOrEmpty();
+        _lastDiff = _diffOf(initial);
+        _setSnapshot(initial);
     }
 
     /**

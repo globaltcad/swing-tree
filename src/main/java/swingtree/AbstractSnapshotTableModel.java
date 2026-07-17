@@ -127,7 +127,13 @@ abstract class AbstractSnapshotTableModel extends AbstractTableModel
                 _fireEverythingChanged();
             });
         } else {
-            _publishToUIThread(this::_fireEverythingChanged);
+            /*
+                The coupled processors run tasks in place, but Swing table events
+                are only safe on the AWT Event Dispatch Thread. So when the change
+                signal reached us on some other thread, we marshal the actual event
+                firing over to the EDT instead of firing where we stand.
+             */
+            UI.run(this::_fireEverythingChanged);
         }
     }
 

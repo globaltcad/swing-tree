@@ -407,6 +407,42 @@ class Table_Threading_Spec extends Specification
             run << (1..5)
     }
 
+    def 'A builder model update event fired away from the UI thread still fires its table events on the UI thread.'()
+    {
+        reportInfo """
+            The lenient `COUPLED` processor runs tasks in place, on whatever thread
+            hands them in. Swing table events however are only safe on the UI thread
+            (the AWT Event Dispatch Thread), which is why a table model refresh
+            marshals the actual event firing over to the UI thread instead of
+            firing wherever the update signal happened to be raised.
+        """
+        given : 'An update event and a lambda based table built around it with the coupled processor.'
+            var update = Event.create()
+            var data = [[1], [2]]
+            var table =
+                    UI.use(EventProcessor.COUPLED, () ->
+                        UI.table().withModel( m -> m
+                            .colCount( () -> 1 )
+                            .rowCount( () -> data.size() )
+                            .getsEntryAt( (r, c) -> data[r][c] )
+                            .updateOn(update)
+                        )
+                    ).get(JTable)
+        and : 'A listener recording, for every table event, whether it arrived on the UI thread.'
+            var arrivedOnUIThread = new CopyOnWriteArrayList<Boolean>()
+            table.getModel().addTableModelListener({ TableModelEvent e ->
+                arrivedOnUIThread << UI.thisIsUIThread()
+            } as TableModelListener)
+
+        when : 'We fire the update from this thread, which is not the UI thread...'
+            assert !UI.thisIsUIThread()
+            update.fire()
+            UI.sync()
+        then : '...the table heard about the change, and every event arrived on the UI thread.'
+            !arrivedOnUIThread.isEmpty()
+            arrivedOnUIThread.every( { it } )
+    }
+
     /**
      *  In the decoupled mode, an update may need several hops to come to rest:
      *  a property change hops to the UI thread, where applying it may trigger

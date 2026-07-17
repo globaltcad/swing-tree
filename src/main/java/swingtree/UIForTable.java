@@ -738,15 +738,21 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     @SuppressWarnings("unchecked")
     private static <E> Val<TableData> _asSnapshotProperty( UI.ListData dataFormat, Val<Tuple<Tuple<E>>> cells ) {
         Function<Tuple<Tuple<E>>, TableData> toSnapshot = tuple ->
-                TableData.of(dataFormat, (Tuple<Tuple<@Nullable Object>>)(Tuple<?>) tuple);
+                tuple == null
+                    // A nullable property may hold no tuple at all (data not loaded
+                    // yet, say), which simply reads as an empty table.
+                    ? TableData.empty().withLayout(dataFormat)
+                    : TableData.of(dataFormat, (Tuple<Tuple<@Nullable Object>>)(Tuple<?>) tuple);
         /*
             Careful: a read only property may well be a 'Var' instance, which is why
             its mutability has to be checked explicitly (a lens onto an immutable
             property would throw as soon as the user edits a cell).
          */
         if ( cells instanceof Var && cells.isMutable() )
+            // The null object flavour of 'zoomTo' is what makes a lens over a
+            // nullable property well defined: a null tuple reads as the empty table.
             return ((Var<Tuple<Tuple<E>>>) cells).zoomTo(
-                        TableData.class,
+                        TableData.empty().withLayout(dataFormat),
                         Lens.of(
                             toSnapshot,
                             (oldCells, snapshot) -> (Tuple<Tuple<E>>)(Tuple<?>) snapshot.cells()
