@@ -8,29 +8,29 @@ import sprouts.Var;
 import sprouts.Viewable;
 import sprouts.impl.SequenceDiff;
 import sprouts.impl.SequenceDiffOwner;
-import swingtree.api.model.TableSnapshot;
+import swingtree.api.model.TableData;
 
 import java.util.Objects;
 
 /**
  *  A thread safe, reactive table model whose contents are modelled by a property
- *  holding an immutable {@link TableSnapshot} value.
+ *  holding an immutable {@link TableData} value.
  *  <p>
  *  This is the table analogue of {@code swingtree.TuplePropertyComboModel}, and it
  *  is the single model behind every property based table binding: a {@link Tuple}
  *  of {@link Tuple}s of cells is simply
  *  {@linkplain Val#viewAs(Class, java.util.function.Function) viewed}
  *  (or {@linkplain Var#zoomTo(Class, sprouts.Lens) zoomed into}, if the cells are
- *  editable) as a {@link TableSnapshot} property before it reaches this model.
+ *  editable) as a {@link TableData} property before it reaches this model.
  *  <p>
- *  Because a {@link TableSnapshot} is a deeply immutable value, the two threads can
+ *  Because a {@link TableData} is a deeply immutable value, the two threads can
  *  publish it to each other without any copying: the property value <em>is</em> the
  *  UI thread owned snapshot. When the property changes on the application thread,
  *  the new snapshot is handed to the UI thread, which swaps it in and fires the
  *  table events.
  *  <p>
  *  Crucially, for a row major snapshot this model exploits the {@link SequenceDiff}
- *  carried by the snapshot's {@link TableSnapshot#cells()} (mirroring
+ *  carried by the snapshot's {@link TableData#cells()} (mirroring
  *  {@code UIForTabbedPane._updateTabs}): if a change is a direct successor of the
  *  previous one, only the affected rows are refreshed through targeted
  *  {@link #fireTableRowsInserted(int, int)} / {@link #fireTableRowsDeleted(int, int)} /
@@ -41,20 +41,20 @@ import java.util.Objects;
  *  never maps onto a row range, which is why such a model falls back to refreshing
  *  all rows at once.)
  */
-final class SnapshotPropertyTableModel extends AbstractSnapshotTableModel
+final class PropertyTableModel extends AbstractSnapshotTableModel
 {
-    private final Val<TableSnapshot> _model;
-    private final Viewable<TableSnapshot> _modelView; // A strong reference keeps the (weakly parented) view and its listener alive.
+    private final Val<TableData> _model;
+    private final Viewable<TableData> _modelView; // A strong reference keeps the (weakly parented) view and its listener alive.
     private volatile @Nullable SequenceDiff _lastDiff; // Read/written on the UI thread only (plus the initial value from the installing thread).
 
-    SnapshotPropertyTableModel( Val<TableSnapshot> model ) {
+    PropertyTableModel( Val<TableData> model ) {
         _model = Objects.requireNonNull(model);
-        TableSnapshot initial = _modelOrEmpty();
+        TableData initial = _modelOrEmpty();
         _lastDiff = _diffOf(initial);
         _setSnapshot(initial);
         _modelView = _model.view();
         _modelView.onChange(From.ALL, it -> {
-            TableSnapshot next = it.currentValue().orElseGet(TableSnapshot::empty);
+            TableData next = it.currentValue().orElseGet(TableData::empty);
             _publishToUIThread(() -> _applyNewSnapshot(next));
         });
     }
@@ -63,8 +63,8 @@ final class SnapshotPropertyTableModel extends AbstractSnapshotTableModel
      *  Applies a new snapshot and fires the most targeted table events the
      *  {@link SequenceDiff} allows. Always runs on the UI thread.
      */
-    private void _applyNewSnapshot( TableSnapshot next ) {
-        TableSnapshot previous = _currentSnapshot();
+    private void _applyNewSnapshot( TableData next ) {
+        TableData previous = _currentSnapshot();
 
         SequenceDiff diff     = _diffOf(next);
         SequenceDiff lastDiff = _lastDiff;
@@ -116,7 +116,7 @@ final class SnapshotPropertyTableModel extends AbstractSnapshotTableModel
      *  can only pick up through a structure change (a row event would leave a stale header
      *  or a stale set of column renderers behind).
      */
-    private static boolean _structureChanged( @Nullable TableSnapshot previous, TableSnapshot next ) {
+    private static boolean _structureChanged( @Nullable TableData previous, TableData next ) {
         return previous == null
             || next.getColumnCount() != previous.getColumnCount()
             || next.layout().isRowMajor() != previous.layout().isRowMajor()
@@ -125,20 +125,20 @@ final class SnapshotPropertyTableModel extends AbstractSnapshotTableModel
     }
 
     @Override
-    protected TableSnapshot takeLiveSnapshot() {
+    protected TableData takeLiveSnapshot() {
         return _modelOrEmpty();
     }
 
-    private static @Nullable SequenceDiff _diffOf( TableSnapshot snapshot ) {
+    private static @Nullable SequenceDiff _diffOf( TableData snapshot ) {
         Tuple<?> cells = snapshot.cells();
         if ( cells instanceof SequenceDiffOwner )
             return ((SequenceDiffOwner) cells).differenceFromPrevious().orElse(null);
         return null;
     }
 
-    private TableSnapshot _modelOrEmpty() {
-        TableSnapshot snapshot = _model.orElseNull();
-        return snapshot == null ? TableSnapshot.empty() : snapshot;
+    private TableData _modelOrEmpty() {
+        TableData snapshot = _model.orElseNull();
+        return snapshot == null ? TableData.empty() : snapshot;
     }
 
     // ---- Live accessors (only used if there is no snapshot, which for this model is never). ----
@@ -164,8 +164,8 @@ final class SnapshotPropertyTableModel extends AbstractSnapshotTableModel
     protected void _liveSetValueAt( @Nullable Object value, int rowIndex, int columnIndex ) {
         if ( !_liveCellEditable(rowIndex, columnIndex) )
             return; // A read only source (or layout) cannot receive edits.
-        // Note that 'withValueAt' returns the snapshot unchanged if the indices went
+        // Note that 'setCellAt' returns the snapshot unchanged if the indices went
         // out of bounds in the meantime, in which case the edit no longer applies.
-        ((Var<TableSnapshot>) _model).update(From.VIEW, snapshot -> snapshot.withValueAt(rowIndex, columnIndex, value));
+        ((Var<TableData>) _model).update(From.VIEW, snapshot -> snapshot.setCellAt(rowIndex, columnIndex, value));
     }
 }

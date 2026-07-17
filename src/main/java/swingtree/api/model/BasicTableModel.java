@@ -26,8 +26,27 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *          )
  *      )
  *  }</pre>
- *  Note that an implementation of this is merely a <i>description of where the table
- *  data lives</i>, it is not the model which the {@link javax.swing.JTable} ends up
+ *  <b>Note that {@link TableData} is the recommended way of modelling a table in
+ *  SwingTree.</b> It is a single immutable value describing the whole table (cells,
+ *  column names, column classes and layout), which you hold in a {@link sprouts.Var}
+ *  property and bind through {@link swingtree.UI#table(sprouts.Var)}:
+ *  <pre>{@code
+ *      Var<TableData> data = Var.of(
+ *              TableData.of(UI.ListData.ROW_MAJOR, "A", "B")
+ *                  .addRow(1, 2)
+ *          );
+ *
+ *      UI.table(data);
+ *  }</pre>
+ *  A table bound like that updates itself whenever the property changes (so there is
+ *  no {@code updateOn(..)} to remember), it is thread safe by construction, and it
+ *  syncs row changes to the {@link javax.swing.JTable} incrementally instead of
+ *  rebuilding it. The lambda based model below, by contrast, is read <i>live</i>,
+ *  which is why SwingTree has to copy the whole table on every refresh under the
+ *  {@link swingtree.threading.EventProcessor#DECOUPLED} protocol.
+ *  <p>
+ *  Note that an implementation of this interface is merely a <i>description of where
+ *  the table data lives</i>, it is not the model which the {@link javax.swing.JTable} ends up
  *  talking to. SwingTree always wraps it in a thread safe model of its own, which
  *  reads through the methods declared here and, under the
  *  {@link swingtree.threading.EventProcessor#DECOUPLED} protocol, keeps a UI thread

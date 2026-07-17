@@ -2,7 +2,7 @@ package swingtree;
 
 import org.jspecify.annotations.Nullable;
 import sprouts.Tuple;
-import swingtree.api.model.TableSnapshot;
+import swingtree.api.model.TableData;
 import swingtree.threading.DecoupledEventProcessor;
 import swingtree.threading.EventProcessor;
 
@@ -35,7 +35,7 @@ import java.util.Objects;
  *          data source <em>live</em> (through the {@code _liveXxx} accessors),
  *          exactly like before, with zero added overhead.</li>
  *      <li>Under {@link EventProcessor#DECOUPLED}, the model maintains a UI thread
- *          owned {@link TableSnapshot}. All UI thread reads are served from that
+ *          owned {@link TableData}. All UI thread reads are served from that
  *          immutable snapshot. When the data changes (see {@link #refresh()}),
  *          a fresh snapshot is taken <em>on the application thread</em> (which
  *          owns the data) and then published to the UI thread, where it is
@@ -53,7 +53,7 @@ abstract class AbstractSnapshotTableModel extends AbstractTableModel
      *  during {@link #_setEventProcessor(EventProcessor)}, possibly read across
      *  the thread that installs the model.
      */
-    private volatile @Nullable TableSnapshot _snapshot = null;
+    private volatile @Nullable TableData _snapshot = null;
     private volatile EventProcessor _eventProcessor = EventProcessor.COUPLED;
 
     /**
@@ -90,12 +90,12 @@ abstract class AbstractSnapshotTableModel extends AbstractTableModel
      *  if the model is currently reading its data source live (coupled mode).
      *  @return The current snapshot, or {@code null}.
      */
-    protected final @Nullable TableSnapshot _currentSnapshot() {
+    protected final @Nullable TableData _currentSnapshot() {
         return _snapshot;
     }
 
     /** Swaps in a new UI thread owned snapshot. Must be called on the UI thread. */
-    protected final void _setSnapshot( @Nullable TableSnapshot snapshot ) {
+    protected final void _setSnapshot( @Nullable TableData snapshot ) {
         _snapshot = snapshot;
     }
 
@@ -121,7 +121,7 @@ abstract class AbstractSnapshotTableModel extends AbstractTableModel
                 _publishToAppThread(this::refresh);
                 return;
             }
-            TableSnapshot next = takeLiveSnapshot();
+            TableData next = takeLiveSnapshot();
             _publishToUIThread(() -> {
                 _snapshot = next;
                 _fireEverythingChanged();
@@ -143,7 +143,7 @@ abstract class AbstractSnapshotTableModel extends AbstractTableModel
     }
 
     /**
-     *  Builds a fresh {@link TableSnapshot} by reading the live data source of
+     *  Builds a fresh {@link TableData} by reading the live data source of
      *  this model through the {@code _liveXxx} accessors. This is called on the
      *  thread that owns the data (the application thread under the decoupled
      *  protocol). Subclasses whose data source is already immutable (like a
@@ -156,7 +156,7 @@ abstract class AbstractSnapshotTableModel extends AbstractTableModel
      * @return A new immutable snapshot of the current table contents.
      */
     @SuppressWarnings("unchecked")
-    protected TableSnapshot takeLiveSnapshot() {
+    protected TableData takeLiveSnapshot() {
         int cols = Math.max(0, _liveColumnCount());
         int rows = Math.max(0, _liveRowCount());
         List<@Nullable String> names   = new ArrayList<>(cols);
@@ -172,10 +172,13 @@ abstract class AbstractSnapshotTableModel extends AbstractTableModel
                 cells.add(_liveValueAt(r, c));
             rowTuples.add(Tuple.ofNullable(Object.class, cells));
         }
-        return TableSnapshot.of(
+        /*
+            Note that the dimensions of the result are derived from what we hand over
+            here: the column metadata has one entry per column, which is what keeps a
+            table with columns but no rows as wide as it should be.
+         */
+        return TableData.of(
             UI.ListData.ROW_MAJOR,
-            rows,
-            cols,
             Tuple.ofNullable(String.class, names),
             Tuple.of((Class<Class<?>>)(Class<?>) Class.class, classes),
             Tuple.of((Class<Tuple<@Nullable Object>>)(Class<?>) Tuple.class, rowTuples)
@@ -185,28 +188,28 @@ abstract class AbstractSnapshotTableModel extends AbstractTableModel
     // ---- TableModel reads: snapshot when present, otherwise live. ----
 
     @Override public int getRowCount() {
-        TableSnapshot snap = _snapshot;
+        TableData snap = _snapshot;
         return snap == null ? Math.max(0, _liveRowCount()) : snap.getRowCount();
     }
 
     @Override public int getColumnCount() {
-        TableSnapshot snap = _snapshot;
+        TableData snap = _snapshot;
         return snap == null ? Math.max(0, _liveColumnCount()) : snap.getColumnCount();
     }
 
     @Override public @Nullable Object getValueAt( int rowIndex, int columnIndex ) {
-        TableSnapshot snap = _snapshot;
+        TableData snap = _snapshot;
         return snap == null ? _liveValueAt(rowIndex, columnIndex) : snap.getValueAt(rowIndex, columnIndex);
     }
 
     @Override public String getColumnName( int columnIndex ) {
-        TableSnapshot snap = _snapshot;
+        TableData snap = _snapshot;
         String name = snap == null ? _liveColumnName(columnIndex) : snap.getColumnName(columnIndex);
         return name == null ? super.getColumnName(columnIndex) : name;
     }
 
     @Override public Class<?> getColumnClass( int columnIndex ) {
-        TableSnapshot snap = _snapshot;
+        TableData snap = _snapshot;
         return snap == null ? _liveColumnClass(columnIndex) : snap.getColumnClass(columnIndex);
     }
 
@@ -228,9 +231,9 @@ abstract class AbstractSnapshotTableModel extends AbstractTableModel
                 Any other write (a programmatic one, say) simply travels to the data
                 source, whose change signal then refreshes the snapshot as usual.
              */
-            TableSnapshot snap = _snapshot;
+            TableData snap = _snapshot;
             if ( snap != null && UI.thisIsUIThread() && _liveCellEditable(rowIndex, columnIndex) ) {
-                TableSnapshot next = snap.withValueAt(rowIndex, columnIndex, value);
+                TableData next = snap.setCellAt(rowIndex, columnIndex, value);
                 if ( next != snap ) {
                     _snapshot = next;
                     fireTableCellUpdated(rowIndex, columnIndex);

@@ -9,7 +9,7 @@ import sprouts.Tuple
 import sprouts.Val
 import sprouts.Var
 import swingtree.api.model.BasicTableModel
-import swingtree.api.model.TableSnapshot
+import swingtree.api.model.TableData
 import swingtree.threading.EventProcessor
 
 import javax.swing.*
@@ -23,7 +23,14 @@ import java.awt.*
     Swing-Tree exposes a user friendly API for defining tables in a declarative manner.
     You don't necessarily have to implement your own table model, because the Swing-Tree
     API allows you to supply simple collection based data as a data source for your table.
-    
+
+    Note that the **recommended** way of modelling a table is the `TableData` value,
+    which describes an entire table (its cells, column names, column classes and layout)
+    as a single immutable value that you hold in a property and bind to a table.
+    See the `Table_Data_Spec` for what that looks like, and read on here for the older,
+    pull based data sources, which are still supported and still handy for a quick table
+    over data you already hold somewhere else.
+
 """)
 @Subject([UIForTable, BasicTableModel])
 class Declarative_Tables_Spec extends Specification
@@ -39,6 +46,11 @@ class Declarative_Tables_Spec extends Specification
             Note that you can actually pass a provider lambda for a map of header names to column lists 
             to the table factory method and it will create a table model for you, which is based on the provided 
             map provider. This will always result in a column major table. 
+            <p>
+            Note that this data source is pull based: the table reads it whenever it feels
+            like it, and it has no way of knowing when your map changed. Prefer a
+            `TableData` value in a property (see the `Table_Data_Spec`) unless you really
+            do have a map lying around which you would rather not copy.
         """
         given : 'A simple table UI with a map based data table model.'
             var ui =
@@ -87,6 +99,12 @@ class Declarative_Tables_Spec extends Specification
             through the `withModel(Configurator)` method. This is a convenient
             way to create a table model without having to implement the TableModel
             interface yourself.
+            <p>
+            Observe how the `Event` has to be fired by hand after the data changed, and
+            how the table can then only rebuild itself wholesale, because the event does
+            not say what changed. A `TableData` value in a property (see the
+            `Table_Data_Spec`) needs neither: it updates itself, and it knows exactly
+            which rows moved.
         """
 
         given : 'We have an update event and some data.'
@@ -787,54 +805,10 @@ class Declarative_Tables_Spec extends Specification
         return "$type[$event.firstRow..$event.lastRow]"
     }
 
-    def 'The `TableSnapshot` of a table model is a value.'()
+    def 'A property of a `TableData` can be used as a data source for tables.'()
     {
         reportInfo """
-            The immutable `TableSnapshot` is what a SwingTree table model hands
-            from the application thread to the UI thread, and it has proper value
-            semantics: two snapshots with the same layout, dimensions and cells
-            are equal to each other (and have the same hash code), whereas a
-            snapshot which merely holds the same cells in a different layout is
-            a different value. This is what allows a model to tell whether
-            something actually changed.
-        """
-        given : 'Two identically built row major snapshots, and a column major one with the same cells.'
-            var cells = Tuple.of(Tuple.ofNullable(Object, "a", "b"), Tuple.ofNullable(Object, "c", "d"))
-            var snapshot1 = TableSnapshot.of(UI.ListData.ROW_MAJOR, cells)
-            var snapshot2 = TableSnapshot.of(UI.ListData.ROW_MAJOR, cells)
-            var transposed = TableSnapshot.of(UI.ListData.COLUMN_MAJOR, cells)
-
-        expect : 'The two identically built snapshots are equal and have the same hash code.'
-            snapshot1 == snapshot2
-            snapshot1.hashCode() == snapshot2.hashCode()
-        and : 'They also have a useful string representation, which tells you what they hold.'
-            snapshot1.toString() == "TableSnapshot[layout=ROW_MAJOR, rowCount=2, columnCount=2, " +
-                                        "columnNames=Tuple<String?>[], " +
-                                        "cells=Tuple<TupleWithDiff>[Tuple<Object?>[a, b], Tuple<Object?>[c, d]]]"
-        and : 'The transposed snapshot is a different value, even though it holds the very same cells.'
-            snapshot1 != transposed
-            transposed.getValueAt(0, 1) == "c"
-            snapshot1.getValueAt(0, 1) == "b"
-
-        when : 'We derive a new snapshot by changing a single cell...'
-            var changed = snapshot1.withValueAt(1, 0, "!")
-        then : '...the original is untouched and the derived one is a different value.'
-            snapshot1.getValueAt(1, 0) == "c"
-            changed.getValueAt(1, 0) == "!"
-            changed != snapshot1
-        and : 'Changing a cell to the value it already has, or out of bounds, yields the very same snapshot.'
-            snapshot1.withValueAt(1, 0, "c") === snapshot1
-            snapshot1.withValueAt(7, 7, "?") === snapshot1
-        and : 'The empty snapshot is empty, no matter how you ask it.'
-            TableSnapshot.empty().getRowCount() == 0
-            TableSnapshot.empty().getColumnCount() == 0
-            TableSnapshot.empty().getValueAt(0, 0) == null
-    }
-
-    def 'A property of a `TableSnapshot` can be used as a data source for tables.'()
-    {
-        reportInfo """
-            A `TableSnapshot` is the most complete description of the contents of
+            A `TableData` is the most complete description of the contents of
             a table: it carries the cells, the column names, the column classes and
             the layout of the data, all in a single immutable value. So if you hold
             such a value in a property, then that property alone describes your
@@ -842,54 +816,47 @@ class Declarative_Tables_Spec extends Specification
             Note that no `updateTableOn(..)` binding is needed here, because the
             table listens to the property itself.
         """
-        given : 'A property holding a fully described table snapshot.'
-            var model = Var.of(TableSnapshot.of(
-                                UI.ListData.ROW_MAJOR, 2, 2,
-                                Tuple.ofNullable(String, "Name", "Age"),
-                                Tuple.of(Class, String, Integer),
-                                Tuple.of(
-                                    Tuple.ofNullable(Object, "Alice", 30),
-                                    Tuple.ofNullable(Object, "Bob",   42)
-                                )
-                            ))
+        given : 'A property holding a fully described table.'
+            var model = Var.of(
+                            TableData.of(UI.ListData.ROW_MAJOR, "Name", "Age")
+                                .setColumnClassAt(0, String)
+                                .setColumnClassAt(1, Integer)
+                                .addRow("Alice", 30)
+                                .addRow("Bob",   42)
+                        )
         and : 'A table built from this property:'
             var table = UI.table(model).get(JTable)
 
-        expect : 'The table displays everything the snapshot describes.'
+        expect : 'The table displays everything the data describes.'
             table.getRowCount() == 2
             table.getColumnCount() == 2
             table.getValueAt(0, 0) == "Alice"
             table.getValueAt(1, 1) == 42
-        and : 'The column names and classes of the snapshot reach the table as well.'
+        and : 'The column names and classes reach the table as well.'
             table.getColumnName(0) == "Name"
             table.getColumnName(1) == "Age"
             table.getModel().getColumnClass(1) == Integer
 
-        when : 'We change the property to a snapshot with an additional row...'
-            model.update({ snapshot -> TableSnapshot.of(
-                                UI.ListData.ROW_MAJOR, 3, 2,
-                                snapshot.columnNames(), snapshot.columnClasses(),
-                                snapshot.cells().add(Tuple.ofNullable(Object, "Carol", 55))
-                            ) })
+        when : 'We add a row to the data held by the property...'
+            model.update({ it.addRow("Carol", 55) })
             UI.sync()
         then : '...the table shows the new row.'
             table.getRowCount() == 3
             table.getValueAt(2, 0) == "Carol"
     }
 
-    def 'A `TableSnapshot` property based table is read only if either its layout or its property is read only.'()
+    def 'A `TableData` property based table is read only if either its layout or its property is read only.'()
     {
         reportInfo """
             Just like for a `Tuple` based table, two conditions have to be met before
-            the user may edit the cells of a `TableSnapshot` based table: the layout
+            the user may edit the cells of a `TableData` based table: the layout
             of the snapshot has to be one of the `*_EDITABLE` constants, and the
             property has to be a mutable `Var` which can actually receive the edit.
             If either is missing, then the table is simply read only.
         """
-        given : 'A snapshot with the given layout, held by a property of the given mutability.'
-            var cells = Tuple.of(Tuple.ofNullable(Object, "a", "b"))
-            var snapshot = TableSnapshot.of(layout, cells)
-            var model = mutable ? Var.of(snapshot) : Val.of(snapshot)
+        given : 'A table with the given layout, held by a property of the given mutability.'
+            var data  = TableData.of(layout).addRow("a", "b")
+            var model = mutable ? Var.of(data) : Val.of(data)
         and : 'A table bound to that property:'
             var table = UI.table(model).get(JTable)
 
@@ -904,22 +871,20 @@ class Declarative_Tables_Spec extends Specification
             UI.ListData.ROW_MAJOR           | false   || false
     }
 
-    def 'The cells of an editable `TableSnapshot` based table are written back into the property.'()
+    def 'The cells of an editable `TableData` based table are written back into the property.'()
     {
         reportInfo """
-            A `Var` holding an editable `TableSnapshot` is a two way binding: an edit
+            A `Var` holding an editable `TableData` is a two way binding: an edit
             made through the table model finds its way back into the property, and the
             property in turn is what the table reads. Note that the snapshot is a value,
             so the property receives a new snapshot rather than a mutated one.
         """
         given : 'A property holding an editable snapshot, and a table bound to it.'
-            var model = Var.of(TableSnapshot.of(
-                                UI.ListData.ROW_MAJOR_EDITABLE,
-                                Tuple.of(
-                                    Tuple.ofNullable(Object, "a", "b"),
-                                    Tuple.ofNullable(Object, "c", "d")
-                                )
-                            ))
+            var model = Var.of(
+                            TableData.of(UI.ListData.ROW_MAJOR_EDITABLE)
+                                .addRow("a", "b")
+                                .addRow("c", "d")
+                        )
             var table = UI.table(model).get(JTable)
         and : 'We remember the initial snapshot, so that we can tell it was not mutated.'
             var initial = model.get()
@@ -935,10 +900,10 @@ class Declarative_Tables_Spec extends Specification
             initial.getValueAt(1, 0) == "c"
     }
 
-    def 'A change of the column names of a `TableSnapshot` property reaches the table.'()
+    def 'A change of the column names of a `TableData` property reaches the table.'()
     {
         reportInfo """
-            The columns of a table are not just its cells: a `TableSnapshot` also
+            The columns of a table are not just its cells: a `TableData` also
             describes the name and class of every column. A `JTable` can only pick
             those up through a table structure change, so the model has to recognize
             a change of the columns as being structural.
@@ -949,14 +914,11 @@ class Declarative_Tables_Spec extends Specification
             update would leave the table sitting on its old header. Recognizing the
             renamed column is what makes the model fall back to a full rebuild here.
         """
-        given : 'A property holding a named snapshot, and a table bound to it.'
-            var cells = Tuple.of(Tuple.ofNullable(Object, "a", "b"))
-            var model = Var.of(TableSnapshot.of(
-                                UI.ListData.ROW_MAJOR, 1, 2,
-                                Tuple.ofNullable(String, "First", "Second"),
-                                Tuple.of(Class, Object, Object),
-                                cells
-                            ))
+        given : 'A property holding a named table, and a table bound to it.'
+            var model = Var.of(
+                            TableData.of(UI.ListData.ROW_MAJOR, "First", "Second")
+                                .addRow("a", "b")
+                        )
             var table = UI.table(model).get(JTable)
         and : 'A listener recording the table model events in a readable form.'
             var events = []
@@ -966,12 +928,7 @@ class Declarative_Tables_Spec extends Specification
             table.getColumnName(0) == "First"
 
         when : 'We rename a column and change a cell of the only row, both at once...'
-            model.set(TableSnapshot.of(
-                        UI.ListData.ROW_MAJOR, 1, 2,
-                        Tuple.ofNullable(String, "Renamed", "Second"),
-                        Tuple.of(Class, Object, Object),
-                        cells.setAt(0, Tuple.ofNullable(Object, "x", "b"))
-                    ))
+            model.update({ it.setColumnNameAt(0, "Renamed").setCellAt(0, 0, "x") })
             UI.sync()
         then : '...the table rebuilds itself entirely, instead of merely updating the row.'
             events.contains("STRUCTURE")

@@ -14,7 +14,7 @@ import swingtree.api.Configurator;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
-import swingtree.api.model.TableSnapshot;
+import swingtree.api.model.TableData;
 import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
@@ -627,11 +627,11 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
 
     /**
      *  Binds the table to a read only property holding an immutable
-     *  {@link TableSnapshot} value, which is the most complete way of describing
+     *  {@link TableData} value, which is the most complete way of describing
      *  the contents of a table: it carries the cells, the column names, the column
      *  classes and the {@link UI.ListData} layout of the data, all in a single value.
      *  <p>
-     *  Because a {@link TableSnapshot} is deeply immutable, the table works with the
+     *  Because a {@link TableData} is deeply immutable, the table works with the
      *  property value itself as its UI thread owned snapshot (so the AWT Event Dispatch
      *  Thread never reads application thread owned mutable state), and no copying is
      *  needed to hand it between the threads. The table updates itself automatically
@@ -644,43 +644,43 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  {@link #withModel(Var)} together with one of the {@code *_EDITABLE} layouts
      *  if you want the user to be able to edit them.
      *  <pre>{@code
-     *  Val<TableSnapshot> model = vm.tableModel();
+     *  Val<TableData> model = vm.tableModel();
      *  UI.table().withModel(model);
      *  }</pre>
      *
-     * @param model A read only property holding the {@link TableSnapshot} describing this table.
+     * @param model A read only property holding the {@link TableData} describing this table.
      * @return This builder node, to allow for method chaining.
      */
-    public final UIForTable<T> withModel( Val<TableSnapshot> model ) {
+    public final UIForTable<T> withModel( Val<TableData> model ) {
         NullUtil.nullArgCheck(model, "model", Val.class);
         return _with( thisComponent -> {
-                    _installModel(thisComponent, new SnapshotPropertyTableModel(model));
+                    _installModel(thisComponent, new PropertyTableModel(model));
                 })
                 ._this();
     }
 
     /**
-     *  Binds the table to a mutable property holding an immutable {@link TableSnapshot}
+     *  Binds the table to a mutable property holding an immutable {@link TableData}
      *  value, which, in addition to what {@link #withModel(Val)} does, allows the user
      *  to edit the cells of the table: an edit is applied to the UI thread owned snapshot
      *  right away (so that the table does not flicker) and then written back into this
      *  property on the application thread.
      *  <p>
-     *  Note that the cells only actually become editable if the {@link TableSnapshot#layout()}
+     *  Note that the cells only actually become editable if the {@link TableData#layout()}
      *  of the bound value is one of the {@code *_EDITABLE} constants of {@link UI.ListData}.
      *  This mirrors {@link #withModel(UI.ListData, Val)}, where the very same two conditions
      *  (an editable layout and a mutable property) decide the matter.
      *  <pre>{@code
-     *  Var<TableSnapshot> model = vm.tableModel();
+     *  Var<TableData> model = vm.tableModel();
      *  UI.table().withModel(model);
      *  }</pre>
      *
-     * @param model A mutable property holding the {@link TableSnapshot} describing this table.
+     * @param model A mutable property holding the {@link TableData} describing this table.
      * @return This builder node, to allow for method chaining.
      */
-    public final UIForTable<T> withModel( Var<TableSnapshot> model ) {
+    public final UIForTable<T> withModel( Var<TableData> model ) {
         NullUtil.nullArgCheck(model, "model", Var.class);
-        return withModel((Val<TableSnapshot>) model);
+        return withModel((Val<TableData>) model);
     }
 
     /**
@@ -725,20 +725,20 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     }
 
     /**
-     *  Translates a {@link Tuple} based cells property into the {@link TableSnapshot}
+     *  Translates a {@link Tuple} based cells property into the {@link TableData}
      *  property which the table models actually speak, so that a tuple based table is
      *  simply a snapshot based table with a differently shaped source.
      *  <p>
-     *  Note that this translation costs nothing: a {@link TableSnapshot} keeps the very
+     *  Note that this translation costs nothing: a {@link TableData} keeps the very
      *  tuple it is handed, so the change diff of that tuple (which the model uses to
      *  fire targeted row events) survives the trip.
      *  Mutable cells are zoomed into through a {@link Lens} so that a user edit finds
      *  its way back into the original property, whereas read only cells only need a view.
      */
     @SuppressWarnings("unchecked")
-    private static <E> Val<TableSnapshot> _asSnapshotProperty( UI.ListData dataFormat, Val<Tuple<Tuple<E>>> cells ) {
-        Function<Tuple<Tuple<E>>, TableSnapshot> toSnapshot = tuple ->
-                TableSnapshot.of(dataFormat, (Tuple<Tuple<@Nullable Object>>)(Tuple<?>) tuple);
+    private static <E> Val<TableData> _asSnapshotProperty( UI.ListData dataFormat, Val<Tuple<Tuple<E>>> cells ) {
+        Function<Tuple<Tuple<E>>, TableData> toSnapshot = tuple ->
+                TableData.of(dataFormat, (Tuple<Tuple<@Nullable Object>>)(Tuple<?>) tuple);
         /*
             Careful: a read only property may well be a 'Var' instance, which is why
             its mutability has to be checked explicitly (a lens onto an immutable
@@ -746,13 +746,13 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
          */
         if ( cells instanceof Var && cells.isMutable() )
             return ((Var<Tuple<Tuple<E>>>) cells).zoomTo(
-                        TableSnapshot.class,
+                        TableData.class,
                         Lens.of(
                             toSnapshot,
                             (oldCells, snapshot) -> (Tuple<Tuple<E>>)(Tuple<?>) snapshot.cells()
                         )
                     );
-        return cells.viewAs(TableSnapshot.class, toSnapshot);
+        return cells.viewAs(TableData.class, toSnapshot);
     }
 
     /**
@@ -776,6 +776,12 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *      <b>Please note that when the data of the provided data source changes (i.e. when the data source
      *      is a {@link List} and the list is modified), the table model will not be updated automatically!
      *      Use {@link #updateTableOn(sprouts.Event)} to bind an update {@link sprouts.Event} to the table model.</b>
+     *  <p>
+     *  <b>Consider {@link #withModel(Var)} with a {@link TableData} value instead:</b> it
+     *  describes the whole table (cells, column names, column classes and layout) as a
+     *  single immutable value which a property hands to the table, so the table updates
+     *  itself, it is thread safe by construction, and it syncs row changes incrementally
+     *  instead of rebuilding. The data source here can only ever refresh everything.
      *
      * @param mode An enum which configures the layout as well as modifiability of the table in a readable fashion.
      * @param dataSource The {@link TableListDataSource} returning a list matrix which will be used to populate the table.
@@ -839,6 +845,12 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *      <b>Please note that when the data of the provided data source changes (i.e. when the data source
      *      is a {@link Map} which gets modified), the table model will not be updated automatically!
      *      Use {@link #updateTableOn(sprouts.Event)} to bind an update {@link sprouts.Event} to the table model.</b>
+     *  <p>
+     *  <b>Consider {@link #withModel(Var)} with a {@link TableData} value instead:</b> it
+     *  describes the whole table (cells, column names, column classes and layout) as a
+     *  single immutable value which a property hands to the table, so the table updates
+     *  itself, it is thread safe by construction, and it syncs row changes incrementally
+     *  instead of rebuilding. The data source here can only ever refresh everything.
      *
      * @param mode An enum which configures the modifiability of the table in a readable fashion.
      * @param dataSource The {@link TableMapDataSource} returning a column major map based matrix which will be used to populate the table.

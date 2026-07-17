@@ -31,7 +31,7 @@ import java.util.concurrent.CountDownLatch
     thread.
 
     This is achieved through the same snapshot protocol the combo box models
-    use: the UI thread reads an immutable, UI thread owned `TableSnapshot`, which
+    use: the UI thread reads an immutable, UI thread owned `TableData`, which
     is refreshed by the application thread and published across the thread
     boundary. For the `Tuple` based reactive table model, the immutable tuple
     *is* the snapshot, and its change diff is used to sync row insertions,
