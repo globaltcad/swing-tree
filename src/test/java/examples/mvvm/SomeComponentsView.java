@@ -16,9 +16,11 @@ import static swingtree.UI.*;
 
 public class SomeComponentsView extends Panel
 {
+	private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(SomeComponentsView.class);
+
 	public SomeComponentsView(SomeComponentsViewModel vm) {
 		try { UIManager.setLookAndFeel(new FlatMaterialDesignDarkIJTheme()); }
-		catch (Exception e) {e.printStackTrace();}
+		catch (Exception e) { log.error("Failed to set up the look and feel.", e); }
 		UIManager.put("ComboBox.selectionBackground", Color.BLUE);
 		UIManager.put("List.selectionBackground", Color.GREEN);
 		of(this).withLayout(FILL.and(INS(12)))

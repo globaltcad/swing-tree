@@ -30,6 +30,8 @@ import java.util.stream.Collectors;
  */
 public class Utility
 {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(Utility.class);
+
     private static final String GITHUB_URL = "https://github.com/globaltcad/swing-tree/blob/";
     private static final String GITHUB_URL_RAW = "https://raw.githubusercontent.com/globaltcad/swing-tree/";
 
@@ -75,6 +77,7 @@ public class Utility
             case DEFAULT: break;
             case FLAT_BRIGHT:
                 FlatLightLaf.setup();
+                // fall through
             default:
                 try {
                     for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
@@ -84,7 +87,7 @@ public class Utility
                         }
                     }
                 } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
-                    e.printStackTrace();
+                    log.error("Failed to set the look and feel.", e);
                 }
         }
 
@@ -296,7 +299,7 @@ public class Utility
             }
             javax.imageio.ImageIO.write(image, "png", new java.io.File(path));
         } catch (java.io.IOException e) {
-            e.printStackTrace();
+            log.error("Failed to write image to '{}'.", path, e);
         }
     }
 
@@ -334,7 +337,7 @@ public class Utility
     }
 
     private static List<String> _findAllVariantsOf(String imagePath) {
-        String[] parts     = imagePath.split("\\.");
+        String[] parts     = imagePath.split("\\.", -1);
         String   base      = parts[0];
         String   extension = parts[1];
         String   directory = base.substring(0, base.lastIndexOf("/"));
@@ -369,7 +372,7 @@ public class Utility
             Objects.requireNonNull(resource);
             imageFromFile = javax.imageio.ImageIO.read(resource);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to read image for comparison.", e);
         }
         int width1 = imageFromFile.getWidth();
         int width0 = image.getWidth();
@@ -405,7 +408,7 @@ public class Utility
                     frame.setVisible(true);
                 });
             } catch (Exception e) {
-                e.printStackTrace();// Probably a headless exception
+                log.error("Failed to show the frame (probably a headless exception).", e);
             }
         });
     }
@@ -447,10 +450,10 @@ public class Utility
         long diff = 0;
         for (int y = 0; y < height1; y++) {
             for (int x = 0; x < width1; x++) {
-                diff += pixelDiff(image1.getRGB(x, y), image0.getRGB(x, y));
+                diff = (long) (diff + pixelDiff(image1.getRGB(x, y), image0.getRGB(x, y)));
             }
         }
-        long maxDiff = (long) Math.pow((Math.pow(255, 2) * 3), 0.5) * width1 * height1;
+        long maxDiff = ((long) Math.pow((Math.pow(255, 2) * 3), 0.5)) * width1 * height1;
         double similarity = 100.0 * ( 1 - (double) diff / maxDiff );
         return similarity;
     }
@@ -521,7 +524,7 @@ public class Utility
             try {
                 stream.close();
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("Failed to close the stream.", e);
             }
         }
         return result;

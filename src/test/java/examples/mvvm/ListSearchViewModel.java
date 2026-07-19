@@ -1,4 +1,5 @@
 package examples.mvvm;
+import java.time.ZoneId;
 
 import sprouts.Var;
 import sprouts.Vars;
@@ -16,7 +17,9 @@ import java.util.List;
  */
 public class ListSearchViewModel {
 
-    private final Vars<LocalDateTime> lastSearchTimes = Vars.of(LocalDateTime.now(), LocalDateTime.of(2018, 1, 1, 0, 0));
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ListSearchViewModel.class);
+
+    private final Vars<LocalDateTime> lastSearchTimes = Vars.of(LocalDateTime.now(ZoneId.systemDefault()), LocalDateTime.of(2018, 1, 1, 0, 0));
     private final Vars<String> searchTerms = Vars.of("foo", "bar");
     private final Var<String> keyword = Var.of("goo");
     private final Var<Integer> found = Var.of(0);
@@ -57,7 +60,7 @@ public class ListSearchViewModel {
             Thread.sleep(100);
             found.set(12);
             Thread.sleep(100);
-            lastSearchTimes.add(LocalDateTime.now());
+            lastSearchTimes.add(LocalDateTime.now(ZoneId.systemDefault()));
             Thread.sleep(100);
             searchTerms.add(keyword.get());
             Thread.sleep(100);
@@ -65,13 +68,13 @@ public class ListSearchViewModel {
             Thread.sleep(500);
             randomColors.add(nextPseudoRandomColor());
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.error("The simulated search was interrupted.", e);
         }
         found.set(42);
         searchRunning.set(false);
         searchButtonText.set("Search");
         searchEnabled.set(true);
-        lastSearchTimes.add(LocalDateTime.now());
+        lastSearchTimes.add(LocalDateTime.now(ZoneId.systemDefault()));
         searchTerms.add(keyword.get());
     }
 
@@ -107,10 +110,10 @@ public class ListSearchViewModel {
     }
 
     public void refill() {
-        lastSearchTimes.add(LocalDateTime.now());
-        lastSearchTimes.add(LocalDateTime.now());
-        lastSearchTimes.add(LocalDateTime.now());
-        lastSearchTimes.add(LocalDateTime.now());
+        lastSearchTimes.add(LocalDateTime.now(ZoneId.systemDefault()));
+        lastSearchTimes.add(LocalDateTime.now(ZoneId.systemDefault()));
+        lastSearchTimes.add(LocalDateTime.now(ZoneId.systemDefault()));
+        lastSearchTimes.add(LocalDateTime.now(ZoneId.systemDefault()));
         searchTerms.add("foo");
         searchTerms.add("bar");
         // Some more random stuff:

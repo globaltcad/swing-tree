@@ -1,4 +1,5 @@
 package examples.tasks.mvvm;
+import java.util.Locale;
 
 import sprouts.Vars;
 import swingtree.UI;
@@ -74,7 +75,7 @@ public final class TasksView extends Panel
                     .addAll(entries, entry ->
                         panel(FILL)
                         .add(GROW_X.and(PUSH_X), textField(entry.task()))
-                        .add(comboBox(entry.dueTo(), it -> it.name().toLowerCase()))
+                        .add(comboBox(entry.dueTo(), it -> it.name().toLowerCase(Locale.ROOT)))
                         .add(button("✕").onClick(it -> entries.remove(entry)))
                         .add(button("⨮").onClick(it -> {
                             TasksViewModel.TaskViewModel newEntry = new TasksViewModel.TaskViewModel();
@@ -92,7 +93,7 @@ public final class TasksView extends Panel
                             Transferable transferable = dropEvent.getTransferable();
                             if (transferable.isDataFlavorSupported(DataFlavor.stringFlavor)) {
                                 String payload = (String) transferable.getTransferData(DataFlavor.stringFlavor);
-                                String[] parts = payload.split("\\|");
+                                String[] parts = payload.split("\\|", -1);
                                 if (parts.length == 2) {
                                     TaskType sourceId = TaskType.valueOf(parts[0]);
                                     if ( sourceId == id ) {

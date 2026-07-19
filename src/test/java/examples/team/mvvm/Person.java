@@ -1,4 +1,5 @@
 package examples.team.mvvm;
+import java.util.Locale;
 
 import sprouts.Var;
 
@@ -39,8 +40,8 @@ final class Person {
     public String initials() {
         String n = name.get();
         if ( n == null || n.isEmpty() ) return "?";
-        String[] parts = n.trim().split("\\s+");
-        if ( parts.length == 1 ) return parts[0].substring(0, 1).toUpperCase();
-        return ("" + parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+        String[] parts = n.trim().split("\\s+", -1);
+        if ( parts.length == 1 ) return parts[0].substring(0, 1).toUpperCase(Locale.ROOT);
+        return ("" + parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase(Locale.ROOT);
     }
 }

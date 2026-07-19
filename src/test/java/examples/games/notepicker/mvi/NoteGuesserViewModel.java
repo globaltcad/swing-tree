@@ -10,6 +10,7 @@ import swingtree.UI;
 import swingtree.animation.*;
 
 import java.awt.Color;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class NoteGuesserViewModel
 
     private NoteGuesserViewModel loadScore() {
         try {
-            String scoreText = new String( Files.readAllBytes(Paths.get(SAVE_FILE_NAME)) );
+            String scoreText = new String( Files.readAllBytes(Paths.get(SAVE_FILE_NAME)), StandardCharsets.UTF_8 );
             return withScore( Integer.parseInt(scoreText) );
         }
         catch (Exception e) {
@@ -57,7 +58,7 @@ public class NoteGuesserViewModel
 
     private void saveScore() {
         try {
-            Files.write( Paths.get(SAVE_FILE_NAME), ("" + score).getBytes() );
+            Files.write( Paths.get(SAVE_FILE_NAME), ("" + score).getBytes(StandardCharsets.UTF_8) );
         }
         catch (Exception e) {
             System.out.println("Failed to save score.");

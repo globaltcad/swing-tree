@@ -1,4 +1,5 @@
 package examples.team.mvvm;
+import java.util.Locale;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import sprouts.Val;
@@ -380,7 +381,7 @@ public final class TeamView {
     }
 
     private static UIForLabel<JLabel> sectionTitle(String text) {
-        return UI.label(text.toUpperCase()).withStyle( it -> it
+        return UI.label(text.toUpperCase(Locale.ROOT)).withStyle( it -> it
             .foregroundColor(INK_FAINT)
             .componentFont( f -> f.family("SansSerif").size(10).weight(2).spacing(0.12f) )
         );

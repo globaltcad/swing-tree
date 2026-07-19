@@ -98,7 +98,7 @@ public final class TasksView extends Panel
                             Transferable transferable = dropEvent.getTransferable();
                             if (transferable.isDataFlavorSupported(DataFlavor.stringFlavor)) {
                                 String payload = (String) transferable.getTransferData(DataFlavor.stringFlavor);
-                                String[] parts = payload.split("\\|");
+                                String[] parts = payload.split("\\|", -1);
                                 if (parts.length == 2) {
                                     TaskType sourceId = TaskType.valueOf(parts[0]);
                                     if ( sourceId == id ) {

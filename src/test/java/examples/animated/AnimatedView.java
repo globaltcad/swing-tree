@@ -1,4 +1,5 @@
 package examples.animated;
+import java.util.Locale;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import sprouts.Val;
@@ -190,7 +191,7 @@ public final class AnimatedView extends Panel
                         .borderAt(Edge.BOTTOM, 1, new Color(80, 90, 120, 80))
                     )
                     .add("shrinkx",
-                        label(selected.viewAsString(r -> "// " + r.label.toLowerCase().replace(' ', '-') + ".java"))
+                        label(selected.viewAsString(r -> "// " + r.label.toLowerCase(Locale.ROOT).replace(' ', '-') + ".java"))
                         .withStyle( it -> it
                             .foregroundColor(INK_FAINT)
                             .componentFont( f -> f.family("Monospaced").size(10).posture(0.15f) )

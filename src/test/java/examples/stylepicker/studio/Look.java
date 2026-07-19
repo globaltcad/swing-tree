@@ -1,4 +1,5 @@
 package examples.stylepicker.studio;
+import java.util.Locale;
 
 /**
  *  A small, deliberately <b>application-agnostic</b> vocabulary of semantic
@@ -49,11 +50,11 @@ public enum Look {
 
     /** {@code PRIMARY_BUTTON} → {@code "Primary Button"} for combo boxes and code. */
     public String pretty() {
-        String[] parts = name().split("_");
+        String[] parts = name().split("_", -1);
         StringBuilder sb = new StringBuilder();
         for (String p : parts) {
             sb.append(Character.toUpperCase(p.charAt(0)))
-              .append(p.substring(1).toLowerCase())
+              .append(p.substring(1).toLowerCase(Locale.ROOT))
               .append(' ');
         }
         return sb.toString().trim();

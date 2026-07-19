@@ -1,4 +1,5 @@
 package examples.mvvm;
+import java.util.Locale;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import swingtree.threading.EventProcessor;
@@ -41,7 +42,7 @@ public class UserRegistrationView extends Panel
                                               .map(Objects::toString)
                                               .map( s -> s.replace("_", " ") )
                                               .orElse("")
-                                              .toLowerCase()
+                                              .toLowerCase(Locale.ROOT)
                         )
                     )
                 )

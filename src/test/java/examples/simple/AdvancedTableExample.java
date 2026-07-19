@@ -15,6 +15,8 @@ import java.util.stream.Stream;
 
 public class AdvancedTableExample extends JPanel {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdvancedTableExample.class);
+
     public AdvancedTableExample()
     {
         Map<String, List<Object>> data = new LinkedHashMap<>();
@@ -70,7 +72,7 @@ public class AdvancedTableExample extends JPanel {
                 }
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Failed to set up the look and feel.", ex);
         }
         UI.show(f->new AdvancedTableExample());
     }

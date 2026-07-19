@@ -1,4 +1,5 @@
 package examples.trains.mvi;
+import java.util.Locale;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLaf;
@@ -345,7 +346,7 @@ public final class TrainsView extends JPanel {
             .withBoard(Tuple.of(Departure.class))
             .withRoute(TrainRoute.empty())
             .withSelectedTripId("")
-            .withStatus("Loading " + current.mode().label().toLowerCase() + " for " + st.name() + "…"));
+            .withStatus("Loading " + current.mode().label().toLowerCase(Locale.ROOT) + " for " + st.name() + "…"));
         io.execute(() -> {
             try {
                 List<Departure> deps = TransitClient.board(st.id(), arrivals);
@@ -354,7 +355,7 @@ public final class TrainsView extends JPanel {
                     .withLoadingBoard(false)
                     .withStatus(deps.isEmpty()
                         ? "No trains found for " + st.name()
-                        : deps.size() + " " + v.mode().label().toLowerCase() + "  ·  " + st.name())));
+                        : deps.size() + " " + v.mode().label().toLowerCase(Locale.ROOT) + "  ·  " + st.name())));
             } catch (Exception e) {
                 UI.runLater(() -> vm.update(v -> v.withLoadingBoard(false)
                     .withStatus("Could not load board: " + message(e))));
