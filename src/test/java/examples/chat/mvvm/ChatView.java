@@ -1,4 +1,5 @@
 package examples.chat.mvvm;
+import java.time.ZoneId;
 
 import sprouts.Var;
 import sprouts.Vars;
@@ -121,7 +122,7 @@ public final class ChatView extends Panel
                 .add(RIGHT,
                     button("Send ➤").onClick(it -> {
                         sentMessages.add(
-                            new ChatViewModel.Message(messageText.get(), LocalDateTime.now())
+                            new ChatViewModel.Message(messageText.get(), LocalDateTime.now(ZoneId.systemDefault()))
                         );
                         messageText.set("");
                     })
@@ -133,8 +134,8 @@ public final class ChatView extends Panel
     {
         ChatViewModel vm = new ChatViewModel();
         vm.allMessages().addAll(
-            new ChatViewModel.Message("Hey, how are you?", LocalDateTime.now().minusDays(1)),
-            new ChatViewModel.Message("Good! :)", LocalDateTime.now())
+            new ChatViewModel.Message("Hey, how are you?", LocalDateTime.now(ZoneId.systemDefault()).minusDays(1)),
+            new ChatViewModel.Message("Good! :)", LocalDateTime.now(ZoneId.systemDefault()))
         );
         UI.show(frame -> new ChatView(vm));
         EventProcessor.DECOUPLED.join();

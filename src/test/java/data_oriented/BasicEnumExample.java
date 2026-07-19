@@ -1,4 +1,5 @@
 package data_oriented;
+import java.time.ZoneId;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -60,7 +61,7 @@ public class BasicEnumExample {
     }
 
     public static void main(String... args) {
-        Var<Train> person = Var.of(new Train(350d, LocalDateTime.now(), Model.SHINKANSEN));
+        Var<Train> person = Var.of(new Train(350d, LocalDateTime.now(ZoneId.systemDefault()), Model.SHINKANSEN));
         UI.show(f->new PersonView(person));
         Viewable.cast(person).onChange(From.ALL, it -> {
             System.out.println(it.currentValue());
