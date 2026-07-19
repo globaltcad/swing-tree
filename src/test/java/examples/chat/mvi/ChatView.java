@@ -1,4 +1,5 @@
 package examples.chat.mvi;
+import java.time.ZoneId;
 
 import sprouts.Tuple;
 import sprouts.Var;
@@ -127,7 +128,7 @@ public final class ChatView extends Panel
                         sentMessages.update(tuple-> tuple.add(
                             new ChatViewModel.Message()
                                 .withText(messageText.get())
-                                .withSentAt(LocalDateTime.now())
+                                .withSentAt(LocalDateTime.now(ZoneId.systemDefault()))
                         ));
                         messageText.set("");
                     })
@@ -138,8 +139,8 @@ public final class ChatView extends Panel
     public static void main(String[] args)
     {
         Var<ChatViewModel> vm = Var.of(new ChatViewModel().withAllMessages(Tuple.of(
-            new ChatViewModel.Message().withText("Hey, how are you?").withSentAt(LocalDateTime.now().minusDays(1)),
-            new ChatViewModel.Message().withText("Good! :)").withSentAt(LocalDateTime.now())
+            new ChatViewModel.Message().withText("Hey, how are you?").withSentAt(LocalDateTime.now(ZoneId.systemDefault()).minusDays(1)),
+            new ChatViewModel.Message().withText("Good! :)").withSentAt(LocalDateTime.now(ZoneId.systemDefault()))
         )));
         UI.show(frame -> new ChatView(vm));
         EventProcessor.DECOUPLED.join();

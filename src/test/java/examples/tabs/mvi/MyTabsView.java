@@ -168,7 +168,7 @@ public class MyTabsView extends Panel
         return new Color[]{
                 new Color(1f, 1f, 1f, 0.45f),
                 new Color(1f, 1f, 1f, model.isRollover() ? 0.5f : 0.0f),
-                new Color(1f, 1f, 1f, vm.currentTab() == tab ? 0f : 0.45f)
+                new Color(1f, 1f, 1f, Objects.equals(vm.currentTab(), tab) ? 0f : 0.45f)
         };
     }
 

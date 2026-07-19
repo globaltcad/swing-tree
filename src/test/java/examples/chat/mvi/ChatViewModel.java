@@ -1,4 +1,5 @@
 package examples.chat.mvi;
+import java.time.ZoneId;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -32,6 +33,6 @@ public final class ChatViewModel
         private final LocalDateTime sentAt;
         private final boolean isEditing;
 
-        public Message() {this(UUID.randomUUID(), "", LocalDateTime.now(), false);}
+        public Message() {this(UUID.randomUUID(), "", LocalDateTime.now(ZoneId.systemDefault()), false);}
     }
 }

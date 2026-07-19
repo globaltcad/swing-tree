@@ -1,4 +1,6 @@
 package examples.stylepicker.studio;
+import java.time.ZoneId;
+import java.util.Locale;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import sprouts.From;
@@ -143,7 +145,7 @@ public final class StyleStudioView extends Panel {
                 .add(button("↷  Redo").group(Look.BUTTON).isEnabledIf(canRedo)
                         .onClick(it -> vm.update(StyleStudioViewModel::redo)))
                 .add(button("✔  Apply").group(Look.PRIMARY_BUTTON)
-                        .onClick(it -> vm.update(m -> m.apply(LocalTime.now().format(CLOCK)))))
+                        .onClick(it -> vm.update(m -> m.apply(LocalTime.now(ZoneId.systemDefault()).format(CLOCK)))))
             );
     }
 
@@ -529,10 +531,10 @@ public final class StyleStudioView extends Panel {
     }
 
     private static String pretty(Enum<?> e) {
-        String[] parts = e.name().split("_");
+        String[] parts = e.name().split("_", -1);
         StringBuilder sb = new StringBuilder();
         for (String p : parts)
-            sb.append(Character.toUpperCase(p.charAt(0))).append(p.substring(1).toLowerCase()).append(' ');
+            sb.append(Character.toUpperCase(p.charAt(0))).append(p.substring(1).toLowerCase(Locale.ROOT)).append(' ');
         return sb.toString().trim();
     }
 
@@ -555,7 +557,7 @@ public final class StyleStudioView extends Panel {
                 return Optional.of(new Color((int)((v >> 24) & 0xFF), (int)((v >> 16) & 0xFF),
                                              (int)((v >> 8) & 0xFF), (int)(v & 0xFF)));
             }
-        } catch (NumberFormatException ignored) { }
+        } catch (NumberFormatException ignored) { /* Not a parseable hex colour; fall through to empty. */ }
         return Optional.empty();
     }
 

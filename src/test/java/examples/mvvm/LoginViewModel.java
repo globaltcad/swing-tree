@@ -77,7 +77,7 @@ public class LoginViewModel
             feedback.set("Wait! Almost done!");
             Thread.sleep(1500);
         }
-        catch(Exception e) {}
+        catch(Exception e) { /* The simulated verification delay was interrupted; nothing to do. */ }
         if ( finalForm != null ) {
             System.out.println( "Verified user with name " + finalForm.username() + " and password " + finalForm.password() );
             feedbackColor.set( new Color(42, 101, 0) );

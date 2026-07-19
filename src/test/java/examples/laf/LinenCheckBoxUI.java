@@ -44,6 +44,9 @@ public final class LinenCheckBoxUI
     }
 
     @Override
+    // Swing UI delegates only ever paint on the Event Dispatch Thread, so the
+    // inherited synchronization is not needed here.
+    @SuppressWarnings("UnsynchronizedOverridesSynchronized")
     public void paint(Graphics g, JComponent c) {
         ComponentExtension.from(c).paintBackground(g, g2 -> {
             LinenPaint.applyAaHints((java.awt.Graphics2D) g2);

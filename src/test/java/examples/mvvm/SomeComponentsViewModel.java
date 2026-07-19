@@ -1,4 +1,5 @@
 package examples.mvvm;
+import java.util.Locale;
 
 import sprouts.From;
 import sprouts.Var;
@@ -34,7 +35,7 @@ public class SomeComponentsViewModel {
 		EXACT, FACTOR, MARGINS;
 
 		public String title() {
-			return this.name().charAt(0)+this.name().substring(1).toLowerCase();
+			return this.name().charAt(0)+this.name().substring(1).toLowerCase(Locale.ROOT);
 		}
 	}
 

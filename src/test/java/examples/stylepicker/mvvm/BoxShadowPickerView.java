@@ -1,4 +1,5 @@
 package examples.stylepicker.mvvm;
+import java.util.Locale;
 
 import com.formdev.flatlaf.FlatLightLaf;
 import sprouts.From;
@@ -253,11 +254,11 @@ public class BoxShadowPickerView extends UI.Panel
 
     private static String enumToTitleString( Enum<?> e ) {
         // Example THIS_IS_AN_ENUM -> This Is An Enum
-        String[] parts = e.name().split("_");
+        String[] parts = e.name().split("_", -1);
         StringBuilder sb = new StringBuilder();
         for ( String part : parts ) {
-            sb.append(part.substring(0, 1).toUpperCase());
-            sb.append(part.substring(1).toLowerCase());
+            sb.append(part.substring(0, 1).toUpperCase(Locale.ROOT));
+            sb.append(part.substring(1).toLowerCase(Locale.ROOT));
             sb.append(" ");
         }
         return sb.toString().trim();

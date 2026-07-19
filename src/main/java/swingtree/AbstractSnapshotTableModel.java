@@ -240,7 +240,11 @@ abstract class AbstractSnapshotTableModel extends AbstractTableModel
             TableData snap = _snapshot;
             if ( snap != null && UI.thisIsUIThread() && _liveCellEditable(rowIndex, columnIndex) ) {
                 TableData next = snap.setCellAt(rowIndex, columnIndex, value);
-                if ( next != snap ) {
+                // 'setCellAt' returns an unchanged snapshot (out of bounds, or the same
+                // value) whose contents equal the old one, in which case there is nothing
+                // to swap in or fire. A cell edit is a rare user action, so the value
+                // comparison here is never on a hot path.
+                if ( !next.equals(snap) ) {
                     _snapshot = next;
                     fireTableCellUpdated(rowIndex, columnIndex);
                 }

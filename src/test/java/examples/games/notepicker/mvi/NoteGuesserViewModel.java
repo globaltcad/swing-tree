@@ -10,6 +10,7 @@ import swingtree.UI;
 import swingtree.animation.*;
 
 import java.awt.Color;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -46,7 +47,7 @@ public class NoteGuesserViewModel
 
     private NoteGuesserViewModel loadScore() {
         try {
-            String scoreText = new String( Files.readAllBytes(Paths.get(SAVE_FILE_NAME)) );
+            String scoreText = new String( Files.readAllBytes(Paths.get(SAVE_FILE_NAME)), StandardCharsets.UTF_8 );
             return withScore( Integer.parseInt(scoreText) );
         }
         catch (Exception e) {
@@ -57,17 +58,11 @@ public class NoteGuesserViewModel
 
     private void saveScore() {
         try {
-            Files.write( Paths.get(SAVE_FILE_NAME), ("" + score).getBytes() );
+            Files.write( Paths.get(SAVE_FILE_NAME), ("" + score).getBytes(StandardCharsets.UTF_8) );
         }
         catch (Exception e) {
             System.out.println("Failed to save score.");
         }
-    }
-
-    private Animatable<NoteGuesserViewModel> activatedPlayMode( boolean isActivated ) {
-        return withFeedback( isActivated ? "Have Fun!" : "Choose:" )
-               .withFeedbackColor( isActivated ? Color.GREEN : Color.WHITE )
-               .animateFeedbackAndThen( m->m );
     }
 
     public Animatable<NoteGuesserViewModel> selectNoteIndex( int ni )
@@ -78,8 +73,8 @@ public class NoteGuesserViewModel
         if ( currentNoteIndex == ni ) {
             vm = vm.withFeedback("Yes. Correct!")
                    .withFeedbackColor(new Color(30, 128, 0));
-            if ( !playMode )
-                vm = vm.withScore(score + 1);
+            // 'playMode' is already known to be false here (see the early return above).
+            vm = vm.withScore(score + 1);
             saveScore();
             return vm.animateFeedbackAndThen( m -> m.newRandomNoteIndex() );
         }
@@ -127,7 +122,7 @@ public class NoteGuesserViewModel
         return octaves;
     }
 
-    public boolean isVisibleLine( int ni ) { return ni > 3 && ni < 13 || ni > 15 && ni < 25; }
+    public boolean isVisibleLine( int ni ) { return (ni > 3 && ni < 13) || (ni > 15 && ni < 25); }
 
     public boolean shouldDrawSupportLine( int ni ) {
         int currentNi = currentNoteIndex;

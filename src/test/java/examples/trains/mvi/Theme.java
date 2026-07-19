@@ -36,6 +36,8 @@ public enum Theme {
         new Color(0x49, 0xC9, 0x83)    // onTime green
     ));
 
+    // 'Palette' is a final class holding only final 'Color' fields, so it is effectively immutable.
+    @SuppressWarnings("ImmutableEnumChecker")
     private final Palette palette;
     Theme(Palette palette) { this.palette = palette; }
     public Palette palette() { return palette; }

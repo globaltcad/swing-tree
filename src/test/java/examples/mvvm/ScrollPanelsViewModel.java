@@ -1,4 +1,5 @@
 package examples.mvvm;
+import java.util.Locale;
 
 import sprouts.From;
 import sprouts.Var;
@@ -63,7 +64,7 @@ public class ScrollPanelsViewModel
 		else
 			entries.addAll(
 					allEntries.stream()
-					.filter(e -> e.text().get().toLowerCase().contains(key.toLowerCase()))
+					.filter(e -> e.text().get().toLowerCase(Locale.ROOT).contains(key.toLowerCase(Locale.ROOT)))
 					.collect(Collectors.toList())
 				);
 	}

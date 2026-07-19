@@ -1,4 +1,5 @@
 package data_oriented;
+import java.time.ZoneId;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -32,6 +33,9 @@ import static swingtree.UI.*;
  *  Below this 4 by 4 grid of components, we see three left aligned radio boxes
  *  listed vertically and spanning an entire layout grid row each.
  */
+// The compact Lombok value classes below trip ErrorProne's SameNameButDifferent
+// (a known false positive of the Lombok interaction), so we silence it for this file.
+@SuppressWarnings("SameNameButDifferent")
 public class BasicEnumExample {
 
     @With @Getter @Accessors(fluent = true)  @AllArgsConstructor @EqualsAndHashCode
@@ -60,7 +64,7 @@ public class BasicEnumExample {
     }
 
     public static void main(String... args) {
-        Var<Train> person = Var.of(new Train(350d, LocalDateTime.now(), Model.SHINKANSEN));
+        Var<Train> person = Var.of(new Train(350d, LocalDateTime.now(ZoneId.systemDefault()), Model.SHINKANSEN));
         UI.show(f->new PersonView(person));
         Viewable.cast(person).onChange(From.ALL, it -> {
             System.out.println(it.currentValue());

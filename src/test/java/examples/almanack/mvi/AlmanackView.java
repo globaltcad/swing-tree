@@ -293,7 +293,7 @@ public final class AlmanackView extends JPanel {
         if ( ink.trim().isEmpty() )
             html.append("<i style='color:#8a7f62'>This page holds no ink yet — switch to ✎ Write.</i>");
         else
-            for ( String paragraph : ink.split("\n\\s*\n") )
+            for ( String paragraph : ink.split("\n\\s*\n", -1) )
                 html.append("<p>").append(escape(paragraph).replace("\n", "<br>")).append("</p>");
         return html.append("</body></html>").toString();
     }

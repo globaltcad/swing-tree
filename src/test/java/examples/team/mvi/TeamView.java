@@ -1,4 +1,5 @@
 package examples.team.mvi;
+import java.util.Locale;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import sprouts.Val;
@@ -21,7 +22,7 @@ import static swingtree.UI.*;
  *
  *  <ul>
  *    <li><b>Dynamic list rendering</b> via {@code addAll(..)} over a
- *        {@code Var&lt;Tuple&lt;Person&gt;&gt;} lens — adding / removing
+ *        {@code Var<Tuple<Person>>} lens — adding / removing
  *        members atomically updates the immutable model and the UI.</li>
  *    <li><b>Single-selection state</b> kept in the view model itself
  *        (not in any Swing component) so the editor pane on the right
@@ -395,7 +396,7 @@ public final class TeamView {
     }
 
     private static UIForAnySwing<?,?> sectionTitle(String text) {
-        return UI.label(text.toUpperCase()).withStyle( it -> it
+        return UI.label(text.toUpperCase(Locale.ROOT)).withStyle( it -> it
             .foregroundColor(INK_FAINT)
             .componentFont( f -> f.family("SansSerif").size(10).weight(2).spacing(0.12f) )
         );

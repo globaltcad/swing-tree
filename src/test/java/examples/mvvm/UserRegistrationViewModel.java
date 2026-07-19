@@ -9,6 +9,8 @@ import java.awt.Color;
 
 public class UserRegistrationViewModel
 {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(UserRegistrationViewModel.class);
+
     public enum Gender {
         NOT_SELECTED, MALE, FEMALE, OTHER
     }
@@ -138,7 +140,7 @@ public class UserRegistrationViewModel
             feedback.set("...processing response...");
             Thread.sleep(1000);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            log.error("The simulated registration was interrupted.", e);
         }
     }
 

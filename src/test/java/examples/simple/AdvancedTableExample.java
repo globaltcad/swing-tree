@@ -15,10 +15,10 @@ import java.util.stream.Stream;
 
 public class AdvancedTableExample extends JPanel {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AdvancedTableExample.class);
+
     public AdvancedTableExample()
     {
-        IconDeclaration pngT = ()->"img/seed.png";
-
         Map<String, List<Object>> data = new LinkedHashMap<>();
         data.put("A", Stream.of("A1", "A2", "A3").collect(Collectors.toList()));
         data.put("B", Stream.of('X', 'Y', 'Z').collect(Collectors.toList()));
@@ -72,7 +72,7 @@ public class AdvancedTableExample extends JPanel {
                 }
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Failed to set up the look and feel.", ex);
         }
         UI.show(f->new AdvancedTableExample());
     }

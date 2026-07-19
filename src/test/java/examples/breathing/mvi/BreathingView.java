@@ -1,4 +1,5 @@
 package examples.breathing.mvi;
+import java.util.Locale;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import sprouts.From;
@@ -367,7 +368,7 @@ public final class BreathingView extends Panel {
     }
 
     private static UIForAnySwing<?,?> sectionTitle( String text ) {
-        return label(text.toUpperCase()).withStyle( it -> it
+        return label(text.toUpperCase(Locale.ROOT)).withStyle( it -> it
             .foregroundColor(new Color(132, 146, 188))
             .componentFont( f -> f.size(11).weight(2).family("SansSerif") )
         );

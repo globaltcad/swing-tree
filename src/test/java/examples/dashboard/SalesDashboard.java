@@ -1,4 +1,5 @@
 package examples.dashboard;
+import java.time.ZoneId;
 
 import sprouts.Var;
 import swingtree.UI;
@@ -168,7 +169,7 @@ public final class SalesDashboard {
                 .add(
                     UI.html("<html>"
                         + "<span style='color:#94a3b8;font-size:10px'>"
-                        + "Q4 &middot; " + LocalDateTime.now().getYear()
+                        + "Q4 &middot; " + LocalDateTime.now(ZoneId.systemDefault()).getYear()
                         + "</span></html>")
                 )
             )

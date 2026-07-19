@@ -224,7 +224,7 @@ public class NoteGuesserView extends Panel
                         if ( note.isBlack() ) {
                             int key2X = keyX + keyWidth / 2;
                             int key2Y = (int) (keyY - (keyHeight / 2.75));
-                            int padding = (int) (0.45 * (keyWidth)/2);
+                            int padding = (int) (0.45 * keyWidth/2);
                             blackNotes.add( new KeyView(key2X+padding, key2Y+padding, keyWidth-2*padding, keyHeight-2*padding, note) );
                         } else {
                             whiteNotes.add( new KeyView(keyX, keyY, keyWidth, keyHeight, note) );
@@ -329,11 +329,11 @@ public class NoteGuesserView extends Panel
         if ( w <= h ) { y += crop; h = w; }
 
         // Let's start the loop that drwas the lines:
-        for ( int ni = 0; ni < (vm.numWhiteNotes()); ni++ ) {
+        for ( int ni = 0; ni < vm.numWhiteNotes(); ni++ ) {
             int lineStartX = x;
-            int lineY = y + (h - h * ni / (vm.numWhiteNotes()));
+            int lineY = y + (h - h * ni / vm.numWhiteNotes());
             int lineEndX = x + w;
-            int distanceBetween2Lines = 2 * (h / (vm.numWhiteNotes()));
+            int distanceBetween2Lines = 2 * (h / vm.numWhiteNotes());
 
             boolean shouldDrawFullLine = vm.isVisibleLine(ni);
 

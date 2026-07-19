@@ -17,6 +17,8 @@ import static swingtree.UI.*;
  */
 public final class FancyTextField extends TextField
 {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(FancyTextField.class);
+
     public FancyTextField() {
         of(this).withLayout("fill, ins 0").withPrefWidth(220)
         .withStyle( it -> it
@@ -74,7 +76,7 @@ public final class FancyTextField extends TextField
                 }
             }
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Failed to set up the look and feel.", ex);
         }
         UI.show( f ->
             panel(FILL)

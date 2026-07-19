@@ -26,6 +26,8 @@ import java.util.stream.Stream;
  */
 public class NamedFieldsView extends JPanel {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(NamedFieldsView.class);
+
     private final Var<Boolean> toggle = Var.of(false);
     private final Event highlight = Event.create();
 
@@ -253,7 +255,7 @@ public class NamedFieldsView extends JPanel {
             }
             //FlatLightLaf.setup();
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error("Failed to set up the look and feel.", ex);
         }
         UI.show(f->new NamedFieldsView());
     }

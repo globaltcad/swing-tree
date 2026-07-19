@@ -1,4 +1,5 @@
 package examples.team.mvi;
+import java.util.Locale;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,8 +39,8 @@ final class Person implements HasId<UUID> {
     /** Initials extracted from {@link #name()} — at most two letters, upper-cased. */
     public String initials() {
         if ( name == null || name.isEmpty() ) return "?";
-        String[] parts = name.trim().split("\\s+");
-        if ( parts.length == 1 ) return parts[0].substring(0, 1).toUpperCase();
-        return ("" + parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+        String[] parts = name.trim().split("\\s+", -1);
+        if ( parts.length == 1 ) return parts[0].substring(0, 1).toUpperCase(Locale.ROOT);
+        return ("" + parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase(Locale.ROOT);
     }
 }

@@ -33,7 +33,7 @@ public final class TasksView extends Panel
         of(this).withLayout(FILL.and(INS(16)).and(WRAP(2)))
         .withPrefSize(750, 400)
         .add(CENTER.and(SPAN), html("<h1>Tasks</h1>"))
-        .add(GROW.and(PUSH).and((SPAN)),
+        .add(GROW.and(PUSH).and(SPAN),
             scrollPane(it->it.fitWidth(true))
             .add(
                 panel().withFlowLayout().withPrefSize(750,200)
@@ -98,7 +98,7 @@ public final class TasksView extends Panel
                             Transferable transferable = dropEvent.getTransferable();
                             if (transferable.isDataFlavorSupported(DataFlavor.stringFlavor)) {
                                 String payload = (String) transferable.getTransferData(DataFlavor.stringFlavor);
-                                String[] parts = payload.split("\\|");
+                                String[] parts = payload.split("\\|", -1);
                                 if (parts.length == 2) {
                                     TaskType sourceId = TaskType.valueOf(parts[0]);
                                     if ( sourceId == id ) {
