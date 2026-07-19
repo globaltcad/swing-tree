@@ -159,6 +159,7 @@ class Declarative_Tables_Spec extends Specification
             var table = ui.get(JTable)
         when : 'We fire the event.'
             event.fire()
+            UI.sync() // Let the EDT finish rebuilding the table before we read it.
         then : 'The table UI is updated.'
             table.getRowCount() == 2
             table.getValueAt(0, 0) == 1
@@ -188,6 +189,7 @@ class Declarative_Tables_Spec extends Specification
             var table = ui.get(JTable)
         when : 'We change the data in the property.'
             data.set([[11, 12, 13], [17, 18, 19]])
+            UI.sync() // Let the EDT finish rebuilding the table before we read it.
         then : 'The table UI is updated automatically:'
             table.getRowCount() == 2
             table.getValueAt(0, 0) == 11
