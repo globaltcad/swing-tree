@@ -45,6 +45,22 @@ public final class LinenSpinnerUI
     public void installUI(JComponent c) {
         super.installUI(c);
         ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        // The spinner's outer border tracks its *inner editor's* focus, but
+        // focus never lands on the spinner itself, so bridge the editor's
+        // focus to a repaint of the whole spinner.
+        JSpinner spinner = (JSpinner) c;
+        Component editor = spinner.getEditor();
+        if (editor instanceof JSpinner.DefaultEditor)
+            LinenFocus.repaintOnFocus(spinner, ((JSpinner.DefaultEditor) editor).getTextField());
+    }
+
+    @Override
+    public void uninstallUI(JComponent c) {
+        JSpinner spinner = (JSpinner) c;
+        Component editor = spinner.getEditor();
+        if (editor instanceof JSpinner.DefaultEditor)
+            LinenFocus.uninstall(spinner, ((JSpinner.DefaultEditor) editor).getTextField());
+        super.uninstallUI(c);
     }
 
     @Override

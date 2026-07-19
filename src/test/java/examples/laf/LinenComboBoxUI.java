@@ -46,6 +46,20 @@ public final class LinenComboBoxUI
     public void installUI(JComponent c) {
         super.installUI(c);
         ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        // A non-editable combo owns focus itself (BasicComboBoxUI repaints it),
+        // but an editable combo's focus lives on its editor, so bridge that to
+        // a repaint of the whole combo.
+        JComboBox<?> combo = (JComboBox<?>) c;
+        if (combo.getEditor() != null)
+            LinenFocus.repaintOnFocus(combo, combo.getEditor().getEditorComponent());
+    }
+
+    @Override
+    public void uninstallUI(JComponent c) {
+        JComboBox<?> combo = (JComboBox<?>) c;
+        if (combo.getEditor() != null)
+            LinenFocus.uninstall(combo, combo.getEditor().getEditorComponent());
+        super.uninstallUI(c);
     }
 
     @Override
@@ -70,7 +84,7 @@ public final class LinenComboBoxUI
     public ComponentStyleDelegate<JComboBox<?>> style(ComponentStyleDelegate<JComboBox<?>> it) {
         JComboBox<?> cb = it.component();
         boolean enabled = cb.isEnabled();
-        boolean focused = enabled && cb.isFocusOwner();
+        boolean focused = enabled && comboHasFocus(cb);
 
         Color  surface = enabled ? LinenPalette.SURFACE_FIELD : LinenPalette.SURFACE_DISABLED;
         Color  fg      = enabled ? LinenPalette.TEXT : LinenPalette.TEXT_DISABLED;
@@ -86,6 +100,21 @@ public final class LinenComboBoxUI
                 .borderColor(border)
                 .backgroundColor(surface)
                 .foregroundColor(fg);
+    }
+
+    /**
+     *  Reads the right focus flag for the combo's outer border. A non-editable
+     *  combo is itself the focus owner; an editable combo delegates focus to
+     *  its editor component, so {@code cb.isFocusOwner()} would never be true.
+     */
+    private static boolean comboHasFocus(JComboBox<?> cb) {
+        if (cb.isFocusOwner())
+            return true;
+        if (cb.isEditable() && cb.getEditor() != null) {
+            java.awt.Component ed = cb.getEditor().getEditorComponent();
+            return ed != null && ed.isFocusOwner();
+        }
+        return false;
     }
 
     /** A flat, transparent chevron button used in place of the basic arrow. */
