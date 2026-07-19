@@ -1,8 +1,8 @@
 package examples.laf;
 
-import javax.swing.JComponent;
+import javax.swing.*;
 
-import java.awt.Component;
+import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 
@@ -58,11 +58,24 @@ final class LinenFocus {
             return; // already wired (e.g. a redundant updateUI())
 
         FocusListener listener = new FocusListener() {
-            @Override public void focusGained(FocusEvent e) { target.repaint(); }
-            @Override public void focusLost(FocusEvent e)   { target.repaint(); }
+            @Override public void focusGained(FocusEvent e) { repaint(target); }
+            @Override public void focusLost(FocusEvent e)   { repaint(target); }
         };
         focusSource.addFocusListener(listener);
         target.putClientProperty(LISTENER, listener);
+    }
+
+    private static void repaint(JComponent target) {
+        Container parent = target.getParent();
+        if ( parent instanceof JSpinner.NumberEditor ) {
+            parent.repaint();
+            Container grandParent = parent.getParent();
+            if ( grandParent instanceof JSpinner ) {
+                grandParent.repaint();
+            }
+        } else {
+            target.repaint();
+        }
     }
 
     /**
