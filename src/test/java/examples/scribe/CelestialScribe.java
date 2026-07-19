@@ -55,7 +55,6 @@ public final class CelestialScribe extends Panel {
 
         // ── Property lenses ──────────────────────────────────────────────
         Var<Tuple<Star>> stars      = vm.zoomTo(CosmosViewModel::stars,      CosmosViewModel::withStars);
-        Var<String>      manuscript = vm.zoomTo(CosmosViewModel::manuscript, CosmosViewModel::withManuscript);
         Var<Mood>        mood       = vm.zoomTo(CosmosViewModel::mood,       CosmosViewModel::withMood);
 
         of(this).withLayout("fill, wrap 1, insets 0")
@@ -76,7 +75,7 @@ public final class CelestialScribe extends Panel {
         .add("grow, push",
             splitPane(Align.HORIZONTAL).withDividerAt(760)
             .add(
-                parchment(vm, stars, manuscript, mood)
+                parchment(vm, stars)
             )
             .add(
                 inspector(vm)
@@ -116,9 +115,7 @@ public final class CelestialScribe extends Panel {
 
     private static UIForAnySwing<?,?> parchment(
         Var<CosmosViewModel> vm,
-        Var<Tuple<Star>>     stars,
-        Var<String>          manuscript,
-        Var<Mood>            mood
+        Var<Tuple<Star>>     stars
     ) {
         // A reactive layout: positions are a pure function of the star tuple.
         // Every wither on the view model re-derives this and reinstalls the

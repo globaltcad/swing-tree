@@ -28,7 +28,7 @@ public final class TasksView extends Panel
         of(this).withLayout(FILL.and(INS(16)).and(WRAP(2)))
         .withPrefSize(750, 400)
         .add(CENTER.and(SPAN), html("<h1>Tasks</h1>"))
-        .add(GROW.and(PUSH).and((SPAN)),
+        .add(GROW.and(PUSH).and(SPAN),
             scrollPane(it->it.fitWidth(true))
             .add(
                 panel().withFlowLayout().withPrefSize(750,200)

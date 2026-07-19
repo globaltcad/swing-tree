@@ -42,6 +42,7 @@ public final class TabSelectionExample2 extends Panel {
         }
     }
 
+    @SuppressWarnings("EnumOrdinal") // The tabs are declared in the same order as TabType, so the ordinal is the tab index.
     public TabSelectionExample2(TabsViewModel vm) {
         TabType currentTab = vm.currentTab().get();
         of(this).withLayout(FILL.and(INS(0)))

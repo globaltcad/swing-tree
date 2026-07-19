@@ -43,7 +43,7 @@ public final class TransitClient {
 
     /** Resolve a free-text query into matching railway stations (best match first). */
     public static List<Station> searchStations(String query) throws Exception {
-        if (query == null || query.trim().isEmpty()) return Collections.emptyList();
+        if (query == null || query.trim().isEmpty()) return new ArrayList<>();
         String body = get(BASE + "/geocode?text=" + enc(query) + "&language=de");
         List<Station> out = new ArrayList<>();
         for (Object o : arr(parse(body))) {

@@ -41,6 +41,7 @@ public final class CosmosViewModel {
         DUSK,
         MIDNIGHT;
 
+        @SuppressWarnings("EnumOrdinal") // The mood cycle is defined by the declaration order on purpose.
         public Mood next() {
             Mood[] all = values();
             return all[(ordinal() + 1) % all.length];

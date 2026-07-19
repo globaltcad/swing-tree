@@ -9,6 +9,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -152,7 +153,7 @@ public final class KanaPickerViewModel
 
     public Animatable<KanaPickerViewModel> selectSymbol( Symbol symbol ) {
         KanaPickerViewModel vm = this;
-        if ( currentSymbol == symbol ) {
+        if ( Objects.equals(currentSymbol, symbol) ) {
             vm = vm.withCurrentSymbol(symbol.incrementSuccesses());
             vm = vm.withFeedback( "Yes. Correct!" );
             vm = vm.withFeedbackColor( new Color(30, 128, 0) );

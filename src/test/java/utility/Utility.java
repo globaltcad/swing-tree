@@ -441,21 +441,6 @@ public class Utility
         return similarityBetween(collage, imageFile, expectedSimilarity);
     }
 
-    /**
-     *  Makes sure the directory of the provided file exists.
-     *
-     * @param filePath The file for which the path is to be established.
-     */
-    private static void establishLocation(String filePath) {
-        String[] parts = filePath.split("/");
-        String filename = parts[parts.length - 1];
-        String path = filePath.replace(filename, "");
-        File dir = new File(path);
-        if (!dir.exists()) {
-            dir.mkdirs();
-        }
-    }
-
     public static double similarityBetween(BufferedImage image0, BufferedImage image1) {
         int width1 = image1.getWidth();
         int height1 = image1.getHeight();
@@ -558,6 +543,7 @@ public class Utility
             this.displayAction = Objects.requireNonNull(displayAction);
         }
 
+        @SuppressWarnings("UnusedMethod") // Part of the value holder's accessor set, kept for completeness.
         public String filename() { return filename; }
 
         public double similarity() { return similarity; }

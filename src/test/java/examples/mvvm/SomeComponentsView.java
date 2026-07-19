@@ -57,7 +57,7 @@ public class SomeComponentsView extends Panel
 				.add(WIDTH(10, 60, 15), label("%"))
 			)
 			.add(GROW,
-				panel(FILL.and(INS((3))))
+				panel(FILL.and(INS(3)))
 				.add(PUSH_Y, panel())
 				.add(GAP_LEFT_PUSH,
 					button("-")

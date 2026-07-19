@@ -64,12 +64,6 @@ public class NoteGuesserViewModel
         }
     }
 
-    private Animatable<NoteGuesserViewModel> activatedPlayMode( boolean isActivated ) {
-        return withFeedback( isActivated ? "Have Fun!" : "Choose:" )
-               .withFeedbackColor( isActivated ? Color.GREEN : Color.WHITE )
-               .animateFeedbackAndThen( m->m );
-    }
-
     public Animatable<NoteGuesserViewModel> selectNoteIndex( int ni )
     {
         if (playMode) return Animatable.of(this);
@@ -78,8 +72,8 @@ public class NoteGuesserViewModel
         if ( currentNoteIndex == ni ) {
             vm = vm.withFeedback("Yes. Correct!")
                    .withFeedbackColor(new Color(30, 128, 0));
-            if ( !playMode )
-                vm = vm.withScore(score + 1);
+            // 'playMode' is already known to be false here (see the early return above).
+            vm = vm.withScore(score + 1);
             saveScore();
             return vm.animateFeedbackAndThen( m -> m.newRandomNoteIndex() );
         }
@@ -127,7 +121,7 @@ public class NoteGuesserViewModel
         return octaves;
     }
 
-    public boolean isVisibleLine( int ni ) { return ni > 3 && ni < 13 || ni > 15 && ni < 25; }
+    public boolean isVisibleLine( int ni ) { return (ni > 3 && ni < 13) || (ni > 15 && ni < 25); }
 
     public boolean shouldDrawSupportLine( int ni ) {
         int currentNi = currentNoteIndex;

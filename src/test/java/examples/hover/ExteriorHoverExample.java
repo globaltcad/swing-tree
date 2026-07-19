@@ -2,7 +2,6 @@ package examples.hover;
 
 import org.jspecify.annotations.NullMarked;
 import org.jspecify.annotations.Nullable;
-import org.slf4j.Logger;
 import sprouts.Action;
 import swingtree.ComponentMouseEventDelegate;
 import swingtree.UI;
@@ -19,7 +18,6 @@ import static swingtree.UI.*;
 
 @NullMarked
 public class ExteriorHoverExample extends JPanel {
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ExteriorHoverExample.class);
 
     private static final Color COLOR_1 = new Color(189, 189, 189);
     private static final Color COLOR_2 = new Color(139, 139, 139);

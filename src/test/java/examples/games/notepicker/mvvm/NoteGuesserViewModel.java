@@ -134,7 +134,7 @@ public class NoteGuesserViewModel
         return octaves;
     }
 
-    public boolean isVisibleLine( int ni ) { return ni > 3 && ni < 13 || ni > 15 && ni < 25; }
+    public boolean isVisibleLine( int ni ) { return (ni > 3 && ni < 13) || (ni > 15 && ni < 25); }
 
     public boolean shouldDrawSupportLine( int ni ) {
         int currentNi = currentNoteIndex.get();

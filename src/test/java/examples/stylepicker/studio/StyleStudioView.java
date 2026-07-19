@@ -555,7 +555,7 @@ public final class StyleStudioView extends Panel {
                 return Optional.of(new Color((int)((v >> 24) & 0xFF), (int)((v >> 16) & 0xFF),
                                              (int)((v >> 8) & 0xFF), (int)(v & 0xFF)));
             }
-        } catch (NumberFormatException ignored) { }
+        } catch (NumberFormatException ignored) { /* Not a parseable hex colour; fall through to empty. */ }
         return Optional.empty();
     }
 

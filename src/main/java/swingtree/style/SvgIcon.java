@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 /**
  *   A specialized {@link ImageIcon} subclass that allows you to use SVG based icon images in your GUI.
@@ -73,6 +74,9 @@ import java.util.function.Function;
 public final class SvgIcon extends ImageIcon
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(SvgIcon.class);
+    // A viewBox is a run of numbers separated by whitespace and/or commas; we keep the
+    // splitter precompiled (and use Pattern.split rather than the surprising String.split).
+    private static final Pattern VIEW_BOX_SEPARATOR = Pattern.compile("[\\s,]+");
     private static final UI.FitComponent DEFAULT_FIT_COMPONENT = UI.FitComponent.UNDEFINED;
     private static final UI.Placement    DEFAULT_PLACEMENT     = UI.Placement.UNDEFINED;
     private static final int             NO_SIZE               = -1;
@@ -354,7 +358,10 @@ public final class SvgIcon extends ImageIcon
     }
 
     private static float @Nullable [] _parseViewBoxWidthHeightFrom( String viewBox ) {
-        String[] parts = viewBox.trim().split("[\\s,]+");
+        // The '-1' limit keeps trailing empty tokens instead of silently dropping them,
+        // which makes the split behaviour explicit; the 'length != 4' guard below rejects
+        // anything that is not exactly the four viewBox numbers anyway.
+        String[] parts = VIEW_BOX_SEPARATOR.split(viewBox.trim(), -1);
         if ( parts.length != 4 )
             return null;
         try {

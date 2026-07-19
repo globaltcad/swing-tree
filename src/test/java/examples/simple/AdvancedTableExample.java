@@ -17,8 +17,6 @@ public class AdvancedTableExample extends JPanel {
 
     public AdvancedTableExample()
     {
-        IconDeclaration pngT = ()->"img/seed.png";
-
         Map<String, List<Object>> data = new LinkedHashMap<>();
         data.put("A", Stream.of("A1", "A2", "A3").collect(Collectors.toList()));
         data.put("B", Stream.of('X', 'Y', 'Z').collect(Collectors.toList()));

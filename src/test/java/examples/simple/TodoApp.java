@@ -47,7 +47,6 @@ public class TodoApp extends Panel {
     // ── Palette ──────────────────────────────────────────────────────────────
 
     private static final Color BG          = new Color( 24,  26,  38);
-    private static final Color BG_SOFT     = new Color( 34,  38,  54);
     private static final Color BG_CARD     = new Color( 42,  46,  64);
     private static final Color BG_CARD_HI  = new Color( 56,  62,  86);
     private static final Color INK         = new Color(232, 236, 252);

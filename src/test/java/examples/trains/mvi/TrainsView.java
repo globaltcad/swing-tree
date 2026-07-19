@@ -67,7 +67,6 @@ public final class TrainsView extends JPanel {
     private final Var<Tuple<Departure>> board;
     private final Var<TrainRoute>       route;
     private final Var<Tuple<RouteStop>> routeStops;
-    private final Var<String>           selectedTripId;
     private final Var<String>           status;
     private final Var<Boolean>          loadingBoard;
     private final Var<Boolean>          loadingRoute;
@@ -84,7 +83,6 @@ public final class TrainsView extends JPanel {
         board          = vm.zoomTo(TrainsViewModel::board,          TrainsViewModel::withBoard);
         route          = vm.zoomTo(TrainsViewModel::route,          TrainsViewModel::withRoute);
         routeStops     = route.zoomTo(TrainRoute::stops,            TrainRoute::withStops);
-        selectedTripId = vm.zoomTo(TrainsViewModel::selectedTripId, TrainsViewModel::withSelectedTripId);
         status         = vm.zoomTo(TrainsViewModel::status,         TrainsViewModel::withStatus);
         loadingBoard   = vm.zoomTo(TrainsViewModel::loadingBoard,   TrainsViewModel::withLoadingBoard);
         loadingRoute   = vm.zoomTo(TrainsViewModel::loadingRoute,   TrainsViewModel::withLoadingRoute);
@@ -319,7 +317,7 @@ public final class TrainsView extends JPanel {
     private void search() {
         String q = vm.get().query();
         vm.update(v -> v.withStatus("Searching for \"" + q + "\"…"));
-        io.submit(() -> {
+        io.execute(() -> {
             try {
                 List<Station> found = TransitClient.searchStations(q);
                 UI.runLater(() -> {
@@ -348,7 +346,7 @@ public final class TrainsView extends JPanel {
             .withRoute(TrainRoute.empty())
             .withSelectedTripId("")
             .withStatus("Loading " + current.mode().label().toLowerCase() + " for " + st.name() + "…"));
-        io.submit(() -> {
+        io.execute(() -> {
             try {
                 List<Departure> deps = TransitClient.board(st.id(), arrivals);
                 UI.runLater(() -> vm.update(v -> v
@@ -373,7 +371,7 @@ public final class TrainsView extends JPanel {
         if (tripId.equals(vm.get().selectedTripId())) return;
         String stationName = vm.get().station().name();
         vm.update(v -> v.withSelectedTripId(tripId).withLoadingRoute(true));
-        io.submit(() -> {
+        io.execute(() -> {
             try {
                 TrainRoute r = TransitClient.trip(tripId, stationName);
                 UI.runLater(() -> vm.update(v -> v.withRoute(r).withLoadingRoute(false)));

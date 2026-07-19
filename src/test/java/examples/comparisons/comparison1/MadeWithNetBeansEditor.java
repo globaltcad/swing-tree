@@ -72,6 +72,7 @@ public class MadeWithNetBeansEditor extends javax.swing.JPanel {
 
         jTextField1.setText("aligned on text baseline");
         jTextField1.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextField1ActionPerformed(evt);
             }
@@ -109,6 +110,7 @@ public class MadeWithNetBeansEditor extends javax.swing.JPanel {
 
         jTextField6.setText("jTextField6 (indented)");
         jTextField6.addActionListener(new java.awt.event.ActionListener() {
+            @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jTextField6ActionPerformed(evt);
             }
@@ -268,10 +270,12 @@ public class MadeWithNetBeansEditor extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    @SuppressWarnings("unused") // Empty NetBeans generated event stub; the event is intentionally not read.
     private void jTextField1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField1ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField1ActionPerformed
 
+    @SuppressWarnings("unused") // Empty NetBeans generated event stub; the event is intentionally not read.
     private void jTextField6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField6ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField6ActionPerformed

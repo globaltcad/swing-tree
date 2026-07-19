@@ -27,6 +27,7 @@ public enum BreathPhase {
     public String instruction() { return instruction; }
 
     /** The phase that naturally follows this one, wrapping around to {@link #INHALE}. */
+    @SuppressWarnings("EnumOrdinal") // The breathing cycle is defined by the declaration order on purpose.
     public BreathPhase next() {
         BreathPhase[] all = values();
         return all[ (ordinal() + 1) % all.length ];
