@@ -3,7 +3,10 @@ package swingtree;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import sprouts.Event;
+import sprouts.Lens;
 import sprouts.Observable;
+import sprouts.Tuple;
+import sprouts.Val;
 import sprouts.Vals;
 import sprouts.Var;
 import swingtree.api.Buildable;
@@ -11,6 +14,7 @@ import swingtree.api.Configurator;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
+import swingtree.api.model.TableData;
 import swingtree.style.ComponentExtension;
 
 import javax.swing.*;
@@ -602,15 +606,192 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     }
     /**
      * Use this to set a basic table model for this table.
+     * <p>
+     * Note that the supplied model merely describes where the table data lives.
+     * SwingTree wraps it in a thread safe model of its own before handing it to the
+     * {@link JTable}, so that under the {@link swingtree.threading.EventProcessor#DECOUPLED}
+     * protocol the AWT Event Dispatch Thread never reads your application thread owned
+     * state while it paints. Consequently {@link JTable#getModel()} does not return the
+     * object supplied here.
+     *
      * @param model The model for the table model.
      * @return This builder object.
      */
     public final UIForTable<T> withModel( BasicTableModel model ) {
         NullUtil.nullArgCheck(model, "model", BasicTableModel.class);
         return _with( thisComponent -> {
-                    thisComponent.setModel(model);
+                    _installModel(thisComponent, new BasicTableModelAdapter(model));
                 })
                 ._this();
+    }
+
+    /**
+     *  Binds the table to a read only property holding an immutable
+     *  {@link TableData} value, which is the most complete way of describing
+     *  the contents of a table: it carries the cells, the column names, the column
+     *  classes and the {@link UI.ListData} layout of the data, all in a single value.
+     *  <p>
+     *  Because a {@link TableData} is deeply immutable, the table works with the
+     *  property value itself as its UI thread owned snapshot (so the AWT Event Dispatch
+     *  Thread never reads application thread owned mutable state), and no copying is
+     *  needed to hand it between the threads. The table updates itself automatically
+     *  whenever the property changes, so no {@code updateTableOn(..)} binding is needed.
+     *  For a row major snapshot, the change diff carried by the cells is furthermore
+     *  used to sync row insertions, removals and updates to the {@link JTable}
+     *  incrementally, instead of rebuilding the whole table.
+     *  <p>
+     *  The cells of a table bound like this are always read only. Use
+     *  {@link #withModel(Var)} together with one of the {@code *_EDITABLE} layouts
+     *  if you want the user to be able to edit them.
+     *  <pre>{@code
+     *  Val<TableData> model = vm.tableModel();
+     *  UI.table().withModel(model);
+     *  }</pre>
+     *
+     * @param model A read only property holding the {@link TableData} describing this table.
+     * @return This builder node, to allow for method chaining.
+     */
+    public final UIForTable<T> withModel( Val<TableData> model ) {
+        NullUtil.nullArgCheck(model, "model", Val.class);
+        // A read only 'Val' overload always yields a read only table, even if the
+        // reference happens to point at a 'Var' at runtime (a view model exposing its
+        // 'Var' as a 'Val', say). The overload the user picked is what expresses intent.
+        return _withTableData(model, false);
+    }
+
+    /**
+     *  Binds the table to a mutable property holding an immutable {@link TableData}
+     *  value, which, in addition to what {@link #withModel(Val)} does, allows the user
+     *  to edit the cells of the table: an edit is applied to the UI thread owned snapshot
+     *  right away (so that the table does not flicker) and then written back into this
+     *  property on the application thread.
+     *  <p>
+     *  Note that the cells only actually become editable if the {@link TableData#layout()}
+     *  of the bound value is one of the {@code *_EDITABLE} constants of {@link UI.ListData}.
+     *  This mirrors {@link #withModel(UI.ListData, Val)}, where the very same two conditions
+     *  (an editable layout and a mutable property) decide the matter.
+     *  <pre>{@code
+     *  Var<TableData> model = vm.tableModel();
+     *  UI.table().withModel(model);
+     *  }</pre>
+     *
+     * @param model A mutable property holding the {@link TableData} describing this table.
+     * @return This builder node, to allow for method chaining.
+     */
+    public final UIForTable<T> withModel( Var<TableData> model ) {
+        NullUtil.nullArgCheck(model, "model", Var.class);
+        // A mutable 'Var' overload yields an editable table (if the layout allows it),
+        // so unlike the 'Val' overload it must not funnel through as read only.
+        return _withTableData(model, true);
+    }
+
+    /**
+     *  The single install path behind every {@link TableData} property based binding.
+     *  The {@code editable} flag carries the user's intent (which {@code withModel}
+     *  overload they picked) down to the {@link PropertyTableModel}, instead of letting
+     *  the model guess it from the runtime type of the property, which would wrongly
+     *  make a table editable when a {@link Var} is bound through a read only {@link Val}.
+     */
+    private UIForTable<T> _withTableData( Val<TableData> model, boolean editable ) {
+        return _with( thisComponent -> {
+                    _installModel(thisComponent, new PropertyTableModel(model, editable));
+                })
+                ._this();
+    }
+
+    /**
+     *  Binds the table to a {@link Tuple} based, fully thread safe and reactive
+     *  data source, whose layout is described by the supplied {@link UI.ListData}
+     *  constant: for a {@code ROW_MAJOR*} layout the outer {@link Tuple} holds the
+     *  rows and each inner {@link Tuple} the cells of a row, whereas for a
+     *  {@code COLUMN_MAJOR*} layout the outer {@link Tuple} holds the columns and
+     *  each inner {@link Tuple} the cells of a column.
+     *  <p>
+     *  This is the recommended way to model dynamic, application thread owned
+     *  table data: because a {@link Tuple} is deeply immutable, the table works
+     *  with a UI thread owned snapshot of it (so the AWT Event Dispatch Thread
+     *  never reads application thread owned mutable state). The table updates
+     *  itself automatically whenever the property changes, so no
+     *  {@code updateTableOn(..)} binding is needed. For a row major layout, the
+     *  change diff carried by the tuple is furthermore used to sync row
+     *  insertions, removals and updates to the {@link JTable} incrementally,
+     *  instead of rebuilding the whole table.
+     *  <p>
+     *  If you pass one of the {@code *_EDITABLE} constants <i>and</i> a mutable
+     *  {@link Var}, then the user may edit the cells of the table, in which case
+     *  the edits are written back into the property on the application thread.
+     *  A read only {@link Val} always yields a read only table.
+     *  <pre>{@code
+     *  var rows = Var.of(Tuple.of(
+     *      Tuple.of("Alice", "30"),
+     *      Tuple.of("Bob",   "42")
+     *  ));
+     *  UI.table().withModel(UI.ListData.ROW_MAJOR_EDITABLE, rows);
+     *  }</pre>
+     *
+     * @param dataFormat The layout of the supplied cells, see {@link UI.ListData}.
+     * @param cells A property holding a {@link Tuple} of {@link Tuple}s of cell values.
+     * @return This builder node, to allow for method chaining.
+     * @param <E> The common type of the cell values.
+     */
+    public final <E> UIForTable<T> withModel( UI.ListData dataFormat, Val<Tuple<Tuple<E>>> cells ) {
+        NullUtil.nullArgCheck(dataFormat, "dataFormat", UI.ListData.class);
+        NullUtil.nullArgCheck(cells, "cells", Val.class);
+        // A tuple based table has only this one overload, so its editability is
+        // driven by the runtime mutability of the cells property (which decides
+        // whether '_asSnapshotProperty' zooms into a mutable snapshot or merely
+        // views a read only one), matching what that method does internally.
+        boolean editable = cells instanceof Var && cells.isMutable();
+        return _withTableData(_asSnapshotProperty(dataFormat, cells), editable);
+    }
+
+    /**
+     *  Translates a {@link Tuple} based cells property into the {@link TableData}
+     *  property which the table models actually speak, so that a tuple based table is
+     *  simply a snapshot based table with a differently shaped source.
+     *  <p>
+     *  Note that this translation costs nothing: a {@link TableData} keeps the very
+     *  tuple it is handed, so the change diff of that tuple (which the model uses to
+     *  fire targeted row events) survives the trip.
+     *  Mutable cells are zoomed into through a {@link Lens} so that a user edit finds
+     *  its way back into the original property, whereas read only cells only need a view.
+     */
+    @SuppressWarnings("unchecked")
+    private static <E> Val<TableData> _asSnapshotProperty( UI.ListData dataFormat, Val<Tuple<Tuple<E>>> cells ) {
+        Function<Tuple<Tuple<E>>, TableData> toSnapshot = tuple ->
+                tuple == null
+                    // A nullable property may hold no tuple at all (data not loaded
+                    // yet, say), which simply reads as an empty table.
+                    ? TableData.empty().withLayout(dataFormat)
+                    : TableData.of(dataFormat, (Tuple<Tuple<@Nullable Object>>)(Tuple<?>) tuple);
+        /*
+            Careful: a read only property may well be a 'Var' instance, which is why
+            its mutability has to be checked explicitly (a lens onto an immutable
+            property would throw as soon as the user edits a cell).
+         */
+        if ( cells instanceof Var && cells.isMutable() )
+            // The null object flavour of 'zoomTo' is what makes a lens over a
+            // nullable property well defined: a null tuple reads as the empty table.
+            return ((Var<Tuple<Tuple<E>>>) cells).zoomTo(
+                        TableData.empty().withLayout(dataFormat),
+                        Lens.of(
+                            toSnapshot,
+                            (oldCells, snapshot) -> (Tuple<Tuple<E>>)(Tuple<?>) snapshot.cells()
+                        )
+                    );
+        return cells.viewAs(TableData.class, toSnapshot);
+    }
+
+    /**
+     *  Installs a table model on the given table, first handing our thread safe
+     *  {@link AbstractSnapshotTableModel}s the current {@link swingtree.threading.EventProcessor}
+     *  (which they need to decide whether to snapshot across threads or read live)
+     *  before the {@link JTable} starts querying the model.
+     */
+    private void _installModel( T thisComponent, TableModel model ) {
+        if ( model instanceof AbstractSnapshotTableModel )
+            ((AbstractSnapshotTableModel) model)._setEventProcessor(_state().eventProcessor());
+        thisComponent.setModel(model);
     }
 
     /**
@@ -622,6 +803,12 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *      <b>Please note that when the data of the provided data source changes (i.e. when the data source
      *      is a {@link List} and the list is modified), the table model will not be updated automatically!
      *      Use {@link #updateTableOn(sprouts.Event)} to bind an update {@link sprouts.Event} to the table model.</b>
+     *  <p>
+     *  <b>Consider {@link #withModel(Var)} with a {@link TableData} value instead:</b> it
+     *  describes the whole table (cells, column names, column classes and layout) as a
+     *  single immutable value which a property hands to the table, so the table updates
+     *  itself, it is thread safe by construction, and it syncs row changes incrementally
+     *  instead of rebuilding. The data source here can only ever refresh everything.
      *
      * @param mode An enum which configures the layout as well as modifiability of the table in a readable fashion.
      * @param dataSource The {@link TableListDataSource} returning a list matrix which will be used to populate the table.
@@ -633,44 +820,60 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         boolean isEditable = mode.isEditable();
         if ( isRowMajor )
             return _with( thisComponent ->
-                    thisComponent.setModel(new ListBasedTableModel<E>(isEditable, dataSource)
+                    _installModel(thisComponent, new ListBasedTableModel<E>(isEditable, dataSource)
                     {
-                        @Override public int getRowCount() { return getData().size(); }
-                        @Override public int getColumnCount() {
+                        @Override protected int _liveRowCount() { return getData().size(); }
+                        @Override protected int _liveColumnCount() {
                             List<List<E>> data = getData();
                             return ( data.isEmpty() ? 0 : data.get(0).size() );
                         }
-                        @Override public @Nullable Object getValueAt(int rowIndex, int columnIndex) {
+                        @Override protected @Nullable Object _liveValueAt(int rowIndex, int columnIndex) {
                             List<List<E>> data = getData();
-                            if (isNotWithinBounds(rowIndex, columnIndex)) return null;
-                            return data.get(rowIndex).get(columnIndex);
+                            // Bound-check against the live data, never the (possibly stale)
+                            // snapshot: this method feeds 'takeLiveSnapshot', which runs while
+                            // the previous snapshot is still installed for the UI thread.
+                            if ( rowIndex < 0 || rowIndex >= data.size() ) return null;
+                            List<E> row = data.get(rowIndex);
+                            if ( columnIndex < 0 || columnIndex >= row.size() ) return null;
+                            return row.get(columnIndex);
                         }
-                        @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+                        @Override protected void _liveSetValueAt(@Nullable Object aValue, int rowIndex, int columnIndex) {
+                            if ( !isEditable ) return;
                             List<List<E>> data = getData();
-                            if ( !isEditable || isNotWithinBounds(rowIndex, columnIndex) ) return;
-                            data.get(rowIndex).set(columnIndex, (E)aValue);
+                            if ( rowIndex < 0 || rowIndex >= data.size() ) return;
+                            List<E> row = data.get(rowIndex);
+                            if ( columnIndex < 0 || columnIndex >= row.size() ) return;
+                            row.set(columnIndex, (E)aValue);
                         }
                     })
                 )
                 ._this();
         else // isColumnMajor
             return _with( thisComponent ->
-                    thisComponent.setModel(new ListBasedTableModel<E>(isEditable, dataSource)
+                    _installModel(thisComponent, new ListBasedTableModel<E>(isEditable, dataSource)
                     {
-                        @Override public int getRowCount() {
+                        @Override protected int _liveRowCount() {
                             List<List<E>> data = getData();
                             return (data.isEmpty() ? 0 : data.get(0).size());
                         }
-                        @Override public int getColumnCount() { return getData().size(); }
-                        @Override public @Nullable Object getValueAt( int rowIndex, int columnIndex ) {
+                        @Override protected int _liveColumnCount() { return getData().size(); }
+                        @Override protected @Nullable Object _liveValueAt( int rowIndex, int columnIndex ) {
                             List<List<E>> data = getData();
-                            if ( isNotWithinBounds(rowIndex, columnIndex) ) return null;
-                            return data.get(columnIndex).get(rowIndex);
+                            // Bound-check against the live data, never the (possibly stale)
+                            // snapshot: this method feeds 'takeLiveSnapshot', which runs while
+                            // the previous snapshot is still installed for the UI thread.
+                            if ( columnIndex < 0 || columnIndex >= data.size() ) return null;
+                            List<E> column = data.get(columnIndex);
+                            if ( rowIndex < 0 || rowIndex >= column.size() ) return null;
+                            return column.get(rowIndex);
                         }
-                        @Override public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+                        @Override protected void _liveSetValueAt(@Nullable Object aValue, int rowIndex, int columnIndex) {
+                            if ( !isEditable ) return;
                             List<List<E>> data = getData();
-                            if ( !isEditable || isNotWithinBounds(rowIndex, columnIndex) ) return;
-                            data.get(columnIndex).set(rowIndex, (E)aValue);
+                            if ( columnIndex < 0 || columnIndex >= data.size() ) return;
+                            List<E> column = data.get(columnIndex);
+                            if ( rowIndex < 0 || rowIndex >= column.size() ) return;
+                            column.set(rowIndex, (E)aValue);
                         }
                     })
                 )
@@ -685,6 +888,12 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *      <b>Please note that when the data of the provided data source changes (i.e. when the data source
      *      is a {@link Map} which gets modified), the table model will not be updated automatically!
      *      Use {@link #updateTableOn(sprouts.Event)} to bind an update {@link sprouts.Event} to the table model.</b>
+     *  <p>
+     *  <b>Consider {@link #withModel(Var)} with a {@link TableData} value instead:</b> it
+     *  describes the whole table (cells, column names, column classes and layout) as a
+     *  single immutable value which a property hands to the table, so the table updates
+     *  itself, it is thread safe by construction, and it syncs row changes incrementally
+     *  instead of rebuilding. The data source here can only ever refresh everything.
      *
      * @param mode An enum which configures the modifiability of the table in a readable fashion.
      * @param dataSource The {@link TableMapDataSource} returning a column major map based matrix which will be used to populate the table.
@@ -693,7 +902,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      */
     public final <E> UIForTable<T> withModel( UI.MapData mode, TableMapDataSource<E> dataSource ) {
         return _with( thisComponent -> {
-                    thisComponent.setModel(new MapBasedColumnMajorTableModel<>(mode.isEditable(), dataSource));
+                    _installModel(thisComponent, new MapBasedColumnMajorTableModel<>(mode.isEditable(), dataSource));
                 })
                 ._this();
     }
@@ -730,30 +939,42 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         return _with( thisComponent -> {
                     WeakReference<T> thisComponentRef = new WeakReference<>(thisComponent);
                     ComponentExtension.from(thisComponent).storeBoundObservable(
-                        observable.subscribe(()->
-                            _runInUI(()->{
-                                T innerComponent = thisComponentRef.get();
-                                if (innerComponent == null)
-                                    return;
-                                TableModel model = innerComponent.getModel();
-                                if ( model instanceof AbstractTableModel ) {
-                                    // We want the table model update to be as thorough as possible, so we
-                                    // will fire a table structure changed event, followed by a table data
-                                    // changed event.
-                                    ((AbstractTableModel)model).fireTableStructureChanged();
-                                    ((AbstractTableModel)model).fireTableDataChanged();
-                                }
-                                else
-                                    throw new IllegalStateException("The table model is not an AbstractTableModel instance.");
-                            })
-                        )
+                        observable.subscribe(()-> {
+                            T innerComponent = thisComponentRef.get();
+                            if (innerComponent == null)
+                                return;
+                            TableModel model = innerComponent.getModel();
+                            if ( model instanceof AbstractSnapshotTableModel ) {
+                                // Our own thread safe models own the threading of the refresh:
+                                // under the decoupled protocol they snapshot on this (application)
+                                // thread and then publish the swap to the UI thread, whereas under
+                                // the coupled protocol they simply fire the change events on the UI thread.
+                                ((AbstractSnapshotTableModel)model).refresh();
+                            }
+                            else
+                                _runInUI(()->{
+                                    T inner = thisComponentRef.get();
+                                    if (inner == null)
+                                        return;
+                                    TableModel innerModel = inner.getModel();
+                                    if ( innerModel instanceof AbstractTableModel ) {
+                                        // We want the table model update to be as thorough as possible, so we
+                                        // will fire a table structure changed event, followed by a table data
+                                        // changed event.
+                                        ((AbstractTableModel)innerModel).fireTableStructureChanged();
+                                        ((AbstractTableModel)innerModel).fireTableDataChanged();
+                                    }
+                                    else
+                                        throw new IllegalStateException("The table model is not an AbstractTableModel instance.");
+                                });
+                        })
                     );
                 })
                 ._this();
     }
 
 
-    private static abstract class ListBasedTableModel<E> extends AbstractTableModel
+    private static abstract class ListBasedTableModel<E> extends AbstractSnapshotTableModel
     {
         private final TableListDataSource<E> dataSource;
         private final boolean isEditable;
@@ -763,22 +984,19 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
             this.dataSource = dataSource;
         }
 
-        @Override public boolean isCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }
+        @Override protected boolean _liveCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }
+        @Override protected @Nullable String _liveColumnName( int columnIndex ) { return null; }
+        @Override protected Class<?> _liveColumnClass( int columnIndex ) { return Object.class; }
 
         protected List<List<E>> getData() {
             List<List<E>> data = dataSource.get();
             if ( data == null ) return new ArrayList<>(); // We really don't want null pointer in UIs.
             return data;
         }
-        protected boolean isNotWithinBounds(int rowIndex, int colIndex) {
-            if ( rowIndex < 0 || rowIndex >= getRowCount()     ) return true;
-            if ( colIndex < 0 || colIndex >= getColumnCount()  ) return true;
-            return false;
-        }
     }
 
 
-    private abstract static class MapBasedTableModel<E> extends AbstractTableModel
+    private abstract static class MapBasedTableModel<E> extends AbstractSnapshotTableModel
     {
         private final TableMapDataSource<E> dataSource;
         private final boolean isEditable;
@@ -795,21 +1013,14 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         }
 
         @Override
-        public @Nullable String getColumnName(int column) {
+        protected @Nullable String _liveColumnName(int column) {
             List<String> columnNames = new ArrayList<>(getData().keySet());
             if ( column < 0 || column >= columnNames.size() ) return null;
             return columnNames.get(column);
         }
 
-        @Override public boolean isCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }
-
-
-        protected boolean isNotWithinBounds(int rowIndex, int colIndex) {
-            if ( rowIndex < 0 || rowIndex >= getRowCount()     ) return true;
-            if ( colIndex < 0 || colIndex >= getColumnCount()  ) return true;
-            return false;
-        }
-
+        @Override protected Class<?> _liveColumnClass( int columnIndex ) { return Object.class; }
+        @Override protected boolean _liveCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }
     }
 
     private static class MapBasedColumnMajorTableModel<E> extends MapBasedTableModel<E>
@@ -819,7 +1030,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         }
 
         @Override
-        public int getRowCount() {
+        protected int _liveRowCount() {
             Map<String, List<E>> data = getData();
             return data.values()
                         .stream()
@@ -830,11 +1041,15 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         }
 
         @Override
-        public int getColumnCount() { return getData().size(); }
+        protected int _liveColumnCount() { return getData().size(); }
 
         @Override
-        public @Nullable Object getValueAt( int rowIndex, int columnIndex ) {
-            if ( isNotWithinBounds(rowIndex, columnIndex) )
+        protected @Nullable Object _liveValueAt( int rowIndex, int columnIndex ) {
+            // Bound-check against the live map, never the (possibly stale) snapshot:
+            // this method feeds 'takeLiveSnapshot', which runs while the previous
+            // snapshot is still installed for the UI thread. A negative column index
+            // also has to be caught before 'skip(..)', which would otherwise throw.
+            if ( columnIndex < 0 )
                 return null;
             List<E> column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);
             if ( column == null )
@@ -845,8 +1060,8 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         }
 
         @Override
-        public void setValueAt( Object aValue, int rowIndex, int columnIndex ) {
-            if ( isNotWithinBounds(rowIndex, columnIndex) )
+        protected void _liveSetValueAt( @Nullable Object aValue, int rowIndex, int columnIndex ) {
+            if ( columnIndex < 0 )
                 return;
             List<E> column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);
             if ( column == null )

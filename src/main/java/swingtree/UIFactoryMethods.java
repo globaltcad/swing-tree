@@ -16,6 +16,7 @@ import swingtree.api.SwingBuilder;
 import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
+import swingtree.api.model.TableData;
 import swingtree.components.*;
 import swingtree.dialogs.ConfirmAnswer;
 import swingtree.dialogs.ConfirmDialog;
@@ -5698,6 +5699,100 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
+     *  Creates a declarative UI builder for a {@link JTable} bound to a read only
+     *  property holding an immutable {@link TableData} value, which is the most
+     *  complete way of describing the contents of a table: it carries the cells, the
+     *  column names, the column classes and the {@link UI.ListData} layout of the
+     *  data, all in a single value.
+     *  <p>
+     *  Because a {@link TableData} is deeply immutable, the table works with the
+     *  property value itself as its UI thread owned snapshot (so the AWT Event
+     *  Dispatch Thread never touches application thread owned mutable state), and it
+     *  updates itself automatically whenever the property changes. For a row major
+     *  snapshot, row changes are furthermore synced to the table incrementally,
+     *  through the change diff carried by the cells.
+     *  <p>
+     *  The cells of a table bound like this are read only, use {@link #table(Var)}
+     *  together with one of the {@code *_EDITABLE} layouts if you want the user to
+     *  be able to edit them.
+     *  <pre>{@code
+     *  Val<TableData> model = vm.tableModel();
+     *  UI.table(model);
+     *  }</pre>
+     *
+     * @param model A read only property holding the {@link TableData} describing the table.
+     * @return A fluent builder instance for a new {@link JTable}.
+     */
+    public static UIForTable<JTable> table( Val<TableData> model ) {
+        NullUtil.nullArgCheck(model, "model", Val.class);
+        return table().withModel(model);
+    }
+
+    /**
+     *  Creates a declarative UI builder for a {@link JTable} bound to a mutable
+     *  property holding an immutable {@link TableData} value, which, in addition
+     *  to what {@link #table(Val)} does, allows the user to edit the cells of the
+     *  table: an edit is applied to the UI thread owned snapshot right away (so that
+     *  the table does not flicker) and then written back into the property on the
+     *  application thread.
+     *  <p>
+     *  Note that the cells only actually become editable if the
+     *  {@link TableData#layout()} of the bound value is one of the
+     *  {@code *_EDITABLE} constants of {@link UI.ListData}.
+     *  <pre>{@code
+     *  Var<TableData> model = vm.tableModel();
+     *  UI.table(model);
+     *  }</pre>
+     *
+     * @param model A mutable property holding the {@link TableData} describing the table.
+     * @return A fluent builder instance for a new {@link JTable}.
+     */
+    public static UIForTable<JTable> table( Var<TableData> model ) {
+        NullUtil.nullArgCheck(model, "model", Var.class);
+        return table().withModel(model);
+    }
+
+    /**
+     *  Creates a declarative UI builder for a {@link JTable} bound to a fully
+     *  thread safe, reactive {@link Tuple} based data source, whose layout is
+     *  described by the supplied {@link UI.ListData} constant: for a
+     *  {@code ROW_MAJOR*} layout the outer {@link Tuple} holds the rows and each
+     *  inner {@link Tuple} the cells of a row, whereas for a {@code COLUMN_MAJOR*}
+     *  layout the outer {@link Tuple} holds the columns and each inner
+     *  {@link Tuple} the cells of a column.
+     *  <p>
+     *  This is the recommended factory for dynamic, application thread owned table
+     *  data: the table works with a UI thread owned snapshot of the immutable
+     *  tuple (so the AWT Event Dispatch Thread never touches application thread
+     *  owned mutable state), and it updates itself automatically whenever the
+     *  property changes. For a row major layout, row changes are furthermore
+     *  synced to the table incrementally, through the change diff carried by the
+     *  tuple.
+     *  <p>
+     *  If you pass one of the {@code *_EDITABLE} constants <i>and</i> a mutable
+     *  {@link sprouts.Var}, then the user may edit the cells of the table, in
+     *  which case the edits are written back into the property on the application
+     *  thread. A read only {@link Val} always yields a read only table.
+     *  <pre>{@code
+     *  var rows = Var.of(Tuple.of(
+     *      Tuple.of("Alice", "30"),
+     *      Tuple.of("Bob",   "42")
+     *  ));
+     *  UI.table(UI.ListData.ROW_MAJOR_EDITABLE, rows);
+     *  }</pre>
+     *
+     * @param dataFormat The layout of the supplied cells, see {@link UI.ListData}.
+     * @param cells A property holding a {@link Tuple} of {@link Tuple}s of cell values.
+     * @return A fluent builder instance for a new {@link JTable}.
+     * @param <E> The common type of the cell values.
+     */
+    public static <E> UIForTable<JTable> table( UI.ListData dataFormat, Val<Tuple<Tuple<E>>> cells ) {
+        NullUtil.nullArgCheck(dataFormat, "dataFormat", UI.ListData.class);
+        NullUtil.nullArgCheck(cells, "cells", Val.class);
+        return table().withModel(dataFormat, cells);
+    }
+
+    /**
      *  Use this to create a new {@link JTable} with a table model whose data can be represented based
      *  on a {@link java.util.List} of {@link java.util.List}s of entries.  <br>
      *  This method will automatically create a {@link AbstractTableModel} instance for you.
@@ -5705,9 +5800,15 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *      <b>Please note that when the data of the provided data source changes (i.e. when the data source
      *      is a {@link java.util.List} which gets modified), the table model will not be updated automatically!
      *      Use {@link UIForTable#updateTableOn(sprouts.Event)} to bind an update {@link Event} to the table model.</b>
+     *  <p>
+     *  <b>Consider {@link #table(Var)} with a {@link TableData} value instead:</b> it
+     *  describes the whole table (cells, column names, column classes and layout) as a
+     *  single immutable value which a property hands to the table, so the table updates
+     *  itself, it is thread safe by construction, and it syncs row changes incrementally
+     *  instead of rebuilding. The data source here can only ever refresh everything.
      *
-     * @param dataFormat An enum which configures the modifiability of the table in a readable fashion.
-     * @param dataSource The {@link TableMapDataSource} returning a column major map based matrix which will be used to populate the table.
+     * @param dataFormat An enum which configures the layout as well as the modifiability of the table in a readable fashion.
+     * @param dataSource The {@link TableListDataSource} returning a list matrix which will be used to populate the table.
      * @return This builder node.
      * @param <E> The type of the table entry {@link Object}s.
      */
@@ -5725,6 +5826,12 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  <b>Please note that when the data of the provided data source changes (i.e. when the data source
      *  is a {@link Map} which gets modified), the table model will not be updated automatically!
      *  Use {@link UIForTable#updateTableOn(sprouts.Event)} to bind an update {@link Event} to the table model.</b>
+     *  <p>
+     *  <b>Consider {@link #table(Var)} with a {@link TableData} value instead:</b> it
+     *  describes the whole table (cells, column names, column classes and layout) as a
+     *  single immutable value which a property hands to the table, so the table updates
+     *  itself, it is thread safe by construction, and it syncs row changes incrementally
+     *  instead of rebuilding. The data source here can only ever refresh everything.
      *
      * @param dataFormat An enum which configures the modifiability of the table in a readable fashion.
      * @param dataSource The {@link TableMapDataSource} returning a column major map-based matrix which will be used to populate the table.

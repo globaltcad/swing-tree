@@ -325,7 +325,11 @@ public final class UI extends UIFactoryMethods
         COLUMN_MAJOR_EDITABLE,
         ROW_MAJOR_EDITABLE;
 
-        final boolean isEditable() {
+        /**
+         *  Tells if the data of a table using this layout may be edited by the user.
+         *  @return True if this is one of the {@code *_EDITABLE} constants.
+         */
+        public final boolean isEditable() {
             switch ( this ) {
                 case COLUMN_MAJOR:
                 case ROW_MAJOR:
@@ -337,7 +341,12 @@ public final class UI extends UIFactoryMethods
             throw new RuntimeException();
         }
 
-        final boolean isRowMajor() {
+        /**
+         *  Tells if the outer list (or {@link sprouts.Tuple}) of a data source using
+         *  this layout holds the rows of the table (row major) or its columns (column major).
+         *  @return True if this is one of the {@code ROW_MAJOR*} constants.
+         */
+        public final boolean isRowMajor() {
             switch ( this ) {
                 case COLUMN_MAJOR:
                 case COLUMN_MAJOR_EDITABLE:
