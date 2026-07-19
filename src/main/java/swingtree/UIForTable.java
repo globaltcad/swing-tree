@@ -653,10 +653,10 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      */
     public final UIForTable<T> withModel( Val<TableData> model ) {
         NullUtil.nullArgCheck(model, "model", Val.class);
-        return _with( thisComponent -> {
-                    _installModel(thisComponent, new PropertyTableModel(model));
-                })
-                ._this();
+        // A read only 'Val' overload always yields a read only table, even if the
+        // reference happens to point at a 'Var' at runtime (a view model exposing its
+        // 'Var' as a 'Val', say). The overload the user picked is what expresses intent.
+        return _withTableData(model, false);
     }
 
     /**
@@ -680,7 +680,23 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      */
     public final UIForTable<T> withModel( Var<TableData> model ) {
         NullUtil.nullArgCheck(model, "model", Var.class);
-        return withModel((Val<TableData>) model);
+        // A mutable 'Var' overload yields an editable table (if the layout allows it),
+        // so unlike the 'Val' overload it must not funnel through as read only.
+        return _withTableData(model, true);
+    }
+
+    /**
+     *  The single install path behind every {@link TableData} property based binding.
+     *  The {@code editable} flag carries the user's intent (which {@code withModel}
+     *  overload they picked) down to the {@link PropertyTableModel}, instead of letting
+     *  the model guess it from the runtime type of the property, which would wrongly
+     *  make a table editable when a {@link Var} is bound through a read only {@link Val}.
+     */
+    private UIForTable<T> _withTableData( Val<TableData> model, boolean editable ) {
+        return _with( thisComponent -> {
+                    _installModel(thisComponent, new PropertyTableModel(model, editable));
+                })
+                ._this();
     }
 
     /**
@@ -721,7 +737,12 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     public final <E> UIForTable<T> withModel( UI.ListData dataFormat, Val<Tuple<Tuple<E>>> cells ) {
         NullUtil.nullArgCheck(dataFormat, "dataFormat", UI.ListData.class);
         NullUtil.nullArgCheck(cells, "cells", Val.class);
-        return withModel(_asSnapshotProperty(dataFormat, cells));
+        // A tuple based table has only this one overload, so its editability is
+        // driven by the runtime mutability of the cells property (which decides
+        // whether '_asSnapshotProperty' zooms into a mutable snapshot or merely
+        // views a read only one), matching what that method does internally.
+        boolean editable = cells instanceof Var && cells.isMutable();
+        return _withTableData(_asSnapshotProperty(dataFormat, cells), editable);
     }
 
     /**

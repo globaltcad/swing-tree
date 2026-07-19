@@ -909,6 +909,43 @@ class Declarative_Tables_Spec extends Specification
             UI.ListData.ROW_MAJOR           | false   || false
     }
 
+    def 'A `Var` exposed as a read only `Val` cannot be edited through the table.'()
+    {
+        reportInfo """
+            A view model routinely keeps its state in a `Var` but exposes only a read
+            only `Val` of it to the outside (a `public Val<TableData> tableModel()`
+            over a `private Var<TableData>`, say). If such a `Val` is bound through the
+            read only `withModel(Val)` overload, then the table must be read only, no
+            matter that the reference happens to point at a mutable `Var` at runtime:
+            the overload the user picked is what expresses the intent, not the runtime
+            type of the property. Anything else would let edits leak into state the
+            view model never meant to expose.
+        """
+        given : 'A mutable `Var` holding an editable snapshot.'
+            var backing = Var.of(
+                            TableData.of(UI.ListData.ROW_MAJOR_EDITABLE)
+                                .addRow("a", "b")
+                        )
+        and : '''
+                A table bound to it through the read only overload. The `(Val)` cast
+                is what picks that overload here, just as a Java caller holding a
+                `Val` reference (a view model exposing its `Var` as a `Val`, say)
+                would pick it, rather than Groovy dispatching on the runtime `Var`.
+            '''
+            var table = UI.table((Val) backing).get(JTable)
+
+        expect : 'The table reports its cells as read only, despite the mutable backing.'
+            !table.isCellEditable(0, 0)
+
+        when : 'An edit is forced through the model API regardless...'
+            table.getModel().setValueAt("!", 0, 0)
+            UI.sync()
+        then : '...it is silently ignored: neither the table nor the backing property change.'
+            noExceptionThrown()
+            table.getValueAt(0, 0) == "a"
+            backing.get().getValueAt(0, 0) == "a"
+    }
+
     def 'The cells of an editable `TableData` based table are written back into the property.'()
     {
         reportInfo """

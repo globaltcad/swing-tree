@@ -44,11 +44,13 @@ import java.util.Objects;
 final class PropertyTableModel extends AbstractSnapshotTableModel
 {
     private final Val<TableData> _model;
+    private final boolean _editable; // Whether the binding was made through a 'Var' overload (write back allowed) or a read only 'Val' overload.
     private final Viewable<TableData> _modelView; // A strong reference keeps the (weakly parented) view and its listener alive.
     private volatile @Nullable SequenceDiff _lastDiff; // Read/written on the UI thread only (plus the initial value from the installing thread).
 
-    PropertyTableModel( Val<TableData> model ) {
+    PropertyTableModel( Val<TableData> model, boolean editable ) {
         _model = Objects.requireNonNull(model);
+        _editable = editable;
         _modelView = _model.view();
         _modelView.onChange(From.ALL, it -> {
             TableData next = it.currentValue().orElseGet(TableData::empty);
@@ -158,12 +160,17 @@ final class PropertyTableModel extends AbstractSnapshotTableModel
 
     /**
      *  A snapshot based table is only editable if the layout of its snapshot says so
-     *  and if the snapshot actually lives in a mutable {@link Var} which can receive
-     *  the edit. (Note that a read only property may well be a {@link Var} instance,
-     *  which is why its mutability has to be checked explicitly.)
+     *  <i>and</i> the binding intends it to be: {@code _editable} is only set when the
+     *  table was bound through a {@link Var} overload (see {@code UIForTable.withModel}),
+     *  never through a read only {@link Val} overload. This matters because a read only
+     *  {@link Val} reference may well point at a {@link Var} instance at runtime (a view
+     *  model exposing its {@code Var} as a {@code Val}, say), so the runtime mutability
+     *  of {@link #_model} is not a trustworthy signal of the user's intent; the overload
+     *  they picked is. The runtime check on {@link #_model} that remains is only a
+     *  defensive guard for the {@code (Var)} cast in {@link #_liveSetValueAt}.
      */
     @Override protected boolean _liveCellEditable( int rowIndex, int columnIndex ) {
-        return _modelOrEmpty().layout().isEditable() && _model instanceof Var && _model.isMutable();
+        return _editable && _modelOrEmpty().layout().isEditable() && _model instanceof Var && _model.isMutable();
     }
 
     @Override
