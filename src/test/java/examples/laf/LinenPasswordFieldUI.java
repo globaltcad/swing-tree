@@ -31,6 +31,13 @@ public final class LinenPasswordFieldUI
     public void installUI(JComponent c) {
         super.installUI(c);
         ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        LinenFocus.repaintOnFocus(c, c); // text components don't self-repaint on focus
+    }
+
+    @Override
+    public void uninstallUI(JComponent c) {
+        LinenFocus.uninstall(c, c);
+        super.uninstallUI(c);
     }
 
     @Override
