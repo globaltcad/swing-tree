@@ -829,13 +829,21 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
                         }
                         @Override protected @Nullable Object _liveValueAt(int rowIndex, int columnIndex) {
                             List<List<E>> data = getData();
-                            if (isNotWithinBounds(rowIndex, columnIndex)) return null;
-                            return data.get(rowIndex).get(columnIndex);
+                            // Bound-check against the live data, never the (possibly stale)
+                            // snapshot: this method feeds 'takeLiveSnapshot', which runs while
+                            // the previous snapshot is still installed for the UI thread.
+                            if ( rowIndex < 0 || rowIndex >= data.size() ) return null;
+                            List<E> row = data.get(rowIndex);
+                            if ( columnIndex < 0 || columnIndex >= row.size() ) return null;
+                            return row.get(columnIndex);
                         }
                         @Override protected void _liveSetValueAt(@Nullable Object aValue, int rowIndex, int columnIndex) {
+                            if ( !isEditable ) return;
                             List<List<E>> data = getData();
-                            if ( !isEditable || isNotWithinBounds(rowIndex, columnIndex) ) return;
-                            data.get(rowIndex).set(columnIndex, (E)aValue);
+                            if ( rowIndex < 0 || rowIndex >= data.size() ) return;
+                            List<E> row = data.get(rowIndex);
+                            if ( columnIndex < 0 || columnIndex >= row.size() ) return;
+                            row.set(columnIndex, (E)aValue);
                         }
                     })
                 )
@@ -851,13 +859,21 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
                         @Override protected int _liveColumnCount() { return getData().size(); }
                         @Override protected @Nullable Object _liveValueAt( int rowIndex, int columnIndex ) {
                             List<List<E>> data = getData();
-                            if ( isNotWithinBounds(rowIndex, columnIndex) ) return null;
-                            return data.get(columnIndex).get(rowIndex);
+                            // Bound-check against the live data, never the (possibly stale)
+                            // snapshot: this method feeds 'takeLiveSnapshot', which runs while
+                            // the previous snapshot is still installed for the UI thread.
+                            if ( columnIndex < 0 || columnIndex >= data.size() ) return null;
+                            List<E> column = data.get(columnIndex);
+                            if ( rowIndex < 0 || rowIndex >= column.size() ) return null;
+                            return column.get(rowIndex);
                         }
                         @Override protected void _liveSetValueAt(@Nullable Object aValue, int rowIndex, int columnIndex) {
+                            if ( !isEditable ) return;
                             List<List<E>> data = getData();
-                            if ( !isEditable || isNotWithinBounds(rowIndex, columnIndex) ) return;
-                            data.get(columnIndex).set(rowIndex, (E)aValue);
+                            if ( columnIndex < 0 || columnIndex >= data.size() ) return;
+                            List<E> column = data.get(columnIndex);
+                            if ( rowIndex < 0 || rowIndex >= column.size() ) return;
+                            column.set(rowIndex, (E)aValue);
                         }
                     })
                 )
@@ -977,11 +993,6 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
             if ( data == null ) return new ArrayList<>(); // We really don't want null pointer in UIs.
             return data;
         }
-        protected boolean isNotWithinBounds(int rowIndex, int colIndex) {
-            if ( rowIndex < 0 || rowIndex >= getRowCount()     ) return true;
-            if ( colIndex < 0 || colIndex >= getColumnCount()  ) return true;
-            return false;
-        }
     }
 
 
@@ -1010,14 +1021,6 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
 
         @Override protected Class<?> _liveColumnClass( int columnIndex ) { return Object.class; }
         @Override protected boolean _liveCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }
-
-
-        protected boolean isNotWithinBounds(int rowIndex, int colIndex) {
-            if ( rowIndex < 0 || rowIndex >= getRowCount()     ) return true;
-            if ( colIndex < 0 || colIndex >= getColumnCount()  ) return true;
-            return false;
-        }
-
     }
 
     private static class MapBasedColumnMajorTableModel<E> extends MapBasedTableModel<E>
@@ -1042,7 +1045,11 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
 
         @Override
         protected @Nullable Object _liveValueAt( int rowIndex, int columnIndex ) {
-            if ( isNotWithinBounds(rowIndex, columnIndex) )
+            // Bound-check against the live map, never the (possibly stale) snapshot:
+            // this method feeds 'takeLiveSnapshot', which runs while the previous
+            // snapshot is still installed for the UI thread. A negative column index
+            // also has to be caught before 'skip(..)', which would otherwise throw.
+            if ( columnIndex < 0 )
                 return null;
             List<E> column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);
             if ( column == null )
@@ -1054,7 +1061,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
 
         @Override
         protected void _liveSetValueAt( @Nullable Object aValue, int rowIndex, int columnIndex ) {
-            if ( isNotWithinBounds(rowIndex, columnIndex) )
+            if ( columnIndex < 0 )
                 return;
             List<E> column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);
             if ( column == null )
