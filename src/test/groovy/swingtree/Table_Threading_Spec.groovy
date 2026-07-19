@@ -247,6 +247,105 @@ class Table_Threading_Spec extends Specification
             table.getValueAt(4, 0) == 5
     }
 
+    def 'A grown row major list based table snapshots its new rows, not phantom nulls, under the decoupled protocol.'()
+    {
+        reportInfo """
+            The older list based data source is snapshotted on the application
+            thread when its update signal fires, while the previous snapshot is
+            still installed for the UI thread. That snapshot must bound-check the
+            live rows against the *live* list, not against the stale snapshot
+            dimensions. Otherwise a grown table would snapshot its freshly added
+            rows as phantom nulls.
+        """
+        given : 'A mutable row major matrix and a list based table in decoupled mode.'
+            var data = new CopyOnWriteArrayList<List<String>>([['a', '1'], ['b', '2']])
+            var update = Event.create()
+            var table = UI.runAndGet({
+                UI.use(EventProcessor.DECOUPLED, ()->
+                    UI.table(UI.ListData.ROW_MAJOR, { data } as swingtree.api.model.TableListDataSource)
+                        .updateTableOn((sprouts.Observable) update)
+                ).get(JTable)
+            })
+        expect : 'The table starts with the two initial rows.'
+            table.rowCount == 2
+            table.getValueAt(1, 0) == 'b'
+
+        when : 'We grow the matrix by two rows and fire the update from this thread.'
+            data.add(['c', '3'])
+            data.add(['d', '4'])
+            update.fire()
+            letBothWorldsSettle()
+        then : 'The new rows carry their real values, not phantom nulls.'
+            table.rowCount == 4
+            table.getValueAt(2, 0) == 'c'
+            table.getValueAt(3, 0) == 'd'
+    }
+
+    def 'A grown column major list based table snapshots its new column, not phantom nulls, under the decoupled protocol.'()
+    {
+        reportInfo """
+            The same bound-checking flaw would bite the column major flavour of the
+            list based model when a column is added: the new column must be
+            snapshotted from the live data, not rejected because it lies beyond the
+            column count of the stale snapshot.
+        """
+        given : 'A mutable column major matrix (two columns) and a table in decoupled mode.'
+            var data = new CopyOnWriteArrayList<List<String>>([['a', 'b'], ['1', '2']])
+            var update = Event.create()
+            var table = UI.runAndGet({
+                UI.use(EventProcessor.DECOUPLED, ()->
+                    UI.table(UI.ListData.COLUMN_MAJOR, { data } as swingtree.api.model.TableListDataSource)
+                        .updateTableOn((sprouts.Observable) update)
+                ).get(JTable)
+            })
+        expect : 'The table starts as a two column, two row table.'
+            table.columnCount == 2
+            table.rowCount == 2
+
+        when : 'We add a third column and fire the update from this thread.'
+            data.add(['x', 'y'])
+            update.fire()
+            letBothWorldsSettle()
+        then : 'The new column carries its real values, not phantom nulls.'
+            table.columnCount == 3
+            table.getValueAt(0, 2) == 'x'
+            table.getValueAt(1, 2) == 'y'
+    }
+
+    def 'A grown map based table snapshots its new rows, not phantom nulls, under the decoupled protocol.'()
+    {
+        reportInfo """
+            The map based (column major) model shares the same snapshot aware bounds
+            helper, so a column that grows past the previous row count would have its
+            new rows snapshotted as phantom nulls. The live snapshot must read the
+            live map instead.
+        """
+        given : 'A mutable, order preserving map of two columns, and a table in decoupled mode.'
+            var data = new LinkedHashMap<String, List<String>>()
+            data.put('X', new ArrayList<String>(['a', 'b']))
+            data.put('Y', new ArrayList<String>(['1', '2']))
+            var update = Event.create()
+            var table = UI.runAndGet({
+                UI.use(EventProcessor.DECOUPLED, ()->
+                    UI.table(UI.MapData.READ_ONLY, { data } as swingtree.api.model.TableMapDataSource)
+                        .updateTableOn((sprouts.Observable) update)
+                ).get(JTable)
+            })
+        expect : 'The table starts as a two column, two row table.'
+            table.columnCount == 2
+            table.rowCount == 2
+
+        when : 'We grow both columns by one row and fire the update from this thread.'
+            data.get('X').add('c')
+            data.get('Y').add('3')
+            update.fire()
+            letBothWorldsSettle()
+        then : 'The new row carries its real values, not phantom nulls.'
+            table.rowCount == 3
+            table.getValueAt(2, 0) == 'c'
+            table.getValueAt(2, 1) == '3'
+    }
+
     def 'A user edit of a `Tuple` based table is applied to the UI right away and written back on the application thread.'()
     {
         reportInfo """
