@@ -13,6 +13,9 @@ import swingtree.UI;
 
 import static swingtree.UI.*;
 
+// The compact Lombok value classes below trip ErrorProne's SameNameButDifferent
+// (a known false positive of the Lombok interaction), so we silence it for this file.
+@SuppressWarnings("SameNameButDifferent")
 public class BasicExample {
 
     @With @Getter @Accessors(fluent = true)  @AllArgsConstructor @EqualsAndHashCode
