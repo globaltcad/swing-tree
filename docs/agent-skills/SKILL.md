@@ -830,6 +830,24 @@ label("status")
     .backgroundColor(mix(s.color(), anim.progress())))
 ```
 
+The same **composite merge** works here: hand a merged `Viewable<Record>` (built with
+`Viewable.of(seed, it -> it.join(...)...)`, Sprouts ≥ 2.7) as the property, and every
+change of *any* joined input restarts the transition towards the newly merged item.
+
+The full family of property/animation styling entry points (all cross-linked in their
+Javadocs):
+
+| Method | Driven by | Use for |
+|---|---|---|
+| `withStyle(it -> ..)` | nothing (plain) | static style, or live state you read *safely* (no app-thread props) |
+| `withStyle(prop, (item, it) -> ..)` | a property **item** | thread-safe property-driven style, auto-repaint |
+| `withStyle(prop, LifeTime, (item, anim, it) -> ..)` | a property **item** + transition | *animate towards* each new item |
+| `withTransitionalStyle(boolVar, LifeTime, (state, it) -> ..)` | a **boolean** property | bidirectional 0↔1 transition as the flag flips (§9b) |
+| `withTransitoryStyle(observable, LifeTime, (state, it) -> ..)` | an `Observable`/`Event` | a one-shot temporary style animation on each fire |
+
+The two item-driven rows (`ItemStyler`/`AnimatedItemStyler`) are the ones that benefit
+from the composite merge — collapse *N* properties into one record and feed a single call.
+
 `withRepaintOn(observableOrEvent, ...)` remains the right tool for repaint triggers
 that are *not* property-item-driven styles — e.g. repainting a custom painter when
 an `Event` fires, or a bound custom layout (§5) whose inputs changed.
