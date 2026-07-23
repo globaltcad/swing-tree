@@ -428,7 +428,7 @@ public final class MyView extends JPanel {
     public static void main(String[] args) {
         Var<MyViewModel> vm = Var.of(new MyViewModel());
         UI.show(f -> new MyView(vm));
-        EventProcessor.DECOUPLED.join();   // keep the app thread alive (see §11)
+        EventProcessor.DECOUPLED.join();   // keep the app thread alive (see §11), processes events forever (blocks)
     }
 }
 ```
