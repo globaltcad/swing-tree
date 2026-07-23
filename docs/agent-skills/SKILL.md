@@ -268,6 +268,19 @@ once, combine them — the result recomputes when *either* input changes:
 Viewable<Double> total = Viewable.of(price, taxRate, (p, tr) -> p * (1 + tr));   // Val<Double>, updates live
 ```
 
+To merge **any number** of sources (not just two) into one value without nesting,
+use the **composite view builder** (Sprouts ≥ 2.7.0): a seed plus one
+`join(property, wither)` per input, each folding that property's item into the seed.
+It recomputes as a whole on any input change — ideal for feeding a *single*
+`withStyle` from a whole cluster of view-model properties (§8):
+
+```java
+Viewable<Weather> weather = Viewable.of(Weather.blank(), it -> it
+    .join(city,        Weather::withCity)
+    .join(temperature, Weather::withTemperature)
+    .join(humidity,    Weather::withHumidity));   // Val<Weather>, recomputed on any change
+```
+
 > All `view*`/`viewAs*` results are `Viewable` (a `Val` you may listen on). They
 > are held **weakly** by their source — see the GC gotcha in §9c: if you only
 > register an `onChange` on one, keep it in a field or it is collected.
@@ -415,7 +428,7 @@ public final class MyView extends JPanel {
     public static void main(String[] args) {
         Var<MyViewModel> vm = Var.of(new MyViewModel());
         UI.show(f -> new MyView(vm));
-        EventProcessor.DECOUPLED.join();   // keep the app thread alive (see §11)
+        EventProcessor.DECOUPLED.join();   // keep the app thread alive (see §11), processes events forever (blocks)
     }
 }
 ```
@@ -759,6 +772,55 @@ the UI thread (unsafe under `EventProcessor.DECOUPLED`) and doesn't refresh by
 itself either. Styles driven by several properties compose by chaining:
 `.withStyle(a, ..).withStyle(b, ..)`.
 
+### Merging *many* properties into **one** `withStyle` (Sprouts ≥ 2.7.0)
+
+When one style rule genuinely depends on **several** properties at once, you don't
+have to chain a `withStyle` per property. Declare a small **record in the view** that
+holds everything the style needs, and merge all the source properties into a single
+`Viewable<ThatRecord>` with the Sprouts **composite view builder**
+`Viewable.of(seed, it -> it.join(p, combiner)...)` — a seed record plus one
+`join(property, wither)` per input, each folding that property's item into the record.
+A *single* `withStyle` then drives the whole style from the merged item, for **any**
+number of inputs:
+
+```java
+record Avatar(Color accent, int diameter, boolean online) {
+    Avatar withAccent(Color c)   { return new Avatar(c, diameter, online); }
+    Avatar withDiameter(int d)   { return new Avatar(accent, d, online); }
+    Avatar withOnline(boolean o) { return new Avatar(accent, diameter, o); }
+}
+
+label(initials)
+.withStyle(
+    Viewable.of(new Avatar(Color.GRAY, 38, false), it -> it
+        .join(accentColor, Avatar::withAccent)     // Val<Color>
+        .join(diameter,    Avatar::withDiameter)   // Val<Integer>
+        .join(isOnline,    Avatar::withOnline)),   // Val<Boolean>
+    (a, it) -> it
+        .prefSize(a.diameter(), a.diameter())
+        .backgroundColor(a.accent())
+        .borderRadius(1000)
+        .border(a.online() ? 2 : 0, Color.GREEN)
+);
+```
+
+The composite item is recomputed **as a whole** whenever *any* joined property
+changes (fold starts at the seed, applies each combiner in join order, reads the
+*current* item of every input), so one `withStyle` stays in sync with all of its
+inputs. It scales to any number of properties without nesting, and a property may be
+joined more than once. **This is the idiomatic way to capture multiple reactive
+view-model properties in a single thread-safe styler.** Requires **Sprouts 2.7.0+**
+(`Viewable.of(seed, configurator)` — the composite builder — was added there). Use the
+`Viewable.of(Type.class, seed, ..)` overload when the record type is polymorphic.
+
+> **No field needed — build it inline.** A composite is a *view*
+> (`isView() == true`), and SwingTree's property bindings hold **views (and lenses)
+> strongly** internally (§9c), so the inline `Viewable.of(..)` above is safe from GC
+> even though views are otherwise only weakly held by their sources. (Chaining
+> separate `withStyle(a,..).withStyle(b,..)` calls is still fine and reads clearer when
+> the rules are independent; reach for the composite when one rule needs several
+> inputs together, or when you want a single styler for a whole cluster of state.)
+
 An animated flavor transitions towards each new item over a `LifeTime`
 (`anim.progress()` runs 0→1 on every item change):
 
@@ -767,6 +829,24 @@ label("status")
 .withStyle(status, LifeTime.of(0.5, TimeUnit.SECONDS), (s, anim, it) -> it
     .backgroundColor(mix(s.color(), anim.progress())))
 ```
+
+The same **composite merge** works here: hand a merged `Viewable<Record>` (built with
+`Viewable.of(seed, it -> it.join(...)...)`, Sprouts ≥ 2.7) as the property, and every
+change of *any* joined input restarts the transition towards the newly merged item.
+
+The full family of property/animation styling entry points (all cross-linked in their
+Javadocs):
+
+| Method | Driven by | Use for |
+|---|---|---|
+| `withStyle(it -> ..)` | nothing (plain) | static style, or live state you read *safely* (no app-thread props) |
+| `withStyle(prop, (item, it) -> ..)` | a property **item** | thread-safe property-driven style, auto-repaint |
+| `withStyle(prop, LifeTime, (item, anim, it) -> ..)` | a property **item** + transition | *animate towards* each new item |
+| `withTransitionalStyle(boolVar, LifeTime, (state, it) -> ..)` | a **boolean** property | bidirectional 0↔1 transition as the flag flips (§9b) |
+| `withTransitoryStyle(observable, LifeTime, (state, it) -> ..)` | an `Observable`/`Event` | a one-shot temporary style animation on each fire |
+
+The two item-driven rows (`ItemStyler`/`AnimatedItemStyler`) are the ones that benefit
+from the composite merge — collapse *N* properties into one record and feed a single call.
 
 `withRepaintOn(observableOrEvent, ...)` remains the right tool for repaint triggers
 that are *not* property-item-driven styles — e.g. repainting a custom painter when
@@ -1119,7 +1199,10 @@ painting, a peeked component, a third-party widget): `UI.scale(int|float|double)
 5. **Never read property values inside a plain `withStyle` lambda** — use the
    property-bound `withStyle(prop, (item, it) -> ..)` (§8), which captures the item
    thread-safely and repaints automatically. (`withRepaintOn(props) + prop.get()`
-   is the legacy version of this pattern.)
+   is the legacy version of this pattern.) When one style depends on **several**
+   properties, merge them into one record with the Sprouts ≥2.7 composite view builder
+   `Viewable.of(seed, it -> it.join(p, wither)…)` and drive it from a single
+   `withStyle` — no need to chain one per property (§8).
 6. **Pick the right thread:** `onView` for view-touching handlers, `on` for
    model/business handlers; respect `From.VIEW` vs `From.VIEW_MODEL` to avoid
    feedback loops.
@@ -1155,6 +1238,7 @@ Var<T> v = Var.of(value);  v.get(); v.set(x); v.update(fn);  Val<U> d = v.viewAs
 v.isEnabledIf / isVisibleIf / isSelectedIf / isEditableIf (Val<Boolean>)
 Viewable<T> c = Viewable.of(a, b, (x,y) -> combine);     // derived from 2 sources; result type = a's type
 Viewable<R> r = Viewable.of(R.class, a, b, (x,y) -> ..); // ...or with an explicitly different result type
+Viewable<C> m = Viewable.of(seed, it -> it.join(a,C::withA).join(b,C::withB).join(c,C::withC)); // N sources → 1 record (Sprouts ≥2.7)
 Viewable<T> w = v.view();                                // weakly-held listenable view (store in a field!)
 
 // sprouts immutable collections (persistent; every op returns a new instance)
@@ -1187,6 +1271,7 @@ it.addRows(t) / .removeRowsAt(i,n) / .setRowsAt(i,t)     // range ops ⇒ ONE ta
                    .gradient(Layer.BACKGROUND,"g",g->g.type(GradientType.RADIAL).colors(a,b))
                    .componentFont(fc -> fc.size(14).family("Serif")))
 .withStyle(prop, (item, it) -> it.backgroundColor(item.color()))  // property-driven, auto-repaint (§8)
+.withStyle(Viewable.of(seed, it -> it.join(a,Seed::withA).join(b,Seed::withB)), (m,it)->..) // N props → 1 styler (Sprouts ≥2.7; §8)
 .withRepaintOn(eventA, eventB)
 .withTransitionalStyle(boolVar, LifeTime.of(0.4, SECONDS), (state, it) -> it. ...progress()...)
 

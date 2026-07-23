@@ -2440,6 +2440,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *
      * @return This very instance, which allows for builder-style method chaining.
      * @see #withStyle(Val, ItemStyler) For styling based on the item of a property, in a thread safe fashion.
+     * @see #withStyle(Val, LifeTime, AnimatedItemStyler) For a property driven style which animates towards each new item.
+     * @see #withTransitionalStyle(Val, LifeTime, AnimatedStyler) For a style transitioning back and forth as a boolean property flips.
+     * @see #withTransitoryStyle(Observable, LifeTime, AnimatedStyler) For a temporary style animation triggered by an {@link Observable}.
      */
     public final I withStyle( Styler<C> styler ) {
         NullUtil.nullArgCheck(styler, "styler", Styler.class);
@@ -2478,6 +2481,43 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *    as an explicit argument. Never read the property itself inside the lambda! <br>
      *    Note that styles based on multiple properties compose naturally by simply
      *    chaining multiple {@code withStyle(property, styler)} calls.
+     *    <p>
+     *    <b>Merging many properties into a single {@link ItemStyler} (requires Sprouts 2.7.0 or above):</b>
+     *    when a single style should react to <i>several</i> properties at once, you do not have to chain
+     *    one {@code withStyle} per property. Instead, declare a small record right here in the view which
+     *    holds every value the style needs, and merge all the source properties into a single
+     *    {@link sprouts.Viewable} of that record using the composite view builder
+     *    {@link sprouts.Viewable#of(Object, java.util.function.Function)}: it takes a <i>seed</i> record and
+     *    a chain of {@link sprouts.Viewable.CompositeBuilder#join(Val, java.util.function.BiFunction)} calls,
+     *    each folding the item of one property into the record through a "wither". A single
+     *    {@code withStyle} then drives the whole style from that one merged item, no matter how many
+     *    properties feed it:
+     *    <pre>{@code
+     *        record Avatar(Color accent, int diameter, boolean online) {
+     *            Avatar withAccent(Color c)   { return new Avatar(c, diameter, online); }
+     *            Avatar withDiameter(int d)   { return new Avatar(accent, d, online); }
+     *            Avatar withOnline(boolean o) { return new Avatar(accent, diameter, o); }
+     *        }
+     *
+     *        UI.label(initials)
+     *        .withStyle(
+     *            Viewable.of(new Avatar(Color.GRAY, 38, false), it -> it
+     *                .join(accentColor, Avatar::withAccent)     // Val<Color>
+     *                .join(diameter,    Avatar::withDiameter)   // Val<Integer>
+     *                .join(isOnline,    Avatar::withOnline)     // Val<Boolean>
+     *            ),
+     *            (a, it) -> it
+     *                .prefSize(a.diameter(), a.diameter())
+     *                .backgroundColor(a.accent())
+     *                .borderRadius(1000)
+     *                .border(a.online() ? 2 : 0, Color.GREEN)
+     *        )
+     *    }</pre>
+     *    The composite item is recomputed as a whole whenever <i>any</i> joined property changes, so the
+     *    style stays in sync with all of its inputs from a single {@code withStyle} call. And because a
+     *    composite view is a {@link sprouts.Viewable#isView() view}, this builder keeps a strong reference
+     *    to it internally (just like it does for lenses), so you may build it inline like above without
+     *    having to store it in a field to protect it from garbage collection.
      *
      * @param item The property whose item should drive the style of the component.
      *             Its change events also trigger the recalculation of the style
@@ -2490,6 +2530,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @return This very instance, which allows for builder-style method chaining.
      * @see #withStyle(Styler) For styles which do not depend on property state.
      * @see #withStyle(Val, LifeTime, AnimatedItemStyler) For styles which animate towards the new item.
+     * @see #withTransitionalStyle(Val, LifeTime, AnimatedStyler) For a style transitioning back and forth as a boolean property flips.
+     * @see #withTransitoryStyle(Observable, LifeTime, AnimatedStyler) For a temporary style animation triggered by an {@link Observable}.
+     * @see sprouts.Viewable#of(Object, java.util.function.Function) The composite view builder used to merge many properties into one styler (Sprouts 2.7.0+).
      */
     public final <T> I withStyle( Val<T> item, ItemStyler<T, C> styler ) {
         NullUtil.nullArgCheck(item, "item", Val.class);
@@ -2529,6 +2572,35 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *    the item is captured from the property change event on the property's owning thread
      *    and handed to the styler as an explicit argument. Never read the property itself
      *    inside the lambda!
+     *    <p>
+     *    <b>Merging many properties into a single {@link AnimatedItemStyler} (requires Sprouts 2.7.0 or above):</b>
+     *    exactly like the non-animated {@link #withStyle(Val, ItemStyler)}, when the animated style should
+     *    follow <i>several</i> properties at once, you do not have to chain one call per property. Merge them
+     *    into a single {@link sprouts.Viewable} of a record using the composite view builder
+     *    {@link sprouts.Viewable#of(Object, java.util.function.Function)} (a <i>seed</i> record plus one
+     *    {@link sprouts.Viewable.CompositeBuilder#join(Val, java.util.function.BiFunction)} per property, each
+     *    folding that property's item into the record through a "wither"), and hand that one merged property
+     *    here. Every change of <i>any</i> joined property then restarts the transition towards the newly
+     *    merged item:
+     *    <pre>{@code
+     *        record Vitals(Color color, int load) {
+     *            Vitals withColor(Color c) { return new Vitals(c, load); }
+     *            Vitals withLoad(int l)    { return new Vitals(color, l); }
+     *        }
+     *
+     *        UI.label("status")
+     *        .withStyle(
+     *            Viewable.of(new Vitals(Color.GRAY, 0), it -> it
+     *                .join(statusColor, Vitals::withColor)   // Val<Color>
+     *                .join(load,        Vitals::withLoad)),  // Val<Integer>
+     *            LifeTime.of(0.5, TimeUnit.SECONDS),
+     *            (v, anim, it) -> it
+     *                .backgroundColor(fadeTowards(v.color(), anim.progress()))
+     *                .shadowBlurRadius((int)(v.load() * anim.progress()))
+     *        )
+     *    }</pre>
+     *    A composite view is held strongly by this binding (just like a lens), so you may build it inline
+     *    as shown without storing it in a field to protect it from garbage collection.
      *
      * @param item The property whose item should drive the style of the component and whose
      *             change events restart the transition animation towards the new item.
@@ -2542,8 +2614,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *               an updated version with the desired style rules applied.
      * @param <T> The type of the item of the supplied property.
      * @return This very instance, which allows for builder-style method chaining.
+     * @see #withStyle(Styler) For styles which do not depend on property state.
      * @see #withStyle(Val, ItemStyler) For property driven styles without a transition animation.
      * @see #withTransitionalStyle(Val, LifeTime, AnimatedStyler) For bidirectional transitions driven by a boolean property.
+     * @see #withTransitoryStyle(Observable, LifeTime, AnimatedStyler) For a temporary style animation triggered by an {@link Observable}.
+     * @see sprouts.Viewable#of(Object, java.util.function.Function) The composite view builder used to merge many properties into one styler (Sprouts 2.7.0+).
      */
     public final <T> I withStyle( Val<T> item, LifeTime transitionLifeTime, AnimatedItemStyler<T, C> styler ) {
         NullUtil.nullArgCheck(item, "item", Val.class);
@@ -2586,7 +2661,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *               transition between the 2 states.
      *
      * @return This builder instance, which enables fluent method chaining.
-     * @see #withTransitoryStyle(Observable, LifeTime, AnimatedStyler)
+     * @see #withTransitoryStyle(Observable, LifeTime, AnimatedStyler) For a temporary style animation triggered by an {@link Observable} (e.g. an {@link Event}).
+     * @see #withStyle(Styler) For a plain style which does not depend on property state.
+     * @see #withStyle(Val, ItemStyler) For a style following the item of a property.
+     * @see #withStyle(Val, LifeTime, AnimatedItemStyler) For a style which animates towards the item of a property.
      */
     public final I withTransitionalStyle(
         Val<Boolean>      transitionToggle,
@@ -2632,7 +2710,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *               transition between the 2 states.
      *
      * @return This builder instance, which enables fluent method chaining.
-     * @see #withTransitionalStyle(Val, LifeTime, AnimatedStyler)
+     * @see #withTransitionalStyle(Val, LifeTime, AnimatedStyler) For a style transitioning back and forth as a boolean property flips.
+     * @see #withStyle(Styler) For a plain style which does not depend on property state.
+     * @see #withStyle(Val, ItemStyler) For a style following the item of a property.
+     * @see #withStyle(Val, LifeTime, AnimatedItemStyler) For a style which animates towards the item of a property.
      */
     public final I withTransitoryStyle(
         Observable        styleTrigger,

@@ -69,7 +69,7 @@ dependencies {
     api("io.github.globaltcad:sprouts") {
         version {
             require("[2.0.0, 3.0.0)") // Allows 2.0.0 and above, but not 3.0.0+
-            prefer("2.6.1") // Default if user doesn't specify
+            prefer("2.7.0") // Default if user doesn't specify
         }
     }
 
@@ -135,6 +135,11 @@ test {
     systemProperty 'swing.aatext', 'true'
     systemProperty 'sun.java2d.uiScale', '1.0'
     systemProperty 'sun.java2d.uiScale.enabled', 'false'
+}
+
+tasks.named('compileTestGroovy', GroovyCompile) {
+    groovyOptions.fork = true
+    groovyOptions.forkOptions.jvmArgs += ['-Xms512m', '-Xmx3g', '-XX:MaxMetaspaceSize=768m']
 }
 
 // CONFIGURING TEST REPORTING :

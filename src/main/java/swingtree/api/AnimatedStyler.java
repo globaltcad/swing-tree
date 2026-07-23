@@ -20,9 +20,18 @@ import java.util.concurrent.TimeUnit;
  * (see {@link swingtree.style.StyleSheet} for more advanced usage).
  * <p>
  * This interface is typically used in {@link swingtree.ComponentDelegate#animateStyleFor(LifeTime, AnimatedStyler)}
- * and {@link swingtree.ComponentDelegate#animateStyleFor(double, TimeUnit, AnimatedStyler)}.
+ * and {@link swingtree.ComponentDelegate#animateStyleFor(double, TimeUnit, AnimatedStyler)}, as well as the
+ * property/event driven {@link swingtree.UIForAnySwing#withTransitionalStyle(sprouts.Val, LifeTime, AnimatedStyler)}
+ * and {@link swingtree.UIForAnySwing#withTransitoryStyle(sprouts.Observable, LifeTime, AnimatedStyler)} builder methods.
+ * <p>
+ * When the animated style should also follow the <b>item</b> of a property (not just a boolean toggle or an event),
+ * use the {@link AnimatedItemStyler} instead, which additionally receives the captured property item as an argument.
  *
  * @param <C> the type of the {@link JComponent} that the {@link ComponentStyleDelegate} is delegating to.
+ * @see #andThen(AnimatedStyler) For composing two animated stylers into one.
+ * @see Styler The non animated styler.
+ * @see ItemStyler The property item driven styler (without animation).
+ * @see AnimatedItemStyler The styler which receives both a property item and an animation status.
  */
 @FunctionalInterface
 public interface AnimatedStyler<C extends JComponent>

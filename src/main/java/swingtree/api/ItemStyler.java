@@ -37,9 +37,19 @@ import java.util.Objects;
  * }</pre>
  * ...which also repaints automatically whenever the property changes, making a
  * separate {@link swingtree.UIForAnySwing#withRepaintOn(sprouts.Observable)} binding unnecessary.
+ * <p>
+ * When a single {@link ItemStyler} should follow <b>several</b> properties at once, merge them
+ * into one record with the composite view builder
+ * {@link sprouts.Viewable#of(Object, java.util.function.Function)} (requires Sprouts 2.7.0 or above)
+ * and bind that one merged property, instead of chaining a
+ * {@link swingtree.UIForAnySwing#withStyle(sprouts.Val, ItemStyler)} per property.
  *
  * @param <T> the type of the item of the bound property, supplied to this function as the first argument.
  * @param <C> the type of the {@link JComponent} that the {@link ComponentStyleDelegate} is delegating to.
+ * @see swingtree.UIForAnySwing#withStyle(sprouts.Val, ItemStyler) The builder method consuming this function.
+ * @see Styler The plain, non property driven counterpart of this function.
+ * @see AnimatedItemStyler The animated counterpart which also receives an animation status per repaint.
+ * @see AnimatedStyler The animation status driven styler used for transitional and transitory styles.
  */
 @FunctionalInterface
 public interface ItemStyler<T, C extends JComponent>

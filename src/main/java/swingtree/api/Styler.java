@@ -15,8 +15,16 @@ import java.util.Objects;
  * This design makes the underlying style engine of SwingTree very flexible and scalable
  * because it allows for the composition of styles and reuse of style logic across many components
  * (see {@link swingtree.style.StyleSheet} for more advanced usage).
+ * <p>
+ * When a style should depend on the item of a {@link sprouts.Val} property in a thread safe way,
+ * use the {@link ItemStyler} (and its animated {@link AnimatedItemStyler} sibling) instead of reading
+ * the property inside a plain {@link Styler}.
  *
  * @param <C> the type of the {@link JComponent} that the {@link ComponentStyleDelegate} is delegating to.
+ * @see swingtree.UIForAnySwing#withStyle(Styler) The builder method consuming this function.
+ * @see ItemStyler The property item driven counterpart of this function (thread safe, auto repainting).
+ * @see AnimatedItemStyler The property item driven counterpart which also animates towards each new item.
+ * @see AnimatedStyler The animation status driven styler used for transitional and transitory styles.
  */
 @FunctionalInterface
 public interface Styler<C extends JComponent>

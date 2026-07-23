@@ -26,9 +26,19 @@ import java.util.Objects;
  * which is what makes it safe to evaluate on the UI thread in the decoupled threading
  * mode (see {@link swingtree.threading.EventProcessor#DECOUPLED}). Never read the
  * property itself inside this function!
+ * <p>
+ * When a single {@link AnimatedItemStyler} should follow <b>several</b> properties at once, merge them
+ * into one record with the composite view builder
+ * {@link sprouts.Viewable#of(Object, java.util.function.Function)} (requires Sprouts 2.7.0 or above) and
+ * bind that one merged property, so that any of its inputs changing restarts the transition towards the
+ * newly merged item.
  *
  * @param <T> the type of the item of the bound property, supplied to this function as the first argument.
  * @param <C> the type of the {@link JComponent} that the {@link ComponentStyleDelegate} is delegating to.
+ * @see swingtree.UIForAnySwing#withStyle(sprouts.Val, swingtree.animation.LifeTime, AnimatedItemStyler) The builder method consuming this function.
+ * @see ItemStyler The non animated counterpart which follows a property item without a transition.
+ * @see AnimatedStyler The animation status driven styler used for transitional and transitory styles.
+ * @see Styler The plain, non property driven and non animated styler.
  */
 @FunctionalInterface
 public interface AnimatedItemStyler<T, C extends JComponent>

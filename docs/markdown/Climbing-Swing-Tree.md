@@ -517,6 +517,51 @@ and repaints automatically whenever the property changes.
 Styles based on multiple properties compose by simply chaining
 multiple `withStyle(property, styler)` calls.
 
+But when a **single** style rule genuinely depends on **several** properties at
+once, there is an even nicer option (which requires **Sprouts 2.7.0 or above**):
+instead of chaining one `withStyle` per property, declare a small **record** right
+here in your view holding everything the style needs, and merge all the source
+properties into a single `Viewable` of that record using the Sprouts **composite
+view builder** `Viewable.of(seed, ..)`. It takes a *seed* record and a chain of
+`join(property, combiner)` calls, where each combiner is a "wither" folding the
+item of one property into the record. A single `withStyle` then drives the whole
+style from that one merged item — no matter how many properties feed it:
+
+```java
+record Avatar(Color accent, int diameter, boolean online) {
+    Avatar withAccent(Color c)   { return new Avatar(c, diameter, online); }
+    Avatar withDiameter(int d)   { return new Avatar(accent, d, online); }
+    Avatar withOnline(boolean o) { return new Avatar(accent, diameter, o); }
+}
+
+label(initials)
+.withStyle(
+    Viewable.of(new Avatar(Color.GRAY, 38, false), it -> it
+        .join(accentColor, Avatar::withAccent)     // Val<Color>
+        .join(diameter,    Avatar::withDiameter)   // Val<Integer>
+        .join(isOnline,    Avatar::withOnline)),   // Val<Boolean>
+    (a, it) -> it
+        .prefSize(a.diameter(), a.diameter())
+        .backgroundColor(a.accent())
+        .borderRadius(1000)
+        .border(a.online() ? 2 : 0, Color.GREEN)
+);
+```
+
+The composite item is recomputed **as a whole** whenever *any* of the joined
+properties changes (the fold starts at the seed and applies every combiner in
+join order, reading the current item of every input), so this one `withStyle`
+call stays in sync with all of its inputs at once. This scales to any number of
+properties without nesting, and it is the idiomatic way to capture several
+reactive view-model properties in a single thread safe styler.
+
+Because a composite is a *view*, and SwingTree's property bindings keep a strong
+reference to the views (and lenses) you hand them, you can build the
+`Viewable.of(..)` **inline** in the `withStyle` argument like above — there is no
+need to store it in a field to protect it from garbage collection. If the record
+type is polymorphic (a combiner may return a sibling subtype), use the
+`Viewable.of(Type.class, seed, ..)` overload to pin the type explicitly.
+
 The SwingTree style API has much more to offer than what could be covered in this tutorial.
 If you want to dive deeper into the SwingTree style API,
 you may also want to check out the following pieces of documentation:
