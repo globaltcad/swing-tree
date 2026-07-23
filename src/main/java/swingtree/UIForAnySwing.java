@@ -2478,6 +2478,43 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *    as an explicit argument. Never read the property itself inside the lambda! <br>
      *    Note that styles based on multiple properties compose naturally by simply
      *    chaining multiple {@code withStyle(property, styler)} calls.
+     *    <p>
+     *    <b>Merging many properties into a single {@link ItemStyler} (requires Sprouts 2.7.0 or above):</b>
+     *    when a single style should react to <i>several</i> properties at once, you do not have to chain
+     *    one {@code withStyle} per property. Instead, declare a small record right here in the view which
+     *    holds every value the style needs, and merge all the source properties into a single
+     *    {@link sprouts.Viewable} of that record using the composite view builder
+     *    {@link sprouts.Viewable#of(Object, java.util.function.Function)}: it takes a <i>seed</i> record and
+     *    a chain of {@link sprouts.Viewable.CompositeBuilder#join(Val, java.util.function.BiFunction)} calls,
+     *    each folding the item of one property into the record through a "wither". A single
+     *    {@code withStyle} then drives the whole style from that one merged item, no matter how many
+     *    properties feed it:
+     *    <pre>{@code
+     *        record Avatar(Color accent, int diameter, boolean online) {
+     *            Avatar withAccent(Color c)   { return new Avatar(c, diameter, online); }
+     *            Avatar withDiameter(int d)   { return new Avatar(accent, d, online); }
+     *            Avatar withOnline(boolean o) { return new Avatar(accent, diameter, o); }
+     *        }
+     *
+     *        UI.label(initials)
+     *        .withStyle(
+     *            Viewable.of(new Avatar(Color.GRAY, 38, false), it -> it
+     *                .join(accentColor, Avatar::withAccent)     // Val<Color>
+     *                .join(diameter,    Avatar::withDiameter)   // Val<Integer>
+     *                .join(isOnline,    Avatar::withOnline)     // Val<Boolean>
+     *            ),
+     *            (a, it) -> it
+     *                .prefSize(a.diameter(), a.diameter())
+     *                .backgroundColor(a.accent())
+     *                .borderRadius(1000)
+     *                .border(a.online() ? 2 : 0, Color.GREEN)
+     *        )
+     *    }</pre>
+     *    The composite item is recomputed as a whole whenever <i>any</i> joined property changes, so the
+     *    style stays in sync with all of its inputs from a single {@code withStyle} call. And because a
+     *    composite view is a {@link sprouts.Viewable#isView() view}, this builder keeps a strong reference
+     *    to it internally (just like it does for lenses), so you may build it inline like above without
+     *    having to store it in a field to protect it from garbage collection.
      *
      * @param item The property whose item should drive the style of the component.
      *             Its change events also trigger the recalculation of the style

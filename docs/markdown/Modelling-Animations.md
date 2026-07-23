@@ -171,6 +171,15 @@ to understand how the animation works:
    pattern), which matters when your application uses the decoupled
    threading mode (`EventProcessor.DECOUPLED`), where properties are owned
    by the application thread.
+   > Here the whole view model is already a single record, so one property
+   > drives the style. When instead you have **several separate properties**
+   > that a single style should react to, merge them into one record with the
+   > Sprouts **composite view builder** (Sprouts 2.7.0+) and hand *that* to a
+   > single `withStyle`:
+   > `withStyle(Viewable.of(seed, it -> it.join(a, Seed::withA).join(b, Seed::withB)), (m, it) -> ..)`.
+   > The composite recomputes as a whole whenever any joined property changes,
+   > so one `withStyle` stays in sync with any number of inputs. See the
+   > [SwingTree tutorial](./Climbing-Swing-Tree.md) for a full example.
 4. And finally the place where the animation is triggered is the
    `onClick` method of the toggle button, which calls the expression
    `UI.animate(vm, ModelledAnimationViewModel::borderAnimation)`.
