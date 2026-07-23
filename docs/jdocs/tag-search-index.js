@@ -1,1 +1,0 @@
-tagSearchIndex = [{"l":"HiDPI fonts: ask SwingTree, don't hardcode","h":"interface swingtree.api.laf.SwingTreeStyledComponentUI","d":"Section","u":"swingtree/api/laf/SwingTreeStyledComponentUI.html#hidpi-fonts-ask-swingtree-don-t-hardcode-heading"},{"l":"Serialized Form","h":"","u":"serialized-form.html"}];updateSearchResults();
