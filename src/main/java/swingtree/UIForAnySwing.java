@@ -2583,6 +2583,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *    here. Every change of <i>any</i> joined property then restarts the transition towards the newly
      *    merged item:
      *    <pre>{@code
+     *        record Vitals(Color color, int load) {
+     *            Vitals withColor(Color c) { return new Vitals(c, load); }
+     *            Vitals withLoad(int l)    { return new Vitals(color, l); }
+     *        }
+     *
      *        UI.label("status")
      *        .withStyle(
      *            Viewable.of(new Vitals(Color.GRAY, 0), it -> it
