@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>PropertyTableModel.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">PropertyTableModel.java</span></div><h1>PropertyTableModel.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.jspecify.annotations.Nullable;
+import sprouts.From;
+import sprouts.Tuple;
+import sprouts.Val;
+import sprouts.Var;
+import sprouts.Viewable;
+import sprouts.impl.SequenceDiff;
+import sprouts.impl.SequenceDiffOwner;
+import swingtree.api.model.TableData;
+
+import java.util.Objects;
+
+/**
+ *  A thread safe, reactive table model whose contents are modelled by a property
+ *  holding an immutable {@link TableData} value.
+ *  &lt;p&gt;
+ *  This is the table analogue of {@code swingtree.TuplePropertyComboModel}, and it
+ *  is the single model behind every property based table binding: a {@link Tuple}
+ *  of {@link Tuple}s of cells is simply
+ *  {@linkplain Val#viewAs(Class, java.util.function.Function) viewed}
+ *  (or {@linkplain Var#zoomTo(Class, sprouts.Lens) zoomed into}, if the cells are
+ *  editable) as a {@link TableData} property before it reaches this model.
+ *  &lt;p&gt;
+ *  Because a {@link TableData} is a deeply immutable value, the two threads can
+ *  publish it to each other without any copying: the property value &lt;em&gt;is&lt;/em&gt; the
+ *  UI thread owned snapshot. When the property changes on the application thread,
+ *  the new snapshot is handed to the UI thread, which swaps it in and fires the
+ *  table events.
+ *  &lt;p&gt;
+ *  Crucially, for a row major snapshot this model exploits the {@link SequenceDiff}
+ *  carried by the snapshot's {@link TableData#cells()} (mirroring
+ *  {@code UIForTabbedPane._updateTabs}): if a change is a direct successor of the
+ *  previous one, only the affected rows are refreshed through targeted
+ *  {@link #fireTableRowsInserted(int, int)} / {@link #fireTableRowsDeleted(int, int)} /
+ *  {@link #fireTableRowsUpdated(int, int)} events. This keeps updates to large tables
+ *  cheap (O(changes) instead of a full rebuild), which is exactly why a row major
+ *  source should be preferred for dynamic, application thread owned table data.
+ *  (For a column major source the cells tuple describes columns, so a change to it
+ *  never maps onto a row range, which is why such a model falls back to refreshing
+ *  all rows at once.)
+ */
+final class PropertyTableModel extends AbstractSnapshotTableModel
+{
+    private final Val&lt;TableData&gt; _model;
+    private final boolean _editable; // Whether the binding was made through a 'Var' overload (write back allowed) or a read only 'Val' overload.
+    private final Viewable&lt;TableData&gt; _modelView; // A strong reference keeps the (weakly parented) view and its listener alive.
+    private volatile @Nullable SequenceDiff _lastDiff; // Read/written on the UI thread only (plus the initial value from the installing thread).
+
+<span class="fc" id="L51">    PropertyTableModel( Val&lt;TableData&gt; model, boolean editable ) {</span>
+<span class="fc" id="L52">        _model = Objects.requireNonNull(model);</span>
+<span class="fc" id="L53">        _editable = editable;</span>
+<span class="fc" id="L54">        _modelView = _model.view();</span>
+<span class="fc" id="L55">        _modelView.onChange(From.ALL, it -&gt; {</span>
+<span class="fc" id="L56">            TableData next = it.currentValue().orElseGet(TableData::empty);</span>
+<span class="fc" id="L57">            _publishToUIThread(() -&gt; _applyNewSnapshot(next));</span>
+<span class="fc" id="L58">        });</span>
+        /*
+            The initial value is read only AFTER the change listener above is in
+            place: a change racing in from the application thread while this
+            constructor runs is then either seen by this read or caught by the
+            listener, instead of slipping through the gap and leaving the table
+            stale until the next change.
+         */
+<span class="fc" id="L66">        TableData initial = _modelOrEmpty();</span>
+<span class="fc" id="L67">        _lastDiff = _diffOf(initial);</span>
+<span class="fc" id="L68">        _setSnapshot(initial);</span>
+<span class="fc" id="L69">    }</span>
+
+    /**
+     *  Applies a new snapshot and fires the most targeted table events the
+     *  {@link SequenceDiff} allows. Always runs on the UI thread.
+     */
+    private void _applyNewSnapshot( TableData next ) {
+<span class="fc" id="L76">        TableData previous = _currentSnapshot();</span>
+
+<span class="fc" id="L78">        SequenceDiff diff     = _diffOf(next);</span>
+<span class="fc" id="L79">        SequenceDiff lastDiff = _lastDiff;</span>
+<span class="fc" id="L80">        _lastDiff = diff;</span>
+
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        if ( next.equals(previous) )</span>
+<span class="fc" id="L83">            return; // Nothing about the table contents changed, so there is nothing to fire.</span>
+
+<span class="fc" id="L85">        _setSnapshot(next); // Swap first, so that the events below observe the new state.</span>
+
+<span class="fc bfc" id="L87" title="All 2 branches covered.">        if ( _structureChanged(previous, next) ) {</span>
+<span class="fc" id="L88">            _fireEverythingChanged();</span>
+<span class="fc" id="L89">            return;</span>
+        }
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        if ( !next.layout().isRowMajor() ) {</span>
+            // The cells tuple describes columns, so its diff says nothing about row ranges.
+<span class="fc" id="L93">            fireTableDataChanged();</span>
+<span class="fc" id="L94">            return;</span>
+        }
+<span class="pc bpc" id="L96" title="3 of 6 branches missed.">        if ( diff == null || lastDiff == null || !diff.isDirectSuccessorOf(lastDiff) ) {</span>
+<span class="nc" id="L97">            _fireEverythingChanged();</span>
+<span class="nc" id="L98">            return;</span>
+        }
+<span class="fc" id="L100">        int index = diff.index().orElse(0);</span>
+<span class="fc" id="L101">        int size  = diff.size();</span>
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">        if ( size &lt;= 0 ) {</span>
+<span class="nc" id="L103">            _fireEverythingChanged();</span>
+<span class="nc" id="L104">            return;</span>
+        }
+<span class="fc bfc" id="L106" title="All 4 branches covered.">        switch ( diff.change() ) {</span>
+            case ADD:
+<span class="fc" id="L108">                fireTableRowsInserted(index, index + size - 1);</span>
+<span class="fc" id="L109">                break;</span>
+            case REMOVE:
+<span class="fc" id="L111">                fireTableRowsDeleted(index, index + size - 1);</span>
+<span class="fc" id="L112">                break;</span>
+            case SET:
+<span class="fc" id="L114">                fireTableRowsUpdated(index, index + size - 1);</span>
+<span class="fc" id="L115">                break;</span>
+            default:
+                // RETAIN, CLEAR, SORT, DISTINCT, REVERSE, NONE and anything unknown:
+                // these either affect unknown ranges or the whole table, so we rebuild.
+<span class="fc" id="L119">                _fireEverythingChanged();</span>
+        }
+<span class="fc" id="L121">    }</span>
+
+    /**
+     *  Tells if the columns of the table itself changed, which the {@link javax.swing.JTable}
+     *  can only pick up through a structure change (a row event would leave a stale header
+     *  or a stale set of column renderers behind).
+     */
+    private static boolean _structureChanged( @Nullable TableData previous, TableData next ) {
+<span class="pc bpc" id="L129" title="1 of 2 branches missed.">        return previous == null</span>
+<span class="fc bfc" id="L130" title="All 2 branches covered.">            || next.getColumnCount() != previous.getColumnCount()</span>
+<span class="pc bpc" id="L131" title="1 of 2 branches missed.">            || next.layout().isRowMajor() != previous.layout().isRowMajor()</span>
+<span class="fc bfc" id="L132" title="All 2 branches covered.">            || !next.columnNames().equals(previous.columnNames())</span>
+<span class="fc bfc" id="L133" title="All 2 branches covered.">            || !next.columnClasses().equals(previous.columnClasses());</span>
+    }
+
+    @Override
+    protected TableData takeLiveSnapshot() {
+<span class="nc" id="L138">        return _modelOrEmpty();</span>
+    }
+
+    private static @Nullable SequenceDiff _diffOf( TableData snapshot ) {
+<span class="fc" id="L142">        Tuple&lt;?&gt; cells = snapshot.cells();</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">        if ( cells instanceof SequenceDiffOwner )</span>
+<span class="fc" id="L144">            return ((SequenceDiffOwner) cells).differenceFromPrevious().orElse(null);</span>
+<span class="nc" id="L145">        return null;</span>
+    }
+
+    private TableData _modelOrEmpty() {
+<span class="fc" id="L149">        TableData snapshot = _model.orElseNull();</span>
+<span class="pc bpc" id="L150" title="1 of 2 branches missed.">        return snapshot == null ? TableData.empty() : snapshot;</span>
+    }
+
+    // ---- Live accessors (only used if there is no snapshot, which for this model is never). ----
+
+<span class="nc" id="L155">    @Override protected int _liveRowCount() { return _modelOrEmpty().getRowCount(); }</span>
+<span class="nc" id="L156">    @Override protected int _liveColumnCount() { return _modelOrEmpty().getColumnCount(); }</span>
+<span class="nc" id="L157">    @Override protected @Nullable Object _liveValueAt( int rowIndex, int columnIndex ) { return _modelOrEmpty().getValueAt(rowIndex, columnIndex); }</span>
+<span class="nc" id="L158">    @Override protected @Nullable String _liveColumnName( int columnIndex ) { return _modelOrEmpty().getColumnName(columnIndex); }</span>
+<span class="nc" id="L159">    @Override protected Class&lt;?&gt; _liveColumnClass( int columnIndex ) { return _modelOrEmpty().getColumnClass(columnIndex); }</span>
+
+    /**
+     *  A snapshot based table is only editable if the layout of its snapshot says so
+     *  &lt;i&gt;and&lt;/i&gt; the binding intends it to be: {@code _editable} is only set when the
+     *  table was bound through a {@link Var} overload (see {@code UIForTable.withModel}),
+     *  never through a read only {@link Val} overload. This matters because a read only
+     *  {@link Val} reference may well point at a {@link Var} instance at runtime (a view
+     *  model exposing its {@code Var} as a {@code Val}, say), so the runtime mutability
+     *  of {@link #_model} is not a trustworthy signal of the user's intent; the overload
+     *  they picked is. The runtime check on {@link #_model} that remains is only a
+     *  defensive guard for the {@code (Var)} cast in {@link #_liveSetValueAt}.
+     */
+    @Override protected boolean _liveCellEditable( int rowIndex, int columnIndex ) {
+<span class="pc bpc" id="L173" title="1 of 8 branches missed.">        return _editable &amp;&amp; _modelOrEmpty().layout().isEditable() &amp;&amp; _model instanceof Var &amp;&amp; _model.isMutable();</span>
+    }
+
+    @Override
+    @SuppressWarnings(&quot;unchecked&quot;)
+    protected void _liveSetValueAt( @Nullable Object value, int rowIndex, int columnIndex ) {
+<span class="fc bfc" id="L179" title="All 2 branches covered.">        if ( !_liveCellEditable(rowIndex, columnIndex) )</span>
+<span class="fc" id="L180">            return; // A read only source (or layout) cannot receive edits.</span>
+        // Note that 'setCellAt' returns the snapshot unchanged if the indices went
+        // out of bounds in the meantime, in which case the edit no longer applies.
+<span class="fc" id="L183">        ((Var&lt;TableData&gt;) _model).update(From.VIEW, snapshot -&gt; snapshot.setCellAt(rowIndex, columnIndex, value));</span>
+<span class="fc" id="L184">    }</span>
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
