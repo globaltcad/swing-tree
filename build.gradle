@@ -137,6 +137,11 @@ test {
     systemProperty 'sun.java2d.uiScale.enabled', 'false'
 }
 
+tasks.named('compileTestGroovy', GroovyCompile) {
+    groovyOptions.fork = true
+    groovyOptions.forkOptions.jvmArgs += ['-Xms512m', '-Xmx3g', '-XX:MaxMetaspaceSize=768m']
+}
+
 // CONFIGURING TEST REPORTING :
 
 jacoco {
