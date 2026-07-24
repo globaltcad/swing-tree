@@ -1311,6 +1311,7 @@ UI.scale(int|float|double) / UI.unscale(..) / UI.scale(g2d)  // only when workin
 - `examples/team/mvi/TeamView.java` **vs** `examples/team/mvvm/TeamView.java` — same UI, both architectures.
 - `examples/chat/mvi/ChatView.java` — `Tuple` + `addAll` + `HasId`.
 - `examples/trains/mvi/TrainsView.java` (+ `TrainsViewModel`, `TransitClient`) — real-world MVI: `Tuple`-valued state, a Swing-free data layer doing blocking IO off the EDT, and Lombok `@With`/`@Getter` value objects (records-free, **Java 8**-clean).
+- `examples/budget/mvi/BudgetView.java` (+ `BudgetViewModel`, `Budget`, `BudgetHealth`) — a self-contained budget planner showcasing three ideas at once: a **value-model table** bound with `UI.table(Var<TableData>)` (editable, edits flow back as a new value), a **value-capturing SVG style** `withStyle(svgText, (svg, it) -> it.image(img -> img.svg(svg)))` driving a donut chart generated from the data, and a **composite view** `Viewable.of(seed, it -> it.join(a, ..).join(b, ..)…)` (Sprouts ≥2.7) merging three properties into one item for a single `withStyle`.
 - `examples/breathing/mvi/BreathingView.java` (+ `BreathingViewModel`) — modelled animation, re-arming, the GC gotcha.
 - `examples/animated/AnimatedView.java` / `TransitionalAnimation.java` — the full animation primitive tour.
 - `examples/zen/ThemeGardenView.java` (+ `ThemedStyleSheet`) — style sheets, groups, runtime theme swap.

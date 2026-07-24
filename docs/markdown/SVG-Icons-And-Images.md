@@ -274,6 +274,7 @@ layers. The `image(..)` sub-style accepts SVG three ways:
   .image( img -> img.image(mySvgIcon) )          // 3. an SvgIcon / any ImageIcon
 ```
 
+This API offers the most room for configurability:
 Inside the `image(..)` sub-style you can further configure `opacity(..)`,
 `size(..)`, `offset(..)`, `repeat(..)`, `autoFit(..)`, `primer(..)` (a fill
 color painted beneath the image) and `clipTo(..)` (clip to
