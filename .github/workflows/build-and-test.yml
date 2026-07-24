@@ -1,5 +1,13 @@
 name: Build And Test on All OSs
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      dump_renders:
+        description: 'Also export the actual rendered snapshot images per OS/JDK as an artifact (to create reference variants)'
+        type: boolean
+        default: false
 jobs:
   gradle:
     strategy:
@@ -25,6 +33,31 @@ jobs:
       - name: Build and test
         run: ./gradlew check
         shell: bash
+        env:
+          # When the workflow is dispatched with "dump_renders" ticked, the image
+          # comparison tests export every rendered snapshot to build/test-renders/
+          # (see utility.Utility). Empty string on push/PR means "off".
+          SWINGTREE_DUMP_RENDERS: ${{ (github.event_name == 'workflow_dispatch' && inputs.dump_renders) && '1' || '' }}
+      - name: Upload snapshot failure images
+        # On any test failure, upload the *-FAILURE.png diffs of the mismatching
+        # snapshots so they can be inspected without access to the runner's OS.
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: failure-images-${{ matrix.os }}-jdk${{ matrix.java }}
+          path: build/**/*-FAILURE.png
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Upload rendered snapshots
+        # Only when dispatched with "dump_renders": the actual per-OS/JDK renders,
+        # ready to be committed as reference variants (<name>_<n>_.png).
+        if: ${{ always() && github.event_name == 'workflow_dispatch' && inputs.dump_renders }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: renders-${{ matrix.os }}-jdk${{ matrix.java }}
+          path: build/test-renders/**
+          if-no-files-found: warn
+          retention-days: 14
       - name: Tear down Xvfb (Linux only)
         if: runner.os == 'Linux'
         run: killall Xvfb || true
