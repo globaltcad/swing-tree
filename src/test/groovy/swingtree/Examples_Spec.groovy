@@ -127,7 +127,7 @@ class Examples_Spec extends Specification
         and :
             new Utility.Query(ui).find(JButton, "hover-icon-button").get().cursor.type == Cursor.HAND_CURSOR
         and :
-            Utility.similarityBetween(ui, "views/simple-form-UI.png", 94) > 94
+            Utility.similarityBetween(ui, "views/simple-form-UI.png", 97) > 97
     }
 
     def 'The login example UI defined in the examples, a good MVVM demonstration.'()
@@ -233,7 +233,7 @@ class Examples_Spec extends Specification
         given : 'We create an instance of the UI.'
             var ui = new NoteGuesserView(new NoteGuesserViewModel())
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "views/note-guesser-UI.png", 93) > 93
+            Utility.similarityBetween(ui, "views/note-guesser-UI.png", 97) > 97
     }
 
     def 'The Kana-Picker is an example game which teaches you the Japanese Kana symbols.'()
@@ -256,7 +256,7 @@ class Examples_Spec extends Specification
         given : 'We create the UI:'
             var ui = new KanaPickerView(new KanaPickerViewModel())
         expect : 'The UI instance is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "views/kana-picker-UI.png", 95) > 95
+            Utility.similarityBetween(ui, "views/kana-picker-UI.png", 97.5) > 97.5
     }
 
     def 'The "Well rounded" style example UI defined in the examples can be created.'()
@@ -278,7 +278,7 @@ class Examples_Spec extends Specification
         given : 'We create the UI.'
             var ui = new WellRoundedView()
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "views/well-rounded-UI.png", 97) > 97
+            Utility.similarityBetween(ui, "views/well-rounded-UI.png", 98) > 98
     }
 
     def 'The soft example UI is rendered as expected.'()
@@ -323,7 +323,7 @@ class Examples_Spec extends Specification
         given : 'We create the UI.'
             var ui = new ThemeGardenView({})
         expect : 'It is rendered as shown in the image.'
-            Utility.similarityBetween(ui, "views/theme-garden-UI.png", 90) > 90
+            Utility.similarityBetween(ui, "views/theme-garden-UI.png", 97) > 97
     }
 
     def 'The breathing helper example can be instantiated correctly.'() {
@@ -574,8 +574,8 @@ class Examples_Spec extends Specification
         """
         given :
             var ui = new MadeWithSwingTree()
-        and :
-            Utility.similarityBetween(ui, "views/made-with-SwingTree.png", 97.5) > 97.5
+        expect : 'It is rendered as expected.'
+            Utility.similarityBetween(ui, "views/made-with-SwingTree.png", 95) > 95
     }
 
     def 'The calculator UI defined in the examples has the expected state and looks.'()
@@ -597,7 +597,7 @@ class Examples_Spec extends Specification
             new Utility.Query(ui).find(JTextField, "input-text-area").isPresent()
             new Utility.Query(ui).find(JTextField, "input-text-area").get().horizontalAlignment == JTextField.RIGHT
         and : 'Its render state is as expected.'
-            Utility.similarityBetween(ui, "views/calculator-UI.png", 97.5) > 97.5
+            Utility.similarityBetween(ui, "views/calculator-UI.png", 98.5) > 98.5
     }
 
     def 'Declare table components using a list of list as data source.'()
@@ -688,7 +688,7 @@ class Examples_Spec extends Specification
             new Utility.Query(ui).find(JTable, "CM2").get().getValueAt(1,1) == "2"
             new Utility.Query(ui).find(JTable, "CM2").get().getValueAt(1,2) == "4"
         and : 'It is rendered as expected.'
-            Utility.similarityBetween(ui, "views/tables-example-view.png", 96.3) > 96.3
+            Utility.similarityBetween(ui, "views/tables-example-view.png", 98) > 98
     }
 
     def 'The todo app UI defined in the examples has the expected state.'()
