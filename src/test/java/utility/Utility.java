@@ -316,6 +316,7 @@ public class Utility
     public static double similarityBetween(BufferedImage image, String imageFile, double expectedSimilarity)
     {
         imageFile = "/"+SNAPSHOTS_DIR_NAME+"/" + imageFile;
+        _maybeDumpRender(image, imageFile);
         List<String> variants = _findAllVariantsOf(imageFile);
         MatchResult result;
         if ( variants.isEmpty() ) {
@@ -334,6 +335,29 @@ public class Utility
             result.displayAction().run();
         }
         return result.similarity();
+    }
+
+    /**
+     *  When the {@code SWINGTREE_DUMP_RENDERS} environment variable (or the
+     *  {@code swingtree.dumpRenders} system property) is set to a non-empty value,
+     *  this writes the freshly rendered image of every snapshot comparison to
+     *  {@code build/test-renders/}. This lets a CI job on a given OS/JDK export its
+     *  actual renders as an artifact, so they can be committed as per-platform
+     *  reference variants ({@code <name>_<n>_.png}) without needing that machine
+     *  locally. The {@code __<width>x<height>} suffix keeps the differently scaled
+     *  variants (uiScale 1/2/3) from overwriting each other.
+     */
+    private static void _maybeDumpRender(BufferedImage image, String imageFile) {
+        String env = System.getenv("SWINGTREE_DUMP_RENDERS");
+        boolean dump = ( env != null && !env.isEmpty() )
+                    || System.getProperty("swingtree.dumpRenders") != null;
+        if ( !dump )
+            return;
+        String flat = imageFile
+                .replaceFirst("^/" + SNAPSHOTS_DIR_NAME + "/", "")
+                .replace('/', '_')
+                .replace(".png", "");
+        safeUIImage(image, "build/test-renders/" + flat + "__" + image.getWidth() + "x" + image.getHeight() + ".png");
     }
 
     private static List<String> _findAllVariantsOf(String imagePath) {
