@@ -47,16 +47,16 @@ final class BoxModelConf
         Size    size
     ) {
 <span class="fc bfc" id="L49" title="All 2 branches covered.">        if ( topLeftArc      .equals( Arc.none() ) &amp;&amp;</span>
-<span class="pc bpc" id="L50" title="1 of 2 branches missed.">             topRightArc     .equals( Arc.none() ) &amp;&amp;</span>
+<span class="fc bfc" id="L50" title="All 2 branches covered.">             topRightArc     .equals( Arc.none() ) &amp;&amp;</span>
 <span class="fc bfc" id="L51" title="All 2 branches covered.">             bottomLeftArc   .equals( Arc.none() ) &amp;&amp;</span>
 <span class="pc bpc" id="L52" title="1 of 2 branches missed.">             bottomRightArc  .equals( Arc.none() ) &amp;&amp;</span>
 <span class="fc bfc" id="L53" title="All 2 branches covered.">             borderWidths    .equals( Outline.none() ) &amp;&amp;</span>
 <span class="fc bfc" id="L54" title="All 2 branches covered.">             margin          .equals( Outline.none() ) &amp;&amp;</span>
 <span class="fc bfc" id="L55" title="All 2 branches covered.">             padding         .equals( Outline.none() ) &amp;&amp;</span>
 <span class="fc bfc" id="L56" title="All 2 branches covered.">             baseOutline     .equals( Outline.none() ) &amp;&amp;</span>
-<span class="fc bfc" id="L57" title="All 2 branches covered.">             size            .equals( Size.unknown() )</span>
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">             size            .equals( Size.unknown() )</span>
         )
-<span class="fc" id="L59">            return _NONE;</span>
+<span class="nc" id="L59">            return _NONE;</span>
         else {
 <span class="fc" id="L61">            return new BoxModelConf(</span>
                                         topLeftArc,    topRightArc,
@@ -139,7 +139,7 @@ final class BoxModelConf
 
     public boolean hasAnyNonZeroArcs() {
 <span class="pc bpc" id="L141" title="2 of 6 branches missed.">        return ( !_topLeftArc     .equals(Arc.none()) &amp;&amp; _topLeftArc.width()     &gt; 0 &amp;&amp; _topLeftArc.height()     &gt; 0 ) ||</span>
-<span class="pc bpc" id="L142" title="5 of 6 branches missed.">               ( !_topRightArc    .equals(Arc.none()) &amp;&amp; _topRightArc.width()    &gt; 0 &amp;&amp; _topRightArc.height()    &gt; 0 ) ||</span>
+<span class="pc bpc" id="L142" title="2 of 6 branches missed.">               ( !_topRightArc    .equals(Arc.none()) &amp;&amp; _topRightArc.width()    &gt; 0 &amp;&amp; _topRightArc.height()    &gt; 0 ) ||</span>
 <span class="pc bpc" id="L143" title="5 of 6 branches missed.">               ( !_bottomLeftArc  .equals(Arc.none()) &amp;&amp; _bottomLeftArc.width()  &gt; 0 &amp;&amp; _bottomLeftArc.height()  &gt; 0 ) ||</span>
 <span class="pc bpc" id="L144" title="5 of 6 branches missed.">               ( !_bottomRightArc .equals(Arc.none()) &amp;&amp; _bottomRightArc.width() &gt; 0 &amp;&amp; _bottomRightArc.height() &gt; 0 );</span>
     }
@@ -180,8 +180,8 @@ final class BoxModelConf
 <span class="fc" id="L180">                return boxModel.margin().plus(boxModel.widths()).plus(boxModel.padding());</span>
             case CENTER_TO_CONTENT:
 <span class="fc" id="L182">                insets = boxModel.margin().plus(boxModel.widths()).plus(boxModel.padding());</span>
-<span class="fc" id="L183">                float deltaWidth = boxModel.size().width().orElse(0f) - insets.left().orElse(0f) - insets.right().orElse(0f);</span>
-<span class="fc" id="L184">                float deltaHeight = boxModel.size().height().orElse(0f) - insets.top().orElse(0f) - insets.bottom().orElse(0f);</span>
+<span class="fc" id="L183">                float deltaWidth = boxModel.size().widthOrElse(0f) - insets.left().orElse(0f) - insets.right().orElse(0f);</span>
+<span class="fc" id="L184">                float deltaHeight = boxModel.size().heightOrElse(0f) - insets.top().orElse(0f) - insets.bottom().orElse(0f);</span>
 <span class="fc" id="L185">                float halfWidth = deltaWidth / 2f;</span>
 <span class="fc" id="L186">                float halfHeight = deltaHeight / 2f;</span>
 <span class="fc" id="L187">                return insets.plus(Outline.of(halfHeight, halfWidth, halfHeight, halfWidth));</span>
@@ -268,11 +268,11 @@ final class BoxModelConf
     }
 
     BoxModelConf withSize(Size size) {
-<span class="nc" id="L271">        return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, size);</span>
+<span class="fc" id="L271">        return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, size);</span>
     }
 
     boolean allCornersShareTheSameArc() {
-<span class="pc bpc" id="L275" title="1 of 2 branches missed.">        return Objects.equals(_topLeftArc, _topRightArc) &amp;&amp;</span>
+<span class="fc bfc" id="L275" title="All 2 branches covered.">        return Objects.equals(_topLeftArc, _topRightArc) &amp;&amp;</span>
 <span class="fc bfc" id="L276" title="All 2 branches covered.">               Objects.equals(_topLeftArc, _bottomLeftArc) &amp;&amp;</span>
 <span class="pc bpc" id="L277" title="1 of 2 branches missed.">               Objects.equals(_topLeftArc, _bottomRightArc);</span>
     }
@@ -300,7 +300,7 @@ final class BoxModelConf
 <span class="fc" id="L300">        BoxModelConf rhs = (BoxModelConf) obj;</span>
 <span class="fc" id="L301">        return</span>
 <span class="fc bfc" id="L302" title="All 2 branches covered.">            Objects.equals(_topLeftArc,     rhs._topLeftArc)     &amp;&amp;</span>
-<span class="pc bpc" id="L303" title="1 of 2 branches missed.">            Objects.equals(_topRightArc,    rhs._topRightArc)    &amp;&amp;</span>
+<span class="fc bfc" id="L303" title="All 2 branches covered.">            Objects.equals(_topRightArc,    rhs._topRightArc)    &amp;&amp;</span>
 <span class="pc bpc" id="L304" title="1 of 2 branches missed.">            Objects.equals(_bottomLeftArc,  rhs._bottomLeftArc)  &amp;&amp;</span>
 <span class="pc bpc" id="L305" title="1 of 2 branches missed.">            Objects.equals(_bottomRightArc, rhs._bottomRightArc) &amp;&amp;</span>
 <span class="fc bfc" id="L306" title="All 2 branches covered.">            Objects.equals(_borderWidths,   rhs._borderWidths)   &amp;&amp;</span>

@@ -59,13 +59,13 @@ public final class ScalableImageIcon extends ImageIcon
 <span class="fc" id="L59">            double originalIconHeight = original.getIconHeight();</span>
 <span class="fc" id="L60">            double ratio = originalIconWidth / originalIconHeight;</span>
 <span class="fc bfc" id="L61" title="All 4 branches covered.">            if (size.hasPositiveWidth() &amp;&amp; size.hasPositiveHeight()) {</span>
-<span class="fc" id="L62">                targetWidth = size.width().orElse(0.0f);</span>
-<span class="fc" id="L63">                targetHeight = size.height().orElse(0.0f);</span>
+<span class="fc" id="L62">                targetWidth = size.widthOrElse(0.0f);</span>
+<span class="fc" id="L63">                targetHeight = size.heightOrElse(0.0f);</span>
 <span class="fc bfc" id="L64" title="All 2 branches covered.">            } else if (size.hasPositiveWidth()) {</span>
-<span class="fc" id="L65">                targetWidth = size.width().orElse(0.0f);</span>
+<span class="fc" id="L65">                targetWidth = size.widthOrElse(0.0f);</span>
 <span class="fc" id="L66">                targetHeight = targetWidth / ratio;</span>
 <span class="fc bfc" id="L67" title="All 2 branches covered.">            } else if (size.hasPositiveHeight()) {</span>
-<span class="fc" id="L68">                targetHeight = size.height().orElse(0.0f);</span>
+<span class="fc" id="L68">                targetHeight = size.heightOrElse(0.0f);</span>
 <span class="fc" id="L69">                targetWidth = targetHeight * ratio;</span>
             } else {
 <span class="fc" id="L71">                targetWidth = originalIconWidth;</span>
@@ -86,14 +86,14 @@ public final class ScalableImageIcon extends ImageIcon
 <span class="pc bpc" id="L86" title="1 of 4 branches missed.">        if ( !_relativeScale.hasPositiveWidth() || !_relativeScale.hasPositiveHeight() )</span>
 <span class="fc" id="L87">            return original;</span>
         try {
-<span class="fc" id="L89">            int width  = Math.round(original.getIconWidth()  * scale * relativeScale.width().orElse(0.0f));</span>
-<span class="fc" id="L90">            int height = Math.round(original.getIconHeight() * scale * relativeScale.height().orElse(0.0f));</span>
+<span class="fc" id="L89">            int width  = Math.round(original.getIconWidth()  * scale * relativeScale.widthOrElse(0.0f));</span>
+<span class="fc" id="L90">            int height = Math.round(original.getIconHeight() * scale * relativeScale.heightOrElse(0.0f));</span>
 <span class="fc" id="L91">            Image originalImage = original.getImage();</span>
 <span class="fc bfc" id="L92" title="All 4 branches covered.">            if ( width == original.getIconWidth() &amp;&amp; height == original.getIconHeight() )</span>
 <span class="fc" id="L93">                return original;</span>
-<span class="pc bpc" id="L94" title="1 of 4 branches missed.">            if ( width &lt;= 0 || height &lt;= 0 ) {</span>
+<span class="pc bpc" id="L94" title="2 of 4 branches missed.">            if ( width &lt;= 0 || height &lt;= 0 ) {</span>
                 // We create the smallest possible image to avoid exceptions.
-<span class="fc" id="L96">                return new ImageIcon(new ImageIcon(new byte[0]).getImage());</span>
+<span class="nc" id="L96">                return new ImageIcon(new ImageIcon(new byte[0]).getImage());</span>
             }
 <span class="fc" id="L98">            return new ImageIcon(originalImage.getScaledInstance(width, height, java.awt.Image.SCALE_SMOOTH));</span>
 <span class="nc" id="L99">        } catch ( Exception e ) {</span>

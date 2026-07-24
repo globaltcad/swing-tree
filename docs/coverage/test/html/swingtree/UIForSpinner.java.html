@@ -245,8 +245,8 @@ public final class UIForSpinner&lt;S extends JSpinner&gt; extends UIForAnySwing&
 <span class="fc" id="L245">        NullUtil.nullArgCheck(value, &quot;value&quot;, Var.class);</span>
 <span class="fc" id="L246">        NullUtil.nullPropertyCheck(value, &quot;value&quot;, &quot;Null is not a valid spinner state!&quot;);</span>
 <span class="fc" id="L247">        return _withOnShow( value, (thisComponent,v) -&gt; {</span>
-<span class="nc" id="L248">                    thisComponent.setValue(v);</span>
-<span class="nc" id="L249">                })</span>
+<span class="fc" id="L248">                    thisComponent.setValue(v);</span>
+<span class="fc" id="L249">                })</span>
 <span class="fc" id="L250">                ._with( thisComponent -&gt; {</span>
 <span class="fc" id="L251">                    _onChange(thisComponent, e -&gt; {</span>
                         // Get access the current component while still in the EDT. (getComponent() is only allowed in the EDT)

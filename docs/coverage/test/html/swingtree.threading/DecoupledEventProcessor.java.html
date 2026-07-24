@@ -37,25 +37,25 @@ import java.util.concurrent.LinkedBlockingQueue;
 	public void registerAndRunAppEventNow(Runnable runnable ) {
 		// We add the task to the queue and then wait for it to be processed.
 		// This is a blocking call.
-<span class="nc" id="L40">		boolean[] done = new boolean[1];</span>
+<span class="fc" id="L40">		boolean[] done = new boolean[1];</span>
 		try {
-<span class="nc" id="L42">			rendererQueue.put(() -&gt; {</span>
-<span class="nc" id="L43">				runnable.run();</span>
-<span class="nc" id="L44">				synchronized (done) {</span>
-<span class="nc" id="L45">					done[0] = true;</span>
-<span class="nc" id="L46">					done.notifyAll();</span>
+<span class="fc" id="L42">			rendererQueue.put(() -&gt; {</span>
+<span class="fc" id="L43">				runnable.run();</span>
+<span class="fc" id="L44">				synchronized (done) {</span>
+<span class="fc" id="L45">					done[0] = true;</span>
+<span class="fc" id="L46">					done.notifyAll();</span>
 					// notify the waiting thread, meaning the GUI/frontend thread,
 					// which is waiting for the task to be processed.
-<span class="nc" id="L49">				}</span>
-<span class="nc" id="L50">			});</span>
-<span class="nc" id="L51">			synchronized (done) {</span>
-<span class="nc bnc" id="L52" title="All 2 branches missed.">				while ( !done[0] ) done.wait();</span>
+<span class="fc" id="L49">				}</span>
+<span class="fc" id="L50">			});</span>
+<span class="fc" id="L51">			synchronized (done) {</span>
+<span class="fc bfc" id="L52" title="All 2 branches covered.">				while ( !done[0] ) done.wait();</span>
 				// wait for the task to be processed. The wait is released by the notifyAll() call in the task.
-<span class="nc" id="L54">			}</span>
+<span class="fc" id="L54">			}</span>
 <span class="nc" id="L55">		} catch (Exception e) {</span>
 <span class="nc" id="L56">			log.error(SwingTree.get().logMarker(), &quot;Failed to register and run application event!&quot;, e);</span>
-<span class="nc" id="L57">		}</span>
-<span class="nc" id="L58">	}</span>
+<span class="fc" id="L57">		}</span>
+<span class="fc" id="L58">	}</span>
 
 	@Override
 	public void registerUIEvent(Runnable runnable) {
@@ -101,8 +101,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 	 *  @throws IllegalStateException If this method is called from the UI thread.
 	 */
 	public void join() {
-<span class="nc bnc" id="L104" title="All 2 branches missed.">		if ( UI.thisIsUIThread() )</span>
-<span class="nc" id="L105">			throw new IllegalStateException(&quot;The UI thread cannot join the application event processing queue!&quot;);</span>
+<span class="pc bpc" id="L104" title="1 of 2 branches missed.">		if ( UI.thisIsUIThread() )</span>
+<span class="fc" id="L105">			throw new IllegalStateException(&quot;The UI thread cannot join the application event processing queue!&quot;);</span>
 		try {
 <span class="nc" id="L107">			this.join(false);</span>
 <span class="nc" id="L108">		} catch (InterruptedException e) {</span>
@@ -143,8 +143,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 <span class="fc bfc" id="L143" title="All 2 branches covered.">		for ( long i = 0; i &lt; numberOfEvents; i++ ) {</span>
 			try {
 <span class="fc" id="L145">				this.rendererQueue.take().run();</span>
-<span class="nc" id="L146">			} catch (Exception e) {</span>
-<span class="nc" id="L147">				log.error(SwingTree.get().logMarker(), &quot;An exception occurred while processing an event!&quot;, e);</span>
+<span class="fc" id="L146">			} catch (Exception e) {</span>
+<span class="fc" id="L147">				log.error(SwingTree.get().logMarker(), &quot;An exception occurred while processing an event!&quot;, e);</span>
 <span class="fc" id="L148">			}</span>
 		}
 <span class="fc" id="L150">	}</span>
@@ -164,9 +164,9 @@ import java.util.concurrent.LinkedBlockingQueue;
 	 *  @throws InterruptedException If the thread is interrupted while waiting for the event processor to join.
 	 */
 	public void joinUntilExceptionFor( long numberOfEvents ) throws InterruptedException {
-<span class="nc bnc" id="L167" title="All 2 branches missed.">		for ( long i = 0; i &lt; numberOfEvents; i++ )</span>
-<span class="nc" id="L168">			this.rendererQueue.take().run();</span>
-<span class="nc" id="L169">	}</span>
+<span class="fc bfc" id="L167" title="All 2 branches covered.">		for ( long i = 0; i &lt; numberOfEvents; i++ )</span>
+<span class="fc" id="L168">			this.rendererQueue.take().run();</span>
+<span class="fc" id="L169">	}</span>
 
 	/**
 	 *  A temporarily blocking call to the decoupled thread event processor

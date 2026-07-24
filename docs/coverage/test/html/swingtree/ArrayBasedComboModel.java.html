@@ -5,30 +5,44 @@ import sprouts.Var;
 
 import java.util.Objects;
 
+/**
+ *  A combo box model based on a plain array of items which is read live,
+ *  meaning that the {@link javax.swing.JComboBox} always sees the current
+ *  content of the array whenever it is rendered.
+ *  &lt;p&gt;
+ *  Note that a plain array is shared mutable state without any change events,
+ *  so unlike the property based combo box models, there is no way for this
+ *  model to maintain a properly synchronized UI thread owned snapshot of it.
+ *  This live read contract is convenient for static or UI thread managed
+ *  option arrays, but if your options change dynamically on an application
+ *  thread (see {@link swingtree.threading.EventProcessor#DECOUPLED}), prefer
+ *  modelling them as a {@link sprouts.Vars} list or a {@link sprouts.Tuple}
+ *  based property, which are fully thread safe.
+ */
 final class ArrayBasedComboModel&lt;E extends @Nullable Object&gt; extends AbstractComboModel&lt;E&gt;
 {
 	private final E[] _items;
 
 
 	ArrayBasedComboModel(E[] items) {
-<span class="fc" id="L14">		this(Var.ofNullable(_findCommonType( items ), null), items);</span>
-<span class="fc" id="L15">	}</span>
+<span class="fc" id="L28">		this(Var.ofNullable(_findCommonType( items ), null), items);</span>
+<span class="fc" id="L29">	}</span>
 
 	ArrayBasedComboModel(Var&lt;E&gt; selection, E @Nullable[] items) {
-<span class="fc" id="L18">		super(selection);</span>
-<span class="fc" id="L19">		_items = Objects.requireNonNull(items);</span>
-<span class="fc" id="L20">		_selectedIndex = _indexOf(_getSelectedItemSafely());</span>
-<span class="fc" id="L21">	}</span>
+<span class="fc" id="L32">		super(selection);</span>
+<span class="fc" id="L33">		_items = Objects.requireNonNull(items);</span>
+<span class="fc" id="L34">		_selectedIndex = _indexOf(_getSelectedItemSafely());</span>
+<span class="fc" id="L35">	}</span>
 
 
 	@Override
 	public AbstractComboModel&lt;E&gt; withVar( Var&lt;E&gt; newVar ) {
-<span class="fc" id="L26">		return new ArrayBasedComboModel&lt;&gt;(newVar, _items);</span>
+<span class="fc" id="L40">		return new ArrayBasedComboModel&lt;&gt;(newVar, _items);</span>
 	}
 
-<span class="fc" id="L29">	@Override protected void setAt( int index, @Nullable E element ) { _items[index] = element; }</span>
-<span class="fc" id="L30">	@Override public int getSize() { return _items.length; }</span>
-<span class="fc" id="L31">	@Override public @Nullable E getElementAt( int index ) { return _items[index]; }</span>
+<span class="fc" id="L43">	@Override protected void setAt( int index, @Nullable E element ) { _items[index] = element; }</span>
+<span class="fc" id="L44">	@Override public int getSize() { return _items.length; }</span>
+<span class="fc" id="L45">	@Override public @Nullable E getElementAt( int index ) { return _items[index]; }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

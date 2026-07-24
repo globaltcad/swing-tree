@@ -20,9 +20,18 @@ import java.util.concurrent.TimeUnit;
  * (see {@link swingtree.style.StyleSheet} for more advanced usage).
  * &lt;p&gt;
  * This interface is typically used in {@link swingtree.ComponentDelegate#animateStyleFor(LifeTime, AnimatedStyler)}
- * and {@link swingtree.ComponentDelegate#animateStyleFor(double, TimeUnit, AnimatedStyler)}.
+ * and {@link swingtree.ComponentDelegate#animateStyleFor(double, TimeUnit, AnimatedStyler)}, as well as the
+ * property/event driven {@link swingtree.UIForAnySwing#withTransitionalStyle(sprouts.Val, LifeTime, AnimatedStyler)}
+ * and {@link swingtree.UIForAnySwing#withTransitoryStyle(sprouts.Observable, LifeTime, AnimatedStyler)} builder methods.
+ * &lt;p&gt;
+ * When the animated style should also follow the &lt;b&gt;item&lt;/b&gt; of a property (not just a boolean toggle or an event),
+ * use the {@link AnimatedItemStyler} instead, which additionally receives the captured property item as an argument.
  *
  * @param &lt;C&gt; the type of the {@link JComponent} that the {@link ComponentStyleDelegate} is delegating to.
+ * @see #andThen(AnimatedStyler) For composing two animated stylers into one.
+ * @see Styler The non animated styler.
+ * @see ItemStyler The property item driven styler (without animation).
+ * @see AnimatedItemStyler The styler which receives both a property item and an animation status.
  */
 @FunctionalInterface
 public interface AnimatedStyler&lt;C extends JComponent&gt;
@@ -36,7 +45,7 @@ public interface AnimatedStyler&lt;C extends JComponent&gt;
      * @return A {@link AnimatedStyler} that does nothing.
      */
     static &lt;C extends JComponent&gt; AnimatedStyler&lt;C&gt; none() {
-<span class="nc" id="L39">        return (AnimatedStyler&lt;C&gt;) Constants.ANIMATED_STYLER_NONE;</span>
+<span class="nc" id="L48">        return (AnimatedStyler&lt;C&gt;) Constants.ANIMATED_STYLER_NONE;</span>
     }
 
     /**
@@ -66,20 +75,20 @@ public interface AnimatedStyler&lt;C extends JComponent&gt;
      * of the given {@link AnimatedStyler}.
      */
     default AnimatedStyler&lt;C&gt; andThen( AnimatedStyler&lt;C&gt; other ) {
-<span class="nc" id="L69">        Objects.requireNonNull(other, &quot;Use AnimatedStyler.none() instead of null.&quot;);</span>
-<span class="nc bnc" id="L70" title="All 2 branches missed.">        if ( this == none() )</span>
-<span class="nc" id="L71">            return other;</span>
-<span class="nc bnc" id="L72" title="All 2 branches missed.">        if ( other == none() )</span>
-<span class="nc" id="L73">            return this;</span>
+<span class="nc" id="L78">        Objects.requireNonNull(other, &quot;Use AnimatedStyler.none() instead of null.&quot;);</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">        if ( this == none() )</span>
+<span class="nc" id="L80">            return other;</span>
+<span class="nc bnc" id="L81" title="All 2 branches missed.">        if ( other == none() )</span>
+<span class="nc" id="L82">            return this;</span>
 
-<span class="nc" id="L75">        return (state, delegate) -&gt; {</span>
-<span class="nc" id="L76">            ComponentStyleDelegate&lt;C&gt; result = delegate;</span>
+<span class="nc" id="L84">        return (state, delegate) -&gt; {</span>
+<span class="nc" id="L85">            ComponentStyleDelegate&lt;C&gt; result = delegate;</span>
             try {
-<span class="nc" id="L78">                result = style( state, delegate );</span>
-<span class="nc" id="L79">            } catch ( Exception e ) {</span>
-<span class="nc" id="L80">                Constants.LOG.error(&quot;Failed to evaluate composed style&quot;, e);</span>
-<span class="nc" id="L81">            }</span>
-<span class="nc" id="L82">            return other.style( state, result );</span>
+<span class="nc" id="L87">                result = style( state, delegate );</span>
+<span class="nc" id="L88">            } catch ( Exception e ) {</span>
+<span class="nc" id="L89">                Constants.LOG.error(&quot;Failed to evaluate composed style&quot;, e);</span>
+<span class="nc" id="L90">            }</span>
+<span class="nc" id="L91">            return other.style( state, result );</span>
         };
     }
 }

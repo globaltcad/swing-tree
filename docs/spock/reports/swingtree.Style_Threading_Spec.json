@@ -1,0 +1,112 @@
+{
+  "className":"swingtree.Style_Threading_Spec",
+  "title":"Styles Across Threads",
+  "narrative":"Style gathering is owned by the UI thread: every `Styler` lambda is\n    evaluated as part of the style and paint cycle of its component.\n    This is a deliberate design decision, because a style is a function\n    of not only your own inputs, but also of the component itself\n    (its parent, its children, its geometry), which belongs to the UI thread.\n\n    This has an important consequence in the decoupled threading mode,\n    where properties are owned by the application thread: a `Styler`\n    lambda must not read a property from its enclosing scope, because\n    that would leak the UI thread into application thread owned state.\n\n    The solution is the property bound `withStyle(property, styler)`\n    family of methods, whose `ItemStyler` receives the current property\n    item as an explicit argument: captured from the property change event\n    on the property's owning thread, published to a UI thread owned copy,\n    and only then handed to the style function on the UI thread.\n    The style is recalculated and the component repainted automatically\n    on every change, so no separate `withRepaintOn` binding is needed.\n\n    This specification documents that threading contract for the plain,\n    the property bound and the animated style APIs.",
+  "subjects":["swingtree.UIForAnySwing","swingtree.api.Styler","swingtree.api.ItemStyler","swingtree.api.AnimatedItemStyler","swingtree.threading.EventProcessor"],
+  "statistics":{
+    "runs":"4",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"Plain `Styler` lambdas are always evaluated by the UI thread.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `withStyle(Styler)` lambda is part of the style and paint\n            cycle of its component, which is owned by the UI thread.\n            This is exactly why such a lambda must not read application\n            thread owned properties from its enclosing scope in the\n            decoupled threading mode: use `withStyle(property, styler)`\n            for that instead, which captures the item safely.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A trace recording the thread of every styler evaluation.","code":["var evaluationThreads = new CopyOnWriteArrayList<Boolean>()"]},
+
+        {"kind":"and","text":"A label with a plain style lambda, built in decoupled mode.","code":["var label = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.label(\"styled\").withStyle( conf -> {","            evaluationThreads.add(SwingUtilities.isEventDispatchThread())","            return conf.foregroundColor(Color.PINK)","        })","    ).get(JLabel)","})"]},
+
+        {"kind":"expect","text":"The styler ran at least once, while the component was being built and styled.","code":["!evaluationThreads.isEmpty()"]},
+
+        {"kind":"when","text":"We force a fresh style gathering, the way a new paint cycle would.","code":["UI.runNow({ ComponentExtension.from(label).gatherApplyAndInstallStyle(true) })"]},
+
+        {"kind":"then","text":"Every single evaluation of the styler happened on the UI thread.","code":["evaluationThreads.every( { it == true } )"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `ItemStyler` receives the items of its property as captured event values, replayed in their original order.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the heart of the thread safety contract of the property\n            bound `withStyle(property, styler)`: the styler does not read\n            the property (which would yield whatever the application thread\n            has written most recently), it receives the item belonging to\n            each individual change event, captured on the property's owning\n            thread.\n\n            To prove this, we park the UI thread and fire two property\n            changes from this thread. When the UI thread catches up, the\n            styler must observe *both* intermediate items, in their original\n            order - a live property read would only ever see the final one.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A color name property, and a trace of the items observed by the styler.","code":["var itemsObserved = new CopyOnWriteArrayList<String>()","var evaluationThreads = new CopyOnWriteArrayList<Boolean>()","var colorName = Var.of(\"red\")"]},
+
+        {"kind":"and","text":"A label whose background is styled from the property item, built in decoupled mode.","code":["var label = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.label(\"colorful\").withStyle( colorName, (name, conf) -> {","            itemsObserved.add(name)","            evaluationThreads.add(SwingUtilities.isEventDispatchThread())","            switch ( name ) {","                case \"green\": return conf.foregroundColor(Color.GREEN)","                case \"blue\" : return conf.foregroundColor(Color.BLUE)","                default     : return conf.foregroundColor(Color.RED)","            }","        })","    ).get(JLabel)","})"]},
+
+        {"kind":"expect","text":"The initial item was already used to style the label.","code":["itemsObserved.contains(\"red\")","UI.runAndGet({ label.foreground }) == Color.RED"]},
+
+        {"kind":"when","text":"We park the UI thread and change the property twice from this thread.","code":["var gate = new CountDownLatch(1)","UI.run({ gate.await() })","var foregroundWhileParked = null","try {","    colorName.set(\"green\")","    colorName.set(\"blue\")","    foregroundWhileParked = label.foreground","} finally {","    gate.countDown()","}","UI.sync()"]},
+
+        {"kind":"then","text":"While the UI thread was parked, the label still wore its old style.","code":["foregroundWhileParked == Color.RED"]},
+
+        {"kind":"and","text":"After the UI thread replayed the events, the styler observed both captured items, in order.","code":["itemsObserved.contains(\"green\")","itemsObserved.contains(\"blue\")","itemsObserved.indexOf(\"green\") < itemsObserved.indexOf(\"blue\")"]},
+
+        {"kind":"and","text":"The label was restyled and repainted automatically, no `withRepaintOn` was needed.","code":["UI.runAndGet({ label.foreground }) == Color.BLUE"]},
+
+        {"kind":"and","text":"Every single evaluation of the styler happened on the UI thread.","code":["evaluationThreads.every( { it == true } )"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A transitional style receives its toggle through captured event values and is evaluated by the UI thread.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `withTransitionalStyle(toggle, lifetime, styler)` binding\n            follows the same threading convention: the boolean toggle is\n            captured from the property change event and handed to the UI\n            thread, where the `AnimatedStyler` interpolates the style\n            between the two states over the given lifetime.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A trace recording the thread of every styler evaluation.","code":["var evaluationThreads = new CopyOnWriteArrayList<Boolean>()"]},
+
+        {"kind":"and","text":"A boolean property and a label with a transitional style, built in decoupled mode.","code":["var isOn = Var.of(false)","var label = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.label(\"transitional\").withTransitionalStyle( isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (status, conf) -> {","            evaluationThreads.add(SwingUtilities.isEventDispatchThread())","            return conf.foregroundColor( status.progress() > 0.5 ? Color.GREEN : Color.RED )","        })","    ).get(JLabel)","})"]},
+
+        {"kind":"expect","text":"The label starts out in the off state.","code":["UI.runAndGet({ label.foreground }) == Color.RED"]},
+
+        {"kind":"when","text":"The application thread flips the toggle, and we wait for the transition to complete.","code":["isOn.set(true)","Wait.until({","    UI.sync()","    UI.runAndGet({","        ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","        label.foreground","    }) == Color.GREEN","}, 5_000)"]},
+
+        {"kind":"then","text":"The label transitioned to the on state.","code":["UI.runAndGet({ label.foreground }) == Color.GREEN"]},
+
+        {"kind":"and","text":"Every single evaluation of the styler happened on the UI thread.","code":["evaluationThreads.every( { it == true } )"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An `AnimatedItemStyler` animates towards each new property item, on the UI thread.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The animated flavour `withStyle(property, lifetime, styler)`\n            restarts a transition animation on every property change, whose\n            progress runs from 0 to 1 over the given lifetime. The styler\n            receives both the captured item and the animation status, so a\n            style can not only follow the application state, but smoothly\n            animate towards it. The same thread safety contract applies:\n            the item is captured on the property's owning thread and the\n            styler is evaluated by the UI thread.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Traces for the observed items, progresses and evaluation threads.","code":["var itemsObserved = new CopyOnWriteArrayList<String>()","var progresses = new CopyOnWriteArrayList<Double>()","var evaluationThreads = new CopyOnWriteArrayList<Boolean>()"]},
+
+        {"kind":"and","text":"A mood property and a label with an animated item style, built in decoupled mode.","code":["var mood = Var.of(\"calm\")","var label = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.label(\"animated\").withStyle( mood, LifeTime.of(1, TimeUnit.MILLISECONDS), (m, status, conf) -> {","            itemsObserved.add(m)","            progresses.add(status.progress())","            evaluationThreads.add(SwingUtilities.isEventDispatchThread())","            return conf.foregroundColor( m == \"excited\" && status.progress() >= 1 ? Color.ORANGE : Color.GRAY )","        })","    ).get(JLabel)","})"]},
+
+        {"kind":"expect","text":"The initial item is considered fully settled, so the styler saw it with a progress of 1.","code":["itemsObserved.contains(\"calm\")","progresses.first() == 1.0d"]},
+
+        {"kind":"when","text":"The application thread changes the mood, and we wait for the transition towards it to complete.","code":["mood.set(\"excited\")","Wait.until({","    UI.sync()","    UI.runAndGet({","        ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","        label.foreground","    }) == Color.ORANGE","}, 5_000)"]},
+
+        {"kind":"then","text":"The styler observed the new captured item and completed the transition towards it.","code":["itemsObserved.contains(\"excited\")","UI.runAndGet({ label.foreground }) == Color.ORANGE"]},
+
+        {"kind":"and","text":"Every single evaluation of the styler happened on the UI thread.","code":["evaluationThreads.every( { it == true } )"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

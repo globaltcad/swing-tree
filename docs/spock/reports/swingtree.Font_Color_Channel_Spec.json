@@ -1,0 +1,401 @@
+{
+  "className":"swingtree.Font_Color_Channel_Spec",
+  "title":"Where The Font Color Lives",
+  "narrative":"In AWT's model, a `java.awt.Font` describes glyph *geometry* only — family,\n    size, weight, posture. The color of text natively belongs to the component's\n    **foreground** property, which is what every look-and-feel consults when\n    painting text (that is why `setForeground` exists at all).\n\n    A color *can* be embedded into a font as a `TextAttribute.FOREGROUND`\n    attribute — but that flips `Font.hasLayoutAttributes()`, which makes the JDK\n    build a `TextLayout` for **every** `stringWidth` and `drawString` of that\n    font (benchmarked as the dominant text cost of heavily styled UIs), and it\n    silently overrides the look-and-feel's *state* colors, so disabled text\n    keeps the embedded color instead of graying out.\n\n    SwingTree therefore routes a **solid** font color through the foreground\n    channel when installing styled fonts on components, while gradient and\n    noise font paints — which no foreground property can express — stay in the\n    font as attributes and knowingly pay the `TextLayout` price. This\n    specification is the behavioral contract of that split: which style\n    properties flip `hasLayoutAttributes`, how the foreground is applied and\n    restored, and how the state-color bug this design fixes stays fixed.",
+  "subjects":[],
+  "statistics":{
+    "runs":"21",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"Only genuinely layout-relevant font styles flip the expensive hasLayoutAttributes flag. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `Font.hasLayoutAttributes()` decides which measuring/drawing regime the\n            JDK uses: `false` means cheap cached advance sums, `true` means a fresh\n            `TextLayout` per call. Styling the font's geometry (size, weight, family)\n            or its **solid color** (routed through the foreground channel) must NOT\n            flip it — while letter spacing, underline, strikethrough and gradient\n            paints genuinely need the layout pipeline and honestly do.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A label styled with one particular font property.","code":["var label = UI.label(\"Regime\").withStyle({ it.componentFont(style) }).get(JLabel)"]},
+
+        {"kind":"expect","text":"The font is exactly as expensive to measure as the property demands.","code":["label.getFont().hasLayoutAttributes() == expensive"]},
+
+        {"kind":"where","text":"","code":{"description":["\"size\"","\"weight (bold)\"","\"family\"","\"solid color\"","\"size + color\"","\"letter spacing\"","\"underlined\"","\"strike through\"","\"gradient paint\""],"style":["{ f -> f.size(23) }","{ f -> f.weight(2) }","{ f -> f.family(\"Serif\") }","{ f -> f.color(Color.RED) }","{ f -> f.size(23).color(Color.BLUE) }","{ f -> f.spacing(0.05f) }","{ f -> f.underlined(true) }","{ f -> f.strikeThrough(true) }","{ f -> f.gradient(g -> g.colors(Color.RED, Color.BLUE)) }"],"expensive":["false","false","false","false","false","true","true","true","true"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Only genuinely layout-relevant font styles flip the expensive hasLayoutAttributes flag. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `Font.hasLayoutAttributes()` decides which measuring/drawing regime the\n            JDK uses: `false` means cheap cached advance sums, `true` means a fresh\n            `TextLayout` per call. Styling the font's geometry (size, weight, family)\n            or its **solid color** (routed through the foreground channel) must NOT\n            flip it — while letter spacing, underline, strikethrough and gradient\n            paints genuinely need the layout pipeline and honestly do.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A label styled with one particular font property.","code":["var label = UI.label(\"Regime\").withStyle({ it.componentFont(style) }).get(JLabel)"]},
+
+        {"kind":"expect","text":"The font is exactly as expensive to measure as the property demands.","code":["label.getFont().hasLayoutAttributes() == expensive"]},
+
+        {"kind":"where","text":"","code":{"description":["\"size\"","\"weight (bold)\"","\"family\"","\"solid color\"","\"size + color\"","\"letter spacing\"","\"underlined\"","\"strike through\"","\"gradient paint\""],"style":["{ f -> f.size(23) }","{ f -> f.weight(2) }","{ f -> f.family(\"Serif\") }","{ f -> f.color(Color.RED) }","{ f -> f.size(23).color(Color.BLUE) }","{ f -> f.spacing(0.05f) }","{ f -> f.underlined(true) }","{ f -> f.strikeThrough(true) }","{ f -> f.gradient(g -> g.colors(Color.RED, Color.BLUE)) }"],"expensive":["false","false","false","false","false","true","true","true","true"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Only genuinely layout-relevant font styles flip the expensive hasLayoutAttributes flag. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `Font.hasLayoutAttributes()` decides which measuring/drawing regime the\n            JDK uses: `false` means cheap cached advance sums, `true` means a fresh\n            `TextLayout` per call. Styling the font's geometry (size, weight, family)\n            or its **solid color** (routed through the foreground channel) must NOT\n            flip it — while letter spacing, underline, strikethrough and gradient\n            paints genuinely need the layout pipeline and honestly do.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A label styled with one particular font property.","code":["var label = UI.label(\"Regime\").withStyle({ it.componentFont(style) }).get(JLabel)"]},
+
+        {"kind":"expect","text":"The font is exactly as expensive to measure as the property demands.","code":["label.getFont().hasLayoutAttributes() == expensive"]},
+
+        {"kind":"where","text":"","code":{"description":["\"size\"","\"weight (bold)\"","\"family\"","\"solid color\"","\"size + color\"","\"letter spacing\"","\"underlined\"","\"strike through\"","\"gradient paint\""],"style":["{ f -> f.size(23) }","{ f -> f.weight(2) }","{ f -> f.family(\"Serif\") }","{ f -> f.color(Color.RED) }","{ f -> f.size(23).color(Color.BLUE) }","{ f -> f.spacing(0.05f) }","{ f -> f.underlined(true) }","{ f -> f.strikeThrough(true) }","{ f -> f.gradient(g -> g.colors(Color.RED, Color.BLUE)) }"],"expensive":["false","false","false","false","false","true","true","true","true"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Only genuinely layout-relevant font styles flip the expensive hasLayoutAttributes flag. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `Font.hasLayoutAttributes()` decides which measuring/drawing regime the\n            JDK uses: `false` means cheap cached advance sums, `true` means a fresh\n            `TextLayout` per call. Styling the font's geometry (size, weight, family)\n            or its **solid color** (routed through the foreground channel) must NOT\n            flip it — while letter spacing, underline, strikethrough and gradient\n            paints genuinely need the layout pipeline and honestly do.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A label styled with one particular font property.","code":["var label = UI.label(\"Regime\").withStyle({ it.componentFont(style) }).get(JLabel)"]},
+
+        {"kind":"expect","text":"The font is exactly as expensive to measure as the property demands.","code":["label.getFont().hasLayoutAttributes() == expensive"]},
+
+        {"kind":"where","text":"","code":{"description":["\"size\"","\"weight (bold)\"","\"family\"","\"solid color\"","\"size + color\"","\"letter spacing\"","\"underlined\"","\"strike through\"","\"gradient paint\""],"style":["{ f -> f.size(23) }","{ f -> f.weight(2) }","{ f -> f.family(\"Serif\") }","{ f -> f.color(Color.RED) }","{ f -> f.size(23).color(Color.BLUE) }","{ f -> f.spacing(0.05f) }","{ f -> f.underlined(true) }","{ f -> f.strikeThrough(true) }","{ f -> f.gradient(g -> g.colors(Color.RED, Color.BLUE)) }"],"expensive":["false","false","false","false","false","true","true","true","true"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Only genuinely layout-relevant font styles flip the expensive hasLayoutAttributes flag. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `Font.hasLayoutAttributes()` decides which measuring/drawing regime the\n            JDK uses: `false` means cheap cached advance sums, `true` means a fresh\n            `TextLayout` per call. Styling the font's geometry (size, weight, family)\n            or its **solid color** (routed through the foreground channel) must NOT\n            flip it — while letter spacing, underline, strikethrough and gradient\n            paints genuinely need the layout pipeline and honestly do.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A label styled with one particular font property.","code":["var label = UI.label(\"Regime\").withStyle({ it.componentFont(style) }).get(JLabel)"]},
+
+        {"kind":"expect","text":"The font is exactly as expensive to measure as the property demands.","code":["label.getFont().hasLayoutAttributes() == expensive"]},
+
+        {"kind":"where","text":"","code":{"description":["\"size\"","\"weight (bold)\"","\"family\"","\"solid color\"","\"size + color\"","\"letter spacing\"","\"underlined\"","\"strike through\"","\"gradient paint\""],"style":["{ f -> f.size(23) }","{ f -> f.weight(2) }","{ f -> f.family(\"Serif\") }","{ f -> f.color(Color.RED) }","{ f -> f.size(23).color(Color.BLUE) }","{ f -> f.spacing(0.05f) }","{ f -> f.underlined(true) }","{ f -> f.strikeThrough(true) }","{ f -> f.gradient(g -> g.colors(Color.RED, Color.BLUE)) }"],"expensive":["false","false","false","false","false","true","true","true","true"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Only genuinely layout-relevant font styles flip the expensive hasLayoutAttributes flag. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `Font.hasLayoutAttributes()` decides which measuring/drawing regime the\n            JDK uses: `false` means cheap cached advance sums, `true` means a fresh\n            `TextLayout` per call. Styling the font's geometry (size, weight, family)\n            or its **solid color** (routed through the foreground channel) must NOT\n            flip it — while letter spacing, underline, strikethrough and gradient\n            paints genuinely need the layout pipeline and honestly do.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A label styled with one particular font property.","code":["var label = UI.label(\"Regime\").withStyle({ it.componentFont(style) }).get(JLabel)"]},
+
+        {"kind":"expect","text":"The font is exactly as expensive to measure as the property demands.","code":["label.getFont().hasLayoutAttributes() == expensive"]},
+
+        {"kind":"where","text":"","code":{"description":["\"size\"","\"weight (bold)\"","\"family\"","\"solid color\"","\"size + color\"","\"letter spacing\"","\"underlined\"","\"strike through\"","\"gradient paint\""],"style":["{ f -> f.size(23) }","{ f -> f.weight(2) }","{ f -> f.family(\"Serif\") }","{ f -> f.color(Color.RED) }","{ f -> f.size(23).color(Color.BLUE) }","{ f -> f.spacing(0.05f) }","{ f -> f.underlined(true) }","{ f -> f.strikeThrough(true) }","{ f -> f.gradient(g -> g.colors(Color.RED, Color.BLUE)) }"],"expensive":["false","false","false","false","false","true","true","true","true"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Only genuinely layout-relevant font styles flip the expensive hasLayoutAttributes flag. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `Font.hasLayoutAttributes()` decides which measuring/drawing regime the\n            JDK uses: `false` means cheap cached advance sums, `true` means a fresh\n            `TextLayout` per call. Styling the font's geometry (size, weight, family)\n            or its **solid color** (routed through the foreground channel) must NOT\n            flip it — while letter spacing, underline, strikethrough and gradient\n            paints genuinely need the layout pipeline and honestly do.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A label styled with one particular font property.","code":["var label = UI.label(\"Regime\").withStyle({ it.componentFont(style) }).get(JLabel)"]},
+
+        {"kind":"expect","text":"The font is exactly as expensive to measure as the property demands.","code":["label.getFont().hasLayoutAttributes() == expensive"]},
+
+        {"kind":"where","text":"","code":{"description":["\"size\"","\"weight (bold)\"","\"family\"","\"solid color\"","\"size + color\"","\"letter spacing\"","\"underlined\"","\"strike through\"","\"gradient paint\""],"style":["{ f -> f.size(23) }","{ f -> f.weight(2) }","{ f -> f.family(\"Serif\") }","{ f -> f.color(Color.RED) }","{ f -> f.size(23).color(Color.BLUE) }","{ f -> f.spacing(0.05f) }","{ f -> f.underlined(true) }","{ f -> f.strikeThrough(true) }","{ f -> f.gradient(g -> g.colors(Color.RED, Color.BLUE)) }"],"expensive":["false","false","false","false","false","true","true","true","true"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Only genuinely layout-relevant font styles flip the expensive hasLayoutAttributes flag. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `Font.hasLayoutAttributes()` decides which measuring/drawing regime the\n            JDK uses: `false` means cheap cached advance sums, `true` means a fresh\n            `TextLayout` per call. Styling the font's geometry (size, weight, family)\n            or its **solid color** (routed through the foreground channel) must NOT\n            flip it — while letter spacing, underline, strikethrough and gradient\n            paints genuinely need the layout pipeline and honestly do.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A label styled with one particular font property.","code":["var label = UI.label(\"Regime\").withStyle({ it.componentFont(style) }).get(JLabel)"]},
+
+        {"kind":"expect","text":"The font is exactly as expensive to measure as the property demands.","code":["label.getFont().hasLayoutAttributes() == expensive"]},
+
+        {"kind":"where","text":"","code":{"description":["\"size\"","\"weight (bold)\"","\"family\"","\"solid color\"","\"size + color\"","\"letter spacing\"","\"underlined\"","\"strike through\"","\"gradient paint\""],"style":["{ f -> f.size(23) }","{ f -> f.weight(2) }","{ f -> f.family(\"Serif\") }","{ f -> f.color(Color.RED) }","{ f -> f.size(23).color(Color.BLUE) }","{ f -> f.spacing(0.05f) }","{ f -> f.underlined(true) }","{ f -> f.strikeThrough(true) }","{ f -> f.gradient(g -> g.colors(Color.RED, Color.BLUE)) }"],"expensive":["false","false","false","false","false","true","true","true","true"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Only genuinely layout-relevant font styles flip the expensive hasLayoutAttributes flag. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `Font.hasLayoutAttributes()` decides which measuring/drawing regime the\n            JDK uses: `false` means cheap cached advance sums, `true` means a fresh\n            `TextLayout` per call. Styling the font's geometry (size, weight, family)\n            or its **solid color** (routed through the foreground channel) must NOT\n            flip it — while letter spacing, underline, strikethrough and gradient\n            paints genuinely need the layout pipeline and honestly do.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A label styled with one particular font property.","code":["var label = UI.label(\"Regime\").withStyle({ it.componentFont(style) }).get(JLabel)"]},
+
+        {"kind":"expect","text":"The font is exactly as expensive to measure as the property demands.","code":["label.getFont().hasLayoutAttributes() == expensive"]},
+
+        {"kind":"where","text":"","code":{"description":["\"size\"","\"weight (bold)\"","\"family\"","\"solid color\"","\"size + color\"","\"letter spacing\"","\"underlined\"","\"strike through\"","\"gradient paint\""],"style":["{ f -> f.size(23) }","{ f -> f.weight(2) }","{ f -> f.family(\"Serif\") }","{ f -> f.color(Color.RED) }","{ f -> f.size(23).color(Color.BLUE) }","{ f -> f.spacing(0.05f) }","{ f -> f.underlined(true) }","{ f -> f.strikeThrough(true) }","{ f -> f.gradient(g -> g.colors(Color.RED, Color.BLUE)) }"],"expensive":["false","false","false","false","false","true","true","true","true"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A solid font color is applied through the foreground property, not the font. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The contract, per component type: the installed font carries NO\n            `FOREGROUND` attribute (so it stays cheap to measure), and the color\n            arrives where every LaF natively looks for it — `getForeground()`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A styled component of the given type.","code":["var component = declaration().get(javax.swing.JComponent)"]},
+
+        {"kind":"expect","text":"The color went to the foreground property...","code":["component.getForeground() == Color.RED"]},
+
+        {"kind":"and","text":"...and explicitly NOT into the font.","code":["component.getFont().getAttributes().get(TextAttribute.FOREGROUND) == null","!component.getFont().hasLayoutAttributes()"]},
+
+        {"kind":"where","text":"","code":{"declaration":["{ UI.label(\"L\").withStyle({ it.componentFont(f -> f.color(Color.RED)) }) }","{ UI.button(\"B\").withStyle({ it.componentFont(f -> f.color(Color.RED)) }) }","{ UI.checkBox(\"C\").withStyle({ it.componentFont(f -> f.color(Color.RED)) }) }","{ UI.textField(\"T\").withStyle({ it.componentFont(f -> f.color(Color.RED)) }) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A solid font color is applied through the foreground property, not the font. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The contract, per component type: the installed font carries NO\n            `FOREGROUND` attribute (so it stays cheap to measure), and the color\n            arrives where every LaF natively looks for it — `getForeground()`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A styled component of the given type.","code":["var component = declaration().get(javax.swing.JComponent)"]},
+
+        {"kind":"expect","text":"The color went to the foreground property...","code":["component.getForeground() == Color.RED"]},
+
+        {"kind":"and","text":"...and explicitly NOT into the font.","code":["component.getFont().getAttributes().get(TextAttribute.FOREGROUND) == null","!component.getFont().hasLayoutAttributes()"]},
+
+        {"kind":"where","text":"","code":{"declaration":["{ UI.label(\"L\").withStyle({ it.componentFont(f -> f.color(Color.RED)) }) }","{ UI.button(\"B\").withStyle({ it.componentFont(f -> f.color(Color.RED)) }) }","{ UI.checkBox(\"C\").withStyle({ it.componentFont(f -> f.color(Color.RED)) }) }","{ UI.textField(\"T\").withStyle({ it.componentFont(f -> f.color(Color.RED)) }) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A solid font color is applied through the foreground property, not the font. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The contract, per component type: the installed font carries NO\n            `FOREGROUND` attribute (so it stays cheap to measure), and the color\n            arrives where every LaF natively looks for it — `getForeground()`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A styled component of the given type.","code":["var component = declaration().get(javax.swing.JComponent)"]},
+
+        {"kind":"expect","text":"The color went to the foreground property...","code":["component.getForeground() == Color.RED"]},
+
+        {"kind":"and","text":"...and explicitly NOT into the font.","code":["component.getFont().getAttributes().get(TextAttribute.FOREGROUND) == null","!component.getFont().hasLayoutAttributes()"]},
+
+        {"kind":"where","text":"","code":{"declaration":["{ UI.label(\"L\").withStyle({ it.componentFont(f -> f.color(Color.RED)) }) }","{ UI.button(\"B\").withStyle({ it.componentFont(f -> f.color(Color.RED)) }) }","{ UI.checkBox(\"C\").withStyle({ it.componentFont(f -> f.color(Color.RED)) }) }","{ UI.textField(\"T\").withStyle({ it.componentFont(f -> f.color(Color.RED)) }) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A solid font color is applied through the foreground property, not the font. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The contract, per component type: the installed font carries NO\n            `FOREGROUND` attribute (so it stays cheap to measure), and the color\n            arrives where every LaF natively looks for it — `getForeground()`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A styled component of the given type.","code":["var component = declaration().get(javax.swing.JComponent)"]},
+
+        {"kind":"expect","text":"The color went to the foreground property...","code":["component.getForeground() == Color.RED"]},
+
+        {"kind":"and","text":"...and explicitly NOT into the font.","code":["component.getFont().getAttributes().get(TextAttribute.FOREGROUND) == null","!component.getFont().hasLayoutAttributes()"]},
+
+        {"kind":"where","text":"","code":{"declaration":["{ UI.label(\"L\").withStyle({ it.componentFont(f -> f.color(Color.RED)) }) }","{ UI.button(\"B\").withStyle({ it.componentFont(f -> f.color(Color.RED)) }) }","{ UI.checkBox(\"C\").withStyle({ it.componentFont(f -> f.color(Color.RED)) }) }","{ UI.textField(\"T\").withStyle({ it.componentFont(f -> f.color(Color.RED)) }) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A gradient font paint stays inside the font, because no foreground property can express it.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A label with a gradient font paint.","code":["var label = UI.label(\"Fancy\")","              .withStyle({ it.componentFont(f -> f.gradient(g -> g.colors(Color.RED, Color.BLUE))) })","              .get(JLabel)"]},
+
+        {"kind":"expect","text":"The paint travels as a font attribute (the TextLayout pipeline renders it)...","code":["label.getFont().getAttributes().get(TextAttribute.FOREGROUND) != null"]},
+
+        {"kind":"and","text":"...which honestly puts this font into the expensive measuring regime.","code":["label.getFont().hasLayoutAttributes()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The styled font color wins over the more general foregroundColor style property.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Both properties target the same native channel. The font color is the\n            more specific of the two, so it takes precedence — one channel, one\n            explicit rule, instead of two mechanisms silently fighting.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A label styled with BOTH a base foreground color and a font color.","code":["var label = UI.label(\"Precedence\")","              .withStyle({ it","                  .foregroundColor(Color.BLUE)","                  .componentFont(f -> f.color(Color.RED))","              })","              .get(JLabel)"]},
+
+        {"kind":"expect","text":"The font color wins.","code":["label.getForeground() == Color.RED"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When the font color style goes away, the original foreground is restored.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":[]
+      },
+      "blocks":[
+        {"kind":"given","text":"A conditional style, switched by a flag which starts OFF.","code":["var styled = Var.of(false)","var label  = UI.label(\"Restore me\")","               .withStyle({ it.componentFont(f -> styled.get() ? f.color(Color.RED) : f) })","               .get(JLabel)"]},
+
+        {"kind":"and","text":"A pre-style foreground, set while no font color is active.","code":["var originalForeground = Color.BLACK","label.setForeground(originalForeground)","paint(label)"]},
+
+        {"kind":"expect","text":"Without an active font color, the style engine leaves the foreground alone.","code":["label.getForeground() == originalForeground"]},
+
+        {"kind":"when","text":"The font color style becomes active.","code":["styled.set(true)","paint(label)"]},
+
+        {"kind":"then","text":"The foreground is the styled color.","code":["label.getForeground() == Color.RED"]},
+
+        {"kind":"when","text":"The flag flips back and the style engine runs again.","code":["styled.set(false)","paint(label)"]},
+
+        {"kind":"then","text":"The pre-style foreground is back.","code":["label.getForeground() == originalForeground"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Disabling a component with a styled font color grays the text out properly.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the state-color bug the foreground channel fixes: a color\n            embedded in the font overrides the look-and-feel's disabled text\n            color, so disabled components used to keep their styled color and\n            looked enabled. Routed through the foreground property, the LaF's\n            disabled painting works as designed. We verify at the pixel level:\n            the enabled label paints plenty of red, the disabled one none.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A label with a large, red-styled font.","code":["var label = UI.label(\"DISABLED\")","              .withStyle({ it.componentFont(f -> f.size(28).color(Color.RED)) })","              .get(JLabel)"]},
+
+        {"kind":"when","text":"We render it enabled and count strongly red pixels.","code":["var enabledRed = countRedDominantPixels(paint(label))"]},
+
+        {"kind":"then","text":"The text is clearly painted red.","code":["enabledRed > 50"]},
+
+        {"kind":"when","text":"We disable it and render again.","code":["label.setEnabled(false)","var disabledRed = countRedDominantPixels(paint(label))"]},
+
+        {"kind":"then","text":"The look-and-feel now paints its proper disabled text — no red at all.","code":["disabledRed == 0"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"UI.Font conversion keeps its color, and the without-color variant strips exactly that.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The public `UI.Font` API is full-fidelity: converting to an AWT font\n            keeps a configured color as a `FOREGROUND` attribute (this also fixes\n            a former bug where the color was silently lost in conversion). The\n            explicitly named `toAwtFontWithoutColor()` is the variant for fonts\n            you install on components yourself — geometry only, cheap to measure;\n            apply the color via `setForeground`, like the style engine does.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A UI.Font carrying a solid color (created from an attributed AWT font).","code":["var attributes = new HashMap()","attributes.put(TextAttribute.FAMILY, \"Dialog\")","attributes.put(TextAttribute.SIZE, 14)","attributes.put(TextAttribute.FOREGROUND, Color.RED)","var font = UI.Font.of(attributes)"]},
+
+        {"kind":"expect","text":"The faithful conversion keeps the color, and is honestly expensive.","code":["font.toAwtFont().getAttributes().get(TextAttribute.FOREGROUND) == Color.RED","font.toAwtFont().hasLayoutAttributes()"]},
+
+        {"kind":"and","text":"The without-color variant strips it, and is cheap to measure.","code":["font.toAwtFontWithoutColor().getAttributes().get(TextAttribute.FOREGROUND) == null","!font.toAwtFontWithoutColor().hasLayoutAttributes()"]},
+
+        {"kind":"and","text":"Both agree on the geometry.","code":["font.toAwtFont().getFamily() == font.toAwtFontWithoutColor().getFamily()","font.toAwtFont().getSize()   == font.toAwtFontWithoutColor().getSize()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Underline styling reaches the font as the value AWT actually understands.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A regression guard for a subtle bug: `TextAttribute.UNDERLINE` expects\n            the Integer constant `UNDERLINE_ON` — a raw Boolean is silently dropped\n            by `Font.deriveFont`, which used to make underline styling a no-op.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"An underlined label.","code":["var label = UI.label(\"Underlined\")","              .withStyle({ it.componentFont(f -> f.underlined(true)) })","              .get(JLabel)"]},
+
+        {"kind":"expect","text":"The attribute actually landed in the font, in AWT dialect.","code":["label.getFont().getAttributes().get(TextAttribute.UNDERLINE) == TextAttribute.UNDERLINE_ON"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When the font color goes away but a base foreground color remains, the base color takes over. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Regression guard for an installation-cycle ordering bug: within one style\n            pass, the base 'foregroundColor' is applied BEFORE the font styles. When a\n            previously active solid font color is withdrawn while a base foreground\n            color remains, the engine used to restore the remembered pre-style\n            foreground AFTER the base color had already been applied — silently\n            overriding it in the same cycle. The contract: once the font color lets go\n            of the channel, a present base color owns it (no stale restore), and the\n            pre-style value is only restored when nothing else claims the channel.\n            Both withdrawal shapes are covered: the font style losing just its color,\n            and the font style disappearing entirely.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A label styled with a base foreground color AND a switchable font color.","code":["var useFontColor = Var.of(true)","var label = UI.label(\"Handover\")","              .withStyle({ it","                  .foregroundColor(Color.BLUE)","                  .componentFont(f -> useFontColor.get() ? f.color(Color.RED) : withdrawnFontStyle(f))","              })","              .get(JLabel)","paint(label)"]},
+
+        {"kind":"expect","text":"While active, the font color wins the channel.","code":["label.getForeground() == Color.RED"]},
+
+        {"kind":"when","text":"The font color is withdrawn while the base color remains.","code":["useFontColor.set(false)","paint(label)"]},
+
+        {"kind":"then","text":"The base foreground color owns the channel now — no stale restore overrides it.","code":["label.getForeground() == Color.BLUE"]},
+
+        {"kind":"where","text":"","code":{"description":["\"font style keeps other properties\"","\"font style disappears entirely\""],"withdrawnFontStyle":["{ f -> f.size(20) }","{ f -> f }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"When the font color goes away but a base foreground color remains, the base color takes over. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Regression guard for an installation-cycle ordering bug: within one style\n            pass, the base 'foregroundColor' is applied BEFORE the font styles. When a\n            previously active solid font color is withdrawn while a base foreground\n            color remains, the engine used to restore the remembered pre-style\n            foreground AFTER the base color had already been applied — silently\n            overriding it in the same cycle. The contract: once the font color lets go\n            of the channel, a present base color owns it (no stale restore), and the\n            pre-style value is only restored when nothing else claims the channel.\n            Both withdrawal shapes are covered: the font style losing just its color,\n            and the font style disappearing entirely.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A label styled with a base foreground color AND a switchable font color.","code":["var useFontColor = Var.of(true)","var label = UI.label(\"Handover\")","              .withStyle({ it","                  .foregroundColor(Color.BLUE)","                  .componentFont(f -> useFontColor.get() ? f.color(Color.RED) : withdrawnFontStyle(f))","              })","              .get(JLabel)","paint(label)"]},
+
+        {"kind":"expect","text":"While active, the font color wins the channel.","code":["label.getForeground() == Color.RED"]},
+
+        {"kind":"when","text":"The font color is withdrawn while the base color remains.","code":["useFontColor.set(false)","paint(label)"]},
+
+        {"kind":"then","text":"The base foreground color owns the channel now — no stale restore overrides it.","code":["label.getForeground() == Color.BLUE"]},
+
+        {"kind":"where","text":"","code":{"description":["\"font style keeps other properties\"","\"font style disappears entirely\""],"withdrawnFontStyle":["{ f -> f.size(20) }","{ f -> f }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

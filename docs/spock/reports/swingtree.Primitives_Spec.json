@@ -4,7 +4,7 @@
   "narrative":"The SwingTree library contains a set of simple value objects\n    that are used as basic building blocks for your UI declarations.\n    These are primitive utility classes for modelling simple things\n    like size, position and bounds of UI components.\n\n    In this specification we will explore the basic primitives\n    and ensure that they behave as expected.",
   "subjects":["swingtree.layout.Bounds","swingtree.layout.Size","swingtree.layout.Position"],
   "statistics":{
-    "runs":"25",
+    "runs":"26",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -152,6 +152,25 @@
         {"kind":"expect","text":"","code":["size1.width().get() == 42","size1.height().get() == 189"]},
 
         {"kind":"and","text":"","code":["!size2.width().isPresent()","!size2.height().isPresent()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `widthOrElse(float)` and `heightOrElse(float)` to read a `Size` with a fallback for unknown dimensions.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Sometimes you just want the raw `float` width or height of a `Size`\n            together with a sensible default for when a dimension is unknown\n            (negative), without unwrapping the `Optional` returned by `width()`\n            and `height()`. The `widthOrElse(float)` and `heightOrElse(float)`\n            methods do exactly that: they return the specified dimension, or the\n            supplied fallback if it is unknown. They are the allocation-free\n            equivalent of `width().orElse(fallback)` and `height().orElse(fallback)`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A fully specified size and a completely unknown one.","code":["var size    = Size.of(42, 189)","var unknown = Size.unknown()"]},
+
+        {"kind":"expect","text":"When a dimension is specified, its value is returned and the fallback is ignored.","code":["size.widthOrElse(7)  == 42","size.heightOrElse(7) == 189"]},
+
+        {"kind":"and","text":"When a dimension is unknown, the supplied fallback is returned instead.","code":["unknown.widthOrElse(7)   == 7","unknown.heightOrElse(13) == 13"]},
+
+        {"kind":"and","text":"The fallback only ever substitutes the missing dimension, never the present one.","code":["Size.of(42, -1).widthOrElse(7)   == 42","Size.of(42, -1).heightOrElse(7)  == 7","Size.of(-1, 189).widthOrElse(7)  == 7","Size.of(-1, 189).heightOrElse(7) == 189"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

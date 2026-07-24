@@ -134,53 +134,68 @@ final class FontPaintConf
 <span class="fc" id="L134">        return new FontPaint(this, new WeakReference&lt;&gt;(component));</span>
     }
 
+    /** The one plain, geometry-independent {@link Color} this conf consists of, or {@code null}
+     *  if it is empty or needs the paint machinery (custom paint, noise, gradient). A solid
+     *  color is special because it is the only font paint that can be rendered through the
+     *  component &lt;em&gt;foreground&lt;/em&gt; channel instead of a {@code TextAttribute.FOREGROUND}
+     *  font attribute — see the color-channel documentation on {@link FontConf}. */
+    @Nullable Color solidColor() {
+<span class="fc bfc" id="L143" title="All 4 branches covered.">        if ( _noise == null &amp;&amp; _gradient == null ) {</span>
+<span class="fc bfc" id="L144" title="All 2 branches covered.">            if ( _paint == null )</span>
+<span class="fc" id="L145">                return _color;</span>
+<span class="pc bpc" id="L146" title="1 of 4 branches missed.">            if ( _color == null &amp;&amp; _paint instanceof Color )</span>
+<span class="fc" id="L147">                return (Color) _paint; // a Color supplied through the generic paint API is still just a solid color</span>
+        }
+<span class="fc" id="L149">        return null;</span>
+    }
+
     public boolean representsColor( @Nullable Color color ) {
-<span class="pc bpc" id="L138" title="3 of 8 branches missed.">        return Objects.equals(color, _color) &amp;&amp;</span>
+<span class="pc bpc" id="L153" title="3 of 8 branches missed.">        return Objects.equals(color, _color) &amp;&amp;</span>
                 _paint    == null &amp;&amp;
                 _gradient == null &amp;&amp;
                 _noise    == null;
     }
 
     FontPaintConf _scale( double scale ) {
-<span class="fc bfc" id="L145" title="All 2 branches covered.">        if ( _noise != null ) {</span>
-<span class="fc" id="L146">            return of(null, null, _noise.map( it -&gt; it._scale(scale) ), null);</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        if ( _noise != null ) {</span>
+<span class="fc" id="L161">            return of(null, null, _noise.map( it -&gt; it._scale(scale) ), null);</span>
         }
-<span class="fc bfc" id="L148" title="All 2 branches covered.">        if ( _gradient != null ) {</span>
-<span class="fc" id="L149">            return of(null, null, null, _gradient._scale(scale));</span>
+<span class="fc bfc" id="L163" title="All 2 branches covered.">        if ( _gradient != null ) {</span>
+<span class="fc" id="L164">            return of(null, null, null, _gradient._scale(scale));</span>
         }
-<span class="fc" id="L151">        return this;</span>
+<span class="fc" id="L166">        return this;</span>
     }
 
     @Override
     public boolean equals( Object o ) {
-<span class="fc bfc" id="L156" title="All 2 branches covered.">        if ( this == o ) return true;</span>
-<span class="pc bpc" id="L157" title="2 of 4 branches missed.">        if ( o == null || getClass() != o.getClass() ) return false;</span>
-<span class="fc" id="L158">        FontPaintConf that = (FontPaintConf) o;</span>
-<span class="fc bfc" id="L159" title="All 2 branches covered.">        return Objects.equals(_color, that._color) &amp;&amp;</span>
-<span class="fc bfc" id="L160" title="All 2 branches covered.">               Objects.equals(_paint, that._paint) &amp;&amp;</span>
-<span class="fc bfc" id="L161" title="All 2 branches covered.">               Objects.equals(_noise, that._noise) &amp;&amp;</span>
-<span class="fc bfc" id="L162" title="All 2 branches covered.">               Objects.equals(_gradient, that._gradient);</span>
+<span class="fc bfc" id="L171" title="All 2 branches covered.">        if ( this == o ) return true;</span>
+<span class="pc bpc" id="L172" title="2 of 4 branches missed.">        if ( o == null || getClass() != o.getClass() ) return false;</span>
+<span class="fc" id="L173">        FontPaintConf that = (FontPaintConf) o;</span>
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        return Objects.equals(_color, that._color) &amp;&amp;</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">               Objects.equals(_paint, that._paint) &amp;&amp;</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">               Objects.equals(_noise, that._noise) &amp;&amp;</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">               Objects.equals(_gradient, that._gradient);</span>
     }
 
     @Override
     public int hashCode() {
-<span class="fc" id="L167">        return Objects.hash(_color, _paint, _noise, _gradient);</span>
+<span class="fc" id="L182">        return Objects.hash(_color, _paint, _noise, _gradient);</span>
     }
 
     @Override
     public String toString() {
-<span class="fc bfc" id="L172" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
-<span class="fc" id="L173">            return this.getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
-<span class="fc" id="L174">        String paint = &quot;?&quot;;</span>
-<span class="fc bfc" id="L175" title="All 2 branches covered.">        if (_color != null)</span>
-<span class="fc" id="L176">            paint = StyleUtil.toString(_color);</span>
-<span class="fc bfc" id="L177" title="All 2 branches covered.">        if (_paint != null)</span>
-<span class="fc" id="L178">            paint = StyleUtil.toString(_paint);</span>
-<span class="pc bpc" id="L179" title="1 of 2 branches missed.">        if (_noise != null)</span>
-<span class="nc" id="L180">            paint = _noise.toString();</span>
-<span class="fc bfc" id="L181" title="All 2 branches covered.">        if (_gradient != null)</span>
-<span class="fc" id="L182">            paint = _gradient.toString();</span>
-<span class="fc" id="L183">        return this.getClass().getSimpleName() + &quot;[&quot; + paint + &quot;]&quot;;</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">        if ( this.equals(_NONE) )</span>
+<span class="fc" id="L188">            return this.getClass().getSimpleName() + &quot;[NONE]&quot;;</span>
+<span class="fc" id="L189">        String paint = &quot;?&quot;;</span>
+<span class="fc bfc" id="L190" title="All 2 branches covered.">        if (_color != null)</span>
+<span class="fc" id="L191">            paint = StyleUtil.toString(_color);</span>
+<span class="fc bfc" id="L192" title="All 2 branches covered.">        if (_paint != null)</span>
+<span class="fc" id="L193">            paint = StyleUtil.toString(_paint);</span>
+<span class="pc bpc" id="L194" title="1 of 2 branches missed.">        if (_noise != null)</span>
+<span class="nc" id="L195">            paint = _noise.toString();</span>
+<span class="fc bfc" id="L196" title="All 2 branches covered.">        if (_gradient != null)</span>
+<span class="fc" id="L197">            paint = _gradient.toString();</span>
+<span class="fc" id="L198">        return this.getClass().getSimpleName() + &quot;[&quot; + paint + &quot;]&quot;;</span>
     }
 
 }

@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import sprouts.Channel;
 import sprouts.From;
 import sprouts.Var;
+import swingtree.threading.EventProcessor;
 
 import javax.swing.*;
 import javax.swing.event.ListDataEvent;
@@ -18,164 +19,232 @@ import java.util.Objects;
  *  property binding to the selection state of the model.
  *  This model wraps a {@link sprouts.Var} instance which is used
  *  to dynamically model the selection state of the model.
+ *  &lt;p&gt;
+ *  Note that the bound property is never accessed by the UI thread directly!
+ *  This model maintains its own UI thread owned copy of the current selection,
+ *  which the {@link JComboBox} reads through {@link #getSelectedItem()}.
+ *  When the user changes the selection, the new state is first applied to this
+ *  UI owned copy and then handed over to the application thread through the
+ *  current {@link EventProcessor}, which writes it into the property.
+ *  Conversely, a property change coming from the application thread is
+ *  dispatched to the UI thread, where it is applied to the UI owned copy
+ *  through {@link #_updateSelectionFromProperty(Object)}.
+ *  This is the same threading convention that all other property bound
+ *  widget states in SwingTree follow.
  *
  * @param &lt;E&gt; The type of the elements which will be stored in this model.
  */
 abstract class AbstractComboModel&lt;E extends @Nullable Object&gt; implements ComboBoxModel&lt;E&gt;
 {
-<span class="fc" id="L26">	private static final Logger log = org.slf4j.LoggerFactory.getLogger(AbstractComboModel.class);</span>
+<span class="fc" id="L39">	private static final Logger log = org.slf4j.LoggerFactory.getLogger(AbstractComboModel.class);</span>
 
-<span class="fc" id="L28">	protected int _selectedIndex = -1;</span>
+<span class="fc" id="L41">	protected int _selectedIndex = -1;</span>
 	private final Var&lt;E&gt; _selectedItem;
-<span class="fc" id="L30">	private final java.util.List&lt;ListDataListener&gt; listeners = new ArrayList&lt;&gt;();</span>
+	private volatile @Nullable E _currentSelection; // The UI thread owned copy of the selection state of `_selectedItem`.
+<span class="fc" id="L44">	private volatile EventProcessor _eventProcessor = EventProcessor.COUPLED;</span>
+<span class="fc" id="L45">	private final java.util.List&lt;ListDataListener&gt; listeners = new ArrayList&lt;&gt;();</span>
 
-<span class="fc" id="L32">	private boolean _acceptsEditorChanges = true; // This is important to prevent getting feedback loops!</span>
+<span class="fc" id="L47">	private boolean _acceptsEditorChanges = true; // This is important to prevent getting feedback loops!</span>
 
 	protected static &lt;E&gt; Class&lt;E&gt; _findCommonType( E[] items ) {
-<span class="fc" id="L35">		Iterable&lt;E&gt; iterable = () -&gt; java.util.Arrays.stream(items).iterator();</span>
-<span class="fc" id="L36">		return _findCommonType(iterable);</span>
+<span class="fc" id="L50">		Iterable&lt;E&gt; iterable = () -&gt; java.util.Arrays.stream(items).iterator();</span>
+<span class="fc" id="L51">		return _findCommonType(iterable);</span>
 	}
 
 	protected static &lt;E&gt; Class&lt;E&gt; _findCommonType( Iterable&lt;E&gt; items ) {
-<span class="pc bpc" id="L40" title="1 of 2 branches missed.">		if ( items == null ) return (Class&lt;E&gt;) Object.class;</span>
-<span class="fc" id="L41">		Class&lt;E&gt; type = null;</span>
-<span class="fc bfc" id="L42" title="All 2 branches covered.">		for ( E item : items ) {</span>
-<span class="pc bpc" id="L43" title="1 of 2 branches missed.">			if ( item == null ) continue;</span>
-<span class="fc bfc" id="L44" title="All 2 branches covered.">			if ( type == null )</span>
-<span class="fc" id="L45">				type = (Class&lt;E&gt;) item.getClass();</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">		if ( items == null ) return (Class&lt;E&gt;) Object.class;</span>
+<span class="fc" id="L56">		Class&lt;E&gt; type = null;</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">		for ( E item : items ) {</span>
+<span class="pc bpc" id="L58" title="1 of 2 branches missed.">			if ( item == null ) continue;</span>
+<span class="fc bfc" id="L59" title="All 2 branches covered.">			if ( type == null )</span>
+<span class="fc" id="L60">				type = (Class&lt;E&gt;) item.getClass();</span>
 			else
-<span class="fc" id="L47">				type = (Class&lt;E&gt;) Object.class;</span>
-<span class="fc" id="L48">		}</span>
-<span class="pc bpc" id="L49" title="1 of 2 branches missed.">		if ( type == null )</span>
-<span class="nc" id="L50">			type = (Class&lt;E&gt;) Object.class;</span>
-<span class="fc" id="L51">		return type;</span>
+<span class="fc" id="L62">				type = (Class&lt;E&gt;) Object.class;</span>
+<span class="fc" id="L63">		}</span>
+<span class="pc bpc" id="L64" title="1 of 2 branches missed.">		if ( type == null )</span>
+<span class="nc" id="L65">			type = (Class&lt;E&gt;) Object.class;</span>
+<span class="fc" id="L66">		return type;</span>
 	}
 
-<span class="fc" id="L54">	AbstractComboModel( Var&lt;E&gt; selectedItem ) {</span>
-<span class="fc" id="L55">		_selectedItem = Objects.requireNonNull(selectedItem);</span>
-<span class="fc" id="L56">	}</span>
+<span class="fc" id="L69">	AbstractComboModel( Var&lt;E&gt; selectedItem ) {</span>
+<span class="fc" id="L70">		_selectedItem = Objects.requireNonNull(selectedItem);</span>
+<span class="fc" id="L71">		_currentSelection = _readPropertyItemSafely();</span>
+<span class="fc" id="L72">	}</span>
 
 	final boolean acceptsEditorChanges() {
-<span class="fc" id="L59">		return _acceptsEditorChanges;</span>
+<span class="fc" id="L75">		return _acceptsEditorChanges;</span>
 	}
 
-<span class="fc" id="L62">	final Var&lt;E&gt; _getSelectedItemVar() { return _selectedItem; }</span>
+<span class="fc" id="L78">	final Var&lt;E&gt; _getSelectedItemVar() { return _selectedItem; }</span>
+
+	/**
+	 *  Gives this model the {@link EventProcessor} of the UI declaration it is
+	 *  installed in, which it uses to hand selection changes made by the user
+	 *  over to the application thread, where they are written into the bound property.
+	 */
+	final void _setEventProcessor( EventProcessor eventProcessor ) {
+<span class="fc" id="L86">		_eventProcessor = Objects.requireNonNull(eventProcessor);</span>
+<span class="fc" id="L87">	}</span>
+
+	/**
+	 *  This is called by the UI thread when the bound selection property changed,
+	 *  so that the state of the property is applied to the UI owned copy
+	 *  of the selection, followed by a notification of the combo box.
+	 *  Note that this must never write back into the property,
+	 *  otherwise updates would echo back and forth between the threads.
+	 *
+	 * @param newItem The new selection state, as carried by the property change event.
+	 */
+	final void _updateSelectionFromProperty( @Nullable E newItem ) {
+<span class="fc bfc" id="L99" title="All 2 branches covered.">		boolean changed = !Objects.equals(_currentSelection, newItem);</span>
+<span class="fc" id="L100">		_currentSelection = newItem;</span>
+<span class="fc" id="L101">		_selectedIndex = _indexOf(newItem);</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">		if ( changed )</span>
+<span class="fc" id="L103">			doQuietly(this::fireListeners);</span>
+<span class="fc" id="L104">	}</span>
+
+	/**
+	 *  Applies a selection change made by the user in the view to the UI owned
+	 *  selection copy, and then hands the new state over to the application
+	 *  thread, which writes it into the bound property.
+	 *  This is the exact inverse of {@link #_updateSelectionFromProperty(Object)}.
+	 */
+	private void _sendSelectionToProperty( @Nullable E newItem ) {
+<span class="fc" id="L113">		_currentSelection = newItem;</span>
+<span class="fc" id="L114">		_publishToAppThread(</span>
+<span class="fc" id="L115">			() -&gt; _setSelectedItemSafely(From.VIEW, NullUtil.fakeNonNull(newItem))</span>
+		);
+<span class="fc" id="L117">	}</span>
+
+	/**
+	 *  Hands a task over to the UI thread of the current {@link EventProcessor}.
+	 *  Subclasses use this to apply a state change coming from the application
+	 *  thread (like a change to the bound item source) to their UI thread
+	 *  owned snapshot of that state.
+	 */
+	protected final void _publishToUIThread( Runnable uiStateUpdate ) {
+<span class="fc" id="L126">		_eventProcessor.registerUIEvent(uiStateUpdate);</span>
+<span class="fc" id="L127">	}</span>
+
+	/**
+	 *  Hands a task over to the application thread of the current {@link EventProcessor}.
+	 *  This is used to write state changes made by the user in the view
+	 *  (like the selection, or an edited item) into the bound properties,
+	 *  which belong to the application thread.
+	 */
+	protected final void _publishToAppThread( Runnable propertyUpdate ) {
+<span class="fc" id="L136">		_eventProcessor.registerAppEvent(propertyUpdate);</span>
+<span class="fc" id="L137">	}</span>
 
 	abstract AbstractComboModel&lt;E&gt; withVar( Var&lt;E&gt; newVar );
 
 	@SuppressWarnings(&quot;NullAway&quot;)
 	@Override public void setSelectedItem( @Nullable Object anItem ) {
-<span class="fc bfc" id="L68" title="All 2 branches covered.">		if ( !UI.thisIsUIThread() ) {</span>
-<span class="fc" id="L69">            log.warn(SwingTree.get().logMarker(),</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">		if ( !UI.thisIsUIThread() ) {</span>
+<span class="fc" id="L144">            log.warn(SwingTree.get().logMarker(),</span>
 					&quot;Detected thread '{}' modifying a combobox data model instead of the expected EDT (AWT) GUI-Thread! &quot; +
 					&quot;Delegating modification to EDT now...&quot;,
-<span class="fc" id="L72">					Thread.currentThread().getName(),</span>
+<span class="fc" id="L147">					Thread.currentThread().getName(),</span>
 					new Throwable(&quot;Stack trace for debugging purposes.&quot;)
 				);
-<span class="fc" id="L75">			@Nullable Object scopedItem = anItem;</span>
-<span class="fc" id="L76">			UI.runNow(()-&gt;setSelectedItem(scopedItem));</span>
-<span class="fc" id="L77">			return;</span>
+<span class="fc" id="L150">			@Nullable Object scopedItem = anItem;</span>
+<span class="fc" id="L151">			UI.runNow(()-&gt;setSelectedItem(scopedItem));</span>
+<span class="fc" id="L152">			return;</span>
 		}
-<span class="pc bpc" id="L79" title="1 of 2 branches missed.">		if ( anItem != null ) {</span>
-<span class="fc" id="L80">			Class&lt;E&gt; expectedType = _selectedItem.type();</span>
-<span class="fc bfc" id="L81" title="All 2 branches covered.">			if ( !expectedType.isAssignableFrom(anItem.getClass()) ) {</span>
-<span class="fc" id="L82">				Object convertedItem = _convert(anItem.toString());</span>
-<span class="pc bpc" id="L83" title="1 of 2 branches missed.">				if ( convertedItem == null )</span>
-<span class="nc" id="L84">                    log.warn(SwingTree.get().logMarker(),</span>
+<span class="pc bpc" id="L154" title="1 of 2 branches missed.">		if ( anItem != null ) {</span>
+<span class="fc" id="L155">			Class&lt;E&gt; expectedType = _selectedItem.type();</span>
+<span class="fc bfc" id="L156" title="All 2 branches covered.">			if ( !expectedType.isAssignableFrom(anItem.getClass()) ) {</span>
+<span class="fc" id="L157">				Object convertedItem = _convert(anItem.toString());</span>
+<span class="pc bpc" id="L158" title="1 of 2 branches missed.">				if ( convertedItem == null )</span>
+<span class="nc" id="L159">                    log.warn(SwingTree.get().logMarker(),</span>
 					    &quot;Failed to set selection due to unexpected data type in combo box!\n&quot; +
 					    &quot;Expected type '{}' but encountered object\n&quot; +
 					    &quot;of type '{}' which is not assignable to the former.&quot;,
-<span class="nc" id="L88">						expectedType.getName(), anItem.getClass().getName(), new Throwable(&quot;Stack trace for debugging purposes.&quot;)</span>
+<span class="nc" id="L163">						expectedType.getName(), anItem.getClass().getName(), new Throwable(&quot;Stack trace for debugging purposes.&quot;)</span>
 					);
 				else
-<span class="fc" id="L91">					anItem = convertedItem;</span>
+<span class="fc" id="L166">					anItem = convertedItem;</span>
 			}
 		}
-<span class="fc" id="L94">        E old = _getSelectedItemSafely();</span>
-<span class="fc" id="L95">		Object finalAnItem = anItem;</span>
-<span class="fc" id="L96">		doQuietly(()-&gt; {</span>
-<span class="fc" id="L97">			E newItemInModel = _setSelectedItemSafely(From.VIEW, (E) NullUtil.fakeNonNull(finalAnItem));</span>
-<span class="fc" id="L98">			_selectedIndex = _indexOf(newItemInModel);</span>
-<span class="fc bfc" id="L99" title="All 2 branches covered.">			if ( !Objects.equals(old, newItemInModel) )</span>
-<span class="fc" id="L100">				fireListeners();</span>
-<span class="fc" id="L101">		});</span>
-<span class="fc" id="L102">	}</span>
+<span class="fc" id="L169">        E old = _currentSelection;</span>
+<span class="fc" id="L170">		Object finalAnItem = anItem;</span>
+<span class="fc" id="L171">		doQuietly(()-&gt; {</span>
+<span class="fc" id="L172">			E newItem = (E) NullUtil.fakeNonNull(finalAnItem);</span>
+<span class="fc" id="L173">			_sendSelectionToProperty(newItem);</span>
+<span class="fc" id="L174">			_selectedIndex = _indexOf(newItem);</span>
+<span class="fc bfc" id="L175" title="All 2 branches covered.">			if ( !Objects.equals(old, newItem) )</span>
+<span class="fc" id="L176">				fireListeners();</span>
+<span class="fc" id="L177">		});</span>
+<span class="fc" id="L178">	}</span>
 
 	/** {@inheritDoc} */
 	@Override public @Nullable Object getSelectedItem() {
-		try {
-<span class="fc" id="L107">			return _selectedItem.orElseNull();</span>
-			/*
-				The property type is an interface, it can have any kind of faulty implementation.
-				So we need to protect the GUI's control flow from any possible exceptions.
-			 */
-<span class="nc" id="L112">		} catch (Exception e) {</span>
-<span class="nc" id="L113">			log.error(SwingTree.get().logMarker(),</span>
-					&quot;Failed to fetch selected combo box item from bound property '{}', due to exception.&quot;,
-					_selectedItem, e
-				);
-		}
-<span class="nc" id="L118">		return null;</span>
+<span class="fc" id="L182">		return _currentSelection;</span>
+		/*
+			Note that this deliberately does not read the bound property!
+			The property belongs to the application thread, whereas this method
+			is called by the UI thread, which only ever sees the UI owned copy.
+		 */
 	}
 
 	/** {@inheritDoc} */
-<span class="fc" id="L122">	@Override public void addListDataListener( ListDataListener l ) { listeners.add(l); }</span>
+<span class="fc" id="L191">	@Override public void addListDataListener( ListDataListener l ) { listeners.add(l); }</span>
 
 	/** {@inheritDoc} */
-<span class="fc" id="L125">	@Override public void removeListDataListener( ListDataListener l ) { listeners.remove(l); }</span>
+<span class="fc" id="L194">	@Override public void removeListDataListener( ListDataListener l ) { listeners.remove(l); }</span>
 
     void fireListeners() {
 		try {
-<span class="fc bfc" id="L129" title="All 2 branches covered.">			for ( ListDataListener l : new ArrayList&lt;&gt;(listeners) )</span>
-<span class="fc" id="L130">				l.contentsChanged(</span>
-<span class="fc" id="L131">					new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, getSize())</span>
+<span class="fc bfc" id="L198" title="All 2 branches covered.">			for ( ListDataListener l : new ArrayList&lt;&gt;(listeners) )</span>
+<span class="fc" id="L199">				l.contentsChanged(</span>
+<span class="fc" id="L200">					new ListDataEvent(this, ListDataEvent.CONTENTS_CHANGED, 0, getSize())</span>
 				);
-<span class="fc" id="L133">		} catch ( Exception e ) {</span>
-<span class="fc" id="L134">			log.error(SwingTree.get().logMarker(), &quot;An exception occurred while firing combo box model listeners!&quot;, e);</span>
-<span class="fc" id="L135">		}</span>
-<span class="fc" id="L136">    }</span>
+<span class="fc" id="L202">		} catch ( Exception e ) {</span>
+<span class="fc" id="L203">			log.error(SwingTree.get().logMarker(), &quot;An exception occurred while firing combo box model listeners!&quot;, e);</span>
+<span class="fc" id="L204">		}</span>
+<span class="fc" id="L205">    }</span>
 
     void doQuietly( Runnable task ) {
-<span class="fc bfc" id="L139" title="All 2 branches covered.">    	boolean alreadyWithinQuietTask = !_acceptsEditorChanges;</span>
-<span class="fc" id="L140">		_acceptsEditorChanges = false;</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">    	boolean alreadyWithinQuietTask = !_acceptsEditorChanges;</span>
+<span class="fc" id="L209">		_acceptsEditorChanges = false;</span>
 		try {
-<span class="fc" id="L142">			task.run();</span>
-<span class="nc" id="L143">		} catch ( Exception e ) {</span>
-<span class="nc" id="L144">			log.error(SwingTree.get().logMarker(), &quot;An exception occurred while running a combo box model task!&quot;, e);</span>
-<span class="fc" id="L145">		}</span>
-<span class="fc bfc" id="L146" title="All 2 branches covered.">		if ( !alreadyWithinQuietTask )</span>
-<span class="fc" id="L147">			_acceptsEditorChanges = true;</span>
-<span class="fc" id="L148">    }</span>
+<span class="fc" id="L211">			task.run();</span>
+<span class="nc" id="L212">		} catch ( Exception e ) {</span>
+<span class="nc" id="L213">			log.error(SwingTree.get().logMarker(), &quot;An exception occurred while running a combo box model task!&quot;, e);</span>
+<span class="fc" id="L214">		}</span>
+<span class="fc bfc" id="L215" title="All 2 branches covered.">		if ( !alreadyWithinQuietTask )</span>
+<span class="fc" id="L216">			_acceptsEditorChanges = true;</span>
+<span class="fc" id="L217">    }</span>
 
 	abstract protected void setAt( int index, @Nullable E element );
 
     void updateSelectedIndex() {
-<span class="fc" id="L153">		E currentSelection = _getSelectedItemSafely();</span>
-<span class="fc bfc" id="L154" title="All 4 branches covered.">        if ( _selectedIndex &gt;= 0 &amp;&amp; !Objects.equals(currentSelection, getElementAt(_selectedIndex)) )</span>
-<span class="fc" id="L155">            _selectedIndex = _indexOf(currentSelection);</span>
-<span class="fc" id="L156">    }</span>
+<span class="fc" id="L222">		E currentSelection = _getSelectedItemSafely();</span>
+<span class="fc bfc" id="L223" title="All 4 branches covered.">        if ( _selectedIndex &gt;= 0 &amp;&amp; !Objects.equals(currentSelection, getElementAt(_selectedIndex)) )</span>
+<span class="fc" id="L224">            _selectedIndex = _indexOf(currentSelection);</span>
+<span class="fc" id="L225">    }</span>
 
 	void setFromEditor( String o ) {
-<span class="fc bfc" id="L159" title="All 2 branches covered.">		if ( !_acceptsEditorChanges )</span>
-<span class="fc" id="L160">			return; // The editor of a combo box can have very strange behaviour when it is updated by listeners</span>
+<span class="fc bfc" id="L228" title="All 2 branches covered.">		if ( !_acceptsEditorChanges )</span>
+<span class="fc" id="L229">			return; // The editor of a combo box can have very strange behaviour when it is updated by listeners</span>
 
-<span class="fc" id="L162">		updateSelectedIndex();</span>
-<span class="fc bfc" id="L163" title="All 2 branches covered.">		if ( _selectedIndex != -1 ) {</span>
+<span class="fc" id="L231">		updateSelectedIndex();</span>
+<span class="fc bfc" id="L232" title="All 2 branches covered.">		if ( _selectedIndex != -1 ) {</span>
 			try {
-<span class="fc" id="L165">				E newItemToStore = _convert(o);</span>
-<span class="fc" id="L166">				this.setAt( _selectedIndex, newItemToStore );</span>
-<span class="fc bfc" id="L167" title="All 2 branches covered.">				boolean stateChanged = !Objects.equals(_getSelectedItemSafely(),newItemToStore);</span>
-<span class="fc" id="L168">				_setSelectedItemSafely(From.VIEW, NullUtil.fakeNonNull(newItemToStore));</span>
-<span class="fc bfc" id="L169" title="All 2 branches covered.">				if ( stateChanged )</span>
-<span class="fc" id="L170">					doQuietly(this::fireListeners);</span>
+<span class="fc" id="L234">				E newItemToStore = _convert(o);</span>
+<span class="fc" id="L235">				this.setAt( _selectedIndex, newItemToStore );</span>
+<span class="fc bfc" id="L236" title="All 2 branches covered.">				boolean stateChanged = !Objects.equals(_currentSelection, newItemToStore);</span>
+<span class="fc" id="L237">				_sendSelectionToProperty(newItemToStore);</span>
+<span class="fc bfc" id="L238" title="All 2 branches covered.">				if ( stateChanged )</span>
+<span class="fc" id="L239">					doQuietly(this::fireListeners);</span>
 
-<span class="fc" id="L172">			} catch (Exception ignored) {</span>
+<span class="fc" id="L241">			} catch (Exception ignored) {</span>
 				// It looks like conversion was not successful
 				// This means the editor input could not be converted to the type of the combo box
 				// So we'll just ignore it
-<span class="fc" id="L176">			}</span>
+<span class="fc" id="L245">			}</span>
 		}
-<span class="fc" id="L178">	}</span>
+<span class="fc" id="L247">	}</span>
 
 	/**
 	 *  Tries to convert the given {@link String} to the type of the combo box
@@ -186,155 +255,168 @@ abstract class AbstractComboModel&lt;E extends @Nullable Object&gt; implements C
 	private @Nullable E _convert( String o ) {
 		// We need to turn the above string into an object of the correct type!
 		// First of all, we know our target type:
-<span class="fc" id="L189">		Class&lt;E&gt; type = _selectedItem.type();</span>
+<span class="fc" id="L258">		Class&lt;E&gt; type = _selectedItem.type();</span>
 		// Now we need to convert it to that type, let's try a few things:
-<span class="fc bfc" id="L191" title="All 2 branches covered.">		if ( type == Object.class )</span>
-<span class="fc" id="L192">			return (E) o; // So apparently the type is intended to be Object, so we'll just return the string</span>
+<span class="fc bfc" id="L260" title="All 2 branches covered.">		if ( type == Object.class )</span>
+<span class="fc" id="L261">			return (E) o; // So apparently the type is intended to be Object, so we'll just return the string</span>
 
-<span class="fc bfc" id="L194" title="All 2 branches covered.">		if ( type == String.class ) // The most elegant case, the type is String, so we'll just return the string</span>
-<span class="fc" id="L195">			return (E) o;</span>
+<span class="fc bfc" id="L263" title="All 2 branches covered.">		if ( type == String.class ) // The most elegant case, the type is String, so we'll just return the string</span>
+<span class="fc" id="L264">			return (E) o;</span>
 
-<span class="fc bfc" id="L197" title="All 2 branches covered.">		if ( Number.class.isAssignableFrom(type) ) {</span>
+<span class="fc bfc" id="L266" title="All 2 branches covered.">		if ( Number.class.isAssignableFrom(type) ) {</span>
 			// Ah, a number, let's try to parse it, but first we make it easier.
-<span class="fc" id="L199">			o = o.trim();</span>
-<span class="pc bpc" id="L200" title="2 of 4 branches missed.">			if ( o.endsWith(&quot;f&quot;) || o.endsWith(&quot;F&quot;) )</span>
-<span class="nc" id="L201">				o = o.substring(0, o.length() - 1);</span>
+<span class="fc" id="L268">			o = o.trim();</span>
+<span class="pc bpc" id="L269" title="2 of 4 branches missed.">			if ( o.endsWith(&quot;f&quot;) || o.endsWith(&quot;F&quot;) )</span>
+<span class="nc" id="L270">				o = o.substring(0, o.length() - 1);</span>
 
-<span class="pc bpc" id="L203" title="2 of 4 branches missed.">			if ( o.endsWith(&quot;d&quot;) || o.endsWith(&quot;D&quot;) )</span>
-<span class="nc" id="L204">				o = o.substring(0, o.length() - 1);</span>
+<span class="pc bpc" id="L272" title="2 of 4 branches missed.">			if ( o.endsWith(&quot;d&quot;) || o.endsWith(&quot;D&quot;) )</span>
+<span class="nc" id="L273">				o = o.substring(0, o.length() - 1);</span>
 
-<span class="pc bpc" id="L206" title="1 of 4 branches missed.">			if ( o.endsWith(&quot;l&quot;) || o.endsWith(&quot;L&quot;) )</span>
-<span class="fc" id="L207">				o = o.substring(0, o.length() - 1);</span>
+<span class="pc bpc" id="L275" title="1 of 4 branches missed.">			if ( o.endsWith(&quot;l&quot;) || o.endsWith(&quot;L&quot;) )</span>
+<span class="fc" id="L276">				o = o.substring(0, o.length() - 1);</span>
 
 			try {
-<span class="fc bfc" id="L210" title="All 2 branches covered.">				if ( type == Integer.class ) return (E) Integer.valueOf(o);</span>
-<span class="pc bpc" id="L211" title="1 of 2 branches missed.">				if ( type == Double.class  ) return (E) Double.valueOf(o);</span>
-<span class="pc bpc" id="L212" title="1 of 2 branches missed.">				if ( type == Float.class   ) return (E) Float.valueOf(o);</span>
-<span class="fc bfc" id="L213" title="All 2 branches covered.">				if ( type == Long.class    ) return (E) Long.valueOf(o);</span>
-<span class="pc bpc" id="L214" title="1 of 2 branches missed.">				if ( type == Short.class   ) return (E) Short.valueOf(o);</span>
-<span class="pc bpc" id="L215" title="1 of 2 branches missed.">				if ( type == Byte.class    ) return (E) Byte.valueOf(o);</span>
-<span class="fc" id="L216">			} catch ( NumberFormatException e ) {</span>
+<span class="fc bfc" id="L279" title="All 2 branches covered.">				if ( type == Integer.class ) return (E) Integer.valueOf(o);</span>
+<span class="pc bpc" id="L280" title="1 of 2 branches missed.">				if ( type == Double.class  ) return (E) Double.valueOf(o);</span>
+<span class="pc bpc" id="L281" title="1 of 2 branches missed.">				if ( type == Float.class   ) return (E) Float.valueOf(o);</span>
+<span class="fc bfc" id="L282" title="All 2 branches covered.">				if ( type == Long.class    ) return (E) Long.valueOf(o);</span>
+<span class="pc bpc" id="L283" title="1 of 2 branches missed.">				if ( type == Short.class   ) return (E) Short.valueOf(o);</span>
+<span class="pc bpc" id="L284" title="1 of 2 branches missed.">				if ( type == Byte.class    ) return (E) Byte.valueOf(o);</span>
+<span class="fc" id="L285">			} catch ( NumberFormatException e ) {</span>
 				// We failed to parse the number... the input is invalid!
 				// So we cannot update the model, and simply return the old value:
-<span class="fc" id="L219">				return _getSelectedItemSafely();</span>
-<span class="fc" id="L220">			}</span>
+<span class="fc" id="L288">				return _getSelectedItemSafely();</span>
+<span class="fc" id="L289">			}</span>
 		}
 		// What now? Hmmm, let's try Boolean!
-<span class="fc bfc" id="L223" title="All 2 branches covered.">		if ( type == Boolean.class ) {</span>
-<span class="fc" id="L224">			o = o.trim().toLowerCase(Locale.ENGLISH);</span>
-<span class="pc bpc" id="L225" title="1 of 6 branches missed.">			if ( o.equals(&quot;true&quot;) || o.equals(&quot;yes&quot;) || o.equals(&quot;1&quot;) )</span>
-<span class="fc" id="L226">				return type.cast(Boolean.TRUE);</span>
+<span class="fc bfc" id="L292" title="All 2 branches covered.">		if ( type == Boolean.class ) {</span>
+<span class="fc" id="L293">			o = o.trim().toLowerCase(Locale.ENGLISH);</span>
+<span class="pc bpc" id="L294" title="1 of 6 branches missed.">			if ( o.equals(&quot;true&quot;) || o.equals(&quot;yes&quot;) || o.equals(&quot;1&quot;) )</span>
+<span class="fc" id="L295">				return type.cast(Boolean.TRUE);</span>
 
-<span class="pc bpc" id="L228" title="3 of 6 branches missed.">			if ( o.equals(&quot;false&quot;) || o.equals(&quot;no&quot;) || o.equals(&quot;0&quot;) )</span>
-<span class="fc" id="L229">				return type.cast(Boolean.FALSE);</span>
+<span class="pc bpc" id="L297" title="3 of 6 branches missed.">			if ( o.equals(&quot;false&quot;) || o.equals(&quot;no&quot;) || o.equals(&quot;0&quot;) )</span>
+<span class="fc" id="L298">				return type.cast(Boolean.FALSE);</span>
 
 			// We failed to parse the boolean... the input is invalid!
 			// So we cannot update the model, and simply return the old value:
-<span class="nc" id="L233">			return _getSelectedItemSafely();</span>
+<span class="nc" id="L302">			return _getSelectedItemSafely();</span>
 		}
 		// Ok maybe it's an enum?
-<span class="pc bpc" id="L236" title="1 of 2 branches missed.">		if ( type.isEnum() ) {</span>
-<span class="nc" id="L237">			Class&lt;? extends Enum&gt; enumType = type.asSubclass(Enum.class);</span>
-<span class="nc" id="L238">			String name = o.trim();</span>
+<span class="pc bpc" id="L305" title="1 of 2 branches missed.">		if ( type.isEnum() ) {</span>
+<span class="nc" id="L306">			Class&lt;? extends Enum&gt; enumType = type.asSubclass(Enum.class);</span>
+<span class="nc" id="L307">			String name = o.trim();</span>
 			try {
-<span class="nc" id="L240">				return type.cast(Enum.valueOf(enumType, name));</span>
-<span class="nc" id="L241">			} catch ( IllegalArgumentException ignored) {</span>
-<span class="nc" id="L242">				log.debug(SwingTree.get().logMarker(), &quot;Failed to parse enum string '&quot;+name+&quot;' as &quot;+type+&quot;.&quot;, ignored);</span>
+<span class="nc" id="L309">				return type.cast(Enum.valueOf(enumType, name));</span>
+<span class="nc" id="L310">			} catch ( IllegalArgumentException ignored) {</span>
+<span class="nc" id="L311">				log.debug(SwingTree.get().logMarker(), &quot;Failed to parse enum string '&quot;+name+&quot;' as &quot;+type+&quot;.&quot;, ignored);</span>
 			}
-<span class="nc" id="L244">			name = o.toUpperCase(Locale.ENGLISH);</span>
+<span class="nc" id="L313">			name = o.toUpperCase(Locale.ENGLISH);</span>
 			try {
-<span class="nc" id="L246">				return type.cast(Enum.valueOf(enumType, name));</span>
-<span class="nc" id="L247">			} catch ( IllegalArgumentException ignored) {</span>
-<span class="nc" id="L248">				log.debug(SwingTree.get().logMarker(), &quot;Failed to parse enum string '&quot;+name+&quot;' as &quot;+type+&quot;.&quot;, ignored);</span>
+<span class="nc" id="L315">				return type.cast(Enum.valueOf(enumType, name));</span>
+<span class="nc" id="L316">			} catch ( IllegalArgumentException ignored) {</span>
+<span class="nc" id="L317">				log.debug(SwingTree.get().logMarker(), &quot;Failed to parse enum string '&quot;+name+&quot;' as &quot;+type+&quot;.&quot;, ignored);</span>
 			}
-<span class="nc" id="L250">			name = o.toLowerCase(Locale.ENGLISH);</span>
+<span class="nc" id="L319">			name = o.toLowerCase(Locale.ENGLISH);</span>
 			try {
-<span class="nc" id="L252">				return type.cast(Enum.valueOf(enumType, name));</span>
-<span class="nc" id="L253">			} catch ( IllegalArgumentException ignored) {</span>
-<span class="nc" id="L254">				log.debug(SwingTree.get().logMarker(), &quot;Failed to parse enum string '&quot;+name+&quot;' as &quot;+type+&quot;.&quot;, ignored);</span>
+<span class="nc" id="L321">				return type.cast(Enum.valueOf(enumType, name));</span>
+<span class="nc" id="L322">			} catch ( IllegalArgumentException ignored) {</span>
+<span class="nc" id="L323">				log.debug(SwingTree.get().logMarker(), &quot;Failed to parse enum string '&quot;+name+&quot;' as &quot;+type+&quot;.&quot;, ignored);</span>
 			}
-<span class="nc" id="L256">			name = name.toUpperCase(Locale.ENGLISH).replace(' ', '_').replace('-', '_');</span>
+<span class="nc" id="L325">			name = name.toUpperCase(Locale.ENGLISH).replace(' ', '_').replace('-', '_');</span>
 			try {
-<span class="nc" id="L258">				return type.cast(Enum.valueOf(enumType, name));</span>
-<span class="nc" id="L259">			} catch ( IllegalArgumentException ignored) {</span>
-<span class="nc" id="L260">				log.debug(SwingTree.get().logMarker(), &quot;Failed to parse enum string '&quot;+name+&quot;' as &quot;+type+&quot;.&quot;, ignored);</span>
+<span class="nc" id="L327">				return type.cast(Enum.valueOf(enumType, name));</span>
+<span class="nc" id="L328">			} catch ( IllegalArgumentException ignored) {</span>
+<span class="nc" id="L329">				log.debug(SwingTree.get().logMarker(), &quot;Failed to parse enum string '&quot;+name+&quot;' as &quot;+type+&quot;.&quot;, ignored);</span>
 			}
-<span class="nc" id="L262">			name = name.toLowerCase(Locale.ENGLISH).replace(' ', '_').replace('-', '_');</span>
+<span class="nc" id="L331">			name = name.toLowerCase(Locale.ENGLISH).replace(' ', '_').replace('-', '_');</span>
 			try {
-<span class="nc" id="L264">				return type.cast(Enum.valueOf(enumType, name));</span>
-<span class="nc" id="L265">			} catch ( IllegalArgumentException ignored) {</span>
-<span class="nc" id="L266">				log.debug(SwingTree.get().logMarker(), &quot;Failed to parse enum string '&quot;+name+&quot;' as &quot;+type+&quot;.&quot;, ignored);</span>
+<span class="nc" id="L333">				return type.cast(Enum.valueOf(enumType, name));</span>
+<span class="nc" id="L334">			} catch ( IllegalArgumentException ignored) {</span>
+<span class="nc" id="L335">				log.debug(SwingTree.get().logMarker(), &quot;Failed to parse enum string '&quot;+name+&quot;' as &quot;+type+&quot;.&quot;, ignored);</span>
 			}
 			// We failed to parse the enum... the input is invalid!
 			// So we cannot update the model, and simply return the old value:
-<span class="nc" id="L270">			return _getSelectedItemSafely();</span>
+<span class="nc" id="L339">			return _getSelectedItemSafely();</span>
 		}
 		// Or a character?
-<span class="pc bpc" id="L273" title="1 of 2 branches missed.">		if ( type == Character.class ) {</span>
-<span class="nc" id="L274">			String trimmed = o.trim();</span>
-<span class="nc bnc" id="L275" title="All 2 branches missed.">			if ( trimmed.length() == 1 )</span>
-<span class="nc" id="L276">				return type.cast(trimmed.charAt(0));</span>
+<span class="pc bpc" id="L342" title="1 of 2 branches missed.">		if ( type == Character.class ) {</span>
+<span class="nc" id="L343">			String trimmed = o.trim();</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">			if ( trimmed.length() == 1 )</span>
+<span class="nc" id="L345">				return type.cast(trimmed.charAt(0));</span>
 			// Maybe it's all repeated?
-<span class="nc bnc" id="L278" title="All 2 branches missed.">			if ( trimmed.length() &gt; 1 ) {</span>
-<span class="nc" id="L279">				char c = trimmed.charAt(0);</span>
-<span class="nc bnc" id="L280" title="All 2 branches missed.">				for ( int i = 1; i &lt; trimmed.length(); i++ )</span>
-<span class="nc bnc" id="L281" title="All 2 branches missed.">					if ( trimmed.charAt(i) != c )</span>
-<span class="nc" id="L282">						return _getSelectedItemSafely();</span>
-<span class="nc" id="L283">				return type.cast(c);</span>
+<span class="nc bnc" id="L347" title="All 2 branches missed.">			if ( trimmed.length() &gt; 1 ) {</span>
+<span class="nc" id="L348">				char c = trimmed.charAt(0);</span>
+<span class="nc bnc" id="L349" title="All 2 branches missed.">				for ( int i = 1; i &lt; trimmed.length(); i++ )</span>
+<span class="nc bnc" id="L350" title="All 2 branches missed.">					if ( trimmed.charAt(i) != c )</span>
+<span class="nc" id="L351">						return _getSelectedItemSafely();</span>
+<span class="nc" id="L352">				return type.cast(c);</span>
 			}
 			// We failed to parse the character... the input is invalid!
 			// So we cannot update the model, and simply return the old value:
-<span class="nc" id="L287">			return _getSelectedItemSafely();</span>
+<span class="nc" id="L356">			return _getSelectedItemSafely();</span>
 		}
 		// Now it's getting tricky, but we don't give up. How about arrays?
-<span class="pc bpc" id="L290" title="1 of 2 branches missed.">		if ( type.isArray() ) {</span>
+<span class="pc bpc" id="L359" title="1 of 2 branches missed.">		if ( type.isArray() ) {</span>
 			// We need to split the string into elements, and then convert each element
 			// to the correct type. We can do this recursively, but first we need to
 			// find the type of the elements:
-<span class="nc" id="L294">			Class&lt;?&gt; componentType = type.getComponentType();</span>
+<span class="nc" id="L363">			Class&lt;?&gt; componentType = type.getComponentType();</span>
 			// Now we can split the string:
-<span class="nc" id="L296">			String[] parts = o.split(&quot;,&quot;);</span>
-<span class="nc bnc" id="L297" title="All 2 branches missed.">			if ( parts.length == 1 )</span>
-<span class="nc" id="L298">				parts = o.split(&quot; &quot;);</span>
+<span class="nc" id="L365">			String[] parts = o.split(&quot;,&quot;);</span>
+<span class="nc bnc" id="L366" title="All 2 branches missed.">			if ( parts.length == 1 )</span>
+<span class="nc" id="L367">				parts = o.split(&quot; &quot;);</span>
 
 			// And convert each part to the correct type:
-<span class="nc" id="L301">			Object[] array = (Object[]) java.lang.reflect.Array.newInstance(componentType, parts.length);</span>
-<span class="nc bnc" id="L302" title="All 2 branches missed.">			for ( int i = 0; i &lt; parts.length; i++ )</span>
-<span class="nc" id="L303">				array[i] = _convert(parts[i]);</span>
+<span class="nc" id="L370">			Object[] array = (Object[]) java.lang.reflect.Array.newInstance(componentType, parts.length);</span>
+<span class="nc bnc" id="L371" title="All 2 branches missed.">			for ( int i = 0; i &lt; parts.length; i++ )</span>
+<span class="nc" id="L372">				array[i] = _convert(parts[i]);</span>
 
 			// And finally we can return the array:
-<span class="nc" id="L306">			return type.cast(array);</span>
+<span class="nc" id="L375">			return type.cast(array);</span>
 		}
 		// Uff! Still nothing?!? Ok let's be creative, maybe we can try to use the constructor:
 		try {
-<span class="fc" id="L310">			return type.getConstructor(String.class).newInstance(o);</span>
-<span class="nc" id="L311">		} catch ( Exception e ) {</span>
+<span class="fc" id="L379">			return type.getConstructor(String.class).newInstance(o);</span>
+<span class="nc" id="L380">		} catch ( Exception e ) {</span>
 			// We failed to instantiate the class... Quite a pity, but at this point, who cares?
 		}
 
 		// What else is there? We don't know, so we just return the old value:
-<span class="nc" id="L316">		return _getSelectedItemSafely();</span>
+<span class="nc" id="L385">		return _getSelectedItemSafely();</span>
 	}
 
 	/**
-	 *  The property type is an interface, it can have any kind of faulty implementation.
-	 *  So we need to protect the GUI's control flow from any possible exceptions.
-	 *  An exception in the property means the item is now null!
+	 *  Exposes the UI thread owned copy of the selection state of the bound property.
+	 *  This is what the UI thread works with instead of the property itself,
+	 *  which belongs to the application thread and must not be accessed here.
 	 *
 	 * @return The selected item of the combo box, or null if nothing is selected.
 	 */
 	protected @Nullable E _getSelectedItemSafely() {
-<span class="fc" id="L327">		E item = null;</span>
+<span class="fc" id="L396">		return _currentSelection;</span>
+	}
+
+	/**
+	 *  The property type is an interface, it can have any kind of faulty implementation.
+	 *  So we need to protect the control flow from any possible exceptions.
+	 *  An exception in the property means the item is now null!
+	 *  This is only used to initialize the UI owned selection copy
+	 *  when this model is first created.
+	 *
+	 * @return The item of the bound selection property, or null if the property failed to deliver it.
+	 */
+	private @Nullable E _readPropertyItemSafely() {
+<span class="fc" id="L409">		E item = null;</span>
 		try {
-<span class="fc" id="L329">			item = _selectedItem.orElseNull();</span>
-<span class="nc" id="L330">		} catch (Exception e) {</span>
-<span class="nc" id="L331">			log.error(</span>
+<span class="fc" id="L411">			item = _selectedItem.orElseNull();</span>
+<span class="nc" id="L412">		} catch (Exception e) {</span>
+<span class="nc" id="L413">			log.error(</span>
 					&quot;Failed to fetch selected combo box item from bound property '{}', &quot; +
 					&quot;due to exception.&quot;,
 					_selectedItem, e
 				);
-<span class="fc" id="L336">		}</span>
-<span class="fc" id="L337">		return item;</span>
+<span class="fc" id="L418">		}</span>
+<span class="fc" id="L419">		return item;</span>
 	}
 
 	/**
@@ -347,24 +429,24 @@ abstract class AbstractComboModel&lt;E extends @Nullable Object&gt; implements C
 	 */
 	protected @Nullable E _setSelectedItemSafely(Channel channel, E newItem) {
 		try {
-<span class="fc" id="L350">			_selectedItem.set(channel, newItem);</span>
-<span class="fc" id="L351">			return newItem;</span>
-<span class="nc" id="L352">		} catch (Exception e) {</span>
-<span class="nc" id="L353">			log.error(</span>
+<span class="fc" id="L432">			_selectedItem.set(channel, newItem);</span>
+<span class="fc" id="L433">			return newItem;</span>
+<span class="nc" id="L434">		} catch (Exception e) {</span>
+<span class="nc" id="L435">			log.error(</span>
 					&quot;Failed to set the selected combo box item in the bound property '{}', &quot; +
 					&quot;due to exception.&quot;,
 					_selectedItem, e
 			);
 		}
-<span class="nc" id="L359">		return null;</span>
+<span class="nc" id="L441">		return null;</span>
 	}
 
 	protected int _indexOf( @Nullable Object anItem ) {
-<span class="fc bfc" id="L363" title="All 2 branches covered.">		for ( int i = 0; i &lt; getSize(); i++ )</span>
-<span class="fc bfc" id="L364" title="All 2 branches covered.">			if ( Objects.equals(anItem, getElementAt(i)) )</span>
-<span class="fc" id="L365">				return i;</span>
+<span class="fc bfc" id="L445" title="All 2 branches covered.">		for ( int i = 0; i &lt; getSize(); i++ )</span>
+<span class="fc bfc" id="L446" title="All 2 branches covered.">			if ( Objects.equals(anItem, getElementAt(i)) )</span>
+<span class="fc" id="L447">				return i;</span>
 
-<span class="fc" id="L367">		return _selectedIndex;</span>
+<span class="fc" id="L449">		return _selectedIndex;</span>
 	}
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

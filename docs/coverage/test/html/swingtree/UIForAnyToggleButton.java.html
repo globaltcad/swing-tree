@@ -55,12 +55,13 @@ import javax.swing.JToggleButton;
                    // But only if the button is selected, otherwise we'll ignore the click.
                    // And we also trigger &quot;set&quot; events for the button, so that other buttons
                    // can be updated to reflect the new selection state.
-<span class="fc" id="L58">                   _onChange(button, event -&gt; {</span>
-<span class="nc bnc" id="L59" title="All 2 branches missed.">                       if ( button.isSelected() )</span>
-<span class="nc" id="L60">                           selection.set(From.VIEW,  state ).fireChange(From.VIEW_MODEL);</span>
-<span class="nc" id="L61">                   });</span>
-<span class="fc" id="L62">               })</span>
-<span class="fc" id="L63">               ._this();</span>
+                   // The write itself is handed over to the application thread, which owns the property.
+<span class="fc" id="L59">                   _onChange(button, event -&gt; {</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">                       if ( button.isSelected() )</span>
+<span class="fc" id="L61">                           _runInApp( () -&gt; selection.set(From.VIEW,  state ).fireChange(From.VIEW_MODEL) );</span>
+<span class="fc" id="L62">                   });</span>
+<span class="fc" id="L63">               })</span>
+<span class="fc" id="L64">               ._this();</span>
     }
 
 }

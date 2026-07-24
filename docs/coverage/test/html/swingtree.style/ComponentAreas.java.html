@@ -31,39 +31,41 @@ final class ComponentAreas
     private final LazyRef&lt;Shape&gt;   _bodyArea;
     private final LazyRef&lt;Shape&gt;   _contentArea;
     private final LazyRef&lt;Area[]&gt;  _borderEdgeAreas;
+    private final LazyRef&lt;Area[]&gt;  _clippedBorderEdgeAreas;
 
     static ComponentAreas of( Pooled&lt;BoxModelConf&gt; state ) {
-<span class="fc" id="L36">        return _CACHE.computeIfAbsent(state, conf -&gt; new ComponentAreas(state.get()));</span>
+<span class="fc" id="L37">        return _CACHE.computeIfAbsent(state, conf -&gt; new ComponentAreas(state.get()));</span>
     }
 
 
-<span class="fc" id="L40">    private ComponentAreas(BoxModelConf conf) {</span>
-<span class="fc" id="L41">        _boxModel        = conf;</span>
-<span class="fc" id="L42">        _bodyArea        = new LazyRef&lt;&gt;(_boxModel, ComponentAreas::_produceBodyArea);</span>
-<span class="fc" id="L43">        _interiorArea    = new LazyRef&lt;&gt;(_boxModel, ComponentAreas::_produceInteriorArea);</span>
-<span class="fc" id="L44">        _borderArea      = new LazyRef&lt;&gt;(Pair.of(_interiorArea, _bodyArea), s-&gt;ComponentAreas._produceBorderArea(s.first(), s.second()));</span>
-<span class="fc" id="L45">        _exteriorArea    = new LazyRef&lt;&gt;(Pair.of(_boxModel, _bodyArea), s-&gt;ComponentAreas._produceExteriorArea(s.first(),s.second()));</span>
-<span class="fc" id="L46">        _contentArea     = new LazyRef&lt;&gt;(Pair.of(_boxModel, _interiorArea), s-&gt;ComponentAreas._produceContentArea(s.first(), s.second()));</span>
-<span class="fc" id="L47">        _borderEdgeAreas = new LazyRef&lt;&gt;(_boxModel, ComponentAreas::calculateEdgeBorderAreas);</span>
-<span class="fc" id="L48">    }</span>
+<span class="fc" id="L41">    private ComponentAreas(BoxModelConf conf) {</span>
+<span class="fc" id="L42">        _boxModel        = conf;</span>
+<span class="fc" id="L43">        _bodyArea        = new LazyRef&lt;&gt;(_boxModel, ComponentAreas::_produceBodyArea);</span>
+<span class="fc" id="L44">        _interiorArea    = new LazyRef&lt;&gt;(_boxModel, ComponentAreas::_produceInteriorArea);</span>
+<span class="fc" id="L45">        _borderArea      = new LazyRef&lt;&gt;(Pair.of(_interiorArea, _bodyArea), s-&gt;ComponentAreas._produceBorderArea(s.first(), s.second()));</span>
+<span class="fc" id="L46">        _exteriorArea    = new LazyRef&lt;&gt;(Pair.of(_boxModel, _bodyArea), s-&gt;ComponentAreas._produceExteriorArea(s.first(),s.second()));</span>
+<span class="fc" id="L47">        _contentArea     = new LazyRef&lt;&gt;(Pair.of(_boxModel, _interiorArea), s-&gt;ComponentAreas._produceContentArea(s.first(), s.second()));</span>
+<span class="fc" id="L48">        _borderEdgeAreas = new LazyRef&lt;&gt;(_boxModel, ComponentAreas::calculateEdgeBorderAreas);</span>
+<span class="fc" id="L49">        _clippedBorderEdgeAreas = new LazyRef&lt;&gt;(Pair.of(_borderArea, _borderEdgeAreas), s-&gt;ComponentAreas._produceClippedBorderEdgeAreas(s.first(), s.second()));</span>
+<span class="fc" id="L50">    }</span>
 
     public Shape get( UI.ComponentArea areaType ) {
-<span class="fc" id="L51">        BoxModelConf boxModel = _boxModel;</span>
-<span class="fc bfc" id="L52" title="All 5 branches covered.">        switch ( areaType ) {</span>
+<span class="fc" id="L53">        BoxModelConf boxModel = _boxModel;</span>
+<span class="fc bfc" id="L54" title="All 5 branches covered.">        switch ( areaType ) {</span>
             case BODY:
-<span class="fc" id="L54">                return _bodyArea.get(); // all - exterior == interior + border</span>
+<span class="fc" id="L56">                return _bodyArea.get(); // all - exterior == interior + border</span>
             case INTERIOR:
-<span class="fc" id="L56">                return _interiorArea.get(); // all - exterior - border == content - border</span>
+<span class="fc" id="L58">                return _interiorArea.get(); // all - exterior - border == content - border</span>
             case BORDER:
-<span class="fc" id="L58">                return _borderArea.get(); // all - exterior - interior</span>
+<span class="fc" id="L60">                return _borderArea.get(); // all - exterior - interior</span>
             case EXTERIOR:
-<span class="fc" id="L60">                return _exteriorArea.get(); // all - border - interior</span>
+<span class="fc" id="L62">                return _exteriorArea.get(); // all - border - interior</span>
             case ALL:
             default:
-<span class="fc" id="L63">                return new Rectangle(</span>
+<span class="fc" id="L65">                return new Rectangle(</span>
                         0, 0,
-<span class="fc" id="L65">                        boxModel.size().width().map(Float::intValue).orElse(0),</span>
-<span class="fc" id="L66">                        boxModel.size().height().map(Float::intValue).orElse(0)</span>
+<span class="fc" id="L67">                        boxModel.size().width().map(Float::intValue).orElse(0),</span>
+<span class="fc" id="L68">                        boxModel.size().height().map(Float::intValue).orElse(0)</span>
                     );
         }
     }
@@ -75,44 +77,73 @@ final class ComponentAreas
      *         without taking into account any border radius.
      */
     public Shape getContentArea() {
-<span class="fc" id="L78">        return _contentArea.get();</span>
+<span class="fc" id="L80">        return _contentArea.get();</span>
     }
 
     private static Area _produceContentArea( BoxModelConf boxModel, LazyRef&lt;Shape&gt; interiorArea ) {
-<span class="fc" id="L82">        Outline insets = boxModel.insetsFor(UI.ComponentBoundary.INTERIOR_TO_CONTENT);</span>
-<span class="fc" id="L83">        Size size = boxModel.size();</span>
-<span class="fc" id="L84">        Area contentArea = new Area(new Rectangle2D.Float(</span>
-<span class="fc" id="L85">                insets.left().orElse(0f),</span>
-<span class="fc" id="L86">                insets.top().orElse(0f),</span>
-<span class="fc" id="L87">                size.width().orElse(0f) - insets.left().orElse(0f) - insets.right().orElse(0f),</span>
-<span class="fc" id="L88">                size.height().orElse(0f) - insets.top().orElse(0f) - insets.bottom().orElse(0f)</span>
+<span class="fc" id="L84">        Outline insets = boxModel.insetsFor(UI.ComponentBoundary.INTERIOR_TO_CONTENT);</span>
+<span class="fc" id="L85">        Size size = boxModel.size();</span>
+<span class="fc" id="L86">        Area contentArea = new Area(new Rectangle2D.Float(</span>
+<span class="fc" id="L87">                insets.left().orElse(0f),</span>
+<span class="fc" id="L88">                insets.top().orElse(0f),</span>
+<span class="fc" id="L89">                size.widthOrElse(0f) - insets.left().orElse(0f) - insets.right().orElse(0f),</span>
+<span class="fc" id="L90">                size.heightOrElse(0f) - insets.top().orElse(0f) - insets.bottom().orElse(0f)</span>
         ));
-<span class="fc" id="L90">        contentArea.intersect(new Area(interiorArea.get()));</span>
-<span class="fc" id="L91">        return contentArea;</span>
+<span class="fc" id="L92">        contentArea.intersect(new Area(interiorArea.get()));</span>
+<span class="fc" id="L93">        return contentArea;</span>
     }
 
     public Area[] getEdgeAreas() {
-<span class="fc" id="L95">        return _borderEdgeAreas.get();</span>
+<span class="nc" id="L97">        return _borderEdgeAreas.get();</span>
+    }
+
+    /**
+     *  Returns the four border-edge areas already clipped to the border area, i.e. the actual shapes
+     *  filled for a per-edge (non-homogeneous) border, in the order top, right, bottom, left. These
+     *  are the intersection of the {@link UI.ComponentArea#BORDER} area with each of the
+     *  {@link #getEdgeAreas() edge regions}. Because both inputs are a pure function of the immutable
+     *  {@link BoxModelConf}, the (expensive) {@link Area#intersect(Area) intersections} are computed
+     *  once and then reused on every subsequent paint of any component with an equal box model,
+     *  instead of being recomputed on every repaint.
+     *
+     * @return An array of 4 {@link Area} objects: the border area clipped to the top, right, bottom
+     *         and left edge regions respectively. The array and its areas are shared/cached — callers
+     *         must only read from them (e.g. {@link Graphics2D#fill(Shape)}), never mutate them.
+     */
+    public Area[] getClippedEdgeAreas() {
+<span class="fc" id="L114">        return _clippedBorderEdgeAreas.get();</span>
+    }
+
+    private static Area[] _produceClippedBorderEdgeAreas( LazyRef&lt;Shape&gt; borderAreaRef, LazyRef&lt;Area[]&gt; edgeAreasRef ) {
+<span class="fc" id="L118">        Shape  borderArea = borderAreaRef.get();</span>
+<span class="fc" id="L119">        Area[] edgeAreas  = edgeAreasRef.get();</span>
+<span class="fc" id="L120">        Area[] clipped    = new Area[4];</span>
+<span class="fc bfc" id="L121" title="All 2 branches covered.">        for ( int i = 0; i &lt; 4; i++ ) {</span>
+<span class="fc" id="L122">            Area edgeBorder = new Area(borderArea);</span>
+<span class="fc" id="L123">            edgeBorder.intersect(edgeAreas[i]);</span>
+<span class="fc" id="L124">            clipped[i] = edgeBorder;</span>
+        }
+<span class="fc" id="L126">        return clipped;</span>
     }
 
     public boolean areaExists(UI.ComponentArea area) {
-<span class="fc bfc" id="L99" title="All 5 branches covered.">        switch ( area ) {</span>
+<span class="fc bfc" id="L130" title="All 5 branches covered.">        switch ( area ) {</span>
             case BODY:
-<span class="fc" id="L101">                return _bodyArea.exists();</span>
+<span class="fc" id="L132">                return _bodyArea.exists();</span>
             case INTERIOR:
-<span class="fc" id="L103">                return _interiorArea.exists();</span>
+<span class="fc" id="L134">                return _interiorArea.exists();</span>
             case BORDER:
-<span class="fc" id="L105">                return _borderArea.exists();</span>
+<span class="fc" id="L136">                return _borderArea.exists();</span>
             case EXTERIOR:
-<span class="fc" id="L107">                return _exteriorArea.exists();</span>
+<span class="fc" id="L138">                return _exteriorArea.exists();</span>
             case ALL:
             default:
-<span class="fc" id="L110">                return true;</span>
+<span class="fc" id="L141">                return true;</span>
         }
     }
 
     static Shape calculateComponentBodyArea(BoxModelConf state, float insTop, float insLeft, float insBottom, float insRight ) {
-<span class="fc" id="L115">        return _calculateComponentBodyArea(</span>
+<span class="fc" id="L146">        return _calculateComponentBodyArea(</span>
                     state,
                     insTop,
                     insLeft,
@@ -122,19 +153,19 @@ final class ComponentAreas
     }
 
     private static Area _produceBorderArea(LazyRef&lt;Shape&gt; interiorArea, LazyRef&lt;Shape&gt; bodyArea) {
-<span class="fc" id="L125">        Area componentArea = new Area(interiorArea.get());</span>
-<span class="fc" id="L126">        Area borderArea = new Area(bodyArea.get());</span>
-<span class="fc" id="L127">        borderArea.subtract(componentArea);</span>
-<span class="fc" id="L128">        return borderArea;</span>
+<span class="fc" id="L156">        Area componentArea = new Area(interiorArea.get());</span>
+<span class="fc" id="L157">        Area borderArea = new Area(bodyArea.get());</span>
+<span class="fc" id="L158">        borderArea.subtract(componentArea);</span>
+<span class="fc" id="L159">        return borderArea;</span>
     }
 
     private static Shape _produceInteriorArea(BoxModelConf currentState) {
-<span class="fc" id="L132">        Outline widths = currentState.widths();</span>
-<span class="fc" id="L133">        float leftBorderWidth   = widths.left().orElse(0f);</span>
-<span class="fc" id="L134">        float topBorderWidth    = widths.top().orElse(0f);</span>
-<span class="fc" id="L135">        float rightBorderWidth  = widths.right().orElse(0f);</span>
-<span class="fc" id="L136">        float bottomBorderWidth = widths.bottom().orElse(0f);</span>
-<span class="fc" id="L137">        return calculateComponentBodyArea(</span>
+<span class="fc" id="L163">        Outline widths = currentState.widths();</span>
+<span class="fc" id="L164">        float leftBorderWidth   = widths.left().orElse(0f);</span>
+<span class="fc" id="L165">        float topBorderWidth    = widths.top().orElse(0f);</span>
+<span class="fc" id="L166">        float rightBorderWidth  = widths.right().orElse(0f);</span>
+<span class="fc" id="L167">        float bottomBorderWidth = widths.bottom().orElse(0f);</span>
+<span class="fc" id="L168">        return calculateComponentBodyArea(</span>
                    currentState,
                    topBorderWidth,
                    leftBorderWidth,
@@ -144,16 +175,16 @@ final class ComponentAreas
     }
 
     private static Area _produceExteriorArea(BoxModelConf currentState, LazyRef&lt;Shape&gt; bodyArea) {
-<span class="fc" id="L147">        Size size = currentState.size();</span>
-<span class="fc" id="L148">        float width  = size.width().orElse(0f);</span>
-<span class="fc" id="L149">        float height = size.height().orElse(0f);</span>
-<span class="fc" id="L150">        Area exteriorComponentArea = new Area(new Rectangle2D.Float(0, 0, width, height));</span>
-<span class="fc" id="L151">        exteriorComponentArea.subtract(new Area(bodyArea.get()));</span>
-<span class="fc" id="L152">        return exteriorComponentArea;</span>
+<span class="fc" id="L178">        Size size = currentState.size();</span>
+<span class="fc" id="L179">        float width  = size.widthOrElse(0f);</span>
+<span class="fc" id="L180">        float height = size.heightOrElse(0f);</span>
+<span class="fc" id="L181">        Area exteriorComponentArea = new Area(new Rectangle2D.Float(0, 0, width, height));</span>
+<span class="fc" id="L182">        exteriorComponentArea.subtract(new Area(bodyArea.get()));</span>
+<span class="fc" id="L183">        return exteriorComponentArea;</span>
     }
 
     private static Shape _produceBodyArea(BoxModelConf currentState) {
-<span class="fc" id="L156">        return calculateComponentBodyArea(currentState, 0, 0, 0, 0);</span>
+<span class="fc" id="L187">        return calculateComponentBodyArea(currentState, 0, 0, 0, 0);</span>
     }
 
     private static Shape _calculateComponentBodyArea(
@@ -163,103 +194,103 @@ final class ComponentAreas
         float insBottom,
         float insRight
     ) {
-<span class="fc" id="L166">        final Outline margin  = border.margin();</span>
-<span class="fc" id="L167">        final Size    size    = border.size();</span>
-<span class="fc" id="L168">        final Outline outline = border.baseOutline();</span>
+<span class="fc" id="L197">        final Outline margin  = border.margin();</span>
+<span class="fc" id="L198">        final Size    size    = border.size();</span>
+<span class="fc" id="L199">        final Outline outline = border.baseOutline();</span>
 
-<span class="pc bpc" id="L170" title="1 of 2 branches missed.">        if ( BoxModelConf.none().equals(border) ) {</span>
-<span class="nc" id="L171">            Outline insets = outline.plus(margin).plus(Outline.of(insTop, insLeft, insBottom, insRight));</span>
+<span class="pc bpc" id="L201" title="1 of 2 branches missed.">        if ( BoxModelConf.none().equals(border) ) {</span>
+<span class="nc" id="L202">            Outline insets = outline.plus(margin).plus(Outline.of(insTop, insLeft, insBottom, insRight));</span>
             // If there is no style, we just return the component's bounds:
-<span class="nc" id="L173">            float left   = insets.left().orElse(0f);</span>
-<span class="nc" id="L174">            float top    = insets.top().orElse(0f);</span>
-<span class="nc" id="L175">            float right  = insets.right().orElse(0f);</span>
-<span class="nc" id="L176">            float bottom = insets.bottom().orElse(0f);</span>
-<span class="nc" id="L177">            float width  = size.width().orElse(0f) - left - right;</span>
-<span class="nc" id="L178">            float height = size.height().orElse(0f) - top - bottom;</span>
-<span class="nc" id="L179">            return _rectangularShapeFrom(left, top, width, height);</span>
+<span class="nc" id="L204">            float left   = insets.left().orElse(0f);</span>
+<span class="nc" id="L205">            float top    = insets.top().orElse(0f);</span>
+<span class="nc" id="L206">            float right  = insets.right().orElse(0f);</span>
+<span class="nc" id="L207">            float bottom = insets.bottom().orElse(0f);</span>
+<span class="nc" id="L208">            float width  = size.widthOrElse(0f) - left - right;</span>
+<span class="nc" id="L209">            float height = size.heightOrElse(0f) - top - bottom;</span>
+<span class="nc" id="L210">            return _rectangularShapeFrom(left, top, width, height);</span>
         }
 
-<span class="fc" id="L182">        insTop    += outline.top().orElse(0f);</span>
-<span class="fc" id="L183">        insLeft   += outline.left().orElse(0f);</span>
-<span class="fc" id="L184">        insBottom += outline.bottom().orElse(0f);</span>
-<span class="fc" id="L185">        insRight  += outline.right().orElse(0f);</span>
+<span class="fc" id="L213">        insTop    += outline.top().orElse(0f);</span>
+<span class="fc" id="L214">        insLeft   += outline.left().orElse(0f);</span>
+<span class="fc" id="L215">        insBottom += outline.bottom().orElse(0f);</span>
+<span class="fc" id="L216">        insRight  += outline.right().orElse(0f);</span>
 
         // The background box is calculated from the margins and border radius:
-<span class="fc" id="L188">        float left   = Math.max(margin.left().orElse(0f), 0)   + insLeft  ;</span>
-<span class="fc" id="L189">        float top    = Math.max(margin.top().orElse(0f), 0)    + insTop   ;</span>
-<span class="fc" id="L190">        float right  = Math.max(margin.right().orElse(0f), 0)  + insRight ;</span>
-<span class="fc" id="L191">        float bottom = Math.max(margin.bottom().orElse(0f), 0) + insBottom;</span>
-<span class="fc" id="L192">        float width  = size.width().orElse(0f);</span>
-<span class="fc" id="L193">        float height = size.height().orElse(0f);</span>
+<span class="fc" id="L219">        float left   = Math.max(margin.left().orElse(0f), 0)   + insLeft  ;</span>
+<span class="fc" id="L220">        float top    = Math.max(margin.top().orElse(0f), 0)    + insTop   ;</span>
+<span class="fc" id="L221">        float right  = Math.max(margin.right().orElse(0f), 0)  + insRight ;</span>
+<span class="fc" id="L222">        float bottom = Math.max(margin.bottom().orElse(0f), 0) + insBottom;</span>
+<span class="fc" id="L223">        float width  = size.widthOrElse(0f);</span>
+<span class="fc" id="L224">        float height = size.heightOrElse(0f);</span>
 
-<span class="pc bpc" id="L195" title="1 of 6 branches missed.">        boolean insAllTheSame = insTop == insLeft &amp;&amp; insLeft == insBottom &amp;&amp; insBottom == insRight;</span>
+<span class="pc bpc" id="L226" title="1 of 6 branches missed.">        boolean insAllTheSame = insTop == insLeft &amp;&amp; insLeft == insBottom &amp;&amp; insBottom == insRight;</span>
 
-<span class="fc bfc" id="L197" title="All 4 branches covered.">        if ( border.allCornersShareTheSameArc() &amp;&amp; insAllTheSame ) {</span>
-<span class="fc" id="L198">            float arcWidth  = border.topLeftArc().map( a -&gt; Math.max(0,a.width() ) ).orElse(0f);</span>
-<span class="fc" id="L199">            float arcHeight = border.topLeftArc().map( a -&gt; Math.max(0,a.height()) ).orElse(0f);</span>
-<span class="fc" id="L200">            arcWidth  = Math.max(0, arcWidth  - insTop * 2f);</span>
-<span class="fc" id="L201">            arcHeight = Math.max(0, arcHeight - insTop * 2f);</span>
-<span class="pc bpc" id="L202" title="1 of 4 branches missed.">            if ( arcWidth == 0 || arcHeight == 0 )</span>
-<span class="fc" id="L203">                return _rectangularShapeFrom(left, top, width - left - right, height - top - bottom);</span>
+<span class="fc bfc" id="L228" title="All 4 branches covered.">        if ( border.allCornersShareTheSameArc() &amp;&amp; insAllTheSame ) {</span>
+<span class="fc" id="L229">            float arcWidth  = border.topLeftArc().map( a -&gt; Math.max(0,a.width() ) ).orElse(0f);</span>
+<span class="fc" id="L230">            float arcHeight = border.topLeftArc().map( a -&gt; Math.max(0,a.height()) ).orElse(0f);</span>
+<span class="fc" id="L231">            arcWidth  = Math.max(0, arcWidth  - insTop * 2f);</span>
+<span class="fc" id="L232">            arcHeight = Math.max(0, arcHeight - insTop * 2f);</span>
+<span class="pc bpc" id="L233" title="1 of 4 branches missed.">            if ( arcWidth == 0 || arcHeight == 0 )</span>
+<span class="fc" id="L234">                return _rectangularShapeFrom(left, top, width - left - right, height - top - bottom);</span>
 
             // We can return a simple round rectangle:
-<span class="fc" id="L206">            return new RoundRectangle2D.Float(</span>
+<span class="fc" id="L237">            return new RoundRectangle2D.Float(</span>
                                 left, top,
                                 width - left - right, height - top - bottom,
                                 arcWidth, arcHeight
                             );
         } else {
-<span class="fc" id="L212">            Arc topLeftArc     = border.topLeftArc().orElse(null);</span>
-<span class="fc" id="L213">            Arc topRightArc    = border.topRightArc().orElse(null);</span>
-<span class="fc" id="L214">            Arc bottomRightArc = border.bottomRightArc().orElse(null);</span>
-<span class="fc" id="L215">            Arc bottomLeftArc  = border.bottomLeftArc().orElse(null);</span>
-<span class="fc" id="L216">            Area area = new Area();</span>
+<span class="fc" id="L243">            Arc topLeftArc     = border.topLeftArc().orElse(null);</span>
+<span class="fc" id="L244">            Arc topRightArc    = border.topRightArc().orElse(null);</span>
+<span class="fc" id="L245">            Arc bottomRightArc = border.bottomRightArc().orElse(null);</span>
+<span class="fc" id="L246">            Arc bottomLeftArc  = border.bottomLeftArc().orElse(null);</span>
+<span class="fc" id="L247">            Area area = new Area();</span>
 
-<span class="fc" id="L218">            float topLeftRoundnessAdjustment     = Math.min(insLeft,   insTop  ) * 2f;</span>
-<span class="fc" id="L219">            float topRightRoundnessAdjustment    = Math.min(insTop,    insRight) * 2f;</span>
-<span class="fc" id="L220">            float bottomRightRoundnessAdjustment = Math.min(insBottom, insRight) * 2f;</span>
-<span class="fc" id="L221">            float bottomLeftRoundnessAdjustment  = Math.min(insBottom, insLeft ) * 2f;</span>
+<span class="fc" id="L249">            float topLeftRoundnessAdjustment     = Math.min(insLeft,   insTop  ) * 2f;</span>
+<span class="fc" id="L250">            float topRightRoundnessAdjustment    = Math.min(insTop,    insRight) * 2f;</span>
+<span class="fc" id="L251">            float bottomRightRoundnessAdjustment = Math.min(insBottom, insRight) * 2f;</span>
+<span class="fc" id="L252">            float bottomLeftRoundnessAdjustment  = Math.min(insBottom, insLeft ) * 2f;</span>
 
-<span class="fc bfc" id="L223" title="All 2 branches covered.">            float arcWidthTL  = Math.max(0, topLeftArc     == null ? 0 : topLeftArc.width()      - topLeftRoundnessAdjustment);</span>
-<span class="fc bfc" id="L224" title="All 2 branches covered.">            float arcHeightTL = Math.max(0, topLeftArc     == null ? 0 : topLeftArc.height()     - topLeftRoundnessAdjustment);</span>
-<span class="fc bfc" id="L225" title="All 2 branches covered.">            float arcWidthTR  = Math.max(0, topRightArc    == null ? 0 : topRightArc.width()     - topRightRoundnessAdjustment);</span>
-<span class="fc bfc" id="L226" title="All 2 branches covered.">            float arcHeightTR = Math.max(0, topRightArc    == null ? 0 : topRightArc.height()    - topRightRoundnessAdjustment);</span>
-<span class="fc bfc" id="L227" title="All 2 branches covered.">            float arcWidthBR  = Math.max(0, bottomRightArc == null ? 0 : bottomRightArc.width()  - bottomRightRoundnessAdjustment);</span>
-<span class="fc bfc" id="L228" title="All 2 branches covered.">            float arcHeightBR = Math.max(0, bottomRightArc == null ? 0 : bottomRightArc.height() - bottomRightRoundnessAdjustment);</span>
-<span class="fc bfc" id="L229" title="All 2 branches covered.">            float arcWidthBL  = Math.max(0, bottomLeftArc  == null ? 0 : bottomLeftArc.width()   - bottomLeftRoundnessAdjustment);</span>
-<span class="fc bfc" id="L230" title="All 2 branches covered.">            float arcHeightBL = Math.max(0, bottomLeftArc  == null ? 0 : bottomLeftArc.height()  - bottomLeftRoundnessAdjustment);</span>
+<span class="fc bfc" id="L254" title="All 2 branches covered.">            float arcWidthTL  = Math.max(0, topLeftArc     == null ? 0 : topLeftArc.width()      - topLeftRoundnessAdjustment);</span>
+<span class="fc bfc" id="L255" title="All 2 branches covered.">            float arcHeightTL = Math.max(0, topLeftArc     == null ? 0 : topLeftArc.height()     - topLeftRoundnessAdjustment);</span>
+<span class="fc bfc" id="L256" title="All 2 branches covered.">            float arcWidthTR  = Math.max(0, topRightArc    == null ? 0 : topRightArc.width()     - topRightRoundnessAdjustment);</span>
+<span class="fc bfc" id="L257" title="All 2 branches covered.">            float arcHeightTR = Math.max(0, topRightArc    == null ? 0 : topRightArc.height()    - topRightRoundnessAdjustment);</span>
+<span class="fc bfc" id="L258" title="All 2 branches covered.">            float arcWidthBR  = Math.max(0, bottomRightArc == null ? 0 : bottomRightArc.width()  - bottomRightRoundnessAdjustment);</span>
+<span class="fc bfc" id="L259" title="All 2 branches covered.">            float arcHeightBR = Math.max(0, bottomRightArc == null ? 0 : bottomRightArc.height() - bottomRightRoundnessAdjustment);</span>
+<span class="fc bfc" id="L260" title="All 2 branches covered.">            float arcWidthBL  = Math.max(0, bottomLeftArc  == null ? 0 : bottomLeftArc.width()   - bottomLeftRoundnessAdjustment);</span>
+<span class="fc bfc" id="L261" title="All 2 branches covered.">            float arcHeightBL = Math.max(0, bottomLeftArc  == null ? 0 : bottomLeftArc.height()  - bottomLeftRoundnessAdjustment);</span>
 
             // Top left:
-<span class="fc bfc" id="L233" title="All 2 branches covered.">            if ( topLeftArc != null ) {</span>
-<span class="fc" id="L234">                area.add(new Area(new Arc2D.Float(</span>
+<span class="fc bfc" id="L264" title="All 2 branches covered.">            if ( topLeftArc != null ) {</span>
+<span class="fc" id="L265">                area.add(new Area(new Arc2D.Float(</span>
                         left, top,
                         arcWidthTL, arcHeightTL,
                         90, 90, Arc2D.PIE
                 )));
             }
             // Top right:
-<span class="fc bfc" id="L241" title="All 2 branches covered.">            if ( topRightArc != null ) {</span>
-<span class="fc" id="L242">                area.add(new Area(new Arc2D.Float(</span>
-<span class="fc" id="L243">                        width - right - topRightArc.width() + topRightRoundnessAdjustment,</span>
+<span class="fc bfc" id="L272" title="All 2 branches covered.">            if ( topRightArc != null ) {</span>
+<span class="fc" id="L273">                area.add(new Area(new Arc2D.Float(</span>
+<span class="fc" id="L274">                        width - right - topRightArc.width() + topRightRoundnessAdjustment,</span>
                         top,
                         arcWidthTR, arcHeightTR,
                         0, 90, Arc2D.PIE
                 )));
             }
             // Bottom right:
-<span class="fc bfc" id="L250" title="All 2 branches covered.">            if ( bottomRightArc != null ) {</span>
-<span class="fc" id="L251">                area.add(new Area(new Arc2D.Float(</span>
-<span class="fc" id="L252">                        width  - right  - bottomRightArc.width()  + bottomRightRoundnessAdjustment,</span>
-<span class="fc" id="L253">                        height - bottom - bottomRightArc.height() + bottomRightRoundnessAdjustment,</span>
+<span class="fc bfc" id="L281" title="All 2 branches covered.">            if ( bottomRightArc != null ) {</span>
+<span class="fc" id="L282">                area.add(new Area(new Arc2D.Float(</span>
+<span class="fc" id="L283">                        width  - right  - bottomRightArc.width()  + bottomRightRoundnessAdjustment,</span>
+<span class="fc" id="L284">                        height - bottom - bottomRightArc.height() + bottomRightRoundnessAdjustment,</span>
                         arcWidthBR, arcHeightBR,
                         270, 90, Arc2D.PIE
                 )));
             }
             // Bottom left:
-<span class="fc bfc" id="L259" title="All 2 branches covered.">            if ( bottomLeftArc != null ) {</span>
-<span class="fc" id="L260">                area.add(new Area(new Arc2D.Float(</span>
+<span class="fc bfc" id="L290" title="All 2 branches covered.">            if ( bottomLeftArc != null ) {</span>
+<span class="fc" id="L291">                area.add(new Area(new Arc2D.Float(</span>
                         left,
-<span class="fc" id="L262">                        height - bottom - bottomLeftArc.height() + bottomLeftRoundnessAdjustment,</span>
+<span class="fc" id="L293">                        height - bottom - bottomLeftArc.height() + bottomLeftRoundnessAdjustment,</span>
                         arcWidthBL, arcHeightBL,
                         180, 90, Arc2D.PIE
                 )));
@@ -269,75 +300,75 @@ final class ComponentAreas
                 and then a single rectangle for the center.
                 The four outer rectangles are calculated from the arcs and the margins.
              */
-<span class="fc" id="L272">            float topDistance    = 0;</span>
-<span class="fc" id="L273">            float rightDistance  = 0;</span>
-<span class="fc" id="L274">            float bottomDistance = 0;</span>
-<span class="fc" id="L275">            float leftDistance   = 0;</span>
+<span class="fc" id="L303">            float topDistance    = 0;</span>
+<span class="fc" id="L304">            float rightDistance  = 0;</span>
+<span class="fc" id="L305">            float bottomDistance = 0;</span>
+<span class="fc" id="L306">            float leftDistance   = 0;</span>
             // top:
-<span class="pc bpc" id="L277" title="1 of 4 branches missed.">            if ( topLeftArc != null || topRightArc != null ) {</span>
-<span class="fc" id="L278">                float arcWidthLeft   = (arcWidthTL  / 2f);</span>
-<span class="fc" id="L279">                float arcHeightLeft  = (arcHeightTL / 2f);</span>
-<span class="fc" id="L280">                float arcWidthRight  = (arcWidthTR  / 2f);</span>
-<span class="fc" id="L281">                float arcHeightRight = (arcHeightTR / 2f);</span>
-<span class="fc" id="L282">                topDistance = Math.max(arcHeightLeft, arcHeightRight);// This is where the center rectangle will start!</span>
-<span class="fc" id="L283">                float innerLeft   = left + arcWidthLeft;</span>
-<span class="fc" id="L284">                float innerRight  = width - right - arcWidthRight;</span>
-<span class="fc" id="L285">                float edgeRectangleHeight = topDistance;</span>
-<span class="fc" id="L286">                area.add(new Area(new Rectangle2D.Float(</span>
+<span class="fc bfc" id="L308" title="All 4 branches covered.">            if ( topLeftArc != null || topRightArc != null ) {</span>
+<span class="fc" id="L309">                float arcWidthLeft   = (arcWidthTL  / 2f);</span>
+<span class="fc" id="L310">                float arcHeightLeft  = (arcHeightTL / 2f);</span>
+<span class="fc" id="L311">                float arcWidthRight  = (arcWidthTR  / 2f);</span>
+<span class="fc" id="L312">                float arcHeightRight = (arcHeightTR / 2f);</span>
+<span class="fc" id="L313">                topDistance = Math.max(arcHeightLeft, arcHeightRight);// This is where the center rectangle will start!</span>
+<span class="fc" id="L314">                float innerLeft   = left + arcWidthLeft;</span>
+<span class="fc" id="L315">                float innerRight  = width - right - arcWidthRight;</span>
+<span class="fc" id="L316">                float edgeRectangleHeight = topDistance;</span>
+<span class="fc" id="L317">                area.add(new Area(new Rectangle2D.Float(</span>
                         innerLeft, top, innerRight - innerLeft, edgeRectangleHeight
                     )));
             }
             // right:
-<span class="pc bpc" id="L291" title="1 of 4 branches missed.">            if ( topRightArc != null || bottomRightArc != null ) {</span>
-<span class="fc" id="L292">                float arcWidthTop    = (arcWidthTR  / 2f);</span>
-<span class="fc" id="L293">                float arcHeightTop   = (arcHeightTR / 2f);</span>
-<span class="fc" id="L294">                float arcWidthBottom = (arcWidthBR  / 2f);</span>
-<span class="fc" id="L295">                float arcHeightBottom= (arcHeightBR / 2f);</span>
-<span class="fc" id="L296">                rightDistance = Math.max(arcWidthTop, arcWidthBottom);// This is where the center rectangle will start!</span>
-<span class="fc" id="L297">                float innerTop    = top + arcHeightTop;</span>
-<span class="fc" id="L298">                float innerBottom = height - bottom - arcHeightBottom;</span>
-<span class="fc" id="L299">                float edgeRectangleWidth = rightDistance;</span>
-<span class="fc" id="L300">                area.add(new Area(new Rectangle2D.Float(</span>
+<span class="pc bpc" id="L322" title="1 of 4 branches missed.">            if ( topRightArc != null || bottomRightArc != null ) {</span>
+<span class="fc" id="L323">                float arcWidthTop    = (arcWidthTR  / 2f);</span>
+<span class="fc" id="L324">                float arcHeightTop   = (arcHeightTR / 2f);</span>
+<span class="fc" id="L325">                float arcWidthBottom = (arcWidthBR  / 2f);</span>
+<span class="fc" id="L326">                float arcHeightBottom= (arcHeightBR / 2f);</span>
+<span class="fc" id="L327">                rightDistance = Math.max(arcWidthTop, arcWidthBottom);// This is where the center rectangle will start!</span>
+<span class="fc" id="L328">                float innerTop    = top + arcHeightTop;</span>
+<span class="fc" id="L329">                float innerBottom = height - bottom - arcHeightBottom;</span>
+<span class="fc" id="L330">                float edgeRectangleWidth = rightDistance;</span>
+<span class="fc" id="L331">                area.add(new Area(new Rectangle2D.Float(</span>
                         width - right - edgeRectangleWidth, innerTop, edgeRectangleWidth, innerBottom - innerTop
                     )));
             }
             // bottom:
-<span class="pc bpc" id="L305" title="1 of 4 branches missed.">            if ( bottomRightArc != null || bottomLeftArc != null ) {</span>
-<span class="fc" id="L306">                float arcWidthRight  = (arcWidthBR  / 2f);</span>
-<span class="fc" id="L307">                float arcHeightRight = (arcHeightBR / 2f);</span>
-<span class="fc" id="L308">                float arcWidthLeft   = (arcWidthBL  / 2f);</span>
-<span class="fc" id="L309">                float arcHeightLeft  = (arcHeightBL / 2f);</span>
-<span class="fc" id="L310">                bottomDistance = Math.max(arcHeightRight, arcHeightLeft);// This is where the center rectangle will start!</span>
-<span class="fc" id="L311">                float innerLeft   = left + arcWidthLeft;</span>
-<span class="fc" id="L312">                float innerRight  = width - right - arcWidthRight;</span>
-<span class="fc" id="L313">                float edgeRectangleHeight = bottomDistance;</span>
-<span class="fc" id="L314">                area.add(new Area(new Rectangle2D.Float(</span>
+<span class="pc bpc" id="L336" title="1 of 4 branches missed.">            if ( bottomRightArc != null || bottomLeftArc != null ) {</span>
+<span class="fc" id="L337">                float arcWidthRight  = (arcWidthBR  / 2f);</span>
+<span class="fc" id="L338">                float arcHeightRight = (arcHeightBR / 2f);</span>
+<span class="fc" id="L339">                float arcWidthLeft   = (arcWidthBL  / 2f);</span>
+<span class="fc" id="L340">                float arcHeightLeft  = (arcHeightBL / 2f);</span>
+<span class="fc" id="L341">                bottomDistance = Math.max(arcHeightRight, arcHeightLeft);// This is where the center rectangle will start!</span>
+<span class="fc" id="L342">                float innerLeft   = left + arcWidthLeft;</span>
+<span class="fc" id="L343">                float innerRight  = width - right - arcWidthRight;</span>
+<span class="fc" id="L344">                float edgeRectangleHeight = bottomDistance;</span>
+<span class="fc" id="L345">                area.add(new Area(new Rectangle2D.Float(</span>
                         innerLeft, height - bottom - edgeRectangleHeight, innerRight - innerLeft, edgeRectangleHeight
                     )));
             }
             // left:
-<span class="fc bfc" id="L319" title="All 4 branches covered.">            if ( bottomLeftArc != null || topLeftArc != null ) {</span>
-<span class="fc" id="L320">                float arcWidthBottom = (arcWidthBL  / 2f);</span>
-<span class="fc" id="L321">                float arcHeightBottom= (arcHeightBL / 2f);</span>
-<span class="fc" id="L322">                float arcWidthTop    = (arcWidthTL  / 2f);</span>
-<span class="fc" id="L323">                float arcHeightTop   = (arcHeightTL / 2f);</span>
-<span class="fc" id="L324">                leftDistance = Math.max(arcWidthBottom, arcWidthTop);// This is where the center rectangle will start!</span>
-<span class="fc" id="L325">                float innerTop    = top + arcHeightTop;</span>
-<span class="fc" id="L326">                float innerBottom = height - bottom - arcHeightBottom;</span>
-<span class="fc" id="L327">                float edgeRectangleWidth = leftDistance;</span>
-<span class="fc" id="L328">                area.add(new Area(new Rectangle2D.Float(</span>
+<span class="fc bfc" id="L350" title="All 4 branches covered.">            if ( bottomLeftArc != null || topLeftArc != null ) {</span>
+<span class="fc" id="L351">                float arcWidthBottom = (arcWidthBL  / 2f);</span>
+<span class="fc" id="L352">                float arcHeightBottom= (arcHeightBL / 2f);</span>
+<span class="fc" id="L353">                float arcWidthTop    = (arcWidthTL  / 2f);</span>
+<span class="fc" id="L354">                float arcHeightTop   = (arcHeightTL / 2f);</span>
+<span class="fc" id="L355">                leftDistance = Math.max(arcWidthBottom, arcWidthTop);// This is where the center rectangle will start!</span>
+<span class="fc" id="L356">                float innerTop    = top + arcHeightTop;</span>
+<span class="fc" id="L357">                float innerBottom = height - bottom - arcHeightBottom;</span>
+<span class="fc" id="L358">                float edgeRectangleWidth = leftDistance;</span>
+<span class="fc" id="L359">                area.add(new Area(new Rectangle2D.Float(</span>
                         left, innerTop, edgeRectangleWidth, innerBottom - innerTop
                     )));
             }
             // Now we add the center:
-<span class="fc" id="L333">            area.add(new Area(</span>
+<span class="fc" id="L364">            area.add(new Area(</span>
                         new Rectangle2D.Float(
                             left + leftDistance, top + topDistance,
                             width - left - leftDistance - right - rightDistance,
                             height - top - topDistance - bottom - bottomDistance
                         )
                     ));
-<span class="fc" id="L340">            return area;</span>
+<span class="fc" id="L371">            return area;</span>
         }
     }
 
@@ -347,15 +378,15 @@ final class ComponentAreas
         float width ,
         float height
     ) {
-<span class="fc bfc" id="L350" title="All 2 branches covered.">        boolean isRound = Math.abs(left   % 1f) == 0f &amp;&amp;</span>
-<span class="fc bfc" id="L351" title="All 2 branches covered.">                          Math.abs(top    % 1f) == 0f &amp;&amp;</span>
-<span class="pc bpc" id="L352" title="1 of 2 branches missed.">                          Math.abs(width  % 1f) == 0f &amp;&amp;</span>
-<span class="pc bpc" id="L353" title="1 of 2 branches missed.">                          Math.abs(height % 1f) == 0f;</span>
+<span class="fc bfc" id="L381" title="All 2 branches covered.">        boolean isRound = Math.abs(left   % 1f) == 0f &amp;&amp;</span>
+<span class="fc bfc" id="L382" title="All 2 branches covered.">                          Math.abs(top    % 1f) == 0f &amp;&amp;</span>
+<span class="pc bpc" id="L383" title="1 of 2 branches missed.">                          Math.abs(width  % 1f) == 0f &amp;&amp;</span>
+<span class="pc bpc" id="L384" title="1 of 2 branches missed.">                          Math.abs(height % 1f) == 0f;</span>
 
-<span class="fc bfc" id="L355" title="All 2 branches covered.">        if ( isRound )</span>
-<span class="fc" id="L356">            return new Rectangle((int) left, (int) top, (int) width, (int) height);</span>
+<span class="fc bfc" id="L386" title="All 2 branches covered.">        if ( isRound )</span>
+<span class="fc" id="L387">            return new Rectangle((int) left, (int) top, (int) width, (int) height);</span>
         else
-<span class="fc" id="L358">            return new Rectangle2D.Float(left, top, width, height);</span>
+<span class="fc" id="L389">            return new Rectangle2D.Float(left, top, width, height);</span>
     }
 
 
@@ -372,63 +403,63 @@ final class ComponentAreas
      * @return An array of 4 {@link Area} objects representing the border-edge areas
      */
     private static Area[] calculateEdgeBorderAreas( BoxModelConf boxModel) {
-<span class="fc" id="L375">        final Size    size   = boxModel.size();</span>
-<span class="fc" id="L376">        final Outline margin = boxModel.margin();</span>
-<span class="fc" id="L377">        final Outline widths = boxModel.widths();</span>
-<span class="fc" id="L378">        final float   width  = size.width().orElse(0f);</span>
-<span class="fc" id="L379">        final float   height = size.height().orElse(0f);</span>
+<span class="fc" id="L406">        final Size    size   = boxModel.size();</span>
+<span class="fc" id="L407">        final Outline margin = boxModel.margin();</span>
+<span class="fc" id="L408">        final Outline widths = boxModel.widths();</span>
+<span class="fc" id="L409">        final float   width  = size.widthOrElse(0f);</span>
+<span class="fc" id="L410">        final float   height = size.heightOrElse(0f);</span>
 
-<span class="fc" id="L381">        final float topLeftX     = margin.left().orElse(0f);</span>
-<span class="fc" id="L382">        final float topLeftY     = margin.top().orElse(0f);</span>
-<span class="fc" id="L383">        final float topRightX    = width - margin.right().orElse(0f);</span>
-<span class="fc" id="L384">        final float topRightY    = topLeftY;</span>
-<span class="fc" id="L385">        final float bottomLeftX  = topLeftX;</span>
-<span class="fc" id="L386">        final float bottomLeftY  = height - margin.bottom().orElse(0f);</span>
-<span class="fc" id="L387">        final float bottomRightX = topRightX;</span>
-<span class="fc" id="L388">        final float bottomRightY = bottomLeftY;</span>
+<span class="fc" id="L412">        final float topLeftX     = margin.left().orElse(0f);</span>
+<span class="fc" id="L413">        final float topLeftY     = margin.top().orElse(0f);</span>
+<span class="fc" id="L414">        final float topRightX    = width - margin.right().orElse(0f);</span>
+<span class="fc" id="L415">        final float topRightY    = topLeftY;</span>
+<span class="fc" id="L416">        final float bottomLeftX  = topLeftX;</span>
+<span class="fc" id="L417">        final float bottomLeftY  = height - margin.bottom().orElse(0f);</span>
+<span class="fc" id="L418">        final float bottomRightX = topRightX;</span>
+<span class="fc" id="L419">        final float bottomRightY = bottomLeftY;</span>
 
-<span class="fc" id="L390">        final float innerTopLeftX     = topLeftX + widths.left().orElse(0f);</span>
-<span class="fc" id="L391">        final float innerTopLeftY     = topLeftY + widths.top().orElse(0f);</span>
-<span class="fc" id="L392">        final float innerTopRightX    = topRightX - widths.right().orElse(0f);</span>
-<span class="fc" id="L393">        final float innerTopRightY    = innerTopLeftY;</span>
-<span class="fc" id="L394">        final float innerBottomLeftX  = bottomLeftX + widths.left().orElse(0f);</span>
-<span class="fc" id="L395">        final float innerBottomLeftY  = bottomLeftY - widths.bottom().orElse(0f);</span>
-<span class="fc" id="L396">        final float innerBottomRightX = bottomRightX - widths.right().orElse(0f);</span>
-<span class="fc" id="L397">        final float innerBottomRightY = innerBottomLeftY;</span>
+<span class="fc" id="L421">        final float innerTopLeftX     = topLeftX + widths.left().orElse(0f);</span>
+<span class="fc" id="L422">        final float innerTopLeftY     = topLeftY + widths.top().orElse(0f);</span>
+<span class="fc" id="L423">        final float innerTopRightX    = topRightX - widths.right().orElse(0f);</span>
+<span class="fc" id="L424">        final float innerTopRightY    = innerTopLeftY;</span>
+<span class="fc" id="L425">        final float innerBottomLeftX  = bottomLeftX + widths.left().orElse(0f);</span>
+<span class="fc" id="L426">        final float innerBottomLeftY  = bottomLeftY - widths.bottom().orElse(0f);</span>
+<span class="fc" id="L427">        final float innerBottomRightX = bottomRightX - widths.right().orElse(0f);</span>
+<span class="fc" id="L428">        final float innerBottomRightY = innerBottomLeftY;</span>
 
-<span class="fc" id="L399">        final float innerCenterX = (innerTopLeftX + innerTopRightX) / 2f;</span>
-<span class="fc" id="L400">        final float innerCenterY = (innerTopLeftY + innerBottomLeftY) / 2f;</span>
+<span class="fc" id="L430">        final float innerCenterX = (innerTopLeftX + innerTopRightX) / 2f;</span>
+<span class="fc" id="L431">        final float innerCenterY = (innerTopLeftY + innerBottomLeftY) / 2f;</span>
 
-<span class="fc" id="L402">        Area[] edgeAreas = new Area[4];</span>
+<span class="fc" id="L433">        Area[] edgeAreas = new Area[4];</span>
         { // TOP:
-<span class="fc" id="L404">            edgeAreas[0] = new Area(new Polygon(</span>
+<span class="fc" id="L435">            edgeAreas[0] = new Area(new Polygon(</span>
                 new int[] {(int)innerCenterX, (int)innerTopLeftX, (int)topLeftX, (int)topRightX, (int)innerTopRightX},
                 new int[] {(int)innerCenterY, (int)innerTopLeftY, (int)topLeftY, (int)topRightY, (int)innerTopRightY},
                 5
             ));
         }
         { // RIGHT:
-<span class="fc" id="L411">            edgeAreas[1] = new Area(new Polygon(</span>
+<span class="fc" id="L442">            edgeAreas[1] = new Area(new Polygon(</span>
                 new int[] {(int)innerCenterX, (int)innerTopRightX, (int)topRightX, (int)bottomRightX, (int)innerBottomRightX},
                 new int[] {(int)innerCenterY, (int)innerTopRightY, (int)topRightY, (int)bottomRightY, (int)innerBottomRightY},
                 5
             ));
         }
         { // BOTTOM:
-<span class="fc" id="L418">            edgeAreas[2] = new Area(new Polygon(</span>
+<span class="fc" id="L449">            edgeAreas[2] = new Area(new Polygon(</span>
                 new int[] {(int)innerCenterX, (int)innerBottomRightX, (int)bottomRightX, (int)bottomLeftX, (int)innerBottomLeftX},
                 new int[] {(int)innerCenterY, (int)innerBottomRightY, (int)bottomRightY, (int)bottomLeftY, (int)innerBottomLeftY},
                 5
             ));
         }
         { // LEFT:
-<span class="fc" id="L425">            edgeAreas[3] = new Area(new Polygon(</span>
+<span class="fc" id="L456">            edgeAreas[3] = new Area(new Polygon(</span>
                 new int[] {(int)innerCenterX, (int)innerBottomLeftX, (int)bottomLeftX, (int)topLeftX, (int)innerTopLeftX},
                 new int[] {(int)innerCenterY, (int)innerBottomLeftY, (int)bottomLeftY, (int)topLeftY, (int)innerTopLeftY},
                 5
             ));
         }
-<span class="fc" id="L431">        return edgeAreas;</span>
+<span class="fc" id="L462">        return edgeAreas;</span>
     }
 
 }

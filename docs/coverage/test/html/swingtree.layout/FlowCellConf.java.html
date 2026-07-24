@@ -98,7 +98,7 @@ public final class FlowCellConf
      *  @return The maximum number of cells that a component can span in a grid layout.
      */
     public int maxCellsToFill() {
-<span class="nc" id="L101">        return _maxCellsToFill;</span>
+<span class="fc" id="L101">        return _maxCellsToFill;</span>
     }
 
     /**
@@ -110,7 +110,7 @@ public final class FlowCellConf
      *          associated with this cell span configuration.
      */
     public Size parentSize() {
-<span class="nc" id="L113">        return _parentSize;</span>
+<span class="fc" id="L113">        return _parentSize;</span>
     }
 
     /**
@@ -127,7 +127,7 @@ public final class FlowCellConf
      *  @return The category of the parent container's size.
      */
     public ParentSizeClass parentSizeCategory() {
-<span class="nc" id="L130">        return _parentSizeCategory;</span>
+<span class="fc" id="L130">        return _parentSizeCategory;</span>
     }
 
     /**
@@ -141,21 +141,21 @@ public final class FlowCellConf
      */
     public FlowCellConf with( ParentSizeClass size, int cellsToFill ) {
 <span class="fc" id="L143">        Objects.requireNonNull(size);</span>
-<span class="pc bpc" id="L144" title="1 of 2 branches missed.">        if ( cellsToFill &lt; 0 ) {</span>
-<span class="nc" id="L145">            log.warn(SwingTree.get().logMarker(),</span>
+<span class="fc bfc" id="L144" title="All 2 branches covered.">        if ( cellsToFill &lt; 0 ) {</span>
+<span class="fc" id="L145">            log.warn(SwingTree.get().logMarker(),</span>
                     &quot;Encountered negative number '{}' for cells to fill as part of the '{}' layout.&quot;,
-<span class="nc" id="L147">                    cellsToFill, ResponsiveGridFlowLayout.class.getSimpleName(),</span>
+<span class="fc" id="L147">                    cellsToFill, ResponsiveGridFlowLayout.class.getSimpleName(),</span>
                     new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                 );
-<span class="nc" id="L150">            cellsToFill = 0;</span>
-<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        } else if ( cellsToFill &gt; _maxCellsToFill ) {</span>
-<span class="nc" id="L152">            log.warn(SwingTree.get().logMarker(),</span>
+<span class="fc" id="L150">            cellsToFill = 0;</span>
+<span class="fc bfc" id="L151" title="All 2 branches covered.">        } else if ( cellsToFill &gt; _maxCellsToFill ) {</span>
+<span class="fc" id="L152">            log.warn(SwingTree.get().logMarker(),</span>
                     &quot;Encountered number '{}' for cells to fill that is greater than the maximum &quot; +
                     &quot;number of cells to fill '{}' as part of the '{}' layout.&quot;,
-<span class="nc" id="L155">                    cellsToFill, _maxCellsToFill, ResponsiveGridFlowLayout.class.getSimpleName(),</span>
+<span class="fc" id="L155">                    cellsToFill, _maxCellsToFill, ResponsiveGridFlowLayout.class.getSimpleName(),</span>
                     new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                 );
-<span class="nc" id="L158">            cellsToFill = _maxCellsToFill;</span>
+<span class="fc" id="L158">            cellsToFill = _maxCellsToFill;</span>
         }
 <span class="fc" id="L160">        FlowCellSpanPolicy[] autoSpans = new FlowCellSpanPolicy[_autoSpans.length+1];</span>
 <span class="fc" id="L161">        System.arraycopy(_autoSpans, 0, autoSpans, 0, _autoSpans.length);</span>

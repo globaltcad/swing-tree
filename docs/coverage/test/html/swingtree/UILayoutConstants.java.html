@@ -305,7 +305,7 @@ public abstract class UILayoutConstants
      * @param yTimes The number of rows to span.
      * @return A constraint that merges columns and rows into a single cell for this component.
      */
-<span class="nc" id="L308">    public static MigAddConstraint SPAN(int xTimes, int yTimes ) { return MigAddConstraint.of( &quot;span &quot; + xTimes + &quot; &quot; + yTimes ); }</span>
+<span class="fc" id="L308">    public static MigAddConstraint SPAN(int xTimes, int yTimes ) { return MigAddConstraint.of( &quot;span &quot; + xTimes + &quot; &quot; + yTimes ); }</span>
 
     /**
      *  Makes this component &lt;b&gt;span across {@code times} columns&lt;/b&gt; only
@@ -316,7 +316,7 @@ public abstract class UILayoutConstants
      * @param times The number of columns to merge.
      * @return A constraint that widens the cell horizontally by the given column count.
      */
-<span class="nc" id="L319">    public static MigAddConstraint SPAN_X(int times ) { return MigAddConstraint.of( &quot;spanx &quot; + times ); }</span>
+<span class="fc" id="L319">    public static MigAddConstraint SPAN_X(int times ) { return MigAddConstraint.of( &quot;spanx &quot; + times ); }</span>
 
     /**
      *  Makes this component &lt;b&gt;span across {@code times} rows&lt;/b&gt; only
@@ -327,7 +327,7 @@ public abstract class UILayoutConstants
      * @param times The number of rows to merge.
      * @return A constraint that extends the cell vertically by the given row count.
      */
-<span class="nc" id="L330">    public static MigAddConstraint SPAN_Y(int times ) { return MigAddConstraint.of( &quot;spany &quot; + times ); }</span>
+<span class="fc" id="L330">    public static MigAddConstraint SPAN_Y(int times ) { return MigAddConstraint.of( &quot;spany &quot; + times ); }</span>
     /**
      *  Tells this component to &lt;b&gt;eagerly expand in both directions&lt;/b&gt;
      *  to fill any extra space in its cell.
@@ -372,7 +372,7 @@ public abstract class UILayoutConstants
      * @param weight The relative grow weight (default is 100 when using {@link #GROW}).
      * @return A constraint that makes the component grow with the specified weight.
      */
-<span class="nc" id="L375">    public static MigAddConstraint GROW(int weight ) { return MigAddConstraint.of( &quot;grow &quot; + weight ); }</span>
+<span class="fc" id="L375">    public static MigAddConstraint GROW(int weight ) { return MigAddConstraint.of( &quot;grow &quot; + weight ); }</span>
 
     /**
      *  Tells this component to &lt;b&gt;grow horizontally&lt;/b&gt; with a specific weight.
@@ -538,7 +538,7 @@ public abstract class UILayoutConstants
      * @param weight The relative vertical push weight.
      * @return A constraint that makes the row push vertically with the given weight.
      */
-<span class="nc" id="L541">    public static MigAddConstraint PUSH_Y( int weight ) { return MigAddConstraint.of(&quot;pushy &quot;+weight); }</span>
+<span class="fc" id="L541">    public static MigAddConstraint PUSH_Y( int weight ) { return MigAddConstraint.of(&quot;pushy &quot;+weight); }</span>
     /**
      *  &lt;b&gt;Skips&lt;/b&gt; over a number of cells in the grid flow
      *  before placing this component.
@@ -550,7 +550,7 @@ public abstract class UILayoutConstants
      * @param cells The number of cells to jump over.
      * @return A constraint that skips the specified number of grid cells.
      */
-<span class="nc" id="L553">    public static MigAddConstraint SKIP( int cells ) { return MigAddConstraint.of(&quot;skip &quot;+cells); }</span>
+<span class="fc" id="L553">    public static MigAddConstraint SKIP( int cells ) { return MigAddConstraint.of(&quot;skip &quot;+cells); }</span>
 
     /**
      *  &lt;b&gt;Splits&lt;/b&gt; the current cell into {@code cells} sub-slots,
@@ -566,7 +566,7 @@ public abstract class UILayoutConstants
      * @param cells The number of sub-slots to create in this cell.
      * @return A constraint that splits the cell for multiple components.
      */
-<span class="nc" id="L569">    public static MigAddConstraint SPLIT( int cells ) { return MigAddConstraint.of(&quot;split &quot;+cells); }</span>
+<span class="fc" id="L569">    public static MigAddConstraint SPLIT( int cells ) { return MigAddConstraint.of(&quot;split &quot;+cells); }</span>
 
     /**
      *  Overrides this component's &lt;b&gt;width&lt;/b&gt; with explicit minimum, preferred, and maximum values (in pixels).
@@ -598,7 +598,7 @@ public abstract class UILayoutConstants
      * @param max  The maximum height in pixels.
      * @return A constraint that overrides the component's height bounds.
      */
-<span class="nc" id="L601">    public static MigAddConstraint HEIGHT( int min, int pref, int max ) { return MigAddConstraint.of(&quot;height &quot;+min+&quot;:&quot;+pref+&quot;:&quot;+max); }</span>
+<span class="fc" id="L601">    public static MigAddConstraint HEIGHT( int min, int pref, int max ) { return MigAddConstraint.of(&quot;height &quot;+min+&quot;:&quot;+pref+&quot;:&quot;+max); }</span>
 
     /**
      *  Applies &lt;b&gt;uniform padding&lt;/b&gt; around this component in absolute pixels.
@@ -614,7 +614,7 @@ public abstract class UILayoutConstants
      * @param size The padding in pixels, applied equally to all four sides.
      * @return A constraint that pads the component's bounds.
      */
-<span class="nc" id="L617">    public static MigAddConstraint PAD( int size ) { return PAD(size, size, size, size); }</span>
+<span class="fc" id="L617">    public static MigAddConstraint PAD( int size ) { return PAD(size, size, size, size); }</span>
 
     /**
      *  Applies &lt;b&gt;individual padding&lt;/b&gt; around this component in absolute pixels.
@@ -631,7 +631,7 @@ public abstract class UILayoutConstants
      * @param right  Padding to the right, in pixels.
      * @return A constraint that pads the component's bounds on each side.
      */
-<span class="nc" id="L634">    public static MigAddConstraint PAD( int top, int left, int bottom, int right ) { return MigAddConstraint.of(&quot;pad &quot;+top+&quot; &quot;+left+&quot; &quot;+bottom+&quot; &quot;+right); }</span>
+<span class="fc" id="L634">    public static MigAddConstraint PAD( int top, int left, int bottom, int right ) { return MigAddConstraint.of(&quot;pad &quot;+top+&quot; &quot;+left+&quot; &quot;+bottom+&quot; &quot;+right); }</span>
     /**
      *  Centres this component &lt;b&gt;both horizontally and vertically&lt;/b&gt; within its cell.
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.

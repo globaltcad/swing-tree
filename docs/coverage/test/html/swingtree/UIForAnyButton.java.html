@@ -1690,8 +1690,8 @@ import java.util.function.Consumer;
     }
 
     private static Icon _fitTo(Size size, Icon icon) {
-<span class="fc" id="L1693">        float width = size.width().orElse(0f);</span>
-<span class="fc" id="L1694">        float height = size.height().orElse(0f);</span>
+<span class="fc" id="L1693">        float width = size.widthOrElse(0f);</span>
+<span class="fc" id="L1694">        float height = size.heightOrElse(0f);</span>
 <span class="fc bfc" id="L1695" title="All 2 branches covered.">        if ( icon instanceof SvgIcon ) {</span>
 <span class="fc" id="L1696">            SvgIcon svgIcon = (SvgIcon) icon;</span>
 <span class="fc" id="L1697">            svgIcon = svgIcon.withIconWidth((int) width);</span>
@@ -2135,8 +2135,8 @@ import java.util.function.Consumer;
 <span class="fc" id="L2135">                        _runInApp(() -&gt; {</span>
                             try {
 <span class="fc" id="L2137">                                action.accept(new ComponentDelegate&lt;&gt;(button, e));</span>
-<span class="nc" id="L2138">                            } catch ( Exception ex ) {</span>
-<span class="nc" id="L2139">                                log.error(SwingTree.get().logMarker(), &quot;Failed to execute action on button click event.&quot;, ex);</span>
+<span class="fc" id="L2138">                            } catch ( Exception ex ) {</span>
+<span class="fc" id="L2139">                                log.error(SwingTree.get().logMarker(), &quot;Failed to execute action on button click event.&quot;, ex);</span>
 <span class="fc" id="L2140">                            }</span>
 <span class="fc" id="L2141">                        })</span>
                     );

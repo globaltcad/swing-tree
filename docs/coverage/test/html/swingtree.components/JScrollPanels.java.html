@@ -41,25 +41,33 @@ import java.util.stream.IntStream;
  *  A {@link JScrollPanels} instance can arrange its entries in a vertical or horizontal manner
  *  based on the {@link UI.Align} parameter.
  *  &lt;br&gt;&lt;br&gt;
- *  Instances of this store view model implementations in a view model property list
- *  so that they can dynamically be turned into views by a {@link ViewSupplier} lambda
- *  when the list changes its state. &lt;br&gt;
- *  Here a simple example demonstrating the usage of the {@link JScrollPanels} class
- *  through the Swing-Tree API:
+ *  The recommended way to populate this component is the tuple based binding,
+ *  where the entries live in a {@link sprouts.Var} property holding an immutable
+ *  {@link sprouts.Tuple} of value objects implementing {@link sprouts.HasId}:
  *  &lt;pre&gt;{@code
  *    UI.scrollPanels()
- *    .addAll(viewModel.entries(), entry -&gt;
- *        UI.panel().add(UI.button(&quot;Click me! :)&quot;))
+ *    .addAll(viewModel.entries(), entry -&gt;  // entry is a Var&lt;Entry&gt; lens into the tuple
+ *        UI.panel().add(UI.label(entry.viewAsString(Entry::text)))
  *    )
  *  }&lt;/pre&gt;
- *  ...where {@code entries()} is a method returning a {@link sprouts.Vars} instance
- *  which contains a list of your sub-view models.
- *  The second parameter of the {@link swingtree.UIForScrollPanels#addAll(sprouts.Vals, ViewSupplier)} method is a lambda
- *  which takes a single view model from the list of view models and turns it into a view.
+ *  ...where {@code entries()} is a method returning a {@code Var&lt;Tuple&lt;Entry&gt;&gt;} property.
+ *  Every entry is handed to the view supplier as a property of its own, structural
+ *  tuple changes add and remove sub-views incrementally, and replacing an entry
+ *  carrying the same {@link sprouts.HasId#id()} recycles its existing sub-view.
+ *  All entry state, including a selection flag if you need one, is simply data in
+ *  your value objects, owned by the application thread — which is what makes this
+ *  pathway fully compatible with the decoupled threading mode
+ *  (see {@link swingtree.threading.EventProcessor#DECOUPLED}).
+ *  &lt;br&gt;&lt;br&gt;
+ *  The older {@link EntryViewModel} based methods of this class remain functional,
+ *  but they are deprecated: their contract requires the UI thread to write position
+ *  and selection state directly into your view models, which cannot be made thread
+ *  safe. See the {@link EntryViewModel} javadoc for the migration pattern.
  */
+@SuppressWarnings(&quot;deprecation&quot;) // This component hosts the deprecated EntryViewModel pathway.
 public class JScrollPanels extends UI.ScrollPane
 {
-<span class="fc" id="L62">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(JScrollPanels.class);</span>
+<span class="fc" id="L70">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(JScrollPanels.class);</span>
 
     /**
      * Constructs a new {@link JScrollPanels} instance with the provided alignment and size.
@@ -71,8 +79,8 @@ public class JScrollPanels extends UI.ScrollPane
     public static JScrollPanels of(
         UI.Align align, @Nullable Dimension size
     ) {
-<span class="fc" id="L74">        Objects.requireNonNull(align);</span>
-<span class="pc" id="L75">        return _construct(align, size, null, Collections.emptyList(), null, m -&gt; UI.panel());</span>
+<span class="fc" id="L82">        Objects.requireNonNull(align);</span>
+<span class="pc" id="L83">        return _construct(align, size, null, Collections.emptyList(), null, m -&gt; UI.panel());</span>
     }
 
     /**
@@ -96,8 +104,8 @@ public class JScrollPanels extends UI.ScrollPane
         @Nullable Dimension size,
         @Nullable Configurator&lt;ScrollableComponentDelegate&gt; configurator
     ) {
-<span class="fc" id="L99">        Objects.requireNonNull(align);</span>
-<span class="pc" id="L100">        return _construct(align, size, configurator, Collections.emptyList(), null, m -&gt; UI.panel());</span>
+<span class="fc" id="L107">        Objects.requireNonNull(align);</span>
+<span class="pc" id="L108">        return _construct(align, size, configurator, Collections.emptyList(), null, m -&gt; UI.panel());</span>
     }
 
     private static JScrollPanels _construct(
@@ -108,33 +116,33 @@ public class JScrollPanels extends UI.ScrollPane
         @Nullable AddConstraint constraints,
         ViewSupplier&lt;EntryViewModel&gt; viewSupplier
     ) {
-<span class="fc" id="L111">        UI.Align type = align;</span>
-<span class="fc" id="L112">        @Nullable InternalPanel[] forwardReference = {null};</span>
-<span class="fc" id="L113">        List&lt;EntryPanel&gt; entries =</span>
-<span class="fc" id="L114">                IntStream.range(0,models.size())</span>
-<span class="fc" id="L115">                        .mapToObj( i -&gt;</span>
-<span class="nc" id="L116">                            new EntryPanel(</span>
-<span class="nc" id="L117">                                    ()-&gt; _entriesIn(forwardReference[0].getComponents()),</span>
+<span class="fc" id="L119">        UI.Align type = align;</span>
+<span class="fc" id="L120">        @Nullable InternalPanel[] forwardReference = {null};</span>
+<span class="fc" id="L121">        List&lt;EntryPanel&gt; entries =</span>
+<span class="fc" id="L122">                IntStream.range(0,models.size())</span>
+<span class="fc" id="L123">                        .mapToObj( i -&gt;</span>
+<span class="nc" id="L124">                            new EntryPanel(</span>
+<span class="nc" id="L125">                                    ()-&gt; _entriesIn(forwardReference[0].getComponents()),</span>
                                     i,
-<span class="nc" id="L119">                                    models.get(i),</span>
+<span class="nc" id="L127">                                    models.get(i),</span>
                                     viewSupplier,
                                     constraints
                                 )
                         )
-<span class="fc" id="L124">                        .collect(Collectors.toList());</span>
+<span class="fc" id="L132">                        .collect(Collectors.toList());</span>
 
 
-<span class="fc" id="L127">        InternalPanel internalWrapperPanel = new InternalPanel(entries, shape, type, configurator);</span>
-<span class="fc" id="L128">        JScrollPanels newJScrollPanels = new JScrollPanels(internalWrapperPanel);</span>
-<span class="fc" id="L129">        internalWrapperPanel._setScrollPane(newJScrollPanels);</span>
-<span class="fc" id="L130">        forwardReference[0] = internalWrapperPanel;</span>
+<span class="fc" id="L135">        InternalPanel internalWrapperPanel = new InternalPanel(entries, shape, type, configurator);</span>
+<span class="fc" id="L136">        JScrollPanels newJScrollPanels = new JScrollPanels(internalWrapperPanel);</span>
+<span class="fc" id="L137">        internalWrapperPanel._setScrollPane(newJScrollPanels);</span>
+<span class="fc" id="L138">        forwardReference[0] = internalWrapperPanel;</span>
 
-<span class="fc bfc" id="L132" title="All 2 branches covered.">        if ( type == UI.Align.HORIZONTAL )</span>
-<span class="fc" id="L133">            newJScrollPanels.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);</span>
+<span class="fc bfc" id="L140" title="All 2 branches covered.">        if ( type == UI.Align.HORIZONTAL )</span>
+<span class="fc" id="L141">            newJScrollPanels.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);</span>
         else
-<span class="fc" id="L135">            newJScrollPanels.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);</span>
+<span class="fc" id="L143">            newJScrollPanels.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);</span>
 
-<span class="fc" id="L137">        return newJScrollPanels;</span>
+<span class="fc" id="L145">        return newJScrollPanels;</span>
     }
 
 
@@ -142,9 +150,9 @@ public class JScrollPanels extends UI.ScrollPane
 
 
     private JScrollPanels(InternalPanel listWrapper) {
-<span class="fc" id="L145">        super(listWrapper);</span>
-<span class="fc" id="L146">        _internal = listWrapper;</span>
-<span class="fc" id="L147">    }</span>
+<span class="fc" id="L153">        super(listWrapper);</span>
+<span class="fc" id="L154">        _internal = listWrapper;</span>
+<span class="fc" id="L155">    }</span>
 
     /**
      *  Allows you to get the number of entries which are currently managed by this {@link JScrollPanels}.
@@ -152,14 +160,14 @@ public class JScrollPanels extends UI.ScrollPane
      *
      * @return The number of entries which are currently managed by this {@link JScrollPanels}.
      */
-<span class="fc" id="L155">    public int getNumberOfEntries() { return _internal.getComponents().length; }</span>
+<span class="fc" id="L163">    public int getNumberOfEntries() { return _internal.getComponents().length; }</span>
 
     /**
      *  Exposes the content panel that contains the actual entry components.
      * @return The container of the entry views.
      */
     public JComponent getContentPanel() {
-<span class="fc" id="L162">        return _internal;</span>
+<span class="fc" id="L170">        return _internal;</span>
     }
 
     /**
@@ -174,15 +182,15 @@ public class JScrollPanels extends UI.ScrollPane
      * @param &lt;M&gt; The type of the entry view model.
      */
     public &lt;M extends EntryViewModel&gt; void addEntry( M entryViewModel, ViewSupplier&lt;M&gt; viewSupplier) {
-<span class="fc" id="L177">        Objects.requireNonNull(entryViewModel);</span>
-<span class="fc" id="L178">        addEntry(null, entryViewModel, viewSupplier);</span>
-<span class="fc" id="L179">    }</span>
+<span class="fc" id="L185">        Objects.requireNonNull(entryViewModel);</span>
+<span class="fc" id="L186">        addEntry(null, entryViewModel, viewSupplier);</span>
+<span class="fc" id="L187">    }</span>
 
     public &lt;M extends EntryViewModel&gt; void addEntryAt( int index, M entryViewModel, ViewSupplier&lt;M&gt; viewSupplier) {
-<span class="nc" id="L182">        Objects.requireNonNull(entryViewModel);</span>
-<span class="nc" id="L183">        EntryPanel entryPanel = _createEntryPanel(null, entryViewModel, viewSupplier, index);</span>
-<span class="nc" id="L184">        _internal.add(entryPanel, index);</span>
-<span class="nc" id="L185">    }</span>
+<span class="nc" id="L190">        Objects.requireNonNull(entryViewModel);</span>
+<span class="nc" id="L191">        EntryPanel entryPanel = _createEntryPanel(null, entryViewModel, viewSupplier, index);</span>
+<span class="nc" id="L192">        _internal.add(entryPanel, index);</span>
+<span class="nc" id="L193">    }</span>
 
     /**
      *  The {@link JScrollPanels} does not store components statically in the UI tree.
@@ -197,11 +205,11 @@ public class JScrollPanels extends UI.ScrollPane
      * @param &lt;M&gt; The type of the entry view model.
      */
     public &lt;M extends EntryViewModel&gt; void addEntry( @Nullable AddConstraint constraints, M entryViewModel, ViewSupplier&lt;M&gt; viewSupplier ) {
-<span class="fc" id="L200">        Objects.requireNonNull(entryViewModel);</span>
-<span class="fc" id="L201">        EntryPanel entryPanel = _createEntryPanel(constraints, entryViewModel, viewSupplier, _internal.getComponents().length);</span>
-<span class="fc" id="L202">        _internal.add(entryPanel);</span>
-<span class="fc" id="L203">        this.validate();</span>
-<span class="fc" id="L204">    }</span>
+<span class="fc" id="L208">        Objects.requireNonNull(entryViewModel);</span>
+<span class="fc" id="L209">        EntryPanel entryPanel = _createEntryPanel(constraints, entryViewModel, viewSupplier, _internal.getComponents().length);</span>
+<span class="fc" id="L210">        _internal.add(entryPanel);</span>
+<span class="fc" id="L211">        this.validate();</span>
+<span class="fc" id="L212">    }</span>
 
     /**
      *  Adds multiple entries at once to this {@link JScrollPanels}.
@@ -211,9 +219,9 @@ public class JScrollPanels extends UI.ScrollPane
      * @param &lt;M&gt; The type of the entry view model.
      */
     public &lt;M extends EntryViewModel&gt; void addAllEntries( @Nullable AddConstraint constraints, Iterable&lt;M&gt; entryViewModels, ViewSupplier&lt;M&gt; viewSupplier ) {
-<span class="nc" id="L214">        Objects.requireNonNull(entryViewModels);</span>
-<span class="nc" id="L215">        addAllEntriesAt(_internal.getComponents().length, constraints, entryViewModels, viewSupplier);</span>
-<span class="nc" id="L216">    }</span>
+<span class="nc" id="L222">        Objects.requireNonNull(entryViewModels);</span>
+<span class="nc" id="L223">        addAllEntriesAt(_internal.getComponents().length, constraints, entryViewModels, viewSupplier);</span>
+<span class="nc" id="L224">    }</span>
 
     /**
      *  Adds multiple entries at once to this {@link JScrollPanels} at a certain index.
@@ -224,25 +232,25 @@ public class JScrollPanels extends UI.ScrollPane
      * @param &lt;M&gt; The type of the entry view model.
      */
     public &lt;M extends EntryViewModel&gt; void addAllEntriesAt( int index, @Nullable AddConstraint constraints, Iterable&lt;M&gt; entryViewModels, ViewSupplier&lt;M&gt; viewSupplier ) {
-<span class="fc" id="L227">        Objects.requireNonNull(entryViewModels);</span>
-<span class="fc" id="L228">        List&lt;EntryPanel&gt; entryPanels = new ArrayList&lt;&gt;();</span>
-<span class="fc" id="L229">        int i = 0;</span>
-<span class="fc bfc" id="L230" title="All 2 branches covered.">        for ( M model : entryViewModels ) {</span>
-<span class="fc" id="L231">            entryPanels.add(</span>
-<span class="fc" id="L232">                    _createEntryPanel(</span>
+<span class="fc" id="L235">        Objects.requireNonNull(entryViewModels);</span>
+<span class="fc" id="L236">        List&lt;EntryPanel&gt; entryPanels = new ArrayList&lt;&gt;();</span>
+<span class="fc" id="L237">        int i = 0;</span>
+<span class="fc bfc" id="L238" title="All 2 branches covered.">        for ( M model : entryViewModels ) {</span>
+<span class="fc" id="L239">            entryPanels.add(</span>
+<span class="fc" id="L240">                    _createEntryPanel(</span>
                             constraints,
                             model,
                             viewSupplier,
                             index + i
                     )
             );
-<span class="fc" id="L239">            i++;</span>
-<span class="fc" id="L240">        }</span>
-<span class="fc bfc" id="L241" title="All 2 branches covered.">        for ( int j = 0; j &lt; entryPanels.size(); j++ ) {</span>
-<span class="fc" id="L242">            _internal.add(entryPanels.get(j), index + j);</span>
+<span class="fc" id="L247">            i++;</span>
+<span class="fc" id="L248">        }</span>
+<span class="fc bfc" id="L249" title="All 2 branches covered.">        for ( int j = 0; j &lt; entryPanels.size(); j++ ) {</span>
+<span class="fc" id="L250">            _internal.add(entryPanels.get(j), index + j);</span>
         }
-<span class="fc" id="L244">        this.validate();</span>
-<span class="fc" id="L245">    }</span>
+<span class="fc" id="L252">        this.validate();</span>
+<span class="fc" id="L253">    }</span>
 
     /**
      *   Use this to set all entries at a certain index
@@ -254,74 +262,74 @@ public class JScrollPanels extends UI.ScrollPane
      * @param &lt;M&gt; The type of the entry view model.
      */
     public &lt;M extends EntryViewModel&gt; void setAllEntriesAt( int index, @Nullable AddConstraint constraints, Iterable&lt;M&gt; entryViewModels, ViewSupplier&lt;M&gt; viewSupplier ) {
-<span class="fc" id="L257">        Objects.requireNonNull(entryViewModels);</span>
-<span class="fc" id="L258">        boolean somethingChanged = false;</span>
-<span class="fc" id="L259">        int i = 0;</span>
-<span class="fc bfc" id="L260" title="All 2 branches covered.">        for ( M model : entryViewModels ) {</span>
-<span class="fc" id="L261">            int localIndex = index + i;</span>
-<span class="fc" id="L262">            i++;</span>
-<span class="fc" id="L263">            EntryPanel entry = _createEntryPanel(</span>
+<span class="fc" id="L265">        Objects.requireNonNull(entryViewModels);</span>
+<span class="fc" id="L266">        boolean somethingChanged = false;</span>
+<span class="fc" id="L267">        int i = 0;</span>
+<span class="fc bfc" id="L268" title="All 2 branches covered.">        for ( M model : entryViewModels ) {</span>
+<span class="fc" id="L269">            int localIndex = index + i;</span>
+<span class="fc" id="L270">            i++;</span>
+<span class="fc" id="L271">            EntryPanel entry = _createEntryPanel(</span>
                                     constraints,
                                     model,
                                     viewSupplier,
                                     localIndex
                                 );
             try {
-<span class="fc" id="L270">                Component existing = _internal.getComponent(localIndex);</span>
-<span class="pc bpc" id="L271" title="1 of 2 branches missed.">                if ( existing instanceof EntryPanel ) {</span>
-<span class="fc" id="L272">                    EntryPanel existingEntry = (EntryPanel) existing;</span>
-<span class="pc bpc" id="L273" title="1 of 2 branches missed.">                    if ( existingEntry.getComponentCount() == 0 ) {</span>
-<span class="nc" id="L274">                        log.error(SwingTree.get().logMarker(),</span>
+<span class="fc" id="L278">                Component existing = _internal.getComponent(localIndex);</span>
+<span class="pc bpc" id="L279" title="1 of 2 branches missed.">                if ( existing instanceof EntryPanel ) {</span>
+<span class="fc" id="L280">                    EntryPanel existingEntry = (EntryPanel) existing;</span>
+<span class="pc bpc" id="L281" title="1 of 2 branches missed.">                    if ( existingEntry.getComponentCount() == 0 ) {</span>
+<span class="nc" id="L282">                        log.error(SwingTree.get().logMarker(),</span>
                                 &quot;The entry panel '{}' about to be replaced by '{}' in '{}' is missing its view.&quot;,
                                 existingEntry, entry, JScrollPanels.class,
                                 new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                         );
-<span class="pc bpc" id="L279" title="1 of 2 branches missed.">                    } else if ( entry.getComponentCount() == 0 ) {</span>
-<span class="nc" id="L280">                        log.error(SwingTree.get().logMarker(),</span>
+<span class="pc bpc" id="L287" title="1 of 2 branches missed.">                    } else if ( entry.getComponentCount() == 0 ) {</span>
+<span class="nc" id="L288">                        log.error(SwingTree.get().logMarker(),</span>
                                 &quot;The entry panel '{}' that should replace panel '{}' in '{}' is missing its view.&quot;,
                                 entry, existingEntry, JScrollPanels.class,
                                 new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                             );
                     } else {
-<span class="fc" id="L286">                        Component existingView = existingEntry.getComponent(0);</span>
-<span class="fc" id="L287">                        Component newView = entry.getComponent(0);</span>
-<span class="pc bpc" id="L288" title="1 of 2 branches missed.">                        if ( existingView == newView )</span>
-<span class="fc" id="L289">                            continue; // The view is already there</span>
+<span class="fc" id="L294">                        Component existingView = existingEntry.getComponent(0);</span>
+<span class="fc" id="L295">                        Component newView = entry.getComponent(0);</span>
+<span class="pc bpc" id="L296" title="1 of 2 branches missed.">                        if ( existingView == newView )</span>
+<span class="fc" id="L297">                            continue; // The view is already there</span>
                     }
-<span class="nc" id="L291">                } else {</span>
-<span class="nc" id="L292">                    log.error(SwingTree.get().logMarker(),</span>
+<span class="nc" id="L299">                } else {</span>
+<span class="nc" id="L300">                    log.error(SwingTree.get().logMarker(),</span>
                             &quot;Encountered illegal type of entry panel in {}.&quot;,
                             JScrollPanels.class, new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                         );
                 }
-<span class="nc" id="L297">                _internal.remove(localIndex);</span>
-<span class="nc" id="L298">                _internal.add(entry, localIndex);</span>
-<span class="nc" id="L299">                somethingChanged = true;</span>
-<span class="nc" id="L300">            } catch (Exception e) {</span>
-<span class="nc" id="L301">                log.error(SwingTree.get().logMarker(), &quot;Encountered an exception while trying to update the component at index '{}'.&quot;, localIndex, e);</span>
-<span class="nc" id="L302">            }</span>
-<span class="nc" id="L303">        }</span>
-<span class="pc bpc" id="L304" title="1 of 2 branches missed.">        if ( somethingChanged ) {</span>
-<span class="nc" id="L305">            this.validate();</span>
+<span class="nc" id="L305">                _internal.remove(localIndex);</span>
+<span class="nc" id="L306">                _internal.add(entry, localIndex);</span>
+<span class="nc" id="L307">                somethingChanged = true;</span>
+<span class="nc" id="L308">            } catch (Exception e) {</span>
+<span class="nc" id="L309">                log.error(SwingTree.get().logMarker(), &quot;Encountered an exception while trying to update the component at index '{}'.&quot;, localIndex, e);</span>
+<span class="nc" id="L310">            }</span>
+<span class="nc" id="L311">        }</span>
+<span class="pc bpc" id="L312" title="1 of 2 branches missed.">        if ( somethingChanged ) {</span>
+<span class="nc" id="L313">            this.validate();</span>
         }
-<span class="fc" id="L307">    }</span>
+<span class="fc" id="L315">    }</span>
 
     /**
      *  Use this to remove all entries.
      */
     public void removeAllEntries() {
-<span class="fc" id="L313">        _internal.removeAll();</span>
-<span class="fc" id="L314">        this.validate();</span>
-<span class="fc" id="L315">    }</span>
+<span class="fc" id="L321">        _internal.removeAll();</span>
+<span class="fc" id="L322">        this.validate();</span>
+<span class="fc" id="L323">    }</span>
 
     /**
      *  Use this to remove an entry at a certain index.
      * @param index The index of the entry which ought to be removed.
      */
     public void removeEntryAt( int index ) {
-<span class="nc" id="L322">        _internal.remove(index);</span>
-<span class="nc" id="L323">        this.validate();</span>
-<span class="nc" id="L324">    }</span>
+<span class="nc" id="L330">        _internal.remove(index);</span>
+<span class="nc" id="L331">        this.validate();</span>
+<span class="nc" id="L332">    }</span>
 
     /**
      *  Use this to remove a certain number of entries starting at a certain index.
@@ -329,9 +337,9 @@ public class JScrollPanels extends UI.ScrollPane
      * @param count The number of entries which ought to be removed.
      */
     public void removeEntriesAt( int index, int count ) {
-<span class="fc" id="L332">        IntStream.range(0, count).forEach( i -&gt; _internal.remove(index) );</span>
-<span class="fc" id="L333">        this.validate();</span>
-<span class="fc" id="L334">    }</span>
+<span class="fc" id="L340">        IntStream.range(0, count).forEach( i -&gt; _internal.remove(index) );</span>
+<span class="fc" id="L341">        this.validate();</span>
+<span class="fc" id="L342">    }</span>
 
     /**
      *  Use this to add an entry at a certain index.
@@ -343,11 +351,11 @@ public class JScrollPanels extends UI.ScrollPane
      *  @param &lt;M&gt; The type of the entry view model.
      */
     public &lt;M extends EntryViewModel&gt; void addEntryAt( int index, @Nullable AddConstraint attr, M entryViewModel, ViewSupplier&lt;M&gt; viewSupplier ) {
-<span class="fc" id="L346">        Objects.requireNonNull(entryViewModel);</span>
-<span class="fc" id="L347">        EntryPanel entryPanel = _createEntryPanel(attr, entryViewModel, viewSupplier, index);</span>
-<span class="fc" id="L348">        _internal.add(entryPanel, index);</span>
-<span class="fc" id="L349">        this.validate();</span>
-<span class="fc" id="L350">    }</span>
+<span class="fc" id="L354">        Objects.requireNonNull(entryViewModel);</span>
+<span class="fc" id="L355">        EntryPanel entryPanel = _createEntryPanel(attr, entryViewModel, viewSupplier, index);</span>
+<span class="fc" id="L356">        _internal.add(entryPanel, index);</span>
+<span class="fc" id="L357">        this.validate();</span>
+<span class="fc" id="L358">    }</span>
 
     /**
      *     Use this to replace an entry at a certain index. &lt;br&gt;
@@ -360,31 +368,31 @@ public class JScrollPanels extends UI.ScrollPane
      *  @param &lt;M&gt; The type of the entry view model.
      */
     public &lt;M extends EntryViewModel&gt; void setEntryAt( int index, @Nullable AddConstraint attr, M entryViewModel, ViewSupplier&lt;M&gt; viewSupplier ) {
-<span class="fc" id="L363">        Objects.requireNonNull(entryViewModel);</span>
-<span class="fc" id="L364">        EntryPanel newEntryPanel = _createEntryPanel(attr, entryViewModel, viewSupplier, index);</span>
-<span class="fc" id="L365">        Component existing = _internal.getComponent(index);</span>
-<span class="pc bpc" id="L366" title="1 of 2 branches missed.">        if ( existing instanceof EntryPanel ) {</span>
-<span class="fc" id="L367">            EntryPanel existingEntry = (EntryPanel) existing;</span>
-<span class="pc bpc" id="L368" title="1 of 2 branches missed.">            if ( existingEntry.getComponentCount() == 0 ) {</span>
-<span class="nc" id="L369">                log.error(SwingTree.get().logMarker(),</span>
+<span class="fc" id="L371">        Objects.requireNonNull(entryViewModel);</span>
+<span class="fc" id="L372">        EntryPanel newEntryPanel = _createEntryPanel(attr, entryViewModel, viewSupplier, index);</span>
+<span class="fc" id="L373">        Component existing = _internal.getComponent(index);</span>
+<span class="pc bpc" id="L374" title="1 of 2 branches missed.">        if ( existing instanceof EntryPanel ) {</span>
+<span class="fc" id="L375">            EntryPanel existingEntry = (EntryPanel) existing;</span>
+<span class="pc bpc" id="L376" title="1 of 2 branches missed.">            if ( existingEntry.getComponentCount() == 0 ) {</span>
+<span class="nc" id="L377">                log.error(SwingTree.get().logMarker(),</span>
                         &quot;The entry panel '{}' about to be replaced by '{}' in '{}' is missing its view.&quot;,
                         existingEntry, newEntryPanel, JScrollPanels.class,
                         new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                     );
-<span class="pc bpc" id="L374" title="1 of 2 branches missed.">            } else if ( newEntryPanel.getComponentCount() == 0 ) {</span>
-<span class="nc" id="L375">                log.error(SwingTree.get().logMarker(),</span>
+<span class="pc bpc" id="L382" title="1 of 2 branches missed.">            } else if ( newEntryPanel.getComponentCount() == 0 ) {</span>
+<span class="nc" id="L383">                log.error(SwingTree.get().logMarker(),</span>
                         &quot;The entry panel '{}' that should replace panel '{}' in '{}' is missing its view.&quot;,
                         newEntryPanel, existingEntry, JScrollPanels.class,
                         new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                     );
             } else {
-<span class="fc" id="L381">                Component existingView = ((EntryPanel) existing).getComponent(0);</span>
-<span class="fc" id="L382">                Component newView = newEntryPanel.getComponent(0);</span>
-<span class="pc bpc" id="L383" title="1 of 2 branches missed.">                if ( existingView == newView )</span>
-<span class="nc" id="L384">                    return; // The view is already there</span>
+<span class="fc" id="L389">                Component existingView = ((EntryPanel) existing).getComponent(0);</span>
+<span class="fc" id="L390">                Component newView = newEntryPanel.getComponent(0);</span>
+<span class="pc bpc" id="L391" title="1 of 2 branches missed.">                if ( existingView == newView )</span>
+<span class="nc" id="L392">                    return; // The view is already there</span>
             }
-<span class="fc" id="L386">        } else {</span>
-<span class="nc" id="L387">            log.error(SwingTree.get().logMarker(),</span>
+<span class="fc" id="L394">        } else {</span>
+<span class="nc" id="L395">            log.error(SwingTree.get().logMarker(),</span>
                     &quot;Encountered illegal type of entry panel in {}.&quot;,
                     JScrollPanels.class, new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                 );
@@ -392,12 +400,12 @@ public class JScrollPanels extends UI.ScrollPane
         // We first remove the old entry panel and then add the new one.
         // This is necessary because the layout manager does not allow to replace
         // a component at a certain index.
-<span class="fc" id="L395">        _internal.remove(index);</span>
+<span class="fc" id="L403">        _internal.remove(index);</span>
         // We have to re-add the entry panel at the same index
         // because the layout manager will otherwise add it at the end.
-<span class="fc" id="L398">        _internal.add(newEntryPanel, index);</span>
-<span class="fc" id="L399">        this.validate();</span>
-<span class="fc" id="L400">    }</span>
+<span class="fc" id="L406">        _internal.add(newEntryPanel, index);</span>
+<span class="fc" id="L407">        this.validate();</span>
+<span class="fc" id="L408">    }</span>
 
     /**
      *  Use this to find an entry component.
@@ -410,16 +418,16 @@ public class JScrollPanels extends UI.ScrollPane
     private &lt;T extends JComponent&gt; @Nullable EntryPanel get(
             Class&lt;T&gt; type, Predicate&lt;EntryPanel&gt; condition
     ) {
-<span class="nc" id="L413">        Objects.requireNonNull(type);</span>
-<span class="nc" id="L414">        Objects.requireNonNull(condition);</span>
-<span class="nc" id="L415">        return</span>
-<span class="nc" id="L416">            Arrays.stream(_internal.getComponents())</span>
-<span class="nc" id="L417">                    .filter(Objects::nonNull)</span>
-<span class="nc" id="L418">                    .map( c -&gt; (EntryPanel) c )</span>
-<span class="nc" id="L419">                    .filter( c -&gt; type.isAssignableFrom(c.getLastState().getClass()) )</span>
-<span class="nc" id="L420">                    .filter( c -&gt; condition.test(c) )</span>
-<span class="nc" id="L421">                    .findFirst()</span>
-<span class="nc" id="L422">                    .orElse(null);</span>
+<span class="nc" id="L421">        Objects.requireNonNull(type);</span>
+<span class="nc" id="L422">        Objects.requireNonNull(condition);</span>
+<span class="nc" id="L423">        return</span>
+<span class="nc" id="L424">            Arrays.stream(_internal.getComponents())</span>
+<span class="nc" id="L425">                    .filter(Objects::nonNull)</span>
+<span class="nc" id="L426">                    .map( c -&gt; (EntryPanel) c )</span>
+<span class="nc" id="L427">                    .filter( c -&gt; type.isAssignableFrom(c.getLastState().getClass()) )</span>
+<span class="nc" id="L428">                    .filter( c -&gt; condition.test(c) )</span>
+<span class="nc" id="L429">                    .findFirst()</span>
+<span class="nc" id="L430">                    .orElse(null);</span>
     }
 
     /**
@@ -428,11 +436,15 @@ public class JScrollPanels extends UI.ScrollPane
      * @param type The component type which ought to be found.
      * @param &lt;T&gt; The component type which ought to be found.
      * @return The found entry panel matching the provided type class and predicate lambda.
+     * @deprecated This is part of the {@link EntryViewModel} based selection machinery,
+     *             which is deprecated in favour of modelling the selection as plain data
+     *             in tuple bound entries. See {@link EntryViewModel} for the migration pattern.
      */
+    @Deprecated
     public &lt;T extends JComponent&gt; Optional&lt;T&gt; getSelected( Class&lt;T&gt; type ) {
-<span class="nc" id="L433">        Objects.requireNonNull(type);</span>
-<span class="nc" id="L434">        Objects.requireNonNull(type);</span>
-<span class="nc" id="L435">        return (Optional&lt;T&gt;) Optional.ofNullable(get(type, EntryPanel::isEntrySelected)).map(e -&gt; e.getLastState() );</span>
+<span class="nc" id="L445">        Objects.requireNonNull(type);</span>
+<span class="nc" id="L446">        Objects.requireNonNull(type);</span>
+<span class="nc" id="L447">        return (Optional&lt;T&gt;) Optional.ofNullable(get(type, EntryPanel::isEntrySelected)).map(e -&gt; e.getLastState() );</span>
     }
 
     /**
@@ -441,11 +453,11 @@ public class JScrollPanels extends UI.ScrollPane
      * @param action The action which ought to be applied to all {@link JScrollPanels} entries.
      */
     public void forEachEntry( Consumer&lt;EntryPanel&gt; action ) {
-<span class="nc" id="L444">        Objects.requireNonNull(action);</span>
-<span class="nc" id="L445">        Arrays.stream(_internal.getComponents())</span>
-<span class="nc" id="L446">                .map( c -&gt; (EntryPanel) c )</span>
-<span class="nc" id="L447">                .forEach(action);</span>
-<span class="nc" id="L448">    }</span>
+<span class="fc" id="L456">        Objects.requireNonNull(action);</span>
+<span class="fc" id="L457">        Arrays.stream(_internal.getComponents())</span>
+<span class="fc" id="L458">                .map( c -&gt; (EntryPanel) c )</span>
+<span class="fc" id="L459">                .forEach(action);</span>
+<span class="fc" id="L460">    }</span>
 
     /**
      *  Use this to iterate over all panel list entries of a certain type
@@ -457,26 +469,30 @@ public class JScrollPanels extends UI.ScrollPane
      * @param &lt;T&gt; The entry value type parameter.
      */
     public &lt;T extends JComponent&gt; void forEachEntry(Class&lt;T&gt; type, Consumer&lt;EntryPanel&gt; action) {
-<span class="nc" id="L460">        Objects.requireNonNull(type);</span>
-<span class="nc" id="L461">        Objects.requireNonNull(action);</span>
-<span class="nc" id="L462">        Arrays.stream(_internal.getComponents())</span>
-<span class="nc" id="L463">                .map( c -&gt; (EntryPanel) c )</span>
-<span class="nc" id="L464">                .filter( e -&gt; type.isAssignableFrom(e.getLastState().getClass()) )</span>
-<span class="nc" id="L465">                .forEach(action);</span>
-<span class="nc" id="L466">    }</span>
+<span class="fc" id="L472">        Objects.requireNonNull(type);</span>
+<span class="fc" id="L473">        Objects.requireNonNull(action);</span>
+<span class="fc" id="L474">        Arrays.stream(_internal.getComponents())</span>
+<span class="fc" id="L475">                .map( c -&gt; (EntryPanel) c )</span>
+<span class="fc" id="L476">                .filter( e -&gt; type.isAssignableFrom(e.getLastState().getClass()) )</span>
+<span class="fc" id="L477">                .forEach(action);</span>
+<span class="fc" id="L478">    }</span>
 
     /**
      *  Use this to set entries as selected based on a condition lambda (predicate).
      * @param type The type of the entry which ought to be selected.
      * @param condition The condition which ought to be met for the entry to be selected.
      * @param &lt;T&gt; The type of the entry which ought to be selected.
+     * @deprecated This is part of the {@link EntryViewModel} based selection machinery,
+     *             which is deprecated in favour of modelling the selection as plain data
+     *             in tuple bound entries. See {@link EntryViewModel} for the migration pattern.
      */
+    @Deprecated
     public &lt;T extends JComponent&gt; void setSelectedFor(Class&lt;T&gt; type, Predicate&lt;T&gt; condition) {
-<span class="nc" id="L475">        forEachEntry( e -&gt; e.setEntrySelected(false) );</span>
-<span class="nc" id="L476">        forEachEntry(type, e -&gt; {</span>
-<span class="nc bnc" id="L477" title="All 2 branches missed.">            if ( condition.test((T) e.getLastState()) ) e.setEntrySelected(true);</span>
-<span class="nc" id="L478">        });</span>
-<span class="nc" id="L479">    }</span>
+<span class="fc" id="L491">        forEachEntry( e -&gt; e.setEntrySelected(false) );</span>
+<span class="fc" id="L492">        forEachEntry(type, e -&gt; {</span>
+<span class="fc bfc" id="L493" title="All 2 branches covered.">            if ( condition.test((T) e.getLastState()) ) e.setEntrySelected(true);</span>
+<span class="fc" id="L494">        });</span>
+<span class="fc" id="L495">    }</span>
 
     private &lt;M extends EntryViewModel&gt; EntryPanel _createEntryPanel(
         @Nullable AddConstraint constraints,
@@ -484,35 +500,35 @@ public class JScrollPanels extends UI.ScrollPane
         ViewSupplier&lt;M&gt; viewSupplier,
         int index
     ) {
-<span class="fc" id="L487">        Function&lt;Boolean, JComponent&gt; indexedViewSupplier = EntryPanel.providerFrom(index, viewModel, viewSupplier);</span>
-<span class="fc" id="L488">        JComponent initialView = indexedViewSupplier.apply(false);</span>
+<span class="fc" id="L503">        Function&lt;Boolean, JComponent&gt; indexedViewSupplier = EntryPanel.providerFrom(index, viewModel, viewSupplier);</span>
+<span class="fc" id="L504">        JComponent initialView = indexedViewSupplier.apply(false);</span>
         // Let's see if we can avoid recreating an entry:
-<span class="fc" id="L490">        int numberOfExistingComponents = _internal.getComponentCount();</span>
-<span class="fc bfc" id="L491" title="All 4 branches covered.">        if ( numberOfExistingComponents &gt; 0 &amp;&amp; numberOfExistingComponents &gt; index ) {</span>
-<span class="fc" id="L492">            Component found = _internal.getComponent(index);</span>
-<span class="pc bpc" id="L493" title="1 of 2 branches missed.">            if ( !(found instanceof EntryPanel) ) {</span>
-<span class="nc" id="L494">                log.error(SwingTree.get().logMarker(),</span>
+<span class="fc" id="L506">        int numberOfExistingComponents = _internal.getComponentCount();</span>
+<span class="fc bfc" id="L507" title="All 4 branches covered.">        if ( numberOfExistingComponents &gt; 0 &amp;&amp; numberOfExistingComponents &gt; index ) {</span>
+<span class="fc" id="L508">            Component found = _internal.getComponent(index);</span>
+<span class="pc bpc" id="L509" title="1 of 2 branches missed.">            if ( !(found instanceof EntryPanel) ) {</span>
+<span class="nc" id="L510">                log.error(SwingTree.get().logMarker(),</span>
                         &quot;Encountered illegal child component '{}' in '{}'.&quot;,
                         found, JScrollPanels.class,
                         new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                     );
             } else {
-<span class="fc" id="L500">                EntryPanel existingEntry = (EntryPanel) found;</span>
-<span class="pc bpc" id="L501" title="1 of 2 branches missed.">                if ( existingEntry.getComponentCount() == 0 ) {</span>
-<span class="nc" id="L502">                    log.error(SwingTree.get().logMarker(),</span>
+<span class="fc" id="L516">                EntryPanel existingEntry = (EntryPanel) found;</span>
+<span class="pc bpc" id="L517" title="1 of 2 branches missed.">                if ( existingEntry.getComponentCount() == 0 ) {</span>
+<span class="nc" id="L518">                    log.error(SwingTree.get().logMarker(),</span>
                             &quot;Existing entry panel '{}' about to be replaced by new view '{}' in '{}' is missing its view.&quot;,
                             existingEntry, initialView, JScrollPanels.class,
                             new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                         );
                 } else {
-<span class="fc" id="L508">                    Component existingView = existingEntry.getComponent(0);</span>
-<span class="fc bfc" id="L509" title="All 2 branches covered.">                    if ( existingView == initialView )</span>
-<span class="fc" id="L510">                        return existingEntry; // The view is already there</span>
+<span class="fc" id="L524">                    Component existingView = existingEntry.getComponent(0);</span>
+<span class="fc bfc" id="L525" title="All 2 branches covered.">                    if ( existingView == initialView )</span>
+<span class="fc" id="L526">                        return existingEntry; // The view is already there</span>
                 }
             }
         }
-<span class="pc" id="L514">        Supplier&lt;List&lt;EntryPanel&gt;&gt; components = ()-&gt; _entriesIn(_internal.getComponents());</span>
-<span class="fc" id="L515">        return new EntryPanel(</span>
+<span class="pc" id="L530">        Supplier&lt;List&lt;EntryPanel&gt;&gt; components = ()-&gt; _entriesIn(_internal.getComponents());</span>
+<span class="fc" id="L531">        return new EntryPanel(</span>
                         components,
                         index,
                         viewModel,
@@ -541,78 +557,78 @@ public class JScrollPanels extends UI.ScrollPane
             @Nullable Dimension shape,
             UI.Align type,
             @Nullable Configurator&lt;ScrollableComponentDelegate&gt; configurator
-<span class="fc" id="L544">        ) {</span>
-<span class="fc bfc" id="L545" title="All 2 branches covered.">            shape = ( shape == null ? new Dimension(120, 100) : shape );</span>
-<span class="fc" id="L546">            int n = entryPanels.size() / 2;</span>
-<span class="fc" id="L547">            _W = (int) shape.getWidth(); // 120</span>
-<span class="fc" id="L548">            _H = (int) shape.getHeight(); // 100</span>
-<span class="fc" id="L549">            _type = type;</span>
-<span class="fc" id="L550">            _configurator = configurator;</span>
+<span class="fc" id="L560">        ) {</span>
+<span class="fc bfc" id="L561" title="All 2 branches covered.">            shape = ( shape == null ? new Dimension(120, 100) : shape );</span>
+<span class="fc" id="L562">            int n = entryPanels.size() / 2;</span>
+<span class="fc" id="L563">            _W = (int) shape.getWidth(); // 120</span>
+<span class="fc" id="L564">            _H = (int) shape.getHeight(); // 100</span>
+<span class="fc" id="L565">            _type = type;</span>
+<span class="fc" id="L566">            _configurator = configurator;</span>
             LayoutManager layout;
-<span class="fc bfc" id="L552" title="All 2 branches covered.">            if ( type == UI.Align.HORIZONTAL ) {</span>
-<span class="fc" id="L553">                ResponsiveGridFlowLayout flow = new ResponsiveGridFlowLayout();</span>
-<span class="fc" id="L554">                _horizontalGap = flow.horizontalGapSize();</span>
-<span class="fc" id="L555">                _verticalGap = flow.verticalGapSize();</span>
-<span class="fc" id="L556">                layout = flow;</span>
-<span class="fc" id="L557">            } else {</span>
-<span class="fc" id="L558">                BoxLayout box = new BoxLayout(this, BoxLayout.Y_AXIS);</span>
-<span class="fc" id="L559">                _horizontalGap = 5;</span>
-<span class="fc" id="L560">                _verticalGap = 5;</span>
-<span class="fc" id="L561">                layout = box;</span>
+<span class="fc bfc" id="L568" title="All 2 branches covered.">            if ( type == UI.Align.HORIZONTAL ) {</span>
+<span class="fc" id="L569">                ResponsiveGridFlowLayout flow = new ResponsiveGridFlowLayout();</span>
+<span class="fc" id="L570">                _horizontalGap = flow.horizontalGapSize();</span>
+<span class="fc" id="L571">                _verticalGap = flow.verticalGapSize();</span>
+<span class="fc" id="L572">                layout = flow;</span>
+<span class="fc" id="L573">            } else {</span>
+<span class="fc" id="L574">                BoxLayout box = new BoxLayout(this, BoxLayout.Y_AXIS);</span>
+<span class="fc" id="L575">                _horizontalGap = 5;</span>
+<span class="fc" id="L576">                _verticalGap = 5;</span>
+<span class="fc" id="L577">                layout = box;</span>
             }
-<span class="fc" id="L563">            setLayout(layout);</span>
-<span class="pc bpc" id="L564" title="1 of 2 branches missed.">            for ( EntryPanel c : entryPanels ) this.add(c);</span>
+<span class="fc" id="L579">            setLayout(layout);</span>
+<span class="pc bpc" id="L580" title="1 of 2 branches missed.">            for ( EntryPanel c : entryPanels ) this.add(c);</span>
 
-<span class="fc bfc" id="L566" title="All 2 branches covered.">            if ( type == UI.Align.HORIZONTAL )</span>
-<span class="fc" id="L567">                _size = new Dimension(n * _W + (n + 1) * _horizontalGap, _H + 2 * _verticalGap);</span>
+<span class="fc bfc" id="L582" title="All 2 branches covered.">            if ( type == UI.Align.HORIZONTAL )</span>
+<span class="fc" id="L583">                _size = new Dimension(n * _W + (n + 1) * _horizontalGap, _H + 2 * _verticalGap);</span>
             else
-<span class="fc" id="L569">                _size = new Dimension(_W + 2 * _horizontalGap, n * _H + (n + 1) * _verticalGap);</span>
+<span class="fc" id="L585">                _size = new Dimension(_W + 2 * _horizontalGap, n * _H + (n + 1) * _verticalGap);</span>
 
-<span class="pc bpc" id="L571" title="1 of 2 branches missed.">            for ( EntryPanel c : entryPanels )</span>
-<span class="nc" id="L572">                c.addMouseListener(</span>
-<span class="nc" id="L573">                    new MouseAdapter() {</span>
+<span class="pc bpc" id="L587" title="1 of 2 branches missed.">            for ( EntryPanel c : entryPanels )</span>
+<span class="nc" id="L588">                c.addMouseListener(</span>
+<span class="nc" id="L589">                    new MouseAdapter() {</span>
                         @Override
                         public void mouseClicked(MouseEvent e) {
-<span class="nc" id="L576">                            entryPanels.forEach( entry -&gt; entry.setEntrySelected(false) );</span>
-<span class="nc" id="L577">                            c.setEntrySelected(true);</span>
-<span class="nc" id="L578">                        }</span>
+<span class="nc" id="L592">                            entryPanels.forEach( entry -&gt; entry.setEntrySelected(false) );</span>
+<span class="nc" id="L593">                            c.setEntrySelected(true);</span>
+<span class="nc" id="L594">                        }</span>
                     }
                 );
 
-<span class="fc" id="L582">            setOpaque(false);</span>
-<span class="fc" id="L583">            setBackground(Color.PINK);</span>
-<span class="fc" id="L584">        }</span>
+<span class="fc" id="L598">            setOpaque(false);</span>
+<span class="fc" id="L599">            setBackground(Color.PINK);</span>
+<span class="fc" id="L600">        }</span>
 
         void _setScrollPane(JScrollPane scrollPane) {
-<span class="fc" id="L587">            _scrollPane = scrollPane;</span>
-<span class="fc" id="L588">        }</span>
+<span class="fc" id="L603">            _scrollPane = scrollPane;</span>
+<span class="fc" id="L604">        }</span>
 
         @Override
         public Dimension getPreferredScrollableViewportSize() {
-<span class="fc bfc" id="L592" title="All 2 branches covered.">            if ( _configurator == null )</span>
-<span class="fc" id="L593">                return _size;</span>
-<span class="fc" id="L594">            ScrollableComponentDelegate delegate = _buildDelegate();</span>
-<span class="pc bpc" id="L595" title="1 of 2 branches missed.">            if ( delegate == null )</span>
-<span class="nc" id="L596">                return _size;</span>
+<span class="fc bfc" id="L608" title="All 2 branches covered.">            if ( _configurator == null )</span>
+<span class="fc" id="L609">                return _size;</span>
+<span class="fc" id="L610">            ScrollableComponentDelegate delegate = _buildDelegate();</span>
+<span class="pc bpc" id="L611" title="1 of 2 branches missed.">            if ( delegate == null )</span>
+<span class="nc" id="L612">                return _size;</span>
             try {
-<span class="fc" id="L598">                return delegate.preferredSize().toDimension();</span>
-<span class="nc" id="L599">            } catch ( Exception e ) {</span>
-<span class="nc" id="L600">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating preferred scrollable viewport size for scroll panels.&quot;, e);</span>
-<span class="nc" id="L601">                return _size;</span>
+<span class="fc" id="L614">                return delegate.preferredSize().toDimension();</span>
+<span class="nc" id="L615">            } catch ( Exception e ) {</span>
+<span class="nc" id="L616">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating preferred scrollable viewport size for scroll panels.&quot;, e);</span>
+<span class="nc" id="L617">                return _size;</span>
             }
         }
 
         @Override
         public Dimension getPreferredSize() {
-<span class="pc bpc" id="L607" title="1 of 2 branches missed.">            if ( _type == UI.Align.VERTICAL )</span>
-<span class="fc" id="L608">                return new Dimension(</span>
-<span class="fc" id="L609">                            Math.max(_W, getParent().getWidth()),</span>
-<span class="fc" id="L610">                            (int) super.getPreferredSize().getHeight()</span>
+<span class="pc bpc" id="L623" title="1 of 2 branches missed.">            if ( _type == UI.Align.VERTICAL )</span>
+<span class="fc" id="L624">                return new Dimension(</span>
+<span class="fc" id="L625">                            Math.max(_W, getParent().getWidth()),</span>
+<span class="fc" id="L626">                            (int) super.getPreferredSize().getHeight()</span>
                         );
             else
-<span class="nc" id="L613">                return new Dimension(</span>
-<span class="nc" id="L614">                            (int) super.getPreferredSize().getWidth(),</span>
-<span class="nc" id="L615">                            Math.max(_H, getParent().getHeight())</span>
+<span class="nc" id="L629">                return new Dimension(</span>
+<span class="nc" id="L630">                            (int) super.getPreferredSize().getWidth(),</span>
+<span class="nc" id="L631">                            Math.max(_H, getParent().getHeight())</span>
                         );
         }
 
@@ -620,18 +636,18 @@ public class JScrollPanels extends UI.ScrollPane
         public int getScrollableUnitIncrement(
                 Rectangle visibleRect, int orientation, int direction
         ) {
-<span class="fc bfc" id="L623" title="All 2 branches covered.">            if ( _configurator == null )</span>
-<span class="fc" id="L624">                return _incrementFrom(orientation);</span>
-<span class="fc" id="L625">            ScrollableComponentDelegate delegate = _buildDelegate();</span>
-<span class="pc bpc" id="L626" title="1 of 2 branches missed.">            if ( delegate == null )</span>
-<span class="nc" id="L627">                return _incrementFrom(orientation);</span>
+<span class="fc bfc" id="L639" title="All 2 branches covered.">            if ( _configurator == null )</span>
+<span class="fc" id="L640">                return _incrementFrom(orientation);</span>
+<span class="fc" id="L641">            ScrollableComponentDelegate delegate = _buildDelegate();</span>
+<span class="pc bpc" id="L642" title="1 of 2 branches missed.">            if ( delegate == null )</span>
+<span class="nc" id="L643">                return _incrementFrom(orientation);</span>
             try {
-<span class="pc bpc" id="L629" title="1 of 2 branches missed.">                Bounds bounds = ( visibleRect == null ? Bounds.none() : Bounds.of(visibleRect) );</span>
-<span class="fc bfc" id="L630" title="All 2 branches covered.">                UI.Align align = ( orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL );</span>
-<span class="fc" id="L631">                return delegate.unitIncrement(bounds, align, direction);</span>
-<span class="nc" id="L632">            } catch ( Exception e ) {</span>
-<span class="nc" id="L633">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating unit increment for scroll panels.&quot;, e);</span>
-<span class="nc" id="L634">                return _incrementFrom(orientation);</span>
+<span class="pc bpc" id="L645" title="1 of 2 branches missed.">                Bounds bounds = ( visibleRect == null ? Bounds.none() : Bounds.of(visibleRect) );</span>
+<span class="fc bfc" id="L646" title="All 2 branches covered.">                UI.Align align = ( orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL );</span>
+<span class="fc" id="L647">                return delegate.unitIncrement(bounds, align, direction);</span>
+<span class="nc" id="L648">            } catch ( Exception e ) {</span>
+<span class="nc" id="L649">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating unit increment for scroll panels.&quot;, e);</span>
+<span class="nc" id="L650">                return _incrementFrom(orientation);</span>
             }
         }
 
@@ -639,71 +655,71 @@ public class JScrollPanels extends UI.ScrollPane
         public int getScrollableBlockIncrement(
                 Rectangle visibleRect, int orientation, int direction
         ) {
-<span class="fc bfc" id="L642" title="All 2 branches covered.">            if ( _configurator == null )</span>
-<span class="fc" id="L643">                return _incrementFrom(orientation) / 2;</span>
-<span class="fc" id="L644">            ScrollableComponentDelegate delegate = _buildDelegate();</span>
-<span class="pc bpc" id="L645" title="1 of 2 branches missed.">            if ( delegate == null )</span>
-<span class="nc" id="L646">                return _incrementFrom(orientation) / 2;</span>
+<span class="fc bfc" id="L658" title="All 2 branches covered.">            if ( _configurator == null )</span>
+<span class="fc" id="L659">                return _incrementFrom(orientation) / 2;</span>
+<span class="fc" id="L660">            ScrollableComponentDelegate delegate = _buildDelegate();</span>
+<span class="pc bpc" id="L661" title="1 of 2 branches missed.">            if ( delegate == null )</span>
+<span class="nc" id="L662">                return _incrementFrom(orientation) / 2;</span>
             try {
-<span class="pc bpc" id="L648" title="1 of 2 branches missed.">                Bounds bounds = ( visibleRect == null ? Bounds.none() : Bounds.of(visibleRect) );</span>
-<span class="fc bfc" id="L649" title="All 2 branches covered.">                UI.Align align = ( orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL );</span>
-<span class="fc" id="L650">                return delegate.blockIncrement(bounds, align, direction);</span>
-<span class="nc" id="L651">            } catch ( Exception e ) {</span>
-<span class="nc" id="L652">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating block increment for scroll panels.&quot;, e);</span>
-<span class="nc" id="L653">                return _incrementFrom(orientation) / 2;</span>
+<span class="pc bpc" id="L664" title="1 of 2 branches missed.">                Bounds bounds = ( visibleRect == null ? Bounds.none() : Bounds.of(visibleRect) );</span>
+<span class="fc bfc" id="L665" title="All 2 branches covered.">                UI.Align align = ( orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL );</span>
+<span class="fc" id="L666">                return delegate.blockIncrement(bounds, align, direction);</span>
+<span class="nc" id="L667">            } catch ( Exception e ) {</span>
+<span class="nc" id="L668">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating block increment for scroll panels.&quot;, e);</span>
+<span class="nc" id="L669">                return _incrementFrom(orientation) / 2;</span>
             }
         }
 
-<span class="pc bpc" id="L657" title="1 of 2 branches missed.">        private int _incrementFrom(int orientation) { return orientation == JScrollBar.HORIZONTAL ? _W + _horizontalGap : _H + _verticalGap; }</span>
+<span class="pc bpc" id="L673" title="1 of 2 branches missed.">        private int _incrementFrom(int orientation) { return orientation == JScrollBar.HORIZONTAL ? _W + _horizontalGap : _H + _verticalGap; }</span>
 
         @Override
         public boolean getScrollableTracksViewportWidth() {
-<span class="fc bfc" id="L661" title="All 2 branches covered.">            if ( _configurator == null )</span>
-<span class="fc" id="L662">                return false;</span>
-<span class="fc" id="L663">            ScrollableComponentDelegate delegate = _buildDelegate();</span>
-<span class="pc bpc" id="L664" title="1 of 2 branches missed.">            if ( delegate == null )</span>
-<span class="nc" id="L665">                return false;</span>
+<span class="fc bfc" id="L677" title="All 2 branches covered.">            if ( _configurator == null )</span>
+<span class="fc" id="L678">                return false;</span>
+<span class="fc" id="L679">            ScrollableComponentDelegate delegate = _buildDelegate();</span>
+<span class="pc bpc" id="L680" title="1 of 2 branches missed.">            if ( delegate == null )</span>
+<span class="nc" id="L681">                return false;</span>
             try {
-<span class="fc" id="L667">                return delegate.fitWidth();</span>
-<span class="nc" id="L668">            } catch ( Exception e ) {</span>
-<span class="nc" id="L669">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating fit width for scroll panels.&quot;, e);</span>
-<span class="nc" id="L670">                return false;</span>
+<span class="fc" id="L683">                return delegate.fitWidth();</span>
+<span class="nc" id="L684">            } catch ( Exception e ) {</span>
+<span class="nc" id="L685">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating fit width for scroll panels.&quot;, e);</span>
+<span class="nc" id="L686">                return false;</span>
             }
         }
 
         @Override
         public boolean getScrollableTracksViewportHeight() {
-<span class="fc bfc" id="L676" title="All 2 branches covered.">            if ( _configurator == null )</span>
-<span class="fc" id="L677">                return false;</span>
-<span class="fc" id="L678">            ScrollableComponentDelegate delegate = _buildDelegate();</span>
-<span class="pc bpc" id="L679" title="1 of 2 branches missed.">            if ( delegate == null )</span>
-<span class="nc" id="L680">                return false;</span>
+<span class="fc bfc" id="L692" title="All 2 branches covered.">            if ( _configurator == null )</span>
+<span class="fc" id="L693">                return false;</span>
+<span class="fc" id="L694">            ScrollableComponentDelegate delegate = _buildDelegate();</span>
+<span class="pc bpc" id="L695" title="1 of 2 branches missed.">            if ( delegate == null )</span>
+<span class="nc" id="L696">                return false;</span>
             try {
-<span class="fc" id="L682">                return delegate.fitHeight();</span>
-<span class="nc" id="L683">            } catch ( Exception e ) {</span>
-<span class="nc" id="L684">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating fit height for scroll panels.&quot;, e);</span>
-<span class="nc" id="L685">                return false;</span>
+<span class="fc" id="L698">                return delegate.fitHeight();</span>
+<span class="nc" id="L699">            } catch ( Exception e ) {</span>
+<span class="nc" id="L700">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating fit height for scroll panels.&quot;, e);</span>
+<span class="nc" id="L701">                return false;</span>
             }
         }
 
         private @Nullable ScrollableComponentDelegate _buildDelegate() {
-<span class="pc bpc" id="L690" title="2 of 4 branches missed.">            if ( _configurator == null || _scrollPane == null )</span>
-<span class="nc" id="L691">                return null;</span>
-<span class="fc" id="L692">            ScrollIncrementSupplier unitSupplier  = (rect, align, direction) -&gt;</span>
-<span class="nc bnc" id="L693" title="All 2 branches missed.">                    _incrementFrom(align == UI.Align.HORIZONTAL ? JScrollBar.HORIZONTAL : JScrollBar.VERTICAL);</span>
-<span class="fc" id="L694">            ScrollIncrementSupplier blockSupplier = (rect, align, direction) -&gt;</span>
-<span class="nc bnc" id="L695" title="All 2 branches missed.">                    _incrementFrom(align == UI.Align.HORIZONTAL ? JScrollBar.HORIZONTAL : JScrollBar.VERTICAL) / 2;</span>
-<span class="fc" id="L696">            ScrollableComponentDelegate delegate = ScrollableComponentDelegate.of(</span>
-<span class="fc" id="L697">                    _scrollPane, this, Size.of(_size),</span>
+<span class="pc bpc" id="L706" title="2 of 4 branches missed.">            if ( _configurator == null || _scrollPane == null )</span>
+<span class="nc" id="L707">                return null;</span>
+<span class="fc" id="L708">            ScrollIncrementSupplier unitSupplier  = (rect, align, direction) -&gt;</span>
+<span class="nc bnc" id="L709" title="All 2 branches missed.">                    _incrementFrom(align == UI.Align.HORIZONTAL ? JScrollBar.HORIZONTAL : JScrollBar.VERTICAL);</span>
+<span class="fc" id="L710">            ScrollIncrementSupplier blockSupplier = (rect, align, direction) -&gt;</span>
+<span class="nc bnc" id="L711" title="All 2 branches missed.">                    _incrementFrom(align == UI.Align.HORIZONTAL ? JScrollBar.HORIZONTAL : JScrollBar.VERTICAL) / 2;</span>
+<span class="fc" id="L712">            ScrollableComponentDelegate delegate = ScrollableComponentDelegate.of(</span>
+<span class="fc" id="L713">                    _scrollPane, this, Size.of(_size),</span>
                     unitSupplier, blockSupplier,
                     false, false
                 );
             try {
-<span class="fc" id="L702">                delegate = _configurator.configure(delegate);</span>
-<span class="nc" id="L703">            } catch ( Exception e ) {</span>
-<span class="nc" id="L704">                log.error(SwingTree.get().logMarker(), &quot;Error while configuring scrollable behavior of scroll panels.&quot;, e);</span>
-<span class="fc" id="L705">            }</span>
-<span class="fc" id="L706">            return delegate;</span>
+<span class="fc" id="L718">                delegate = _configurator.configure(delegate);</span>
+<span class="nc" id="L719">            } catch ( Exception e ) {</span>
+<span class="nc" id="L720">                log.error(SwingTree.get().logMarker(), &quot;Error while configuring scrollable behavior of scroll panels.&quot;, e);</span>
+<span class="fc" id="L721">            }</span>
+<span class="fc" id="L722">            return delegate;</span>
         }
     }
 
@@ -711,10 +727,10 @@ public class JScrollPanels extends UI.ScrollPane
      *  Filters the entry panels from the provided components array.
      */
     private static List&lt;EntryPanel&gt; _entriesIn(Component[] components) {
-<span class="nc" id="L714">        return Arrays.stream(components)</span>
-<span class="nc" id="L715">                .filter( c -&gt; c instanceof EntryPanel )</span>
-<span class="nc" id="L716">                .map( c -&gt; (EntryPanel) c )</span>
-<span class="nc" id="L717">                .collect(Collectors.toList());</span>
+<span class="nc" id="L730">        return Arrays.stream(components)</span>
+<span class="nc" id="L731">                .filter( c -&gt; c instanceof EntryPanel )</span>
+<span class="nc" id="L732">                .map( c -&gt; (EntryPanel) c )</span>
+<span class="nc" id="L733">                .collect(Collectors.toList());</span>
     }
 
     /**
@@ -726,8 +742,8 @@ public class JScrollPanels extends UI.ScrollPane
      */
     public static class EntryPanel extends JBox
     {
-<span class="fc" id="L729">        private static final Color HIGHLIGHT = Color.GREEN;</span>
-<span class="fc" id="L730">        private static final Color LOW_LIGHT = Color.WHITE;</span>
+<span class="fc" id="L745">        private static final Color HIGHLIGHT = Color.GREEN;</span>
+<span class="fc" id="L746">        private static final Color LOW_LIGHT = Color.WHITE;</span>
         private final Function&lt;Boolean, JComponent&gt; _provider;
         private final EntryViewModel _viewable;
         private boolean _isSelected;
@@ -739,18 +755,18 @@ public class JScrollPanels extends UI.ScrollPane
             M viewModel,
             ViewSupplier&lt;M&gt; viewSupplier
         ) {
-<span class="fc" id="L742">            return (Boolean isSelected) -&gt; {</span>
-<span class="fc" id="L743">                viewModel.position().set(From.VIEW, position);</span>
-<span class="fc" id="L744">                viewModel.isSelected().set(From.VIEW, isSelected);</span>
-<span class="fc" id="L745">                UIForAnySwing&lt;?,?&gt; view = null;</span>
+<span class="fc" id="L758">            return (Boolean isSelected) -&gt; {</span>
+<span class="fc" id="L759">                viewModel.position().set(From.VIEW, position);</span>
+<span class="fc" id="L760">                viewModel.isSelected().set(From.VIEW, isSelected);</span>
+<span class="fc" id="L761">                UIForAnySwing&lt;?,?&gt; view = null;</span>
                 try {
-<span class="fc" id="L747">                    view = viewSupplier.createViewFor(viewModel);</span>
-<span class="nc" id="L748">                } catch (Exception e) {</span>
-<span class="nc" id="L749">                    log.error(SwingTree.get().logMarker(), &quot;Failed to create view for entry &quot; + viewModel, e);</span>
-<span class="fc" id="L750">                }</span>
-<span class="pc bpc" id="L751" title="1 of 2 branches missed.">                if ( view == null )</span>
-<span class="nc" id="L752">                    view = UI.box(); // We return an empty box if the view is null.</span>
-<span class="fc" id="L753">                return view.get((Class) view.getType());</span>
+<span class="fc" id="L763">                    view = viewSupplier.createViewFor(viewModel);</span>
+<span class="nc" id="L764">                } catch (Exception e) {</span>
+<span class="nc" id="L765">                    log.error(SwingTree.get().logMarker(), &quot;Failed to create view for entry &quot; + viewModel, e);</span>
+<span class="fc" id="L766">                }</span>
+<span class="pc bpc" id="L767" title="1 of 2 branches missed.">                if ( view == null )</span>
+<span class="nc" id="L768">                    view = UI.box(); // We return an empty box if the view is null.</span>
+<span class="fc" id="L769">                return view.get((Class) view.getType());</span>
             };
         }
 
@@ -761,14 +777,14 @@ public class JScrollPanels extends UI.ScrollPane
             ViewSupplier&lt;M&gt; viewSupplier,
             @Nullable AddConstraint constraints
         ) {
-<span class="nc" id="L764">            this(</span>
-<span class="nc" id="L765">                Objects.requireNonNull(components),</span>
+<span class="nc" id="L780">            this(</span>
+<span class="nc" id="L781">                Objects.requireNonNull(components),</span>
                 position,
-<span class="nc" id="L767">                Objects.requireNonNull(viewModel),</span>
-<span class="nc" id="L768">                providerFrom(position, viewModel, viewSupplier),</span>
+<span class="nc" id="L783">                Objects.requireNonNull(viewModel),</span>
+<span class="nc" id="L784">                providerFrom(position, viewModel, viewSupplier),</span>
                 constraints
             );
-<span class="nc" id="L771">        }</span>
+<span class="nc" id="L787">        }</span>
 
         private &lt;M extends EntryViewModel&gt; EntryPanel(
             Supplier&lt;List&lt;EntryPanel&gt;&gt; components,
@@ -777,15 +793,15 @@ public class JScrollPanels extends UI.ScrollPane
             Function&lt;Boolean, JComponent&gt; viewSupplier,
             @Nullable AddConstraint constraints
         ) {
-<span class="nc" id="L780">            this(</span>
+<span class="nc" id="L796">            this(</span>
                 components,
                 position,
                 provider,
-<span class="nc" id="L784">                viewSupplier.apply(false),</span>
+<span class="nc" id="L800">                viewSupplier.apply(false),</span>
                 viewSupplier,
                 constraints
             );
-<span class="nc" id="L788">        }</span>
+<span class="nc" id="L804">        }</span>
 
         private &lt;M extends EntryViewModel&gt; EntryPanel(
             Supplier&lt;List&lt;EntryPanel&gt;&gt; components,
@@ -794,24 +810,24 @@ public class JScrollPanels extends UI.ScrollPane
             JComponent lastState,
             Function&lt;Boolean, JComponent&gt; viewSupplier,
             @Nullable AddConstraint constraints
-<span class="fc" id="L797">        ) {</span>
-<span class="fc" id="L798">            Objects.requireNonNull(components);</span>
-<span class="fc" id="L799">            Objects.requireNonNull(provider);</span>
+<span class="fc" id="L813">        ) {</span>
+<span class="fc" id="L814">            Objects.requireNonNull(components);</span>
+<span class="fc" id="L815">            Objects.requireNonNull(provider);</span>
             // We make the entry panel fit the outer (public) scroll panel.
-<span class="fc" id="L801">            this.setLayout(new MigLayout(&quot;fill, insets 0&quot;, &quot;[grow]&quot;));</span>
-<span class="fc" id="L802">            _viewable = provider;</span>
-<span class="fc" id="L803">            _provider = viewSupplier;</span>
-<span class="fc" id="L804">            _lastState = lastState;</span>
-<span class="fc" id="L805">            Container previousParent = _lastState.getParent();</span>
-<span class="fc bfc" id="L806" title="All 2 branches covered.">            if ( previousParent != null ) {</span>
+<span class="fc" id="L817">            this.setLayout(new MigLayout(&quot;fill, insets 0&quot;, &quot;[grow]&quot;));</span>
+<span class="fc" id="L818">            _viewable = provider;</span>
+<span class="fc" id="L819">            _provider = viewSupplier;</span>
+<span class="fc" id="L820">            _lastState = lastState;</span>
+<span class="fc" id="L821">            Container previousParent = _lastState.getParent();</span>
+<span class="fc bfc" id="L822" title="All 2 branches covered.">            if ( previousParent != null ) {</span>
                 // A previously rendered entry view that was just detached from the
                 // list is being recycled by id - this is the intended reuse path,
                 // not an error. We only complain when the view is still attached to
                 // a *live* parent, which signals genuine sharing/duplication.
-<span class="pc bpc" id="L811" title="1 of 2 branches missed.">                boolean isBenignRecycle = previousParent instanceof EntryPanel</span>
-<span class="fc bfc" id="L812" title="All 2 branches covered.">                                       &amp;&amp; previousParent.getParent() == null;</span>
-<span class="fc bfc" id="L813" title="All 2 branches covered.">                if ( !isBenignRecycle ) {</span>
-<span class="fc" id="L814">                    log.error(SwingTree.get().logMarker(),</span>
+<span class="pc bpc" id="L827" title="1 of 2 branches missed.">                boolean isBenignRecycle = previousParent instanceof EntryPanel</span>
+<span class="fc bfc" id="L828" title="All 2 branches covered.">                                       &amp;&amp; previousParent.getParent() == null;</span>
+<span class="fc bfc" id="L829" title="All 2 branches covered.">                if ( !isBenignRecycle ) {</span>
+<span class="fc" id="L830">                    log.error(SwingTree.get().logMarker(),</span>
                             &quot;A view supplied to a '{}' is already attached to another, still-live parent ({}).\n&quot; +
                             &quot;  This is most likely due to: (1) a view supplier that returns a cached or shared &quot; +
                             &quot;component instead of building a fresh view for each entry, or (2) two entries that &quot; +
@@ -819,60 +835,74 @@ public class JScrollPanels extends UI.ScrollPane
                             &quot;  How to fix: make the supplier build a new view per entry, and give every entry a &quot; +
                             &quot;unique, stable 'HasId.id()'. The view will be force-reparented now, which can scramble &quot; +
                             &quot;the layout if the duplication was unintended.&quot;,
-<span class="fc" id="L822">                            JScrollPanels.class.getSimpleName(), previousParent,</span>
+<span class="fc" id="L838">                            JScrollPanels.class.getSimpleName(), previousParent,</span>
                             new Throwable(&quot;Stack trace for debugging purposes.&quot;)
                         );
                 }
                 // Either way, detach it explicitly so 'add(..)' below has a clean slate.
-<span class="fc" id="L827">                previousParent.remove(_lastState);</span>
+<span class="fc" id="L843">                previousParent.remove(_lastState);</span>
             }
-<span class="pc bpc" id="L829" title="1 of 2 branches missed.">            this.add(_lastState, constraints != null ? constraints.toConstraintForLayoutManager() : &quot;grow&quot; );</span>
+<span class="pc bpc" id="L845" title="1 of 2 branches missed.">            this.add(_lastState, constraints != null ? constraints.toConstraintForLayoutManager() : &quot;grow&quot; );</span>
 
-<span class="fc" id="L831">            ComponentExtension.from(this).storeBoundObservable(</span>
-<span class="pc" id="L832">                    _viewable.isSelected().view().onChange(From.VIEW_MODEL, it -&gt; _selectThis(components) )</span>
+<span class="fc" id="L847">            ComponentExtension.from(this).storeBoundObservable(</span>
+<span class="pc" id="L848">                    _viewable.isSelected().view().onChange(From.VIEW_MODEL, it -&gt; _selectThis(components) )</span>
                 );
-<span class="pc bpc" id="L834" title="1 of 2 branches missed.">            if ( _viewable.isSelected().is(true) )</span>
-<span class="nc" id="L835">                _selectThis(components);</span>
-<span class="fc" id="L836">            _viewable.position().set(From.VIEW, position);</span>
-<span class="fc" id="L837">        }</span>
+<span class="pc bpc" id="L850" title="1 of 2 branches missed.">            if ( _viewable.isSelected().is(true) )</span>
+<span class="nc" id="L851">                _selectThis(components);</span>
+<span class="fc" id="L852">            _viewable.position().set(From.VIEW, position);</span>
+<span class="fc" id="L853">        }</span>
 
         private void _selectThis(
                 Supplier&lt;List&lt;EntryPanel&gt;&gt; components
         ) {
-<span class="nc" id="L842">            SwingUtilities.invokeLater( () -&gt; {</span>
-<span class="nc" id="L843">                        components.get()</span>
-<span class="nc" id="L844">                                .stream()</span>
-<span class="nc" id="L845">                                .forEach( entry -&gt; entry.setEntrySelected(false) );</span>
-<span class="nc" id="L846">                        setEntrySelected(true);</span>
-<span class="nc" id="L847">                    }</span>
+<span class="nc" id="L858">            SwingUtilities.invokeLater( () -&gt; {</span>
+<span class="nc" id="L859">                        components.get()</span>
+<span class="nc" id="L860">                                .stream()</span>
+<span class="nc" id="L861">                                .forEach( entry -&gt; entry.setEntrySelected(false) );</span>
+<span class="nc" id="L862">                        setEntrySelected(true);</span>
+<span class="nc" id="L863">                    }</span>
             );
-<span class="nc" id="L849">        }</span>
+<span class="nc" id="L865">        }</span>
 
         /**
          *  The last state of this entry panel is the view which was most recently set.
          * @return The last state of this entry panel.
          */
-<span class="nc" id="L855">        public JComponent getLastState() { return _lastState; }</span>
+<span class="fc" id="L871">        public JComponent getLastState() { return _lastState; }</span>
 
-<span class="nc" id="L857">        public boolean isEntrySelected() { return _isSelected; }</span>
+        /**
+         * @return The truth value determining if this entry is currently selected.
+         * @deprecated This is part of the {@link EntryViewModel} based selection machinery,
+         *             which is deprecated in favour of modelling the selection as plain data
+         *             in tuple bound entries. See {@link EntryViewModel} for the migration pattern.
+         */
+        @Deprecated
+<span class="nc" id="L880">        public boolean isEntrySelected() { return _isSelected; }</span>
 
+        /**
+         * @param isHighlighted The truth value determining if this entry should be selected.
+         * @deprecated This is part of the {@link EntryViewModel} based selection machinery,
+         *             which is deprecated in favour of modelling the selection as plain data
+         *             in tuple bound entries. See {@link EntryViewModel} for the migration pattern.
+         */
+        @Deprecated
         public void setEntrySelected(Boolean isHighlighted) {
-<span class="nc bnc" id="L860" title="All 2 branches missed.">            if ( _isSelected != isHighlighted ) {</span>
-<span class="nc" id="L861">                this.remove(_lastState);</span>
+<span class="fc bfc" id="L890" title="All 2 branches covered.">            if ( _isSelected != isHighlighted ) {</span>
+<span class="fc" id="L891">                this.remove(_lastState);</span>
                 try {
-<span class="nc" id="L863">                    _lastState = _provider.apply(isHighlighted);</span>
-<span class="nc" id="L864">                } catch (Exception e) {</span>
-<span class="nc" id="L865">                    log.error(SwingTree.get().logMarker(), &quot;Failed to create view for entry: &quot; + this, e);</span>
-<span class="nc" id="L866">                }</span>
-<span class="nc bnc" id="L867" title="All 2 branches missed.">                this.setBackground( isHighlighted ? HIGHLIGHT : LOW_LIGHT );</span>
-<span class="nc" id="L868">                this.add(_lastState, &quot;grow&quot;);</span>
-<span class="nc" id="L869">                this.validate();</span>
-<span class="nc" id="L870">                _viewable.isSelected().set(From.VIEW, isHighlighted);</span>
+<span class="fc" id="L893">                    _lastState = _provider.apply(isHighlighted);</span>
+<span class="nc" id="L894">                } catch (Exception e) {</span>
+<span class="nc" id="L895">                    log.error(SwingTree.get().logMarker(), &quot;Failed to create view for entry: &quot; + this, e);</span>
+<span class="fc" id="L896">                }</span>
+<span class="pc bpc" id="L897" title="1 of 2 branches missed.">                this.setBackground( isHighlighted ? HIGHLIGHT : LOW_LIGHT );</span>
+<span class="fc" id="L898">                this.add(_lastState, &quot;grow&quot;);</span>
+<span class="fc" id="L899">                this.validate();</span>
+<span class="fc" id="L900">                _viewable.isSelected().set(From.VIEW, isHighlighted);</span>
             }
-<span class="nc" id="L872">            _isSelected = isHighlighted;</span>
-<span class="nc" id="L873">        }</span>
+<span class="fc" id="L902">            _isSelected = isHighlighted;</span>
+<span class="fc" id="L903">        }</span>
 
-<span class="fc" id="L875">        @Override public String toString() { return &quot;EntryPanel[&quot; + _lastState + &quot;]&quot;; }</span>
+<span class="fc" id="L905">        @Override public String toString() { return &quot;EntryPanel[&quot; + _lastState + &quot;]&quot;; }</span>
     }
 
 }

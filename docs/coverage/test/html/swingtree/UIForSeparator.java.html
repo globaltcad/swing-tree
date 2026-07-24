@@ -66,15 +66,15 @@ public final class UIForSeparator&lt;S extends JSeparator&gt; extends UIForAnySw
      * @throws IllegalArgumentException if {@code align} is {@code null}.
      */
     public final UIForSeparator&lt;S&gt; withOrientation( Val&lt;UI.Align&gt; align ) {
-<span class="nc" id="L69">        NullUtil.nullArgCheck( align, &quot;align&quot;, Val.class );</span>
-<span class="nc" id="L70">        NullUtil.nullPropertyCheck( align, &quot;align&quot;, &quot;Null is not a valid alignment.&quot; );</span>
-<span class="nc" id="L71">        return _withOnShow( align, (c,v) -&gt; {</span>
-<span class="nc" id="L72">                    c.setOrientation( v.forSeparator() );</span>
-<span class="nc" id="L73">                })</span>
-<span class="nc" id="L74">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L75">                    thisComponent.setOrientation( align.orElseThrowUnchecked().forSeparator() );</span>
-<span class="nc" id="L76">                })</span>
-<span class="nc" id="L77">                ._this();</span>
+<span class="fc" id="L69">        NullUtil.nullArgCheck( align, &quot;align&quot;, Val.class );</span>
+<span class="fc" id="L70">        NullUtil.nullPropertyCheck( align, &quot;align&quot;, &quot;Null is not a valid alignment.&quot; );</span>
+<span class="fc" id="L71">        return _withOnShow( align, (c,v) -&gt; {</span>
+<span class="fc" id="L72">                    c.setOrientation( v.forSeparator() );</span>
+<span class="fc" id="L73">                })</span>
+<span class="fc" id="L74">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L75">                    thisComponent.setOrientation( align.orElseThrowUnchecked().forSeparator() );</span>
+<span class="fc" id="L76">                })</span>
+<span class="fc" id="L77">                ._this();</span>
     }
 
     /**
@@ -87,20 +87,20 @@ public final class UIForSeparator&lt;S extends JSeparator&gt; extends UIForAnySw
      * @return This very builder to allow for method chaining.
      */
     public final UIForSeparator&lt;S&gt; withLength( int separatorLength ) {
-<span class="nc" id="L90">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L91">                    _setLength( thisComponent, separatorLength );</span>
-<span class="nc" id="L92">                })</span>
-<span class="nc" id="L93">                ._this();</span>
+<span class="fc" id="L90">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L91">                    _setLength( thisComponent, separatorLength );</span>
+<span class="fc" id="L92">                })</span>
+<span class="fc" id="L93">                ._this();</span>
     }
 
     private void _setLength( S thisComponent, int separatorLength ) {
-<span class="nc" id="L97">        Dimension d = thisComponent.getPreferredSize();</span>
-<span class="nc bnc" id="L98" title="All 2 branches missed.">        if ( thisComponent.getOrientation() == JSeparator.VERTICAL )</span>
-<span class="nc" id="L99">            d.height = UI.scale(separatorLength);</span>
-<span class="nc bnc" id="L100" title="All 2 branches missed.">        else if ( thisComponent.getOrientation() == JSeparator.HORIZONTAL )</span>
-<span class="nc" id="L101">            d.width = UI.scale(separatorLength);</span>
-<span class="nc" id="L102">        thisComponent.setPreferredSize(d);</span>
-<span class="nc" id="L103">    }</span>
+<span class="fc" id="L97">        Dimension d = thisComponent.getPreferredSize();</span>
+<span class="fc bfc" id="L98" title="All 2 branches covered.">        if ( thisComponent.getOrientation() == JSeparator.VERTICAL )</span>
+<span class="fc" id="L99">            d.height = UI.scale(separatorLength);</span>
+<span class="pc bpc" id="L100" title="1 of 2 branches missed.">        else if ( thisComponent.getOrientation() == JSeparator.HORIZONTAL )</span>
+<span class="fc" id="L101">            d.width = UI.scale(separatorLength);</span>
+<span class="fc" id="L102">        thisComponent.setPreferredSize(d);</span>
+<span class="fc" id="L103">    }</span>
 
     /**
      *  Binds the provided integer property to the length of the separation line.,
@@ -110,15 +110,15 @@ public final class UIForSeparator&lt;S extends JSeparator&gt; extends UIForAnySw
      * @return This very builder to allow for method chaining.
      */
     public UIForSeparator&lt;S&gt; withLength( Val&lt;Integer&gt; separatorLength ) {
-<span class="nc" id="L113">        NullUtil.nullArgCheck( separatorLength, &quot;separatorLength&quot;, Val.class );</span>
-<span class="nc" id="L114">        NullUtil.nullPropertyCheck( separatorLength, &quot;separatorLength&quot;, &quot;Null is not a valid separator length.&quot; );</span>
-<span class="nc" id="L115">        return _withOnShow( separatorLength, (thisComponent,it) -&gt; {</span>
-<span class="nc" id="L116">                    _setLength( thisComponent, it );</span>
-<span class="nc" id="L117">                })</span>
-<span class="nc" id="L118">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L119">                    _setLength( thisComponent, separatorLength.orElseThrowUnchecked() );</span>
-<span class="nc" id="L120">                })</span>
-<span class="nc" id="L121">                ._this();</span>
+<span class="fc" id="L113">        NullUtil.nullArgCheck( separatorLength, &quot;separatorLength&quot;, Val.class );</span>
+<span class="fc" id="L114">        NullUtil.nullPropertyCheck( separatorLength, &quot;separatorLength&quot;, &quot;Null is not a valid separator length.&quot; );</span>
+<span class="fc" id="L115">        return _withOnShow( separatorLength, (thisComponent,it) -&gt; {</span>
+<span class="fc" id="L116">                    _setLength( thisComponent, it );</span>
+<span class="fc" id="L117">                })</span>
+<span class="fc" id="L118">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L119">                    _setLength( thisComponent, separatorLength.orElseThrowUnchecked() );</span>
+<span class="fc" id="L120">                })</span>
+<span class="fc" id="L121">                ._this();</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

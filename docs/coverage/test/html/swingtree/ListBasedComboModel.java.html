@@ -6,28 +6,42 @@ import sprouts.Var;
 import java.util.List;
 import java.util.Objects;
 
+/**
+ *  A combo box model based on a plain {@link List} of items which is read live,
+ *  meaning that the {@link javax.swing.JComboBox} always sees the current
+ *  content of the list whenever it is rendered.
+ *  &lt;p&gt;
+ *  Note that a plain list is shared mutable state without any change events,
+ *  so unlike the property based combo box models, there is no way for this
+ *  model to maintain a properly synchronized UI thread owned snapshot of it.
+ *  This live read contract is convenient for static or UI thread managed
+ *  option lists, but if your options change dynamically on an application
+ *  thread (see {@link swingtree.threading.EventProcessor#DECOUPLED}), prefer
+ *  modelling them as a {@link sprouts.Vars} list or a {@link sprouts.Tuple}
+ *  based property, which are fully thread safe.
+ */
 final class ListBasedComboModel&lt;E extends @Nullable Object&gt; extends AbstractComboModel&lt;E&gt;
 {
 	private final List&lt;E&gt; _items;
 
 	ListBasedComboModel( List&lt;E&gt; items ) {
-<span class="fc" id="L14">		super(Var.ofNullable(_findCommonType( (E[]) items.toArray() ), null));</span>
-<span class="fc" id="L15">		_items         = Objects.requireNonNull(items);</span>
-<span class="fc" id="L16">		_selectedIndex = _indexOf(_getSelectedItemSafely());</span>
-<span class="fc" id="L17">	}</span>
+<span class="fc" id="L28">		super(Var.ofNullable(_findCommonType( (E[]) items.toArray() ), null));</span>
+<span class="fc" id="L29">		_items         = Objects.requireNonNull(items);</span>
+<span class="fc" id="L30">		_selectedIndex = _indexOf(_getSelectedItemSafely());</span>
+<span class="fc" id="L31">	}</span>
 
 	ListBasedComboModel( Var&lt;E&gt; var, List&lt;E&gt; items ) {
-<span class="fc" id="L20">		super(var);</span>
-<span class="fc" id="L21">		_items         = Objects.requireNonNull(items);</span>
-<span class="fc" id="L22">		_selectedIndex = _indexOf(_getSelectedItemSafely());</span>
-<span class="fc" id="L23">	}</span>
+<span class="fc" id="L34">		super(var);</span>
+<span class="fc" id="L35">		_items         = Objects.requireNonNull(items);</span>
+<span class="fc" id="L36">		_selectedIndex = _indexOf(_getSelectedItemSafely());</span>
+<span class="fc" id="L37">	}</span>
 
-<span class="fc" id="L25">	@Override public int getSize() { return _items.size(); }</span>
-<span class="fc" id="L26">	@Override public E getElementAt( int index ) { return _items.get(index); }</span>
+<span class="fc" id="L39">	@Override public int getSize() { return _items.size(); }</span>
+<span class="fc" id="L40">	@Override public E getElementAt( int index ) { return _items.get(index); }</span>
 
 	@Override
 	public AbstractComboModel&lt;E&gt; withVar(Var&lt;E&gt; newVar) {
-<span class="fc" id="L30">		return new ListBasedComboModel&lt;&gt;(newVar, _items);</span>
+<span class="fc" id="L44">		return new ListBasedComboModel&lt;&gt;(newVar, _items);</span>
 	}
 
 	@Override protected void setAt(int index, @Nullable E element) {
@@ -43,11 +57,11 @@ final class ListBasedComboModel&lt;E extends @Nullable Object&gt; extends Abstra
 			So we'll just try to modify it, and if it fails, we'll just ignore it.
 		 */
 		try {
-<span class="nc" id="L46">			_items.set(index, element);</span>
-<span class="fc" id="L47">		} catch (UnsupportedOperationException ignored) {</span>
+<span class="nc" id="L60">			_items.set(index, element);</span>
+<span class="fc" id="L61">		} catch (UnsupportedOperationException ignored) {</span>
 			// ignore, the user of this library doesn't want us to modify the list
-<span class="nc" id="L49">		}</span>
-<span class="fc" id="L50">	}</span>
+<span class="nc" id="L63">		}</span>
+<span class="fc" id="L64">	}</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

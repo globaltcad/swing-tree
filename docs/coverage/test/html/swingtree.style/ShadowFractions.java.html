@@ -71,10 +71,10 @@ public final class ShadowFractions
      *  &lt;b&gt;Falloff (the &quot;smoothstep&quot; function):&lt;/b&gt; {@code f(t) = 1 - t}&lt;sup&gt;2&lt;/sup&gt;{@code (3 - 2t)}.
      */
     public static Tuple&lt;Float&gt; penumbra() {
-<span class="nc" id="L74">        Tuple&lt;Float&gt; fractions = PENUMBRA;</span>
-<span class="nc bnc" id="L75" title="All 2 branches missed.">        if ( fractions == null )</span>
-<span class="nc" id="L76">            PENUMBRA = fractions = _sample(SAMPLES, t -&gt; 1f - (t * t * (3f - 2f * t)));</span>
-<span class="nc" id="L77">        return fractions;</span>
+<span class="fc" id="L74">        Tuple&lt;Float&gt; fractions = PENUMBRA;</span>
+<span class="fc bfc" id="L75" title="All 2 branches covered.">        if ( fractions == null )</span>
+<span class="fc" id="L76">            PENUMBRA = fractions = _sample(SAMPLES, t -&gt; 1f - (t * t * (3f - 2f * t)));</span>
+<span class="fc" id="L77">        return fractions;</span>
     }
 
     /**

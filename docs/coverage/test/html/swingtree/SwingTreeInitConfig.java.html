@@ -79,19 +79,72 @@ public final class SwingTreeInitConfig
 <span class="fc" id="L79">        FROM_SYSTEM_FONT</span>
     }
 
+    /**
+     *  Defines how aggressively SwingTree trades memory for CPU time across &lt;i&gt;all&lt;/i&gt;
+     *  of its internal rendering caches (style layer images, rasterised text, noise
+     *  tiles, shadow gradients and text layouts). Higher modes keep more rendered
+     *  results in memory so that subsequent repaints can blit them instead of
+     *  re-rendering, which is a large saving for complex or text-heavy UIs under load
+     *  (e.g. while a window is being resized) — at the cost of more heap and video
+     *  memory. The chosen mode is combined with the amount of system RAM to derive a
+     *  concrete memory budget, so the same mode scales sensibly across machines.
+     *  &lt;p&gt;
+     *  This can also be selected through the system property {@code &quot;swingtree.cacheMode&quot;}
+     *  (the enum constant name, case-insensitive), and changed at runtime through
+     *  {@link SwingTree#setCacheMode(CacheMode)}.
+     *
+     *  @see SwingTreeInitConfig#withCacheMode(CacheMode)
+     */
+<span class="fc" id="L98">    public enum CacheMode</span>
+    {
+        /**
+         *  Caching is turned off entirely: every cache is emptied and bypassed,
+         *  regardless of how much RAM the machine has. Painting always re-renders
+         *  from scratch — the lowest memory footprint, the highest CPU cost.
+         */
+<span class="fc" id="L105">        DISABLED,</span>
+
+        /**
+         *  A small, cautious memory footprint. Only the cheapest and most reused
+         *  rendering results are kept. Good for memory-constrained environments.
+         */
+<span class="fc" id="L111">        CONSERVATIVE,</span>
+
+        /**
+         *  The default: a balanced trade-off between memory and CPU that reproduces
+         *  SwingTree's historical, RAM-scaled caching behaviour.
+         */
+<span class="fc" id="L117">        BALANCED,</span>
+
+        /**
+         *  Leans towards caching more: keeps noticeably more rendered results in
+         *  memory to further reduce repaint cost on machines that can spare the RAM.
+         */
+<span class="fc" id="L123">        GENEROUS,</span>
+
+        /**
+         *  Caches as much as the memory budget allows, trading the most memory for the
+         *  least CPU time. Intended for powerful machines running heavy, animated or
+         *  frequently-repainted UIs.
+         */
+<span class="fc" id="L130">        AGGRESSIVE</span>
+    }
+
     public static SwingTreeInitConfig defaults() {
-<span class="fc" id="L83">        return new SwingTreeInitConfig(</span>
-<span class="fc" id="L84">                        tryToFindDefaultFontInUIManager(),</span>
+<span class="fc" id="L134">        return new SwingTreeInitConfig(</span>
+<span class="fc" id="L135">                        tryToFindDefaultFontInUIManager(),</span>
                         FontInstallation.SOFT,
                         EventProcessor.COUPLED_STRICT,
-<span class="fc" id="L87">                        StyleSheet.none(),</span>
-<span class="fc" id="L88">                        SystemProperties.getFloat(SystemProperties.UI_SCALE,                 -1    ),</span>
-<span class="fc" id="L89">                        SystemProperties.getBool(SystemProperties.UI_SCALE_ENABLED,          true  ),</span>
-<span class="fc" id="L90">                        SystemProperties.getBool(SystemProperties.UI_SCALE_ALLOW_SCALE_DOWN, false ),</span>
-<span class="fc" id="L91">                        SystemProperties.getLong(SystemProperties.ANIMATION_INTERVAL,        16    ),</span>
-<span class="fc" id="L92">                        MarkerFactory.getMarker(&quot;&quot;),</span>
-<span class="fc" id="L93">                        SystemProperties.getBool(SystemProperties.RECORD_DEBUG_SOURCE_TRACE, true ),</span>
-<span class="fc" id="L94">                        System.getProperty(SystemProperties.ENABLE_DEV_TOOL_KEY_STROKE,&quot;ctrl shift I&quot;)</span>
+<span class="fc" id="L138">                        StyleSheet.none(),</span>
+<span class="fc" id="L139">                        SystemProperties.getFloat(SystemProperties.UI_SCALE,                 -1    ),</span>
+<span class="fc" id="L140">                        SystemProperties.getBool(SystemProperties.UI_SCALE_ENABLED,          true  ),</span>
+<span class="fc" id="L141">                        SystemProperties.getBool(SystemProperties.UI_SCALE_ALLOW_SCALE_DOWN, false ),</span>
+<span class="fc" id="L142">                        SystemProperties.getLong(SystemProperties.ANIMATION_INTERVAL,        16    ),</span>
+<span class="fc" id="L143">                        MarkerFactory.getMarker(&quot;&quot;),</span>
+<span class="fc" id="L144">                        SystemProperties.getBool(SystemProperties.RECORD_DEBUG_SOURCE_TRACE, true ),</span>
+<span class="fc" id="L145">                        System.getProperty(SystemProperties.ENABLE_DEV_TOOL_KEY_STROKE,&quot;ctrl shift I&quot;),</span>
+<span class="fc" id="L146">                        SystemProperties.getEnum(SystemProperties.CACHE_MODE, CacheMode.class, CacheMode.BALANCED),</span>
+<span class="fc" id="L147">                        SystemProperties.getBool(SystemProperties.CACHE_TILING, true)</span>
                     );
                     /*
                         Note that we want the refresh rate to be as high as possible so that the animation
@@ -105,10 +158,10 @@ public final class SwingTreeInitConfig
     }
 
     private static @Nullable Font tryToFindDefaultFontInUIManager() {
-<span class="fc" id="L108">        Object defaultFont = javax.swing.UIManager.getDefaults().get(&quot;defaultFont&quot;);</span>
-<span class="fc bfc" id="L109" title="All 2 branches covered.">        if ( defaultFont instanceof Font )</span>
-<span class="fc" id="L110">            return (Font) defaultFont;</span>
-<span class="fc" id="L111">        return null;</span>
+<span class="fc" id="L161">        Object defaultFont = javax.swing.UIManager.getDefaults().get(&quot;defaultFont&quot;);</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        if ( defaultFont instanceof Font )</span>
+<span class="fc" id="L163">            return (Font) defaultFont;</span>
+<span class="fc" id="L164">        return null;</span>
     }
 
 
@@ -123,6 +176,8 @@ public final class SwingTreeInitConfig
     private final Marker           _logMarker;
     private final boolean          _recordDebugSourceTrace;
     private final String           _devToolKeyStrokeShortcut;
+    private final CacheMode        _cacheMode;
+    private final boolean          _isCacheTilingEnabled;
 
 
     private SwingTreeInitConfig(
@@ -136,34 +191,38 @@ public final class SwingTreeInitConfig
         long                defaultAnimationInterval,
         Marker              logMarker,
         boolean             recordDebugSourceTrace,
-        String              devToolKeyStroke
-<span class="fc" id="L140">    ) {</span>
-<span class="fc" id="L141">        _defaultFont              = defaultFont;</span>
-<span class="fc" id="L142">        _fontInstallation         = Objects.requireNonNull(fontInstallation);</span>
-<span class="fc" id="L143">        _eventProcessor           = Objects.requireNonNull(eventProcessor);</span>
-<span class="fc" id="L144">        _styleSheet               = Objects.requireNonNull(styleSheet);</span>
-<span class="fc" id="L145">        _uiScale                  = uiScale;</span>
-<span class="fc" id="L146">        _uiScaleEnabled           = uiScaleEnabled;</span>
-<span class="fc" id="L147">        _uiScaleAllowScaleDown    = uiScaleAllowScaleDown;</span>
-<span class="fc" id="L148">        _defaultAnimationInterval = defaultAnimationInterval;</span>
-<span class="fc" id="L149">        _logMarker                = logMarker;</span>
-<span class="fc" id="L150">        _recordDebugSourceTrace   = recordDebugSourceTrace;</span>
-<span class="fc" id="L151">        _devToolKeyStrokeShortcut = Objects.requireNonNull(devToolKeyStroke);</span>
-<span class="fc" id="L152">    }</span>
+        String              devToolKeyStroke,
+        CacheMode           cacheMode,
+        boolean             isCacheTilingEnabled
+<span class="fc" id="L197">    ) {</span>
+<span class="fc" id="L198">        _defaultFont              = defaultFont;</span>
+<span class="fc" id="L199">        _fontInstallation         = Objects.requireNonNull(fontInstallation);</span>
+<span class="fc" id="L200">        _eventProcessor           = Objects.requireNonNull(eventProcessor);</span>
+<span class="fc" id="L201">        _styleSheet               = Objects.requireNonNull(styleSheet);</span>
+<span class="fc" id="L202">        _uiScale                  = uiScale;</span>
+<span class="fc" id="L203">        _uiScaleEnabled           = uiScaleEnabled;</span>
+<span class="fc" id="L204">        _uiScaleAllowScaleDown    = uiScaleAllowScaleDown;</span>
+<span class="fc" id="L205">        _defaultAnimationInterval = defaultAnimationInterval;</span>
+<span class="fc" id="L206">        _logMarker                = logMarker;</span>
+<span class="fc" id="L207">        _recordDebugSourceTrace   = recordDebugSourceTrace;</span>
+<span class="fc" id="L208">        _devToolKeyStrokeShortcut = Objects.requireNonNull(devToolKeyStroke);</span>
+<span class="fc" id="L209">        _cacheMode                = Objects.requireNonNull(cacheMode);</span>
+<span class="fc" id="L210">        _isCacheTilingEnabled     = isCacheTilingEnabled;</span>
+<span class="fc" id="L211">    }</span>
 
     /**
      *  Returns an {@link Optional} containing the default font
      *  or an empty {@link Optional} if no default font is set.
      */
     Optional&lt;Font&gt; defaultFont() {
-<span class="fc" id="L159">        return Optional.ofNullable(_defaultFont);</span>
+<span class="fc" id="L218">        return Optional.ofNullable(_defaultFont);</span>
     }
 
     /**
      *  Returns the {@link FontInstallation} mode.
      */
     FontInstallation fontInstallation() {
-<span class="fc" id="L166">        return _fontInstallation;</span>
+<span class="fc" id="L225">        return _fontInstallation;</span>
     }
 
     /**
@@ -187,14 +246,14 @@ public final class SwingTreeInitConfig
      *  If none of the above applies, then {@link Scaling#FROM_SYSTEM_FONT} is returned. &lt;br&gt;
      */
     Scaling scalingStrategy() {
-<span class="pc bpc" id="L190" title="1 of 2 branches missed.">        if ( !_uiScaleEnabled )</span>
-<span class="nc" id="L191">            return Scaling.NONE;</span>
-<span class="fc bfc" id="L192" title="All 2 branches covered.">        if ( _uiScale &gt; 0 )</span>
-<span class="fc" id="L193">            return Scaling.FROM_SCALING_FACTOR;</span>
-<span class="fc bfc" id="L194" title="All 2 branches covered.">        if ( _defaultFont != null )</span>
-<span class="fc" id="L195">            return Scaling.FROM_DEFAULT_FONT;</span>
+<span class="pc bpc" id="L249" title="1 of 2 branches missed.">        if ( !_uiScaleEnabled )</span>
+<span class="nc" id="L250">            return Scaling.NONE;</span>
+<span class="fc bfc" id="L251" title="All 2 branches covered.">        if ( _uiScale &gt; 0 )</span>
+<span class="fc" id="L252">            return Scaling.FROM_SCALING_FACTOR;</span>
+<span class="fc bfc" id="L253" title="All 2 branches covered.">        if ( _defaultFont != null )</span>
+<span class="fc" id="L254">            return Scaling.FROM_DEFAULT_FONT;</span>
 
-<span class="fc" id="L197">        return Scaling.FROM_SYSTEM_FONT;</span>
+<span class="fc" id="L256">        return Scaling.FROM_SYSTEM_FONT;</span>
     }
 
     /**
@@ -202,7 +261,7 @@ public final class SwingTreeInitConfig
      *  which is used to process both UI and application events.
      */
     EventProcessor eventProcessor() {
-<span class="fc" id="L205">        return _eventProcessor;</span>
+<span class="fc" id="L264">        return _eventProcessor;</span>
     }
 
     /**
@@ -210,21 +269,21 @@ public final class SwingTreeInitConfig
      *  or an empty {@link Optional} if no {@link StyleSheet} is set.
      */
     StyleSheet styleSheet() {
-<span class="fc" id="L213">        return _styleSheet;</span>
+<span class="fc" id="L272">        return _styleSheet;</span>
     }
 
     /**
      *  Returns the UI scaling factor as is specified by the system property {@code swingtree.uiScale}.
      */
     float uiScaleFactor() {
-<span class="fc" id="L220">        return _uiScale;</span>
+<span class="fc" id="L279">        return _uiScale;</span>
     }
 
     /**
      *  Returns whether the UI scaling mode is enabled as is specified by the system property {@code swingtree.uiScale.enabled}.
      */
     boolean isUiScaleFactorEnabled() {
-<span class="fc" id="L227">        return _uiScaleEnabled;</span>
+<span class="fc" id="L286">        return _uiScaleEnabled;</span>
     }
 
     /**
@@ -232,7 +291,7 @@ public final class SwingTreeInitConfig
      *  as is specified by the system property {@code swingtree.uiScale.allowScaleDown}.
      */
     boolean isUiScaleDownAllowed() {
-<span class="fc" id="L235">        return _uiScaleAllowScaleDown;</span>
+<span class="fc" id="L294">        return _uiScaleAllowScaleDown;</span>
     }
 
     /**
@@ -249,7 +308,7 @@ public final class SwingTreeInitConfig
      *  object which is used to define the duration of an {@link swingtree.animation.Animation}.
      */
     long defaultAnimationInterval() {
-<span class="fc" id="L252">        return _defaultAnimationInterval;</span>
+<span class="fc" id="L311">        return _defaultAnimationInterval;</span>
     }
 
     /**
@@ -259,7 +318,7 @@ public final class SwingTreeInitConfig
      * @return The logging {@link Marker} which is passed to methods of the SLF4J logger.
      */
     Marker logMarker() {
-<span class="fc" id="L262">        return _logMarker;</span>
+<span class="fc" id="L321">        return _logMarker;</span>
     }
 
     /**
@@ -276,7 +335,7 @@ public final class SwingTreeInitConfig
      *  control and click on a component to see the source code trace among other debug information about the component.
      */
     boolean recordDebugSourceTrace() {
-<span class="fc" id="L279">        return _recordDebugSourceTrace;</span>
+<span class="fc" id="L338">        return _recordDebugSourceTrace;</span>
     }
 
     /**
@@ -289,7 +348,7 @@ public final class SwingTreeInitConfig
      *  to initialize it programmatically use {@link SwingTreeInitConfig#devToolKeyStrokeShortcut(String)}.
      */
     String devToolKeyStrokeShortcut() {
-<span class="fc" id="L292">        return _devToolKeyStrokeShortcut;</span>
+<span class="fc" id="L351">        return _devToolKeyStrokeShortcut;</span>
     }
 
     /**
@@ -300,10 +359,10 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new default font.
      */
     public SwingTreeInitConfig defaultFont( Font newDefaultFont ) {
-<span class="nc" id="L303">        return new SwingTreeInitConfig(</span>
+<span class="nc" id="L362">        return new SwingTreeInitConfig(</span>
                 newDefaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -324,10 +383,10 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new default font and {@link FontInstallation} mode.
      */
     public SwingTreeInitConfig defaultFont( Font newDefaultFont, FontInstallation newFontInstallation ) {
-<span class="fc" id="L327">        return new SwingTreeInitConfig(</span>
+<span class="fc" id="L386">        return new SwingTreeInitConfig(</span>
                 newDefaultFont, newFontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -342,10 +401,10 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new {@link EventProcessor}.
      */
     public SwingTreeInitConfig eventProcessor( EventProcessor newEventProcessor ) {
-<span class="fc" id="L345">        return new SwingTreeInitConfig(</span>
+<span class="fc" id="L404">        return new SwingTreeInitConfig(</span>
                 _defaultFont, _fontInstallation, newEventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -357,10 +416,10 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new {@link StyleSheet}.
      */
     public SwingTreeInitConfig styleSheet( StyleSheet newStyleSheet ) {
-<span class="fc" id="L360">        return new SwingTreeInitConfig(</span>
+<span class="fc" id="L419">        return new SwingTreeInitConfig(</span>
                 _defaultFont, _fontInstallation, _eventProcessor, newStyleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -380,10 +439,10 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling factor.
      */
     public SwingTreeInitConfig uiScaleFactor( float newUiScale ) {
-<span class="fc" id="L383">        return new SwingTreeInitConfig(</span>
+<span class="fc" id="L442">        return new SwingTreeInitConfig(</span>
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, newUiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -398,10 +457,10 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling mode.
      */
     public SwingTreeInitConfig isUiScaleFactorEnabled( boolean newUiScaleEnabled ) {
-<span class="fc" id="L401">        return new SwingTreeInitConfig(</span>
+<span class="fc" id="L460">        return new SwingTreeInitConfig(</span>
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, newUiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -416,10 +475,10 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling mode.
      */
     public SwingTreeInitConfig isUiScaleDownAllowed( boolean newUiScaleAllowScaleDown ) {
-<span class="nc" id="L419">        return new SwingTreeInitConfig(</span>
+<span class="nc" id="L478">        return new SwingTreeInitConfig(</span>
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 newUiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -440,10 +499,10 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new default animation interval.
      */
     public SwingTreeInitConfig defaultAnimationInterval( long newDefaultAnimationInterval ) {
-<span class="fc" id="L443">        return new SwingTreeInitConfig(</span>
+<span class="fc" id="L502">        return new SwingTreeInitConfig(</span>
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, newDefaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -458,10 +517,10 @@ public final class SwingTreeInitConfig
      * @return A new {@link SwingTreeInitConfig} instance with the new logging {@link Marker}.
      */
     public SwingTreeInitConfig logMarker( Marker newLogMarker ) {
-<span class="fc" id="L461">        return new SwingTreeInitConfig(</span>
+<span class="fc" id="L520">        return new SwingTreeInitConfig(</span>
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, newLogMarker, _recordDebugSourceTrace,
-                _devToolKeyStrokeShortcut
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -482,10 +541,10 @@ public final class SwingTreeInitConfig
      * @see #devToolKeyStrokeShortcut(String)
      */
     public SwingTreeInitConfig recordDebugSourceTrace( boolean isEnabled ) {
-<span class="nc" id="L485">        return new SwingTreeInitConfig(</span>
+<span class="nc" id="L544">        return new SwingTreeInitConfig(</span>
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, isEnabled,
-                _devToolKeyStrokeShortcut
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
         );
     }
 
@@ -506,10 +565,82 @@ public final class SwingTreeInitConfig
      * @see SwingTree#getDevToolKeyStrokeShortcut()
      */
     public SwingTreeInitConfig devToolKeyStrokeShortcut( String keyStroke ) {
-<span class="fc" id="L509">        return new SwingTreeInitConfig(</span>
+<span class="fc" id="L568">        return new SwingTreeInitConfig(</span>
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
-                keyStroke
+                keyStroke, _cacheMode, _isCacheTilingEnabled
+        );
+    }
+
+
+
+    /**
+     *  Returns the {@link CacheMode} governing how aggressively SwingTree's rendering
+     *  caches trade memory for CPU time (see {@link #withCacheMode(CacheMode)}).
+     */
+    CacheMode cacheMode() {
+<span class="fc" id="L582">        return _cacheMode;</span>
+    }
+
+    /**
+     *  Selects how aggressively SwingTree trades memory for CPU time across all of its
+     *  internal rendering caches (style layers, rasterised text, noise tiles, shadow
+     *  gradients and text layouts). The mode is combined with the amount of system RAM
+     *  to derive a concrete total memory budget which is then partitioned across the
+     *  caches, so the same mode scales sensibly across machines. It can also be selected
+     *  through the system property {@code &quot;swingtree.cacheMode&quot;} and changed at runtime
+     *  through {@link SwingTree#setCacheMode(CacheMode)}.
+     *  &lt;p&gt;
+     *  &lt;strong&gt;Default&lt;/strong&gt; {@link CacheMode#BALANCED}
+     *
+     * @param cacheMode The {@link CacheMode} to use.
+     * @return A new {@link SwingTreeInitConfig} instance with the new cache mode.
+     * @see SwingTree#getCacheMode()
+     */
+    public SwingTreeInitConfig withCacheMode( CacheMode cacheMode ) {
+<span class="fc" id="L601">        return new SwingTreeInitConfig(</span>
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+<span class="fc" id="L604">                _devToolKeyStrokeShortcut, Objects.requireNonNull(cacheMode), _isCacheTilingEnabled</span>
+        );
+    }
+
+    /**
+     *  Tells whether SwingTree may cache the rendering of eligible component styles
+     *  &lt;b&gt;independently of the component size&lt;/b&gt; using stretch tiling (also known
+     *  as &quot;nine slice&quot; rendering), so that resizing a styled component does not
+     *  invalidate its cached rendering (see {@link #withCacheTilingEnabled(boolean)}).
+     */
+    boolean isCacheTilingEnabled() {
+<span class="fc" id="L615">        return _isCacheTilingEnabled;</span>
+    }
+
+    /**
+     *  SwingTree caches the rendered output of component styles keyed by their style
+     *  configuration, which includes the component size. For styles whose pixels are
+     *  constant along the component edges (flat colors, borders, shadows), SwingTree
+     *  additionally makes the cache key &lt;b&gt;size independent&lt;/b&gt; through stretch tiling
+     *  (also known as &quot;nine slice&quot; rendering): the style is rendered once at a small
+     *  canonical size and any component size is reconstructed by copying the corner
+     *  tiles and stretching the edge bands. This makes live-resizing styled components
+     *  dramatically cheaper, because no re-rendering happens at all.
+     *  &lt;p&gt;
+     *  This flag exists as a safety hatch: disabling it makes every style fall back to
+     *  the classic exact-size cache keying. It can also be set through the system
+     *  property {@code &quot;swingtree.cacheMode.tiling&quot;} and changed at runtime through
+     *  {@link SwingTree#setCacheTilingEnabled(boolean)}.
+     *  &lt;p&gt;
+     *  &lt;strong&gt;Default&lt;/strong&gt; {@code true}
+     *
+     * @param enabled Whether size independent (stretch tiled) render caching is allowed.
+     * @return A new {@link SwingTreeInitConfig} instance with the new flag.
+     * @see SwingTree#isCacheTilingEnabled()
+     */
+    public SwingTreeInitConfig withCacheTilingEnabled( boolean enabled ) {
+<span class="fc" id="L640">        return new SwingTreeInitConfig(</span>
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut, _cacheMode, enabled
         );
     }
 
@@ -580,55 +711,93 @@ public final class SwingTreeInitConfig
         String ENABLE_DEV_TOOL_KEY_STROKE = &quot;swingtree.devTool.keyStrokeShortcut&quot;;
 
         /**
+         * Selects how aggressively SwingTree's rendering caches trade memory for CPU time
+         * (see {@link CacheMode}). The value is the name of a {@link CacheMode} constant,
+         * matched case-insensitively.
+         * &lt;p&gt;
+         * &lt;strong&gt;Allowed Values&lt;/strong&gt; {@code DISABLED}, {@code CONSERVATIVE},
+         * {@code BALANCED}, {@code GENEROUS}, {@code AGGRESSIVE}&lt;br&gt;
+         * &lt;strong&gt;Default&lt;/strong&gt; {@code BALANCED}
+         */
+        String CACHE_MODE = &quot;swingtree.cacheMode&quot;;
+
+        /**
+         * Enables or disables size independent (stretch tiled / &quot;nine slice&quot;) caching
+         * of eligible component style renderings, which makes resizing styled
+         * components cheap because it no longer invalidates their render caches
+         * (see {@link SwingTreeInitConfig#withCacheTilingEnabled(boolean)}).
+         * &lt;p&gt;
+         * &lt;strong&gt;Allowed Values&lt;/strong&gt; {@code true} or {@code false}&lt;br&gt;
+         * &lt;strong&gt;Default&lt;/strong&gt; {@code true}
+         */
+        String CACHE_TILING = &quot;swingtree.cacheMode.tiling&quot;;
+
+        /**
          * Checks whether a system property is set and returns {@code true} if its value
          * is {@code &quot;true&quot;} (case-insensitive), otherwise it returns {@code false}.
          * If the system property is not set, {@code defaultValue} is returned.
          */
         static boolean getBool( String key, boolean defaultValue ) {
-<span class="fc" id="L588">            String value = System.getProperty( key );</span>
-<span class="pc bpc" id="L589" title="1 of 2 branches missed.">            return (value != null) ? Boolean.parseBoolean( value ) : defaultValue;</span>
+<span class="fc" id="L741">            String value = System.getProperty( key );</span>
+<span class="pc bpc" id="L742" title="1 of 2 branches missed.">            return (value != null) ? Boolean.parseBoolean( value ) : defaultValue;</span>
         }
 
         /**
          * Similar to sun.java2d.SunGraphicsEnvironment.getScaleFactor(String)
          */
         static float getFloat( String key, float defaultValue ) {
-<span class="fc" id="L596">            String s = System.getProperty( key );</span>
+<span class="fc" id="L749">            String s = System.getProperty( key );</span>
 
-<span class="pc bpc" id="L598" title="1 of 2 branches missed.">            if ( s == null )</span>
-<span class="fc" id="L599">                return defaultValue;</span>
+<span class="pc bpc" id="L751" title="1 of 2 branches missed.">            if ( s == null )</span>
+<span class="fc" id="L752">                return defaultValue;</span>
 
-<span class="nc" id="L601">            float units = 1;</span>
-<span class="nc bnc" id="L602" title="All 2 branches missed.">            if ( s.endsWith( &quot;x&quot; ) )</span>
-<span class="nc" id="L603">                s = s.substring( 0, s.length() - 1 );</span>
-<span class="nc bnc" id="L604" title="All 2 branches missed.">            else if ( s.endsWith( &quot;dpi&quot; ) ) {</span>
-<span class="nc" id="L605">                units = 96;</span>
-<span class="nc" id="L606">                s = s.substring( 0, s.length() - 3 );</span>
-<span class="nc bnc" id="L607" title="All 2 branches missed.">            } else if ( s.endsWith( &quot;%&quot; ) ) {</span>
-<span class="nc" id="L608">                units = 100;</span>
-<span class="nc" id="L609">                s = s.substring( 0, s.length() - 1 );</span>
+<span class="nc" id="L754">            float units = 1;</span>
+<span class="nc bnc" id="L755" title="All 2 branches missed.">            if ( s.endsWith( &quot;x&quot; ) )</span>
+<span class="nc" id="L756">                s = s.substring( 0, s.length() - 1 );</span>
+<span class="nc bnc" id="L757" title="All 2 branches missed.">            else if ( s.endsWith( &quot;dpi&quot; ) ) {</span>
+<span class="nc" id="L758">                units = 96;</span>
+<span class="nc" id="L759">                s = s.substring( 0, s.length() - 3 );</span>
+<span class="nc bnc" id="L760" title="All 2 branches missed.">            } else if ( s.endsWith( &quot;%&quot; ) ) {</span>
+<span class="nc" id="L761">                units = 100;</span>
+<span class="nc" id="L762">                s = s.substring( 0, s.length() - 1 );</span>
             }
 
             try {
-<span class="nc" id="L613">                float scale = Float.parseFloat( s );</span>
-<span class="nc bnc" id="L614" title="All 2 branches missed.">                return scale &gt; 0 ? scale / units : -1;</span>
-<span class="nc" id="L615">            } catch( NumberFormatException ex ) {</span>
-<span class="nc" id="L616">                return defaultValue;</span>
+<span class="nc" id="L766">                float scale = Float.parseFloat( s );</span>
+<span class="nc bnc" id="L767" title="All 2 branches missed.">                return scale &gt; 0 ? scale / units : -1;</span>
+<span class="nc" id="L768">            } catch( NumberFormatException ex ) {</span>
+<span class="nc" id="L769">                return defaultValue;</span>
             }
         }
 
         static long getLong( String key, long defaultValue ) {
-<span class="fc" id="L621">            String s = System.getProperty( key );</span>
+<span class="fc" id="L774">            String s = System.getProperty( key );</span>
 
-<span class="pc bpc" id="L623" title="1 of 2 branches missed.">            if ( s == null )</span>
-<span class="fc" id="L624">                return defaultValue;</span>
+<span class="pc bpc" id="L776" title="1 of 2 branches missed.">            if ( s == null )</span>
+<span class="fc" id="L777">                return defaultValue;</span>
 
             try {
-<span class="nc" id="L627">                long interval = Long.parseLong( s );</span>
-<span class="nc bnc" id="L628" title="All 2 branches missed.">                return interval &gt; 0 ? interval : defaultValue;</span>
-<span class="nc" id="L629">            } catch( NumberFormatException ex ) {</span>
-<span class="nc" id="L630">                return defaultValue;</span>
+<span class="nc" id="L780">                long interval = Long.parseLong( s );</span>
+<span class="nc bnc" id="L781" title="All 2 branches missed.">                return interval &gt; 0 ? interval : defaultValue;</span>
+<span class="nc" id="L782">            } catch( NumberFormatException ex ) {</span>
+<span class="nc" id="L783">                return defaultValue;</span>
             }
+        }
+
+        /**
+         * Resolves a system property to one of the constants of the given enum type,
+         * matching the property value against the constant names case-insensitively.
+         * If the property is unset or does not name a valid constant, {@code defaultValue}
+         * is returned.
+         */
+        static &lt;E extends Enum&lt;E&gt;&gt; E getEnum( String key, Class&lt;E&gt; type, E defaultValue ) {
+<span class="fc" id="L794">            String s = System.getProperty( key );</span>
+<span class="pc bpc" id="L795" title="1 of 2 branches missed.">            if ( s == null )</span>
+<span class="fc" id="L796">                return defaultValue;</span>
+<span class="nc bnc" id="L797" title="All 2 branches missed.">            for ( E constant : type.getEnumConstants() )</span>
+<span class="nc bnc" id="L798" title="All 2 branches missed.">                if ( constant.name().equalsIgnoreCase( s.trim() ) )</span>
+<span class="nc" id="L799">                    return constant;</span>
+<span class="nc" id="L800">            return defaultValue;</span>
         }
     }
 }

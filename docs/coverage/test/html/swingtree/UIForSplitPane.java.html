@@ -174,8 +174,8 @@ public final class UIForSplitPane&lt;P extends JSplitPane&gt; extends UIForAnySw
 <span class="fc" id="L174">    }</span>
 
     private double _calculatePercentageFrom( P p ) {
-<span class="pc bpc" id="L177" title="1 of 2 branches missed.">        return p.getOrientation() == JSplitPane.HORIZONTAL_SPLIT</span>
-<span class="nc" id="L178">                ? (double) p.getDividerLocation() / p.getWidth()</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">        return p.getOrientation() == JSplitPane.HORIZONTAL_SPLIT</span>
+<span class="fc" id="L178">                ? (double) p.getDividerLocation() / p.getWidth()</span>
 <span class="fc" id="L179">                : (double) p.getDividerLocation() / p.getHeight();</span>
     }
 
@@ -256,21 +256,26 @@ public final class UIForSplitPane&lt;P extends JSplitPane&gt; extends UIForAnySw
     public final UIForSplitPane&lt;P&gt; withDivisionOf( Val&lt;Double&gt; percentage ) {
 <span class="nc" id="L257">        NullUtil.nullArgCheck( percentage, &quot;percentage&quot;, Val.class );</span>
 <span class="nc" id="L258">        NullUtil.nullPropertyCheck( percentage, &quot;percentage&quot;, &quot;Null is not a valid percentage.&quot; );</span>
-<span class="nc" id="L259">        return _withOnShow( percentage, (thisComponent,v) -&gt; {</span>
-<span class="nc" id="L260">                    _calculateDividerLocationFrom(thisComponent, v);</span>
-<span class="nc" id="L261">               })</span>
-<span class="nc" id="L262">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L259">        return _with( thisComponent -&gt; {</span>
+                    // The UI thread must not read the property directly, because it belongs to the
+                    // application thread. So the UI thread works with this copy of the percentage,
+                    // which is refreshed through the property change events.
+<span class="nc" id="L263">                    double[] shownPercentage = { percentage.orElseThrowUnchecked() };</span>
+<span class="nc" id="L264">                    _onShow( percentage, thisComponent, (c,v) -&gt; {</span>
+<span class="nc" id="L265">                        shownPercentage[0] = v;</span>
+<span class="nc" id="L266">                        _calculateDividerLocationFrom(c, v);</span>
+<span class="nc" id="L267">                    });</span>
                     // Now we need to register a listener to the split pane's size, so that we can recalculate the divider location
                     // when the split pane is resized:
-<span class="nc" id="L265">                    thisComponent.addComponentListener(new ComponentAdapter() {</span>
+<span class="nc" id="L270">                    thisComponent.addComponentListener(new ComponentAdapter() {</span>
                         @Override
                         public void componentResized( ComponentEvent e ) {
-<span class="nc" id="L268">                            _calculateDividerLocationFrom(thisComponent, percentage.orElseThrowUnchecked());</span>
-<span class="nc" id="L269">                        }</span>
+<span class="nc" id="L273">                            _calculateDividerLocationFrom(thisComponent, shownPercentage[0]);</span>
+<span class="nc" id="L274">                        }</span>
                     });
-<span class="nc" id="L271">                    _calculateDividerLocationFrom(thisComponent, percentage.orElseThrowUnchecked());</span>
-<span class="nc" id="L272">                })</span>
-<span class="nc" id="L273">                ._this();</span>
+<span class="nc" id="L276">                    _calculateDividerLocationFrom(thisComponent, shownPercentage[0]);</span>
+<span class="nc" id="L277">                })</span>
+<span class="nc" id="L278">                ._this();</span>
     }
 
     /**
@@ -300,30 +305,37 @@ public final class UIForSplitPane&lt;P extends JSplitPane&gt; extends UIForAnySw
      * @return This very instance, which enables builder-style method chaining.
      */
     public final UIForSplitPane&lt;P&gt; withDivisionOf( Var&lt;Double&gt; percentage ) {
-<span class="fc" id="L303">        NullUtil.nullArgCheck( percentage, &quot;percentage&quot;, Var.class );</span>
-<span class="fc" id="L304">        NullUtil.nullPropertyCheck( percentage, &quot;percentage&quot;, &quot;Null is not a valid percentage.&quot; );</span>
-<span class="fc" id="L305">        return _withOnShow( percentage, (thisComponent,v) -&gt; {</span>
-<span class="fc" id="L306">                    _calculateDividerLocationFrom(thisComponent, v);</span>
-<span class="fc" id="L307">               })</span>
-<span class="fc" id="L308">                ._with( thisComponent -&gt; {</span>
-<span class="fc" id="L309">                    _calculateDividerLocationFrom(thisComponent, percentage.orElseThrowUnchecked());</span>
+<span class="fc" id="L308">        NullUtil.nullArgCheck( percentage, &quot;percentage&quot;, Var.class );</span>
+<span class="fc" id="L309">        NullUtil.nullPropertyCheck( percentage, &quot;percentage&quot;, &quot;Null is not a valid percentage.&quot; );</span>
+<span class="fc" id="L310">        return _with( thisComponent -&gt; {</span>
+                    // The UI thread must not read the property directly, because it belongs to the
+                    // application thread. So the UI thread works with this copy of the percentage,
+                    // which is refreshed through the property change events as well as divider movements.
+<span class="fc" id="L314">                    double[] shownPercentage = { percentage.orElseThrowUnchecked() };</span>
+<span class="fc" id="L315">                    _onShow( percentage, thisComponent, (c,v) -&gt; {</span>
+<span class="fc" id="L316">                        shownPercentage[0] = v;</span>
+<span class="fc" id="L317">                        _calculateDividerLocationFrom(c, v);</span>
+<span class="fc" id="L318">                    });</span>
+<span class="fc" id="L319">                    _calculateDividerLocationFrom(thisComponent, shownPercentage[0]);</span>
                     // Now we need to register a listener to the split pane's size, so that we can recalculate the divider location
                     // when the split pane is resized:
-<span class="fc" id="L312">                    thisComponent.addComponentListener(new ComponentAdapter() {</span>
+<span class="fc" id="L322">                    thisComponent.addComponentListener(new ComponentAdapter() {</span>
                         @Override
                         public void componentResized( ComponentEvent e ) {
-<span class="fc" id="L315">                            _calculateDividerLocationFrom(thisComponent, percentage.orElseThrowUnchecked());</span>
-<span class="fc" id="L316">                        }</span>
+<span class="fc" id="L325">                            _calculateDividerLocationFrom(thisComponent, shownPercentage[0]);</span>
+<span class="fc" id="L326">                        }</span>
                     });
                     // We listen for slider movement as well, so that we can recalculate the divider location
-<span class="fc" id="L319">                    thisComponent.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, evt -&gt; {</span>
-<span class="pc bpc" id="L320" title="1 of 2 branches missed.">                        if ( evt.getNewValue() != null ) {</span>
-<span class="fc" id="L321">                            double newPercentage = _calculatePercentageFrom(thisComponent);</span>
-<span class="fc" id="L322">                            percentage.set(From.VIEW, newPercentage);</span>
+<span class="fc" id="L329">                    thisComponent.addPropertyChangeListener(JSplitPane.DIVIDER_LOCATION_PROPERTY, evt -&gt; {</span>
+<span class="pc bpc" id="L330" title="1 of 2 branches missed.">                        if ( evt.getNewValue() != null ) {</span>
+<span class="fc" id="L331">                            double newPercentage = _calculatePercentageFrom(thisComponent);</span>
+<span class="fc" id="L332">                            shownPercentage[0] = newPercentage;</span>
+                            // The write is handed over to the application thread, which owns the property.
+<span class="fc" id="L334">                            _runInApp( () -&gt; percentage.set(From.VIEW, newPercentage) );</span>
                         }
-<span class="fc" id="L324">                    });</span>
-<span class="fc" id="L325">                })</span>
-<span class="fc" id="L326">                ._this();</span>
+<span class="fc" id="L336">                    });</span>
+<span class="fc" id="L337">                })</span>
+<span class="fc" id="L338">                ._this();</span>
     }
 
 }

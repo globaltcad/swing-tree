@@ -213,7 +213,7 @@ final class StyleConfLayers
 <span class="fc" id="L213">                                return totalHeight;</span>
                             }
 <span class="fc" id="L215">                            final Bounds textBounds = StyleRenderer._computeTextBounds(textConf, predictedBoxModel);</span>
-<span class="fc" id="L216">                            final float boundsWidth = textBounds.size().width().orElse(0f);</span>
+<span class="fc" id="L216">                            final float boundsWidth = textBounds.size().widthOrElse(0f);</span>
 <span class="fc" id="L217">                            final float boundsX     = textBounds.location().x();</span>
 <span class="fc" id="L218">                            final float boundsY     = textBounds.location().y();</span>
 <span class="fc bfc" id="L219" title="All 2 branches covered.">                            if ( boundsWidth &lt;= 0 )</span>

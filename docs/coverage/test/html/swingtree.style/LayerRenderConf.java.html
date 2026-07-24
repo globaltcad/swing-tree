@@ -14,18 +14,27 @@ import java.util.Objects;
  *  When the config changes compared to the previous one, the image buffer based
  *  render cache is being invalidated and the component is rendered again
  *  (potentially with a new cached image buffer).
+ *  &lt;p&gt;
+ *  &lt;b&gt;Warning to maintainers:&lt;/b&gt; the component {@link swingtree.layout.Size} carried by the
+ *  {@link #boxModel()} must remain the &lt;i&gt;only&lt;/i&gt; size dependent property reachable from here.
+ *  {@link LayerCache} relies on it: for stretch tileable styles it derives a size independent
+ *  cache key by swapping in a smaller size through {@link #withBoxModel(BoxModelConf)} and
+ *  reconstructs any actual size from the resulting rendering. A newly added field whose value
+ *  (or whose rendering) depends on the component size would silently break that reconstruction,
+ *  producing subtly wrong pixels rather than a failure. Should such a field become necessary,
+ *  it must also be rejected by {@code LayerCache._isStretchTileable}.
  */
 @Immutable
 @SuppressWarnings(&quot;Immutable&quot;)
 final class LayerRenderConf
 {
-<span class="fc" id="L22">    private static final LayerRenderConf _NONE = new LayerRenderConf(</span>
-<span class="fc" id="L23">                                                    BoxModelConf.none(),</span>
-<span class="fc" id="L24">                                                    BaseColorConf.none(),</span>
-<span class="fc" id="L25">                                                    StyleConfLayer.empty()</span>
+<span class="fc" id="L31">    private static final LayerRenderConf _NONE = new LayerRenderConf(</span>
+<span class="fc" id="L32">                                                    BoxModelConf.none(),</span>
+<span class="fc" id="L33">                                                    BaseColorConf.none(),</span>
+<span class="fc" id="L34">                                                    StyleConfLayer.empty()</span>
                                                 );
 
-<span class="fc" id="L28">    public static LayerRenderConf none() { return _NONE; }</span>
+<span class="fc" id="L37">    public static LayerRenderConf none() { return _NONE; }</span>
 
     private final Pooled&lt;BoxModelConf&gt; _boxModelConf;
     private final BaseColorConf _baseColor;
@@ -35,27 +44,27 @@ final class LayerRenderConf
         BoxModelConf   boxModelConf,
         BaseColorConf  base,
         StyleConfLayer layers
-<span class="fc" id="L38">    ) {</span>
-<span class="fc" id="L39">        _boxModelConf = new Pooled&lt;&gt;(Objects.requireNonNull(boxModelConf)).intern();</span>
-<span class="fc" id="L40">        _baseColor    = Objects.requireNonNull(base);</span>
-<span class="fc" id="L41">        _layer        = Objects.requireNonNull(layers);</span>
-<span class="fc" id="L42">    }</span>
+<span class="fc" id="L47">    ) {</span>
+<span class="fc" id="L48">        _boxModelConf = new Pooled&lt;&gt;(Objects.requireNonNull(boxModelConf)).intern();</span>
+<span class="fc" id="L49">        _baseColor    = Objects.requireNonNull(base);</span>
+<span class="fc" id="L50">        _layer        = Objects.requireNonNull(layers);</span>
+<span class="fc" id="L51">    }</span>
 
     static LayerRenderConf of( UI.Layer layer, ComponentConf fullConf ) {
-<span class="fc" id="L45">        BoxModelConf boxModelConf = BoxModelConf.of(</span>
-<span class="fc" id="L46">                                        fullConf.style().border(),</span>
-<span class="fc" id="L47">                                        fullConf.areaMarginCorrection(),</span>
-<span class="fc" id="L48">                                        fullConf.currentBounds().size()</span>
+<span class="fc" id="L54">        BoxModelConf boxModelConf = BoxModelConf.of(</span>
+<span class="fc" id="L55">                                        fullConf.style().border(),</span>
+<span class="fc" id="L56">                                        fullConf.areaMarginCorrection(),</span>
+<span class="fc" id="L57">                                        fullConf.currentBounds().size()</span>
                                     );
-<span class="fc" id="L50">        BaseColorConf colorConf = BaseColorConf.of(</span>
-<span class="fc bfc" id="L51" title="All 2 branches covered.">                                    fullConf.style().base().foundationColor().filter( c -&gt; layer == UI.Layer.BACKGROUND ).orElse(null),</span>
-<span class="fc bfc" id="L52" title="All 2 branches covered.">                                    fullConf.style().base().backgroundColor().filter( c -&gt; layer == UI.Layer.BACKGROUND ).orElse(null),</span>
-<span class="fc bfc" id="L53" title="All 2 branches covered.">                                    layer == UI.Layer.BORDER ? fullConf.style().border().colors() : BorderColorsConf.none()</span>
+<span class="fc" id="L59">        BaseColorConf colorConf = BaseColorConf.of(</span>
+<span class="fc bfc" id="L60" title="All 2 branches covered.">                                    fullConf.style().base().foundationColor().filter( c -&gt; layer == UI.Layer.BACKGROUND ).orElse(null),</span>
+<span class="fc bfc" id="L61" title="All 2 branches covered.">                                    fullConf.style().base().backgroundColor().filter( c -&gt; layer == UI.Layer.BACKGROUND ).orElse(null),</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">                                    layer == UI.Layer.BORDER ? fullConf.style().border().colors() : BorderColorsConf.none()</span>
                                 );
-<span class="fc" id="L55">        return of(</span>
+<span class="fc" id="L64">        return of(</span>
                     boxModelConf,
                     colorConf,
-<span class="fc" id="L58">                    fullConf.style().layer(layer)</span>
+<span class="fc" id="L67">                    fullConf.style().layer(layer)</span>
                 );
     }
 
@@ -64,45 +73,56 @@ final class LayerRenderConf
         final BaseColorConf  base,
         final StyleConfLayer layers
     ) {
-<span class="fc" id="L67">        if (</span>
-<span class="fc bfc" id="L68" title="All 2 branches covered.">                boxModelConf .equals( BoxModelConf.none()  ) &amp;&amp;</span>
-<span class="pc bpc" id="L69" title="1 of 2 branches missed.">                        base         .equals( BaseColorConf.none() ) &amp;&amp;</span>
-<span class="pc bpc" id="L70" title="1 of 2 branches missed.">                        layers       .equals( _NONE._layer )</span>
+<span class="fc" id="L76">        if (</span>
+<span class="pc bpc" id="L77" title="1 of 2 branches missed.">                boxModelConf .equals( BoxModelConf.none()  ) &amp;&amp;</span>
+<span class="nc bnc" id="L78" title="All 2 branches missed.">                        base         .equals( BaseColorConf.none() ) &amp;&amp;</span>
+<span class="nc bnc" id="L79" title="All 2 branches missed.">                        layers       .equals( _NONE._layer )</span>
         )
-<span class="fc" id="L72">            return _NONE;</span>
+<span class="nc" id="L81">            return _NONE;</span>
         else
-<span class="fc" id="L74">            return new LayerRenderConf(boxModelConf, base, layers);</span>
+<span class="fc" id="L83">            return new LayerRenderConf(boxModelConf, base, layers);</span>
     }
 
-<span class="fc" id="L77">    BoxModelConf boxModel() { return _boxModelConf.get(); }</span>
+<span class="fc" id="L86">    BoxModelConf boxModel() { return _boxModelConf.get(); }</span>
 
-<span class="fc" id="L79">    BaseColorConf baseColors() { return _baseColor; }</span>
+    /**
+     *  Returns a new {@link LayerRenderConf} with the supplied box model
+     *  and everything else unchanged. Used by {@link LayerCache} to derive
+     *  a size independent canonical render configuration from this one.
+     */
+    LayerRenderConf withBoxModel( BoxModelConf boxModelConf ) {
+<span class="pc bpc" id="L94" title="1 of 2 branches missed.">        if ( boxModelConf.equals(_boxModelConf.get()) )</span>
+<span class="nc" id="L95">            return this;</span>
+<span class="fc" id="L96">        return of(boxModelConf, _baseColor, _layer);</span>
+    }
 
-<span class="fc" id="L81">    StyleConfLayer layer() { return _layer; }</span>
+<span class="fc" id="L99">    BaseColorConf baseColors() { return _baseColor; }</span>
 
-<span class="fc" id="L83">    ComponentAreas areas() { return ComponentAreas.of(_boxModelConf); }</span>
+<span class="fc" id="L101">    StyleConfLayer layer() { return _layer; }</span>
+
+<span class="fc" id="L103">    ComponentAreas areas() { return ComponentAreas.of(_boxModelConf); }</span>
 
 
     @Override
     public int hashCode() {
-<span class="fc" id="L88">        return Objects.hash(_boxModelConf, _baseColor, _layer);</span>
+<span class="fc" id="L108">        return Objects.hash(_boxModelConf, _baseColor, _layer);</span>
     }
 
     @Override
     public boolean equals( Object o ) {
-<span class="fc bfc" id="L93" title="All 2 branches covered.">        if ( o == this ) return true;</span>
-<span class="pc bpc" id="L94" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
-<span class="pc bpc" id="L95" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
-<span class="fc" id="L96">        LayerRenderConf other = (LayerRenderConf) o;</span>
-<span class="fc bfc" id="L97" title="All 2 branches covered.">        return Objects.equals(_boxModelConf, other._boxModelConf) &amp;&amp;</span>
-<span class="fc bfc" id="L98" title="All 2 branches covered.">               Objects.equals(_baseColor, other._baseColor) &amp;&amp;</span>
-<span class="fc bfc" id="L99" title="All 2 branches covered.">               Objects.equals(_layer, other._layer);</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        if ( o == this ) return true;</span>
+<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
+<span class="pc bpc" id="L115" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
+<span class="fc" id="L116">        LayerRenderConf other = (LayerRenderConf) o;</span>
+<span class="fc bfc" id="L117" title="All 2 branches covered.">        return Objects.equals(_boxModelConf, other._boxModelConf) &amp;&amp;</span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">               Objects.equals(_baseColor, other._baseColor) &amp;&amp;</span>
+<span class="fc bfc" id="L119" title="All 2 branches covered.">               Objects.equals(_layer, other._layer);</span>
     }
 
     @Override
     public String toString() {
-<span class="nc" id="L104">        return getClass().getSimpleName()+&quot;[&quot; +</span>
-<span class="nc" id="L105">                    &quot;boxModel=&quot; + _boxModelConf.get() + &quot;, &quot; +</span>
+<span class="nc" id="L124">        return getClass().getSimpleName()+&quot;[&quot; +</span>
+<span class="nc" id="L125">                    &quot;boxModel=&quot; + _boxModelConf.get() + &quot;, &quot; +</span>
                     &quot;baseColor=&quot; + _baseColor + &quot;, &quot; +
                     &quot;layer=&quot; + _layer +
                 ']';

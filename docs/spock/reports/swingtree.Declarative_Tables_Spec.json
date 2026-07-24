@@ -1,10 +1,10 @@
 {
   "className":"swingtree.Declarative_Tables_Spec",
   "title":"Creating Tables",
-  "narrative":"Swing-Tree exposes a user friendly API for defining tables in a declarative manner.\n    You don't necessarily have to implement your own table model, because the Swing-Tree\n    API allows you to supply simple collection based data as a data source for your table.",
-  "subjects":["swingtree.UIForTable"],
+  "narrative":"Swing-Tree exposes a user friendly API for defining tables in a declarative manner.\n    You don't necessarily have to implement your own table model, because the Swing-Tree\n    API allows you to supply simple collection based data as a data source for your table.\n\n    Note that the **recommended** way of modelling a table is the `TableData` value,\n    which describes an entire table (its cells, column names, column classes and layout)\n    as a single immutable value that you hold in a property and bind to a table.\n    See the `Table_Data_Spec` for what that looks like, and read on here for the older,\n    pull based data sources, which are still supported and still handy for a quick table\n    over data you already hold somewhere else.",
+  "subjects":["swingtree.UIForTable","swingtree.api.model.BasicTableModel"],
   "statistics":{
-    "runs":"7",
+    "runs":"43",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -18,7 +18,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Note that you can actually pass a provider lambda for a map of header names to column lists \n            to the table factory method and it will create a table model for you, which is based on the provided \n            map provider. This will always result in a column major table. \n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Note that you can actually pass a provider lambda for a map of header names to column lists \n            to the table factory method and it will create a table model for you, which is based on the provided \n            map provider. This will always result in a column major table. \n            <p>\n            Note that this data source is pull based: the table reads it whenever it feels\n            like it, and it has no way of knowing when your map changed. Prefer a\n            `TableData` value in a property (see the `Table_Data_Spec`) unless you really\n            do have a map lying around which you would rather not copy.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A simple table UI with a map based data table model.","code":["var ui =","        UI.table(UI.MapData.EDITABLE, { [\"X\":[\"a\", \"b\", \"c\"], \"Y\":[\"1\", \"2\", \"3\"]] })"]},
@@ -52,7 +52,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Note that in this example we use a lambda based table model\n            through the `UI.tableModel()` factory method. This is a convenient\n            way to create a table model without having to implement the TableModel\n            interface yourself.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Note that in this example we use a lambda based table model\n            through the `withModel(Configurator)` method. This is a convenient\n            way to create a table model without having to implement the TableModel\n            interface yourself.\n            <p>\n            Observe how the `Event` has to be fired by hand after the data changed, and\n            how the table can then only rebuild itself wholesale, because the event does\n            not say what changed. A `TableData` value in a property (see the\n            `Table_Data_Spec`) needs neither: it updates itself, and it knows exactly\n            which rows moved.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We have an update event and some data.","code":["var data = [1, 2, 3, 4]","var update = Event.create()"]},
@@ -86,7 +86,7 @@
 
         {"kind":"and","text":"We actually build the component:","code":["var table = ui.get(JTable)"]},
 
-        {"kind":"when","text":"We fire the event.","code":["event.fire()"]},
+        {"kind":"when","text":"We fire the event.","code":["event.fire()","UI.sync() // Let the EDT finish rebuilding the table before we read it."]},
 
         {"kind":"then","text":"The table UI is updated.","code":["table.getRowCount() == 2","table.getValueAt(0, 0) == 1","table.getValueAt(0, 1) == 2","table.getValueAt(0, 2) == 3","table.getValueAt(1, 0) == 7","table.getValueAt(1, 1) == 8","table.getValueAt(1, 2) == 9"]}
       ],
@@ -107,7 +107,7 @@
 
         {"kind":"and","text":"We actually build the component:","code":["var table = ui.get(JTable)"]},
 
-        {"kind":"when","text":"We change the data in the property.","code":["data.set([[11, 12, 13], [17, 18, 19]])"]},
+        {"kind":"when","text":"We change the data in the property.","code":["data.set([[11, 12, 13], [17, 18, 19]])","UI.sync() // Let the EDT finish rebuilding the table before we read it."]},
 
         {"kind":"then","text":"The table UI is updated automatically:","code":["table.getRowCount() == 2","table.getValueAt(0, 0) == 11","table.getValueAt(0, 1) == 12","table.getValueAt(0, 2) == 13","table.getValueAt(1, 0) == 17","table.getValueAt(1, 1) == 18","table.getValueAt(1, 2) == 19"]}
       ],
@@ -164,6 +164,820 @@
         {"kind":"when","text":"We simulate a user edit through `editCellAt(int row, int column, EventObject e)`.","code":["boolean success = UI.runAndGet({table.editCellAt(0, 0, new EventObject(table))})"]},
 
         {"kind":"then","text":"The editor is a text field with a magenta background.","code":["success == true","editor.getEditorComponent() instanceof JTextField","editor.getEditorComponent().background == Color.MAGENTA"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Fixed column names declared through `colNames(..)` also determine the column count.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When you declare a fixed array of column names using the\n            `colNames(String...)` method, you usually do not have to\n            declare a `colCount(..)` lambda anymore, because the number\n            of column names already implies the number of columns.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Some row major table data.","code":["var data = [","                [\"Joey\",   34],","                [\"Fabian\", 28],","            ]"]},
+
+        {"kind":"and","text":"A table with a model that declares fixed column names, but no explicit column count.","code":["var table =","        UI.table().withModel( m -> m","            .colNames(\"Name\", \"Age\")","            .rowCount( () -> data.size() )","            .getsEntryAt( (r, c) -> data[r][c] )","        )","        .get(JTable)"]},
+
+        {"kind":"expect","text":"The column count is inferred from the two column names.","code":["table.columnCount == 2","table.rowCount == 2"]},
+
+        {"kind":"and","text":"The columns have the declared names.","code":["table.getColumnName(0) == \"Name\"","table.getColumnName(1) == \"Age\""]},
+
+        {"kind":"and","text":"The cells resolve against the data as expected.","code":["table.getValueAt(0, 0) == \"Joey\"","table.getValueAt(1, 1) == 28"]},
+
+        {"kind":"and","text":"Asking the model for a name outside of the declared range yields an empty string rather than an error.","code":["table.getModel().getColumnName(42) == \"\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Fixed column classes declared through `colClasses(..)` imply the column count and default names.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `colClasses(Class...)` method defines the types of the\n            individual columns, which a `JTable` uses to pick appropriate\n            renderers and editors (a checkbox for booleans for example).\n\n            Just like with `colNames(..)`, the number of declared classes\n            implies the column count if you do not specify one.\n            And if you do not declare any column names either, the simple\n            names of the column classes serve as default column names.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A table model with two typed columns and nothing else but data.","code":["var data = [ [42, \"meaning of life\"] ]","var table =","        UI.table().withModel( m -> m","            .colClasses(Integer, String)","            .rowCount( () -> data.size() )","            .getsEntryAt( (r, c) -> data[r][c] )","        )","        .get(JTable)"]},
+
+        {"kind":"expect","text":"The column count is inferred from the two column classes.","code":["table.columnCount == 2"]},
+
+        {"kind":"and","text":"The model reports the declared classes to the table.","code":["table.getModel().getColumnClass(0) == Integer","table.getModel().getColumnClass(1) == String"]},
+
+        {"kind":"and","text":"The default column names are derived from the class names.","code":["table.getColumnName(0) == \"Integer\"","table.getColumnName(1) == \"String\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `setsEntryAt(..)` to receive the edits a user makes through the table.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `getsEntryAt(..)` lambda feeds data into the table, and the\n            `setsEntryAt(..)` lambda is its counterpart which channels user\n            edits back out of the table and into your data structure.\n            Note that for edits to reach the setter in a real application,\n            the cells also have to be declared editable using `isEditableIf(..)`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A mutable matrix of data.","code":["var data = [","                [1, 2],","                [3, 4],","            ]"]},
+
+        {"kind":"and","text":"A fully editable table model with both a getter and a setter lambda.","code":["var table =","        UI.table().withModel( m -> m","            .colNames(\"A\", \"B\")","            .rowCount( () -> data.size() )","            .getsEntryAt( (r, c) -> data[r][c] )","            .setsEntryAt( (r, c, v) -> data[r][c] = v )","            .isEditableIf( (r, c) -> true )","        )","        .get(JTable)"]},
+
+        {"kind":"when","text":"The value of a particular cell is set through the standard `JTable` API.","code":["table.setValueAt(42, 1, 0)"]},
+
+        {"kind":"then","text":"The edit was channeled through the setter lambda into our data structure.","code":["data == [","            [1,  2],","            [42, 4],","        ]"]},
+
+        {"kind":"and","text":"The table of course displays the new value.","code":["table.getValueAt(1, 0) == 42"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A table model without any configuration is empty, but does not blow up.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            All aspects of the lambda based table model are optional.\n            Whatever you do not declare falls back to a sensible default:\n            no rows, no columns, `null` entries, no editability and\n            silently ignored edits.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A table with a model that was not configured at all.","code":["var table = UI.table().withModel( m -> m ).get(JTable)","var model = table.getModel()"]},
+
+        {"kind":"expect","text":"The model is empty.","code":["model.getRowCount() == 0","model.getColumnCount() == 0"]},
+
+        {"kind":"and","text":"Entries are reported as null and cells are not editable.","code":["model.getValueAt(0, 0) == null","!model.isCellEditable(0, 0)"]},
+
+        {"kind":"when","text":"We try to store a value despite there being no setter lambda...","code":["model.setValueAt(42, 0, 0)"]},
+
+        {"kind":"then","text":"...the call is simply ignored.","code":["noExceptionThrown()","model.getValueAt(0, 0) == null"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Firing the `updateOn` event notifies the table model listeners and refreshes the values.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is a regression guard for the lambda based table model update path.\n            When the bound `updateOn` event fires, the model must notify its\n            registered `TableModelListener`s (so a `JTable` repaints) and the\n            values served afterwards must reflect the new state of the data.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Some mutable data and an update event.","code":["var data = [10, 20, 30]","var update = Event.create()"]},
+
+        {"kind":"and","text":"A lambda based table model bound to the update event.","code":["var model =","        UI.table().withModel( m -> m","            .colNames(\"V\")","            .rowCount( () -> data.size() )","            .getsEntryAt( (r, c) -> data[r] )","            .updateOn(update)","        )","        .get(JTable).getModel()"]},
+
+        {"kind":"and","text":"A listener recording the events it receives.","code":["var events = []","model.addTableModelListener({ TableModelEvent e -> events << e } as TableModelListener)"]},
+
+        {"kind":"expect","text":"The model starts with the initial data.","code":["model.getRowCount() == 3","model.getValueAt(0, 0) == 10","model.getValueAt(2, 0) == 30"]},
+
+        {"kind":"when","text":"We change the data and fire the update event.","code":["data = [11, 22, 33, 44]","update.fire()","UI.sync()"]},
+
+        {"kind":"then","text":"The listeners were notified...","code":["!events.isEmpty()"]},
+
+        {"kind":"and","text":"...and the model now serves the new data.","code":["model.getRowCount() == 4","model.getValueAt(0, 0) == 11","model.getValueAt(3, 0) == 44"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Firing `updateTableOn` notifies the listeners of a list based table model.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The same regression guard as above, but for the collection based\n            table models installed through `updateTableOn(Event)`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A mutable matrix and an update event.","code":["var data = [[1, 2], [3, 4]]","var event = Event.create()"]},
+
+        {"kind":"and","text":"A row major list based table bound to the update event.","code":["var model =","        UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data })","        .updateTableOn(event as Event)","        .get(JTable).getModel()"]},
+
+        {"kind":"and","text":"A listener recording the events it receives.","code":["var events = []","model.addTableModelListener({ TableModelEvent e -> events << e } as TableModelListener)"]},
+
+        {"kind":"expect","text":"The model starts with the initial data.","code":["model.getRowCount() == 2","model.getValueAt(1, 1) == 4"]},
+
+        {"kind":"when","text":"We grow the data and fire the event.","code":["data = [[5, 6], [7, 8], [9, 10]]","event.fire()","UI.sync()"]},
+
+        {"kind":"then","text":"The listeners were notified and the values reflect the new data.","code":["!events.isEmpty()","model.getRowCount() == 3","model.getValueAt(2, 0) == 9","model.getValueAt(2, 1) == 10"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Every aspect of a lambda based table model may only be declared once.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `BasicTableModel.Builder` fails fast when you accidentally\n            declare the same model aspect twice, because the second declaration\n            would silently override the first one, which is most likely a bug\n            in the declaration. So instead of guessing which lambda you meant,\n            it throws an `IllegalStateException` right away.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A table model builder with a row count already defined.","code":["var builder = new BasicTableModel.Builder<>(Object).rowCount( () -> 2 )"]},
+
+        {"kind":"when","text":"We try to define a second row count lambda...","code":["builder.rowCount( () -> 42 )"]},
+
+        {"kind":"then","text":"...the builder complains immediately.","code":["thrown(IllegalStateException)"]},
+
+        {"kind":"when","text":"A null lambda on the other hand is reported as an invalid argument.","code":["builder.colCount(null)"]},
+
+        {"kind":"then","text":"","code":["thrown(IllegalArgumentException)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A property of a `Tuple` of `Tuple`s can be used as a data source for tables.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The most convenient way to model the data of a table is a property\n            holding a `Tuple` of `Tuple`s of cell values, a matrix of rows.\n            Because a `Tuple` is immutable, such a table is thread safe by\n            construction, and because the property is observable, the table\n            updates itself whenever the property changes. So unlike for the\n            collection based data sources, you do not need to bind an update\n            `Event` through `updateTableOn(..)`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding a row major matrix of cell values.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"Alice\", \"30\"),","                    Tuple.of(\"Bob\",   \"42\")","                ))"]},
+
+        {"kind":"and","text":"A table built from this property:","code":["var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+
+        {"kind":"expect","text":"The table displays the rows of the property.","code":["table.getRowCount() == 2","table.getColumnCount() == 2","table.getValueAt(0, 0) == \"Alice\"","table.getValueAt(0, 1) == \"30\"","table.getValueAt(1, 0) == \"Bob\"","table.getValueAt(1, 1) == \"42\""]},
+
+        {"kind":"and","text":"The columns have the default (spreadsheet style) names.","code":["table.getColumnName(0) == \"A\"","table.getColumnName(1) == \"B\""]},
+
+        {"kind":"and","text":"The cells are read only, because we did not ask for an editable layout.","code":["!table.isCellEditable(0, 0)"]},
+
+        {"kind":"when","text":"We change the property by adding a row...","code":["rows.update({ it.add(Tuple.of(\"Carol\", \"27\")) })","UI.sync()"]},
+
+        {"kind":"then","text":"...the table updates itself, no update event needed.","code":["table.getRowCount() == 3","table.getValueAt(2, 0) == \"Carol\""]},
+
+        {"kind":"when","text":"We replace the entire tuple with a completely different one...","code":["rows.set(Tuple.of(Tuple.of(\"Dave\", \"51\", \"extra\")))","UI.sync()"]},
+
+        {"kind":"then","text":"...the table follows, including the new column count.","code":["table.getRowCount() == 1","table.getColumnCount() == 3","table.getValueAt(0, 2) == \"extra\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The layout of a `Tuple` based table can be configured to be column major.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Just like for the list based data sources, you may tell the table\n            how to interpret the matrix you hand it, through one of the\n            `UI.ListData` constants. In a column major layout the outer `Tuple`\n            holds the columns of the table and each inner `Tuple` the cells of\n            a column, which the table transposes for you.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding a column major matrix of cell values.","code":["var columns = Var.of(Tuple.of(","                    Tuple.of(\"a\", \"b\", \"c\"),","                    Tuple.of(\"x\", \"y\", \"z\")","                ))"]},
+
+        {"kind":"and","text":"A table built from this property, declared to be column major:","code":["var table = UI.table(UI.ListData.COLUMN_MAJOR, columns).get(JTable)"]},
+
+        {"kind":"expect","text":"The two tuples are displayed as the two columns of a 3 row table.","code":["table.getRowCount() == 3","table.getColumnCount() == 2","table.getValueAt(0, 0) == \"a\"","table.getValueAt(0, 1) == \"x\"","table.getValueAt(1, 0) == \"b\"","table.getValueAt(1, 1) == \"y\"","table.getValueAt(2, 0) == \"c\"","table.getValueAt(2, 1) == \"z\""]},
+
+        {"kind":"when","text":"We add another column to the property...","code":["columns.update({ it.add(Tuple.of(\"1\", \"2\", \"3\")) })","UI.sync()"]},
+
+        {"kind":"then","text":"...the table displays a third column.","code":["table.getRowCount() == 3","table.getColumnCount() == 3","table.getValueAt(0, 2) == \"1\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The cells of an editable `Tuple` based table are written back into the property. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            If you declare one of the editable `UI.ListData` layouts and hand the\n            table a mutable `Var`, then the user may edit the cells of the table.\n            Such an edit is written back into the property, which means your\n            application state stays the single source of truth for the table.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding a matrix of cell values, in the given layout.","code":["var cells = Var.of(Tuple.of(","                    Tuple.of(\"a\", \"b\"),","                    Tuple.of(\"x\", \"y\")","                ))"]},
+
+        {"kind":"and","text":"A table built from this property, declared to be editable:","code":["var table = UI.table(layout, cells).get(JTable)"]},
+
+        {"kind":"expect","text":"The table considers its cells editable.","code":["table.isCellEditable(0, 0)"]},
+
+        {"kind":"when","text":"The user edits a cell through the regular `JTable` API...","code":["table.setValueAt(\"!\", 1, 0)","UI.sync()"]},
+
+        {"kind":"then","text":"...the edit landed in the property, at the place the layout dictates.","code":["cells.get() == Tuple.of(expectedFirst, expectedSecond)"]},
+
+        {"kind":"and","text":"The table of course displays the new value.","code":["table.getValueAt(1, 0) == \"!\""]},
+
+        {"kind":"where","text":"We check this for both editable layouts.","code":{"layout":["UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.COLUMN_MAJOR_EDITABLE"],"expectedFirst":["Tuple.of(\"a\", \"b\")","Tuple.of(\"a\", \"!\")"],"expectedSecond":["Tuple.of(\"!\", \"y\")","Tuple.of(\"x\", \"y\")"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The cells of an editable `Tuple` based table are written back into the property. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            If you declare one of the editable `UI.ListData` layouts and hand the\n            table a mutable `Var`, then the user may edit the cells of the table.\n            Such an edit is written back into the property, which means your\n            application state stays the single source of truth for the table.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding a matrix of cell values, in the given layout.","code":["var cells = Var.of(Tuple.of(","                    Tuple.of(\"a\", \"b\"),","                    Tuple.of(\"x\", \"y\")","                ))"]},
+
+        {"kind":"and","text":"A table built from this property, declared to be editable:","code":["var table = UI.table(layout, cells).get(JTable)"]},
+
+        {"kind":"expect","text":"The table considers its cells editable.","code":["table.isCellEditable(0, 0)"]},
+
+        {"kind":"when","text":"The user edits a cell through the regular `JTable` API...","code":["table.setValueAt(\"!\", 1, 0)","UI.sync()"]},
+
+        {"kind":"then","text":"...the edit landed in the property, at the place the layout dictates.","code":["cells.get() == Tuple.of(expectedFirst, expectedSecond)"]},
+
+        {"kind":"and","text":"The table of course displays the new value.","code":["table.getValueAt(1, 0) == \"!\""]},
+
+        {"kind":"where","text":"We check this for both editable layouts.","code":{"layout":["UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.COLUMN_MAJOR_EDITABLE"],"expectedFirst":["Tuple.of(\"a\", \"b\")","Tuple.of(\"a\", \"!\")"],"expectedSecond":["Tuple.of(\"!\", \"y\")","Tuple.of(\"x\", \"y\")"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Tuple` based table is read only if either its layout or its property is read only. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Editability of a tuple based table needs two things: an editable\n            layout, and a property which can actually receive the edit. A read\n            only `Val` cannot, which is why it always yields a read only table,\n            even if you ask for an editable layout. Any edit which sneaks in\n            through the model API anyway is silently ignored instead of\n            corrupting the table.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of cells, wrapped in the given kind of property.","code":["var tuple = Tuple.of(Tuple.of(\"a\", \"b\"))","var property = ( mutable ? Var.of(tuple) : Val.of(tuple) )"]},
+
+        {"kind":"and","text":"A table built from this property, with the given layout:","code":["var table = UI.table(layout, property).get(JTable)"]},
+
+        {"kind":"expect","text":"The table is only editable if both the layout and the property allow it.","code":["table.isCellEditable(0, 0) == isEditable"]},
+
+        {"kind":"when","text":"We push an edit through the model API regardless...","code":["table.getModel().setValueAt(\"!\", 0, 0)","UI.sync()"]},
+
+        {"kind":"then","text":"...it is only honored if the table is actually editable.","code":["noExceptionThrown()","table.getValueAt(0, 0) == ( isEditable ? \"!\" : \"a\" )"]},
+
+        {"kind":"where","text":"We check every combination of layout and property mutability.","code":{"layout":["UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR","UI.ListData.ROW_MAJOR"],"mutable":["true","false","true","false"],"isEditable":["true","false","false","false"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Tuple` based table is read only if either its layout or its property is read only. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Editability of a tuple based table needs two things: an editable\n            layout, and a property which can actually receive the edit. A read\n            only `Val` cannot, which is why it always yields a read only table,\n            even if you ask for an editable layout. Any edit which sneaks in\n            through the model API anyway is silently ignored instead of\n            corrupting the table.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of cells, wrapped in the given kind of property.","code":["var tuple = Tuple.of(Tuple.of(\"a\", \"b\"))","var property = ( mutable ? Var.of(tuple) : Val.of(tuple) )"]},
+
+        {"kind":"and","text":"A table built from this property, with the given layout:","code":["var table = UI.table(layout, property).get(JTable)"]},
+
+        {"kind":"expect","text":"The table is only editable if both the layout and the property allow it.","code":["table.isCellEditable(0, 0) == isEditable"]},
+
+        {"kind":"when","text":"We push an edit through the model API regardless...","code":["table.getModel().setValueAt(\"!\", 0, 0)","UI.sync()"]},
+
+        {"kind":"then","text":"...it is only honored if the table is actually editable.","code":["noExceptionThrown()","table.getValueAt(0, 0) == ( isEditable ? \"!\" : \"a\" )"]},
+
+        {"kind":"where","text":"We check every combination of layout and property mutability.","code":{"layout":["UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR","UI.ListData.ROW_MAJOR"],"mutable":["true","false","true","false"],"isEditable":["true","false","false","false"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Tuple` based table is read only if either its layout or its property is read only. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Editability of a tuple based table needs two things: an editable\n            layout, and a property which can actually receive the edit. A read\n            only `Val` cannot, which is why it always yields a read only table,\n            even if you ask for an editable layout. Any edit which sneaks in\n            through the model API anyway is silently ignored instead of\n            corrupting the table.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of cells, wrapped in the given kind of property.","code":["var tuple = Tuple.of(Tuple.of(\"a\", \"b\"))","var property = ( mutable ? Var.of(tuple) : Val.of(tuple) )"]},
+
+        {"kind":"and","text":"A table built from this property, with the given layout:","code":["var table = UI.table(layout, property).get(JTable)"]},
+
+        {"kind":"expect","text":"The table is only editable if both the layout and the property allow it.","code":["table.isCellEditable(0, 0) == isEditable"]},
+
+        {"kind":"when","text":"We push an edit through the model API regardless...","code":["table.getModel().setValueAt(\"!\", 0, 0)","UI.sync()"]},
+
+        {"kind":"then","text":"...it is only honored if the table is actually editable.","code":["noExceptionThrown()","table.getValueAt(0, 0) == ( isEditable ? \"!\" : \"a\" )"]},
+
+        {"kind":"where","text":"We check every combination of layout and property mutability.","code":{"layout":["UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR","UI.ListData.ROW_MAJOR"],"mutable":["true","false","true","false"],"isEditable":["true","false","false","false"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Tuple` based table is read only if either its layout or its property is read only. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Editability of a tuple based table needs two things: an editable\n            layout, and a property which can actually receive the edit. A read\n            only `Val` cannot, which is why it always yields a read only table,\n            even if you ask for an editable layout. Any edit which sneaks in\n            through the model API anyway is silently ignored instead of\n            corrupting the table.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tuple of cells, wrapped in the given kind of property.","code":["var tuple = Tuple.of(Tuple.of(\"a\", \"b\"))","var property = ( mutable ? Var.of(tuple) : Val.of(tuple) )"]},
+
+        {"kind":"and","text":"A table built from this property, with the given layout:","code":["var table = UI.table(layout, property).get(JTable)"]},
+
+        {"kind":"expect","text":"The table is only editable if both the layout and the property allow it.","code":["table.isCellEditable(0, 0) == isEditable"]},
+
+        {"kind":"when","text":"We push an edit through the model API regardless...","code":["table.getModel().setValueAt(\"!\", 0, 0)","UI.sync()"]},
+
+        {"kind":"then","text":"...it is only honored if the table is actually editable.","code":["noExceptionThrown()","table.getValueAt(0, 0) == ( isEditable ? \"!\" : \"a\" )"]},
+
+        {"kind":"where","text":"We check every combination of layout and property mutability.","code":{"layout":["UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR","UI.ListData.ROW_MAJOR"],"mutable":["true","false","true","false"],"isEditable":["true","false","false","false"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Tuple` based table survives empty, ragged and out of bounds data.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A table is queried by Swing at times you do not control, which is why\n            a tuple based table never throws at its data source boundaries:\n            an empty tuple is simply an empty table, a ragged matrix is as wide\n            as its longest row (with the missing cells reading as `null`), and\n            any out of bounds read is answered with `null`.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding a ragged matrix, including an empty row.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"a\", \"b\", \"c\"),","                    Tuple.of(\"d\"),","                    Tuple.of(String)","                ))"]},
+
+        {"kind":"and","text":"A table built from this property:","code":["var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)","var model = table.getModel()"]},
+
+        {"kind":"expect","text":"The table is as wide as the longest row.","code":["model.getRowCount() == 3","model.getColumnCount() == 3"]},
+
+        {"kind":"and","text":"The cells the shorter rows do not have are reported as null.","code":["model.getValueAt(1, 0) == \"d\"","model.getValueAt(1, 2) == null","model.getValueAt(2, 0) == null"]},
+
+        {"kind":"and","text":"Reads beyond the bounds of the table are answered with null instead of an exception.","code":["model.getValueAt(3, 0) == null","model.getValueAt(0, 3) == null","model.getValueAt(-1, -1) == null"]},
+
+        {"kind":"when","text":"We empty the property completely...","code":["rows.set(Tuple.of(Tuple.classTyped(String)))","UI.sync()"]},
+
+        {"kind":"then","text":"...the table is empty, and still does not blow up when read.","code":["model.getRowCount() == 0","model.getColumnCount() == 0","model.getValueAt(0, 0) == null","noExceptionThrown()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Tuple` based table tolerates a property which currently holds no tuple at all.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A nullable property is a natural way to model table data which has not\n            arrived yet (or which went away again). Binding such a property must\n            yield an empty table rather than an exception, no matter whether the\n            property is mutable or read only, and the table must fill up as soon\n            as the data arrives.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A mutable and a read only nullable property, neither holding a tuple yet.","code":["var rows = Var.ofNullable(Tuple, null)","var readOnlyRows = Val.ofNullable(Tuple, null)"]},
+
+        {"kind":"and","text":"A table bound to each of them:","code":["var table = UI.table(UI.ListData.ROW_MAJOR_EDITABLE, rows).get(JTable)","var readOnlyTable = UI.table(UI.ListData.ROW_MAJOR, readOnlyRows).get(JTable)"]},
+
+        {"kind":"expect","text":"Both tables read as empty instead of being broken.","code":["table.getRowCount() == 0","table.getColumnCount() == 0","readOnlyTable.getRowCount() == 0","readOnlyTable.getColumnCount() == 0"]},
+
+        {"kind":"when","text":"The data arrives in the mutable property...","code":["rows.set(Tuple.of(Tuple.of(\"a\", \"b\"), Tuple.of(\"c\", \"d\")))","UI.sync()"]},
+
+        {"kind":"then","text":"...the table fills up.","code":["table.getRowCount() == 2","table.getColumnCount() == 2","table.getValueAt(1, 0) == \"c\""]},
+
+        {"kind":"when","text":"The data goes away again...","code":["rows.set(null)","UI.sync()"]},
+
+        {"kind":"then","text":"...the table empties out, again without any drama.","code":["table.getRowCount() == 0","table.getColumnCount() == 0"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Tuple` based table translates a change of its property into the most targeted table events possible. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+
+        {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
+
+        {"kind":"when","text":"We apply the given change to the property...","code":["rows.update({ change(it) })","UI.sync()"]},
+
+        {"kind":"then","text":"...the table fired exactly the expected events...","code":["events == expectedEvents"]},
+
+        {"kind":"and","text":"...and it displays exactly the expected rows.","code":["(0..<table.rowCount).collect({ r ->","    (0..<table.columnCount).collect({ c -> table.getValueAt(r, c) })","}) == expectedRows"]},
+
+        {"kind":"where","text":"We cover every kind of change a tuple of rows may undergo.","code":{"change":["({ it.add(Tuple.of(\"D\", \"4\")) })","({ it.addAt(1, Tuple.of(\"X\", \"9\")) })","({ it.addAllAt(1, Tuple.of(\"X\",\"9\"), Tuple.of(\"Y\",\"8\")) })","({ it.removeAt(1) })","({ it.removeFirst(2) })","({ it.setAt(2, Tuple.of(\"Z\", \"9\")) })","({ it.setAllAt(0, Tuple.of(\"X\",\"7\"), Tuple.of(\"Y\",\"8\")) })","({ it.setAt(0, Tuple.of(\"A\", \"1\")) })","({ it.reversed() })","({ it.clear() })","({ it.add(Tuple.of(\"D\", \"4\", \"!\")) })"],"expectedEvents":["[\"INSERT[3..3]\"]","[\"INSERT[1..1]\"]","[\"INSERT[1..2]\"]","[\"DELETE[1..1]\"]","[\"DELETE[0..1]\"]","[\"UPDATE[2..2]\"]","[\"UPDATE[0..1]\"]","[]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]"],"expectedRows":["[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"], [\"D\",\"4\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"Y\",\"8\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"C\",\"3\"]]","[[\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"Z\",\"9\"]]","[[\"X\",\"7\"], [\"Y\",\"8\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"C\",\"3\"], [\"B\",\"2\"], [\"A\",\"1\"]]","[]","[[\"A\",\"1\",null], [\"B\",\"2\",null], [\"C\",\"3\",null], [\"D\",\"4\",\"!\"]]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Tuple` based table translates a change of its property into the most targeted table events possible. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+
+        {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
+
+        {"kind":"when","text":"We apply the given change to the property...","code":["rows.update({ change(it) })","UI.sync()"]},
+
+        {"kind":"then","text":"...the table fired exactly the expected events...","code":["events == expectedEvents"]},
+
+        {"kind":"and","text":"...and it displays exactly the expected rows.","code":["(0..<table.rowCount).collect({ r ->","    (0..<table.columnCount).collect({ c -> table.getValueAt(r, c) })","}) == expectedRows"]},
+
+        {"kind":"where","text":"We cover every kind of change a tuple of rows may undergo.","code":{"change":["({ it.add(Tuple.of(\"D\", \"4\")) })","({ it.addAt(1, Tuple.of(\"X\", \"9\")) })","({ it.addAllAt(1, Tuple.of(\"X\",\"9\"), Tuple.of(\"Y\",\"8\")) })","({ it.removeAt(1) })","({ it.removeFirst(2) })","({ it.setAt(2, Tuple.of(\"Z\", \"9\")) })","({ it.setAllAt(0, Tuple.of(\"X\",\"7\"), Tuple.of(\"Y\",\"8\")) })","({ it.setAt(0, Tuple.of(\"A\", \"1\")) })","({ it.reversed() })","({ it.clear() })","({ it.add(Tuple.of(\"D\", \"4\", \"!\")) })"],"expectedEvents":["[\"INSERT[3..3]\"]","[\"INSERT[1..1]\"]","[\"INSERT[1..2]\"]","[\"DELETE[1..1]\"]","[\"DELETE[0..1]\"]","[\"UPDATE[2..2]\"]","[\"UPDATE[0..1]\"]","[]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]"],"expectedRows":["[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"], [\"D\",\"4\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"Y\",\"8\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"C\",\"3\"]]","[[\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"Z\",\"9\"]]","[[\"X\",\"7\"], [\"Y\",\"8\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"C\",\"3\"], [\"B\",\"2\"], [\"A\",\"1\"]]","[]","[[\"A\",\"1\",null], [\"B\",\"2\",null], [\"C\",\"3\",null], [\"D\",\"4\",\"!\"]]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Tuple` based table translates a change of its property into the most targeted table events possible. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+
+        {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
+
+        {"kind":"when","text":"We apply the given change to the property...","code":["rows.update({ change(it) })","UI.sync()"]},
+
+        {"kind":"then","text":"...the table fired exactly the expected events...","code":["events == expectedEvents"]},
+
+        {"kind":"and","text":"...and it displays exactly the expected rows.","code":["(0..<table.rowCount).collect({ r ->","    (0..<table.columnCount).collect({ c -> table.getValueAt(r, c) })","}) == expectedRows"]},
+
+        {"kind":"where","text":"We cover every kind of change a tuple of rows may undergo.","code":{"change":["({ it.add(Tuple.of(\"D\", \"4\")) })","({ it.addAt(1, Tuple.of(\"X\", \"9\")) })","({ it.addAllAt(1, Tuple.of(\"X\",\"9\"), Tuple.of(\"Y\",\"8\")) })","({ it.removeAt(1) })","({ it.removeFirst(2) })","({ it.setAt(2, Tuple.of(\"Z\", \"9\")) })","({ it.setAllAt(0, Tuple.of(\"X\",\"7\"), Tuple.of(\"Y\",\"8\")) })","({ it.setAt(0, Tuple.of(\"A\", \"1\")) })","({ it.reversed() })","({ it.clear() })","({ it.add(Tuple.of(\"D\", \"4\", \"!\")) })"],"expectedEvents":["[\"INSERT[3..3]\"]","[\"INSERT[1..1]\"]","[\"INSERT[1..2]\"]","[\"DELETE[1..1]\"]","[\"DELETE[0..1]\"]","[\"UPDATE[2..2]\"]","[\"UPDATE[0..1]\"]","[]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]"],"expectedRows":["[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"], [\"D\",\"4\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"Y\",\"8\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"C\",\"3\"]]","[[\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"Z\",\"9\"]]","[[\"X\",\"7\"], [\"Y\",\"8\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"C\",\"3\"], [\"B\",\"2\"], [\"A\",\"1\"]]","[]","[[\"A\",\"1\",null], [\"B\",\"2\",null], [\"C\",\"3\",null], [\"D\",\"4\",\"!\"]]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Tuple` based table translates a change of its property into the most targeted table events possible. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+
+        {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
+
+        {"kind":"when","text":"We apply the given change to the property...","code":["rows.update({ change(it) })","UI.sync()"]},
+
+        {"kind":"then","text":"...the table fired exactly the expected events...","code":["events == expectedEvents"]},
+
+        {"kind":"and","text":"...and it displays exactly the expected rows.","code":["(0..<table.rowCount).collect({ r ->","    (0..<table.columnCount).collect({ c -> table.getValueAt(r, c) })","}) == expectedRows"]},
+
+        {"kind":"where","text":"We cover every kind of change a tuple of rows may undergo.","code":{"change":["({ it.add(Tuple.of(\"D\", \"4\")) })","({ it.addAt(1, Tuple.of(\"X\", \"9\")) })","({ it.addAllAt(1, Tuple.of(\"X\",\"9\"), Tuple.of(\"Y\",\"8\")) })","({ it.removeAt(1) })","({ it.removeFirst(2) })","({ it.setAt(2, Tuple.of(\"Z\", \"9\")) })","({ it.setAllAt(0, Tuple.of(\"X\",\"7\"), Tuple.of(\"Y\",\"8\")) })","({ it.setAt(0, Tuple.of(\"A\", \"1\")) })","({ it.reversed() })","({ it.clear() })","({ it.add(Tuple.of(\"D\", \"4\", \"!\")) })"],"expectedEvents":["[\"INSERT[3..3]\"]","[\"INSERT[1..1]\"]","[\"INSERT[1..2]\"]","[\"DELETE[1..1]\"]","[\"DELETE[0..1]\"]","[\"UPDATE[2..2]\"]","[\"UPDATE[0..1]\"]","[]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]"],"expectedRows":["[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"], [\"D\",\"4\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"Y\",\"8\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"C\",\"3\"]]","[[\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"Z\",\"9\"]]","[[\"X\",\"7\"], [\"Y\",\"8\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"C\",\"3\"], [\"B\",\"2\"], [\"A\",\"1\"]]","[]","[[\"A\",\"1\",null], [\"B\",\"2\",null], [\"C\",\"3\",null], [\"D\",\"4\",\"!\"]]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Tuple` based table translates a change of its property into the most targeted table events possible. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+
+        {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
+
+        {"kind":"when","text":"We apply the given change to the property...","code":["rows.update({ change(it) })","UI.sync()"]},
+
+        {"kind":"then","text":"...the table fired exactly the expected events...","code":["events == expectedEvents"]},
+
+        {"kind":"and","text":"...and it displays exactly the expected rows.","code":["(0..<table.rowCount).collect({ r ->","    (0..<table.columnCount).collect({ c -> table.getValueAt(r, c) })","}) == expectedRows"]},
+
+        {"kind":"where","text":"We cover every kind of change a tuple of rows may undergo.","code":{"change":["({ it.add(Tuple.of(\"D\", \"4\")) })","({ it.addAt(1, Tuple.of(\"X\", \"9\")) })","({ it.addAllAt(1, Tuple.of(\"X\",\"9\"), Tuple.of(\"Y\",\"8\")) })","({ it.removeAt(1) })","({ it.removeFirst(2) })","({ it.setAt(2, Tuple.of(\"Z\", \"9\")) })","({ it.setAllAt(0, Tuple.of(\"X\",\"7\"), Tuple.of(\"Y\",\"8\")) })","({ it.setAt(0, Tuple.of(\"A\", \"1\")) })","({ it.reversed() })","({ it.clear() })","({ it.add(Tuple.of(\"D\", \"4\", \"!\")) })"],"expectedEvents":["[\"INSERT[3..3]\"]","[\"INSERT[1..1]\"]","[\"INSERT[1..2]\"]","[\"DELETE[1..1]\"]","[\"DELETE[0..1]\"]","[\"UPDATE[2..2]\"]","[\"UPDATE[0..1]\"]","[]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]"],"expectedRows":["[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"], [\"D\",\"4\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"Y\",\"8\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"C\",\"3\"]]","[[\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"Z\",\"9\"]]","[[\"X\",\"7\"], [\"Y\",\"8\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"C\",\"3\"], [\"B\",\"2\"], [\"A\",\"1\"]]","[]","[[\"A\",\"1\",null], [\"B\",\"2\",null], [\"C\",\"3\",null], [\"D\",\"4\",\"!\"]]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Tuple` based table translates a change of its property into the most targeted table events possible. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+
+        {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
+
+        {"kind":"when","text":"We apply the given change to the property...","code":["rows.update({ change(it) })","UI.sync()"]},
+
+        {"kind":"then","text":"...the table fired exactly the expected events...","code":["events == expectedEvents"]},
+
+        {"kind":"and","text":"...and it displays exactly the expected rows.","code":["(0..<table.rowCount).collect({ r ->","    (0..<table.columnCount).collect({ c -> table.getValueAt(r, c) })","}) == expectedRows"]},
+
+        {"kind":"where","text":"We cover every kind of change a tuple of rows may undergo.","code":{"change":["({ it.add(Tuple.of(\"D\", \"4\")) })","({ it.addAt(1, Tuple.of(\"X\", \"9\")) })","({ it.addAllAt(1, Tuple.of(\"X\",\"9\"), Tuple.of(\"Y\",\"8\")) })","({ it.removeAt(1) })","({ it.removeFirst(2) })","({ it.setAt(2, Tuple.of(\"Z\", \"9\")) })","({ it.setAllAt(0, Tuple.of(\"X\",\"7\"), Tuple.of(\"Y\",\"8\")) })","({ it.setAt(0, Tuple.of(\"A\", \"1\")) })","({ it.reversed() })","({ it.clear() })","({ it.add(Tuple.of(\"D\", \"4\", \"!\")) })"],"expectedEvents":["[\"INSERT[3..3]\"]","[\"INSERT[1..1]\"]","[\"INSERT[1..2]\"]","[\"DELETE[1..1]\"]","[\"DELETE[0..1]\"]","[\"UPDATE[2..2]\"]","[\"UPDATE[0..1]\"]","[]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]"],"expectedRows":["[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"], [\"D\",\"4\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"Y\",\"8\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"C\",\"3\"]]","[[\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"Z\",\"9\"]]","[[\"X\",\"7\"], [\"Y\",\"8\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"C\",\"3\"], [\"B\",\"2\"], [\"A\",\"1\"]]","[]","[[\"A\",\"1\",null], [\"B\",\"2\",null], [\"C\",\"3\",null], [\"D\",\"4\",\"!\"]]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Tuple` based table translates a change of its property into the most targeted table events possible. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+
+        {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
+
+        {"kind":"when","text":"We apply the given change to the property...","code":["rows.update({ change(it) })","UI.sync()"]},
+
+        {"kind":"then","text":"...the table fired exactly the expected events...","code":["events == expectedEvents"]},
+
+        {"kind":"and","text":"...and it displays exactly the expected rows.","code":["(0..<table.rowCount).collect({ r ->","    (0..<table.columnCount).collect({ c -> table.getValueAt(r, c) })","}) == expectedRows"]},
+
+        {"kind":"where","text":"We cover every kind of change a tuple of rows may undergo.","code":{"change":["({ it.add(Tuple.of(\"D\", \"4\")) })","({ it.addAt(1, Tuple.of(\"X\", \"9\")) })","({ it.addAllAt(1, Tuple.of(\"X\",\"9\"), Tuple.of(\"Y\",\"8\")) })","({ it.removeAt(1) })","({ it.removeFirst(2) })","({ it.setAt(2, Tuple.of(\"Z\", \"9\")) })","({ it.setAllAt(0, Tuple.of(\"X\",\"7\"), Tuple.of(\"Y\",\"8\")) })","({ it.setAt(0, Tuple.of(\"A\", \"1\")) })","({ it.reversed() })","({ it.clear() })","({ it.add(Tuple.of(\"D\", \"4\", \"!\")) })"],"expectedEvents":["[\"INSERT[3..3]\"]","[\"INSERT[1..1]\"]","[\"INSERT[1..2]\"]","[\"DELETE[1..1]\"]","[\"DELETE[0..1]\"]","[\"UPDATE[2..2]\"]","[\"UPDATE[0..1]\"]","[]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]"],"expectedRows":["[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"], [\"D\",\"4\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"Y\",\"8\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"C\",\"3\"]]","[[\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"Z\",\"9\"]]","[[\"X\",\"7\"], [\"Y\",\"8\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"C\",\"3\"], [\"B\",\"2\"], [\"A\",\"1\"]]","[]","[[\"A\",\"1\",null], [\"B\",\"2\",null], [\"C\",\"3\",null], [\"D\",\"4\",\"!\"]]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Tuple` based table translates a change of its property into the most targeted table events possible. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+
+        {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
+
+        {"kind":"when","text":"We apply the given change to the property...","code":["rows.update({ change(it) })","UI.sync()"]},
+
+        {"kind":"then","text":"...the table fired exactly the expected events...","code":["events == expectedEvents"]},
+
+        {"kind":"and","text":"...and it displays exactly the expected rows.","code":["(0..<table.rowCount).collect({ r ->","    (0..<table.columnCount).collect({ c -> table.getValueAt(r, c) })","}) == expectedRows"]},
+
+        {"kind":"where","text":"We cover every kind of change a tuple of rows may undergo.","code":{"change":["({ it.add(Tuple.of(\"D\", \"4\")) })","({ it.addAt(1, Tuple.of(\"X\", \"9\")) })","({ it.addAllAt(1, Tuple.of(\"X\",\"9\"), Tuple.of(\"Y\",\"8\")) })","({ it.removeAt(1) })","({ it.removeFirst(2) })","({ it.setAt(2, Tuple.of(\"Z\", \"9\")) })","({ it.setAllAt(0, Tuple.of(\"X\",\"7\"), Tuple.of(\"Y\",\"8\")) })","({ it.setAt(0, Tuple.of(\"A\", \"1\")) })","({ it.reversed() })","({ it.clear() })","({ it.add(Tuple.of(\"D\", \"4\", \"!\")) })"],"expectedEvents":["[\"INSERT[3..3]\"]","[\"INSERT[1..1]\"]","[\"INSERT[1..2]\"]","[\"DELETE[1..1]\"]","[\"DELETE[0..1]\"]","[\"UPDATE[2..2]\"]","[\"UPDATE[0..1]\"]","[]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]"],"expectedRows":["[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"], [\"D\",\"4\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"Y\",\"8\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"C\",\"3\"]]","[[\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"Z\",\"9\"]]","[[\"X\",\"7\"], [\"Y\",\"8\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"C\",\"3\"], [\"B\",\"2\"], [\"A\",\"1\"]]","[]","[[\"A\",\"1\",null], [\"B\",\"2\",null], [\"C\",\"3\",null], [\"D\",\"4\",\"!\"]]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Tuple` based table translates a change of its property into the most targeted table events possible. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+
+        {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
+
+        {"kind":"when","text":"We apply the given change to the property...","code":["rows.update({ change(it) })","UI.sync()"]},
+
+        {"kind":"then","text":"...the table fired exactly the expected events...","code":["events == expectedEvents"]},
+
+        {"kind":"and","text":"...and it displays exactly the expected rows.","code":["(0..<table.rowCount).collect({ r ->","    (0..<table.columnCount).collect({ c -> table.getValueAt(r, c) })","}) == expectedRows"]},
+
+        {"kind":"where","text":"We cover every kind of change a tuple of rows may undergo.","code":{"change":["({ it.add(Tuple.of(\"D\", \"4\")) })","({ it.addAt(1, Tuple.of(\"X\", \"9\")) })","({ it.addAllAt(1, Tuple.of(\"X\",\"9\"), Tuple.of(\"Y\",\"8\")) })","({ it.removeAt(1) })","({ it.removeFirst(2) })","({ it.setAt(2, Tuple.of(\"Z\", \"9\")) })","({ it.setAllAt(0, Tuple.of(\"X\",\"7\"), Tuple.of(\"Y\",\"8\")) })","({ it.setAt(0, Tuple.of(\"A\", \"1\")) })","({ it.reversed() })","({ it.clear() })","({ it.add(Tuple.of(\"D\", \"4\", \"!\")) })"],"expectedEvents":["[\"INSERT[3..3]\"]","[\"INSERT[1..1]\"]","[\"INSERT[1..2]\"]","[\"DELETE[1..1]\"]","[\"DELETE[0..1]\"]","[\"UPDATE[2..2]\"]","[\"UPDATE[0..1]\"]","[]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]"],"expectedRows":["[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"], [\"D\",\"4\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"Y\",\"8\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"C\",\"3\"]]","[[\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"Z\",\"9\"]]","[[\"X\",\"7\"], [\"Y\",\"8\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"C\",\"3\"], [\"B\",\"2\"], [\"A\",\"1\"]]","[]","[[\"A\",\"1\",null], [\"B\",\"2\",null], [\"C\",\"3\",null], [\"D\",\"4\",\"!\"]]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Tuple` based table translates a change of its property into the most targeted table events possible. [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+
+        {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
+
+        {"kind":"when","text":"We apply the given change to the property...","code":["rows.update({ change(it) })","UI.sync()"]},
+
+        {"kind":"then","text":"...the table fired exactly the expected events...","code":["events == expectedEvents"]},
+
+        {"kind":"and","text":"...and it displays exactly the expected rows.","code":["(0..<table.rowCount).collect({ r ->","    (0..<table.columnCount).collect({ c -> table.getValueAt(r, c) })","}) == expectedRows"]},
+
+        {"kind":"where","text":"We cover every kind of change a tuple of rows may undergo.","code":{"change":["({ it.add(Tuple.of(\"D\", \"4\")) })","({ it.addAt(1, Tuple.of(\"X\", \"9\")) })","({ it.addAllAt(1, Tuple.of(\"X\",\"9\"), Tuple.of(\"Y\",\"8\")) })","({ it.removeAt(1) })","({ it.removeFirst(2) })","({ it.setAt(2, Tuple.of(\"Z\", \"9\")) })","({ it.setAllAt(0, Tuple.of(\"X\",\"7\"), Tuple.of(\"Y\",\"8\")) })","({ it.setAt(0, Tuple.of(\"A\", \"1\")) })","({ it.reversed() })","({ it.clear() })","({ it.add(Tuple.of(\"D\", \"4\", \"!\")) })"],"expectedEvents":["[\"INSERT[3..3]\"]","[\"INSERT[1..1]\"]","[\"INSERT[1..2]\"]","[\"DELETE[1..1]\"]","[\"DELETE[0..1]\"]","[\"UPDATE[2..2]\"]","[\"UPDATE[0..1]\"]","[]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]"],"expectedRows":["[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"], [\"D\",\"4\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"Y\",\"8\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"C\",\"3\"]]","[[\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"Z\",\"9\"]]","[[\"X\",\"7\"], [\"Y\",\"8\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"C\",\"3\"], [\"B\",\"2\"], [\"A\",\"1\"]]","[]","[[\"A\",\"1\",null], [\"B\",\"2\",null], [\"C\",\"3\",null], [\"D\",\"4\",\"!\"]]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Tuple` based table translates a change of its property into the most targeted table events possible. [10]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+
+        {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
+
+        {"kind":"when","text":"We apply the given change to the property...","code":["rows.update({ change(it) })","UI.sync()"]},
+
+        {"kind":"then","text":"...the table fired exactly the expected events...","code":["events == expectedEvents"]},
+
+        {"kind":"and","text":"...and it displays exactly the expected rows.","code":["(0..<table.rowCount).collect({ r ->","    (0..<table.columnCount).collect({ c -> table.getValueAt(r, c) })","}) == expectedRows"]},
+
+        {"kind":"where","text":"We cover every kind of change a tuple of rows may undergo.","code":{"change":["({ it.add(Tuple.of(\"D\", \"4\")) })","({ it.addAt(1, Tuple.of(\"X\", \"9\")) })","({ it.addAllAt(1, Tuple.of(\"X\",\"9\"), Tuple.of(\"Y\",\"8\")) })","({ it.removeAt(1) })","({ it.removeFirst(2) })","({ it.setAt(2, Tuple.of(\"Z\", \"9\")) })","({ it.setAllAt(0, Tuple.of(\"X\",\"7\"), Tuple.of(\"Y\",\"8\")) })","({ it.setAt(0, Tuple.of(\"A\", \"1\")) })","({ it.reversed() })","({ it.clear() })","({ it.add(Tuple.of(\"D\", \"4\", \"!\")) })"],"expectedEvents":["[\"INSERT[3..3]\"]","[\"INSERT[1..1]\"]","[\"INSERT[1..2]\"]","[\"DELETE[1..1]\"]","[\"DELETE[0..1]\"]","[\"UPDATE[2..2]\"]","[\"UPDATE[0..1]\"]","[]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]","[\"STRUCTURE\", \"ALL_DATA\"]"],"expectedRows":["[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"], [\"D\",\"4\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"X\",\"9\"], [\"Y\",\"8\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"C\",\"3\"]]","[[\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"Z\",\"9\"]]","[[\"X\",\"7\"], [\"Y\",\"8\"], [\"C\",\"3\"]]","[[\"A\",\"1\"], [\"B\",\"2\"], [\"C\",\"3\"]]","[[\"C\",\"3\"], [\"B\",\"2\"], [\"A\",\"1\"]]","[]","[[\"A\",\"1\",null], [\"B\",\"2\",null], [\"C\",\"3\",null], [\"D\",\"4\",\"!\"]]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A property of a `TableData` can be used as a data source for tables.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `TableData` is the most complete description of the contents of\n            a table: it carries the cells, the column names, the column classes and\n            the layout of the data, all in a single immutable value. So if you hold\n            such a value in a property, then that property alone describes your\n            whole table, which is why you may bind it directly.\n            Note that no `updateTableOn(..)` binding is needed here, because the\n            table listens to the property itself.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding a fully described table.","code":["var model = Var.of(","                TableData.of(UI.ListData.ROW_MAJOR, \"Name\", \"Age\")","                    .setColumnClassAt(0, String)","                    .setColumnClassAt(1, Integer)","                    .addRow(\"Alice\", 30)","                    .addRow(\"Bob\",   42)","            )"]},
+
+        {"kind":"and","text":"A table built from this property:","code":["var table = UI.table(model).get(JTable)"]},
+
+        {"kind":"expect","text":"The table displays everything the data describes.","code":["table.getRowCount() == 2","table.getColumnCount() == 2","table.getValueAt(0, 0) == \"Alice\"","table.getValueAt(1, 1) == 42"]},
+
+        {"kind":"and","text":"The column names and classes reach the table as well.","code":["table.getColumnName(0) == \"Name\"","table.getColumnName(1) == \"Age\"","table.getModel().getColumnClass(1) == Integer"]},
+
+        {"kind":"when","text":"We add a row to the data held by the property...","code":["model.update({ it.addRow(\"Carol\", 55) })","UI.sync()"]},
+
+        {"kind":"then","text":"...the table shows the new row.","code":["table.getRowCount() == 3","table.getValueAt(2, 0) == \"Carol\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `TableData` property based table is read only if either its layout or its property is read only. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Just like for a `Tuple` based table, two conditions have to be met before\n            the user may edit the cells of a `TableData` based table: the layout\n            of the snapshot has to be one of the `*_EDITABLE` constants, and the\n            property has to be a mutable `Var` which can actually receive the edit.\n            If either is missing, then the table is simply read only.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A table with the given layout, held by a property of the given mutability.","code":["var data  = TableData.of(layout).addRow(\"a\", \"b\")","var model = mutable ? Var.of(data) : Val.of(data)"]},
+
+        {"kind":"and","text":"A table bound to that property:","code":["var table = UI.table(model).get(JTable)"]},
+
+        {"kind":"expect","text":"The table only lets the user edit if both conditions are met.","code":["table.isCellEditable(0, 0) == editable"]},
+
+        {"kind":"where","text":"","code":{"layout":["UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR","UI.ListData.ROW_MAJOR"],"mutable":["true","false","true","false"],"editable":["true","false","false","false"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `TableData` property based table is read only if either its layout or its property is read only. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Just like for a `Tuple` based table, two conditions have to be met before\n            the user may edit the cells of a `TableData` based table: the layout\n            of the snapshot has to be one of the `*_EDITABLE` constants, and the\n            property has to be a mutable `Var` which can actually receive the edit.\n            If either is missing, then the table is simply read only.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A table with the given layout, held by a property of the given mutability.","code":["var data  = TableData.of(layout).addRow(\"a\", \"b\")","var model = mutable ? Var.of(data) : Val.of(data)"]},
+
+        {"kind":"and","text":"A table bound to that property:","code":["var table = UI.table(model).get(JTable)"]},
+
+        {"kind":"expect","text":"The table only lets the user edit if both conditions are met.","code":["table.isCellEditable(0, 0) == editable"]},
+
+        {"kind":"where","text":"","code":{"layout":["UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR","UI.ListData.ROW_MAJOR"],"mutable":["true","false","true","false"],"editable":["true","false","false","false"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `TableData` property based table is read only if either its layout or its property is read only. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Just like for a `Tuple` based table, two conditions have to be met before\n            the user may edit the cells of a `TableData` based table: the layout\n            of the snapshot has to be one of the `*_EDITABLE` constants, and the\n            property has to be a mutable `Var` which can actually receive the edit.\n            If either is missing, then the table is simply read only.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A table with the given layout, held by a property of the given mutability.","code":["var data  = TableData.of(layout).addRow(\"a\", \"b\")","var model = mutable ? Var.of(data) : Val.of(data)"]},
+
+        {"kind":"and","text":"A table bound to that property:","code":["var table = UI.table(model).get(JTable)"]},
+
+        {"kind":"expect","text":"The table only lets the user edit if both conditions are met.","code":["table.isCellEditable(0, 0) == editable"]},
+
+        {"kind":"where","text":"","code":{"layout":["UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR","UI.ListData.ROW_MAJOR"],"mutable":["true","false","true","false"],"editable":["true","false","false","false"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `TableData` property based table is read only if either its layout or its property is read only. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Just like for a `Tuple` based table, two conditions have to be met before\n            the user may edit the cells of a `TableData` based table: the layout\n            of the snapshot has to be one of the `*_EDITABLE` constants, and the\n            property has to be a mutable `Var` which can actually receive the edit.\n            If either is missing, then the table is simply read only.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A table with the given layout, held by a property of the given mutability.","code":["var data  = TableData.of(layout).addRow(\"a\", \"b\")","var model = mutable ? Var.of(data) : Val.of(data)"]},
+
+        {"kind":"and","text":"A table bound to that property:","code":["var table = UI.table(model).get(JTable)"]},
+
+        {"kind":"expect","text":"The table only lets the user edit if both conditions are met.","code":["table.isCellEditable(0, 0) == editable"]},
+
+        {"kind":"where","text":"","code":{"layout":["UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR","UI.ListData.ROW_MAJOR"],"mutable":["true","false","true","false"],"editable":["true","false","false","false"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Var` exposed as a read only `Val` cannot be edited through the table.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A view model routinely keeps its state in a `Var` but exposes only a read\n            only `Val` of it to the outside (a `public Val<TableData> tableModel()`\n            over a `private Var<TableData>`, say). If such a `Val` is bound through the\n            read only `withModel(Val)` overload, then the table must be read only, no\n            matter that the reference happens to point at a mutable `Var` at runtime:\n            the overload the user picked is what expresses the intent, not the runtime\n            type of the property. Anything else would let edits leak into state the\n            view model never meant to expose.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A mutable `Var` holding an editable snapshot.","code":["var backing = Var.of(","                TableData.of(UI.ListData.ROW_MAJOR_EDITABLE)","                    .addRow(\"a\", \"b\")","            )"]},
+
+        {"kind":"and","text":"\n                A table bound to it through the read only overload. The `(Val)` cast\n                is what picks that overload here, just as a Java caller holding a\n                `Val` reference (a view model exposing its `Var` as a `Val`, say)\n                would pick it, rather than Groovy dispatching on the runtime `Var`.\n            ","code":["var table = UI.table((Val) backing).get(JTable)"]},
+
+        {"kind":"expect","text":"The table reports its cells as read only, despite the mutable backing.","code":["!table.isCellEditable(0, 0)"]},
+
+        {"kind":"when","text":"An edit is forced through the model API regardless...","code":["table.getModel().setValueAt(\"!\", 0, 0)","UI.sync()"]},
+
+        {"kind":"then","text":"...it is silently ignored: neither the table nor the backing property change.","code":["noExceptionThrown()","table.getValueAt(0, 0) == \"a\"","backing.get().getValueAt(0, 0) == \"a\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The cells of an editable `TableData` based table are written back into the property.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `Var` holding an editable `TableData` is a two way binding: an edit\n            made through the table model finds its way back into the property, and the\n            property in turn is what the table reads. Note that the snapshot is a value,\n            so the property receives a new snapshot rather than a mutated one.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding an editable snapshot, and a table bound to it.","code":["var model = Var.of(","                TableData.of(UI.ListData.ROW_MAJOR_EDITABLE)","                    .addRow(\"a\", \"b\")","                    .addRow(\"c\", \"d\")","            )","var table = UI.table(model).get(JTable)"]},
+
+        {"kind":"and","text":"We remember the initial snapshot, so that we can tell it was not mutated.","code":["var initial = model.get()"]},
+
+        {"kind":"when","text":"The user edits a cell of the table...","code":["table.getModel().setValueAt(\"!\", 1, 0)","UI.sync()"]},
+
+        {"kind":"then","text":"...the edit is written back into the property.","code":["model.get().getValueAt(1, 0) == \"!\""]},
+
+        {"kind":"and","text":"The table displays the new value as well.","code":["table.getValueAt(1, 0) == \"!\""]},
+
+        {"kind":"and","text":"The snapshot the property held before the edit is untouched.","code":["initial.getValueAt(1, 0) == \"c\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A change of the column names of a `TableData` property reaches the table.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The columns of a table are not just its cells: a `TableData` also\n            describes the name and class of every column. A `JTable` can only pick\n            those up through a table structure change, so the model has to recognize\n            a change of the columns as being structural.\n            <p>\n            Note how deliberate this is: below we rename a column and edit a row in\n            one and the same change. The row edit alone would be synced through a\n            targeted row update (the cells carry a diff which says so), and a row\n            update would leave the table sitting on its old header. Recognizing the\n            renamed column is what makes the model fall back to a full rebuild here.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding a named table, and a table bound to it.","code":["var model = Var.of(","                TableData.of(UI.ListData.ROW_MAJOR, \"First\", \"Second\")","                    .addRow(\"a\", \"b\")","            )","var table = UI.table(model).get(JTable)"]},
+
+        {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
+
+        {"kind":"expect","text":"The table starts out with the initial column names.","code":["table.getColumnName(0) == \"First\""]},
+
+        {"kind":"when","text":"We rename a column and change a cell of the only row, both at once...","code":["model.update({ it.setColumnNameAt(0, \"Renamed\").setCellAt(0, 0, \"x\") })","UI.sync()"]},
+
+        {"kind":"then","text":"...the table rebuilds itself entirely, instead of merely updating the row.","code":["events.contains(\"STRUCTURE\")"]},
+
+        {"kind":"and","text":"Both the renamed column and the changed cell arrive in the table.","code":["table.getColumnName(0) == \"Renamed\"","table.getValueAt(0, 0) == \"x\""]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

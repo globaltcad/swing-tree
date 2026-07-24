@@ -5,42 +5,82 @@ import sprouts.From;
 import sprouts.Tuple;
 import sprouts.Val;
 import sprouts.Var;
+import sprouts.Viewable;
 
+/**
+ *  A combo box model whose available options are modelled by a {@link Tuple}
+ *  based property. Note that the UI thread never accesses the property itself!
+ *  Because a {@link Tuple} is deeply immutable, the two threads can simply
+ *  publish their state to each other: this model maintains a UI thread owned
+ *  snapshot of the tuple, which is refreshed through the property change events
+ *  of the item property, and conversely, an item edited by the user in the view
+ *  is first applied to this snapshot and then handed over to the application
+ *  thread, which writes it into the property.
+ *  This is the same threading convention that the selection state
+ *  of the {@link AbstractComboModel} follows.
+ */
 final class TuplePropertyComboModel&lt;E extends @Nullable Object&gt; extends AbstractComboModel&lt;E&gt;
 {
 	private final Val&lt;Tuple&lt;E&gt;&gt; _items;
+	private final Viewable&lt;Tuple&lt;E&gt;&gt; _itemsView; // A strong reference keeps the (weakly parented) view and its change listener alive.
+	private volatile @Nullable Tuple&lt;E&gt; _itemsSnapshot; // The UI thread owned copy of the state of `_items`.
 	private final boolean _mutable;
 
 	TuplePropertyComboModel(Var&lt;E&gt; selection, Val&lt;Tuple&lt;E&gt;&gt; items ) {
-<span class="nc" id="L15">		super(selection);</span>
-<span class="nc" id="L16">		_items = items;</span>
-<span class="nc" id="L17">		_selectedIndex = _indexOf(_getSelectedItemSafely());</span>
-<span class="nc" id="L18">		_mutable = false;</span>
-<span class="nc" id="L19">	}</span>
+<span class="nc" id="L30">		this( selection, items, false );</span>
+<span class="nc" id="L31">	}</span>
 
 	TuplePropertyComboModel(Var&lt;E&gt; selection, Var&lt;Tuple&lt;E&gt;&gt; items ) {
-<span class="fc" id="L22">		super(selection);</span>
-<span class="fc" id="L23">		_items = items;</span>
-<span class="fc" id="L24">		_selectedIndex = _indexOf(_getSelectedItemSafely());</span>
-<span class="fc" id="L25">		_mutable = true;</span>
-<span class="fc" id="L26">	}</span>
+<span class="fc" id="L34">		this( selection, items, true );</span>
+<span class="fc" id="L35">	}</span>
+
+	private TuplePropertyComboModel(Var&lt;E&gt; selection, Val&lt;Tuple&lt;E&gt;&gt; items, boolean mutable ) {
+<span class="fc" id="L38">		super(selection);</span>
+<span class="fc" id="L39">		_items = items;</span>
+<span class="fc" id="L40">		_itemsSnapshot = items.orElseNull();</span>
+<span class="fc" id="L41">		_mutable = mutable;</span>
+<span class="fc" id="L42">		_selectedIndex = _indexOf(_getSelectedItemSafely());</span>
+<span class="fc" id="L43">		_itemsView = _items.view();</span>
+<span class="fc" id="L44">		_itemsView.onChange(From.ALL, it -&gt; {</span>
+<span class="fc" id="L45">			@Nullable Tuple&lt;E&gt; newItems = it.currentValue().orElseNull();</span>
+<span class="fc" id="L46">			_publishToUIThread(() -&gt; {</span>
+<span class="fc" id="L47">				_itemsSnapshot = newItems;</span>
+<span class="fc" id="L48">				updateSelectedIndex();</span>
+<span class="fc" id="L49">				fireListeners();</span>
+<span class="fc" id="L50">			});</span>
+<span class="fc" id="L51">		});</span>
+<span class="fc" id="L52">	}</span>
 
 	@Override
 	public AbstractComboModel&lt;E&gt; withVar( Var&lt;E&gt; newVar ) {
-<span class="nc" id="L30">		return new TuplePropertyComboModel&lt;&gt;(newVar, _items);</span>
+<span class="nc" id="L56">		return new TuplePropertyComboModel&lt;&gt;(newVar, _items, _mutable);</span>
 	}
 
 	@Override protected void setAt(int index, @Nullable E element) {
-<span class="nc bnc" id="L34" title="All 4 branches missed.">		if ( _mutable &amp;&amp; _items instanceof Var )</span>
-<span class="nc" id="L35">			((Var&lt;Tuple&lt;E&gt;&gt;)_items).update(From.VIEW, tuple -&gt; tuple.setAt(index, NullUtil.fakeNonNull(element)));</span>
-<span class="nc" id="L36">	}</span>
+<span class="nc bnc" id="L60" title="All 4 branches missed.">		if ( _mutable &amp;&amp; _items instanceof Var ) {</span>
+<span class="nc" id="L61">			Tuple&lt;E&gt; snapshot = _itemsSnapshot;</span>
+<span class="nc bnc" id="L62" title="All 6 branches missed.">			if ( snapshot != null &amp;&amp; index &gt;= 0 &amp;&amp; index &lt; snapshot.size() )</span>
+<span class="nc" id="L63">				_itemsSnapshot = snapshot.setAt(index, NullUtil.fakeNonNull(element));</span>
+<span class="nc" id="L64">			_publishToAppThread(() -&gt;</span>
+<span class="nc" id="L65">				((Var&lt;Tuple&lt;E&gt;&gt;)_items).update(From.VIEW, tuple -&gt; {</span>
+<span class="nc bnc" id="L66" title="All 4 branches missed.">					if ( index &lt; 0 || index &gt;= tuple.size() )</span>
+<span class="nc" id="L67">						return tuple; // The tuple changed in the meantime; the edit no longer applies.</span>
+<span class="nc" id="L68">					return tuple.setAt(index, NullUtil.fakeNonNull(element));</span>
+				})
+			);
+		}
+<span class="nc" id="L72">	}</span>
 
 	@Override public int getSize() {
-<span class="fc" id="L39">		return _items.mapTo(Integer.class, Tuple::size).orElse(0);</span>
+<span class="fc" id="L75">		Tuple&lt;E&gt; snapshot = _itemsSnapshot;</span>
+<span class="pc bpc" id="L76" title="1 of 2 branches missed.">		return snapshot == null ? 0 : snapshot.size();</span>
 	}
 
 	@Override public @Nullable E getElementAt( int index ) {
-<span class="fc" id="L43">		return (E) _items.mapTo(Object.class, i -&gt; i.get(index) ).orElseNull();</span>
+<span class="fc" id="L80">		Tuple&lt;E&gt; snapshot = _itemsSnapshot;</span>
+<span class="pc bpc" id="L81" title="2 of 6 branches missed.">		if ( snapshot == null || index &lt; 0 || index &gt;= snapshot.size() )</span>
+<span class="fc" id="L82">			return null;</span>
+<span class="fc" id="L83">		return snapshot.get(index);</span>
 	}
 
 }

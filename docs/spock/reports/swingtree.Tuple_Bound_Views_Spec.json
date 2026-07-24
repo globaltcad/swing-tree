@@ -900,7 +900,7 @@
       "blocks":[
         {"kind":"given","text":"A tuple where two tags accidentally share the id \"dup\".","code":["var models = Var.of(Tuple.of(","    new Tag(\"dup\", \"First\"),","    new Tag(\"dup\", \"Second\"),","    new Tag(\"unique\", \"Third\")","))","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.label(p.viewAsString({ it.label() })) }"]},
 
-        {"kind":"when","text":"We build the panel binding, capturing what is written to the error log.","code":["var log = Utility.captureSystemErr({","    UI.panel().addAll(models, supplier).get(JPanel)","})"]},
+        {"kind":"when","text":"We build the panel binding, capturing what is written to the error log.","code":["var log = Utility.captureErrorLog({","    UI.panel().addAll(models, supplier).get(JPanel)","})"]},
 
         {"kind":"then","text":"The framework names the duplicated id and points at the unique-id fix.","code":["log.contains(\"Detected duplicate entry id 'dup'\")","log.contains(\"unique and stable id\")"]}
       ],
@@ -917,7 +917,7 @@
       "blocks":[
         {"kind":"given","text":"A tuple with two items that share the id \"x\".","code":["var models = Var.of(Tuple.of(","    new Tag(\"x\", \"One\"),","    new Tag(\"x\", \"Two\")","))","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.label(p.viewAsString({ it.label() })) }"]},
 
-        {"kind":"when","text":"We build the scroll-panels binding, capturing the error log.","code":["var log = Utility.captureSystemErr({","    UI.scrollPanels().addAll(models, supplier).get(JScrollPanels)","})"]},
+        {"kind":"when","text":"We build the scroll-panels binding, capturing the error log.","code":["var log = Utility.captureErrorLog({","    UI.scrollPanels().addAll(models, supplier).get(JScrollPanels)","})"]},
 
         {"kind":"then","text":"The duplicate id is reported.","code":["log.contains(\"Detected duplicate entry id 'x'\")"]}
       ],
@@ -936,7 +936,7 @@
 
         {"kind":"and","text":"...but a faulty supplier that always wraps the very same shared component.","code":["var shared = new JLabel(\"I am shared\")","BoundViewSupplier<Tag> faultySupplier = { Var<Tag> p -> UI.of(shared) }"]},
 
-        {"kind":"when","text":"We build the scroll-panels binding, capturing the error log.","code":["var log = Utility.captureSystemErr({","    UI.scrollPanels().addAll(models, faultySupplier).get(JScrollPanels)","})"]},
+        {"kind":"when","text":"We build the scroll-panels binding, capturing the error log.","code":["var log = Utility.captureErrorLog({","    UI.scrollPanels().addAll(models, faultySupplier).get(JScrollPanels)","})"]},
 
         {"kind":"then","text":"The framework reports that a view is already tied to a still-live parent.","code":["log.contains(\"still-live parent\")"]}
       ],
@@ -953,7 +953,7 @@
       "blocks":[
         {"kind":"given","text":"A scroll-panels view bound to two uniquely-identified items.","code":["var models = Var.of(Tuple.of(new Tag(\"a\", \"A\"), new Tag(\"b\", \"B\")))","BoundViewSupplier<Tag> supplier = { Var<Tag> p -> UI.label(p.viewAsString({ it.label() })) }","var scrollPanels = UI.scrollPanels().addAll(models, supplier).get(JScrollPanels)"]},
 
-        {"kind":"when","text":"We replace the tuple with a fresh one carrying the very same ids.","code":["var log = Utility.captureSystemErr({","    models.set(Tuple.of(new Tag(\"a\", \"A-reloaded\"), new Tag(\"b\", \"B-reloaded\")))","    UI.sync()","})"]},
+        {"kind":"when","text":"We replace the tuple with a fresh one carrying the very same ids.","code":["var log = Utility.captureErrorLog({","    models.set(Tuple.of(new Tag(\"a\", \"A-reloaded\"), new Tag(\"b\", \"B-reloaded\")))","    UI.sync()","})"]},
 
         {"kind":"then","text":"The recycle is benign: no view-parent error is logged.","code":["!log.contains(\"tied to another parent\")","!log.contains(\"still-live parent\")"]},
 
