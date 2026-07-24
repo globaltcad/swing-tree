@@ -45,8 +45,9 @@ subtypes of `UIForAnySwing`). On a builder you:
 - and finally **unwrap** it with `.get(JPanel.class)` or hand it to `UI.show(..)`.
 
 Crucial idea: **a builder is a recipe, not the component.** It produces a real
-`JComponent` underneath. You can always escape to the raw component with
-`.peek(c -> ...)` or unwrap with `.get(Type.class)`.
+`JComponent` underneath. You can escape to the raw component with `.peek(c -> ...)`
+or unwrap with `.get(Type.class)` — but treat `peek` as a last resort (§12): reach
+for a SwingTree `with*`/`is*If`/`on*` method first.
 
 The smallest complete program:
 
@@ -1013,8 +1014,9 @@ UI.table(UI.ListData.ROW_MAJOR, tupleVar);   // Var<Tuple<Tuple<E>>>: TableData 
 in a thread-safe model of its own, so `JTable.getModel()` does **not** return the
 object you passed to `withModel(..)`.
 
-Full prose: `docs/markdown/Writing-Tables.md`. Executable catalogue of the whole
-`TableData` API: `src/test/groovy/swingtree/Table_Data_Spec.groovy`.
+Full prose: [Writing-Tables.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Writing-Tables.md).
+Executable catalogue of the whole `TableData` API:
+[Table_Data_Spec.groovy](https://github.com/globaltcad/swing-tree/blob/main/src/test/groovy/swingtree/Table_Data_Spec.groovy).
 
 ### Icons & SVG (first-class, HiDPI-crisp)
 
@@ -1075,7 +1077,8 @@ or `img.image(iconDeclOrImageIcon)`; plus `opacity`, `size`, `offset`, `repeat`,
 `primer(color)`, `clipTo(ComponentArea.BODY|BORDER|INTERIOR|..)`. Layer via the
 outer overload `image(Layer.BACKGROUND, img -> ..)`. If the SVG text/config comes
 from a property, use the property-bound `withStyle(prop, (svg, it) -> ..)` (§8).
-Playground example covering all of this: `examples/stylish/SvgViewer.java`.
+Playground example covering all of this:
+[SvgViewer.java](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/stylish/SvgViewer.java).
 
 ### Dialogs (`JOptionPane` wrappers)
 
@@ -1116,7 +1119,7 @@ lambda) — push risky top-level code into `apply(ui -> ...)` or `peek(c -> ...)
 
 | Hatch | Use |
 |---|---|
-| `.peek(c -> ...)` | grab the raw Swing component for an imperative tweak |
+| `.peek(c -> ...)` | **last resort** — reach into the raw Swing component only when SwingTree wraps no equivalent (see the caution below) |
 | `.apply(ui -> ...)` | imperative loop that `add(..)`s many children (the lambda gets the builder) |
 | `.applyIf(boolean, ui -> ...)` | inline conditional sub-tree (static shape decisions) |
 | `.applyIfPresent(Optional<Consumer<I>>)` | inline `Optional`-driven sub-tree |
@@ -1126,6 +1129,18 @@ lambda) — push risky top-level code into `apply(ui -> ...)` or `peek(c -> ...)
 > **Prefer reactivity over hatches.** If a condition depends on app state, bind it
 > (`isVisibleIf`, `isEnabledIf`, property-bound `add`) instead of `applyIf`, so the
 > UI updates automatically. The hatches are for *construction-time* decisions.
+
+> **`peek(..)` is a code smell — always look for a SwingTree method first.** It hands
+> you the raw component and steps *outside* SwingTree's control, forfeiting what the
+> library gives you for free: HiDPI "developer-pixel" scaling (§13), the style
+> engine's ownership of colours/opacity/borders (§7), decoupled-thread safety (§11),
+> and any usability fixes SwingTree layers over raw Swing. So before writing `peek`,
+> look for the SwingTree variant — a `with*` setter (e.g. `withPrefSize`,
+> `withBackground`, `withTooltip`), an `is*If(Val<Boolean>)` binding, an `on*(..)`
+> event handler, `withStyle(..)`, or `withProperty(key, value)` for a client
+> property. `peek` is legitimate **only** when no such method exists — a niche Swing
+> setter SwingTree genuinely does not wrap (say `JTable#setRowHeight`), or capturing
+> a third-party component — and then keep it to that one imperative line.
 
 ---
 
@@ -1177,7 +1192,7 @@ painting, a peeked component, a third-party widget): `UI.scale(int|float|double)
 `UI.scale()` (the raw factor). Override the factor with
 `SwingTree.get().setUiScaleFactor(2.0f)` or
 `SwingTree.initializeUsing(cfg -> cfg.uiScaleFactor(2.0f))`. Full prose:
-`docs/markdown/HiDPI-Scaling.md`.
+[HiDPI-Scaling.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/HiDPI-Scaling.md).
 
 ## 14. Hard-won gotchas (check these in any review)
 
@@ -1217,6 +1232,10 @@ painting, a peeked component, a third-party widget): `UI.scale(int|float|double)
     *component pixels* (already scaled); passing them to `minHeight(..)`/`size(..)`/etc.
     double-scales them. Read geometry through the delegate accessors
     (`componentPrefHeight()`, `getWidth()`, `mouseX()`, …) which give developer pixels. (§13)
+12. **`peek(..)` is a code smell — prefer a SwingTree method.** Raw-component tweaks
+    step outside HiDPI scaling, the style engine and decoupled-thread safety; reach
+    for a `with*`/`is*If`/`on*`/`withStyle`/`withProperty` method first. `peek` is
+    legitimate only when SwingTree wraps no equivalent (§12).
 
 ---
 
@@ -1296,7 +1315,7 @@ SvgIcon.of(svgText).withIconSizeFromWidth(64).withFitComponent(FitComponent.MIN_
 // style sheet + theme
 UI.use(sheet, () -> UI.show(f -> new View()));   // sheet.reconfigure() hot-swaps
 
-// escape hatches
+// escape hatches  (peek = last resort; prefer a with*/is*If/on*/withStyle method — §12)
 .peek(c -> c.setX(..)).apply(ui -> {for(..) ui.add(..);}).applyIf(cond, ui -> ui.add(..)).get(JPanel.class)
 
 // HiDPI scaling — you write developer px (scaled up), delegates return developer px (scaled down)
@@ -1307,19 +1326,25 @@ UI.scale(int|float|double) / UI.unscale(..) / UI.scale(g2d)  // only when workin
 
 ### Runnable examples in the SwingTree repo (read these for full context)
 
-- `examples/calculator/mvi/CalculatorView.java` — canonical MVI/MVL.
-- `examples/team/mvi/TeamView.java` **vs** `examples/team/mvvm/TeamView.java` — same UI, both architectures.
-- `examples/chat/mvi/ChatView.java` — `Tuple` + `addAll` + `HasId`.
-- `examples/trains/mvi/TrainsView.java` (+ `TrainsViewModel`, `TransitClient`) — real-world MVI: `Tuple`-valued state, a Swing-free data layer doing blocking IO off the EDT, and Lombok `@With`/`@Getter` value objects (records-free, **Java 8**-clean).
-- `examples/breathing/mvi/BreathingView.java` (+ `BreathingViewModel`) — modelled animation, re-arming, the GC gotcha.
-- `examples/animated/AnimatedView.java` / `TransitionalAnimation.java` — the full animation primitive tour.
-- `examples/zen/ThemeGardenView.java` (+ `ThemedStyleSheet`) — style sheets, groups, runtime theme swap.
-- `examples/scribe/CelestialScribe.java` — `Layout.none()` derived from data, styled text flowing around children.
-- `examples/dashboard/SalesDashboard.java` — reactive `Var<Layout>` reflow.
-- `examples/almanack/mvi/AlmanackView.java` (+ `AlmanackViewModel`) — every tab binding mechanism in one field-notebook app: a two-way `Var<Integer>` selection index that may point at tabs which don't exist yet (deferred selection), `addAll(Val<Tuple<M>>, TabSupplier)` dynamic tabs, enum⇄index lenses, bound tab titles/tooltips/enabled flags.
-- `examples/stylish/SoftUIView.java` — soft-UI style sheet, custom paint.
-- `examples/stylish/SvgViewer.java` — SVG playground: one SVG rendered through four pipelines (`SvgIcon` in style API, `img.svg(..)` string, rasterized `getImage()`, component icon) with live `Placement`/`FitComponent` switching.
-- `examples/simple/ResponsiveLayout*.java` — `AUTO_SPAN` responsive flow.
+All example sources live under [`src/test/java/examples/`](https://github.com/globaltcad/swing-tree/tree/main/src/test/java/examples)
+in the repo; the links below open each on GitHub.
 
-The wiki (`docs/markdown/`) is the prose companion; start at `README.md` →
-`Climbing-Swing-Tree.md` → `Functional-MVVM.md`.
+- [`calculator/mvi/CalculatorView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/calculator/mvi/CalculatorView.java) — canonical MVI/MVL.
+- [`team/mvi/TeamView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/team/mvi/TeamView.java) **vs** [`team/mvvm/TeamView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/team/mvvm/TeamView.java) — same UI, both architectures.
+- [`chat/mvi/ChatView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/chat/mvi/ChatView.java) — `Tuple` + `addAll` + `HasId`.
+- [`trains/mvi/TrainsView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/trains/mvi/TrainsView.java) (+ `TrainsViewModel`, `TransitClient`) — real-world MVI: `Tuple`-valued state, a Swing-free data layer doing blocking IO off the EDT, and Lombok `@With`/`@Getter` value objects (records-free, **Java 8**-clean).
+- [`budget/mvi/BudgetView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/budget/mvi/BudgetView.java) (+ `BudgetViewModel`, `Budget`, `BudgetHealth`) — a self-contained budget planner showcasing three ideas at once: a **value-model table** bound with `UI.table(Var<TableData>)` (editable, edits flow back as a new value; a `withCellForColumn` renderer/editor euro-formats the Amount column yet commits back a `Double`), a **value-capturing SVG style** `withStyle(svgText, (svg, it) -> it.image(img -> img.svg(svg)))` driving a donut chart generated from the data, and a **composite view** `Viewable.of(seed, it -> it.join(a, ..).join(b, ..)…)` (Sprouts ≥2.7) merging three properties into one item for a single `withStyle`.
+- [`breathing/mvi/BreathingView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/breathing/mvi/BreathingView.java) (+ `BreathingViewModel`) — modelled animation, re-arming, the GC gotcha.
+- [`animated/AnimatedView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/animated/AnimatedView.java) / [`TransitionalAnimation.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/animated/TransitionalAnimation.java) — the full animation primitive tour.
+- [`zen/ThemeGardenView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/zen/ThemeGardenView.java) (+ `ThemedStyleSheet`) — style sheets, groups, runtime theme swap.
+- [`scribe/CelestialScribe.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/scribe/CelestialScribe.java) — `Layout.none()` derived from data, styled text flowing around children.
+- [`dashboard/SalesDashboard.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/dashboard/SalesDashboard.java) — reactive `Var<Layout>` reflow.
+- [`almanack/mvi/AlmanackView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/almanack/mvi/AlmanackView.java) (+ `AlmanackViewModel`) — every tab binding mechanism in one field-notebook app: a two-way `Var<Integer>` selection index that may point at tabs which don't exist yet (deferred selection), `addAll(Val<Tuple<M>>, TabSupplier)` dynamic tabs, enum⇄index lenses, bound tab titles/tooltips/enabled flags.
+- [`stylish/SoftUIView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/stylish/SoftUIView.java) — soft-UI style sheet, custom paint.
+- [`stylish/SvgViewer.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/stylish/SvgViewer.java) — SVG playground: one SVG rendered through four pipelines (`SvgIcon` in style API, `img.svg(..)` string, rasterized `getImage()`, component icon) with live `Placement`/`FitComponent` switching.
+- [`simple/ResponsiveLayout.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/simple/ResponsiveLayout.java) (+ `ResponsiveLayoutAlign`, `ResponsiveLayoutFill`) — `AUTO_SPAN` responsive flow.
+
+The wiki ([`docs/markdown/`](https://github.com/globaltcad/swing-tree/tree/main/docs/markdown)) is the prose
+companion; start at [README.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/README.md) →
+[Climbing-Swing-Tree.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Climbing-Swing-Tree.md) →
+[Functional-MVVM.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Functional-MVVM.md).
