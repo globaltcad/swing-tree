@@ -227,8 +227,11 @@ any other layout manager you want.
 You can specify the layout manager for a component by using
 the `withLayout` method.
 
-You may also want to [check out this guide](./Responsive-Layouts.md)
-if you are interested in building responsive layouts with Swing-Tree.
+A window is rarely the size you designed it at — people tile, snap and stack
+windows, and rotate monitors into portrait. [Convergent Design](./Convergent-Design.md)
+explains how to make a view survive that, and
+[Responsive Layouts](./Responsive-Layouts.md) is the 12-column grid it mostly
+leans on.
 
 And if you want those responsive (or any other) layouts to change dynamically at runtime —
 driven by a button click, a model property, or application state — take a look at the
@@ -710,6 +713,7 @@ Here some more reading material to get you started:
 
 - [Simple Dialogs](./Simple-Dialogs.md) — `JOptionPane` confirmations and messages, the SwingTree way.
 - [Writing Tables](./Writing-Tables.md) — declarative `JTable` models and cell rendering.
+- [Convergent Design](./Convergent-Design.md) — making a view usable at *any* window shape, and choosing between the four mechanisms for it.
 - [Responsive Layouts](./Responsive-Layouts.md) — Bootstrap-style 12-column flow that adapts to size.
 - [Reactive Layouts](./Reactive-Layouts.md) — bind the panel's *layout itself* to a `Var<Layout>` property.
 - [Functional MVVM (MVI / MVL)](./Functional-MVVM.md) — the recommended pattern: immutable view models + lenses.

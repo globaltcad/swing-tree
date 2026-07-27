@@ -4,7 +4,7 @@ description: >
   Write Swing desktop UIs with the SwingTree library and its companion property
   library Sprouts. Use this skill whenever you are building, editing, reviewing,
   or debugging Java Swing GUI code that imports `swingtree.UI` or `sprouts.*` —
-  declarative component trees, MigLayout/responsive/reactive layouts, the
+  declarative component trees, convergent/responsive/reactive layouts, the
   functional style API, SVG icons, animations, and MVI/MVL or MVVM view models.
 ---
 
@@ -23,6 +23,13 @@ layout, properties & lenses, the two architecture patterns (MVI/MVL and classic
 MVVM), events, styling, animation, tables, icons & SVG, dialogs, and the
 non-obvious gotchas that bite people. Read it top to bottom once; thereafter use the cheat sheet at
 the end.
+
+> **One library-wide preference up front: SwingTree views are expected to be
+> *convergent*** — usable whether the window is maximised on an ultrawide or
+> tiled into a tall, 500-pixel strip. Users run tiling window managers, snap
+> windows to halves, and rotate monitors into portrait; a view that only works
+> at the size you developed it in is considered broken. §2c is the short
+> version and the checklist; apply it to every view you write or review.
 
 ---
 
@@ -118,9 +125,11 @@ engine owns opacity and will fight you.**
 
 ---
 
-## 2. Layout — MigLayout, type-safe constants, responsive, reactive
+## 2. Layout — MigLayout, type-safe constants, and convergence
 
-SwingTree's default layout manager is **MigLayout**. You drive it three ways.
+SwingTree's default layout manager is **MigLayout**; §2a and §2b are the two ways
+to drive it. §2c onwards is about making the result work at **any** window size,
+which SwingTree treats as the default expectation rather than a nice-to-have.
 
 ### 2a. String constraints (most common, terse)
 
@@ -162,26 +171,165 @@ Per-child constants: `GROW`, `GROW_X`, `GROW_Y`, `PUSH`, `PUSH_X`, `PUSH_Y`, `SP
 String constraints and constants are interchangeable — pick whichever reads
 clearer locally. (Examples in this codebase mix both freely.)
 
-### 2c. Responsive flow layout (`ResponsiveGridFlowLayout`, Bootstrap-style 12 columns)
+### 2c. Convergence — a SwingTree view is expected to survive any window shape
 
-For layouts that adapt **as the container resizes**, use a flow layout plus
-`AUTO_SPAN(..)` per child. Each child declares how many of 12 virtual columns it
-occupies at each width category (`small`, `medium`, `large`, `veryLarge`,
-`oversize`). The category is the container's current width vs. its preferred width.
+**This is a strong preference of the library, not an optional polish step. Write
+convergent views by default; treat "it only works maximised on a landscape
+monitor" as a bug.**
+
+Desktop windows are not a fixed size any more. Users run tiling window managers
+(i3, sway, Hyprland, yabai, AeroSpace, FancyZones), snap windows to halves and
+thirds, put four windows across an ultrawide, rotate a monitor into portrait,
+and drag your app onto a smaller second screen. A view that assumes ~1400×900
+is broken for a large fraction of real users.
+
+**Convergent** ≠ merely responsive. Responsive means nothing *overlaps*;
+convergent means nothing is *lost* — the layout rearranges, the content
+re-prioritises, and the primary action stays reachable at every size.
+
+#### The default recipe (start every page like this)
 
 ```java
-panel().withFlowLayout()
-.add(AUTO_SPAN(it -> it.small(12).medium(6).large(3)), boxA)
-.add(AUTO_SPAN(it -> it.small(12).medium(6).large(3)), boxB)
+UI.scrollPane( conf -> conf.fitWidth(true) )         // the page may outgrow the window
+.withHorizontalScrollBarPolicy(UI.Active.NEVER)      // never scroll sideways
+.withVerticalScrollIncrement(24)
+.add(
+    UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 18, 18)
+    .withMinSize(0, 0)                               // may shrink to whatever it is given
+    .withPrefSize(PAGE_REFERENCE_WIDTH, 0)           // the reference width (see 2d)
+    .add(SIDEBAR_SPAN, sidebar(vm))
+    .add(CONTENT_SPAN, content(vm))
+);
 ```
 
-The `AUTO_SPAN` lambda re-runs on every resize, so the spans are genuinely dynamic.
+#### Four mechanisms, in the order you should reach for them
 
-### 2d. Reactive layout — bind the layout itself to a `Var<Layout>`
+| Gear | Mechanism | Use when | Costs |
+|---|---|---|---|
+| **0** | `"wmin 0"` + `withMinSize(0,0)` | **always** — a prerequisite for all of the others | nothing |
+| **1** | `withFlowLayout()` + `AUTO_SPAN` (§2d) | the same regions want a different number of columns | **no state at all** |
+| **2** | `Var<Layout>` reflow (§2e) | the same widgets want a genuinely different arrangement (a toolbar folding into rows) | one property; **nothing is rebuilt** |
+| **3** | form-factor state + view swap (§2f) | the two shapes want different component trees (split pane ⇄ scrolling column) | rebuilds — loses focus/caret/scroll |
+| **4** | `isVisibleIf` + shorter bound labels (below) | content, not layout, must re-prioritise | nothing |
 
-To swap the *entire layout manager* at runtime (compact ↔ tablet ↔ wide, edit ↔
-read mode) **without destroying or rebuilding any child**, bind a panel to a
-`Var<Layout>`:
+Most views need **gear 0 + gear 1**. Escalate only when the shape of the problem
+demands it — gear 3 is the only one that destroys component state.
+
+#### Gear 0 — minimum sizes are a hard floor (the #1 cause of "it won't narrow")
+
+A `JLabel`'s minimum width is its full text; containers propagate child minimums
+upward; a flow grid reports the **sum** of its children's minimums. One
+forgotten label deep in the tree gives the whole *window* a minimum width, and
+the responsive bands are then unreachable — the layout never even gets to try.
+
+```java
+.add("growx, wmin 0", label("A long descriptive caption"))   // ellipsizes instead of strutting
+.withMinSize(0, 0)                                           // on every flow-grid panel
+```
+
+Prefer ranges over hard sizes: `width 90::200`, not `width 200!`.
+**Rule:** drag the window as narrow as it goes. If it stops at an arbitrary
+width, that is a minimum-size bug — fix it before touching anything else.
+
+#### Gear 4 — the content converges too
+
+```java
+label("Live timetable · click any train to see its route").isVisibleIf(isWide)  // + "hidemode 3"
+Val<String> btn = Viewable.of(String.class, theme, formfactor,
+        (t, f) -> f.isTall() ? "☾" : "☾  Dark mode");
+```
+
+`hidemode 3` on the container constraint makes a hidden child stop reserving its
+cell. Drop what is **redundant** (already shown elsewhere) before what is unique.
+
+#### The convergence checklist (apply this in every review)
+
+- [ ] Window narrows freely — no arbitrary floor (`wmin 0`, `withMinSize(0,0)`).
+- [ ] Multi-column regions collapse to one column rather than becoming slivers.
+- [ ] A stacked page sits in `scrollPane(conf -> conf.fitWidth(true))`.
+- [ ] Everything with no natural preferred size (`scrollPane`, `scrollPanels`,
+      empty `textField`) has been given one.
+- [ ] A nested grid lives inside another **grid**, never in a MigLayout cell (§2d).
+- [ ] The primary action is reachable at every size.
+- [ ] What vanishes when narrow is redundant, not unique.
+- [ ] A view swap (gear 3) has hysteresis.
+- [ ] Every `Var<Layout>` variant spells out a constraint for **every** child.
+
+Full prose: [Convergent-Design.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Convergent-Design.md).
+
+### 2d. Gear 1 — the responsive flow grid (`ResponsiveGridFlowLayout`, Bootstrap-style 12 columns)
+
+The workhorse, and **stateless**: no breakpoint field, no resize listener, no
+view-model change. Each child declares how many of 12 virtual columns it occupies
+per size category; the lambda re-runs on every resize.
+
+```java
+private static final FlowCell ROSTER_SPAN = AUTO_SPAN( it -> it.fill(true)
+        .verySmall(12).small(12).medium(12).large(5).veryLarge(4).oversize(4) );
+private static final FlowCell EDITOR_SPAN = AUTO_SPAN( it -> it.fill(true)
+        .verySmall(12).small(12).medium(12).large(7).veryLarge(8).oversize(8) );
+
+panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 18, 18)
+.withMinSize(0, 0).withPrefSize(900, 0)
+.add(ROSTER_SPAN, roster(vm))
+.add(EDITOR_SPAN, editor(vm));
+```
+
+That span table **is** the responsive design — read it out loud: *side by side
+from LARGE up, one stacked column below.*
+
+**Size categories are exact fifths of the grid's reference width** (not pixels):
+
+| `VERY_SMALL` | `SMALL` | `MEDIUM` | `LARGE` | `VERY_LARGE` | `OVERSIZE` |
+|---|---|---|---|---|---|
+| 0…⅕ | ⅕…⅖ | ⅖…⅗ | ⅗…⅘ | ⅘…1 | ≥1 |
+
+An undeclared category falls back to the **nearest declared** one, so
+`AUTO_SPAN(it -> it.large(12))` means "always full width". Spell all six out in
+shared code anyway — the table then documents the design.
+
+**Reference width** = the explicitly set preferred width if there is one, else
+the ideal single-row sum of all children. Declaring it (`withPrefSize(w, 0)`) is
+how you *move* the breakpoints, and it is mandatory for a nested grid — otherwise
+the nested grid reports "all children in one row" upward and silently rewrites
+the parent's bands.
+
+**Other cell options:** `.fill(true)` stretches the cell to the row height (how a
+short sidebar card ends up flush with a tall content card; a MigLayout child with
+a `fill`/`filly` container constraint gets this automatically), and
+`.align(UI.VerticalAlignment.TOP|CENTER|BOTTOM)` positions a non-filling cell.
+
+**Heights: a row is as tall as its tallest child's *preferred* height** — a flow
+grid never stretches a row to fill a tall window. Hence two rules:
+1. Give a preferred height to anything that has none:
+   `scrollPanels().withPrefSize(340, 470)`, or it collapses to one line.
+2. Put a page-level grid in a `scrollPane(conf -> conf.fitWidth(true))`, or the
+   stacked layout is clipped at the bottom.
+
+> ⚠️ **THE NESTING TRAP — a grid nests in a grid, NOT in a MigLayout cell.**
+> A wrapping grid is a *width-for-height* layout, so `ResponsiveGridFlowLayout`
+> asks each child "how tall at the width you are about to get?" — and only
+> another `ResponsiveGridFlowLayout` can answer. Meanwhile
+> `JComponent.getPreferredSize()` short-circuits the layout manager once a
+> preferred size is set, so a **MigLayout** parent reads the literal `0` from
+> `withPrefSize(w, 0)` and **the nested grid collapses to zero height**, silently
+> clipping everything in it.
+> ```java
+> // ❌ form laid out at height 0
+> panel("fill, wrap 1").add("grow, push", panel().withFlowLayout(..).withPrefSize(620,0)...)
+> // ✅ make the card a grid too
+> panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 0, 0).withMinSize(0,0).withPrefSize(620,0)
+> .add(FULL_ROW, titleStrip()).add(FULL_ROW, form())
+> ```
+> A grid declaring a reference width must live inside another grid or directly
+> inside a `scrollPane(fitWidth(true))`. Anywhere else, drop the explicit
+> preferred size.
+
+### 2e. Gear 2 — reactive layout: bind the layout itself to a `Var<Layout>`
+
+To swap the *entire layout manager* at runtime (one toolbar row ↔ three rows,
+compact ↔ wide, edit ↔ read mode) **without destroying or rebuilding any
+child** — so focus, caret, selection and scroll offsets all survive:
 
 ```java
 import swingtree.api.Layout;
@@ -203,8 +351,50 @@ layout.set(Layout.mig("fill, wrap 2").withChildConstraints(
 `Layout.border()`, `Layout.grid(rows,cols)`, `Layout.box(UI.Axis.X)`,
 `Layout.none()` (absolute positioning — `setLayout(null)`), `Layout.unspecific()`
 (no-op, leaves current manager alone). `withChildConstraints(...)` maps
-positionally to children. This is how `SalesDashboard` and `CelestialScribe`
-work — see §5.4 for deriving a layout from data.
+positionally to children. This is how `SalesDashboard`, `AlmanackView` and
+`CelestialScribe` work — see §5.4 for deriving a layout from data.
+
+Two rules that cost debug time:
+- **Every variant must supply a constraint for *every* child.** They apply
+  positionally and are only overwritten where a new layout supplies one, so a gap
+  leaves the previous variant's constraint (a stray `"wrap"`) in place after
+  switching back.
+- **Add `nogrid`** to a wrapped MigLayout variant, or every row's columns line up
+  with every other row's and the second row inherits the first column's width.
+
+### 2f. Gear 3 — form-factor state and view swapping
+
+When the two shapes want genuinely different component trees (a split pane is a
+good landscape design and a bad portrait one), classify the shape into a small
+enum, keep it in the **view model** like any other state, and swap the body with
+the property-bound `add(Val, ViewSupplier)`:
+
+```java
+public enum Formfactor {
+    WIDE, TALL;
+    public boolean isTall(){ return this == TALL; }
+    /** 10% dead band — without hysteresis, dragging along the diagonal strobes. */
+    public static Formfactor of( int width, int height, Formfactor current ) {
+        double slack = 1.1;
+        return current == TALL ? (width  > height * slack ? WIDE : TALL)
+                               : (height > width  * slack ? TALL : WIDE);
+    }
+}
+```
+```java
+of(this).withLayout(FILL.and(WRAP(1)))
+.onResize( it -> formfactor.update(From.VIEW, f -> Formfactor.of(it.getWidth(), it.getHeight(), f)) )
+.add(GROW.and(PUSH), formfactor, this::body);   // rebuilds only on an actual shape change
+```
+
+- **Always add hysteresis** (gears 1 and 2 don't need it — reflowing never
+  changes the width it was measured against; a view *swap* can).
+- `onResize` fires per pixel of a drag, but `Var.update(..)` is a no-op when the
+  value is unchanged, so the rebuild happens once per shape change.
+- The form factor is ordinary, Swing-free state ⇒ unit-testable without a GUI.
+- If the swapped sub-view is built under a `StyleSheet`, re-enter the scope:
+  `UI.of(UI.use(sheet, () -> tallBody().get(JScrollPane.class)))` — `UI.use`
+  consumes the builder and returns the component (§7).
 
 ---
 
@@ -738,6 +928,12 @@ Install a sheet either globally —
 UI.use(new MySheet(), () -> UI.show(f -> new MyView()));   // only components built INSIDE the lambda bind
 ```
 
+> `UI.use(sheet, supplier)` **consumes** the builder it is handed and returns the
+> finished component. And it only binds what is built *inside* the lambda — so a
+> sub-view built later (a property-bound `add(Val, ViewSupplier)`, a lazy tab)
+> must re-enter the scope itself, or it comes out unstyled:
+> `UI.of(UI.use(sheet, () -> tallBody().get(JScrollPane.class)))`.
+
 **Hot-swap themes**: keep mutable state in the sheet and call `reconfigure()` to
 re-run `configure()` and instantly repaint every component in the `UI.use` scope:
 
@@ -1196,43 +1392,60 @@ painting, a peeked component, a third-party widget): `UI.scale(int|float|double)
 
 ## 14. Hard-won gotchas (check these in any review)
 
-1. **Never `setOpaque(..)`** on a styled component — the style engine controls
+1. **A view that only works at one window size is a bug.** Build convergent by
+   default (§2c): `wmin 0` / `withMinSize(0,0)` everywhere, a 12-column
+   `AUTO_SPAN` grid for the page, a `scrollPane(conf -> conf.fitWidth(true))`
+   around it so the stacked arrangement can outgrow the window.
+2. **Minimum sizes are a hard floor and propagate upward.** A label's minimum
+   width is its full text and a flow grid's minimum is the **sum** of its
+   children's — one forgotten row gives the whole *window* a minimum width and
+   the responsive bands become unreachable. `"wmin 0"` on rows, `withMinSize(0,0)`
+   on grids, `width 90::200` instead of `width 200!`.
+3. **A responsive grid nests inside another grid — never inside a MigLayout
+   cell.** `withPrefSize(w, 0)` declares the reference width, but
+   `getPreferredSize()` short-circuits the layout manager, so a MigLayout parent
+   reads that literal `0` and the nested grid **collapses to zero height**,
+   silently clipping its content. Make the containing card a grid too (§2d). Also
+   give a preferred height to anything that has none (`scrollPane`,
+   `scrollPanels`, empty `textField`) — a grid row is only as tall as its
+   tallest child *prefers* to be.
+4. **Never `setOpaque(..)`** on a styled component — the style engine controls
    opacity; manual calls fight it. Use `backgroundColor(Color.TRANSPARENT)` / a real
    color in `withStyle` instead.
-2. **`Tuple` items bound for *per-item editing* (`addAll(Var<Tuple<M>>, entry -> ..)`,
+5. **`Tuple` items bound for *per-item editing* (`addAll(Var<Tuple<M>>, entry -> ..)`,
    where `entry` is a `Var<M>` lens) must `implement HasId<UUID>`** with a stable id —
    otherwise equal value-records collide and bindings target the wrong sub-view. The
    read-only `addAll(Val<Tuple<M>>/Tuple<M>, m -> ..)` overloads pass the value and
    need no `HasId` (§5.2).
-3. **Hold a strong reference (a view field) to any lens used only by a raw
+6. **Hold a strong reference (a view field) to any lens used only by a raw
    `onChange` subscription** — weak observation will GC it and silently break (§9c).
-4. **Tables: bind a `Var<TableData>`; don't reach for a `TableModel` or a pull-based
+7. **Tables: bind a `Var<TableData>`; don't reach for a `TableModel` or a pull-based
    data source** (§10). An editable table needs **both** a `*_EDITABLE` layout **and**
    a mutable `Var` — either alone is silently read-only. Use **`ROW_MAJOR`** (the
    diff-driven, incremental path) and **range ops** (`addRows`/`removeRowsAt`/
    `setRowsAt`) for bulk changes; per-row loops emit one event each.
-5. **Never read property values inside a plain `withStyle` lambda** — use the
+8. **Never read property values inside a plain `withStyle` lambda** — use the
    property-bound `withStyle(prop, (item, it) -> ..)` (§8), which captures the item
    thread-safely and repaints automatically. (`withRepaintOn(props) + prop.get()`
    is the legacy version of this pattern.) When one style depends on **several**
    properties, merge them into one record with the Sprouts ≥2.7 composite view builder
    `Viewable.of(seed, it -> it.join(p, wither)…)` and drive it from a single
    `withStyle` — no need to chain one per property (§8).
-6. **Pick the right thread:** `onView` for view-touching handlers, `on` for
+9. **Pick the right thread:** `onView` for view-touching handlers, `on` for
    model/business handlers; respect `From.VIEW` vs `From.VIEW_MODEL` to avoid
    feedback loops.
-7. **View models import zero Swing classes.** If you find a `JComponent` in a view
+10. **View models import zero Swing classes.** If you find a `JComponent` in a view
    model, the architecture is wrong.
-8. Expose **`Val`** (not `Var`) from a view model for fields the view must not write.
-9. Use **enum** group tags and the type-safe layout constants for refactor safety.
-10. Withers must be **pure** and return **new** instances (Lombok `@With` on records
+11. Expose **`Val`** (not `Var`) from a view model for fields the view must not write.
+12. Use **enum** group tags and the type-safe layout constants for refactor safety.
+13. Withers must be **pure** and return **new** instances (Lombok `@With` on records
    is the cleanest path); never mutate `this`.
-11. **Never feed a raw Swing size/position back into the SwingTree API** — values
+14. **Never feed a raw Swing size/position back into the SwingTree API** — values
     from `it.component().getPreferredSize()`/`getBounds()`/`getWidth()` are in
     *component pixels* (already scaled); passing them to `minHeight(..)`/`size(..)`/etc.
     double-scales them. Read geometry through the delegate accessors
     (`componentPrefHeight()`, `getWidth()`, `mouseX()`, …) which give developer pixels. (§13)
-12. **`peek(..)` is a code smell — prefer a SwingTree method.** Raw-component tweaks
+15. **`peek(..)` is a code smell — prefer a SwingTree method.** Raw-component tweaks
     step outside HiDPI scaling, the style engine and decoupled-thread safety; reach
     for a `with*`/`is*If`/`on*`/`withStyle`/`withProperty` method first. `peek` is
     legitimate only when SwingTree wraps no equivalent (§12).
@@ -1299,9 +1512,27 @@ it.animateFor(0.5, TimeUnit.SECONDS, s -> ... s.progress() / s.fadeIn() / it.pai
 UI.animateFor(2, SECONDS).go(s -> p.set(s.progress()));
 UI.animate(vm, ViewModel::someAnimatable);
 
-// reactive layout
+// convergence — the default page skeleton (§2c). Categories are FIFTHS of the reference width.
+scrollPane(conf -> conf.fitWidth(true)).withHorizontalScrollBarPolicy(UI.Active.NEVER).add(
+  panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 18, 18)
+  .withMinSize(0,0)                    // a grid's minimum is the SUM of its children's — kill it
+  .withPrefSize(REFERENCE_WIDTH, 0)    // declares where the bands sit; MANDATORY for a nested grid
+  .add(AUTO_SPAN(it->it.fill(true).verySmall(12).small(12).medium(12).large(5).veryLarge(4).oversize(4)), sidebar)
+  .add(AUTO_SPAN(it->it.fill(true).verySmall(12).small(12).medium(12).large(7).veryLarge(8).oversize(8)), content));
+.add("growx, wmin 0", label(..))       // or its text becomes the window's minimum width
+scrollPanels().withPrefSize(340, 470)  // a grid row is only as tall as its tallest child PREFERS
+// ⚠ a grid with withPrefSize(w,0) must sit in a GRID or a fitWidth scrollPane — a MigLayout
+//   cell reads the literal 0 and the grid renders at zero height (§2d)
+label(..).isVisibleIf(isWide)           // + "hidemode 3" on the container ⇒ content converges too
+
+// reactive layout (gear 2 — reflow, nothing rebuilt: focus/caret/scroll survive)
 Var<Layout> L = Var.of(Layout.class, Layout.mig("fill, wrap 1"));
-panel(L)...;  L.set(Layout.mig("fill, wrap 2").withChildConstraints(MigAddConstraint.of("growx, span 2")));
+panel(L)...;  L.set(Layout.mig("fill, wrap 2, nogrid").withChildConstraints(MigAddConstraint.of("growx, span 2")));
+// every variant must give EVERY child a constraint (positional, only overwritten where supplied)
+
+// form factor (gear 3 — swaps the tree; needs hysteresis, loses component state)
+.onResize(it -> ff.update(From.VIEW, f -> Formfactor.of(it.getWidth(), it.getHeight(), f)))
+.add(GROW.and(PUSH), ff, this::body);
 
 // icons & SVG (crisp at any DPI; sizes in developer px)
 IconDeclaration ic = () -> "img/x.svg";                  // value object -> belongs in view models
@@ -1333,7 +1564,7 @@ in the repo; the links below open each on GitHub.
 - [`team/mvi/TeamView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/team/mvi/TeamView.java) **vs** [`team/mvvm/TeamView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/team/mvvm/TeamView.java) — same UI, both architectures.
 - [`chat/mvi/ChatView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/chat/mvi/ChatView.java) — `Tuple` + `addAll` + `HasId`.
 - [`trains/mvi/TrainsView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/trains/mvi/TrainsView.java) (+ `TrainsViewModel`, `TransitClient`) — real-world MVI: `Tuple`-valued state, a Swing-free data layer doing blocking IO off the EDT, and Lombok `@With`/`@Getter` value objects (records-free, **Java 8**-clean).
-- [`budget/mvi/BudgetView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/budget/mvi/BudgetView.java) (+ `BudgetViewModel`, `Budget`, `BudgetHealth`) — a self-contained budget planner showcasing three ideas at once: a **value-model table** bound with `UI.table(Var<TableData>)` (editable, edits flow back as a new value; a `withCellForColumn` renderer/editor euro-formats the Amount column yet commits back a `Double`), a **value-capturing SVG style** `withStyle(svgText, (svg, it) -> it.image(img -> img.svg(svg)))` driving a donut chart generated from the data, and a **composite view** `Viewable.of(seed, it -> it.join(a, ..).join(b, ..)…)` (Sprouts ≥2.7) merging three properties into one item for a single `withStyle`.
+- [`budget/mvi/BudgetView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/budget/mvi/BudgetView.java) (+ `BudgetViewModel`, `Budget`, `BudgetHealth`) — **the reference for convergence (§2c/2d): four arrangements of three cards from one span table, with zero state.** It also showcases three other ideas at once: a **value-model table** bound with `UI.table(Var<TableData>)` (editable, edits flow back as a new value; a `withCellForColumn` renderer/editor euro-formats the Amount column yet commits back a `Double`), a **value-capturing SVG style** `withStyle(svgText, (svg, it) -> it.image(img -> img.svg(svg)))` driving a donut chart generated from the data, and a **composite view** `Viewable.of(seed, it -> it.join(a, ..).join(b, ..)…)` (Sprouts ≥2.7) merging three properties into one item for a single `withStyle`.
 - [`breathing/mvi/BreathingView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/breathing/mvi/BreathingView.java) (+ `BreathingViewModel`) — modelled animation, re-arming, the GC gotcha.
 - [`animated/AnimatedView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/animated/AnimatedView.java) / [`TransitionalAnimation.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/animated/TransitionalAnimation.java) — the full animation primitive tour.
 - [`zen/ThemeGardenView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/zen/ThemeGardenView.java) (+ `ThemedStyleSheet`) — style sheets, groups, runtime theme swap.
@@ -1342,9 +1573,27 @@ in the repo; the links below open each on GitHub.
 - [`almanack/mvi/AlmanackView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/almanack/mvi/AlmanackView.java) (+ `AlmanackViewModel`) — every tab binding mechanism in one field-notebook app: a two-way `Var<Integer>` selection index that may point at tabs which don't exist yet (deferred selection), `addAll(Val<Tuple<M>>, TabSupplier)` dynamic tabs, enum⇄index lenses, bound tab titles/tooltips/enabled flags.
 - [`stylish/SoftUIView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/stylish/SoftUIView.java) — soft-UI style sheet, custom paint.
 - [`stylish/SvgViewer.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/stylish/SvgViewer.java) — SVG playground: one SVG rendered through four pipelines (`SvgIcon` in style API, `img.svg(..)` string, rasterized `getImage()`, component icon) with live `Placement`/`FitComponent` switching.
-- [`simple/ResponsiveLayout.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/simple/ResponsiveLayout.java) (+ `ResponsiveLayoutAlign`, `ResponsiveLayoutFill`) — `AUTO_SPAN` responsive flow.
+- [`simple/ResponsiveLayout.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/simple/ResponsiveLayout.java) (+ `ResponsiveLayoutAlign`, `ResponsiveLayoutFill`) — the smallest `AUTO_SPAN` responsive flow demo.
+
+**Convergent examples, by which gears they use (§2c):** `budget/mvi/BudgetView`
+and `zen/ThemeGardenView` (gears 0+1, pure span tables); `animated/AnimatedView`
+(0+1 with a **nested** grid — the recipe list is a column as a sidebar, a chip
+grid when stacked); `team/mvi/TeamView` + its `mvvm` twin (0+1, master–detail
+with a nested responsive *form*, and the grid-in-a-grid card that makes it
+measure correctly); `breathing/mvi/BreathingView` (0+1 plus size-relative
+*painting* — the orb is sized from its box, not in pixels);
+`almanack/mvi/AlmanackView` (0+2+4, four breakpoints feeding four `Val<Layout>`
+properties, nothing ever rebuilt); `trains/mvi/TrainsView` (0+2+3+4 — a
+`Formfactor` in the view model swapping a split pane for a scrolling column,
+plus a reactive toolbar and bound labels that shorten).
 
 The wiki ([`docs/markdown/`](https://github.com/globaltcad/swing-tree/tree/main/docs/markdown)) is the prose
 companion; start at [README.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/README.md) →
 [Climbing-Swing-Tree.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Climbing-Swing-Tree.md) →
 [Functional-MVVM.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Functional-MVVM.md).
+For layout specifically:
+[Convergent-Design.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Convergent-Design.md)
+(strategy + checklist) →
+[Responsive-Layouts.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Responsive-Layouts.md)
+(grid mechanics, nesting rules, a debugging table) →
+[Reactive-Layouts.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Reactive-Layouts.md).

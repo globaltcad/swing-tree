@@ -37,11 +37,12 @@ fans out from there.
 | [Data Oriented Programming — Benefits](./Data-Oriented-Programming-Benefits.md) | The pragmatic payoff: testability, concurrency, memory locality, undo/redo. |
 | [Advanced Event Handling](./Advanced-Event-Handling.md) | Wiring custom `Observable`s to the UI with `on(..)` (app thread) and `onView(..)` (EDT). |
 
-## 📐 Layout — static, responsive, reactive ##
+## 📐 Layout — convergent, responsive, reactive ##
 
 | Guide | What it covers |
 |---|---|
-| [Responsive Layouts](./Responsive-Layouts.md) | The `ResponsiveGridFlowLayout` and the 12-column `AUTO_SPAN` model — adapt as the container resizes. |
+| [Convergent Design](./Convergent-Design.md) | **Start here.** Why a desktop GUI has to survive being a third of a screen wide, and the four mechanisms SwingTree gives you for it — plus a review checklist. |
+| [Responsive Layouts](./Responsive-Layouts.md) | The `ResponsiveGridFlowLayout` and the 12-column `AUTO_SPAN` model — size categories, reference widths, nesting rules, and the traps. |
 | [Reactive Layouts](./Reactive-Layouts.md) | Bind the **entire layout** to a `Var<Layout>` property. Swap MigLayout / flow / box at runtime, atomically. |
 
 ## 🎨 Styling & animation ##
@@ -81,9 +82,11 @@ graph TD;
     S[Should I Use SwingTree?] --> M[Motivation]
     M[Motivation] --> C[Climbing the Swing Tree]
     C --> AD[Advanced Declarations]
-    C --> RL[Responsive Layouts]
+    C --> CD[Convergent Design]
     C --> SAN[Sane Error Handling]
+    CD --> RL[Responsive Layouts]
     RL --> RAL[Reactive Layouts]
+    CD --> RAL
     C --> BMV[Basic MVVM]
     BMV --> AMV[Advanced MVVM]
     BMV --> FMV[Functional MVVM / MVI / MVL]
@@ -117,6 +120,7 @@ illustrative ones:
 
 - [**ThemeGardenView**](../../src/test/java/examples/zen/ThemeGardenView.java) — one skeleton UI, five completely different themes, switchable at runtime. See [Style Sheets and Groups](./Style-Sheets-And-Groups.md).
 - [**BreathingView**](../../src/test/java/examples/breathing/mvi/BreathingView.java) — a glowing breathing-companion app, every frame derived from an immutable view model. See [Modelling Animations](./Modelling-Animations.md).
+- [**BudgetView**](../../src/test/java/examples/budget/mvi/BudgetView.java) — a budget planner that converges through four arrangements, from a three-column dashboard down to a single scrolling phone column, with no state at all. See [Convergent Design](./Convergent-Design.md).
 - [**CelestialScribe**](../../src/test/java/examples/scribe/CelestialScribe.java) — text flowing around draggable stars, layout entirely derived from a `Tuple<Star>`. See [Reactive Layouts](./Reactive-Layouts.md).
 - [**SalesDashboard**](../../src/test/java/examples/dashboard/SalesDashboard.java) — a single dashboard reflowed by toggling a `Var<Layout>`. See [Reactive Layouts](./Reactive-Layouts.md).
 - [**CalculatorView**](../../src/test/java/examples/calculator/mvi/CalculatorView.java) — the canonical MVI / MVL walk-through. See [Functional MVVM](./Functional-MVVM.md).

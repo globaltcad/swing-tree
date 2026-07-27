@@ -7,6 +7,8 @@ import sprouts.Var;
 import swingtree.Tab;
 import swingtree.UI;
 import swingtree.UIForAnySwing;
+import swingtree.api.Layout;
+import swingtree.layout.MigAddConstraint;
 import swingtree.threading.EventProcessor;
 
 import javax.swing.JPanel;
@@ -52,6 +54,13 @@ import static swingtree.UI.*;
  *        {@code withTabPlacementAt(Val<Side>)}, and {@code onSelection(..)} and
  *        {@code onTabMouseClick(..)} feeding the event log.</li>
  *  </ul>
+ *  <p>
+ *  <b>It also converges.</b> Drag the window narrow and the toolbar folds into
+ *  lines, the drawer slides under the pages, the header stacks and the tab strip
+ *  scrolls instead of growing rows. All of it is one {@code Var<Breakpoint>}
+ *  feeding four {@code Val<Layout>} properties — a <i>reactive layout</i>, so
+ *  nothing is rebuilt and every tab selection, caret and scroll position survives.
+ *  See {@link Breakpoint} and the layout constants beside it.
  *  Run {@link #main(String[])} to open the notebook.
  */
 public final class AlmanackView extends JPanel {
@@ -93,6 +102,25 @@ public final class AlmanackView extends JPanel {
     /** View-only preference: where the page tabs sit — not part of the view model. */
     private final Var<UI.Side> tabSide = Var.of(UI.Side.TOP);
 
+    /**
+     *  How much horizontal room the window offers. Like {@link #tabSide} this is
+     *  view-only state, so it lives here rather than in the view model. One
+     *  {@code onResize} handler writes it; the views below turn it into layouts.
+     */
+    private final Var<Breakpoint> breakpoint = Var.of(Breakpoint.WIDE);
+
+    // The reactive layouts. Every region keeps its children and merely rearranges
+    // them — rebuilding would throw away the tab selections, the caret in the text
+    // area and the scroll position of the log.
+    private final Val<Layout>  headerLayout;
+    private final Val<Layout>  toolbarLayout;
+    private final Val<Layout>  bodyLayout;
+    private final Val<Layout>  statusLayout;
+    private final Val<Boolean> roomy;
+    private final Val<String>  reopenText;
+    /** One more bound tab property: a short strip scrolls rather than stacking rows. */
+    private final Val<UI.OverflowPolicy> tabOverflow;
+
     public AlmanackView( Var<AlmanackViewModel> vm ) {
         this.vm = vm;
 
@@ -104,32 +132,180 @@ public final class AlmanackView extends JPanel {
         idle        = vm.viewAs(Boolean.class, m -> !m.restoring());
         log         = vm.zoomTo(AlmanackViewModel::log, AlmanackViewModel::withLog);
 
+        headerLayout  = breakpoint.viewAs(Layout.class, b -> b == Breakpoint.NARROW ? HEADER_STACKED : HEADER_ROW);
+        toolbarLayout = breakpoint.viewAs(Layout.class, b -> b.pick(TOOLBAR_ONE_ROW, TOOLBAR_TWO_ROWS, TOOLBAR_TWO_ROWS, TOOLBAR_STACKED));
+        bodyLayout    = breakpoint.viewAs(Layout.class, b -> b.pick(BODY_BESIDE_330, BODY_BESIDE_280, BODY_BELOW, BODY_BELOW));
+        statusLayout  = breakpoint.viewAs(Layout.class, b -> b == Breakpoint.NARROW ? STATUS_TWO_ROWS : STATUS_ONE_ROW);
+        roomy         = breakpoint.viewAs(Boolean.class, b -> b == Breakpoint.WIDE);
+        tabOverflow   = breakpoint.viewAs(UI.OverflowPolicy.class,
+                            b -> b == Breakpoint.WIDE ? UI.OverflowPolicy.WRAP : UI.OverflowPolicy.SCROLL);
+        reopenText    = breakpoint.viewAsString( b -> b == Breakpoint.WIDE
+                            ? "Close notebook  &  re-open at the bookmark"
+                            : "Close  &  re-open at ⚑" );
+
+        // "wmin 0" on every row, or the widest row (the toolbar) becomes the
+        // window's minimum width and the reflow can never be reached.
         of(this).withLayout("fill, wrap 1, ins 0, gap 0")
         .withPrefSize(1180, 780)
         .withStyle( it -> it.backgroundColor(PARCHMENT) )
-        .add("growx", header())
-        .add("growx", toolbar())
-        .add("grow, push",
-            panel("fill, ins 10 12 6 12, gap 10, hidemode 3")
+        // The single input to every arrangement below.
+        .onResize( it -> breakpoint.set(Breakpoint.of(it.getWidth())) )
+        .add("growx, wmin 0", header())
+        .add("growx, wmin 0", toolbar())
+        // "hmin 0" for the same reason: stacked, the notebook and the drawer would
+        // claim more height than a short window has and push the status bar off.
+        .add("grow, push, wmin 0, hmin 0",
+            panel(bodyLayout)
             .withStyle( it -> it.backgroundColor(PARCHMENT) )
-            .add("grow, push",       pagePane())
-            .add("growy, width 330!", drawerPane())
+            .add(pagePane())
+            .add(drawerPane())
         )
-        .add("growx", statusBar());
+        .add("growx, wmin 0", statusBar());
     }
+
+    // ═════════════════════════════════════════════════════════════════════════════
+    //  Convergence — the same components, rearranged by a Var<Layout>
+    // ═════════════════════════════════════════════════════════════════════════════
+
+    /**
+     *  Four amounts of horizontal room. No hysteresis needed (unlike a layout that
+     *  swaps sub-views): reflowing a {@link Layout} never changes the width it was
+     *  chosen from, so the switch cannot oscillate.
+     */
+    private enum Breakpoint {
+        /** ≥ 1020px — the notebook, the drawer and a single toolbar line all fit. */
+        WIDE,
+        /** 700–1020px — the toolbar needs a second line and the drawer gives up room. */
+        COMPACT,
+        /** 520–700px — too narrow for two columns: the drawer moves below the notebook. */
+        SNUG,
+        /** &lt; 520px — a phone: one control group per toolbar line, header stacked. */
+        NARROW;
+
+        static Breakpoint of( int width ) {
+            return width >= 1020 ? WIDE
+                 : width >=  700 ? COMPACT
+                 : width >=  520 ? SNUG
+                 :                 NARROW;
+        }
+
+        <T> T pick( T wide, T compact, T snug, T narrow ) {
+            switch ( this ) {
+                case WIDE:    return wide;
+                case COMPACT: return compact;
+                case SNUG:    return snug;
+                default:      return narrow;
+            }
+        }
+    }
+
+    /*
+     *  ⚠ Every variant below spells out a constraint for *every* child. They are
+     *  applied positionally and only overwritten where a new layout supplies one,
+     *  so a gap would leave the previous variant's constraint (a stray "wrap", say)
+     *  in place after switching back.
+     */
+
+    // ── header ── children: [0] title block, [1] bookmark, [2] close & re-open ──
+    private static final Layout HEADER_ROW =
+            Layout.mig("fill, ins 14 22 14 22, hidemode 3", "[grow][][]", "")
+                  .withChildConstraints(
+                      MigAddConstraint.of("growx, wmin 0"),
+                      MigAddConstraint.of("aligny center"),
+                      MigAddConstraint.of("aligny center"));
+    /** The button is too wide to share a line, so it takes one of its own. */
+    private static final Layout HEADER_STACKED =
+            Layout.mig("fill, wrap 2, ins 12 16 10 16, hidemode 3", "[grow][]", "")
+                  .withChildConstraints(
+                      MigAddConstraint.of("growx, wmin 0"),
+                      MigAddConstraint.of("aligny center"),
+                      MigAddConstraint.of("growx, span 2, gaptop 8"));
+
+    // ── toolbar ── children: [0] open, [1] "Mode:", [2..4] radios,
+    //               [5] "Tabs:", [6] placement combo, [7] spacer,
+    //               [8] "Drawer:", [9..11] drawer toggles ──
+    private static final Layout TOOLBAR_ONE_ROW =
+            Layout.mig("fillx, ins 8 18 8 18, gap 6")
+                  .withChildConstraints(
+                      MigAddConstraint.of(""), MigAddConstraint.of("gapleft 18"),
+                      MigAddConstraint.of(""), MigAddConstraint.of(""), MigAddConstraint.of(""),
+                      MigAddConstraint.of("gapleft 18"), MigAddConstraint.of(""),
+                      MigAddConstraint.of("pushx"),
+                      MigAddConstraint.of(""),
+                      MigAddConstraint.of(""), MigAddConstraint.of(""), MigAddConstraint.of(""));
+    /*
+     *  "nogrid" on the wrapped variants: MigLayout is a grid, so otherwise every
+     *  row's columns line up and the second row inherits the width of
+     *  "＋ Open a page" as its first column. In no-grid mode rows simply flow.
+     */
+    /** Break after the mode radios: notebook controls above, view controls below. */
+    private static final Layout TOOLBAR_TWO_ROWS =
+            Layout.mig("fillx, nogrid, ins 8 18 8 18, gap 6")
+                  .withChildConstraints(
+                      MigAddConstraint.of(""), MigAddConstraint.of("gapleft 18"),
+                      MigAddConstraint.of(""), MigAddConstraint.of(""), MigAddConstraint.of("wrap"),
+                      MigAddConstraint.of(""), MigAddConstraint.of(""),
+                      MigAddConstraint.of("pushx"),
+                      MigAddConstraint.of(""),
+                      MigAddConstraint.of(""), MigAddConstraint.of(""), MigAddConstraint.of(""));
+    /** One group per line: open · mode · placement · drawer. */
+    private static final Layout TOOLBAR_STACKED =
+            Layout.mig("fillx, nogrid, ins 8 12 8 12, gap 5")
+                  .withChildConstraints(
+                      MigAddConstraint.of("growx, wrap"),
+                      MigAddConstraint.of(""),
+                      MigAddConstraint.of(""), MigAddConstraint.of(""), MigAddConstraint.of("wrap"),
+                      MigAddConstraint.of(""), MigAddConstraint.of("growx, wrap"),
+                      MigAddConstraint.of("w 0!"),
+                      MigAddConstraint.of(""),
+                      MigAddConstraint.of(""), MigAddConstraint.of(""), MigAddConstraint.of(""));
+
+    // ── body ── children: [0] the notebook, [1] the drawer ──
+    private static final Layout BODY_BESIDE_330 = besideLayout(330);
+    private static final Layout BODY_BESIDE_280 = besideLayout(280);
+    private static final Layout BODY_BELOW =
+            Layout.mig("fill, wrap 1, ins 8 10 6 10, gap 8, hidemode 3")
+                  .withChildConstraints(
+                      MigAddConstraint.of("grow, push, wmin 0"),
+                      // A range, not a fixed "300!": a short window may squeeze it.
+                      MigAddConstraint.of("growx, wmin 0, height 140:300:300"));
+
+    private static Layout besideLayout( int drawerWidth ) {
+        return Layout.mig("fill, ins 10 12 6 12, gap 10, hidemode 3")
+                     .withChildConstraints(
+                         MigAddConstraint.of("grow, push, wmin 0"),
+                         MigAddConstraint.of("growy, wmin 0, width " + drawerWidth + "!"));
+    }
+
+    // ── status bar ── children: [0..2] counters, [3] spacer, [4] summary ──
+    private static final Layout STATUS_ONE_ROW =
+            Layout.mig("fillx, ins 7 18 7 18, gap 18")
+                  .withChildConstraints(
+                      MigAddConstraint.of(""), MigAddConstraint.of(""), MigAddConstraint.of(""),
+                      MigAddConstraint.of("pushx, growx"),
+                      MigAddConstraint.of(""));
+    private static final Layout STATUS_TWO_ROWS =
+            Layout.mig("fillx, ins 6 12 6 12, gap 8")
+                  .withChildConstraints(
+                      MigAddConstraint.of(""), MigAddConstraint.of(""), MigAddConstraint.of("wrap"),
+                      MigAddConstraint.of("w 0!"),
+                      MigAddConstraint.of("growx, wmin 0"));
 
     // ═════════════════════════════════════════════════════════════════════════════
     //  Header — title, bookmark, and the deferred-selection showpiece
     // ═════════════════════════════════════════════════════════════════════════════
 
     private UIForAnySwing<?,?> header() {
-        return panel("fill, ins 14 22 14 22", "[grow][][]")
+        return panel(headerLayout)
             .withStyle( it -> it.backgroundColor(MOSS) )
-            .add("growx",
-                box("fill, wrap 1, ins 0")
-                .add(label("The Almanack")
+            .add(
+                box("fill, wrap 1, ins 0, hidemode 3")
+                .add("growx, wmin 0", label("The Almanack")
                     .withStyle( it -> it.componentFont( f -> f.family("Serif").size(23).weight(2f).color(CREAM) ) ))
-                .add(label("a field notebook — every tab in this window is property-bound")
+                .add("growx, wmin 0",
+                    label("a field notebook — every tab in this window is property-bound")
+                    // The tag line is the first thing to go when the room runs out.
+                    .isVisibleIf(roomy)
                     .withStyle( it -> it.componentFont( f -> f.family("Serif").size(12).posture(0.09f).color(new Color(197, 208, 189)) ) ))
             )
             .add(
@@ -140,7 +316,7 @@ public final class AlmanackView extends JPanel {
                 )
             )
             .add(
-                button("Close notebook  &  re-open at the bookmark")
+                button(reopenText)
                 .isEnabledIf(idle)
                 .withTooltip("Empties the notebook, requests the bookmarked page while it does not exist, " +
                              "then streams the pages back in — watch the selection wait for its tab.")
@@ -158,7 +334,7 @@ public final class AlmanackView extends JPanel {
     // ═════════════════════════════════════════════════════════════════════════════
 
     private UIForAnySwing<?,?> toolbar() {
-        return panel("fillx, ins 8 18 8 18, gap 6")
+        return panel(toolbarLayout)
             .withStyle( it -> it.backgroundColor(CREAM).borderAt(Edge.BOTTOM, 1, HAIRLINE) )
             .add(
                 button("＋ Open a page")
@@ -169,15 +345,15 @@ public final class AlmanackView extends JPanel {
                     return next.logged("Opened “" + opened.title() + "” (tab " + next.pages().size() + ")");
                 }))
             )
-            .add(toolbarLabel("      Mode:"))
+            .add(toolbarLabel("Mode:"))
             // The same enum property the sub-tabs bind to — radios and tabs stay in sync.
             .add(radioButton(EditorMode.WRITE.label(),   EditorMode.WRITE,   mode))
             .add(radioButton(EditorMode.PREVIEW.label(), EditorMode.PREVIEW, mode))
             .add(radioButton(EditorMode.DETAILS.label(), EditorMode.DETAILS, mode))
-            .add(toolbarLabel("      Tabs:"))
+            .add(toolbarLabel("Tabs:"))
             .add(comboBox(tabSide))
-            .add("pushx", box())
-            .add(toolbarLabel("Drawer: "))
+            .add(box())
+            .add(toolbarLabel("Drawer:"))
             // Boolean twins of the drawer tabs' enum bindings: each toggle looks at
             // the same DrawerSection property through a little boolean lens, so a
             // pressed toggle, its drawer tab and the view model always agree —
@@ -208,6 +384,7 @@ public final class AlmanackView extends JPanel {
     private UIForAnySwing<?,?> pagePane() {
         return tabbedPane(desiredPage)              // two-way selection index binding
             .withTabPlacementAt(tabSide)            // bound placement, switchable live
+            .withOverflowPolicy(tabOverflow)        // bound policy: scroll the strip when narrow
             .onTabMouseClick( it ->
                 vm.update( m -> m.logged("Mouse click on tab header #" + (it.tabIndex() + 1)) )
             )
@@ -250,6 +427,8 @@ public final class AlmanackView extends JPanel {
                         scrollPane().withStyle( it -> it.borderWidth(0) )
                         .add(
                             textArea(ink)
+                            // No SwingTree equivalent for these two yet.
+                            .peek( area -> { area.setLineWrap(true); area.setWrapStyleWord(true); } )
                             .withStyle( it -> it
                                 .padding(18, 22, 18, 22)
                                 .backgroundColor(CARD)
@@ -317,8 +496,10 @@ public final class AlmanackView extends JPanel {
         // binding is established BEFORE any tab exists (initially LOG, index 2), so
         // it starts out deferred and is applied once the third tab below is added.
         return tabbedPane(drawerIndex)
-            .add(tab("Navigator").add(navigator()))
-            .add(tab("Inspector").add(inspector()))
+            // Wrapped in a scroll pane: the drawer is only 300px tall once it moves
+            // below the notebook, and short windows squeeze it either way.
+            .add(tab("Navigator").add(drawerScroll(navigator())))
+            .add(tab("Inspector").add(drawerScroll(inspector())))
             .add(tab("Log")      .add(eventLog()))
             // NONE means collapsed: hiding the pane lets the pages take the room.
             .isVisibleIf(vm.viewAs(Boolean.class, m -> m.drawer() != DrawerSection.NONE))
@@ -417,6 +598,15 @@ public final class AlmanackView extends JPanel {
             );
     }
 
+    /** Lets a drawer section grow taller than the drawer without being cut off. */
+    private static UIForAnySwing<?,?> drawerScroll( UIForAnySwing<?,?> content ) {
+        return scrollPane( conf -> conf.fitWidth(true) )
+            .withHorizontalScrollBarPolicy(UI.Active.NEVER)
+            .withScrollIncrement(20)
+            .withStyle( it -> it.borderWidth(0).backgroundColor(MOSS_LIGHT) )
+            .add(content);
+    }
+
     private static UIForAnySwing<?,?> drawerTitle( String text ) {
         return label(text).withStyle( it -> it.componentFont( f -> f.size(10).weight(2f).spacing(0.08f).color(FADED_INK) ) );
     }
@@ -426,12 +616,12 @@ public final class AlmanackView extends JPanel {
     // ═════════════════════════════════════════════════════════════════════════════
 
     private UIForAnySwing<?,?> statusBar() {
-        return panel("fillx, ins 7 18 7 18, gap 18")
+        return panel(statusLayout)
             .withStyle( it -> it.backgroundColor(MOSS) )
             .add(statusLabel(vm.viewAsString( m -> m.pages().size() + " pages open" )))
             .add(statusLabel(vm.viewAsString( m -> "desired index: " + m.desiredPage() )))
             .add(statusLabel(vm.viewAsString( m -> "mode: " + m.mode().label() )))
-            .add("pushx, growx", box())
+            .add(box())
             .add(statusLabel(vm.viewAsString(AlmanackViewModel::selectionSummary)));
     }
 

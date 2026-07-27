@@ -30,6 +30,7 @@ import examples.stylepicker.mvvm.BoxShadowPickerViewModel
 import examples.stylish.*
 import examples.tabs.mvvm.TabSelectionExample1
 import examples.team.mvi.TeamView
+import examples.team.mvvm.TeamView as MvvmTeamView
 import examples.zen.ThemeGardenView
 import spock.lang.Narrative
 import spock.lang.Specification
@@ -230,8 +231,17 @@ class Examples_Spec extends Specification
             The ${Utility.link('view model', NoteGuesserViewModel)} is also a nice example of how to
             do MVVM with SwingTree.
         """
-        given : 'We create an instance of the UI.'
-            var ui = new NoteGuesserView(new NoteGuesserViewModel())
+        given : 'We create the view model.'
+            var vm = new NoteGuesserViewModel()
+        and : """
+            The view model picks a **random** note in its constructor, which is exactly
+            what you want when playing the game and exactly what you do not want in a
+            snapshot test. So we pin the note to a fixed index before building the view,
+            which makes the rendering deterministic.
+        """
+            vm.currentNoteIndex().set(14)
+        and : 'We create an instance of the UI.'
+            var ui = new NoteGuesserView(vm)
         expect : 'It is rendered as shown in the image.'
             Utility.similarityBetween(ui, "views/note-guesser-UI.png", 97) > 97
     }
@@ -532,6 +542,19 @@ class Examples_Spec extends Specification
             lens property focused on a tuple item.
         """
         expect : TeamView.createView()
+    }
+
+    def 'The MVVM twin of the `TeamView` class can be created.'()
+    {
+        reportInfo """
+            The ${Utility.link('MVVM team view example', MvvmTeamView)} renders
+            the very same UI as the MVI ${Utility.link('team view example', TeamView)},
+            but wires it up in the classical MVVM way: mutable <code>Var</code> /
+            <code>Vars</code> properties on the view model instead of lenses into
+            one immutable record. The two exist side by side so the difference
+            between the patterns is the only thing that differs.
+        """
+        expect : MvvmTeamView.createView()
     }
 
     def 'The `CalculatorView` class can be created.'()

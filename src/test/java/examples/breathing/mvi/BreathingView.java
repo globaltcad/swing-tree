@@ -9,6 +9,7 @@ import sprouts.Var;
 import sprouts.Viewable;
 import swingtree.UI;
 import swingtree.UIForAnySwing;
+import swingtree.layout.FlowCell;
 import swingtree.threading.EventProcessor;
 
 import java.awt.Color;
@@ -58,7 +59,31 @@ import static swingtree.UI.*;
  */
 public final class BreathingView extends Panel {
 
-    private static final int ORB_BOX = 460;
+    /**
+     *  The orb's <i>preferred</i> box, and the size it falls back to once the
+     *  layout stacks. On a wide window it grows well past this: it is added with
+     *  a {@code grow} constraint and its gradients are sized relative to the box
+     *  it ends up in.
+     */
+    private static final int ORB_BOX = 320;
+
+    // ── The responsive span table — the whole "convergence" config ───────────
+    //
+    // A size category is a fraction of the grid's reference width, so these are
+    // relative bands rather than pixel breakpoints: orb beside controls from
+    // LARGE upwards, one stacked column below that.
+    //
+    // Both cards are MigLayout panels with a "fill" constraint, which the flow
+    // layout detects on its own, so each stretches to the height of the taller
+    // one while they share a row — that is what lets the orb grow.
+
+    private static final int PAGE_REFERENCE_WIDTH = 900;
+
+    private static final FlowCell ORB_SPAN = AUTO_SPAN( it -> it
+            .verySmall(12).small(12).medium(12).large(7).veryLarge(8).oversize(8) );
+
+    private static final FlowCell CONTROLS_SPAN = AUTO_SPAN( it -> it
+            .verySmall(12).small(12).medium(12).large(5).veryLarge(4).oversize(4) );
 
     private final Var<BreathingViewModel> vm;
 
@@ -91,7 +116,7 @@ public final class BreathingView extends Panel {
         });
 
         of(this).withLayout("fill, wrap 1, insets 0")
-        .withPrefSize(1080, 720)
+        .withPrefSize(1080, 660)
         .withStyle( it -> it
             .gradient("backdrop", g -> g
                 .type(GradientType.RADIAL)
@@ -102,28 +127,55 @@ public final class BreathingView extends Panel {
                 .clipTo(ComponentArea.BODY)
             )
         )
-        .add("growx", header())
-        .add("grow, push",
-            panel("fill, insets 0").withStyle( it -> it.backgroundColor(new Color(0, 0, 0, 0)) )
-            .add("grow, push",
-                orbStage(instruction, cycleInfo, phaseProgress, sessionDone)
-            )
-            .add("growy, width 340!",
-                controlPanel()
-            )
-        );
+        .add("growx, wmin 0", header())
+        .add("grow, push, wmin 0", body(instruction, cycleInfo, phaseProgress, sessionDone));
+    }
+
+    // ── The page: a scrolling 12-column grid holding the two cards ───────────
+    //
+    // A flow grid gives every row the height of its tallest child, so once the
+    // cards stack the page outgrows the window — hence the scroll pane.
+
+    private UIForAnySwing<?,?> body(
+        Val<String> instruction,
+        Val<String> cycleInfo,
+        Val<Double> phaseProgress,
+        Val<Double> sessionDone
+    ) {
+        return scrollPane( conf -> conf.fitWidth(true) )
+            .withHorizontalScrollBarPolicy(UI.Active.NEVER)
+            .withVerticalScrollIncrement(24)
+            .withStyle( it -> it.backgroundColor(new Color(0, 0, 0, 0)).borderWidth(0).padding(0) )
+            .add(
+                panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 0, 0)
+                .withMinSize(0, 0) // a grid reports the SUM of its children's minimums
+                .withPrefSize(PAGE_REFERENCE_WIDTH, 0) // the reference width, see above
+                .withStyle( it -> it.backgroundColor(new Color(0, 0, 0, 0)) )
+                .add(ORB_SPAN,      orbStage(instruction, cycleInfo, phaseProgress, sessionDone))
+                .add(CONTROLS_SPAN, controlPanel())
+            );
     }
 
     // ── Header ───────────────────────────────────────────────────────────────
 
+    // Title and subtitle as two labels rather than one html(..) string: html
+    // re-wraps instead of ellipsizing, so it just gets clipped when it runs out
+    // of room.
+
     private static UIForAnySwing<?,?> header() {
-        return panel("fill, insets 16 26 16 26")
+        return panel("fill, insets 16 26 16 26, gap 0")
             .withStyle( it -> it.backgroundColor(new Color(0, 0, 0, 95)) )
-            .add("pushx, growx",
-                html(
-                    "<span style='color:#f3f4ff;font-family:serif;font-size:21px;'>Tranquil</span>" +
-                    "<span style='color:#9aa6c8;font-style:italic;font-size:12px;'>" +
-                    "&nbsp;&nbsp;—&nbsp;&nbsp;a breathing companion, animated with SwingTree</span>"
+            .add("split 2",
+                label("Tranquil").withStyle( it -> it
+                    .foregroundColor(new Color(0xF3, 0xF4, 0xFF))
+                    .componentFont( f -> f.size(21).family("Serif") )
+                )
+            )
+            .add("pushx, growx, wmin 0",
+                label("  —  a breathing companion, animated with SwingTree")
+                .withStyle( it -> it
+                    .foregroundColor(new Color(154, 166, 200))
+                    .componentFont( f -> f.size(12).family("SansSerif").posture(0.15f) )
                 )
             );
     }
@@ -136,28 +188,31 @@ public final class BreathingView extends Panel {
         Val<Double> phaseProgress,
         Val<Double> sessionDone
     ) {
-        return panel("fill, wrap 1, insets 30").withStyle( it -> it.backgroundColor(new Color(0, 0, 0, 0)) )
-            .add("center, gapbottom 6",
+        // Every row may shrink below the width of its own text, so the stage can
+        // follow the grid down to a phone. The orb is added with "grow" so that it
+        // expands into whatever room the row leaves it — see `breathingOrb()`.
+        return panel("fill, wrap 1, insets 20").withStyle( it -> it.backgroundColor(new Color(0, 0, 0, 0)) )
+            .add("center, gapbottom 6, wmin 0",
                 label(instruction)
                 .withStyle( it -> it
                     .foregroundColor(new Color(232, 236, 252))
                     .componentFont( f -> f.size(24).family("Serif").posture(0.08f) )
                 )
             )
-            .add("center, push",
+            .add("center, grow, push, wmin 0",
                 breathingOrb()
             )
-            .add("center, gaptop 4",
+            .add("center, gaptop 4, wmin 0",
                 label(cycleInfo)
                 .withStyle( it -> it
                     .foregroundColor(new Color(150, 162, 198))
                     .componentFont( f -> f.size(13).family("SansSerif") )
                 )
             )
-            .add("center, growx, width 360!, gaptop 8",
+            .add("center, growx, width 160::360, wmin 0, gaptop 8",
                 progressBar(Align.HORIZONTAL, phaseProgress)
             )
-            .add("center, growx, width 360!, gaptop 2",
+            .add("center, growx, width 160::360, wmin 0, gaptop 2",
                 label(sessionDone.viewAsString( d -> "Session " + Math.round(d * 100) + "% complete" ))
                 .withStyle( it -> it
                     .foregroundColor(new Color(120, 132, 168))
@@ -177,7 +232,14 @@ public final class BreathingView extends Panel {
                 double  s      = m.orbScale();
                 double  cx     = it.componentWidth()  * 0.5;
                 double  cy     = it.componentHeight() * 0.5;
-                double  radius = 95 + 250 * s;
+                // Sized relative to the box rather than in absolute pixels, so the
+                // orb stays a circle that fits whether it is stretched across a wide
+                // window or squeezed onto a phone. Every ring is capped at `reach`,
+                // the largest circle the box can hold: past that `clipTo(BODY)` cuts
+                // it off and it reads as the rectangle it was clipped to.
+                double  unit   = Math.min(it.componentWidth(), it.componentHeight());
+                double  reach  = unit * 0.5;
+                double  radius = Math.min(unit * (0.207 + 0.293 * s), reach);
                 // The glow colour smoothly morphs towards the next phase's
                 // colour as the current phase progresses.
                 UI.Color glow  = phaseColor(m.phase()).blend(phaseColor(m.phase().next()), m.phaseProgress());
@@ -206,25 +268,35 @@ public final class BreathingView extends Panel {
                         .type(GradientType.RADIAL)
                         .boundary(ComponentBoundary.BORDER_TO_INTERIOR)
                         .offset(cx, cy)
-                        .size(radius * 1.6)
+                        .size(Math.min(radius * 1.6, reach))
                         .colors(
                             withAlpha(glow, 20 + (int) (60 * s)),
                             withAlpha(glow, 0)
                         )
                         .clipTo(ComponentArea.BODY)
                     )
-                    // A soft outer bloom whose blur tracks the breath.
-                    .shadowColor(withAlpha(glow, 55 + (int) (120 * s)))
-                    .shadowBlurRadius((int) (16 + 78 * s))
-                    .shadowSpreadRadius((int) (2 + 24 * s))
-                    .shadowIsInset(false)
+                    // A soft outer bloom whose reach tracks the breath. Not a
+                    // shadow: a shadow is painted around the component's *rectangle*,
+                    // which shows as an outline once the box stops being square.
+                    // A radial gradient blooms in a circle whatever the box shape.
+                    .gradient(Layer.BORDER, "bloom", g -> g
+                        .type(GradientType.RADIAL)
+                        .boundary(ComponentBoundary.BORDER_TO_INTERIOR)
+                        .offset(cx, cy)
+                        .size(Math.min(radius * 2.2, reach))
+                        .colors(
+                            withAlpha(glow, 14 + (int) (30 * s)),
+                            withAlpha(glow, 0)
+                        )
+                        .clipTo(ComponentArea.BODY)
+                    )
                     // The countdown number, sized to the breath.
                     .text( t -> t
                         .content(orbText)
                         .placement(Placement.CENTER)
                         .clipTo(ComponentArea.BODY)
                         .font( f -> f
-                            .size((int) (38 + 34 * s))
+                            .size((int) (unit * (0.083 + 0.074 * s)))
                             .weight(2)
                             .color(new Color(255, 255, 255, m.running() ? 235 : 150))
                             .family("Serif")
@@ -256,26 +328,26 @@ public final class BreathingView extends Panel {
         return panel("fill, wrap 1, insets 22").withStyle( it -> it
                 .backgroundColor(new Color(0, 0, 0, 95))
             )
-            .add("growx",
+            .add("growx, wmin 0",
                 sectionTitle("Pattern")
             )
-            .add("growx, gaptop 4",
+            .add("growx, gaptop 4, wmin 0",
                 panel("fill, insets 0").withStyle( it -> it.backgroundColor(new Color(0, 0, 0, 0)) )
-                .add("grow", presetButton("Box",   BreathSettings.box(),            idle))
-                .add("grow", presetButton("4-7-8", BreathSettings.fourSevenEight(), idle))
-                .add("grow", presetButton("Calm",  BreathSettings.deepCalm(),       idle))
+                .add("grow, wmin 0", presetButton("Box",   BreathSettings.box(),            idle))
+                .add("grow, wmin 0", presetButton("4-7-8", BreathSettings.fourSevenEight(), idle))
+                .add("grow, wmin 0", presetButton("Calm",  BreathSettings.deepCalm(),       idle))
             )
-            .add("growx, gaptop 16",
+            .add("growx, gaptop 16, wmin 0",
                 sectionTitle("Timing")
             )
-            .add("growx", sliderRow("Inhale",  inhale,  1, 12))
-            .add("growx", sliderRow("Hold",    holdIn,  0, 12))
-            .add("growx", sliderRow("Exhale",  exhale,  1, 12))
-            .add("growx", sliderRow("Rest",    holdOut, 0, 12))
-            .add("growx", sliderRow("Cycles",  cycles,  1, 12))
-            .add("growx, gaptop 18",
+            .add("growx, wmin 0", sliderRow("Inhale",  inhale,  1, 12))
+            .add("growx, wmin 0", sliderRow("Hold",    holdIn,  0, 12))
+            .add("growx, wmin 0", sliderRow("Exhale",  exhale,  1, 12))
+            .add("growx, wmin 0", sliderRow("Rest",    holdOut, 0, 12))
+            .add("growx, wmin 0", sliderRow("Cycles",  cycles,  1, 12))
+            .add("growx, gaptop 18, wmin 0",
                 panel("fill, insets 0").withStyle( it -> it.backgroundColor(new Color(0, 0, 0, 0)) )
-                .add("grow",
+                .add("grow, wmin 0",
                     button(vm.viewAsString(BreathingView::transportLabel))
                     .withStyle( it -> it
                         .backgroundColor(new Color(120, 176, 238, 210))
@@ -291,7 +363,7 @@ public final class BreathingView extends Panel {
                         }
                     })
                 )
-                .add("grow, gapleft 8",
+                .add("grow, gapleft 8, wmin 0",
                     button("↺  Reset")
                     .isEnabledIf(idle)
                     .withStyle( it -> it
@@ -302,10 +374,10 @@ public final class BreathingView extends Panel {
                     .onClick( it -> vm.update(BreathingViewModel::freshSession) )
                 )
             )
-            .add("growx, gaptop 18",
+            .add("growx, gaptop 18, wmin 0",
                 sectionTitle("Completed cycles")
             )
-            .add("grow, push",
+            .add("grow, push, wmin 0",
                 scrollPanels().withPrefHeight(150)
                 .addAll(log, (Var<CompletedCycle> entry) -> cycleCard(entry))
             );
@@ -334,7 +406,7 @@ public final class BreathingView extends Panel {
                     .componentFont( f -> f.size(12).family("SansSerif") )
                 )
             )
-            .add("growx, pushx",
+            .add("growx, pushx, wmin 0",
                 slider(Align.HORIZONTAL, min, max, value)
             )
             .add("width 42!",
@@ -351,7 +423,7 @@ public final class BreathingView extends Panel {
                 .backgroundColor(new Color(255, 255, 255, 16))
                 .borderRadius(14).margin(3, 0, 3, 0)
             )
-            .add("pushx, growx",
+            .add("pushx, growx, wmin 0",
                 label(entry.viewAsString( c -> "❀  Cycle " + c.index() ))
                 .withStyle( it -> it
                     .foregroundColor(new Color(224, 230, 248))
