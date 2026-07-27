@@ -238,9 +238,19 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      *  because at the time it asks, the target still has the width of the
      *  previous layout pass.
      *  <p>
-     *  The returned width is always the "ideal" width of a single row holding all
-     *  children, independently of {@code width}. That width is also the reference
-     *  against which the {@link ParentSizeClass} of the children is measured.
+     *  The returned width does not depend on {@code width}: it is the "ideal" width
+     *  of a single row holding all children, raised to the explicitly set preferred
+     *  width of the target if there is one and it is larger. Only the height varies
+     *  with {@code width}.
+     *  <p>
+     *  Mind that the returned width is <b>not</b> necessarily the reference width
+     *  against which the {@link ParentSizeClass} of the children is measured. That
+     *  reference is the explicitly set preferred width whenever there is one, even
+     *  when it is <i>smaller</i> than the ideal single row width — which is exactly
+     *  how a nested grid keeps its own size categories usable without imposing its
+     *  single row width on the grid it sits in. An explicitly set preferred size
+     *  therefore acts as a lower bound on the returned size and, independently of
+     *  that, as the reference width.
      *
      * @param target The container whose layout size should be computed.
      * @param width The width the container is assumed to have, where a value of
@@ -341,28 +351,69 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      *  Walks the cells exactly like {@link #layoutContainer(Container)} does, but
      *  only accumulates how much vertical room the resulting rows occupy, without
      *  moving or resizing anything.
+     *  <p>
+     *  Note that this has to mirror how {@link #moveComponents} arrives at a row
+     *  height, baseline alignment included. Otherwise the height promised here and
+     *  the height actually laid out drift apart, and the difference is clipped.
      */
     private int _wrappedContentHeight(
             Cell[] cells, int maxwidth, int hgap, int vgap
     ) {
-        int x = 0, y = 0, rowh = 0;
+        final boolean useBaseline = getAlignOnBaseline();
+        int x = 0, y = 0;
+        RowHeight row = new RowHeight();
         for ( Cell cell : cells ) {
             Component m = cell.component();
             if (!m.isVisible())
                 continue;
             Dimension d = _cellSize(cell, maxwidth);
-            if ((x == 0) || ((x + d.width) <= maxwidth)) {
-                if (x > 0)
-                    x += hgap;
-                x += d.width;
-                rowh = Math.max(rowh, d.height);
+            if ( (x != 0) && ((x + d.width) > maxwidth) ) {
+                // The component does not fit into the current row, so a new one starts:
+                y += vgap + row.resolve(useBaseline);
+                x = 0;
+                row = new RowHeight();
+            }
+            if (x > 0)
+                x += hgap;
+            x += d.width;
+            row.add(m, d, useBaseline);
+        }
+        return y + row.resolve(useBaseline);
+    }
+
+    /**
+     *  Accumulates the height of a single row of cells, both the plain way (the
+     *  tallest child) and the baseline aligned way (the deepest ascent plus the
+     *  deepest descent, which may come from two different children and can
+     *  therefore exceed the height of any one of them).
+     */
+    private static final class RowHeight
+    {
+        private int tallest           = 0;
+        private int maxAscent         = 0;
+        private int maxDescent        = 0;
+        private int nonBaselineHeight = 0;
+
+        void add( Component m, Dimension d, boolean useBaseline ) {
+            tallest = Math.max(tallest, d.height);
+            if ( !useBaseline )
+                return;
+            int baseline = -1;
+            if ( d.width >= 0 && d.height >= 0 )
+                baseline = m.getBaseline(d.width, d.height);
+            if ( baseline >= 0 ) {
+                maxAscent  = Math.max(maxAscent,  baseline);
+                maxDescent = Math.max(maxDescent, d.height - baseline);
             } else {
-                y += vgap + rowh;
-                x = d.width;
-                rowh = d.height;
+                nonBaselineHeight = Math.max(nonBaselineHeight, d.height);
             }
         }
-        return y + rowh;
+
+        int resolve( boolean useBaseline ) {
+            if ( !useBaseline )
+                return tallest;
+            return Math.max(maxAscent + maxDescent, nonBaselineHeight);
+        }
     }
 
     /**

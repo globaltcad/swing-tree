@@ -11,9 +11,12 @@ import swingtree.layout.ResponsiveGridFlowLayout
 import swingtree.layout.Size
 import swingtree.threading.EventProcessor
 
+import javax.swing.JLabel
 import javax.swing.JPanel
+import javax.swing.border.EmptyBorder
 import java.awt.Dimension
 import java.awt.FlowLayout
+import java.awt.Font
 import java.awt.Rectangle
 
 @Title("Responsive Layouts")
@@ -575,6 +578,65 @@ class Layout_Spec extends Specification
             panel.doLayout()
         then : 'The child again spans 6 of 12 cells of the now much larger width.'
             panel.getComponent(0).getWidth() == 75
+    }
+
+    def 'A baseline aligned row asks for the height that aligning the baselines really needs.'()
+    {
+        reportInfo """
+            When `setAlignOnBaseline(true)` is used, the components of a row are
+            shifted vertically until their text baselines line up. A row then no
+            longer needs the height of its tallest child, it needs the deepest
+            ascent plus the deepest descent found in that row -- and those two may
+            well come from two *different* children, in which case the row is
+            taller than any single child.
+
+            The preferred height reported by the layout has to account for this,
+            otherwise the parent hands out the height of the tallest child and the
+            baseline shifted components are clipped at the bottom.
+        """
+        given : 'A fixed UI scale factor of 1 for deterministic numbers.'
+            SwingTree.get().setUiScaleFactor(1f)
+        and : 'A responsive flow layout which aligns its children on their baseline.'
+            var layout = new ResponsiveGridFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)
+            layout.setAlignOnBaseline(true)
+        and : """
+            Two labels with deliberately mismatched baselines: a big one whose
+            baseline sits low in its bounds, and a small one padded from below so
+            that its baseline sits high in its bounds.
+        """
+            var big = new JLabel("Big")
+            big.setFont(new Font("SansSerif", Font.PLAIN, 40))
+            var low = new JLabel("low")
+            low.setFont(new Font("SansSerif", Font.PLAIN, 10))
+            low.setBorder(new EmptyBorder(0, 0, 40, 0))
+        and : 'A panel holding both of them, wide enough for a single shared row.'
+            var panel = new JPanel(layout)
+            panel.add(big)
+            panel.add(low)
+
+        when : 'We measure what aligning these two baselines demands...'
+            var heightOf   = { JLabel l -> (int) l.getPreferredSize().height }
+            var ascentOf   = { JLabel l -> l.getBaseline((int) l.getPreferredSize().width, heightOf(l)) }
+            var deepestAscent  = Math.max(ascentOf(big), ascentOf(low))
+            var deepestDescent = Math.max(heightOf(big) - ascentOf(big), heightOf(low) - ascentOf(low))
+            var neededRowHeight = deepestAscent + deepestDescent
+            var tallestChild = Math.max(heightOf(big), heightOf(low))
+        then : '...it is genuinely more than the tallest of the two children needs on its own.'
+            neededRowHeight > tallestChild
+
+        when : 'The panel is laid out at a width which fits both labels into one row,'
+            panel.setSize(300, 400)
+            panel.doLayout()
+        then : 'the lower of the two labels really does reach down to the full baseline row height.'
+            var contentBottom = Math.max(big.getY() + big.getHeight(), low.getY() + low.getHeight())
+            contentBottom == 5 + neededRowHeight
+
+        and : """
+            And the height the layout promises covers that row plus the vertical
+            gap above and below it. Were it to report the tallest child instead,
+            it would fall short by the difference between the two.
+        """
+            layout.preferredLayoutSize(panel).height == neededRowHeight + 10
     }
 
 }
