@@ -1,0 +1,804 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>SwingTreeInitConfig.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">SwingTreeInitConfig.java</span></div><h1>SwingTreeInitConfig.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Marker;
+import org.slf4j.MarkerFactory;
+import swingtree.style.StyleSheet;
+import swingtree.threading.EventProcessor;
+
+import java.awt.*;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Supplier;
+
+/**
+ *  An immutable configuration object for the {@link SwingTree} library,
+ *  which can be configured using a functional {@link SwingTreeConfigurator} lambda
+ *  passed to {@link SwingTree#initializeUsing(SwingTreeConfigurator)}.
+ *  &lt;p&gt;
+ *  It allows for the configuration of the default
+ *  font, font installation, scaling, event processing and
+ *  application wide {@link StyleSheet} among other things.
+ */
+public final class SwingTreeInitConfig
+{
+    /**
+     *  Defines how the {@link Font}, specified through {@link SwingTreeInitConfig#defaultFont(Font)},
+     *  is installed in the {@link javax.swing.UIManager}.
+     */
+<span class="fc" id="L29">    public enum FontInstallation</span>
+    {
+        /**
+         *  A soft installation will only install the font as the &quot;defaultFont&quot; property
+         *  of the {@link javax.swing.UIManager}.
+         */
+<span class="fc" id="L35">        SOFT,</span>
+
+        /**
+         *  A hard installation will install the font as the &quot;defaultFont&quot; property
+         *  of the {@link javax.swing.UIManager} and as the default font of all
+         *  {@link javax.swing.UIManager} components.
+         */
+<span class="fc" id="L42">        HARD,</span>
+
+        /**
+         *  No installation will be performed.
+         */
+<span class="fc" id="L47">        NONE</span>
+    }
+
+    /**
+     *  Defines how the scaling factor for the UI should be determined.
+     */
+<span class="fc" id="L53">    public enum Scaling</span>
+    {
+        /**
+         *  No scaling will be performed.
+         */
+<span class="fc" id="L58">        NONE,</span>
+
+        /**
+         *  The scaling will be derived from the supplied scaling factor.
+         *  (see {@link SwingTreeInitConfig#uiScaleFactor(float)} as well as
+         *  system property {@code &quot;swingtree.uiScale&quot;}).
+         */
+<span class="fc" id="L65">        FROM_SCALING_FACTOR,</span>
+
+        /**
+         *  The scaling will be derived from the default font size,
+         *  if a default font was specified. (see {@link SwingTreeInitConfig#defaultFont(Font)})
+         */
+<span class="fc" id="L71">        FROM_DEFAULT_FONT,</span>
+
+        /**
+         *  The scaling will be derived from the system font size.
+         *  This scaling policy is chosen if no default font was specified,
+         *  no scaling factor was specified and the scaling mode is enabled
+         *  (see {@link SwingTreeInitConfig#isUiScaleFactorEnabled()}).
+         */
+<span class="fc" id="L79">        FROM_SYSTEM_FONT</span>
+    }
+
+    /**
+     *  Defines how aggressively SwingTree trades memory for CPU time across &lt;i&gt;all&lt;/i&gt;
+     *  of its internal rendering caches (style layer images, rasterised text, noise
+     *  tiles, shadow gradients and text layouts). Higher modes keep more rendered
+     *  results in memory so that subsequent repaints can blit them instead of
+     *  re-rendering, which is a large saving for complex or text-heavy UIs under load
+     *  (e.g. while a window is being resized) — at the cost of more heap and video
+     *  memory. The chosen mode is combined with the amount of system RAM to derive a
+     *  concrete memory budget, so the same mode scales sensibly across machines.
+     *  &lt;p&gt;
+     *  This can also be selected through the system property {@code &quot;swingtree.cacheMode&quot;}
+     *  (the enum constant name, case-insensitive), and changed at runtime through
+     *  {@link SwingTree#setCacheMode(CacheMode)}.
+     *
+     *  @see SwingTreeInitConfig#withCacheMode(CacheMode)
+     */
+<span class="fc" id="L98">    public enum CacheMode</span>
+    {
+        /**
+         *  Caching is turned off entirely: every cache is emptied and bypassed,
+         *  regardless of how much RAM the machine has. Painting always re-renders
+         *  from scratch — the lowest memory footprint, the highest CPU cost.
+         */
+<span class="fc" id="L105">        DISABLED,</span>
+
+        /**
+         *  A small, cautious memory footprint. Only the cheapest and most reused
+         *  rendering results are kept. Good for memory-constrained environments.
+         */
+<span class="fc" id="L111">        CONSERVATIVE,</span>
+
+        /**
+         *  The default: a balanced trade-off between memory and CPU that reproduces
+         *  SwingTree's historical, RAM-scaled caching behaviour.
+         */
+<span class="fc" id="L117">        BALANCED,</span>
+
+        /**
+         *  Leans towards caching more: keeps noticeably more rendered results in
+         *  memory to further reduce repaint cost on machines that can spare the RAM.
+         */
+<span class="fc" id="L123">        GENEROUS,</span>
+
+        /**
+         *  Caches as much as the memory budget allows, trading the most memory for the
+         *  least CPU time. Intended for powerful machines running heavy, animated or
+         *  frequently-repainted UIs.
+         */
+<span class="fc" id="L130">        AGGRESSIVE</span>
+    }
+
+    public static SwingTreeInitConfig defaults() {
+<span class="fc" id="L134">        return new SwingTreeInitConfig(</span>
+<span class="fc" id="L135">                        tryToFindDefaultFontInUIManager(),</span>
+                        FontInstallation.SOFT,
+                        EventProcessor.COUPLED_STRICT,
+<span class="fc" id="L138">                        StyleSheet.none(),</span>
+<span class="fc" id="L139">                        SystemProperties.getFloat(SystemProperties.UI_SCALE,                 -1    ),</span>
+<span class="fc" id="L140">                        SystemProperties.getBool(SystemProperties.UI_SCALE_ENABLED,          true  ),</span>
+<span class="fc" id="L141">                        SystemProperties.getBool(SystemProperties.UI_SCALE_ALLOW_SCALE_DOWN, false ),</span>
+<span class="fc" id="L142">                        SystemProperties.getLong(SystemProperties.ANIMATION_INTERVAL,        16    ),</span>
+<span class="fc" id="L143">                        MarkerFactory.getMarker(&quot;&quot;),</span>
+<span class="fc" id="L144">                        SystemProperties.getBool(SystemProperties.RECORD_DEBUG_SOURCE_TRACE, true ),</span>
+<span class="fc" id="L145">                        System.getProperty(SystemProperties.ENABLE_DEV_TOOL_KEY_STROKE,&quot;ctrl shift I&quot;),</span>
+<span class="fc" id="L146">                        SystemProperties.getEnum(SystemProperties.CACHE_MODE, CacheMode.class, CacheMode.BALANCED),</span>
+<span class="fc" id="L147">                        SystemProperties.getBool(SystemProperties.CACHE_TILING, true)</span>
+                    );
+                    /*
+                        Note that we want the refresh rate to be as high as possible so that the animation
+                        looks smooth, but we don't want to use 100% of the CPU.
+                        The ideal refresh rate is 60 fps which is 16.6 ms per frame.
+                        So we set the timer to 16 ms.
+                        This does of course not account for the time it takes to run the animation
+                        code, but that should be negligible, and in the worst case
+                        the animation will be a bit slower than 60 fps.
+                    */
+    }
+
+    private static @Nullable Font tryToFindDefaultFontInUIManager() {
+<span class="fc" id="L161">        Object defaultFont = javax.swing.UIManager.getDefaults().get(&quot;defaultFont&quot;);</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        if ( defaultFont instanceof Font )</span>
+<span class="fc" id="L163">            return (Font) defaultFont;</span>
+<span class="fc" id="L164">        return null;</span>
+    }
+
+
+    private final @Nullable Font   _defaultFont;
+    private final FontInstallation _fontInstallation;
+    private final EventProcessor   _eventProcessor;
+    private final StyleSheet       _styleSheet;
+    private final float            _uiScale;
+    private final boolean          _uiScaleEnabled;
+    private final boolean          _uiScaleAllowScaleDown;
+    private final long             _defaultAnimationInterval;
+    private final Marker           _logMarker;
+    private final boolean          _recordDebugSourceTrace;
+    private final String           _devToolKeyStrokeShortcut;
+    private final CacheMode        _cacheMode;
+    private final boolean          _isCacheTilingEnabled;
+
+
+    private SwingTreeInitConfig(
+        @Nullable Font      defaultFont,
+        FontInstallation    fontInstallation,
+        EventProcessor      eventProcessor,
+        StyleSheet          styleSheet,
+        float               uiScale,
+        boolean             uiScaleEnabled,
+        boolean             uiScaleAllowScaleDown,
+        long                defaultAnimationInterval,
+        Marker              logMarker,
+        boolean             recordDebugSourceTrace,
+        String              devToolKeyStroke,
+        CacheMode           cacheMode,
+        boolean             isCacheTilingEnabled
+<span class="fc" id="L197">    ) {</span>
+<span class="fc" id="L198">        _defaultFont              = defaultFont;</span>
+<span class="fc" id="L199">        _fontInstallation         = Objects.requireNonNull(fontInstallation);</span>
+<span class="fc" id="L200">        _eventProcessor           = Objects.requireNonNull(eventProcessor);</span>
+<span class="fc" id="L201">        _styleSheet               = Objects.requireNonNull(styleSheet);</span>
+<span class="fc" id="L202">        _uiScale                  = uiScale;</span>
+<span class="fc" id="L203">        _uiScaleEnabled           = uiScaleEnabled;</span>
+<span class="fc" id="L204">        _uiScaleAllowScaleDown    = uiScaleAllowScaleDown;</span>
+<span class="fc" id="L205">        _defaultAnimationInterval = defaultAnimationInterval;</span>
+<span class="fc" id="L206">        _logMarker                = logMarker;</span>
+<span class="fc" id="L207">        _recordDebugSourceTrace   = recordDebugSourceTrace;</span>
+<span class="fc" id="L208">        _devToolKeyStrokeShortcut = Objects.requireNonNull(devToolKeyStroke);</span>
+<span class="fc" id="L209">        _cacheMode                = Objects.requireNonNull(cacheMode);</span>
+<span class="fc" id="L210">        _isCacheTilingEnabled     = isCacheTilingEnabled;</span>
+<span class="fc" id="L211">    }</span>
+
+    /**
+     *  Returns an {@link Optional} containing the default font
+     *  or an empty {@link Optional} if no default font is set.
+     */
+    Optional&lt;Font&gt; defaultFont() {
+<span class="fc" id="L218">        return Optional.ofNullable(_defaultFont);</span>
+    }
+
+    /**
+     *  Returns the {@link FontInstallation} mode.
+     */
+    FontInstallation fontInstallation() {
+<span class="fc" id="L225">        return _fontInstallation;</span>
+    }
+
+    /**
+     *  Returns the {@link Scaling} mode
+     *  which is determined based on the configuration.
+     *  &lt;ul&gt;
+     *      &lt;li&gt;
+     *          If {@code false} was passed to {@link #isUiScaleFactorEnabled(boolean)},
+     *          then {@link Scaling#NONE} is returned.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;
+     *          Otherwise, if a scaling factor greater than 0 was passed to {@link #uiScaleFactor(float)},
+     *          then {@link Scaling#FROM_SCALING_FACTOR} is returned.
+     *      &lt;/li&gt;
+     *      &lt;li&gt;
+     *          Otherwise, if a default font was passed to {@link #defaultFont(Font)}, &lt;br&gt;
+     *          then {@link Scaling#FROM_DEFAULT_FONT} is returned. &lt;br&gt;
+     *      &lt;/li&gt;
+     *  &lt;/ul&gt;
+     *  &lt;p&gt;
+     *  If none of the above applies, then {@link Scaling#FROM_SYSTEM_FONT} is returned. &lt;br&gt;
+     */
+    Scaling scalingStrategy() {
+<span class="pc bpc" id="L249" title="1 of 2 branches missed.">        if ( !_uiScaleEnabled )</span>
+<span class="nc" id="L250">            return Scaling.NONE;</span>
+<span class="fc bfc" id="L251" title="All 2 branches covered.">        if ( _uiScale &gt; 0 )</span>
+<span class="fc" id="L252">            return Scaling.FROM_SCALING_FACTOR;</span>
+<span class="fc bfc" id="L253" title="All 2 branches covered.">        if ( _defaultFont != null )</span>
+<span class="fc" id="L254">            return Scaling.FROM_DEFAULT_FONT;</span>
+
+<span class="fc" id="L256">        return Scaling.FROM_SYSTEM_FONT;</span>
+    }
+
+    /**
+     *  Returns the {@link EventProcessor},
+     *  which is used to process both UI and application events.
+     */
+    EventProcessor eventProcessor() {
+<span class="fc" id="L264">        return _eventProcessor;</span>
+    }
+
+    /**
+     *  Returns an {@link Optional} containing the {@link StyleSheet}
+     *  or an empty {@link Optional} if no {@link StyleSheet} is set.
+     */
+    StyleSheet styleSheet() {
+<span class="fc" id="L272">        return _styleSheet;</span>
+    }
+
+    /**
+     *  Returns the UI scaling factor as is specified by the system property {@code swingtree.uiScale}.
+     */
+    float uiScaleFactor() {
+<span class="fc" id="L279">        return _uiScale;</span>
+    }
+
+    /**
+     *  Returns whether the UI scaling mode is enabled as is specified by the system property {@code swingtree.uiScale.enabled}.
+     */
+    boolean isUiScaleFactorEnabled() {
+<span class="fc" id="L286">        return _uiScaleEnabled;</span>
+    }
+
+    /**
+     *  Returns whether values smaller than 100% are allowed for the user scale factor
+     *  as is specified by the system property {@code swingtree.uiScale.allowScaleDown}.
+     */
+    boolean isUiScaleDownAllowed() {
+<span class="fc" id="L294">        return _uiScaleAllowScaleDown;</span>
+    }
+
+    /**
+     *  Returns the default animation interval in milliseconds,
+     *  which is a property that
+     *  determines the delay between two consecutive animation steps.
+     *  You can think of it as the time between the heartbeats of the animation.
+     *  The smaller the interval, the higher the refresh rate and
+     *  the smoother the animation will look.
+     *  However, the smaller the interval, the more CPU time will be used.
+     *  The default interval is 16 ms which corresponds to 60 fps.
+     *  See {@link #defaults()}, returning an instance of this config with the default value. &lt;br&gt;
+     *  This property is used as default value by the {@link swingtree.animation.LifeTime}
+     *  object which is used to define the duration of an {@link swingtree.animation.Animation}.
+     */
+    long defaultAnimationInterval() {
+<span class="fc" id="L311">        return _defaultAnimationInterval;</span>
+    }
+
+    /**
+     *  Returns the logging {@link Marker} used by SwingTree for all its logging.
+     *  You may use this marker to channel SwingTree logs to a separate log file
+     *  or to filter them in any other way you like.
+     * @return The logging {@link Marker} which is passed to methods of the SLF4J logger.
+     */
+    Marker logMarker() {
+<span class="fc" id="L321">        return _logMarker;</span>
+    }
+
+    /**
+     *  Returns whether &lt;i&gt;SwingTree&lt;/i&gt; should record the source code trace during every component creation in the form
+     *  of a {@link sprouts.Tuple} of {@link StackTraceElement}s stored as a client property on the component
+     *  under the key &quot;built-at&quot;.&lt;br&gt;
+     *  So for every component built by SwingTree, you can retrieve this
+     *  stack trace tuple like so:
+     *   &lt;pre&gt;{@code
+     *   var trace = mycomp.getClientProperty(&quot;built-at&quot;);
+     *  }&lt;/pre&gt;
+     *  You can inspect the source code trace using the SwingTree dev tools by pressing the keystroke specified
+     *  by {@link #devToolKeyStrokeShortcut(String)}, which is by default &quot;ctrl shift I&quot;. In the dev tool you can hold
+     *  control and click on a component to see the source code trace among other debug information about the component.
+     */
+    boolean recordDebugSourceTrace() {
+<span class="fc" id="L338">        return _recordDebugSourceTrace;</span>
+    }
+
+    /**
+     *  Returns the keystroke {@link String} used to open the &lt;i&gt;SwingTree&lt;/i&gt; dev tools,
+     *  which by default is {@code &quot;ctrl shift I&quot;}.
+     *  In the dev tool you can hold control and click on a component to view valuable debug information.
+     *  This includes a source code trace created during the component creation, a pretty print of its style,
+     *  the layout configuration and other debug information about the component...&lt;br&gt;
+     *  To read if the dev tools are enabled, use {@link SwingTree#isDevToolEnabled()}, and
+     *  to initialize it programmatically use {@link SwingTreeInitConfig#devToolKeyStrokeShortcut(String)}.
+     */
+    String devToolKeyStrokeShortcut() {
+<span class="fc" id="L351">        return _devToolKeyStrokeShortcut;</span>
+    }
+
+    /**
+     *  Used to configure the default font, which may be used by the {@link SwingTree}
+     *  to derive the UI scaling factor and or to install the font in the {@link javax.swing.UIManager}
+     *  depending on the {@link FontInstallation} mode (see {@link #defaultFont(Font, FontInstallation)}).
+     * @param newDefaultFont The new default font, or {@code null} to unset the default font.
+     * @return A new {@link SwingTreeInitConfig} instance with the new default font.
+     */
+    public SwingTreeInitConfig defaultFont( Font newDefaultFont ) {
+<span class="nc" id="L362">        return new SwingTreeInitConfig(</span>
+                newDefaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
+        );
+    }
+
+    /**
+     *  Used to configure both the default {@link Font} and the {@link FontInstallation} mode.
+     *  &lt;p&gt;
+     *  The {@link FontInstallation} mode determines how the {@link Font} is installed
+     *  in the {@link javax.swing.UIManager} (see {@link FontInstallation}).
+     *  &lt;p&gt;
+     *  If the {@link FontInstallation} mode is {@link FontInstallation#SOFT},
+     *  then the {@link Font} will only be installed as the &quot;defaultFont&quot; property
+     *  in the {@link javax.swing.UIManager}. If on the other hand the {@link FontInstallation}
+     *  mode is {@link FontInstallation#HARD}, then the {@link Font} will be installed
+     *  by replacing all {@link Font}s in the {@link javax.swing.UIManager}.
+     *
+     * @param newDefaultFont The new default font, or {@code null} to unset the default font.
+     * @param newFontInstallation The new {@link FontInstallation} mode.
+     * @return A new {@link SwingTreeInitConfig} instance with the new default font and {@link FontInstallation} mode.
+     */
+    public SwingTreeInitConfig defaultFont( Font newDefaultFont, FontInstallation newFontInstallation ) {
+<span class="fc" id="L386">        return new SwingTreeInitConfig(</span>
+                newDefaultFont, newFontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
+        );
+    }
+
+    /**
+     *  Used to configure the {@link EventProcessor}, which is used to process both
+     *  UI and application events.
+     *  You may create your own {@link EventProcessor} implementation or use one of the
+     *  predefined ones like {@link EventProcessor#COUPLED_STRICT}, {@link EventProcessor#COUPLED}
+     *  or {@link EventProcessor#DECOUPLED}.
+     *
+     * @param newEventProcessor The new {@link EventProcessor}.
+     * @return A new {@link SwingTreeInitConfig} instance with the new {@link EventProcessor}.
+     */
+    public SwingTreeInitConfig eventProcessor( EventProcessor newEventProcessor ) {
+<span class="fc" id="L404">        return new SwingTreeInitConfig(</span>
+                _defaultFont, _fontInstallation, newEventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
+        );
+    }
+
+    /**
+     *  Used to configure a global {@link StyleSheet} serving as a base for all
+     *  {@link StyleSheet}s used inside your application (see {@link UI#use(swingtree.style.StyleSheet, Supplier)}).
+     *
+     * @param newStyleSheet The new {@link StyleSheet}, or {@code null} to unset the {@link StyleSheet}.
+     * @return A new {@link SwingTreeInitConfig} instance with the new {@link StyleSheet}.
+     */
+    public SwingTreeInitConfig styleSheet( StyleSheet newStyleSheet ) {
+<span class="fc" id="L419">        return new SwingTreeInitConfig(</span>
+                _defaultFont, _fontInstallation, _eventProcessor, newStyleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
+        );
+    }
+
+    /**
+     *  Use this to configure the UI scaling factor.
+     *  The default factor determined by the system property {@code &quot;swingtree.uiScale&quot;}.
+     *  &lt;p&gt;
+     *  If Java runtime scales (Java 9 or later), this scale factor is applied on top
+     *  of the Java system scale factor. Java 8 does not scale and this scale factor
+     *  replaces the user scale factor that SwingTree computes based on the font.
+     *  To replace the Java 9+ system scale factor, use system property &quot;sun.java2d.uiScale&quot;,
+     *  which has the same syntax as this one.
+     *  &lt;p&gt;
+     *  &lt;strong&gt;Allowed Values&lt;/strong&gt; e.g. {@code 1.5}, {@code 1.5x}, {@code 150%} or {@code 144dpi} (96dpi is 100%)&lt;br&gt;
+     *
+     * @param newUiScale The new UI scaling factor.
+     * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling factor.
+     */
+    public SwingTreeInitConfig uiScaleFactor( float newUiScale ) {
+<span class="fc" id="L442">        return new SwingTreeInitConfig(</span>
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, newUiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
+        );
+    }
+
+    /**
+     *  Used to configure whether the UI scaling mode is enabled as is specified by the
+     *  system property {@code swingtree.uiScale.enabled}.
+     *  &lt;p&gt;
+     *  &lt;strong&gt;Allowed Values&lt;/strong&gt; {@code false} and {@code true}&lt;br&gt;
+     *  &lt;strong&gt;Default&lt;/strong&gt; {@code true}
+     *
+     * @param newUiScaleEnabled The new UI scaling mode.
+     * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling mode.
+     */
+    public SwingTreeInitConfig isUiScaleFactorEnabled( boolean newUiScaleEnabled ) {
+<span class="fc" id="L460">        return new SwingTreeInitConfig(</span>
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, newUiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
+        );
+    }
+
+    /**
+     *  Used to configure whether values smaller than 100% are allowed for the user scale factor
+     *  as is specified by the system property {@code swingtree.uiScale.allowScaleDown}.
+     *  &lt;p&gt;
+     *  &lt;strong&gt;Allowed Values&lt;/strong&gt; {@code false} and {@code true}&lt;br&gt;
+     *  &lt;strong&gt;Default&lt;/strong&gt; {@code false}
+     *
+     * @param newUiScaleAllowScaleDown The new UI scaling mode.
+     * @return A new {@link SwingTreeInitConfig} instance with the new UI scaling mode.
+     */
+    public SwingTreeInitConfig isUiScaleDownAllowed( boolean newUiScaleAllowScaleDown ) {
+<span class="nc" id="L478">        return new SwingTreeInitConfig(</span>
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                newUiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
+        );
+    }
+
+    /**
+     *  Used to configure the default animation interval in milliseconds,
+     *  which is a property that
+     *  determines the delay between two consecutive animation steps.
+     *  You can think of it as the time between the heartbeats of the animation.
+     *  The smaller the interval, the higher the refresh rate and
+     *  the smoother the animation will look.
+     *  However, the smaller the interval, the more CPU time will be used.
+     *  The default interval is 16 ms which corresponds to 60 fps.
+     *  See {@link #defaults()}, returning an instance of this config with the default value. &lt;br&gt;
+     *  This property is used as default value by the {@link swingtree.animation.LifeTime}
+     *  object which is used to define the duration of an {@link swingtree.animation.Animation}.
+     *
+     * @param newDefaultAnimationInterval The new default animation interval.
+     * @return A new {@link SwingTreeInitConfig} instance with the new default animation interval.
+     */
+    public SwingTreeInitConfig defaultAnimationInterval( long newDefaultAnimationInterval ) {
+<span class="fc" id="L502">        return new SwingTreeInitConfig(</span>
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, newDefaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
+        );
+    }
+
+    /**
+     *  Allows you to configure the logging {@link Marker} used by SwingTree for all its logging.
+     *  This is typically passed to methods like {@code logger.debug(Marker, String)},
+     *  {@code logger.info(Marker, String)} and so on.&lt;br&gt;
+     *  You may use this marker to channel SwingTree logs to a separate log file
+     *  or to filter them in any other way you like.
+     *
+     * @param newLogMarker The new logging {@link Marker} which is passed to methods of the SLF4J logger.
+     * @return A new {@link SwingTreeInitConfig} instance with the new logging {@link Marker}.
+     */
+    public SwingTreeInitConfig logMarker( Marker newLogMarker ) {
+<span class="fc" id="L520">        return new SwingTreeInitConfig(</span>
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, newLogMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
+        );
+    }
+
+    /**
+     *  Used to configure whether &lt;i&gt;SwingTree&lt;/i&gt; should record a source code trace for every
+     *  component built by &lt;i&gt;SwingTree&lt;/i&gt; for debugging purposes. Such a source code trace is stored in the form
+     *  of a {@link sprouts.Tuple} of {@link StackTraceElement}s as a client property on the component
+     *  under the key &quot;built-at&quot;.&lt;br&gt;
+     *  You can inspect the source code trace using the SwingTree dev tools by pressing the keystroke specified
+     *  by {@link #devToolKeyStrokeShortcut(String)}, which is by default &quot;ctrl shift I&quot;.
+     *  In the dev tool you can hold control and click on a component to see the source code
+     *  trace among other debug information about the component.
+     *
+     * @param isEnabled Whether the recording of the source code trace should be enabled.
+     * @return A new {@link SwingTreeInitConfig} instance with the new recording mode for the source code trace.
+     * @see SwingTree#isRecordingDebugSourceTrace()
+     * @see SwingTree#getDevToolKeyStrokeShortcut()
+     * @see #devToolKeyStrokeShortcut(String)
+     */
+    public SwingTreeInitConfig recordDebugSourceTrace( boolean isEnabled ) {
+<span class="nc" id="L544">        return new SwingTreeInitConfig(</span>
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, isEnabled,
+                _devToolKeyStrokeShortcut, _cacheMode, _isCacheTilingEnabled
+        );
+    }
+
+    /**
+     *  Use this method to configure the keystroke to access the &lt;i&gt;SwingTree&lt;/i&gt; dev tools,
+     *  which by default is {@code &quot;ctrl shift I&quot;}.&lt;br&gt;
+     *  In the dev tool you can hold control and click on a component to summon a
+     *  dialog showing valuable debug information about the component.&lt;br&gt;
+     *  This includes basic things like the name, style, layout information and the dimensions of the component.&lt;br&gt;
+     *  However, you may also want to see a stack trace of when the component was created and added to the
+     *  component hierarchy. This is also something you can inspect in this dev tool &lt;i&gt;if&lt;/i&gt; the
+     *  {@link #recordDebugSourceTrace(boolean)} mode is set to {@code true} (which by default it is).&lt;br&gt;
+     *  Because this is the mode that creates the source code trace in the first place. &lt;br&gt;
+     *
+     * @param keyStroke The new keystroke to access the &lt;i&gt;SwingTree&lt;/i&gt; dev tools, e.g. &quot;ctrl shift I&quot;.
+     * @return A new {@link SwingTreeInitConfig} instance with the new keystroke to access the &lt;i&gt;SwingTree&lt;/i&gt; dev tools.
+     * @see SwingTree#isDevToolEnabled()
+     * @see SwingTree#getDevToolKeyStrokeShortcut()
+     */
+    public SwingTreeInitConfig devToolKeyStrokeShortcut( String keyStroke ) {
+<span class="fc" id="L568">        return new SwingTreeInitConfig(</span>
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                keyStroke, _cacheMode, _isCacheTilingEnabled
+        );
+    }
+
+
+
+    /**
+     *  Returns the {@link CacheMode} governing how aggressively SwingTree's rendering
+     *  caches trade memory for CPU time (see {@link #withCacheMode(CacheMode)}).
+     */
+    CacheMode cacheMode() {
+<span class="fc" id="L582">        return _cacheMode;</span>
+    }
+
+    /**
+     *  Selects how aggressively SwingTree trades memory for CPU time across all of its
+     *  internal rendering caches (style layers, rasterised text, noise tiles, shadow
+     *  gradients and text layouts). The mode is combined with the amount of system RAM
+     *  to derive a concrete total memory budget which is then partitioned across the
+     *  caches, so the same mode scales sensibly across machines. It can also be selected
+     *  through the system property {@code &quot;swingtree.cacheMode&quot;} and changed at runtime
+     *  through {@link SwingTree#setCacheMode(CacheMode)}.
+     *  &lt;p&gt;
+     *  &lt;strong&gt;Default&lt;/strong&gt; {@link CacheMode#BALANCED}
+     *
+     * @param cacheMode The {@link CacheMode} to use.
+     * @return A new {@link SwingTreeInitConfig} instance with the new cache mode.
+     * @see SwingTree#getCacheMode()
+     */
+    public SwingTreeInitConfig withCacheMode( CacheMode cacheMode ) {
+<span class="fc" id="L601">        return new SwingTreeInitConfig(</span>
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+<span class="fc" id="L604">                _devToolKeyStrokeShortcut, Objects.requireNonNull(cacheMode), _isCacheTilingEnabled</span>
+        );
+    }
+
+    /**
+     *  Tells whether SwingTree may cache the rendering of eligible component styles
+     *  &lt;b&gt;independently of the component size&lt;/b&gt; using stretch tiling (also known
+     *  as &quot;nine slice&quot; rendering), so that resizing a styled component does not
+     *  invalidate its cached rendering (see {@link #withCacheTilingEnabled(boolean)}).
+     */
+    boolean isCacheTilingEnabled() {
+<span class="fc" id="L615">        return _isCacheTilingEnabled;</span>
+    }
+
+    /**
+     *  SwingTree caches the rendered output of component styles keyed by their style
+     *  configuration, which includes the component size. For styles whose pixels are
+     *  constant along the component edges (flat colors, borders, shadows), SwingTree
+     *  additionally makes the cache key &lt;b&gt;size independent&lt;/b&gt; through stretch tiling
+     *  (also known as &quot;nine slice&quot; rendering): the style is rendered once at a small
+     *  canonical size and any component size is reconstructed by copying the corner
+     *  tiles and stretching the edge bands. This makes live-resizing styled components
+     *  dramatically cheaper, because no re-rendering happens at all.
+     *  &lt;p&gt;
+     *  This flag exists as a safety hatch: disabling it makes every style fall back to
+     *  the classic exact-size cache keying. It can also be set through the system
+     *  property {@code &quot;swingtree.cacheMode.tiling&quot;} and changed at runtime through
+     *  {@link SwingTree#setCacheTilingEnabled(boolean)}.
+     *  &lt;p&gt;
+     *  &lt;strong&gt;Default&lt;/strong&gt; {@code true}
+     *
+     * @param enabled Whether size independent (stretch tiled) render caching is allowed.
+     * @return A new {@link SwingTreeInitConfig} instance with the new flag.
+     * @see SwingTree#isCacheTilingEnabled()
+     */
+    public SwingTreeInitConfig withCacheTilingEnabled( boolean enabled ) {
+<span class="fc" id="L640">        return new SwingTreeInitConfig(</span>
+                _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
+                _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
+                _devToolKeyStrokeShortcut, _cacheMode, enabled
+        );
+    }
+
+    /**
+     * Defines/documents own system properties used in SwingTree.
+     *
+     * @author Daniel Nepp, but originally a derivative work of Karl Tauber
+     */
+    private static interface SystemProperties
+    {
+        /**
+         * Specifies a custom scale factor used to scale the UI.
+         * &lt;p&gt;
+         * If Java runtime scales (Java 9 or later), this scale factor is applied on top
+         * of the Java system scale factor. Java 8 does not scale and this scale factor
+         * replaces the user scale factor that SwingTree computes based on the font.
+         * To replace the Java 9+ system scale factor, use system property &quot;sun.java2d.uiScale&quot;,
+         * which has the same syntax as this one.
+         * &lt;p&gt;
+         * &lt;strong&gt;Allowed Values&lt;/strong&gt; e.g. {@code 1.5}, {@code 1.5x}, {@code 150%} or {@code 144dpi} (96dpi is 100%)&lt;br&gt;
+         */
+        String UI_SCALE = &quot;swingtree.uiScale&quot;;
+
+        /**
+         * Specifies whether user scaling mode is enabled.
+         * &lt;p&gt;
+         * &lt;strong&gt;Allowed Values&lt;/strong&gt; {@code false} and {@code true}&lt;br&gt;
+         * &lt;strong&gt;Default&lt;/strong&gt; {@code true}
+         */
+        String UI_SCALE_ENABLED = &quot;swingtree.uiScale.enabled&quot;;
+
+        /**
+         * Specifies whether values smaller than 100% are allowed for the user scale factor
+         * (see {@link UI#scale()}).
+         * &lt;p&gt;
+         * &lt;strong&gt;Allowed Values&lt;/strong&gt; {@code false} and {@code true}&lt;br&gt;
+         * &lt;strong&gt;Default&lt;/strong&gt; {@code false}
+         */
+        String UI_SCALE_ALLOW_SCALE_DOWN = &quot;swingtree.uiScale.allowScaleDown&quot;;
+
+        /**
+         * Specifies the default animation interval in milliseconds.
+         * &lt;p&gt;
+         * This property is used as default value by the {@link swingtree.animation.LifeTime}
+         * object which is used to define the duration of an {@link swingtree.animation.Animation}.
+         * &lt;p&gt;
+         * &lt;strong&gt;Allowed Values&lt;/strong&gt; must be a positive integer&lt;br&gt;
+         * &lt;strong&gt;Default&lt;/strong&gt; {@code 16}
+         */
+        String ANIMATION_INTERVAL = &quot;swingtree.animation.interval&quot;;
+
+        /**
+         * Specifies whether SwingTree should record the source code trace of the component creation
+         * and hierarchy modification calls for debugging purposes. In practice, this is a {@link sprouts.Tuple}
+         * of {@link StackTraceElement}s stored as a client property of the component under the key &quot;built-at&quot;.
+         */
+        String RECORD_DEBUG_SOURCE_TRACE = &quot;swingtree.devTool.recordDebugSourceTrace&quot;;
+
+        /**
+         * Specifies the keystroke to access the &lt;i&gt;SwingTree&lt;/i&gt; dev tool, which by default is {@code &quot;ctrl shift I&quot;}.
+         * In the dev tool you can hold control and click on a component to view valuable debug information about the component.&lt;br&gt;
+         * This includes basic things like the name, style, layout information and the dimensions of the component.&lt;br&gt;
+         * However, you may also want to see a stack trace of when the component was created and added to the
+         * component hierarchy. This is also something you can inspect in this dev tool &lt;i&gt;if&lt;/i&gt; the
+         * {@link #RECORD_DEBUG_SOURCE_TRACE} mode is set to {@code true} (which by default it is).&lt;br&gt;
+         * Because this is the mode that creates the source code trace in the first place. &lt;br&gt;
+         */
+        String ENABLE_DEV_TOOL_KEY_STROKE = &quot;swingtree.devTool.keyStrokeShortcut&quot;;
+
+        /**
+         * Selects how aggressively SwingTree's rendering caches trade memory for CPU time
+         * (see {@link CacheMode}). The value is the name of a {@link CacheMode} constant,
+         * matched case-insensitively.
+         * &lt;p&gt;
+         * &lt;strong&gt;Allowed Values&lt;/strong&gt; {@code DISABLED}, {@code CONSERVATIVE},
+         * {@code BALANCED}, {@code GENEROUS}, {@code AGGRESSIVE}&lt;br&gt;
+         * &lt;strong&gt;Default&lt;/strong&gt; {@code BALANCED}
+         */
+        String CACHE_MODE = &quot;swingtree.cacheMode&quot;;
+
+        /**
+         * Enables or disables size independent (stretch tiled / &quot;nine slice&quot;) caching
+         * of eligible component style renderings, which makes resizing styled
+         * components cheap because it no longer invalidates their render caches
+         * (see {@link SwingTreeInitConfig#withCacheTilingEnabled(boolean)}).
+         * &lt;p&gt;
+         * &lt;strong&gt;Allowed Values&lt;/strong&gt; {@code true} or {@code false}&lt;br&gt;
+         * &lt;strong&gt;Default&lt;/strong&gt; {@code true}
+         */
+        String CACHE_TILING = &quot;swingtree.cacheMode.tiling&quot;;
+
+        /**
+         * Checks whether a system property is set and returns {@code true} if its value
+         * is {@code &quot;true&quot;} (case-insensitive), otherwise it returns {@code false}.
+         * If the system property is not set, {@code defaultValue} is returned.
+         */
+        static boolean getBool( String key, boolean defaultValue ) {
+<span class="fc" id="L741">            String value = System.getProperty( key );</span>
+<span class="pc bpc" id="L742" title="1 of 2 branches missed.">            return (value != null) ? Boolean.parseBoolean( value ) : defaultValue;</span>
+        }
+
+        /**
+         * Similar to sun.java2d.SunGraphicsEnvironment.getScaleFactor(String)
+         */
+        static float getFloat( String key, float defaultValue ) {
+<span class="fc" id="L749">            String s = System.getProperty( key );</span>
+
+<span class="pc bpc" id="L751" title="1 of 2 branches missed.">            if ( s == null )</span>
+<span class="fc" id="L752">                return defaultValue;</span>
+
+<span class="nc" id="L754">            float units = 1;</span>
+<span class="nc bnc" id="L755" title="All 2 branches missed.">            if ( s.endsWith( &quot;x&quot; ) )</span>
+<span class="nc" id="L756">                s = s.substring( 0, s.length() - 1 );</span>
+<span class="nc bnc" id="L757" title="All 2 branches missed.">            else if ( s.endsWith( &quot;dpi&quot; ) ) {</span>
+<span class="nc" id="L758">                units = 96;</span>
+<span class="nc" id="L759">                s = s.substring( 0, s.length() - 3 );</span>
+<span class="nc bnc" id="L760" title="All 2 branches missed.">            } else if ( s.endsWith( &quot;%&quot; ) ) {</span>
+<span class="nc" id="L761">                units = 100;</span>
+<span class="nc" id="L762">                s = s.substring( 0, s.length() - 1 );</span>
+            }
+
+            try {
+<span class="nc" id="L766">                float scale = Float.parseFloat( s );</span>
+<span class="nc bnc" id="L767" title="All 2 branches missed.">                return scale &gt; 0 ? scale / units : -1;</span>
+<span class="nc" id="L768">            } catch( NumberFormatException ex ) {</span>
+<span class="nc" id="L769">                return defaultValue;</span>
+            }
+        }
+
+        static long getLong( String key, long defaultValue ) {
+<span class="fc" id="L774">            String s = System.getProperty( key );</span>
+
+<span class="pc bpc" id="L776" title="1 of 2 branches missed.">            if ( s == null )</span>
+<span class="fc" id="L777">                return defaultValue;</span>
+
+            try {
+<span class="nc" id="L780">                long interval = Long.parseLong( s );</span>
+<span class="nc bnc" id="L781" title="All 2 branches missed.">                return interval &gt; 0 ? interval : defaultValue;</span>
+<span class="nc" id="L782">            } catch( NumberFormatException ex ) {</span>
+<span class="nc" id="L783">                return defaultValue;</span>
+            }
+        }
+
+        /**
+         * Resolves a system property to one of the constants of the given enum type,
+         * matching the property value against the constant names case-insensitively.
+         * If the property is unset or does not name a valid constant, {@code defaultValue}
+         * is returned.
+         */
+        static &lt;E extends Enum&lt;E&gt;&gt; E getEnum( String key, Class&lt;E&gt; type, E defaultValue ) {
+<span class="fc" id="L794">            String s = System.getProperty( key );</span>
+<span class="pc bpc" id="L795" title="1 of 2 branches missed.">            if ( s == null )</span>
+<span class="fc" id="L796">                return defaultValue;</span>
+<span class="nc bnc" id="L797" title="All 2 branches missed.">            for ( E constant : type.getEnumConstants() )</span>
+<span class="nc bnc" id="L798" title="All 2 branches missed.">                if ( constant.name().equalsIgnoreCase( s.trim() ) )</span>
+<span class="nc" id="L799">                    return constant;</span>
+<span class="nc" id="L800">            return defaultValue;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

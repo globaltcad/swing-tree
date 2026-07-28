@@ -1,0 +1,150 @@
+{
+  "className":"swingtree.Decoupled_Event_Processing_Spec",
+  "title":"Decoupled Event Processing",
+  "narrative":"The decoupled threading mode, activated by wrapping a UI declaration\n    in `UI.use(EventProcessor.DECOUPLED, ...)`, splits your application\n    in two worlds: the UI thread (AWT's event dispatch thread), which owns\n    all Swing components, and an application thread, which owns your\n    business logic and view models.\n\n    The bridge between the two worlds is the `DecoupledEventProcessor`,\n    which at its heart is simply a thread safe event queue:\n    user events like button clicks do not execute your handler code\n    on the UI thread, instead they enqueue it as a task\n    to be picked up by the application thread.\n\n    An important consequence of this design is that SwingTree does\n    **not** create the application thread for you. Any thread of your\n    choosing, usually the main thread, becomes the application thread\n    simply by draining this queue, typically by calling\n    `EventProcessor.DECOUPLED.join()` after the UI was shown.\n    In this specification, the test thread itself will often take on\n    that role, which makes the handover between the two worlds\n    fully deterministic and easy to follow.",
+  "subjects":["swingtree.threading.DecoupledEventProcessor","swingtree.threading.EventProcessor"],
+  "statistics":{
+    "runs":"6",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"The decoupled event processor does not own a thread, any thread draining its queue becomes the application thread.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the fundamental contract of the decoupled mode:\n            a user event, like a button click, merely *enqueues* your handler.\n            Nothing runs until some thread volunteers to process the queue.\n\n            In this test, the test thread itself takes on the role of\n            the application thread by calling `joinFor(1)`, and we verify\n            that the handler is executed by exactly this thread,\n            and not by the UI thread.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A trace list into which the event handler reports what happened where.","code":["var trace = new CopyOnWriteArrayList<String>()"]},
+
+        {"kind":"and","text":"A button declared in the decoupled threading mode.","code":["var ui =","        UI.use(EventProcessor.DECOUPLED, ()->","            UI.button(\"Do it!\")","            .onClick({","                trace << \"handled on '${Thread.currentThread().name}', UI thread: ${UI.thisIsUIThread()}\".toString()","            })","        )"]},
+
+        {"kind":"and","text":"We build the button on the UI thread, as required by the decoupled mode.","code":["var button = UI.runAndGet({ ui.get(JButton) })"]},
+
+        {"kind":"when","text":"The user clicks the button (which naturally happens on the UI thread).","code":["UI.runNow({ button.doClick() })"]},
+
+        {"kind":"then","text":"The handler has not run! It sits in the application event queue, waiting.","code":["trace.isEmpty()"]},
+
+        {"kind":"when","text":"This test thread now volunteers to process a single application event.","code":["EventProcessor.DECOUPLED.joinFor(1)"]},
+
+        {"kind":"then","text":"The handler was executed by this very thread, far away from the UI thread.","code":["trace == [\"handled on '${Thread.currentThread().name}', UI thread: false\".toString()]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Application events are processed in the order they occurred, exactly as many as requested.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The application event queue is a FIFO queue, and the various\n            `join` methods give you precise control over how much of it\n            you want to process:\n\n            - `joinFor(n)` processes exactly `n` events (and waits for them if need be),\n            - `joinUntilDoneOrException()` drains the queue until it is empty,\n            - `join()` processes events forever, which is what a real\n              application main thread typically does.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A counter based trace and a decoupled button which reports each click.","code":["var clickCounter = new AtomicInteger()","var trace = new CopyOnWriteArrayList<Integer>()","var ui =","        UI.use(EventProcessor.DECOUPLED, ()->","            UI.button(\"Click me thrice!\")","            .onClick({ trace << clickCounter.incrementAndGet() })","        )","var button = UI.runAndGet({ ui.get(JButton) })"]},
+
+        {"kind":"when","text":"The button is clicked three times in a row.","code":["UI.runNow({","    button.doClick()","    button.doClick()","    button.doClick()","})"]},
+
+        {"kind":"then","text":"All three events are still queued up, none of them was handled.","code":["trace.isEmpty()"]},
+
+        {"kind":"when","text":"We process exactly two of them.","code":["EventProcessor.DECOUPLED.joinFor(2)"]},
+
+        {"kind":"then","text":"The first two events were handled, in the order they were fired.","code":["trace == [1, 2]"]},
+
+        {"kind":"when","text":"We drain whatever is left in the queue.","code":["EventProcessor.DECOUPLED.joinUntilDoneOrException()"]},
+
+        {"kind":"then","text":"The remaining third event was handled as well.","code":["trace == [1, 2, 3]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Use `registerAndRunAppEventNow(Runnable)` to hand a task to the application thread and wait for its completion.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Sometimes the UI side needs to hand work over to the application\n            thread and continue only after that work is done.\n            The `registerAndRunAppEventNow(Runnable)` method does exactly that:\n            it enqueues the task and blocks until the application thread\n            has processed it.\n\n            **Beware:** this only works if some application thread is actually\n            draining the queue! If no such thread exists, the call will\n            wait forever. In this test we therefore first start a background\n            thread which continuously processes application events,\n            just like the main thread of a real decoupled application would.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A continuously draining application thread and a trace list.","code":["var app = ApplicationThread.startDraining()","var trace = new CopyOnWriteArrayList<String>()"]},
+
+        {"kind":"when","text":"We hand a task over to the application thread and wait for it.","code":["EventProcessor.DECOUPLED.registerAndRunAppEventNow({","    trace << \"executed on '${Thread.currentThread().name}'\".toString()","})"]},
+
+        {"kind":"then","text":"The moment the call returns, the task is guaranteed to have been executed, on the application thread.","code":["trace == [\"executed on 'application-thread'\"]"]},
+
+        {"kind":"cleanup","text":"","code":["app.stop()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The UI thread itself is not allowed to join the application event queue.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The whole point of the decoupled mode is that the UI thread stays\n            responsive while the application thread does the heavy lifting.\n            If the UI thread were to join the application event queue, it\n            would block itself forever and freeze the UI.\n            SwingTree protects you from this mistake by failing fast.\n        "]
+      },
+      "blocks":[
+        {"kind":"when","text":"We ask the UI thread to join the application event queue...","code":["var error = UI.runAndGet({","    try {","        EventProcessor.DECOUPLED.join()","        return null","    } catch (Exception e) {","        return e","    }","})"]},
+
+        {"kind":"then","text":"...which it refuses with an exception.","code":["error instanceof IllegalStateException","error.message.contains(\"UI thread\")"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A failing event task is logged by the lenient `joinFor`, but rethrown by `joinUntilExceptionFor`.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            What happens when an application event task throws an exception\n            depends on how the queue is drained. The lenient methods,\n            `join()` and `joinFor(n)`, log the exception and keep the queue\n            going, because a single failing event should not bring down\n            the whole application.\n            The `joinUntilException...` variants on the other hand rethrow\n            the exception to the calling thread, which is useful\n            for debugging and for tests.\n\n            Note that this test uses a log spy to prove that the leniently\n            handled exception is not simply lost, it lands in the log.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A spy on the log, so we can observe silently handled failures.","code":["var log = LogSpy.attach()"]},
+
+        {"kind":"and","text":"Two application events, the first of which misbehaves.","code":["var trace = []","EventProcessor.DECOUPLED.registerAppEvent({ throw new IllegalStateException(\"Something went wrong!\") })","EventProcessor.DECOUPLED.registerAppEvent({ trace << \"all good here\" })"]},
+
+        {"kind":"when","text":"We process both events with the lenient `joinFor`.","code":["EventProcessor.DECOUPLED.joinFor(2)"]},
+
+        {"kind":"then","text":"No exception reached us, and the queue kept going after the failure.","code":["noExceptionThrown()","trace == [\"all good here\"]"]},
+
+        {"kind":"and","text":"The failure was not lost though, it was recorded in the log.","code":["log.errors().size() == 1","log.errors()[0].contains(\"Something went wrong!\")"]},
+
+        {"kind":"when","text":"We enqueue another misbehaving event, but drain with `joinUntilExceptionFor` this time.","code":["EventProcessor.DECOUPLED.registerAppEvent({ throw new IllegalStateException(\"Again!\") })","EventProcessor.DECOUPLED.joinUntilExceptionFor(1)"]},
+
+        {"kind":"then","text":"This time the exception is rethrown right into our face.","code":["var e = thrown(IllegalStateException)","e.message == \"Again!\""]},
+
+        {"kind":"cleanup","text":"","code":["log.detach()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An exception in a UI event handler is logged, it does not disturb event processing.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The event handlers you register on your components, like `onClick`\n            actions, are guarded by SwingTree itself. If your handler throws,\n            the exception is caught and logged, and neither the UI thread nor\n            the application thread is harmed.\n\n            This is very convenient in production, but be aware of it during\n            development: a bug in your handler will not fail loudly!\n            It only leaves an ERROR entry in the log, which is why the\n            log spy used by this test is such a valuable tool.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A log spy and a decoupled button whose handler always fails.","code":["var log = LogSpy.attach()","var ui =","        UI.use(EventProcessor.DECOUPLED, ()->","            UI.button(\"Kaboom\")","            .onClick({ throw new IllegalStateException(\"Kaboom!\") })","        )","var button = UI.runAndGet({ ui.get(JButton) })"]},
+
+        {"kind":"when","text":"The button is clicked and the event is processed by this thread.","code":["UI.runNow({ button.doClick() })","EventProcessor.DECOUPLED.joinFor(1)"]},
+
+        {"kind":"then","text":"No exception surfaced, neither here nor on the UI thread.","code":["noExceptionThrown()"]},
+
+        {"kind":"and","text":"But the log tells the true story.","code":["log.errors().size() == 1","log.errors()[0].contains(\"Kaboom!\")"]},
+
+        {"kind":"cleanup","text":"","code":["log.detach()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

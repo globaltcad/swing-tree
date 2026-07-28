@@ -1,0 +1,515 @@
+{
+  "className":"swingtree.Combo_Box_Threading_Spec",
+  "title":"Combo Boxes Across Threads",
+  "narrative":"The data model of a SwingTree combo box comes in five flavours, depending\n    on what you hand to the `comboBox(..)` factories or the `withItems(..)`\n    methods: a plain array, a plain list, a `Vars` property list, a read only\n    `Vals` property list, or a `Tuple` based property.\n\n    The three property based models follow the thread safe publication\n    protocol of the decoupled threading mode: the combo box works with a\n    UI thread owned snapshot of the options, which is refreshed through the\n    change events of the bound properties, while everything the user does\n    in the view is handed over to the application thread, which writes it\n    into the properties. The two threads never wait for one another.\n\n    The plain array and list models are different by (documented) design:\n    a bare collection has no change events, so the combo box reads it live,\n    whenever it is rendered. This is convenient for static option sets, but\n    it is shared mutable state, which is why dynamic, application thread\n    owned options should be modelled with the property based flavours.\n\n    The features in this specification are first and foremost regression\n    guards against deadlocks and data races: every feature runs under a\n    timeout, so if a blocking handover between the two threads ever sneaks\n    back into the combo box machinery, this specification fails loudly\n    instead of hanging the build.",
+  "subjects":["swingtree.UIForCombo","swingtree.AbstractComboModel","swingtree.threading.EventProcessor"],
+  "statistics":{
+    "runs":"19",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"Changing property based combo box options from the application thread never waits for the UI thread. [Tuple property based options] [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The application thread must be able to update the option properties\n            of a combo box at any time, even while the UI thread is completely\n            unresponsive. To prove this, we park the UI thread behind a latch\n            and mutate the options from this thread: the mutation must return\n            immediately (if it secretly waited for the UI thread, this feature\n            would hang and trip its timeout), and the combo box must keep\n            offering its old snapshot of the options until the UI thread\n            is released and catches up.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A selection property and a combo box built in decoupled mode. (See the `where` block for the current model flavour!)","code":["var selection = Var.of(\"B\")","var combo = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> declare(selection)).get(JComboBox)","})"]},
+
+        {"kind":"expect","text":"The combo box offers the three initial options.","code":["combo.itemCount == 3"]},
+
+        {"kind":"when","text":"We park the UI thread and add an option from this thread, peeking at the combo box before releasing the UI thread.","code":["var gate = new CountDownLatch(1)","UI.run({ gate.await() })","var itemCountWhileParked = -1","try {","    addOption()","    itemCountWhileParked = combo.itemCount","} finally {","    gate.countDown()","}","UI.sync()"]},
+
+        {"kind":"then","text":"The mutation returned while the UI thread was still parked, and the combo box still offered the old options...","code":["itemCountWhileParked == 3"]},
+
+        {"kind":"and","text":"...but once the UI thread caught up, the new option appeared.","code":["combo.itemCount == 4","combo.getItemAt(3) == \"D\""]},
+
+        {"kind":"where","text":"All three property based option models behave identically:","code":{"kind":["Tuple property based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__tupleOptionsScenario_closure1@3edcaac7"],"addOption":["swingtree.Combo_Box_Threading_Spec$__tupleOptionsScenario_closure2@95d05dd"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Changing property based combo box options from the application thread never waits for the UI thread. [Vars based options] [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The application thread must be able to update the option properties\n            of a combo box at any time, even while the UI thread is completely\n            unresponsive. To prove this, we park the UI thread behind a latch\n            and mutate the options from this thread: the mutation must return\n            immediately (if it secretly waited for the UI thread, this feature\n            would hang and trip its timeout), and the combo box must keep\n            offering its old snapshot of the options until the UI thread\n            is released and catches up.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A selection property and a combo box built in decoupled mode. (See the `where` block for the current model flavour!)","code":["var selection = Var.of(\"B\")","var combo = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> declare(selection)).get(JComboBox)","})"]},
+
+        {"kind":"expect","text":"The combo box offers the three initial options.","code":["combo.itemCount == 3"]},
+
+        {"kind":"when","text":"We park the UI thread and add an option from this thread, peeking at the combo box before releasing the UI thread.","code":["var gate = new CountDownLatch(1)","UI.run({ gate.await() })","var itemCountWhileParked = -1","try {","    addOption()","    itemCountWhileParked = combo.itemCount","} finally {","    gate.countDown()","}","UI.sync()"]},
+
+        {"kind":"then","text":"The mutation returned while the UI thread was still parked, and the combo box still offered the old options...","code":["itemCountWhileParked == 3"]},
+
+        {"kind":"and","text":"...but once the UI thread caught up, the new option appeared.","code":["combo.itemCount == 4","combo.getItemAt(3) == \"D\""]},
+
+        {"kind":"where","text":"All three property based option models behave identically:","code":{"kind":["Vars based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__varsOptionsScenario_closure3@1b3afd42"],"addOption":["swingtree.Combo_Box_Threading_Spec$__varsOptionsScenario_closure4@d541571"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Changing property based combo box options from the application thread never waits for the UI thread. [Vals based options] [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The application thread must be able to update the option properties\n            of a combo box at any time, even while the UI thread is completely\n            unresponsive. To prove this, we park the UI thread behind a latch\n            and mutate the options from this thread: the mutation must return\n            immediately (if it secretly waited for the UI thread, this feature\n            would hang and trip its timeout), and the combo box must keep\n            offering its old snapshot of the options until the UI thread\n            is released and catches up.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A selection property and a combo box built in decoupled mode. (See the `where` block for the current model flavour!)","code":["var selection = Var.of(\"B\")","var combo = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> declare(selection)).get(JComboBox)","})"]},
+
+        {"kind":"expect","text":"The combo box offers the three initial options.","code":["combo.itemCount == 3"]},
+
+        {"kind":"when","text":"We park the UI thread and add an option from this thread, peeking at the combo box before releasing the UI thread.","code":["var gate = new CountDownLatch(1)","UI.run({ gate.await() })","var itemCountWhileParked = -1","try {","    addOption()","    itemCountWhileParked = combo.itemCount","} finally {","    gate.countDown()","}","UI.sync()"]},
+
+        {"kind":"then","text":"The mutation returned while the UI thread was still parked, and the combo box still offered the old options...","code":["itemCountWhileParked == 3"]},
+
+        {"kind":"and","text":"...but once the UI thread caught up, the new option appeared.","code":["combo.itemCount == 4","combo.getItemAt(3) == \"D\""]},
+
+        {"kind":"where","text":"All three property based option models behave identically:","code":{"kind":["Vals based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__valsOptionsScenario_closure5@148718af"],"addOption":["swingtree.Combo_Box_Threading_Spec$__valsOptionsScenario_closure6@258be962"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Plain array and list based options are shared live state, visible without any UI thread involvement. [plain array based options] [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The plain array and list models are the deliberate exception to\n            the snapshot protocol: a bare collection has no change events,\n            so the combo box model reads it live. This means a mutation is\n            visible to whoever asks the model *immediately*, even while the\n            UI thread is parked, and it also means the collection is shared\n            mutable state whose safe publication is the responsibility\n            of the application. For dynamic options, prefer the property\n            based models, which are fully thread safe.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A selection property and a combo box built in decoupled mode around a plain collection.","code":["var selection = Var.of(\"B\")","var combo = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> declare(selection)).get(JComboBox)","})"]},
+
+        {"kind":"expect","text":"","code":["combo.getItemAt(0) == \"A\""]},
+
+        {"kind":"when","text":"We park the UI thread and mutate the raw collection from this thread.","code":["var gate = new CountDownLatch(1)","UI.run({ gate.await() })","var firstItemWhileParked = null","try {","    mutate()","    firstItemWhileParked = combo.getItemAt(0)","} finally {","    gate.countDown()","}","UI.sync()"]},
+
+        {"kind":"then","text":"The mutation was visible immediately, no UI thread required, because the model reads the collection live.","code":["firstItemWhileParked == expectedFirstItem","combo.getItemAt(0) == expectedFirstItem"]},
+
+        {"kind":"where","text":"Both plain collection models share this live read contract:","code":{"kind":["plain array based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__arrayOptionsScenario_closure7@253a6ae9"],"mutate":["swingtree.Combo_Box_Threading_Spec$__arrayOptionsScenario_closure8@7691edae"],"expectedFirstItem":["D"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Plain array and list based options are shared live state, visible without any UI thread involvement. [plain list based options] [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The plain array and list models are the deliberate exception to\n            the snapshot protocol: a bare collection has no change events,\n            so the combo box model reads it live. This means a mutation is\n            visible to whoever asks the model *immediately*, even while the\n            UI thread is parked, and it also means the collection is shared\n            mutable state whose safe publication is the responsibility\n            of the application. For dynamic options, prefer the property\n            based models, which are fully thread safe.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A selection property and a combo box built in decoupled mode around a plain collection.","code":["var selection = Var.of(\"B\")","var combo = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> declare(selection)).get(JComboBox)","})"]},
+
+        {"kind":"expect","text":"","code":["combo.getItemAt(0) == \"A\""]},
+
+        {"kind":"when","text":"We park the UI thread and mutate the raw collection from this thread.","code":["var gate = new CountDownLatch(1)","UI.run({ gate.await() })","var firstItemWhileParked = null","try {","    mutate()","    firstItemWhileParked = combo.getItemAt(0)","} finally {","    gate.countDown()","}","UI.sync()"]},
+
+        {"kind":"then","text":"The mutation was visible immediately, no UI thread required, because the model reads the collection live.","code":["firstItemWhileParked == expectedFirstItem","combo.getItemAt(0) == expectedFirstItem"]},
+
+        {"kind":"where","text":"Both plain collection models share this live read contract:","code":{"kind":["plain list based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__listOptionsScenario_closure9@5a7fd1b3"],"mutate":["swingtree.Combo_Box_Threading_Spec$__listOptionsScenario_closure10@2045e367"],"expectedFirstItem":["D"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The UI thread never waits for the application thread, even when nobody is processing application events. [plain array based options] [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the mirror image of the previous deadlock guards:\n            everything the UI thread does with a combo box must complete\n            immediately, out of its own UI thread owned state, even when the\n            application thread is stuck or does not exist at all.\n            In this feature, nobody drains the application event queue while\n            the user selects an option and the combo box is read like a\n            renderer would during painting. If any of this secretly waited\n            for the application thread, the feature would hang and\n            trip its timeout.\n\n            Only after this thread volunteers to process the queue does the\n            new selection reach the bound property, which is also the\n            guarantee that view model listeners never run on the UI thread.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A selection property and a combo box built in decoupled mode. (See the `where` block for the current model flavour!)","code":["var selection = Var.of(\"B\")","var combo = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> declare(selection)).get(JComboBox)","})"]},
+
+        {"kind":"when","text":"With no application thread in sight, the user selects another option, and we read the combo box the way a renderer would.","code":["var itemsSeenByRenderer = UI.runAndGet({","    combo.setSelectedItem(\"C\")","    return (0..<combo.itemCount).collect({ combo.getItemAt(it) })","})"]},
+
+        {"kind":"then","text":"All of it completed immediately: the combo box shows the new selection and served all options from its own state.","code":["combo.selectedItem == \"C\"","itemsSeenByRenderer == [\"A\", \"B\", \"C\"]"]},
+
+        {"kind":"and","text":"The bound property however is still untouched, its update is waiting in the application event queue.","code":["selection.is(\"B\")"]},
+
+        {"kind":"when","text":"This test thread takes the role of the application thread and processes the queue.","code":["EventProcessor.DECOUPLED.joinUntilDoneOrException()"]},
+
+        {"kind":"then","text":"Now the new selection arrived in the view model.","code":["selection.is(\"C\")"]},
+
+        {"kind":"where","text":"This contract holds for every single combo box model flavour:","code":{"kind":["plain array based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__arrayOptionsScenario_closure7@b0d6d5d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The UI thread never waits for the application thread, even when nobody is processing application events. [plain list based options] [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the mirror image of the previous deadlock guards:\n            everything the UI thread does with a combo box must complete\n            immediately, out of its own UI thread owned state, even when the\n            application thread is stuck or does not exist at all.\n            In this feature, nobody drains the application event queue while\n            the user selects an option and the combo box is read like a\n            renderer would during painting. If any of this secretly waited\n            for the application thread, the feature would hang and\n            trip its timeout.\n\n            Only after this thread volunteers to process the queue does the\n            new selection reach the bound property, which is also the\n            guarantee that view model listeners never run on the UI thread.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A selection property and a combo box built in decoupled mode. (See the `where` block for the current model flavour!)","code":["var selection = Var.of(\"B\")","var combo = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> declare(selection)).get(JComboBox)","})"]},
+
+        {"kind":"when","text":"With no application thread in sight, the user selects another option, and we read the combo box the way a renderer would.","code":["var itemsSeenByRenderer = UI.runAndGet({","    combo.setSelectedItem(\"C\")","    return (0..<combo.itemCount).collect({ combo.getItemAt(it) })","})"]},
+
+        {"kind":"then","text":"All of it completed immediately: the combo box shows the new selection and served all options from its own state.","code":["combo.selectedItem == \"C\"","itemsSeenByRenderer == [\"A\", \"B\", \"C\"]"]},
+
+        {"kind":"and","text":"The bound property however is still untouched, its update is waiting in the application event queue.","code":["selection.is(\"B\")"]},
+
+        {"kind":"when","text":"This test thread takes the role of the application thread and processes the queue.","code":["EventProcessor.DECOUPLED.joinUntilDoneOrException()"]},
+
+        {"kind":"then","text":"Now the new selection arrived in the view model.","code":["selection.is(\"C\")"]},
+
+        {"kind":"where","text":"This contract holds for every single combo box model flavour:","code":{"kind":["plain list based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__listOptionsScenario_closure9@4dcf980"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The UI thread never waits for the application thread, even when nobody is processing application events. [Tuple property based options] [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the mirror image of the previous deadlock guards:\n            everything the UI thread does with a combo box must complete\n            immediately, out of its own UI thread owned state, even when the\n            application thread is stuck or does not exist at all.\n            In this feature, nobody drains the application event queue while\n            the user selects an option and the combo box is read like a\n            renderer would during painting. If any of this secretly waited\n            for the application thread, the feature would hang and\n            trip its timeout.\n\n            Only after this thread volunteers to process the queue does the\n            new selection reach the bound property, which is also the\n            guarantee that view model listeners never run on the UI thread.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A selection property and a combo box built in decoupled mode. (See the `where` block for the current model flavour!)","code":["var selection = Var.of(\"B\")","var combo = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> declare(selection)).get(JComboBox)","})"]},
+
+        {"kind":"when","text":"With no application thread in sight, the user selects another option, and we read the combo box the way a renderer would.","code":["var itemsSeenByRenderer = UI.runAndGet({","    combo.setSelectedItem(\"C\")","    return (0..<combo.itemCount).collect({ combo.getItemAt(it) })","})"]},
+
+        {"kind":"then","text":"All of it completed immediately: the combo box shows the new selection and served all options from its own state.","code":["combo.selectedItem == \"C\"","itemsSeenByRenderer == [\"A\", \"B\", \"C\"]"]},
+
+        {"kind":"and","text":"The bound property however is still untouched, its update is waiting in the application event queue.","code":["selection.is(\"B\")"]},
+
+        {"kind":"when","text":"This test thread takes the role of the application thread and processes the queue.","code":["EventProcessor.DECOUPLED.joinUntilDoneOrException()"]},
+
+        {"kind":"then","text":"Now the new selection arrived in the view model.","code":["selection.is(\"C\")"]},
+
+        {"kind":"where","text":"This contract holds for every single combo box model flavour:","code":{"kind":["Tuple property based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__tupleOptionsScenario_closure1@27647a27"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The UI thread never waits for the application thread, even when nobody is processing application events. [Vars based options] [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the mirror image of the previous deadlock guards:\n            everything the UI thread does with a combo box must complete\n            immediately, out of its own UI thread owned state, even when the\n            application thread is stuck or does not exist at all.\n            In this feature, nobody drains the application event queue while\n            the user selects an option and the combo box is read like a\n            renderer would during painting. If any of this secretly waited\n            for the application thread, the feature would hang and\n            trip its timeout.\n\n            Only after this thread volunteers to process the queue does the\n            new selection reach the bound property, which is also the\n            guarantee that view model listeners never run on the UI thread.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A selection property and a combo box built in decoupled mode. (See the `where` block for the current model flavour!)","code":["var selection = Var.of(\"B\")","var combo = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> declare(selection)).get(JComboBox)","})"]},
+
+        {"kind":"when","text":"With no application thread in sight, the user selects another option, and we read the combo box the way a renderer would.","code":["var itemsSeenByRenderer = UI.runAndGet({","    combo.setSelectedItem(\"C\")","    return (0..<combo.itemCount).collect({ combo.getItemAt(it) })","})"]},
+
+        {"kind":"then","text":"All of it completed immediately: the combo box shows the new selection and served all options from its own state.","code":["combo.selectedItem == \"C\"","itemsSeenByRenderer == [\"A\", \"B\", \"C\"]"]},
+
+        {"kind":"and","text":"The bound property however is still untouched, its update is waiting in the application event queue.","code":["selection.is(\"B\")"]},
+
+        {"kind":"when","text":"This test thread takes the role of the application thread and processes the queue.","code":["EventProcessor.DECOUPLED.joinUntilDoneOrException()"]},
+
+        {"kind":"then","text":"Now the new selection arrived in the view model.","code":["selection.is(\"C\")"]},
+
+        {"kind":"where","text":"This contract holds for every single combo box model flavour:","code":{"kind":["Vars based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__varsOptionsScenario_closure3@5b200981"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The UI thread never waits for the application thread, even when nobody is processing application events. [Vals based options] [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the mirror image of the previous deadlock guards:\n            everything the UI thread does with a combo box must complete\n            immediately, out of its own UI thread owned state, even when the\n            application thread is stuck or does not exist at all.\n            In this feature, nobody drains the application event queue while\n            the user selects an option and the combo box is read like a\n            renderer would during painting. If any of this secretly waited\n            for the application thread, the feature would hang and\n            trip its timeout.\n\n            Only after this thread volunteers to process the queue does the\n            new selection reach the bound property, which is also the\n            guarantee that view model listeners never run on the UI thread.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A selection property and a combo box built in decoupled mode. (See the `where` block for the current model flavour!)","code":["var selection = Var.of(\"B\")","var combo = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> declare(selection)).get(JComboBox)","})"]},
+
+        {"kind":"when","text":"With no application thread in sight, the user selects another option, and we read the combo box the way a renderer would.","code":["var itemsSeenByRenderer = UI.runAndGet({","    combo.setSelectedItem(\"C\")","    return (0..<combo.itemCount).collect({ combo.getItemAt(it) })","})"]},
+
+        {"kind":"then","text":"All of it completed immediately: the combo box shows the new selection and served all options from its own state.","code":["combo.selectedItem == \"C\"","itemsSeenByRenderer == [\"A\", \"B\", \"C\"]"]},
+
+        {"kind":"and","text":"The bound property however is still untouched, its update is waiting in the application event queue.","code":["selection.is(\"B\")"]},
+
+        {"kind":"when","text":"This test thread takes the role of the application thread and processes the queue.","code":["EventProcessor.DECOUPLED.joinUntilDoneOrException()"]},
+
+        {"kind":"then","text":"Now the new selection arrived in the view model.","code":["selection.is(\"C\")"]},
+
+        {"kind":"where","text":"This contract holds for every single combo box model flavour:","code":{"kind":["Vals based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__valsOptionsScenario_closure5@71e25894"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Rendering a combo box always sees an internally consistent snapshot, even during an option mutation storm. [Tuple property based options] [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Swing consults `getSize()` and `getElementAt(i)` whenever it\n            paints a combo box, and it may do so at any time. Historically\n            these reads went straight into the live property state, so a\n            mutation on the application thread could shift the items between\n            the size query and the element access, producing phantom nulls,\n            torn option lists or even exceptions in the middle of painting.\n\n            With the snapshot protocol, all reads within one UI thread task\n            are served from a single immutable snapshot. This feature hammers\n            the options from this thread while the UI thread continuously\n            reads the model like a renderer would, and asserts that not a\n            single read round ever observes an inconsistency.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A log spy, so that silently logged errors fail this test.","code":["var log = LogSpy.attach()"]},
+
+        {"kind":"and","text":"A combo box built in decoupled mode, with its options under mutation pressure.","code":["var selection = Var.of(\"B\")","var combo = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> declare(selection)).get(JComboBox)","})"]},
+
+        {"kind":"and","text":"A list collecting every inconsistency a render pass may observe.","code":["var violations = new CopyOnWriteArrayList<String>()"]},
+
+        {"kind":"when","text":"We fire 60 mutation steps from this thread, and after each one, a full renderer style read pass runs on the UI thread.","code":["60.times { step ->","    mutateStep(step)","    UI.runNow({","        int count = combo.itemCount","        for ( int i = 0; i < count; i++ ) {","            if ( combo.getItemAt(i) == null )","                violations.add(\"Phantom null at index $i of $count in step $step!\".toString())","        }","    })","}","UI.sync()"]},
+
+        {"kind":"then","text":"Not a single render pass observed a torn snapshot.","code":["violations.isEmpty()"]},
+
+        {"kind":"and","text":"No exception was silently logged along the way.","code":["log.errors().isEmpty()"]},
+
+        {"kind":"and","text":"After everything settled, the combo box agrees with the final state of the options.","code":["combo.itemCount >= 1"]},
+
+        {"kind":"cleanup","text":"","code":["log.detach()"]},
+
+        {"kind":"where","text":"The mutation storm is survived by all three property based models:","code":{"kind":["Tuple property based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__tupleStormScenario_closure11@2ad52b28"],"mutateStep":["swingtree.Combo_Box_Threading_Spec$__tupleStormScenario_closure12@445d97ca"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Rendering a combo box always sees an internally consistent snapshot, even during an option mutation storm. [Vars based options] [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Swing consults `getSize()` and `getElementAt(i)` whenever it\n            paints a combo box, and it may do so at any time. Historically\n            these reads went straight into the live property state, so a\n            mutation on the application thread could shift the items between\n            the size query and the element access, producing phantom nulls,\n            torn option lists or even exceptions in the middle of painting.\n\n            With the snapshot protocol, all reads within one UI thread task\n            are served from a single immutable snapshot. This feature hammers\n            the options from this thread while the UI thread continuously\n            reads the model like a renderer would, and asserts that not a\n            single read round ever observes an inconsistency.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A log spy, so that silently logged errors fail this test.","code":["var log = LogSpy.attach()"]},
+
+        {"kind":"and","text":"A combo box built in decoupled mode, with its options under mutation pressure.","code":["var selection = Var.of(\"B\")","var combo = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> declare(selection)).get(JComboBox)","})"]},
+
+        {"kind":"and","text":"A list collecting every inconsistency a render pass may observe.","code":["var violations = new CopyOnWriteArrayList<String>()"]},
+
+        {"kind":"when","text":"We fire 60 mutation steps from this thread, and after each one, a full renderer style read pass runs on the UI thread.","code":["60.times { step ->","    mutateStep(step)","    UI.runNow({","        int count = combo.itemCount","        for ( int i = 0; i < count; i++ ) {","            if ( combo.getItemAt(i) == null )","                violations.add(\"Phantom null at index $i of $count in step $step!\".toString())","        }","    })","}","UI.sync()"]},
+
+        {"kind":"then","text":"Not a single render pass observed a torn snapshot.","code":["violations.isEmpty()"]},
+
+        {"kind":"and","text":"No exception was silently logged along the way.","code":["log.errors().isEmpty()"]},
+
+        {"kind":"and","text":"After everything settled, the combo box agrees with the final state of the options.","code":["combo.itemCount >= 1"]},
+
+        {"kind":"cleanup","text":"","code":["log.detach()"]},
+
+        {"kind":"where","text":"The mutation storm is survived by all three property based models:","code":{"kind":["Vars based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__varsStormScenario_closure13@758155d1"],"mutateStep":["swingtree.Combo_Box_Threading_Spec$__varsStormScenario_closure14@1644850d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Rendering a combo box always sees an internally consistent snapshot, even during an option mutation storm. [Vals based options] [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Swing consults `getSize()` and `getElementAt(i)` whenever it\n            paints a combo box, and it may do so at any time. Historically\n            these reads went straight into the live property state, so a\n            mutation on the application thread could shift the items between\n            the size query and the element access, producing phantom nulls,\n            torn option lists or even exceptions in the middle of painting.\n\n            With the snapshot protocol, all reads within one UI thread task\n            are served from a single immutable snapshot. This feature hammers\n            the options from this thread while the UI thread continuously\n            reads the model like a renderer would, and asserts that not a\n            single read round ever observes an inconsistency.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A log spy, so that silently logged errors fail this test.","code":["var log = LogSpy.attach()"]},
+
+        {"kind":"and","text":"A combo box built in decoupled mode, with its options under mutation pressure.","code":["var selection = Var.of(\"B\")","var combo = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> declare(selection)).get(JComboBox)","})"]},
+
+        {"kind":"and","text":"A list collecting every inconsistency a render pass may observe.","code":["var violations = new CopyOnWriteArrayList<String>()"]},
+
+        {"kind":"when","text":"We fire 60 mutation steps from this thread, and after each one, a full renderer style read pass runs on the UI thread.","code":["60.times { step ->","    mutateStep(step)","    UI.runNow({","        int count = combo.itemCount","        for ( int i = 0; i < count; i++ ) {","            if ( combo.getItemAt(i) == null )","                violations.add(\"Phantom null at index $i of $count in step $step!\".toString())","        }","    })","}","UI.sync()"]},
+
+        {"kind":"then","text":"Not a single render pass observed a torn snapshot.","code":["violations.isEmpty()"]},
+
+        {"kind":"and","text":"No exception was silently logged along the way.","code":["log.errors().isEmpty()"]},
+
+        {"kind":"and","text":"After everything settled, the combo box agrees with the final state of the options.","code":["combo.itemCount >= 1"]},
+
+        {"kind":"cleanup","text":"","code":["log.detach()"]},
+
+        {"kind":"where","text":"The mutation storm is survived by all three property based models:","code":{"kind":["Vals based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__valsStormScenario_closure15@700e3a34"],"mutateStep":["swingtree.Combo_Box_Threading_Spec$__valsStormScenario_closure16@3e8f2bf3"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An option edit which arrives after the options changed is dropped gracefully.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When the user edits an option through an editable combo box, the\n            new item value is applied to the UI owned snapshot right away,\n            while the write into the bound property list travels through the\n            application event queue. By the time it arrives there, the world\n            may have moved on: if the edited position no longer exists,\n            the stale edit must be dropped silently instead of corrupting\n            unrelated state or throwing in the middle of the event queue.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A log spy, a selection property, an option list, and an editable combo box in decoupled mode.","code":["var log = LogSpy.attach()","var selection = Var.of(\"C\")","var options = Vars.of(\"A\", \"B\", \"C\")","var combo = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.comboBox(selection, options).isEditableIf(true)","    ).get(JComboBox)","})"]},
+
+        {"kind":"when","text":"The user edits the selected option, which sits at the very end of the list.","code":["UI.runNow({ combo.editor.item = \"XY\" })"]},
+
+        {"kind":"and","text":"Before any application thread processed the edit, the option list shrinks below the edited position.","code":["options.removeLast(2) // [A, B, C] -> [A]"]},
+
+        {"kind":"and","text":"Only now does this thread process the application event queue, and we let both worlds settle.","code":["EventProcessor.DECOUPLED.joinUntilDoneOrException()","letBothWorldsSettle()"]},
+
+        {"kind":"then","text":"The stale edit was dropped: the shrunken option list does not contain it.","code":["options.toList() == [\"A\"]"]},
+
+        {"kind":"and","text":"The combo box agrees with the final state of the options.","code":["combo.itemCount == 1","combo.getItemAt(0) == \"A\""]},
+
+        {"kind":"and","text":"The edit still went through as the current selection, because selection and options are independent states.","code":["selection.is(\"XY\")"]},
+
+        {"kind":"and","text":"Nothing was silently logged as an error.","code":["log.errors().isEmpty()"]},
+
+        {"kind":"cleanup","text":"","code":["log.detach()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Selections and option mutations racing from both sides of the thread boundary always converge. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The final exam: a continuously draining application thread, this\n            thread enqueueing a stream of option list mutations, and the UI\n            thread selecting options at the same time, all interleaving\n            freely. No matter how the threads interleave, once all queues\n            have run dry, the combo box and the view model must agree on\n            *everything*: the offered options and the current selection.\n            The feature is repeated to explore different interleavings.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A log spy and a continuously draining application thread.","code":["var log = LogSpy.attach()","var app = ApplicationThread.startDraining()"]},
+
+        {"kind":"and","text":"A selection property, an option list, and a combo box in decoupled mode.","code":["var selection = Var.of(\"start\")","var options = Vars.of(\"start\")","var combo = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.comboBox(selection, options)).get(JComboBox)","})"]},
+
+        {"kind":"when","text":"We enqueue 100 option mutations for the application thread, while the UI thread performs 50 user selections.","code":["100.times { step ->","    EventProcessor.DECOUPLED.registerAppEvent({","        if ( step % 2 == 0 )","            options.add(\"option-$step\".toString())","        else if ( options.size() > 1 )","            options.removeAt(0)","    })","}","50.times { step ->","    UI.runNow({","        int count = combo.itemCount","        if ( count > 0 )","            combo.setSelectedIndex(step % count)","    })","}"]},
+
+        {"kind":"and","text":"We wait for the application thread to work off the queue, and let both worlds settle.","code":["app.awaitAllProcessed()","letBothWorldsSettle()"]},
+
+        {"kind":"then","text":"The combo box offers exactly the final options of the view model.","code":["combo.itemCount == options.size()","(0..<combo.itemCount).collect({ combo.getItemAt(it) }) == options.toList()"]},
+
+        {"kind":"and","text":"Both worlds agree on the selection.","code":["combo.selectedItem == selection.orElseNull()"]},
+
+        {"kind":"and","text":"No event task failed and nothing was silently logged as an error.","code":["app.failures().isEmpty()","log.errors().isEmpty()"]},
+
+        {"kind":"cleanup","text":"","code":["app.stop()","log.detach()"]},
+
+        {"kind":"where","text":"We repeat this race a few times to explore different thread interleavings.","code":{"run":[]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Selections and option mutations racing from both sides of the thread boundary always converge. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The final exam: a continuously draining application thread, this\n            thread enqueueing a stream of option list mutations, and the UI\n            thread selecting options at the same time, all interleaving\n            freely. No matter how the threads interleave, once all queues\n            have run dry, the combo box and the view model must agree on\n            *everything*: the offered options and the current selection.\n            The feature is repeated to explore different interleavings.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A log spy and a continuously draining application thread.","code":["var log = LogSpy.attach()","var app = ApplicationThread.startDraining()"]},
+
+        {"kind":"and","text":"A selection property, an option list, and a combo box in decoupled mode.","code":["var selection = Var.of(\"start\")","var options = Vars.of(\"start\")","var combo = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.comboBox(selection, options)).get(JComboBox)","})"]},
+
+        {"kind":"when","text":"We enqueue 100 option mutations for the application thread, while the UI thread performs 50 user selections.","code":["100.times { step ->","    EventProcessor.DECOUPLED.registerAppEvent({","        if ( step % 2 == 0 )","            options.add(\"option-$step\".toString())","        else if ( options.size() > 1 )","            options.removeAt(0)","    })","}","50.times { step ->","    UI.runNow({","        int count = combo.itemCount","        if ( count > 0 )","            combo.setSelectedIndex(step % count)","    })","}"]},
+
+        {"kind":"and","text":"We wait for the application thread to work off the queue, and let both worlds settle.","code":["app.awaitAllProcessed()","letBothWorldsSettle()"]},
+
+        {"kind":"then","text":"The combo box offers exactly the final options of the view model.","code":["combo.itemCount == options.size()","(0..<combo.itemCount).collect({ combo.getItemAt(it) }) == options.toList()"]},
+
+        {"kind":"and","text":"Both worlds agree on the selection.","code":["combo.selectedItem == selection.orElseNull()"]},
+
+        {"kind":"and","text":"No event task failed and nothing was silently logged as an error.","code":["app.failures().isEmpty()","log.errors().isEmpty()"]},
+
+        {"kind":"cleanup","text":"","code":["app.stop()","log.detach()"]},
+
+        {"kind":"where","text":"We repeat this race a few times to explore different thread interleavings.","code":{"run":[]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Selections and option mutations racing from both sides of the thread boundary always converge. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The final exam: a continuously draining application thread, this\n            thread enqueueing a stream of option list mutations, and the UI\n            thread selecting options at the same time, all interleaving\n            freely. No matter how the threads interleave, once all queues\n            have run dry, the combo box and the view model must agree on\n            *everything*: the offered options and the current selection.\n            The feature is repeated to explore different interleavings.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A log spy and a continuously draining application thread.","code":["var log = LogSpy.attach()","var app = ApplicationThread.startDraining()"]},
+
+        {"kind":"and","text":"A selection property, an option list, and a combo box in decoupled mode.","code":["var selection = Var.of(\"start\")","var options = Vars.of(\"start\")","var combo = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.comboBox(selection, options)).get(JComboBox)","})"]},
+
+        {"kind":"when","text":"We enqueue 100 option mutations for the application thread, while the UI thread performs 50 user selections.","code":["100.times { step ->","    EventProcessor.DECOUPLED.registerAppEvent({","        if ( step % 2 == 0 )","            options.add(\"option-$step\".toString())","        else if ( options.size() > 1 )","            options.removeAt(0)","    })","}","50.times { step ->","    UI.runNow({","        int count = combo.itemCount","        if ( count > 0 )","            combo.setSelectedIndex(step % count)","    })","}"]},
+
+        {"kind":"and","text":"We wait for the application thread to work off the queue, and let both worlds settle.","code":["app.awaitAllProcessed()","letBothWorldsSettle()"]},
+
+        {"kind":"then","text":"The combo box offers exactly the final options of the view model.","code":["combo.itemCount == options.size()","(0..<combo.itemCount).collect({ combo.getItemAt(it) }) == options.toList()"]},
+
+        {"kind":"and","text":"Both worlds agree on the selection.","code":["combo.selectedItem == selection.orElseNull()"]},
+
+        {"kind":"and","text":"No event task failed and nothing was silently logged as an error.","code":["app.failures().isEmpty()","log.errors().isEmpty()"]},
+
+        {"kind":"cleanup","text":"","code":["app.stop()","log.detach()"]},
+
+        {"kind":"where","text":"We repeat this race a few times to explore different thread interleavings.","code":{"run":[]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Selections and option mutations racing from both sides of the thread boundary always converge. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The final exam: a continuously draining application thread, this\n            thread enqueueing a stream of option list mutations, and the UI\n            thread selecting options at the same time, all interleaving\n            freely. No matter how the threads interleave, once all queues\n            have run dry, the combo box and the view model must agree on\n            *everything*: the offered options and the current selection.\n            The feature is repeated to explore different interleavings.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A log spy and a continuously draining application thread.","code":["var log = LogSpy.attach()","var app = ApplicationThread.startDraining()"]},
+
+        {"kind":"and","text":"A selection property, an option list, and a combo box in decoupled mode.","code":["var selection = Var.of(\"start\")","var options = Vars.of(\"start\")","var combo = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.comboBox(selection, options)).get(JComboBox)","})"]},
+
+        {"kind":"when","text":"We enqueue 100 option mutations for the application thread, while the UI thread performs 50 user selections.","code":["100.times { step ->","    EventProcessor.DECOUPLED.registerAppEvent({","        if ( step % 2 == 0 )","            options.add(\"option-$step\".toString())","        else if ( options.size() > 1 )","            options.removeAt(0)","    })","}","50.times { step ->","    UI.runNow({","        int count = combo.itemCount","        if ( count > 0 )","            combo.setSelectedIndex(step % count)","    })","}"]},
+
+        {"kind":"and","text":"We wait for the application thread to work off the queue, and let both worlds settle.","code":["app.awaitAllProcessed()","letBothWorldsSettle()"]},
+
+        {"kind":"then","text":"The combo box offers exactly the final options of the view model.","code":["combo.itemCount == options.size()","(0..<combo.itemCount).collect({ combo.getItemAt(it) }) == options.toList()"]},
+
+        {"kind":"and","text":"Both worlds agree on the selection.","code":["combo.selectedItem == selection.orElseNull()"]},
+
+        {"kind":"and","text":"No event task failed and nothing was silently logged as an error.","code":["app.failures().isEmpty()","log.errors().isEmpty()"]},
+
+        {"kind":"cleanup","text":"","code":["app.stop()","log.detach()"]},
+
+        {"kind":"where","text":"We repeat this race a few times to explore different thread interleavings.","code":{"run":[]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Selections and option mutations racing from both sides of the thread boundary always converge. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The final exam: a continuously draining application thread, this\n            thread enqueueing a stream of option list mutations, and the UI\n            thread selecting options at the same time, all interleaving\n            freely. No matter how the threads interleave, once all queues\n            have run dry, the combo box and the view model must agree on\n            *everything*: the offered options and the current selection.\n            The feature is repeated to explore different interleavings.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A log spy and a continuously draining application thread.","code":["var log = LogSpy.attach()","var app = ApplicationThread.startDraining()"]},
+
+        {"kind":"and","text":"A selection property, an option list, and a combo box in decoupled mode.","code":["var selection = Var.of(\"start\")","var options = Vars.of(\"start\")","var combo = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.comboBox(selection, options)).get(JComboBox)","})"]},
+
+        {"kind":"when","text":"We enqueue 100 option mutations for the application thread, while the UI thread performs 50 user selections.","code":["100.times { step ->","    EventProcessor.DECOUPLED.registerAppEvent({","        if ( step % 2 == 0 )","            options.add(\"option-$step\".toString())","        else if ( options.size() > 1 )","            options.removeAt(0)","    })","}","50.times { step ->","    UI.runNow({","        int count = combo.itemCount","        if ( count > 0 )","            combo.setSelectedIndex(step % count)","    })","}"]},
+
+        {"kind":"and","text":"We wait for the application thread to work off the queue, and let both worlds settle.","code":["app.awaitAllProcessed()","letBothWorldsSettle()"]},
+
+        {"kind":"then","text":"The combo box offers exactly the final options of the view model.","code":["combo.itemCount == options.size()","(0..<combo.itemCount).collect({ combo.getItemAt(it) }) == options.toList()"]},
+
+        {"kind":"and","text":"Both worlds agree on the selection.","code":["combo.selectedItem == selection.orElseNull()"]},
+
+        {"kind":"and","text":"No event task failed and nothing was silently logged as an error.","code":["app.failures().isEmpty()","log.errors().isEmpty()"]},
+
+        {"kind":"cleanup","text":"","code":["app.stop()","log.detach()"]},
+
+        {"kind":"where","text":"We repeat this race a few times to explore different thread interleavings.","code":{"run":[]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

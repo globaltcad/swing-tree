@@ -1,0 +1,909 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TableData.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.api.model</a> &gt; <span class="el_source">TableData.java</span></div><h1>TableData.java</h1><pre class="source lang-java linenums">package swingtree.api.model;
+
+import org.jspecify.annotations.Nullable;
+import sprouts.Tuple;
+import swingtree.UI;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ *  An immutable value describing the entire contents of a table: its cells, the
+ *  name and class of every column, and the {@link UI.ListData} layout tying the
+ *  two together. Hold one of these in a {@link sprouts.Var} property, bind that
+ *  property to a table, and you have a complete, thread safe, reactive table:
+ *  &lt;pre&gt;{@code
+ *  Var&lt;TableData&gt; data = Var.of(
+ *          TableData.of(UI.ListData.ROW_MAJOR, &quot;Name&quot;, &quot;Age&quot;)
+ *              .addRow(&quot;Alice&quot;, 30)
+ *              .addRow(&quot;Bob&quot;,   42)
+ *      );
+ *
+ *  UI.table(data);
+ *  }&lt;/pre&gt;
+ *  Changing the table is then simply a matter of changing the value in the property,
+ *  from wherever your business logic happens to live:
+ *  &lt;pre&gt;{@code
+ *  data.update( it -&gt; it.addRow(&quot;Carol&quot;, 55) );
+ *  }&lt;/pre&gt;
+ *
+ *  &lt;h2&gt;It is a value&lt;/h2&gt;
+ *
+ *  Every method on this class which sounds like it changes something really returns
+ *  a &lt;i&gt;new&lt;/i&gt; {@link TableData}, leaving the one you called it on untouched. Two
+ *  tables with the same layout, columns and cells are {@link #equals(Object)} to each
+ *  other and have the same {@link #hashCode()}, which is what lets a table tell
+ *  whether anything actually changed.
+ *  &lt;p&gt;
+ *  Do not let the copying scare you: the cells live in immutable {@link Tuple}s,
+ *  which share their structure between versions. Adding a row to a thousand row
+ *  table does not copy a thousand rows.
+ *
+ *  &lt;h2&gt;It is thread safe&lt;/h2&gt;
+ *
+ *  Because this is a deeply immutable value, the application thread and the UI
+ *  thread (the AWT Event Dispatch Thread) can hand it to each other without any
+ *  locking. Under {@link swingtree.threading.EventProcessor#DECOUPLED}, the value
+ *  in your property &lt;i&gt;is&lt;/i&gt; what the UI thread reads, so every read within a
+ *  single UI thread task sees the same consistent table, even while your
+ *  application thread is busy building the next version of it.
+ *
+ *  &lt;h2&gt;It is cheap to update&lt;/h2&gt;
+ *
+ *  A {@link Tuple} remembers how it was derived from its predecessor, and a
+ *  {@link UI.ListData#ROW_MAJOR} table passes that knowledge straight to the
+ *  {@link javax.swing.JTable}: adding, removing or changing a handful of rows only
+ *  repaints those rows, rather than rebuilding the whole table. This is why a row
+ *  major layout is the right default for large, frequently changing tables.
+ *
+ *  &lt;h2&gt;Rows and columns, whatever the layout&lt;/h2&gt;
+ *
+ *  The {@link #layout()} decides how the {@link #cells()} are &lt;i&gt;stored&lt;/i&gt;: in a
+ *  {@link UI.ListData#ROW_MAJOR} table the outer {@link Tuple} holds the rows and
+ *  each inner {@link Tuple} holds the cells of one row, whereas in a
+ *  {@link UI.ListData#COLUMN_MAJOR} table the outer {@link Tuple} holds the columns.
+ *  That is a storage detail: every method on this class speaks in {@code (row, column)}
+ *  terms no matter which layout you picked, so {@link #addRow(Object...)} adds a row
+ *  to a column major table just as happily (it is merely a little more work for it).
+ */
+public final class TableData
+{
+    @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L73">    private static final Class&lt;Tuple&lt;@Nullable Object&gt;&gt; LINE_TYPE = (Class&lt;Tuple&lt;@Nullable Object&gt;&gt;)(Class&lt;?&gt;) Tuple.class;</span>
+    @SuppressWarnings(&quot;unchecked&quot;)
+<span class="fc" id="L75">    private static final Class&lt;Class&lt;?&gt;&gt; CLASS_TYPE = (Class&lt;Class&lt;?&gt;&gt;)(Class&lt;?&gt;) Class.class;</span>
+
+<span class="fc" id="L77">    private static final Tuple&lt;@Nullable Object&gt;        EMPTY_LINE    = Tuple.ofNullable(Object.class);</span>
+<span class="fc" id="L78">    private static final Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt; EMPTY_LINES   = Tuple.of(LINE_TYPE);</span>
+<span class="fc" id="L79">    private static final Tuple&lt;@Nullable String&gt;        EMPTY_NAMES   = Tuple.ofNullable(String.class);</span>
+<span class="fc" id="L80">    private static final Tuple&lt;Class&lt;?&gt;&gt;                EMPTY_CLASSES = Tuple.of(CLASS_TYPE);</span>
+
+<span class="fc" id="L82">    private static final TableData EMPTY = new TableData(</span>
+            UI.ListData.ROW_MAJOR, EMPTY_NAMES, EMPTY_CLASSES, EMPTY_LINES
+        );
+
+    /**
+     *  The shared empty table: no columns, no rows, not editable.
+     *  A good starting point for a table you are about to build up.
+     *  @return An empty {@link TableData}.
+     */
+    public static TableData empty() {
+<span class="fc" id="L92">        return EMPTY;</span>
+    }
+
+    /**
+     *  Creates a table which has columns but no rows yet, which is how most tables
+     *  start out in life:
+     *  &lt;pre&gt;{@code
+     *  TableData.of(UI.ListData.ROW_MAJOR, &quot;Name&quot;, &quot;Age&quot;, &quot;City&quot;)
+     *  }&lt;/pre&gt;
+     *  The columns are all of type {@link Object} until you say otherwise through
+     *  {@link #setColumnClassAt(int, Class)}.
+     *
+     * @param layout      The {@link UI.ListData} layout of the table, which also decides
+     *                    whether the user may edit its cells ({@code *_EDITABLE}).
+     * @param columnNames The names of the columns, one per column.
+     * @return A new {@link TableData} with the given columns and no rows.
+     */
+    public static TableData of( UI.ListData layout, String... columnNames ) {
+<span class="fc" id="L110">        Objects.requireNonNull(layout);</span>
+<span class="fc" id="L111">        Objects.requireNonNull(columnNames);</span>
+<span class="fc" id="L112">        List&lt;Class&lt;?&gt;&gt; classes = new ArrayList&lt;&gt;(columnNames.length);</span>
+<span class="fc bfc" id="L113" title="All 2 branches covered.">        for ( int i = 0; i &lt; columnNames.length; i++ )</span>
+<span class="fc" id="L114">            classes.add(Object.class);</span>
+<span class="fc" id="L115">        return new TableData(</span>
+                    layout,
+<span class="fc" id="L117">                    Tuple.ofNullable(String.class, columnNames),</span>
+<span class="fc" id="L118">                    Tuple.of(CLASS_TYPE, classes),</span>
+                    EMPTY_LINES
+                );
+    }
+
+    /**
+     *  Creates a table from nothing but its cells, whose dimensions are derived from
+     *  them: the major axis of the {@code layout} is as long as the outer {@link Tuple},
+     *  and the minor axis is as long as the longest inner {@link Tuple} (so a ragged
+     *  matrix reads as though it were padded with {@code null} cells).
+     *  The columns have no names, which makes a table fall back to the default
+     *  (spreadsheet style) names, and they are all of type {@link Object}.
+     *
+     * @param layout The {@link UI.ListData} layout describing how {@code cells} is to be interpreted.
+     * @param cells  The cell values, an immutable tuple of rows (or columns, see {@code layout}),
+     *               each of which is an immutable tuple of cell values.
+     * @return A new {@link TableData}.
+     */
+    public static TableData of(
+        UI.ListData                    layout,
+        Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt; cells
+    ) {
+<span class="fc" id="L140">        Objects.requireNonNull(layout);</span>
+<span class="fc" id="L141">        Objects.requireNonNull(cells);</span>
+<span class="fc" id="L142">        return new TableData(layout, EMPTY_NAMES, EMPTY_CLASSES, cells);</span>
+    }
+
+    /**
+     *  Creates a fully described table, whose columns carry both a name and a class.
+     *  &lt;p&gt;
+     *  Note that the dimensions of the table are derived from what you pass here, and
+     *  that the column metadata takes part in that: a table with three column names but
+     *  rows only two cells wide still has three columns, the last of which reads as
+     *  {@code null}. This is what lets a table have columns but no rows.
+     *
+     * @param layout        The {@link UI.ListData} layout describing how {@code cells} is to be interpreted.
+     * @param columnNames   The column names, one per column, where {@code null} means
+     *                      &quot;fall back to the default (spreadsheet style) name&quot;.
+     * @param columnClasses The column classes, one per column, which a {@link javax.swing.JTable}
+     *                      consults to pick a renderer and an editor.
+     * @param cells         The cell values, an immutable tuple of rows (or columns, see {@code layout}),
+     *                      each of which is an immutable tuple of cell values.
+     * @return A new {@link TableData}.
+     */
+    public static TableData of(
+        UI.ListData                    layout,
+        Tuple&lt;@Nullable String&gt;        columnNames,
+        Tuple&lt;Class&lt;?&gt;&gt;                columnClasses,
+        Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt; cells
+    ) {
+<span class="fc" id="L168">        return new TableData(layout, columnNames, columnClasses, cells);</span>
+    }
+
+    /**
+     *  Builds a single row (or column) out of plain values, which is handy when you
+     *  want to hand a prepared row to {@link #addRow(Tuple)} or {@link #setRowsAt(int, Tuple)},
+     *  or a prepared column to {@link #addColumn(String, Class, Tuple)}.
+     *
+     * @param values The cell values of the row.
+     * @return An immutable tuple of the given values.
+     */
+    public static Tuple&lt;@Nullable Object&gt; row( @Nullable Object... values ) {
+<span class="fc" id="L180">        Objects.requireNonNull(values);</span>
+<span class="fc" id="L181">        return Tuple.ofNullable(Object.class, values);</span>
+    }
+
+    private final UI.ListData                    _layout;
+    private final Tuple&lt;@Nullable String&gt;        _columnNames;
+    private final Tuple&lt;Class&lt;?&gt;&gt;                _columnClasses;
+    private final Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt; _cells;
+    /*
+        The two dimensions are not state of their own, they are a function of the
+        three tuples above, precomputed here because a JTable asks for them
+        relentlessly while it paints. Deriving them (instead of letting the caller
+        supply them) is what keeps a table which grew a row or lost a column
+        consistent without anybody having to keep a counter in sync.
+     */
+    private final int _rowCount;
+    private final int _columnCount;
+
+    private TableData(
+        UI.ListData                    layout,
+        Tuple&lt;@Nullable String&gt;        columnNames,
+        Tuple&lt;Class&lt;?&gt;&gt;                columnClasses,
+        Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt; cells
+<span class="fc" id="L203">    ) {</span>
+<span class="fc" id="L204">        _layout        = Objects.requireNonNull(layout);</span>
+<span class="fc" id="L205">        _columnNames   = Objects.requireNonNull(columnNames);</span>
+<span class="fc" id="L206">        _columnClasses = Objects.requireNonNull(columnClasses);</span>
+<span class="fc" id="L207">        _cells         = Objects.requireNonNull(cells);</span>
+
+<span class="fc" id="L209">        int longestLine = 0;</span>
+<span class="fc bfc" id="L210" title="All 2 branches covered.">        for ( Tuple&lt;@Nullable Object&gt; line : cells )</span>
+<span class="fc" id="L211">            longestLine = Math.max(longestLine, line.size());</span>
+<span class="fc" id="L212">        int describedColumns = Math.max(columnNames.size(), columnClasses.size());</span>
+
+<span class="fc bfc" id="L214" title="All 2 branches covered.">        if ( layout.isRowMajor() ) {</span>
+<span class="fc" id="L215">            _rowCount    = cells.size();</span>
+<span class="fc" id="L216">            _columnCount = Math.max(describedColumns, longestLine);</span>
+        } else {
+<span class="fc" id="L218">            _rowCount    = longestLine;</span>
+<span class="fc" id="L219">            _columnCount = Math.max(describedColumns, cells.size());</span>
+        }
+<span class="fc" id="L221">    }</span>
+
+    // ---- Reading ----
+
+    /**
+     *  The layout deciding how the {@link #cells()} of this table are stored, and
+     *  whether the user may edit them.
+     *  @return The {@link UI.ListData} layout of this table.
+     */
+    public UI.ListData layout() {
+<span class="fc" id="L231">        return _layout;</span>
+    }
+
+    /**
+     *  Tells whether the user is allowed to edit the cells of this table, which is
+     *  the case for the {@code *_EDITABLE} layouts. Note that a table also needs to
+     *  live in a mutable {@link sprouts.Var} before an edit has anywhere to go.
+     *  @return True if the layout of this table permits cell editing.
+     */
+    public boolean isEditable() {
+<span class="fc" id="L241">        return _layout.isEditable();</span>
+    }
+
+    /** Returns the number of rows in this table. @return The row count. */
+    public int getRowCount() {
+<span class="fc" id="L246">        return _rowCount;</span>
+    }
+
+    /** Returns the number of columns in this table. @return The column count. */
+    public int getColumnCount() {
+<span class="fc" id="L251">        return _columnCount;</span>
+    }
+
+    /**
+     *  Tells whether this table has nothing to show, meaning it has no rows,
+     *  no columns, or neither.
+     *  @return True if this table has no cells to display.
+     */
+    public boolean isEmpty() {
+<span class="pc bpc" id="L260" title="1 of 4 branches missed.">        return _rowCount == 0 || _columnCount == 0;</span>
+    }
+
+    /**
+     *  Reads the value of a single cell, always in {@code (row, column)} terms,
+     *  irrespective of the {@link #layout()} of this table.
+     * @param rowIndex    The row index of the cell.
+     * @param columnIndex The column index of the cell.
+     * @return The value of the cell, or {@code null} if the indices are out of bounds.
+     */
+    public @Nullable Object getValueAt( int rowIndex, int columnIndex ) {
+<span class="pc bpc" id="L271" title="1 of 8 branches missed.">        if ( rowIndex &lt; 0 || rowIndex &gt;= _rowCount || columnIndex &lt; 0 || columnIndex &gt;= _columnCount )</span>
+<span class="fc" id="L272">            return null;</span>
+<span class="fc" id="L273">        return _cellAt(_majorOf(rowIndex, columnIndex), _minorOf(rowIndex, columnIndex));</span>
+    }
+
+    /**
+     *  Reads an entire row, padded with {@code null} to the width of the table, so
+     *  that the returned tuple always has exactly {@link #getColumnCount()} entries.
+     * @param rowIndex The index of the row.
+     * @return The cells of the row, or an empty tuple if the index is out of bounds.
+     */
+    public Tuple&lt;@Nullable Object&gt; getRow( int rowIndex ) {
+<span class="pc bpc" id="L283" title="1 of 4 branches missed.">        if ( rowIndex &lt; 0 || rowIndex &gt;= _rowCount )</span>
+<span class="fc" id="L284">            return EMPTY_LINE;</span>
+<span class="fc bfc" id="L285" title="All 2 branches covered.">        if ( _layout.isRowMajor() )</span>
+<span class="fc" id="L286">            return _padTo(_lineAt(rowIndex), _columnCount);</span>
+<span class="fc" id="L287">        return _gatherAcrossLines(rowIndex, _columnCount);</span>
+    }
+
+    /**
+     *  Reads an entire column, padded with {@code null} to the height of the table, so
+     *  that the returned tuple always has exactly {@link #getRowCount()} entries.
+     * @param columnIndex The index of the column.
+     * @return The cells of the column, or an empty tuple if the index is out of bounds.
+     */
+    public Tuple&lt;@Nullable Object&gt; getColumn( int columnIndex ) {
+<span class="pc bpc" id="L297" title="2 of 4 branches missed.">        if ( columnIndex &lt; 0 || columnIndex &gt;= _columnCount )</span>
+<span class="nc" id="L298">            return EMPTY_LINE;</span>
+<span class="fc bfc" id="L299" title="All 2 branches covered.">        if ( !_layout.isRowMajor() )</span>
+<span class="fc" id="L300">            return _padTo(_lineAt(columnIndex), _rowCount);</span>
+<span class="fc" id="L301">        return _gatherAcrossLines(columnIndex, _rowCount);</span>
+    }
+
+    /**
+     *  Reads the name of a column.
+     * @param columnIndex The column index.
+     * @return The column name, or {@code null} if the column has no name of its own
+     *         (in which case a table falls back to the default, spreadsheet style name).
+     */
+    public @Nullable String getColumnName( int columnIndex ) {
+<span class="pc bpc" id="L311" title="1 of 4 branches missed.">        if ( columnIndex &lt; 0 || columnIndex &gt;= _columnNames.size() )</span>
+<span class="fc" id="L312">            return null;</span>
+<span class="fc" id="L313">        return _columnNames.get(columnIndex);</span>
+    }
+
+    /**
+     *  Reads the class of a column, which a {@link javax.swing.JTable} consults to
+     *  pick a renderer and an editor for it.
+     * @param columnIndex The column index.
+     * @return The column class, or {@link Object} if the column has no class of its own.
+     */
+    public Class&lt;?&gt; getColumnClass( int columnIndex ) {
+<span class="pc bpc" id="L323" title="2 of 4 branches missed.">        if ( columnIndex &lt; 0 || columnIndex &gt;= _columnClasses.size() )</span>
+<span class="nc" id="L324">            return Object.class;</span>
+<span class="fc" id="L325">        return _columnClasses.get(columnIndex);</span>
+    }
+
+    /**
+     *  Looks up a column by name, so that your business logic may address columns
+     *  by what they mean rather than by where they happen to sit:
+     *  &lt;pre&gt;{@code
+     *  data.setCellAt(0, data.indexOfColumn(&quot;Age&quot;), 31);
+     *  }&lt;/pre&gt;
+     * @param columnName The name of the column to look for.
+     * @return The index of the first column with the given name, or {@code -1} if there is none.
+     */
+    public int indexOfColumn( @Nullable String columnName ) {
+<span class="fc bfc" id="L338" title="All 2 branches covered.">        for ( int i = 0; i &lt; _columnNames.size(); i++ )</span>
+<span class="fc bfc" id="L339" title="All 2 branches covered.">            if ( Objects.equals(_columnNames.get(i), columnName) )</span>
+<span class="fc" id="L340">                return i;</span>
+<span class="fc" id="L341">        return -1;</span>
+    }
+
+    /**
+     *  The raw cell values of this table, in the order described by its {@link #layout()}.
+     *  This is exposed so that a table model can reuse the very same immutable
+     *  structure without copying it, and so that you may reach for the full
+     *  {@link Tuple} API when this class does not have the operation you need.
+     *  @return The immutable tuple of rows (or columns, see {@link #layout()}).
+     */
+    public Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt; cells() {
+<span class="fc" id="L352">        return _cells;</span>
+    }
+
+    /**
+     *  The column names of this table, where a {@code null} entry means that
+     *  the table falls back to the default (spreadsheet style) column name.
+     *  @return The immutable tuple of column names.
+     */
+    public Tuple&lt;@Nullable String&gt; columnNames() {
+<span class="fc" id="L361">        return _columnNames;</span>
+    }
+
+    /**
+     *  The column classes of this table, which a {@link javax.swing.JTable}
+     *  consults to pick a renderer and editor for each column.
+     *  @return The immutable tuple of column classes.
+     */
+    public Tuple&lt;Class&lt;?&gt;&gt; columnClasses() {
+<span class="fc" id="L370">        return _columnClasses;</span>
+    }
+
+    // ---- Changing cells ----
+
+    /**
+     *  Produces a new table in which a single cell has a new value, reusing the
+     *  immutable structure of this table for everything else.
+     *  &lt;p&gt;
+     *  Note that this is a targeted change: a row major table hands it to a
+     *  {@link javax.swing.JTable} as a single row update, so only that row repaints.
+     *
+     * @param rowIndex    The row index of the cell to change.
+     * @param columnIndex The column index of the cell to change.
+     * @param value       The new value of the cell.
+     * @return A new {@link TableData} with the changed cell, or this table unchanged
+     *         if the indices are out of bounds or the cell already holds that value.
+     */
+    public TableData setCellAt( int rowIndex, int columnIndex, @Nullable Object value ) {
+<span class="pc bpc" id="L389" title="3 of 8 branches missed.">        if ( rowIndex &lt; 0 || rowIndex &gt;= _rowCount || columnIndex &lt; 0 || columnIndex &gt;= _columnCount )</span>
+<span class="fc" id="L390">            return this;</span>
+<span class="fc" id="L391">        int majorIndex = _majorOf(rowIndex, columnIndex);</span>
+<span class="fc" id="L392">        int minorIndex = _minorOf(rowIndex, columnIndex);</span>
+<span class="fc bfc" id="L393" title="All 2 branches covered.">        if ( Objects.equals(_cellAt(majorIndex, minorIndex), value) )</span>
+<span class="fc" id="L394">            return this;</span>
+<span class="fc" id="L395">        Tuple&lt;@Nullable Object&gt; line = _padTo(_lineAt(majorIndex), minorIndex + 1).setAt(minorIndex, value);</span>
+<span class="fc" id="L396">        return _withCells(_padLines(majorIndex + 1).setAt(majorIndex, line));</span>
+    }
+
+    // ---- Changing rows ----
+
+    /**
+     *  Appends a row to the end of this table, built from plain values:
+     *  &lt;pre&gt;{@code
+     *  data.addRow(&quot;Alice&quot;, 30, &quot;Rome&quot;)
+     *  }&lt;/pre&gt;
+     * @param values The cell values of the new row, one per column.
+     * @return A new {@link TableData} with the additional row.
+     */
+    public TableData addRow( @Nullable Object... values ) {
+<span class="fc" id="L410">        return addRowAt(_rowCount, row(values));</span>
+    }
+
+    /**
+     *  Appends a row to the end of this table.
+     * @param row The cells of the new row, one per column.
+     * @return A new {@link TableData} with the additional row.
+     */
+    public TableData addRow( Tuple&lt;@Nullable Object&gt; row ) {
+<span class="nc" id="L419">        return addRowAt(_rowCount, row);</span>
+    }
+
+    /**
+     *  Inserts a row at the given index, built from plain values.
+     * @param rowIndex The index the new row will have.
+     * @param values   The cell values of the new row, one per column.
+     * @return A new {@link TableData} with the additional row.
+     */
+    public TableData addRowAt( int rowIndex, @Nullable Object... values ) {
+<span class="fc" id="L429">        return addRowAt(rowIndex, row(values));</span>
+    }
+
+    /**
+     *  Inserts a row at the given index.
+     * @param rowIndex The index the new row will have.
+     * @param row      The cells of the new row, one per column.
+     * @return A new {@link TableData} with the additional row, or this table unchanged
+     *         if the index is out of bounds.
+     */
+    public TableData addRowAt( int rowIndex, Tuple&lt;@Nullable Object&gt; row ) {
+<span class="fc" id="L440">        Objects.requireNonNull(row);</span>
+<span class="fc" id="L441">        return addRowsAt(rowIndex, Tuple.of(LINE_TYPE, row));</span>
+    }
+
+    /**
+     *  Appends several rows at once, which is the efficient way to grow a table by
+     *  more than one row: a row major table hands this to a {@link javax.swing.JTable}
+     *  as a &lt;i&gt;single&lt;/i&gt; insertion of a range of rows, rather than one event per row.
+     * @param rows The new rows, each holding one cell value per column.
+     * @return A new {@link TableData} with the additional rows.
+     */
+    public TableData addRows( Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt; rows ) {
+<span class="fc" id="L452">        return addRowsAt(_rowCount, rows);</span>
+    }
+
+    /**
+     *  Inserts several rows at once, starting at the given index.
+     *  See {@link #addRows(Tuple)} for why you should prefer this over adding
+     *  the rows one at a time.
+     * @param rowIndex The index the first of the new rows will have.
+     * @param rows     The new rows, each holding one cell value per column.
+     * @return A new {@link TableData} with the additional rows, or this table unchanged
+     *         if the index is out of bounds or there is nothing to add.
+     */
+    public TableData addRowsAt( int rowIndex, Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt; rows ) {
+<span class="fc" id="L465">        Objects.requireNonNull(rows);</span>
+<span class="pc bpc" id="L466" title="3 of 6 branches missed.">        if ( rowIndex &lt; 0 || rowIndex &gt; _rowCount || rows.isEmpty() )</span>
+<span class="nc" id="L467">            return this;</span>
+<span class="fc bfc" id="L468" title="All 2 branches covered.">        if ( _layout.isRowMajor() )</span>
+<span class="fc" id="L469">            return _withCells(_cells.addAllAt(rowIndex, rows));</span>
+<span class="fc" id="L470">        return _withCells(_insertMinors(rowIndex, rows, _rowCount));</span>
+    }
+
+    /**
+     *  Replaces the row at the given index, built from plain values.
+     * @param rowIndex The index of the row to replace.
+     * @param values   The new cell values of the row, one per column.
+     * @return A new {@link TableData} with the replaced row.
+     */
+    public TableData setRowAt( int rowIndex, @Nullable Object... values ) {
+<span class="fc" id="L480">        return setRowAt(rowIndex, row(values));</span>
+    }
+
+    /**
+     *  Replaces the row at the given index.
+     * @param rowIndex The index of the row to replace.
+     * @param row      The new cells of the row, one per column.
+     * @return A new {@link TableData} with the replaced row, or this table unchanged
+     *         if the index is out of bounds.
+     */
+    public TableData setRowAt( int rowIndex, Tuple&lt;@Nullable Object&gt; row ) {
+<span class="fc" id="L491">        Objects.requireNonNull(row);</span>
+<span class="fc" id="L492">        return setRowsAt(rowIndex, Tuple.of(LINE_TYPE, row));</span>
+    }
+
+    /**
+     *  Replaces a whole range of rows at once, starting at the given index, which a
+     *  row major table hands to a {@link javax.swing.JTable} as a single update of a
+     *  range of rows. This is the operation you want when a batch of your data changed
+     *  and you would rather not rebuild the whole table for it.
+     * @param rowIndex The index of the first row to replace.
+     * @param rows     The new rows, each holding one cell value per column.
+     * @return A new {@link TableData} with the replaced rows, or this table unchanged
+     *         if the range is out of bounds or there is nothing to replace.
+     */
+    public TableData setRowsAt( int rowIndex, Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt; rows ) {
+<span class="fc" id="L506">        Objects.requireNonNull(rows);</span>
+<span class="pc bpc" id="L507" title="3 of 6 branches missed.">        if ( rowIndex &lt; 0 || rows.isEmpty() || rowIndex + rows.size() &gt; _rowCount )</span>
+<span class="nc" id="L508">            return this;</span>
+<span class="pc bpc" id="L509" title="1 of 2 branches missed.">        if ( _layout.isRowMajor() )</span>
+<span class="fc" id="L510">            return _withCells(_cells.setAllAt(rowIndex, rows));</span>
+<span class="nc" id="L511">        return _withCells(_replaceMinors(rowIndex, rows));</span>
+    }
+
+    /**
+     *  Removes the row at the given index.
+     * @param rowIndex The index of the row to remove.
+     * @return A new {@link TableData} without that row, or this table unchanged
+     *         if the index is out of bounds.
+     */
+    public TableData removeRowAt( int rowIndex ) {
+<span class="fc" id="L521">        return removeRowsAt(rowIndex, 1);</span>
+    }
+
+    /**
+     *  Removes a whole range of rows at once, which a row major table hands to a
+     *  {@link javax.swing.JTable} as a single deletion of a range of rows.
+     * @param rowIndex The index of the first row to remove.
+     * @param count    The number of rows to remove.
+     * @return A new {@link TableData} without those rows, or this table unchanged
+     *         if the range is out of bounds or there is nothing to remove.
+     */
+    public TableData removeRowsAt( int rowIndex, int count ) {
+<span class="pc bpc" id="L533" title="2 of 6 branches missed.">        if ( rowIndex &lt; 0 || count &lt;= 0 || rowIndex + count &gt; _rowCount )</span>
+<span class="fc" id="L534">            return this;</span>
+<span class="pc bpc" id="L535" title="1 of 2 branches missed.">        if ( _layout.isRowMajor() )</span>
+<span class="fc" id="L536">            return _withCells(_cells.removeAt(rowIndex, count));</span>
+<span class="nc" id="L537">        return _withCells(_removeMinors(rowIndex, count));</span>
+    }
+
+    /**
+     *  Removes every row, while keeping the columns of this table exactly as they are.
+     *  Reach for {@link #empty()} instead if you want to be rid of the columns too.
+     * @return A new {@link TableData} with the same columns but no rows.
+     */
+    public TableData removeAllRows() {
+<span class="fc" id="L546">        return removeRowsAt(0, _rowCount);</span>
+    }
+
+    // ---- Changing columns ----
+
+    /**
+     *  Appends a column to the right of this table, with a name, a class and its cells:
+     *  &lt;pre&gt;{@code
+     *  data.addColumn(&quot;City&quot;, String.class, TableData.row(&quot;Rome&quot;, &quot;Oslo&quot;))
+     *  }&lt;/pre&gt;
+     * @param columnName  The name of the new column.
+     * @param columnClass The class of the new column.
+     * @param values      The cells of the new column, one per row.
+     * @return A new {@link TableData} with the additional column.
+     */
+    public TableData addColumn( @Nullable String columnName, Class&lt;?&gt; columnClass, Tuple&lt;@Nullable Object&gt; values ) {
+<span class="fc" id="L562">        return addColumnAt(_columnCount, columnName, columnClass, values);</span>
+    }
+
+    /**
+     *  Inserts a column at the given index, with a name, a class and its cells.
+     * @param columnIndex The index the new column will have.
+     * @param columnName  The name of the new column.
+     * @param columnClass The class of the new column.
+     * @param values      The cells of the new column, one per row.
+     * @return A new {@link TableData} with the additional column, or this table
+     *         unchanged if the index is out of bounds.
+     */
+    public TableData addColumnAt(
+        int                     columnIndex,
+        @Nullable String        columnName,
+        Class&lt;?&gt;                columnClass,
+        Tuple&lt;@Nullable Object&gt; values
+    ) {
+<span class="fc" id="L580">        Objects.requireNonNull(columnClass);</span>
+<span class="fc" id="L581">        Objects.requireNonNull(values);</span>
+<span class="pc bpc" id="L582" title="2 of 4 branches missed.">        if ( columnIndex &lt; 0 || columnIndex &gt; _columnCount )</span>
+<span class="nc" id="L583">            return this;</span>
+<span class="fc" id="L584">        Tuple&lt;@Nullable String&gt; names   = _padNamesTo(_columnCount).addAt(columnIndex, columnName);</span>
+<span class="fc" id="L585">        Tuple&lt;Class&lt;?&gt;&gt;         classes = _padClassesTo(_columnCount).addAt(columnIndex, columnClass);</span>
+        Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt; cells =
+<span class="fc bfc" id="L587" title="All 2 branches covered.">                _layout.isRowMajor()</span>
+<span class="fc" id="L588">                    ? _insertMinors(columnIndex, Tuple.of(LINE_TYPE, values), _columnCount)</span>
+                    // Metadata may describe more columns than the cells fill, so the
+                    // cells are padded up to the insertion point first - clamping the
+                    // index instead would land the new cells under the wrong column.
+<span class="fc" id="L592">                    : _padLines(columnIndex).addAllAt(columnIndex, Tuple.of(LINE_TYPE, values));</span>
+<span class="fc" id="L593">        return new TableData(_layout, names, classes, cells);</span>
+    }
+
+    /**
+     *  Replaces the cells of the column at the given index, leaving its name and
+     *  class alone.
+     * @param columnIndex The index of the column to replace.
+     * @param values      The new cells of the column, one per row.
+     * @return A new {@link TableData} with the replaced column, or this table
+     *         unchanged if the index is out of bounds.
+     */
+    public TableData setColumnAt( int columnIndex, Tuple&lt;@Nullable Object&gt; values ) {
+<span class="fc" id="L605">        Objects.requireNonNull(values);</span>
+<span class="pc bpc" id="L606" title="2 of 4 branches missed.">        if ( columnIndex &lt; 0 || columnIndex &gt;= _columnCount )</span>
+<span class="nc" id="L607">            return this;</span>
+<span class="pc bpc" id="L608" title="1 of 2 branches missed.">        if ( !_layout.isRowMajor() )</span>
+<span class="nc" id="L609">            return _withCells(_padLines(columnIndex + 1).setAt(columnIndex, values));</span>
+<span class="fc" id="L610">        return _withCells(_replaceMinors(columnIndex, Tuple.of(LINE_TYPE, values)));</span>
+    }
+
+    /**
+     *  Removes the column at the given index, along with its name and class.
+     * @param columnIndex The index of the column to remove.
+     * @return A new {@link TableData} without that column, or this table unchanged
+     *         if the index is out of bounds.
+     */
+    public TableData removeColumnAt( int columnIndex ) {
+<span class="fc" id="L620">        return removeColumnsAt(columnIndex, 1);</span>
+    }
+
+    /**
+     *  Removes a whole range of columns at once, along with their names and classes.
+     * @param columnIndex The index of the first column to remove.
+     * @param count       The number of columns to remove.
+     * @return A new {@link TableData} without those columns, or this table unchanged
+     *         if the range is out of bounds or there is nothing to remove.
+     */
+    public TableData removeColumnsAt( int columnIndex, int count ) {
+<span class="pc bpc" id="L631" title="2 of 6 branches missed.">        if ( columnIndex &lt; 0 || count &lt;= 0 || columnIndex + count &gt; _columnCount )</span>
+<span class="fc" id="L632">            return this;</span>
+<span class="fc" id="L633">        Tuple&lt;@Nullable String&gt; names   = _removeFrom(_padNamesTo(_columnCount), columnIndex, count);</span>
+<span class="fc" id="L634">        Tuple&lt;Class&lt;?&gt;&gt;         classes = _removeFrom(_padClassesTo(_columnCount), columnIndex, count);</span>
+        Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt; cells =
+<span class="fc bfc" id="L636" title="All 2 branches covered.">                _layout.isRowMajor()</span>
+<span class="fc" id="L637">                    ? _removeMinors(columnIndex, count)</span>
+<span class="fc" id="L638">                    : _removeFrom(_cells, columnIndex, count);</span>
+<span class="fc" id="L639">        return new TableData(_layout, names, classes, cells);</span>
+    }
+
+    /**
+     *  Renames a single column, which a table picks up as a change of its header.
+     * @param columnIndex The index of the column to rename.
+     * @param columnName  The new name of the column, where {@code null} means
+     *                    &quot;fall back to the default (spreadsheet style) name&quot;.
+     * @return A new {@link TableData} with the renamed column, or this table unchanged
+     *         if the index is out of bounds or the name did not change.
+     */
+    public TableData setColumnNameAt( int columnIndex, @Nullable String columnName ) {
+<span class="pc bpc" id="L651" title="2 of 4 branches missed.">        if ( columnIndex &lt; 0 || columnIndex &gt;= _columnCount )</span>
+<span class="nc" id="L652">            return this;</span>
+<span class="pc bpc" id="L653" title="1 of 2 branches missed.">        if ( Objects.equals(getColumnName(columnIndex), columnName) )</span>
+<span class="nc" id="L654">            return this;</span>
+<span class="fc" id="L655">        return new TableData(</span>
+                    _layout,
+<span class="fc" id="L657">                    _padNamesTo(_columnCount).setAt(columnIndex, columnName),</span>
+                    _columnClasses,
+                    _cells
+                );
+    }
+
+    /**
+     *  Renames every column at once.
+     * @param columnNames The new column names, one per column.
+     * @return A new {@link TableData} with the new column names.
+     */
+    public TableData setColumnNames( String... columnNames ) {
+<span class="fc" id="L669">        Objects.requireNonNull(columnNames);</span>
+<span class="fc" id="L670">        return setColumnNames(Tuple.ofNullable(String.class, columnNames));</span>
+    }
+
+    /**
+     *  Renames every column at once. Note that the number of names takes part in
+     *  deciding how many columns this table has, so handing over more names than
+     *  the cells fill widens the table.
+     * @param columnNames The new column names, one per column.
+     * @return A new {@link TableData} with the new column names.
+     */
+    public TableData setColumnNames( Tuple&lt;@Nullable String&gt; columnNames ) {
+<span class="fc" id="L681">        Objects.requireNonNull(columnNames);</span>
+<span class="fc" id="L682">        return new TableData(_layout, columnNames, _columnClasses, _cells);</span>
+    }
+
+    /**
+     *  Changes the class of a single column, which is how you tell a
+     *  {@link javax.swing.JTable} to render and edit it differently (a
+     *  {@link Boolean} column becomes a column of check boxes, say).
+     * @param columnIndex The index of the column.
+     * @param columnClass The new class of the column.
+     * @return A new {@link TableData} with the new column class, or this table
+     *         unchanged if the index is out of bounds or the class did not change.
+     */
+    public TableData setColumnClassAt( int columnIndex, Class&lt;?&gt; columnClass ) {
+<span class="fc" id="L695">        Objects.requireNonNull(columnClass);</span>
+<span class="pc bpc" id="L696" title="2 of 4 branches missed.">        if ( columnIndex &lt; 0 || columnIndex &gt;= _columnCount )</span>
+<span class="nc" id="L697">            return this;</span>
+<span class="fc bfc" id="L698" title="All 2 branches covered.">        if ( getColumnClass(columnIndex).equals(columnClass) )</span>
+<span class="fc" id="L699">            return this;</span>
+<span class="fc" id="L700">        return new TableData(</span>
+                    _layout,
+                    _columnNames,
+<span class="fc" id="L703">                    _padClassesTo(_columnCount).setAt(columnIndex, columnClass),</span>
+                    _cells
+                );
+    }
+
+    /**
+     *  Changes the class of every column at once.
+     * @param columnClasses The new column classes, one per column.
+     * @return A new {@link TableData} with the new column classes.
+     */
+    public TableData setColumnClasses( Tuple&lt;Class&lt;?&gt;&gt; columnClasses ) {
+<span class="nc" id="L714">        Objects.requireNonNull(columnClasses);</span>
+<span class="nc" id="L715">        return new TableData(_layout, _columnNames, columnClasses, _cells);</span>
+    }
+
+    // ---- Changing everything ----
+
+    /**
+     *  Replaces all of the cells of this table at once, keeping its layout and columns.
+     * @param cells The new cell values, an immutable tuple of rows (or columns, see {@link #layout()}).
+     * @return A new {@link TableData} with the new cells.
+     */
+    public TableData setCells( Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt; cells ) {
+<span class="nc" id="L726">        Objects.requireNonNull(cells);</span>
+<span class="nc" id="L727">        return _withCells(cells);</span>
+    }
+
+    /**
+     *  Changes the layout of this table, which is how you make a table editable
+     *  (or read only again) without touching a single cell:
+     *  &lt;pre&gt;{@code
+     *  data.withLayout(UI.ListData.ROW_MAJOR_EDITABLE)
+     *  }&lt;/pre&gt;
+     *  &lt;b&gt;Careful:&lt;/b&gt; the layout also decides how the {@link #cells()} are read, so
+     *  switching between a {@code ROW_MAJOR*} and a {@code COLUMN_MAJOR*} layout
+     *  reinterprets the very same cells along the other axis, which transposes what
+     *  the table shows.
+     *
+     * @param layout The new {@link UI.ListData} layout of this table.
+     * @return A new {@link TableData} with the given layout, or this table unchanged
+     *         if it already has it.
+     */
+    public TableData withLayout( UI.ListData layout ) {
+<span class="fc" id="L746">        Objects.requireNonNull(layout);</span>
+<span class="fc bfc" id="L747" title="All 2 branches covered.">        if ( _layout == layout )</span>
+<span class="fc" id="L748">            return this;</span>
+<span class="fc" id="L749">        return new TableData(layout, _columnNames, _columnClasses, _cells);</span>
+    }
+
+    // ---- Internals ----
+
+    private int _majorOf( int rowIndex, int columnIndex ) {
+<span class="fc bfc" id="L755" title="All 2 branches covered.">        return _layout.isRowMajor() ? rowIndex : columnIndex;</span>
+    }
+
+    private int _minorOf( int rowIndex, int columnIndex ) {
+<span class="fc bfc" id="L759" title="All 2 branches covered.">        return _layout.isRowMajor() ? columnIndex : rowIndex;</span>
+    }
+
+    private Tuple&lt;@Nullable Object&gt; _lineAt( int majorIndex ) {
+<span class="pc bpc" id="L763" title="1 of 4 branches missed.">        if ( majorIndex &lt; 0 || majorIndex &gt;= _cells.size() )</span>
+<span class="fc" id="L764">            return EMPTY_LINE;</span>
+<span class="fc" id="L765">        return _cells.get(majorIndex);</span>
+    }
+
+    private @Nullable Object _cellAt( int majorIndex, int minorIndex ) {
+<span class="fc" id="L769">        Tuple&lt;@Nullable Object&gt; line = _lineAt(majorIndex);</span>
+<span class="pc bpc" id="L770" title="1 of 4 branches missed.">        if ( minorIndex &lt; 0 || minorIndex &gt;= line.size() )</span>
+<span class="fc" id="L771">            return null;</span>
+<span class="fc" id="L772">        return line.get(minorIndex);</span>
+    }
+
+    /** Reads one value out of every major line, which is how the minor axis is read. */
+    private Tuple&lt;@Nullable Object&gt; _gatherAcrossLines( int minorIndex, int length ) {
+<span class="fc" id="L777">        List&lt;@Nullable Object&gt; values = new ArrayList&lt;&gt;(length);</span>
+<span class="fc bfc" id="L778" title="All 2 branches covered.">        for ( int i = 0; i &lt; length; i++ )</span>
+<span class="fc" id="L779">            values.add(_cellAt(i, minorIndex));</span>
+<span class="fc" id="L780">        return Tuple.ofNullable(Object.class, values);</span>
+    }
+
+    /**
+     *  Inserts one value into every major line, which is how a row is added to a
+     *  column major table (and a column to a row major one). The supplied lines are
+     *  the new minor lines, each holding one value per major line.
+     */
+    private Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt; _insertMinors(
+        int minorIndex, Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt; minorLines, int minorCount
+    ) {
+<span class="fc" id="L791">        int majorCount = _cells.size();</span>
+<span class="fc bfc" id="L792" title="All 2 branches covered.">        for ( Tuple&lt;@Nullable Object&gt; minorLine : minorLines )</span>
+<span class="fc" id="L793">            majorCount = Math.max(majorCount, minorLine.size());</span>
+<span class="fc" id="L794">        List&lt;Tuple&lt;@Nullable Object&gt;&gt; lines = new ArrayList&lt;&gt;(majorCount);</span>
+<span class="fc bfc" id="L795" title="All 2 branches covered.">        for ( int major = 0; major &lt; majorCount; major++ ) {</span>
+<span class="fc" id="L796">            List&lt;@Nullable Object&gt; inserted = new ArrayList&lt;&gt;(minorLines.size());</span>
+<span class="fc bfc" id="L797" title="All 2 branches covered.">            for ( Tuple&lt;@Nullable Object&gt; minorLine : minorLines )</span>
+<span class="pc bpc" id="L798" title="1 of 2 branches missed.">                inserted.add(major &lt; minorLine.size() ? minorLine.get(major) : null);</span>
+<span class="fc" id="L799">            lines.add(</span>
+<span class="fc" id="L800">                _padTo(_lineAt(major), minorCount)</span>
+<span class="fc" id="L801">                    .addAllAt(minorIndex, Tuple.ofNullable(Object.class, inserted))</span>
+            );
+        }
+<span class="fc" id="L804">        return Tuple.of(LINE_TYPE, lines);</span>
+    }
+
+    /** Replaces one value in every major line, the mirror image of {@link #_insertMinors}. */
+    private Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt; _replaceMinors( int minorIndex, Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt; minorLines ) {
+<span class="fc" id="L809">        int majorCount = _cells.size();</span>
+<span class="fc bfc" id="L810" title="All 2 branches covered.">        for ( Tuple&lt;@Nullable Object&gt; minorLine : minorLines )</span>
+<span class="fc" id="L811">            majorCount = Math.max(majorCount, minorLine.size());</span>
+<span class="fc" id="L812">        List&lt;Tuple&lt;@Nullable Object&gt;&gt; lines = new ArrayList&lt;&gt;(majorCount);</span>
+<span class="fc bfc" id="L813" title="All 2 branches covered.">        for ( int major = 0; major &lt; majorCount; major++ ) {</span>
+<span class="fc" id="L814">            List&lt;@Nullable Object&gt; replacements = new ArrayList&lt;&gt;(minorLines.size());</span>
+<span class="fc bfc" id="L815" title="All 2 branches covered.">            for ( Tuple&lt;@Nullable Object&gt; minorLine : minorLines )</span>
+<span class="pc bpc" id="L816" title="1 of 2 branches missed.">                replacements.add(major &lt; minorLine.size() ? minorLine.get(major) : null);</span>
+<span class="fc" id="L817">            lines.add(</span>
+<span class="fc" id="L818">                _padTo(_lineAt(major), minorIndex + replacements.size())</span>
+<span class="fc" id="L819">                    .setAllAt(minorIndex, Tuple.ofNullable(Object.class, replacements))</span>
+            );
+        }
+<span class="fc" id="L822">        return Tuple.of(LINE_TYPE, lines);</span>
+    }
+
+    /** Removes a range of values from every major line, the mirror image of {@link #_insertMinors}. */
+    private Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt; _removeMinors( int minorIndex, int count ) {
+<span class="fc" id="L827">        List&lt;Tuple&lt;@Nullable Object&gt;&gt; lines = new ArrayList&lt;&gt;(_cells.size());</span>
+<span class="fc bfc" id="L828" title="All 2 branches covered.">        for ( Tuple&lt;@Nullable Object&gt; line : _cells )</span>
+<span class="fc" id="L829">            lines.add(_removeFrom(line, minorIndex, count));</span>
+<span class="fc" id="L830">        return Tuple.of(LINE_TYPE, lines);</span>
+    }
+
+    private static Tuple&lt;@Nullable Object&gt; _padTo( Tuple&lt;@Nullable Object&gt; line, int length ) {
+<span class="fc bfc" id="L834" title="All 2 branches covered.">        if ( line.size() &gt;= length )</span>
+<span class="fc" id="L835">            return line;</span>
+<span class="fc" id="L836">        List&lt;@Nullable Object&gt; padding = new ArrayList&lt;&gt;(length - line.size());</span>
+<span class="fc bfc" id="L837" title="All 2 branches covered.">        for ( int i = line.size(); i &lt; length; i++ )</span>
+<span class="fc" id="L838">            padding.add(null);</span>
+<span class="fc" id="L839">        return line.addAll(Tuple.ofNullable(Object.class, padding));</span>
+    }
+
+    private Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt; _padLines( int length ) {
+<span class="fc bfc" id="L843" title="All 2 branches covered.">        if ( _cells.size() &gt;= length )</span>
+<span class="fc" id="L844">            return _cells;</span>
+<span class="fc" id="L845">        List&lt;Tuple&lt;@Nullable Object&gt;&gt; padding = new ArrayList&lt;&gt;(length - _cells.size());</span>
+<span class="fc bfc" id="L846" title="All 2 branches covered.">        for ( int i = _cells.size(); i &lt; length; i++ )</span>
+<span class="fc" id="L847">            padding.add(EMPTY_LINE);</span>
+<span class="fc" id="L848">        return _cells.addAll(Tuple.of(LINE_TYPE, padding));</span>
+    }
+
+    private Tuple&lt;@Nullable String&gt; _padNamesTo( int length ) {
+<span class="fc bfc" id="L852" title="All 2 branches covered.">        if ( _columnNames.size() &gt;= length )</span>
+<span class="fc" id="L853">            return _columnNames;</span>
+<span class="fc" id="L854">        List&lt;@Nullable String&gt; padding = new ArrayList&lt;&gt;(length - _columnNames.size());</span>
+<span class="fc bfc" id="L855" title="All 2 branches covered.">        for ( int i = _columnNames.size(); i &lt; length; i++ )</span>
+<span class="fc" id="L856">            padding.add(null);</span>
+<span class="fc" id="L857">        return _columnNames.addAll(Tuple.ofNullable(String.class, padding));</span>
+    }
+
+    private Tuple&lt;Class&lt;?&gt;&gt; _padClassesTo( int length ) {
+<span class="fc bfc" id="L861" title="All 2 branches covered.">        if ( _columnClasses.size() &gt;= length )</span>
+<span class="fc" id="L862">            return _columnClasses;</span>
+<span class="fc" id="L863">        List&lt;Class&lt;?&gt;&gt; padding = new ArrayList&lt;&gt;(length - _columnClasses.size());</span>
+<span class="fc bfc" id="L864" title="All 2 branches covered.">        for ( int i = _columnClasses.size(); i &lt; length; i++ )</span>
+<span class="fc" id="L865">            padding.add(Object.class);</span>
+<span class="fc" id="L866">        return _columnClasses.addAll(Tuple.of(CLASS_TYPE, padding));</span>
+    }
+
+    private static &lt;T extends @Nullable Object&gt; Tuple&lt;T&gt; _removeFrom( Tuple&lt;T&gt; tuple, int index, int count ) {
+<span class="fc" id="L870">        int from = Math.min(Math.max(0, index), tuple.size());</span>
+<span class="fc" id="L871">        int to   = Math.min(from + count, tuple.size());</span>
+<span class="pc bpc" id="L872" title="1 of 2 branches missed.">        return from &lt; to ? tuple.removeRange(from, to) : tuple;</span>
+    }
+
+    private TableData _withCells( Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt; cells ) {
+<span class="pc bpc" id="L876" title="1 of 2 branches missed.">        if ( cells.equals(_cells) )</span>
+<span class="nc" id="L877">            return this;</span>
+<span class="fc" id="L878">        return new TableData(_layout, _columnNames, _columnClasses, cells);</span>
+    }
+
+    @Override
+    public boolean equals( Object obj ) {
+<span class="pc bpc" id="L883" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L884" title="1 of 2 branches missed.">        if ( !(obj instanceof TableData) ) return false;</span>
+<span class="fc" id="L885">        TableData other = (TableData) obj;</span>
+        // Note that the two dimensions are derived from the state below, so they take care of themselves.
+<span class="fc bfc" id="L887" title="All 2 branches covered.">        return _layout == other._layout</span>
+<span class="fc bfc" id="L888" title="All 2 branches covered.">            &amp;&amp; _columnNames.equals(other._columnNames)</span>
+<span class="fc bfc" id="L889" title="All 2 branches covered.">            &amp;&amp; _columnClasses.equals(other._columnClasses)</span>
+<span class="fc bfc" id="L890" title="All 2 branches covered.">            &amp;&amp; _cells.equals(other._cells);</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L895">        return Objects.hash(_layout, _columnNames, _columnClasses, _cells);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="fc" id="L900">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+                    &quot;layout=&quot;      + _layout        + &quot;, &quot; +
+                    &quot;rowCount=&quot;    + _rowCount      + &quot;, &quot; +
+                    &quot;columnCount=&quot; + _columnCount   + &quot;, &quot; +
+                    &quot;columnNames=&quot; + _columnNames   + &quot;, &quot; +
+                    &quot;cells=&quot;       + _cells         +
+                &quot;]&quot;;
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
