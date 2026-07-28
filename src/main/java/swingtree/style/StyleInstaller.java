@@ -76,6 +76,7 @@ final class StyleInstaller<C extends JComponent>
     private @Nullable Boolean _initialContentAreaFilled  = null;
     private @Nullable Font    _initialFont               = null;
     private @Nullable Color   _initialForeground         = null; // set when a solid font color is routed through the foreground channel (see _applyFontStyleTo)
+    private @Nullable Color   _initialViewportBackground = null; // set when the styled background is handed down to a scroll pane viewport (see _restoreViewportBackgroundOf)
     // Remember the component's minimum/maximum size from before the style engine overrode them, so
     // that they can be restored once a (possibly animated/transitional) style stops specifying them.
     // A 'true' ownership flag means the style engine currently holds an explicit override;
@@ -291,6 +292,8 @@ final class StyleInstaller<C extends JComponent>
                 }
                 _restoreForegroundIfFontColorWasInstalled(owner, newStyle);
                 _restoreStyleOwnedSizesOf(owner);
+                _restoreViewportBackgroundOf(owner);
+                _updateViewportOpaquenessOf(owner);
 
                 return _updateEngine(owner, engine, newStyle);
             }
@@ -357,8 +360,11 @@ final class StyleInstaller<C extends JComponent>
                     JScrollPane scrollPane = (JScrollPane) owner;
                     if ( scrollPane.getViewport() != null ) {
                         JViewport viewport = scrollPane.getViewport();
-                        if ( !Objects.equals( viewport.getBackground(), newColor ) )
+                        if ( !Objects.equals( viewport.getBackground(), newColor ) ) {
+                            if ( _initialViewportBackground == null )
+                                _initialViewportBackground = viewport.getBackground();
                             viewport.setBackground( newColor );
+                        }
                     }
                 }
             }
@@ -513,11 +519,82 @@ final class StyleInstaller<C extends JComponent>
 
         backgroundSetter.run();
 
+        _updateViewportOpaquenessOf(owner);
+        /*
+            Note that the above call has to happen after every code path which
+            may still change the opaqueness or background color of the owner,
+            because the viewport has to mirror the final state of the scroll pane.
+        */
+
         StyleEngine newEngine = _updateEngine(owner, engine, newStyle);
 
         _applyFontStyleTo(owner, newStyle);
 
         return newEngine;
+    }
+
+    /**
+     *  The viewport of a scroll pane is opaque by default, which is a promise to Swing
+     *  that it will fill every single pixel of its bounds. A scroll pane, on the other hand,
+     *  may very well be styled to be (partially) transparent, in which case the style engine
+     *  hands the styled background color over to the viewport (see the {@code JScrollPane}
+     *  case further above), because the viewport lies on top of the scroll pane background.
+     *  <p>
+     *  A viewport which fills its bounds with a transparent color paints little or nothing,
+     *  and yet, as long as it is flagged as opaque, Swing will not repaint the ancestors
+     *  behind it. Whatever was painted there before consequently survives every repaint,
+     *  which makes the renderings of successive paints pile up into ever growing artifacts.
+     *  This is especially noticeable when there are animations inside the scroll pane.
+     *  <p>
+     *  So a viewport may never claim to be opaque when the scroll pane behind it does not,
+     *  or when the color it would fill its bounds with is not fully opaque.
+     *  The reverse is just as important though: as soon as the style of the scroll pane
+     *  turns opaque again, the viewport has to reclaim its opaqueness, or else Swing's
+     *  repaint manager keeps climbing past it to find an opaque ancestor, and every
+     *  little repaint inside the scroll pane costs more than it should, forever.
+     *
+     * @param owner The component whose viewport should be synchronized, only scroll panes have one.
+     */
+    private void _updateViewportOpaquenessOf( final C owner ) {
+        if ( !(owner instanceof JScrollPane) )
+            return;
+
+        JViewport viewport = ((JScrollPane) owner).getViewport();
+        if ( viewport == null )
+            return;
+
+        Color   viewportBackground   = viewport.getBackground();
+        boolean viewportFillsItsArea = viewportBackground != null && viewportBackground.getAlpha() == 255;
+        boolean shouldBeOpaque       = owner.isOpaque() && viewportFillsItsArea;
+        /*
+            Note that a viewport without its own background color inherits the one of
+            the scroll pane, which the style engine may well have set to the fully
+            transparent 'UI.Color.UNDEFINED' so that it can paint the background itself.
+            The viewport cannot do that painting, so it also cannot claim to be opaque.
+        */
+        if ( viewport.isOpaque() != shouldBeOpaque )
+            viewport.setOpaque(shouldBeOpaque);
+    }
+
+    /**
+     *  Gives the viewport of a scroll pane its original background color back,
+     *  the one the style engine took away from it when it handed the styled
+     *  background color down to the viewport.
+     *  Without this, a scroll pane whose styling was removed again would keep
+     *  a translucent viewport, and with it the loss of opaqueness
+     *  which {@link #_updateViewportOpaquenessOf(JComponent)} derives from it.
+     *
+     * @param owner The component whose viewport should be restored, only scroll panes have one.
+     */
+    private void _restoreViewportBackgroundOf( final C owner ) {
+        if ( !(owner instanceof JScrollPane) || _initialViewportBackground == null )
+            return;
+
+        JViewport viewport = ((JScrollPane) owner).getViewport();
+        if ( viewport != null && !Objects.equals( viewport.getBackground(), _initialViewportBackground ) )
+            viewport.setBackground(_initialViewportBackground);
+
+        _initialViewportBackground = null;
     }
 
     @SuppressWarnings("ReferenceEquality")
