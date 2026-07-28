@@ -1632,7 +1632,7 @@ public void setCacheMode( SwingTreeInitConfig.CacheMode cacheMode ) {
 <span class="pc bpc" id="L1632" title="2 of 4 branches missed.">                    else if( lword.startsWith( &quot;extra-&quot; ) || lword.startsWith( &quot;ultra-&quot; ) )</span>
 <span class="nc" id="L1633">                        word = word.substring( 0, 5 ) + word.substring( 6 );</span>
 
-<span class="pc bpc" id="L1635" title="1 of 2 branches missed.">                    family = family.isEmpty() ? word : (family + ' ' + word);</span>
+<span class="fc bfc" id="L1635" title="All 2 branches covered.">                    family = family.isEmpty() ? word : (family + ' ' + word);</span>
                 }
 <span class="fc" id="L1637">            }</span>
 
@@ -1640,8 +1640,8 @@ public void setCacheMode( SwingTreeInitConfig.CacheMode cacheMode ) {
             // --&gt; use Liberation Sans font
 <span class="fc" id="L1641">            String useUbuntu = &quot;swingtree.USE_UBUNTU_FONT&quot;;</span>
 
-<span class="pc bpc" id="L1643" title="3 of 6 branches missed.">            if( family.startsWith( &quot;Ubuntu&quot; ) &amp;&amp; !SystemInfo.isJetBrainsJVM &amp;&amp; !getBoolean( useUbuntu, false ) )</span>
-<span class="fc" id="L1644">                family = &quot;Liberation Sans&quot;;</span>
+<span class="pc bpc" id="L1643" title="5 of 6 branches missed.">            if( family.startsWith( &quot;Ubuntu&quot; ) &amp;&amp; !SystemInfo.isJetBrainsJVM &amp;&amp; !getBoolean( useUbuntu, false ) )</span>
+<span class="nc" id="L1644">                family = &quot;Liberation Sans&quot;;</span>
 
             // scale font size
 <span class="fc" id="L1647">            dsize *= getGnomeFontScale();</span>
@@ -1663,8 +1663,8 @@ public void setCacheMode( SwingTreeInitConfig.CacheMode cacheMode ) {
          * If the system property is not set, {@code defaultValue} is returned.
          */
         static boolean getBoolean( String key, boolean defaultValue ) {
-<span class="fc" id="L1666">            String value = System.getProperty( key );</span>
-<span class="pc bpc" id="L1667" title="1 of 2 branches missed.">            return (value != null) ? Boolean.parseBoolean( value ) : defaultValue;</span>
+<span class="nc" id="L1666">            String value = System.getProperty( key );</span>
+<span class="nc bnc" id="L1667" title="All 2 branches missed.">            return (value != null) ? Boolean.parseBoolean( value ) : defaultValue;</span>
         }
 
         /**

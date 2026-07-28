@@ -254,12 +254,12 @@ public final class UI extends UIFactoryMethods
         }
 
         public final Optional&lt;Integer&gt; forFlowLayout() {
-<span class="pc bpc" id="L257" title="3 of 6 branches missed.">            switch ( this ) {</span>
+<span class="pc bpc" id="L257" title="1 of 6 branches missed.">            switch ( this ) {</span>
 <span class="fc" id="L258">                case LEFT:     return Optional.of(FlowLayout.LEFT);</span>
 <span class="fc" id="L259">                case CENTER:   return Optional.of(FlowLayout.CENTER);</span>
 <span class="fc" id="L260">                case RIGHT:    return Optional.of(FlowLayout.RIGHT);</span>
-<span class="nc" id="L261">                case LEADING:  return Optional.of(FlowLayout.LEADING);</span>
-<span class="nc" id="L262">                case TRAILING: return Optional.of(FlowLayout.TRAILING);</span>
+<span class="fc" id="L261">                case LEADING:  return Optional.of(FlowLayout.LEADING);</span>
+<span class="fc" id="L262">                case TRAILING: return Optional.of(FlowLayout.TRAILING);</span>
                 default:
 <span class="nc" id="L264">                    return Optional.empty();</span>
             }

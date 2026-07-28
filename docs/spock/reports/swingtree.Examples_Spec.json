@@ -4,7 +4,7 @@
   "narrative":"This is an overview of the various example UIs\n    in the test suite.\n\n    This specification also ensures that the\n    various UI examples in the test suite,\n    run successfully and also produce\n    UIs with expected state and appearance.",
   "subjects":[],
   "statistics":{
-    "runs":"38",
+    "runs":"39",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -39,7 +39,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The form UI looks like this:\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/simple-form-UI_2_.png\" alt=\"/snapshots/views/simple-form-UI_2_.png\" style=\"max-width: 50%;\" />\n\n            This is the <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/simple/Form.java\" target=\"_blank\">oldest example in the test suite</a> and also a great\n            first example of how to write declarative UI code with SwingTree.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The form UI looks like this:\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/simple-form-UI_5_.png\" alt=\"/snapshots/views/simple-form-UI_5_.png\" style=\"max-width: 50%;\" />\n\n            This is the <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/simple/Form.java\" target=\"_blank\">oldest example in the test suite</a> and also a great\n            first example of how to write declarative UI code with SwingTree.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We get the UI.","code":["var ui = new Form()"]},
@@ -48,7 +48,7 @@
 
         {"kind":"and","text":"","code":["new Utility.Query(ui).find(JButton, \"hover-icon-button\").get().cursor.type == Cursor.HAND_CURSOR"]},
 
-        {"kind":"and","text":"","code":["Utility.similarityBetween(ui, \"views/simple-form-UI.png\", 94) > 94"]}
+        {"kind":"and","text":"","code":["Utility.similarityBetween(ui, \"views/simple-form-UI.png\", 97) > 97"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -140,12 +140,16 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The guesser example view looks like this:\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/note-guesser-UI.png\" alt=\"/snapshots/views/note-guesser-UI.png\" style=\"max-width: 50%;\" />\n            This not only demonstrates how to do some custom 2D rendering on a JPanel,\n            it is also a nice little game you can play to test your knowledge of music theory.\n\n            Just <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/games/notepicker/mvvm/NoteGuesserView.java\" target=\"_blank\">navigate to the class</a> and run\n            it yourself and play around with it.\n            The <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/games/notepicker/mvvm/NoteGuesserViewModel.java\" target=\"_blank\">view model</a> is also a nice example of how to\n            do MVVM with SwingTree.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The guesser example view looks like this:\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/note-guesser-UI_1_.png\" alt=\"/snapshots/views/note-guesser-UI_1_.png\" style=\"max-width: 50%;\" />\n            This not only demonstrates how to do some custom 2D rendering on a JPanel,\n            it is also a nice little game you can play to test your knowledge of music theory.\n\n            Just <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/games/notepicker/mvvm/NoteGuesserView.java\" target=\"_blank\">navigate to the class</a> and run\n            it yourself and play around with it.\n            The <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/games/notepicker/mvvm/NoteGuesserViewModel.java\" target=\"_blank\">view model</a> is also a nice example of how to\n            do MVVM with SwingTree.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"We create an instance of the UI.","code":["var ui = new NoteGuesserView(new NoteGuesserViewModel())"]},
+        {"kind":"given","text":"We create the view model.","code":["var vm = new NoteGuesserViewModel()"]},
 
-        {"kind":"expect","text":"It is rendered as shown in the image.","code":["Utility.similarityBetween(ui, \"views/note-guesser-UI.png\", 93) > 93"]}
+        {"kind":"and","text":"\n            The view model picks a **random** note in its constructor, which is exactly\n            what you want when playing the game and exactly what you do not want in a\n            snapshot test. So we pin the note to a fixed index before building the view,\n            which makes the rendering deterministic.\n        ","code":["vm.currentNoteIndex().set(14)"]},
+
+        {"kind":"and","text":"We create an instance of the UI.","code":["var ui = new NoteGuesserView(vm)"]},
+
+        {"kind":"expect","text":"It is rendered as shown in the image.","code":["Utility.similarityBetween(ui, \"views/note-guesser-UI.png\", 97) > 97"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -155,12 +159,12 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The Kana Picker is a very simple SwingTree based example game\n            that teaches you the Japanese Kana symbols. \n            A random Hiragana or Katakana symbol is shown on the left\n            and you have to pick the correct Romaji pronunciation from a list of options.\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/kana-picker-UI_1_.png\" alt=\"/snapshots/views/kana-picker-UI_1_.png\" style=\"max-width: 50%;\" />\n\n            It also demonstrates nicely how to use the MVVM design pattern\n            in a SwingTree based application.\n            Just <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/games/kanapicker/mvvm/KanaPickerView.java\" target=\"_blank\">navigate to the class</a> and run\n            it yourself and play around with it.\n            The <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/games/kanapicker/mvvm/KanaPickerViewModel.java\" target=\"_blank\">view model</a> is also a nice example of how to\n            do MVVM with SwingTree.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The Kana Picker is a very simple SwingTree based example game\n            that teaches you the Japanese Kana symbols. \n            A random Hiragana or Katakana symbol is shown on the left\n            and you have to pick the correct Romaji pronunciation from a list of options.\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/kana-picker-UI_2_.png\" alt=\"/snapshots/views/kana-picker-UI_2_.png\" style=\"max-width: 50%;\" />\n\n            It also demonstrates nicely how to use the MVVM design pattern\n            in a SwingTree based application.\n            Just <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/games/kanapicker/mvvm/KanaPickerView.java\" target=\"_blank\">navigate to the class</a> and run\n            it yourself and play around with it.\n            The <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/games/kanapicker/mvvm/KanaPickerViewModel.java\" target=\"_blank\">view model</a> is also a nice example of how to\n            do MVVM with SwingTree.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create the UI:","code":["var ui = new KanaPickerView(new KanaPickerViewModel())"]},
 
-        {"kind":"expect","text":"The UI instance is rendered as shown in the image.","code":["Utility.similarityBetween(ui, \"views/kana-picker-UI.png\", 95) > 95"]}
+        {"kind":"expect","text":"The UI instance is rendered as shown in the image.","code":["Utility.similarityBetween(ui, \"views/kana-picker-UI.png\", 97.5) > 97.5"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -170,12 +174,12 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The well rounded UI looks like this:\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/well-rounded-UI_1_.png\" alt=\"/snapshots/views/well-rounded-UI_1_.png\" style=\"max-width: 50%;\" />\n\n            This is the most basic example of how to use the SwingTree style API to\n            override the default look and feel of Swing components.\n            As you can see, the style engine of SwingTree supports shadows, rounded corners,\n            gradients and much much more out of the box.\n\n            Here we will only test looks of the UI, if you want to see the code, \n            <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/stylish/WellRoundedView.java\" target=\"_blank\">click here</a> to jump to the class.\n            And also feel free to run \n            it yourself, it has a main method for that purpose already.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The well rounded UI looks like this:\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/well-rounded-UI_4_.png\" alt=\"/snapshots/views/well-rounded-UI_4_.png\" style=\"max-width: 50%;\" />\n\n            This is the most basic example of how to use the SwingTree style API to\n            override the default look and feel of Swing components.\n            As you can see, the style engine of SwingTree supports shadows, rounded corners,\n            gradients and much much more out of the box.\n\n            Here we will only test looks of the UI, if you want to see the code, \n            <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/stylish/WellRoundedView.java\" target=\"_blank\">click here</a> to jump to the class.\n            And also feel free to run \n            it yourself, it has a main method for that purpose already.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create the UI.","code":["var ui = new WellRoundedView()"]},
 
-        {"kind":"expect","text":"It is rendered as shown in the image.","code":["Utility.similarityBetween(ui, \"views/well-rounded-UI.png\", 97) > 97"]}
+        {"kind":"expect","text":"It is rendered as shown in the image.","code":["Utility.similarityBetween(ui, \"views/well-rounded-UI.png\", 98) > 98"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -205,7 +209,7 @@
       "blocks":[
         {"kind":"given","text":"We create the UI.","code":["var ui = new ThemeGardenView({})"]},
 
-        {"kind":"expect","text":"It is rendered as shown in the image.","code":["Utility.similarityBetween(ui, \"views/theme-garden-UI.png\", 90) > 90"]}
+        {"kind":"expect","text":"It is rendered as shown in the image.","code":["Utility.similarityBetween(ui, \"views/theme-garden-UI.png\", 97) > 97"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -404,6 +408,19 @@
     },
   
     {
+      "id":"The MVVM twin of the `TeamView` class can be created.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/team/mvvm/TeamView.java\" target=\"_blank\">MVVM team view example</a> renders\n            the very same UI as the MVI <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/team/mvi/TeamView.java\" target=\"_blank\">team view example</a>,\n            but wires it up in the classical MVVM way: mutable <code>Var</code> /\n            <code>Vars</code> properties on the view model instead of lenses into\n            one immutable record. The two exist side by side so the difference\n            between the patterns is the only thing that differs.\n        "]
+      },
+      "blocks":[
+        {"kind":"expect","text":"","code":["expect : MvvmTeamView.createView()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
       "id":"The `CalculatorView` class can be created.",
       "result":"PASS",
       "duration":"?",
@@ -421,12 +438,12 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            This example GUI serves as a comparison between SwingTree\n            and an identically looking implementation based on \n            NetBeans's GUI Editor.\n            <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/comparisons/comparison1/MadeWithNetBeansEditor.java\" target=\"_blank\">This class</a> \n            is an implementation that is editor based, wherease\n            <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/comparisons/comparison1/MadeWithSwingTree.java\" target=\"_blank\">this class</a> \n            uses SwingTree to achieve the same appearance.\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/made-with-SwingTree_4_.png\" alt=\"/snapshots/views/made-with-SwingTree_4_.png\" style=\"max-width: 50%;\" />\n\n            Here we only check that it is rendered as expected,\n            but the really interesting part is how the two implementations\n            compare to each other side by side.\n\n            As you can see, the components of this view \n            each have unique layout requirements which can be difficult to handle.\n            <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/comparisons/comparison1/MadeWithSwingTree.java\" target=\"_blank\">The SwingTree implementation</a> \n            demonstrates nicely how the requirements can be met\n            without much boilerplate using the various MigLayout\n            keywords and layout modes.\n\n            Feel free to visit the two examples and run them yourself, they each \n            have main methods for that purpose already.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            This example GUI serves as a comparison between SwingTree\n            and an identically looking implementation based on \n            NetBeans's GUI Editor.\n            <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/comparisons/comparison1/MadeWithNetBeansEditor.java\" target=\"_blank\">This class</a> \n            is an implementation that is editor based, wherease\n            <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/comparisons/comparison1/MadeWithSwingTree.java\" target=\"_blank\">this class</a> \n            uses SwingTree to achieve the same appearance.\n\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/made-with-SwingTree_1_.png\" alt=\"/snapshots/views/made-with-SwingTree_1_.png\" style=\"max-width: 50%;\" />\n\n            Here we only check that it is rendered as expected,\n            but the really interesting part is how the two implementations\n            compare to each other side by side.\n\n            As you can see, the components of this view \n            each have unique layout requirements which can be difficult to handle.\n            <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/comparisons/comparison1/MadeWithSwingTree.java\" target=\"_blank\">The SwingTree implementation</a> \n            demonstrates nicely how the requirements can be met\n            without much boilerplate using the various MigLayout\n            keywords and layout modes.\n\n            Feel free to visit the two examples and run them yourself, they each \n            have main methods for that purpose already.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"","code":["var ui = new MadeWithSwingTree()"]},
 
-        {"kind":"and","text":"","code":["Utility.similarityBetween(ui, \"views/made-with-SwingTree.png\", 97.5) > 97.5"]}
+        {"kind":"expect","text":"It is rendered as expected.","code":["Utility.similarityBetween(ui, \"views/made-with-SwingTree.png\", 95) > 95"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -436,14 +453,14 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The calculator view looks like this:\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/calculator-UI_2_.png\" alt=\"/snapshots/views/calculator-UI_2_.png\" style=\"max-width: 50%;\" />\n\n            Here we only check that it is rendered as expected and we will not go further into detail \n            with respect to its code, if you want to see the code, just \n            <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/Calculator.java\" target=\"_blank\">navigate to the class</a> \n            and run it yourself, it has \n            a main method for that purpose already.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The calculator view looks like this:\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/calculator-UI_5_.png\" alt=\"/snapshots/views/calculator-UI_5_.png\" style=\"max-width: 50%;\" />\n\n            Here we only check that it is rendered as expected and we will not go further into detail \n            with respect to its code, if you want to see the code, just \n            <a href=\"https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/Calculator.java\" target=\"_blank\">navigate to the class</a> \n            and run it yourself, it has \n            a main method for that purpose already.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create the UI.","code":["var ui = new Calculator()","ui.setBackground(new Color(242, 242, 242))"]},
 
         {"kind":"expect","text":"","code":["new Utility.Query(ui).find(JTextField, \"input-text-area\").isPresent()","new Utility.Query(ui).find(JTextField, \"input-text-area\").get().horizontalAlignment == JTextField.RIGHT"]},
 
-        {"kind":"and","text":"Its render state is as expected.","code":["Utility.similarityBetween(ui, \"views/calculator-UI.png\", 97.5) > 97.5"]}
+        {"kind":"and","text":"Its render state is as expected.","code":["Utility.similarityBetween(ui, \"views/calculator-UI.png\", 98.5) > 98.5"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -453,7 +470,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The UI declaration in this example demonstrates various ways to declare\n            tables from a list of lists as a data source.\n            The UI looks like this:\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/tables-example-view.png\" alt=\"/snapshots/views/tables-example-view.png\" style=\"max-width: 50%;\" />\n\n            As you can see, there are 4 different tables in the UI.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The UI declaration in this example demonstrates various ways to declare\n            tables from a list of lists as a data source.\n            The UI looks like this:\n            <img src=\"https://raw.githubusercontent.com/globaltcad/swing-tree/main/src/test/resources/snapshots/views/tables-example-view_3_.png\" alt=\"/snapshots/views/tables-example-view_3_.png\" style=\"max-width: 50%;\" />\n\n            As you can see, there are 4 different tables in the UI.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We declare the UI.","code":["var data = [[\"X\", \"Y\"], [\"1\", \"2\"], [\"3\", \"4\"]]","def ui =","    UI.panel(\"fill\")","    .add(\"grow\",","        UI.panel(\"fill\")","        .add(\"grow, span\", UI.label(\"Row Major\"))","        .add(\"grow, span\", UI.table(UI.ListData.ROW_MAJOR, ()->[[\"A\", \"B\", \"C\"], [\"a\", \"b\", \"c\"]]).id(\"RM\"))","        .add(\"grow, span\", UI.separator())","        .add(\"grow, span\", UI.label(\"Column Major\"))","        .add(\"grow, span\", UI.table(UI.ListData.COLUMN_MAJOR, ()->[[\"A\", \"B\", \"C\"], [\"a\", \"b\", \"c\"]]).id(\"CM\"))","    )","    .add(\"grow\", UI.separator(UI.Align.VERTICAL))","    .add(\"grow\",","        UI.panel(\"fill\")","        .add(\"grow, span\", UI.label(\"Row Major 2\"))","        .add(\"grow, span\",","            UI.table( m -> m","               .colCount( () -> data[0].size() ).rowCount( () -> data.size() )","               .getsEntryAt((col, row) -> data[col][row] )","            )","            .id(\"RM2\")","        )","        .add(\"grow, span\", UI.separator())","        .add(\"grow, span\", UI.label(\"Column Major 2\"))","        .add(\"grow, span\",","            UI.table( m -> m","               .colCount( () -> data.size() )","               .rowCount( () -> data[0].size() )","               .getsEntryAt((col, row) -> data[row][col] )","            )","            .id(\"CM2\")","        )","    )","    .get(JPanel)"]},
@@ -470,7 +487,7 @@
 
         {"kind":"and","text":"","code":["new Utility.Query(ui).find(JTable, \"CM2\").get().getRowCount() == 2","new Utility.Query(ui).find(JTable, \"CM2\").get().getColumnCount() == 3","new Utility.Query(ui).find(JTable, \"CM2\").get().getValueAt(0,0) == \"X\"","new Utility.Query(ui).find(JTable, \"CM2\").get().getValueAt(0,1) == \"1\"","new Utility.Query(ui).find(JTable, \"CM2\").get().getValueAt(0,2) == \"3\"","new Utility.Query(ui).find(JTable, \"CM2\").get().getValueAt(1,0) == \"Y\"","new Utility.Query(ui).find(JTable, \"CM2\").get().getValueAt(1,1) == \"2\"","new Utility.Query(ui).find(JTable, \"CM2\").get().getValueAt(1,2) == \"4\""]},
 
-        {"kind":"and","text":"It is rendered as expected.","code":["Utility.similarityBetween(ui, \"views/tables-example-view.png\", 96.3) > 96.3"]}
+        {"kind":"and","text":"It is rendered as expected.","code":["Utility.similarityBetween(ui, \"views/tables-example-view.png\", 98) > 98"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

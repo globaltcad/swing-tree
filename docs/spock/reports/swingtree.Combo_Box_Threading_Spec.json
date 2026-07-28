@@ -31,7 +31,7 @@
 
         {"kind":"and","text":"...but once the UI thread caught up, the new option appeared.","code":["combo.itemCount == 4","combo.getItemAt(3) == \"D\""]},
 
-        {"kind":"where","text":"All three property based option models behave identically:","code":{"kind":["Tuple property based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__tupleOptionsScenario_closure1@1c68f6b8"],"addOption":["swingtree.Combo_Box_Threading_Spec$__tupleOptionsScenario_closure2@1d373764"]}}
+        {"kind":"where","text":"All three property based option models behave identically:","code":{"kind":["Tuple property based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__tupleOptionsScenario_closure1@3edcaac7"],"addOption":["swingtree.Combo_Box_Threading_Spec$__tupleOptionsScenario_closure2@95d05dd"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -54,7 +54,7 @@
 
         {"kind":"and","text":"...but once the UI thread caught up, the new option appeared.","code":["combo.itemCount == 4","combo.getItemAt(3) == \"D\""]},
 
-        {"kind":"where","text":"All three property based option models behave identically:","code":{"kind":["Vars based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__varsOptionsScenario_closure3@1580867c"],"addOption":["swingtree.Combo_Box_Threading_Spec$__varsOptionsScenario_closure4@5c7240e8"]}}
+        {"kind":"where","text":"All three property based option models behave identically:","code":{"kind":["Vars based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__varsOptionsScenario_closure3@1b3afd42"],"addOption":["swingtree.Combo_Box_Threading_Spec$__varsOptionsScenario_closure4@d541571"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -77,7 +77,7 @@
 
         {"kind":"and","text":"...but once the UI thread caught up, the new option appeared.","code":["combo.itemCount == 4","combo.getItemAt(3) == \"D\""]},
 
-        {"kind":"where","text":"All three property based option models behave identically:","code":{"kind":["Vals based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__valsOptionsScenario_closure5@7f96f9db"],"addOption":["swingtree.Combo_Box_Threading_Spec$__valsOptionsScenario_closure6@3927df20"]}}
+        {"kind":"where","text":"All three property based option models behave identically:","code":{"kind":["Vals based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__valsOptionsScenario_closure5@148718af"],"addOption":["swingtree.Combo_Box_Threading_Spec$__valsOptionsScenario_closure6@258be962"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -98,7 +98,7 @@
 
         {"kind":"then","text":"The mutation was visible immediately, no UI thread required, because the model reads the collection live.","code":["firstItemWhileParked == expectedFirstItem","combo.getItemAt(0) == expectedFirstItem"]},
 
-        {"kind":"where","text":"Both plain collection models share this live read contract:","code":{"kind":["plain array based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__arrayOptionsScenario_closure7@4284b366"],"mutate":["swingtree.Combo_Box_Threading_Spec$__arrayOptionsScenario_closure8@4988c5b7"],"expectedFirstItem":["D"]}}
+        {"kind":"where","text":"Both plain collection models share this live read contract:","code":{"kind":["plain array based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__arrayOptionsScenario_closure7@253a6ae9"],"mutate":["swingtree.Combo_Box_Threading_Spec$__arrayOptionsScenario_closure8@7691edae"],"expectedFirstItem":["D"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -119,7 +119,7 @@
 
         {"kind":"then","text":"The mutation was visible immediately, no UI thread required, because the model reads the collection live.","code":["firstItemWhileParked == expectedFirstItem","combo.getItemAt(0) == expectedFirstItem"]},
 
-        {"kind":"where","text":"Both plain collection models share this live read contract:","code":{"kind":["plain list based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__listOptionsScenario_closure9@198b57c"],"mutate":["swingtree.Combo_Box_Threading_Spec$__listOptionsScenario_closure10@6c1b4b0"],"expectedFirstItem":["D"]}}
+        {"kind":"where","text":"Both plain collection models share this live read contract:","code":{"kind":["plain list based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__listOptionsScenario_closure9@5a7fd1b3"],"mutate":["swingtree.Combo_Box_Threading_Spec$__listOptionsScenario_closure10@2045e367"],"expectedFirstItem":["D"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -144,7 +144,7 @@
 
         {"kind":"then","text":"Now the new selection arrived in the view model.","code":["selection.is(\"C\")"]},
 
-        {"kind":"where","text":"This contract holds for every single combo box model flavour:","code":{"kind":["plain array based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__arrayOptionsScenario_closure7@2ae4879b"]}}
+        {"kind":"where","text":"This contract holds for every single combo box model flavour:","code":{"kind":["plain array based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__arrayOptionsScenario_closure7@b0d6d5d"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -169,7 +169,7 @@
 
         {"kind":"then","text":"Now the new selection arrived in the view model.","code":["selection.is(\"C\")"]},
 
-        {"kind":"where","text":"This contract holds for every single combo box model flavour:","code":{"kind":["plain list based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__listOptionsScenario_closure9@210bd243"]}}
+        {"kind":"where","text":"This contract holds for every single combo box model flavour:","code":{"kind":["plain list based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__listOptionsScenario_closure9@4dcf980"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -194,7 +194,7 @@
 
         {"kind":"then","text":"Now the new selection arrived in the view model.","code":["selection.is(\"C\")"]},
 
-        {"kind":"where","text":"This contract holds for every single combo box model flavour:","code":{"kind":["Tuple property based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__tupleOptionsScenario_closure1@95eebbf"]}}
+        {"kind":"where","text":"This contract holds for every single combo box model flavour:","code":{"kind":["Tuple property based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__tupleOptionsScenario_closure1@27647a27"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -219,7 +219,7 @@
 
         {"kind":"then","text":"Now the new selection arrived in the view model.","code":["selection.is(\"C\")"]},
 
-        {"kind":"where","text":"This contract holds for every single combo box model flavour:","code":{"kind":["Vars based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__varsOptionsScenario_closure3@39bb773f"]}}
+        {"kind":"where","text":"This contract holds for every single combo box model flavour:","code":{"kind":["Vars based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__varsOptionsScenario_closure3@5b200981"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -244,7 +244,7 @@
 
         {"kind":"then","text":"Now the new selection arrived in the view model.","code":["selection.is(\"C\")"]},
 
-        {"kind":"where","text":"This contract holds for every single combo box model flavour:","code":{"kind":["Vals based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__valsOptionsScenario_closure5@77a9b9f3"]}}
+        {"kind":"where","text":"This contract holds for every single combo box model flavour:","code":{"kind":["Vals based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__valsOptionsScenario_closure5@71e25894"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -273,7 +273,7 @@
 
         {"kind":"cleanup","text":"","code":["log.detach()"]},
 
-        {"kind":"where","text":"The mutation storm is survived by all three property based models:","code":{"kind":["Tuple property based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__tupleStormScenario_closure11@15c92ab6"],"mutateStep":["swingtree.Combo_Box_Threading_Spec$__tupleStormScenario_closure12@3796c14f"]}}
+        {"kind":"where","text":"The mutation storm is survived by all three property based models:","code":{"kind":["Tuple property based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__tupleStormScenario_closure11@2ad52b28"],"mutateStep":["swingtree.Combo_Box_Threading_Spec$__tupleStormScenario_closure12@445d97ca"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -302,7 +302,7 @@
 
         {"kind":"cleanup","text":"","code":["log.detach()"]},
 
-        {"kind":"where","text":"The mutation storm is survived by all three property based models:","code":{"kind":["Vars based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__varsStormScenario_closure13@a53f1ff"],"mutateStep":["swingtree.Combo_Box_Threading_Spec$__varsStormScenario_closure14@308fa767"]}}
+        {"kind":"where","text":"The mutation storm is survived by all three property based models:","code":{"kind":["Vars based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__varsStormScenario_closure13@758155d1"],"mutateStep":["swingtree.Combo_Box_Threading_Spec$__varsStormScenario_closure14@1644850d"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -331,7 +331,7 @@
 
         {"kind":"cleanup","text":"","code":["log.detach()"]},
 
-        {"kind":"where","text":"The mutation storm is survived by all three property based models:","code":{"kind":["Vals based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__valsStormScenario_closure15@35e26382"],"mutateStep":["swingtree.Combo_Box_Threading_Spec$__valsStormScenario_closure16@2486e713"]}}
+        {"kind":"where","text":"The mutation storm is survived by all three property based models:","code":{"kind":["Vals based options"],"declare":["swingtree.Combo_Box_Threading_Spec$__valsStormScenario_closure15@700e3a34"],"mutateStep":["swingtree.Combo_Box_Threading_Spec$__valsStormScenario_closure16@3e8f2bf3"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

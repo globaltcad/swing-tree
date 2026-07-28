@@ -4,7 +4,7 @@
   "narrative":"A basic requirement of any UI framework is the ability to create UIs\n    with layouts that adapt to different screen sizes and resolutions.\n    SwingTree is primarily based on the `MigLayout` layout manager, which\n    is a powerful and flexible layout manager that can be used to create\n    all kinds of layouts.\n\n    However, `MigLayout` is based on a rigid grid system, which can make\n    it difficult to create responsive layouts that adapt to different\n    size constraints.\n\n    To address this limitation, SwingTree provides an alternative layout\n    manager called `ResponsiveGridFlowLayout`, that is originally\n    based on the `FlowLayout` layout manager, but has been extended to\n    support responsive grid cell sizing.\n\n    In this specification, we will explore the features of the `ResponsiveGridFlowLayout`\n    as part of declarative SwingTree UI code.",
   "subjects":["swingtree.layout.ResponsiveGridFlowLayout","swingtree.layout.FlowCell","swingtree.layout.FlowCellConf","swingtree.UIFactoryMethods","swingtree.UI"],
   "statistics":{
-    "runs":"55",
+    "runs":"68",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -1327,6 +1327,282 @@
     },
   
     {
+      "id":"A preferred width of zero or less is ignored when the parent size category is determined. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The size categories of a responsive grid are measured against its\n            reference width, which is the explicitly set preferred width when there\n            is one, and the ideal single row width otherwise.\n\n            A preferred width of zero or less is not a meaningful statement about\n            how wide a grid is when it considers itself full, and taking it\n            literally makes every category degenerate: the reference width would\n            end up at or below zero, and the ratio the categories are derived from\n            would come out as infinity or as a negative number. Such a width is\n            therefore ignored, and the grid falls back to its ideal single row\n            width — which is why the rows below pair up so neatly, the classified\n            categories are the same whether a useless width was set or none at all.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A fixed UI scale factor of 1 for deterministic numbers.","code":["SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"and","text":"A variable for capturing the configuration object passed to the configurator.","code":["var FlowCellConf captured = null"]},
+
+        {"kind":"and","text":"A grid holding a single 100 pixel wide child, so its ideal single row is 110 wide.","code":["var ui = UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)","if ( explicitWidth != null )","    ui = ui.withPrefSize(explicitWidth, 50)","var panel = ui.add(UI.AUTO_SPAN({ captured = it; return it.medium(6) }),","                   UI.box().withPrefSize(100, 20)","              )","              .get(JPanel)"]},
+
+        {"kind":"when","text":"We size the grid to the width under examination and let it lay out,","code":["panel.setSize(parentWidth, 50)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the category is the one the ideal single row width implies.","code":["captured != null","captured.parentSizeCategory() == expectedCategory"]},
+
+        {"kind":"where","text":"A `null` explicit width means none was set at all, which is the reference behaviour.","code":{"explicitWidth":["null","null","null","0","0","0","-50","-50","-50"],"parentWidth":["30","60","200","30","60","200","30","60","200"],"expectedCategory":["ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE","ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE","ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A preferred width of zero or less is ignored when the parent size category is determined. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The size categories of a responsive grid are measured against its\n            reference width, which is the explicitly set preferred width when there\n            is one, and the ideal single row width otherwise.\n\n            A preferred width of zero or less is not a meaningful statement about\n            how wide a grid is when it considers itself full, and taking it\n            literally makes every category degenerate: the reference width would\n            end up at or below zero, and the ratio the categories are derived from\n            would come out as infinity or as a negative number. Such a width is\n            therefore ignored, and the grid falls back to its ideal single row\n            width — which is why the rows below pair up so neatly, the classified\n            categories are the same whether a useless width was set or none at all.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A fixed UI scale factor of 1 for deterministic numbers.","code":["SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"and","text":"A variable for capturing the configuration object passed to the configurator.","code":["var FlowCellConf captured = null"]},
+
+        {"kind":"and","text":"A grid holding a single 100 pixel wide child, so its ideal single row is 110 wide.","code":["var ui = UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)","if ( explicitWidth != null )","    ui = ui.withPrefSize(explicitWidth, 50)","var panel = ui.add(UI.AUTO_SPAN({ captured = it; return it.medium(6) }),","                   UI.box().withPrefSize(100, 20)","              )","              .get(JPanel)"]},
+
+        {"kind":"when","text":"We size the grid to the width under examination and let it lay out,","code":["panel.setSize(parentWidth, 50)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the category is the one the ideal single row width implies.","code":["captured != null","captured.parentSizeCategory() == expectedCategory"]},
+
+        {"kind":"where","text":"A `null` explicit width means none was set at all, which is the reference behaviour.","code":{"explicitWidth":["null","null","null","0","0","0","-50","-50","-50"],"parentWidth":["30","60","200","30","60","200","30","60","200"],"expectedCategory":["ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE","ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE","ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A preferred width of zero or less is ignored when the parent size category is determined. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The size categories of a responsive grid are measured against its\n            reference width, which is the explicitly set preferred width when there\n            is one, and the ideal single row width otherwise.\n\n            A preferred width of zero or less is not a meaningful statement about\n            how wide a grid is when it considers itself full, and taking it\n            literally makes every category degenerate: the reference width would\n            end up at or below zero, and the ratio the categories are derived from\n            would come out as infinity or as a negative number. Such a width is\n            therefore ignored, and the grid falls back to its ideal single row\n            width — which is why the rows below pair up so neatly, the classified\n            categories are the same whether a useless width was set or none at all.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A fixed UI scale factor of 1 for deterministic numbers.","code":["SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"and","text":"A variable for capturing the configuration object passed to the configurator.","code":["var FlowCellConf captured = null"]},
+
+        {"kind":"and","text":"A grid holding a single 100 pixel wide child, so its ideal single row is 110 wide.","code":["var ui = UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)","if ( explicitWidth != null )","    ui = ui.withPrefSize(explicitWidth, 50)","var panel = ui.add(UI.AUTO_SPAN({ captured = it; return it.medium(6) }),","                   UI.box().withPrefSize(100, 20)","              )","              .get(JPanel)"]},
+
+        {"kind":"when","text":"We size the grid to the width under examination and let it lay out,","code":["panel.setSize(parentWidth, 50)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the category is the one the ideal single row width implies.","code":["captured != null","captured.parentSizeCategory() == expectedCategory"]},
+
+        {"kind":"where","text":"A `null` explicit width means none was set at all, which is the reference behaviour.","code":{"explicitWidth":["null","null","null","0","0","0","-50","-50","-50"],"parentWidth":["30","60","200","30","60","200","30","60","200"],"expectedCategory":["ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE","ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE","ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A preferred width of zero or less is ignored when the parent size category is determined. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The size categories of a responsive grid are measured against its\n            reference width, which is the explicitly set preferred width when there\n            is one, and the ideal single row width otherwise.\n\n            A preferred width of zero or less is not a meaningful statement about\n            how wide a grid is when it considers itself full, and taking it\n            literally makes every category degenerate: the reference width would\n            end up at or below zero, and the ratio the categories are derived from\n            would come out as infinity or as a negative number. Such a width is\n            therefore ignored, and the grid falls back to its ideal single row\n            width — which is why the rows below pair up so neatly, the classified\n            categories are the same whether a useless width was set or none at all.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A fixed UI scale factor of 1 for deterministic numbers.","code":["SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"and","text":"A variable for capturing the configuration object passed to the configurator.","code":["var FlowCellConf captured = null"]},
+
+        {"kind":"and","text":"A grid holding a single 100 pixel wide child, so its ideal single row is 110 wide.","code":["var ui = UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)","if ( explicitWidth != null )","    ui = ui.withPrefSize(explicitWidth, 50)","var panel = ui.add(UI.AUTO_SPAN({ captured = it; return it.medium(6) }),","                   UI.box().withPrefSize(100, 20)","              )","              .get(JPanel)"]},
+
+        {"kind":"when","text":"We size the grid to the width under examination and let it lay out,","code":["panel.setSize(parentWidth, 50)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the category is the one the ideal single row width implies.","code":["captured != null","captured.parentSizeCategory() == expectedCategory"]},
+
+        {"kind":"where","text":"A `null` explicit width means none was set at all, which is the reference behaviour.","code":{"explicitWidth":["null","null","null","0","0","0","-50","-50","-50"],"parentWidth":["30","60","200","30","60","200","30","60","200"],"expectedCategory":["ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE","ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE","ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A preferred width of zero or less is ignored when the parent size category is determined. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The size categories of a responsive grid are measured against its\n            reference width, which is the explicitly set preferred width when there\n            is one, and the ideal single row width otherwise.\n\n            A preferred width of zero or less is not a meaningful statement about\n            how wide a grid is when it considers itself full, and taking it\n            literally makes every category degenerate: the reference width would\n            end up at or below zero, and the ratio the categories are derived from\n            would come out as infinity or as a negative number. Such a width is\n            therefore ignored, and the grid falls back to its ideal single row\n            width — which is why the rows below pair up so neatly, the classified\n            categories are the same whether a useless width was set or none at all.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A fixed UI scale factor of 1 for deterministic numbers.","code":["SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"and","text":"A variable for capturing the configuration object passed to the configurator.","code":["var FlowCellConf captured = null"]},
+
+        {"kind":"and","text":"A grid holding a single 100 pixel wide child, so its ideal single row is 110 wide.","code":["var ui = UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)","if ( explicitWidth != null )","    ui = ui.withPrefSize(explicitWidth, 50)","var panel = ui.add(UI.AUTO_SPAN({ captured = it; return it.medium(6) }),","                   UI.box().withPrefSize(100, 20)","              )","              .get(JPanel)"]},
+
+        {"kind":"when","text":"We size the grid to the width under examination and let it lay out,","code":["panel.setSize(parentWidth, 50)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the category is the one the ideal single row width implies.","code":["captured != null","captured.parentSizeCategory() == expectedCategory"]},
+
+        {"kind":"where","text":"A `null` explicit width means none was set at all, which is the reference behaviour.","code":{"explicitWidth":["null","null","null","0","0","0","-50","-50","-50"],"parentWidth":["30","60","200","30","60","200","30","60","200"],"expectedCategory":["ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE","ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE","ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A preferred width of zero or less is ignored when the parent size category is determined. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The size categories of a responsive grid are measured against its\n            reference width, which is the explicitly set preferred width when there\n            is one, and the ideal single row width otherwise.\n\n            A preferred width of zero or less is not a meaningful statement about\n            how wide a grid is when it considers itself full, and taking it\n            literally makes every category degenerate: the reference width would\n            end up at or below zero, and the ratio the categories are derived from\n            would come out as infinity or as a negative number. Such a width is\n            therefore ignored, and the grid falls back to its ideal single row\n            width — which is why the rows below pair up so neatly, the classified\n            categories are the same whether a useless width was set or none at all.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A fixed UI scale factor of 1 for deterministic numbers.","code":["SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"and","text":"A variable for capturing the configuration object passed to the configurator.","code":["var FlowCellConf captured = null"]},
+
+        {"kind":"and","text":"A grid holding a single 100 pixel wide child, so its ideal single row is 110 wide.","code":["var ui = UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)","if ( explicitWidth != null )","    ui = ui.withPrefSize(explicitWidth, 50)","var panel = ui.add(UI.AUTO_SPAN({ captured = it; return it.medium(6) }),","                   UI.box().withPrefSize(100, 20)","              )","              .get(JPanel)"]},
+
+        {"kind":"when","text":"We size the grid to the width under examination and let it lay out,","code":["panel.setSize(parentWidth, 50)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the category is the one the ideal single row width implies.","code":["captured != null","captured.parentSizeCategory() == expectedCategory"]},
+
+        {"kind":"where","text":"A `null` explicit width means none was set at all, which is the reference behaviour.","code":{"explicitWidth":["null","null","null","0","0","0","-50","-50","-50"],"parentWidth":["30","60","200","30","60","200","30","60","200"],"expectedCategory":["ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE","ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE","ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A preferred width of zero or less is ignored when the parent size category is determined. [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The size categories of a responsive grid are measured against its\n            reference width, which is the explicitly set preferred width when there\n            is one, and the ideal single row width otherwise.\n\n            A preferred width of zero or less is not a meaningful statement about\n            how wide a grid is when it considers itself full, and taking it\n            literally makes every category degenerate: the reference width would\n            end up at or below zero, and the ratio the categories are derived from\n            would come out as infinity or as a negative number. Such a width is\n            therefore ignored, and the grid falls back to its ideal single row\n            width — which is why the rows below pair up so neatly, the classified\n            categories are the same whether a useless width was set or none at all.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A fixed UI scale factor of 1 for deterministic numbers.","code":["SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"and","text":"A variable for capturing the configuration object passed to the configurator.","code":["var FlowCellConf captured = null"]},
+
+        {"kind":"and","text":"A grid holding a single 100 pixel wide child, so its ideal single row is 110 wide.","code":["var ui = UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)","if ( explicitWidth != null )","    ui = ui.withPrefSize(explicitWidth, 50)","var panel = ui.add(UI.AUTO_SPAN({ captured = it; return it.medium(6) }),","                   UI.box().withPrefSize(100, 20)","              )","              .get(JPanel)"]},
+
+        {"kind":"when","text":"We size the grid to the width under examination and let it lay out,","code":["panel.setSize(parentWidth, 50)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the category is the one the ideal single row width implies.","code":["captured != null","captured.parentSizeCategory() == expectedCategory"]},
+
+        {"kind":"where","text":"A `null` explicit width means none was set at all, which is the reference behaviour.","code":{"explicitWidth":["null","null","null","0","0","0","-50","-50","-50"],"parentWidth":["30","60","200","30","60","200","30","60","200"],"expectedCategory":["ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE","ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE","ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A preferred width of zero or less is ignored when the parent size category is determined. [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The size categories of a responsive grid are measured against its\n            reference width, which is the explicitly set preferred width when there\n            is one, and the ideal single row width otherwise.\n\n            A preferred width of zero or less is not a meaningful statement about\n            how wide a grid is when it considers itself full, and taking it\n            literally makes every category degenerate: the reference width would\n            end up at or below zero, and the ratio the categories are derived from\n            would come out as infinity or as a negative number. Such a width is\n            therefore ignored, and the grid falls back to its ideal single row\n            width — which is why the rows below pair up so neatly, the classified\n            categories are the same whether a useless width was set or none at all.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A fixed UI scale factor of 1 for deterministic numbers.","code":["SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"and","text":"A variable for capturing the configuration object passed to the configurator.","code":["var FlowCellConf captured = null"]},
+
+        {"kind":"and","text":"A grid holding a single 100 pixel wide child, so its ideal single row is 110 wide.","code":["var ui = UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)","if ( explicitWidth != null )","    ui = ui.withPrefSize(explicitWidth, 50)","var panel = ui.add(UI.AUTO_SPAN({ captured = it; return it.medium(6) }),","                   UI.box().withPrefSize(100, 20)","              )","              .get(JPanel)"]},
+
+        {"kind":"when","text":"We size the grid to the width under examination and let it lay out,","code":["panel.setSize(parentWidth, 50)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the category is the one the ideal single row width implies.","code":["captured != null","captured.parentSizeCategory() == expectedCategory"]},
+
+        {"kind":"where","text":"A `null` explicit width means none was set at all, which is the reference behaviour.","code":{"explicitWidth":["null","null","null","0","0","0","-50","-50","-50"],"parentWidth":["30","60","200","30","60","200","30","60","200"],"expectedCategory":["ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE","ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE","ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A preferred width of zero or less is ignored when the parent size category is determined. [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The size categories of a responsive grid are measured against its\n            reference width, which is the explicitly set preferred width when there\n            is one, and the ideal single row width otherwise.\n\n            A preferred width of zero or less is not a meaningful statement about\n            how wide a grid is when it considers itself full, and taking it\n            literally makes every category degenerate: the reference width would\n            end up at or below zero, and the ratio the categories are derived from\n            would come out as infinity or as a negative number. Such a width is\n            therefore ignored, and the grid falls back to its ideal single row\n            width — which is why the rows below pair up so neatly, the classified\n            categories are the same whether a useless width was set or none at all.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A fixed UI scale factor of 1 for deterministic numbers.","code":["SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"and","text":"A variable for capturing the configuration object passed to the configurator.","code":["var FlowCellConf captured = null"]},
+
+        {"kind":"and","text":"A grid holding a single 100 pixel wide child, so its ideal single row is 110 wide.","code":["var ui = UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)","if ( explicitWidth != null )","    ui = ui.withPrefSize(explicitWidth, 50)","var panel = ui.add(UI.AUTO_SPAN({ captured = it; return it.medium(6) }),","                   UI.box().withPrefSize(100, 20)","              )","              .get(JPanel)"]},
+
+        {"kind":"when","text":"We size the grid to the width under examination and let it lay out,","code":["panel.setSize(parentWidth, 50)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the category is the one the ideal single row width implies.","code":["captured != null","captured.parentSizeCategory() == expectedCategory"]},
+
+        {"kind":"where","text":"A `null` explicit width means none was set at all, which is the reference behaviour.","code":{"explicitWidth":["null","null","null","0","0","0","-50","-50","-50"],"parentWidth":["30","60","200","30","60","200","30","60","200"],"expectedCategory":["ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE","ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE","ParentSizeClass.SMALL","ParentSizeClass.MEDIUM","ParentSizeClass.OVERSIZE"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid whose children have no width of their own still classifies its size. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The reference width of a grid without an explicitly set preferred width\n            is the width of all of its children in a single row. Children may well\n            have no width at all — an empty box is the obvious case — which leaves\n            the grid with nothing to fill and a reference width of zero.\n\n            That must not turn into a division by zero. A grid with nothing to fill\n            is considered to be past full, so every child lands in the `OVERSIZE`\n            category no matter how much room there is.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A fixed UI scale factor of 1 for deterministic numbers.","code":["SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"and","text":"A variable for capturing the configuration object passed to the configurator.","code":["var FlowCellConf captured = null"]},
+
+        {"kind":"and","text":"A grid whose two children declare a height but no width whatsoever.","code":["var panel =","        UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)","        .add(UI.AUTO_SPAN({ captured = it; return it.medium(6) }),","            UI.box().withPrefHeight(20)","        )","        .add(UI.AUTO_SPAN({ it.medium(6) }),","            UI.box().withPrefHeight(20)","        )","        .get(JPanel)"]},
+
+        {"kind":"when","text":"We size the grid and let it lay out,","code":["panel.setSize(parentWidth, 50)","panel.doLayout()"]},
+
+        {"kind":"then","text":"it neither blows up nor reports a nonsensical category.","code":["noExceptionThrown()","captured != null","captured.parentSizeCategory() == ParentSizeClass.OVERSIZE"]},
+
+        {"kind":"where","text":"","code":{"parentWidth":["20","60","200"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid whose children have no width of their own still classifies its size. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The reference width of a grid without an explicitly set preferred width\n            is the width of all of its children in a single row. Children may well\n            have no width at all — an empty box is the obvious case — which leaves\n            the grid with nothing to fill and a reference width of zero.\n\n            That must not turn into a division by zero. A grid with nothing to fill\n            is considered to be past full, so every child lands in the `OVERSIZE`\n            category no matter how much room there is.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A fixed UI scale factor of 1 for deterministic numbers.","code":["SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"and","text":"A variable for capturing the configuration object passed to the configurator.","code":["var FlowCellConf captured = null"]},
+
+        {"kind":"and","text":"A grid whose two children declare a height but no width whatsoever.","code":["var panel =","        UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)","        .add(UI.AUTO_SPAN({ captured = it; return it.medium(6) }),","            UI.box().withPrefHeight(20)","        )","        .add(UI.AUTO_SPAN({ it.medium(6) }),","            UI.box().withPrefHeight(20)","        )","        .get(JPanel)"]},
+
+        {"kind":"when","text":"We size the grid and let it lay out,","code":["panel.setSize(parentWidth, 50)","panel.doLayout()"]},
+
+        {"kind":"then","text":"it neither blows up nor reports a nonsensical category.","code":["noExceptionThrown()","captured != null","captured.parentSizeCategory() == ParentSizeClass.OVERSIZE"]},
+
+        {"kind":"where","text":"","code":{"parentWidth":["20","60","200"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid whose children have no width of their own still classifies its size. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The reference width of a grid without an explicitly set preferred width\n            is the width of all of its children in a single row. Children may well\n            have no width at all — an empty box is the obvious case — which leaves\n            the grid with nothing to fill and a reference width of zero.\n\n            That must not turn into a division by zero. A grid with nothing to fill\n            is considered to be past full, so every child lands in the `OVERSIZE`\n            category no matter how much room there is.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A fixed UI scale factor of 1 for deterministic numbers.","code":["SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"and","text":"A variable for capturing the configuration object passed to the configurator.","code":["var FlowCellConf captured = null"]},
+
+        {"kind":"and","text":"A grid whose two children declare a height but no width whatsoever.","code":["var panel =","        UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)","        .add(UI.AUTO_SPAN({ captured = it; return it.medium(6) }),","            UI.box().withPrefHeight(20)","        )","        .add(UI.AUTO_SPAN({ it.medium(6) }),","            UI.box().withPrefHeight(20)","        )","        .get(JPanel)"]},
+
+        {"kind":"when","text":"We size the grid and let it lay out,","code":["panel.setSize(parentWidth, 50)","panel.doLayout()"]},
+
+        {"kind":"then","text":"it neither blows up nor reports a nonsensical category.","code":["noExceptionThrown()","captured != null","captured.parentSizeCategory() == ParentSizeClass.OVERSIZE"]},
+
+        {"kind":"where","text":"","code":{"parentWidth":["20","60","200"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
       "id":"Cell spans outside of the valid range are clamped to the nearest valid span.",
       "result":"PASS",
       "duration":"?",
@@ -1370,6 +1646,35 @@
         {"kind":"when","text":"The panel is sized beyond its preferred width, into the \"oversize\" category.","code":["panel.setSize(150, 50)","panel.doLayout()"]},
 
         {"kind":"then","text":"The child again spans 6 of 12 cells of the now much larger width.","code":["panel.getComponent(0).getWidth() == 75"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A baseline aligned row asks for the height that aligning the baselines really needs.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When `setAlignOnBaseline(true)` is used, the components of a row are\n            shifted vertically until their text baselines line up. A row then no\n            longer needs the height of its tallest child, it needs the deepest\n            ascent plus the deepest descent found in that row -- and those two may\n            well come from two *different* children, in which case the row is\n            taller than any single child.\n\n            The preferred height reported by the layout has to account for this,\n            otherwise the parent hands out the height of the tallest child and the\n            baseline shifted components are clipped at the bottom.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A fixed UI scale factor of 1 for deterministic numbers.","code":["SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"and","text":"A responsive flow layout which aligns its children on their baseline.","code":["var layout = new ResponsiveGridFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)","layout.setAlignOnBaseline(true)"]},
+
+        {"kind":"and","text":"\n            Two labels with deliberately mismatched baselines: a big one whose\n            baseline sits low in its bounds, and a small one padded from below so\n            that its baseline sits high in its bounds.\n        ","code":["var big = new JLabel(\"Big\")","big.setFont(new Font(\"SansSerif\", Font.PLAIN, 40))","var low = new JLabel(\"low\")","low.setFont(new Font(\"SansSerif\", Font.PLAIN, 10))","low.setBorder(new EmptyBorder(0, 0, 40, 0))"]},
+
+        {"kind":"and","text":"A panel holding both of them, wide enough for a single shared row.","code":["var panel = new JPanel(layout)","panel.add(big)","panel.add(low)"]},
+
+        {"kind":"when","text":"We measure what aligning these two baselines demands...","code":["var heightOf   = { JLabel l -> (int) l.getPreferredSize().height }","var ascentOf   = { JLabel l -> l.getBaseline((int) l.getPreferredSize().width, heightOf(l)) }","var deepestAscent  = Math.max(ascentOf(big), ascentOf(low))","var deepestDescent = Math.max(heightOf(big) - ascentOf(big), heightOf(low) - ascentOf(low))","var neededRowHeight = deepestAscent + deepestDescent","var tallestChild = Math.max(heightOf(big), heightOf(low))"]},
+
+        {"kind":"then","text":"...it is genuinely more than the tallest of the two children needs on its own.","code":["neededRowHeight > tallestChild"]},
+
+        {"kind":"when","text":"The panel is laid out at a width which fits both labels into one row,","code":["panel.setSize(300, 400)","panel.doLayout()"]},
+
+        {"kind":"then","text":"the lower of the two labels really does reach down to the full baseline row height.","code":["var contentBottom = Math.max(big.getY() + big.getHeight(), low.getY() + low.getHeight())","contentBottom == 5 + neededRowHeight"]},
+
+        {"kind":"and","text":"\n            And the height the layout promises covers that row plus the vertical\n            gap above and below it. Were it to report the tallest child instead,\n            it would fall short by the difference between the two.\n        ","code":["layout.preferredLayoutSize(panel).height == neededRowHeight + 10"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

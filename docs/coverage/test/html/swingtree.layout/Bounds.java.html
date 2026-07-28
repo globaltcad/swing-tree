@@ -53,12 +53,12 @@ public final class Bounds
      *  @return a bounds object with the specified location and size.
      */
     public static Bounds of( Position position, Size size ) {
-<span class="fc" id="L56">        Objects.requireNonNull(position);</span>
-<span class="fc" id="L57">        Objects.requireNonNull(size);</span>
-<span class="pc bpc" id="L58" title="1 of 4 branches missed.">        if ( position.equals(Position.origin()) &amp;&amp; size.equals(Size.unknown()) )</span>
+<span class="nc" id="L56">        Objects.requireNonNull(position);</span>
+<span class="nc" id="L57">        Objects.requireNonNull(size);</span>
+<span class="nc bnc" id="L58" title="All 4 branches missed.">        if ( position.equals(Position.origin()) &amp;&amp; size.equals(Size.unknown()) )</span>
 <span class="nc" id="L59">            return EMPTY;</span>
 
-<span class="fc" id="L61">        return new Bounds(position, size);</span>
+<span class="nc" id="L61">        return new Bounds(position, size);</span>
     }
 
     /**
@@ -281,8 +281,8 @@ public final class Bounds
      */
     public Bounds merge( Bounds other ) {
 <span class="fc" id="L283">        Objects.requireNonNull(other);</span>
-<span class="fc bfc" id="L284" title="All 2 branches covered.">        if ( this.equals(other) )</span>
-<span class="fc" id="L285">            return this;</span>
+<span class="pc bpc" id="L284" title="1 of 2 branches missed.">        if ( this.equals(other) )</span>
+<span class="nc" id="L285">            return this;</span>
 
 <span class="fc" id="L287">        final float thisLeft   = _position.x();</span>
 <span class="fc" id="L288">        final float thisTop    = _position.y();</span>

@@ -46,8 +46,8 @@ public final class Position
      *         If both coordinates are zero, the {@link #origin()} is returned.
      */
     public static Position of( Point p ) {
-<span class="fc" id="L49">        Objects.requireNonNull(p);</span>
-<span class="fc" id="L50">        return of( p.x, p.y );</span>
+<span class="nc" id="L49">        Objects.requireNonNull(p);</span>
+<span class="nc" id="L50">        return of( p.x, p.y );</span>
     }
 
     public static Position origin() {
@@ -183,7 +183,7 @@ public final class Position
 
     @Override
     public boolean equals( Object o ) {
-<span class="fc bfc" id="L186" title="All 2 branches covered.">        if ( o == this ) return true;</span>
+<span class="pc bpc" id="L186" title="1 of 2 branches missed.">        if ( o == this ) return true;</span>
 <span class="pc bpc" id="L187" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
 <span class="pc bpc" id="L188" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
 <span class="fc" id="L189">        Position other = (Position) o;</span>

@@ -92,7 +92,7 @@ public final class StyledString {
     }
 
     StyledString mapStyle( Function&lt;FontConf, FontConf&gt; mapper ) {
-<span class="nc bnc" id="L95" title="All 2 branches missed.">        if ( _configuratorOrFontConf instanceof FontConf ) {</span>
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">        if ( _configuratorOrFontConf instanceof FontConf ) {</span>
             try {
 <span class="nc" id="L97">                FontConf newConf = mapper.apply((FontConf) _configuratorOrFontConf);</span>
 <span class="nc" id="L98">                return new StyledString(_string, newConf);</span>
@@ -100,7 +100,7 @@ public final class StyledString {
 <span class="nc" id="L100">                log.error(SwingTree.get().logMarker(), &quot;Error mapping font conf for string '{}'&quot;, _string, e);</span>
             }
         }
-<span class="nc" id="L103">        return this;</span>
+<span class="fc" id="L103">        return this;</span>
     }
 
     Optional&lt;FontConf&gt; fontConf() {

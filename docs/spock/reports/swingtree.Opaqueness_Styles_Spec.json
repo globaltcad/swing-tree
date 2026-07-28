@@ -4,7 +4,7 @@
   "narrative":"This specification focuses on the opaqueness of Swing components and\n    how the SwingTree style engine relates to it.\n    The opaqueness flag of a component is an interesting property.\n    You might think that it merely controls whether the background of\n    the component is painted or not.\n\n    But it is actually more than that.\n\n    This flag is at the center of some important rendering optimizations in Swing.\n    If a component is reporting itself as opaque, then Swing assumes that a repaint\n    only needs to be done on that component and not on any of its ancestors.\n    This is a big deal because it means that Swing can avoid repainting a lot of\n    components in the hierarchy.\n\n    This sound relatively straightforward, but it becomes a lot more complicated together\n    with the SwingTree style API and its underlying styling engine.\n    So for example, if a component has rounded corners, and no foundational background\n    color, then it is technically not opaque.\n    Leaving it opaque will cause strange rendering artifacts, due to the parent component\n    not being repainted.\n\n    In this specification we will explore the different scenarios and how the SwingTree\n    style engine deals with them.",
   "subjects":[],
   "statistics":{
-    "runs":"172",
+    "runs":"180",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -5001,6 +5001,170 @@
         {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
 
         {"kind":"where","text":"","code":{"isColorBypass":["false","true","true","true","true","true","true","true","true","true","true","false","true"],"opaque":["true","true","false","true","true","false","true","true","false","true","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}","{it.gradient( g -> g.type(UI.GradientType.RADIAL).colors(UI.Color.BLUEVIOLET, UI.Color.WHITE.withAlpha(0)) )}"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The viewport of a scroll pane is only opaque if the scroll pane itself is opaque. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JScrollPane` is a composite component: the contents you add to it are\n            not children of the scroll pane itself, they are children of an intermediate\n            `JViewport`, which covers the entire area in which the scroll pane\n            would otherwise paint its own background.\n\n            This is why the style engine hands a styled background color over to\n            the viewport, so that the viewport does not cover it with the background\n            color of the look and feel.\n            But the viewport is opaque by default, which is a promise to Swing that it\n            fills every single pixel of its bounds!\n            A viewport filling its bounds with a transparent color paints little or nothing,\n            and so this promise would be broken, which is why the style engine\n            has to take the opaqueness flag away from the viewport whenever the\n            scroll pane behind it is not opaque either.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scroll pane styled to have a background color with a configurable alpha channel:","code":["var scrollPane =","        UI.scrollPane()","        .withStyle( it -> it.backgroundColor(new Color(20, 200, 100, alpha)) )","        .add(UI.panel())","        .get(JScrollPane)"]},
+
+        {"kind":"expect","text":"The scroll pane is only opaque if its background color is fully opaque:","code":["scrollPane.isOpaque() == opaque"]},
+
+        {"kind":"and","text":"\n                The viewport, which lies on top of the scroll pane background,\n                has the same opaqueness as the scroll pane itself.\n        ","code":["scrollPane.getViewport().isOpaque() == opaque"]},
+
+        {"kind":"and","text":"In both cases the styled background color was handed over to the viewport:","code":["scrollPane.getViewport().getBackground() == new Color(20, 200, 100, alpha)"]},
+
+        {"kind":"where","text":"","code":{"alpha":["0","95","254","255"],"opaque":["false","false","false","true"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The viewport of a scroll pane is only opaque if the scroll pane itself is opaque. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JScrollPane` is a composite component: the contents you add to it are\n            not children of the scroll pane itself, they are children of an intermediate\n            `JViewport`, which covers the entire area in which the scroll pane\n            would otherwise paint its own background.\n\n            This is why the style engine hands a styled background color over to\n            the viewport, so that the viewport does not cover it with the background\n            color of the look and feel.\n            But the viewport is opaque by default, which is a promise to Swing that it\n            fills every single pixel of its bounds!\n            A viewport filling its bounds with a transparent color paints little or nothing,\n            and so this promise would be broken, which is why the style engine\n            has to take the opaqueness flag away from the viewport whenever the\n            scroll pane behind it is not opaque either.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scroll pane styled to have a background color with a configurable alpha channel:","code":["var scrollPane =","        UI.scrollPane()","        .withStyle( it -> it.backgroundColor(new Color(20, 200, 100, alpha)) )","        .add(UI.panel())","        .get(JScrollPane)"]},
+
+        {"kind":"expect","text":"The scroll pane is only opaque if its background color is fully opaque:","code":["scrollPane.isOpaque() == opaque"]},
+
+        {"kind":"and","text":"\n                The viewport, which lies on top of the scroll pane background,\n                has the same opaqueness as the scroll pane itself.\n        ","code":["scrollPane.getViewport().isOpaque() == opaque"]},
+
+        {"kind":"and","text":"In both cases the styled background color was handed over to the viewport:","code":["scrollPane.getViewport().getBackground() == new Color(20, 200, 100, alpha)"]},
+
+        {"kind":"where","text":"","code":{"alpha":["0","95","254","255"],"opaque":["false","false","false","true"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The viewport of a scroll pane is only opaque if the scroll pane itself is opaque. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JScrollPane` is a composite component: the contents you add to it are\n            not children of the scroll pane itself, they are children of an intermediate\n            `JViewport`, which covers the entire area in which the scroll pane\n            would otherwise paint its own background.\n\n            This is why the style engine hands a styled background color over to\n            the viewport, so that the viewport does not cover it with the background\n            color of the look and feel.\n            But the viewport is opaque by default, which is a promise to Swing that it\n            fills every single pixel of its bounds!\n            A viewport filling its bounds with a transparent color paints little or nothing,\n            and so this promise would be broken, which is why the style engine\n            has to take the opaqueness flag away from the viewport whenever the\n            scroll pane behind it is not opaque either.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scroll pane styled to have a background color with a configurable alpha channel:","code":["var scrollPane =","        UI.scrollPane()","        .withStyle( it -> it.backgroundColor(new Color(20, 200, 100, alpha)) )","        .add(UI.panel())","        .get(JScrollPane)"]},
+
+        {"kind":"expect","text":"The scroll pane is only opaque if its background color is fully opaque:","code":["scrollPane.isOpaque() == opaque"]},
+
+        {"kind":"and","text":"\n                The viewport, which lies on top of the scroll pane background,\n                has the same opaqueness as the scroll pane itself.\n        ","code":["scrollPane.getViewport().isOpaque() == opaque"]},
+
+        {"kind":"and","text":"In both cases the styled background color was handed over to the viewport:","code":["scrollPane.getViewport().getBackground() == new Color(20, 200, 100, alpha)"]},
+
+        {"kind":"where","text":"","code":{"alpha":["0","95","254","255"],"opaque":["false","false","false","true"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The viewport of a scroll pane is only opaque if the scroll pane itself is opaque. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A `JScrollPane` is a composite component: the contents you add to it are\n            not children of the scroll pane itself, they are children of an intermediate\n            `JViewport`, which covers the entire area in which the scroll pane\n            would otherwise paint its own background.\n\n            This is why the style engine hands a styled background color over to\n            the viewport, so that the viewport does not cover it with the background\n            color of the look and feel.\n            But the viewport is opaque by default, which is a promise to Swing that it\n            fills every single pixel of its bounds!\n            A viewport filling its bounds with a transparent color paints little or nothing,\n            and so this promise would be broken, which is why the style engine\n            has to take the opaqueness flag away from the viewport whenever the\n            scroll pane behind it is not opaque either.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scroll pane styled to have a background color with a configurable alpha channel:","code":["var scrollPane =","        UI.scrollPane()","        .withStyle( it -> it.backgroundColor(new Color(20, 200, 100, alpha)) )","        .add(UI.panel())","        .get(JScrollPane)"]},
+
+        {"kind":"expect","text":"The scroll pane is only opaque if its background color is fully opaque:","code":["scrollPane.isOpaque() == opaque"]},
+
+        {"kind":"and","text":"\n                The viewport, which lies on top of the scroll pane background,\n                has the same opaqueness as the scroll pane itself.\n        ","code":["scrollPane.getViewport().isOpaque() == opaque"]},
+
+        {"kind":"and","text":"In both cases the styled background color was handed over to the viewport:","code":["scrollPane.getViewport().getBackground() == new Color(20, 200, 100, alpha)"]},
+
+        {"kind":"where","text":"","code":{"alpha":["0","95","254","255"],"opaque":["false","false","false","true"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The viewport of a scroll pane reclaims its opaqueness when the scroll pane becomes opaque again.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            Keeping the opaqueness flag of a viewport in sync with its scroll pane\n            is not a one way street!\n            Taking the flag away when the scroll pane turns transparent is only half\n            of the job, because a style may just as well turn opaque again\n            (a transition or animation does this many times per second).\n\n            If the viewport were to stay non-opaque in that case, then Swing's repaint\n            manager would keep climbing past it, up the component hierarchy, in search\n            of an opaque ancestor. Every little repaint inside the scroll pane\n            would then cost more than it has to, for the rest of the component's life.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A flag property which we use to transition between two styles:","code":["var isOn = Var.of(false)"]},
+
+        {"kind":"and","text":"\n            A scroll pane whose background color fades in and out\n            together with the above flag property.\n        ","code":["var scrollPane =","        UI.scrollPane()","        .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it","            .backgroundColor(new Color(20, 200, 100, (int)(255 * state.progress())))","        )","        .add(UI.panel())","        .get(JScrollPane)"]},
+
+        {"kind":"expect","text":"Initially the background color is fully transparent, so neither the scroll pane nor its viewport are opaque:","code":["scrollPane.isOpaque() == false","scrollPane.getViewport().isOpaque() == false"]},
+
+        {"kind":"when","text":"We turn the flag on and wait for the transition to complete...","code":["isOn.set(true)","Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"The background color is fully opaque again, and so are the scroll pane and its viewport:","code":["scrollPane.isOpaque() == true","scrollPane.getViewport().isOpaque() == true"]},
+
+        {"kind":"when","text":"We turn the flag off again and wait for the transition to complete...","code":["isOn.set(false)","Thread.sleep(50)","UI.sync()"]},
+
+        {"kind":"then","text":"Both of them are back to being non-opaque, just like in the beginning:","code":["scrollPane.isOpaque() == false","scrollPane.getViewport().isOpaque() == false"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A foreground painter on a scroll pane makes both the scroll pane and its viewport non-opaque.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            When a style has a painter on the foreground layer, then the style engine\n            makes all children of the styled component transparent, so that the\n            foreground painting cannot be overwritten by a child repainting itself.\n            The component itself loses its opaqueness in that process as well,\n            even if its background color would otherwise permit it to be opaque.\n\n            For a scroll pane this is a subtle trap, because its viewport is the\n            component whose opaqueness has to mirror that of the scroll pane.\n            So this scenario verifies that the two are still in sync afterwards,\n            no matter in which order the style engine arrives at its conclusions.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scroll pane with a fully opaque background color and a foreground painter:","code":["var scrollPane =","        UI.scrollPane()","        .withStyle( it -> it","            .backgroundColor(new Color(20, 200, 100, 255))","            .painter(UI.Layer.FOREGROUND, g -> {","                g.setColor(Color.BLACK)","                g.drawLine(0, 0, it.component().getWidth(), it.component().getHeight())","            })","        )","        .add(UI.panel())","        .get(JScrollPane)"]},
+
+        {"kind":"expect","text":"The scroll pane is not opaque, because the foreground painting has to survive child repaints:","code":["scrollPane.isOpaque() == false"]},
+
+        {"kind":"and","text":"And its viewport did not stay behind claiming to be opaque:","code":["scrollPane.getViewport().isOpaque() == false"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A scroll pane whose styling is removed again also gives its viewport back its opaqueness.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            A style can not only change, it can also disappear entirely,\n            in which case the style engine restores the state the component\n            had before SwingTree ever touched it.\n            The viewport of a scroll pane is part of that state.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A flag property which decides if the scroll pane is styled at all:","code":["var isStyled = Var.of(true)"]},
+
+        {"kind":"and","text":"A scroll pane which is only transparently styled while the flag is true:","code":["var scrollPane =","        UI.scrollPane()","        .withStyle(isStyled, (styled, it) -> styled ? it.backgroundColor(new Color(20, 200, 100, 0)) : it )","        .add(UI.panel())","        .get(JScrollPane)"]},
+
+        {"kind":"expect","text":"The transparent styling took the opaqueness away from both the scroll pane and its viewport:","code":["scrollPane.isOpaque() == false","scrollPane.getViewport().isOpaque() == false"]},
+
+        {"kind":"when","text":"We remove the styling again...","code":["isStyled.set(false)","UI.sync()"]},
+
+        {"kind":"then","text":"Both the scroll pane and its viewport are opaque again:","code":["scrollPane.isOpaque() == true","scrollPane.getViewport().isOpaque() == true"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A component which reports itself as opaque, paints every single one of its pixels.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n\n            This is the actual contract behind the opaqueness flag, and the reason\n            why the style engine cares about it so much:\n            When a component claims to be opaque, then Swing will not repaint any of the\n            ancestors behind it, because it trusts the component to overwrite\n            every single pixel of its own bounds.\n\n            A component breaking this promise causes the renderings of successive\n            paints to pile up into ever growing artifacts, because whatever was painted\n            in a previous frame simply survives.\n            This is especially noticeable when there are animations involved.\n\n            The scenario below is a regression test for exactly that kind of bug:\n            a transparently styled scroll pane, whose viewport used to stay opaque\n            despite the fact that neither it, nor its transparently styled contents,\n            paint anything at all.\n\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A page with an opaque background, holding a transparently styled scroll pane:","code":["var page =","        UI.panel(\"fill, insets 0\").withPrefSize(200, 200)","        .withStyle( it -> it.backgroundColor(UI.Color.RED) )","        .add(\"grow\",","            UI.scrollPane()","            .withStyle( it -> it.backgroundColor(new Color(0,0,0,0)) )","            .add(","                UI.panel().withPrefSize(50, 50)","                .withStyle( it -> it.backgroundColor(new Color(0,0,0,0)) )","            )","        )","        .get(JPanel)"]},
+
+        {"kind":"and","text":"We give the page a size and lay it out, just like a window would:","code":["UI.runNow({","    page.setSize(200, 200)","    layOutRecursively(page)","})"]},
+
+        {"kind":"expect","text":"\n                Every component in the hierarchy which claims to be opaque\n                really does paint all of its pixels. We verify this by painting\n                each of them twice, onto two differently pre-filled canvases,\n                and then checking that both renderings are identical\n                (nothing of what was underneath survived).\n        ","code":["findOpaqueComponentsNotPaintingAllTheirPixels(page) == []"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }
