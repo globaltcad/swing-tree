@@ -95,6 +95,42 @@ re-layout the components accordingly.
 This is a powerful feature that allows you to create dynamic layouts
 that adapt to any conceivable screen size or parent container size.
 
+## Nesting Grids and the Reference Width ##
+
+A responsive grid may be placed inside another responsive grid, which is
+how you would express a page whose sidebar is itself a grid of items.
+There is one thing to know before you do that.
+
+Size categories are measured against the width at which a grid considers
+itself "full", its *reference width*. By default that is the width of all
+of its children laid out in a single row, which is also the preferred
+width the grid reports to its parent.
+
+For a nested grid those two roles pull in opposite directions. A sidebar
+holding a dozen items has an ideal single row width of well over a thousand
+pixels, and reporting *that* to the page it lives on would push the page
+into its narrowest size category and make the sidebar the widest thing on
+the screen.
+
+So give a nested grid an explicit preferred size:
+
+```java
+UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 6, 6)
+.withPrefSize(700, 0) // <- the reference width
+.add(UI.AUTO_SPAN(it->it.small(12).medium(6).veryLarge(4).oversize(3)), item1)
+.add(UI.AUTO_SPAN(it->it.small(12).medium(6).veryLarge(4).oversize(3)), item2)
+// ...
+```
+
+This declares the width at which the nested grid considers itself full, and
+it is what the parent gets to see. Its *height*, however, still follows the
+rows it wraps into — for a grid an explicit preferred size is a lower bound
+rather than a fixed size, because the rows have to fit no matter what.
+
+Pick a reference width which is wider than the narrowest slot the grid will
+ever occupy, so that there is room left for the size categories you want to
+use once it stretches out.
+
 ## Conclusion ##
 
 SwingTree's `ResponsiveGridFlowLayout` is a nice alternative to

@@ -223,60 +223,240 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      */
     @Override
     public Dimension preferredLayoutSize( Container target ) {
-        synchronized (target.getTreeLock()) {
-            Dimension dim = new Dimension(0, 0);
-            int nmembers = target.getComponentCount();
-            boolean firstVisibleComponent = true;
-            boolean useBaseline = getAlignOnBaseline();
-            int maxAscent = 0;
-            int maxDescent = 0;
-            int hgap = UI.scale(_horizontalGapSize);
-            int vgap = UI.scale(_verticalGapSize);
+        return preferredLayoutSizeAtWidth(target, target.getWidth());
+    }
 
-            Bounds bounds = Bounds.of(Position.of(0,0), recursionSafePreferredSizeOf(target));
-            for (int i = 0; i < nmembers; i++) {
-                Component m = target.getComponent(i);
-                if (m.isVisible()) {
-                    Dimension d = m.getPreferredSize();
-                    Bounds childBounds = Bounds.of(Position.of(m.getLocation()), Size.of(d).plus(hgap, vgap));
-                    bounds = bounds.merge(childBounds);
-                    dim.height = Math.max(dim.height, d.height);
-                    if (firstVisibleComponent) {
-                        firstVisibleComponent = false;
-                    } else {
-                        dim.width += hgap;
-                    }
-                    dim.width += d.width;
-                    if (useBaseline) {
-                        int baseline = m.getBaseline(d.width, d.height);
-                        if (baseline >= 0) {
-                            maxAscent = Math.max(maxAscent, baseline);
-                            maxDescent = Math.max(maxDescent, d.height - baseline);
-                        }
-                    }
-                }
+    /**
+     *  Returns the size this layout would like to have if its target container
+     *  were {@code width} pixels wide.
+     *  <p>
+     *  This layout wraps its children into rows, which makes it a
+     *  <i>width-for-height</i> layout: the height it needs is a function of the
+     *  width it is given, and it cannot be expressed as a single fixed number.
+     *  A parent container which itself decides the width of this layout's target
+     *  must therefore ask this method rather than {@link #preferredLayoutSize(Container)},
+     *  because at the time it asks, the target still has the width of the
+     *  previous layout pass.
+     *  <p>
+     *  The returned width does not depend on {@code width}: it is the "ideal" width
+     *  of a single row holding all children, raised to the explicitly set preferred
+     *  width of the target if there is one and it is larger. Only the height varies
+     *  with {@code width}.
+     *  <p>
+     *  Mind that the returned width is <b>not</b> necessarily the reference width
+     *  against which the {@link ParentSizeClass} of the children is measured. That
+     *  reference is the explicitly set preferred width whenever there is one, even
+     *  when it is <i>smaller</i> than the ideal single row width — which is exactly
+     *  how a nested grid keeps its own size categories usable without imposing its
+     *  single row width on the grid it sits in. An explicitly set preferred size
+     *  therefore acts as a lower bound on the returned size and, independently of
+     *  that, as the reference width.
+     *
+     * @param target The container whose layout size should be computed.
+     * @param width The width the container is assumed to have, where a value of
+     *              {@code 0} or less means that no width is known yet, in which
+     *              case the children are assumed to fit into a single row.
+     * @return The preferred size of the given container at the given width.
+     */
+    public Dimension preferredLayoutSizeAtWidth( Container target, int width ) {
+        synchronized (target.getTreeLock()) {
+            final Insets insets = target.getInsets();
+            final int hgap = UI.scale(_horizontalGapSize);
+            final int vgap = UI.scale(_verticalGapSize);
+
+            Dimension dim = _singleRowSize(target);
+
+            final int maxwidth = width - (insets.left + insets.right + hgap * 2);
+            if ( maxwidth > 0 ) {
+                // The container has a width, so we can determine how the children wrap:
+                final int referenceWidth = _referenceWidth(target, dim.width + insets.left + insets.right);
+                final int generalMaxWidth = referenceWidth - (insets.left + insets.right + hgap * 2);
+                final int nmembers = target.getComponentCount();
+                Cell[] cells = _createCells(target, nmembers, maxwidth, generalMaxWidth);
+                dim.height = _wrappedContentHeight(cells, maxwidth, hgap, vgap) + vgap * 2;
             }
-            if (useBaseline) {
-                dim.height = Math.max(maxAscent + maxDescent, dim.height);
-            }
-            Insets insets = target.getInsets();
-            dim.width  = Math.max( dim.width  + hgap * 2, (int) bounds.size().widthOrElse(0f) );
-            dim.height = Math.max( dim.height + vgap * 2, (int) bounds.size().heightOrElse(0f) );
+
             dim.width  += insets.left + insets.right;
             dim.height += insets.top  + insets.bottom;
+
+            if ( target.isPreferredSizeSet() ) {
+                // An explicitly set preferred size is a lower bound, it is what the user asked for.
+                Dimension explicit = target.getPreferredSize();
+                dim.width  = Math.max(dim.width,  explicit.width);
+                dim.height = Math.max(dim.height, explicit.height);
+            }
             return dim;
         }
     }
 
-    private static Size recursionSafePreferredSizeOf( Container target ) {
-        if ( target.isPreferredSizeSet() )
-            return Size.of(target.getPreferredSize());
-        else if ( target.isMaximumSizeSet() )
-            return Size.of(target.getMaximumSize()); // Good enough fall back 1.
-        else if  ( target.isMinimumSizeSet() )
-            return Size.of(target.getMinimumSize()); // Good enough fall back 2.
-        else
-            return Size.of(target.getSize()); // Good enough fallback 3.
+    /**
+     *  The size of all children laid out in a single row, without the insets of
+     *  the target. This is the "ideal" size of this layout, which doubles as the
+     *  reference width for the {@link ParentSizeClass} of the children.
+     */
+    private Dimension _singleRowSize( Container target ) {
+        Dimension dim = new Dimension(0, 0);
+        int nmembers = target.getComponentCount();
+        boolean firstVisibleComponent = true;
+        boolean useBaseline = getAlignOnBaseline();
+        int maxAscent = 0;
+        int maxDescent = 0;
+        int hgap = UI.scale(_horizontalGapSize);
+        int vgap = UI.scale(_verticalGapSize);
+
+        for (int i = 0; i < nmembers; i++) {
+            Component m = target.getComponent(i);
+            if (m.isVisible()) {
+                Dimension d = m.getPreferredSize();
+                dim.height = Math.max(dim.height, d.height);
+                if (firstVisibleComponent) {
+                    firstVisibleComponent = false;
+                } else {
+                    dim.width += hgap;
+                }
+                dim.width += d.width;
+                if (useBaseline) {
+                    int baseline = m.getBaseline(d.width, d.height);
+                    if (baseline >= 0) {
+                        maxAscent = Math.max(maxAscent, baseline);
+                        maxDescent = Math.max(maxDescent, d.height - baseline);
+                    }
+                }
+            }
+        }
+        if (useBaseline) {
+            dim.height = Math.max(maxAscent + maxDescent, dim.height);
+        }
+        dim.width  += hgap * 2;
+        dim.height += vgap * 2;
+        return dim;
+    }
+
+    /**
+     *  The width against which the {@link ParentSizeClass} of the children is
+     *  measured. An explicitly set preferred width wins, because it is a
+     *  deliberate statement about how wide this grid considers itself to be.
+     *  Otherwise the ideal single row width is used.
+     *  <p>
+     *  Note that this deliberately avoids {@code target.getPreferredSize()} when
+     *  no preferred size was set, because that would recurse back into this layout.
+     */
+    private int _referenceWidth( Container target, int singleRowWidth ) {
+        if ( target.isPreferredSizeSet() ) {
+            int explicitWidth = target.getPreferredSize().width;
+            if ( explicitWidth > 0 )
+                return explicitWidth;
+            // A preferred width of zero or less is not a meaningful statement about
+            // how wide this grid is when it considers itself full. Taken literally
+            // it makes every size category degenerate, so we ignore it and fall back
+            // to the ideal single row width, exactly as if none had been set.
+        }
+        return singleRowWidth;
+    }
+
+    /**
+     *  Walks the cells exactly like {@link #layoutContainer(Container)} does, but
+     *  only accumulates how much vertical room the resulting rows occupy, without
+     *  moving or resizing anything.
+     *  <p>
+     *  Note that this has to mirror how {@link #moveComponents} arrives at a row
+     *  height, baseline alignment included. Otherwise the height promised here and
+     *  the height actually laid out drift apart, and the difference is clipped.
+     */
+    private int _wrappedContentHeight(
+            Cell[] cells, int maxwidth, int hgap, int vgap
+    ) {
+        final boolean useBaseline = getAlignOnBaseline();
+        int x = 0, y = 0;
+        RowHeight row = new RowHeight();
+        for ( Cell cell : cells ) {
+            Component m = cell.component();
+            if (!m.isVisible())
+                continue;
+            Dimension d = _cellSize(cell, maxwidth);
+            if ( (x != 0) && ((x + d.width) > maxwidth) ) {
+                // The component does not fit into the current row, so a new one starts:
+                y += vgap + row.resolve(useBaseline);
+                x = 0;
+                row = new RowHeight();
+            }
+            if (x > 0)
+                x += hgap;
+            x += d.width;
+            row.add(m, d, useBaseline);
+        }
+        return y + row.resolve(useBaseline);
+    }
+
+    /**
+     *  Accumulates the height of a single row of cells, both the plain way (the
+     *  tallest child) and the baseline aligned way (the deepest ascent plus the
+     *  deepest descent, which may come from two different children and can
+     *  therefore exceed the height of any one of them).
+     */
+    private static final class RowHeight
+    {
+        private int tallest           = 0;
+        private int maxAscent         = 0;
+        private int maxDescent        = 0;
+        private int nonBaselineHeight = 0;
+
+        void add( Component m, Dimension d, boolean useBaseline ) {
+            tallest = Math.max(tallest, d.height);
+            if ( !useBaseline )
+                return;
+            int baseline = -1;
+            if ( d.width >= 0 && d.height >= 0 )
+                baseline = m.getBaseline(d.width, d.height);
+            if ( baseline >= 0 ) {
+                maxAscent  = Math.max(maxAscent,  baseline);
+                maxDescent = Math.max(maxDescent, d.height - baseline);
+            } else {
+                nonBaselineHeight = Math.max(nonBaselineHeight, d.height);
+            }
+        }
+
+        int resolve( boolean useBaseline ) {
+            if ( !useBaseline )
+                return tallest;
+            return Math.max(maxAscent + maxDescent, nonBaselineHeight);
+        }
+    }
+
+    /**
+     *  The size a cell's component ends up with, which is its configured span
+     *  width where a span applies, and its preferred size otherwise.
+     */
+    private Dimension _cellSize( Cell cell, int maxwidth ) {
+        Dimension d = cell.component().getPreferredSize();
+        try {
+            d = _dimensionsFromCellConf(cell, maxwidth).orElse(d);
+        } catch (Exception e) {
+            log.error(SwingTree.get().logMarker(), "Error applying cell configuration", e);
+        }
+        return d;
+    }
+
+    /**
+     *  Asks a component how tall it wants to be if it were {@code width} pixels
+     *  wide. Only a nested {@link ResponsiveGridFlowLayout} can actually answer
+     *  that question, every other component is asked for its preferred height.
+     *  <p>
+     *  Note that a nested grid is asked even when it has an explicitly set
+     *  preferred size. Its rows still have to fit, so the explicit size acts as a
+     *  lower bound rather than as a fixed height. Setting it is how a nested grid
+     *  declares the width at which it considers itself "full", see
+     *  {@link #preferredLayoutSizeAtWidth(Container, int)}.
+     */
+    private static int _preferredHeightAtWidth( Component component, int width ) {
+        if ( component instanceof Container ) {
+            LayoutManager layout = ((Container) component).getLayout();
+            if ( layout instanceof ResponsiveGridFlowLayout )
+                return ((ResponsiveGridFlowLayout) layout)
+                            .preferredLayoutSizeAtWidth((Container) component, width)
+                            .height;
+        }
+        return component.getPreferredSize().height;
     }
 
     /**
@@ -456,7 +636,15 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
             final int vgap = UI.scale(_verticalGapSize);
             final Insets insets = target.getInsets();
             final int maxwidth = target.getWidth() - (insets.left + insets.right + hgap * 2);
-            final int generalMaxWidth = target.getPreferredSize().width - (insets.left + insets.right + hgap * 2);
+            // Note that the reference width is deliberately derived the same way as
+            // in `preferredLayoutSizeAtWidth`, and not simply read from
+            // `getPreferredSize()`. Otherwise measuring and laying out could pick
+            // two different size categories for the very same container.
+            final int referenceWidth = _referenceWidth(
+                                            target,
+                                            _singleRowSize(target).width + insets.left + insets.right
+                                        );
+            final int generalMaxWidth = referenceWidth - (insets.left + insets.right + hgap * 2);
             final int nmembers = target.getComponentCount();
             int x = 0, y = insets.top + vgap;
             int rowh = 0, start = 0;
@@ -476,12 +664,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
             for (int i = 0; i < nmembers; i++) {
                 Component m = cells[i].component();
                 if (m.isVisible()) {
-                    Dimension d = m.getPreferredSize();
-                    try {
-                        d = _dimensionsFromCellConf(cells[i], maxwidth).orElse(d);
-                    } catch (Exception e) {
-                        log.error(SwingTree.get().logMarker(), "Error applying cell configuration", e);
-                    }
+                    Dimension d = _cellSize(cells[i], maxwidth);
                     m.setSize(d.width, d.height);
 
                     if (useBaseline ) {
@@ -687,7 +870,10 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
         int cellsToFill = autoSpan.get().cellsToFill();
         int unusableSpace = ((cell.numberOfComponentsInRow()-1) * UI.scale(_horizontalGapSize));
         int width = ((maxWidth - unusableSpace) * cellsToFill) / NUMBER_OF_COLUMNS;
-        Dimension newSize = new Dimension(width, cell.component().getPreferredSize().height);
+        // The height has to be requested for the width the component is about to
+        // receive, or a component which wraps its own content (like a nested grid)
+        // would report the number of rows it had during the previous layout pass.
+        Dimension newSize = new Dimension(width, _preferredHeightAtWidth(cell.component(), width));
         return Optional.of(newSize);
     }
 

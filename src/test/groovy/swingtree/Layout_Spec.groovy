@@ -11,9 +11,12 @@ import swingtree.layout.ResponsiveGridFlowLayout
 import swingtree.layout.Size
 import swingtree.threading.EventProcessor
 
+import javax.swing.JLabel
 import javax.swing.JPanel
+import javax.swing.border.EmptyBorder
 import java.awt.Dimension
 import java.awt.FlowLayout
+import java.awt.Font
 import java.awt.Rectangle
 
 @Title("Responsive Layouts")
@@ -496,6 +499,96 @@ class Layout_Spec extends Specification
                 150     || ParentSizeClass.OVERSIZE
     }
 
+    def 'A preferred width of zero or less is ignored when the parent size category is determined.'(
+        Integer explicitWidth, int parentWidth, ParentSizeClass expectedCategory
+    ) {
+        reportInfo """
+            The size categories of a responsive grid are measured against its
+            reference width, which is the explicitly set preferred width when there
+            is one, and the ideal single row width otherwise.
+
+            A preferred width of zero or less is not a meaningful statement about
+            how wide a grid is when it considers itself full, and taking it
+            literally makes every category degenerate: the reference width would
+            end up at or below zero, and the ratio the categories are derived from
+            would come out as infinity or as a negative number. Such a width is
+            therefore ignored, and the grid falls back to its ideal single row
+            width — which is why the rows below pair up so neatly, the classified
+            categories are the same whether a useless width was set or none at all.
+        """
+        given : 'A fixed UI scale factor of 1 for deterministic numbers.'
+            SwingTree.get().setUiScaleFactor(1f)
+        and : 'A variable for capturing the configuration object passed to the configurator.'
+            var FlowCellConf captured = null
+        and : 'A grid holding a single 100 pixel wide child, so its ideal single row is 110 wide.'
+            var ui = UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)
+            if ( explicitWidth != null )
+                ui = ui.withPrefSize(explicitWidth, 50)
+            var panel = ui.add(UI.AUTO_SPAN({ captured = it; return it.medium(6) }),
+                               UI.box().withPrefSize(100, 20)
+                          )
+                          .get(JPanel)
+
+        when : 'We size the grid to the width under examination and let it lay out,'
+            panel.setSize(parentWidth, 50)
+            panel.doLayout()
+        then : 'the category is the one the ideal single row width implies.'
+            captured != null
+            captured.parentSizeCategory() == expectedCategory
+
+        where : 'A `null` explicit width means none was set at all, which is the reference behaviour.'
+            explicitWidth | parentWidth || expectedCategory
+            null          | 30          || ParentSizeClass.SMALL
+            null          | 60          || ParentSizeClass.MEDIUM
+            null          | 200         || ParentSizeClass.OVERSIZE
+            0             | 30          || ParentSizeClass.SMALL
+            0             | 60          || ParentSizeClass.MEDIUM
+            0             | 200         || ParentSizeClass.OVERSIZE
+            -50           | 30          || ParentSizeClass.SMALL
+            -50           | 60          || ParentSizeClass.MEDIUM
+            -50           | 200         || ParentSizeClass.OVERSIZE
+    }
+
+    def 'A grid whose children have no width of their own still classifies its size.'(
+        int parentWidth
+    ) {
+        reportInfo """
+            The reference width of a grid without an explicitly set preferred width
+            is the width of all of its children in a single row. Children may well
+            have no width at all — an empty box is the obvious case — which leaves
+            the grid with nothing to fill and a reference width of zero.
+
+            That must not turn into a division by zero. A grid with nothing to fill
+            is considered to be past full, so every child lands in the `OVERSIZE`
+            category no matter how much room there is.
+        """
+        given : 'A fixed UI scale factor of 1 for deterministic numbers.'
+            SwingTree.get().setUiScaleFactor(1f)
+        and : 'A variable for capturing the configuration object passed to the configurator.'
+            var FlowCellConf captured = null
+        and : 'A grid whose two children declare a height but no width whatsoever.'
+            var panel =
+                    UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)
+                    .add(UI.AUTO_SPAN({ captured = it; return it.medium(6) }),
+                        UI.box().withPrefHeight(20)
+                    )
+                    .add(UI.AUTO_SPAN({ it.medium(6) }),
+                        UI.box().withPrefHeight(20)
+                    )
+                    .get(JPanel)
+
+        when : 'We size the grid and let it lay out,'
+            panel.setSize(parentWidth, 50)
+            panel.doLayout()
+        then : 'it neither blows up nor reports a nonsensical category.'
+            noExceptionThrown()
+            captured != null
+            captured.parentSizeCategory() == ParentSizeClass.OVERSIZE
+
+        where :
+            parentWidth << [20, 60, 200]
+    }
+
     def 'Cell spans outside of the valid range are clamped to the nearest valid span.'()
     {
         reportInfo """
@@ -575,6 +668,65 @@ class Layout_Spec extends Specification
             panel.doLayout()
         then : 'The child again spans 6 of 12 cells of the now much larger width.'
             panel.getComponent(0).getWidth() == 75
+    }
+
+    def 'A baseline aligned row asks for the height that aligning the baselines really needs.'()
+    {
+        reportInfo """
+            When `setAlignOnBaseline(true)` is used, the components of a row are
+            shifted vertically until their text baselines line up. A row then no
+            longer needs the height of its tallest child, it needs the deepest
+            ascent plus the deepest descent found in that row -- and those two may
+            well come from two *different* children, in which case the row is
+            taller than any single child.
+
+            The preferred height reported by the layout has to account for this,
+            otherwise the parent hands out the height of the tallest child and the
+            baseline shifted components are clipped at the bottom.
+        """
+        given : 'A fixed UI scale factor of 1 for deterministic numbers.'
+            SwingTree.get().setUiScaleFactor(1f)
+        and : 'A responsive flow layout which aligns its children on their baseline.'
+            var layout = new ResponsiveGridFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)
+            layout.setAlignOnBaseline(true)
+        and : """
+            Two labels with deliberately mismatched baselines: a big one whose
+            baseline sits low in its bounds, and a small one padded from below so
+            that its baseline sits high in its bounds.
+        """
+            var big = new JLabel("Big")
+            big.setFont(new Font("SansSerif", Font.PLAIN, 40))
+            var low = new JLabel("low")
+            low.setFont(new Font("SansSerif", Font.PLAIN, 10))
+            low.setBorder(new EmptyBorder(0, 0, 40, 0))
+        and : 'A panel holding both of them, wide enough for a single shared row.'
+            var panel = new JPanel(layout)
+            panel.add(big)
+            panel.add(low)
+
+        when : 'We measure what aligning these two baselines demands...'
+            var heightOf   = { JLabel l -> (int) l.getPreferredSize().height }
+            var ascentOf   = { JLabel l -> l.getBaseline((int) l.getPreferredSize().width, heightOf(l)) }
+            var deepestAscent  = Math.max(ascentOf(big), ascentOf(low))
+            var deepestDescent = Math.max(heightOf(big) - ascentOf(big), heightOf(low) - ascentOf(low))
+            var neededRowHeight = deepestAscent + deepestDescent
+            var tallestChild = Math.max(heightOf(big), heightOf(low))
+        then : '...it is genuinely more than the tallest of the two children needs on its own.'
+            neededRowHeight > tallestChild
+
+        when : 'The panel is laid out at a width which fits both labels into one row,'
+            panel.setSize(300, 400)
+            panel.doLayout()
+        then : 'the lower of the two labels really does reach down to the full baseline row height.'
+            var contentBottom = Math.max(big.getY() + big.getHeight(), low.getY() + low.getHeight())
+            contentBottom == 5 + neededRowHeight
+
+        and : """
+            And the height the layout promises covers that row plus the vertical
+            gap above and below it. Were it to report the tallest child instead,
+            it would fall short by the difference between the two.
+        """
+            layout.preferredLayoutSize(panel).height == neededRowHeight + 10
     }
 
 }
