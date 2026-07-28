@@ -12,6 +12,7 @@ import swingtree.style.StyleConf
 
 import javax.swing.*
 import java.awt.*
+import java.awt.image.BufferedImage
 import java.util.concurrent.TimeUnit
 
 @Title("Opaque or not Opaque")
@@ -1654,6 +1655,148 @@ class Opaqueness_Styles_Spec extends Specification
              true         | true   | {it.foundationColor("light oak").shadowIsInset(true).shadowColor("black").shadowBlurRadius(3).margin(16).padding(16)}
              false        | true   | {it.shadowColor(Color.BLACK).shadowBlurRadius(6)}
              true         | true   | {it.gradient( g -> g.type(UI.GradientType.RADIAL).colors(UI.Color.BLUEVIOLET, UI.Color.WHITE.withAlpha(0)) )}
+    }
+
+    def 'The viewport of a scroll pane is only opaque if the scroll pane itself is opaque.'(
+        int alpha, boolean opaque
+    ) {
+        reportInfo """
+
+            A `JScrollPane` is a composite component: the contents you add to it are
+            not children of the scroll pane itself, they are children of an intermediate
+            `JViewport`, which covers the entire area in which the scroll pane
+            would otherwise paint its own background.
+
+            This is why the style engine hands a styled background color over to
+            the viewport, so that the viewport does not cover it with the background
+            color of the look and feel.
+            But the viewport is opaque by default, which is a promise to Swing that it
+            fills every single pixel of its bounds!
+            A viewport filling its bounds with a transparent color paints little or nothing,
+            and so this promise would be broken, which is why the style engine
+            has to take the opaqueness flag away from the viewport whenever the
+            scroll pane behind it is not opaque either.
+
+        """
+        given : 'A scroll pane styled to have a background color with a configurable alpha channel:'
+            var scrollPane =
+                    UI.scrollPane()
+                    .withStyle( it -> it.backgroundColor(new Color(20, 200, 100, alpha)) )
+                    .add(UI.panel())
+                    .get(JScrollPane)
+
+        expect : 'The scroll pane is only opaque if its background color is fully opaque:'
+            scrollPane.isOpaque() == opaque
+        and : """
+                The viewport, which lies on top of the scroll pane background,
+                has the same opaqueness as the scroll pane itself.
+        """
+            scrollPane.getViewport().isOpaque() == opaque
+        and : 'In both cases the styled background color was handed over to the viewport:'
+            scrollPane.getViewport().getBackground() == new Color(20, 200, 100, alpha)
+
+        where :
+            alpha | opaque
+            0     | false
+            95    | false
+            254   | false
+            255   | true
+    }
+
+    def 'A component which reports itself as opaque, paints every single one of its pixels.'()
+    {
+        reportInfo """
+
+            This is the actual contract behind the opaqueness flag, and the reason
+            why the style engine cares about it so much:
+            When a component claims to be opaque, then Swing will not repaint any of the
+            ancestors behind it, because it trusts the component to overwrite
+            every single pixel of its own bounds.
+
+            A component breaking this promise causes the renderings of successive
+            paints to pile up into ever growing artifacts, because whatever was painted
+            in a previous frame simply survives.
+            This is especially noticeable when there are animations involved.
+
+            The scenario below is a regression test for exactly that kind of bug:
+            a transparently styled scroll pane, whose viewport used to stay opaque
+            despite the fact that neither it, nor its transparently styled contents,
+            paint anything at all.
+
+        """
+        given : 'A page with an opaque background, holding a transparently styled scroll pane:'
+            var page =
+                    UI.panel("fill, insets 0").withPrefSize(200, 200)
+                    .withStyle( it -> it.backgroundColor(UI.Color.RED) )
+                    .add("grow",
+                        UI.scrollPane()
+                        .withStyle( it -> it.backgroundColor(new Color(0,0,0,0)) )
+                        .add(
+                            UI.panel().withPrefSize(50, 50)
+                            .withStyle( it -> it.backgroundColor(new Color(0,0,0,0)) )
+                        )
+                    )
+                    .get(JPanel)
+
+        and : 'We give the page a size and lay it out, just like a window would:'
+            UI.runNow({
+                page.setSize(200, 200)
+                layOutRecursively(page)
+            })
+
+        expect : """
+                Every component in the hierarchy which claims to be opaque
+                really does paint all of its pixels. We verify this by painting
+                each of them twice, onto two differently pre-filled canvases,
+                and then checking that both renderings are identical
+                (nothing of what was underneath survived).
+        """
+            findOpaqueComponentsNotPaintingAllTheirPixels(page) == []
+    }
+
+    /**
+     *  Lays out the given component and all of its children recursively,
+     *  which is needed for components which were never added to a window.
+     */
+    private static void layOutRecursively( Component component ) {
+        if ( component instanceof Container ) {
+            ((Container)component).doLayout()
+            for ( Component child : ((Container)component).getComponents() )
+                layOutRecursively(child)
+        }
+    }
+
+    /**
+     *  Returns the names of all components in the given hierarchy which are flagged
+     *  as opaque, but which do not paint every pixel of their own bounds.
+     */
+    private static java.util.List<String> findOpaqueComponentsNotPaintingAllTheirPixels( Component component ) {
+        var found = []
+        if ( component.isOpaque() && component.getWidth() > 0 && component.getHeight() > 0 ) {
+            var onWhite = paintOnto(component, Color.WHITE)
+            var onBlack = paintOnto(component, Color.BLACK)
+            for ( int x = 0; x < onWhite.getWidth(); x++ )
+                for ( int y = 0; y < onWhite.getHeight(); y++ )
+                    if ( onWhite.getRGB(x, y) != onBlack.getRGB(x, y) ) {
+                        found.add(component.getClass().getSimpleName())
+                        x = onWhite.getWidth() // stop after the first uncovered pixel
+                        break
+                    }
+        }
+        if ( component instanceof Container )
+            for ( Component child : ((Container)component).getComponents() )
+                found.addAll(findOpaqueComponentsNotPaintingAllTheirPixels(child))
+        return found
+    }
+
+    private static BufferedImage paintOnto( Component component, Color underlyingColor ) {
+        var image = new BufferedImage(component.getWidth(), component.getHeight(), BufferedImage.TYPE_INT_RGB)
+        var g = image.createGraphics()
+        g.setColor(underlyingColor)
+        g.fillRect(0, 0, component.getWidth(), component.getHeight())
+        component.paint(g)
+        g.dispose()
+        return image
     }
 
 }

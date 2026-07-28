@@ -501,6 +501,8 @@ final class StyleInstaller<C extends JComponent>
             */
         }
 
+        _updateViewportOpaquenessOf(owner);
+
         _applyGenericBaseStyleTo(owner, newStyle);
         _applyIconStyleTo(owner, newStyle);
         _applyLayoutStyleTo(owner, newStyle);
@@ -518,6 +520,35 @@ final class StyleInstaller<C extends JComponent>
         _applyFontStyleTo(owner, newStyle);
 
         return newEngine;
+    }
+
+    /**
+     *  The viewport of a scroll pane is opaque by default, which is a promise to Swing
+     *  that it will fill every single pixel of its bounds. A scroll pane, on the other hand,
+     *  may very well be styled to be (partially) transparent, in which case the style engine
+     *  hands the styled background color over to the viewport (see the {@code JScrollPane}
+     *  case further above), because the viewport lies on top of the scroll pane background.
+     *  <p>
+     *  A viewport which fills its bounds with a transparent color paints little or nothing,
+     *  and yet, as long as it is flagged as opaque, Swing will not repaint the ancestors
+     *  behind it. Whatever was painted there before consequently survives every repaint,
+     *  which makes the renderings of successive paints pile up into ever growing artifacts.
+     *  This is especially noticeable when there are animations inside the scroll pane.
+     *  <p>
+     *  So a viewport may never claim to be opaque when the scroll pane behind it does not.
+     *  Note that we only ever take the flag away here, never grant it, because the
+     *  opaqueness of the viewport may also be turned off for reasons the style engine
+     *  is not aware of (like the custom look and feel installed by {@link DynamicLaF},
+     *  or simply the user of the library doing it manually).
+     *
+     * @param owner The component whose viewport should be checked, only scroll panes have one.
+     */
+    private void _updateViewportOpaquenessOf( final C owner ) {
+        if ( owner instanceof JScrollPane && !owner.isOpaque() ) {
+            JViewport viewport = ((JScrollPane) owner).getViewport();
+            if ( viewport != null && viewport.isOpaque() )
+                viewport.setOpaque(false);
+        }
     }
 
     @SuppressWarnings("ReferenceEquality")
