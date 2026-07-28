@@ -88,6 +88,14 @@ public final class TrainStyle extends StyleSheet {
             .componentFont(f -> f.family("SansSerif").size(12).color(p.subtext))
         );
 
+        // The page-wide scroll pane carrying the content column in the tall shape.
+        // It has to look like the page, or the viewport shows through.
+        add(group(Skin.PAGE_SCROLL), it -> it
+            .backgroundColor(p.page)
+            .border(0, p.page)
+            .padding(0)
+        );
+
         // Primary (accent) buttons — Search, Refresh.
         add(type(AbstractButton.class).group(Skin.ACCENT_BUTTON), it -> it
             .backgroundColor(p.accent)

@@ -30,6 +30,7 @@ public final class TrainsViewModel {
     private final boolean          loadingRoute;
     private final String           status;           // status / error line
     private final Theme            theme;
+    private final Formfactor       formfactor;       // wide (desktop) vs tall (phone-like) window
 
     /** The initial state: Aspang-Markt pre-filled, nothing loaded yet. */
     public static TrainsViewModel initial() {
@@ -44,7 +45,8 @@ public final class TrainsViewModel {
             false,
             false,
             "Loading Aspang-Markt…",
-            Theme.LIGHT
+            Theme.LIGHT,
+            Formfactor.WIDE
         );
     }
 }

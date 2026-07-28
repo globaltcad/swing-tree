@@ -8,6 +8,7 @@ import swingtree.CellConf;
 import swingtree.UI;
 import swingtree.UIForAnySwing;
 import swingtree.api.model.TableData;
+import swingtree.layout.FlowCell;
 import swingtree.style.ComponentStyleDelegate;
 import swingtree.threading.EventProcessor;
 
@@ -26,7 +27,7 @@ import static swingtree.UI.*;
 /**
  *  A self-contained <b>monthly budget planner</b> built on the MVI / MVL pattern:
  *  everything on screen is a pure function of one immutable {@link BudgetViewModel}
- *  held in a single {@link Var}. It exists to show three SwingTree / Sprouts ideas
+ *  held in a single {@link Var}. It exists to show four SwingTree / Sprouts ideas
  *  working together in one small, genuinely useful app — each with a distinct home:
  *
  *  <ol>
@@ -50,6 +51,13 @@ import static swingtree.UI.*;
  *        builder {@code Viewable.of(seed, it -> it.join(a, ..).join(b, ..)...)} and a
  *        single {@code withStyle} drives the whole banner. See the constructor and
  *        {@link #healthCard}.</li>
+ *
+ *    <li><b>A responsive 12-column grid.</b> The three cards are laid out by a
+ *        {@code withFlowLayout()} panel, each declaring with {@code AUTO_SPAN(..)}
+ *        how many of 12 virtual columns it wants per width category. The window
+ *        converges through four arrangements <em>without a single line of state</em>:
+ *        no form-factor field, no resize listener, nothing in the view model.
+ *        See {@link #body}.</li>
  *  </ol>
  *
  *  <p>The app imports zero data from the network and needs no files: a realistic
@@ -57,7 +65,7 @@ import static swingtree.UI.*;
  */
 public final class BudgetView extends JPanel {
 
-    // ── One calm, light palette (no theme switching, to keep the focus on the three ideas) ──
+    // ── One calm, light palette (no theme switching, to keep the focus on the four ideas) ──
     private static final Color PAGE    = new Color(0xF4, 0xF6, 0xF9);
     private static final Color CARD    = new Color(0xFF, 0xFF, 0xFF);
     private static final Color INK     = new Color(0x1E, 0x24, 0x30);
@@ -105,16 +113,57 @@ public final class BudgetView extends JPanel {
             .join(spent,  BudgetHealth::withSpent)
             .join(count,  BudgetHealth::withItemCount));
 
-        of(this).withLayout(FILL.and(WRAP(1)).and(INS(0)).and("gap 0")).withPrefSize(1120, 780)
+        // Every row is added with "wmin 0": a flow grid reports the *sum* of its
+        // children's minimum widths, so without it the body would pin the window
+        // open at the width of all three cards side by side.
+        of(this).withLayout(FILL.and(WRAP(1)).and(INS(0)).and("gap 0")).withPrefSize(1420, 764)
         .withStyle(it -> it.backgroundColor(PAGE).foundationColor(PAGE))
-        .add(GROW_X, header())
-        .add(GROW.and(PUSH),
-            panel(FILL).withLayout("fill, ins 18, gap 18", "[grow 58][grow 42]", "[grow]")
-            .withStyle(it -> it.backgroundColor(PAGE))
-            .add("grow", expensesCard())
-            .add("grow", rightColumn(donutSvg, health))
-        )
-        .add(GROW_X, statusBar());
+        .add(GROW_X.and("wmin 0"), header())
+        .add(GROW.and(PUSH).and("wmin 0"), body(donutSvg, health))
+        .add(GROW_X.and("wmin 0"), statusBar());
+    }
+
+    // ════════════════════════════════════════════════════════════════════════
+    //  The body — concept #4: a responsive 12-column grid
+    // ════════════════════════════════════════════════════════════════════════
+
+    /*
+     *  The three cards are siblings in one flow grid, each declaring per size
+     *  category how many of the 12 virtual columns it wants. A category is the
+     *  panel's width relative to its *preferred* width, so the breakpoints move
+     *  with the content instead of being hard-coded pixels:
+     *
+     *      OVERSIZE / VERY_LARGE  6 | 3 | 3   three columns — the dashboard look
+     *      LARGE                  6 | 6 | 12  table beside chart, health a wide strip
+     *      MEDIUM                 12 | 6 | 6  full-width table, the rest below it
+     *      SMALL and narrower     12 | 12 | 12  one column, scrolled: a phone
+     */
+    private static final FlowCell EXPENSES_SPAN = AUTO_SPAN(it -> it
+            .verySmall(12).small(12).medium(12).large(6).veryLarge(6).oversize(6));
+    private static final FlowCell DONUT_SPAN = AUTO_SPAN(it -> it
+            .verySmall(12).small(12).medium(6).large(6).veryLarge(3).oversize(3));
+    private static final FlowCell HEALTH_SPAN = AUTO_SPAN(it -> it
+            .verySmall(12).small(12).medium(6).large(12).veryLarge(3).oversize(3));
+
+    /**
+     *  A flow grid gives every row the height of its tallest child, so once the
+     *  cards stack the page outgrows the window — hence the scroll pane.
+     */
+    private UIForAnySwing<?, ?> body(Val<String> donutSvg, Viewable<BudgetHealth> health) {
+        return scrollPane(conf -> conf.fitWidth(true))
+            .withHorizontalScrollBarPolicy(UI.Active.NEVER)
+            .withScrollIncrement(24)
+            .withStyle(it -> it.backgroundColor(PAGE).border(0, PAGE))
+            .add(
+                // A zero minimum, or the grid's own minimum (the SUM of its
+                // children's) would pin the page open at three cards wide.
+                panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 18, 18)
+                .withMinSize(0, 0)
+                .withStyle(it -> it.backgroundColor(PAGE))
+                .add(EXPENSES_SPAN, expensesCard())
+                .add(DONUT_SPAN,    donutCard(donutSvg))
+                .add(HEALTH_SPAN,   healthCard(health))
+            );
     }
 
     // ════════════════════════════════════════════════════════════════════════
@@ -127,11 +176,12 @@ public final class BudgetView extends JPanel {
                 .backgroundColor(CARD)
                 .borderAt(UI.Edge.BOTTOM, 3, ACCENT)
                 .shadow("h", s -> s.color(new Color(20, 30, 60, 26)).offset(0, 2).blurRadius(10)))
-            .add(LEFT,
+            .add(GROW_X.and("wmin 0"),
                 box(FILL.and(WRAP(1)).and(INS(0)))
-                .add(label("💶  Monthly Budget Planner")
-                    .withStyle(it -> it.componentFont(f -> f.family("SansSerif").size(23).weight(2f).color(INK))))
-                .add(label("Editable value-model table · live SVG breakdown · composite-view health banner")
+                .add(GROW_X.and("wmin 0"), label("💶  Monthly Budget Planner")
+                    .withStyle(it -> it.componentFont(f -> f.family("SansSerif").size(20).weight(2f).color(INK))))
+                .add(GROW_X.and("wmin 0"),
+                    label("Editable value-model table · live SVG breakdown · responsive 12-column grid")
                     .withStyle(it -> it.componentFont(f -> f.family("SansSerif").size(12).color(SUBTEXT))))
             );
     }
@@ -143,9 +193,12 @@ public final class BudgetView extends JPanel {
     private UIForAnySwing<?, ?> expensesCard() {
         return panel(FILL.and(WRAP(1)).and(INS(0))).withStyle(BudgetView::card)
             .add(GROW_X, cardHeader("Expenses",
-                "Edit any cell inline — the Amount column is euro-formatted, yet commits back as a Double."))
+                "Edit any cell inline — the Amount column is euro-formatted, yet commits a Double."))
             .add(GROW.and(PUSH),
-                scrollPane().withStyle(it -> it.backgroundColor(CARD).border(0, CARD).padding(0, 10, 0, 10))
+                // A declared preferred size: the grid derives both the card's share
+                // of the row and its breakpoints from the preferred sizes inside it.
+                scrollPane().withPrefSize(520, 380)
+                .withStyle(it -> it.backgroundColor(CARD).border(0, CARD).padding(0, 10, 0, 10))
                 .add(
                     // The whole binding: an immutable TableData value in a mutable
                     // property. A ROW_MAJOR_EDITABLE layout + a Var makes it editable,
@@ -168,14 +221,26 @@ public final class BudgetView extends JPanel {
             .add(GROW_X, actionBar());
     }
 
+    /**
+     *  Two deliberate rows rather than one clever one: the card is only ever as
+     *  wide as its span — 6 of 12 columns — so one line holding three inputs and a
+     *  button was cramped at <em>every</em> size.
+     *  <p>
+     *  A nested {@code withFlowLayout} was the tempting alternative, but a grid
+     *  only reports an honest height to a parent that asks it width-for-height,
+     *  which a MigLayout cell does not. Nest a grid in a grid, or in a scroll pane.
+     */
     private UIForAnySwing<?, ?> addForm() {
-        return box(FILL).withLayout("fillx, ins 12 16 4 16, gap 8", "[][130!][grow][14!][80!][]")
-            .add(label("Add").withStyle(it -> it.componentFont(f -> f.family("SansSerif").size(12).weight(2f).color(SUBTEXT))))
+        return box(FILL).withLayout("fillx, wrap 2, ins 8 16 4 16, gap 6", "[90::160][grow]")
             .add(GROW_X, comboBox(draftCategory, Category::label))
-            .add(GROW_X, textField(draftDetail))
-            .add(label("€").withStyle(it -> it.componentFont(f -> f.family("SansSerif").size(13).color(SUBTEXT))))
-            .add(GROW_X, textField(draftAmount).onEnter(it -> vm.update(BudgetViewModel::addDraft)))
-            .add(primaryButton("＋ Add", () -> vm.update(BudgetViewModel::addDraft)));
+            .add(GROW_X.and("wmin 0"), textField(draftDetail))
+            .add(GROW_X.and("span 2, wmin 0"),
+                box(FILL).withLayout("fillx, ins 0, gap 6", "[][grow][]")
+                .add(label("€").withStyle(it -> it.componentFont(f -> f.family("SansSerif").size(13).color(SUBTEXT))))
+                .add(GROW_X.and("wmin 0"),
+                    textField(draftAmount).onEnter(it -> vm.update(BudgetViewModel::addDraft)))
+                .add(primaryButton("＋ Add", () -> vm.update(BudgetViewModel::addDraft)))
+            );
     }
 
     private UIForAnySwing<?, ?> actionBar() {
@@ -214,14 +279,8 @@ public final class BudgetView extends JPanel {
     }
 
     // ════════════════════════════════════════════════════════════════════════
-    //  Right — the donut chart (concept #1) above the health banner (concept #2)
+    //  The donut chart and the health banner — two more cards in the same grid
     // ════════════════════════════════════════════════════════════════════════
-
-    private UIForAnySwing<?, ?> rightColumn(Val<String> donutSvg, Viewable<BudgetHealth> health) {
-        return box(FILL.and(WRAP(1)).and(INS(0))).withLayout("fill, wrap 1, ins 0, gap 18", "[grow]", "[grow][]")
-            .add(GROW.and(PUSH), donutCard(donutSvg))
-            .add(GROW_X, healthCard(health));
-    }
 
     /**
      *  Concept #1 — a value-capturing SVG style. The property item {@code svg} is the
@@ -231,9 +290,9 @@ public final class BudgetView extends JPanel {
      */
     private UIForAnySwing<?, ?> donutCard(Val<String> donutSvg) {
         return panel(FILL.and(WRAP(1)).and(INS(0))).withStyle(BudgetView::card)
-            .add(GROW_X, cardHeader("Where it goes", "Spending by category — the whole infographic is one generated SVG string."))
+            .add(GROW_X, cardHeader("Where it goes", "By category — the whole infographic is one generated SVG string."))
             .add(GROW.and(PUSH),
-                box().withMinSize(280, 320)
+                box().withPrefSize(300, 320).withMinSize(200, 200)
                 .withStyle(donutSvg, (svg, it) -> it
                     .image(img -> img
                         .svg(svg)
@@ -269,11 +328,11 @@ public final class BudgetView extends JPanel {
             // The single, composite-driven style: background tint, border and the
             // progress bar are all a pure function of the merged health item.
             .withStyle(health, BudgetView::bannerStyle)
-            .add(GROW_X, label(health.viewAsString(h -> Budget.money(Math.abs(h.remaining()))))
+            .add(GROW_X.and("wmin 0"), label(health.viewAsString(h -> Budget.money(Math.abs(h.remaining()))))
                 .withStyle(health, (h, it) -> it.componentFont(f -> f.family("SansSerif").size(32).weight(2f).color(stateColor(h.state())))))
-            .add(GROW_X, label(health.viewAsString(h -> h.state() == BudgetHealth.State.OVER ? "over budget" : "left to spend"))
+            .add(GROW_X.and("wmin 0"), label(health.viewAsString(h -> h.state() == BudgetHealth.State.OVER ? "over budget" : "left to spend"))
                 .withStyle(it -> it.componentFont(f -> f.family("SansSerif").size(13).weight(2f).color(SUBTEXT))))
-            .add(GROW_X, label(health.viewAsString(h ->
+            .add(GROW_X.and("wmin 0"), label(health.viewAsString(h ->
                     Budget.money(h.spent()) + " spent of " + Budget.money(h.budget()) + "   ·   " + h.itemCount() + " items"))
                 .withStyle(it -> it.componentFont(f -> f.family("SansSerif").size(12).color(SUBTEXT)).padding(2, 0, 0, 0)));
     }
@@ -328,8 +387,8 @@ public final class BudgetView extends JPanel {
 
     private UIForAnySwing<?, ?> cardHeader(String title, String sub) {
         return box(FILL.and(WRAP(1)).and(INS(0))).withLayout("fill, wrap 1, ins 16 18 6 18", "[grow]")
-            .add(GROW_X, label(title).withStyle(it -> it.componentFont(f -> f.family("SansSerif").size(15).weight(2f).color(INK))))
-            .add(GROW_X, label(sub).withStyle(it -> it.componentFont(f -> f.family("SansSerif").size(12).color(SUBTEXT))));
+            .add(GROW_X.and("wmin 0"), label(title).withStyle(it -> it.componentFont(f -> f.family("SansSerif").size(15).weight(2f).color(INK))))
+            .add(GROW_X.and("wmin 0"), label(sub).withStyle(it -> it.componentFont(f -> f.family("SansSerif").size(12).color(SUBTEXT))));
     }
 
     private UIForAnySwing<?, ?> primaryButton(String text, Runnable onClick) {

@@ -11,6 +11,7 @@ public enum Skin {
     TOOLBAR, TOOL_LABEL,
     STATUS,
     CARD, CARD_TITLE, CARD_SUB,
+    PAGE_SCROLL,
     ACCENT_BUTTON,
     EMPTY
 }

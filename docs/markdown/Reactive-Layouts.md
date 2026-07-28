@@ -4,7 +4,9 @@
 > **Prerequisites:** This guide assumes you are comfortable with the basics
 > covered in [Climbing the Swing Tree](./Climbing-Swing-Tree.md)
 > and with the responsive flow layout introduced in
-> [Responsive Layouts](./Responsive-Layouts.md).
+> [Responsive Layouts](./Responsive-Layouts.md). For *when* to reach for a
+> reactive layout rather than a responsive grid, see
+> [Convergent Design](./Convergent-Design.md).
 >
 > You will also benefit from a passing familiarity with the
 > [property system](./Functional-MVVM.md) (`Var` / `Val`),

@@ -7,6 +7,7 @@ import sprouts.Var;
 import swingtree.UI;
 import swingtree.UIForAnySwing;
 import swingtree.animation.LifeTime;
+import swingtree.layout.FlowCell;
 import swingtree.threading.EventProcessor;
 
 import javax.swing.JFrame;
@@ -31,6 +32,12 @@ import static swingtree.UI.*;
  *  stage rebinds itself via the property-bound <code>add(Val, viewSupplier)</code>
  *  overload — a tiny taste of the MVI / MVL pattern documented in the
  *  <i>Functional MVVM</i> wiki guide.</p>
+ *
+ *  <p>The playground is also <b>convergent</b>: the body is a responsive
+ *  12-column grid ({@code withFlowLayout()} plus {@code AUTO_SPAN(..)}), so the
+ *  recipe sidebar sits beside the stage while there is room and folds into a
+ *  single scrolling column when there is not — no breakpoint state, no resize
+ *  listener, no second version of the view.</p>
  */
 public final class AnimatedView extends Panel
 {
@@ -65,35 +72,81 @@ public final class AnimatedView extends Panel
         Recipe(String label, String blurb) { this.label = label; this.blurb = blurb; }
     }
 
+    // ── The responsive span table — the whole "convergence" config ───────────
+    //
+    // A size category is a fraction of the grid's *reference width*, so these are
+    // relative bands rather than pixel breakpoints. Below MEDIUM the stage would
+    // be squeezed into ~300px next to the sidebar, so both claim all 12 columns
+    // and the page becomes one scrolling column.
+
+    private static final FlowCell SIDEBAR_SPAN = AUTO_SPAN( it -> it.fill(true)
+            .verySmall(12).small(12).medium(12).large(4).veryLarge(3).oversize(3) );
+
+    private static final FlowCell STAGE_SPAN = AUTO_SPAN( it -> it
+            .verySmall(12).small(12).medium(12).large(8).veryLarge(9).oversize(9) );
+
+    // Every grid declares the width at which it considers itself "full", since
+    // that is what its size categories are measured against. Declaring it is also
+    // what lets grids nest: the recipe list below would otherwise report the width
+    // of all seven buttons in a single row as the reference width of *this* grid.
+    private static final int PAGE_REFERENCE_WIDTH = 1000;
+
     public AnimatedView(JFrame frame) {
         Var<Recipe> selected = Var.of(Recipe.COLOR_PULSE);
 
-        of(this).withLayout("fill, wrap 1, insets 0, gap 0").withPrefSize(980, 660)
+        of(this).withLayout("fill, wrap 1, insets 0, gap 0").withPrefSize(1000, 700)
         .withStyle( it -> it.backgroundColor(BG) )
-        .add("growx",     header())
-        .add("grow, push",
-            panel("fill, insets 18, gap 18").withStyle( it -> it.backgroundColor(BG) )
-            .add("growy, width 240!", sidebar(selected))
-            .add("grow, push",        mainCard(selected))
-        );
+        .add("growx, wmin 0",     header())
+        .add("grow, push, wmin 0", body(selected));
+    }
+
+    // ── The page: a scrolling 12-column grid holding the two cards ───────────
+    //
+    // A flow grid gives every row the height of its tallest child, so once the
+    // cards stack the page outgrows the window — hence the scroll pane.
+
+    private static UIForAnySwing<?,?> body(Var<Recipe> selected) {
+        return scrollPane( conf -> conf.fitWidth(true) )
+            .withHorizontalScrollBarPolicy(UI.Active.NEVER)
+            .withVerticalScrollIncrement(24)
+            .withStyle( it -> it.backgroundColor(BG).borderWidth(0).padding(0) )
+            .add(
+                panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 18, 18)
+                .withMinSize(0, 0) // a grid reports the SUM of its children's minimums
+                .withPrefSize(PAGE_REFERENCE_WIDTH, 0) // the reference width, see above
+                .withStyle( it -> it.backgroundColor(BG) )
+                .add(SIDEBAR_SPAN, sidebar(selected))
+                .add(STAGE_SPAN,   mainCard(selected))
+            );
     }
 
     // ── Header — single title strip, no gimmicks ─────────────────────────────
+    //
+    // Title and subtitle as two labels rather than one html(..) string: html
+    // re-wraps instead of ellipsizing, so it just gets clipped when it runs out
+    // of room.
 
     private static UIForAnySwing<?,?> header() {
-        return panel("fill, insets 16 26 16 26")
+        return panel("fill, insets 16 26 16 26, gap 0")
             .withStyle( it -> it
                 .backgroundColor(BG_SIDEBAR)
                 .borderAt(Edge.BOTTOM, 1, new Color(60, 70, 100))
             )
-            .add("pushx, growx",
-                html(
-                    "<span style='color:#f3f4ff;font-family:serif;font-size:21px;'>Animation Playground</span>" +
-                    "<span style='color:#9aa6c8;font-style:italic;font-size:12px;'>" +
-                    "&nbsp;&nbsp;—&nbsp;&nbsp;a tour of SwingTree's animation primitives</span>"
+            .add("shrinkx",
+                label("Animation Playground")
+                .withStyle( it -> it
+                    .foregroundColor(new Color(0xF3, 0xF4, 0xFF))
+                    .componentFont( f -> f.family("Serif").size(21) )
                 )
             )
-            .add("shrinkx",
+            .add("pushx, growx, wmin 0",
+                label("  —  a tour of SwingTree's animation primitives")
+                .withStyle( it -> it
+                    .foregroundColor(INK_FAINT)
+                    .componentFont( f -> f.family("SansSerif").size(12).posture(0.15f) )
+                )
+            )
+            .add("shrinkx, gapleft 12",
                 label("● live")
                 .withStyle( it -> it
                     .foregroundColor(ACCENT_LIME)
@@ -102,21 +155,37 @@ public final class AnimatedView extends Panel
             );
     }
 
-    // ── Sidebar: one row per recipe ──────────────────────────────────────────
+    // ── Sidebar: a grid of recipes, nested inside the page grid ──────────────
+    //
+    // As a sidebar this list gets about a third of its reference width, which
+    // lands it in SMALL, where every button claims a full row — a vertical list.
+    // Once the page stacks, the same list is handed the whole window width and
+    // the buttons spread out two, three and finally four across. Hence a
+    // reference width much wider than the sidebar itself ever gets.
+
+    private static final int RECIPES_REFERENCE_WIDTH = 700;
+
+    private static final FlowCell HEADING_SPAN = AUTO_SPAN( it -> it
+            .verySmall(12).small(12).medium(12).large(12).veryLarge(12).oversize(12) );
+
+    private static final FlowCell RECIPE_SPAN = AUTO_SPAN( it -> it
+            .verySmall(12).small(12).medium(6).large(6).veryLarge(4).oversize(3) );
 
     private static UIForAnySwing<?,?> sidebar(Var<Recipe> selected) {
-        return panel("fill, wrap 1, insets 14, gap 6")
-            .withStyle( it -> it.backgroundColor(BG_SIDEBAR).borderRadius(14) )
-            .add("growx, gapbottom 4",
+        return panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 6, 6)
+            .withPrefSize(RECIPES_REFERENCE_WIDTH, 0)
+            .withMinSize(0, 0)
+            .withStyle( it -> it.backgroundColor(BG_SIDEBAR).borderRadius(14).padding(8) )
+            .add(HEADING_SPAN,
                 label("RECIPES").withStyle( it -> it
                     .foregroundColor(INK_FAINT)
                     .componentFont( f -> f.family("SansSerif").size(10).weight(2).spacing(0.12f) )
-                    .padding(2, 6, 6, 6)
+                    .padding(2, 6, 2, 6)
                 )
             )
             .apply( ui -> {
                 for (Recipe r : Recipe.values())
-                    ui.add("growx", recipeButton(r, selected));
+                    ui.add(RECIPE_SPAN, recipeButton(r, selected));
             });
     }
 
@@ -154,14 +223,14 @@ public final class AnimatedView extends Panel
                     .borderRadiusAt(Corner.TOP_LEFT, 14, 14)
                     .borderRadiusAt(Corner.TOP_RIGHT, 14, 14)
                 )
-                .add("pushx, growx, wrap",
+                .add("pushx, growx, wmin 0, wrap",
                     label(selected.viewAsString(r -> r.label))
                     .withStyle( it -> it
                         .foregroundColor(INK)
                         .componentFont( f -> f.family("Serif").size(18).weight(2) )
                     )
                 )
-                .add("pushx, growx",
+                .add("pushx, growx, wmin 0",
                     label(selected.viewAsString(r -> r.blurb))
                     .withStyle( it -> it
                         .foregroundColor(INK_FAINT)
@@ -169,11 +238,13 @@ public final class AnimatedView extends Panel
                     )
                 )
             )
-            // Stage (binds to selected — rebuilds only this region on switch)
-            .add("grow, push",
+            // Stage (binds to selected — rebuilds only this region on switch).
+            // "height 350::" is a floor: the stages prefer between ~140 and ~342px,
+            // and without it the card would jump on every recipe switch.
+            .add("grow, push, height 350::, wmin 0",
                 panel("fill, insets 0")
                 .withStyle( it -> it.backgroundColor(STAGE_BG) )
-                .add("grow, push", selected, AnimatedView::stageFor)
+                .add("grow, push, wmin 0", selected, AnimatedView::stageFor)
             )
             // Code panel — fixed-height scroll region so long snippets scroll
             // instead of pushing the layout out
@@ -190,7 +261,7 @@ public final class AnimatedView extends Panel
                         .backgroundColor(BG_CARD)
                         .borderAt(Edge.BOTTOM, 1, new Color(80, 90, 120, 80))
                     )
-                    .add("shrinkx",
+                    .add("shrinkx, wmin 0",
                         label(selected.viewAsString(r -> "// " + r.label.toLowerCase(Locale.ROOT).replace(' ', '-') + ".java"))
                         .withStyle( it -> it
                             .foregroundColor(INK_FAINT)
@@ -198,8 +269,12 @@ public final class AnimatedView extends Panel
                         )
                     )
                 )
-                .add("growx, height 140!",
+                .add("growx, height 140!, wmin 0",
                     scrollPane()
+                    // A scroll pane inherits its view's preferred width, and the
+                    // widest snippet line is ~500px of monospaced text — which would
+                    // otherwise decide every size category of the grid above.
+                    .withPrefSize(380, 140)
                     .withStyle( it -> it
                         .padding(0) // -> removes the look and feel border
                         .borderRadius(0)
@@ -484,9 +559,11 @@ public final class AnimatedView extends Panel
     // ── Helpers ──────────────────────────────────────────────────────────────
 
     private static UIForAnySwing<?,?> centeredStage(UIForAnySwing<?,?> subtitle, UIForAnySwing<?,?> body) {
+        // "wmin 0" all the way down, or the longest caption on any stage becomes
+        // the window's minimum width and the grid never reaches its narrow bands.
         return panel("fill, wrap 1, insets 24").withStyle( it -> it.backgroundColor(new Color(0,0,0,0)) )
-            .add("center, gapbottom 14", subtitle)
-            .add("center, grow, push",   body);
+            .add("center, gapbottom 14, wmin 0", subtitle)
+            .add("center, grow, push, wmin 0",   body);
     }
 
     private static swingtree.style.ComponentStyleDelegate<javax.swing.JLabel> stageSubtitle(
