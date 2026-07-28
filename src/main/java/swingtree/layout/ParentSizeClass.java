@@ -57,13 +57,21 @@ public enum ParentSizeClass
      * @return The {@link ParentSizeClass} that corresponds to the given current size and preferred size.
      */
     static ParentSizeClass of( int currentSize, int preferredSize ) {
+        if ( currentSize <= 0 ) {
+            // There is no size at all to classify.
+            return ParentSizeClass.VOID;
+        }
+        if ( preferredSize <= 0 ) {
+            // There is nothing to fill, so whatever size we have is past "full".
+            // Guarding this here keeps the division below total: a preferred size
+            // of 0 would otherwise yield infinity, and a negative one would yield a
+            // negative ratio that silently collapses into the VOID category.
+            return ParentSizeClass.OVERSIZE;
+        }
         // How much preferred width the parent actually fills:
         double howFull = currentSize / (double) preferredSize;
-        howFull = Math.max(0, howFull);
 
-        if ( howFull <= 0 ) {
-            return ParentSizeClass.VOID;
-        } else if (howFull < 1/5d) {
+        if ( howFull < 1/5d) {
             return ParentSizeClass.VERY_SMALL;
         } else if (howFull < 2/5d) {
             return ParentSizeClass.SMALL;

@@ -499,6 +499,96 @@ class Layout_Spec extends Specification
                 150     || ParentSizeClass.OVERSIZE
     }
 
+    def 'A preferred width of zero or less is ignored when the parent size category is determined.'(
+        Integer explicitWidth, int parentWidth, ParentSizeClass expectedCategory
+    ) {
+        reportInfo """
+            The size categories of a responsive grid are measured against its
+            reference width, which is the explicitly set preferred width when there
+            is one, and the ideal single row width otherwise.
+
+            A preferred width of zero or less is not a meaningful statement about
+            how wide a grid is when it considers itself full, and taking it
+            literally makes every category degenerate: the reference width would
+            end up at or below zero, and the ratio the categories are derived from
+            would come out as infinity or as a negative number. Such a width is
+            therefore ignored, and the grid falls back to its ideal single row
+            width — which is why the rows below pair up so neatly, the classified
+            categories are the same whether a useless width was set or none at all.
+        """
+        given : 'A fixed UI scale factor of 1 for deterministic numbers.'
+            SwingTree.get().setUiScaleFactor(1f)
+        and : 'A variable for capturing the configuration object passed to the configurator.'
+            var FlowCellConf captured = null
+        and : 'A grid holding a single 100 pixel wide child, so its ideal single row is 110 wide.'
+            var ui = UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)
+            if ( explicitWidth != null )
+                ui = ui.withPrefSize(explicitWidth, 50)
+            var panel = ui.add(UI.AUTO_SPAN({ captured = it; return it.medium(6) }),
+                               UI.box().withPrefSize(100, 20)
+                          )
+                          .get(JPanel)
+
+        when : 'We size the grid to the width under examination and let it lay out,'
+            panel.setSize(parentWidth, 50)
+            panel.doLayout()
+        then : 'the category is the one the ideal single row width implies.'
+            captured != null
+            captured.parentSizeCategory() == expectedCategory
+
+        where : 'A `null` explicit width means none was set at all, which is the reference behaviour.'
+            explicitWidth | parentWidth || expectedCategory
+            null          | 30          || ParentSizeClass.SMALL
+            null          | 60          || ParentSizeClass.MEDIUM
+            null          | 200         || ParentSizeClass.OVERSIZE
+            0             | 30          || ParentSizeClass.SMALL
+            0             | 60          || ParentSizeClass.MEDIUM
+            0             | 200         || ParentSizeClass.OVERSIZE
+            -50           | 30          || ParentSizeClass.SMALL
+            -50           | 60          || ParentSizeClass.MEDIUM
+            -50           | 200         || ParentSizeClass.OVERSIZE
+    }
+
+    def 'A grid whose children have no width of their own still classifies its size.'(
+        int parentWidth
+    ) {
+        reportInfo """
+            The reference width of a grid without an explicitly set preferred width
+            is the width of all of its children in a single row. Children may well
+            have no width at all — an empty box is the obvious case — which leaves
+            the grid with nothing to fill and a reference width of zero.
+
+            That must not turn into a division by zero. A grid with nothing to fill
+            is considered to be past full, so every child lands in the `OVERSIZE`
+            category no matter how much room there is.
+        """
+        given : 'A fixed UI scale factor of 1 for deterministic numbers.'
+            SwingTree.get().setUiScaleFactor(1f)
+        and : 'A variable for capturing the configuration object passed to the configurator.'
+            var FlowCellConf captured = null
+        and : 'A grid whose two children declare a height but no width whatsoever.'
+            var panel =
+                    UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)
+                    .add(UI.AUTO_SPAN({ captured = it; return it.medium(6) }),
+                        UI.box().withPrefHeight(20)
+                    )
+                    .add(UI.AUTO_SPAN({ it.medium(6) }),
+                        UI.box().withPrefHeight(20)
+                    )
+                    .get(JPanel)
+
+        when : 'We size the grid and let it lay out,'
+            panel.setSize(parentWidth, 50)
+            panel.doLayout()
+        then : 'it neither blows up nor reports a nonsensical category.'
+            noExceptionThrown()
+            captured != null
+            captured.parentSizeCategory() == ParentSizeClass.OVERSIZE
+
+        where :
+            parentWidth << [20, 60, 200]
+    }
+
     def 'Cell spans outside of the valid range are clamped to the nearest valid span.'()
     {
         reportInfo """

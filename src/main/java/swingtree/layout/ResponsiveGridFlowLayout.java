@@ -342,8 +342,15 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      *  no preferred size was set, because that would recurse back into this layout.
      */
     private int _referenceWidth( Container target, int singleRowWidth ) {
-        if ( target.isPreferredSizeSet() )
-            return target.getPreferredSize().width;
+        if ( target.isPreferredSizeSet() ) {
+            int explicitWidth = target.getPreferredSize().width;
+            if ( explicitWidth > 0 )
+                return explicitWidth;
+            // A preferred width of zero or less is not a meaningful statement about
+            // how wide this grid is when it considers itself full. Taken literally
+            // it makes every size category degenerate, so we ignore it and fall back
+            // to the ideal single row width, exactly as if none had been set.
+        }
         return singleRowWidth;
     }
 
@@ -629,7 +636,15 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
             final int vgap = UI.scale(_verticalGapSize);
             final Insets insets = target.getInsets();
             final int maxwidth = target.getWidth() - (insets.left + insets.right + hgap * 2);
-            final int generalMaxWidth = target.getPreferredSize().width - (insets.left + insets.right + hgap * 2);
+            // Note that the reference width is deliberately derived the same way as
+            // in `preferredLayoutSizeAtWidth`, and not simply read from
+            // `getPreferredSize()`. Otherwise measuring and laying out could pick
+            // two different size categories for the very same container.
+            final int referenceWidth = _referenceWidth(
+                                            target,
+                                            _singleRowSize(target).width + insets.left + insets.right
+                                        );
+            final int generalMaxWidth = referenceWidth - (insets.left + insets.right + hgap * 2);
             final int nmembers = target.getComponentCount();
             int x = 0, y = insets.top + vgap;
             int rowh = 0, start = 0;
