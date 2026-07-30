@@ -9,6 +9,7 @@ import swingtree.layout.Size;
 
 import javax.swing.*;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.util.Objects;
 
 /**
@@ -104,8 +105,12 @@ public final class ScrollableComponentDelegate
             } catch ( Exception e ) {
                 log.error(SwingTree.get().logMarker(), "Error while calculating average unit increment for scrollable component.", e);
             }
-            fitWidth  = viewport.getWidth()  >  view.getPreferredSize().width;
-            fitHeight = viewport.getHeight() > view.getPreferredSize().height;
+            // Note: a view's preferred size is not necessarily cached (a JComponent recomputes it on every call),
+            // and for a densely populated view this single preferred size query is the most expensive
+            // thing in this whole factory method:
+            Dimension viewPreferredSize = view.getPreferredSize();
+            fitWidth  = viewport.getWidth()  > viewPreferredSize.width;
+            fitHeight = viewport.getHeight() > viewPreferredSize.height;
             int unitIncrement  = averageUnitIncrement;
             int blockIncrement = averageBlockIncrement;
             unitIncrementSupplier = (a,b,c) -> {return unitIncrement;};
