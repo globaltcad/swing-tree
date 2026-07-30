@@ -428,13 +428,14 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      *  width where a span applies, and its preferred size otherwise.
      */
     private Dimension _cellSize( Cell cell, int maxwidth ) {
-        Dimension d = cell.component().getPreferredSize();
         try {
-            d = _dimensionsFromCellConf(cell, maxwidth).orElse(d);
+            Optional<Dimension> fromCellConf = _dimensionsFromCellConf(cell, maxwidth);
+            if ( fromCellConf.isPresent() )
+                return fromCellConf.get();
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Error applying cell configuration", e);
         }
-        return d;
+        return cell.component().getPreferredSize();
     }
 
     /**

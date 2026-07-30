@@ -1874,7 +1874,7 @@ final class StyleRenderer
         /** Side length of the pre-rendered large tiles, in (unscaled) device pixels. */
         private static final int LARGE_TILE_SIZE = 256;
         /** Areas larger than this (in pixels) use the large-tile blitting strategy. */
-        private static final int LARGE_AREA_THRESHOLD = LARGE_TILE_SIZE * LARGE_TILE_SIZE;
+        private static final int LARGE_AREA_THRESHOLD = 64 * 64;
         /** Upper bound on retained large tiles (~256 KiB each), from this cache's slice of
          *  the shared {@link CacheBudget} byte budget. {@code 0} disables tile caching.
          *  Read live (not snapshotted) so a runtime cache-mode change takes effect at once. */

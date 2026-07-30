@@ -326,49 +326,48 @@ final class NoiseGradientPaint implements Paint
                     scratchData = new int[dataLength];
                 final int[] data = scratchData;
 
-                for ( int tileIndex = 0; tileIndex < TILE_WIDTH * TILE_HEIGHT; tileIndex++ ) {
-                    double currentRed   = 0;
-                    double currentGreen = 0;
-                    double currentBlue  = 0;
-                    double currentAlpha = 0;
-                    float onGradientRange;
+                final boolean isRotated = ( rotation != 0f && rotation % 360f != 0f );
+                final double  rotSin    = isRotated ? Math.sin(Math.toRadians(rotation)) : 0;
+                final double  rotCos    = isRotated ? Math.cos(Math.toRadians(rotation)) : 1;
 
-                    int tileY = tileIndex / TILE_WIDTH;
-                    int tileX = tileIndex % TILE_WIDTH;
+                int base = 0;
+                for ( int tileY = 0; tileY < TILE_HEIGHT; tileY++ ) {
+                    final double rowY = ( Y + tileY - center.getY() ) / scaleY;
+                    for ( int tileX = 0; tileX < TILE_WIDTH; tileX++, base += 4 ) {
+                        double currentRed   = 0;
+                        double currentGreen = 0;
+                        double currentBlue  = 0;
+                        double currentAlpha = 0;
 
-                    double localX = ( X + tileX - center.getX() ) / scaleX;
-                    double localY = ( Y + tileY - center.getY() ) / scaleY;
-                    if ( rotation != 0f && rotation % 360f != 0f ) {
-                        final double angle = Math.toRadians(rotation);
-                        final double sin   = Math.sin(angle);
-                        final double cos   = Math.cos(angle);
-                        final double newX = localX * cos - localY * sin;
-                        final double newY = localX * sin + localY * cos;
-                        localX = newX;
-                        localY = newY;
-                    }
-                    float x = (float) localX;
-                    float y = (float) localY;
-
-                    onGradientRange = noiseFunction.getFractionAt( x, y );
-
-                    // Check for each angle in fractionAngles array
-                    for (int i = 0; i < MAX; i++) {
-                        if ((onGradientRange >= localFractions[i])) {
-                            currentRed   = colors[i].getRed()   * INT_TO_FLOAT_CONST + (onGradientRange - localFractions[i]) * redStepLookup[i];
-                            currentGreen = colors[i].getGreen() * INT_TO_FLOAT_CONST + (onGradientRange - localFractions[i]) * greenStepLookup[i];
-                            currentBlue  = colors[i].getBlue()  * INT_TO_FLOAT_CONST + (onGradientRange - localFractions[i]) * blueStepLookup[i];
-                            currentAlpha = colors[i].getAlpha() * INT_TO_FLOAT_CONST + (onGradientRange - localFractions[i]) * alphaStepLookup[i];
+                        double localX = ( X + tileX - center.getX() ) / scaleX;
+                        double localY = rowY;
+                        if ( isRotated ) {
+                            final double newX = localX * rotCos - localY * rotSin;
+                            final double newY = localX * rotSin + localY * rotCos;
+                            localX = newX;
+                            localY = newY;
                         }
+                        final float x = (float) localX;
+                        final float y = (float) localY;
+
+                        final float onGradientRange = noiseFunction.getFractionAt( x, y );
+
+                        for ( int i = MAX - 1; i >= 0; i-- ) {
+                            if ( onGradientRange >= localFractions[i] ) {
+                                final float distance = onGradientRange - localFractions[i];
+                                currentRed   = colors[i].getRed()   * INT_TO_FLOAT_CONST + distance * redStepLookup[i];
+                                currentGreen = colors[i].getGreen() * INT_TO_FLOAT_CONST + distance * greenStepLookup[i];
+                                currentBlue  = colors[i].getBlue()  * INT_TO_FLOAT_CONST + distance * blueStepLookup[i];
+                                currentAlpha = colors[i].getAlpha() * INT_TO_FLOAT_CONST + distance * alphaStepLookup[i];
+                                break;
+                            }
+                        }
+
+                        data[base    ] = (int) Math.round(currentRed   * 255);
+                        data[base + 1] = (int) Math.round(currentGreen * 255);
+                        data[base + 2] = (int) Math.round(currentBlue  * 255);
+                        data[base + 3] = (int) Math.round(currentAlpha * 255);
                     }
-
-                    // Fill data array with calculated color values
-                    final int BASE = (tileY * TILE_WIDTH + tileX) * 4;
-
-                    data[BASE + 0] = (int) Math.round(currentRed   * 255);
-                    data[BASE + 1] = (int) Math.round(currentGreen * 255);
-                    data[BASE + 2] = (int) Math.round(currentBlue  * 255);
-                    data[BASE + 3] = (int) Math.round(currentAlpha * 255);
                 }
 
                 // Fill the raster with the data
