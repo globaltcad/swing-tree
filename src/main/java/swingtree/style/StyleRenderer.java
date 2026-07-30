@@ -110,6 +110,58 @@ final class StyleRenderer
         // And that's it! We have rendered a style layer!
     }
 
+    /**
+     *  Fills a shape, switching antialiasing off first when the shape provably has
+     *  no partially covered edge pixels for it to smooth.
+     *  <p>
+     *  This matters a great deal. With antialiasing on, {@code Graphics2D.fill(..)}
+     *  routes even an axis aligned rectangle through the AA shape pipe, which
+     *  rasterizes a per-pixel coverage mask for the whole shape before compositing
+     *  anything. For a style layer covering a maximized window that is millions of
+     *  mask pixels per fill, computed on every single frame of a live resize - and
+     *  every one of them comes out fully opaque, because a rectangle aligned to the
+     *  pixel grid has no soft edge to begin with.
+     *  <p>
+     *  The precondition is checked, not assumed: {@link ComponentAreas} only hands
+     *  out a {@link Rectangle} (integer valued by its very type) when all four
+     *  coordinates are whole numbers, and the current transform is verified to map
+     *  those whole numbers onto whole device pixels. Anything else - a fractional
+     *  {@link java.awt.geom.Rectangle2D}, a rounded shape, a rotated or oddly scaled
+     *  transform - keeps antialiasing and is filled exactly as before.
+     */
+    private static void _fillShape( final Graphics2D g2d, final Shape shape ) {
+        if ( shape instanceof Rectangle && g2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING) == RenderingHints.VALUE_ANTIALIAS_ON ) {
+            if ( _mapsOntoWholeDevicePixels(g2d.getTransform(), (Rectangle) shape) ) {
+                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+                try {
+                    g2d.fill(shape);
+                } finally {
+                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                }
+                return;
+            }
+        }
+        g2d.fill(shape);
+    }
+
+    /**
+     *  Whether the given transform turns the corners of the given integer rectangle
+     *  into whole device pixels, which requires it to be free of rotation and shear
+     *  and to scale the corners onto integers.
+     */
+    private static boolean _mapsOntoWholeDevicePixels( final AffineTransform transform, final Rectangle rectangle ) {
+        if ( transform.getShearX() != 0 || transform.getShearY() != 0 )
+            return false;
+        return _isWhole(transform.getScaleX() * rectangle.x                    + transform.getTranslateX())
+            && _isWhole(transform.getScaleY() * rectangle.y                    + transform.getTranslateY())
+            && _isWhole(transform.getScaleX() * (rectangle.x + rectangle.width ) + transform.getTranslateX())
+            && _isWhole(transform.getScaleY() * (rectangle.y + rectangle.height) + transform.getTranslateY());
+    }
+
+    private static boolean _isWhole( final double value ) {
+        return Math.abs(value - Math.rint(value)) < 1e-6;
+    }
+
     private static void _drawBackgroundFill(
         final LayerRenderConf conf,
         final Graphics2D g2d
@@ -123,18 +175,18 @@ final class StyleRenderer
             Shape bodyArea = conf.areas().get(UI.ComponentArea.BODY);
             if ( !StyleUtil.shapesAreEqual(fullArea, bodyArea) ) {
                 g2d.setColor(foundationColor);
-                g2d.fill(fullArea); // Filling everything is a bit cheaper than UI.ComponentArea.EXTERIOR!
+                _fillShape(g2d, fullArea); // Filling everything is a bit cheaper than UI.ComponentArea.EXTERIOR!
             }
             g2d.setColor(backgroundColor);
-            g2d.fill(bodyArea);
+            _fillShape(g2d, bodyArea);
         } else {
             if ( foundationColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
                 g2d.setColor(foundationColor);
-                g2d.fill(conf.areas().get(UI.ComponentArea.EXTERIOR));
+                _fillShape(g2d, conf.areas().get(UI.ComponentArea.EXTERIOR));
             }
             if ( backgroundColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
                 g2d.setColor(backgroundColor);
-                g2d.fill(conf.areas().get(UI.ComponentArea.BODY));
+                _fillShape(g2d, conf.areas().get(UI.ComponentArea.BODY));
             }
         }
     }
@@ -153,7 +205,7 @@ final class StyleRenderer
                 Objects.requireNonNull(borderArea);
                 if ( colors.isHomogeneous() ) {
                     g2d.setColor(colors.bottom().orElse(UI.Color.BLACK));
-                    g2d.fill(borderArea);
+                    _fillShape(g2d, borderArea);
                 } else {
                     // The border area clipped to each edge region. These intersections are a pure
                     // function of the (immutable) box model, so they are computed once and cached in
@@ -764,14 +816,14 @@ final class StyleRenderer
     ) {
         if ( gradient.colors().length == 1 ) {
             g2d.setColor(gradient.colors()[0]);
-            g2d.fill(conf.areas().get(gradient.area()));
+            _fillShape(g2d, conf.areas().get(gradient.area()));
         }
         else {
             final Paint paint = _createGradientPaint(conf.boxModel(), gradient);
             if ( paint != null ) {
                 Shape areaToFill = conf.areas().get(gradient.area());
                 g2d.setPaint(paint);
-                g2d.fill(areaToFill);
+                _fillShape(g2d, areaToFill);
             }
         }
     }
@@ -1227,7 +1279,7 @@ final class StyleRenderer
     ) {
         if ( style.primer().isPresent() ) {
             g2d.setColor(style.primer().get());
-            g2d.fill(conf.areas().get(style.clipArea()));
+            _fillShape(g2d, conf.areas().get(style.clipArea()));
         }
 
         style.image().ifPresent( imageIcon -> {
@@ -1366,7 +1418,7 @@ final class StyleRenderer
                         Paint oldPaint = g2d.getPaint();
                         try {
                             g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));
-                            g2d.fill(conf.areas().get(UI.ComponentArea.BODY));
+                            _fillShape(g2d, conf.areas().get(UI.ComponentArea.BODY));
                         } finally {
                             g2d.setPaint(oldPaint);
                         }
@@ -1866,7 +1918,7 @@ final class StyleRenderer
             final Color[] colors = noise.get().colors();
             if ( colors.length == 1 ) {
                 g2d.setPaint(colors[0]);
-                g2d.fill(areaToFill);
+                _fillShape(g2d, areaToFill);
                 return;
             }
 
@@ -1882,7 +1934,7 @@ final class StyleRenderer
             if ( area <= LARGE_AREA_THRESHOLD || maxCachedTiles() <= 0 ) {
                 // Small area (or tile caching disabled): the per-pixel Paint pipeline is fine here.
                 g2d.setPaint(getCachedNoisePaint(center, noise));
-                g2d.fill(areaToFill);
+                _fillShape(g2d, areaToFill);
             } else {
                 // Large area: blit pre-rendered large tiles to dodge the 32x32 Paint pipeline.
                 _renderWithLargeTiles(center, noise, areaToFill, bounds, g2d);
