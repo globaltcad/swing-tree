@@ -362,6 +362,13 @@ that looks like this:
 
 ![Chat](../img/tutorial/chat-example-view.png)
 
+> The listing above is the *distilled* version, kept small so the list binding
+> stays in focus. The runnable example in the repository,
+> [`examples/chat/mvi`](../../src/test/java/examples/chat/mvi/ChatView.java), has
+> since grown into a complete little messenger — rooms, a roster, emoji
+> reactions, live search, a day/night skin and a convergent layout — but the core
+> you see here (a `Tuple` lens plus `addAll`) is exactly the same code.
+
 The important parts of they are the usage of the lens pattern
 to focus on the `allMessages` field of the view model:
 
