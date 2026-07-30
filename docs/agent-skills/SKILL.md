@@ -725,6 +725,30 @@ messages.update(t -> t.add(new Message().withText(draft.get())));
 > hand the supplier the **value** `M`, not a lens — use these when items aren't
 > individually editable. `HasId` is the price of admission for per-item editing.
 
+> **A bound `addAll` OWNS its container — give it a panel of its own.** The
+> binding manages every child, so a component that already had children added by
+> hand is **cleared** when `addAll` binds to it (SwingTree logs "Trying to bind
+> multiple sub-views to component … Clearing component now"). A heading plus a
+> bound list is therefore two components, not one:
+> ```java
+> // ❌ the heading is silently deleted when the binding attaches
+> panel().add(FULL_ROW, label("ROOMS")).addAll(CHIP_SPAN, rooms, this::roomChip)
+> // ✅ the list gets a container to itself
+> panel().add(FULL_ROW, label("ROOMS")).add(FULL_ROW, roomRail())
+> //  where roomRail() == panel().withFlowLayout(..).addAll(CHIP_SPAN, rooms, this::roomChip)
+> ```
+
+> **A row supplier runs *later*, so under a `StyleSheet` it must re-enter the
+> scope.** `UI.use(sheet, ..)` only binds what is built inside its lambda, and
+> `addAll` rebuilds rows whenever the tuple changes — long after the constructor
+> returned. Initial rows then look right and every row built after the first
+> model change comes out unstyled (§7):
+> ```java
+> private UIForAnySwing<?,?> row( Var<M> entry ) {   // the supplier passed to addAll
+>     return UI.of(UI.use(sheet, () -> rowBody(entry).get(JPanel.class)));
+> }
+> ```
+
 `Tuple` is functional: `.add(x)`, `.remove(x)`, `.map(fn)`, `.setAt(i, x)`,
 `.get(i)`, `.size()`, `.isEmpty()` — all return new tuples (or values).
 `Tuple.of(Message.class)` makes an empty typed tuple; `Tuple.of(a, b, c)` a
@@ -1417,6 +1441,10 @@ painting, a peeked component, a third-party widget): `UI.scale(int|float|double)
    otherwise equal value-records collide and bindings target the wrong sub-view. The
    read-only `addAll(Val<Tuple<M>>/Tuple<M>, m -> ..)` overloads pass the value and
    need no `HasId` (§5.2).
+5b. **A bound `addAll` owns its container and clears hand-added children, and its
+   row supplier runs *later*** — so give the list a panel of its own, and under a
+   `StyleSheet` wrap the supplier in `UI.use(sheet, ..)` or every row built after
+   the first model change comes out unstyled (§5.2, §7).
 6. **Hold a strong reference (a view field) to any lens used only by a raw
    `onChange` subscription** — weak observation will GC it and silently break (§9c).
 7. **Tables: bind a `Var<TableData>`; don't reach for a `TableModel` or a pull-based
@@ -1562,7 +1590,7 @@ in the repo; the links below open each on GitHub.
 
 - [`calculator/mvi/CalculatorView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/calculator/mvi/CalculatorView.java) — canonical MVI/MVL.
 - [`team/mvi/TeamView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/team/mvi/TeamView.java) **vs** [`team/mvvm/TeamView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/team/mvvm/TeamView.java) — same UI, both architectures.
-- [`chat/mvi/ChatView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/chat/mvi/ChatView.java) — `Tuple` + `addAll` + `HasId`.
+- [`chat/mvi/ChatView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/chat/mvi/ChatView.java) (+ `ChatViewModel`, `Room`, `Message`, `ChatStyle`, `ChatArt`) — **the reference for `Tuple` + `addAll` + `HasId`**, inside a whole messenger: a room rail, a roster, message bubbles editable in place, and emoji reactions, all bound off one immutable root. Three less obvious ideas live here too: a **lens onto a *computed* projection** (`vm.zoomTo(ChatViewModel::visibleMessages, ChatViewModel::withVisibleMessages)` — the getter filters the selected room by the search box, the wither merges edits and deletions back by `id`, so one lens reacts to three inputs with zero listeners); **generated SVG as a value** (`ChatArt` builds the room sigils and a "conversation ribbon" as SVG *text*, fed to `withStyle(svgVal, (svg, it) -> it.image(img -> img.svg(svg)))`); and a hot-swapped `StyleSheet` whose row suppliers **re-enter the `UI.use(..)` scope** — the gotcha that otherwise leaves every dynamically added row unstyled (§5.2).
 - [`trains/mvi/TrainsView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/trains/mvi/TrainsView.java) (+ `TrainsViewModel`, `TransitClient`) — real-world MVI: `Tuple`-valued state, a Swing-free data layer doing blocking IO off the EDT, and Lombok `@With`/`@Getter` value objects (records-free, **Java 8**-clean).
 - [`budget/mvi/BudgetView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/budget/mvi/BudgetView.java) (+ `BudgetViewModel`, `Budget`, `BudgetHealth`) — **the reference for convergence (§2c/2d): four arrangements of three cards from one span table, with zero state.** It also showcases three other ideas at once: a **value-model table** bound with `UI.table(Var<TableData>)` (editable, edits flow back as a new value; a `withCellForColumn` renderer/editor euro-formats the Amount column yet commits back a `Double`), a **value-capturing SVG style** `withStyle(svgText, (svg, it) -> it.image(img -> img.svg(svg)))` driving a donut chart generated from the data, and a **composite view** `Viewable.of(seed, it -> it.join(a, ..).join(b, ..)…)` (Sprouts ≥2.7) merging three properties into one item for a single `withStyle`.
 - [`breathing/mvi/BreathingView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/breathing/mvi/BreathingView.java) (+ `BreathingViewModel`) — modelled animation, re-arming, the GC gotcha.
@@ -1585,7 +1613,13 @@ measure correctly); `breathing/mvi/BreathingView` (0+1 plus size-relative
 `almanack/mvi/AlmanackView` (0+2+4, four breakpoints feeding four `Val<Layout>`
 properties, nothing ever rebuilt); `trains/mvi/TrainsView` (0+2+3+4 — a
 `Formfactor` in the view model swapping a split pane for a scrolling column,
-plus a reactive toolbar and bound labels that shorten).
+plus a reactive toolbar and bound labels that shorten);
+`chat/mvi/ChatView` (0+1+2+4 and **deliberately no gear 3** — a chat is full of
+state you must not destroy, so every shape is reached by reflowing: nested grids
+turn the room rail and the roster from sidebars into banners, a `Val<Layout>`
+composer measures *its own* width rather than the window's, and the conversation's
+preferred height is derived from the window inside the view model, because a flow
+grid gives a row the height its tallest child *prefers* and never stretches it).
 
 The wiki ([`docs/markdown/`](https://github.com/globaltcad/swing-tree/tree/main/docs/markdown)) is the prose
 companion; start at [README.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/README.md) →

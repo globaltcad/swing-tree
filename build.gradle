@@ -157,6 +157,77 @@ jacocoTestReport {
 }
 check.dependsOn jacocoTestReport
 
+// BENCHMARKS :
+
+/*
+ *  Measures what laying out and painting one of the (heavily styled) example UIs costs,
+ *  so that a claim about resize performance can be checked instead of believed.
+ *  '-Dbenchmark.view=chat|sequencer|trains|team|scribe|almanack|garden' picks the UI,
+ *  'all' or a comma separated list measures several and prints a comparison table.
+ *  It opens a window, so it needs a display and is never part of 'check'.
+ */
+tasks.register('runResizeBenchmark', JavaExec) {
+    group = 'verification'
+    description = 'Measures the layout and paint cost of a window resize of an example UI.'
+    dependsOn 'testClasses'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'benchmarks.ViewResizeBenchmark'
+    // '-Dbenchmark.warmup=..' and '-Dbenchmark.sweeps=..' control how much work is done,
+    // which matters when profiling, because a sampler needs more than a second of it.
+    // '-Dbenchmark.phase=layout|resize|static|clip' measures one regime at a time, which is
+    // what makes a recording attributable; the run then prints the wall clock window of the
+    // timed sweeps, so a profile can exclude the warm-up (where one-off cache filling lives):
+    System.properties.each { key, value ->
+        if ( key.toString().startsWith('benchmark.') ) systemProperty(key.toString(), value)
+    }
+    // '-Pjfr=<file>' records a flight recording of the run, to find out where the time goes:
+    if ( project.hasProperty('jfr') ) {
+        jvmArgs "-XX:FlightRecorderOptions=stackdepth=512"
+        jvmArgs "-XX:StartFlightRecording=settings=profile,dumponexit=true,filename=${project.property('jfr')}"
+    }
+}
+
+/*
+ *  Measures a component styled with a large noise gradient, while resizing and at an
+ *  unchanged size, which is how the decision to lift a noise out of its layer is judged.
+ *  Opens a window, so it needs a display and is never part of 'check'.
+ */
+tasks.register('runNoiseBenchmark', JavaExec) {
+    group = 'verification'
+    description = 'Measures the paint cost of a large noise gradient, resizing and not.'
+    dependsOn 'testClasses'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'benchmarks.NoisePaintBenchmark'
+    System.properties.each { key, value ->
+        if ( key.toString().startsWith('benchmark.') ) systemProperty(key.toString(), value)
+    }
+    if ( project.hasProperty('jfr') ) {
+        jvmArgs "-XX:FlightRecorderOptions=stackdepth=512"
+        jvmArgs "-XX:StartFlightRecording=settings=profile,dumponexit=true,filename=${project.property('jfr')}"
+    }
+}
+
+/*
+ *  Measures a rounded component carrying a gradient, which is the one common style shape
+ *  that can take none of the shortcuts: a gradient denies it size independent caching and a
+ *  rounded fill area denies it the antialiasing-free rectangle path. Opens a window, so it
+ *  needs a display and is never part of 'check'.
+ */
+tasks.register('runRoundedGradientBenchmark', JavaExec) {
+    group = 'verification'
+    description = 'Measures the paint cost of a rounded component with a gradient, resizing and not.'
+    dependsOn 'testClasses'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'benchmarks.RoundedGradientBenchmark'
+    System.properties.each { key, value ->
+        if ( key.toString().startsWith('benchmark.') ) systemProperty(key.toString(), value)
+    }
+    if ( project.hasProperty('jfr') ) {
+        jvmArgs "-XX:FlightRecorderOptions=stackdepth=512"
+        jvmArgs "-XX:StartFlightRecording=settings=profile,dumponexit=true,filename=${project.property('jfr')}"
+    }
+}
+
 // CUSTOM DEPLOYMENT TASKS :
 
 // 0: Cleanup

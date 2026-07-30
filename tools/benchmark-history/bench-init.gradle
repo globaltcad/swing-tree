@@ -1,0 +1,47 @@
+/*
+ *  A Gradle init script used by 'bench_history.py' to run one benchmark main class per JVM,
+ *  at an arbitrary historical commit, without editing that commit's 'build.gradle'.
+ *
+ *  Two things it does that the 'runResizeBenchmark' / 'runNoiseBenchmark' /
+ *  'runRoundedGradientBenchmark' tasks in 'build.gradle' do not:
+ *
+ *    1. It does not depend on 'testClasses', only on 'compileTestJava'. The benchmarks and
+ *       the example UIs they build are plain Java; the Spock specs next to them are not
+ *       needed to run a benchmark, and compiling them is by far the slowest part of the
+ *       build. Skipping them turns a per-commit build from minutes into seconds, which is
+ *       what makes sweeping a whole commit range affordable.
+ *
+ *    2. It takes the main class as a project property, so one task covers all benchmarks
+ *       and every commit in the range is driven through the exact same task definition -
+ *       even commits whose 'build.gradle' predates a given benchmark task.
+ *
+ *  Usage:
+ *      ./gradlew --init-script bench-init.gradle benchmarkRun \
+ *                -PbenchMain=benchmarks.ViewResizeBenchmark -Dbenchmark.view=all
+ *
+ *  Every '-Dbenchmark.*' property given to Gradle is forwarded to the benchmark JVM, which
+ *  is the same convention the in-repo benchmark tasks use.
+ */
+allprojects { p ->
+    p.plugins.withId('java') {
+        p.tasks.register('benchmarkRun', JavaExec) {
+            group = 'verification'
+            description = 'Runs a single benchmark main class, skipping the Groovy test sources.'
+            dependsOn p.tasks.named('compileTestJava')
+            dependsOn p.tasks.named('processTestResources')
+            /*
+             *  Assembled by hand rather than taken from 'sourceSets.test.runtimeClasspath',
+             *  because that collection carries a task dependency on the Groovy compilation
+             *  we are here to avoid. Only the Java half of the test output is on it.
+             */
+            classpath = p.sourceSets.main.output +
+                        p.files(p.sourceSets.test.java.classesDirectory) +
+                        p.files(p.sourceSets.test.output.resourcesDir) +
+                        p.configurations.testRuntimeClasspath
+            mainClass = p.findProperty('benchMain') ?: 'benchmarks.ViewResizeBenchmark'
+            System.properties.each { key, value ->
+                if ( key.toString().startsWith('benchmark.') ) systemProperty(key.toString(), value)
+            }
+        }
+    }
+}
