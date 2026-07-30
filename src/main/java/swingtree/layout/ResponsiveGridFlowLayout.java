@@ -426,15 +426,23 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
     /**
      *  The size a cell's component ends up with, which is its configured span
      *  width where a span applies, and its preferred size otherwise.
+     *  <p>
+     *  Note that the preferred size is only asked for when the cell configuration
+     *  yields nothing. Asking first and then discarding the answer would double
+     *  the number of {@code getPreferredSize()} calls for every spanning cell, and
+     *  that is not cheap: a {@link javax.swing.JComponent} does not cache its
+     *  preferred size, so each call re-measures the component - for a label, down
+     *  to laying out its text.
      */
     private Dimension _cellSize( Cell cell, int maxwidth ) {
-        Dimension d = cell.component().getPreferredSize();
         try {
-            d = _dimensionsFromCellConf(cell, maxwidth).orElse(d);
+            Optional<Dimension> fromCellConf = _dimensionsFromCellConf(cell, maxwidth);
+            if ( fromCellConf.isPresent() )
+                return fromCellConf.get();
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Error applying cell configuration", e);
         }
-        return d;
+        return cell.component().getPreferredSize();
     }
 
     /**
