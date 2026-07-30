@@ -406,7 +406,7 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
             Dimension maxChildSize = _child.getMaximumSize();
             Dimension maxSelfSize  = super.getMaximumSize();
             if ( !Objects.equals(maxChildSize, maxSelfSize) ) {
-                this.setMinimumSize(maxChildSize);
+                this.setMaximumSize(maxChildSize);
             }
             return maxChildSize;
         }
