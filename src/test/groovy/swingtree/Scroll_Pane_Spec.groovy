@@ -12,6 +12,7 @@ import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JScrollPane
+import javax.swing.SwingConstants
 import java.awt.Dimension
 import java.awt.Font
 
@@ -335,6 +336,106 @@ class Scroll_Pane_Spec extends Specification
             UI.runAndGet( () -> view.getPreferredSize() ) == UI.runAndGet( () -> content.getPreferredSize() )
     }
 
+    def 'Asking a configured scroll pane for a scroll increment does not measure its content.'()
+    {
+        reportInfo """
+            A scroll pane configured through `UI.scrollPane(Configurator)` builds a fresh
+            configuration object for every single question the scroll pane asks it, and Swing
+            asks a handful of those per layout pass. Most of them are cheap questions whose
+            answer does not depend on how big the content is, like "how far is one scroll
+            unit?", and the same goes for every value the configurator supplies itself.
+
+            None of those should measure the content component, because measuring a densely
+            populated view is by far the most expensive thing a scroll pane ever does.
+        """
+        given : 'A content component whose layout manager counts how often it is measured.'
+            var layout  = new CountingLayout()
+            var ui =
+                UI.frame("Scroll Increment Measurement Test")
+                .peek(it -> it.setPreferredSize(new Dimension(400, 200)))
+                .add(
+                    UI.scrollPane( conf -> conf
+                        .unitIncrement(7)
+                        .blockIncrement(13)
+                        .fitWidth(true)
+                        .fitHeight(false)
+                    )
+                    .id("scroll")
+                    .add(UI.of(new JPanel(layout)).id("content"))
+                )
+        and : 'We build the UI and let it lay itself out:'
+            var frame = ui.get(JFrame)
+            UI.runNow( () -> frame.pack() )
+        and : 'We look up the content as well as the delegation box acting as the view.'
+            var scrollPane = new Utility.Query(frame).find(JScrollPane, "scroll").orElseThrow(NoSuchElementException::new)
+            var content    = new Utility.Query(frame).find(JPanel, "content").orElseThrow(NoSuchElementException::new)
+            var view       = UI.runAndGet( () -> scrollPane.getViewport().getView() )
+
+        when : 'We invalidate the content so that no cached measurement can answer on its behalf,'
+            UI.runNow( () -> content.invalidate() )
+        and : 'we start counting from here,'
+            var measurementsBefore = layout.measurements
+        and : 'and then ask the view every question whose answer the configurator already supplied.'
+            var unitIncrement  = UI.runAndGet( () -> view.getScrollableUnitIncrement(null, SwingConstants.VERTICAL, 1) )
+            var blockIncrement = UI.runAndGet( () -> view.getScrollableBlockIncrement(null, SwingConstants.VERTICAL, 1) )
+            var tracksWidth    = UI.runAndGet( () -> view.getScrollableTracksViewportWidth() )
+            var tracksHeight   = UI.runAndGet( () -> view.getScrollableTracksViewportHeight() )
+
+        then : 'We receive exactly what was configured,'
+            unitIncrement  == 7
+            blockIncrement == 13
+            tracksWidth    == true
+            tracksHeight   == false
+        and : 'and the content was not measured a single time for any of it.'
+            layout.measurements == measurementsBefore
+
+        when : 'We ask for the preferred viewport size, which the configurator did not supply,'
+            var preferredViewportSize = UI.runAndGet( () -> view.getPreferredScrollableViewportSize() )
+
+        then : 'the content is measured after all, because now the answer does depend on it.'
+            preferredViewportSize == new Dimension(300, 200)
+            layout.measurements > measurementsBefore
+    }
+
+    def 'A scroll pane still derives the viewport fitting defaults from the content it was given.'()
+    {
+        reportInfo """
+            The `fitWidth` and `fitHeight` flags of the scroll configuration API have defaults
+            which are derived from the content: a content component which is already smaller
+            than the viewport has nothing to scroll and may just as well be stretched to fill
+            it, whereas one which is larger must keep its own size so that it can be scrolled.
+
+            These defaults are computed only when they are actually read, so this test makes
+            sure that deferring them did not quietly change what they are.
+        """
+        given : 'A scroll pane with an identity configurator, so that all defaults survive.'
+            var content = new JPanel(new CountingLayout(width: contentWidth, height: contentHeight))
+            var ui =
+                UI.frame("Scroll Fitting Defaults Test")
+                .peek(it -> it.setPreferredSize(new Dimension(400, 300)))
+                .add(
+                    UI.scrollPane( conf -> conf ).id("scroll")
+                    .withScrollBarPolicy(UI.Active.NEVER)
+                    .add(UI.of(content))
+                )
+        and : 'We build the UI and let it lay itself out:'
+            var frame = ui.get(JFrame)
+            UI.runNow( () -> frame.pack() )
+            var scrollPane = new Utility.Query(frame).find(JScrollPane, "scroll").orElseThrow(NoSuchElementException::new)
+            var view       = UI.runAndGet( () -> scrollPane.getViewport().getView() )
+
+        expect : 'The viewport only takes over a dimension the content does not need for itself.'
+            UI.runAndGet( () -> view.getScrollableTracksViewportWidth()  ) == expectedToFitWidth
+            UI.runAndGet( () -> view.getScrollableTracksViewportHeight() ) == expectedToFitHeight
+
+        where :
+            contentWidth | contentHeight || expectedToFitWidth | expectedToFitHeight
+            50           | 50            || true               | true
+            5000         | 50            || false              | true
+            50           | 5000          || true               | false
+            5000         | 5000          || false              | false
+    }
+
     def 'You can add a custom ´Scrollable´ component to a scroll pane with layout constraints that work.'()
     {
         reportInfo """
@@ -400,6 +501,21 @@ class Scroll_Pane_Spec extends Specification
             content2 instanceof CustomScrollablePanel
     }
 
+
+    /**
+     *  A layout manager of a fixed opinion which keeps track of how often it was
+     *  asked for it, so that a test can tell whether a component was measured or not.
+     */
+    static class CountingLayout implements java.awt.LayoutManager {
+        int measurements = 0
+        int width  = 300
+        int height = 200
+        @Override void addLayoutComponent(String name, java.awt.Component comp) {}
+        @Override void removeLayoutComponent(java.awt.Component comp) {}
+        @Override Dimension preferredLayoutSize(java.awt.Container parent) { measurements++; return new Dimension(width, height) }
+        @Override Dimension minimumLayoutSize(java.awt.Container parent) { return new Dimension(10, 10) }
+        @Override void layoutContainer(java.awt.Container parent) {}
+    }
 
     static class CustomScrollablePanel extends JPanel implements javax.swing.Scrollable {
         @Override
