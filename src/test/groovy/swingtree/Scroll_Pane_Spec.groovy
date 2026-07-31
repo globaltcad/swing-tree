@@ -502,6 +502,69 @@ class Scroll_Pane_Spec extends Specification
     }
 
 
+    def 'The layout constraints of a custom ´Scrollable´ component are actually applied to it.'()
+    {
+        reportInfo """
+            Adding a component to a scroll pane together with layout constraints is something
+            regular Swing has no answer for, because a viewport holds exactly one view and no
+            layout manager to interpret a constraint with. SwingTree supplies the missing
+            layout manager by slipping a thin box in between, and this has to happen for a
+            content component implementing `Scrollable` just as much as for any other one --
+            the box then simply passes the scroll behaviour of its child on to the scroll pane,
+            so that nothing is lost by the indirection.
+
+            Here we give the very same custom `Scrollable` component to two scroll panes, one
+            of them with a size constraint, and then check that the constraint made a
+            difference. Note that the component in question reports that it wants to track the
+            width of its viewport, so without the box in between it would be stretched to the
+            full viewport width and the constraint would simply evaporate.
+        """
+        given : 'Two scroll panes with the same custom `Scrollable` content, one of them constrained.'
+            var ui =
+                UI.frame("Scrollable Constraints Test")
+                .peek(it -> it.setPreferredSize(new Dimension(600, 400)))
+                .add(
+                    UI.panel("fill, wrap 1", "[grow]", "[grow][grow]").withPrefSize(600, 400)
+                    .add("grow, push",
+                        UI.scrollPane().id("scroll-unconstrained")
+                        .add(
+                            UI.of(new CustomScrollablePanel()).id("content-unconstrained")
+                            .add(UI.label("Hello"))
+                        )
+                    )
+                    .add("grow, push",
+                        UI.scrollPane().id("scroll-constrained")
+                        .add("width 250px",
+                            UI.of(new CustomScrollablePanel()).id("content-constrained")
+                            .add(UI.label("Hello"))
+                        )
+                    )
+                )
+        and : 'We build the UI and let it lay itself out:'
+            var frame = ui.get(JFrame)
+            UI.runNow( () -> frame.pack() )
+        and : 'We look up the two scroll panes and their content components.'
+            var unconstrainedScroll  = new Utility.Query(frame).find(JScrollPane, "scroll-unconstrained").orElseThrow(NoSuchElementException::new)
+            var constrainedScroll    = new Utility.Query(frame).find(JScrollPane, "scroll-constrained").orElseThrow(NoSuchElementException::new)
+            var unconstrainedContent = new Utility.Query(frame).find(JPanel, "content-unconstrained").orElseThrow(NoSuchElementException::new)
+            var constrainedContent   = new Utility.Query(frame).find(JPanel, "content-constrained").orElseThrow(NoSuchElementException::new)
+
+        expect : 'The unconstrained content does what its own `Scrollable` implementation asks for.'
+            unconstrainedContent.getWidth() == unconstrainedScroll.getViewport().getWidth()
+        and : 'The constrained content has the width we demanded of it instead.'
+            constrainedContent.getWidth()  == 250
+        and : 'Its viewport is in fact wider than that, which is what makes the constraint visible at all.'
+            constrainedScroll.getViewport().getWidth() > 250
+        and : """
+            The scroll behaviour of the content survived the indirection: the view of the
+            constrained scroll pane answers the very same questions its content would.
+        """
+            UI.runAndGet( () -> constrainedScroll.getViewport().getView().getScrollableTracksViewportWidth()  ) == true
+            UI.runAndGet( () -> constrainedScroll.getViewport().getView().getScrollableTracksViewportHeight() ) == false
+            UI.runAndGet( () -> constrainedScroll.getViewport().getView().getScrollableUnitIncrement(null, SwingConstants.VERTICAL, 1) ) == 10
+            UI.runAndGet( () -> constrainedScroll.getViewport().getView().getScrollableBlockIncrement(null, SwingConstants.VERTICAL, 1) ) == 10
+    }
+
     /**
      *  A layout manager of a fixed opinion which keeps track of how often it was
      *  asked for it, so that a test can tell whether a component was measured or not.

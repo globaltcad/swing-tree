@@ -30,22 +30,24 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
     @Override
     protected void _addComponentTo(P thisComponent, JComponent addedComponent, @Nullable AddConstraint constraints) {
         if ( constraints != null ) {
+            // The user wants to add a component to the scroll pane with a specific constraint.
+            // Swing does not support any constraints for scroll panes, but we are not Swing, we are SwingTree!
+            // So we improve this situation by wrapping the component in a mig layout panel, supporting constraints.
+            ThinDelegationBox thinDelegationBox;
             if ( addedComponent instanceof Scrollable ) {
-                ThinScrollableDelegateBox thinDelegationBox = new ThinScrollableDelegateBox((Scrollable) addedComponent);
-                thinDelegationBox.add(addedComponent, constraints.toConstraintForLayoutManager());
+                // The wrapper has to pass the scroll behaviour of the wrapped component on to
+                // the scroll pane, or wrapping it would silently take that behaviour away.
+                thinDelegationBox = new ThinScrollableDelegateBox((Scrollable) addedComponent);
             } else {
-                // The user wants to add a component to the scroll pane with a specific constraint.
-                // Swing does not support any constraints for scroll panes, but we are not Swing, we are SwingTree!
-                ThinDelegationBox thinDelegationBox = new ThinDelegationBox(addedComponent);
-                thinDelegationBox.add(addedComponent, constraints.toConstraintForLayoutManager());
-                addedComponent = thinDelegationBox;
-                //  ^ So we improve this situation by wrapping the component in a mig layout panel, supporting constraints.
-
-                // Let's strip it of any visible properties, since it should serve merely as a container.
-                addedComponent.setBorder(null);
-                addedComponent.setOpaque(false);
-                addedComponent.setBackground(null);
+                thinDelegationBox = new ThinDelegationBox(addedComponent);
             }
+            thinDelegationBox.add(addedComponent, constraints.toConstraintForLayoutManager());
+            addedComponent = thinDelegationBox;
+
+            // Let's strip it of any visible properties, since it should serve merely as a container.
+            addedComponent.setBorder(null);
+            addedComponent.setOpaque(false);
+            addedComponent.setBackground(null);
         }
         thisComponent.setViewportView(addedComponent);
     }
