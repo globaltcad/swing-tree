@@ -626,6 +626,16 @@ public final class FontConf
      * Tracking values are typically between {@code -0.1} and
      * {@code 0.3}; values outside this range are generally not
      * desirable.
+     * <p>
+     * <b>Note that spacing is not free.</b> Unlike a font's family, size, weight or posture,
+     * tracking is one of the attributes that flips {@link Font#hasLayoutAttributes()}, and the
+     * JDK answers every {@code stringWidth} and every {@code drawString} of such a font by
+     * building a fresh {@code TextLayout} instead of adding up cached glyph advances. That is
+     * unavoidable - the spacing genuinely has to be laid out - but it is worth knowing that a
+     * letter-spaced label is measured and painted on a markedly slower path than an ordinary
+     * one. In a profile of the chat example, three letter-spaced section labels accounted for
+     * roughly a fifth of the cost of laying the whole window out again. Use it where it earns
+     * its keep, which is headings and other short, rarely re-measured text.
      *
      * @param spacing The spacing to use for the {@link TextAttribute#TRACKING} property.
      * @return A new font style with the specified spacing.
