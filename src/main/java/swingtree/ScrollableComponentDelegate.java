@@ -1,5 +1,6 @@
 package swingtree;
 
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import swingtree.api.Configurator;
@@ -11,6 +12,7 @@ import javax.swing.*;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 /**
  * This class is an immutable builder which defines the {@link javax.swing.Scrollable} behavior of a component
@@ -64,22 +66,41 @@ public final class ScrollableComponentDelegate
 {
     private static final Logger log = LoggerFactory.getLogger(ScrollableComponentDelegate.class);
 
+    /**
+     *  Builds a delegate whose defaults are all deferred until they are actually read.
+     *  <p>
+     *  This matters because a {@link Scrollable} implementation backed by a
+     *  {@link Configurator} has to build a fresh delegate for every single question the
+     *  scroll pane asks it, and Swing asks several of those per layout pass. Almost every
+     *  one of those questions concerns exactly one of the values below, and two of them
+     *  (the preferred size and the two fitting flags) can only be answered by measuring a
+     *  whole component tree. Computing all of them up front therefore meant measuring
+     *  repeatedly to then throw the result away -- once because the caller only wanted a
+     *  scroll increment, and once more for every default the configurator overrides
+     *  anyway. Deferring them means each one is computed only if it survives configuration
+     *  <i>and</i> is asked for, and then only once.
+     *
+     * @param scrollPane    The {@link JScrollPane} in which the content component is placed.
+     * @param content       The user provided content component placed inside the scroll pane.
+     * @param preferredSize Supplies the default preferred viewport size when it is first read.
+     * @return A new {@link ScrollableComponentDelegate} with lazily computed defaults.
+     */
     static ScrollableComponentDelegate of(
         JScrollPane scrollPane,
         JComponent content,
-        Size preferredSize
+        Supplier<Size> preferredSize
     ) {
         Component view     = scrollPane.getViewport().getView();
         JViewport viewport = scrollPane.getViewport();
 
-        boolean fitWidth ;
-        boolean fitHeight;
+        Lazy<Boolean> fitWidth ;
+        Lazy<Boolean> fitHeight;
         ScrollIncrementSupplier unitIncrementSupplier;
         ScrollIncrementSupplier blockIncrementSupplier;
         if ( content instanceof Scrollable) {
             Scrollable scrollable = (Scrollable)content;
-            fitWidth = scrollable.getScrollableTracksViewportWidth();
-            fitHeight = scrollable.getScrollableTracksViewportHeight();
+            fitWidth  = Lazy.from(scrollable::getScrollableTracksViewportWidth);
+            fitHeight = Lazy.from(scrollable::getScrollableTracksViewportHeight);
             unitIncrementSupplier = (a,b,c) -> {
                 int orientation = b == UI.Align.HORIZONTAL ? SwingConstants.HORIZONTAL : SwingConstants.VERTICAL;
                 return scrollable.getScrollableUnitIncrement(a.toRectangle(),orientation,c);
@@ -107,16 +128,16 @@ public final class ScrollableComponentDelegate
             }
             // Note: a view's preferred size is not necessarily cached (a JComponent recomputes it on every call),
             // and depending on what sits behind it this single preferred size query can be expensive!
-            Dimension viewPreferredSize = view.getPreferredSize();
-            fitWidth  = viewport.getWidth()  > viewPreferredSize.width;
-            fitHeight = viewport.getHeight() > viewPreferredSize.height;
+            Lazy<Dimension> viewPreferredSize = Lazy.from(view::getPreferredSize);
+            fitWidth  = Lazy.from(() -> viewport.getWidth()  > viewPreferredSize.get().width );
+            fitHeight = Lazy.from(() -> viewport.getHeight() > viewPreferredSize.get().height);
             int unitIncrement  = averageUnitIncrement;
             int blockIncrement = averageBlockIncrement;
             unitIncrementSupplier = (a,b,c) -> unitIncrement;
             blockIncrementSupplier = (a,b,c) -> blockIncrement;
         }
         return new ScrollableComponentDelegate(
-                    scrollPane, content, view, preferredSize,
+                    scrollPane, content, view, Lazy.from(preferredSize),
                     unitIncrementSupplier, blockIncrementSupplier,
                     fitWidth, fitHeight
                 );
@@ -155,30 +176,30 @@ public final class ScrollableComponentDelegate
         Objects.requireNonNull(blockIncrement);
         Component view = scrollPane.getViewport().getView();
         return new ScrollableComponentDelegate(
-                    scrollPane, content, view, preferredSize,
-                    unitIncrement, blockIncrement, fitWidth, fitHeight
+                    scrollPane, content, view, Lazy.of(preferredSize),
+                    unitIncrement, blockIncrement, Lazy.of(fitWidth), Lazy.of(fitHeight)
                 );
     }
 
     private final JScrollPane             _scrollPane;
     private final JComponent              _content;
     private final Component               _view;
-    private final Size                    _preferredSize;
+    private final Lazy<Size>              _preferredSize;
     private final ScrollIncrementSupplier _unitIncrement;
     private final ScrollIncrementSupplier _blockIncrement;
-    private final boolean                 _fitWidth;
-    private final boolean                 _fitHeight;
+    private final Lazy<Boolean>           _fitWidth;
+    private final Lazy<Boolean>           _fitHeight;
 
 
     private ScrollableComponentDelegate(
         JScrollPane             scrollPane,
         JComponent              content,
         Component               view,
-        Size                    preferredSize,
+        Lazy<Size>              preferredSize,
         ScrollIncrementSupplier unitIncrement,
         ScrollIncrementSupplier blockIncrement,
-        boolean                 fitWidth,
-        boolean                 fitHeight
+        Lazy<Boolean>           fitWidth,
+        Lazy<Boolean>           fitHeight
     ) {
         _scrollPane     = scrollPane;
         _content        = content;
@@ -209,7 +230,7 @@ public final class ScrollableComponentDelegate
      */
     public ScrollableComponentDelegate prefSize( int width, int height ) {
         return new ScrollableComponentDelegate(
-                _scrollPane, _content, _view, Size.of(width, height), _unitIncrement, _blockIncrement, _fitWidth, _fitHeight
+                _scrollPane, _content, _view, Lazy.of(Size.of(width, height)), _unitIncrement, _blockIncrement, _fitWidth, _fitHeight
             );
     }
 
@@ -235,7 +256,7 @@ public final class ScrollableComponentDelegate
         if ( preferredSize.equals(Size.unknown()) )
             return this;
         return new ScrollableComponentDelegate(
-                _scrollPane, _content, _view, preferredSize, _unitIncrement, _blockIncrement, _fitWidth, _fitHeight
+                _scrollPane, _content, _view, Lazy.of(preferredSize), _unitIncrement, _blockIncrement, _fitWidth, _fitHeight
             );
     }
 
@@ -350,7 +371,7 @@ public final class ScrollableComponentDelegate
      */
     public ScrollableComponentDelegate fitWidth( boolean fitWidth ) {
         return new ScrollableComponentDelegate(
-                _scrollPane, _content, _view, _preferredSize, _unitIncrement, _blockIncrement, fitWidth, _fitHeight
+                _scrollPane, _content, _view, _preferredSize, _unitIncrement, _blockIncrement, Lazy.of(fitWidth), _fitHeight
         );
     }
 
@@ -370,7 +391,7 @@ public final class ScrollableComponentDelegate
      */
     public ScrollableComponentDelegate fitHeight( boolean fitHeight ) {
         return new ScrollableComponentDelegate(
-                _scrollPane, _content, _view, _preferredSize, _unitIncrement, _blockIncrement, _fitWidth, fitHeight
+                _scrollPane, _content, _view, _preferredSize, _unitIncrement, _blockIncrement, _fitWidth, Lazy.of(fitHeight)
         );
     }
 
@@ -430,7 +451,7 @@ public final class ScrollableComponentDelegate
      * @return The configured preferred viewport size of the scrollable content.
      */
     public Size preferredSize() {
-        return _preferredSize;
+        return _preferredSize.get();
     }
 
     /**
@@ -476,7 +497,7 @@ public final class ScrollableComponentDelegate
      *         {@code false} otherwise.
      */
     public boolean fitWidth() {
-        return _fitWidth;
+        return _fitWidth.get();
     }
 
     /**
@@ -488,17 +509,17 @@ public final class ScrollableComponentDelegate
      *         {@code false} otherwise.
      */
     public boolean fitHeight() {
-        return _fitHeight;
+        return _fitHeight.get();
     }
 
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "[" +
-                "preferredSize="  + _preferredSize  + ", " +
-                "unitIncrement="  + _unitIncrement  + ", " +
-                "blockIncrement=" + _blockIncrement + ", " +
-                "fitWidth="       + _fitWidth       + ", " +
-                "fitHeight="      + _fitHeight      +
+                "preferredSize="  + this.preferredSize() + ", " +
+                "unitIncrement="  + _unitIncrement       + ", " +
+                "blockIncrement=" + _blockIncrement      + ", " +
+                "fitWidth="       + this.fitWidth()      + ", " +
+                "fitHeight="      + this.fitHeight()     +
             "]";
     }
 
@@ -509,16 +530,58 @@ public final class ScrollableComponentDelegate
         if ( !(obj instanceof ScrollableComponentDelegate) )
             return false;
         ScrollableComponentDelegate that = (ScrollableComponentDelegate) obj;
-        return _preferredSize.equals(that._preferredSize) &&
+        return this.preferredSize().equals(that.preferredSize()) &&
                _unitIncrement.equals(that._unitIncrement) &&
                _blockIncrement.equals(that._blockIncrement) &&
-               _fitWidth       == that._fitWidth &&
-               _fitHeight      == that._fitHeight;
+               this.fitWidth()  == that.fitWidth() &&
+               this.fitHeight() == that.fitHeight();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(_preferredSize, _unitIncrement, _blockIncrement, _fitWidth, _fitHeight);
+        return Objects.hash(this.preferredSize(), _unitIncrement, _blockIncrement, this.fitWidth(), this.fitHeight());
+    }
+
+    /**
+     *  A value which is either known up front or else computed on demand, at most once.
+     *  <p>
+     *  The delegate hands the same instance to every copy of itself produced by its wither
+     *  methods, which is what keeps a default from being computed twice when a configurator
+     *  reads it and the scroll pane then reads it again. Note that the value a {@code Lazy}
+     *  reports never changes; only the moment at which it is determined does. Like the
+     *  Swing components it measures, it belongs to the event dispatch thread and is not
+     *  safe to share across threads.
+     *
+     * @param <T> The type of the value held by this.
+     */
+    private static final class Lazy<T>
+    {
+        static <T> Lazy<T> of( T value ) {
+            return new Lazy<>(null, Objects.requireNonNull(value));
+        }
+
+        static <T> Lazy<T> from( Supplier<T> supplier ) {
+            return new Lazy<>(Objects.requireNonNull(supplier), null);
+        }
+
+        private @Nullable Supplier<T> _supplier;
+        private @Nullable T           _value;
+
+        private Lazy( @Nullable Supplier<T> supplier, @Nullable T value ) {
+            _supplier = supplier;
+            _value    = value;
+        }
+
+        T get() {
+            T value = _value;
+            if ( value == null ) {
+                Supplier<T> supplier = Objects.requireNonNull(_supplier);
+                value     = Objects.requireNonNull(supplier.get());
+                _value    = value;
+                _supplier = null; // Lets the supplier and everything it captured be collected.
+            }
+            return value;
+        }
     }
 
 }

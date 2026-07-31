@@ -211,7 +211,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
             JScrollPane parent, JComponent child, Configurator<ScrollableComponentDelegate> configurator
     ) {
         ScrollableComponentDelegate delegate = ScrollableComponentDelegate.of(
-                                                    parent, child, Size.of(child.getPreferredSize())
+                                                    parent, child, () -> Size.of(child.getPreferredSize())
                                                 );
         try {
             delegate = configurator.configure(delegate);

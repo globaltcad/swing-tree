@@ -122,15 +122,20 @@ final class StyleRenderer
      *  every one of them comes out fully opaque, because a rectangle aligned to the
      *  pixel grid has no soft edge to begin with.
      *  <p>
-     *  The precondition is checked, not assumed: {@link ComponentAreas} only hands
-     *  out a {@link Rectangle} (integer valued by its very type) when all four
-     *  coordinates are whole numbers, and the current transform is verified to map
-     *  those whole numbers onto whole device pixels. Anything else - a fractional
+     *  The precondition is checked, not assumed. A {@link Rectangle} is integer valued
+     *  by its very type, so the only thing left that could put an edge between two
+     *  pixels is the transform, and that is verified here to be free of shear and to
+     *  map all four corners onto whole device pixels. Anything else - a fractional
      *  {@link java.awt.geom.Rectangle2D}, a rounded shape, a rotated or oddly scaled
      *  transform - keeps antialiasing and is filled exactly as before.
+     *  <p>
+     *  Note that the check deliberately says nothing about where the {@code Rectangle}
+     *  came from. {@link ComponentAreas} produces one both by verifying that a shape's
+     *  bounds are whole and by truncating them, and either way the two antialiasing
+     *  states fill the very same integer rectangle identically.
      */
     private static void _fillShape( final Graphics2D g2d, final Shape shape ) {
-        if ( shape instanceof Rectangle && g2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING) == RenderingHints.VALUE_ANTIALIAS_ON ) {
+        if ( shape instanceof Rectangle && RenderingHints.VALUE_ANTIALIAS_ON.equals(g2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING)) ) {
             if ( _mapsOntoWholeDevicePixels(g2d.getTransform(), (Rectangle) shape) ) {
                 g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
                 try {
