@@ -358,10 +358,13 @@ final class NoiseGradientPaint implements Paint
 
                         final float onGradientRange = noiseFunction.getFractionAt( x, y );
 
-                        // The fractions ascend, so the last one this value reaches is the
-                        // one that wins. Walking down from the top finds it immediately
-                        // instead of overwriting the result once per remaining stop --
-                        // which matters, because a soft shadow falloff has dozens of them.
+                        // The stop that wins is the highest indexed one this value reaches,
+                        // so walking down and stopping at the first hit picks exactly what
+                        // walking up and overwriting on every hit used to pick -- but it
+                        // stops there instead of running through every remaining stop, which
+                        // matters, because a soft shadow falloff has dozens of them. Note
+                        // that this is a statement about index order only: nothing here
+                        // assumes the fractions themselves ascend, and nothing sorts them.
                         for ( int i = MAX - 1; i >= 0; i-- ) {
                             if ( onGradientRange >= localFractions[i] ) {
                                 final float distance = onGradientRange - localFractions[i];
