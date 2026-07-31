@@ -157,6 +157,31 @@ jacocoTestReport {
 }
 check.dependsOn jacocoTestReport
 
+// BENCHMARKS :
+
+/*
+ *  Measures what laying out and painting the (heavily styled) 'ChatView' example costs,
+ *  so that a claim about resize performance can be checked instead of believed.
+ *  It opens a window, so it needs a display and is never part of 'check'.
+ */
+tasks.register('runResizeBenchmark', JavaExec) {
+    group = 'verification'
+    description = 'Measures the layout and paint cost of a window resize of the ChatView example.'
+    dependsOn 'testClasses'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'benchmarks.ChatViewResizeBenchmark'
+    // '-Pbenchmark.warmup=..' and '-Pbenchmark.sweeps=..' control how much work is done,
+    // which matters when profiling, because a sampler needs more than a second of it:
+    System.properties.each { key, value ->
+        if ( key.toString().startsWith('benchmark.') ) systemProperty(key.toString(), value)
+    }
+    // '-Pjfr=<file>' records a flight recording of the run, to find out where the time goes:
+    if ( project.hasProperty('jfr') ) {
+        jvmArgs "-XX:FlightRecorderOptions=stackdepth=512"
+        jvmArgs "-XX:StartFlightRecording=settings=profile,dumponexit=true,filename=${project.property('jfr')}"
+    }
+}
+
 // CUSTOM DEPLOYMENT TASKS :
 
 // 0: Cleanup
