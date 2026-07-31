@@ -6,7 +6,6 @@ import spock.lang.Subject
 import spock.lang.Title
 import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
-import utility.Utility
 
 import javax.swing.JComponent
 import javax.swing.JPanel
@@ -55,22 +54,37 @@ class Scroll_Pane_Delegation_Spec extends Specification
             gives it away is the component telling everyone that a size changed, so that is
             what we listen for.
         """
-        given : 'A scroll pane with some content in it, and the box SwingTree put in between.'
-            var view = boxOf(UI.panel("fill").withMinSize(40, 20).withMaxSize(400, 300))
+        given : 'A scroll pane with some content in it.'
+            var scrollPane =
+                    UI.scrollPane( conf -> conf.fitWidth(true) )
+                    .add(
+                        UI.panel("fill")
+                        .withMinSize(40, 20)
+                        .withMaxSize(400, 300)
+                    )
+                    .get(JScrollPane)
+        and : 'The box SwingTree slipped in between the viewport and the content.'
+            var box = UI.runAndGet({ (JComponent) scrollPane.getViewport().getView() })
         and : 'A record of every size the box announces as changed.'
-            var announced = announcementsOf(view)
+            var announced = []
+            UI.runNow({
+                box.addPropertyChangeListener({ event ->
+                    if ( event.propertyName in ["minimumSize", "maximumSize", "preferredSize"] )
+                        announced.add(event.propertyName)
+                } as PropertyChangeListener)
+            })
 
         when : 'We ask it one of the three questions, a few times over.'
-            UI.runNow({ 3.times { question.call(view) } })
+            UI.runNow({ 3.times { question.call(box) } })
 
         then : 'The only size it can possibly have changed is the one we asked about.'
             announced.every { it == expectedProperty }
 
         where : 'We ask each of the three questions in turn.'
             expectedProperty | question
-            "minimumSize"    | { JComponent v -> v.getMinimumSize()   }
-            "maximumSize"    | { JComponent v -> v.getMaximumSize()   }
-            "preferredSize"  | { JComponent v -> v.getPreferredSize() }
+            "minimumSize"    | { JComponent it -> it.getMinimumSize()   }
+            "maximumSize"    | { JComponent it -> it.getMaximumSize()   }
+            "preferredSize"  | { JComponent it -> it.getPreferredSize() }
     }
 
     def 'The box settles down: asking it the same things again changes nothing.'()
@@ -86,13 +100,29 @@ class Scroll_Pane_Delegation_Spec extends Specification
             what the previous one recorded and the box never stops announcing changes - even
             though every single answer it gives is correct.
         """
-        given : 'A scroll pane with some content in it, and the box SwingTree put in between.'
-            var view = boxOf(UI.panel("fill").withMinSize(40, 20).withMaxSize(400, 300))
-            var announced = announcementsOf(view)
+        given : 'A scroll pane with some content in it.'
+            var scrollPane =
+                    UI.scrollPane( conf -> conf.fitWidth(true) )
+                    .add(
+                        UI.panel("fill")
+                        .withMinSize(40, 20)
+                        .withMaxSize(400, 300)
+                    )
+                    .get(JScrollPane)
+        and : 'The box SwingTree slipped in between the viewport and the content.'
+            var box = UI.runAndGet({ (JComponent) scrollPane.getViewport().getView() })
+        and : 'A record of every size the box announces as changed.'
+            var announced = []
+            UI.runNow({
+                box.addPropertyChangeListener({ event ->
+                    if ( event.propertyName in ["minimumSize", "maximumSize", "preferredSize"] )
+                        announced.add(event.propertyName)
+                } as PropertyChangeListener)
+            })
 
         when : 'We ask the box all three questions, over and over, the way a layout pass does.'
             UI.runNow({
-                20.times { view.getMinimumSize(); view.getMaximumSize(); view.getPreferredSize() }
+                20.times { box.getMinimumSize(); box.getMaximumSize(); box.getPreferredSize() }
             })
 
         then : """
@@ -112,41 +142,27 @@ class Scroll_Pane_Delegation_Spec extends Specification
             be satisfied by a box that has simply stopped answering.
         """
         given : 'A content component with a mind of its own about how it wants to be sized.'
-            var content = UI.panel("fill").withMinSize(40, 20).withMaxSize(400, 300)
-            var view = boxOf(content)
-            var contentComponent = new Utility.Query(view).find(JPanel, "content").orElseThrow(NoSuchElementException::new)
+            var content =
+                    UI.panel("fill")
+                    .withMinSize(40, 20)
+                    .withMaxSize(400, 300)
+                    .get(JPanel)
+        and : 'A scroll pane wrapped around it, and the box SwingTree slipped in between.'
+            var scrollPane =
+                    UI.scrollPane( conf -> conf.fitWidth(true) )
+                    .add(UI.of(content))
+                    .get(JScrollPane)
+            var box = UI.runAndGet({ (JComponent) scrollPane.getViewport().getView() })
 
         expect : 'The box says exactly what the content says.'
-            UI.runAndGet({ view.getMinimumSize() }) == UI.runAndGet({ contentComponent.getMinimumSize() })
-            UI.runAndGet({ view.getMaximumSize() }) == UI.runAndGet({ contentComponent.getMaximumSize() })
-            UI.runAndGet({ view.getPreferredSize() }) == UI.runAndGet({ contentComponent.getPreferredSize() })
+            UI.runAndGet({ box.getMinimumSize()   }) == UI.runAndGet({ content.getMinimumSize()   })
+            UI.runAndGet({ box.getMaximumSize()   }) == UI.runAndGet({ content.getMaximumSize()   })
+            UI.runAndGet({ box.getPreferredSize() }) == UI.runAndGet({ content.getPreferredSize() })
 
         when : 'The content changes its mind,'
-            UI.runNow({ contentComponent.setMinimumSize(new Dimension(123, 45)) })
+            UI.runNow({ content.setMinimumSize(new Dimension(123, 45)) })
 
         then : 'the box changes its mind with it.'
-            UI.runAndGet({ view.getMinimumSize() }) == new Dimension(123, 45)
-    }
-
-    // ────────────────────────────────────────────────────────────────────────
-
-    /** Builds a configured scroll pane around the given content and returns the box in between. */
-    private static JComponent boxOf( UIForAnySwing<?,?> content ) {
-        var scrollPane = UI.scrollPane(conf -> conf.fitWidth(true) )
-                           .add(content.id("content"))
-                           .get(JScrollPane)
-        return UI.runAndGet({ (JComponent) scrollPane.getViewport().getView() })
-    }
-
-    /** Records the name of every size the given component announces as changed. */
-    private static List<String> announcementsOf( JComponent component ) {
-        List<String> announced = []
-        UI.runNow({
-            component.addPropertyChangeListener({ event ->
-                if ( event.propertyName in ["minimumSize", "maximumSize", "preferredSize"] )
-                    announced.add(event.propertyName)
-            } as PropertyChangeListener)
-        })
-        return announced
+            UI.runAndGet({ box.getMinimumSize() }) == new Dimension(123, 45)
     }
 }
