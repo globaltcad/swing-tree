@@ -9,6 +9,7 @@ import utility.SwingTreeTestConfigurator
 import utility.Utility
 
 import javax.swing.JFrame
+import javax.swing.JLabel
 import javax.swing.JPanel
 import javax.swing.JScrollPane
 import java.awt.Dimension
@@ -268,6 +269,70 @@ class Scroll_Pane_Spec extends Specification
             200 <= content1.getHeight() && content1.getHeight() <= 230
             315 <= content2.getWidth()  && content2.getWidth()  <= 335
             215 <= content2.getHeight() && content2.getHeight() <= 245
+    }
+
+    def 'The view of a configured scroll pane reports a preferred size which tracks its content.'()
+    {
+        reportInfo """
+            When you configure a scroll pane through the `UI.scrollPane(Configurator)` factory
+            method, then SwingTree places a thin delegation box between the viewport and your
+            content component. The box exists so that the `Scrollable` behaviour can be supplied
+            declaratively instead of through inheritance, and it is meant to be completely
+            transparent with respect to sizing: whatever the content component says it needs,
+            the box says too.
+
+            This little test pins that transparency down for the case that tends to break it,
+            namely a content component which changes size after the box has already been
+            measured once. Note that we deliberately measure the box while it is in the
+            invalidated state, because that is the state it spends every layout pass in, and
+            because an invalid component does not receive `invalidate()` from its children a
+            second time. So a box which remembered its last measurement would answer with a
+            stale size here, and the scroll pane would then lay out and scroll a view that
+            does not exist anymore.
+        """
+        given : 'A label whose text we are going to grow later on, placed inside a configured scroll pane.'
+            var label = new JLabel("short")
+            var ui =
+                UI.frame("Scroll Pane Content Growth Test")
+                .peek(it -> it.setPreferredSize(new Dimension(400, 200)))
+                .add(
+                    UI.scrollPane( conf -> conf.fitWidth(true) ).id("scroll")
+                    .add(
+                        UI.panel("fill, ins 0").id("content")
+                        .add("grow", UI.of(label))
+                    )
+                )
+        and : 'We build the UI and let it lay itself out:'
+            var frame = ui.get(JFrame)
+            UI.runNow( () -> frame.pack() )
+        and : 'We look up the scroll pane as well as the delegation box acting as its view.'
+            var scrollPane = new Utility.Query(frame).find(JScrollPane, "scroll").orElseThrow(NoSuchElementException::new)
+            var content    = new Utility.Query(frame).find(JPanel, "content").orElseThrow(NoSuchElementException::new)
+            var view       = UI.runAndGet( () -> scrollPane.getViewport().getView() )
+
+        expect : 'Right after the first layout the box already agrees with its content.'
+            UI.runAndGet( () -> view.getPreferredSize() ) == UI.runAndGet( () -> content.getPreferredSize() )
+
+        when : 'The box enters the invalidated state it is in throughout every layout pass,'
+            UI.runNow( () -> view.invalidate() )
+        and : 'and it is measured while being in that state, just like a layout pass would do,'
+            var widthBefore = UI.runAndGet( () -> view.getPreferredSize() ).width
+        and : 'and the content then becomes substantially wider.'
+            UI.runNow( () -> label.setText("a piece of text which is a great deal longer than the previous one, by a wide margin indeed") )
+
+        then : 'The box grew together with its content instead of reporting the size it had before.'
+            UI.runAndGet( () -> view.getPreferredSize() ).width > widthBefore
+        and : 'It still reports exactly what the content component itself reports.'
+            UI.runAndGet( () -> view.getPreferredSize() ) == UI.runAndGet( () -> content.getPreferredSize() )
+
+        when : 'We lay the whole frame out again and shrink the content back down,'
+            UI.runNow( () -> frame.validate() )
+            var widthOfWideContent = UI.runAndGet( () -> view.getPreferredSize() ).width
+            UI.runNow( () -> label.setText("short") )
+
+        then : 'the box shrinks along with it.'
+            UI.runAndGet( () -> view.getPreferredSize() ).width < widthOfWideContent
+            UI.runAndGet( () -> view.getPreferredSize() ) == UI.runAndGet( () -> content.getPreferredSize() )
     }
 
     def 'You can add a custom ´Scrollable´ component to a scroll pane with layout constraints that work.'()
