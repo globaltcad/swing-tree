@@ -257,10 +257,10 @@ class Border_Delegation_Spec extends Specification
     /** How many pixels the border actually put paint on, so that a comparison of two blank images cannot pass. */
     private static int paintedPixels( BufferedImage image ) {
         int painted = 0
-        for ( int y = 0; y < image.getHeight(); y++ )
-            for ( int x = 0; x < image.getWidth(); x++ )
-                if ( (image.getRGB(x, y) >>> 24) != 0 )
-                    painted++
+        int[] pixels = ((java.awt.image.DataBufferInt) image.getRaster().getDataBuffer()).getData()
+        for ( int argb : pixels )
+            if ( (argb >>> 24) != 0 )
+                painted++
         return painted
     }
 
