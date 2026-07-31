@@ -170,6 +170,16 @@ tasks.register('runResizeBenchmark', JavaExec) {
     dependsOn 'testClasses'
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'benchmarks.ChatViewResizeBenchmark'
+    // '-Pbenchmark.warmup=..' and '-Pbenchmark.sweeps=..' control how much work is done,
+    // which matters when profiling, because a sampler needs more than a second of it:
+    System.properties.each { key, value ->
+        if ( key.toString().startsWith('benchmark.') ) systemProperty(key.toString(), value)
+    }
+    // '-Pjfr=<file>' records a flight recording of the run, to find out where the time goes:
+    if ( project.hasProperty('jfr') ) {
+        jvmArgs "-XX:FlightRecorderOptions=stackdepth=512"
+        jvmArgs "-XX:StartFlightRecording=settings=profile,dumponexit=true,filename=${project.property('jfr')}"
+    }
 }
 
 // CUSTOM DEPLOYMENT TASKS :

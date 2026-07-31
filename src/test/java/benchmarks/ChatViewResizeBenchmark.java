@@ -49,8 +49,13 @@ public final class ChatViewResizeBenchmark
     private static final int   WINDOW_WIDTH  = 2600;
     private static final int   WINDOW_HEIGHT = 1660;
     private static final int   NARROW_WIDTH  = 1200;
-    private static final int   WARMUP_SWEEPS = 24;
-    private static final int   TIMED_SWEEPS  = 40;
+    /*
+     *  Raise these when profiling rather than measuring: a JFR execution sampler ticks
+     *  every few milliseconds, and the default sweep counts amount to about a second of
+     *  work in total, which is not enough sample mass to rank anything by.
+     */
+    private static final int   WARMUP_SWEEPS = Integer.getInteger("benchmark.warmup", 24);
+    private static final int   TIMED_SWEEPS  = Integer.getInteger("benchmark.sweeps", 40);
     private static final int   CLIP_HEIGHT   = 300;
 
     public static void main( String[] args ) throws Exception
