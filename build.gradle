@@ -157,6 +157,21 @@ jacocoTestReport {
 }
 check.dependsOn jacocoTestReport
 
+// BENCHMARKS :
+
+/*
+ *  Measures what laying out and painting the (heavily styled) 'ChatView' example costs,
+ *  so that a claim about resize performance can be checked instead of believed.
+ *  It opens a window, so it needs a display and is never part of 'check'.
+ */
+tasks.register('runResizeBenchmark', JavaExec) {
+    group = 'verification'
+    description = 'Measures the layout and paint cost of a window resize of the ChatView example.'
+    dependsOn 'testClasses'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'benchmarks.ChatViewResizeBenchmark'
+}
+
 // CUSTOM DEPLOYMENT TASKS :
 
 // 0: Cleanup
