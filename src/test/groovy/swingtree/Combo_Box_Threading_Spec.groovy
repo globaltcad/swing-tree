@@ -71,7 +71,7 @@ class Combo_Box_Threading_Spec extends Specification
     }
 
     def 'Changing property based combo box options from the application thread never waits for the UI thread. [#kind]'(
-        String kind, Closure declare, Closure addOption
+        String kind, Closure newOptions, Closure declare, Closure addOption
     ) {
         reportInfo """
             The application thread must be able to update the option properties
@@ -83,10 +83,11 @@ class Combo_Box_Threading_Spec extends Specification
             offering its old snapshot of the options until the UI thread
             is released and catches up.
         """
-        given : 'A selection property and a combo box built in decoupled mode. (See the `where` block for the current model flavour!)'
+        given : 'A selection property, a fresh option holder of the flavour under test, and a combo box built in decoupled mode.'
             var selection = Var.of("B")
+            var options = newOptions()
             var combo = UI.runAndGet({
-                UI.use(EventProcessor.DECOUPLED, ()-> declare(selection)).get(JComboBox)
+                UI.use(EventProcessor.DECOUPLED, ()-> declare(selection, options)).get(JComboBox)
             })
         expect : 'The combo box offers the three initial options.'
             combo.itemCount == 3
@@ -99,7 +100,7 @@ class Combo_Box_Threading_Spec extends Specification
             // by the mutation below is fenced behind the gate task either way.
             var itemCountWhileParked = -1
             try {
-                addOption()
+                addOption(options)
                 itemCountWhileParked = combo.itemCount
             } finally {
                 gate.countDown()
@@ -112,15 +113,15 @@ class Combo_Box_Threading_Spec extends Specification
             combo.getItemAt(3) == "D"
 
         where : 'All three property based option models behave identically:'
-            [kind, declare, addOption] << [
-                _tupleOptionsScenario(),
-                _varsOptionsScenario(),
-                _valsOptionsScenario()
-            ]
+            kind                           | newOptions                        | declare                                                                        | addOption
+            'Tuple property based options' | { Var.of(Tuple.of("A","B","C")) } | { Var sel, Var opts -> UI.comboBox().withItems(sel, opts) }                     | { Var opts -> opts.update( tuple -> tuple.add("D") ) }
+            'Vars based options'           | { Vars.of("A","B","C") }          | { Var sel, Vars opts -> UI.comboBox(sel, opts) }                                | { Vars opts -> opts.add("D") }
+            // The `Vals` model is constructed directly, so that dynamic dispatch cannot pick the `Vars` flavour:
+            'Vals based options'           | { Vars.of("A","B","C") }          | { Var sel, Vars opts -> UI.comboBox().withModel(new ValsBasedComboModel<>(sel, opts)) } | { Vars opts -> opts.add("D") }
     }
 
     def 'Plain array and list based options are shared live state, visible without any UI thread involvement. [#kind]'(
-        String kind, Closure declare, Closure mutate, String expectedFirstItem
+        String kind, Closure newOptions, Closure declare, Closure mutate, String expectedFirstItem
     ) {
         reportInfo """
             The plain array and list models are the deliberate exception to
@@ -134,8 +135,9 @@ class Combo_Box_Threading_Spec extends Specification
         """
         given : 'A selection property and a combo box built in decoupled mode around a plain collection.'
             var selection = Var.of("B")
+            var options = newOptions()
             var combo = UI.runAndGet({
-                UI.use(EventProcessor.DECOUPLED, ()-> declare(selection)).get(JComboBox)
+                UI.use(EventProcessor.DECOUPLED, ()-> declare(selection, options)).get(JComboBox)
             })
         expect :
             combo.getItemAt(0) == "A"
@@ -148,7 +150,7 @@ class Combo_Box_Threading_Spec extends Specification
             // merely demonstrates that visibility does not depend on it.
             var firstItemWhileParked = null
             try {
-                mutate()
+                mutate(options)
                 firstItemWhileParked = combo.getItemAt(0)
             } finally {
                 gate.countDown()
@@ -159,10 +161,9 @@ class Combo_Box_Threading_Spec extends Specification
             combo.getItemAt(0) == expectedFirstItem
 
         where : 'Both plain collection models share this live read contract:'
-            [kind, declare, mutate, expectedFirstItem] << [
-                _arrayOptionsScenario(),
-                _listOptionsScenario()
-            ]
+            kind                        | newOptions                             | declare                                                          | mutate                            | expectedFirstItem
+            'plain array based options' | { new String[]{ "A", "B", "C" } }      | { Var sel, String[] opts -> UI.comboBox().withItems(sel, opts) } | { String[] opts -> opts[0] = "D" }| "D"
+            'plain list based options'  | { new ArrayList<>(["A", "B", "C"]) }   | { Var sel, List opts -> UI.comboBox(sel, opts) }                 | { List opts -> opts.add(0, "D") } | "D"
     }
 
     def 'The UI thread never waits for the application thread, even when nobody is processing application events. [#kind]'(
@@ -206,17 +207,16 @@ class Combo_Box_Threading_Spec extends Specification
             selection.is("C")
 
         where : 'This contract holds for every single combo box model flavour:'
-            [kind, declare] << [
-                _arrayOptionsScenario(),
-                _listOptionsScenario(),
-                _tupleOptionsScenario(),
-                _varsOptionsScenario(),
-                _valsOptionsScenario()
-            ].collect({ it.subList(0, 2) })
+            kind                           | declare
+            'plain array based options'    | { Var sel -> UI.comboBox().withItems(sel, new String[]{ "A", "B", "C" }) }
+            'plain list based options'     | { Var sel -> UI.comboBox(sel, new ArrayList<>(["A", "B", "C"])) }
+            'Tuple property based options' | { Var sel -> UI.comboBox().withItems(sel, Var.of(Tuple.of("A","B","C"))) }
+            'Vars based options'           | { Var sel -> UI.comboBox(sel, Vars.of("A","B","C")) }
+            'Vals based options'           | { Var sel -> UI.comboBox().withModel(new ValsBasedComboModel<>(sel, Vars.of("A","B","C"))) }
     }
 
     def 'Rendering a combo box always sees an internally consistent snapshot, even during an option mutation storm. [#kind]'(
-        String kind, Closure declare, Closure mutateStep
+        String kind, Closure newOptions, Closure declare, Closure mutateStep
     ) {
         reportInfo """
             Swing consults `getSize()` and `getElementAt(i)` whenever it
@@ -236,15 +236,16 @@ class Combo_Box_Threading_Spec extends Specification
             var log = LogSpy.attach()
         and : 'A combo box built in decoupled mode, with its options under mutation pressure.'
             var selection = Var.of("B")
+            var options = newOptions()
             var combo = UI.runAndGet({
-                UI.use(EventProcessor.DECOUPLED, ()-> declare(selection)).get(JComboBox)
+                UI.use(EventProcessor.DECOUPLED, ()-> declare(selection, options)).get(JComboBox)
             })
         and : 'A list collecting every inconsistency a render pass may observe.'
             var violations = new CopyOnWriteArrayList<String>()
 
         when : 'We fire 60 mutation steps from this thread, and after each one, a full renderer style read pass runs on the UI thread.'
             60.times { step ->
-                mutateStep(step)
+                mutateStep(options, step)
                 UI.runNow({
                     int count = combo.itemCount
                     for ( int i = 0; i < count; i++ ) {
@@ -264,12 +265,11 @@ class Combo_Box_Threading_Spec extends Specification
         cleanup :
             log.detach()
 
-        where : 'The mutation storm is survived by all three property based models:'
-            [kind, declare, mutateStep] << [
-                _tupleStormScenario(),
-                _varsStormScenario(),
-                _valsStormScenario()
-            ]
+        where : 'The mutation storm is survived by all three property based models, each growing to six options and then dropping three:'
+            kind                           | newOptions                        | declare                                                                        | mutateStep
+            'Tuple property based options' | { Var.of(Tuple.of("A","B","C")) } | { Var sel, Var opts -> UI.comboBox().withItems(sel, opts) }                     | { Var opts, int step -> opts.update( tuple -> tuple.size() < 6 ? tuple.add("option-$step".toString()) : tuple.removeAt(0, 3) ) }
+            'Vars based options'           | { Vars.of("A","B","C") }          | { Var sel, Vars opts -> UI.comboBox(sel, opts) }                                | { Vars opts, int step -> if ( opts.size() < 6 ) opts.add("option-$step".toString()) else opts.removeAt(0, 3) }
+            'Vals based options'           | { Vars.of("A","B","C") }          | { Var sel, Vars opts -> UI.comboBox().withModel(new ValsBasedComboModel<>(sel, opts)) } | { Vars opts, int step -> if ( opts.size() < 6 ) opts.add("option-$step".toString()) else opts.removeAt(0, 3) }
     }
 
     def 'An option edit which arrives after the options changed is dropped gracefully.'()
@@ -369,87 +369,6 @@ class Combo_Box_Threading_Spec extends Specification
 
         where : 'We repeat this race a few times to explore different thread interleavings.'
             run << (1..5)
-    }
-
-    /*
-        The scenarios below each create their own option holder and return
-        the name of the model flavour, a declaration function (taking the
-        selection property), and a mutation function operating on the holder.
-    */
-
-    private static List _tupleOptionsScenario() {
-        var options = Var.of(Tuple.of("A", "B", "C"))
-        return [
-            'Tuple property based options',
-            { Var sel -> UI.comboBox().withItems(sel, options) },
-            { options.update( tuple -> tuple.add("D") ) }
-        ]
-    }
-
-    private static List _varsOptionsScenario() {
-        var options = Vars.of("A", "B", "C")
-        return [
-            'Vars based options',
-            { Var sel -> UI.comboBox(sel, options) },
-            { options.add("D") }
-        ]
-    }
-
-    private static List _valsOptionsScenario() {
-        var options = Vars.of("A", "B", "C")
-        return [
-            'Vals based options',
-            { Var sel -> UI.comboBox().withModel(new ValsBasedComboModel<>(sel, options)) },
-            // ^ We construct the model directly so that dynamic dispatch cannot pick the `Vars` flavour.
-            { options.add("D") }
-        ]
-    }
-
-    private static List _arrayOptionsScenario() {
-        var options = new String[]{ "A", "B", "C" }
-        return [
-            'plain array based options',
-            { Var sel -> UI.comboBox().withItems(sel, options) },
-            { options[0] = "D" },
-            "D"
-        ]
-    }
-
-    private static List _listOptionsScenario() {
-        var options = new ArrayList<>(["A", "B", "C"])
-        return [
-            'plain list based options',
-            { Var sel -> UI.comboBox(sel, options) },
-            { options.add(0, "D") },
-            "D"
-        ]
-    }
-
-    private static List _tupleStormScenario() {
-        var options = Var.of(Tuple.of("A", "B", "C"))
-        return [
-            'Tuple property based options',
-            { Var sel -> UI.comboBox().withItems(sel, options) },
-            { int step -> options.update( tuple -> tuple.size() < 6 ? tuple.add("option-$step".toString()) : tuple.removeAt(0, 3) ) }
-        ]
-    }
-
-    private static List _varsStormScenario() {
-        var options = Vars.of("A", "B", "C")
-        return [
-            'Vars based options',
-            { Var sel -> UI.comboBox(sel, options) },
-            { int step -> if ( options.size() < 6 ) options.add("option-$step".toString()) else options.removeAt(0, 3) }
-        ]
-    }
-
-    private static List _valsStormScenario() {
-        var options = Vars.of("A", "B", "C")
-        return [
-            'Vals based options',
-            { Var sel -> UI.comboBox().withModel(new ValsBasedComboModel<>(sel, options)) },
-            { int step -> if ( options.size() < 6 ) options.add("option-$step".toString()) else options.removeAt(0, 3) }
-        ]
     }
 
     /**
