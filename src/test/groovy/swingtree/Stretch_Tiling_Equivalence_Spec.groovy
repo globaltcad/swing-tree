@@ -69,42 +69,6 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
         SwingTree.clear()
     }
 
-    /** A parentless styled box, sized directly (never through the styler, so the size sticks). */
-    private static JBox boxWith( int width, int height, Closure styler ) {
-        var box = UI.box().withStyle(conf -> styler(conf)).get(JBox)
-        box.setSize(width, height)
-        return box
-    }
-
-    /** Paints a fresh component the classic way: stretch tiling off, so this
-     *  size is rendered from scratch by the style renderer. */
-    private static BufferedImage renderedClassically( int width, int height, Closure styler ) {
-        SwingTree.get().setCacheTilingEnabled(false)
-        var box = boxWith(width, height, styler)
-        var image = Utility.renderSingleComponent(box)
-        assert box.width == width && box.height == height
-        return image
-    }
-
-    /** Paints a fresh box with stretch tiling on, twice, so it warms the shared exemplar
-     *  and any further paint of it is served purely from that cache. Returns the *live box*
-     *  on purpose: the exemplar lives in a weakly keyed global pool and survives only while
-     *  a component still holds its cache key, so the caller must keep this box referenced for
-     *  as long as it relies on the entry being warm (e.g. while a sibling reads it). */
-    private static JBox tiledAndWarmed( int width, int height, Closure styler ) {
-        SwingTree.get().setCacheTilingEnabled(true)
-        var box = boxWith(width, height, styler)
-        Utility.renderSingleComponent(box)
-        Utility.renderSingleComponent(box)
-        assert box.width == width && box.height == height
-        return box
-    }
-
-    /** The warm, cache-served rendering of a stretch-tiled box (see {@link #tiledAndWarmed}). */
-    private static BufferedImage renderedTiled( int width, int height, Closure styler ) {
-        return Utility.renderSingleComponent(tiledAndWarmed(width, height, styler))
-    }
-
     def 'Stretch tiled painting is pixel equivalent to classic painting. (#description)'(
         String description, UI.Layer layer, int width, int height, Closure styler
     ) {
@@ -116,16 +80,34 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             and multiple named ones) — at wide, tall and large sizes.
         """
         given : 'The component painted the classic way, with stretch tiling disabled:'
-            var classic = renderedClassically(width, height, styler)
-        and : 'An identically styled box painted with stretch tiling enabled and warmed into the shared cache:'
-            var tiledBox = tiledAndWarmed(width, height, styler)
+            SwingTree.get().setCacheTilingEnabled(false)
+            // The box is sized directly and never through the styler, so that the size sticks.
+            var classicBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)
+            classicBox.setSize(width, height)
+            var classic = Utility.renderSingleComponent(classicBox)
+            assert classicBox.width == width && classicBox.height == height
+        and : """
+            An identically styled box painted with stretch tiling enabled, twice, so that
+            it warms the shared exemplar and any further paint of it is served purely from
+            that cache. We keep the *live box* around on purpose: the exemplar lives in a
+            weakly keyed global pool and survives only while a component still holds its
+            cache key, so it has to stay referenced for as long as the sibling below relies
+            on the entry being warm.
+        """
+            SwingTree.get().setCacheTilingEnabled(true)
+            var tiledBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)
+            tiledBox.setSize(width, height)
+            Utility.renderSingleComponent(tiledBox)
+            Utility.renderSingleComponent(tiledBox)
+            assert tiledBox.width == width && tiledBox.height == height
         and : """
             Proof that the comparison is not vacuous, i.e. that the style really
             is being cached size independently and not just re-rendered: a
             differently sized sibling finds the shared cache entry already
             populated and is served from it on its very first paint.
         """
-            var sibling = boxWith(width + 16, height + 12, styler)
+            var sibling = UI.box().withStyle(conf -> styler(conf)).get(JBox)
+            sibling.setSize(width + 16, height + 12)
             Utility.renderSingleComponent(sibling)
             assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0
             assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1
@@ -172,10 +154,18 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             threshold could (no off-by-one tile boundaries, no interpolation
             artifacts, no color drift).
         """
-        given : 'A flat background with a foundation frame, painted both ways:'
-            var styler  = { it.backgroundColor("#4a6fb1").foundationColor("#404040").margin(1, 2, 3, 4) }
-            var classic = renderedClassically(300, 200, styler)
-            var tiled   = renderedTiled(300, 200, styler)
+        given : 'A flat background with a foundation frame, painted the classic way, with stretch tiling disabled:'
+            var styler = { it.backgroundColor("#4a6fb1").foundationColor("#404040").margin(1, 2, 3, 4) }
+            SwingTree.get().setCacheTilingEnabled(false)
+            var classicBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)
+            classicBox.setSize(300, 200)
+            var classic = Utility.renderSingleComponent(classicBox)
+        and : 'And the same style painted with stretch tiling enabled, twice, so the second paint is cache served:'
+            SwingTree.get().setCacheTilingEnabled(true)
+            var tiledBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)
+            tiledBox.setSize(300, 200)
+            Utility.renderSingleComponent(tiledBox)
+            var tiled = Utility.renderSingleComponent(tiledBox)
         expect :
             classic.getWidth()  == tiled.getWidth()
             classic.getHeight() == tiled.getHeight()
@@ -201,8 +191,17 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             var styler = { it.backgroundColor("#7a4ab1").foundationColor("#efe6d8").borderRadius(16).margin(6) }
         expect : 'Classic and stretch tiled painting agree at every size in the bracket:'
             for ( var size : [[44, 44], [48, 48], [52, 52], [56, 56], [60, 60], [64, 64], [96, 52], [52, 96]] ) {
-                var classic = renderedClassically(size[0], size[1], styler)
-                var tiled   = renderedTiled(size[0], size[1], styler)
+                SwingTree.get().setCacheTilingEnabled(false)
+                var classicBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)
+                classicBox.setSize(size[0], size[1])
+                var classic = Utility.renderSingleComponent(classicBox)
+
+                SwingTree.get().setCacheTilingEnabled(true)
+                var tiledBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)
+                tiledBox.setSize(size[0], size[1])
+                Utility.renderSingleComponent(tiledBox) // The first paint warms the shared exemplar,
+                var tiled = Utility.renderSingleComponent(tiledBox) // ...so this one is served from it.
+
                 assert Utility.similarityBetween(classic, tiled) >= 99.9
             }
     }
@@ -227,10 +226,13 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             int deviceHeight = Math.ceil(height * scale) as int
         and : 'The classic rendering, painted through a scaling transform:'
             SwingTree.get().setCacheTilingEnabled(false)
-            var classic = paintScaled(boxWith(width, height, styler), deviceWidth, deviceHeight, scale)
+            var classicBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)
+            classicBox.setSize(width, height)
+            var classic = paintScaled(classicBox, deviceWidth, deviceHeight, scale)
         and : 'The stretch tiled rendering, painted the same way, twice, so it is cache served:'
             SwingTree.get().setCacheTilingEnabled(true)
-            var box = boxWith(width, height, styler)
+            var box = UI.box().withStyle(conf -> styler(conf)).get(JBox)
+            box.setSize(width, height)
             paintScaled(box, deviceWidth, deviceHeight, scale)
             var tiled = paintScaled(box, deviceWidth, deviceHeight, scale)
             assert ComponentExtension.from(box).cacheHitCount(UI.Layer.BACKGROUND) >= 1
@@ -271,13 +273,16 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
         given : 'The reference: the transformed component painted with all caching switched off.'
             var styler = { it.backgroundColor("#3f6fa1").foundationColor("#1c2026").borderRadius(14).margin(5) }
             CacheBudget.UNITS_OVERRIDE = 0 // no cache budget at all -> always render directly
-            var uncached = paintTransformed(boxWith(300, 200, styler), transformer)
+            var uncachedBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)
+            uncachedBox.setSize(300, 200)
+            var uncached = paintTransformed(uncachedBox, transformer)
 
         when : 'The same component is painted through that transform with stretch tiling fully enabled.'
             CacheBudget.UNITS_OVERRIDE = 10
             SwingTree.get().setCacheTilingEnabled(true)
             ComponentExtension.updateAllCachesFromLibraryConfig()
-            var box = boxWith(300, 200, styler)
+            var box = UI.box().withStyle(conf -> styler(conf)).get(JBox)
+            box.setSize(300, 200)
             var ext = ComponentExtension.from(box)
             paintTransformed(box, transformer)
             var tiled = paintTransformed(box, transformer)
@@ -318,7 +323,8 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
         given : 'A styled box which is first grown large (so it gets stretch tiled)...'
             var styler = { it.backgroundColor("#7a4ab1").foundationColor("#efe6d8").borderRadius(16).margin(6) }
             SwingTree.get().setCacheTilingEnabled(true)
-            var box = boxWith(400, 300, styler)
+            var box = UI.box().withStyle(conf -> styler(conf)).get(JBox)
+            box.setSize(400, 300)
             var ext = ComponentExtension.from(box)
             2.times { Utility.renderSingleComponent(box) }
         expect : 'It really is cached as a small atlas at this point.'
@@ -333,7 +339,10 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             ext.cachedRendering(UI.Layer.BACKGROUND).get().width  == 30
             ext.cachedRendering(UI.Layer.BACKGROUND).get().height == 24
         and : 'Its pixels are exactly the classic rendering of a component which was never anything else.'
-            var classic = renderedClassically(30, 24, styler)
+            SwingTree.get().setCacheTilingEnabled(false)
+            var classicBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)
+            classicBox.setSize(30, 24)
+            var classic = Utility.renderSingleComponent(classicBox)
             for ( int y = 0; y < classic.getHeight(); y++ )
                 for ( int x = 0; x < classic.getWidth(); x++ )
                     assert classic.getRGB(x, y) == shrunk.getRGB(x, y)
@@ -367,10 +376,14 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
                              .shadow("dark",   s -> s.color(new Color(0, 0, 0, 110)).offset(4, 4).type(UI.ShadowType.PENUMBRA))
                              .shadowBlurRadius(17).shadowSpreadRadius(-5).shadowIsInset(true) }
         and : 'The classic software rendering as the reference:'
-            var classic = renderedClassically(W, H, styler)
+            SwingTree.get().setCacheTilingEnabled(false)
+            var classicBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)
+            classicBox.setSize(W, H)
+            var classic = Utility.renderSingleComponent(classicBox)
         and : 'A stretch tiled component, painted repeatedly onto an accelerated VolatileImage:'
             SwingTree.get().setCacheTilingEnabled(true)
-            var box = boxWith(W, H, styler)
+            var box = UI.box().withStyle(conf -> styler(conf)).get(JBox)
+            box.setSize(W, H)
             var gc = GraphicsEnvironment.localGraphicsEnvironment.defaultScreenDevice.defaultConfiguration
             var volatileDestination = gc.createCompatibleVolatileImage(W, H, Transparency.TRANSLUCENT)
             BufferedImage accelerated = null

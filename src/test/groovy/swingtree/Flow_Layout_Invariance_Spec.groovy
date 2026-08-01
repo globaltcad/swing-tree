@@ -56,23 +56,6 @@ class Flow_Layout_Invariance_Spec extends Specification
 
     // ── Little helpers shared by the features below ──────────────────────────
 
-    private static ComponentOrientation _orientation( boolean leftToRight ) {
-        return leftToRight ? ComponentOrientation.LEFT_TO_RIGHT : ComponentOrientation.RIGHT_TO_LEFT
-    }
-
-    /** The five boxes used by most features, of increasing width. */
-    private static List<List<Integer>> FIVE_BOXES() {
-        return [[10, 20], [20, 20], [30, 20], [40, 20], [50, 20]]
-    }
-
-    private static JPanel _panelOf( def layout, List<List<Integer>> boxes, boolean ltr, boolean withInsets ) {
-        return UI.panel().withLayout(layout)
-                .peek({ it.setComponentOrientation(_orientation(ltr)) })
-                .applyIf(withInsets, { it.peek({ p -> p.setBorder(new EmptyBorder(4, 6, 8, 10)) }) })
-                .apply({ ui -> boxes.each { b -> ui.add(UI.box().withPrefSize(b[0], b[1])) } })
-                .get(JPanel)
-    }
-
     private static List<Rectangle> _laidOutBoundsOf( JPanel panel, int width, int height ) {
         panel.setSize(width, height)
         panel.doLayout()
@@ -101,15 +84,21 @@ class Flow_Layout_Invariance_Spec extends Specification
             5, so the narrow widths in this table genuinely force the layout to
             wrap into several rows.
         """
-        given : 'Two panels with identical children, one per layout manager.'
-            var ours = _panelOf(
-                            new ResponsiveGridFlowLayout(alignment, horizontalGap, verticalGap),
-                            FIVE_BOXES(), true, false
-                        )
-            var awts = _panelOf(
-                            new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap),
-                            FIVE_BOXES(), true, false
-                        )
+        given : 'Two panels holding the same five boxes of increasing width, one per layout manager.'
+            var ours = UI.panel().withLayout(new ResponsiveGridFlowLayout(alignment, horizontalGap, verticalGap))
+                            .add(UI.box().withPrefSize(10, 20))
+                            .add(UI.box().withPrefSize(20, 20))
+                            .add(UI.box().withPrefSize(30, 20))
+                            .add(UI.box().withPrefSize(40, 20))
+                            .add(UI.box().withPrefSize(50, 20))
+                            .get(JPanel)
+            var awts = UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))
+                            .add(UI.box().withPrefSize(10, 20))
+                            .add(UI.box().withPrefSize(20, 20))
+                            .add(UI.box().withPrefSize(30, 20))
+                            .add(UI.box().withPrefSize(40, 20))
+                            .add(UI.box().withPrefSize(50, 20))
+                            .get(JPanel)
         when : 'Both are given the same size and told to lay out their children,'
             var ourBounds = _laidOutBoundsOf(ours, width, 200)
             var awtBounds = _laidOutBoundsOf(awts, width, 200)
@@ -151,12 +140,24 @@ class Flow_Layout_Invariance_Spec extends Specification
             the two would drift apart for anybody building a UI for a
             right-to-left locale.
         """
-        given : 'Two panels with the same component orientation, one per layout manager.'
-            var ours = _panelOf(new ResponsiveGridFlowLayout(alignment, 5, 5), FIVE_BOXES(), leftToRight, false)
-            var awts = _panelOf(
-                            new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), 5, 5),
-                            FIVE_BOXES(), leftToRight, false
-                        )
+        given : 'Two panels with the same five boxes and the same component orientation, one per layout manager.'
+            var orientation = leftToRight ? ComponentOrientation.LEFT_TO_RIGHT : ComponentOrientation.RIGHT_TO_LEFT
+            var ours = UI.panel().withLayout(new ResponsiveGridFlowLayout(alignment, 5, 5))
+                            .peek({ it.setComponentOrientation(orientation) })
+                            .add(UI.box().withPrefSize(10, 20))
+                            .add(UI.box().withPrefSize(20, 20))
+                            .add(UI.box().withPrefSize(30, 20))
+                            .add(UI.box().withPrefSize(40, 20))
+                            .add(UI.box().withPrefSize(50, 20))
+                            .get(JPanel)
+            var awts = UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), 5, 5))
+                            .peek({ it.setComponentOrientation(orientation) })
+                            .add(UI.box().withPrefSize(10, 20))
+                            .add(UI.box().withPrefSize(20, 20))
+                            .add(UI.box().withPrefSize(30, 20))
+                            .add(UI.box().withPrefSize(40, 20))
+                            .add(UI.box().withPrefSize(50, 20))
+                            .get(JPanel)
         expect : 'The two panels really do carry the orientation we asked for.'
             ours.getComponentOrientation().isLeftToRight() == leftToRight
             awts.getComponentOrientation().isLeftToRight() == leftToRight
@@ -191,12 +192,23 @@ class Flow_Layout_Invariance_Spec extends Specification
             shifts them right and down. Both layout managers read those insets
             from the container itself, so the outcome has to be identical.
         """
-        given : 'Two panels carrying the same asymmetric border, one per layout manager.'
-            var ours = _panelOf(new ResponsiveGridFlowLayout(alignment, 5, 5), FIVE_BOXES(), true, true)
-            var awts = _panelOf(
-                            new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), 5, 5),
-                            FIVE_BOXES(), true, true
-                        )
+        given : 'Two panels carrying the same asymmetric border around the same five boxes, one per layout manager.'
+            var ours = UI.panel().withLayout(new ResponsiveGridFlowLayout(alignment, 5, 5))
+                            .peek({ it.setBorder(new EmptyBorder(4, 6, 8, 10)) })
+                            .add(UI.box().withPrefSize(10, 20))
+                            .add(UI.box().withPrefSize(20, 20))
+                            .add(UI.box().withPrefSize(30, 20))
+                            .add(UI.box().withPrefSize(40, 20))
+                            .add(UI.box().withPrefSize(50, 20))
+                            .get(JPanel)
+            var awts = UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), 5, 5))
+                            .peek({ it.setBorder(new EmptyBorder(4, 6, 8, 10)) })
+                            .add(UI.box().withPrefSize(10, 20))
+                            .add(UI.box().withPrefSize(20, 20))
+                            .add(UI.box().withPrefSize(30, 20))
+                            .add(UI.box().withPrefSize(40, 20))
+                            .add(UI.box().withPrefSize(50, 20))
+                            .get(JPanel)
         when : 'Both are laid out at the same width,'
             var ourBounds = _laidOutBoundsOf(ours, width, 200)
             var awtBounds = _laidOutBoundsOf(awts, width, 200)
@@ -226,12 +238,18 @@ class Flow_Layout_Invariance_Spec extends Specification
             vertical centering inside it, immediately visible.
         """
         given : 'Two panels holding four equally wide but differently tall children.'
-            var boxes = [[40, 10], [40, 30], [40, 20], [40, 50]]
-            var ours = _panelOf(new ResponsiveGridFlowLayout(alignment, 5, 5), boxes, true, false)
-            var awts = _panelOf(
-                            new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), 5, 5),
-                            boxes, true, false
-                        )
+            var ours = UI.panel().withLayout(new ResponsiveGridFlowLayout(alignment, 5, 5))
+                            .add(UI.box().withPrefSize(40, 10))
+                            .add(UI.box().withPrefSize(40, 30))
+                            .add(UI.box().withPrefSize(40, 20))
+                            .add(UI.box().withPrefSize(40, 50))
+                            .get(JPanel)
+            var awts = UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), 5, 5))
+                            .add(UI.box().withPrefSize(40, 10))
+                            .add(UI.box().withPrefSize(40, 30))
+                            .add(UI.box().withPrefSize(40, 20))
+                            .add(UI.box().withPrefSize(40, 50))
+                            .get(JPanel)
         when : 'Both are laid out at the same width,'
             var ourBounds = _laidOutBoundsOf(ours, width, 300)
             var awtBounds = _laidOutBoundsOf(awts, width, 300)
@@ -403,12 +421,23 @@ class Flow_Layout_Invariance_Spec extends Specification
             equivalence: unlike the preferred size, there is no wrapping involved
             and therefore no reason for the two to ever differ.
         """
-        given : 'Two panels, one per layout manager.'
-            var ours = _panelOf(new ResponsiveGridFlowLayout(alignment, horizontalGap, verticalGap), FIVE_BOXES(), true, withInsets)
-            var awts = _panelOf(
-                            new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap),
-                            FIVE_BOXES(), true, withInsets
-                        )
+        given : 'Two panels holding the same five boxes, one per layout manager, both with or without a border.'
+            var ours = UI.panel().withLayout(new ResponsiveGridFlowLayout(alignment, horizontalGap, verticalGap))
+                            .applyIf(withInsets, { it.peek({ p -> p.setBorder(new EmptyBorder(4, 6, 8, 10)) }) })
+                            .add(UI.box().withPrefSize(10, 20))
+                            .add(UI.box().withPrefSize(20, 20))
+                            .add(UI.box().withPrefSize(30, 20))
+                            .add(UI.box().withPrefSize(40, 20))
+                            .add(UI.box().withPrefSize(50, 20))
+                            .get(JPanel)
+            var awts = UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))
+                            .applyIf(withInsets, { it.peek({ p -> p.setBorder(new EmptyBorder(4, 6, 8, 10)) }) })
+                            .add(UI.box().withPrefSize(10, 20))
+                            .add(UI.box().withPrefSize(20, 20))
+                            .add(UI.box().withPrefSize(30, 20))
+                            .add(UI.box().withPrefSize(40, 20))
+                            .add(UI.box().withPrefSize(50, 20))
+                            .get(JPanel)
         expect : 'Before any layout pass the two agree.'
             ours.getLayout().minimumLayoutSize(ours) == awts.getLayout().minimumLayoutSize(awts)
 
@@ -440,12 +469,21 @@ class Flow_Layout_Invariance_Spec extends Specification
             it has ever been laid out. Both layout managers then assume a single
             row, which is what lets a window pack itself around a flow layout.
         """
-        given : 'Two panels, one per layout manager.'
-            var ours = _panelOf(new ResponsiveGridFlowLayout(alignment, horizontalGap, verticalGap), FIVE_BOXES(), true, false)
-            var awts = _panelOf(
-                            new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap),
-                            FIVE_BOXES(), true, false
-                        )
+        given : 'Two panels holding the same five boxes, one per layout manager.'
+            var ours = UI.panel().withLayout(new ResponsiveGridFlowLayout(alignment, horizontalGap, verticalGap))
+                            .add(UI.box().withPrefSize(10, 20))
+                            .add(UI.box().withPrefSize(20, 20))
+                            .add(UI.box().withPrefSize(30, 20))
+                            .add(UI.box().withPrefSize(40, 20))
+                            .add(UI.box().withPrefSize(50, 20))
+                            .get(JPanel)
+            var awts = UI.panel().withLayout(new FlowLayout(alignment.forFlowLayout().orElse(FlowLayout.CENTER), horizontalGap, verticalGap))
+                            .add(UI.box().withPrefSize(10, 20))
+                            .add(UI.box().withPrefSize(20, 20))
+                            .add(UI.box().withPrefSize(30, 20))
+                            .add(UI.box().withPrefSize(40, 20))
+                            .add(UI.box().withPrefSize(50, 20))
+                            .get(JPanel)
         when : 'Both are laid out at a width which does not force any wrapping,'
             _laidOutBoundsOf(ours, width, 200)
             _laidOutBoundsOf(awts, width, 200)
@@ -480,9 +518,21 @@ class Flow_Layout_Invariance_Spec extends Specification
             Note that the preferred *width* does not differ: both report the width
             of the ideal single row. Only the height reacts to wrapping.
         """
-        given : 'Two panels, one per layout manager.'
-            var ours = _panelOf(new ResponsiveGridFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5), FIVE_BOXES(), true, false)
-            var awts = _panelOf(new FlowLayout(FlowLayout.LEFT, 5, 5), FIVE_BOXES(), true, false)
+        given : 'Two panels holding the same five boxes, one per layout manager.'
+            var ours = UI.panel().withLayout(new ResponsiveGridFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5))
+                            .add(UI.box().withPrefSize(10, 20))
+                            .add(UI.box().withPrefSize(20, 20))
+                            .add(UI.box().withPrefSize(30, 20))
+                            .add(UI.box().withPrefSize(40, 20))
+                            .add(UI.box().withPrefSize(50, 20))
+                            .get(JPanel)
+            var awts = UI.panel().withLayout(new FlowLayout(FlowLayout.LEFT, 5, 5))
+                            .add(UI.box().withPrefSize(10, 20))
+                            .add(UI.box().withPrefSize(20, 20))
+                            .add(UI.box().withPrefSize(30, 20))
+                            .add(UI.box().withPrefSize(40, 20))
+                            .add(UI.box().withPrefSize(50, 20))
+                            .get(JPanel)
 
         when : 'Both are laid out at a width which forces the children to wrap,'
             var ourBounds = _laidOutBoundsOf(ours, width, 400)

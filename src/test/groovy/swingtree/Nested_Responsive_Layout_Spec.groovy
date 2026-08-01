@@ -68,20 +68,6 @@ class Nested_Responsive_Layout_Spec extends Specification
                 _layoutTree((java.awt.Container) child)
     }
 
-    private static JPanel _gridOfThreeBoxes( int span ) {
-        return UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)
-                .add(UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(span).large(span).veryLarge(span).oversize(span) }),
-                    UI.box().withPrefSize(40, 20)
-                )
-                .add(UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(span).large(span).veryLarge(span).oversize(span) }),
-                    UI.box().withPrefSize(40, 20)
-                )
-                .add(UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(span).large(span).veryLarge(span).oversize(span) }),
-                    UI.box().withPrefSize(40, 20)
-                )
-                .get(JPanel)
-    }
-
     def 'A responsive grid reports the height it needs for the width it currently has.'()
     {
         reportInfo """
@@ -96,8 +82,18 @@ class Nested_Responsive_Layout_Spec extends Specification
             previous pass cannot be nested, and it also cannot be placed in a
             scroll pane and be expected to scroll to the right height.
         """
-        given : 'A grid of three boxes, each 40 by 20 pixels, with a gap of 5.'
-            var panel = _gridOfThreeBoxes(12)
+        given : 'A grid of three boxes, each 40 by 20 pixels, with a gap of 5, every one of them claiming a full row.'
+            var panel = UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)
+                            .add(UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(12).large(12).veryLarge(12).oversize(12) }),
+                                UI.box().withPrefSize(40, 20)
+                            )
+                            .add(UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(12).large(12).veryLarge(12).oversize(12) }),
+                                UI.box().withPrefSize(40, 20)
+                            )
+                            .add(UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(12).large(12).veryLarge(12).oversize(12) }),
+                                UI.box().withPrefSize(40, 20)
+                            )
+                            .get(JPanel)
         expect : """
             Laid out in a single row, the grid is 140 wide
             (3*40 for the boxes, 2*5 for the gaps between them and 2*5 for the
@@ -142,7 +138,17 @@ class Nested_Responsive_Layout_Spec extends Specification
             row that does not fit into that stale height is clipped away.
         """
         given : 'A nested grid whose three boxes each span half a row,'
-            var nested = _gridOfThreeBoxes(6)
+            var nested = UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)
+                            .add(UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(6).large(6).veryLarge(6).oversize(6) }),
+                                UI.box().withPrefSize(40, 20)
+                            )
+                            .add(UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(6).large(6).veryLarge(6).oversize(6) }),
+                                UI.box().withPrefSize(40, 20)
+                            )
+                            .add(UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(6).large(6).veryLarge(6).oversize(6) }),
+                                UI.box().withPrefSize(40, 20)
+                            )
+                            .get(JPanel)
         and : 'placed as the only child of an outer grid, where it spans half of the outer row.'
             var outer = UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 0, 0)
                             .withPrefSize(400, 200)
@@ -183,8 +189,19 @@ class Nested_Responsive_Layout_Spec extends Specification
             self-sufficient: there is nothing which would schedule a second,
             corrective pass afterwards.
         """
-        given : 'A nested grid inside an outer grid, both responsive.'
-            var nested = _gridOfThreeBoxes(6)
+        given : 'A nested grid of three boxes, each of them spanning half a row,'
+            var nested = UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)
+                            .add(UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(6).large(6).veryLarge(6).oversize(6) }),
+                                UI.box().withPrefSize(40, 20)
+                            )
+                            .add(UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(6).large(6).veryLarge(6).oversize(6) }),
+                                UI.box().withPrefSize(40, 20)
+                            )
+                            .add(UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(6).large(6).veryLarge(6).oversize(6) }),
+                                UI.box().withPrefSize(40, 20)
+                            )
+                            .get(JPanel)
+        and : 'placed inside an outer grid, which is responsive as well.'
             var outer = UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 0, 0)
                             .withPrefSize(400, 200)
                             .add(UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(12).large(12).veryLarge(6).oversize(6) }),
@@ -232,7 +249,17 @@ class Nested_Responsive_Layout_Spec extends Specification
             height, because the rows have to fit no matter what.
         """
         given : 'A nested grid of three boxes whose ideal single row width is 140,'
-            var nested = _gridOfThreeBoxes(6)
+            var nested = UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)
+                            .add(UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(6).large(6).veryLarge(6).oversize(6) }),
+                                UI.box().withPrefSize(40, 20)
+                            )
+                            .add(UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(6).large(6).veryLarge(6).oversize(6) }),
+                                UI.box().withPrefSize(40, 20)
+                            )
+                            .add(UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(6).large(6).veryLarge(6).oversize(6) }),
+                                UI.box().withPrefSize(40, 20)
+                            )
+                            .get(JPanel)
         expect : 'which is indeed what it reports when left to its own devices.'
             nested.getPreferredSize().width == 140
 

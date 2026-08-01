@@ -71,12 +71,6 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         SwingTree.clear()
     }
 
-    /** A styled button; note that the size is *not* part of the style, it is set
-     *  through `setSize` so that the resizes below actually take effect. */
-    private static JButton buttonWith( Closure styler ) {
-        return UI.button("Tile me").withStyle(conf -> styler(conf)).get(JButton)
-    }
-
     def 'Resizing does not re-render a style whose edges look the same at every size. (#description)'(
         String description, UI.Layer layer, Closure styler
     ) {
@@ -89,7 +83,8 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             rendering.
         """
         given : 'A styled button, warmed up with two paints at its initial size.'
-            var button = buttonWith(styler)
+            // The size is set directly and never through the styler, so that the resizes below take effect.
+            var button = UI.button("Tile me").withStyle(conf -> styler(conf)).get(JButton)
             button.setSize(220, 160)
             var ext = ComponentExtension.from(button)
             2.times { Utility.renderSingleComponent(button) }
@@ -138,7 +133,8 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             stretch tiling existed.
         """
         given : 'A styled button, warmed up with two paints at its initial size.'
-            var button = buttonWith(styler)
+            // The size is set directly and never through the styler, so that the resizes below take effect.
+            var button = UI.button("Tile me").withStyle(conf -> styler(conf)).get(JButton)
             button.setSize(220, 160)
             var ext = ComponentExtension.from(button)
             2.times { Utility.renderSingleComponent(button) }
@@ -179,8 +175,8 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             resize for free.
         """
         given : 'Two buttons with per-edge border colors, one square, one rounded, both warmed up.'
-            var square  = buttonWith({ it.borderWidths(2, 3, 4, 5).borderColors("#8a1e1e", "#1e8a1e", "#1e1e8a", "#8a8a1e") })
-            var rounded = buttonWith({ it.borderWidths(2, 3, 4, 5).borderColors("#8a1e1e", "#1e8a1e", "#1e1e8a", "#8a8a1e").borderRadius(16) })
+            var square  = UI.button("Tile me").withStyle({ it.borderWidths(2, 3, 4, 5).borderColors("#8a1e1e", "#1e8a1e", "#1e1e8a", "#8a8a1e") }).get(JButton)
+            var rounded = UI.button("Tile me").withStyle({ it.borderWidths(2, 3, 4, 5).borderColors("#8a1e1e", "#1e8a1e", "#1e1e8a", "#8a8a1e").borderRadius(16) }).get(JButton)
             square.setSize(220, 160)
             rounded.setSize(220, 160)
             var squareExt  = ComponentExtension.from(square)
@@ -217,7 +213,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             resizing becomes free.
         """
         given : 'A tiny button with a comparatively heavy style, warmed up.'
-            var button = buttonWith({ it.borderRadius(16).margin(6).backgroundColor("#5a8a1e").foundationColor("#f4f0e8") })
+            var button = UI.button("Tile me").withStyle({ it.borderRadius(16).margin(6).backgroundColor("#5a8a1e").foundationColor("#f4f0e8") }).get(JButton)
             button.setSize(40, 40)
             var ext = ComponentExtension.from(button)
             2.times { Utility.renderSingleComponent(button) }
@@ -256,7 +252,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             where dozens of sizes fly by in a second.
         """
         given : 'A styled button, warmed up at its initial size.'
-            var button = buttonWith({ it.borderRadius(20).margin(4).backgroundColor("#1e5a8a").foundationColor("#efe9dc") })
+            var button = UI.button("Tile me").withStyle({ it.borderRadius(20).margin(4).backgroundColor("#1e5a8a").foundationColor("#efe9dc") }).get(JButton)
             button.setSize(200, 150)
             var ext = ComponentExtension.from(button)
             2.times { Utility.renderSingleComponent(button) }
@@ -293,8 +289,8 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             own component.
         """
         given : 'The same style, painted on two differently sized components.'
-            var first  = buttonWith(styler)
-            var second = buttonWith(styler)
+            var first  = UI.button("Tile me").withStyle(conf -> styler(conf)).get(JButton)
+            var second = UI.button("Tile me").withStyle(conf -> styler(conf)).get(JButton)
             first.setSize(400, 300)
             second.setSize(500, 350)
             5.times { Utility.renderSingleComponent(first) }  // Large full-size renderings only get
@@ -364,8 +360,8 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             full size rendering of it would blow the memory budget.
         """
         given : 'Two gigantic buttons: one with a tileable style, one with a gradient.'
-            var tileable = buttonWith({ it.borderRadius(24).margin(8).backgroundColor("#0b3d2e").foundationColor("#efe8d8") })
-            var gradient = buttonWith({ it.borderRadius(24).gradient(g -> g.colors("#803060", "#306080")) })
+            var tileable = UI.button("Tile me").withStyle({ it.borderRadius(24).margin(8).backgroundColor("#0b3d2e").foundationColor("#efe8d8") }).get(JButton)
+            var gradient = UI.button("Tile me").withStyle({ it.borderRadius(24).gradient(g -> g.colors("#803060", "#306080")) }).get(JButton)
             tileable.setSize(3000, 1500)
             gradient.setSize(3000, 1500)
 
@@ -398,9 +394,9 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             resize re-renders only the former.
         """
         given : 'One button carrying a gradient background *and* a shadow, warmed up.'
-            var button = buttonWith({ it.borderRadius(18)
+            var button = UI.button("Tile me").withStyle({ it.borderRadius(18)
                                         .gradient(g -> g.colors("#a02050", "#2050a0"))
-                                        .shadowColor("#0a0a12").shadowBlurRadius(7).shadowSpreadRadius(2) })
+                                        .shadowColor("#0a0a12").shadowBlurRadius(7).shadowSpreadRadius(2) }).get(JButton)
             button.setSize(300, 200)
             var ext = ComponentExtension.from(button)
             3.times { Utility.renderSingleComponent(button) }
@@ -441,7 +437,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         """
         given : 'A button whose background color is read from a variable the "animation" nudges every frame.'
             var frame  = new java.util.concurrent.atomic.AtomicInteger(0)
-            var button = buttonWith({ it.borderRadius(16).backgroundColor(new Color(10 + frame.get(), 80, 160)) })
+            var button = UI.button("Tile me").withStyle({ it.borderRadius(16).backgroundColor(new Color(10 + frame.get(), 80, 160)) }).get(JButton)
             button.setSize(240, 120)
             var ext = ComponentExtension.from(button)
 
@@ -467,7 +463,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             ComponentExtension.globalRenderCacheEntryCounts().toMap()["style layers"] < 100
 
         when : 'An ordinary component with a stable style is painted afterwards.'
-            var stable = buttonWith({ it.borderRadius(12).margin(4).backgroundColor("#1e5a8a").foundationColor("#efe9dc") })
+            var stable = UI.button("Tile me").withStyle({ it.borderRadius(12).margin(4).backgroundColor("#1e5a8a").foundationColor("#efe9dc") }).get(JButton)
             stable.setSize(260, 140)
             2.times { Utility.renderSingleComponent(stable) }
         then : 'It is cached and served from the cache, just as if no animation had ever run.'
@@ -486,7 +482,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             exactly like on the full sized component.
         """
         given : 'A button with an opaque background, foundation and margin, warmed up.'
-            var button = buttonWith({ it.borderRadius(10).margin(6).backgroundColor("#204080").foundationColor("#d0c8b8") })
+            var button = UI.button("Tile me").withStyle({ it.borderRadius(10).margin(6).backgroundColor("#204080").foundationColor("#d0c8b8") }).get(JButton)
             button.setSize(400, 300)
             2.times { Utility.renderSingleComponent(button) }
         and : 'Its compressed atlas.'
