@@ -55,25 +55,6 @@ class Responsive_Layout_Size_Invalidation_Spec extends Specification
         SwingTree.clear()
     }
 
-    private static JPanel _panelWithLabel( JLabel label ) {
-        return UI.panel().withFlowLayout()
-                .apply({ ui -> ui.add(label) })
-                .get(JPanel)
-    }
-
-    /** A plain fixed size child, so that a feature measures the layout and not a look and feel. */
-    private static JPanel _box( int width, int height ) {
-        var box = new JPanel()
-        box.setPreferredSize(new Dimension(width, height))
-        return box
-    }
-
-    private static JPanel _panelWithBoxes( int count ) {
-        var panel = UI.panel().withFlowLayout().get(JPanel)
-        count.times { panel.add(_box(20, 20)) }
-        return panel
-    }
-
     def 'A label growing its text grows the preferred size reported by its parent.'()
     {
         reportInfo """
@@ -84,7 +65,7 @@ class Responsive_Layout_Size_Invalidation_Spec extends Specification
         """
         given : 'A panel whose only child is a label with a short text.'
             var label = new JLabel("x")
-            var panel = _panelWithLabel(label)
+            var panel = UI.panel().withFlowLayout().add(label).get(JPanel)
         and : 'We ask for the preferred size once, so that there is something to remember.'
             var before = panel.getLayout().preferredLayoutSize(panel)
 
@@ -105,7 +86,7 @@ class Responsive_Layout_Size_Invalidation_Spec extends Specification
         """
         given : 'A panel whose only child is a label with a long text.'
             var label = new JLabel("a considerably longer piece of text than before")
-            var panel = _panelWithLabel(label)
+            var panel = UI.panel().withFlowLayout().add(label).get(JPanel)
             var before = panel.getLayout().preferredLayoutSize(panel)
 
         when : 'The label is given a much shorter text,'
@@ -118,12 +99,17 @@ class Responsive_Layout_Size_Invalidation_Spec extends Specification
 
     def 'Adding and removing children is reflected in the preferred size.'()
     {
-        given : 'A panel with a single box in it.'
-            var panel = _panelWithBoxes(1)
+        given : 'A panel with a single box in it, a plain one, so that this measures the layout and not a look and feel.'
+            var box = new JPanel()
+            box.setPreferredSize(new Dimension(20, 20))
+            var panel = UI.panel().withFlowLayout().get(JPanel)
+            panel.add(box)
             var withOne = panel.getLayout().preferredLayoutSize(panel)
 
         when : 'A second box of the same size is added,'
-            panel.add(_box(20, 20))
+            var secondBox = new JPanel()
+            secondBox.setPreferredSize(new Dimension(20, 20))
+            panel.add(secondBox)
             panel.invalidate()
             var withTwo = panel.getLayout().preferredLayoutSize(panel)
         then : 'the panel grew wider.'
@@ -147,7 +133,7 @@ class Responsive_Layout_Size_Invalidation_Spec extends Specification
         given : 'A panel holding a label in a small font.'
             var label = new JLabel("some text")
             label.setFont(new Font("Dialog", Font.PLAIN, 8))
-            var panel = _panelWithLabel(label)
+            var panel = UI.panel().withFlowLayout().add(label).get(JPanel)
             var small = panel.getLayout().preferredLayoutSize(panel)
 
         when : 'The very same label is given a much bigger font,'
@@ -165,8 +151,11 @@ class Responsive_Layout_Size_Invalidation_Spec extends Specification
             The reported size includes the insets of the container, so a change
             of border has to move it just like a change of child does.
         """
-        given : 'A panel with a box in it and no border.'
-            var panel = _panelWithBoxes(1)
+        given : 'A panel with a plain fixed size box in it and no border.'
+            var box = new JPanel()
+            box.setPreferredSize(new Dimension(20, 20))
+            var panel = UI.panel().withFlowLayout().get(JPanel)
+            panel.add(box)
             var without = panel.getLayout().preferredLayoutSize(panel)
 
         when : 'A generous empty border is put around it,'
@@ -187,8 +176,11 @@ class Responsive_Layout_Size_Invalidation_Spec extends Specification
             out copies, or one caller writing into the dimension it received
             would silently change the size every later caller is told.
         """
-        given : 'A panel with a box in it, measured once.'
-            var panel = _panelWithBoxes(1)
+        given : 'A panel with a plain fixed size box in it, measured once.'
+            var box = new JPanel()
+            box.setPreferredSize(new Dimension(20, 20))
+            var panel = UI.panel().withFlowLayout().get(JPanel)
+            panel.add(box)
             var first = panel.getLayout().preferredLayoutSize(panel)
             var expected = new Dimension((int) first.width, (int) first.height)
 
@@ -212,8 +204,13 @@ class Responsive_Layout_Size_Invalidation_Spec extends Specification
             var shared = new ResponsiveGridFlowLayout()
             var narrow = UI.panel().withLayout(shared).get(JPanel)
             var wide   = UI.panel().withLayout(shared).get(JPanel)
-            narrow.add(_box(20, 20))
-            wide.add(_box(200, 20))
+        and : 'A plain fixed size box in each of them, so that this measures the layout and not a look and feel.'
+            var narrowBox = new JPanel()
+            narrowBox.setPreferredSize(new Dimension(20, 20))
+            narrow.add(narrowBox)
+            var wideBox = new JPanel()
+            wideBox.setPreferredSize(new Dimension(200, 20))
+            wide.add(wideBox)
 
         when : 'Both are measured, and then measured again in the other order,'
             var narrowFirst = shared.preferredLayoutSize(narrow)
