@@ -613,15 +613,25 @@ final class LayerCache
         }
 
         /**
-         *  Allocates the backing buffer. We derive it from the supplied
-         *  {@link GraphicsConfiguration} when one is available, so it uses the device
-         *  color model (typically premultiplied {@code INT_ARGB_PRE}, faster to
-         *  composite) and so Java2D can keep an accelerated copy of it in video memory:
-         *  this image is rendered once and then blitted on every repaint and never read
-         *  back, which is exactly the managed-image pattern that gets texture-cached.
-         *  The maximum acceleration priority keeps that copy resident under memory
-         *  pressure. Falls back to a plain {@code INT_ARGB} buffer when there is no
-         *  device configuration (e.g. headless rendering).
+         *  Allocates the backing buffer from the supplied {@link GraphicsConfiguration}
+         *  when one is available, so Java2D can keep an accelerated copy of it in video
+         *  memory: the image is rendered once and then blitted on every repaint and never
+         *  read back, which is exactly the managed-image pattern that gets pixmap/texture
+         *  cached. The maximum acceleration priority keeps that copy resident under memory
+         *  pressure. Falls back to {@code INT_ARGB} when there is no device configuration
+         *  (e.g. headless rendering). <br>
+         *  <br>
+         *  Note that {@code createCompatibleImage(w, h, TRANSLUCENT)} yields plain
+         *  {@code INT_ARGB}, <i>not</i> the premultiplied layout: the translucent device
+         *  colour model is {@link java.awt.image.ColorModel#getRGBdefault()} on X11,
+         *  Windows and macOS alike. Do not "fix" that by allocating
+         *  {@code INT_ARGB_PRE} here - it is a measured pessimization, because
+         *  {@code IntArgbPre} is the one common integer layout for which XRender does not
+         *  register a {@code XrSwToPMBlit} software-to-pixmap loop, so the blit drops all
+         *  the way to {@code Blit$GeneralMaskBlit} (measured +23% on a fresh 1300x830
+         *  image, i.e. exactly the miss-per-frame case of a live resize; once an entry is
+         *  stable long enough to be promoted to a server side pixmap, both layouts land on
+         *  the same {@code XRPMBlit} and the choice stops mattering).
          */
         private static BufferedImage _allocate( @Nullable GraphicsConfiguration gc, int width, int height ) {
             BufferedImage img = ( gc != null )
