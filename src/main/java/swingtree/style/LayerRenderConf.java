@@ -22,7 +22,7 @@ import java.util.Objects;
  *  reconstructs any actual size from the resulting rendering. A newly added field whose value
  *  (or whose rendering) depends on the component size would silently break that reconstruction,
  *  producing subtly wrong pixels rather than a failure. Should such a field become necessary,
- *  it must also be rejected by {@code LayerPartCache._isStretchTileable}.
+ *  it must also be rejected by {@code LayerPartCache.isStretchTileable}.
  */
 @Immutable
 @SuppressWarnings("Immutable")
@@ -120,6 +120,12 @@ final class LayerRenderConf
         if ( layer.equals(_layer) )
             return this;
         return of(_boxModelConf.get(), _baseColor, layer);
+    }
+
+    /** Whether handing this to the style renderer would put no pixels anywhere - a common
+     *  outcome of narrowing a configuration down to a {@link StyleLayerPart}. */
+    boolean rendersNothing() {
+        return _baseColor.equals(BaseColorConf.none()) && _layer.isNone();
     }
 
     ComponentAreas areas() { return ComponentAreas.of(_boxModelConf); }

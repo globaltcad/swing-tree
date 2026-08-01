@@ -17,15 +17,10 @@ import swingtree.UI;
  *  everything <i>except</i> the noise and replaying the noise on top, than not being cacheable
  *  at all. <br>
  *  <br>
- *  <b>But only sometimes, and that is the hard part.</b> Cutting is not free: a replayed noise
- *  costs a fill on <i>every</i> paint, whereas a noise baked into a cached image costs nothing
- *  on a cache hit. So the cut only pays for itself when it actually buys size independence -
- *  that is, when everything on <i>both</i> sides of the noise is
- *  {@code LayerPartCache._isStretchTileable}, and when the component size really changes. At an
- *  unchanged size a cut is a loss by construction, because several blits replace the single one
- *  a whole-layer cache hit would have done. Whoever wires the cut up must gate it on that, and
- *  must measure a real, busy UI rather than an isolated large noise - the two disagree sharply.
- *  <br>
+ *  <b>But only while the component is resizing</b>, because a replayed noise costs a fill on
+ *  <i>every</i> paint whereas a noise baked into a cached image costs nothing on a cache hit.
+ *  {@link StyleLayerCache} owns that decision; anything changing it must measure a real, busy
+ *  UI rather than an isolated large noise, because the two disagree sharply. <br>
  *  <br>
  *  Splitting is possible at all because the renderer draws by kind in a fixed order - fill,
  *  border, images, gradients, <b>noises</b>, shadows, texts, painters - so the noises are
@@ -37,19 +32,14 @@ import swingtree.UI;
  *  compositing is associative, drawing them one after another is pixel identical to drawing the
  *  whole layer in one go. <br>
  *  <br>
- *  A layer without any noise in it is not split at all - it is a single {@link #WHOLE} part,
- *  which restricts to the configuration unchanged and so behaves exactly as it did before parts
- *  existed. <br>
+ *  An uncut layer is a single {@link #WHOLE} part, which restricts to the configuration
+ *  unchanged and so behaves exactly as it did before parts existed. A cut one is
+ *  {@link #UNDER_NOISE} and {@link #OVER_NOISE} in a {@link LayerPartCache} each, with
+ *  {@link #NOISES} replayed straight onto the destination in between - never cached, because a
+ *  cached noise would be an image at the component's real size, re-rendered at every new size,
+ *  which is exactly what the cut exists to avoid. <br>
  *  <br>
- *  <b>Status:</b> only {@link #WHOLE} is currently ever constructed (see {@link StyleLayerCache}),
- *  so no layer is split yet and painting is bit for bit what it always was. The other three
- *  constants exist so that the machinery around them - restriction, per part caching, per layer
- *  composition - can be built and verified before anything depends on it, and their decomposition
- *  is pinned as pixel identical to {@link #WHOLE} by {@code Style_Layer_Part_Decomposition_Spec}.
- *  Two things still have to be solved before a layer may actually be cut: the gate described
- *  above, and the fact that {@link LayerPartCache} has no way to express "never cache this part"
- *  - a {@link #NOISES} part handed to it today would be cached like any other, at full size,
- *  which is the very thing the cut is meant to avoid.
+ *  That the cut paints what the whole does is pinned by {@code Stretch_Tiling_Equivalence_Spec}.
  */
 enum StyleLayerPart
 {
@@ -57,9 +47,9 @@ enum StyleLayerPart
     WHOLE,
     /** Everything the renderer draws before the noises: fill, border, images and gradients. */
     UNDER_NOISE,
-    /** The noises themselves, which are meant to be replayed on every paint rather than cached
-     *  (relying on the noise tile cache one level down); note that nothing enforces that yet,
-     *  see the status note on this enum. */
+    /** The noises themselves, replayed on every paint rather than cached - which is cheap
+     *  because the noise tile cache one level down keeps them in a size independent noise
+     *  space. {@link StyleLayerCache} never hands this part to a {@link LayerPartCache}. */
     NOISES,
     /** Everything the renderer draws after the noises: shadows, texts and painters. */
     OVER_NOISE;

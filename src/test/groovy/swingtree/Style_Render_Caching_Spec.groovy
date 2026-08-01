@@ -157,6 +157,60 @@ class Style_Render_Caching_Spec extends Specification
             ext.cachedRendering(UI.Layer.FOREGROUND).isEmpty()
     }
 
+    def 'The hit and miss counts keep counting when a layer changes how it is cached.'()
+    {
+        reportInfo """
+            `cacheHitCount(..)` and `cacheMissCount(..)` are cumulative for the
+            lifetime of a component: together they say how often this component
+            painted the layer, split into the paints a cache served and the
+            paints it had to render. Nothing that happens to the cache
+            underneath may take a recorded paint back, or a monitoring view
+            watching these numbers would see a component un-paint itself.
+
+            That is worth pinning down, because a layer is not always cached in
+            the same shape. A layer carrying a noise is cached as one image at a
+            settled size, but while the component is being resized it is cached
+            as the part *under* the noise and the part *over* it, with the noise
+            replayed in between, so that everything around it resizes for free.
+            Those are different cache entries, entered and left mid-life, and the
+            counters have to run straight through it.
+
+            Here a button big enough for that to happen is painted, dragged, and
+            left alone again, and we simply count paints.
+        """
+        given : 'A button with a noise over a rounded background.'
+            var button =
+                UI.button("Grain me")
+                  .withStyle( it -> it
+                        .borderRadius(16)
+                        .backgroundColor(Color.BLUE)
+                        .noise("grain", n -> n.colors(Color.BLACK, Color.WHITE))
+                  )
+                  .get(JButton)
+            button.setSize(400, 240)
+            var ext = ComponentExtension.from(button)
+
+        when : 'We paint it three times at a settled size.'
+            3.times { Utility.renderSingleComponent(button) }
+        then : 'Every one of those paints was counted, as a hit or as a miss.'
+            ext.cacheHitCount(UI.Layer.BACKGROUND) + ext.cacheMissCount(UI.Layer.BACKGROUND) == 3
+        and  : 'And the cache did serve some of them, so there is something to lose.'
+            ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
+
+        when : 'It is dragged, so the layer is cut around its noise.'
+            [[440, 260], [480, 280], [520, 300]].each { w, h ->
+                button.setSize(w, h)
+                Utility.renderSingleComponent(button)
+            }
+        then : 'Not one of the earlier paints was forgotten, and the new ones were counted too.'
+            ext.cacheHitCount(UI.Layer.BACKGROUND) + ext.cacheMissCount(UI.Layer.BACKGROUND) == 6
+
+        when : 'The drag ends and the layer becomes a single rasterization again.'
+            12.times { Utility.renderSingleComponent(button) }
+        then : 'Still nothing was taken back.'
+            ext.cacheHitCount(UI.Layer.BACKGROUND) + ext.cacheMissCount(UI.Layer.BACKGROUND) == 18
+    }
+
     def 'A plain, undecorated component is *never* cached.'()
     {
         reportInfo """

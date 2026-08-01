@@ -168,6 +168,13 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
         return Objects.equals(_texts, otherStyle._texts);
     }
 
+    /** Whether this layer has a noise the renderer would actually draw, mirroring the condition
+     *  {@link StyleRenderer#renderStyleOn(UI.Layer, LayerRenderConf, java.awt.Graphics2D)} uses:
+     *  a noise without colors is no reason to split the layer into {@link StyleLayerPart}s. */
+    public boolean hasRenderableNoises() {
+        return _noises.any( noise -> noise.style().get().colors().length > 0 );
+    }
+
     public boolean hasPaintersWhichCannotBeCached() {
         return _painters.any( p -> !p.style().painter().canBeCached() );
     }

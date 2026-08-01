@@ -145,6 +145,58 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             "big margin, huge radius"                   | UI.Layer.BACKGROUND | 500   | 300    | { it.backgroundColor("#c19a3f").borderRadius(32).margin(10) }
     }
 
+    def 'A layer cut around its noise paints what the whole layer paints. (#description)'(
+        String description, int width, int height, Closure styler
+    ) {
+        reportInfo """
+            A layer carrying a noise is cached differently from every other
+            layer: while the component resizes, the noise is lifted out and
+            replayed straight onto the destination, and only what sits under and
+            over it is cached — as two size independent exemplars rather than
+            one exact-size image.
+
+            That is three drawing operations where there used to be one, so it
+            is worth demanding that they add up to the same picture. They do,
+            because the renderer draws by kind in a fixed order and source-over
+            compositing is associative, which makes drawing the pieces one after
+            another identical to drawing the layer in one go.
+        """
+        given : 'The component painted the classic way, with stretch tiling disabled:'
+            SwingTree.get().setCacheTilingEnabled(false)
+            var classicBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)
+            classicBox.setSize(width, height)
+            var classic = Utility.renderSingleComponent(classicBox)
+        and : """
+            An identically styled box which is *dragged* to that size with stretch tiling
+            enabled, because that is what makes its layer be cut around the noise. The last
+            paint of the drag lands on the very size the classic box was painted at.
+        """
+            SwingTree.get().setCacheTilingEnabled(true)
+            var tiledBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)
+            [[width - 40, height - 20], [width - 20, height - 10], [width, height]].each { w, h ->
+                tiledBox.setSize(w, h)
+                Utility.renderSingleComponent(tiledBox)
+            }
+        and : """
+            Proof that the comparison is not vacuous: what is cached for that layer is a size
+            independent exemplar, which it could only be with the noise lifted out of it.
+        """
+            var cached = ComponentExtension.from(tiledBox).cachedRendering(UI.Layer.BACKGROUND)
+            assert !cached.isEmpty()
+            assert cached.all( image -> image.width < width )
+
+        expect : 'Both ways of painting produced practically identical pixels:'
+            Utility.similarityBetween(classic, Utility.renderSingleComponent(tiledBox)) >= 99.9
+
+        where :
+            description                                 | width | height | styler
+            "a noise over a rounded background"         | 400   | 200    | { it.backgroundColor("#2f4f6f").borderRadius(14).margin(6)
+                                                                              .noise(UI.Layer.BACKGROUND, "grain", n -> n.colors("#101010", "#e0e0e0")) }
+            "a noise between a background and a shadow" | 360   | 240    | { it.backgroundColor("#6f4f2f").borderRadius(18)
+                                                                              .noise(UI.Layer.BACKGROUND, "grain", n -> n.function(UI.NoiseType.FABRIC).colors("#201000", "#f0e0d0"))
+                                                                              .shadow(UI.Layer.BACKGROUND, "glow", s -> s.color("#0a0a14").blurRadius(7).spreadRadius(1)) }
+    }
+
     def 'For a flat, arcless style the reconstruction is exactly pixel identical.'()
     {
         reportInfo """

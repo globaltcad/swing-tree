@@ -28,9 +28,16 @@ import java.util.concurrent.TimeUnit
     Stretching is only truthful for styles which look the same along their
     edges no matter the component size: flat background and foundation
     colors, borders and shadows. Content whose pixels genuinely depend on
-    the full component bounds — gradients, noise, background images,
-    styled text — cannot be reconstructed that way and falls back to the
+    the full component bounds — gradients, background images, styled
+    text — cannot be reconstructed that way and falls back to the
     classic exact-size caching, where every resize re-renders.
+
+    Noise is the interesting exception. Its pixels vary with every pixel
+    position, so it can never be stretched — but it is also the one kind
+    of style that is nearly free to simply draw again, so instead of
+    dragging its whole layer down to exact-size caching it is lifted out
+    of the cached image and replayed on top of it. Everything around it in
+    that layer keeps resizing for free.
 
     This specification pins down that boundary purely through the public
     API: it builds ordinary styled components, paints them through the
@@ -123,9 +130,9 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         String description, UI.Layer layer, Closure styler
     ) {
         reportInfo """
-            A gradient spans the whole component, noise varies with every pixel
-            position, a background image is placed and fitted relative to the
-            component bounds, and styled text is laid out within them. Their
+            A gradient spans the whole component, a background image is placed
+            and fitted relative to the component bounds, and styled text is laid
+            out within them. Their
             pixels at one size are genuinely different from their pixels at
             another size, so no amount of corner copying and edge stretching
             can reconstruct them. Such styles keep the classic exact-size
@@ -156,9 +163,197 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         where :
             description          | layer               | styler
             "a gradient"         | UI.Layer.BACKGROUND | { it.borderRadius(10).gradient(g -> g.colors("#c81e46", "#1e46c8")) }
-            "a noise texture"    | UI.Layer.BACKGROUND | { it.borderRadius(10).noise(n -> n.colors("#111111", "#eeeeee")) }
             "a background image" | UI.Layer.BACKGROUND | { it.borderRadius(10).image(img -> img.image(ICON)) }
             "styled text"        | UI.Layer.CONTENT    | { it.text(t -> t.content("Ninety-nine slices")) }
+    }
+
+    def 'While a component resizes, a noise is lifted out so the rest of its layer resizes for free.'()
+    {
+        reportInfo """
+            Noise cannot be stretched: its pixels vary with every pixel position,
+            so a corner copied and an edge band stretched would simply be the
+            wrong pixels. Baking it into the cached image would therefore drag
+            the *whole* layer down to exact-size caching, and a flat rounded
+            background sharing that layer would start re-rendering on every
+            frame of a resize just for having a texture over it.
+
+            It does not, because noise is also the one kind of style that is
+            practically free to draw again. So while the size is changing, the
+            noise is lifted out of the cached image and replayed on top of it,
+            and everything around it keeps the small size independent exemplar
+            it would have had on its own.
+
+            Here a single layer carries a rounded background, a noise over it
+            and a shadow over that. Once the drag is under way, the background
+            and the shadow are cached on either side of the noise, and no amount
+            of further resizing re-renders them.
+        """
+        given : 'A button whose background layer is a rounded fill, a noise and a shadow.'
+            var button =
+                UI.button("Tile me")
+                  .withStyle( it -> it
+                        .borderRadius(16)
+                        .backgroundColor("#1e5a8a")
+                        .noise(UI.Layer.BACKGROUND, "grain", n -> n.colors("#202020", "#dedede"))
+                        .shadow(UI.Layer.BACKGROUND, "glow", s -> s.color("#0a0a14").blurRadius(6))
+                  )
+                  .get(JButton)
+            // Comfortably large, because a noise is only lifted out when it is big enough to be
+            // drawn by blitting tiles - see the scenario after the next one.
+            button.setSize(500, 300)
+            var ext = ComponentExtension.from(button)
+        and : 'A drag is started, which is what makes the layer worth cutting in two.'
+            2.times { Utility.renderSingleComponent(button) }
+            button.setSize(640, 360)
+            2.times { Utility.renderSingleComponent(button) }
+
+        expect : 'The layer is cached in two pieces: the part under the noise and the part over it.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).size() == 2
+        and : 'Both are small exemplars, not full sized renderings of a 640x360 component.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).all( image -> image.width < 640 && image.height < 360 )
+
+        when : 'The drag continues through a series of very different sizes.'
+            int missesWhenWarm = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            var journey = [[700, 400], [400, 500], [900, 320], [501, 301], [500, 300]]
+            journey.each { w, h ->
+                button.setSize(w, h)
+                Utility.renderSingleComponent(button)
+                assert button.width == w && button.height == h
+            }
+
+        then : 'Not one of those paints re-rendered the style, despite the noise on the layer.'
+            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesWhenWarm
+        and : 'And the two exemplars are still the ones being painted from.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).size() == 2
+    }
+
+    def 'Once the size settles again, the noise goes back into a single cached image.'()
+    {
+        reportInfo """
+            Cutting a layer around its noise is a trade, and the currency is
+            blits. A cut layer costs a stretch reconstruction per cached part
+            plus a tile blit per noise tile, on *every* paint; an uncut one
+            costs a single blit of one exact-size image. The cut only comes out
+            ahead when that single blit would not have been possible anyway,
+            which is precisely when the component is being resized.
+
+            So the cut is not a property of the style but of what is happening
+            to the component. A drag turns it on; a short tail of paints at a
+            settled size turns it off again, and the layer is one cached image
+            once more — which is what almost every paint of a real UI looks
+            like, since hovering, focusing, blinking a caret and scrolling all
+            happen at an unchanged size.
+        """
+        given : 'A dragged button with a noise over a rounded background.'
+            var button =
+                UI.button("Tile me")
+                  .withStyle( it -> it
+                        .borderRadius(16)
+                        .backgroundColor("#1e5a8a")
+                        .noise(UI.Layer.BACKGROUND, "grain", n -> n.colors("#202020", "#dedede"))
+                  )
+                  .get(JButton)
+            var ext = ComponentExtension.from(button)
+            [[500, 300], [560, 320], [620, 340]].each { w, h ->
+                button.setSize(w, h)
+                Utility.renderSingleComponent(button)
+            }
+
+        expect : """
+            Mid-drag what is cached is the small size independent exemplar of the
+            fill alone - the noise is not in it, and neither is the component size.
+            (There is one image rather than two only because nothing on this style
+            sits over the noise, so the part over it has nothing to cache.)
+        """
+            ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1
+            ext.cachedRendering(UI.Layer.BACKGROUND).first().width < 620
+
+        when : 'The drag ends and the button is simply repainted at that size.'
+            12.times { Utility.renderSingleComponent(button) }
+
+        then : 'The layer is a single image again, holding the noise along with everything else.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1
+            ext.cachedRendering(UI.Layer.BACKGROUND).first().width == 620
+
+        and : 'And repainting it is served from that image, not re-rendered.'
+            int missesWhenSettled = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            5.times { Utility.renderSingleComponent(button) }
+            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesWhenSettled
+            ext.cacheHitCount(UI.Layer.BACKGROUND) >= 5
+    }
+
+    def 'A noise is only lifted out when it is big enough to be drawn by blitting tiles.'()
+    {
+        reportInfo """
+            The replayed noise has to be drawn again on every paint, so lifting
+            it out only pays while drawing it is cheap — and whether it is cheap
+            depends on its size. Above a certain area SwingTree draws a noise by
+            blitting a handful of pre-rendered tiles, which the graphics pipeline
+            is very good at. Below it, it fills through the per pixel paint
+            pipeline instead, which is perfectly fine once into a cached image
+            but far too slow to repeat on every paint. Such a noise stays baked
+            in, and its layer keeps the classic exact-size caching even mid-drag.
+
+            That crossover is much lower than one might guess — well under the
+            size of a single tile — because the two ways of drawing a noise
+            remember their work on completely different terms. Tiles are laid
+            out in noise space, so they survive any resize; the paint pipeline
+            keeps its rasters against the noise's centre, which moves with the
+            component, so a resize throws them away.
+        """
+        given : 'Two buttons with the same rounded background and noise, one small, one large.'
+            var styler = { it.borderRadius(16).backgroundColor("#1e5a8a")
+                             .noise(UI.Layer.BACKGROUND, "grain", n -> n.colors("#202020", "#dedede")) }
+            var small = UI.button("Tile me").withStyle(conf -> styler(conf)).get(JButton)
+            var large = UI.button("Tile me").withStyle(conf -> styler(conf)).get(JButton)
+
+        when : 'Both are dragged through a couple of sizes.'
+            [[60, 50], [64, 54], [68, 58]].each { w, h ->      // under the crossover
+                small.setSize(w, h); Utility.renderSingleComponent(small)
+            }
+            [[500, 300], [520, 310], [540, 320]].each { w, h -> // over it
+                large.setSize(w, h); Utility.renderSingleComponent(large)
+            }
+
+        then : 'The large one had its noise lifted out, leaving the rounded fill cached as an exemplar.'
+            ComponentExtension.from(large).cachedRendering(UI.Layer.BACKGROUND).size() == 1
+            ComponentExtension.from(large).cachedRendering(UI.Layer.BACKGROUND).first().width < 500
+
+        and : 'The small one kept its noise baked in, so its cached image is the whole component.'
+            ComponentExtension.from(small).cachedRendering(UI.Layer.BACKGROUND).size() == 1
+            ComponentExtension.from(small).cachedRendering(UI.Layer.BACKGROUND).first().width == 68
+    }
+
+    def 'A layer which is nothing but a noise is not cached while it resizes.'()
+    {
+        reportInfo """
+            The flip side of lifting a noise out of the cached image: when the
+            noise is *all* there is on a layer, what is left to cache is
+            nothing, so mid-drag nothing is cached. That is the right outcome
+            rather than a missing optimisation — an image holding a copy of the
+            noise would have to be re-rendered at every new size, which is
+            strictly more work than replaying the noise, which is cheap by
+            construction. At a settled size the layer is cached whole again, as
+            any other layer is.
+        """
+        given : 'A button whose background layer carries a noise and nothing else.'
+            var button =
+                UI.button("Tile me")
+                  .withStyle( it -> it.noise(n -> n.colors("#111111", "#eeeeee")) )
+                  .get(JButton)
+            button.setSize(220, 160)
+            var ext = ComponentExtension.from(button)
+
+        when : 'We paint it a few times and then drag it.'
+            5.times { Utility.renderSingleComponent(button) }
+        then : 'At a settled size it is one cached image, like any other layer.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1
+
+        when : 'The drag begins, and there is suddenly nothing left to cache.'
+            button.setSize(420, 240)
+            Utility.renderSingleComponent(button)
+        then : 'There is no cached image for that layer.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
     }
 
     def 'Per edge border colors tolerate resizing only with square corners.'()
@@ -338,7 +533,6 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
                                                                                                             .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 14, 15)
                                                                                                             .borderRadiusAt(UI.Corner.BOTTOM_RIGHT, 16, 17) }
             "a gradient"                                   | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(10).gradient(g -> g.colors("#b02050", "#2050b0")) }
-            "a noise texture"                              | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(10).noise(n -> n.colors("#202020", "#dedede")) }
             "a background image"                           | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(10).image(img -> img.image(ICON)) }
             "styled text"                                  | UI.Layer.CONTENT    | "full size"        | { it.text(t -> t.content("Full size")) }
             "per-edge border colors with rounded corners"  | UI.Layer.BORDER     | "full size"        | { it.borderWidths(2, 3, 4, 5).borderColors("#6a1010", "#106a10", "#10106a", "#6a6a10").borderRadius(16) }

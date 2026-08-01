@@ -182,6 +182,26 @@ tasks.register('runResizeBenchmark', JavaExec) {
     }
 }
 
+/*
+ *  Measures a component styled with a large noise gradient, while resizing and at an
+ *  unchanged size, which is how the decision to lift a noise out of its layer is judged.
+ *  Opens a window, so it needs a display and is never part of 'check'.
+ */
+tasks.register('runNoiseBenchmark', JavaExec) {
+    group = 'verification'
+    description = 'Measures the paint cost of a large noise gradient, resizing and not.'
+    dependsOn 'testClasses'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'benchmarks.NoisePaintBenchmark'
+    System.properties.each { key, value ->
+        if ( key.toString().startsWith('benchmark.') ) systemProperty(key.toString(), value)
+    }
+    if ( project.hasProperty('jfr') ) {
+        jvmArgs "-XX:FlightRecorderOptions=stackdepth=512"
+        jvmArgs "-XX:StartFlightRecording=settings=profile,dumponexit=true,filename=${project.property('jfr')}"
+    }
+}
+
 // CUSTOM DEPLOYMENT TASKS :
 
 // 0: Cleanup

@@ -120,6 +120,10 @@ final class LayerPartCache
     private Pooled<LayerRenderConf> _cacheKey;
     private int                     _cacheHitsUntilAllocation;
     private boolean                 _isInitialized;
+    /** Whether {@code _layerRenderData} holds none of the layer's style. Decided in
+     *  {@link #validate(ComponentConf)}, because the answer is a deep comparison and
+     *  {@link #paint(Graphics2D, BiConsumer)} sits directly in the paint path. */
+    private boolean                 _rendersNothing;
 
 
     public LayerPartCache( UI.Layer layer, StyleLayerPart part ) {
@@ -129,6 +133,7 @@ final class LayerPartCache
         _cacheKey                 = _layerRenderData;
         _cacheHitsUntilAllocation = -1;
         _isInitialized            = false;
+        _rendersNothing           = true;
     }
 
     /** The fully rendered cached image which subsequent paint calls will be served from,
@@ -178,10 +183,12 @@ final class LayerPartCache
             _isInitialized            = false;
             _layerRenderData          = new Pooled<>(LayerRenderConf.none());
             _cacheKey                 = _layerRenderData;
+            _rendersNothing           = true;
             return;
         }
 
         final LayerRenderConf newState = _part.restrict(newConf.renderConfFor(_layer));
+        _rendersNothing = newState.rendersNothing();
         /*
             Canonicalization maps eligible configurations onto the size independent
             exemplar key, so that a resize does not invalidate the cache. For everything
@@ -234,7 +241,8 @@ final class LayerPartCache
      *  reported per call rather than counted here.
      */
     enum PaintOutcome {
-        /** Nothing was painted at all, because the component currently has no area. */
+        /** Nothing was painted at all, because the component currently has no area, or
+         *  because this part holds none of the layer's style. */
         NOT_PAINTED,
         /** The pixels came entirely from the cached image. */
         SERVED_FROM_CACHE,
@@ -247,6 +255,11 @@ final class LayerPartCache
         Size size = _layerRenderData.get().boxModel().size();
 
         if ( size.widthOrElse(0f) == 0f || size.heightOrElse(0f) == 0f )
+            return PaintOutcome.NOT_PAINTED;
+
+        // A part holding none of the layer's style draws nothing, and must not report a miss
+        // for it, or a split layer would miss on every paint for the side its style leaves empty.
+        if ( _rendersNothing )
             return PaintOutcome.NOT_PAINTED;
 
         if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
@@ -429,7 +442,7 @@ final class LayerPartCache
      *  which already has the exemplar size maps onto itself.
      */
     private static LayerRenderConf _canonicalize( LayerRenderConf conf ) {
-        if ( !_isStretchTileable(conf) )
+        if ( !isStretchTileable(conf) )
             return conf;
 
         final Outline sliceInsets = _sliceInsets(conf);
@@ -446,7 +459,7 @@ final class LayerPartCache
     }
 
     /** Whether the layer content satisfies the tiling invariant (see class javadoc). */
-    private static boolean _isStretchTileable( LayerRenderConf conf ) {
+    static boolean isStretchTileable( LayerRenderConf conf ) {
         final StyleConfLayer layer = conf.layer();
 
         for ( GradientConf gradient : layer.gradients().sortedByNames() )
