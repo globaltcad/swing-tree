@@ -73,11 +73,18 @@ class Border_Delegation_Spec extends Specification
             The same border is worn by two panels: one built through SwingTree, and one a plain
             `JPanel` which Swing paints all by itself. Rendering both has to produce the very
             same image, whatever the border is and whatever size the panel was stretched to.
+
+            Note that the border sits on the panel before SwingTree ever sees it, which is the
+            situation a real application is in: the look and feel installed the border long
+            before any styling happened.
         """
         given : 'A panel handed to SwingTree with that border already on it, styled only with a padding.'
-            var swingTreePanel = swingTreePanelWearing(inheritedBorder)
+            var raw = new JPanel()
+            raw.setBorder(inheritedBorder)
+            var swingTreePanel = UI.of(raw).withStyle(it -> it.padding(1) ).get(JPanel)
         and : 'And a plain Swing panel wearing the very same border.'
-            var plainPanel = plainPanelWearing(inheritedBorder)
+            var plainPanel = new JPanel()
+            plainPanel.setBorder(inheritedBorder)
 
         when : 'We render both at the same size,'
             var throughSwingTree = render(swingTreePanel, width, height)
@@ -92,21 +99,21 @@ class Border_Delegation_Spec extends Specification
             differingPixels(throughSwingTree, plainSwing) == 0
 
         where : 'We try every kind of border we can think of, on a modest panel and on a maximized one.'
-            inheritedBorder                                         | width | height
-            new LineBorder(Color.RED, 1, false)                     | 300   | 200
-            new LineBorder(Color.RED, 1, false)                     | 1400  | 1000
-            new LineBorder(Color.BLUE, 5, false)                    | 1400  | 1000
-            new LineBorder(new Color(0, 128, 0, 128), 3, true)      | 1400  | 1000
-            new MatteBorder(4, 8, 12, 16, Color.MAGENTA)            | 1400  | 1000
-            BorderFactory.createEtchedBorder()                      | 1400  | 1000
-            BorderFactory.createRaisedSoftBevelBorder()             | 1400  | 1000
-            BorderFactory.createLoweredBevelBorder()                | 1400  | 1000
-            BorderFactory.createTitledBorder("A long enough title") | 1400  | 1000
-            BorderFactory.createDashedBorder(Color.BLUE)            | 1400  | 1000
-            compound()                                              | 1400  | 1000
-            new RoundedOutlineBorder(1, 8)                          | 1400  | 1000
-            new RoundedOutlineBorder(6, 24)                         | 1400  | 1000
-            new RoundedOutlineBorder(3, 64)                         | 1400  | 1000
+            inheritedBorder                                                                                            | width | height
+            new LineBorder(Color.RED, 1, false)                                                                        | 300   | 200
+            new LineBorder(Color.RED, 1, false)                                                                        | 1400  | 1000
+            new LineBorder(Color.BLUE, 5, false)                                                                       | 1400  | 1000
+            new LineBorder(new Color(0, 128, 0, 128), 3, true)                                                         | 1400  | 1000
+            new MatteBorder(4, 8, 12, 16, Color.MAGENTA)                                                               | 1400  | 1000
+            BorderFactory.createEtchedBorder()                                                                         | 1400  | 1000
+            BorderFactory.createRaisedSoftBevelBorder()                                                                | 1400  | 1000
+            BorderFactory.createLoweredBevelBorder()                                                                   | 1400  | 1000
+            BorderFactory.createTitledBorder("A long enough title")                                                    | 1400  | 1000
+            BorderFactory.createDashedBorder(Color.BLUE)                                                               | 1400  | 1000
+            BorderFactory.createCompoundBorder(new LineBorder(Color.RED, 2, true), new EmptyBorder(4, 4, 4, 4))        | 1400  | 1000
+            new RoundedOutlineBorder(1, 8)                                                                             | 1400  | 1000
+            new RoundedOutlineBorder(6, 24)                                                                            | 1400  | 1000
+            new RoundedOutlineBorder(3, 64)                                                                            | 1400  | 1000
     }
 
     def 'A component keeps the border it came with on a high resolution screen too.'()
@@ -120,8 +127,11 @@ class Border_Delegation_Spec extends Specification
         """
         given : 'A SwingTree panel and a plain Swing panel, both wearing a thin antialiased outline.'
             var inheritedBorder = new RoundedOutlineBorder(1, 12)
-            var swingTreePanel = swingTreePanelWearing(inheritedBorder)
-            var plainPanel = plainPanelWearing(inheritedBorder)
+            var raw = new JPanel()
+            raw.setBorder(inheritedBorder)
+            var swingTreePanel = UI.of(raw).withStyle(it -> it.padding(1) ).get(JPanel)
+            var plainPanel = new JPanel()
+            plainPanel.setBorder(inheritedBorder)
 
         when : 'We render both onto a screen scaled by the given factor,'
             var throughSwingTree = render(swingTreePanel, 1400, 1000, scale)
@@ -154,8 +164,11 @@ class Border_Delegation_Spec extends Specification
             var inheritedBorder = borderSource.call()
 
         and : 'A SwingTree panel and a plain Swing panel, both wearing it.'
-            var swingTreePanel = swingTreePanelWearing(inheritedBorder)
-            var plainPanel = plainPanelWearing(inheritedBorder)
+            var raw = new JPanel()
+            raw.setBorder(inheritedBorder)
+            var swingTreePanel = UI.of(raw).withStyle(it -> it.padding(1) ).get(JPanel)
+            var plainPanel = new JPanel()
+            plainPanel.setBorder(inheritedBorder)
 
         when : 'We render both, on an ordinary screen and on a fractionally scaled one,'
             var plainOnAnOrdinaryScreen = render(plainPanel, 1400, 1000)
@@ -203,28 +216,6 @@ class Border_Delegation_Spec extends Specification
     }
 
     // ────────────────────────── helpers ──────────────────────────
-
-    /**
-     *  A panel handed to SwingTree with the border already on it, which is the situation a real
-     *  application is in: the look and feel installed the border long before any styling happened.
-     */
-    private static JPanel swingTreePanelWearing( Border border ) {
-        var panel = new JPanel()
-        panel.setBorder(border)
-        return UI.of(panel).withStyle(it -> it.padding(1) ).get(JPanel)
-    }
-
-    private static JPanel plainPanelWearing( Border border ) {
-        var panel = new JPanel()
-        panel.setBorder(border)
-        return panel
-    }
-
-    private static Border compound() {
-        return BorderFactory.createCompoundBorder(
-                    new LineBorder(Color.RED, 2, true), new EmptyBorder(4, 4, 4, 4)
-                )
-    }
 
     /**
      *  Renders a component the way Swing renders it - sized, laid out and painted into an image -
