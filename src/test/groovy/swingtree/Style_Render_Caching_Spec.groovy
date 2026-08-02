@@ -32,7 +32,7 @@ import java.awt.Color
       1. Building components the way an application would (`UI.button(...).withStyle(...)`),
       2. Painting them with the regular paint pipeline (`Utility.renderSingleComponent(...)`
          which ultimately calls `JComponent.paint(g)`),
-      3. Observing the resulting cache state via `ComponentExtension.cachedRendering(layer).isPresent()`,
+      3. Observing the resulting cache state via `ComponentExtension.cachedRendering(layer).isNotEmpty()`,
          `ComponentExtension.cacheHitCount(layer)` and `ComponentExtension.cacheMissCount(layer)`.
 
     Crucially, this spec does **not** instantiate any of SwingTree's internal
@@ -103,7 +103,7 @@ class Style_Render_Caching_Spec extends Specification
         when : 'We render the component once through the regular paint pipeline.'
             Utility.renderSingleComponent(button)
         then : 'The background layer has produced a cached rendering after that first paint.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
         and  : 'The renderer was invoked at least once to produce the cached image.'
             ext.cacheMissCount(UI.Layer.BACKGROUND) >= 1
             ext.cacheHitCount(UI.Layer.BACKGROUND)  == 0
@@ -116,7 +116,45 @@ class Style_Render_Caching_Spec extends Specification
         and  : 'And the miss counter did *not* increase – no fresh rendering was needed.'
             ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeRepaint
         and  : 'The cached rendering is, of course, still there.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+    }
+
+    def 'The cache reports a layer as a tuple of images, one per separately cached part.'()
+    {
+        reportInfo """
+            A layer is not limited in how much style it may carry, and not all
+            style caches the same way. A flat colour or a shadow is constant
+            along the component edges, so it can be kept as one small image and
+            stretched back to any size, whereas a gradient or painted text has
+            to be kept at the component's real size. When a single layer mixes
+            such parts, one image cannot represent both, so `cachedRendering(..)`
+            hands back a *tuple*: empty when nothing is cached, one image for the
+            ordinary case where the whole layer rasterizes together, and several
+            when the cache had to split the layer up. They come in paint order.
+
+            Here we look at the ordinary case, which is what a layer carrying a
+            single kind of style produces.
+        """
+        given : 'A button whose background layer carries one kind of style.'
+            var button =
+                UI.button("Hello!")
+                  .withStyle( it -> it
+                        .size(120, 60)
+                        .borderRadius(20)
+                        .backgroundColor(Color.BLUE)
+                        .foundationColor(Color.WHITE)
+                  )
+                  .get(JButton)
+        and : 'We grab the public extension associated with the component.'
+            var ext = ComponentExtension.from(button)
+
+        when : 'We paint it through the regular paint pipeline.'
+            2.times { Utility.renderSingleComponent(button) }
+
+        then : 'The background layer rasterized into a single cached image.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1
+        and  : 'A layer without any style of its own has nothing to show.'
+            ext.cachedRendering(UI.Layer.FOREGROUND).isEmpty()
     }
 
     def 'A plain, undecorated component is *never* cached.'()
@@ -144,10 +182,10 @@ class Style_Render_Caching_Spec extends Specification
             Utility.renderSingleComponent(label)
             Utility.renderSingleComponent(label)
         then : 'No layer ever produced a cached rendering.'
-            !ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
-            !ext.cachedRendering(UI.Layer.CONTENT).isPresent()
-            !ext.cachedRendering(UI.Layer.BORDER).isPresent()
-            !ext.cachedRendering(UI.Layer.FOREGROUND).isPresent()
+            ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
+            ext.cachedRendering(UI.Layer.CONTENT).isEmpty()
+            ext.cachedRendering(UI.Layer.BORDER).isEmpty()
+            ext.cachedRendering(UI.Layer.FOREGROUND).isEmpty()
         and  : 'And the cache hit counter for the background never increased.'
             ext.cacheHitCount(UI.Layer.BACKGROUND)  == 0
     }
@@ -186,7 +224,7 @@ class Style_Render_Caching_Spec extends Specification
             buttons.each { Utility.renderSingleComponent(it) }
 
         then : 'Every button reports that its background layer is cached.'
-            exts.every { it.cachedRendering(UI.Layer.BACKGROUND).isPresent() }
+            exts.every { it.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty() }
 
         and : """
             The first button to render had to actually invoke the style
@@ -246,7 +284,7 @@ class Style_Render_Caching_Spec extends Specification
             Utility.renderSingleComponent(button)
             Utility.renderSingleComponent(button)
         then : 'The cache is now populated and the second paint counted as a hit.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
             ext.cacheHitCount(UI.Layer.BACKGROUND)  >= 1
 
         when : 'The view model produces a new tint and we paint again.'
@@ -266,7 +304,7 @@ class Style_Render_Caching_Spec extends Specification
         then : 'It is served from the cache again – the cache repopulated after invalidation.'
             ext.cacheHitCount(UI.Layer.BACKGROUND)  > hitsBeforeBlit
             ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeBlit
-            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
     }
 
     def 'Resizing a styled component does not invalidate its cached rendering.'()
@@ -299,7 +337,7 @@ class Style_Render_Caching_Spec extends Specification
             Utility.renderSingleComponent(button)
             Utility.renderSingleComponent(button)
         expect : 'The cache is warm.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
             ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
 
         when : 'The component grows substantially and is painted again.'
@@ -312,7 +350,7 @@ class Style_Render_Caching_Spec extends Specification
         and : 'The paint was served from the cache - no fresh rendering despite the new size!'
             ext.cacheHitCount(UI.Layer.BACKGROUND)  > hitsBeforeResize
             ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeResize
-            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
 
         when : 'The component shrinks to yet another size and is painted again.'
             int missesBeforeShrink = ext.cacheMissCount(UI.Layer.BACKGROUND)
@@ -320,7 +358,7 @@ class Style_Render_Caching_Spec extends Specification
             Utility.renderSingleComponent(button)
         then : 'Still no fresh rendering - every size maps onto the same cached rendering.'
             ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeShrink
-            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
     }
 
     def 'Shrinking a styled component to a zero size releases its cached rendering.'()
@@ -354,7 +392,7 @@ class Style_Render_Caching_Spec extends Specification
             var ext = ComponentExtension.from(button)
             Utility.renderSingleComponent(button)
         expect : 'The cache is warm - the background layer produced a cached rendering.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
 
         when : '''
             The component collapses to a zero height and its style is re-validated -
@@ -364,13 +402,13 @@ class Style_Render_Caching_Spec extends Specification
             button.setSize(120, 0)
             ext.gatherApplyAndInstallStyle(true)
         then : 'The cached rendering was released - nothing keeps the image reachable through this component anymore.'
-            !ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
 
         when : 'The component regains a real size and is painted once more.'
             button.setSize(120, 60)
             Utility.renderSingleComponent(button)
         then : 'The cache repopulates from scratch - the rendering is available again.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
     }
 
     def 'Components of different sizes but the same style share a single cached rendering.'()
@@ -402,7 +440,7 @@ class Style_Render_Caching_Spec extends Specification
 
         then : 'The first paint of the first button populated the shared cache entry.'
             firstExt.cacheMissCount(UI.Layer.BACKGROUND) >= 1
-            firstExt.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            firstExt.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
         and : 'The second button was served from the cache on its very first paint, despite its different size.'
             secondExt.cacheMissCount(UI.Layer.BACKGROUND) == 0
             secondExt.cacheHitCount(UI.Layer.BACKGROUND)  >= 1
@@ -430,7 +468,7 @@ class Style_Render_Caching_Spec extends Specification
             Utility.renderSingleComponent(button)
             Utility.renderSingleComponent(button)
         expect : 'The gradient is cached and served from the cache at a stable size.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
             ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
 
         when : 'The component is resized and painted again.'
@@ -476,9 +514,9 @@ class Style_Render_Caching_Spec extends Specification
             Utility.renderSingleComponent(button)
 
         then : 'The background layer is cached, just like in the other scenarios.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
 
         and : 'But the foreground layer was skipped by the cache because it carries no heavy ingredients.'
-            !ext.cachedRendering(UI.Layer.FOREGROUND).isPresent()
+            ext.cachedRendering(UI.Layer.FOREGROUND).isEmpty()
     }
 }
