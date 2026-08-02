@@ -45,7 +45,7 @@ final class StyleEngine
         if ( layerCaches == null ) {
             layerCaches = new LayerCache[ALL_LAYERS.length];
             for ( int i = 0; i < layerCaches.length; i++ )
-                layerCaches[i] = new LayerCache(ALL_LAYERS[i]);
+                layerCaches[i] = new LayerCache(ALL_LAYERS[i], StyleLayerPart.WHOLE);
         }
         _layerCaches = Objects.requireNonNull(layerCaches);
     }

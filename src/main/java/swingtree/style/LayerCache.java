@@ -109,6 +109,8 @@ final class LayerCache
 
 
     private final UI.Layer          _layer;
+    /** Which piece of {@link #_layer} this instance caches, see {@link StyleLayerPart}. */
+    private final StyleLayerPart    _part;
     private @Nullable CachedImage   _localCache;
     /** The render input: always the actual configuration at the real component size (see class javadoc). */
     private Pooled<LayerRenderConf> _layerRenderData;
@@ -125,8 +127,9 @@ final class LayerCache
     private int                     _paintCacheMissCount = 0; // paint() had to invoke the renderer (caching disabled, or the cache was not yet rendered)
 
 
-    public LayerCache( UI.Layer layer ) {
+    public LayerCache( UI.Layer layer, StyleLayerPart part ) {
         _layer                    = Objects.requireNonNull(layer);
+        _part                     = Objects.requireNonNull(part);
         _layerRenderData          = new Pooled<>(LayerRenderConf.none());
         _cacheKey                 = _layerRenderData;
         _cacheHitsUntilAllocation = -1;
@@ -183,7 +186,7 @@ final class LayerCache
             return;
         }
 
-        final LayerRenderConf newState = newConf.renderConfFor(_layer);
+        final LayerRenderConf newState = _part.restrict(newConf.renderConfFor(_layer));
         /*
             Canonicalization maps eligible configurations onto the size independent
             exemplar key, so that a resize does not invalidate the cache. For everything
