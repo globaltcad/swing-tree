@@ -18,11 +18,13 @@ import java.util.WeakHashMap;
 import java.util.function.BiConsumer;
 
 /**
- *  A {@link BufferedImage} based cache for the rendering of a particular layer of a component's style. <br>
- *  Caching is keyed by the deeply immutable {@link LayerRenderConf} of the layer: as long as it
+ *  A {@link BufferedImage} based cache for the rendering of one {@link LayerRenderConfPartitions} of a
+ *  particular layer of a component's style - which is ordinarily {@link LayerRenderConfPartitions#WHOLE},
+ *  the entire layer. <br>
+ *  Caching is keyed by the deeply immutable {@link LayerRenderConf} of that part: as long as it
  *  stays equal across paint calls, the cached image is blitted instead of re-rendered, and when
- *  it changes, the entry is invalidated. An instance of this exists per component and layer
- *  (inside the style engine), while the rendered images live in a global, weakly keyed pool
+ *  it changes, the entry is invalidated. An instance of this exists per component, layer and
+ *  part (inside the style engine), while the rendered images live in a global, weakly keyed pool
  *  shared by all components with an equal configuration. <br>
  *  <br>
  *  <b>Size independent caching through stretch tiling ("nine slice"):</b><br>
@@ -62,9 +64,9 @@ import java.util.function.BiConsumer;
  *          keeps the weakly keyed entry alive.</li>
  *  </ul>
  */
-final class LayerCache
+final class LayerPartitionCache
 {
-    private static final Logger log = LoggerFactory.getLogger(LayerCache.class);
+    private static final Logger log = LoggerFactory.getLogger(LayerPartitionCache.class);
 
     private static final int    MAX_CACHE_ENTRIES                 = 1024; // There can never be more entries!
     private static final int    PIXELS_PER_UNIT_OF_AGGRESSIVENESS = 256 * 256; // Determines how many pixels a single unit of cache aggressiveness can cache
@@ -114,7 +116,7 @@ final class LayerCache
     /** Drops every globally cached layer image. Called when the library cache configuration
      *  changes (see {@link ComponentExtension#updateAllCachesFromLibraryConfig()}) so memory
      *  shrinks immediately; the cache repopulates lazily under the new budget. <br>
-     *  Note that living {@link LayerCache} instances keep holding their {@code _localCache}
+     *  Note that living {@link LayerPartitionCache} instances keep holding their {@code _localCache}
      *  image until their next {@link #validate(ComponentConf)}, so a component
      *  which revalidates afterwards may briefly mint a second image for a key another component
      *  is still painting from. This costs a little duplicated memory until the stragglers
@@ -126,6 +128,8 @@ final class LayerCache
 
 
     private final UI.Layer          _layer;
+    /** Which piece of {@link #_layer} this instance caches, see {@link LayerRenderConfPartitions}. */
+    private final LayerRenderConfPartitions _part;
     private @Nullable CachedImage   _localCache;
     /** The render input: always the actual configuration at the real component size (see class javadoc). */
     private Pooled<LayerRenderConf> _layerRenderData;
@@ -133,17 +137,11 @@ final class LayerCache
     private Pooled<LayerRenderConf> _cacheKey;
     private int                     _cacheHitsUntilAllocation;
     private boolean                 _isInitialized;
-    /*
-     *  Per-instance utilisation counters, observable through the {@link ComponentExtension}
-     *  public API, which is also how the test suite reasons about cache effectiveness
-     *  without coupling to any of the package-private machinery.
-     */
-    private int                     _paintCacheHitCount  = 0; // paint() served entirely from a rendered cache image
-    private int                     _paintCacheMissCount = 0; // paint() had to invoke the renderer (caching disabled, or the cache was not yet rendered)
 
 
-    public LayerCache( UI.Layer layer ) {
+    public LayerPartitionCache(UI.Layer layer, LayerRenderConfPartitions part ) {
         _layer                    = Objects.requireNonNull(layer);
+        _part                     = Objects.requireNonNull(part);
         _layerRenderData          = new Pooled<>(LayerRenderConf.none());
         _cacheKey                 = _layerRenderData;
         _cacheHitsUntilAllocation = -1;
@@ -175,7 +173,7 @@ final class LayerCache
             return;
         }
 
-        final LayerRenderConf newState = newConf.renderConfFor(_layer);
+        final LayerRenderConf newState = _part.restrict(newConf.renderConfFor(_layer));
         /*
             Canonicalization maps eligible configurations onto the size independent
             exemplar key, so that a resize does not invalidate the cache. For everything
@@ -233,17 +231,32 @@ final class LayerCache
         }
     }
 
-    public void paint( Graphics2D g, BiConsumer<LayerRenderConf, Graphics2D> renderer )
+    /**
+     *  What a single {@link #paint(Graphics2D, BiConsumer)} call did, so that the owning
+     *  {@link StyleLayerCache} can tell a paint served purely by blitting from one that had
+     *  to run the style renderer. A layer is only as cached as its least cached part, and
+     *  that verdict cannot be recovered from per part totals after the fact - hence it is
+     *  reported per call rather than counted here.
+     */
+    enum PaintOutcome {
+        /** Nothing was painted at all (component currently has no area, or no meaningful style conf) */
+        NOTHING_RENDERED,
+        /** The pixels came entirely from the cached image. */
+        RENDERED_FROM_CACHE,
+        /** The style renderer had to be invoked (caching disabled, or the cache was not yet rendered). */
+        RENDERED_FROM_STYLE
+    }
+
+    public PaintOutcome paint( Graphics2D g, BiConsumer<LayerRenderConf, Graphics2D> renderer )
     {
         Size size = _layerRenderData.get().boxModel().size();
 
         if ( size.widthOrElse(0f) == 0f || size.heightOrElse(0f) == 0f )
-            return;
+            return PaintOutcome.NOTHING_RENDERED;
 
         if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
             renderer.accept(_layerRenderData.get(), g);
-            _paintCacheMissCount++;
-            return;
+            return PaintOutcome.RENDERED_FROM_STYLE;
         }
 
         /*
@@ -256,21 +269,20 @@ final class LayerCache
         final boolean isTiled = !_cacheKey.get().boxModel().size().equals(size);
         if ( isTiled && !_isBlitCompatible(g.getTransform()) ) {
             renderer.accept(_layerRenderData.get(), g);
-            _paintCacheMissCount++;
-            return;
+            return PaintOutcome.RENDERED_FROM_STYLE;
         }
 
         if ( _localCache == null ) {
             renderer.accept(_layerRenderData.get(), g);
-            _paintCacheMissCount++;
             log.error(
                 "Caching enabled for layer '{}', but the local buffer is null; rendered without cache. " +
                 "Hit countdown until allocation is '{}'.",
                 _layer, _cacheHitsUntilAllocation
             );
-            return;
+            return PaintOutcome.RENDERED_FROM_STYLE;
         }
 
+        final PaintOutcome outcome;
         if ( !_localCache.isRendered() ) {
             Graphics2D g2 = _localCache.createGraphics(g.getDeviceConfiguration());
             if ( g2 == null ) {
@@ -280,8 +292,7 @@ final class LayerCache
                     So we just do normal rendering instead:
                 */
                 renderer.accept(_layerRenderData.get(), g);
-                _paintCacheMissCount++;
-                return;
+                return PaintOutcome.RENDERED_FROM_STYLE;
             }
             try {
                 StyleUtil.transferConfigurations(g, g2);
@@ -298,26 +309,22 @@ final class LayerCache
                 renderer.accept(_cacheKey.get(), g2);
                 g2.dispose();
             }
-            _paintCacheMissCount++;
+            outcome = PaintOutcome.RENDERED_FROM_STYLE;
         } else {
-            _paintCacheHitCount++;
+            outcome = PaintOutcome.RENDERED_FROM_CACHE;
         }
 
         final BufferedImage cachedImage = _localCache.getImage();
         if ( cachedImage == null )
-            return; // Cannot happen (the count-down path returned above), but let's be defensive.
+            return outcome; // Cannot happen (the count-down path returned above), but let's be defensive.
 
         if ( isTiled )
             _localCache.paintStretched(g, _cacheKey.get(), size);
         else
             g.drawImage(cachedImage, 0, 0, null);
+
+        return outcome;
     }
-
-    /** Number of paint calls served entirely from the cached image, since this instance was created. */
-    int paintCacheHitCount()  { return _paintCacheHitCount;  }
-
-    /** Number of paint calls that had to invoke the renderer, since this instance was created. */
-    int paintCacheMissCount() { return _paintCacheMissCount; }
 
     /**
      *  Scores whether caching pays off for the supplied configuration: -1 means never
@@ -579,11 +586,11 @@ final class LayerCache
     /**
      *  A wrapper for a cached image that is either rendered or not yet allocated and
      *  associated with a particular {@link LayerRenderConf} key, which is used
-     *  by the {@link LayerCache} instance of a particular component to get a strong
+     *  by the {@link LayerPartitionCache} instance of a particular component to get a strong
      *  reference to the key (causing it to stay in cache and not get garbage collected). <br>
      *  <br>
      *  So instances of this are stored as values in the global {@link #_CACHE},
-     *  and can be accessed and shared by multiple {@link LayerCache} instances.
+     *  and can be accessed and shared by multiple {@link LayerPartitionCache} instances.
      *  (So be careful with modifying this class!)<br>
      *  The image can be allocated lazily only after a certain number of cache
      *  hits have been reached. This is to avoid allocating and rendering cache
@@ -685,7 +692,7 @@ final class LayerCache
          *  <br>
          *  The caller must ensure the graphics transform is blit compatible and that the
          *  actual size is strictly larger than the image in both dimensions (both of which
-         *  {@link LayerCache#paint} guarantees).
+         *  {@link LayerPartitionCache#paint} guarantees).
          *
          * @param g The destination graphics to draw the tiles into.
          * @param canonicalConf The exemplar configuration this image was rendered from,
