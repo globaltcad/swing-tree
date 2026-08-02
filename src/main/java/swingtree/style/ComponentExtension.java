@@ -507,11 +507,9 @@ public final class ComponentExtension<C extends JComponent>
     @SuppressWarnings("EnumOrdinal") // Layer ordinals are used intentionally to index the per-layer cache array.
     public Tuple<BufferedImage> cachedRendering( UI.Layer layer ) {
         Objects.requireNonNull(layer);
-        LayerPartCache[] caches = _styleEngine.getLayerCaches();
-        BufferedImage cached = caches[layer.ordinal()].renderedImage();
-        if ( cached == null )
-            return Tuple.of(BufferedImage.class);
-        return Tuple.of(BufferedImage.class, _defensiveCopyOf(cached));
+        StyleLayerCache[] caches = _styleEngine.getLayerCaches();
+        return caches[layer.ordinal()].renderedImages()
+                                      .mapTo(BufferedImage.class, ComponentExtension::_defensiveCopyOf);
     }
 
     private static BufferedImage _defensiveCopyOf( BufferedImage image ) {
@@ -544,7 +542,7 @@ public final class ComponentExtension<C extends JComponent>
     @SuppressWarnings("EnumOrdinal") // Layer ordinals are used intentionally to index the per-layer cache array.
     public int cacheHitCount( UI.Layer layer ) {
         Objects.requireNonNull(layer);
-        LayerPartCache[] caches = _styleEngine.getLayerCaches();
+        StyleLayerCache[] caches = _styleEngine.getLayerCaches();
         return caches[layer.ordinal()].paintCacheHitCount();
     }
 
@@ -562,7 +560,7 @@ public final class ComponentExtension<C extends JComponent>
     @SuppressWarnings("EnumOrdinal") // Layer ordinals are used intentionally to index the per-layer cache array.
     public int cacheMissCount( UI.Layer layer ) {
         Objects.requireNonNull(layer);
-        LayerPartCache[] caches = _styleEngine.getLayerCaches();
+        StyleLayerCache[] caches = _styleEngine.getLayerCaches();
         return caches[layer.ordinal()].paintCacheMissCount();
     }
 

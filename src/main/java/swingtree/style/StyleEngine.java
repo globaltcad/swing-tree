@@ -32,27 +32,27 @@ final class StyleEngine
 
     private final Pooled<BoxModelConf>  _boxModelConf;
     private final Pooled<ComponentConf> _componentConf;
-    private final LayerPartCache[]      _layerCaches;
+    private final StyleLayerCache[]     _layerCaches;
 
 
     private StyleEngine(
         Pooled<BoxModelConf>  boxModelConf,
         Pooled<ComponentConf> componentConf,
-        @Nullable LayerPartCache[] layerCaches // Null when the style engine is freshly created
+        @Nullable StyleLayerCache[] layerCaches // Null when the style engine is freshly created
     ) {
         _boxModelConf  = Objects.requireNonNull(boxModelConf).intern();
         _componentConf = Objects.requireNonNull(componentConf).intern();
         if ( layerCaches == null ) {
-            layerCaches = new LayerPartCache[ALL_LAYERS.length];
+            layerCaches = new StyleLayerCache[ALL_LAYERS.length];
             for ( int i = 0; i < layerCaches.length; i++ )
-                layerCaches[i] = new LayerPartCache(ALL_LAYERS[i], StyleLayerPart.WHOLE);
+                layerCaches[i] = new StyleLayerCache(ALL_LAYERS[i]);
         }
         _layerCaches = Objects.requireNonNull(layerCaches);
     }
 
     ComponentConf getComponentConf() { return _componentConf.get(); }
 
-    LayerPartCache[] getLayerCaches() { return _layerCaches; }
+    StyleLayerCache[] getLayerCaches() { return _layerCaches; }
 
     BoxModelConf getBoxModelConf() { return _boxModelConf.get(); }
 
@@ -80,8 +80,8 @@ final class StyleEngine
         final BoxModelConf newBoxModelConf = boxModelAndComponentConfs.first();
         final ComponentConf newConf = boxModelAndComponentConfs.second();
 
-        final LayerPartCache[] layerCaches = engine.getLayerCaches();
-        for ( LayerPartCache layerCache : layerCaches )
+        final StyleLayerCache[] layerCaches = engine.getLayerCaches();
+        for ( StyleLayerCache layerCache : layerCaches )
             layerCache.validate(newConf);
 
         return new StyleEngine(new Pooled<>(newBoxModelConf), new Pooled<>(newConf), _layerCaches);
@@ -155,7 +155,7 @@ final class StyleEngine
             antialiasingWasEnabled = false;
         }
 
-        LayerPartCache cache = null;
+        StyleLayerCache cache = null;
         switch ( layer ) {
             case BACKGROUND: cache = _layerCaches[0]; break;
             case CONTENT:    cache = _layerCaches[1]; break;
@@ -163,9 +163,7 @@ final class StyleEngine
             case FOREGROUND: cache = _layerCaches[3]; break;
         }
         if ( cache != null )
-            cache.paint(g2d, (conf, graphics) -> {
-                StyleRenderer.renderStyleOn(layer, conf, graphics);
-            });
+            cache.paint(g2d);
         else
             log.error(SwingTree.get().logMarker(),
                     "Layer cache is null for layer: {}",
