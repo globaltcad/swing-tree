@@ -645,8 +645,8 @@ final class LayerCache
 
         private static BufferedImage _allocate( @Nullable GraphicsConfiguration gc, int width, int height ) {
             BufferedImage img = ( gc != null )
-                    ? gc.createCompatibleImage(width, height, Transparency.TRANSLUCENT)
-                    : new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+                    ? gc.createCompatibleImage(width, height, Transparency.TRANSLUCENT) // potentially accelerated
+                    : new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB); // probably headless
             img.setAccelerationPriority(1.0f);
             return img;
         }

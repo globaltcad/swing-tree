@@ -9,6 +9,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.ColorModel;
+import java.awt.image.DirectColorModel;
 import java.awt.image.Raster;
 import java.awt.image.WritableRaster;
 import java.util.Arrays;
@@ -58,7 +59,11 @@ final class NoiseGradientPaint implements Paint
     private final float[] blueStepLookup;
     private final float[] alphaStepLookup;
     private final Color[] colors;
+    /** Whether every pixel this paint produces is fully opaque, see {@link #getTransparency()}. */
+    private final boolean isOpaque;
     private static final float INT_TO_FLOAT_CONST = 1f / 255f;
+    /** The alpha-less counterpart of {@link ColorModel#getRGBdefault()}, used by an opaque paint. */
+    private static final ColorModel OPAQUE_COLOR_MODEL = new DirectColorModel(24, 0xFF0000, 0xFF00, 0xFF);
     private @Nullable CachedContext cached;
 
 
@@ -143,6 +148,14 @@ final class NoiseGradientPaint implements Paint
             this.blueStepLookup[i]  = ((this.colors[i + 1].getBlue()  - this.colors[i].getBlue()) * INT_TO_FLOAT_CONST)  / (localFractions[i + 1] - localFractions[i]);
             this.alphaStepLookup[i] = ((this.colors[i + 1].getAlpha() - this.colors[i].getAlpha()) * INT_TO_FLOAT_CONST) / (localFractions[i + 1] - localFractions[i]);
         }
+
+        boolean allColorsOpaque = true;
+        for ( Color color : this.colors )
+            if ( color.getAlpha() < 255 ) {
+                allColorsOpaque = false;
+                break;
+            }
+        this.isOpaque = allColorsOpaque;
     }
 
     public Point2D getCenter() {
@@ -228,7 +241,7 @@ final class NoiseGradientPaint implements Paint
 
     @Override
     public int getTransparency() {
-        return Transparency.TRANSLUCENT;
+        return isOpaque ? Transparency.OPAQUE : Transparency.TRANSLUCENT;
     }
 
     @Override
@@ -296,7 +309,7 @@ final class NoiseGradientPaint implements Paint
 
         @Override
         public ColorModel getColorModel() {
-            return ColorModel.getRGBdefault();
+            return isOpaque ? OPAQUE_COLOR_MODEL : ColorModel.getRGBdefault();
         }
 
         @Override
@@ -307,7 +320,9 @@ final class NoiseGradientPaint implements Paint
             final int TILE_HEIGHT
         ) {
             try {
-                long index = ((long)X << 32) | (long)Y;
+                // The mask matters: a bare (long)Y would sign extend, collapsing every
+                // tile of a negative row onto one and the same key.
+                long index = ((long)X << 32) | (Y & 0xFFFFFFFFL);
                 WritableRaster raster = cachedRasters.get(index);
 
                 if (raster == null || raster.getWidth() < TILE_WIDTH || raster.getHeight() < TILE_HEIGHT)
@@ -317,11 +332,9 @@ final class NoiseGradientPaint implements Paint
 
                 final int MAX = localFractions.length - 1;
 
-                // Reusable data array with place for red, green, blue and alpha values.
-                // Grown only when a larger tile is encountered; setPixels(..) below reads
-                // exactly TILE_WIDTH * TILE_HEIGHT * 4 elements from the front, so a larger
-                // backing array is harmless.
-                final int dataLength = TILE_WIDTH * TILE_HEIGHT * 4;
+                // Create or reuse data array with place for red, green, blue and alpha values
+                final int bands      = isOpaque ? 3 : 4; // The channels
+                final int dataLength = TILE_WIDTH * TILE_HEIGHT * bands;
                 if ( scratchData.length < dataLength )
                     scratchData = new int[dataLength];
                 final int[] data = scratchData;
@@ -333,7 +346,7 @@ final class NoiseGradientPaint implements Paint
                 int base = 0;
                 for ( int tileY = 0; tileY < TILE_HEIGHT; tileY++ ) {
                     final double rowY = ( Y + tileY - center.getY() ) / scaleY;
-                    for ( int tileX = 0; tileX < TILE_WIDTH; tileX++, base += 4 ) {
+                    for ( int tileX = 0; tileX < TILE_WIDTH; tileX++, base += bands ) {
                         double currentRed   = 0;
                         double currentGreen = 0;
                         double currentBlue  = 0;
@@ -350,7 +363,11 @@ final class NoiseGradientPaint implements Paint
                         final float x = (float) localX;
                         final float y = (float) localY;
 
-                        final float onGradientRange = noiseFunction.getFractionAt( x, y );
+                        float onGradientRange = noiseFunction.getFractionAt( x, y );
+                        if ( !(onGradientRange > 0f) )
+                            onGradientRange = 0f;
+                        else if ( onGradientRange > 1f )
+                            onGradientRange = 1f;
 
                         for ( int i = MAX - 1; i >= 0; i-- ) {
                             if ( onGradientRange >= localFractions[i] ) {
@@ -366,7 +383,8 @@ final class NoiseGradientPaint implements Paint
                         data[base    ] = (int) Math.round(currentRed   * 255);
                         data[base + 1] = (int) Math.round(currentGreen * 255);
                         data[base + 2] = (int) Math.round(currentBlue  * 255);
-                        data[base + 3] = (int) Math.round(currentAlpha * 255);
+                        if ( bands == 4 )
+                            data[base + 3] = (int) Math.round(currentAlpha * 255);
                     }
                 }
 
