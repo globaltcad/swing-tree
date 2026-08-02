@@ -477,9 +477,9 @@ public final class ComponentExtension<C extends JComponent>
      *  other layers permanently report an empty tuple because caching them would not pay for
      *  itself.
      *  <p>
-     *  <b>How many images to expect.</b> There is no limit on how much style a single layer may
-     *  carry, and not all of it caches the same way, so the layer's rendering is not necessarily
-     *  one image:
+     *  <b>How many images to expect.</b> Currently the cache produces at most one image per layer,
+     *  but the return type is a tuple to remain forward-compatible with future splitting. There is
+     *  no limit on how much style a single layer may carry, and not all of it caches the same way,
      *  <ul>
      *      <li><b>none</b> - nothing about this layer is currently cached.</li>
      *      <li><b>one</b> - the whole layer rasterizes into a single image, which is the
