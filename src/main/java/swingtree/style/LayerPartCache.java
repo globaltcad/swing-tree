@@ -120,13 +120,6 @@ final class LayerPartCache
     private Pooled<LayerRenderConf> _cacheKey;
     private int                     _cacheHitsUntilAllocation;
     private boolean                 _isInitialized;
-    /*
-     *  Per-instance utilisation counters, observable through the {@link ComponentExtension}
-     *  public API, which is also how the test suite reasons about cache effectiveness
-     *  without coupling to any of the package-private machinery.
-     */
-    private int                     _paintCacheHitCount  = 0; // paint() served entirely from a rendered cache image
-    private int                     _paintCacheMissCount = 0; // paint() had to invoke the renderer (caching disabled, or the cache was not yet rendered)
 
 
     public LayerPartCache( UI.Layer layer, StyleLayerPart part ) {
@@ -233,17 +226,32 @@ final class LayerPartCache
         }
     }
 
-    public void paint( Graphics2D g, BiConsumer<LayerRenderConf, Graphics2D> renderer )
+    /**
+     *  What a single {@link #paint(Graphics2D, BiConsumer)} call did, so that the owning
+     *  {@link StyleLayerCache} can tell a paint served purely by blitting from one that had
+     *  to run the style renderer. A layer is only as cached as its least cached part, and
+     *  that verdict cannot be recovered from per part totals after the fact - hence it is
+     *  reported per call rather than counted here.
+     */
+    enum PaintOutcome {
+        /** Nothing was painted at all, because the component currently has no area. */
+        NOT_PAINTED,
+        /** The pixels came entirely from the cached image. */
+        SERVED_FROM_CACHE,
+        /** The style renderer had to be invoked (caching disabled, or the cache was not yet rendered). */
+        RENDERED
+    }
+
+    public PaintOutcome paint( Graphics2D g, BiConsumer<LayerRenderConf, Graphics2D> renderer )
     {
         Size size = _layerRenderData.get().boxModel().size();
 
         if ( size.widthOrElse(0f) == 0f || size.heightOrElse(0f) == 0f )
-            return;
+            return PaintOutcome.NOT_PAINTED;
 
         if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
             renderer.accept(_layerRenderData.get(), g);
-            _paintCacheMissCount++;
-            return;
+            return PaintOutcome.RENDERED;
         }
 
         /*
@@ -256,21 +264,20 @@ final class LayerPartCache
         final boolean isTiled = !_cacheKey.get().boxModel().size().equals(size);
         if ( isTiled && !_isBlitCompatible(g.getTransform()) ) {
             renderer.accept(_layerRenderData.get(), g);
-            _paintCacheMissCount++;
-            return;
+            return PaintOutcome.RENDERED;
         }
 
         if ( _localCache == null ) {
             renderer.accept(_layerRenderData.get(), g);
-            _paintCacheMissCount++;
             log.error(
                 "Caching enabled for layer '{}', but the local buffer is null; rendered without cache. " +
                 "Hit countdown until allocation is '{}'.",
                 _layer, _cacheHitsUntilAllocation
             );
-            return;
+            return PaintOutcome.RENDERED;
         }
 
+        final PaintOutcome outcome;
         if ( !_localCache.isRendered() ) {
             Graphics2D g2 = _localCache.createGraphics(g.getDeviceConfiguration());
             if ( g2 == null ) {
@@ -280,8 +287,7 @@ final class LayerPartCache
                     So we just do normal rendering instead:
                 */
                 renderer.accept(_layerRenderData.get(), g);
-                _paintCacheMissCount++;
-                return;
+                return PaintOutcome.RENDERED;
             }
             try {
                 StyleUtil.transferConfigurations(g, g2);
@@ -298,26 +304,22 @@ final class LayerPartCache
                 renderer.accept(_cacheKey.get(), g2);
                 g2.dispose();
             }
-            _paintCacheMissCount++;
+            outcome = PaintOutcome.RENDERED;
         } else {
-            _paintCacheHitCount++;
+            outcome = PaintOutcome.SERVED_FROM_CACHE;
         }
 
         final BufferedImage cachedImage = _localCache.getImage();
         if ( cachedImage == null )
-            return; // Cannot happen (the count-down path returned above), but let's be defensive.
+            return outcome; // Cannot happen (the count-down path returned above), but let's be defensive.
 
         if ( isTiled )
             _localCache.paintStretched(g, _cacheKey.get(), size);
         else
             g.drawImage(cachedImage, 0, 0, null);
+
+        return outcome;
     }
-
-    /** Number of paint calls served entirely from the cached image, since this instance was created. */
-    int paintCacheHitCount()  { return _paintCacheHitCount;  }
-
-    /** Number of paint calls that had to invoke the renderer, since this instance was created. */
-    int paintCacheMissCount() { return _paintCacheMissCount; }
 
     /**
      *  Scores whether caching pays off for the supplied configuration: -1 means never

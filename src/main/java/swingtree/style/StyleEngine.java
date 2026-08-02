@@ -142,6 +142,7 @@ final class StyleEngine
         _render(UI.Layer.FOREGROUND, g2d);
     }
 
+    @SuppressWarnings("EnumOrdinal") // Layer ordinals are used intentionally to index the per-layer cache array.
     private void _render( UI.Layer layer, Graphics2D g2d ) {
 
         final boolean antialiasingEnabled = IS_ANTIALIASING_ENABLED();
@@ -155,18 +156,19 @@ final class StyleEngine
             antialiasingWasEnabled = false;
         }
 
-        StyleLayerCache cache = null;
-        switch ( layer ) {
-            case BACKGROUND: cache = _layerCaches[0]; break;
-            case CONTENT:    cache = _layerCaches[1]; break;
-            case BORDER:     cache = _layerCaches[2]; break;
-            case FOREGROUND: cache = _layerCaches[3]; break;
-        }
-        if ( cache != null )
-            cache.paint(g2d);
+        /*
+            The caches are created from ALL_LAYERS, so the layer's own ordinal is what indexes
+            them - deliberately not a hardcoded layer-to-index switch. Each cache now renders
+            through the layer it was constructed with, so a mapping that disagreed with
+            ALL_LAYERS would not merely cache in the wrong slot, it would paint the wrong
+            layer's style. ComponentExtension indexes the very same array the same way.
+        */
+        final int layerIndex = layer.ordinal();
+        if ( layerIndex >= 0 && layerIndex < _layerCaches.length )
+            _layerCaches[layerIndex].paint(g2d);
         else
             log.error(SwingTree.get().logMarker(),
-                    "Layer cache is null for layer: {}",
+                    "No layer cache for layer: {}",
                     layer, new Throwable("Stack trace for debugging purposes.")
                 );
 

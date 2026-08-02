@@ -8,6 +8,7 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 
 /**
  *  Caches and paints one {@link UI.Layer} of a component's style, by composing the
@@ -18,18 +19,39 @@ import java.util.Objects;
  *  that a layer mixing style which caches in incompatible ways cannot be one rasterization, and
  *  then it is painted as several parts in order - see {@link StyleLayerPart} for what those parts
  *  are and why source-over compositing makes painting them one after another identical to
- *  painting the layer whole.
+ *  painting the layer whole. <br>
+ *  <br>
+ *  <b>Status:</b> {@link #_parts} is currently always that single {@link StyleLayerPart#WHOLE}
+ *  entry, so no layer is split yet and this composes a sequence of exactly one. Deciding when a
+ *  layer should be built from the three noise parts instead is what this is preparation for, and
+ *  {@link StyleLayerPart} documents the gate such a decision has to pass.
  */
 final class StyleLayerCache
 {
     private final UI.Layer         _layer;
     /** The parts this layer is cached and painted in, in paint order. */
     private final LayerPartCache[] _parts;
+    /**
+     *  The renderer handed to every part, allocated once instead of per part and per paint,
+     *  because this sits directly in the paint path. A part draws itself by handing this a
+     *  <i>restricted</i> configuration - the renderer draws whatever the configuration
+     *  contains, so it needs no notion of parts at all.
+     */
+    private final BiConsumer<LayerRenderConf, Graphics2D> _renderer;
+    /*
+     *  Per-layer utilisation counters, observable through the ComponentExtension public API,
+     *  which is also how the test suite reasons about cache effectiveness without coupling to
+     *  any of the package-private machinery. They are counted here rather than per part
+     *  because whether a *layer* was served from cache is a property of the whole paint.
+     */
+    private int _paintCacheHitCount  = 0;
+    private int _paintCacheMissCount = 0;
 
 
     StyleLayerCache( UI.Layer layer ) {
-        _layer = Objects.requireNonNull(layer);
-        _parts = new LayerPartCache[] { new LayerPartCache(layer, StyleLayerPart.WHOLE) };
+        _layer    = Objects.requireNonNull(layer);
+        _parts    = new LayerPartCache[] { new LayerPartCache(layer, StyleLayerPart.WHOLE) };
+        _renderer = ( conf, graphics ) -> StyleRenderer.renderStyleOn(_layer, conf, graphics);
     }
 
     void validate( ComponentConf newConf ) {
@@ -38,11 +60,25 @@ final class StyleLayerCache
     }
 
     void paint( Graphics2D g2d ) {
-        for ( LayerPartCache part : _parts )
-            part.paint(g2d, ( conf, graphics ) -> StyleRenderer.renderStyleOn(_layer, conf, graphics));
+        boolean anyPainted  = false;
+        boolean anyRendered = false;
+        for ( LayerPartCache part : _parts ) {
+            LayerPartCache.PaintOutcome outcome = part.paint(g2d, _renderer);
+            anyPainted  |= ( outcome != LayerPartCache.PaintOutcome.NOT_PAINTED );
+            anyRendered |= ( outcome == LayerPartCache.PaintOutcome.RENDERED   );
+        }
+        if ( anyPainted ) {
+            if ( anyRendered )
+                _paintCacheMissCount++;
+            else
+                _paintCacheHitCount++;
+        }
     }
 
-    /** The rendered images of the parts which currently have one, in paint order. */
+    /** The rendered images of the parts which currently have one, in paint order. Parts without
+     *  one are skipped rather than represented by a hole, so a position in the result does not
+     *  identify a part and the size of the result tells you how many parts are currently
+     *  rendered, not how many parts the layer has. */
     Tuple<BufferedImage> renderedImages() {
         List<BufferedImage> images = new ArrayList<>(_parts.length);
         for ( LayerPartCache part : _parts ) {
@@ -56,18 +92,8 @@ final class StyleLayerCache
     /** Paints served entirely from a cached image. A paint only counts when every part of the
      *  layer was served from its cache, because a layer painted partly from a cache and partly
      *  by the renderer is, from the outside, a paint the renderer was invoked for. */
-    int paintCacheHitCount() {
-        int hits = Integer.MAX_VALUE;
-        for ( LayerPartCache part : _parts )
-            hits = Math.min(hits, part.paintCacheHitCount());
-        return ( hits == Integer.MAX_VALUE ? 0 : hits );
-    }
+    int paintCacheHitCount() { return _paintCacheHitCount; }
 
     /** Paints which had to invoke the style renderer for at least one part of the layer. */
-    int paintCacheMissCount() {
-        int misses = 0;
-        for ( LayerPartCache part : _parts )
-            misses = Math.max(misses, part.paintCacheMissCount());
-        return misses;
-    }
+    int paintCacheMissCount() { return _paintCacheMissCount; }
 }
