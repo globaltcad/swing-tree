@@ -152,7 +152,7 @@ final class CacheBudget {
     }
 
     /** The total budget re-expressed as a count of {@code 4 MiB} units. Replaces the former
-     *  {@code LayerCache.DYNAMIC_CACHE_AGGRESSIVENESS()} scalar; the image caches multiply it
+     *  {@code LayerPartCache.DYNAMIC_CACHE_AGGRESSIVENESS()} scalar; the image caches multiply it
      *  by a pixels-per-unit constant to decide which images are small enough to cache. */
     static double units() {
         if ( UNITS_OVERRIDE >= 0 )
