@@ -7,7 +7,7 @@ import swingtree.UI;
  *  <br>
  *  A layer is ordinarily one rasterization: {@link StyleRenderer#renderStyleOn(UI.Layer,
  *  LayerRenderConf, java.awt.Graphics2D)} draws the whole of it into one image which
- *  {@link LayerCache} then blits. That breaks down when a layer mixes style which caches in
+ *  {@link LayerPartCache} then blits. That breaks down when a layer mixes style which caches in
  *  incompatible ways. The case this exists for is <b>noise</b>: its pixels vary per pixel
  *  position, so unlike a flat fill, a border or a shadow it can never be stored as the small
  *  size independent exemplar that lets a component resize without re-rendering - yet noise is

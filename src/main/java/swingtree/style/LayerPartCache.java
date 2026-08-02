@@ -18,11 +18,13 @@ import java.util.WeakHashMap;
 import java.util.function.BiConsumer;
 
 /**
- *  A {@link BufferedImage} based cache for the rendering of a particular layer of a component's style. <br>
- *  Caching is keyed by the deeply immutable {@link LayerRenderConf} of the layer: as long as it
+ *  A {@link BufferedImage} based cache for the rendering of one {@link StyleLayerPart} of a
+ *  particular layer of a component's style - which is ordinarily {@link StyleLayerPart#WHOLE},
+ *  the entire layer. <br>
+ *  Caching is keyed by the deeply immutable {@link LayerRenderConf} of that part: as long as it
  *  stays equal across paint calls, the cached image is blitted instead of re-rendered, and when
- *  it changes, the entry is invalidated. An instance of this exists per component and layer
- *  (inside the style engine), while the rendered images live in a global, weakly keyed pool
+ *  it changes, the entry is invalidated. An instance of this exists per component, layer and
+ *  part (inside the style engine), while the rendered images live in a global, weakly keyed pool
  *  shared by all components with an equal configuration. <br>
  *  <br>
  *  <b>Size independent caching through stretch tiling ("nine slice"):</b><br>
@@ -62,9 +64,9 @@ import java.util.function.BiConsumer;
  *          keeps the weakly keyed entry alive.</li>
  *  </ul>
  */
-final class LayerCache
+final class LayerPartCache
 {
-    private static final Logger log = LoggerFactory.getLogger(LayerCache.class);
+    private static final Logger log = LoggerFactory.getLogger(LayerPartCache.class);
 
     private static final int    MAX_CACHE_ENTRIES                 = 1024; // There can never be more entries!
     private static final int    PIXELS_PER_UNIT_OF_AGGRESSIVENESS = 256 * 256; // Determines how many pixels a single unit of cache aggressiveness can cache
@@ -97,7 +99,7 @@ final class LayerCache
     /** Drops every globally cached layer image. Called when the library cache configuration
      *  changes (see {@link ComponentExtension#updateAllCachesFromLibraryConfig()}) so memory
      *  shrinks immediately; the cache repopulates lazily under the new budget. <br>
-     *  Note that living {@link LayerCache} instances keep holding their {@code _localCache}
+     *  Note that living {@link LayerPartCache} instances keep holding their {@code _localCache}
      *  image until their next {@link #validate(ComponentConf)}, so a component
      *  which revalidates afterwards may briefly mint a second image for a key another component
      *  is still painting from. This costs a little duplicated memory until the stragglers
@@ -127,7 +129,7 @@ final class LayerCache
     private int                     _paintCacheMissCount = 0; // paint() had to invoke the renderer (caching disabled, or the cache was not yet rendered)
 
 
-    public LayerCache( UI.Layer layer, StyleLayerPart part ) {
+    public LayerPartCache( UI.Layer layer, StyleLayerPart part ) {
         _layer                    = Objects.requireNonNull(layer);
         _part                     = Objects.requireNonNull(part);
         _layerRenderData          = new Pooled<>(LayerRenderConf.none());
@@ -151,7 +153,7 @@ final class LayerCache
             key object is also the key in the global (weak) hash map based cache
             whose reachability determines if the cached image is garbage collected or not!
             So in order to avoid the cache being freed too early, we need to keep a strong
-            reference to the key object for all LayerCache instances that make use of the
+            reference to the key object for all LayerPartCache instances that make use of the
             corresponding cached image (the value of a particular key in the global cache).
             And so a pooled object has a higher likely hood of being strongly referenced somewhere.
         */
@@ -577,11 +579,11 @@ final class LayerCache
     /**
      *  A wrapper for a cached image that is either rendered or not yet allocated and
      *  associated with a particular {@link LayerRenderConf} key, which is used
-     *  by the {@link LayerCache} instance of a particular component to get a strong
+     *  by the {@link LayerPartCache} instance of a particular component to get a strong
      *  reference to the key (causing it to stay in cache and not get garbage collected). <br>
      *  <br>
      *  So instances of this are stored as values in the global {@link #_CACHE},
-     *  and can be accessed and shared by multiple {@link LayerCache} instances.
+     *  and can be accessed and shared by multiple {@link LayerPartCache} instances.
      *  (So be careful with modifying this class!)<br>
      *  The image can be allocated lazily only after a certain number of cache
      *  hits have been reached. This is to avoid allocating and rendering cache
@@ -690,7 +692,7 @@ final class LayerCache
          *  <br>
          *  The caller must ensure the graphics transform is blit compatible and that the
          *  actual size is strictly larger than the image in both dimensions (both of which
-         *  {@link LayerCache#paint} guarantees).
+         *  {@link LayerPartCache#paint} guarantees).
          *
          * @param g The destination graphics to draw the tiles into.
          * @param canonicalConf The exemplar configuration this image was rendered from,

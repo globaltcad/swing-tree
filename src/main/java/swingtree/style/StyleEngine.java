@@ -32,27 +32,27 @@ final class StyleEngine
 
     private final Pooled<BoxModelConf>  _boxModelConf;
     private final Pooled<ComponentConf> _componentConf;
-    private final LayerCache[]          _layerCaches;
+    private final LayerPartCache[]      _layerCaches;
 
 
     private StyleEngine(
         Pooled<BoxModelConf>  boxModelConf,
         Pooled<ComponentConf> componentConf,
-        @Nullable LayerCache[] layerCaches // Null when the style engine is freshly created
+        @Nullable LayerPartCache[] layerCaches // Null when the style engine is freshly created
     ) {
         _boxModelConf  = Objects.requireNonNull(boxModelConf).intern();
         _componentConf = Objects.requireNonNull(componentConf).intern();
         if ( layerCaches == null ) {
-            layerCaches = new LayerCache[ALL_LAYERS.length];
+            layerCaches = new LayerPartCache[ALL_LAYERS.length];
             for ( int i = 0; i < layerCaches.length; i++ )
-                layerCaches[i] = new LayerCache(ALL_LAYERS[i], StyleLayerPart.WHOLE);
+                layerCaches[i] = new LayerPartCache(ALL_LAYERS[i], StyleLayerPart.WHOLE);
         }
         _layerCaches = Objects.requireNonNull(layerCaches);
     }
 
     ComponentConf getComponentConf() { return _componentConf.get(); }
 
-    LayerCache[] getLayerCaches() { return _layerCaches; }
+    LayerPartCache[] getLayerCaches() { return _layerCaches; }
 
     BoxModelConf getBoxModelConf() { return _boxModelConf.get(); }
 
@@ -80,8 +80,8 @@ final class StyleEngine
         final BoxModelConf newBoxModelConf = boxModelAndComponentConfs.first();
         final ComponentConf newConf = boxModelAndComponentConfs.second();
 
-        final LayerCache[] layerCaches = engine.getLayerCaches();
-        for ( LayerCache layerCache : layerCaches )
+        final LayerPartCache[] layerCaches = engine.getLayerCaches();
+        for ( LayerPartCache layerCache : layerCaches )
             layerCache.validate(newConf);
 
         return new StyleEngine(new Pooled<>(newBoxModelConf), new Pooled<>(newConf), _layerCaches);
@@ -155,7 +155,7 @@ final class StyleEngine
             antialiasingWasEnabled = false;
         }
 
-        LayerCache cache = null;
+        LayerPartCache cache = null;
         switch ( layer ) {
             case BACKGROUND: cache = _layerCaches[0]; break;
             case CONTENT:    cache = _layerCaches[1]; break;

@@ -469,7 +469,7 @@ public final class ComponentExtension<C extends JComponent>
      *  The fully rendered cache images standing by for the given style {@link swingtree.UI.Layer}
      *  of this component, in the order they are painted. When there are any, the next repaint of
      *  that layer will be served from them rather than by re-running the style renderer. This is
-     *  a per-component window into the internal {@link LayerCache} pipeline for tests and
+     *  a per-component window into the internal {@link LayerPartCache} pipeline for tests and
      *  tooling, not a hard guarantee about the next paint - cache entries are weakly referenced
      *  and may be reclaimed under memory pressure. Caching only kicks in for layers with at least
      *  one <em>heavy</em> style ingredient (rounded backgrounds with a base/foundation colour,
@@ -507,7 +507,7 @@ public final class ComponentExtension<C extends JComponent>
     @SuppressWarnings("EnumOrdinal") // Layer ordinals are used intentionally to index the per-layer cache array.
     public Tuple<BufferedImage> cachedRendering( UI.Layer layer ) {
         Objects.requireNonNull(layer);
-        LayerCache[] caches = _styleEngine.getLayerCaches();
+        LayerPartCache[] caches = _styleEngine.getLayerCaches();
         BufferedImage cached = caches[layer.ordinal()].renderedImage();
         if ( cached == null )
             return Tuple.of(BufferedImage.class);
@@ -544,7 +544,7 @@ public final class ComponentExtension<C extends JComponent>
     @SuppressWarnings("EnumOrdinal") // Layer ordinals are used intentionally to index the per-layer cache array.
     public int cacheHitCount( UI.Layer layer ) {
         Objects.requireNonNull(layer);
-        LayerCache[] caches = _styleEngine.getLayerCaches();
+        LayerPartCache[] caches = _styleEngine.getLayerCaches();
         return caches[layer.ordinal()].paintCacheHitCount();
     }
 
@@ -562,7 +562,7 @@ public final class ComponentExtension<C extends JComponent>
     @SuppressWarnings("EnumOrdinal") // Layer ordinals are used intentionally to index the per-layer cache array.
     public int cacheMissCount( UI.Layer layer ) {
         Objects.requireNonNull(layer);
-        LayerCache[] caches = _styleEngine.getLayerCaches();
+        LayerPartCache[] caches = _styleEngine.getLayerCaches();
         return caches[layer.ordinal()].paintCacheMissCount();
     }
 
@@ -578,7 +578,7 @@ public final class ComponentExtension<C extends JComponent>
      */
     public static Association<String, Integer> globalRenderCacheEntryCounts() {
         return Association.betweenLinked(String.class, Integer.class)
-                .put("style layers",     LayerCache.globalEntryCount())
+                .put("style layers",     LayerPartCache.globalEntryCount())
                 .put("text layouts",     TextLayoutEngine.globalEntryCount())
                 .put("noise paints",     StyleRenderer.noisePaintCacheSize())
                 .put("shadow gradients", StyleRenderer.shadowGradientCacheSize());
@@ -603,7 +603,7 @@ public final class ComponentExtension<C extends JComponent>
      */
     public static void updateAllCachesFromLibraryConfig() {
         CacheBudget.markUnresolved();
-        LayerCache.clearGlobalCache();
+        LayerPartCache.clearGlobalCache();
         StyleRenderer.clearGlobalRenderCaches();
         TextLayoutEngine.clearGlobalCaches();
     }
