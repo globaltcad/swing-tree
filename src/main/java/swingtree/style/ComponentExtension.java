@@ -466,49 +466,64 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
-     *  The fully rendered cache image standing by for the given style {@link swingtree.UI.Layer}
-     *  of this component, or {@link Optional#empty()} if there is none. When present, the next
-     *  repaint of that layer will be served from this image rather than re-running the style
-     *  renderer. This is a per-component window into the internal {@link LayerCache} pipeline
-     *  for tests and tooling, not a hard guarantee about the next paint - cache entries are
-     *  weakly referenced and may be reclaimed under memory pressure. Caching only kicks in for
-     *  layers with at least one <em>heavy</em> style ingredient (rounded backgrounds with a
-     *  base/foundation colour, borders with width and colour, gradients, shadows, noise,
-     *  painted text, sized icons); other layers permanently report an empty optional because
-     *  caching them would not pay for itself.
+     *  The fully rendered cache images standing by for the given style {@link swingtree.UI.Layer}
+     *  of this component, in the order they are painted. When there are any, the next repaint of
+     *  that layer will be served from them rather than by re-running the style renderer. This is
+     *  a per-component window into the internal {@link LayerCache} pipeline for tests and
+     *  tooling, not a hard guarantee about the next paint - cache entries are weakly referenced
+     *  and may be reclaimed under memory pressure. Caching only kicks in for layers with at least
+     *  one <em>heavy</em> style ingredient (rounded backgrounds with a base/foundation colour,
+     *  borders with width and colour, gradients, shadows, noise, painted text, sized icons);
+     *  other layers permanently report an empty tuple because caching them would not pay for
+     *  itself.
      *  <p>
-     *  The dimensions of the returned image reveal <em>how</em> the style is cached: styles
-     *  whose pixels are constant along the component edges (flat colours, borders, shadows)
-     *  are stored as a small, size independent exemplar rendering which may be much smaller
-     *  than the component itself (it is stretch tiled back to any actual size on paint,
-     *  see {@link swingtree.SwingTree#setCacheTilingEnabled(boolean)}), while all other
-     *  styles are cached at exactly the component size.
+     *  <b>How many images to expect.</b> There is no limit on how much style a single layer may
+     *  carry, and not all of it caches the same way, so the layer's rendering is not necessarily
+     *  one image:
+     *  <ul>
+     *      <li><b>none</b> - nothing about this layer is currently cached.</li>
+     *      <li><b>one</b> - the whole layer rasterizes into a single image, which is the
+     *          ordinary case.</li>
+     *      <li><b>several</b> - the cache split the layer, because one part of it can be cached
+     *          in a way another part cannot. Painting the layer then means painting these in
+     *          order, with the uncached parts rendered in between.</li>
+     *  </ul>
+     *  The dimensions of each image reveal <em>how</em> that part is cached: style whose pixels
+     *  are constant along the component edges (flat colours, borders, shadows) is stored as a
+     *  small, size independent exemplar rendering which may be much smaller than the component
+     *  itself (it is stretch tiled back to any actual size on paint, see
+     *  {@link swingtree.SwingTree#setCacheTilingEnabled(boolean)}), while everything else is
+     *  cached at exactly the component size.
      *  <p>
-     *  The returned image is a defensive copy: the cached rendering is shared by all
-     *  components with an equal style, so callers may examine (or even modify) the copy
-     *  freely without corrupting anyone's painting.
+     *  The returned images are defensive copies: a cached rendering is shared by all components
+     *  with an equal style, so callers may examine (or even modify) the copies freely without
+     *  corrupting anyone's painting.
      *
      * @param layer The style layer to query (typically {@link swingtree.UI.Layer#BACKGROUND}
      *              for the cases people care about most).
-     * @return A copy of the rendered cache image currently associated with the given
-     *         layer of this component, or an empty optional if there is none.
+     * @return Copies of the rendered cache images currently associated with the given layer of
+     *         this component, in paint order, or an empty tuple if there are none.
      */
     @SuppressWarnings("EnumOrdinal") // Layer ordinals are used intentionally to index the per-layer cache array.
-    public Optional<BufferedImage> cachedRendering( UI.Layer layer ) {
+    public Tuple<BufferedImage> cachedRendering( UI.Layer layer ) {
         Objects.requireNonNull(layer);
         LayerCache[] caches = _styleEngine.getLayerCaches();
         BufferedImage cached = caches[layer.ordinal()].renderedImage();
         if ( cached == null )
-            return Optional.empty();
-        BufferedImage copy = new BufferedImage(cached.getWidth(), cached.getHeight(), BufferedImage.TYPE_INT_ARGB);
+            return Tuple.of(BufferedImage.class);
+        return Tuple.of(BufferedImage.class, _defensiveCopyOf(cached));
+    }
+
+    private static BufferedImage _defensiveCopyOf( BufferedImage image ) {
+        BufferedImage copy = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = copy.createGraphics();
         try {
             g.setComposite(AlphaComposite.Src);
-            g.drawImage(cached, 0, 0, null);
+            g.drawImage(image, 0, 0, null);
         } finally {
             g.dispose();
         }
-        return Optional.of(copy);
+        return copy;
     }
 
     /**

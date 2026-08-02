@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit
     API: it builds ordinary styled components, paints them through the
     regular paint pipeline and observes the cache through
     `ComponentExtension.cacheHitCount(layer)` / `cacheMissCount(layer)` /
-    `cachedRendering(layer).isPresent()`. Which styles resize for free and which
+    `cachedRendering(layer).isNotEmpty()`. Which styles resize for free and which
     re-render is the user visible requirement; how the machinery decides
     is deliberately not referenced anywhere in here.
 
@@ -90,7 +90,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             2.times { Utility.renderSingleComponent(button) }
         expect : 'The size stuck, the cache is populated and the second paint already hit it.'
             button.width == 220 && button.height == 160
-            ext.cachedRendering(layer).isPresent()
+            ext.cachedRendering(layer).isNotEmpty()
             ext.cacheHitCount(layer) >= 1
 
         when : 'The button grows substantially and is painted again.'
@@ -103,7 +103,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         and : '...and the paint at the new size was still served from the cache.'
             ext.cacheMissCount(layer) == missesBeforeResize
             ext.cacheHitCount(layer)  >  hitsBeforeResize
-            ext.cachedRendering(layer).isPresent()
+            ext.cachedRendering(layer).isNotEmpty()
 
         where :
             description                               | layer               | styler
@@ -140,7 +140,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             2.times { Utility.renderSingleComponent(button) }
         expect : 'The cache is populated and serving hits at this stable size.'
             button.width == 220 && button.height == 160
-            ext.cachedRendering(layer).isPresent()
+            ext.cachedRendering(layer).isNotEmpty()
             ext.cacheHitCount(layer) >= 1
 
         when : 'The button is resized and painted again.'
@@ -184,8 +184,8 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             2.times { Utility.renderSingleComponent(square) }
             2.times { Utility.renderSingleComponent(rounded) }
         expect : 'Both are cached and serving hits at their initial size.'
-            squareExt.cachedRendering(UI.Layer.BORDER).isPresent()  && squareExt.cacheHitCount(UI.Layer.BORDER)  >= 1
-            roundedExt.cachedRendering(UI.Layer.BORDER).isPresent() && roundedExt.cacheHitCount(UI.Layer.BORDER) >= 1
+            squareExt.cachedRendering(UI.Layer.BORDER).isNotEmpty()  && squareExt.cacheHitCount(UI.Layer.BORDER)  >= 1
+            roundedExt.cachedRendering(UI.Layer.BORDER).isNotEmpty() && roundedExt.cacheHitCount(UI.Layer.BORDER) >= 1
 
         when : 'Both buttons are resized and painted again.'
             int squareMisses  = squareExt.cacheMissCount(UI.Layer.BORDER)
@@ -219,7 +219,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             2.times { Utility.renderSingleComponent(button) }
         expect :
             button.width == 40 && button.height == 40
-            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
             ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
 
         when : 'The tiny button is resized ever so slightly, staying tiny.'
@@ -257,7 +257,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             var ext = ComponentExtension.from(button)
             2.times { Utility.renderSingleComponent(button) }
         expect :
-            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
             ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
 
         when : 'The button is dragged through wildly different sizes and painted at every one of them.'
@@ -270,7 +270,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             }
         then : 'Not a single one of those paints re-rendered the style.'
             ext.cacheMissCount(UI.Layer.BACKGROUND) == missesWhenWarm
-            ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
     }
 
     def 'The dimensions of the cached rendering reveal how a style is cached: compressed atlas or full size. (#description)'(
@@ -296,8 +296,8 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             5.times { Utility.renderSingleComponent(first) }  // Large full-size renderings only get
             5.times { Utility.renderSingleComponent(second) } // allocated after a few warm-up paints.
         and : 'The two cached renderings.'
-            var firstImage  = ComponentExtension.from(first).cachedRendering(layer).get()
-            var secondImage = ComponentExtension.from(second).cachedRendering(layer).get()
+            var firstImage  = ComponentExtension.from(first).cachedRendering(layer).first()
+            var secondImage = ComponentExtension.from(second).cachedRendering(layer).first()
 
         expect : 'Atlases are size independent and compressed, full size renderings track their component:'
             if ( cachedAs == "compressed atlas" ) {
@@ -369,8 +369,8 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             Utility.renderSingleComponent(tileable)
             Utility.renderSingleComponent(gradient)
         then : 'The tileable style is already cached - as a tiny atlas, allocated eagerly on the first paint.'
-            ComponentExtension.from(tileable).cachedRendering(UI.Layer.BACKGROUND).isPresent()
-            ComponentExtension.from(tileable).cachedRendering(UI.Layer.BACKGROUND).get().width < 100
+            ComponentExtension.from(tileable).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            ComponentExtension.from(tileable).cachedRendering(UI.Layer.BACKGROUND).first().width < 100
 
         when : 'Both are painted several more times.'
             6.times { Utility.renderSingleComponent(tileable) }
@@ -378,7 +378,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         then : 'Every one of those paints of the tileable button was served from the cache...'
             ComponentExtension.from(tileable).cacheHitCount(UI.Layer.BACKGROUND) >= 6
         and : '...while the multi-megapixel gradient rendering is over budget and is never cached.'
-            !ComponentExtension.from(gradient).cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ComponentExtension.from(gradient).cachedRendering(UI.Layer.BACKGROUND).isEmpty()
             ComponentExtension.from(gradient).cacheHitCount(UI.Layer.BACKGROUND) == 0
     }
 
@@ -402,11 +402,11 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             3.times { Utility.renderSingleComponent(button) }
 
         expect : 'The gradient background is cached at the full component size...'
-            ext.cachedRendering(UI.Layer.BACKGROUND).get().width  == 300
-            ext.cachedRendering(UI.Layer.BACKGROUND).get().height == 200
+            ext.cachedRendering(UI.Layer.BACKGROUND).first().width  == 300
+            ext.cachedRendering(UI.Layer.BACKGROUND).first().height == 200
         and : '...while the shadow on the content layer is a small atlas.'
-            ext.cachedRendering(UI.Layer.CONTENT).get().width  < 300
-            ext.cachedRendering(UI.Layer.CONTENT).get().height < 200
+            ext.cachedRendering(UI.Layer.CONTENT).first().width  < 300
+            ext.cachedRendering(UI.Layer.CONTENT).first().height < 200
 
         when : 'The button is resized and painted again.'
             int backgroundMisses = ext.cacheMissCount(UI.Layer.BACKGROUND)
@@ -467,7 +467,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             stable.setSize(260, 140)
             2.times { Utility.renderSingleComponent(stable) }
         then : 'It is cached and served from the cache, just as if no animation had ever run.'
-            ComponentExtension.from(stable).cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ComponentExtension.from(stable).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
             ComponentExtension.from(stable).cacheHitCount(UI.Layer.BACKGROUND) >= 1
     }
 
@@ -486,7 +486,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             button.setSize(400, 300)
             2.times { Utility.renderSingleComponent(button) }
         and : 'Its compressed atlas.'
-            var atlas = ComponentExtension.from(button).cachedRendering(UI.Layer.BACKGROUND).get()
+            var atlas = ComponentExtension.from(button).cachedRendering(UI.Layer.BACKGROUND).first()
         expect : 'The atlas really is the compressed rendering, not the component sized one.'
             atlas.width < 60 && atlas.height < 60
         and : 'Its center pixel carries the background color.'

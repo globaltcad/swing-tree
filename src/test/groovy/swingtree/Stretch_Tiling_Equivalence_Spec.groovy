@@ -328,7 +328,7 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             var ext = ComponentExtension.from(box)
             2.times { Utility.renderSingleComponent(box) }
         expect : 'It really is cached as a small atlas at this point.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).get().width < 400
+            ext.cachedRendering(UI.Layer.BACKGROUND).first().width < 400
 
         when : '...and is then dragged back down to a size far below the reconstructable minimum.'
             box.setSize(30, 24)
@@ -336,8 +336,8 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             var shrunk = Utility.renderSingleComponent(box)
         then : 'The size took effect, and the style is cached at that real size again - the atlas is gone.'
             box.width == 30 && box.height == 24
-            ext.cachedRendering(UI.Layer.BACKGROUND).get().width  == 30
-            ext.cachedRendering(UI.Layer.BACKGROUND).get().height == 24
+            ext.cachedRendering(UI.Layer.BACKGROUND).first().width  == 30
+            ext.cachedRendering(UI.Layer.BACKGROUND).first().height == 24
         and : 'Its pixels are exactly the classic rendering of a component which was never anything else.'
             SwingTree.get().setCacheTilingEnabled(false)
             var classicBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)
@@ -400,7 +400,7 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             }
 
         expect : 'The repeated paints really were served from the cache.'
-            ComponentExtension.from(box).cachedRendering(UI.Layer.CONTENT).isPresent()
+            ComponentExtension.from(box).cachedRendering(UI.Layer.CONTENT).isNotEmpty()
             ComponentExtension.from(box).cacheHitCount(UI.Layer.CONTENT) >= 1
         and : 'The accelerated painting matches the classic software rendering.'
             Utility.similarityBetween(classic, accelerated) >= 99.9

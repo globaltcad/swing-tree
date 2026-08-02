@@ -98,7 +98,7 @@ class Cache_Configuration_Spec extends Specification
             2.times { Utility.renderSingleComponent(button) }
 
         then : 'Its background layer is never promoted to a cached image.'
-            !ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()
+            ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
     }
 
     def 'Raising the budget at runtime takes effect without re-initializing the library.'()
