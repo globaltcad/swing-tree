@@ -98,7 +98,29 @@ final class LayerRenderConf
 
     BaseColorConf baseColors() { return _baseColor; }
 
+    /**
+     *  Returns a new {@link LayerRenderConf} with the supplied base colors and everything
+     *  else unchanged. Used by {@link StyleLayerPart} to narrow this configuration down to
+     *  a single part of the layer.
+     */
+    LayerRenderConf withBaseColors( BaseColorConf baseColors ) {
+        if ( baseColors.equals(_baseColor) )
+            return this;
+        return of(_boxModelConf.get(), baseColors, _layer);
+    }
+
     StyleConfLayer layer() { return _layer; }
+
+    /**
+     *  Returns a new {@link LayerRenderConf} with the supplied style layer and everything
+     *  else unchanged. Used by {@link StyleLayerPart} to narrow this configuration down to
+     *  a single part of the layer.
+     */
+    LayerRenderConf withLayer( StyleConfLayer layer ) {
+        if ( layer.equals(_layer) )
+            return this;
+        return of(_boxModelConf.get(), _baseColor, layer);
+    }
 
     ComponentAreas areas() { return ComponentAreas.of(_boxModelConf); }
 
