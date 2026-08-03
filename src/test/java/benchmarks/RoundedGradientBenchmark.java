@@ -9,6 +9,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
 import java.awt.Toolkit;
 import java.awt.image.VolatileImage;
 
@@ -52,6 +53,12 @@ public final class RoundedGradientBenchmark
     private static final int NARROW_WIDTH = Math.max(40, WIDE_WIDTH * 11 / 16);
     private static final int ARC          = Integer.getInteger("benchmark.arc",    32);
 
+    /** How often the volatile surface had to be restored or replaced, reported with the
+     *  results: a run which lost its surface repeatedly was not measuring one steady pipeline
+     *  and its numbers should not be compared with another run's. Only ever touched on the
+     *  event dispatch thread, which is where every paint happens. */
+    private static int surfaceLosses = 0;
+
     private static final int WARMUP_SWEEPS = Integer.getInteger("benchmark.warmup", 30);
     private static final int TIMED_SWEEPS  = Integer.getInteger("benchmark.sweeps", 80);
 
@@ -64,7 +71,9 @@ public final class RoundedGradientBenchmark
             would repaint one already painted and measure the cache hit path instead. Throwing
             after the frame is up would hang the JVM on the event dispatch thread.
         */
-        final int distinctWidths = WIDE_WIDTH - NARROW_WIDTH;
+        // Inclusive at both ends: the sweeps use NARROW_WIDTH + 0 up to NARROW_WIDTH + (n - 1),
+        // so n widths fit exactly when the last of them is still WIDE_WIDTH.
+        final int distinctWidths = WIDE_WIDTH - NARROW_WIDTH + 1;
         if ( WARMUP_SWEEPS + TIMED_SWEEPS > distinctWidths )
             throw new IllegalArgumentException(
                 "This benchmark needs one unused width per resize sweep, but " + (WARMUP_SWEEPS + TIMED_SWEEPS)
@@ -105,9 +114,17 @@ public final class RoundedGradientBenchmark
         // would be measuring the window manager instead of us:
         Thread.sleep(1200);
 
-        JComponent    root   = (JComponent) frame.getContentPane();
-        VolatileImage buffer = frame.getGraphicsConfiguration()
-                                    .createCompatibleVolatileImage(WIDE_WIDTH, HEIGHT);
+        JComponent root = (JComponent) frame.getContentPane();
+        /*
+            Held in a one element array because a VolatileImage may have to be *replaced* mid
+            run: its surface lives in video memory and the windowing system is free to take it
+            away (a display mode change, a screen lock, memory pressure), after which it comes
+            back either restored-but-blank or altogether incompatible. See paintOnce for the
+            protocol, and why this benchmark in particular cannot skip it.
+        */
+        VolatileImage[] buffer = {
+                frame.getGraphicsConfiguration().createCompatibleVolatileImage(WIDE_WIDTH, HEIGHT)
+            };
 
         // The unchanged-size sweep goes first: the resize sweep deliberately misses the layer
         // cache on every one of its widths, which leaves that cache full of debris the
@@ -115,7 +132,7 @@ public final class RoundedGradientBenchmark
         double unchangedSize = measureSweep(frame, root, buffer, false);
         double whileResizing = measureSweep(frame, root, buffer, true);
 
-        buffer.flush();
+        buffer[0].flush();
 
         System.out.println();
         System.out.println("  Rounded gradient benchmark, arc " + ARC + ", "
@@ -124,12 +141,15 @@ public final class RoundedGradientBenchmark
                          + ", median of " + TIMED_SWEEPS + " sweeps");
         System.out.printf ("  repaint while resizing       %8.3f ms%n", whileResizing);
         System.out.printf ("  repaint at an unchanged size %8.3f ms%n", unchangedSize);
+        if ( surfaceLosses > 0 )
+            System.out.println("  NOTE: the volatile surface was restored or replaced "
+                             + surfaceLosses + " times during this run.");
         System.out.println();
 
         System.exit(0);
     }
 
-    private static double measureSweep( JFrame frame, JComponent root, VolatileImage buffer, boolean resize )
+    private static double measureSweep( JFrame frame, JComponent root, VolatileImage[] buffer, boolean resize )
     throws Exception {
         // The sweep index runs straight through both loops: restarting it at zero for the timed
         // half would replay widths the warmup already painted, i.e. the warm cache path.
@@ -143,7 +163,21 @@ public final class RoundedGradientBenchmark
         return medianMillis(samples);
     }
 
-    private static long paintOnce( JFrame frame, JComponent root, VolatileImage buffer, boolean resize, int index )
+    /**
+     *  One timed paint, into a validated volatile buffer, repeated if the surface was lost
+     *  underneath it. <br>
+     *  <br>
+     *  The {@code validate} / {@code contentsLost} protocol is not optional politeness here. A
+     *  {@link VolatileImage}'s surface lives in video memory and the windowing system may
+     *  reclaim it at any moment; rendering into a surface which has not been validated can
+     *  quietly fall back to a software one, and this benchmark exists precisely to tell the
+     *  accelerated path from the software path - a silent fallback would not make it noisy, it
+     *  would make it wrong, and wrong in exactly the dimension being measured. So the buffer is
+     *  validated before the clock starts (never inside it), replaced outright if it came back
+     *  incompatible, and any paint whose contents were lost while it ran is timed again rather
+     *  than counted.
+     */
+    private static long paintOnce( JFrame frame, JComponent root, VolatileImage[] buffer, boolean resize, int index )
     throws Exception {
         int width = resize ? NARROW_WIDTH + index : WIDE_WIDTH;
         long[] nanos = new long[1];
@@ -153,17 +187,29 @@ public final class RoundedGradientBenchmark
                 root.invalidate();
                 root.validate();
             }
-            Graphics2D g = buffer.createGraphics();
-            try {
-                g.setClip(0, 0, root.getWidth(), root.getHeight());
-                long start = System.nanoTime();
-                root.paint(g);
-                // Sync with the pipeline, or we would be timing how fast we can queue work:
-                Toolkit.getDefaultToolkit().sync();
-                nanos[0] = System.nanoTime() - start;
-            } finally {
-                g.dispose();
+            final GraphicsConfiguration gc = frame.getGraphicsConfiguration();
+            do {
+                if ( buffer[0].validate(gc) == VolatileImage.IMAGE_INCOMPATIBLE ) {
+                    buffer[0].flush();
+                    buffer[0] = gc.createCompatibleVolatileImage(WIDE_WIDTH, HEIGHT);
+                    buffer[0].validate(gc);
+                    surfaceLosses++;
+                }
+                Graphics2D g = buffer[0].createGraphics();
+                try {
+                    g.setClip(0, 0, root.getWidth(), root.getHeight());
+                    long start = System.nanoTime();
+                    root.paint(g);
+                    // Sync with the pipeline, or we would be timing how fast we can queue work:
+                    Toolkit.getDefaultToolkit().sync();
+                    nanos[0] = System.nanoTime() - start;
+                } finally {
+                    g.dispose();
+                }
+                if ( buffer[0].contentsLost() )
+                    surfaceLosses++;
             }
+            while ( buffer[0].contentsLost() );
         });
         return nanos[0];
     }

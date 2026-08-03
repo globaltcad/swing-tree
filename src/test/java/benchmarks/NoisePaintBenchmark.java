@@ -8,6 +8,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
 import java.awt.Toolkit;
 import java.awt.image.VolatileImage;
 
@@ -67,7 +68,9 @@ public final class NoisePaintBenchmark
             Throwing after the frame is up would hang the JVM on the event dispatch thread
             instead of reporting this.
         */
-        final int distinctWidths = WIDE_WIDTH - NARROW_WIDTH;
+        // Inclusive at both ends: the sweeps use NARROW_WIDTH + 0 up to NARROW_WIDTH + (n - 1),
+        // so n widths fit exactly when the last of them is still WIDE_WIDTH.
+        final int distinctWidths = WIDE_WIDTH - NARROW_WIDTH + 1;
         if ( WARMUP_SWEEPS + TIMED_SWEEPS > distinctWidths )
             throw new IllegalArgumentException(
                 "This benchmark needs one unused width per resize sweep, but " + (WARMUP_SWEEPS + TIMED_SWEEPS)
@@ -104,9 +107,18 @@ public final class NoisePaintBenchmark
         // would be measuring the window manager instead of us:
         Thread.sleep(1200);
 
-        JComponent    root   = (JComponent) frame.getContentPane();
-        VolatileImage buffer = frame.getGraphicsConfiguration()
-                                    .createCompatibleVolatileImage(WIDE_WIDTH, HEIGHT);
+        JComponent root = (JComponent) frame.getContentPane();
+    /*
+        The buffer is held in a one element array because a VolatileImage may have to be
+        *replaced* mid run: its surface lives in video memory and the windowing system is free
+        to reclaim it, after which it returns either restored-but-blank or altogether
+        incompatible. Rendering into an unvalidated surface can quietly fall back to a software
+        one, which for a benchmark comparing rendering paths is not noise but a wrong answer.
+        See RoundedGradientBenchmark.paintOnce for the full reasoning.
+    */
+        VolatileImage[] buffer = {
+                frame.getGraphicsConfiguration().createCompatibleVolatileImage(WIDE_WIDTH, HEIGHT)
+            };
 
         // The unchanged-size sweep goes first: the resize sweep deliberately misses the layer
         // cache on every one of its widths, which leaves that cache full of debris the
@@ -114,7 +126,7 @@ public final class NoisePaintBenchmark
         double unchangedSize = measureSweep(frame, root, buffer, false);
         double whileResizing = measureSweep(frame, root, buffer, true);
 
-        buffer.flush();
+        buffer[0].flush();
 
         System.out.println();
         System.out.println("  Noise benchmark, " + (opaque ? "OPAQUE" : "TRANSLUCENT") + " colours, "
@@ -127,7 +139,7 @@ public final class NoisePaintBenchmark
         System.exit(0);
     }
 
-    private static double measureSweep( JFrame frame, JComponent root, VolatileImage buffer, boolean resize )
+    private static double measureSweep( JFrame frame, JComponent root, VolatileImage[] buffer, boolean resize )
     throws Exception {
         // The sweep index runs straight through both loops: restarting it at zero for the timed
         // half would replay widths the warmup already painted, i.e. the warm cache path.
@@ -146,7 +158,7 @@ public final class NoisePaintBenchmark
      *  behaves, and the only way to make a noise layer miss its cache - or at the one fixed
      *  width, where the caches stay warm.
      */
-    private static long paintOnce( JFrame frame, JComponent root, VolatileImage buffer, boolean resize, int index )
+    private static long paintOnce( JFrame frame, JComponent root, VolatileImage[] buffer, boolean resize, int index )
     throws Exception {
         int width = resize ? NARROW_WIDTH + index : WIDE_WIDTH;
         long[] nanos = new long[1];
@@ -156,17 +168,26 @@ public final class NoisePaintBenchmark
                 root.invalidate();
                 root.validate();
             }
-            Graphics2D g = buffer.createGraphics();
-            try {
-                g.setClip(0, 0, root.getWidth(), root.getHeight());
-                long start = System.nanoTime();
-                root.paint(g);
-                // Sync with the pipeline, or we would be timing how fast we can queue work:
-                Toolkit.getDefaultToolkit().sync();
-                nanos[0] = System.nanoTime() - start;
-            } finally {
-                g.dispose();
+            final GraphicsConfiguration gc = frame.getGraphicsConfiguration();
+            do {
+                if ( buffer[0].validate(gc) == VolatileImage.IMAGE_INCOMPATIBLE ) {
+                    buffer[0].flush();
+                    buffer[0] = gc.createCompatibleVolatileImage(WIDE_WIDTH, HEIGHT);
+                    buffer[0].validate(gc);
+                }
+                Graphics2D g = buffer[0].createGraphics();
+                try {
+                    g.setClip(0, 0, root.getWidth(), root.getHeight());
+                    long start = System.nanoTime();
+                    root.paint(g);
+                    // Sync with the pipeline, or we would be timing how fast we can queue work:
+                    Toolkit.getDefaultToolkit().sync();
+                    nanos[0] = System.nanoTime() - start;
+                } finally {
+                    g.dispose();
+                }
             }
+            while ( buffer[0].contentsLost() );
         });
         return nanos[0];
     }
