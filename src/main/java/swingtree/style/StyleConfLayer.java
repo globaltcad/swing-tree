@@ -9,6 +9,7 @@ import java.util.Objects;
  *  component {@link swingtree.UI.Layer}. <br>
  */
 @Immutable
+@SuppressWarnings("Immutable") // The cached hash code below is a computed constant, see there.
 final class StyleConfLayer implements Simplifiable<StyleConfLayer>
 {
     static final NamedConfigs<ShadowConf>        _NO_SHADOWS   = NamedConfigs.of(NamedConf.of(StyleUtil.DEFAULT_KEY, ShadowConf.none()));
@@ -37,6 +38,22 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
     private final NamedConfigs<Pooled<NoiseConf>> _noises;
     private final NamedConfigs<ImageConf>         _images;
     private final NamedConfigs<TextConf>          _texts;
+
+    /*
+     *  A lazily computed, cached hash. These configurations form a deep tree which is
+     *  hashed on the hot path - every paint interns a cache key whose hash walks all of
+     *  it - while a resize only ever replaces the component's bounds and leaves the style
+     *  tree itself untouched, so the very same nodes are re-hashed frame after frame.
+     *  Caching it per node turns that walk into a single field read per child.
+     *
+     *  Deliberately one non-volatile int with 0 as the "not computed yet" sentinel, and
+     *  not an int plus a boolean flag: with two fields a racing thread may observe the
+     *  flag already set while the value is still stale, whereas with one field a race can
+     *  only ever make a second thread recompute the identical value. This is exactly what
+     *  String.hashCode() does, and it is sound only because these objects are immutable.
+     */
+    private int _hashCode = 0; // Lazily computed, 0 means "not computed yet".
+
 
 
     static StyleConfLayer of(
@@ -157,7 +174,10 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
 
     @Override
     public int hashCode() {
-        return Objects.hash(_shadows, _painters, _gradients, _noises, _images, _texts);
+        int hash = _hashCode;
+        if ( hash == 0 )
+            _hashCode = hash = Objects.hash(_shadows, _painters, _gradients, _noises, _images, _texts);
+        return hash;
     }
 
     @Override

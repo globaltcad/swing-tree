@@ -28,8 +28,13 @@ final class ComponentConf
     private final Outline   _marginCorrection;
     private final LazyRef<RenderConf> _renderConf; // Computed constant, used for rendering!
 
-    private boolean _wasAlreadyHashed = false;
-    private int     _hashCode         = 0; // cached hash code
+    /*
+     *  A lazily computed, cached hash - see NamedConf for why it is one non-volatile int
+     *  with 0 as the "not computed yet" sentinel rather than a value plus a flag. (With two
+     *  fields a racing thread can observe the flag already set while the value is still
+     *  stale; with one it can only ever recompute the identical value.)
+     */
+    private int _hashCode = 0; // Lazily computed, 0 means "not computed yet".
 
 
     ComponentConf(
@@ -95,11 +100,9 @@ final class ComponentConf
 
     @Override
     public int hashCode() {
-        if ( _wasAlreadyHashed )
-            return _hashCode;
-
-        _hashCode = Objects.hash(_styleConf, _currentBounds, _marginCorrection);
-        _wasAlreadyHashed = true;
-        return _hashCode;
+        int hash = _hashCode;
+        if ( hash == 0 )
+            _hashCode = hash = Objects.hash(_styleConf, _currentBounds, _marginCorrection);
+        return hash;
     }
 }
