@@ -20,6 +20,7 @@ import java.util.*;
 import java.util.function.BiPredicate;
 
 @Immutable
+@SuppressWarnings("Immutable") // The cached hash code below is a computed constant, see there.
 final class StyleConfLayers
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleConfLayers.class);
@@ -45,6 +46,13 @@ final class StyleConfLayers
     private final StyleConfLayer           _foreground;
 
     private final @Nullable StyleConfLayer _any;
+
+    /*
+     *  A lazily computed, cached hash - see NamedConf for why it is one non-volatile int
+     *  with 0 as the "not computed yet" sentinel rather than a value plus a flag.
+     */
+    private int _hashCode = 0; // Lazily computed, 0 means "not computed yet".
+
 
 
     static StyleConfLayers of(
@@ -265,7 +273,10 @@ final class StyleConfLayers
 
     @Override
     public int hashCode() {
-        return Objects.hash(_filter, _background, _content, _border, _foreground, _any);
+        int hash = _hashCode;
+        if ( hash == 0 )
+            _hashCode = hash = Objects.hash(_filter, _background, _content, _border, _foreground, _any);
+        return hash;
     }
 
     @Override
