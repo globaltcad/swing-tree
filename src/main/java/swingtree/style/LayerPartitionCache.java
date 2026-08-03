@@ -137,6 +137,10 @@ final class LayerPartitionCache
     private Pooled<LayerRenderConf> _cacheKey;
     private int                     _cacheHitsUntilAllocation;
     private boolean                 _isInitialized;
+    /** Whether {@code _layerRenderData} holds none of the layer's style. Decided in
+     *  {@link #validate(ComponentConf)}, because the answer is a deep comparison and
+     *  {@link #paint(Graphics2D, BiConsumer)} sits directly in the paint path. */
+    private boolean                 _rendersNothing;
 
 
     public LayerPartitionCache(UI.Layer layer, LayerRenderConfPartitions part ) {
@@ -146,6 +150,7 @@ final class LayerPartitionCache
         _cacheKey                 = _layerRenderData;
         _cacheHitsUntilAllocation = -1;
         _isInitialized            = false;
+        _rendersNothing           = true;
     }
 
     /** The fully rendered cached image which subsequent paint calls will be served from,
@@ -170,10 +175,12 @@ final class LayerPartitionCache
             _isInitialized            = false;
             _layerRenderData          = new Pooled<>(LayerRenderConf.none());
             _cacheKey                 = _layerRenderData;
+            _rendersNothing           = true;
             return;
         }
 
         final LayerRenderConf newState = _part.restrict(newConf.renderConfFor(_layer));
+        _rendersNothing = newState.rendersNothing();
         /*
             Canonicalization maps eligible configurations onto the size independent
             exemplar key, so that a resize does not invalidate the cache. For everything
@@ -252,6 +259,11 @@ final class LayerPartitionCache
         Size size = _layerRenderData.get().boxModel().size();
 
         if ( size.widthOrElse(0f) == 0f || size.heightOrElse(0f) == 0f )
+            return PaintOutcome.NOTHING_RENDERED;
+
+        // A part holding none of the layer's style draws nothing, and must not report a miss
+        // for it, or a split layer would miss on every paint for the side its style leaves empty.
+        if ( _rendersNothing )
             return PaintOutcome.NOTHING_RENDERED;
 
         if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
@@ -448,6 +460,24 @@ final class LayerPartitionCache
             return conf;
 
         return conf.withBoxModel(conf.boxModel().withSize(canonical));
+    }
+
+    /**
+     *  Whether the supplied configuration would be cached as the small size independent
+     *  exemplar rather than at the exact component size - that is, whether
+     *  {@link #_canonicalize} actually moves it. <br>
+     *  <br>
+     *  {@link StyleLayerCache} asks before cutting a layer around its noises, because size
+     *  independence is the entire yield of that cut. Being {@link #_isStretchTileable} is only
+     *  half of it: a configuration whose component is not strictly larger than its own exemplar
+     *  (a chunky corner radius or a wide shadow on a short component) keeps the exact-size key
+     *  anyway, so cutting would buy nothing while still paying to replay the noise on every
+     *  paint - and would cache two full sized images where there was one.
+     */
+    static boolean cachesSizeIndependently( LayerRenderConf conf ) {
+        if ( !CacheBudget.tilingEnabled() )
+            return false;
+        return !_canonicalize(conf).boxModel().size().equals(conf.boxModel().size());
     }
 
     /** Whether the layer content satisfies the tiling invariant (see class javadoc). */

@@ -34,9 +34,9 @@ enum LayerRenderConfPartitions
     WHOLE,
     /** Everything the renderer draws before the noises: fill, border, images and gradients. */
     UNDER_NOISE,
-    /** The noises themselves, which are meant to be replayed on every paint rather than cached
-     *  (relying on the noise tile cache one level down); note that nothing enforces that yet,
-     *  see the status note on this enum. */
+    /** The noises themselves, replayed on every paint rather than cached - which is cheap
+     *  because the noise tile cache one level down keeps them in a size independent noise
+     *  space. {@link StyleLayerCache} never hands this part to a {@link LayerPartCache}. */
     NOISES,
     /** Everything the renderer draws after the noises: shadows, texts and painters. */
     OVER_NOISE;
