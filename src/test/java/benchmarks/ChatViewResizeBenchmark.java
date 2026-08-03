@@ -45,10 +45,19 @@ import java.awt.image.VolatileImage;
  */
 public final class ChatViewResizeBenchmark
 {
-    private static final int   UI_SCALE      = 2;
-    private static final int   WINDOW_WIDTH  = 2600;
-    private static final int   WINDOW_HEIGHT = 1660;
-    private static final int   NARROW_WIDTH  = 1200;
+    /*
+     *  The window geometry is overridable, because it decides *which* regime is measured,
+     *  not merely how much of it. A style layer is only admitted to the render cache below
+     *  a pixel area budget, so at the default 2600x1660 at scale 2 almost every layer of
+     *  the ChatView is too large to cache and is drawn straight onto the destination - the
+     *  exact-size caching that an ordinary 1300x830 window leans on hardly runs at all, and
+     *  a change to it measures as nothing here while mattering a great deal in a real
+     *  window. Sweep more than one geometry before believing a cache result.
+     */
+    private static final int   UI_SCALE      = Integer.getInteger("benchmark.scale",  2);
+    private static final int   WINDOW_WIDTH  = Integer.getInteger("benchmark.width",  2600);
+    private static final int   WINDOW_HEIGHT = Integer.getInteger("benchmark.height", 1660);
+    private static final int   NARROW_WIDTH  = Integer.getInteger("benchmark.narrow", 1200);
     /*
      *  Raise these when profiling rather than measuring: a JFR execution sampler ticks
      *  every few milliseconds, and the default sweep counts amount to about a second of
