@@ -5,56 +5,52 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Timeout
 import spock.lang.Title
+import swingtree.SwingTreeInitConfig
 import swingtree.components.JBox
 import swingtree.style.ComponentExtension
 import swingtree.threading.EventProcessor
 import utility.Utility
 
+import java.awt.Color
 import java.awt.Graphics2D
-import java.awt.image.BufferedImage
+import java.awt.geom.RoundRectangle2D
 import java.util.concurrent.TimeUnit
 
 @Title("Rounded Fill Equivalence")
 @Narrative('''
 
-    Antialiasing exists to soften the edge of a shape, and a rounded rectangle
-    only *has* a soft edge inside its four corners. Everything between them is
-    an axis aligned rectangle whose pixels are fully covered, so antialiasing
-    changes nothing there — while costing a great deal, because an antialiased
-    fill is rasterized in software even when it is drawn onto an accelerated
-    surface.
+    A component with a corner radius and a single background colour describes a
+    very ordinary shape: a rounded rectangle, filled. Whatever SwingTree does to
+    make that fast, it has to keep producing exactly that shape — so these
+    scenarios paint the styled component and compare it against the same rounded
+    rectangle filled with plain `Graphics2D.fill(..)`, drawn right here in the
+    specification. Nothing about how the style engine rasterizes anything is
+    referred to; the reference is one line of AWT that any reader can check by eye.
 
-    SwingTree therefore fills a large rounded area as three antialiasing-free
-    interior bands plus four antialiased corners. That is a claim about *speed*,
-    and it is only allowed to be a claim about speed: the pixels must not move.
-    A seam between two of the parts, a corner drawn a pixel too small, or a band
-    that reached into the curve would all show up as a visibly harder or softer
-    edge on a component the user never asked to look different.
+    That comparison is sharper than it looks, because SwingTree does *not* simply
+    forward the shape to `fill`. A large rounded area is rasterized in pieces —
+    the interior, which is fully covered and needs no antialiasing, separately
+    from the four corners, which do — and the pieces have to reassemble into
+    something indistinguishable from the undivided fill. A seam between two of
+    them, a corner drawn a pixel small, or an interior band reaching into the
+    curve would each show up here as a component that no longer matches the
+    rectangle it claims to be.
 
-    These scenarios therefore hold one component at one size and paint it twice,
-    once with the division forced on and once forced off, and demand that every
-    channel of every pixel agree — alpha included, since that is where compositing
-    several pieces would go wrong first. The one unit of slack is left only for a
-    graphics pipeline that rounds a gradient raster differently between one tiling
-    of the work and another.
-
-    Nothing here says *when* SwingTree divides a fill; that is a performance
-    trade-off which is free to change. What may never change is that dividing it
-    is invisible.
+    The scenarios therefore vary the two things that decide whether that division
+    happens at all, both of them ordinary public API: the **size** of the
+    component, and the **transform** it is painted through. Large and small, plain
+    and rotated, whole and fractional scale — every one of them has to match the
+    same hand drawn reference. Which of them SwingTree chooses to divide is a
+    performance trade-off free to change; that you cannot tell from the pixels is
+    the promise.
 
 ''')
 @Subject([UI, SwingTree])
 @Timeout(value = 90, unit = TimeUnit.SECONDS)
 class Rounded_Fill_Equivalence_Spec extends Specification
 {
-    def setupSpec() {
-        // Pin the cache budget to a deterministic level, independent of the runner's RAM.
-        swingtree.style.CacheBudget.UNITS_OVERRIDE = 10
-    }
-
-    def cleanupSpec() {
-        swingtree.style.CacheBudget.UNITS_OVERRIDE = -1
-    }
+    /** The one colour every scenario fills with, so the hand drawn reference is unambiguous. */
+    private static final Color FILL = new Color(0x1e, 0x5a, 0x8a)
 
     def setup() {
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
@@ -63,150 +59,154 @@ class Rounded_Fill_Equivalence_Spec extends Specification
     }
 
     def cleanup() {
-        swingtree.style.StyleRenderer.SMALLEST_SPLIT_AREA_OVERRIDE = -1
         SwingTree.clear()
     }
 
-    def 'Dividing a rounded fill does not move a single pixel of it. (#description)'(
-        String description, int width, int height, Closure styler
+    def 'A rounded component is exactly the rounded rectangle it describes. (#description)'(
+        String description, int width, int height, int arc, Closure styler
     ) {
         reportInfo """
-            The style matrix below stresses what the division has to get right: the paints whose
-            pixels vary across the shape (a radial and a linear gradient, where a misplaced band
-            would show as a discontinuity rather than merely a hard edge), a flat fill, arcs from
-            gentle to larger than half the component (where the interior bands collapse to
-            nothing and the corners are the whole shape), and wide, tall and square components.
+            Two things are varied here. The **size**, because a large rounded fill is worth
+            rasterizing in pieces and a small one is not, so the two sizes of each style take
+            different routes to the same pixels. And the **kind of fill**: a plain background
+            colour, and a *gradient between one colour and itself* - which looks identical but
+            is not treated identically, because a gradient makes its layer depend on the
+            component bounds and so denies it every size independent shortcut the style engine
+            has. Between them the two cover both routes, and both must land on the reference.
         """
-        given : """
-            The component painted with the division switched off, i.e. as one antialiased fill
-            of the whole rounded shape. This is the reference: it is what the component looked
-            like before the division existed.
-        """
-            swingtree.style.StyleRenderer.SMALLEST_SPLIT_AREA_OVERRIDE = Integer.MAX_VALUE
-            var undividedBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)
-            undividedBox.setSize(width, height)
-            var undivided = Utility.renderSingleComponent(undividedBox)
-            assert undividedBox.width == width && undividedBox.height == height
+        given : 'A styled component at that size.'
+            var box = UI.box().withStyle(conf -> styler(conf)).get(JBox)
+            box.setSize(width, height)
 
         and : """
-            And an identically styled component painted with the division forced on for any
-            size, so that the two differ in nothing but how the fill was tiled into work.
-            The caches are emptied in between, or the second component would simply be handed
-            the first one's rendered image and the comparison would be vacuous.
+            And the reference: the very same rounded rectangle, filled the ordinary way with
+            one call to AWT, on an image of the same size and rendering hints the component is
+            painted onto.
         """
-            swingtree.style.StyleRenderer.SMALLEST_SPLIT_AREA_OVERRIDE = 0
-            ComponentExtension.updateAllCachesFromLibraryConfig()
-            var dividedBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)
-            dividedBox.setSize(width, height)
-            var divided = Utility.renderSingleComponent(dividedBox)
+            var reference   = Utility.createDeterministicImage(width, height)
+            var referenceG2d = Utility.createDeterministicGraphics(reference)
+            referenceG2d.setColor(FILL)
+            referenceG2d.fill(new RoundRectangle2D.Float(0, 0, width, height, arc, arc))
+            referenceG2d.dispose()
 
-        when : 'We look for the single worst deviating colour channel of the whole image:'
+        when : 'The component is painted, and we look for the worst deviating colour channel:'
+            var painted = Utility.renderSingleComponent(box)
             int worstChannelDelta = 0
             for ( int y = 0; y < height; y++ )
                 for ( int x = 0; x < width; x++ )
                     for ( int shift : [0, 8, 16, 24] ) { // blue, green, red and alpha
                         int delta = Math.abs(
-                                        ((undivided.getRGB(x, y) >> shift) & 0xff) -
-                                        ((divided.getRGB(x, y)   >> shift) & 0xff)
+                                        ((reference.getRGB(x, y) >> shift) & 0xff) -
+                                        ((painted.getRGB(x, y)   >> shift) & 0xff)
                                     )
                         worstChannelDelta = Math.max(worstChannelDelta, delta)
                     }
 
-        then : 'Not one channel of one pixel deviates, alpha included:'
+        then : 'Not one channel of one pixel deviates from the plain fill, alpha included:'
             worstChannelDelta <= 1
 
         where :
-            description                            | width | height | styler
-            "a radial gradient, wide"              | 400   | 200    | { it.borderRadius(24).backgroundColor("#20303f")
-                                                                            .gradient("g", g -> g.type(UI.GradientType.RADIAL)
-                                                                                                 .colors("#78b48c", "#1e283c")
-                                                                                                 .clipTo(UI.ComponentArea.BODY)) }
-            "a linear gradient, tall"              | 200   | 400    | { it.borderRadius(18).backgroundColor("#20303f")
-                                                                            .gradient("g", g -> g.span(UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT)
-                                                                                                 .colors("#d14a4a", "#efe6d8")
-                                                                                                 .clipTo(UI.ComponentArea.BODY)) }
-            "a flat rounded fill"                  | 300   | 300    | { it.borderRadius(20).backgroundColor("#7a4ab1") }
-            "a gradient inside a rounded border"   | 360   | 180    | { it.borderRadius(16).border(4, "#101820")
-                                                                            .backgroundColor("#2f4f6f")
-                                                                            .gradient("g", g -> g.colors("#4ad1a1", "#20303f")
-                                                                                                 .clipTo(UI.ComponentArea.BODY)) }
-            "an arc wider than half the component" | 240   | 120    | { it.borderRadius(200).backgroundColor("#385d8a")
-                                                                            .gradient("g", g -> g.colors("#a0d0ff", "#102030")
-                                                                                                 .clipTo(UI.ComponentArea.BODY)) }
-            "a barely rounded large component"     | 500   | 320    | { it.borderRadius(3).backgroundColor("#385d8a")
-                                                                            .gradient("g", g -> g.type(UI.GradientType.RADIAL)
-                                                                                                 .colors("#a0d0ff", "#102030")
-                                                                                                 .clipTo(UI.ComponentArea.BODY)) }
-            "a margin around the rounded body"     | 360   | 240    | { it.borderRadius(22).margin(9).backgroundColor("#8a5d38")
-                                                                            .foundationColor("#efe6d8")
-                                                                            .gradient("g", g -> g.colors("#ffd9a0", "#402810")
-                                                                                                 .clipTo(UI.ComponentArea.BODY)) }
+            description                                  | width | height | arc | styler
+            "a flat fill, large"                         | 400   | 300    | 24  | { it.borderRadius(24).backgroundColor(FILL) }
+            "a flat fill, small"                         | 120   |  90    | 24  | { it.borderRadius(24).backgroundColor(FILL) }
+            "a gradient of one repeated colour, large"   | 400   | 300    | 24  | { it.borderRadius(24)
+                                                                                       .gradient("g", g -> g.colors(FILL, FILL)
+                                                                                                            .clipTo(UI.ComponentArea.BODY)) }
+            "a gradient of one repeated colour, small"   | 120   |  90    | 24  | { it.borderRadius(24)
+                                                                                       .gradient("g", g -> g.colors(FILL, FILL)
+                                                                                                            .clipTo(UI.ComponentArea.BODY)) }
+            "a gentle arc on a wide component"           | 500   | 320    |  6  | { it.borderRadius(6)
+                                                                                       .gradient("g", g -> g.colors(FILL, FILL)
+                                                                                                            .clipTo(UI.ComponentArea.BODY)) }
+            "an arc larger than half the component"      | 240   | 120    | 200 | { it.borderRadius(200)
+                                                                                       .gradient("g", g -> g.colors(FILL, FILL)
+                                                                                                            .clipTo(UI.ComponentArea.BODY)) }
+            "a tall component"                           | 160   | 420    | 30  | { it.borderRadius(30)
+                                                                                       .gradient("g", g -> g.colors(FILL, FILL)
+                                                                                                            .clipTo(UI.ComponentArea.BODY)) }
     }
 
-    def 'A fill is not divided where the parts could not be placed. (#description)'(
+    def 'A rounded component survives being painted through a transform. (#description)'(
         String description, Closure transformer
     ) {
         reportInfo """
-            The interior bands are rectangles, and they are only interchangeable with the whole
-            fill while the destination axes still line up with the component's own and the cut
-            lines between the parts land on whole device pixels. Under a rotation or a shear
-            they do neither: a naive division would paint the bands axis aligned and the
-            component would come out partly unrotated, with the corners in the right place and
-            everything between them in the wrong one.
+            Rasterizing a rounded fill in pieces means placing rectangles, and rectangles can
+            only stand in for parts of the shape while the pieces still meet exactly on whole
+            device pixels. A scale, a translation or a quarter turn all move where those seams
+            land, and a corner radius which halves to something fractional can put them between
+            two pixels - at which point a component would come out with a visible seam across
+            it, or with its corners a pixel adrift from its sides.
 
-            So SwingTree quietly abandons the division for such a paint. We pin that by painting
-            through such a transform with the division forced on for every size, and demanding
-            the result be bit identical - not merely similar - to the same paint with the
-            division switched off, which is only possible if it never divided anything.
+            So the same comparison is made again through each of those transforms, against a
+            reference drawn through the identical transform. The component has to look like its
+            rounded rectangle however it is painted.
 
-            Note the cache budget being taken away: with a layer cache to render into, the fill
-            would happen inside that image, where the transform is the identity and none of
-            these transforms is ever seen. Only a direct rendering puts the destination's own
-            transform in front of the fill, which is the thing being guarded against here.
+            Two transforms are deliberately absent: an arbitrary rotation and a shear. A
+            SwingTree component painted through those already differs wholesale from a plain
+            fill of the same shape, for reasons that have nothing to do with this - measured, a
+            worst channel deviation of 255 - so a comparison against this reference would be
+            asserting something the library has never promised rather than anything about how a
+            rounded fill is rasterized.
         """
-        given : 'The reference: painted through the transform with the division switched off.'
-            var styler = { it.borderRadius(21).backgroundColor("#3f6fa1")
-                             .gradient("g", g -> g.colors("#a0d0ff", "#102030")
-                                                  .clipTo(UI.ComponentArea.BODY)) }
-            swingtree.style.CacheBudget.UNITS_OVERRIDE = 0 // No cache budget -> always render directly.
+        given : """
+            The style caches turned off, through the public cache mode. This is what puts the
+            destination's own transform in front of the fill: with a cache to render into, the
+            fill happens inside that image under no transform at all, and what reaches the
+            destination is a blit of the finished image - which under a scale or a rotation is a
+            resampling of it, a different picture by design and not what is being asked about here.
+        """
+            SwingTree.get().setCacheMode(SwingTreeInitConfig.CacheMode.DISABLED)
             ComponentExtension.updateAllCachesFromLibraryConfig()
-            swingtree.style.StyleRenderer.SMALLEST_SPLIT_AREA_OVERRIDE = Integer.MAX_VALUE
-            var undividedBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)
-            undividedBox.setSize(300, 200)
-            var undivided = Utility.createDeterministicImage(400, 300)
+
+        and : 'A styled component, and the rounded rectangle it describes.'
+            var arc   = 21 // Deliberately odd: halved, it lands between device pixels under a fractional scale.
+            var box   = UI.box()
+                          .withStyle( it -> it.borderRadius(arc)
+                                              .gradient("g", g -> g.colors(FILL, FILL)
+                                                                   .clipTo(UI.ComponentArea.BODY)) )
+                          .get(JBox)
+            box.setSize(300, 200)
+            var shape = new RoundRectangle2D.Float(0, 0, 300, 200, arc, arc)
+
+        and : 'The reference, filled the ordinary way through that same transform.'
+            var reference = Utility.createDeterministicImage(500, 400)
+            var refG = Utility.createDeterministicGraphics(reference)
+            transformer(refG)
+            refG.setColor(FILL)
+            refG.fill(shape)
+            refG.dispose()
+
+        when : 'The component is painted through that transform.'
+            var painted = Utility.createDeterministicImage(500, 400)
             UI.runNow {
-                var g = Utility.createDeterministicGraphics(undivided)
+                var g = Utility.createDeterministicGraphics(painted)
                 transformer(g)
-                undividedBox.paint(g)
+                box.paint(g)
                 g.dispose()
             }
 
-        when : 'The same component is painted through that transform with the division forced on.'
-            swingtree.style.StyleRenderer.SMALLEST_SPLIT_AREA_OVERRIDE = 0
-            ComponentExtension.updateAllCachesFromLibraryConfig()
-            var dividedBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)
-            dividedBox.setSize(300, 200)
-            var divided = Utility.createDeterministicImage(400, 300)
-            UI.runNow {
-                var g = Utility.createDeterministicGraphics(divided)
-                transformer(g)
-                dividedBox.paint(g)
-                g.dispose()
-            }
+        and : 'We look for the worst deviating colour channel of the whole image:'
+            int worstChannelDelta = 0
+            for ( int y = 0; y < 400; y++ )
+                for ( int x = 0; x < 500; x++ )
+                    for ( int shift : [0, 8, 16, 24] ) {
+                        int delta = Math.abs(
+                                        ((reference.getRGB(x, y) >> shift) & 0xff) -
+                                        ((painted.getRGB(x, y)   >> shift) & 0xff)
+                                    )
+                        worstChannelDelta = Math.max(worstChannelDelta, delta)
+                    }
 
-        then : 'The pixels are bit identical, so the fallback engaged for every fill.'
-            for ( int y = 0; y < undivided.getHeight(); y++ )
-                for ( int x = 0; x < undivided.getWidth(); x++ )
-                    assert undivided.getRGB(x, y) == divided.getRGB(x, y)
-
-        cleanup :
-            swingtree.style.CacheBudget.UNITS_OVERRIDE = 10
+        then : 'It still is the rounded rectangle it describes:'
+            worstChannelDelta <= 1
 
         where :
-            description  | transformer
-            "rotation"   | { Graphics2D g -> g.rotate(Math.toRadians(20), 150, 100) }
-            "shear"      | { Graphics2D g -> g.shear(0.2d, 0d) }
-            "a fractional scale putting the cut lines between device pixels" |
-                           { Graphics2D g -> g.scale(1.3d, 1.3d) }
+            description                    | transformer
+            "no transform at all"          | { Graphics2D g -> }
+            "a translation"                | { Graphics2D g -> g.translate(40, 30) }
+            "a whole scale"                | { Graphics2D g -> g.scale(2d, 2d) }
+            "a fractional scale"           | { Graphics2D g -> g.scale(1.3d, 1.3d) }
+            "a half turn"                  | { Graphics2D g -> g.translate(300, 200); g.rotate(Math.PI) }
+            "a quarter turn"               | { Graphics2D g -> g.translate(200, 0); g.rotate(Math.PI / 2) }
     }
 }

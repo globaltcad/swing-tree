@@ -189,19 +189,6 @@ final class StyleRenderer
      */
     private static final int SMALLEST_AREA_WORTH_SPLITTING = 32768; // device pixels
 
-    /**
-     *  Test hook: when {@code >= 0} it replaces {@link #SMALLEST_AREA_WORTH_SPLITTING}, so that
-     *  a specification can hold a component at one size and compare the divided fill against the
-     *  undivided one. Without it the two could only be compared at two <i>different</i> sizes
-     *  straddling the threshold, which are not comparable at all. {@code 0} divides everything
-     *  eligible, {@link Integer#MAX_VALUE} divides nothing.
-     */
-    static volatile int SMALLEST_SPLIT_AREA_OVERRIDE = -1;
-
-    private static int _smallestAreaWorthSplitting() {
-        final int override = SMALLEST_SPLIT_AREA_OVERRIDE;
-        return override >= 0 ? override : SMALLEST_AREA_WORTH_SPLITTING;
-    }
 
     /**
      *  Fills a rounded rectangle as three antialiasing-free interior bands plus four
@@ -250,7 +237,7 @@ final class StyleRenderer
         final double scaleX = transform.getScaleX(), translateX = transform.getTranslateX();
         final double scaleY = transform.getScaleY(), translateY = transform.getTranslateY();
 
-        if ( Math.abs(w * scaleX * h * scaleY) < _smallestAreaWorthSplitting() )
+        if ( Math.abs(w * scaleX * h * scaleY) < SMALLEST_AREA_WORTH_SPLITTING )
             return false; // Too small for the split to pay for itself, see the threshold.
 
         /*
