@@ -34,7 +34,10 @@ final class StyleLayerCache
      *  component is merely asked for its border insets or has its style recomputed, and a single
      *  paint drives more than one of them (two, for the components measured), so a tail counted
      *  in validations would be a different length per component type and would drain without
-     *  anything having been painted at all.
+     *  anything having been painted at all. <br>
+     *  <br>
+     *  Every paint reaching the layer drains it, including one this layer had nothing to draw
+     *  for - see {@link #paint(Graphics2D)} for why that distinction must not be made here.
      */
     private static final int PAINTS_UNTIL_REJOINED = 4;
 
@@ -210,6 +213,19 @@ final class StyleLayerCache
             anyRendered  |= ( outcome == LayerPartCache.PaintOutcome.RENDERED          );
             anyFromCache |= ( outcome == LayerPartCache.PaintOutcome.SERVED_FROM_CACHE );
         }
+        /*
+            This, and not validate(), is what drains the rejoin tail, see PAINTS_UNTIL_REJOINED -
+            and it deliberately happens before the "nothing was painted" return below. Whether the
+            component size has settled is a question about the component, not about this layer:
+            a layer holding none of the style draws nothing on every single paint, so counting
+            only paints that drew something would leave such a layer reporting "in flux" forever
+            after its first resize, and every gate hanging off _isResizing permanently armed.
+            Measured on ChatView: without this, a narrow clip repaint at a long settled size still
+            saw ~1200 layer validations believing the component was mid-drag.
+        */
+        if ( _paintsAtThisSize < PAINTS_UNTIL_REJOINED )
+            _paintsAtThisSize++;
+
         if ( !anyPainted )
             return; // Nothing reached the destination, so this was not a paint of this layer.
 
@@ -222,10 +238,6 @@ final class StyleLayerCache
             _paintCacheMissCount++;
         else
             _paintCacheHitCount++;
-
-        // This, and not validate(), is what drains the rejoin tail, see PAINTS_UNTIL_REJOINED:
-        if ( _paintsAtThisSize < PAINTS_UNTIL_REJOINED )
-            _paintsAtThisSize++;
     }
 
     /**
