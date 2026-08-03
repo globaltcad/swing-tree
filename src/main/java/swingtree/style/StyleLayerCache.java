@@ -200,18 +200,18 @@ final class StyleLayerCache
     }
 
     void paint( Graphics2D g2d ) {
-        boolean anyPainted   = false;
-        boolean anyRendered  = false;
-        boolean anyFromCache = false;
+        boolean anythingRendered          = false;
+        boolean anythingRenderedFromStyle = false;
+        boolean anythingRenderedFromCache = false;
         for ( int i = 0; i < _parts.length; i++ ) {
             // The lifted out noises go between the parts - which is the only reason a layer
             // ever has more than one part, so "not before the first" locates them exactly:
             if ( i > 0 )
-                anyPainted |= _paintNoises(g2d);
+                anythingRendered |= _paintNoises(g2d);
             LayerPartCache.PaintOutcome outcome = _parts[i].paint(g2d, _renderer);
-            anyPainted   |= ( outcome != LayerPartCache.PaintOutcome.NOT_PAINTED       );
-            anyRendered  |= ( outcome == LayerPartCache.PaintOutcome.RENDERED          );
-            anyFromCache |= ( outcome == LayerPartCache.PaintOutcome.SERVED_FROM_CACHE );
+            anythingRendered          |= ( outcome != LayerPartCache.PaintOutcome.NOTHING_RENDERED   );
+            anythingRenderedFromStyle |= ( outcome == LayerPartCache.PaintOutcome.RENDERED_FROM_STYLE);
+            anythingRenderedFromCache |= ( outcome == LayerPartCache.PaintOutcome.RENDERED_FROM_CACHE);
         }
         /*
             This, and not validate(), is what drains the rejoin tail, see PAINTS_UNTIL_REJOINED -
@@ -226,7 +226,7 @@ final class StyleLayerCache
         if ( _paintsAtThisSize < PAINTS_UNTIL_REJOINED )
             _paintsAtThisSize++;
 
-        if ( !anyPainted )
+        if ( !anythingRendered )
             return; // Nothing reached the destination, so this was not a paint of this layer.
 
         /*
@@ -234,7 +234,7 @@ final class StyleLayerCache
             whose only style is the replayed noise - so that both cut out parts hold nothing and
             neither renders nor caches - would report a hit for a paint no cache took part in.
         */
-        if ( anyRendered || !anyFromCache )
+        if ( anythingRenderedFromStyle || !anythingRenderedFromCache )
             _paintCacheMissCount++;
         else
             _paintCacheHitCount++;

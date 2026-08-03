@@ -241,13 +241,12 @@ final class LayerPartCache
      *  reported per call rather than counted here.
      */
     enum PaintOutcome {
-        /** Nothing was painted at all, because the component currently has no area, or
-         *  because this part holds none of the layer's style. */
-        NOT_PAINTED,
+        /** Nothing was painted at all (component currently has no area, or no meaningful style conf) */
+        NOTHING_RENDERED,
         /** The pixels came entirely from the cached image. */
-        SERVED_FROM_CACHE,
+        RENDERED_FROM_CACHE,
         /** The style renderer had to be invoked (caching disabled, or the cache was not yet rendered). */
-        RENDERED
+        RENDERED_FROM_STYLE
     }
 
     public PaintOutcome paint( Graphics2D g, BiConsumer<LayerRenderConf, Graphics2D> renderer )
@@ -255,16 +254,16 @@ final class LayerPartCache
         Size size = _layerRenderData.get().boxModel().size();
 
         if ( size.widthOrElse(0f) == 0f || size.heightOrElse(0f) == 0f )
-            return PaintOutcome.NOT_PAINTED;
+            return PaintOutcome.NOTHING_RENDERED;
 
         // A part holding none of the layer's style draws nothing, and must not report a miss
         // for it, or a split layer would miss on every paint for the side its style leaves empty.
         if ( _rendersNothing )
-            return PaintOutcome.NOT_PAINTED;
+            return PaintOutcome.NOTHING_RENDERED;
 
         if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
             renderer.accept(_layerRenderData.get(), g);
-            return PaintOutcome.RENDERED;
+            return PaintOutcome.RENDERED_FROM_STYLE;
         }
 
         /*
@@ -277,7 +276,7 @@ final class LayerPartCache
         final boolean isTiled = !_cacheKey.get().boxModel().size().equals(size);
         if ( isTiled && !_isBlitCompatible(g.getTransform()) ) {
             renderer.accept(_layerRenderData.get(), g);
-            return PaintOutcome.RENDERED;
+            return PaintOutcome.RENDERED_FROM_STYLE;
         }
 
         if ( _localCache == null ) {
@@ -287,7 +286,7 @@ final class LayerPartCache
                 "Hit countdown until allocation is '{}'.",
                 _layer, _cacheHitsUntilAllocation
             );
-            return PaintOutcome.RENDERED;
+            return PaintOutcome.RENDERED_FROM_STYLE;
         }
 
         final PaintOutcome outcome;
@@ -300,7 +299,7 @@ final class LayerPartCache
                     So we just do normal rendering instead:
                 */
                 renderer.accept(_layerRenderData.get(), g);
-                return PaintOutcome.RENDERED;
+                return PaintOutcome.RENDERED_FROM_STYLE;
             }
             try {
                 StyleUtil.transferConfigurations(g, g2);
@@ -317,9 +316,9 @@ final class LayerPartCache
                 renderer.accept(_cacheKey.get(), g2);
                 g2.dispose();
             }
-            outcome = PaintOutcome.RENDERED;
+            outcome = PaintOutcome.RENDERED_FROM_STYLE;
         } else {
-            outcome = PaintOutcome.SERVED_FROM_CACHE;
+            outcome = PaintOutcome.RENDERED_FROM_CACHE;
         }
 
         final BufferedImage cachedImage = _localCache.getImage();
