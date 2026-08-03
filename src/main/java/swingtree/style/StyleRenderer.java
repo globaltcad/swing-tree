@@ -1903,6 +1903,13 @@ final class StyleRenderer
          *  with the box model. So the extra rasterization a whole tile costs is paid once, while
          *  what it buys recurs. Measured on a 200x150 noise, lowering this from one tile made a
          *  repaint while resizing ~2x faster and left a repaint at an unchanged size unchanged.
+         *  <br>
+         *  What it trades away is memory: a noise smaller than a tile still needs whole tiles,
+         *  so an area of a few thousand pixels can retain up to four of them. That is bounded
+         *  per noise configuration by {@link #maxCachedTiles()}, and the tiles are shared by
+         *  every component painting the same noise at the same {@code center}, but it does mean
+         *  a UI with many <i>distinct</i> small noise styles now spends noticeably more of the
+         *  {@link CacheBudget.Kind#NOISE_TILE} slice than it used to.
          */
         private static final int LARGE_AREA_THRESHOLD = 64 * 64;
         /** Upper bound on retained large tiles (~256 KiB each), from this cache's slice of

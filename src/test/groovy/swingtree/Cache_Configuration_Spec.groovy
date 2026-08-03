@@ -186,6 +186,63 @@ class Cache_Configuration_Spec extends Specification
             ext.cacheMissCount(UI.Layer.BACKGROUND) == missesAfterRepopulation
     }
 
+    def 'Turning stretch tiling off also stops layers being cut around their noises.'()
+    {
+        reportInfo """
+            `setCacheTilingEnabled(false)` is the safety hatch for going back to
+            the classic exact-size caching, and a layer painted in several pieces
+            is not that either. So the switch covers both: with it off, a
+            noise-bearing layer is one cached image at the component's own size,
+            being dragged or not, exactly as it was before any of this existed.
+        """
+        given : 'A deterministic budget, and a big button with a noise over a rounded fill.'
+            CacheBudget.UNITS_OVERRIDE = 10
+            ComponentExtension.updateAllCachesFromLibraryConfig()
+            var button =
+                UI.button("Grain me")
+                  .withStyle( it -> it
+                        .borderRadius(16)
+                        .backgroundColor(new Color(30, 90, 138))
+                        .noise("grain", n -> n.colors(new Color(32, 32, 32), new Color(222, 222, 222)))
+                  )
+                  .get(JButton)
+            var ext = ComponentExtension.from(button)
+
+        when : 'It is dragged with the hatch open, which is when a layer gets cut.'
+            [[500, 300], [560, 320], [620, 340]].each { w, h ->
+                button.setSize(w, h)
+                Utility.renderSingleComponent(button)
+            }
+        then : 'What is cached is the size independent exemplar of everything but the noise.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            ext.cachedRendering(UI.Layer.BACKGROUND).all( image -> image.width < 620 )
+
+        when : 'The hatch is closed and it is dragged further.'
+            SwingTree.get().setCacheTilingEnabled(false)
+            [[660, 360], [700, 380]].each { w, h ->
+                button.setSize(w, h)
+                Utility.renderSingleComponent(button)
+            }
+        then : """
+            The exemplar is gone: the layer was not cut, so there is nothing size independent
+            left to cache, and a full sized image is not worth allocating for a size the drag
+            is about to leave behind anyway.
+        """
+            ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
+
+        when : 'The drag ends, and it is painted a few times at that final size.'
+            6.times { Utility.renderSingleComponent(button) }
+        then : 'The layer is one whole image at the component size, noise and all.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1
+            ext.cachedRendering(UI.Layer.BACKGROUND).first().width  == 700
+            ext.cachedRendering(UI.Layer.BACKGROUND).first().height == 380
+
+        cleanup :
+            SwingTree.get().setCacheTilingEnabled(true)
+            CacheBudget.UNITS_OVERRIDE = -1
+            ComponentExtension.updateAllCachesFromLibraryConfig()
+    }
+
     def 'The live cache monitoring snapshot covers every global rendering cache.'()
     {
         reportInfo """

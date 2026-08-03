@@ -9,6 +9,8 @@ import swingtree.style.ComponentExtension
 import swingtree.threading.EventProcessor
 import utility.Utility
 
+import swingtree.components.JBox
+
 import javax.swing.JButton
 import javax.swing.JLabel
 import java.awt.Color
@@ -209,6 +211,47 @@ class Style_Render_Caching_Spec extends Specification
             12.times { Utility.renderSingleComponent(button) }
         then : 'Still nothing was taken back.'
             ext.cacheHitCount(UI.Layer.BACKGROUND) + ext.cacheMissCount(UI.Layer.BACKGROUND) == 18
+    }
+
+    def 'A paint no cache took part in is counted as a miss, not lost.'()
+    {
+        reportInfo """
+            The counters must add up to the number of paints even for the layer
+            that gives the cache the least to work with: one whose entire style
+            is a noise.
+
+            While such a component is resized, the noise is lifted out and
+            replayed, and what is left under and over it is *nothing at all* —
+            so there is nothing to cache, nothing to render, and the layer is
+            painted entirely by that replay. It would be easy for such a paint
+            to fall between the two counters and simply vanish, and it would be
+            wrong to call it a hit, since no cache took part in it. It counts as
+            a miss, which is also the honest reading of these numbers: the cache
+            did nothing for this paint.
+        """
+        given : 'A box whose background layer is a noise and absolutely nothing else.'
+            var box =
+                UI.box()
+                  .withStyle( it -> it.noise("grain", n -> n.colors(Color.BLACK, Color.WHITE)) )
+                  .get(JBox)
+            var ext = ComponentExtension.from(box)
+            box.setSize(300, 200)
+
+        when : 'It is painted at a settled size, and then dragged.'
+            3.times { Utility.renderSingleComponent(box) }
+            int countedWhenSettled = ext.cacheHitCount(UI.Layer.BACKGROUND) + ext.cacheMissCount(UI.Layer.BACKGROUND)
+            [[320, 210], [340, 220], [360, 230]].each { w, h ->
+                box.setSize(w, h)
+                Utility.renderSingleComponent(box)
+            }
+
+        then : 'Every paint of both phases is accounted for.'
+            countedWhenSettled == 3
+            ext.cacheHitCount(UI.Layer.BACKGROUND) + ext.cacheMissCount(UI.Layer.BACKGROUND) == 6
+        and : 'And the drag paints, which no cache served, are misses.'
+            ext.cacheMissCount(UI.Layer.BACKGROUND) >= 3
+        and : 'Which is consistent with there being nothing cached for that layer mid-drag.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
     }
 
     def 'A plain, undecorated component is *never* cached.'()

@@ -22,7 +22,7 @@ import java.util.Objects;
  *  reconstructs any actual size from the resulting rendering. A newly added field whose value
  *  (or whose rendering) depends on the component size would silently break that reconstruction,
  *  producing subtly wrong pixels rather than a failure. Should such a field become necessary,
- *  it must also be rejected by {@code LayerPartCache.isStretchTileable}.
+ *  it must also be rejected by {@code LayerPartCache._isStretchTileable}.
  */
 @Immutable
 @SuppressWarnings("Immutable")

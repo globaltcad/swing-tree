@@ -442,7 +442,7 @@ final class LayerPartCache
      *  which already has the exemplar size maps onto itself.
      */
     private static LayerRenderConf _canonicalize( LayerRenderConf conf ) {
-        if ( !isStretchTileable(conf) )
+        if ( !_isStretchTileable(conf) )
             return conf;
 
         final Outline sliceInsets = _sliceInsets(conf);
@@ -458,8 +458,26 @@ final class LayerPartCache
         return conf.withBoxModel(conf.boxModel().withSize(canonical));
     }
 
+    /**
+     *  Whether the supplied configuration would be cached as the small size independent
+     *  exemplar rather than at the exact component size - that is, whether
+     *  {@link #_canonicalize} actually moves it. <br>
+     *  <br>
+     *  {@link StyleLayerCache} asks before cutting a layer around its noises, because size
+     *  independence is the entire yield of that cut. Being {@link #_isStretchTileable} is only
+     *  half of it: a configuration whose component is not strictly larger than its own exemplar
+     *  (a chunky corner radius or a wide shadow on a short component) keeps the exact-size key
+     *  anyway, so cutting would buy nothing while still paying to replay the noise on every
+     *  paint - and would cache two full sized images where there was one.
+     */
+    static boolean cachesSizeIndependently( LayerRenderConf conf ) {
+        if ( !CacheBudget.tilingEnabled() )
+            return false;
+        return !_canonicalize(conf).boxModel().size().equals(conf.boxModel().size());
+    }
+
     /** Whether the layer content satisfies the tiling invariant (see class javadoc). */
-    static boolean isStretchTileable( LayerRenderConf conf ) {
+    private static boolean _isStretchTileable( LayerRenderConf conf ) {
         final StyleConfLayer layer = conf.layer();
 
         for ( GradientConf gradient : layer.gradients().sortedByNames() )

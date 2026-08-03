@@ -324,6 +324,78 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             ComponentExtension.from(small).cachedRendering(UI.Layer.BACKGROUND).first().width == 68
     }
 
+    def 'A noise is not lifted out of a layer whose rest would not fit a smaller exemplar.'()
+    {
+        reportInfo """
+            Lifting a noise out of its layer only earns anything if what is left
+            behind then really does fit the small size independent exemplar,
+            because that exemplar is the entire yield of the operation. Merely
+            *being the kind of style* that can be stretched is not enough.
+
+            A component only ever gets mapped onto an exemplar when it is
+            strictly larger than that exemplar in both directions, and how large
+            the exemplar is depends on the style: every corner arc, border
+            width, margin and shadow reach has to fit inside it, because those
+            are the pixels that cannot be stretched. So a chunky corner radius
+            and a wide shadow on a component that is wide but not tall produce
+            an exemplar taller than the component itself, and that style is
+            cached at the exact component size no matter what.
+
+            Cutting such a layer would be the worst of both worlds: two exact
+            size images instead of one, both re-rendered at every new size, plus
+            the noise replayed on top on every single paint. So it is not cut,
+            even mid-drag.
+        """
+        given : """
+            A wide but short button whose 30 pixel corner radius and 14 pixel shadow blur
+            need an exemplar around 92 pixels tall - taller than the button.
+        """
+            var button =
+                UI.button("Grain me")
+                  .withStyle( it -> it
+                        .borderRadius(30)
+                        .backgroundColor("#1e5a8a")
+                        .noise(UI.Layer.BACKGROUND, "grain", n -> n.colors("#202020", "#dedede"))
+                        .shadow(UI.Layer.BACKGROUND, "glow", s -> s.color("#0a0a14").blurRadius(14))
+                  )
+                  .get(JButton)
+            var ext = ComponentExtension.from(button)
+
+        when : 'It is dragged, which is exactly when a layer would be cut around its noise.'
+            [[400, 60], [420, 62], [440, 64]].each { w, h ->
+                button.setSize(w, h)
+                Utility.renderSingleComponent(button)
+            }
+
+        then : 'It was not cut: there is a single cached image, not one per side of the noise.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1
+        and : 'And that image is the plain exact size rendering it would have been anyway.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).first().width  == 440
+            ext.cachedRendering(UI.Layer.BACKGROUND).first().height == 64
+
+        when : """
+            The very same style is dragged on a component tall enough for the exemplar to fit,
+            which is the case the cut exists for.
+        """
+            var tall =
+                UI.button("Grain me")
+                  .withStyle( it -> it
+                        .borderRadius(30)
+                        .backgroundColor("#1e5a8a")
+                        .noise(UI.Layer.BACKGROUND, "grain", n -> n.colors("#202020", "#dedede"))
+                        .shadow(UI.Layer.BACKGROUND, "glow", s -> s.color("#0a0a14").blurRadius(14))
+                  )
+                  .get(JButton)
+            [[400, 300], [420, 320], [440, 340]].each { w, h ->
+                tall.setSize(w, h)
+                Utility.renderSingleComponent(tall)
+            }
+
+        then : 'That one *is* cut, into exemplars far smaller than the component.'
+            ComponentExtension.from(tall).cachedRendering(UI.Layer.BACKGROUND)
+                              .all( image -> image.width < 440 && image.height < 340 )
+    }
+
     def 'A layer which is nothing but a noise is not cached while it resizes.'()
     {
         reportInfo """
@@ -482,6 +554,12 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             images: atlases must be identical in size (and much smaller than
             either component), full size renderings must each track their
             own component.
+
+            Note that a noise sits in the full size group here even though it is
+            the one style that gets lifted out of its layer's cached image: that
+            only happens while the component is being resized, and these two are
+            painted repeatedly at one settled size, which is what a real UI
+            spends nearly all of its paints doing.
         """
         given : 'The same style, painted on two differently sized components.'
             var first  = UI.button("Tile me").withStyle(conf -> styler(conf)).get(JButton)
@@ -533,6 +611,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
                                                                                                             .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 14, 15)
                                                                                                             .borderRadiusAt(UI.Corner.BOTTOM_RIGHT, 16, 17) }
             "a gradient"                                   | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(10).gradient(g -> g.colors("#b02050", "#2050b0")) }
+            "a noise texture at a settled size"            | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(10).noise(n -> n.colors("#202020", "#dedede")) }
             "a background image"                           | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(10).image(img -> img.image(ICON)) }
             "styled text"                                  | UI.Layer.CONTENT    | "full size"        | { it.text(t -> t.content("Full size")) }
             "per-edge border colors with rounded corners"  | UI.Layer.BORDER     | "full size"        | { it.borderWidths(2, 3, 4, 5).borderColors("#6a1010", "#106a10", "#10106a", "#6a6a10").borderRadius(16) }

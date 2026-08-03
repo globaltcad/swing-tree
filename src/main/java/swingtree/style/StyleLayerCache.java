@@ -25,11 +25,18 @@ import java.util.function.BiConsumer;
 final class StyleLayerCache
 {
     /**
-     *  How many validations at an unchanged size end a cut (see {@link #_isResizing}). Roughly
-     *  a validation per paint, so this is a short tail after the last drag frame - long enough
-     *  to bridge the paints a drag emits at a repeated size, short enough to be imperceptible.
+     *  How many <i>paints</i> at an unchanged size end a cut (see {@link #_isResizing}) - a short
+     *  tail after the last drag frame, long enough to bridge the paints a drag emits at a
+     *  repeated size, short enough to be imperceptible. <br>
+     *  <br>
+     *  Deliberately counted in paints rather than in {@link #validate(ComponentConf)} calls, even
+     *  though the decision is taken there: a validation is not a paint. It also runs when a
+     *  component is merely asked for its border insets or has its style recomputed, and a single
+     *  paint drives more than one of them (two, for the components measured), so a tail counted
+     *  in validations would be a different length per component type and would drain without
+     *  anything having been painted at all.
      */
-    private static final int VALIDATIONS_UNTIL_REJOINED = 8;
+    private static final int PAINTS_UNTIL_REJOINED = 4;
 
     private final UI.Layer         _layer;
     /**
@@ -46,10 +53,10 @@ final class StyleLayerCache
     /** The noises, ready to be replayed straight onto the destination between the cached
      *  parts. Empty whenever the layer is not split, in which case nothing is replayed. */
     private LayerRenderConf        _noises;
-    /** The size seen by the previous validation, and how many validations ago it last
-     *  changed - the resize detection {@link #_isResizing} implements. */
+    /** The size seen by the previous validation, and how many paints ago it last changed -
+     *  the resize detection {@link #_isResizing} implements. */
     private Size                   _lastSize;
-    private int                    _validationsAtThisSize;
+    private int                    _paintsAtThisSize;
     /*
      *  Per-layer utilisation counters, observable through the ComponentExtension public API,
      *  which is also how the test suite reasons about cache effectiveness without coupling to
@@ -69,7 +76,7 @@ final class StyleLayerCache
         _isSplitAroundNoises   = false;
         _noises                = LayerRenderConf.none();
         _lastSize              = Size.unknown();
-        _validationsAtThisSize = VALIDATIONS_UNTIL_REJOINED;
+        _paintsAtThisSize      = PAINTS_UNTIL_REJOINED;
     }
 
     /**
@@ -117,21 +124,19 @@ final class StyleLayerCache
      *  noise gradient, cutting regardless is ~5x faster while resizing and ~60% slower at an
      *  unchanged size - and a UI spends nearly all its paints at an unchanged size. <br>
      *  <br>
-     *  Hence the tail rather than a bare "differs from last time": a validation runs per paint,
-     *  and a drag emits plenty of paints at a repeated size. And hence growing out of an
-     *  unrenderable size does not count - a component is validated at 0x0 before it is ever
-     *  laid out, and reaching its first real size is a birth rather than a resize.
+     *  Hence the tail rather than a bare "differs from last time": a drag emits plenty of paints
+     *  at a repeated size, and dropping the cut between two of them would re-render the layer
+     *  twice for nothing. And hence growing out of an unrenderable size does not count - a
+     *  component is validated at 0x0 before it is ever laid out, and reaching its first real
+     *  size is a birth rather than a resize.
      */
     private boolean _isResizing( Size size ) {
         if ( !size.equals(_lastSize) ) {
             final boolean grewFromNothing = !_lastSize.hasPositiveWidth() || !_lastSize.hasPositiveHeight();
-            _lastSize              = size;
-            _validationsAtThisSize = grewFromNothing ? VALIDATIONS_UNTIL_REJOINED : 0;
+            _lastSize         = size;
+            _paintsAtThisSize = grewFromNothing ? PAINTS_UNTIL_REJOINED : 0;
         }
-        else if ( _validationsAtThisSize < VALIDATIONS_UNTIL_REJOINED )
-            _validationsAtThisSize++;
-
-        return _validationsAtThisSize < VALIDATIONS_UNTIL_REJOINED;
+        return _paintsAtThisSize < PAINTS_UNTIL_REJOINED;
     }
 
     /**
@@ -150,37 +155,81 @@ final class StyleLayerCache
     private static boolean _canBeSplitAroundNoises( LayerRenderConf conf ) {
         if ( !conf.layer().hasRenderableNoises() )
             return false; // Nothing to cut around.
+        /*
+            Size independent caching is switched off, so a cut could win nothing anyway - but this
+            is stated here rather than left to the checks below, because that switch is the
+            documented safety hatch for restoring the classic exact-size caching (see
+            SwingTree.setCacheTilingEnabled), and a layer painted in pieces is not that.
+        */
         if ( !CacheBudget.tilingEnabled() )
-            return false; // Size independent caching is switched off, so there is nothing to win.
+            return false;
         if ( !StyleRenderer.allNoisesUseLargeTiles(conf) )
             return false; // Replaying this noise every paint would cost more than it saves.
-        return LayerPartCache.isStretchTileable(StyleLayerPart.UNDER_NOISE.restrict(conf))
-            && LayerPartCache.isStretchTileable(StyleLayerPart.OVER_NOISE.restrict(conf));
+        return _isWorthCuttingOut(StyleLayerPart.UNDER_NOISE.restrict(conf))
+            && _isWorthCuttingOut(StyleLayerPart.OVER_NOISE.restrict(conf));
+    }
+
+    /**
+     *  Whether one side of the cut is worth having: either it draws nothing, in which case it
+     *  costs nothing either, or it is genuinely cached size independently. <br>
+     *  <br>
+     *  The second condition is deliberately {@link LayerPartCache#cachesSizeIndependently} and
+     *  not merely "is stretch tileable". A part can satisfy the tiling invariant and still be
+     *  keyed on the exact component size, because a component is only ever mapped onto the
+     *  exemplar when it is strictly larger than that exemplar in both dimensions - which a
+     *  chunky corner radius or a wide shadow on a short component is not. Cutting such a layer
+     *  hands us two exact-size images in place of one, both of them re-rendered at every new
+     *  size, plus the noise replayed on top of that: strictly worse than not cutting at all.
+     */
+    private static boolean _isWorthCuttingOut( LayerRenderConf part ) {
+        return part.rendersNothing() || LayerPartCache.cachesSizeIndependently(part);
     }
 
     void paint( Graphics2D g2d ) {
-        boolean anyPainted  = false;
-        boolean anyRendered = false;
+        boolean anyPainted   = false;
+        boolean anyRendered  = false;
+        boolean anyFromCache = false;
         for ( int i = 0; i < _parts.length; i++ ) {
-            /*
-                The noises go in between the cached parts, straight onto the destination at the
-                component's real size. Painting the pieces one after another is pixel identical
-                to painting the layer whole, because source-over compositing is associative -
-                see StyleLayerPart. The replay is not a cache outcome of its own: it is
-                unconditional work, which is why the cut is gated on the component resizing.
-            */
             if ( i > 0 )
-                StyleRenderer.renderStyleOn(_layer, _noises, g2d);
+                anyPainted |= _paintNoises(g2d);
             LayerPartCache.PaintOutcome outcome = _parts[i].paint(g2d, _renderer);
-            anyPainted  |= ( outcome != LayerPartCache.PaintOutcome.NOT_PAINTED );
-            anyRendered |= ( outcome == LayerPartCache.PaintOutcome.RENDERED   );
+            anyPainted   |= ( outcome != LayerPartCache.PaintOutcome.NOT_PAINTED       );
+            anyRendered  |= ( outcome == LayerPartCache.PaintOutcome.RENDERED          );
+            anyFromCache |= ( outcome == LayerPartCache.PaintOutcome.SERVED_FROM_CACHE );
         }
-        if ( anyPainted ) {
-            if ( anyRendered )
-                _paintCacheMissCount++;
-            else
-                _paintCacheHitCount++;
-        }
+        if ( !anyPainted )
+            return; // Nothing reached the destination, so this was not a paint of this layer.
+
+        /*
+            A hit requires a cache to have actually served something. Without that clause a layer
+            whose only style is the replayed noise - so that both cut out parts hold nothing and
+            neither renders nor caches - would report a hit for a paint no cache took part in.
+        */
+        if ( anyRendered || !anyFromCache )
+            _paintCacheMissCount++;
+        else
+            _paintCacheHitCount++;
+
+        // This, and not validate(), is what drains the rejoin tail, see PAINTS_UNTIL_REJOINED:
+        if ( _paintsAtThisSize < PAINTS_UNTIL_REJOINED )
+            _paintsAtThisSize++;
+    }
+
+    /**
+     *  Draws the lifted out noises straight onto the destination at the component's real size,
+     *  in between the cached parts, and reports whether it drew anything. <br>
+     *  <br>
+     *  Painting the pieces one after another is pixel identical to painting the layer whole,
+     *  because source-over compositing is associative - see {@link StyleLayerPart}. The replay
+     *  is not a cache outcome of its own: it is unconditional work, which is why the cut is
+     *  gated on the component resizing.
+     */
+    private boolean _paintNoises( Graphics2D g2d ) {
+        final Size size = _noises.boxModel().size();
+        if ( !size.hasPositiveWidth() || !size.hasPositiveHeight() )
+            return false; // Nothing lifted out, or nowhere to put it.
+        StyleRenderer.renderStyleOn(_layer, _noises, g2d);
+        return true;
     }
 
     /** The rendered images of the parts which currently have one, in paint order. Parts without
@@ -197,12 +246,16 @@ final class StyleLayerCache
         return Tuple.of(BufferedImage.class, images);
     }
 
-    /** Paints served entirely from a cached image. A paint only counts when every part of the
-     *  layer which draws anything was served from its cache, because a layer painted partly
-     *  from a cache and partly by the renderer is, from the outside, a paint the renderer was
-     *  invoked for. A part holding none of the layer's style neither paints nor counts. */
+    /** Paints served entirely from cached images. A paint only counts when at least one part of
+     *  the layer came out of a cache and no part had to be rendered, because a layer painted
+     *  partly from a cache and partly by the renderer is, from the outside, a paint the renderer
+     *  was invoked for. A part holding none of the layer's style neither paints nor counts. <br>
+     *  A noise lifted out of the layer is the one exception: it is replayed on every paint, yet
+     *  a paint replaying it still counts as a hit, because it is cheap by construction and
+     *  counting it as a render would hide the very saving the cut exists to make. */
     int paintCacheHitCount() { return _paintCacheHitCount; }
 
-    /** Paints which had to invoke the style renderer for at least one part of the layer. */
+    /** Paints which had to invoke the style renderer for at least one part of the layer, or
+     *  which no cache took part in at all. */
     int paintCacheMissCount() { return _paintCacheMissCount; }
 }
