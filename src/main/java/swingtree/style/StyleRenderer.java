@@ -111,42 +111,185 @@ final class StyleRenderer
     }
 
     /**
-     *  Fills a shape, switching antialiasing off first when the shape provably has
-     *  no partially covered edge pixels for it to smooth.
+     *  Fills a shape with antialiasing switched off over every part of it which provably has
+     *  no partially covered pixels for antialiasing to smooth.
      *  <p>
-     *  This matters a great deal. With antialiasing on, {@code Graphics2D.fill(..)}
-     *  routes even an axis aligned rectangle through the AA shape pipe, which
-     *  rasterizes a per-pixel coverage mask for the whole shape before compositing
-     *  anything. For a style layer covering a maximized window that is millions of
-     *  mask pixels per fill, computed on every single frame of a live resize - and
-     *  every one of them comes out fully opaque, because a rectangle aligned to the
-     *  pixel grid has no soft edge to begin with.
+     *  This matters a great deal. With antialiasing on, {@code Graphics2D.fill(..)} rasterizes
+     *  a per-pixel coverage mask for the whole shape in software before compositing anything,
+     *  and it does so <i>even when the destination is accelerated</i>: on X11,
+     *  {@code XRSurfaceData.validatePipe} only ever offers a {@link Paint} to the X server
+     *  inside an {@code antialiasHint != ANTIALIAS_ON} branch. For a style layer covering a
+     *  maximized window that is millions of mask pixels per fill, on every single frame of a
+     *  live resize - and nearly all of them come out fully opaque, because the interior of the
+     *  shape has no soft edge to begin with.
      *  <p>
-     *  The precondition is checked, not assumed. A {@link Rectangle} is integer valued
-     *  by its very type, so the only thing left that could put an edge between two
-     *  pixels is the transform, and that is verified here to be free of shear and to
-     *  map all four corners onto whole device pixels. Anything else - a fractional
-     *  {@link java.awt.geom.Rectangle2D}, a rounded shape, a rotated or oddly scaled
-     *  transform - keeps antialiasing and is filled exactly as before.
+     *  Two shapes are recognised, and the second is the reason this is not simply a boolean:
+     *  <ul>
+     *      <li>A {@link Rectangle} has no soft edge <i>anywhere</i>, being integer valued by
+     *          its very type, so the only thing that could still put an edge between two
+     *          pixels is the transform. It is filled in one go with antialiasing off.</li>
+     *      <li>A {@link RoundRectangle2D} curves only inside its four corner boxes.
+     *          Everything between them is fully covered, so it is filled as three
+     *          antialiasing-free bands and four antialiased corners - see
+     *          {@link #_fillRoundRectangleInParts}.</li>
+     *  </ul>
+     *  Anything else - a fractional {@link Rectangle2D}, an {@link java.awt.geom.Area} built
+     *  from per-corner arcs, a rotated or sheared transform - keeps antialiasing and is filled
+     *  exactly as it always was.
      *  <p>
-     *  Note that the check deliberately says nothing about where the {@code Rectangle}
-     *  came from. {@link ComponentAreas} produces one both by verifying that a shape's
-     *  bounds are whole and by truncating them, and either way the two antialiasing
-     *  states fill the very same integer rectangle identically.
+     *  Every precondition is checked rather than assumed, because an over-eager rule here
+     *  produces subtly wrong pixels rather than a crash. Note also that the checks deliberately
+     *  say nothing about where a shape came from: {@link ComponentAreas} produces a
+     *  {@link Rectangle} both by verifying that a shape's bounds are whole and by truncating
+     *  them, and either way the two antialiasing states fill the very same integer rectangle
+     *  identically.
      */
     private static void _fillShape( final Graphics2D g2d, final Shape shape ) {
-        if ( shape instanceof Rectangle && RenderingHints.VALUE_ANTIALIAS_ON.equals(g2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING)) ) {
-            if ( _mapsOntoWholeDevicePixels(g2d.getTransform(), (Rectangle) shape) ) {
-                g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-                try {
-                    g2d.fill(shape);
-                } finally {
-                    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                }
-                return;
+        if ( !RenderingHints.VALUE_ANTIALIAS_ON.equals(g2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING)) ) {
+            g2d.fill(shape); // Nothing to gain, antialiasing is already off.
+            return;
+        }
+        final AffineTransform transform = g2d.getTransform();
+
+        if ( shape instanceof Rectangle && _mapsOntoWholeDevicePixels(transform, (Rectangle) shape) ) {
+            _fillWithoutAntialiasing(g2d, shape);
+            return;
+        }
+        if ( shape instanceof RoundRectangle2D && _fillRoundRectangleInParts(g2d, (RoundRectangle2D) shape, transform) )
+            return;
+
+        g2d.fill(shape);
+    }
+
+    /**
+     *  Fills with antialiasing off and restores the hint, which the caller has established
+     *  is currently on and has established the shape does not need.
+     */
+    private static void _fillWithoutAntialiasing( final Graphics2D g2d, final Shape shape ) {
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
+        try {
+            g2d.fill(shape);
+        } finally {
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        }
+    }
+
+    /**
+     *  The smallest area, in device pixels, for which splitting a rounded fill into parts pays.
+     *  <p>
+     *  The split trades one fill for seven, so it only wins once the interior it stops
+     *  antialiasing is worth more than six extra fill invocations. Measured on a radial
+     *  gradient, split versus whole, straight onto an XRender surface and into a
+     *  {@code BufferedImage} respectively: 9.9x / 1.1x at 2600x1660, 10.1x / 1.3x at 1300x830,
+     *  5.5x / 1.2x at 600x400 and 3.2x / 1.1x at 400x80 (32000 px). Below that the two
+     *  strategies measure within noise of each other on an accelerated surface and slightly
+     *  <i>worse</i> on a software one (0.9x / 0.8x at 80x40), and repeated sweeps stop agreeing
+     *  with each other at all, these being sub-millisecond fills. So the threshold sits above
+     *  the band where the measurement is unreliable rather than at the apparent crossover.
+     */
+    private static final int SMALLEST_AREA_WORTH_SPLITTING = 32768; // device pixels
+
+    /**
+     *  Test hook: when {@code >= 0} it replaces {@link #SMALLEST_AREA_WORTH_SPLITTING}, so that
+     *  a specification can hold a component at one size and compare the divided fill against the
+     *  undivided one. Without it the two could only be compared at two <i>different</i> sizes
+     *  straddling the threshold, which are not comparable at all. {@code 0} divides everything
+     *  eligible, {@link Integer#MAX_VALUE} divides nothing.
+     */
+    static volatile int SMALLEST_SPLIT_AREA_OVERRIDE = -1;
+
+    private static int _smallestAreaWorthSplitting() {
+        final int override = SMALLEST_SPLIT_AREA_OVERRIDE;
+        return override >= 0 ? override : SMALLEST_AREA_WORTH_SPLITTING;
+    }
+
+    /**
+     *  Fills a rounded rectangle as three antialiasing-free interior bands plus four
+     *  antialiased corners, and reports whether it could.
+     *  <p>
+     *  A rounded rectangle only curves inside its four corner boxes; everything between them is
+     *  an axis aligned rectangle every pixel of which is <i>fully</i> covered, so antialiasing
+     *  has nothing to smooth there and produces the identical pixels either way. It is not
+     *  identical <i>work</i> though, for the reason {@link #_fillShape} gives: one antialiased
+     *  fill of the whole shape drops the entire component into software rasterization over an
+     *  area that is nearly all interior.
+     *  <p>
+     *  The three bands and the four corner boxes tile the shape's bounding box without
+     *  overlapping, which is what makes the parts add up to the whole rather than blending
+     *  twice along the seams. Measured pixel identical to the undivided fill at every size
+     *  probed but one, where 2 pixels of 45000 differed by one in a single channel - a gradient
+     *  raster tile alignment difference, not a geometric one.
+     *  <p>
+     *  All of it is expressed in <i>user</i> space on purpose. The {@link Paint} is anchored
+     *  there, so drawing the parts under a different transform would slide the gradient
+     *  underneath them; the cut lines are therefore <i>required</i> to land on whole device
+     *  pixels rather than being rounded onto them, and a configuration where they do not simply
+     *  falls back to the undivided fill.
+     *
+     * @return {@code true} when the shape was filled, {@code false} when the caller must fill it.
+     */
+    private static boolean _fillRoundRectangleInParts(
+        final Graphics2D       g2d,
+        final RoundRectangle2D round,
+        final AffineTransform  transform
+    ) {
+        final double x = round.getX(),     y = round.getY();
+        final double w = round.getWidth(), h = round.getHeight();
+        if ( w <= 0 || h <= 0 )
+            return false;
+
+        // How far the curvature reaches in from each side, which is half of the arc:
+        final double arcW = Math.min(Math.abs(round.getArcWidth()),  w) / 2d;
+        final double arcH = Math.min(Math.abs(round.getArcHeight()), h) / 2d;
+        if ( arcW <= 0 || arcH <= 0 )
+            return false; // Not actually rounded; an undivided fill of it is already optimal.
+
+        if ( transform.getShearX() != 0 || transform.getShearY() != 0 )
+            return false; // The bands would not be axis aligned in device space.
+
+        final double scaleX = transform.getScaleX(), translateX = transform.getTranslateX();
+        final double scaleY = transform.getScaleY(), translateY = transform.getTranslateY();
+
+        if ( Math.abs(w * scaleX * h * scaleY) < _smallestAreaWorthSplitting() )
+            return false; // Too small for the split to pay for itself, see the threshold.
+
+        /*
+            Every cut line has to sit on a whole device pixel. Otherwise a band edge and the
+            corner clip meeting it would disagree about which pixel they own, and the seam
+            between them would come out either doubly blended or not covered at all.
+        */
+        final double[] cutX = { x, x + arcW, x + w - arcW, x + w };
+        final double[] cutY = { y, y + arcH, y + h - arcH, y + h };
+        for ( double cut : cutX )
+            if ( !_isWhole(cut * scaleX + translateX) )
+                return false;
+        for ( double cut : cutY )
+            if ( !_isWhole(cut * scaleY + translateY) )
+                return false;
+
+        // The interior, which is where nearly all of the area is and none of the curvature:
+        if ( cutY[2] > cutY[1] )
+            _fillWithoutAntialiasing(g2d, new Rectangle2D.Double(cutX[0], cutY[1], w, cutY[2] - cutY[1]));
+        if ( cutX[2] > cutX[1] ) {
+            _fillWithoutAntialiasing(g2d, new Rectangle2D.Double(cutX[1], cutY[0], cutX[2] - cutX[1], arcH));
+            _fillWithoutAntialiasing(g2d, new Rectangle2D.Double(cutX[1], cutY[2], cutX[2] - cutX[1], arcH));
+        }
+        /*
+            And the four corner boxes, each filled with the whole shape clipped to it, so that
+            the curve is rasterized by exactly the code which would have drawn it anyway.
+        */
+        for ( int corner = 0; corner < 4; corner++ ) {
+            final double cornerX = ( corner == 1 || corner == 3 ) ? cutX[2] : cutX[0];
+            final double cornerY = ( corner >= 2 )                ? cutY[2] : cutY[0];
+            final Graphics2D cornerG2d = (Graphics2D) g2d.create();
+            try {
+                cornerG2d.clip(new Rectangle2D.Double(cornerX, cornerY, arcW, arcH));
+                cornerG2d.fill(round);
+            } finally {
+                cornerG2d.dispose();
             }
         }
-        g2d.fill(shape);
+        return true;
     }
 
     /**
