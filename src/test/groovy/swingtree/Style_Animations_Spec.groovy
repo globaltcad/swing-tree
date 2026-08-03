@@ -7,6 +7,7 @@ import spock.util.concurrent.PollingConditions
 import sprouts.Var
 import swingtree.animation.LifeTime
 import swingtree.style.ComponentExtension
+import utility.Utility
 import swingtree.threading.EventProcessor
 
 import javax.swing.*
@@ -76,7 +77,7 @@ class Style_Animations_Spec extends Specification
             event.fire()
             Thread.sleep(100)
             UI.sync()
-            button.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            Utility.paintWithoutWindow(button, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
 
         then : """
             The progress of the animation will always end with 1.
@@ -128,7 +129,7 @@ class Style_Animations_Spec extends Specification
             label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))
             Thread.sleep(100)
             UI.sync()
-            label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
 
         then : 'The label will have a border and the custom colors...'
             new PollingConditions(timeout: 10, initialDelay: 0, factor: 1.25).eventually {
@@ -183,7 +184,7 @@ class Style_Animations_Spec extends Specification
             label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))
             Thread.sleep(1_000)
             UI.sync()
-            label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
 
         then : 'The label will have a border and a background color.'
             label.border != null
@@ -226,7 +227,7 @@ class Style_Animations_Spec extends Specification
             label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))
             Thread.sleep(50)
             UI.sync()
-            label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
 
 
         then : """
@@ -242,7 +243,7 @@ class Style_Animations_Spec extends Specification
         when : 'We wait for the animation to end...'
             Thread.sleep(2000)
             UI.sync()
-            label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
 
         then : """
             The border will have been uninstalled.
@@ -302,7 +303,7 @@ class Style_Animations_Spec extends Specification
         button.doClick()
             Thread.sleep(100)
             UI.sync()
-            UI.runNow({button.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())})
+            UI.runNow({Utility.paintWithoutWindow(button, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())})
 
         then : 'The label will have a border and a background color.'
             !(button.border instanceof CompoundBorder)
