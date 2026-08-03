@@ -1,10 +1,8 @@
 package swingtree.style;
 
 import com.google.errorprone.annotations.Immutable;
-import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 
 /**
@@ -34,7 +32,16 @@ final class Pooled<V> {
         return pooledClass;
     }
 
-    private final AtomicReference<@Nullable Integer> _hashCache = new AtomicReference<>();
+    /*
+     *  A lazily computed, cached hash of the wrapped value, with 0 meaning "not computed
+     *  yet". A plain non-volatile int rather than an AtomicReference: one of these is
+     *  allocated for every render configuration on the paint path, so the extra object,
+     *  the Integer boxing and the compare-and-set loop were all pure overhead - a race can
+     *  only ever make a second thread recompute the identical value, because the wrapped
+     *  value is immutable. A value whose real hash is 0 simply keeps recomputing it, which
+     *  costs nothing but the computation it would have done anyway.
+     */
+    private int _hashCode = 0;
     private final V value;
 
     public Pooled( V value ) {
@@ -71,20 +78,24 @@ final class Pooled<V> {
     public boolean equals( Object o ) {
         if (o == null || getClass() != o.getClass()) return false;
         Pooled<?> other = (Pooled<?>) o;
-        Integer otherHash = other._hashCache.get();
-        Integer thisHash = this._hashCache.get();
-        if ( thisHash != null && otherHash != null ) {
-            if ( !Objects.equals(thisHash, otherHash) )
-                return false;
-        }
+        /*
+            Two values with different hashes cannot be equal, so an already computed pair of
+            them settles the question without the deep comparison below. This is only ever a
+            shortcut: a hash still being 0 (not computed, or genuinely 0) merely skips it.
+        */
+        final int thisHash  = this._hashCode;
+        final int otherHash = other._hashCode;
+        if ( thisHash != 0 && otherHash != 0 && thisHash != otherHash )
+            return false;
         return Objects.equals(this.value, other.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.requireNonNull(
-            _hashCache.updateAndGet(h -> h != null ? h : Objects.hashCode(value))
-        );
+        int hash = _hashCode;
+        if ( hash == 0 )
+            _hashCode = hash = Objects.hashCode(value);
+        return hash;
     }
 
     @Override

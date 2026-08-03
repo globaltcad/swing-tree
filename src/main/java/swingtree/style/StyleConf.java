@@ -53,7 +53,7 @@ import java.util.stream.Collectors;
  *  how this composition of styles is achieved in practice.
  */
 @Immutable
-@SuppressWarnings("ReferenceEquality")
+@SuppressWarnings({"ReferenceEquality", "Immutable"}) // The cached hash code below is a computed constant, see there.
 public final class StyleConf
 {
     private static final UI.Layer[] ALL_LAYERS = UI.Layer.values();
@@ -109,6 +109,13 @@ public final class StyleConf
     private final DimensionalityConf   _dimensionality;
     private final StyleConfLayers      _layers;
     private final NamedConfigs<String> _properties;
+
+    /*
+     *  A lazily computed, cached hash - see NamedConf for why it is one non-volatile int
+     *  with 0 as the "not computed yet" sentinel rather than a value plus a flag.
+     */
+    private int _hashCode = 0; // Lazily computed, 0 means "not computed yet".
+
 
 
     private StyleConf(
@@ -699,9 +706,12 @@ public final class StyleConf
 
     @Override
     public int hashCode() {
-        return Objects.hash(
-                    _layout, _border, _base, _font, _dimensionality, _layers, _properties
-                );
+        int hash = _hashCode;
+        if ( hash == 0 )
+            _hashCode = hash = Objects.hash(
+                        _layout, _border, _base, _font, _dimensionality, _layers, _properties
+                    );
+        return hash;
     }
 
     @Override
