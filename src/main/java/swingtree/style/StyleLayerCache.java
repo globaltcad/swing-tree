@@ -147,10 +147,12 @@ final class StyleLayerCache
      *  cost on top (measured on {@code ChatView}: cutting regardless took a repaint from
      *  10.6 to 16.4 ms). <br>
      *  <br>
-     *  The noise must also be big enough for {@link StyleRenderer.NoisePaintCache#renderNoise}
-     *  to blit pre-rendered tiles for it. Below that it falls back to the per-pixel
-     *  {@link java.awt.Paint} pipeline, which is fine into a software image but ruinous
-     *  straight onto an accelerated surface - measured 3x worse at 240x240.
+     *  The noise must also be cheap enough to draw again on every paint, which for anything but
+     *  a single coloured noise means being big enough for
+     *  {@link StyleRenderer.NoisePaintCache#renderNoise} to blit pre-rendered tiles for it.
+     *  Below that it falls back to the per-pixel {@link java.awt.Paint} pipeline, which is fine
+     *  into a software image but ruinous straight onto an accelerated surface - measured 3x
+     *  worse at 240x240.
      */
     private static boolean _canBeSplitAroundNoises( LayerRenderConf conf ) {
         if ( !conf.layer().hasRenderableNoises() )
@@ -163,7 +165,7 @@ final class StyleLayerCache
         */
         if ( !CacheBudget.tilingEnabled() )
             return false;
-        if ( !StyleRenderer.allNoisesUseLargeTiles(conf) )
+        if ( !StyleRenderer.allNoisesAreCheapToReplay(conf) )
             return false; // Replaying this noise every paint would cost more than it saves.
         return _isWorthCuttingOut(StyleLayerPart.UNDER_NOISE.restrict(conf))
             && _isWorthCuttingOut(StyleLayerPart.OVER_NOISE.restrict(conf));
@@ -179,7 +181,16 @@ final class StyleLayerCache
      *  exemplar when it is strictly larger than that exemplar in both dimensions - which a
      *  chunky corner radius or a wide shadow on a short component is not. Cutting such a layer
      *  hands us two exact-size images in place of one, both of them re-rendered at every new
-     *  size, plus the noise replayed on top of that: strictly worse than not cutting at all.
+     *  size, plus the noise replayed on top of that: strictly worse than not cutting at all. <br>
+     *  <br>
+     *  Measured, because it is the one gate that keeps the whole feature away from a busy UI:
+     *  making this method return {@code true} unconditionally, so that only the temporal gate
+     *  and the replay cost gate remain, is a wash on {@code ChatView}'s drag frames (7.9 vs
+     *  7.9 ms, 3 interleaved runs) and consistently <i>worse</i> on a partial repaint
+     *  (2.0 → 2.4 ms), which is what a caret blink or a hover costs. The extra exact-size
+     *  entries such cuts mint are the likely reason: {@code LayerPartCache} stops admitting
+     *  new entries once the global cache is full, so filling it up with debris locks other
+     *  components out of caching altogether.
      */
     private static boolean _isWorthCuttingOut( LayerRenderConf part ) {
         return part.rendersNothing() || LayerPartCache.cachesSizeIndependently(part);
@@ -190,6 +201,8 @@ final class StyleLayerCache
         boolean anyRendered  = false;
         boolean anyFromCache = false;
         for ( int i = 0; i < _parts.length; i++ ) {
+            // The lifted out noises go between the parts - which is the only reason a layer
+            // ever has more than one part, so "not before the first" locates them exactly:
             if ( i > 0 )
                 anyPainted |= _paintNoises(g2d);
             LayerPartCache.PaintOutcome outcome = _parts[i].paint(g2d, _renderer);

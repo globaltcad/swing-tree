@@ -160,6 +160,15 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             because the renderer draws by kind in a fixed order and source-over
             compositing is associative, which makes drawing the pieces one after
             another identical to drawing the layer in one go.
+
+            So this asks for more than an overall resemblance. An average over
+            the whole image would happily absorb a one pixel seam where two
+            pieces meet, or a corner that came out of the wrong part of an
+            exemplar, and it would not look at the alpha channel at all — which
+            is exactly where compositing three pieces could go wrong. Every
+            single channel of every single pixel is therefore checked, and it
+            measures *exactly* equal here; the one unit of slack is left only
+            for a graphics pipeline that rounds a blit differently.
         """
         given : 'The component painted the classic way, with stretch tiling disabled:'
             SwingTree.get().setCacheTilingEnabled(false)
@@ -185,8 +194,21 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             assert !cached.isEmpty()
             assert cached.all( image -> image.width < width )
 
-        expect : 'Both ways of painting produced practically identical pixels:'
-            Utility.similarityBetween(classic, Utility.renderSingleComponent(tiledBox)) >= 99.9
+        when : 'We look for the single worst deviating colour channel of the whole image:'
+            var tiled = Utility.renderSingleComponent(tiledBox)
+            int worstChannelDelta = 0
+            for ( int y = 0; y < height; y++ )
+                for ( int x = 0; x < width; x++ )
+                    for ( int shift : [0, 8, 16, 24] ) { // blue, green, red and alpha
+                        int delta = Math.abs(
+                                        ((classic.getRGB(x, y) >> shift) & 0xff) -
+                                        ((tiled.getRGB(x, y)   >> shift) & 0xff)
+                                    )
+                        worstChannelDelta = Math.max(worstChannelDelta, delta)
+                    }
+
+        then : 'Not one channel of one pixel deviates, alpha included:'
+            worstChannelDelta <= 1
 
         where :
             description                                 | width | height | styler

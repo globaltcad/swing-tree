@@ -307,11 +307,17 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             var small = UI.button("Tile me").withStyle(conf -> styler(conf)).get(JButton)
             var large = UI.button("Tile me").withStyle(conf -> styler(conf)).get(JButton)
 
-        when : 'Both are dragged through a couple of sizes.'
-            [[60, 50], [64, 54], [68, 58]].each { w, h ->      // under the crossover
+        when : """
+            Both are dragged through a couple of sizes. The small one ends at 55x55, which is
+            3025 pixels of noise - comfortably below the crossover - while still being much
+            larger than the roughly 38x38 exemplar this style would have, so it is the noise
+            area deciding here and not the component being too small to map onto an exemplar
+            (which the scenario after this one is about).
+        """
+            [[45, 45], [50, 50], [55, 55]].each { w, h ->      // under the crossover
                 small.setSize(w, h); Utility.renderSingleComponent(small)
             }
-            [[500, 300], [520, 310], [540, 320]].each { w, h -> // over it
+            [[500, 300], [520, 310], [540, 320]].each { w, h -> // far over it
                 large.setSize(w, h); Utility.renderSingleComponent(large)
             }
 
@@ -321,7 +327,64 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
 
         and : 'The small one kept its noise baked in, so its cached image is the whole component.'
             ComponentExtension.from(small).cachedRendering(UI.Layer.BACKGROUND).size() == 1
-            ComponentExtension.from(small).cachedRendering(UI.Layer.BACKGROUND).first().width == 68
+            ComponentExtension.from(small).cachedRendering(UI.Layer.BACKGROUND).first().width == 55
+    }
+
+    def 'A noise of a single colour is lifted out at any size, because it is only a fill.'()
+    {
+        reportInfo """
+            The size rule of the previous scenario is really a rule about *cost*:
+            a noise may be lifted out of its layer only while drawing it again is
+            cheap, and for a noise made of several colours that means being big
+            enough to be drawn by blitting pre-rendered tiles.
+
+            A noise configured with a single colour never reaches that decision.
+            There is nothing to interpolate between, so SwingTree draws it as one
+            plain fill of the noise's area — which is cheaper than the tile blits
+            the large case was allowed for, at every size. Such a noise is
+            therefore lifted out however small it is, and the rest of its layer
+            gets to keep the size independent exemplar.
+
+            This matters more than a one-colour noise deserves, because it is the
+            place where a shortcut in the renderer and a gate in the cache have to
+            agree about the same style. A gate reading "is this noise big enough
+            for tiles" gets this case backwards in both directions.
+        """
+        given : """
+            Two small buttons with the same rounded background, well under the size at which
+            a noise is drawn by blitting tiles. One carries a noise of two colours, the other
+            the very same noise with a single colour.
+        """
+            var twoColoured =
+                UI.button("Tile me")
+                  .withStyle( it -> it
+                        .borderRadius(16)
+                        .backgroundColor("#1e5a8a")
+                        .noise(UI.Layer.BACKGROUND, "grain", n -> n.colors("#202020", "#dedede"))
+                  )
+                  .get(JButton)
+            var oneColoured =
+                UI.button("Tile me")
+                  .withStyle( it -> it
+                        .borderRadius(16)
+                        .backgroundColor("#1e5a8a")
+                        .noise(UI.Layer.BACKGROUND, "grain", n -> n.colors("#202020"))
+                  )
+                  .get(JButton)
+
+        when : 'Both are dragged through the same few small sizes.'
+            [[45, 45], [50, 50], [55, 55]].each { w, h ->
+                twoColoured.setSize(w, h); Utility.renderSingleComponent(twoColoured)
+                oneColoured.setSize(w, h); Utility.renderSingleComponent(oneColoured)
+            }
+
+        then : 'The two coloured noise was too small to be worth replaying, so it stayed baked in.'
+            ComponentExtension.from(twoColoured).cachedRendering(UI.Layer.BACKGROUND).size() == 1
+            ComponentExtension.from(twoColoured).cachedRendering(UI.Layer.BACKGROUND).first().width == 55
+
+        and : 'The single coloured one was lifted out anyway, leaving a size independent exemplar.'
+            ComponentExtension.from(oneColoured).cachedRendering(UI.Layer.BACKGROUND).size() == 1
+            ComponentExtension.from(oneColoured).cachedRendering(UI.Layer.BACKGROUND).first().width < 55
     }
 
     def 'A noise is not lifted out of a layer whose rest would not fit a smaller exemplar.'()
