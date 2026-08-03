@@ -122,6 +122,12 @@ final class LayerRenderConf
         return of(_boxModelConf.get(), _baseColor, layer);
     }
 
+    /** Whether handing this to the style renderer would put no pixels anywhere - a common
+     *  outcome of narrowing a configuration down to a {@link StyleLayerPart}. */
+    boolean rendersNothing() {
+        return _baseColor.equals(BaseColorConf.none()) && _layer.isNone();
+    }
+
     ComponentAreas areas() { return ComponentAreas.of(_boxModelConf); }
 
 

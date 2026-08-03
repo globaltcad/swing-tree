@@ -45,10 +45,19 @@ import java.awt.image.VolatileImage;
  */
 public final class ChatViewResizeBenchmark
 {
-    private static final int   UI_SCALE      = 2;
-    private static final int   WINDOW_WIDTH  = 2600;
-    private static final int   WINDOW_HEIGHT = 1660;
-    private static final int   NARROW_WIDTH  = 1200;
+    /*
+     *  The window geometry is overridable, because it decides *which* regime is measured,
+     *  not merely how much of it. A style layer is only admitted to the render cache below
+     *  a pixel area budget, so at the default 2600x1660 at scale 2 almost every layer of
+     *  the ChatView is too large to cache and is drawn straight onto the destination - the
+     *  exact-size caching that an ordinary 1300x830 window leans on hardly runs at all, and
+     *  a change to it measures as nothing here while mattering a great deal in a real
+     *  window. Sweep more than one geometry before believing a cache result.
+     */
+    private static final int   UI_SCALE      = Integer.getInteger("benchmark.scale",  2);
+    private static final int   WINDOW_WIDTH  = Integer.getInteger("benchmark.width",  2600);
+    private static final int   WINDOW_HEIGHT = Integer.getInteger("benchmark.height", 1660);
+    private static final int   NARROW_WIDTH  = Integer.getInteger("benchmark.narrow", 1200);
     /*
      *  Raise these when profiling rather than measuring: a JFR execution sampler ticks
      *  every few milliseconds, and the default sweep counts amount to about a second of
@@ -57,6 +66,9 @@ public final class ChatViewResizeBenchmark
     private static final int   WARMUP_SWEEPS = Integer.getInteger("benchmark.warmup", 24);
     private static final int   TIMED_SWEEPS  = Integer.getInteger("benchmark.sweeps", 40);
     private static final int   CLIP_HEIGHT   = 300;
+    /** Coprime with {@code WINDOW_WIDTH - NARROW_WIDTH}, so {@link #widthForSweep} never
+     *  repeats a width within a sweep - see there for why that is the whole ballgame. */
+    private static final int   FRESH_WIDTH_STRIDE = 17;
 
     public static void main( String[] args ) throws Exception
     {
@@ -101,7 +113,22 @@ public final class ChatViewResizeBenchmark
     }
 
     /**
-     *  Times a full re-layout of the tree at alternating widths. The tree is invalidated
+     *  The width of the {@code index}-th sweep, which is a width no earlier sweep has used. <br>
+     *  <br>
+     *  This matters far more than it looks. Sweeping back and forth between two widths lets the
+     *  style caches keep an entry for each of them, so after the warmup every second frame is a
+     *  cache <i>hit</i> - and a sweep meant to measure what a drag frame costs would instead be
+     *  measuring the one thing a drag never gets. A real drag emits a new width per frame and
+     *  never revisits one, which is what the stride reproduces: it is coprime with the width
+     *  range, so all {@code WARMUP_SWEEPS + TIMED_SWEEPS} widths are distinct.
+     */
+    private static int widthForSweep( int index ) {
+        final int range = WINDOW_WIDTH - NARROW_WIDTH;
+        return NARROW_WIDTH + ( index * FRESH_WIDTH_STRIDE ) % range;
+    }
+
+    /**
+     *  Times a full re-layout of the tree, each sweep at a fresh width. The tree is invalidated
      *  explicitly because {@code setSize} alone leaves most of it valid, and a valid tree
      *  validates in nanoseconds, which would measure nothing at all.
      */
@@ -112,14 +139,14 @@ public final class ChatViewResizeBenchmark
 
         long[] samples = new long[TIMED_SWEEPS];
         for ( int i = 0; i < TIMED_SWEEPS; i++ )
-            samples[i] = layoutOnce(root, frame, i);
+            samples[i] = layoutOnce(root, frame, WARMUP_SWEEPS + i);
 
         return medianMillis(samples);
     }
 
     private static long layoutOnce( JComponent root, JFrame frame, int index ) throws Exception
     {
-        int width = ( index % 2 == 0 ? NARROW_WIDTH : WINDOW_WIDTH );
+        int width = widthForSweep(index);
         long[] nanos = new long[1];
         UI.runNow(() -> {
             frame.setSize(width, WINDOW_HEIGHT);
@@ -145,7 +172,7 @@ public final class ChatViewResizeBenchmark
 
         long[] samples = new long[TIMED_SWEEPS];
         for ( int i = 0; i < TIMED_SWEEPS; i++ )
-            samples[i] = paintOnce(frame, root, buffer, resizeFirst, clipHeight, i);
+            samples[i] = paintOnce(frame, root, buffer, resizeFirst, clipHeight, WARMUP_SWEEPS + i);
 
         buffer.flush();
         return medianMillis(samples);
@@ -155,7 +182,7 @@ public final class ChatViewResizeBenchmark
         JFrame frame, JComponent root, VolatileImage buffer,
         boolean resizeFirst, int clipHeight, int index
     ) throws Exception {
-        int width = ( resizeFirst ? ( index % 2 == 0 ? NARROW_WIDTH : WINDOW_WIDTH ) : WINDOW_WIDTH );
+        int width = ( resizeFirst ? widthForSweep(index) : WINDOW_WIDTH );
         long[] nanos = new long[1];
         UI.runNow(() -> {
             if ( resizeFirst || root.getWidth() != width ) {

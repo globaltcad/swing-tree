@@ -1,7 +1,9 @@
 package swingtree.style;
 
 import com.google.errorprone.annotations.Immutable;
+import swingtree.UI;
 
+import java.awt.Graphics2D;
 import java.util.Objects;
 
 /**
@@ -166,6 +168,13 @@ final class StyleConfLayer implements Simplifiable<StyleConfLayer>
 
     boolean hasEqualTextsAs( StyleConfLayer otherStyle ) {
         return Objects.equals(_texts, otherStyle._texts);
+    }
+
+    /** Whether this layer has a noise the renderer would actually draw, mirroring the condition
+     *  {@link StyleRenderer#renderStyleOn(UI.Layer, LayerRenderConf, Graphics2D)}} uses:
+     *  a noise without colors is no reason to split the layer into {@link StyleLayerPart}s. */
+    boolean hasRenderableNoises() {
+        return _noises.any( noise -> noise.style().get().colors().length > 0 );
     }
 
     public boolean hasPaintersWhichCannotBeCached() {

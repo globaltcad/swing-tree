@@ -961,6 +961,29 @@ final class StyleRenderer
                     );
     }
 
+    /**
+     *  Whether drawing every noise on this layer again costs little enough to do it on every
+     *  paint - the condition {@link StyleLayerCache} needs before it may lift them out of the
+     *  layer's cached image. <br>
+     *  <br>
+     *  Cheap means one of the two things {@link NoisePaintCache#renderNoise} does that are not
+     *  a per-pixel rasterization: a handful of {@link NoisePaintCache#usesLargeTiles pre-rendered
+     *  tile blits}, or - for a noise of a single colour, which the renderer degenerates to a flat
+     *  fill before it ever considers tiles - one shape fill. Everything else goes through the
+     *  per-pixel {@link Paint} pipeline, which is fine once into a software image but ruinous
+     *  repeated straight onto an accelerated surface.
+     */
+    static boolean allNoisesAreCheapToReplay( LayerRenderConf conf ) {
+        for ( Pooled<NoiseConf> noise : conf.layer().noises().sortedByNames() ) {
+            if ( noise.get().colors().length <= 1 )
+                continue; // Draws nothing, or a single flat fill - neither constrains anything.
+            Shape areaToFill = conf.areas().get(noise.get().area());
+            if ( !NoisePaintCache.usesLargeTiles(areaToFill.getBounds()) )
+                return false;
+        }
+        return true;
+    }
+
     private static void _renderNoise(
         final Pooled<NoiseConf> noise,
         final LayerRenderConf conf,
@@ -1874,12 +1897,35 @@ final class StyleRenderer
      *  <i>which</i> tiles are visible and <i>where</i> they are drawn - already rendered tiles
      *  stay valid, which keeps a dynamically resized UI responsive.
      */
-    private static class NoisePaintCache {
+    static class NoisePaintCache {
 
         /** Side length of the pre-rendered large tiles, in (unscaled) device pixels. */
         private static final int LARGE_TILE_SIZE = 256;
-        /** Areas larger than this (in pixels) use the large-tile blitting strategy. */
-        private static final int LARGE_AREA_THRESHOLD = LARGE_TILE_SIZE * LARGE_TILE_SIZE;
+        /**
+         *  Areas larger than this (in pixels) use the large-tile blitting strategy. <br>
+         *  <br>
+         *  Deliberately unrelated to {@link #LARGE_TILE_SIZE}: how big an area has to be before
+         *  blitting tiles beats filling it is a different question from how big a tile is. It
+         *  sits well below a single tile because the two strategies remember their work on
+         *  different terms - a tile is keyed in noise space and survives any resize, whereas the
+         *  {@link Paint} pipeline's rasters are keyed by the noise {@code center}, which moves
+         *  with the box model. So the extra rasterization a whole tile costs is paid once, while
+         *  what it buys recurs. Measured on a 200x150 noise, lowering this from one tile made a
+         *  repaint while resizing ~2x faster and left a repaint at an unchanged size unchanged.
+         *  <br>
+         *  What it trades away is a whole tile's worth of work and memory for an area that
+         *  needs a fraction of it: a noise just over this threshold still rasterizes (and
+         *  retains) a full {@value #LARGE_TILE_SIZE}x{@value #LARGE_TILE_SIZE} tile the first
+         *  time it is painted, roughly sixteen times the pixels it will use. Both are one-off
+         *  and shared - the tiles are keyed in noise space, so every component painting the
+         *  same noise reuses them, and the count is bounded per noise configuration by
+         *  {@link #maxCachedTiles()}. But it does mean a UI with many <i>distinct</i> small
+         *  noise styles now spends noticeably more of the {@link CacheBudget.Kind#NOISE_TILE}
+         *  slice than it used to, and pays a longer first paint for each of them - which is
+         *  worth remembering for an expensive {@link swingtree.api.NoiseFunction}, where one
+         *  tile is milliseconds rather than microseconds.
+         */
+        private static final int LARGE_AREA_THRESHOLD = 64 * 64;
         /** Upper bound on retained large tiles (~256 KiB each), from this cache's slice of
          *  the shared {@link CacheBudget} byte budget. {@code 0} disables tile caching.
          *  Read live (not snapshotted) so a runtime cache-mode change takes effect at once. */
@@ -1934,9 +1980,8 @@ final class StyleRenderer
             );
 
             final Rectangle bounds = areaToFill.getBounds();
-            final long area = (long) bounds.width * bounds.height;
 
-            if ( area <= LARGE_AREA_THRESHOLD || maxCachedTiles() <= 0 ) {
+            if ( !usesLargeTiles(bounds) ) {
                 // Small area (or tile caching disabled): the per-pixel Paint pipeline is fine here.
                 g2d.setPaint(getCachedNoisePaint(center, noise));
                 _fillShape(g2d, areaToFill);
@@ -1944,6 +1989,27 @@ final class StyleRenderer
                 // Large area: blit pre-rendered large tiles to dodge the 32x32 Paint pipeline.
                 _renderWithLargeTiles(center, noise, areaToFill, bounds, g2d);
             }
+        }
+
+        /**
+         *  Which of the two strategies {@link #renderNoise} will use for an area of these
+         *  bounds: {@code true} for the pre-rendered tile blits, {@code false} for the per-pixel
+         *  {@link Paint} pipeline. <br>
+         *  <br>
+         *  {@link StyleLayerCache} asks through {@link #allNoisesAreCheapToReplay}, because it
+         *  may only lift a noise out of its layer's cached image when drawing it again is cheap:
+         *  a tile blit is a handful of pixmap composites, whereas the {@link Paint} pipeline
+         *  turns the same area into thousands of 32x32 mask compositions - fine into a software
+         *  image, ruinous straight onto the screen. Sharing this one predicate keeps the two
+         *  decisions in agreement. <br>
+         *  <br>
+         *  Note that this only speaks for the noises {@link #renderNoise} gets as far as asking
+         *  about: a single coloured one is a flat fill decided before this, so a caller reasoning
+         *  about replay cost has to account for that case itself.
+         */
+        static boolean usesLargeTiles( Rectangle bounds ) {
+            final long area = (long) bounds.width * bounds.height;
+            return area > LARGE_AREA_THRESHOLD && maxCachedTiles() > 0;
         }
 
         /**
@@ -2019,9 +2085,11 @@ final class StyleRenderer
                 surface combination, so a translucent tile always goes through
                 `Blit$GeneralMaskBlit`, whereas an opaque one lets `DrawImage.blitSurfaceData`
                 upgrade the composite to `SrcNoEa` and pick a specialised loop. Measured -71%
-                blitting a tile grid into a layer cache image (the hot path, since a noise layer
-                is never stretch tileable), and the result is pixel identical - source-over of
-                an opaque source is a plain overwrite.
+                blitting a tile grid into a layer cache image, which is where the tiles land
+                whenever the noise stays baked into its layer; a noise lifted out of its layer
+                is blitted straight onto the destination instead, where the tiles are
+                pixmap-promoted and the type matters far less. Either way the result is pixel
+                identical - source-over of an opaque source is a plain overwrite.
 
                 The tile is derived from the device configuration so Java2D can keep an
                 accelerated copy of it in video memory: each tile is rendered once and then

@@ -477,9 +477,8 @@ public final class ComponentExtension<C extends JComponent>
      *  other layers permanently report an empty tuple because caching them would not pay for
      *  itself.
      *  <p>
-     *  <b>How many images to expect.</b> Currently the cache produces at most one image per layer,
-     *  but the return type is a tuple to remain forward-compatible with future splitting. There is
-     *  no limit on how much style a single layer may carry, and not all of it caches the same way,
+     *  <b>How many images to expect.</b> There is no limit on how much style a single layer may
+     *  carry, and not all of it caches the same way,
      *  <ul>
      *      <li><b>none</b> - nothing about this layer is currently cached.</li>
      *      <li><b>one</b> - the whole layer rasterizes into a single image, which is the
@@ -488,6 +487,13 @@ public final class ComponentExtension<C extends JComponent>
      *          in a way another part cannot. Painting the layer then means painting these in
      *          order, with the uncached parts rendered in between.</li>
      *  </ul>
+     *  The one split that happens today is a layer carrying a <em>noise</em> while its component
+     *  is being resized: noise pixels vary with every pixel position, so a noise cannot live in a
+     *  size independent exemplar - but it is cheap to simply draw again. So for the duration of
+     *  the resize it is lifted out and replayed on every paint, and what sits under and over it
+     *  is cached separately, as exemplars that survive the resize. Either of those two may also
+     *  be absent, when that side of the noise holds no style (or none worth caching), which is
+     *  why such a layer can report two images, one, or none at all.
      *  The dimensions of each image reveal <em>how</em> that part is cached: style whose pixels
      *  are constant along the component edges (flat colours, borders, shadows) is stored as a
      *  small, size independent exemplar rendering which may be much smaller than the component
@@ -533,7 +539,18 @@ public final class ComponentExtension<C extends JComponent>
      *  This counter is cumulative for the lifetime of this component instance.
      *  It does not automatically reset when the underlying cache entry is freed,
      *  invalidated, or rebuilt; such events only affect whether future paints
-     *  contribute to this counter or to {@link #cacheMissCount(UI.Layer)}.
+     *  contribute to this counter or to {@link #cacheMissCount(UI.Layer)}. Together
+     *  the two therefore say how often this component painted the layer at all — a paint
+     *  which put no pixels anywhere, because the layer holds no style worth drawing, is
+     *  counted by neither, since nothing was painted for a cache to have served.
+     *  <p>
+     *  One nuance for layers carrying a <em>noise</em>: while such a component is being
+     *  resized the noise is lifted out of the cached image and drawn again on every paint
+     *  (see {@link #cachedRendering(UI.Layer)}). Those paints still count as hits, because
+     *  redrawing a noise is cheap by construction — it is blitted from pre-rendered tiles,
+     *  or is a single fill — and counting them as renders would hide the saving the split
+     *  exists to make. A paint which did draw something, but which no cache took part in,
+     *  is always a miss.
      *
      * @param layer The style layer to query.
      * @return Number of paint calls served from the cache, since this component
@@ -548,10 +565,12 @@ public final class ComponentExtension<C extends JComponent>
 
     /**
      *  Returns the number of times this <em>component's</em> given style {@link swingtree.UI.Layer}
-     *  had to invoke the style renderer because no usable cache image was
-     *  available – either because caching is disabled for that layer, or because
-     *  the cache was not yet populated. The counter is local to this component
-     *  instance.
+     *  was painted without a cache image serving it – either because the style renderer had to
+     *  be invoked (caching is disabled for that layer, or the cache was not yet populated), or
+     *  because there was nothing for a cache to hold in the first place, which happens to a
+     *  layer whose entire style is a noise while it is being resized: the noise is then lifted
+     *  out and replayed, and nothing is left on either side of it to cache. The counter is
+     *  local to this component instance.
      *
      * @param layer The style layer to query.
      * @return Number of paint calls that had to render fresh, since this component
