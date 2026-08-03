@@ -1897,7 +1897,7 @@ final class StyleRenderer
      *  <i>which</i> tiles are visible and <i>where</i> they are drawn - already rendered tiles
      *  stay valid, which keeps a dynamically resized UI responsive.
      */
-    private static class NoisePaintCache {
+    static class NoisePaintCache {
 
         /** Side length of the pre-rendered large tiles, in (unscaled) device pixels. */
         private static final int LARGE_TILE_SIZE = 256;
