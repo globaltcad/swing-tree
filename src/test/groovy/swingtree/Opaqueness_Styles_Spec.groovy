@@ -1872,6 +1872,106 @@ class Opaqueness_Styles_Spec extends Specification
             findOpaqueComponentsNotPaintingAllTheirPixels(page) == []
     }
 
+    def 'The viewport of a scroll pane does not cover the inset shadow of the scroll pane.'()
+    {
+        reportInfo """
+
+            The viewport of a scroll pane covers the entire area in which the scroll pane
+            paints its own background, and Swing paints it after the scroll pane
+            itself, on top of everything the style engine has rendered there.
+
+            An opaque viewport fills all of that area with a single flat color,
+            which means it would simply wipe away an inset shadow, a gradient
+            or any other background styling of the scroll pane.
+            So the viewport may only claim to be opaque when there is nothing
+            underneath it which it could destroy.
+
+            This scenario is a regression test for a scroll pane with an inset shadow,
+            a very common "soft UI" (a.k.a. neumorphism) look, where the scroll pane
+            is supposed to appear as if it was embedded into the surface around it.
+
+        """
+        given : 'A scroll pane with a white background and a black inset shadow along its edges:'
+            var scrollPane =
+                    UI.scrollPane()
+                    .withStyle( it -> it
+                        .backgroundColor(Color.WHITE)
+                        .shadowIsInset(true)
+                        .shadowColor(Color.BLACK)
+                        .shadowBlurRadius(10)
+                    )
+                    .add(UI.box())
+                    .get(JScrollPane)
+
+        and : 'We give it a size and lay it out, just like a window would:'
+            UI.runNow({
+                scrollPane.setSize(200, 200)
+                layOutRecursively(scrollPane)
+            })
+        and : 'Finally we render it into an image so that we can look at the individual pixels:'
+            var rendering = Utility.renderSingleComponent(scrollPane)
+
+        expect : 'In the middle of the scroll pane we find nothing but the plain white background color:'
+            brightnessAt(rendering, 100, 100) == 255
+        and : """
+                Close to its edges however, well inside the area which the viewport covers,
+                the inset shadow darkens that background color considerably.
+                If the viewport had covered the shadow, then these pixels
+                would be just as white as the ones in the middle.
+        """
+            brightnessAt(rendering, 100,   4) < 240 // top
+            brightnessAt(rendering,   4, 100) < 240 // left
+            brightnessAt(rendering, 196, 100) < 240 // right
+            brightnessAt(rendering, 100, 196) < 240 // bottom
+        and : 'All of this is only possible because the viewport does not claim to be opaque:'
+            scrollPane.getViewport().isOpaque() == false
+    }
+
+    def 'A scroll pane viewport keeps its opaqueness until the style engine paints below it.'(
+        boolean viewportIsOpaque, Styler<JScrollPane> styler
+    ) {
+        reportInfo """
+
+            Taking the opaqueness flag away from a viewport is not free:
+            Swing's repaint manager will then keep climbing past it, up the component
+            hierarchy, in search of an opaque ancestor, which makes every little
+            repaint inside the scroll pane more expensive than it has to be.
+
+            So the style engine only does it when it has to, namely when the scroll pane
+            is not opaque itself, or when the style engine renders something
+            in the area which the viewport would otherwise cover.
+            A plain background color is not such a rendering, because the viewport
+            fills its bounds with exactly that same color.
+
+        """
+        given : 'A scroll pane which is styled according to the styler of the current scenario:'
+            var scrollPane =
+                    UI.scrollPane()
+                    .withStyle(styler)
+                    .add(UI.box())
+                    .get(JScrollPane)
+
+        expect : 'In all of these scenarios the scroll pane itself remains opaque:'
+            scrollPane.isOpaque() == true
+        and : 'But its viewport only stays opaque as long as it does not cover any styling:'
+            scrollPane.getViewport().isOpaque() == viewportIsOpaque
+
+        where :
+            viewportIsOpaque | styler
+            true             | { it.backgroundColor(Color.WHITE) }
+            false            | { it.backgroundColor(Color.WHITE).shadowIsInset(true).shadowColor(Color.BLACK).shadowBlurRadius(10) }
+            false            | { it.backgroundColor(Color.WHITE).gradient( g -> g.colors(Color.BLACK, Color.WHITE) ) }
+            false            | { it.backgroundColor(Color.WHITE).painter(UI.Layer.CONTENT, g -> g.fillRect(0, 0, 10, 10) ) }
+    }
+
+    /**
+     *  Returns the brightness, between 0 and 255, of a single pixel of the supplied rendering.
+     */
+    private static int brightnessAt( BufferedImage rendering, int x, int y ) {
+        var color = new Color(rendering.getRGB(x, y))
+        return ( color.getRed() + color.getGreen() + color.getBlue() ) / 3
+    }
+
     /**
      *  Lays out the given component and all of its children recursively,
      *  which is needed for components which were never added to a window.

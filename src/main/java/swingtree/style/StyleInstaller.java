@@ -293,7 +293,7 @@ final class StyleInstaller<C extends JComponent>
                 _restoreForegroundIfFontColorWasInstalled(owner, newStyle);
                 _restoreStyleOwnedSizesOf(owner);
                 _restoreViewportBackgroundOf(owner);
-                _updateViewportOpaquenessOf(owner);
+                _updateViewportOpaquenessOf(owner, newStyle);
 
                 return _updateEngine(owner, engine, newStyle);
             }
@@ -519,7 +519,7 @@ final class StyleInstaller<C extends JComponent>
 
         backgroundSetter.run();
 
-        _updateViewportOpaquenessOf(owner);
+        _updateViewportOpaquenessOf(owner, newStyle);
         /*
             Note that the above call has to happen after every code path which
             may still change the opaqueness or background color of the owner,
@@ -552,10 +552,19 @@ final class StyleInstaller<C extends JComponent>
      *  turns opaque again, the viewport has to reclaim its opaqueness, or else Swing's
      *  repaint manager keeps climbing past it to find an opaque ancestor, and every
      *  little repaint inside the scroll pane costs more than it should, forever.
+     *  <p>
+     *  There is a third party in this though, namely the style engine itself:
+     *  Everything it renders for a scroll pane, be it an inset shadow, a gradient
+     *  or a rounded background, is painted before the children of the scroll pane,
+     *  which means the viewport lies on top of all of it.
+     *  An opaque viewport would simply wipe these renderings away with its flat
+     *  background color, so it may only make its promise when the style engine
+     *  has nothing to show underneath it.
      *
      * @param owner The component whose viewport should be synchronized, only scroll panes have one.
+     * @param style The style of the owner, which tells us if the style engine paints below the viewport.
      */
-    private void _updateViewportOpaquenessOf( final C owner ) {
+    private void _updateViewportOpaquenessOf( final C owner, final StyleConf style ) {
         if ( !(owner instanceof JScrollPane) )
             return;
 
@@ -565,7 +574,7 @@ final class StyleInstaller<C extends JComponent>
 
         Color   viewportBackground   = viewport.getBackground();
         boolean viewportFillsItsArea = viewportBackground != null && viewportBackground.getAlpha() == 255;
-        boolean shouldBeOpaque       = owner.isOpaque() && viewportFillsItsArea;
+        boolean shouldBeOpaque       = owner.isOpaque() && viewportFillsItsArea && !_stylePaintsBelowViewportOf(style);
         /*
             Note that a viewport without its own background color inherits the one of
             the scroll pane, which the style engine may well have set to the fully
@@ -577,12 +586,30 @@ final class StyleInstaller<C extends JComponent>
     }
 
     /**
+     *  Determines if the supplied style makes the style engine render anything
+     *  in the area which the viewport of a scroll pane covers.
+     *  This is the case for all layers except the foreground layer, because they
+     *  are all painted before the children of a component, and it is also the case
+     *  for a border radius, whose rounded corners reach into the rectangular
+     *  bounds of the viewport.
+     *
+     * @param style The style of a scroll pane.
+     * @return {@code true} if the style engine paints something below the viewport.
+     */
+    private static boolean _stylePaintsBelowViewportOf( final StyleConf style ) {
+        return style.border().hasAnyNonZeroArcs()
+            || !style.layer(UI.Layer.BACKGROUND).isNone()
+            || !style.layer(UI.Layer.CONTENT).isNone()
+            || !style.layer(UI.Layer.BORDER).isNone();
+    }
+
+    /**
      *  Gives the viewport of a scroll pane its original background color back,
      *  the one the style engine took away from it when it handed the styled
      *  background color down to the viewport.
      *  Without this, a scroll pane whose styling was removed again would keep
      *  a translucent viewport, and with it the loss of opaqueness
-     *  which {@link #_updateViewportOpaquenessOf(JComponent)} derives from it.
+     *  which {@link #_updateViewportOpaquenessOf(JComponent, StyleConf)} derives from it.
      *
      * @param owner The component whose viewport should be restored, only scroll panes have one.
      */
