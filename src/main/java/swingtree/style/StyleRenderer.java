@@ -29,6 +29,31 @@ import java.util.List;
  */
 final class StyleRenderer
 {
+    /**
+     *  The smallest area, in device pixels, for which splitting a rounded fill into parts pays.
+     *  <p>
+     *  The split trades one fill for seven, so it only wins once the interior it stops
+     *  antialiasing is worth more than six extra fill invocations. Measured on a radial
+     *  gradient, split versus whole, straight onto an XRender surface and into a
+     *  {@code BufferedImage} respectively: 9.9x / 1.1x at 2600x1660, 10.1x / 1.3x at 1300x830,
+     *  5.5x / 1.2x at 600x400 and 3.2x / 1.1x at 400x80 (32000 px). Below that the two
+     *  strategies measure within noise of each other on an accelerated surface and slightly
+     *  <i>worse</i> on a software one (0.9x / 0.8x at 80x40), and repeated sweeps stop agreeing
+     *  with each other at all, these being sub-millisecond fills. So the threshold sits above
+     *  the band where the measurement is unreliable rather than at the apparent crossover.
+     */
+    private static final int SMALLEST_AREA_WORTH_SPLITTING = 32768; // device pixels
+
+    /**
+     *  A shadow's gradient transition happens across the normalized region
+     *  {@code [gradientStart, 1]}. When that region is narrower than this, it cannot hold the
+     *  gradient's stops as distinct {@code float} values (the fine falloff curves use up to 65
+     *  stops), which would make {@link MultipleGradientPaint} throw, and it is invisible anyway,
+     *  so we render such a degenerate shadow as a solid fill instead. See
+     *  {@link #_isDegenerateShadowGradient(float)}.
+     */
+    private static final float SHADOW_GRADIENT_MIN_SPAN = 1e-3f;
+
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleRenderer.class);
     private static final Map<Pooled<NoiseConf>, NoisePaintCache> _NOISE_PAINT_CACHE = new WeakHashMap<>();
     /**
@@ -53,16 +78,6 @@ final class StyleRenderer
         _NOISE_PAINT_CACHE.clear();
         _SHADOW_GRADIENT_CACHE.clear();
     }
-
-    /**
-     *  A shadow's gradient transition happens across the normalized region
-     *  {@code [gradientStart, 1]}. When that region is narrower than this, it cannot hold the
-     *  gradient's stops as distinct {@code float} values (the fine falloff curves use up to 65
-     *  stops), which would make {@link MultipleGradientPaint} throw, and it is invisible anyway,
-     *  so we render such a degenerate shadow as a solid fill instead. See
-     *  {@link #_isDegenerateShadowGradient(float)}.
-     */
-    private static final float SHADOW_GRADIENT_MIN_SPAN = 1e-3f;
 
     private StyleRenderer() {} // Un-instantiable!
 
@@ -173,22 +188,6 @@ final class StyleRenderer
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         }
     }
-
-    /**
-     *  The smallest area, in device pixels, for which splitting a rounded fill into parts pays.
-     *  <p>
-     *  The split trades one fill for seven, so it only wins once the interior it stops
-     *  antialiasing is worth more than six extra fill invocations. Measured on a radial
-     *  gradient, split versus whole, straight onto an XRender surface and into a
-     *  {@code BufferedImage} respectively: 9.9x / 1.1x at 2600x1660, 10.1x / 1.3x at 1300x830,
-     *  5.5x / 1.2x at 600x400 and 3.2x / 1.1x at 400x80 (32000 px). Below that the two
-     *  strategies measure within noise of each other on an accelerated surface and slightly
-     *  <i>worse</i> on a software one (0.9x / 0.8x at 80x40), and repeated sweeps stop agreeing
-     *  with each other at all, these being sub-millisecond fills. So the threshold sits above
-     *  the band where the measurement is unreliable rather than at the apparent crossover.
-     */
-    private static final int SMALLEST_AREA_WORTH_SPLITTING = 32768; // device pixels
-
 
     /**
      *  Fills a rounded rectangle as three antialiasing-free interior bands plus four
