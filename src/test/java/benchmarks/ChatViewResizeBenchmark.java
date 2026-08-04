@@ -165,7 +165,15 @@ public final class ChatViewResizeBenchmark
     private static double measurePaintSweep( JFrame frame, JComponent root, boolean resizeFirst, int clipHeight ) throws Exception
     {
         GraphicsConfiguration gc = frame.getGraphicsConfiguration();
-        VolatileImage buffer = gc.createCompatibleVolatileImage(WINDOW_WIDTH, WINDOW_HEIGHT);
+    /*
+        The buffer is held in a one element array because a VolatileImage may have to be
+        *replaced* mid run: its surface lives in video memory and the windowing system is free
+        to reclaim it, after which it returns either restored-but-blank or altogether
+        incompatible. Rendering into an unvalidated surface can quietly fall back to a software
+        one, which for a benchmark comparing rendering paths is not noise but a wrong answer.
+        See RoundedGradientBenchmark.paintOnce for the full reasoning.
+    */
+        VolatileImage[] buffer = { gc.createCompatibleVolatileImage(WINDOW_WIDTH, WINDOW_HEIGHT) };
 
         for ( int i = 0; i < WARMUP_SWEEPS; i++ )
             paintOnce(frame, root, buffer, resizeFirst, clipHeight, i);
@@ -174,12 +182,12 @@ public final class ChatViewResizeBenchmark
         for ( int i = 0; i < TIMED_SWEEPS; i++ )
             samples[i] = paintOnce(frame, root, buffer, resizeFirst, clipHeight, WARMUP_SWEEPS + i);
 
-        buffer.flush();
+        buffer[0].flush();
         return medianMillis(samples);
     }
 
     private static long paintOnce(
-        JFrame frame, JComponent root, VolatileImage buffer,
+        JFrame frame, JComponent root, VolatileImage[] buffer,
         boolean resizeFirst, int clipHeight, int index
     ) throws Exception {
         int width = ( resizeFirst ? widthForSweep(index) : WINDOW_WIDTH );
@@ -190,17 +198,26 @@ public final class ChatViewResizeBenchmark
                 invalidateTree(root);
                 root.validate();
             }
-            Graphics2D g = buffer.createGraphics();
-            try {
-                g.setClip(0, 0, root.getWidth(), clipHeight);
-                long start = System.nanoTime();
-                root.paint(g);
-                // Sync with the pipeline, or we would be timing how fast we can queue work:
-                java.awt.Toolkit.getDefaultToolkit().sync();
-                nanos[0] = System.nanoTime() - start;
-            } finally {
-                g.dispose();
+            final GraphicsConfiguration gc = frame.getGraphicsConfiguration();
+            do {
+                if ( buffer[0].validate(gc) == VolatileImage.IMAGE_INCOMPATIBLE ) {
+                    buffer[0].flush();
+                    buffer[0] = gc.createCompatibleVolatileImage(WINDOW_WIDTH, WINDOW_HEIGHT);
+                    buffer[0].validate(gc);
+                }
+                Graphics2D g = buffer[0].createGraphics();
+                try {
+                    g.setClip(0, 0, root.getWidth(), clipHeight);
+                    long start = System.nanoTime();
+                    root.paint(g);
+                    // Sync with the pipeline, or we would be timing how fast we can queue work:
+                    java.awt.Toolkit.getDefaultToolkit().sync();
+                    nanos[0] = System.nanoTime() - start;
+                } finally {
+                    g.dispose();
+                }
             }
+            while ( buffer[0].contentsLost() );
         });
         return nanos[0];
     }

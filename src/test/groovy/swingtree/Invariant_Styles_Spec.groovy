@@ -25,6 +25,37 @@ import java.time.DayOfWeek
 @Subject([UI, Styler])
 class Invariant_Styles_Spec extends Specification
 {
+    /**
+     *  Every scenario here renders straight, never through the style layer cache.
+     *  <p>
+     *  This is not tidiness, it is what makes the comparisons deterministic. Whether a
+     *  component's layer is served from a cached image is decided by state this specification
+     *  does not own: a memory budget derived from the machine's RAM, a package private
+     *  override which four other specifications set and clear around themselves, and the
+     *  occupancy of a <i>weakly</i> keyed cache which a garbage collection may change at any
+     *  moment. The components compared below sit close enough to that decision boundary that
+     *  the two halves of a pair could take different rendering paths depending on nothing but
+     *  test ordering and collection timing - and on a graphics pipeline where those two paths
+     *  do not rasterize identically, that surfaces as a pixel comparison which passes or fails
+     *  by the run rather than by the code. Pinning the path removes the variable; what these
+     *  scenarios are actually about is gradient geometry, which caching has no bearing on.
+     */
+    def setup() {
+        // A full re-initialization rather than flipping one setting: that way the library
+        // starts from its documented defaults instead of from whatever the previously run
+        // specification happened to leave behind.
+        SwingTree.initializeUsing( it -> it.withCacheMode(SwingTreeInitConfig.CacheMode.DISABLED) )
+        // Re-initializing swaps the library instance but does not by itself re-resolve the
+        // already computed cache budget, nor empty the globally shared caches - this does both,
+        // so the isolation holds whatever ran before this specification.
+        ComponentExtension.updateAllCachesFromLibraryConfig()
+    }
+
+    /** Also drops the UI scale factor each scenario sets, which used to leak into whatever ran next. */
+    def cleanup() {
+        SwingTree.clear()
+    }
+
     def 'Diagonally linear gradients can be invariant in certain cases.'( float uiScale )
     {
         reportInfo """

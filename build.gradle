@@ -202,6 +202,27 @@ tasks.register('runNoiseBenchmark', JavaExec) {
     }
 }
 
+/*
+ *  Measures a rounded component carrying a gradient, which is the one common style shape
+ *  that can take none of the shortcuts: a gradient denies it size independent caching and a
+ *  rounded fill area denies it the antialiasing-free rectangle path. Opens a window, so it
+ *  needs a display and is never part of 'check'.
+ */
+tasks.register('runRoundedGradientBenchmark', JavaExec) {
+    group = 'verification'
+    description = 'Measures the paint cost of a rounded component with a gradient, resizing and not.'
+    dependsOn 'testClasses'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'benchmarks.RoundedGradientBenchmark'
+    System.properties.each { key, value ->
+        if ( key.toString().startsWith('benchmark.') ) systemProperty(key.toString(), value)
+    }
+    if ( project.hasProperty('jfr') ) {
+        jvmArgs "-XX:FlightRecorderOptions=stackdepth=512"
+        jvmArgs "-XX:StartFlightRecording=settings=profile,dumponexit=true,filename=${project.property('jfr')}"
+    }
+}
+
 // CUSTOM DEPLOYMENT TASKS :
 
 // 0: Cleanup

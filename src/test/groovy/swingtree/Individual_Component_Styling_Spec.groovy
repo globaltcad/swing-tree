@@ -695,7 +695,7 @@ class Individual_Component_Styling_Spec extends Specification
 
         when : 'We disable the style and simulate a repaint.'
             doStyle = false
-            label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
 
         then : """
             The custom border has been uninstalled.
@@ -730,7 +730,7 @@ class Individual_Component_Styling_Spec extends Specification
 
         when : 'We enable the style and simulate a repaint.'
             doStyle = true
-            label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
 
         then : """
             The custom border has been installed.
@@ -740,7 +740,7 @@ class Individual_Component_Styling_Spec extends Specification
 
         when : 'We disable the style and simulate a repaint.'
             doStyle = false
-            label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
 
         then : """
             The original border has been re-installed.

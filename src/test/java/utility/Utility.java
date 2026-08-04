@@ -248,6 +248,42 @@ public class Utility
         }
     }
 
+    /**
+     *  Paints a component which is not inside any window, with Swing's double buffering
+     *  suppressed for the duration of the paint.
+     *  <p>
+     *  {@link JComponent#paint(java.awt.Graphics)} does not always paint straight into the
+     *  graphics it is handed. When the component is double buffered - which every
+     *  {@code JPanel}, {@code JLabel} and {@code JButton} is by default - and a repaint cycle
+     *  happens to be in progress on the event dispatch thread, it instead routes the paint
+     *  through the shared {@link RepaintManager}:
+     *  <pre>{@code
+     *  if (!printing && repaintManager.isDoubleBufferingEnabled() &&
+     *      !getFlag(ANCESTOR_USING_BUFFER) && isDoubleBuffered() &&
+     *      (getFlag(IS_REPAINTING) || repaintManager.isPainting()))
+     *  }</pre>
+     *  That path asks the repaint manager for an offscreen buffer, which requires the
+     *  component to have a {@link java.awt.Window} ancestor - a component being rendered by a
+     *  test has none, so it throws, and on the way out it can leave the shared repaint manager
+     *  in a state which breaks the <i>next</i> paint of an unrelated window.
+     *  <p>
+     *  The trap is that the last clause makes it depend on whether anything else happens to be
+     *  painting at that instant, so the same test passes or fails by the run rather than by the
+     *  code. Suppressing double buffering for the duration removes the branch entirely and
+     *  cannot change the resulting pixels, the buffered path differing only in that it composes
+     *  through an intermediate image.
+     */
+    public static void paintWithoutWindow(Component component, Graphics2D g) {
+        RepaintManager repaintManager = RepaintManager.currentManager(component);
+        boolean wasEnabled = repaintManager.isDoubleBufferingEnabled();
+        repaintManager.setDoubleBufferingEnabled(false);
+        try {
+            component.paint(g);
+        } finally {
+            repaintManager.setDoubleBufferingEnabled(wasEnabled);
+        }
+    }
+
     public static BufferedImage renderSingleComponent(Component component) {
         int w = component.getWidth();
         int h = component.getHeight();
@@ -262,7 +298,7 @@ public class Utility
         SwingUtilities.invokeLater(() -> {
             BufferedImage image = createDeterministicImage(finalWidth, finalHeight);
             Graphics2D g2d = createDeterministicGraphics(image);
-            component.paint(g2d);
+            paintWithoutWindow(component, g2d);
             g2d.dispose();
             future.complete(image);
         });

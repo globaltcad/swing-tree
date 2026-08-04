@@ -1,6 +1,7 @@
 package benchmarks;
 
 import swingtree.SwingTree;
+import swingtree.SwingTreeInitConfig;
 import swingtree.UI;
 
 import javax.swing.JComponent;
@@ -13,60 +14,62 @@ import java.awt.Toolkit;
 import java.awt.image.VolatileImage;
 
 /**
- *  Measures what a component styled with a large noise gradient costs to paint, in the two
- *  situations that pull the style cache in opposite directions:
+ *  Measures what a <b>rounded</b> component carrying a gradient costs to paint, which is the
+ *  one common style shape that cannot take any of the shortcuts the style engine already has.
+ *  <p>
+ *  A gradient makes its layer ineligible for size independent caching (its pixels span the
+ *  component bounds), so every frame of a resize rasterizes it again. A rounded fill area then
+ *  makes that rasterization antialiased, and an antialiased fill is rasterized in software
+ *  whatever it is drawn onto - on X11 {@code XRSurfaceData.validatePipe} only offers a
+ *  {@link java.awt.Paint} to the X server inside an {@code antialiasHint != ANTIALIAS_ON}
+ *  branch. A flat rounded fill escapes this by being cacheable, and a rectangular gradient
+ *  escapes it because {@code StyleRenderer._fillShape} may switch antialiasing off for a
+ *  whole-pixel rectangle. Rounded plus gradient escapes neither.
+ *  <p>
+ *  Two sweeps, for the two directions the style cache pulls in:
  *  <ul>
- *      <li><b>while resizing</b> - every sweep uses a width no earlier sweep used, so the
- *          layer cache misses and the noise is actually rasterized;</li>
- *      <li><b>at an unchanged size</b> - the caches are warm, which is what the overwhelming
- *          majority of a UI's paints look like.</li>
+ *      <li><b>at an unchanged size</b> - caches warm, which is what nearly every paint of a
+ *          real UI looks like, and the number any change here must not regress;</li>
+ *      <li><b>while resizing</b> - every sweep at a width no earlier sweep used, so the layer
+ *          cache misses and the fill is genuinely rasterized.</li>
  *  </ul>
- *  Both numbers are needed to judge {@code StyleLayerCache}'s decision to lift a noise out of
- *  its layer: the cut buys the first at the expense of the second.
+ *  <b>{@code -Dbenchmark.cache=disabled} is the interesting one.</b> With caching on, a
+ *  component small enough to be admitted to the layer cache is rasterized into a
+ *  {@code BufferedImage}, where the antialiasing hint hardly changes which loop runs;
+ *  disabling the cache sends every paint straight onto the window's accelerated surface,
+ *  which is where the hint decides between the X server and software rasterization. Both are
+ *  worth measuring - the first is the common case, the second is where the cost lives.
  *  <p>
- *  Opaque colours (the default) let {@code NoiseGradientPaint} declare itself
- *  {@link java.awt.Transparency#OPAQUE} and the pre-rendered tiles be allocated without an
- *  alpha channel, which picks a specialised blit loop; {@code -Dbenchmark.noise=translucent}
- *  measures the same style with one colour carrying an alpha channel, to check that.
+ *  <b>One case per process, on purpose:</b> two windows would compete for the one global layer
+ *  cache. Compare whole runs, several of them alternating, because the absolute figure on a
+ *  desktop machine drifts by half between one minute and the next.
  *  <p>
- *  <b>One case per process, on purpose:</b> two windows would compete for the one global
- *  layer cache, which this deliberately misses on every resize sweep, so they thrash each
- *  other. Compare runs instead, several of them alternating, because the absolute figure on
- *  a desktop machine drifts by half between one minute and the next.
- *  <p>
- *  Run with {@code ./gradlew runNoiseBenchmark}. It needs a display.
+ *  Run with {@code ./gradlew runRoundedGradientBenchmark}. It needs a display.
  */
-public final class NoisePaintBenchmark
+public final class RoundedGradientBenchmark
 {
-    /* Settable, because how big the component is decides whether cutting a layer around its
-       noise pays at all - see StyleLayerCache. */
     private static final int WIDE_WIDTH   = Integer.getInteger("benchmark.width",  1600);
     private static final int HEIGHT       = Integer.getInteger("benchmark.height", 1000);
     private static final int NARROW_WIDTH = Math.max(40, WIDE_WIDTH * 11 / 16);
+    private static final int ARC          = Integer.getInteger("benchmark.arc",    32);
+
+    /** How often the volatile surface had to be restored or replaced, reported with the
+     *  results: a run which lost its surface repeatedly was not measuring one steady pipeline
+     *  and its numbers should not be compared with another run's. Only ever touched on the
+     *  event dispatch thread, which is where every paint happens. */
+    private static int surfaceLosses = 0;
 
     private static final int WARMUP_SWEEPS = Integer.getInteger("benchmark.warmup", 30);
     private static final int TIMED_SWEEPS  = Integer.getInteger("benchmark.sweeps", 80);
 
-    /** Fully opaque, so every pixel the gradient produces is opaque. */
-    private static final Color[] OPAQUE_COLORS = {
-            new Color(38, 54, 47), new Color(96, 124, 96)
-    };
-    /** The same two colours, except that one carries an alpha channel. Nothing else differs. */
-    private static final Color[] TRANSLUCENT_COLORS = {
-            new Color(38, 54, 47), new Color(96, 124, 96, 254)
-    };
-
     public static void main( String[] args ) throws Exception
     {
-        String  which  = System.getProperty("benchmark.noise", "opaque");
-        boolean opaque = !"translucent".equalsIgnoreCase(which);
-        Color[] colors = opaque ? OPAQUE_COLORS : TRANSLUCENT_COLORS;
+        final boolean cacheDisabled = "disabled".equalsIgnoreCase(System.getProperty("benchmark.cache", "default"));
 
         /*
-            Checked before anything is shown: past the number of distinct widths a resize
-            sweep would repaint one already painted and measure the cache hit path instead.
-            Throwing after the frame is up would hang the JVM on the event dispatch thread
-            instead of reporting this.
+            Checked before anything is shown: past the number of distinct widths a resize sweep
+            would repaint one already painted and measure the cache hit path instead. Throwing
+            after the frame is up would hang the JVM on the event dispatch thread.
         */
         // Inclusive at both ends: the sweeps use NARROW_WIDTH + 0 up to NARROW_WIDTH + (n - 1),
         // so n widths fit exactly when the last of them is still WIDE_WIDTH.
@@ -79,20 +82,24 @@ public final class NoisePaintBenchmark
             );
 
         SwingTree.initializeUsing( it -> it.uiScaleFactor(1) );
+        if ( cacheDisabled )
+            SwingTree.get().setCacheMode(SwingTreeInitConfig.CacheMode.DISABLED);
 
         JFrame[] frameBox = new JFrame[1];
         UI.runNow(() -> {
-            JFrame frame = new JFrame("noise benchmark");
+            JFrame frame = new JFrame("rounded gradient benchmark");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
             frame.setContentPane(
                 UI.panel("fill")
                 .withStyle( it -> it
                     .backgroundColor(new Color(28, 34, 31))
-                    .borderRadius(16)
-                    .noise("grain", n -> n
-                        .function(UI.NoiseType.FABRIC)
-                        .colors(colors)
-                        .scale(0.6)
+                    .borderRadius(ARC)
+                    .gradient("sheen", g -> g
+                        .type(UI.GradientType.RADIAL)
+                        .boundary(UI.ComponentBoundary.OUTER_TO_EXTERIOR)
+                        .span(UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT)
+                        .size(Math.max(WIDE_WIDTH, HEIGHT) * 0.85f)
+                        .colors(new Color(120, 180, 140), new Color(30, 40, 60))
                         .clipTo(UI.ComponentArea.BODY)
                     )
                 )
@@ -108,14 +115,13 @@ public final class NoisePaintBenchmark
         Thread.sleep(1200);
 
         JComponent root = (JComponent) frame.getContentPane();
-    /*
-        The buffer is held in a one element array because a VolatileImage may have to be
-        *replaced* mid run: its surface lives in video memory and the windowing system is free
-        to reclaim it, after which it returns either restored-but-blank or altogether
-        incompatible. Rendering into an unvalidated surface can quietly fall back to a software
-        one, which for a benchmark comparing rendering paths is not noise but a wrong answer.
-        See RoundedGradientBenchmark.paintOnce for the full reasoning.
-    */
+        /*
+            Held in a one element array because a VolatileImage may have to be *replaced* mid
+            run: its surface lives in video memory and the windowing system is free to take it
+            away (a display mode change, a screen lock, memory pressure), after which it comes
+            back either restored-but-blank or altogether incompatible. See paintOnce for the
+            protocol, and why this benchmark in particular cannot skip it.
+        */
         VolatileImage[] buffer = {
                 frame.getGraphicsConfiguration().createCompatibleVolatileImage(WIDE_WIDTH, HEIGHT)
             };
@@ -129,11 +135,15 @@ public final class NoisePaintBenchmark
         buffer[0].flush();
 
         System.out.println();
-        System.out.println("  Noise benchmark, " + (opaque ? "OPAQUE" : "TRANSLUCENT") + " colours, "
+        System.out.println("  Rounded gradient benchmark, arc " + ARC + ", "
                          + NARROW_WIDTH + ".." + WIDE_WIDTH + "x" + HEIGHT
+                         + ", cache " + ( cacheDisabled ? "DISABLED (straight onto the surface)" : "default" )
                          + ", median of " + TIMED_SWEEPS + " sweeps");
         System.out.printf ("  repaint while resizing       %8.3f ms%n", whileResizing);
         System.out.printf ("  repaint at an unchanged size %8.3f ms%n", unchangedSize);
+        if ( surfaceLosses > 0 )
+            System.out.println("  NOTE: the volatile surface was restored or replaced "
+                             + surfaceLosses + " times during this run.");
         System.out.println();
 
         System.exit(0);
@@ -154,9 +164,18 @@ public final class NoisePaintBenchmark
     }
 
     /**
-     *  One paint, either at a width no earlier sweep used - the way dragging a window edge
-     *  behaves, and the only way to make a noise layer miss its cache - or at the one fixed
-     *  width, where the caches stay warm.
+     *  One timed paint, into a validated volatile buffer, repeated if the surface was lost
+     *  underneath it. <br>
+     *  <br>
+     *  The {@code validate} / {@code contentsLost} protocol is not optional politeness here. A
+     *  {@link VolatileImage}'s surface lives in video memory and the windowing system may
+     *  reclaim it at any moment; rendering into a surface which has not been validated can
+     *  quietly fall back to a software one, and this benchmark exists precisely to tell the
+     *  accelerated path from the software path - a silent fallback would not make it noisy, it
+     *  would make it wrong, and wrong in exactly the dimension being measured. So the buffer is
+     *  validated before the clock starts (never inside it), replaced outright if it came back
+     *  incompatible, and any paint whose contents were lost while it ran is timed again rather
+     *  than counted.
      */
     private static long paintOnce( JFrame frame, JComponent root, VolatileImage[] buffer, boolean resize, int index )
     throws Exception {
@@ -174,6 +193,7 @@ public final class NoisePaintBenchmark
                     buffer[0].flush();
                     buffer[0] = gc.createCompatibleVolatileImage(WIDE_WIDTH, HEIGHT);
                     buffer[0].validate(gc);
+                    surfaceLosses++;
                 }
                 Graphics2D g = buffer[0].createGraphics();
                 try {
@@ -186,6 +206,8 @@ public final class NoisePaintBenchmark
                 } finally {
                     g.dispose();
                 }
+                if ( buffer[0].contentsLost() )
+                    surfaceLosses++;
             }
             while ( buffer[0].contentsLost() );
         });
@@ -207,5 +229,5 @@ public final class NoisePaintBenchmark
         return nanos / 1_000_000.0;
     }
 
-    private NoisePaintBenchmark() {}
+    private RoundedGradientBenchmark() {}
 }
