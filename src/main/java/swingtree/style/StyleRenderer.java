@@ -32,15 +32,13 @@ final class StyleRenderer
     /**
      *  The smallest area, in device pixels, for which splitting a rounded fill into parts pays.
      *  <p>
-     *  The split trades one fill for seven, so it only wins once the interior it stops
-     *  antialiasing is worth more than six extra fill invocations. Measured on a radial
-     *  gradient, split versus whole, straight onto an XRender surface and into a
-     *  {@code BufferedImage} respectively: 9.9x / 1.1x at 2600x1660, 10.1x / 1.3x at 1300x830,
-     *  5.5x / 1.2x at 600x400 and 3.2x / 1.1x at 400x80 (32000 px). Below that the two
-     *  strategies measure within noise of each other on an accelerated surface and slightly
-     *  <i>worse</i> on a software one (0.9x / 0.8x at 80x40), and repeated sweeps stop agreeing
-     *  with each other at all, these being sub-millisecond fills. So the threshold sits above
-     *  the band where the measurement is unreliable rather than at the apparent crossover.
+     *  The split trades one fill for seven, so it only wins once the interior it keeps out of
+     *  the antialiasing pipe is worth more than six extra fill invocations. Above this
+     *  threshold a gradient fill was measured 3x to 10x faster on an accelerated surface,
+     *  growing with the area; below it the two strategies are indistinguishable, and the
+     *  measurements themselves stop being repeatable. So the threshold deliberately sits above
+     *  the noise floor rather than at the apparent crossover.
+     *  See {@code benchmarks.RoundedGradientBenchmark}.
      */
     private static final int SMALLEST_AREA_WORTH_SPLITTING = 32768; // device pixels
 
@@ -126,38 +124,30 @@ final class StyleRenderer
     }
 
     /**
-     *  Fills a shape with antialiasing switched off over every part of it which provably has
+     *  Fills a shape, with antialiasing switched off over every part of it that provably has
      *  no partially covered pixels for antialiasing to smooth.
      *  <p>
-     *  This matters a great deal. With antialiasing on, {@code Graphics2D.fill(..)} rasterizes
-     *  a per-pixel coverage mask for the whole shape in software before compositing anything,
-     *  and it does so <i>even when the destination is accelerated</i>: on X11,
-     *  {@code XRSurfaceData.validatePipe} only ever offers a {@link Paint} to the X server
-     *  inside an {@code antialiasHint != ANTIALIAS_ON} branch. For a style layer covering a
-     *  maximized window that is millions of mask pixels per fill, on every single frame of a
-     *  live resize - and nearly all of them come out fully opaque, because the interior of the
-     *  shape has no soft edge to begin with.
+     *  This matters a great deal, because antialiasing is not just a per-pixel cost: it makes
+     *  {@code Graphics2D.fill(..)} rasterize a coverage mask for the whole shape in software
+     *  before compositing anything, <i>even when the destination is hardware accelerated</i>
+     *  (on X11 for example the {@link Paint} is only ever handed to the X server when
+     *  antialiasing is off). For a style layer covering a maximized window that is millions of
+     *  mask pixels per fill, on every frame of a live resize, and nearly all of them come out
+     *  fully opaque anyway.
      *  <p>
-     *  Two shapes are recognised, and the second is the reason this is not simply a boolean:
+     *  So two kinds of shape get a faster treatment here:
      *  <ul>
-     *      <li>A {@link Rectangle} has no soft edge <i>anywhere</i>, being integer valued by
-     *          its very type, so the only thing that could still put an edge between two
-     *          pixels is the transform. It is filled in one go with antialiasing off.</li>
-     *      <li>A {@link RoundRectangle2D} curves only inside its four corner boxes.
-     *          Everything between them is fully covered, so it is filled as three
-     *          antialiasing-free bands and four antialiased corners - see
-     *          {@link #_fillRoundRectangleInParts}.</li>
+     *      <li>A {@link Rectangle} is integer valued by its very type and so has no soft edge
+     *          anywhere. Only the transform could still put one between two pixels, which is
+     *          why that is checked before filling it in one go, without antialiasing.</li>
+     *      <li>A {@link RoundRectangle2D} curves only inside its four corner boxes, so it is
+     *          filled as antialiasing-free bands plus antialiased corners.
+     *          See {@link #_fillRoundRectangleInParts}.</li>
      *  </ul>
-     *  Anything else - a fractional {@link Rectangle2D}, an {@link java.awt.geom.Area} built
-     *  from per-corner arcs, a rotated or sheared transform - keeps antialiasing and is filled
-     *  exactly as it always was.
-     *  <p>
-     *  Every precondition is checked rather than assumed, because an over-eager rule here
-     *  produces subtly wrong pixels rather than a crash. Note also that the checks deliberately
-     *  say nothing about where a shape came from: {@link ComponentAreas} produces a
-     *  {@link Rectangle} both by verifying that a shape's bounds are whole and by truncating
-     *  them, and either way the two antialiasing states fill the very same integer rectangle
-     *  identically.
+     *  Anything else, like a fractional {@link Rectangle2D} or a rotated transform, keeps
+     *  antialiasing and is filled exactly as it always was. Note that every precondition is
+     *  checked rather than assumed, because being too eager here yields subtly wrong pixels
+     *  instead of an error.
      */
     private static void _fillShape( final Graphics2D g2d, final Shape shape ) {
         if ( !RenderingHints.VALUE_ANTIALIAS_ON.equals(g2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING)) ) {
@@ -177,40 +167,36 @@ final class StyleRenderer
     }
 
     /**
-     *  Fills with antialiasing off and restores the hint, which the caller has established
-     *  is currently on and has established the shape does not need.
+     *  Fills the given shapes with antialiasing switched off and then switches it back on.
+     *  The caller is responsible for establishing that it was on to begin with and that
+     *  these particular shapes do not need it, see {@link #_fillShape}.
      */
-    private static void _fillWithoutAntialiasing( final Graphics2D g2d, final Shape shape ) {
+    private static void _fillWithoutAntialiasing( final Graphics2D g2d, final Shape... shapes ) {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
         try {
-            g2d.fill(shape);
+            for ( Shape shape : shapes )
+                g2d.fill(shape);
         } finally {
             g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         }
     }
 
     /**
-     *  Fills a rounded rectangle as three antialiasing-free interior bands plus four
-     *  antialiased corners, and reports whether it could.
+     *  Fills a rounded rectangle as three antialiasing-free bands plus four antialiased
+     *  corners, and reports whether it could.
      *  <p>
-     *  A rounded rectangle only curves inside its four corner boxes; everything between them is
-     *  an axis aligned rectangle every pixel of which is <i>fully</i> covered, so antialiasing
-     *  has nothing to smooth there and produces the identical pixels either way. It is not
-     *  identical <i>work</i> though, for the reason {@link #_fillShape} gives: one antialiased
-     *  fill of the whole shape drops the entire component into software rasterization over an
-     *  area that is nearly all interior.
+     *  A rounded rectangle curves only inside its four corner boxes. Everything between them is
+     *  an axis aligned rectangle whose pixels are <i>fully</i> covered, so antialiasing has
+     *  nothing to smooth there and yields the same pixels either way, just far more slowly
+     *  (for the reason given in {@link #_fillShape}). The bands and the corner boxes tile the
+     *  shape's bounding box without overlapping, which is what lets the parts add up to the
+     *  whole instead of blending twice along their seams.
      *  <p>
-     *  The three bands and the four corner boxes tile the shape's bounding box without
-     *  overlapping, which is what makes the parts add up to the whole rather than blending
-     *  twice along the seams. Measured pixel identical to the undivided fill at every size
-     *  probed but one, where 2 pixels of 45000 differed by one in a single channel - a gradient
-     *  raster tile alignment difference, not a geometric one.
-     *  <p>
-     *  All of it is expressed in <i>user</i> space on purpose. The {@link Paint} is anchored
-     *  there, so drawing the parts under a different transform would slide the gradient
-     *  underneath them; the cut lines are therefore <i>required</i> to land on whole device
-     *  pixels rather than being rounded onto them, and a configuration where they do not simply
-     *  falls back to the undivided fill.
+     *  All of this is laid out in <i>user</i> space, because that is where the {@link Paint} is
+     *  anchored and drawing the parts under any other transform would slide the gradient
+     *  underneath them. The cut lines therefore have to already land on whole device pixels
+     *  instead of being rounded onto them, and if they do not, we simply hand the shape back
+     *  to be filled undivided.
      *
      * @return {@code true} when the shape was filled, {@code false} when the caller must fill it.
      */
@@ -219,25 +205,26 @@ final class StyleRenderer
         final RoundRectangle2D round,
         final AffineTransform  transform
     ) {
+        if ( transform.getShearX() != 0 || transform.getShearY() != 0 )
+            return false; // The bands would not be axis aligned in device space.
+
         final double x = round.getX(),     y = round.getY();
         final double w = round.getWidth(), h = round.getHeight();
         if ( w <= 0 || h <= 0 )
             return false;
+
+        final double scaleX = transform.getScaleX(), translateX = transform.getTranslateX();
+        final double scaleY = transform.getScaleY(), translateY = transform.getTranslateY();
+
+        final double deviceArea = Math.abs(w * scaleX * h * scaleY);
+        if ( deviceArea < SMALLEST_AREA_WORTH_SPLITTING )
+            return false; // The split would not pay for its six extra fills.
 
         // How far the curvature reaches in from each side, which is half of the arc:
         final double arcW = Math.min(Math.abs(round.getArcWidth()),  w) / 2d;
         final double arcH = Math.min(Math.abs(round.getArcHeight()), h) / 2d;
         if ( arcW <= 0 || arcH <= 0 )
             return false; // Not actually rounded; an undivided fill of it is already optimal.
-
-        if ( transform.getShearX() != 0 || transform.getShearY() != 0 )
-            return false; // The bands would not be axis aligned in device space.
-
-        final double scaleX = transform.getScaleX(), translateX = transform.getTranslateX();
-        final double scaleY = transform.getScaleY(), translateY = transform.getTranslateY();
-
-        if ( Math.abs(w * scaleX * h * scaleY) < SMALLEST_AREA_WORTH_SPLITTING )
-            return false; // Too small for the split to pay for itself, see the threshold.
 
         /*
             Every cut line has to sit on a whole device pixel. Otherwise a band edge and the
@@ -253,16 +240,19 @@ final class StyleRenderer
             if ( !_isWhole(cut * scaleY + translateY) )
                 return false;
 
-        // The interior, which is where nearly all of the area is and none of the curvature:
-        if ( cutY[2] > cutY[1] )
-            _fillWithoutAntialiasing(g2d, new Rectangle2D.Double(cutX[0], cutY[1], w, cutY[2] - cutY[1]));
-        if ( cutX[2] > cutX[1] ) {
-            _fillWithoutAntialiasing(g2d, new Rectangle2D.Double(cutX[1], cutY[0], cutX[2] - cutX[1], arcH));
-            _fillWithoutAntialiasing(g2d, new Rectangle2D.Double(cutX[1], cutY[2], cutX[2] - cutX[1], arcH));
-        }
         /*
-            And the four corner boxes, each filled with the whole shape clipped to it, so that
-            the curve is rasterized by exactly the code which would have drawn it anyway.
+            First the interior, which holds nearly all of the area and none of the curvature.
+            A band may be empty when the arc spans the full width or height, in which case its
+            neighbours already cover everything and filling it is a no-op.
+        */
+        _fillWithoutAntialiasing(g2d,
+            new Rectangle2D.Double(cutX[0], cutY[1], w,                 cutY[2] - cutY[1]), // Between the corners.
+            new Rectangle2D.Double(cutX[1], cutY[0], cutX[2] - cutX[1], arcH),              // Above them,
+            new Rectangle2D.Double(cutX[1], cutY[2], cutX[2] - cutX[1], arcH)               // and below them.
+        );
+        /*
+            And then the four corner boxes, each filled with the whole shape clipped to it, so
+            that the curve is rasterized by exactly the code which would have drawn it anyway.
         */
         for ( int corner = 0; corner < 4; corner++ ) {
             final double cornerX = ( corner == 1 || corner == 3 ) ? cutX[2] : cutX[0];
