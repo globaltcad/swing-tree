@@ -7,6 +7,7 @@ import spock.lang.Title
 import swingtree.api.Styler
 import swingtree.layout.Size
 import swingtree.style.ComponentExtension
+import utility.Utility
 import swingtree.style.StyleConf
 import swingtree.style.StyleSheet
 
@@ -818,14 +819,14 @@ class Style_Installation_Spec extends Specification
 
         when: 'We activate the style and let the component paint, which gathers and installs the style:'
             applyStyle = true
-            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
         then: 'The style engine has installed an explicit, larger minimum size:'
             panel.isMinimumSizeSet()
             panel.getMinimumSize().height > naturalMinimum.height
 
         when: 'We deactivate the style again and let the component paint:'
             applyStyle = false
-            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
         then: 'The component is restored to its natural minimum size, free to shrink again:'
             !panel.isMinimumSizeSet()
             panel.getMinimumSize() == naturalMinimum
@@ -863,13 +864,13 @@ class Style_Installation_Spec extends Specification
 
         when: 'The style is activated and the component painted:'
             applyStyle = true
-            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
         then: 'The size of this kind is now explicitly set by the style engine:'
             isSet(panel)
 
         when: 'The style is removed again and the component painted:'
             applyStyle = false
-            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
         then: 'The component returns to its natural size of this kind:'
             !isSet(panel)
             sizeOf(panel) == natural
@@ -910,7 +911,7 @@ class Style_Installation_Spec extends Specification
 
         when: 'We activate the style and paint:'
             applyStyle = true
-            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
         then: 'The preferred size is now explicitly set by the style engine:'
             panel.isPreferredSizeSet()
         and : 'We remember the preferred size that was installed:'
@@ -918,7 +919,7 @@ class Style_Installation_Spec extends Specification
 
         when: 'We remove the style again and paint:'
             applyStyle = false
-            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
         then: 'The preferred size sticks at the last value, it is deliberately not reset:'
             panel.isPreferredSizeSet()
             panel.getPreferredSize() == installed
@@ -947,13 +948,13 @@ class Style_Installation_Spec extends Specification
 
         when: 'The style overrides the minimum height and the component paints:'
             applyStyle = true
-            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
         then: 'The styled minimum height takes effect:'
             panel.getMinimumSize().height > 84
 
         when: 'The style is removed again and the component paints:'
             applyStyle = false
-            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
         then: "The component's own minimum size is faithfully restored:"
             panel.isMinimumSizeSet()
             panel.getMinimumSize() == new Dimension(42, 84)
@@ -990,14 +991,14 @@ class Style_Installation_Spec extends Specification
                     .get(JPanel)
 
         when: 'The clamping (fold) style is active and the panel paints:'
-            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
         then: 'The panel is clamped: both a minimum and a maximum height are pinned:'
             panel.isMinimumSizeSet()
             panel.isMaximumSizeSet()
 
         when: 'The animation completes, so the clamping style is gone, and the panel paints again:'
             folding = false
-            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
         then: 'The clamp is fully released, so the panel is free to size to its content again:'
             !panel.isMinimumSizeSet()
             !panel.isMaximumSizeSet()
@@ -1041,14 +1042,14 @@ class Style_Installation_Spec extends Specification
 
         when: 'We apply the clamp and paint:'
             clamp = true
-            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
         then: 'The minimum height is pinned:'
             panel.isMinimumSizeSet()
             panel.getMinimumSize().height > naturalMinimum.height
 
         when: 'We drop only the clamp, so the other styling stays, and paint:'
             clamp = false
-            panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+            Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
         then: 'The minimum size is restored to natural, even though the component is still styled:'
             !panel.isMinimumSizeSet()
             panel.getMinimumSize() == naturalMinimum
