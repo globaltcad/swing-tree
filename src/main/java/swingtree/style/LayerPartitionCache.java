@@ -305,7 +305,15 @@ final class LayerPartitionCache
         return (int) ( _maxCacheableImageArea() * EAGER_ALLOCATION_FRIENDLINESS );
     }
 
-    private int _cachingMakesSenseFor( LayerRenderConf state )
+    private int _cachingMakesSenseFor( LayerRenderConf state ) {
+        return _cachingMakesSenseFor(_layer, state);
+    }
+
+    static boolean wouldBeAdmitted( UI.Layer layer, LayerRenderConf state ) {
+        return _cachingMakesSenseFor(layer, state) >= 0;
+    }
+
+    private static int _cachingMakesSenseFor( UI.Layer layer, LayerRenderConf state )
     {
         final int maxEntries = _maxCacheEntries();
         if ( maxEntries <= 0 || _CACHE.size() >= maxEntries )
@@ -341,18 +349,21 @@ final class LayerPartitionCache
         for ( ShadowConf shadow : state.layer().shadows().sortedByNames() )
             if ( !shadow.equals(ShadowConf.none()) && shadow.color().isPresent() )
                 heavyStyleCount++;
+        for ( PainterConf painter : state.layer().painters().sortedByNames() )
+            if ( !painter.equals(PainterConf.none()) && painter.painter().canBeCached() )
+                heavyStyleCount++;
 
         final BaseColorConf baseCoors = state.baseColors();
         final BoxModelConf  boxModel  = state.boxModel();
         final boolean       isRounded = boxModel.hasAnyNonZeroArcs();
 
-        if ( _layer == UI.Layer.BORDER ) {
+        if ( layer == UI.Layer.BORDER ) {
             boolean hasWidth = !Outline.none().equals(boxModel.widths());
             boolean hasColoring = !baseCoors.borderColor().equals(BorderColorsConf.none());
             if ( hasWidth && hasColoring )
                 heavyStyleCount++;
         }
-        if ( _layer == UI.Layer.BACKGROUND ) {
+        if ( layer == UI.Layer.BACKGROUND ) {
             boolean roundedOrHasMargin = isRounded || !boxModel.margin().equals(Outline.none());
             if ( roundedOrHasMargin ) {
                 if ( baseCoors.backgroundColor().filter( c -> c.getAlpha() > 0 ).isPresent() )

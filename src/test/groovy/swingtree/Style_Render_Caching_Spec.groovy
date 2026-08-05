@@ -603,16 +603,16 @@ class Style_Render_Caching_Spec extends Specification
                   )
                   .get(JButton)
             var ext = ComponentExtension.from(button)
-        and : 'It is large: above the area up to which an image is worth allocating eagerly.'
-            button.setSize(400, 200)
+        and : 'It is large: above the size up to which an image is worth allocating eagerly.'
+            button.setSize(600, 400)
 
         when : 'It is painted a few times at its first size, which is a birth rather than a resize.'
-            5.times { Utility.renderSingleComponent(button) }
+            8.times { Utility.renderSingleComponent(button) }
         then : 'It is cached, as any heavy style of this size would be.'
             ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
 
         when : 'The component is then resized and painted again.'
-            button.setSize(420, 200)
+            button.setSize(620, 400)
             Utility.renderSingleComponent(button)
         then : 'No image was minted for the new size.'
             ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
@@ -702,6 +702,232 @@ class Style_Render_Caching_Spec extends Specification
             resizingExt.cacheHitCount(UI.Layer.BACKGROUND) >= 1
         and : 'The sibling is still alive, which is what kept that rendering reachable.'
             settled.width == 400
+    }
+
+    def 'A layer whose only content is a cacheable painter is cached.'()
+    {
+        reportInfo """
+            A painter is ordinarily opaque to the library: it is user code, so what it draws
+            cannot be assumed to be a function of anything SwingTree can compare, and a layer
+            carrying one is therefore not cached.
+
+            `Painter.of(data, painter)` is the user lifting exactly that restriction: it
+            promises that the painting is a pure function of the supplied data object, which is
+            immutable and has proper `equals`/`hashCode`. That promise is what makes the painter
+            usable as part of a cache key - so a layer holding nothing but such a painter is
+            cached like any other heavy style, and the painter runs once instead of on every
+            paint.
+        """
+        given : 'A component whose only styling is a cacheable painter.'
+            var runs = new java.util.concurrent.atomic.AtomicInteger()
+            var painter = swingtree.api.Painter.of("the-key", { g ->
+                                runs.incrementAndGet()
+                                g.setColor(new Color(240, 120, 30))
+                                g.fillOval(10, 10, 40, 30)
+                            })
+            var box = UI.box().withStyle( it -> it.painter(UI.Layer.BACKGROUND, "mark", painter) ).get(JBox)
+            box.setSize(200, 120)
+            var ext = ComponentExtension.from(box)
+
+        when : 'It is painted a handful of times.'
+            5.times { Utility.renderSingleComponent(box) }
+
+        then : 'There is a cached rendering of that layer.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+        and : 'And the painter really did run only while that rendering was being made.'
+            runs.get() == 1
+            ext.cacheHitCount(UI.Layer.BACKGROUND) >= 3
+    }
+
+    def 'A cacheable painter ahead of an uncacheable one is baked into the cached image.'()
+    {
+        reportInfo """
+            A user painter is arbitrary code, so SwingTree cannot know what it draws and cannot
+            cache it - which would ordinarily sink the whole layer it sits on, a layer being
+            cached as a single rasterization. Such a layer is therefore cut in two: everything
+            cacheable is rendered into an image, and the painter is replayed over that image on
+            every paint.
+
+            `Painter.of(data, painter)` changes which side a painter falls on. It is the user
+            promising that the painting is a pure function of an immutable value, so a painter
+            declared that way can go *into* the cached image - and that is what this pins: it
+            runs once, while the uncacheable painter beside it keeps running on every paint.
+
+            Where exactly the cut falls is decided by order. The renderer runs painters in the
+            order of their names, and the cut is taken at the *first* uncacheable one:
+            everything before it is baked in, everything from it onwards is replayed. That
+            keeps every painter in its original position relative to every other, which is what
+            makes the cut incapable of changing a single pixel. A cacheable painter which sorts
+            *after* an uncacheable one is therefore left where it is.
+        """
+        given : 'A style with a cacheable painter named ahead of an uncacheable one.'
+            var cacheableRuns = new java.util.concurrent.atomic.AtomicInteger()
+            var lambdaRuns    = new java.util.concurrent.atomic.AtomicInteger()
+            var cacheable = swingtree.api.Painter.of("key", { g ->
+                                cacheableRuns.incrementAndGet()
+                                g.setColor(new Color(240, 120, 30)); g.fillOval(20, 20, 60, 40)
+                            })
+            var box = UI.box().withStyle( it -> it
+                            .backgroundColor("#2f4f6f").borderRadius(14)
+                            .painter(UI.Layer.BACKGROUND, "a-cacheable", cacheable)
+                            .painter(UI.Layer.BACKGROUND, "b-uncacheable", { g ->
+                                lambdaRuns.incrementAndGet()
+                                g.setColor(new Color(30, 200, 160)); g.fillRect(40, 30, 90, 50)
+                            })
+                        ).get(JBox)
+            box.setSize(300, 160)
+
+        when : 'It is painted five times.'
+            5.times { Utility.renderSingleComponent(box) }
+
+        then : 'The cacheable painter ran once, into the cached image.'
+            cacheableRuns.get() == 1
+        and : 'While the uncacheable one ran on every single paint, as it must.'
+            lambdaRuns.get() == 5
+    }
+
+    def 'A cacheable painter behind an uncacheable one keeps running, so that order is preserved.'()
+    {
+        reportInfo """
+            SwingTree cannot cache what a user painter draws, because it is arbitrary code, so
+            a layer carrying one is cut in two: what can be cached is rendered into an image,
+            and the painter is replayed over that image on every paint. A painter created with
+            `Painter.of(data, painter)` is the exception - there the user promises that the
+            painting is a pure function of an immutable value, so it can be baked into the
+            image instead of being replayed.
+
+            That raises the question of *which* cacheable painters are taken into the image,
+            and what this scenario pins is the deliberate limit on the answer: only those which
+            sort ahead of every uncacheable one.
+
+            The reason is that painters on a layer are run in the order of their names and may
+            overlap, so which of them end up inside the image decides what the component looks
+            like. Taking a cacheable painter out from behind an uncacheable one would move it
+            underneath, changing the picture - silently, and in code the library never sees. So
+            a painter which sorts *after* an uncacheable one is left where it is and keeps
+            being replayed, even though its promise would have allowed caching it.
+
+            A user who wants such a painter cached can have it, by naming it so that it sorts
+            ahead of the uncacheable one - which is the same thing as saying it should be
+            painted first.
+        """
+        given : 'A cacheable and an uncacheable painter, the cacheable one named so that it sorts second.'
+            var cacheableRuns = new java.util.concurrent.atomic.AtomicInteger()
+            var cacheable = swingtree.api.Painter.of("key", { g ->
+                                cacheableRuns.incrementAndGet()
+                                g.setColor(new Color(240, 120, 30)); g.fillOval(20, 20, 60, 40)
+                            })
+            var box = UI.box().withStyle( it -> it
+                            .backgroundColor("#2f4f6f").borderRadius(14)
+                            .painter(UI.Layer.BACKGROUND, "a-uncacheable", { g ->
+                                g.setColor(new Color(30, 200, 160)); g.fillRect(40, 30, 90, 50)
+                            })
+                            .painter(UI.Layer.BACKGROUND, "b-cacheable", cacheable)
+                        ).get(JBox)
+            box.setSize(300, 160)
+
+        when : 'It is painted five times.'
+            5.times { Utility.renderSingleComponent(box) }
+
+        then : 'The cacheable painter ran every time, because caching it would have reordered it.'
+            cacheableRuns.get() == 5
+    }
+
+    def 'Two identically styled components share a cached rendering even if they name their painters differently.'()
+    {
+        reportInfo """
+            Cached renderings are keyed on the style configuration and shared globally, so a UI
+            full of identically styled components renders one image and blits it for all of
+            them. A layer carrying an uncacheable painter is cut in two, and what is cached is
+            then everything *except* the painter - so what is cached is identical for two
+            components which differ only in their painter.
+
+            The *name* of the painter must therefore not survive into that key. A name is how a
+            style is addressed while it is being configured, not something the user expects to
+            change what is drawn - so two components whose only difference is that one calls its
+            painter "mark" and the other calls it "logo" have to share the one cached image.
+            Were they not to, each would mint an entry of its own, and since the number of
+            entries is capped, that debris would lock other components out of the cache too.
+        """
+        given : 'Two boxes with the same background, each with an uncacheable painter of its own name.'
+            var first = UI.box().withStyle( it -> it
+                            .backgroundColor(new Color(35, 95, 125)).borderRadius(11).margin(4)
+                            .painter(UI.Layer.BACKGROUND, "mark", { g ->
+                                g.setColor(new Color(240, 120, 30)); g.fillOval(10, 10, 40, 30)
+                            })
+                        ).get(JBox)
+            var second = UI.box().withStyle( it -> it
+                            .backgroundColor(new Color(35, 95, 125)).borderRadius(11).margin(4)
+                            .painter(UI.Layer.BACKGROUND, "logo", { g ->
+                                g.setColor(new Color(30, 200, 160)); g.fillRect(20, 20, 30, 20)
+                            })
+                        ).get(JBox)
+            first.setSize(260, 140)
+            second.setSize(260, 140)
+
+        when : 'The first one is painted until its background is cached.'
+            3.times { Utility.renderSingleComponent(first) }
+        then : 'It is: the painter was cut out of the layer, so the rest of it could be cached.'
+            ComponentExtension.from(first).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+
+        when : 'The second one is painted for the very first time.'
+            Utility.renderSingleComponent(second)
+        then : 'It found the image the first one had already rendered, instead of rendering again.'
+            ComponentExtension.from(second).cacheHitCount(UI.Layer.BACKGROUND)  == 1
+            ComponentExtension.from(second).cacheMissCount(UI.Layer.BACKGROUND) == 0
+    }
+
+    def 'A painter baked into a cached image does not tie it to the names of the painters replayed over it.'()
+    {
+        reportInfo """
+            Rendered layers are cached globally and keyed on the style itself, so any number of
+            identically styled components render once between them and blit that single image.
+            Anything which makes two equivalent styles compare as *different* therefore costs
+            both memory and rendering - and because the number of cached images is capped, it
+            pushes other components out of the cache as well.
+
+            A user painter complicates this, because SwingTree cannot know what arbitrary code
+            draws and so cannot cache it. A layer carrying one is cut in two: everything else
+            goes into the cached image, and the painter is replayed on top of it on every
+            paint. `Painter.of(data, painter)` is the exception - it is the user promising that
+            the painting is a pure function of an immutable value, and that promise is what
+            lets such a painter be baked into the image like any other style.
+
+            One layer can therefore hold both kinds at once, which is the case below, and what
+            this scenario pins is which parts of the style may decide whether two components
+            share the resulting image: only the parts the image actually contains. Both
+            components here draw the same background and the same cacheable painter, so it is
+            the same image. All that differs is the *name* each gave the painter that is
+            replayed on top - and a name that contributes no pixel to an image has no business
+            deciding whether that image can be found again.
+        """
+        given : 'Two components sharing a background and a cacheable painter, differing only in the name of an uncacheable one.'
+            var cacheable = swingtree.api.Painter.of("shared-key", { g ->
+                                g.setColor(new Color(250, 200, 60)); g.fillOval(12, 12, 50, 34)
+                            })
+            def build = { String lambdaName, Color color -> UI.box().withStyle( it -> it
+                                .backgroundColor(new Color(45, 80, 115)).borderRadius(13).margin(5)
+                                .painter(UI.Layer.BACKGROUND, "a-cacheable", cacheable)
+                                .painter(UI.Layer.BACKGROUND, lambdaName, { g ->
+                                    g.setColor(color); g.fillRect(24, 24, 34, 22)
+                                })
+                            ).get(JBox)
+            }
+            var first  = build("m-mark", new Color(240, 120, 30))
+            var second = build("z-logo", new Color(30, 200, 160))
+            first.setSize(280, 150)
+            second.setSize(280, 150)
+
+        when : 'The first one is painted until its background is cached.'
+            3.times { Utility.renderSingleComponent(first) }
+        then : 'It is - the cut put the background and the cacheable painter into one image.'
+            ComponentExtension.from(first).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+
+        when : 'The second one is painted for the very first time.'
+            Utility.renderSingleComponent(second)
+        then : 'It found that very image, rather than minting one of its own.'
+            ComponentExtension.from(second).cacheHitCount(UI.Layer.BACKGROUND)  == 1
+            ComponentExtension.from(second).cacheMissCount(UI.Layer.BACKGROUND) == 0
     }
 
     def 'Caching is per-layer: a heavy background does not imply a cached foreground.'()

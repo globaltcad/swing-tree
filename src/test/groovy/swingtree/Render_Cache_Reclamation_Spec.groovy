@@ -121,6 +121,13 @@ class Render_Cache_Reclamation_Spec extends Specification
             "a coloured border"                | { UI.box().withStyle({ it.border(4, "#903030").borderRadius(10).backgroundColor("#e8e0d0") }).get(JBox) }
             "a noise"                          | { UI.box().withStyle({ it.backgroundColor("#2f4f6f").borderRadius(12)
                                                         .noise(UI.Layer.BACKGROUND, "grain", n -> n.colors("#101010", "#e0e0e0")) }).get(JBox) }
+            "a cacheable painter"              | { UI.box().withStyle({ it.painter(UI.Layer.BACKGROUND, "mark", swingtree.api.Painter.of("k", { g ->
+                                                        g.setColor(new Color(240, 120, 30)); g.fillOval(10, 10, 60, 40)
+                                                     })) }).get(JBox) }
+            "a layer cut around its painter"   | { UI.box().withStyle({ it.backgroundColor("#2f4f6f").borderRadius(14)
+                                                        .painter(UI.Layer.BACKGROUND, "mark", { g ->
+                                                            g.setColor(new Color(30, 200, 160)); g.fillRect(20, 20, 60, 40)
+                                                        }) }).get(JBox) }
             "several layers at once"           | { UI.box().withStyle({ it.backgroundColor("#3f5f2f").foundationColor("#e0e8d0").borderRadius(16).margin(8)
                                                         .gradient(UI.Layer.BACKGROUND, "sky", g -> g.colors(new Color(80, 120, 200), new Color(20, 30, 60)))
                                                         .shadow(UI.Layer.CONTENT, "glow", s -> s.color("#0a0a14").blurRadius(6)) }).get(JBox) }

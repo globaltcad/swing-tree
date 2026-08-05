@@ -237,6 +237,115 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
                                                                               .shadow(UI.Layer.BACKGROUND, "glow", s -> s.color("#0a0a14").blurRadius(7).spreadRadius(1)) }
     }
 
+    def 'A layer cut around its painters paints what the whole layer paints. (#description)'(
+        String description, UI.Layer layer, int width, int height, Closure styler
+    ) {
+        reportInfo """
+            A user painter is arbitrary code, so SwingTree cannot cache what it draws - and
+            because a layer is cached as one rasterization, a single painter used to make the
+            *whole* layer uncacheable: every shadow, gradient and fill sharing it was
+            re-rendered at full size on every paint. Such a layer is therefore cut in two, the
+            painters replayed straight onto the destination on top of a cached image of
+            everything else. A painter created with `Painter.of(..)` is the exception, being a
+            promise that the painting is a pure function of an immutable value, so it can go
+            into that image - and a layer may hold both kinds at once. The cut then falls at
+            the first uncacheable painter, so that every painter keeps its position relative to
+            every other; the deliberately overlapping rows below are what pin that.
+
+            That turns one drawing operation into two, which is only acceptable if they add up
+            to the very same picture. They do, because the renderer draws by kind in a fixed
+            order with the painters last, and source-over compositing is associative.
+
+            As with the noise cut, an overall similarity score would be too weak a claim: it
+            would absorb a seam, a missing shadow or an alpha channel that composited twice.
+            Every channel of every pixel is compared instead, against the same style painted
+            with caching switched off entirely - which is the switch position in which the
+            layer is drawn whole, in one go, exactly as it was before this cut existed. It
+            measures *exactly* equal here; the one unit of slack below is left only for a
+            graphics pipeline that rounds a blit differently.
+        """
+        given : '''
+            The component painted whole, with the render cache switched off. Note that this
+            has to go through the budget rather than through `setCacheMode(DISABLED)`: the
+            `UNITS_OVERRIDE` hook this spec pins in `setupSpec` takes precedence over the
+            mode, so setting the mode alone would leave caching (and the cut) fully active and
+            compare the cut rendering against itself.
+        '''
+            CacheBudget.UNITS_OVERRIDE = 0 // A maximally constrained machine: no caching at all.
+            var wholeBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)
+            wholeBox.setSize(width, height)
+            var whole = Utility.renderSingleComponent(wholeBox)
+
+        and : 'An identically styled box painted with the cache on, so that its layer is cut:'
+            CacheBudget.UNITS_OVERRIDE = 10
+            var cutBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)
+            cutBox.setSize(width, height)
+            Utility.renderSingleComponent(cutBox)
+            Utility.renderSingleComponent(cutBox)
+
+        and : """
+            Proof that the comparison is not vacuous: there is a cached image for that layer
+            at all. A layer carrying an uncacheable painter is refused by the cache as a whole,
+            so an image can only exist for it if the painters really were cut out of it.
+        """
+            assert !ComponentExtension.from(cutBox).cachedRendering(layer).isEmpty()
+
+        when : 'We look for the single worst deviating colour channel of the whole image:'
+            var cut = Utility.renderSingleComponent(cutBox)
+            int worstChannelDelta = 0
+            for ( int y = 0; y < height; y++ )
+                for ( int x = 0; x < width; x++ )
+                    for ( int shift : [0, 8, 16, 24] ) { // blue, green, red and alpha
+                        int delta = Math.abs(
+                                        ((whole.getRGB(x, y) >> shift) & 0xff) -
+                                        ((cut.getRGB(x, y)   >> shift) & 0xff)
+                                    )
+                        worstChannelDelta = Math.max(worstChannelDelta, delta)
+                    }
+
+        then : 'Not one channel of one pixel deviates, alpha included:'
+            worstChannelDelta <= 1
+
+        cleanup : 'The budget goes back to what the rest of this specification expects.'
+            // Restored here rather than only in the `given` block above, so that a failure
+            // between the two assignments cannot leave every later scenario running uncached.
+            CacheBudget.UNITS_OVERRIDE = 10
+
+        where :
+            description                            | layer               | width | height | styler
+            "a painter over a rounded background"  | UI.Layer.BACKGROUND | 300   | 160    | { it.backgroundColor("#2f4f6f").borderRadius(14).margin(6)
+                                                                                               .painter(UI.Layer.BACKGROUND, "mark", { g ->
+                                                                                                    g.setColor(new Color(240, 120, 30, 200))
+                                                                                                    g.fillOval(20, 20, 60, 40)
+                                                                                               }) }
+            "overlapping cacheable and lambda painters" | UI.Layer.BACKGROUND | 300 | 160  | { it.backgroundColor("#3f5f2f").borderRadius(12)
+                                                                                               .painter(UI.Layer.BACKGROUND, "a-cacheable",
+                                                                                                    swingtree.api.Painter.of("k", { g ->
+                                                                                                        g.setColor(new Color(240, 120, 30, 190))
+                                                                                                        g.fillOval(20, 20, 120, 90)
+                                                                                                    }))
+                                                                                               .painter(UI.Layer.BACKGROUND, "b-lambda", { g ->
+                                                                                                    g.setColor(new Color(30, 200, 160, 150))
+                                                                                                    g.fillRect(60, 40, 120, 70)
+                                                                                               }) }
+            "overlapping lambda painter *first*"   | UI.Layer.BACKGROUND | 300   | 160    | { it.backgroundColor("#3f2f5f").borderRadius(12)
+                                                                                               .painter(UI.Layer.BACKGROUND, "a-lambda", { g ->
+                                                                                                    g.setColor(new Color(30, 200, 160, 150))
+                                                                                                    g.fillRect(60, 40, 120, 70)
+                                                                                               })
+                                                                                               .painter(UI.Layer.BACKGROUND, "b-cacheable",
+                                                                                                    swingtree.api.Painter.of("k2", { g ->
+                                                                                                        g.setColor(new Color(240, 120, 30, 190))
+                                                                                                        g.fillOval(20, 20, 120, 90)
+                                                                                                    })) }
+            "a painter over a shadow"              | UI.Layer.CONTENT    | 320   | 180    | { it.backgroundColor("#6f4f2f").borderRadius(18)
+                                                                                               .shadow(UI.Layer.CONTENT, "glow", s -> s.color("#0a0a14").blurRadius(7).spreadRadius(1))
+                                                                                               .painter(UI.Layer.CONTENT, "mark", { g ->
+                                                                                                    g.setColor(new Color(30, 200, 160, 180))
+                                                                                                    g.fillRect(40, 30, 90, 50)
+                                                                                               }) }
+    }
+
     def 'For a flat, arcless style the reconstruction is exactly pixel identical.'()
     {
         reportInfo """
