@@ -96,7 +96,8 @@ final class StyleLayerCache
     void validate( ComponentConf newConf ) {
         final LayerRenderConf full = newConf.renderConfFor(_layer);
         // Note that _isResizing() records the size and so must run on every validation:
-        final boolean split = _isResizing(newConf.currentBounds().size()) && _canBeSplitAroundNoises(full);
+        final boolean isResizing = _isResizing(newConf.currentBounds().size());
+        final boolean split = isResizing && _canBeSplitAroundNoises(full);
         if ( split != _isSplitAroundNoises ) {
             _isSplitAroundNoises = split;
             _parts = split
@@ -109,7 +110,7 @@ final class StyleLayerCache
                         };
         }
         for ( LayerPartitionCache part : _parts )
-            part.validate(newConf);
+            part.validate(newConf, isResizing);
 
         _uncachedPartition = split
                 ? LayerRenderConfPartitions.NOISES.restrict(full)
