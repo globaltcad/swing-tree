@@ -242,8 +242,18 @@ public final class ViewResizeBenchmark
             SwingTree.get().setCacheMode(SwingTreeInitConfig.CacheMode.valueOf(CACHE_MODE.toUpperCase(Locale.ROOT)));
 
         Map<Example, Result> results = new LinkedHashMap<>();
-        for ( Example example : examples )
+        for ( Example example : examples ) {
+            /*
+             *  Every example is measured as if it were the only application running, because
+             *  that is what it stands in for. The render caches are global and bounded by a
+             *  byte budget, so without this each example would be measured against a cache
+             *  already spent on the ones before it - and a seventh example would report the
+             *  numbers of an application sharing its process with six others, which is not a
+             *  situation anyone is in.
+             */
+            UI.runNow(ComponentExtension::updateAllCachesFromLibraryConfig);
             results.put(example, measure(example));
+        }
 
         printTable(results);
 
