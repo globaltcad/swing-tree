@@ -824,6 +824,10 @@ public final class NoiseFunctions
     private static final double LEAF_MAX_ASYMMETRY      = 0.6;
     private static final double LEAF_WAVE_AMPLITUDE     = 0.18;
     private static final double LEAF_MAX_SPINE_BOW      = 0.35;
+    /** The widest a leaf can get, relative to its half length - the first of the two bounds
+     *  {@link #_isOutsideLeafBounds} is derived from, see there. */
+    private static final double LEAF_MAX_HALF_WIDTH_PER_HALF_LENGTH =
+            ( LEAF_MIN_ASPECT + LEAF_ASPECT_SPREAD ) * ( 1 + LEAF_MAX_ASYMMETRY ) * ( 1 + LEAF_WAVE_AMPLITUDE );
 
     /**
      *  Whether the pixel offset {@code (dx, dy)} from a leaf's center lies outside the smallest
@@ -847,18 +851,15 @@ public final class NoiseFunctions
      *          {@code |t| < 1}.</li>
      *      <li>{@code |spineV| = |curve| * (1-t²) <= LEAF_MAX_SPINE_BOW}.</li>
      *  </ul>
-     *  so {@code |v| <= halfWidth + |spineV| <= _MAX_HALF_WIDTH_PER_HALF_LENGTH * halfLength
+     *  so {@code |v| <= halfWidth + |spineV| <= LEAF_MAX_HALF_WIDTH_PER_HALF_LENGTH * halfLength
      *  + LEAF_MAX_SPINE_BOW}, and the radius below follows. The bounds are deliberately the
      *  obvious analytic ones rather than the tightest numeric ones: a tighter radius rejects a
      *  little more, but it would have to be re-derived by hand every time a leaf is reshaped.
      */
     private static boolean _isOutsideLeafBounds( double dx, double dy, double halfLength ) {
-        final double acrossReach = _MAX_HALF_WIDTH_PER_HALF_LENGTH * halfLength + LEAF_MAX_SPINE_BOW;
+        final double acrossReach = LEAF_MAX_HALF_WIDTH_PER_HALF_LENGTH * halfLength + LEAF_MAX_SPINE_BOW;
         return dx * dx + dy * dy >= halfLength * halfLength + acrossReach * acrossReach;
     }
-
-    private static final double _MAX_HALF_WIDTH_PER_HALF_LENGTH =
-            ( LEAF_MIN_ASPECT + LEAF_ASPECT_SPREAD ) * ( 1 + LEAF_MAX_ASYMMETRY ) * ( 1 + LEAF_WAVE_AMPLITUDE );
 
     /**
      *  A leafy foliage texture. Leaves are scattered from a jittered grid - jittered
