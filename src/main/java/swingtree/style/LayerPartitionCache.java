@@ -442,7 +442,21 @@ final class LayerPartitionCache
      *  reclamation - were a frame's key ever strongly retained, a long animation would fill
      *  the cache to {@link #_maxCacheEntries()} and lock every other component out of it.
      */
-    private int _cachingMakesSenseFor( LayerRenderConf state )
+    private int _cachingMakesSenseFor( LayerRenderConf state ) {
+        return _cachingMakesSenseFor(_layer, state);
+    }
+
+    /**
+     *  Whether a configuration would be admitted to the cache at all, which
+     *  {@link StyleLayerCache} asks before cutting a layer around its user painters: the whole
+     *  point of that cut is to get the rest of the layer cached, so if the rest would not be
+     *  cached anyway (a flat fill is cheaper to draw than to blit) the cut is pure overhead.
+     */
+    static boolean wouldBeAdmitted( UI.Layer layer, LayerRenderConf state ) {
+        return _cachingMakesSenseFor(layer, state) >= 0;
+    }
+
+    private static int _cachingMakesSenseFor( UI.Layer layer, LayerRenderConf state )
     {
         final int maxEntries = _maxCacheEntries();
         if ( maxEntries <= 0 || _CACHE.size() >= maxEntries )
@@ -478,18 +492,30 @@ final class LayerPartitionCache
         for ( ShadowConf shadow : state.layer().shadows().sortedByNames() )
             if ( !shadow.equals(ShadowConf.none()) && shadow.color().isPresent() )
                 heavyStyleCount++;
+        /*
+            A painter which declares itself cacheable is drawing the library cannot see but
+            which the user has promised is a pure function of a value (see Painter.of(..)).
+            It counts as heavy for the same reason an image does: arbitrary drawing, possibly
+            expensive, and worth not repeating. Without this a layer whose only content is such
+            a painter scored zero and was never cached at all - the promise was accepted and
+            then quietly ignored. Uncacheable painters are not counted, because a layer still
+            holding one is refused outright a few lines above.
+        */
+        for ( PainterConf painter : state.layer().painters().sortedByNames() )
+            if ( !painter.equals(PainterConf.none()) && painter.painter().canBeCached() )
+                heavyStyleCount++;
 
         final BaseColorConf baseCoors = state.baseColors();
         final BoxModelConf  boxModel  = state.boxModel();
         final boolean       isRounded = boxModel.hasAnyNonZeroArcs();
 
-        if ( _layer == UI.Layer.BORDER ) {
+        if ( layer == UI.Layer.BORDER ) {
             boolean hasWidth = !Outline.none().equals(boxModel.widths());
             boolean hasColoring = !baseCoors.borderColor().equals(BorderColorsConf.none());
             if ( hasWidth && hasColoring )
                 heavyStyleCount++;
         }
-        if ( _layer == UI.Layer.BACKGROUND ) {
+        if ( layer == UI.Layer.BACKGROUND ) {
             boolean roundedOrHasMargin = isRounded || !boxModel.margin().equals(Outline.none());
             if ( roundedOrHasMargin ) {
                 if ( baseCoors.backgroundColor().filter( c -> c.getAlpha() > 0 ).isPresent() )

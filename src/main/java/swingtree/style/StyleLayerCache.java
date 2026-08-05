@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import sprouts.Tuple;
 import swingtree.UI;
 import swingtree.layout.Size;
@@ -51,10 +52,11 @@ final class StyleLayerCache
     private final BiConsumer<LayerRenderConf, Graphics2D> _renderer;
     /** The cached parts of this layer, in paint order. */
     private LayerPartitionCache[]  _parts;
-    /** Whether the layer is currently cut around its noises, see {@link #validate}. */
-    private boolean                _isSplitAroundNoises;
-    /** The noises, ready to be replayed straight onto the destination between the cached
-     *  parts. Empty whenever the layer is not split, in which case nothing is replayed. */
+    /** How the layer is currently cut, see {@link #validate}. */
+    private SplitMode              _splitMode;
+    /** The piece which is replayed straight onto the destination rather than cached, drawn
+     *  directly after the first cached part. Empty whenever the layer is not cut, in which
+     *  case nothing is replayed. */
     private LayerRenderConf        _uncachedPartition;
     /** The size seen by the previous validation, and how many paints ago it last changed -
      *  the resize detection {@link #_isResizing} implements. */
@@ -72,12 +74,54 @@ final class StyleLayerCache
     private int _paintCacheMissCount = 0;
 
 
+    /**
+     *  The shapes a layer is cached in. Each one names the cached parts it consists of and the
+     *  piece (if any) which is instead replayed onto the destination after the first of them -
+     *  see {@link LayerRenderConfPartitions} for why a layer is ever cut at all.
+     */
+    private enum SplitMode
+    {
+        /** One cached rendering of everything. */
+        NONE( Tuple.of(LayerRenderConfPartitions.WHOLE), null ),
+        /** Cut around the noises, so that everything else keeps a size independent cache
+         *  entry across a resize. Temporary: only while the component is resizing. */
+        AROUND_NOISES(
+            Tuple.of(LayerRenderConfPartitions.UNDER_NOISE, LayerRenderConfPartitions.OVER_NOISE),
+            LayerRenderConfPartitions.NOISES
+        ),
+        /** Cut around the user painters, so that a layer which carries one is cacheable at
+         *  all rather than being re-rendered whole on every paint. */
+        AROUND_PAINTERS(
+            Tuple.of(LayerRenderConfPartitions.UNDER_PAINTERS),
+            LayerRenderConfPartitions.PAINTERS
+        );
+
+        private final Tuple<LayerRenderConfPartitions> _cachedParts;
+        private final @Nullable LayerRenderConfPartitions _replayedPart;
+
+        SplitMode( Tuple<LayerRenderConfPartitions> cachedParts, @Nullable LayerRenderConfPartitions replayedPart ) {
+            _cachedParts  = cachedParts;
+            _replayedPart = replayedPart;
+        }
+
+        LayerPartitionCache[] newPartsFor( UI.Layer layer ) {
+            LayerPartitionCache[] parts = new LayerPartitionCache[_cachedParts.size()];
+            for ( int i = 0; i < parts.length; i++ )
+                parts[i] = new LayerPartitionCache(layer, _cachedParts.get(i));
+            return parts;
+        }
+
+        LayerRenderConf uncachedPartitionOf (LayerRenderConf full ) {
+            return ( _replayedPart == null ? LayerRenderConf.none() : _replayedPart.restrict(full) );
+        }
+    }
+
     StyleLayerCache( UI.Layer layer ) {
         _layer                 = Objects.requireNonNull(layer);
         _renderer              = ( conf, graphics ) -> StyleRenderer.renderStyleOn(_layer, conf, graphics);
-        _parts                 = new LayerPartitionCache[] { new LayerPartitionCache(layer, LayerRenderConfPartitions.WHOLE) };
-        _isSplitAroundNoises   = false;
-        _uncachedPartition = LayerRenderConf.none();
+        _splitMode             = SplitMode.NONE;
+        _parts                 = SplitMode.NONE.newPartsFor(layer);
+        _uncachedPartition     = LayerRenderConf.none();
         _lastSize              = Size.unknown();
         _paintsAtThisSize      = PAINTS_UNTIL_REJOINED;
     }
@@ -97,24 +141,55 @@ final class StyleLayerCache
         final LayerRenderConf full = newConf.renderConfFor(_layer);
         // Note that _isResizing() records the size and so must run on every validation:
         final boolean isResizing = _isResizing(newConf.currentBounds().size());
-        final boolean split = isResizing && _canBeSplitAroundNoises(full);
-        if ( split != _isSplitAroundNoises ) {
-            _isSplitAroundNoises = split;
-            _parts = split
-                    ? new LayerPartitionCache[] {
-                            new LayerPartitionCache(_layer, LayerRenderConfPartitions.UNDER_NOISE),
-                            new LayerPartitionCache(_layer, LayerRenderConfPartitions.OVER_NOISE)
-                        }
-                    : new LayerPartitionCache[] {
-                            new LayerPartitionCache(_layer, LayerRenderConfPartitions.WHOLE)
-                        };
+        final SplitMode mode = _splitModeFor(full, isResizing);
+        if ( mode != _splitMode ) {
+            _splitMode = mode;
+            _parts     = mode.newPartsFor(_layer);
         }
         for ( LayerPartitionCache part : _parts )
             part.validate(newConf, isResizing);
 
-        _uncachedPartition = split
-                ? LayerRenderConfPartitions.NOISES.restrict(full)
-                : LayerRenderConf.none();
+        _uncachedPartition = mode.uncachedPartitionOf(full);
+    }
+
+    /**
+     *  Which shape this layer should be cached in. The two cuts are mutually exclusive and the
+     *  painter one wins, which costs nothing: a layer holding an uncacheable painter can never
+     *  satisfy {@link #_canBeSplitAroundNoises} anyway, because the side of a noise cut that
+     *  the painters land on is then neither empty nor cacheable size independently.
+     */
+    private SplitMode _splitModeFor( LayerRenderConf full, boolean isResizing ) {
+        if ( _canBeSplitAroundPainters(full) )
+            return SplitMode.AROUND_PAINTERS;
+        if ( isResizing && _canBeSplitAroundNoises(full) )
+            return SplitMode.AROUND_NOISES;
+        return SplitMode.NONE;
+    }
+
+    /**
+     *  Whether cutting the user painters out of this layer would achieve anything. <br>
+     *  <br>
+     *  Unlike the noise cut this needs no temporal gate and trades nothing away, because the
+     *  alternative it is measured against is not a cached whole layer - it is <i>no cache at
+     *  all</i>. {@link LayerPartitionCache} refuses a layer carrying a painter whose output it
+     *  cannot know, so today every shadow, gradient and fill sharing that layer is re-rendered
+     *  at full size on every paint. Cutting the painters out lets all of that be cached, and
+     *  the painters themselves run exactly as often as they did before. <br>
+     *  <br>
+     *  What does have to be checked is that the cut would actually buy a cached image: that
+     *  the layer holds something besides the painter, and that this something is heavy enough
+     *  for {@link LayerPartitionCache} to admit it. Asking the cache itself rather than guessing
+     *  matters - a layer whose only other content is a flat fill is cheaper to draw than to
+     *  blit, and cutting it measured ~7% <i>worse</i> on the theme garden example, whose
+     *  painter bearing layers are exactly that.
+     */
+    private boolean _canBeSplitAroundPainters( LayerRenderConf conf ) {
+        if ( !conf.layer().hasPaintersWhichCannotBeCached() )
+            return false; // Nothing to cut around, or nothing that stops the layer being cached whole.
+        final LayerRenderConf underPainters = LayerRenderConfPartitions.UNDER_PAINTERS.restrict(conf);
+        if ( underPainters.rendersNothing() )
+            return false; // The painters are all there is, so a cut would only add bookkeeping.
+        return LayerPartitionCache.wouldBeAdmitted(_layer, underPainters);
     }
 
     /**
@@ -205,14 +280,14 @@ final class StyleLayerCache
         boolean anythingRenderedFromStyle = false;
         boolean anythingRenderedFromCache = false;
         for ( int i = 0; i < _parts.length; i++ ) {
-            // The lifted out noises go between the parts - which is the only reason a layer
-            // ever has more than one part, so "not before the first" locates them exactly:
-            if ( i > 0 )
-                anythingRendered |= _paintNoises(g2d);
             LayerPartitionCache.PaintOutcome outcome = _parts[i].paint(g2d, _renderer);
             anythingRendered          |= ( outcome != LayerPartitionCache.PaintOutcome.NOTHING_RENDERED   );
             anythingRenderedFromStyle |= ( outcome == LayerPartitionCache.PaintOutcome.RENDERED_FROM_STYLE);
             anythingRenderedFromCache |= ( outcome == LayerPartitionCache.PaintOutcome.RENDERED_FROM_CACHE);
+            // The lifted out piece always sits directly after the first cached part: between
+            // the two parts of a noise cut, and on top of the single part of a painter cut.
+            if ( i == 0 )
+                anythingRendered |= _paintUncachedPartition(g2d);
         }
         /*
             This, and not validate(), is what drains the rejoin tail, see PAINTS_UNTIL_REJOINED -
@@ -250,7 +325,7 @@ final class StyleLayerCache
      *  The replay is not a cache outcome of its own: it is unconditional work, which is why
      *  the cut is gated on the component resizing.
      */
-    private boolean _paintNoises( Graphics2D g2d ) {
+    private boolean _paintUncachedPartition( Graphics2D g2d ) {
         final Size size = _uncachedPartition.boxModel().size();
         if ( !size.hasPositiveWidth() || !size.hasPositiveHeight() )
             return false; // Nothing lifted out, or nowhere to put it.
@@ -276,9 +351,11 @@ final class StyleLayerCache
      *  the layer came out of a cache and no part had to be rendered, because a layer painted
      *  partly from a cache and partly by the renderer is, from the outside, a paint the renderer
      *  was invoked for. A part holding none of the layer's style neither paints nor counts. <br>
-     *  A noise lifted out of the layer is the one exception: it is replayed on every paint, yet
-     *  a paint replaying it still counts as a hit, because it is cheap by construction and
-     *  counting it as a render would hide the very saving the cut exists to make. */
+     *  A piece lifted out of the layer is the one exception: it is replayed on every paint, yet
+     *  a paint replaying it still counts as a hit, because what the cut exists to make cheaper
+     *  is everything else - counting the replay as a render would hide exactly that saving.
+     *  For a lifted out noise the replay is cheap by construction; for a lifted out painter it
+     *  is arbitrary user code, but it is code which ran just as often before the cut. */
     int paintCacheHitCount() { return _paintCacheHitCount; }
 
     /** Paints which had to invoke the style renderer for at least one part of the layer, or
