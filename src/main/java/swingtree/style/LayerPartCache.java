@@ -485,6 +485,18 @@ final class LayerPartCache
         for ( ShadowConf shadow : state.layer().shadows().sortedByNames() )
             if ( !shadow.equals(ShadowConf.none()) && shadow.color().isPresent() )
                 heavyStyleCount++;
+        /*
+            A painter which declares itself cacheable is drawing the library cannot see but
+            which the user has promised is a pure function of a value (see Painter.of(..)).
+            It counts as heavy for the same reason an image does: arbitrary drawing, possibly
+            expensive, and worth not repeating. Without this a layer whose only content is such
+            a painter scored zero and was never cached at all - the promise was accepted and
+            then quietly ignored. Uncacheable painters are not counted, because a layer still
+            holding one is refused outright a few lines above.
+        */
+        for ( PainterConf painter : state.layer().painters().sortedByNames() )
+            if ( !painter.equals(PainterConf.none()) && painter.painter().canBeCached() )
+                heavyStyleCount++;
 
         final BaseColorConf baseCoors = state.baseColors();
         final BoxModelConf  boxModel  = state.boxModel();

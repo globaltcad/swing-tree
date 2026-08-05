@@ -107,7 +107,7 @@ enum StyleLayerPart
                                     .withNoises(StyleConfLayer._NO_NOISES)
                            );
             case UNDER_PAINTERS:
-                return conf.withLayer( conf.layer().withPainters(StyleConfLayer._NO_PAINTERS) );
+                return conf.withLayer( conf.layer().withPainters(_paintersBefore(conf, true)) );
             case PAINTERS:
                 return conf.withBaseColors(BaseColorConf.none())
                            .withLayer(
@@ -117,8 +117,57 @@ enum StyleLayerPart
                                     .withNoises(StyleConfLayer._NO_NOISES)
                                     .withShadows(StyleConfLayer._NO_SHADOWS)
                                     .withTexts(StyleConfLayer._NO_TEXTS)
+                                    .withPainters(_paintersBefore(conf, false))
                            );
         }
         throw new IllegalStateException("Unknown style layer part: " + this);
+    }
+
+    /**
+     *  The painters of the supplied configuration, with everything on the other side of the
+     *  painter cut replaced by {@link PainterConf#none()} - which draws nothing and, unlike an
+     *  arbitrary painter, declares itself cacheable, so a part left with only these is a part
+     *  the cache will take. <br>
+     *  <br>
+     *  <b>Where the cut falls, and why there rather than "all the cacheable ones".</b>
+     *  A painter which promises to be cacheable (see {@link swingtree.api.Painter#of(Object,
+     *  swingtree.api.Painter)}) can perfectly well be baked into the cached image, and it
+     *  should be - the promise exists to be taken up. But the renderer runs painters in the
+     *  order of their names, and painters on one layer may overlap, so <i>which</i> of them are
+     *  moved into the image decides what the component looks like. This therefore takes the
+     *  longest <b>prefix</b> in that order which is entirely cacheable, rather than every
+     *  cacheable painter wherever it sits: a prefix keeps every painter in its original
+     *  position relative to every other, so the cut cannot change a single pixel. Gathering all
+     *  cacheable painters instead would hoist those that sit behind an uncacheable one in front
+     *  of it, which is a visual change - a silent one, in code the library never sees.
+     *
+     * @param conf The configuration whose painters are to be partitioned.
+     * @param wantPrefix True for the cacheable prefix (what is baked into the image),
+     *                   false for the remainder (what is replayed on every paint).
+     */
+    private static NamedConfigs<PainterConf> _paintersBefore( LayerRenderConf conf, boolean wantPrefix ) {
+        final NamedConfigs<PainterConf> painters = conf.layer().painters();
+        final @org.jspecify.annotations.Nullable String cut = _firstUncacheablePainterName(painters);
+        if ( cut == null )
+            return ( wantPrefix ? painters : StyleConfLayer._NO_PAINTERS ); // Nothing to replay.
+        return painters.mapNamedStyles( named -> {
+                    boolean isInPrefix = named.name().compareTo(cut) < 0;
+                    return ( isInPrefix == wantPrefix
+                                ? named
+                                : NamedConf.of(named.name(), PainterConf.none()) );
+                });
+    }
+
+    /** The name of the first painter, in the order the renderer runs them, which cannot be
+     *  cached - or null when every one of them can. */
+    private static @org.jspecify.annotations.Nullable String _firstUncacheablePainterName( NamedConfigs<PainterConf> painters ) {
+        String first = null;
+        for ( NamedConf<PainterConf> named : painters.namedStylesStream().toArray(NamedConf[]::new) ) {
+            if ( named.style().painter().canBeCached() )
+                continue;
+            if ( first == null || named.name().compareTo(first) < 0 )
+                first = named.name();
+        }
+        return first;
     }
 }

@@ -228,7 +228,9 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             *whole* layer uncacheable: every shadow, gradient and fill sharing it was
             re-rendered at full size on every paint. Such a layer is therefore cut in two, the
             painters replayed straight onto the destination on top of a cached image of
-            everything else.
+            everything else. When the two kinds are mixed, the cut falls at the first
+            uncacheable painter, so that every painter keeps its position relative to every
+            other - the deliberately overlapping row below is what pins that.
 
             That turns one drawing operation into two, which is only acceptable if they add up
             to the very same picture. They do, because the renderer draws by kind in a fixed
@@ -296,6 +298,26 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
                                                                                                     g.setColor(new Color(240, 120, 30, 200))
                                                                                                     g.fillOval(20, 20, 60, 40)
                                                                                                }) }
+            "overlapping cacheable and lambda painters" | UI.Layer.BACKGROUND | 300 | 160  | { it.backgroundColor("#3f5f2f").borderRadius(12)
+                                                                                               .painter(UI.Layer.BACKGROUND, "a-cacheable",
+                                                                                                    swingtree.api.Painter.of("k", { g ->
+                                                                                                        g.setColor(new Color(240, 120, 30, 190))
+                                                                                                        g.fillOval(20, 20, 120, 90)
+                                                                                                    }))
+                                                                                               .painter(UI.Layer.BACKGROUND, "b-lambda", { g ->
+                                                                                                    g.setColor(new Color(30, 200, 160, 150))
+                                                                                                    g.fillRect(60, 40, 120, 70)
+                                                                                               }) }
+            "overlapping lambda painter *first*"   | UI.Layer.BACKGROUND | 300   | 160    | { it.backgroundColor("#3f2f5f").borderRadius(12)
+                                                                                               .painter(UI.Layer.BACKGROUND, "a-lambda", { g ->
+                                                                                                    g.setColor(new Color(30, 200, 160, 150))
+                                                                                                    g.fillRect(60, 40, 120, 70)
+                                                                                               })
+                                                                                               .painter(UI.Layer.BACKGROUND, "b-cacheable",
+                                                                                                    swingtree.api.Painter.of("k2", { g ->
+                                                                                                        g.setColor(new Color(240, 120, 30, 190))
+                                                                                                        g.fillOval(20, 20, 120, 90)
+                                                                                                    })) }
             "a painter over a shadow"              | UI.Layer.CONTENT    | 320   | 180    | { it.backgroundColor("#6f4f2f").borderRadius(18)
                                                                                                .shadow(UI.Layer.CONTENT, "glow", s -> s.color("#0a0a14").blurRadius(7).spreadRadius(1))
                                                                                                .painter(UI.Layer.CONTENT, "mark", { g ->
