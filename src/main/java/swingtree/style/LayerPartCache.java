@@ -435,7 +435,21 @@ final class LayerPartCache
      *  reclamation - were a frame's key ever strongly retained, a long animation would fill
      *  the cache to {@link #_maxCacheEntries()} and lock every other component out of it.
      */
-    private int _cachingMakesSenseFor( LayerRenderConf state )
+    private int _cachingMakesSenseFor( LayerRenderConf state ) {
+        return _cachingMakesSenseFor(_layer, state);
+    }
+
+    /**
+     *  Whether a configuration would be admitted to the cache at all, which
+     *  {@link StyleLayerCache} asks before cutting a layer around its user painters: the whole
+     *  point of that cut is to get the rest of the layer cached, so if the rest would not be
+     *  cached anyway (a flat fill is cheaper to draw than to blit) the cut is pure overhead.
+     */
+    static boolean wouldBeAdmitted( UI.Layer layer, LayerRenderConf state ) {
+        return _cachingMakesSenseFor(layer, state) >= 0;
+    }
+
+    private static int _cachingMakesSenseFor( UI.Layer _layer, LayerRenderConf state )
     {
         final int maxEntries = _maxCacheEntries();
         if ( maxEntries <= 0 || _CACHE.size() >= maxEntries )

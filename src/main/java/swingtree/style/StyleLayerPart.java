@@ -22,6 +22,14 @@ import swingtree.UI;
  *  {@link StyleLayerCache} owns that decision; anything changing it must measure a real, busy
  *  UI rather than an isolated large noise, because the two disagree sharply. <br>
  *  <br>
+ *  The second case is a <b>user painter</b>, and its economics are the opposite in every
+ *  respect. A painter is arbitrary user code, so its output cannot be cached at all and a layer
+ *  carrying one is refused by {@link LayerPartCache} outright - shadows, gradients and all,
+ *  re-rendered at full size on every single paint. Cutting the painters out lets everything
+ *  else on that layer be cached normally, and the painters are then replayed exactly as often
+ *  as they ran before. There is therefore nothing to trade off and no resizing condition: the
+ *  cut is a strict improvement whenever the layer holds anything else worth caching. <br>
+ *  <br>
  *  Splitting is possible at all because the renderer draws by kind in a fixed order - fill,
  *  border, images, gradients, <b>noises</b>, shadows, texts, painters - so the noises are
  *  always one contiguous block and the layer always cuts into exactly the same three pieces.
@@ -43,7 +51,7 @@ import swingtree.UI;
  */
 enum StyleLayerPart
 {
-    /** The entire layer, used when there is no noise to split around. */
+    /** The entire layer, used when there is nothing to split around. */
     WHOLE,
     /** Everything the renderer draws before the noises: fill, border, images and gradients. */
     UNDER_NOISE,
@@ -52,7 +60,16 @@ enum StyleLayerPart
      *  space. {@link StyleLayerCache} never hands this part to a {@link LayerPartCache}. */
     NOISES,
     /** Everything the renderer draws after the noises: shadows, texts and painters. */
-    OVER_NOISE;
+    OVER_NOISE,
+    /** Everything except the painters, which is the whole layer minus the one kind of style
+     *  that can never be cached - see {@link #PAINTERS}. */
+    UNDER_PAINTERS,
+    /** The user painters, replayed straight onto the destination on every paint. Unlike
+     *  {@link #NOISES} this is not cheap - it is arbitrary user code - but it is drawn exactly
+     *  as often as it would have been without the cut, because a layer carrying it was never
+     *  cacheable in the first place. {@link StyleLayerCache} never hands this part to a
+     *  {@link LayerPartCache}. */
+    PAINTERS;
 
     /**
      *  Narrows the supplied render configuration down to just this part of the layer, by
@@ -88,6 +105,18 @@ enum StyleLayerPart
                                     .withImages(StyleConfLayer._NO_IMAGES)
                                     .withGradients(StyleConfLayer._NO_GRADIENTS)
                                     .withNoises(StyleConfLayer._NO_NOISES)
+                           );
+            case UNDER_PAINTERS:
+                return conf.withLayer( conf.layer().withPainters(StyleConfLayer._NO_PAINTERS) );
+            case PAINTERS:
+                return conf.withBaseColors(BaseColorConf.none())
+                           .withLayer(
+                                conf.layer()
+                                    .withImages(StyleConfLayer._NO_IMAGES)
+                                    .withGradients(StyleConfLayer._NO_GRADIENTS)
+                                    .withNoises(StyleConfLayer._NO_NOISES)
+                                    .withShadows(StyleConfLayer._NO_SHADOWS)
+                                    .withTexts(StyleConfLayer._NO_TEXTS)
                            );
         }
         throw new IllegalStateException("Unknown style layer part: " + this);
