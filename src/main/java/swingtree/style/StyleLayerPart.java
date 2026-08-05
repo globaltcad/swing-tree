@@ -137,10 +137,9 @@ enum StyleLayerPart
     }
 
     /**
-     *  The painters of the supplied configuration, with everything on the other side of the
-     *  painter cut replaced by {@link PainterConf#none()} - which draws nothing and, unlike an
-     *  arbitrary painter, declares itself cacheable, so a part left with only these is a part
-     *  the cache will take. <br>
+     *  The painters of the supplied configuration which fall on one side of the painter cut,
+     *  with those on the other side dropped entirely - so a part left with none of them is the
+     *  canonical "no painters" configuration, which is a part the cache will take. <br>
      *  <br>
      *  <b>Where the cut falls, and why there rather than "all the cacheable ones".</b>
      *  A painter which promises to be cacheable (see {@link swingtree.api.Painter#of(Object,
@@ -163,29 +162,27 @@ enum StyleLayerPart
         final @Nullable String cut = _firstUncacheablePainterName(painters);
         if ( cut == null )
             return ( wantPrefix ? painters : StyleConfLayer._NO_PAINTERS ); // Nothing to replay.
-        final NamedConfigs<PainterConf> wanted = painters.mapNamedStyles( named -> {
-                    boolean isInPrefix = named.name().compareTo(cut) < 0;
-                    return ( isInPrefix == wantPrefix
-                                ? named
-                                : NamedConf.of(named.name(), PainterConf.none()) );
-                });
         /*
-            A side that kept no painter at all is normalized to the canonical "no painters"
-            configuration, because the names would otherwise survive as empty entries. That
-            matters for the cached side: this configuration *is* the cache key, and an entry
-            keyed on the name of a painter it does not draw can only ever be found again by a
-            component whose painter happens to have the same name. Two identically styled
-            components calling their painter "mark" and "logo" would mint an entry each - and
-            those entries count against the global entry limit, so the debris locks other
-            components out of caching too. Normalizing lets them share the one entry they
-            should always have shared, and additionally lets `rendersNothing()` recognize a
-            side with nothing left on it.
-        */
-        return ( _drawsNoPainter(wanted) ? StyleConfLayer._NO_PAINTERS : wanted );
-    }
+            The painters of the other side are *dropped*, not merely emptied, and that is what
+            keeps this usable as a cache key. A name is how a style is addressed while it is
+            being configured; it has no business in the key of an image that draws nothing for
+            it. Were the emptied entries kept under their names, two components with the very
+            same cached prefix would still mint an image each merely because they call their
+            replayed painter "mark" and "logo" - and since the number of entries is capped,
+            that debris locks other components out of the cache as well.
 
-    private static boolean _drawsNoPainter( NamedConfigs<PainterConf> painters ) {
-        return !painters.any( named -> !named.style().equals(PainterConf.none()) );
+            Building up from the canonical "no painters" rather than filtering down to it is
+            what makes the empty case fall out on its own: a side which keeps nothing is the
+            base, which is exactly the configuration a layer without painters has, so the two
+            share their image as they always should have. It also lets `rendersNothing()`
+            recognize such a side.
+        */
+        return painters.namedStylesStream()
+                       .filter( named -> ( named.name().compareTo(cut) < 0 ) == wantPrefix )
+                       .filter( named -> !named.style().equals(PainterConf.none()) )
+                       .reduce( StyleConfLayer._NO_PAINTERS,
+                                ( keptSoFar, named ) -> keptSoFar.withNamedStyle(named.name(), named.style()),
+                                ( a, b ) -> a ); // Never called: the stream is sequential.
     }
 
     /** The name of the first painter, in the order the renderer runs them, which cannot be

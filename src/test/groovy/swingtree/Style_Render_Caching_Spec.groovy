@@ -860,6 +860,48 @@ class Style_Render_Caching_Spec extends Specification
             ComponentExtension.from(second).cacheMissCount(UI.Layer.BACKGROUND) == 0
     }
 
+    def 'The sharing survives a cacheable painter sitting in front of the differently named ones.'()
+    {
+        reportInfo """
+            The scenario above has nothing left on the cached side but the background. This one
+            has a *painter* there too - a cacheable one, which is baked into the image - while
+            the uncacheable painters behind it are still named differently from each other.
+
+            It is the same requirement and the harder half of it: what the two components share
+            is the background and the cacheable painter, and that is what the cached image
+            holds, so they must share it. Only the names of what is replayed differ, and a name
+            that draws nothing into the image has no business deciding whether that image can
+            be found again.
+        """
+        given : 'Two components sharing a background and a cacheable painter, differing only in the name of an uncacheable one.'
+            var cacheable = swingtree.api.Painter.of("shared-key", { g ->
+                                g.setColor(new Color(250, 200, 60)); g.fillOval(12, 12, 50, 34)
+                            })
+            def build = { String lambdaName, Color color -> UI.box().withStyle( it -> it
+                                .backgroundColor(new Color(45, 80, 115)).borderRadius(13).margin(5)
+                                .painter(UI.Layer.BACKGROUND, "a-cacheable", cacheable)
+                                .painter(UI.Layer.BACKGROUND, lambdaName, { g ->
+                                    g.setColor(color); g.fillRect(24, 24, 34, 22)
+                                })
+                            ).get(JBox)
+            }
+            var first  = build("m-mark", new Color(240, 120, 30))
+            var second = build("z-logo", new Color(30, 200, 160))
+            first.setSize(280, 150)
+            second.setSize(280, 150)
+
+        when : 'The first one is painted until its background is cached.'
+            3.times { Utility.renderSingleComponent(first) }
+        then : 'It is - the cut put the background and the cacheable painter into one image.'
+            ComponentExtension.from(first).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+
+        when : 'The second one is painted for the very first time.'
+            Utility.renderSingleComponent(second)
+        then : 'It found that very image, rather than minting one of its own.'
+            ComponentExtension.from(second).cacheHitCount(UI.Layer.BACKGROUND)  == 1
+            ComponentExtension.from(second).cacheMissCount(UI.Layer.BACKGROUND) == 0
+    }
+
     def 'Caching is per-layer: a heavy background does not imply a cached foreground.'()
     {
         reportInfo """
