@@ -578,6 +578,86 @@ class Style_Render_Caching_Spec extends Specification
             ext.cacheHitCount(UI.Layer.BACKGROUND)  == hitsBeforeResize
     }
 
+    def 'A large exact-size rendering is not minted while the component is being resized.'()
+    {
+        reportInfo """
+            A cached rendering earns its keep by being blitted more than once. An entry keyed
+            on the exact component size, for a component whose size is currently changing, is
+            the one case where that cannot happen: it is allocated, rendered into, blitted
+            once, and invalidated by the very next frame. For a large image that is strictly
+            more work than having drawn straight onto the destination - a multi megabyte
+            allocation per frame, and a software blit rather than an accelerated one, because
+            Java2D only promotes an image to a server side pixmap after several uses.
+
+            So while the size is in flux, a *large* exact-size entry is not minted at all.
+            Note the two qualifiers: a stretch tileable style is keyed size independently and
+            is not affected, and small entries are always minted - see the scenario after this
+            one for why that second exception is essential.
+        """
+        given : 'A gradient styled button - heavy enough to cache, too gradient-y to stretch tile.'
+            var button =
+                UI.button("Wide")
+                  .withStyle( it -> it
+                        .borderRadius(10)
+                        .gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
+                  )
+                  .get(JButton)
+            var ext = ComponentExtension.from(button)
+        and : 'It is large: above the area up to which an image is worth allocating eagerly.'
+            button.setSize(400, 200)
+
+        when : 'It is painted a few times at its first size, which is a birth rather than a resize.'
+            5.times { Utility.renderSingleComponent(button) }
+        then : 'It is cached, as any heavy style of this size would be.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+
+        when : 'The component is then resized and painted again.'
+            button.setSize(420, 200)
+            Utility.renderSingleComponent(button)
+        then : 'No image was minted for the new size.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
+
+        when : 'The size settles and the component keeps being painted.'
+            8.times { Utility.renderSingleComponent(button) }
+        then : 'Caching resumes, because the reason to suppress it is gone.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+    }
+
+    def 'A small rendering is still minted while resizing, so equally styled components keep sharing it.'()
+    {
+        reportInfo """
+            This is the guard rail on the scenario above. Cached renderings are keyed globally
+            on the render configuration rather than per component, so a UI full of identically
+            styled components mints *one* entry and blits it for all of them. That kind of
+            sharing happens within a single frame and therefore survives a resize perfectly
+            well - suppressing it would turn one rendering per frame into dozens.
+
+            Suppressing every exact-size entry during a resize was measured at more than twice
+            the cost on a drag frame of a UI with 64 identically styled pads, which is why the
+            rule above only ever applies to entries too large to be worth minting eagerly.
+        """
+        given : 'Two identically styled small buttons.'
+            def styler = { conf -> conf
+                .borderRadius(10)
+                .gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
+            }
+            var first  = UI.button("A").withStyle(styler as swingtree.api.Styler).get(JButton)
+            var second = UI.button("B").withStyle(styler as swingtree.api.Styler).get(JButton)
+            first.setSize(100, 60)
+            second.setSize(100, 60)
+            var secondExt = ComponentExtension.from(second)
+
+        when : 'The first one is resized and painted, so it paints mid-resize.'
+            first.setSize(120, 60)
+            Utility.renderSingleComponent(first)
+        and : 'The second one, of that very same new size, is painted afterwards.'
+            second.setSize(120, 60)
+            Utility.renderSingleComponent(second)
+            Utility.renderSingleComponent(second)
+        then : 'It was served from the entry the resizing component minted, rather than rendering again.'
+            secondExt.cacheHitCount(UI.Layer.BACKGROUND) >= 1
+    }
+
     def 'Caching is per-layer: a heavy background does not imply a cached foreground.'()
     {
         reportInfo """
