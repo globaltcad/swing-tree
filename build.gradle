@@ -173,7 +173,10 @@ tasks.register('runResizeBenchmark', JavaExec) {
     classpath = sourceSets.test.runtimeClasspath
     mainClass = 'benchmarks.ViewResizeBenchmark'
     // '-Dbenchmark.warmup=..' and '-Dbenchmark.sweeps=..' control how much work is done,
-    // which matters when profiling, because a sampler needs more than a second of it:
+    // which matters when profiling, because a sampler needs more than a second of it.
+    // '-Dbenchmark.phase=layout|resize|static|clip' measures one regime at a time, which is
+    // what makes a recording attributable; the run then prints the wall clock window of the
+    // timed sweeps, so a profile can exclude the warm-up (where one-off cache filling lives):
     System.properties.each { key, value ->
         if ( key.toString().startsWith('benchmark.') ) systemProperty(key.toString(), value)
     }

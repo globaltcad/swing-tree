@@ -17,7 +17,9 @@ import examples.trains.mvi.TrainsViewModel;
 import examples.zen.ThemeGardenView;
 import sprouts.Var;
 import swingtree.SwingTree;
+import swingtree.SwingTreeInitConfig;
 import swingtree.UI;
+import swingtree.style.ComponentExtension;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -64,6 +66,12 @@ import java.util.Map;
  *  measures several of them back to back and prints one comparison table at the end. That is
  *  the interesting mode when profiling, because a bottleneck that only one styling idiom
  *  triggers is indistinguishable from a universal one until a second UI disagrees.
+ *  <p>
+ *  {@code -Dbenchmark.phase=layout|resize|static|clip} narrows a run down to one of the four
+ *  sweeps, which is how a profile of one regime is kept free of the other three. Two further
+ *  switches exist for the same reason - to answer <i>why</i> rather than <i>how much</i>:
+ *  {@code -Dbenchmark.cachestats=true} reports how many layer paints came out of the render
+ *  cache, and {@code -Dbenchmark.cachemode=..} measures under a different cache budget.
  *  <p>
  *  Run it with {@code ./gradlew runResizeBenchmark -Dbenchmark.view=..}, or as a plain main
  *  method. It needs a display; there is nothing to measure without one.
@@ -189,6 +197,40 @@ public final class ViewResizeBenchmark
     private static final int WARMUP_SWEEPS = Integer.getInteger("benchmark.warmup", 24);
     private static final int TIMED_SWEEPS  = Integer.getInteger("benchmark.sweeps", 40);
     private static final int CLIP_HEIGHT   = Integer.getInteger("benchmark.clip",   300);
+    /*
+     *  Which of the four sweeps run, as a comma separated list of the names below, or 'all'.
+     *  Measuring wants all of them; *profiling* usually wants exactly one, because the four
+     *  sweeps are four different regimes and a sampler cannot tell them apart afterwards -
+     *  they interleave nothing and share every frame of their stacks. One phase per run
+     *  means one recording per regime, which is what makes a profile attributable.
+     */
+    private static final String PHASES = System.getProperty("benchmark.phase", "all");
+    /**
+     *  Whether to report, per style layer, how many layer paints were served from a cached
+     *  image and how many had to run the style renderer. Answers *why* a view paints the way
+     *  it does, which a time alone never does: two views with the same drag frame can sit at
+     *  opposite ends of this. Combine it with {@code benchmark.phase}, since the counters are
+     *  cumulative over everything the run painted.
+     */
+    private static final boolean CACHE_STATS = Boolean.getBoolean("benchmark.cachestats");
+    /**
+     *  The cache mode to measure under, one of the {@link SwingTreeInitConfig.CacheMode} names.
+     *  It is not merely "how much memory": the mode also decides the pixel area above which a
+     *  style layer is no longer admitted to the render cache at all, and at the default that
+     *  ceiling sits below a maximized window - so the largest, most expensive layer of a view
+     *  is precisely the one that is never cached. Sweeping the mode is how that is measured
+     *  rather than assumed.
+     */
+    private static final String CACHE_MODE = System.getProperty("benchmark.cachemode", "");
+
+    private static boolean runsPhase( String name ) {
+        for ( String part : PHASES.split(",", -1) ) {
+            String wanted = part.trim().toLowerCase(Locale.ROOT);
+            if ( wanted.equals("all") || wanted.equals(name) )
+                return true;
+        }
+        return false;
+    }
 
     public static void main( String[] args ) throws Exception
     {
@@ -196,6 +238,8 @@ public final class ViewResizeBenchmark
         List<Example> examples = Example.parse(spec);
 
         SwingTree.initializeUsing( it -> it.uiScaleFactor(UI_SCALE) );
+        if ( !CACHE_MODE.isEmpty() )
+            SwingTree.get().setCacheMode(SwingTreeInitConfig.CacheMode.valueOf(CACHE_MODE.toUpperCase(Locale.ROOT)));
 
         Map<Example, Result> results = new LinkedHashMap<>();
         for ( Example example : examples )
@@ -267,10 +311,13 @@ public final class ViewResizeBenchmark
         System.out.println("  measuring '" + example.name + "' at " + geometry.width + "x" + geometry.height +
                            " (UI scale " + UI_SCALE + ")");
 
-        double layoutMillis         = measureLayoutSweep(root, geometry);
-        double paintAfterResize     = measurePaintSweep(frame, root, geometry, true,  geometry.height);
-        double paintAtUnchangedSize = measurePaintSweep(frame, root, geometry, false, geometry.height);
-        double paintOfNarrowClip    = measurePaintSweep(frame, root, geometry, false, CLIP_HEIGHT);
+        double layoutMillis         = runsPhase("layout") ? measureLayoutSweep(root, geometry)                                        : Double.NaN;
+        double paintAfterResize     = runsPhase("resize") ? measurePaintSweep(frame, root, geometry, true,  geometry.height, "resize") : Double.NaN;
+        double paintAtUnchangedSize = runsPhase("static") ? measurePaintSweep(frame, root, geometry, false, geometry.height, "static") : Double.NaN;
+        double paintOfNarrowClip    = runsPhase("clip")   ? measurePaintSweep(frame, root, geometry, false, CLIP_HEIGHT,     "clip")   : Double.NaN;
+
+        if ( CACHE_STATS )
+            UI.runNow(() -> printCacheStats(example, root));
 
         UI.runNow(frame::dispose);
 
@@ -341,11 +388,27 @@ public final class ViewResizeBenchmark
         for ( int i = 0; i < WARMUP_SWEEPS; i++ )
             layoutOnce(root, geometry, i);
 
+        long start = System.currentTimeMillis();
         long[] samples = new long[TIMED_SWEEPS];
         for ( int i = 0; i < TIMED_SWEEPS; i++ )
             samples[i] = layoutOnce(root, geometry, WARMUP_SWEEPS + i);
+        printTimedWindow("layout", start);
 
         return medianMillis(samples);
+    }
+
+    /**
+     *  Reports the wall clock window the timed sweeps occupied, so that a profile can be
+     *  restricted to it. <br>
+     *  <br>
+     *  Without this a recording is dominated by work the measurement deliberately excludes:
+     *  the first paint of a style rasterizes every cache it will later be served from, and
+     *  for an expensive noise that one-off is seconds of CPU - enough to look like the top
+     *  bottleneck in a profile of a run whose reported number never contained it at all.
+     *  The timestamps are epoch millis, which is the clock JFR event start times are on.
+     */
+    private static void printTimedWindow( String phase, long start ) {
+        System.out.println("  timed-window " + phase + " " + start + " " + System.currentTimeMillis());
     }
 
     private static long layoutOnce( JComponent root, Geometry geometry, int index ) throws Exception
@@ -367,7 +430,7 @@ public final class ViewResizeBenchmark
      *  so that the style caches are either cold (a drag frame) or warm (an ordinary repaint).
      */
     private static double measurePaintSweep(
-        JFrame frame, JComponent root, Geometry geometry, boolean resizeFirst, int clipHeight
+        JFrame frame, JComponent root, Geometry geometry, boolean resizeFirst, int clipHeight, String phase
     ) throws Exception {
         GraphicsConfiguration gc = frame.getGraphicsConfiguration();
     /*
@@ -383,9 +446,11 @@ public final class ViewResizeBenchmark
         for ( int i = 0; i < WARMUP_SWEEPS; i++ )
             paintOnce(frame, root, buffer, geometry, resizeFirst, clipHeight, i);
 
+        long start = System.currentTimeMillis();
         long[] samples = new long[TIMED_SWEEPS];
         for ( int i = 0; i < TIMED_SWEEPS; i++ )
             samples[i] = paintOnce(frame, root, buffer, geometry, resizeFirst, clipHeight, WARMUP_SWEEPS + i);
+        printTimedWindow(phase, start);
 
         buffer[0].flush();
         return medianMillis(samples);
@@ -459,10 +524,10 @@ public final class ViewResizeBenchmark
                            "view", "size", "layout", "paint±", "paint=", "clip" + CLIP_HEIGHT, "drag");
         for ( Map.Entry<Example, Result> entry : results.entrySet() ) {
             Result r = entry.getValue();
-            System.out.printf("  %-10s %11s %9.2f %9.2f %9.2f %9.2f %9.2f%n",
+            System.out.printf("  %-10s %11s %9s %9s %9s %9s %9s%n",
                               entry.getKey().name, r.geometry.width + "x" + r.geometry.height,
-                              r.layout, r.paintAfterResize, r.paintAtUnchangedSize,
-                              r.paintOfNarrowClip, r.dragFrame());
+                              millis(r.layout), millis(r.paintAfterResize), millis(r.paintAtUnchangedSize),
+                              millis(r.paintOfNarrowClip), millis(r.dragFrame()));
         }
         System.out.println();
         System.out.println("    layout   full re-layout at a width never laid out before");
@@ -471,6 +536,48 @@ public final class ViewResizeBenchmark
         System.out.println("    clip     repaint of a " + CLIP_HEIGHT + "px high clip, as a caret blink or a hover would");
         System.out.println("    drag     layout + paint±, which is what one frame of a window drag costs");
         System.out.println();
+    }
+
+    /**
+     *  Sums the style layer cache counters over the whole component tree and prints them,
+     *  one line per {@link UI.Layer}. A "paint" here is one layer of one component, so the
+     *  totals are much larger than the sweep count - what matters is the ratio.
+     */
+    private static void printCacheStats( Example example, JComponent root ) {
+        UI.Layer[] layers = UI.Layer.values();
+        int[] hits   = new int[layers.length];
+        int[] misses = new int[layers.length];
+        int[] components = { 0 };
+        collectCacheStats(root, layers, hits, misses, components);
+        System.out.println("  cache statistics for '" + example.name + "' over " + components[0] + " components:");
+        for ( int i = 0; i < layers.length; i++ ) {
+            int total = hits[i] + misses[i];
+            if ( total == 0 )
+                continue;
+            System.out.printf(Locale.ROOT, "    %-11s %9d layer paints, %5.1f%% from cache%n",
+                              layers[i], total, 100d * hits[i] / total);
+        }
+    }
+
+    private static void collectCacheStats(
+        Component component, UI.Layer[] layers, int[] hits, int[] misses, int[] components
+    ) {
+        if ( component instanceof JComponent ) {
+            components[0]++;
+            ComponentExtension<?> extension = ComponentExtension.from((JComponent) component);
+            for ( int i = 0; i < layers.length; i++ ) {
+                hits[i]   += extension.cacheHitCount(layers[i]);
+                misses[i] += extension.cacheMissCount(layers[i]);
+            }
+        }
+        if ( component instanceof Container )
+            for ( Component child : ((Container) component).getComponents() )
+                collectCacheStats(child, layers, hits, misses, components);
+    }
+
+    /** A measurement, or a dash for a sweep this run skipped (see {@code benchmark.phase}). */
+    private static String millis( double value ) {
+        return Double.isNaN(value) ? "-" : String.format(Locale.ROOT, "%.2f", value);
     }
 
     private ViewResizeBenchmark() {}
