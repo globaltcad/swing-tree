@@ -860,18 +860,29 @@ class Style_Render_Caching_Spec extends Specification
             ComponentExtension.from(second).cacheMissCount(UI.Layer.BACKGROUND) == 0
     }
 
-    def 'The sharing survives a cacheable painter sitting in front of the differently named ones.'()
+    def 'A painter baked into a cached image does not tie it to the names of the painters replayed over it.'()
     {
         reportInfo """
-            The scenario above has nothing left on the cached side but the background. This one
-            has a *painter* there too - a cacheable one, which is baked into the image - while
-            the uncacheable painters behind it are still named differently from each other.
+            Rendered layers are cached globally and keyed on the style itself, so any number of
+            identically styled components render once between them and blit that single image.
+            Anything which makes two equivalent styles compare as *different* therefore costs
+            both memory and rendering - and because the number of cached images is capped, it
+            pushes other components out of the cache as well.
 
-            It is the same requirement and the harder half of it: what the two components share
-            is the background and the cacheable painter, and that is what the cached image
-            holds, so they must share it. Only the names of what is replayed differ, and a name
-            that draws nothing into the image has no business deciding whether that image can
-            be found again.
+            A user painter complicates this, because SwingTree cannot know what arbitrary code
+            draws and so cannot cache it. A layer carrying one is cut in two: everything else
+            goes into the cached image, and the painter is replayed on top of it on every
+            paint. `Painter.of(data, painter)` is the exception - it is the user promising that
+            the painting is a pure function of an immutable value, and that promise is what
+            lets such a painter be baked into the image like any other style.
+
+            One layer can therefore hold both kinds at once, which is the case below, and what
+            this scenario pins is which parts of the style may decide whether two components
+            share the resulting image: only the parts the image actually contains. Both
+            components here draw the same background and the same cacheable painter, so it is
+            the same image. All that differs is the *name* each gave the painter that is
+            replayed on top - and a name that contributes no pixel to an image has no business
+            deciding whether that image can be found again.
         """
         given : 'Two components sharing a background and a cacheable painter, differing only in the name of an uncacheable one.'
             var cacheable = swingtree.api.Painter.of("shared-key", { g ->
