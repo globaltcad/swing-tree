@@ -100,7 +100,7 @@ final class LayerPartCache
      *  changes (see {@link ComponentExtension#updateAllCachesFromLibraryConfig()}) so memory
      *  shrinks immediately; the cache repopulates lazily under the new budget. <br>
      *  Note that living {@link LayerPartCache} instances keep holding their {@code _localCache}
-     *  image until their next {@link #validate(ComponentConf)}, so a component
+     *  image until their next {@link #validate(ComponentConf, boolean)}, so a component
      *  which revalidates afterwards may briefly mint a second image for a key another component
      *  is still painting from. This costs a little duplicated memory until the stragglers
      *  revalidate; it is never a correctness problem (the images are equal by construction),
@@ -121,7 +121,7 @@ final class LayerPartCache
     private int                     _cacheHitsUntilAllocation;
     private boolean                 _isInitialized;
     /** Whether {@code _layerRenderData} holds none of the layer's style. Decided in
-     *  {@link #validate(ComponentConf)}, because the answer is a deep comparison and
+     *  {@link #validate(ComponentConf, boolean)}, because the answer is a deep comparison and
      *  {@link #paint(Graphics2D, BiConsumer)} sits directly in the paint path. */
     private boolean                 _rendersNothing;
 
@@ -168,7 +168,15 @@ final class LayerPartCache
         _localCache = bufferedImage;
     }
 
-    public final void validate( ComponentConf newConf )
+    /**
+     *  Brings this part's cache entry in line with the supplied configuration.
+     *
+     * @param newConf The configuration to validate against.
+     * @param isResizing Whether the component's size is currently in flux, as
+     *        {@link StyleLayerCache} determines it. It only ever suppresses caching, see
+     *        {@link #_isPointlessToMintWhileResizing}.
+     */
+    public final void validate( ComponentConf newConf, boolean isResizing )
     {
         if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) ) {
             /*
@@ -208,7 +216,9 @@ final class LayerPartCache
             _layerRenderData = new Pooled<>(newState);
 
         if ( validationNeeded ) {
-            _cacheHitsUntilAllocation = _cachingMakesSenseFor(newCacheState);
+            _cacheHitsUntilAllocation = _isPointlessToMintWhileResizing(newCacheState, newState, isResizing)
+                                            ? _hitsForReusingAFinishedRendering(newCacheState)
+                                            : _cachingMakesSenseFor(newCacheState);
             if ( _localCache != null )
                 _localCache.updateNumberOfHitsUntilAllocation(_cacheHitsUntilAllocation);
         }
@@ -334,6 +344,78 @@ final class LayerPartCache
     }
 
     /**
+     *  Whether minting a cache entry for this configuration right now would cost more than it
+     *  can ever repay, which is the case for a <b>large</b> entry keyed on the <b>exact
+     *  component size</b> while that size is <b>changing</b>. Such an entry is allocated,
+     *  rendered into, blitted once and then thrown away by the very next frame, which is
+     *  strictly more work than having rendered straight onto the destination - plus a
+     *  full-size image allocation per frame, and a software blit rather than an accelerated
+     *  one, because Java2D only promotes an image to a server side pixmap after it has been
+     *  used several times. <br>
+     *  <br>
+     *  Strictly <b>minting</b>, note - a rendering which already exists is still used, see
+     *  {@link #_hitsForReusingAFinishedRendering}. <br>
+     *  <br>
+     *  Both qualifiers are load bearing, and both were measured: <br>
+     *  <br>
+     *  <b>Only exact-size keys.</b> A stretch tileable style is keyed on a size independent
+     *  exemplar, so a resize does not invalidate it in the first place and suppressing it
+     *  would throw away the entire point of that mechanism. <br>
+     *  <br>
+     *  <b>Only large ones.</b> Suppressing every exact-size entry during a resize measured
+     *  <i>catastrophically</i> worse - a drag frame of the sequencer example went from 23 ms
+     *  to 51 ms. The reason is that this cache is keyed globally on the render configuration
+     *  rather than per component, so a UI with many identical components (that example has 64
+     *  identical pads) mints one entry and blits it for all of them: the cache's value there
+     *  is sharing <i>within</i> a frame, not reuse <i>across</i> frames, and that survives any
+     *  resize. Only entries too big to be worth minting eagerly are suppressed here, which
+     *  leaves such sharing untouched - a shared entry is by nature component sized and small,
+     *  whereas the entries this rule targets are page sized backgrounds of several megabytes.
+     */
+    private static boolean _isPointlessToMintWhileResizing(
+        LayerRenderConf cacheKey, LayerRenderConf renderInput, boolean isResizing
+    ) {
+        if ( !isResizing )
+            return false;
+        if ( !cacheKey.boxModel().size().equals(renderInput.boxModel().size()) )
+            return false; // Size independent, so the resize does not invalidate it at all.
+        final Size size = cacheKey.boxModel().size();
+        return size.widthOrElse(0f) * size.heightOrElse(0f) > _eagerAllocationLimit();
+    }
+
+    /**
+     *  What {@link #_isPointlessToMintWhileResizing} suppresses is <b>minting</b>, and nothing
+     *  more: if a finished rendering for this very key happens to be in the global cache
+     *  already, blitting it costs no allocation and no rendering at all, and is therefore
+     *  strictly cheaper than the direct render the suppression would otherwise force. So such
+     *  an entry is reused (0 - ready now), and only the absence of one disables caching (-1).
+     *  <br>
+     *  This is not a hypothetical: the cache is keyed globally on the configuration rather than
+     *  per component, so a component being dragged through a size at which an identically
+     *  styled sibling already sits finds that sibling's rendering waiting for it. Refusing it
+     *  would re-render a page sized layer to avoid an allocation that was never going to
+     *  happen. <br>
+     *  <br>
+     *  Note the deliberately narrow condition. An entry which exists but has <i>not</i> been
+     *  rendered into yet - one still counting down to its allocation - must not be taken, since
+     *  using it is precisely what would allocate and render it.
+     */
+    private static int _hitsForReusingAFinishedRendering( LayerRenderConf cacheKey ) {
+        /*
+            Deliberately not interned: `Pooled` compares by value, so a plain probe finds the
+            entry without putting anything into the object pool for a key we may not use.
+        */
+        final @Nullable CachedImage existing = _CACHE.get(new Pooled<>(cacheKey));
+        return ( existing != null && existing.isRendered() ? 0 : -1 );
+    }
+
+    /** The image area up to which an entry is worth allocating right away rather than after a
+     *  warm-up of cache hits; also the line above which minting one mid-resize is a loss. */
+    private static int _eagerAllocationLimit() {
+        return (int) ( _maxCacheableImageArea() * EAGER_ALLOCATION_FRIENDLINESS );
+    }
+
+    /**
      *  Scores whether caching pays off for the supplied configuration: -1 means never
      *  cache, otherwise the number of cache hits to wait before allocating and rendering
      *  (0 = eagerly). The supplied state is the <i>cache key</i>, which for stretch
@@ -414,7 +496,7 @@ final class LayerPartCache
             return -1;
 
         final int maxSizeLimit         = _maxCacheableImageArea();
-        final int eagerAllocationLimit = (int) (maxSizeLimit * EAGER_ALLOCATION_FRIENDLINESS);
+        final int eagerAllocationLimit = _eagerAllocationLimit();
         final int cacheHitCountLimit   = (int) (maxSizeLimit * (1 - EAGER_ALLOCATION_FRIENDLINESS));
 
         final int pixelCount = (int) (size.widthOrElse(0f) * size.heightOrElse(0f));
