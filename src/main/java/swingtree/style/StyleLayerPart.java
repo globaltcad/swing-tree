@@ -1,6 +1,9 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.UI;
+
+import java.util.Comparator;
 
 /**
  *  The pieces a single {@link UI.Layer} is rendered, and cached, in. <br>
@@ -31,21 +34,31 @@ import swingtree.UI;
  *  cut is a strict improvement whenever the layer holds anything else worth caching. <br>
  *  <br>
  *  Splitting is possible at all because the renderer draws by kind in a fixed order - fill,
- *  border, images, gradients, <b>noises</b>, shadows, texts, painters - so the noises are
- *  always one contiguous block and the layer always cuts into exactly the same three pieces.
- *  A part is expressed by <i>restricting the configuration</i> rather than by running a
+ *  border, images, gradients, <b>noises</b>, shadows, texts, <b>painters</b> - so each of the
+ *  two kinds cut around is one contiguous block, and a layer therefore always cuts at the same
+ *  places. A part is expressed by <i>restricting the configuration</i> rather than by running a
  *  different renderer: the renderer draws whatever the configuration contains, so handing it
  *  a configuration with the other kinds emptied out draws exactly that part and nothing else.
- *  The three parts therefore recompose to the original by construction, and because source-over
+ *  The parts therefore recompose to the original by construction, and because source-over
  *  compositing is associative, drawing them one after another is pixel identical to drawing the
  *  whole layer in one go. <br>
  *  <br>
- *  An uncut layer is a single {@link #WHOLE} part, which restricts to the configuration
- *  unchanged and so behaves exactly as it did before parts existed. A cut one is
- *  {@link #UNDER_NOISE} and {@link #OVER_NOISE} in a {@link LayerPartCache} each, with
- *  {@link #NOISES} replayed straight onto the destination in between - never cached, because a
- *  cached noise would be an image at the component's real size, re-rendered at every new size,
- *  which is exactly what the cut exists to avoid. <br>
+ *  There are consequently three shapes a layer can be cached in, and {@link StyleLayerCache}
+ *  picks between them: <br>
+ *  <ul>
+ *      <li><b>Uncut</b> - a single {@link #WHOLE} part, which restricts to the configuration
+ *          unchanged and so behaves exactly as it did before parts existed.</li>
+ *      <li><b>Cut around the noises</b> - {@link #UNDER_NOISE} and {@link #OVER_NOISE} in a
+ *          {@link LayerPartCache} each, with {@link #NOISES} replayed straight onto the
+ *          destination in between - never cached, because a cached noise would be an image at
+ *          the component's real size, re-rendered at every new size, which is exactly what
+ *          the cut exists to avoid.</li>
+ *      <li><b>Cut around the painters</b> - {@link #UNDER_PAINTERS} in a
+ *          {@link LayerPartCache}, with {@link #PAINTERS} replayed on top of it.</li>
+ *  </ul>
+ *  The two cuts are mutually exclusive; a layer needing both is cut around its painters only,
+ *  which loses nothing because a layer carrying an uncacheable painter could never satisfy the
+ *  noise cut's conditions anyway. <br>
  *  <br>
  *  That the cut paints what the whole does is pinned by {@code Stretch_Tiling_Equivalence_Spec}.
  */
@@ -147,27 +160,41 @@ enum StyleLayerPart
      */
     private static NamedConfigs<PainterConf> _paintersBefore( LayerRenderConf conf, boolean wantPrefix ) {
         final NamedConfigs<PainterConf> painters = conf.layer().painters();
-        final @org.jspecify.annotations.Nullable String cut = _firstUncacheablePainterName(painters);
+        final @Nullable String cut = _firstUncacheablePainterName(painters);
         if ( cut == null )
             return ( wantPrefix ? painters : StyleConfLayer._NO_PAINTERS ); // Nothing to replay.
-        return painters.mapNamedStyles( named -> {
+        final NamedConfigs<PainterConf> wanted = painters.mapNamedStyles( named -> {
                     boolean isInPrefix = named.name().compareTo(cut) < 0;
                     return ( isInPrefix == wantPrefix
                                 ? named
                                 : NamedConf.of(named.name(), PainterConf.none()) );
                 });
+        /*
+            A side that kept no painter at all is normalized to the canonical "no painters"
+            configuration, because the names would otherwise survive as empty entries. That
+            matters for the cached side: this configuration *is* the cache key, and an entry
+            keyed on the name of a painter it does not draw can only ever be found again by a
+            component whose painter happens to have the same name. Two identically styled
+            components calling their painter "mark" and "logo" would mint an entry each - and
+            those entries count against the global entry limit, so the debris locks other
+            components out of caching too. Normalizing lets them share the one entry they
+            should always have shared, and additionally lets `rendersNothing()` recognize a
+            side with nothing left on it.
+        */
+        return ( _drawsNoPainter(wanted) ? StyleConfLayer._NO_PAINTERS : wanted );
+    }
+
+    private static boolean _drawsNoPainter( NamedConfigs<PainterConf> painters ) {
+        return !painters.any( named -> !named.style().equals(PainterConf.none()) );
     }
 
     /** The name of the first painter, in the order the renderer runs them, which cannot be
      *  cached - or null when every one of them can. */
-    private static @org.jspecify.annotations.Nullable String _firstUncacheablePainterName( NamedConfigs<PainterConf> painters ) {
-        String first = null;
-        for ( NamedConf<PainterConf> named : painters.namedStylesStream().toArray(NamedConf[]::new) ) {
-            if ( named.style().painter().canBeCached() )
-                continue;
-            if ( first == null || named.name().compareTo(first) < 0 )
-                first = named.name();
-        }
-        return first;
+    private static @Nullable String _firstUncacheablePainterName( NamedConfigs<PainterConf> painters ) {
+        return painters.namedStylesStream()
+                       .filter( named -> !named.style().painter().canBeCached() )
+                       .map( NamedConf::name )
+                       .min( Comparator.naturalOrder() )
+                       .orElse(null);
     }
 }

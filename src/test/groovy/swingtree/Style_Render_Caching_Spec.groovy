@@ -816,6 +816,50 @@ class Style_Render_Caching_Spec extends Specification
             cacheableRuns.get() == 5
     }
 
+    def 'Two identically styled components share a cached rendering even if they name their painters differently.'()
+    {
+        reportInfo """
+            Cached renderings are keyed on the style configuration and shared globally, so a UI
+            full of identically styled components renders one image and blits it for all of
+            them. A layer carrying an uncacheable painter is cut in two, and what is cached is
+            then everything *except* the painter - so what is cached is identical for two
+            components which differ only in their painter.
+
+            The *name* of the painter must therefore not survive into that key. A name is how a
+            style is addressed while it is being configured, not something the user expects to
+            change what is drawn - so two components whose only difference is that one calls its
+            painter "mark" and the other calls it "logo" have to share the one cached image.
+            Were they not to, each would mint an entry of its own, and since the number of
+            entries is capped, that debris would lock other components out of the cache too.
+        """
+        given : 'Two boxes with the same background, each with an uncacheable painter of its own name.'
+            var first = UI.box().withStyle( it -> it
+                            .backgroundColor(new Color(35, 95, 125)).borderRadius(11).margin(4)
+                            .painter(UI.Layer.BACKGROUND, "mark", { g ->
+                                g.setColor(new Color(240, 120, 30)); g.fillOval(10, 10, 40, 30)
+                            })
+                        ).get(JBox)
+            var second = UI.box().withStyle( it -> it
+                            .backgroundColor(new Color(35, 95, 125)).borderRadius(11).margin(4)
+                            .painter(UI.Layer.BACKGROUND, "logo", { g ->
+                                g.setColor(new Color(30, 200, 160)); g.fillRect(20, 20, 30, 20)
+                            })
+                        ).get(JBox)
+            first.setSize(260, 140)
+            second.setSize(260, 140)
+
+        when : 'The first one is painted until its background is cached.'
+            3.times { Utility.renderSingleComponent(first) }
+        then : 'It is: the painter was cut out of the layer, so the rest of it could be cached.'
+            ComponentExtension.from(first).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+
+        when : 'The second one is painted for the very first time.'
+            Utility.renderSingleComponent(second)
+        then : 'It found the image the first one had already rendered, instead of rendering again.'
+            ComponentExtension.from(second).cacheHitCount(UI.Layer.BACKGROUND)  == 1
+            ComponentExtension.from(second).cacheMissCount(UI.Layer.BACKGROUND) == 0
+    }
+
     def 'Caching is per-layer: a heavy background does not imply a cached foreground.'()
     {
         reportInfo """
