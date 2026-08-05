@@ -238,7 +238,9 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             would absorb a seam, a missing shadow or an alpha channel that composited twice.
             Every channel of every pixel is compared instead, against the same style painted
             with caching switched off entirely - which is the switch position in which the
-            layer is drawn whole, in one go, exactly as it was before this cut existed.
+            layer is drawn whole, in one go, exactly as it was before this cut existed. It
+            measures *exactly* equal here; the one unit of slack below is left only for a
+            graphics pipeline that rounds a blit differently.
         """
         given : '''
             The component painted whole, with the render cache switched off. Note that this
@@ -281,6 +283,11 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
 
         then : 'Not one channel of one pixel deviates, alpha included:'
             worstChannelDelta <= 1
+
+        cleanup : 'The budget goes back to what the rest of this specification expects.'
+            // Restored here rather than only in the `given` block above, so that a failure
+            // between the two assignments cannot leave every later scenario running uncached.
+            CacheBudget.UNITS_OVERRIDE = 10
 
         where :
             description                            | layer               | width | height | styler

@@ -449,7 +449,7 @@ final class LayerPartCache
         return _cachingMakesSenseFor(layer, state) >= 0;
     }
 
-    private static int _cachingMakesSenseFor( UI.Layer _layer, LayerRenderConf state )
+    private static int _cachingMakesSenseFor( UI.Layer layer, LayerRenderConf state )
     {
         final int maxEntries = _maxCacheEntries();
         if ( maxEntries <= 0 || _CACHE.size() >= maxEntries )
@@ -490,13 +490,13 @@ final class LayerPartCache
         final BoxModelConf  boxModel  = state.boxModel();
         final boolean       isRounded = boxModel.hasAnyNonZeroArcs();
 
-        if ( _layer == UI.Layer.BORDER ) {
+        if ( layer == UI.Layer.BORDER ) {
             boolean hasWidth = !Outline.none().equals(boxModel.widths());
             boolean hasColoring = !baseCoors.borderColor().equals(BorderColorsConf.none());
             if ( hasWidth && hasColoring )
                 heavyStyleCount++;
         }
-        if ( _layer == UI.Layer.BACKGROUND ) {
+        if ( layer == UI.Layer.BACKGROUND ) {
             boolean roundedOrHasMargin = isRounded || !boxModel.margin().equals(Outline.none());
             if ( roundedOrHasMargin ) {
                 if ( baseCoors.backgroundColor().filter( c -> c.getAlpha() > 0 ).isPresent() )
