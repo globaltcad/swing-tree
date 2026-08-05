@@ -658,6 +658,52 @@ class Style_Render_Caching_Spec extends Specification
             secondExt.cacheHitCount(UI.Layer.BACKGROUND) >= 1
     }
 
+    def 'A resizing component still uses a large rendering that already exists.'()
+    {
+        reportInfo """
+            What the rule above suppresses is *minting*, and only that. If a finished rendering
+            for exactly this style and size happens to be there already, using it costs no
+            allocation and no rendering at all - it is a blit, which is strictly cheaper than
+            the fresh render that refusing it would force. There is nothing to save by saying
+            no.
+
+            And this is not a corner case, because renderings are keyed globally on the style
+            rather than per component: a component being dragged through a size at which an
+            identically styled sibling already sits finds that sibling's rendering waiting for
+            it. Refusing it would re-render a page sized layer in order to avoid an allocation
+            that was never going to happen.
+        """
+        given : 'A large gradient style, too gradient-y to be stretch tiled, in two components.'
+            def styler = { conf -> conf
+                .borderRadius(10)
+                .gradient( g -> g.colors(new Color(40, 160, 90), new Color(160, 40, 90)) )
+            }
+            var settled  = UI.button("Settled").withStyle(styler as swingtree.api.Styler).get(JButton)
+            var resizing = UI.button("Resizing").withStyle(styler as swingtree.api.Styler).get(JButton)
+            var resizingExt = ComponentExtension.from(resizing)
+
+        and : """
+            The first one sits still at a large size until its rendering exists. It is kept
+            alive for the rest of the scenario on purpose: renderings are held weakly by the
+            style they belong to, so a sibling that went out of scope would take the very
+            entry this scenario is about with it.
+        """
+            settled.setSize(400, 200)
+            6.times { Utility.renderSingleComponent(settled) }
+            assert ComponentExtension.from(settled).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+
+        when : 'The second component is dragged, arriving at the size the first one holds.'
+            resizing.setSize(360, 200)
+            Utility.renderSingleComponent(resizing)
+            resizing.setSize(400, 200)
+            Utility.renderSingleComponent(resizing)
+
+        then : 'It was served from the existing rendering rather than rendering the layer again.'
+            resizingExt.cacheHitCount(UI.Layer.BACKGROUND) >= 1
+        and : 'The sibling is still alive, which is what kept that rendering reachable.'
+            settled.width == 400
+    }
+
     def 'Caching is per-layer: a heavy background does not imply a cached foreground.'()
     {
         reportInfo """

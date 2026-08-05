@@ -217,7 +217,7 @@ final class LayerPartCache
 
         if ( validationNeeded ) {
             _cacheHitsUntilAllocation = _isPointlessToMintWhileResizing(newCacheState, newState, isResizing)
-                                            ? -1
+                                            ? _hitsForReusingAFinishedRendering(newCacheState)
                                             : _cachingMakesSenseFor(newCacheState);
             if ( _localCache != null )
                 _localCache.updateNumberOfHitsUntilAllocation(_cacheHitsUntilAllocation);
@@ -353,6 +353,9 @@ final class LayerPartCache
      *  one, because Java2D only promotes an image to a server side pixmap after it has been
      *  used several times. <br>
      *  <br>
+     *  Strictly <b>minting</b>, note - a rendering which already exists is still used, see
+     *  {@link #_hitsForReusingAFinishedRendering}. <br>
+     *  <br>
      *  Both qualifiers are load bearing, and both were measured: <br>
      *  <br>
      *  <b>Only exact-size keys.</b> A stretch tileable style is keyed on a size independent
@@ -378,6 +381,32 @@ final class LayerPartCache
             return false; // Size independent, so the resize does not invalidate it at all.
         final Size size = cacheKey.boxModel().size();
         return size.widthOrElse(0f) * size.heightOrElse(0f) > _eagerAllocationLimit();
+    }
+
+    /**
+     *  What {@link #_isPointlessToMintWhileResizing} suppresses is <b>minting</b>, and nothing
+     *  more: if a finished rendering for this very key happens to be in the global cache
+     *  already, blitting it costs no allocation and no rendering at all, and is therefore
+     *  strictly cheaper than the direct render the suppression would otherwise force. So such
+     *  an entry is reused (0 - ready now), and only the absence of one disables caching (-1).
+     *  <br>
+     *  This is not a hypothetical: the cache is keyed globally on the configuration rather than
+     *  per component, so a component being dragged through a size at which an identically
+     *  styled sibling already sits finds that sibling's rendering waiting for it. Refusing it
+     *  would re-render a page sized layer to avoid an allocation that was never going to
+     *  happen. <br>
+     *  <br>
+     *  Note the deliberately narrow condition. An entry which exists but has <i>not</i> been
+     *  rendered into yet - one still counting down to its allocation - must not be taken, since
+     *  using it is precisely what would allocate and render it.
+     */
+    private static int _hitsForReusingAFinishedRendering( LayerRenderConf cacheKey ) {
+        /*
+            Deliberately not interned: `Pooled` compares by value, so a plain probe finds the
+            entry without putting anything into the object pool for a key we may not use.
+        */
+        final @Nullable CachedImage existing = _CACHE.get(new Pooled<>(cacheKey));
+        return ( existing != null && existing.isRendered() ? 0 : -1 );
     }
 
     /** The image area up to which an entry is worth allocating right away rather than after a
