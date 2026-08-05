@@ -811,6 +811,55 @@ public final class NoiseFunctions
         return (float) _clamp01( bolt + glow );
     }
 
+    /*
+     *  The shape parameters of a single {@link #foliage} leaf. They are named rather than
+     *  inlined because {@link #_isOutsideLeafBounds} derives a bounding circle from them, and
+     *  that derivation is only sound as long as it sees the same numbers the shape does. A leaf
+     *  reshaped by editing a literal in place would silently start being clipped.
+     */
+    private static final double LEAF_MIN_HALF_LENGTH    = 0.45;
+    private static final double LEAF_HALF_LENGTH_SPREAD = 0.6;  // so the half length is 0.45 .. 1.05
+    private static final double LEAF_MIN_ASPECT         = 0.30;
+    private static final double LEAF_ASPECT_SPREAD      = 0.16; // so the aspect is 0.30 .. 0.46
+    private static final double LEAF_MAX_ASYMMETRY      = 0.6;
+    private static final double LEAF_WAVE_AMPLITUDE     = 0.18;
+    private static final double LEAF_MAX_SPINE_BOW      = 0.35;
+
+    /**
+     *  Whether the pixel offset {@code (dx, dy)} from a leaf's center lies outside the smallest
+     *  circle that is guaranteed to contain that leaf - in which case the coverage tests further
+     *  down are certain to reject it, and none of the work leading up to them has to happen. <br>
+     *  <br>
+     *  This is what makes {@link #foliage} affordable. A pixel scans a 5x5 neighbourhood of leaf
+     *  cells, but a leaf is roughly one cell across, so all but a handful of those 25 candidates
+     *  are nowhere near the pixel - and each of them was paying for five pseudo randoms, a
+     *  {@link Math#sin} and a {@link Math#cos} before being discarded on distance grounds anyway.
+     *  <br>
+     *  <b>The test is exact, not an approximation:</b> it rejects a strict superset of what the
+     *  coverage tests reject, so the rendered pixels are unchanged. In the leaf's own frame
+     *  coverage requires {@code |u| < halfLength} and {@code |v - spineV| < halfWidth}, and since
+     *  the frame is a pure rotation, {@code dx² + dy² == u² + v²}. Bounding the two:
+     *  <ul>
+     *      <li>{@code halfWidth = aspect * halfLength * profile * wave}, where
+     *          {@code aspect <= LEAF_MIN_ASPECT + LEAF_ASPECT_SPREAD},
+     *          {@code wave <= 1 + LEAF_WAVE_AMPLITUDE} and
+     *          {@code profile = max(0, (1-t²)(1 - asym*t)) <= 1 + LEAF_MAX_ASYMMETRY} for
+     *          {@code |t| < 1}.</li>
+     *      <li>{@code |spineV| = |curve| * (1-t²) <= LEAF_MAX_SPINE_BOW}.</li>
+     *  </ul>
+     *  so {@code |v| <= halfWidth + |spineV| <= _MAX_HALF_WIDTH_PER_HALF_LENGTH * halfLength
+     *  + LEAF_MAX_SPINE_BOW}, and the radius below follows. The bounds are deliberately the
+     *  obvious analytic ones rather than the tightest numeric ones: a tighter radius rejects a
+     *  little more, but it would have to be re-derived by hand every time a leaf is reshaped.
+     */
+    private static boolean _isOutsideLeafBounds( double dx, double dy, double halfLength ) {
+        final double acrossReach = _MAX_HALF_WIDTH_PER_HALF_LENGTH * halfLength + LEAF_MAX_SPINE_BOW;
+        return dx * dx + dy * dy >= halfLength * halfLength + acrossReach * acrossReach;
+    }
+
+    private static final double _MAX_HALF_WIDTH_PER_HALF_LENGTH =
+            ( LEAF_MIN_ASPECT + LEAF_ASPECT_SPREAD ) * ( 1 + LEAF_MAX_ASYMMETRY ) * ( 1 + LEAF_WAVE_AMPLITUDE );
+
     /**
      *  A leafy foliage texture. Leaves are scattered from a jittered grid - jittered
      *  far enough that the underlying grid disappears - and layered by a random depth
@@ -840,11 +889,18 @@ public final class NoiseFunctions
                 if ( z <= bestZ )
                     continue; // a leaf nearer to the viewer already won this pixel
 
-                final double angle = _fastPseudoRandomDoubleFrom( gx + 101, gy - 57 ) * 2 * Math.PI;
                 final double leafX = gx + 0.5 + ( _fastPseudoRandomDoubleFrom( gx, gy ) - 0.5 ) * 1.4;
                 final double leafY = gy + 0.5 + ( _fastPseudoRandomDoubleFrom( gy, -gx ) - 0.5 ) * 1.4;
                 final double dx = x - leafX;
                 final double dy = y - leafY;
+
+                final double halfLength = LEAF_MIN_HALF_LENGTH
+                                        + _fastPseudoRandomDoubleFrom( gx - 1597, gy - 2749 ) * LEAF_HALF_LENGTH_SPREAD;
+
+                if ( _isOutsideLeafBounds(dx, dy, halfLength) )
+                    continue; // Cannot possibly be covered - and this is the common case, see below.
+
+                final double angle = _fastPseudoRandomDoubleFrom( gx + 101, gy - 57 ) * 2 * Math.PI;
 
                 // Rotate the offset into the leaf's own frame (u = along, v = across):
                 final double sin = Math.sin(angle);
@@ -852,19 +908,18 @@ public final class NoiseFunctions
                 final double u = dx * cos - dy * sin;
                 final double v = dx * sin + dy * cos;
 
-                final double halfLength = 0.45 + _fastPseudoRandomDoubleFrom( gx - 1597, gy - 2749 ) * 0.6;
                 if ( Math.abs(u) >= halfLength )
                     continue;
                 final double t = u / halfLength; // -1 at the base, +1 at the tip
 
                 // The spine bows like a banana, so the leaf is not a rigid symmetric lens:
-                final double curve  = ( _fastPseudoRandomDoubleFrom( gx + 53, gy + 877 ) - 0.5 ) * 0.7;
+                final double curve  = ( _fastPseudoRandomDoubleFrom( gx + 53, gy + 877 ) - 0.5 ) * 2 * LEAF_MAX_SPINE_BOW;
                 final double spineV = curve * ( 1 - t * t );
 
                 // Outline: a lens skewed toward the base, with a per-leaf wavy edge:
-                final double asym    = _fastPseudoRandomDoubleFrom( gx - 71, gy + 311 ) * 0.6;
-                final double aspect  = 0.30 + _fastPseudoRandomDoubleFrom( gx + 211, gy - 19 ) * 0.16;
-                final double wave    = 1 + 0.18 * Math.sin( u * ( 7 + 7 * asym ) + angle * 3 );
+                final double asym    = _fastPseudoRandomDoubleFrom( gx - 71, gy + 311 ) * LEAF_MAX_ASYMMETRY;
+                final double aspect  = LEAF_MIN_ASPECT + _fastPseudoRandomDoubleFrom( gx + 211, gy - 19 ) * LEAF_ASPECT_SPREAD;
+                final double wave    = 1 + LEAF_WAVE_AMPLITUDE * Math.sin( u * ( 7 + 7 * asym ) + angle * 3 );
                 final double profile = Math.max( 0, ( 1 - t * t ) * ( 1 - asym * t ) );
                 final double halfWidth = aspect * halfLength * profile * wave;
 
