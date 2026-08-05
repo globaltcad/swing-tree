@@ -228,9 +228,11 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             *whole* layer uncacheable: every shadow, gradient and fill sharing it was
             re-rendered at full size on every paint. Such a layer is therefore cut in two, the
             painters replayed straight onto the destination on top of a cached image of
-            everything else. When the two kinds are mixed, the cut falls at the first
-            uncacheable painter, so that every painter keeps its position relative to every
-            other - the deliberately overlapping row below is what pins that.
+            everything else. A painter created with `Painter.of(..)` is the exception, being a
+            promise that the painting is a pure function of an immutable value, so it can go
+            into that image - and a layer may hold both kinds at once. The cut then falls at
+            the first uncacheable painter, so that every painter keeps its position relative to
+            every other; the deliberately overlapping rows below are what pin that.
 
             That turns one drawing operation into two, which is only acceptable if they add up
             to the very same picture. They do, because the renderer draws by kind in a fixed

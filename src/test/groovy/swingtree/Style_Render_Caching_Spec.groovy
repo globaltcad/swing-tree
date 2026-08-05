@@ -742,14 +742,23 @@ class Style_Render_Caching_Spec extends Specification
     def 'A cacheable painter ahead of an uncacheable one is baked into the cached image.'()
     {
         reportInfo """
-            A layer may hold both kinds at once. The uncacheable painter alone would sink the
-            whole layer, so the layer is cut: what can be cached is cached, and only the
-            uncacheable painter is replayed on every paint.
+            A user painter is arbitrary code, so SwingTree cannot know what it draws and cannot
+            cache it - which would ordinarily sink the whole layer it sits on, a layer being
+            cached as a single rasterization. Such a layer is therefore cut in two: everything
+            cacheable is rendered into an image, and the painter is replayed over that image on
+            every paint.
 
-            The cut is taken at the *first* uncacheable painter in the order the renderer runs
-            them (which is the order of their names), so that everything keeps its position
-            relative to everything else and the cut cannot change a single pixel - see the
-            scenario after this one for the case that rule deliberately gives up on.
+            `Painter.of(data, painter)` changes which side a painter falls on. It is the user
+            promising that the painting is a pure function of an immutable value, so a painter
+            declared that way can go *into* the cached image - and that is what this pins: it
+            runs once, while the uncacheable painter beside it keeps running on every paint.
+
+            Where exactly the cut falls is decided by order. The renderer runs painters in the
+            order of their names, and the cut is taken at the *first* uncacheable one:
+            everything before it is baked in, everything from it onwards is replayed. That
+            keeps every painter in its original position relative to every other, which is what
+            makes the cut incapable of changing a single pixel. A cacheable painter which sorts
+            *after* an uncacheable one is therefore left where it is.
         """
         given : 'A style with a cacheable painter named ahead of an uncacheable one.'
             var cacheableRuns = new java.util.concurrent.atomic.AtomicInteger()
@@ -780,21 +789,29 @@ class Style_Render_Caching_Spec extends Specification
     def 'A cacheable painter behind an uncacheable one keeps running, so that order is preserved.'()
     {
         reportInfo """
-            This is the deliberate limit of the rule above, and the reason it is a *prefix*
-            rather than "every cacheable painter wherever it sits".
+            SwingTree cannot cache what a user painter draws, because it is arbitrary code, so
+            a layer carrying one is cut in two: what can be cached is rendered into an image,
+            and the painter is replayed over that image on every paint. A painter created with
+            `Painter.of(data, painter)` is the exception - there the user promises that the
+            painting is a pure function of an immutable value, so it can be baked into the
+            image instead of being replayed.
 
-            Painters on one layer are run in the order of their names and may overlap, so which
-            of them end up inside the cached image decides what the component looks like.
-            Hoisting a cacheable painter out from behind an uncacheable one would move it
+            That raises the question of *which* cacheable painters are taken into the image,
+            and what this scenario pins is the deliberate limit on the answer: only those which
+            sort ahead of every uncacheable one.
+
+            The reason is that painters on a layer are run in the order of their names and may
+            overlap, so which of them end up inside the image decides what the component looks
+            like. Taking a cacheable painter out from behind an uncacheable one would move it
             underneath, changing the picture - silently, and in code the library never sees. So
-            a cacheable painter which sorts *after* an uncacheable one is left where it is and
-            keeps being replayed.
+            a painter which sorts *after* an uncacheable one is left where it is and keeps
+            being replayed, even though its promise would have allowed caching it.
 
-            A user who wants such a painter cached can have it: name it so that it sorts ahead
-            of the uncacheable one, which is the same thing as saying it should be painted
-            first.
+            A user who wants such a painter cached can have it, by naming it so that it sorts
+            ahead of the uncacheable one - which is the same thing as saying it should be
+            painted first.
         """
-        given : 'The very same two painters, with their names the other way around.'
+        given : 'A cacheable and an uncacheable painter, the cacheable one named so that it sorts second.'
             var cacheableRuns = new java.util.concurrent.atomic.AtomicInteger()
             var cacheable = swingtree.api.Painter.of("key", { g ->
                                 cacheableRuns.incrementAndGet()
