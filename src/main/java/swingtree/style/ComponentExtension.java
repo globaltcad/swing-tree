@@ -628,6 +628,8 @@ public final class ComponentExtension<C extends JComponent>
      * @return Bytes currently reserved by the global style layer render cache.
      */
     public static long globalStyleLayerCacheBytesReserved() {
+        if ( !UI.thisIsUIThread() )
+            throw new IllegalStateException("globalStyleLayerCacheBytesReserved() must be called on the UI thread.");
         return LayerPartCache.globalBytesReserved();
     }
 
