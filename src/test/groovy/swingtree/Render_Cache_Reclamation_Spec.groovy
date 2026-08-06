@@ -148,9 +148,17 @@ class Render_Cache_Reclamation_Spec extends Specification
             var bytesBefore = globalStyleLayerCacheBytesReserved()
 
         when : 'A noise bearing component is dragged through a range of sizes, and then dropped.'
-            var ghost = dragAndForget({ it.backgroundColor("#2f4f6f").borderRadius(12).margin(5)
-                                          .noise(UI.Layer.BACKGROUND, "grain", n -> n.colors("#101010", "#e0e0e0"))
-                                          .shadow(UI.Layer.BACKGROUND, "glow", s -> s.color("#0a0a14").blurRadius(6)) })
+            var box = UI.box().withStyle( { it.backgroundColor("#2f4f6f").borderRadius(12).margin(5)
+                                .noise(UI.Layer.BACKGROUND, "grain", n -> n.colors("#101010", "#e0e0e0"))
+                                .shadow(UI.Layer.BACKGROUND, "glow", s -> s.color("#0a0a14").blurRadius(6)) }
+                            )
+                            .get(JBox)
+            (0..9).each { i ->
+                box.setSize(220 + i * 12, 150 + i * 7)
+                Utility.renderSingleComponent(box)
+            }
+            var ghost = new WeakReference<>(box)
+            box = null
         then : 'The drag really did fill the cache with more than a single entry.'
             styleLayerEntries() > entriesBefore + 1
 
@@ -218,17 +226,6 @@ class Render_Cache_Reclamation_Spec extends Specification
         var box = UI.box().withStyle(styler as swingtree.api.Styler).get(JBox)
         box.setSize(260, 150)
         12.times { Utility.renderSingleComponent(box) }
-        return new WeakReference<>(box)
-    }
-
-    /** As {@link #paintAndForget}, but dragging the component through a range of sizes, which
-     *  is what makes a noise bearing layer be cached in pieces rather than as one image. */
-    private static WeakReference<JBox> dragAndForget( Closure styler ) {
-        var box = UI.box().withStyle( conf -> styler(conf) ).get(JBox)
-        (0..9).each { i ->
-            box.setSize(220 + i * 12, 150 + i * 7)
-            Utility.renderSingleComponent(box)
-        }
         return new WeakReference<>(box)
     }
 
