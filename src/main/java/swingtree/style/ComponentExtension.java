@@ -609,10 +609,10 @@ public final class ComponentExtension<C extends JComponent>
      *  it. The two figures differ for as long as that warm-up lasts, and this is the higher of
      *  them - which is the honest one to report, because it is what the budget is enforced
      *  against, and because the difference is memory already promised away. What it counts is
-     *  also the whole cost of an entry rather than only its pixels: the render configuration
-     *  keying an entry is itself substantial, and for the size independently cached entries
-     *  (whose images are small exemplars) it is the larger half. <br>
+     *  the pixel memory reserved by each entry's backing images (including any stretch tiles),
+     *  counted from the moment the entry exists rather than only after the backing buffers are allocated. <br>
      *  <br>
+     *
      *  This is the observation point for the memory promise a
      *  {@link swingtree.SwingTreeInitConfig.CacheMode} makes: style layer images are the only
      *  rendering cache big enough for that promise to be about, and it is the one bounded by
