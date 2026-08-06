@@ -73,7 +73,7 @@ final class LayerPartCache
     private static final double EAGER_ALLOCATION_FRIENDLINESS     = 0.1; // Has to be between 0 and 1!
     private static final int    MAX_CACHE_HIT_COUNT               = 12;
     private static final int    STRETCH_BAND                      = 2; // Freely stretchable band between the slice insets; one pixel suffices mathematically, two give slack.
-    private static final int    SAFETY_MARGIN                     = 2; // Added to every slice inset to absorb antialiasing bleed and artifact adjustments in the renderer.                     = 2; // Added to every slice inset to absorb antialiasing bleed and artifact adjustments in the renderer.
+    private static final int    SAFETY_MARGIN                     = 2; // Added to every slice inset to absorb antialiasing bleed and artifact adjustments in the renderer.
     private static final int    BYTES_PER_PIXEL                   = 4; // Every cached rendering is 32 bit ARGB, see CachedImage._allocate.
 
     /** The largest device-pixel area a single style-layer image may occupy to still be
