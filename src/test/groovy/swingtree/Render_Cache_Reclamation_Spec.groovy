@@ -76,7 +76,7 @@ class Render_Cache_Reclamation_Spec extends Specification
         """
         given : 'An empty cache to measure against.'
             var entriesBefore = styleLayerEntries()
-            var bytesBefore   = ComponentExtension.globalStyleLayerCacheBytesReserved()
+            var bytesBefore = UI.runAndGet({ComponentExtension.globalStyleLayerCacheBytesReserved()})
 
         when : """
             A component with this style is painted often enough to be cached, and then dropped.
@@ -87,7 +87,7 @@ class Render_Cache_Reclamation_Spec extends Specification
             var ghost = paintAndForget(builder)
         then : 'While it was alive, its style really was cached - so there is something to reclaim.'
             styleLayerEntries() > entriesBefore
-            ComponentExtension.globalStyleLayerCacheBytesReserved() > bytesBefore
+            UI.runAndGet({ComponentExtension.globalStyleLayerCacheBytesReserved()}) > bytesBefore
 
         when : 'The garbage collector gets its chance.'
             var componentWasCollected = eventually(24, { ghost.get() == null })
@@ -98,7 +98,7 @@ class Render_Cache_Reclamation_Spec extends Specification
             component it belonged to.
         """
             eventually(24, { styleLayerEntries() <= entriesBefore })
-            ComponentExtension.globalStyleLayerCacheBytesReserved() <= bytesBefore
+            UI.runAndGet({ComponentExtension.globalStyleLayerCacheBytesReserved()}) <= bytesBefore
 
         where :
             description                        | builder
@@ -141,7 +141,7 @@ class Render_Cache_Reclamation_Spec extends Specification
         """
         given : 'An empty cache to measure against.'
             var entriesBefore = styleLayerEntries()
-            var bytesBefore   = ComponentExtension.globalStyleLayerCacheBytesReserved()
+            var bytesBefore = UI.runAndGet({ComponentExtension.globalStyleLayerCacheBytesReserved()})
 
         when : 'A noise bearing component is dragged through a range of sizes, and then dropped.'
             var ghost = dragAndForget({ it.backgroundColor("#2f4f6f").borderRadius(12).margin(5)
@@ -155,7 +155,7 @@ class Render_Cache_Reclamation_Spec extends Specification
         then : 'Every piece went with the component, not just the first.'
             componentWasCollected
             eventually(24, { styleLayerEntries() <= entriesBefore })
-            ComponentExtension.globalStyleLayerCacheBytesReserved() <= bytesBefore
+            UI.runAndGet({ComponentExtension.globalStyleLayerCacheBytesReserved()}) <= bytesBefore
     }
 
     def 'Dropping one of two identically styled components does not disturb the other.'()
@@ -229,7 +229,7 @@ class Render_Cache_Reclamation_Spec extends Specification
     }
 
     private static int styleLayerEntries() {
-        return ComponentExtension.globalRenderCacheEntryCounts().toMap()["style layers"]
+        return UI.runAndGet({ComponentExtension.globalRenderCacheEntryCounts().toMap()["style layers"]})
     }
 
     /**
