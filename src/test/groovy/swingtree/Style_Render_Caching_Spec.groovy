@@ -603,16 +603,16 @@ class Style_Render_Caching_Spec extends Specification
                   )
                   .get(JButton)
             var ext = ComponentExtension.from(button)
-        and : 'It is large: above the area up to which an image is worth allocating eagerly.'
-            button.setSize(400, 200)
+        and : 'It is large: above the size up to which an image is worth allocating eagerly.'
+            button.setSize(600, 400)
 
         when : 'It is painted a few times at its first size, which is a birth rather than a resize.'
-            5.times { Utility.renderSingleComponent(button) }
+            8.times { Utility.renderSingleComponent(button) }
         then : 'It is cached, as any heavy style of this size would be.'
             ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
 
         when : 'The component is then resized and painted again.'
-            button.setSize(420, 200)
+            button.setSize(620, 400)
             Utility.renderSingleComponent(button)
         then : 'No image was minted for the new size.'
             ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
