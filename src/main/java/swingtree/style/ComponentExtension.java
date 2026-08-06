@@ -627,12 +627,12 @@ public final class ComponentExtension<C extends JComponent>
      *
      * @return Bytes currently reserved by the global style layer render cache.
      */
-    public static long globalStyleLayerCacheBytesUsed() {
-        return LayerPartCache.globalBytesUsed();
+    public static long globalStyleLayerCacheBytesReserved() {
+        return LayerPartCache.globalBytesReserved();
     }
 
     /**
-     *  The ceiling {@link #globalStyleLayerCacheBytesUsed()} is held under: the share of the
+     *  The ceiling {@link #globalStyleLayerCacheBytesReserved()} is held under: the share of the
      *  current {@link swingtree.SwingTreeInitConfig.CacheMode} budget that style layer
      *  renderings may spend. <br>
      *  <br>

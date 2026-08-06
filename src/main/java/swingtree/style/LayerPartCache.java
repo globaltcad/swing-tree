@@ -95,7 +95,7 @@ final class LayerPartCache
     /** What the live entries have reserved right now - which is what they will occupy, but
      *  counted from the moment an entry exists rather than from the moment its buffer is
      *  actually allocated, see {@link CachedImage#reservedBytes()}. */
-    private static long _bytesUsedUpByCache() {
+    private static long _bytesReservedByCache() {
         long total = 0;
         for ( CachedImage image : _CACHE.values() )
             total += image.reservedBytes();
@@ -109,8 +109,8 @@ final class LayerPartCache
 
     /** Live bytes reserved by the cached style-layer renderings (for monitoring/tests).
      *  Must be called on the painting thread: it walks the same map that painting writes to. */
-    static long globalBytesUsed() {
-        return _bytesUsedUpByCache();
+    static long globalBytesReserved() {
+        return _bytesReservedByCache();
     }
 
     /** Drops every globally cached layer image. Called when the library cache configuration
