@@ -247,9 +247,9 @@ class Render_Cache_Reclamation_Spec extends Specification
     }
 
     /**
-     *  Blocks until a collection has demonstrably happened, by watching an object of our own.
-     *  Bounded, because a hint that is never honoured must end the scenario rather than spin a
-     *  CI runner at full tilt until the specification's timeout fires.
+     *  Attempts to trigger a collection and waits briefly until an object of our own is reclaimed,
+     *  as evidence that the collector ran at least once (bounded to keep CI from spinning indefinitely).
+     *  If the JVM keeps ignoring the hint, this method may return without having observed a collection.
      */
     private static void waitForGarbageCollection() {
         Object canary = new Object()
