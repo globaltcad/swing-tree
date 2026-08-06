@@ -585,6 +585,55 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
+     *  How much memory the cached style layer renderings have reserved, in bytes. <br>
+     *  <br>
+     *  Reserved, not allocated: an entry claims its bytes the moment it exists, whereas a large
+     *  rendering only allocates its buffer after a warm-up of cache hits has shown it is worth
+     *  it. The two figures differ for as long as that warm-up lasts, and this is the higher of
+     *  them - which is the honest one to report, because it is what the budget is enforced
+     *  against, and because the difference is memory already promised away. What it counts is
+     *  the pixel memory reserved by each entry's backing images (including any stretch tiles),
+     *  counted from the moment the entry exists rather than only after the backing buffers are allocated. <br>
+     *  <br>
+     *
+     *  This is the observation point for the memory promise a
+     *  {@link swingtree.SwingTreeInitConfig.CacheMode} makes: style layer images are the only
+     *  rendering cache big enough for that promise to be about, and it is the one bounded by
+     *  measuring itself rather than by counting entries, because its entries range from a few
+     *  kilobytes to tens of megabytes. Counting them (which is what
+     *  {@link #globalRenderCacheEntryCounts()} reports) therefore says nothing about memory,
+     *  which is why this exists alongside it. <br>
+     *  <br>
+     *  <b>Call this on the UI thread.</b> Unlike the entry counts, arriving at this figure means
+     *  walking the cache, and painting writes to it - so a call from another thread races the
+     *  next repaint.
+     *
+     * @return Bytes currently reserved by the global style layer render cache.
+     */
+    public static long globalStyleLayerCacheBytesReserved() {
+        if ( !UI.thisIsUIThread() )
+            throw new IllegalStateException("globalStyleLayerCacheBytesReserved() must be called on the UI thread.");
+        return LayerCache.globalBytesReserved();
+    }
+
+    /**
+     *  The ceiling {@link #globalStyleLayerCacheBytesReserved()} is held under: the share of the
+     *  current {@link swingtree.SwingTreeInitConfig.CacheMode} budget that style layer
+     *  renderings may spend. <br>
+     *  <br>
+     *  Reported next to the figure it bounds because neither number means much alone - the
+     *  budget scales with the machine's RAM and with the configured mode, so "eleven megabytes
+     *  cached" is only interpretable against the ceiling in force at the time.
+     *
+     * @return Bytes the global style layer render cache may retain at most, right now.
+     */
+    public static long globalStyleLayerCacheByteBudget() {
+        if ( !UI.thisIsUIThread() )
+            throw new IllegalStateException("globalStyleLayerCacheByteBudget() must be called on the UI thread.");
+        return CacheBudget.bytesFor(CacheBudget.Kind.STYLE_LAYER);
+    }
+
+    /**
      *  The single bridge through which the {@code swingtree} package tells the rendering
      *  caches in the {@code swingtree.style} package that the library configuration may have
      *  changed (see {@link SwingTree#setCacheMode(swingtree.SwingTreeInitConfig.CacheMode)}).
@@ -600,6 +649,11 @@ public final class ComponentExtension<C extends JComponent>
      *  recursion-safe: it never reads {@link SwingTree#get()} itself (so it is safe to call
      *  while the {@link SwingTree} singleton is still being constructed); the budget is only
      *  resolved later, lazily, from the painting thread.
+     *  <p>
+     *  <b>Call this on the UI thread.</b> It writes the very maps painting reads, and the two
+     *  library setters which reach it ({@link SwingTree#setCacheMode(swingtree.SwingTreeInitConfig.CacheMode)}
+     *  and {@link SwingTree#setCacheTilingEnabled(boolean)}) marshal onto that thread before
+     *  they do. Calling it from anywhere else races the next repaint.
      */
     public static void updateAllCachesFromLibraryConfig() {
         CacheBudget.markUnresolved();

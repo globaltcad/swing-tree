@@ -72,6 +72,7 @@ final class LayerCache
     private static final int    MAX_CACHE_HIT_COUNT               = 12;
     private static final int    STRETCH_BAND                      = 2; // Freely stretchable band between the slice insets; one pixel suffices mathematically, two give slack.
     private static final int    SAFETY_MARGIN                     = 2; // Added to every slice inset to absorb antialiasing bleed and artifact adjustments in the renderer.
+    private static final int    BYTES_PER_PIXEL                   = 4; // Every cached rendering is 32 bit ARGB, see CachedImage._allocate.
 
     /** The largest device-pixel area a single style-layer image may occupy to still be
      *  cached. Expressed in {@link CacheBudget#units()} so that, at the default mode,
@@ -89,9 +90,25 @@ final class LayerCache
 
     private static final Map<Pooled<LayerRenderConf>, CachedImage> _CACHE = new WeakHashMap<>();
 
+    /** What the live entries have reserved right now - which is what they will occupy, but
+     *  counted from the moment an entry exists rather than from the moment its buffer is
+     *  actually allocated, see {@link CachedImage#reservedBytes()}. */
+    private static long _bytesReservedByCache() {
+        long total = 0;
+        for ( CachedImage image : _CACHE.values() )
+            total += image.reservedBytes();
+        return total;
+    }
+
     /** Live number of cached style-layer renderings (for monitoring/tests). */
     static int globalEntryCount() {
         return _CACHE.size();
+    }
+
+    /** Live bytes reserved by the cached style-layer renderings (for monitoring/tests).
+     *  Must be called on the painting thread: it walks the same map that painting writes to. */
+    static long globalBytesReserved() {
+        return _bytesReservedByCache();
     }
 
     /** Drops every globally cached layer image. Called when the library cache configuration
@@ -612,17 +629,20 @@ final class LayerCache
             _numberOfHitsUntilAllocation = numberOfHitsUntilAllocation;
         }
 
-        /**
-         *  Allocates the backing buffer. We derive it from the supplied
-         *  {@link GraphicsConfiguration} when one is available, so it uses the device
-         *  color model (typically premultiplied {@code INT_ARGB_PRE}, faster to
-         *  composite) and so Java2D can keep an accelerated copy of it in video memory:
-         *  this image is rendered once and then blitted on every repaint and never read
-         *  back, which is exactly the managed-image pattern that gets texture-cached.
-         *  The maximum acceleration priority keeps that copy resident under memory
-         *  pressure. Falls back to a plain {@code INT_ARGB} buffer when there is no
-         *  device configuration (e.g. headless rendering).
-         */
+        /** The memory this entry has claimed: its image - counted from the moment the entry
+         *  exists, not from the moment the buffer is actually allocated.  */
+        long reservedBytes() {
+            long total = (long) _width * _height * BYTES_PER_PIXEL;
+            if ( _stretchTiles != null )
+                for ( BufferedImage tile : _stretchTiles )
+                    total += _bytesOf(tile);
+            return total;
+        }
+
+        private static long _bytesOf( @Nullable BufferedImage image ) {
+            return ( image == null ? 0 : (long) image.getWidth() * image.getHeight() * BYTES_PER_PIXEL );
+        }
+
         private static BufferedImage _allocate( @Nullable GraphicsConfiguration gc, int width, int height ) {
             BufferedImage img = ( gc != null )
                     ? gc.createCompatibleImage(width, height, Transparency.TRANSLUCENT)
