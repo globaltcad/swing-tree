@@ -52,7 +52,7 @@ class Render_Cache_Reclamation_Spec extends Specification
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         SwingTree.get().setUiScaleFactor(1f)
         CacheBudget.UNITS_OVERRIDE = 10 // A deterministic budget, independent of the runner's RAM.
-        ComponentExtension.updateAllCachesFromLibraryConfig() // Every scenario starts with empty caches.
+        UI.runNow( () -> ComponentExtension.updateAllCachesFromLibraryConfig() ) // Every scenario starts with empty caches.
     }
 
     def cleanup() {
