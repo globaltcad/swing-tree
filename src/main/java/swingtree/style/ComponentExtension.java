@@ -645,6 +645,8 @@ public final class ComponentExtension<C extends JComponent>
      * @return Bytes the global style layer render cache may retain at most, right now.
      */
     public static long globalStyleLayerCacheByteBudget() {
+        if ( !UI.thisIsUIThread() )
+            throw new IllegalStateException("globalStyleLayerCacheByteBudget() must be called on the UI thread.");
         return CacheBudget.bytesFor(CacheBudget.Kind.STYLE_LAYER);
     }
 
