@@ -86,7 +86,11 @@ class Render_Cache_Reclamation_Spec extends Specification
             would still be reachable from this scenario's own stack frame when the collector
             runs, and the scenario would then be pinning the very reference it is testing.
         """
-            var ghost = paintAndForget(builder)
+            var box = (JComponent) builder.call()
+            box.setSize(260, 150)
+            12.times { Utility.renderSingleComponent(box) }
+            var ghost = new WeakReference<>(box)
+            box = null
         then : 'While it was alive, its style really was cached - so there is something to reclaim.'
             styleLayerEntries() > entriesBefore
             globalStyleLayerCacheBytesReserved() > bytesBefore
@@ -186,7 +190,11 @@ class Render_Cache_Reclamation_Spec extends Specification
                                        .gradient( g -> g.colors(new Color(90, 30, 140), new Color(20, 90, 140)) ) }
             var survivor = UI.box().withStyle(styler as swingtree.api.Styler).get(JBox)
             survivor.setSize(260, 150)
-            var ghost = paintAndForgetLike(styler)
+            var box = UI.box().withStyle(styler as swingtree.api.Styler).get(JBox)
+            box.setSize(260, 150)
+            12.times { Utility.renderSingleComponent(box) }
+            var ghost = new WeakReference<>(box)
+            box = null // Causing the component + style conf garbage collection
             8.times { Utility.renderSingleComponent(survivor) }
 
         expect : 'They shared a single entry rather than minting one each.'
@@ -206,27 +214,6 @@ class Render_Cache_Reclamation_Spec extends Specification
             Utility.renderSingleComponent(survivor)
             ComponentExtension.from(survivor).cacheHitCount(UI.Layer.BACKGROUND) == hitsBefore + 1
             ComponentExtension.from(survivor).cacheMissCount(UI.Layer.BACKGROUND) == missesBefore
-    }
-
-    /**
-     *  Builds a component with the supplied style, paints it until its style is cached, and
-     *  returns only a weak handle on it. Everything strong is confined to this frame, which is
-     *  what lets the caller assert that the component can be collected.
-     */
-    private static WeakReference<JComponent> paintAndForget( Closure builder ) {
-        JComponent component = (JComponent) builder.call()
-        component.setSize(260, 150)
-        12.times { Utility.renderSingleComponent(component) }
-        return new WeakReference<>(component)
-    }
-
-    /** As {@link #paintAndForget}, for a style handed in as a `Styler` so that a caller can
-     *  build a second, identically styled component from the very same style. */
-    private static WeakReference<JBox> paintAndForgetLike( Closure styler ) {
-        var box = UI.box().withStyle(styler as swingtree.api.Styler).get(JBox)
-        box.setSize(260, 150)
-        12.times { Utility.renderSingleComponent(box) }
-        return new WeakReference<>(box)
     }
 
     /**
