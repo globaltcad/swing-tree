@@ -66,6 +66,8 @@ final class LayerCache
 {
     private static final Logger log = LoggerFactory.getLogger(LayerCache.class);
 
+    private static final Map<Pooled<LayerRenderConf>, CachedImage> _CACHE = new WeakHashMap<>();
+
     private static final int    MAX_CACHE_ENTRIES                 = 1024; // There can never be more entries!
     private static final int    PIXELS_PER_UNIT_OF_AGGRESSIVENESS = 256 * 256; // Determines how many pixels a single unit of cache aggressiveness can cache
     private static final double EAGER_ALLOCATION_FRIENDLINESS     = 0.1; // Has to be between 0 and 1!
@@ -74,52 +76,20 @@ final class LayerCache
     private static final int    SAFETY_MARGIN                     = 2; // Added to every slice inset to absorb antialiasing bleed and artifact adjustments in the renderer.
     private static final int    BYTES_PER_PIXEL                   = 4; // Every cached rendering is 32 bit ARGB, see CachedImage._allocate.
 
-    /** The largest device-pixel area a single style-layer image may occupy to still be
-     *  cached. Expressed in {@link CacheBudget#units()} so that, at the default mode,
-     *  <em>which</em> components qualify for caching is exactly as it always was. */
-    private static int _maxCacheableImageArea() {
-        return (int) (CacheBudget.units() * PIXELS_PER_UNIT_OF_AGGRESSIVENESS);
+    private static int  _maxCacheableImageArea() { return (int) (CacheBudget.units() * PIXELS_PER_UNIT_OF_AGGRESSIVENESS); }
+    private static int  _maxCacheEntries()       { return Math.min(MAX_CACHE_ENTRIES, CacheBudget.maxEntriesFor(CacheBudget.Kind.STYLE_LAYER)); }
+
+    static int globalEntryCount() {
+        return _CACHE.size();
     }
 
-    /** The backstop on how many style-layer images the global cache retains, derived from
-     *  this cache's slice of the shared {@link CacheBudget} byte budget (so the total
-     *  footprint is tangible) and clamped to an absolute ceiling. */
-    private static int _maxCacheEntries() {
-        return Math.min(MAX_CACHE_ENTRIES, CacheBudget.maxEntriesFor(CacheBudget.Kind.STYLE_LAYER));
-    }
-
-    private static final Map<Pooled<LayerRenderConf>, CachedImage> _CACHE = new WeakHashMap<>();
-
-    /** What the live entries have reserved right now - which is what they will occupy, but
-     *  counted from the moment an entry exists rather than from the moment its buffer is
-     *  actually allocated, see {@link CachedImage#reservedBytes()}. */
-    private static long _bytesReservedByCache() {
+    static long globalBytesReserved() {
         long total = 0;
         for ( CachedImage image : _CACHE.values() )
             total += image.reservedBytes();
         return total;
     }
 
-    /** Live number of cached style-layer renderings (for monitoring/tests). */
-    static int globalEntryCount() {
-        return _CACHE.size();
-    }
-
-    /** Live bytes reserved by the cached style-layer renderings (for monitoring/tests).
-     *  Must be called on the painting thread: it walks the same map that painting writes to. */
-    static long globalBytesReserved() {
-        return _bytesReservedByCache();
-    }
-
-    /** Drops every globally cached layer image. Called when the library cache configuration
-     *  changes (see {@link ComponentExtension#updateAllCachesFromLibraryConfig()}) so memory
-     *  shrinks immediately; the cache repopulates lazily under the new budget. <br>
-     *  Note that living {@link LayerCache} instances keep holding their {@code _localCache}
-     *  image until their next {@link #validate(ComponentConf)}, so a component
-     *  which revalidates afterwards may briefly mint a second image for a key another component
-     *  is still painting from. This costs a little duplicated memory until the stragglers
-     *  revalidate; it is never a correctness problem (the images are equal by construction),
-     *  and it only ever happens on the rare library configuration change. */
     static void clearGlobalCache() {
         _CACHE.clear();
     }
@@ -127,17 +97,10 @@ final class LayerCache
 
     private final UI.Layer          _layer;
     private @Nullable CachedImage   _localCache;
-    /** The render input: always the actual configuration at the real component size (see class javadoc). */
     private Pooled<LayerRenderConf> _layerRenderData;
-    /** The cache key: the interned canonical form of {@code _layerRenderData} (see class javadoc). */
     private Pooled<LayerRenderConf> _cacheKey;
     private int                     _cacheHitsUntilAllocation;
     private boolean                 _isInitialized;
-    /*
-     *  Per-instance utilisation counters, observable through the {@link ComponentExtension}
-     *  public API, which is also how the test suite reasons about cache effectiveness
-     *  without coupling to any of the package-private machinery.
-     */
     private int                     _paintCacheHitCount  = 0; // paint() served entirely from a rendered cache image
     private int                     _paintCacheMissCount = 0; // paint() had to invoke the renderer (caching disabled, or the cache was not yet rendered)
 
@@ -150,9 +113,10 @@ final class LayerCache
         _isInitialized            = false;
     }
 
-    /** The fully rendered cached image which subsequent paint calls will be served from,
-     *  or null while there is none (caching not worthwhile, or the lazy allocation
-     *  count-down has not finished yet). */
+    int paintCacheHitCount()  { return _paintCacheHitCount;  }
+
+    int paintCacheMissCount() { return _paintCacheMissCount; }
+
     public @Nullable BufferedImage renderedImage() {
         return _localCache != null && _localCache.isRendered() ? _localCache.getImage() : null;
     }
@@ -160,13 +124,6 @@ final class LayerCache
     public final void validate( ComponentConf newConf )
     {
         if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) ) {
-            /*
-                The component is (currently) non-renderable - collapsed or hidden.
-                We drop our reference to any previously cached image so it can be
-                reclaimed promptly instead of being pinned for as long as this
-                component lives, and we reset the initialization state so that a
-                later non-zero size revalidates and re-allocates from scratch.
-            */
             _localCache               = null;
             _cacheHitsUntilAllocation = -1;
             _isInitialized            = false;
@@ -176,12 +133,8 @@ final class LayerCache
         }
 
         final LayerRenderConf newState = newConf.renderConfFor(_layer);
-        /*
-            Canonicalization maps eligible configurations onto the size independent
-            exemplar key, so that a resize does not invalidate the cache. For everything
-            else it is the identity and this whole method behaves exactly as it did
-            when key and render input were one and the same.
-        */
+
+        // We try to canonicalizd to a size independent conf for 9 patch based caching:
         final LayerRenderConf newCacheState = CacheBudget.tilingEnabled()
                                                 ? _canonicalize(newState)
                                                 : newState;
@@ -313,32 +266,6 @@ final class LayerCache
             g.drawImage(cachedImage, 0, 0, null);
     }
 
-    /** Number of paint calls served entirely from the cached image, since this instance was created. */
-    int paintCacheHitCount()  { return _paintCacheHitCount;  }
-
-    /** Number of paint calls that had to invoke the renderer, since this instance was created. */
-    int paintCacheMissCount() { return _paintCacheMissCount; }
-
-    /**
-     *  Scores whether caching pays off for the supplied configuration: -1 means never
-     *  cache, otherwise the number of cache hits to wait before allocating and rendering
-     *  (0 = eagerly). The supplied state is the <i>cache key</i>, which for stretch
-     *  tileable styles is the small exemplar configuration - so the size based gates
-     *  (maximum cacheable image area, allocation warm-up) measure the memory that will
-     *  actually be allocated, not the component size. This is what makes arbitrarily
-     *  large components cacheable (and typically eagerly so) when their style tiles. <br>
-     *  <br>
-     *  Note the second order effect on the warm-up gate, which exists to stop short-lived
-     *  configurations (a style animation mints a fresh one every frame) from paying for an
-     *  image: a tileable style always scores small enough to be allocated eagerly, so an
-     *  animated tileable style now does allocate an exemplar per frame. This is a deliberate
-     *  trade: the exemplar is a few kilobytes and is rendered far more cheaply than the full
-     *  sized component the direct fallback would otherwise rasterize, and because the keys
-     *  are held weakly the debris is reclaimed as soon as the animation moves on (pinned by
-     *  {@code Stretch_Tiling_Eligibility_Spec}). What must not regress is that weak
-     *  reclamation - were a frame's key ever strongly retained, a long animation would fill
-     *  the cache to {@link #_maxCacheEntries()} and lock every other component out of it.
-     */
     private int _cachingMakesSenseFor( LayerRenderConf state )
     {
         final int maxEntries = _maxCacheEntries();
@@ -421,10 +348,8 @@ final class LayerCache
         ------------------------------------------------------------------------------------ */
 
     /**
-     *  Maps eligible configurations of any size onto the size independent exemplar key,
-     *  and returns ineligible ones (as well as those not strictly larger than the exemplar
-     *  in both dimensions) unchanged - which also makes this idempotent, so a configuration
-     *  which already has the exemplar size maps onto itself.
+     *  If possible, maps eligible configurations of any size onto the size independent exemplar key,
+     *  which may be used to create a 9 patch/tile based cache entry.
      */
     private static LayerRenderConf _canonicalize( LayerRenderConf conf ) {
         if ( !_isStretchTileable(conf) )
