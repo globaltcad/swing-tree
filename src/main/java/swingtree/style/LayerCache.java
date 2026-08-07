@@ -157,31 +157,6 @@ final class LayerCache
         return _localCache != null && _localCache.isRendered() ? _localCache.getImage() : null;
     }
 
-    private void _allocateOrGetCachedBuffer( Pooled<LayerRenderConf> layerRenderConf )
-    {
-        Map<Pooled<LayerRenderConf>, CachedImage> CACHE = _CACHE;
-        /*
-            We store a pooled ref as the key because this
-            key object is also the key in the global (weak) hash map based cache
-            whose reachability determines if the cached image is garbage collected or not!
-            So in order to avoid the cache being freed too early, we need to keep a strong
-            reference to the key object for all LayerCache instances that make use of the
-            corresponding cached image (the value of a particular key in the global cache).
-            And so a pooled object has a higher likely hood of being strongly referenced somewhere.
-        */
-        layerRenderConf = layerRenderConf.intern();
-        CachedImage bufferedImage = CACHE.get(layerRenderConf);
-
-        if ( bufferedImage == null ) {
-            Size size = layerRenderConf.get().boxModel().size();
-            bufferedImage = new CachedImage(size, _cacheHitsUntilAllocation);
-            CACHE.put(layerRenderConf, bufferedImage);
-        }
-        _cacheKey = layerRenderConf;
-
-        _localCache = bufferedImage;
-    }
-
     public final void validate( ComponentConf newConf )
     {
         if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) ) {
@@ -234,14 +209,27 @@ final class LayerCache
         }
 
         if ( _localCache == null || cacheStateChanged ) {
-            // We only drop the stale local image here so the call below re-attaches
-            // to the entry for the new cache key. Unlike the caching-disabled branch
-            // above, we deliberately keep `_cacheHitsUntilAllocation` and
-            // `_isInitialized`, because we just computed the correct
-            // `_cacheHitsUntilAllocation` for the new state above and want it to be
-            // used by the upcoming `_allocateOrGetCachedBuffer` call.
+            // Now we bind the configuration to a new entry:
             _localCache = null;
-            _allocateOrGetCachedBuffer(new Pooled<>(newCacheState));
+            Pooled<LayerRenderConf> layerRenderConf = new Pooled<>(newCacheState).intern();
+            /*
+                We store a pooled ref as the key because this key object is also the key in the global
+                (weak) hash map based cache whose reachability determines if the cached image is
+                garbage collected or not! So in order to avoid the cache being freed too early, we need to keep a strong
+                reference to the key object for all LayerCache instances that make use of the
+                corresponding cached image (the value of a particular key in the global cache).
+                And so a pooled object has a higher likely hood of being strongly referenced somewhere.
+            */
+            CachedImage bufferedImage = _CACHE.get(layerRenderConf);
+
+            if ( bufferedImage == null ) {
+                Size size = layerRenderConf.get().boxModel().size();
+                bufferedImage = new CachedImage(size, _cacheHitsUntilAllocation);
+                _CACHE.put(layerRenderConf, bufferedImage);
+            }
+            _cacheKey = layerRenderConf;
+
+            _localCache = bufferedImage;
         }
     }
 
