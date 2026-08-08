@@ -149,8 +149,6 @@ final class LayerCache
 
         if ( validationNeeded ) {
             _cacheHitsUntilAllocation = _cachingMakesSenseFor(newCacheState);
-            if ( _localCache != null )
-                _localCache.updateNumberOfHitsUntilAllocation(_cacheHitsUntilAllocation);
         }
 
         if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
@@ -562,11 +560,6 @@ final class LayerCache
                     : new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB); // probably headless
             img.setAccelerationPriority(1.0f);
             return img;
-        }
-
-        public void updateNumberOfHitsUntilAllocation( int latestNumberOfHitsUntilAllocation ) {
-            if ( _numberOfHitsUntilAllocation < 0 )
-                _numberOfHitsUntilAllocation = latestNumberOfHitsUntilAllocation;
         }
 
         public @Nullable BufferedImage getImage() {
