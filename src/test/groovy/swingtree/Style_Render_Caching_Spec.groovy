@@ -623,38 +623,112 @@ class Style_Render_Caching_Spec extends Specification
             ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
     }
 
-    def 'A small rendering is still minted while resizing, so equally styled components keep sharing it.'()
+    def 'A component dragged through fresh sizes leaves no finished renderings behind.'()
     {
         reportInfo """
-            This is the guard rail on the scenario above. Cached renderings are keyed globally
-            on the render configuration rather than per component, so a UI full of identically
-            styled components mints *one* entry and blits it for all of them. That kind of
-            sharing happens within a single frame and therefore survives a resize perfectly
-            well - suppressing it would turn one rendering per frame into dozens.
+            A cached rendering pays for itself by being blitted more than once. During a live
+            resize of a style that cannot be stretch tiled, an entry keyed on the exact
+            component size can almost never manage that: it would be allocated, rendered into,
+            blitted once, and thrown away by the very next frame, which arrives at a width no
+            frame has had before. Measured on one of the example UIs shipped with SwingTree,
+            that came to roughly three megabytes of freshly allocated image memory *per drag
+            frame*, of which more than nine tenths was never read a second time.
 
-            Suppressing every exact-size entry during a resize was measured at more than twice
-            the cost on a drag frame of a UI with 64 identically styled pads, which is why the
-            rule above only ever applies to entries too large to be worth minting eagerly.
+            So an entry whose key contains a size that is currently changing is not allocated
+            on the spot any more. The entry itself is still created, and it still waits in the
+            shared pool where any other component with the very same style can find it - but
+            the pixel memory behind it is only committed once a second user actually asks for
+            it. A component being dragged on its own never produces that second user, and
+            therefore never pays for an image it would immediately discard.
+
+            Below, the component is first painted at a settled size, where the ordinary rule
+            applies and it does get a cached rendering. It is then dragged across four widths
+            it has never had, and none of those frames leaves a rendering behind. As soon as
+            the size stops changing, caching returns of its own accord.
         """
-        given : 'Two identically styled small buttons.'
+        given : 'A gradient styled button, heavy enough to be cached, but not stretch tileable.'
+            var button =
+                UI.button("Drag me")
+                  .withStyle( it -> it
+                        .borderRadius(10)
+                        .gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
+                  )
+                  .get(JButton)
+            var ext = ComponentExtension.from(button)
+        and : 'It sits at a settled size, painted often enough to be cached there.'
+            button.setSize(100, 60)
+            2.times { Utility.renderSingleComponent(button) }
+        expect : 'A rendering exists, because nothing about this size is in flux.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+
+        when : 'The component is dragged across four widths it has never had before.'
+            var renderingsPerFrame = []
+            [120, 140, 160, 180].each { width ->
+                button.setSize(width, 60)
+                Utility.renderSingleComponent(button)
+                renderingsPerFrame << ext.cachedRendering(UI.Layer.BACKGROUND).size()
+            }
+        then : 'The component really did arrive at the last of those widths.'
+            button.width == 180
+        and  : 'Not one of those frames left a finished rendering behind.'
+            renderingsPerFrame == [0, 0, 0, 0]
+
+        when : 'The drag ends and the component keeps being painted at its final size.'
+            2.times { Utility.renderSingleComponent(button) }
+        then : 'Caching resumes on its own, because the reason to hold back is gone.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+    }
+
+    def 'Equally styled components resizing together still end up sharing one rendering.'()
+    {
+        reportInfo """
+            This is the guard rail on the scenario above, and the reason the entry is still
+            created rather than skipped altogether. Renderings are keyed on the style
+            configuration and not on the component, so a window full of identically styled
+            cells produces *one* rendering that all of them blit. That kind of sharing happens
+            within a single frame and survives a resize perfectly well - refusing it would
+            turn one rendering per frame into dozens.
+
+            What "wait for a second user" therefore means in a UI of equally styled siblings
+            is only this: the first sibling to be painted renders straight onto the screen,
+            and the second one commits the shared image. Every sibling after that blits it,
+            and - because they were all pointed at the same entry - the first one finds it
+            waiting on its next repaint too, without having asked for it again.
+        """
+        given : 'Two buttons carrying the exact same style.'
             def styler = { conf -> conf
                 .borderRadius(10)
                 .gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
             }
             var first  = UI.button("A").withStyle(styler as swingtree.api.Styler).get(JButton)
             var second = UI.button("B").withStyle(styler as swingtree.api.Styler).get(JButton)
+            var firstExt  = ComponentExtension.from(first)
+            var secondExt = ComponentExtension.from(second)
+        and : 'Both are painted once at a common size, so that neither is newborn any more.'
             first.setSize(100, 60)
             second.setSize(100, 60)
-            var secondExt = ComponentExtension.from(second)
-
-        when : 'The first one is resized and painted, so it paints mid-resize.'
-            first.setSize(120, 60)
             Utility.renderSingleComponent(first)
-        and : 'The second one, of that very same new size, is painted afterwards.'
+            Utility.renderSingleComponent(second)
+
+        when : 'Both are resized to a common new size, and the first one is painted there.'
+            first.setSize(120, 60)
             second.setSize(120, 60)
+            Utility.renderSingleComponent(first)
+        then : 'It rendered onto the screen without committing an image, as the scenario above showed.'
+            firstExt.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
+
+        when : 'The second one is painted at that very same size.'
             Utility.renderSingleComponent(second)
+        then : 'It found the waiting entry and committed the shared image.'
+            secondExt.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+        and  : 'Which the first component now has as well, without having painted again.'
+            firstExt.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+
+        when : 'Both are painted once more.'
+            Utility.renderSingleComponent(first)
             Utility.renderSingleComponent(second)
-        then : 'It was served from the entry the resizing component minted, rather than rendering again.'
+        then : 'Both were served from that one shared rendering.'
+            firstExt.cacheHitCount(UI.Layer.BACKGROUND)  >= 1
             secondExt.cacheHitCount(UI.Layer.BACKGROUND) >= 1
     }
 
