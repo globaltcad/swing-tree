@@ -103,8 +103,9 @@ final class LayerPartitionCache
 
     // Sum type based states
     private interface CacheState {
+        final class Nothing  implements CacheState { static final Nothing  INSTANCE = new Nothing();  }
         final class Uncached implements CacheState { static final Uncached INSTANCE = new Uncached(); }
-        final class Cached implements CacheState {
+        final class Cached   implements CacheState {
             final Pooled<LayerRenderConf> _key;
             final CachedImage             _image;
             Cached( Pooled<LayerRenderConf> key, CachedImage image ) {
@@ -120,11 +121,11 @@ final class LayerPartitionCache
     private CacheState              _state;
 
 
-    public LayerPartitionCache(UI.Layer layer, LayerRenderConfPartitions part ) {
+    public LayerPartitionCache( UI.Layer layer, LayerRenderConfPartitions part ) {
         _layer                    = Objects.requireNonNull(layer);
         _part                     = Objects.requireNonNull(part);
         _layerRenderData          = LayerRenderConf.none();
-        _state                    = CacheState.Uncached.INSTANCE;
+        _state                    = CacheState.Nothing.INSTANCE;
     }
 
     public @Nullable BufferedImage renderedImage() {
@@ -138,11 +139,15 @@ final class LayerPartitionCache
     {
         if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) ) {
             _layerRenderData          = LayerRenderConf.none();
-            _state                    = CacheState.Uncached.INSTANCE;
+            _state                    = CacheState.Nothing.INSTANCE;
             return;
         }
 
         _layerRenderData = _part.restrict(newConf.renderConfFor(_layer));
+        if ( _layerRenderData.rendersNothing() ) {
+            _state = CacheState.Nothing.INSTANCE;
+            return;
+        }
 
         // We try to canonicalizd to a size independent conf for 9 patch based caching:
         final LayerRenderConf keyConf = CacheBudget.tilingEnabled()
@@ -170,6 +175,9 @@ final class LayerPartitionCache
     PaintOutcome paint( Graphics2D g, BiConsumer<LayerRenderConf, Graphics2D> renderer )
     {
         final Size size = _layerRenderData.boxModel().size();
+
+        if ( _state instanceof CacheState.Nothing )
+            return PaintOutcome.NOTHING_RENDERED;
 
         if ( size.widthOrElse(0f) == 0f || size.heightOrElse(0f) == 0f )
             return PaintOutcome.NOTHING_RENDERED;
@@ -341,6 +349,12 @@ final class LayerPartitionCache
             return conf;
 
         return conf.withBoxModel(conf.boxModel().withSize(canonical));
+    }
+
+    static boolean cachesSizeIndependently( LayerRenderConf conf ) {
+        if ( !CacheBudget.tilingEnabled() )
+            return false;
+        return !_canonicalize(conf).boxModel().size().equals(conf.boxModel().size());
     }
 
     /** Whether the layer content satisfies the tiling invariant (see class javadoc). */
