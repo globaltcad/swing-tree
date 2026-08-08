@@ -32,27 +32,27 @@ final class StyleEngine
 
     private final Pooled<BoxModelConf>  _boxModelConf;
     private final Pooled<ComponentConf> _componentConf;
-    private final LayerCache[]          _layerCaches;
+    private final StyleLayerCache[]     _layerCaches;
 
 
     private StyleEngine(
         Pooled<BoxModelConf>  boxModelConf,
         Pooled<ComponentConf> componentConf,
-        @Nullable LayerCache[] layerCaches // Null when the style engine is freshly created
+        @Nullable StyleLayerCache[] layerCaches // Null when the style engine is freshly created
     ) {
         _boxModelConf  = Objects.requireNonNull(boxModelConf).intern();
         _componentConf = Objects.requireNonNull(componentConf).intern();
         if ( layerCaches == null ) {
-            layerCaches = new LayerCache[ALL_LAYERS.length];
+            layerCaches = new StyleLayerCache[ALL_LAYERS.length];
             for ( int i = 0; i < layerCaches.length; i++ )
-                layerCaches[i] = new LayerCache(ALL_LAYERS[i]);
+                layerCaches[i] = new StyleLayerCache(ALL_LAYERS[i]);
         }
         _layerCaches = Objects.requireNonNull(layerCaches);
     }
 
     ComponentConf getComponentConf() { return _componentConf.get(); }
 
-    LayerCache[] getLayerCaches() { return _layerCaches; }
+    StyleLayerCache[] getLayerCaches() { return _layerCaches; }
 
     BoxModelConf getBoxModelConf() { return _boxModelConf.get(); }
 
@@ -80,8 +80,8 @@ final class StyleEngine
         final BoxModelConf newBoxModelConf = boxModelAndComponentConfs.first();
         final ComponentConf newConf = boxModelAndComponentConfs.second();
 
-        final LayerCache[] layerCaches = engine.getLayerCaches();
-        for ( LayerCache layerCache : layerCaches )
+        final StyleLayerCache[] layerCaches = engine.getLayerCaches();
+        for ( StyleLayerCache layerCache : layerCaches )
             layerCache.validate(newConf);
 
         return new StyleEngine(new Pooled<>(newBoxModelConf), new Pooled<>(newConf), _layerCaches);
@@ -142,6 +142,7 @@ final class StyleEngine
         _render(UI.Layer.FOREGROUND, g2d);
     }
 
+    @SuppressWarnings("EnumOrdinal") // Layer ordinals are used intentionally to index the per-layer cache array.
     private void _render( UI.Layer layer, Graphics2D g2d ) {
 
         final boolean antialiasingEnabled = IS_ANTIALIASING_ENABLED();
@@ -155,20 +156,19 @@ final class StyleEngine
             antialiasingWasEnabled = false;
         }
 
-        LayerCache cache = null;
-        switch ( layer ) {
-            case BACKGROUND: cache = _layerCaches[0]; break;
-            case CONTENT:    cache = _layerCaches[1]; break;
-            case BORDER:     cache = _layerCaches[2]; break;
-            case FOREGROUND: cache = _layerCaches[3]; break;
-        }
-        if ( cache != null )
-            cache.paint(g2d, (conf, graphics) -> {
-                StyleRenderer.renderStyleOn(layer, conf, graphics);
-            });
+        /*
+            The caches are created from ALL_LAYERS, so the layer's own ordinal is what indexes
+            them - deliberately not a hardcoded layer-to-index switch. Each cache now renders
+            through the layer it was constructed with, so a mapping that disagreed with
+            ALL_LAYERS would not merely cache in the wrong slot, it would paint the wrong
+            layer's style. ComponentExtension indexes the very same array the same way.
+        */
+        final int layerIndex = layer.ordinal();
+        if ( layerIndex >= 0 && layerIndex < _layerCaches.length )
+            _layerCaches[layerIndex].paint(g2d);
         else
             log.error(SwingTree.get().logMarker(),
-                    "Layer cache is null for layer: {}",
+                    "No layer cache for layer: {}",
                     layer, new Throwable("Stack trace for debugging purposes.")
                 );
 
