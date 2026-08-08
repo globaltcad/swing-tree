@@ -109,15 +109,17 @@ final class LayerPartitionCache
     private Pooled<LayerRenderConf> _cacheKey;
     private int                     _cacheHitsUntilAllocation;
     private boolean                 _isInitialized;
+    private boolean                 _rendersNothing;
 
 
-    public LayerPartitionCache(UI.Layer layer, LayerRenderConfPartitions part ) {
+    public LayerPartitionCache( UI.Layer layer, LayerRenderConfPartitions part ) {
         _layer                    = Objects.requireNonNull(layer);
         _part                     = Objects.requireNonNull(part);
         _layerRenderData          = new Pooled<>(LayerRenderConf.none());
         _cacheKey                 = _layerRenderData;
         _cacheHitsUntilAllocation = -1;
         _isInitialized            = false;
+        _rendersNothing           = true;
     }
 
     public @Nullable BufferedImage renderedImage() {
@@ -132,10 +134,12 @@ final class LayerPartitionCache
             _isInitialized            = false;
             _layerRenderData          = new Pooled<>(LayerRenderConf.none());
             _cacheKey                 = _layerRenderData;
+            _rendersNothing           = true;
             return;
         }
 
         final LayerRenderConf newState = _part.restrict(newConf.renderConfFor(_layer));
+        _rendersNothing = newState.rendersNothing();
 
         // We try to canonicalizd to a size independent conf for 9 patch based caching:
         final LayerRenderConf newCacheState = CacheBudget.tilingEnabled()
@@ -194,6 +198,11 @@ final class LayerPartitionCache
         Size size = _layerRenderData.get().boxModel().size();
 
         if ( size.widthOrElse(0f) == 0f || size.heightOrElse(0f) == 0f )
+            return PaintOutcome.NOTHING_RENDERED;
+
+        // A part holding none of the layer's style draws nothing, and must not report a miss
+        // for it, or a split layer would miss on every paint for the side its style leaves empty.
+        if ( _rendersNothing )
             return PaintOutcome.NOTHING_RENDERED;
 
         if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
@@ -370,6 +379,12 @@ final class LayerPartitionCache
             return conf;
 
         return conf.withBoxModel(conf.boxModel().withSize(canonical));
+    }
+
+    static boolean cachesSizeIndependently( LayerRenderConf conf ) {
+        if ( !CacheBudget.tilingEnabled() )
+            return false;
+        return !_canonicalize(conf).boxModel().size().equals(conf.boxModel().size());
     }
 
     /** Whether the layer content satisfies the tiling invariant (see class javadoc). */
