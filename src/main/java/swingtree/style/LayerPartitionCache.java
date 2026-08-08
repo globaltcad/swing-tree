@@ -126,7 +126,7 @@ final class LayerPartitionCache
         return _localCache != null && _localCache.isRendered() ? _localCache.getImage() : null;
     }
 
-    public final void validate( ComponentConf newConf )
+    public final void validate( ComponentConf newConf, boolean isResizing )
     {
         if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) ) {
             _localCache               = null;
@@ -155,7 +155,9 @@ final class LayerPartitionCache
             _layerRenderData = new Pooled<>(newState);
 
         if ( validationNeeded ) {
-            _cacheHitsUntilAllocation = _cachingMakesSenseFor(newCacheState);
+            _cacheHitsUntilAllocation = _isPointlessToMintWhileResizing(newCacheState, newState, isResizing)
+                                            ? _hitsForReusingAFinishedRendering(newCacheState)
+                                            : _cachingMakesSenseFor(newCacheState);
             if ( _localCache != null )
                 _localCache.updateNumberOfHitsUntilAllocation(_cacheHitsUntilAllocation);
         }
@@ -277,6 +279,32 @@ final class LayerPartitionCache
         return outcome;
     }
 
+    private static boolean _isPointlessToMintWhileResizing(
+        LayerRenderConf cacheKey, LayerRenderConf renderInput, boolean isResizing
+    ) {
+        if ( !isResizing )
+            return false;
+        if ( !cacheKey.boxModel().size().equals(renderInput.boxModel().size()) )
+            return false; // Size independent, so the resize does not invalidate it at all.
+        final Size size = cacheKey.boxModel().size();
+        return size.widthOrElse(0f) * size.heightOrElse(0f) > _eagerAllocationLimit();
+    }
+
+    private static int _hitsForReusingAFinishedRendering( LayerRenderConf cacheKey ) {
+        /*
+            Deliberately not interned: `Pooled` compares by value, so a plain probe finds the
+            entry without putting anything into the object pool for a key we may not use.
+        */
+        final @Nullable CachedImage existing = _CACHE.get(new Pooled<>(cacheKey));
+        return ( existing != null && existing.isRendered() ? 0 : -1 );
+    }
+
+    /** The image area up to which an entry is worth allocating right away rather than after a
+     *  warm-up of cache hits; also the line above which minting one mid-resize is a loss. */
+    private static int _eagerAllocationLimit() {
+        return (int) ( _maxCacheableImageArea() * EAGER_ALLOCATION_FRIENDLINESS );
+    }
+
     private int _cachingMakesSenseFor( LayerRenderConf state )
     {
         final int maxEntries = _maxCacheEntries();
@@ -338,7 +366,7 @@ final class LayerPartitionCache
             return -1;
 
         final int maxSizeLimit         = _maxCacheableImageArea();
-        final int eagerAllocationLimit = (int) (maxSizeLimit * EAGER_ALLOCATION_FRIENDLINESS);
+        final int eagerAllocationLimit = _eagerAllocationLimit();
         final int cacheHitCountLimit   = (int) (maxSizeLimit * (1 - EAGER_ALLOCATION_FRIENDLINESS));
 
         final int pixelCount = (int) (size.widthOrElse(0f) * size.heightOrElse(0f));
