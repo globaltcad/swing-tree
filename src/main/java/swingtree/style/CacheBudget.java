@@ -56,28 +56,37 @@ import swingtree.SwingTreeInitConfig.CacheMode;
  *
  *  <h2>Reference: where the default ({@code BALANCED}) budget goes, per cache (MB)</h2>
  *  The total is partitioned across the four caches by the {@link Kind} weights below
- *  (style layers 45%, noise tiles 30%, text layouts 15%, shadows 10%):
+ *  (style layers 60%, noise tiles 35%, text layouts 3%, shadows 2%):
  *  <pre>
  *    RAM      Total   Layers   Noise   Layouts   Shadows
- *    2 GiB      16      7.2      4.8      2.4       1.6
- *    4 GiB      20      9.2      6.1      3.1       2.0
- *    8 GiB      41     18.4     12.3      6.1       4.1
- *   16 GiB      82     36.9     24.6     12.3       8.2
- *  &gt;=32 GiB    128     57.6     38.4     19.2      12.8   (at cap)
+ *    2 GiB      16      9.6      5.6      0.5       0.3
+ *    4 GiB      20     12.3      7.2      0.6       0.4
+ *    8 GiB      41     24.6     14.3      1.2       0.8
+ *   16 GiB      82     49.2     28.7      2.5       1.6
+ *  &gt;=32 GiB    128     76.8     44.8      3.8       2.6   (at cap)
  *  </pre>
  *  These are <em>ceilings on retention</em>, not pre-allocations: a cache only ever holds
  *  what the painted components actually produce, up to its slice. A small app on a big
  *  machine therefore costs little even though its ceiling is high.
  *
+ *  <p><b>Why the weights are so lopsided.</b> They express what each cache <em>can</em> spend,
+ *  not how important it is. Only the two image caches hold anything big: a style layer image
+ *  runs to tens of megabytes, a noise tile is exactly 256 KiB. The other two are bounded by
+ *  their own hard entry caps far below any budget &mdash; 128 text layouts is a quarter of a
+ *  megabyte, 16 shadow gradient stop arrays is sixteen kilobytes &mdash; so a large slice for
+ *  them is a slice that can never be spent. An earlier split gave those two a quarter of the
+ *  whole budget, which measured out as 25% of it reserved for caches that between them could
+ *  never exceed 0.3 MB.
+ *
  *  <h2>Two complementary scalars</h2>
  *  <ul>
- *      <li>{@link #units()} &mdash; the budget re-expressed as a {@code 4 MiB} unit count.
- *          The two image caches keep using it for the per-image <em>admission</em> decisions
- *          that are naturally expressed in pixels (e.g. "a single cached image may not exceed
- *          N device pixels"), so bigger machines admit bigger images.</li>
- *      <li>{@link #bytesFor(Kind)} &mdash; a cache's slice of the total byte budget, used for
- *          the <em>retention</em> caps (how many entries / how much total memory). This is what
- *          makes the overall footprint tangible.</li>
+ *      <li>{@link #bytesFor(Kind)} &mdash; a cache's slice of the total byte budget. This is
+ *          the real bound and what makes the overall footprint tangible; a cache holding
+ *          unequally sized things (see {@link Kind#STYLE_LAYER}) measures itself against it
+ *          directly.</li>
+ *      <li>{@link #maxEntriesFor(Kind)} &mdash; that slice divided by a per-entry cost, for the
+ *          caches whose entries are all about the same size and which can therefore be bounded
+ *          by counting instead of measuring.</li>
  *  </ul>
  *
  *  <h2>Lifecycle</h2>
@@ -97,9 +106,7 @@ final class CacheBudget {
 
     private static final long MiB = 1024L * 1024;
 
-    /** The unit in which {@link #units()} re-expresses the byte budget; it bridges the
-     *  tangible byte budget and the pixel-area <em>admission</em> thresholds the two image
-     *  caches express in these units. Also the scale of the {@link #UNITS_OVERRIDE} test hook. */
+    /** The scale of the {@link #UNITS_OVERRIDE} test hook. */
     private static final long BYTES_PER_UNIT = 4L * MiB; // 4 MiB / unit
 
     /** Sentinel for "the budget has not been resolved from the library config yet". */
@@ -111,8 +118,8 @@ final class CacheBudget {
 
     /** Test hook: when {@code >= 0} it overrides the RAM/mode-derived budget, giving specs a
      *  deterministic figure independent of the CI machine's RAM. The value is expressed in
-     *  {@code 4 MiB} units (so {@code units() == UNITS_OVERRIDE}); {@code 0} simulates a
-     *  maximally constrained machine (all caching off). */
+     *  {@code 4 MiB} units (so {@code totalBudgetBytes() == UNITS_OVERRIDE * 4 MiB});
+     *  {@code 0} simulates a maximally constrained machine (all caching off). */
     static volatile double UNITS_OVERRIDE = -1;
 
     /** Total physical RAM in bytes, queried once. The expensive query is never repeated. */
@@ -121,15 +128,26 @@ final class CacheBudget {
         _SYSTEM_RAM_BYTES = _detectSystemRamGiB() * (double) (1L << 30);
     }
 
+    /** Marks a {@link Kind} whose entries are too unequal in size for an entry count to mean
+     *  anything; {@link #maxEntriesFor(Kind)} refuses to answer for such a kind. */
+    private static final long NOT_COUNTED_BY_ENTRIES = -1L;
+
     /** The cache kinds the total byte budget is partitioned across, each with its weight
-     *  (the fractions sum to 1) and a representative per-entry byte cost used to translate
-     *  the kind's byte slice into a native entry/tile count. The per-entry costs are real
-     *  estimates (a 256² tile really is ~256 KiB), which is what makes the budget tangible. */
+     *  (the fractions sum to 1) and a per-entry byte cost used to translate the kind's byte
+     *  slice into an entry count. <br>
+     *  <br>
+     *  A per-entry cost is only meaningful for a cache whose entries are all <em>the same
+     *  size</em> - a noise tile really is exactly 256 KiB, a gradient stop array really is
+     *  about a kilobyte - which is why {@link #STYLE_LAYER} has none. Style layer images range
+     *  from a few kilobytes to tens of megabytes, so any single figure for them is fiction and
+     *  the entry count derived from it is meaningless: measured across the seven example UIs,
+     *  a nominal 921 entry allowance corresponded to over a gigabyte of real images. That cache
+     *  measures its own bytes instead, see {@link #bytesFor(Kind)}. */
     enum Kind {
-        STYLE_LAYER    (0.45, 64L  * 1024),        // representative style layer image (~128² ARGB)
-        NOISE_TILE     (0.30, 256L * 256 * 4),     // exact: one 256² ARGB noise tile (256 KiB)
-        SHADOW_GRADIENT(0.10, 1L   * 1024),        // a blended gradient-stop array
-        TEXT_LAYOUT    (0.15, 2L   * 1024);        // a cached paragraph layout
+        STYLE_LAYER    (0.60, NOT_COUNTED_BY_ENTRIES), // images from kilobytes to tens of megabytes
+        NOISE_TILE     (0.35, 256L * 256 * 4),         // exact: one 256² ARGB noise tile (256 KiB)
+        SHADOW_GRADIENT(0.02, 1L   * 1024),            // a blended gradient-stop array
+        TEXT_LAYOUT    (0.03, 2L   * 1024);            // a cached paragraph layout
 
         final double weight;
         final long   bytesPerEntry;
@@ -151,23 +169,21 @@ final class CacheBudget {
         return b;
     }
 
-    /** The total budget re-expressed as a count of {@code 4 MiB} units. Replaces the former
-     *  {@code LayerPartCache.DYNAMIC_CACHE_AGGRESSIVENESS()} scalar; the image caches multiply it
-     *  by a pixels-per-unit constant to decide which images are small enough to cache. */
-    static double units() {
-        if ( UNITS_OVERRIDE >= 0 )
-            return UNITS_OVERRIDE;                       // honour the test hook exactly, without byte-conversion drift
-        return totalBudgetBytes() / (double) BYTES_PER_UNIT;
-    }
-
     /** The slice of the total byte budget allotted to the given cache kind. */
     static long bytesFor( Kind kind ) {
         return (long) (totalBudgetBytes() * kind.weight);
     }
 
-    /** The number of native entries (images / tiles / arrays) the kind's byte slice buys,
-     *  using its representative per-entry cost. {@code 0} when caching is off. */
+    /** The number of native entries (tiles / arrays) the kind's byte slice buys, using its
+     *  per-entry cost. {@code 0} when caching is off. Only valid for a kind whose entries are
+     *  all about the same size; a kind marked {@link #NOT_COUNTED_BY_ENTRIES} has to measure
+     *  its own bytes against {@link #bytesFor(Kind)} instead. */
     static int maxEntriesFor( Kind kind ) {
+        if ( kind.bytesPerEntry == NOT_COUNTED_BY_ENTRIES )
+            throw new IllegalArgumentException(
+                    "The entries of the '" + kind + "' cache are too unequal in size to be counted; " +
+                    "bound that cache by bytesFor(" + kind + ") instead."
+                );
         return (int) Math.max(0, bytesFor(kind) / kind.bytesPerEntry);
     }
 
