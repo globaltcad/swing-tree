@@ -97,7 +97,7 @@ final class LayerCache
 
     private final UI.Layer          _layer;
     private @Nullable CachedImage   _localCache;
-    private Pooled<LayerRenderConf> _layerRenderData;
+    private LayerRenderConf         _layerRenderData;
     private Pooled<LayerRenderConf> _cacheKey;
     private int                     _cacheHitsUntilAllocation;
     private boolean                 _isInitialized;
@@ -107,8 +107,8 @@ final class LayerCache
 
     public LayerCache( UI.Layer layer ) {
         _layer                    = Objects.requireNonNull(layer);
-        _layerRenderData          = new Pooled<>(LayerRenderConf.none());
-        _cacheKey                 = _layerRenderData;
+        _layerRenderData          = LayerRenderConf.none();
+        _cacheKey                 = new Pooled<>(_layerRenderData);
         _cacheHitsUntilAllocation = -1;
         _isInitialized            = false;
     }
@@ -121,14 +121,14 @@ final class LayerCache
         return _localCache != null && _localCache.isRendered() ? _localCache.getImage() : null;
     }
 
-    public final void validate( ComponentConf newConf )
+    public void validate( ComponentConf newConf )
     {
         if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) ) {
             _localCache               = null;
             _cacheHitsUntilAllocation = -1;
             _isInitialized            = false;
-            _layerRenderData          = new Pooled<>(LayerRenderConf.none());
-            _cacheKey                 = _layerRenderData;
+            _layerRenderData          = LayerRenderConf.none();
+            _cacheKey                 = new Pooled<>(_layerRenderData);
             return;
         }
 
@@ -144,8 +144,8 @@ final class LayerCache
 
         _isInitialized = true;
 
-        if ( !_layerRenderData.get().equals(newState) )
-            _layerRenderData = new Pooled<>(newState);
+        if ( !_layerRenderData.equals(newState) )
+            _layerRenderData = newState;
 
         if ( validationNeeded ) {
             _cacheHitsUntilAllocation = _cachingMakesSenseFor(newCacheState);
@@ -155,7 +155,7 @@ final class LayerCache
             _cacheHitsUntilAllocation = -1;
             _localCache               = null;
             _isInitialized            = false;
-            _cacheKey                 = _layerRenderData;
+            _cacheKey                 = new Pooled<>(_layerRenderData);
             return;
         }
 
@@ -186,17 +186,19 @@ final class LayerCache
 
     public void paint( Graphics2D g, BiConsumer<LayerRenderConf, Graphics2D> renderer )
     {
-        Size size = _layerRenderData.get().boxModel().size();
+        final Size size = _layerRenderData.boxModel().size();
 
         if ( size.widthOrElse(0f) == 0f || size.heightOrElse(0f) == 0f )
             return;
 
         if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
-            renderer.accept(_layerRenderData.get(), g);
+            renderer.accept(_layerRenderData, g);
             _paintCacheMissCount++;
             return;
         }
 
+        final CachedImage image        = _localCache;
+        final LayerRenderConf cacheKey = _cacheKey.get();
         /*
             A cache key size differing from the actual size means the entry is the small
             exemplar rendering, and painting means reconstructing the actual size from it
@@ -204,15 +206,15 @@ final class LayerCache
             under anything more exotic (rotation, shear, flips) we render directly
             instead of using the cache for this paint.
         */
-        final boolean isTiled = !_cacheKey.get().boxModel().size().equals(size);
+        final boolean isTiled = !cacheKey.boxModel().size().equals(size);
         if ( isTiled && !_isBlitCompatible(g.getTransform()) ) {
-            renderer.accept(_layerRenderData.get(), g);
+            renderer.accept(_layerRenderData, g);
             _paintCacheMissCount++;
             return;
         }
 
-        if ( _localCache == null ) {
-            renderer.accept(_layerRenderData.get(), g);
+        if ( image == null ) {
+            renderer.accept(_layerRenderData, g);
             _paintCacheMissCount++;
             log.error(
                 "Caching enabled for layer '{}', but the local buffer is null; rendered without cache. " +
@@ -222,15 +224,15 @@ final class LayerCache
             return;
         }
 
-        if ( !_localCache.isRendered() ) {
-            Graphics2D g2 = _localCache.createGraphics(g.getDeviceConfiguration());
+        if ( !image.isRendered() ) {
+            Graphics2D g2 = image.createGraphics(g.getDeviceConfiguration());
             if ( g2 == null ) {
                 /*
                     The cache is not yet ready to render into!
                     It will need a few more hits to be ready...
                     So we just do normal rendering instead:
                 */
-                renderer.accept(_layerRenderData.get(), g);
+                renderer.accept(_layerRenderData, g);
                 _paintCacheMissCount++;
                 return;
             }
@@ -246,7 +248,7 @@ final class LayerCache
                     the *cache key* configuration (possibly the small exemplar), whereas
                     the direct-render fallbacks above render the full sized render input.
                 */
-                renderer.accept(_cacheKey.get(), g2);
+                renderer.accept(cacheKey, g2);
                 g2.dispose();
             }
             _paintCacheMissCount++;
@@ -254,12 +256,12 @@ final class LayerCache
             _paintCacheHitCount++;
         }
 
-        final BufferedImage cachedImage = _localCache.getImage();
+        final BufferedImage cachedImage = image.getImage();
         if ( cachedImage == null )
             return; // Cannot happen (the count-down path returned above), but let's be defensive.
 
         if ( isTiled )
-            _localCache.paintStretched(g, _cacheKey.get(), size);
+            image.paintStretched(g, cacheKey, size);
         else
             g.drawImage(cachedImage, 0, 0, null);
     }
