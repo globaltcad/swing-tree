@@ -132,23 +132,20 @@ final class LayerCache
             return;
         }
 
-        final LayerRenderConf newState = newConf.renderConfFor(_layer);
+        _layerRenderData = newConf.renderConfFor(_layer);
 
         // We try to canonicalizd to a size independent conf for 9 patch based caching:
-        final LayerRenderConf newCacheState = CacheBudget.tilingEnabled()
-                                                ? _canonicalize(newState)
-                                                : newState;
+        final LayerRenderConf keyConf = CacheBudget.tilingEnabled()
+                                                ? _canonicalize(_layerRenderData)
+                                                : _layerRenderData;
 
-        final boolean cacheStateChanged = !_cacheKey.get().equals(newCacheState);
+        final boolean cacheStateChanged = !_cacheKey.get().equals(keyConf);
         final boolean validationNeeded  = !_isInitialized || cacheStateChanged;
 
         _isInitialized = true;
 
-        if ( !_layerRenderData.equals(newState) )
-            _layerRenderData = newState;
-
         if ( validationNeeded ) {
-            _cacheHitsUntilAllocation = _cachingMakesSenseFor(newCacheState);
+            _cacheHitsUntilAllocation = _cachingMakesSenseFor(keyConf);
         }
 
         if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
@@ -162,7 +159,7 @@ final class LayerCache
         if ( _localCache == null || cacheStateChanged ) {
             // Now we bind the configuration to a new entry:
             _localCache = null;
-            Pooled<LayerRenderConf> layerRenderConf = new Pooled<>(newCacheState).intern();
+            Pooled<LayerRenderConf> layerRenderConf = new Pooled<>(keyConf).intern();
             /*
                 We store a pooled ref as the key because this key object is also the key in the global
                 (weak) hash map based cache whose reachability determines if the cached image is
