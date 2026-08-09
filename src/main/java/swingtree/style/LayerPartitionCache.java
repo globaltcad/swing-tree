@@ -75,30 +75,62 @@ final class LayerPartitionCache
 
     private static final Map<Pooled<LayerRenderConf>, CachedImage> _CACHE = new WeakHashMap<>();
 
-    private static final int    MAX_CACHE_ENTRIES                 = 1024; // There can never be more entries!
-    private static final int    PIXELS_PER_UNIT_OF_AGGRESSIVENESS = 256 * 256; // Determines how many pixels a single unit of cache aggressiveness can cache
     private static final double EAGER_ALLOCATION_FRIENDLINESS     = 0.1; // Has to be between 0 and 1!
     private static final int    MAX_CACHE_HIT_COUNT               = 12;
     private static final int    STRETCH_BAND                      = 2; // Freely stretchable band between the slice insets; one pixel suffices mathematically, two give slack.
     private static final int    SAFETY_MARGIN                     = 2; // Added to every slice inset to absorb antialiasing bleed and artifact adjustments in the renderer.
     private static final int    BYTES_PER_PIXEL                   = 4; // Every cached rendering is 32 bit ARGB, see CachedImage._allocate.
+    private static final int    MIN_DISTINCT_RENDERINGS_OF_THE_LARGEST_SIZE = 4;
 
-    private static int  _maxCacheableImageArea() { return (int) (CacheBudget.units() * PIXELS_PER_UNIT_OF_AGGRESSIVENESS); }
-    private static int  _maxCacheEntries()       { return Math.min(MAX_CACHE_ENTRIES, CacheBudget.maxEntriesFor(CacheBudget.Kind.STYLE_LAYER)); }
+    private static long _bytesHandedOut = 0;
+    private static int _entriesAccountedFor = 0;
+    private static volatile int _cacheGeneration = 0;
 
-    static int globalEntryCount() {
-        return _CACHE.size();
+    private static long _budgetBytes() {
+        return CacheBudget.bytesFor(CacheBudget.Kind.STYLE_LAYER);
     }
 
-    static long globalBytesReserved() {
+    private static long _maxBytesPerEntry() {
+        return _budgetBytes() / MIN_DISTINCT_RENDERINGS_OF_THE_LARGEST_SIZE;
+    }
+
+    private static long _bytesNeededFor( Size size ) {
+        final long width  = Math.max(1, (long) size.widthOrElse(1f) );
+        final long height = Math.max(1, (long) size.heightOrElse(1f) );
+        return width * height * BYTES_PER_PIXEL;
+    }
+
+    private static boolean _hasRoomFor( long bytes ) {
+        if ( _bytesHandedOut + bytes <= _budgetBytes() )
+            return true;
+        if ( _CACHE.size() < _entriesAccountedFor ) {
+            _bytesHandedOut      = _bytesReservedByCache();
+            _entriesAccountedFor = _CACHE.size();
+        }
+        return _bytesHandedOut + bytes <= _budgetBytes();
+    }
+
+    private static long _bytesReservedByCache() {
         long total = 0;
         for ( CachedImage image : _CACHE.values() )
             total += image.reservedBytes();
         return total;
     }
 
+    static int globalEntryCount() {
+        return _CACHE.size();
+    }
+
+    static long globalBytesReserved() {
+        return _bytesReservedByCache();
+    }
+
+    @SuppressWarnings("NonAtomicVolatileUpdate")
     static void clearGlobalCache() {
         _CACHE.clear();
+        _bytesHandedOut      = 0;
+        _entriesAccountedFor = 0;
+        _cacheGeneration++;
     }
 
 
@@ -108,16 +140,18 @@ final class LayerPartitionCache
     private LayerRenderConf         _layerRenderData;
     private Pooled<LayerRenderConf> _cacheKey;
     private int                     _cacheHitsUntilAllocation;
+    private int                     _seenCacheGeneration;
     private boolean                 _isInitialized;
     private boolean                 _rendersNothing;
 
 
-    public LayerPartitionCache( UI.Layer layer, LayerRenderConfPartitions part ) {
+    public LayerPartitionCache(UI.Layer layer, LayerRenderConfPartitions part ) {
         _layer                    = Objects.requireNonNull(layer);
         _part                     = Objects.requireNonNull(part);
         _layerRenderData          = LayerRenderConf.none();
         _cacheKey                 = new Pooled<>(_layerRenderData);
         _cacheHitsUntilAllocation = -1;
+        _seenCacheGeneration      = _cacheGeneration;
         _isInitialized            = false;
         _rendersNothing           = true;
     }
@@ -146,16 +180,24 @@ final class LayerPartitionCache
                                                 ? _canonicalize(_layerRenderData)
                                                 : _layerRenderData;
 
+        final boolean cacheWasCleared = ( _seenCacheGeneration != _cacheGeneration );
+        _seenCacheGeneration = _cacheGeneration;
+
         final boolean cacheStateChanged = !_cacheKey.get().equals(keyConf);
-        final boolean validationNeeded  = !_isInitialized || cacheStateChanged;
+        final boolean validationNeeded  = !_isInitialized || cacheStateChanged || cacheWasCleared;
 
         _isInitialized = true;
 
+        final boolean reuseOnly;
+
         if ( validationNeeded ) {
-            _cacheHitsUntilAllocation = _isPointlessToMintWhileResizing(keyConf, _layerRenderData, isResizing)
+            reuseOnly = _isPointlessToMintWhileResizing(keyConf, _layerRenderData, isResizing);
+            _cacheHitsUntilAllocation = reuseOnly
                                             ? _hitsForReusingAFinishedRendering(keyConf)
                                             : _cachingMakesSenseFor(keyConf);
         }
+        else
+            reuseOnly = false; // Nothing was decided, so there is nothing to insist on.
 
         if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
             _cacheHitsUntilAllocation = -1;
@@ -165,28 +207,28 @@ final class LayerPartitionCache
             return;
         }
 
-        if ( _localCache == null || cacheStateChanged ) {
+        if ( _localCache == null || cacheStateChanged || cacheWasCleared ) {
             // Now we bind the configuration to a new entry:
             _localCache = null;
-            Pooled<LayerRenderConf> layerRenderConf = new Pooled<>(keyConf).intern();
-            /*
-                We store a pooled ref as the key because this key object is also the key in the global
-                (weak) hash map based cache whose reachability determines if the cached image is
-                garbage collected or not! So in order to avoid the cache being freed too early, we need to keep a strong
-                reference to the key object for all LayerCache instances that make use of the
-                corresponding cached image (the value of a particular key in the global cache).
-                And so a pooled object has a higher likely hood of being strongly referenced somewhere.
-            */
+            Pooled<LayerRenderConf> layerRenderConf = new Pooled<>(keyConf);
             CachedImage bufferedImage = _CACHE.get(layerRenderConf);
+            if ( bufferedImage == null && reuseOnly ) {
+                _cacheHitsUntilAllocation = -1;
+                _isInitialized            = false;
+                _cacheKey                 = _layerRenderData;
+            } else {
+                layerRenderConf = layerRenderConf.intern();
 
-            if ( bufferedImage == null ) {
-                Size size = layerRenderConf.get().boxModel().size();
-                bufferedImage = new CachedImage(size, _cacheHitsUntilAllocation);
-                _CACHE.put(layerRenderConf, bufferedImage);
+                if (bufferedImage == null) {
+                    Size size = layerRenderConf.get().boxModel().size();
+                    bufferedImage = new CachedImage(size, _cacheHitsUntilAllocation);
+                    _CACHE.put(layerRenderConf, bufferedImage);
+                    _bytesHandedOut += bufferedImage.reservedBytes();
+                    _entriesAccountedFor++;
+                }
+                _cacheKey = layerRenderConf;
+                _localCache = bufferedImage;
             }
-            _cacheKey = layerRenderConf;
-
-            _localCache = bufferedImage;
         }
     }
 
@@ -283,23 +325,20 @@ final class LayerPartitionCache
             return false;
         if ( !cacheKey.boxModel().size().equals(renderInput.boxModel().size()) )
             return false; // Size independent, so the resize does not invalidate it at all.
-        final Size size = cacheKey.boxModel().size();
-        return size.widthOrElse(0f) * size.heightOrElse(0f) > _eagerAllocationLimit();
+        return _bytesNeededFor(cacheKey.boxModel().size()) > _eagerAllocationLimit();
     }
 
     private static int _hitsForReusingAFinishedRendering( LayerRenderConf cacheKey ) {
-        /*
-            Deliberately not interned: `Pooled` compares by value, so a plain probe finds the
-            entry without putting anything into the object pool for a key we may not use.
-        */
-        final @Nullable CachedImage existing = _CACHE.get(new Pooled<>(cacheKey));
+        final @Nullable CachedImage existing = _entryFor(cacheKey);
         return ( existing != null && existing.isRendered() ? 0 : -1 );
     }
 
-    /** The image area up to which an entry is worth allocating right away rather than after a
-     *  warm-up of cache hits; also the line above which minting one mid-resize is a loss. */
-    private static int _eagerAllocationLimit() {
-        return (int) ( _maxCacheableImageArea() * EAGER_ALLOCATION_FRIENDLINESS );
+    private static @Nullable CachedImage _entryFor( LayerRenderConf cacheKey ) {
+        return _CACHE.get(new Pooled<>(cacheKey));
+    }
+
+    private static long _eagerAllocationLimit() {
+        return (long) ( _maxBytesPerEntry() * EAGER_ALLOCATION_FRIENDLINESS );
     }
 
     private int _cachingMakesSenseFor( LayerRenderConf state ) {
@@ -312,10 +351,6 @@ final class LayerPartitionCache
 
     private static int _cachingMakesSenseFor( UI.Layer layer, LayerRenderConf state )
     {
-        final int maxEntries = _maxCacheEntries();
-        if ( maxEntries <= 0 || _CACHE.size() >= maxEntries )
-            return -1; // Caching disabled or cache already too full, don't admit more entries.
-
         final Size size = state.boxModel().size();
 
         if ( !size.hasPositiveWidth() || !size.hasPositiveHeight() )
@@ -371,22 +406,24 @@ final class LayerPartitionCache
         }
 
         if ( heavyStyleCount < 1 )
-            return -1;
+            return -1; // Nothing here is expensive enough that an image would pay for itself.
+        final long entryBytes = _bytesNeededFor(size);
+        if ( entryBytes > _maxBytesPerEntry() || !_hasRoomFor(entryBytes) ) {
+            if ( _entryFor(state) == null ) // Probed only here; it hashes a whole configuration.
+                return -1;
+        }
 
-        final int maxSizeLimit         = _maxCacheableImageArea();
-        final int eagerAllocationLimit = _eagerAllocationLimit();
-        final int cacheHitCountLimit   = (int) (maxSizeLimit * (1 - EAGER_ALLOCATION_FRIENDLINESS));
+        return _cacheHitsBeforeAllocating( entryBytes / Math.min(heavyStyleCount, 5) );
+    }
 
-        final int pixelCount = (int) (size.widthOrElse(0f) * size.heightOrElse(0f));
-        final int score      = pixelCount / Math.min(heavyStyleCount, 5); // Heavier styles get cached more easily!
-
-        if ( score > maxSizeLimit )
-            return -1; // We are not going to cache such a large image!
-        else if ( score <= eagerAllocationLimit )
+    private static int _cacheHitsBeforeAllocating( long bytes ) {
+        final long eagerLimit = _eagerAllocationLimit();
+        if ( bytes <= eagerLimit )
             return 0; // Nice and small, definitely worth allocating and caching right away!
-        else
-            return 1 + (score - eagerAllocationLimit) / Math.max(1, cacheHitCountLimit / MAX_CACHE_HIT_COUNT);
-            // Here we return the number of cache hits until allocation and rendering should happen.
+        final long bytesPerHit = Math.max(1, (_maxBytesPerEntry() - eagerLimit) / MAX_CACHE_HIT_COUNT);
+        // Clamped, because the integer division above lands on MAX_CACHE_HIT_COUNT + 1 for an
+        // entry of the largest admissible size, and the cap is what the count means.
+        return (int) Math.min( MAX_CACHE_HIT_COUNT, 1 + (bytes - eagerLimit) / bytesPerHit );
     }
 
     /*  ------------------------------------------------------------------------------------
@@ -597,8 +634,6 @@ final class LayerPartitionCache
             _numberOfHitsUntilAllocation = numberOfHitsUntilAllocation;
         }
 
-        /** The memory this entry has claimed: its image - counted from the moment the entry
-         *  exists, not from the moment the buffer is actually allocated.  */
         long reservedBytes() {
             long total = (long) _width * _height * BYTES_PER_PIXEL;
             if ( _stretchTiles != null )
@@ -679,6 +714,8 @@ final class LayerPartitionCache
             if ( tiles == null ) {
                 tiles = _extractStretchTiles(g.getDeviceConfiguration(), image, insetTop, insetRight, insetBottom, insetLeft);
                 _stretchTiles = tiles;
+                for ( BufferedImage tile : tiles )
+                    _bytesHandedOut += _bytesOf(tile);
             }
 
             final float actualWidth  = actualSize.widthOrElse(0f);

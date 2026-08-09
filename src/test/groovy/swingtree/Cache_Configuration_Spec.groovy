@@ -10,11 +10,11 @@ import java.util.concurrent.TimeUnit
 import swingtree.SwingTreeInitConfig.CacheMode
 import swingtree.style.CacheBudget
 import swingtree.style.ComponentExtension
+import swingtree.components.JBox
 import swingtree.threading.EventProcessor
 import utility.Utility
 
 import javax.swing.JButton
-import javax.swing.JLabel
 import java.awt.Color
 
 @Title("Configuring the Memory/CPU Trade-off")
@@ -124,6 +124,165 @@ class Cache_Configuration_Spec extends Specification
             5.times { paint(label) }
         then : 'Caching kicks in — the live limit reacted to the runtime change.'
             ComponentExtension.globalRenderCacheEntryCounts().toMap()["style layers"] > 0
+    }
+
+    def 'A cache mode is a memory promise: no amount of painting makes the style layer cache exceed it.'()
+    {
+        reportInfo """
+            A `CacheMode` names an amount of memory (see its documentation for the figures),
+            and this is what makes that a promise rather than a hope: however many differently
+            styled components an application paints, and however big they are, what SwingTree
+            retains stays within the budget the mode selected.
+
+            The promise is worth stating precisely because it is not free. A rendering that
+            does not fit is simply not cached, and a component whose rendering is not cached is
+            re-rendered on every paint - so the budget is a real ceiling on speed as well as on
+            memory, which is exactly why `CacheMode` is a knob an application can turn.
+
+            Style layer images are what this is about: they are the only rendering cache whose
+            entries are large (a page sized background is tens of megabytes, where a text
+            layout is two kilobytes), so they are the only ones that can spend a budget.
+
+            Note that the ceiling asserted against below is this one cache's *share* of the
+            library budget rather than the whole of it. Measuring against the whole would leave
+            room to overspend the share by more than half and still pass.
+        """
+        given : 'A deliberately small budget, and empty caches to start from.'
+            CacheBudget.UNITS_OVERRIDE = 3
+            ComponentExtension.updateAllCachesFromLibraryConfig()
+            long budget = CacheBudget.totalBudgetBytes()
+            long layerBudget = UI.runAndGet(()->ComponentExtension.globalStyleLayerCacheByteBudget())
+
+        when : """
+            Far more distinctly styled large components are painted than that budget could
+            ever hold. Each carries a gradient, which is both heavy enough to be worth caching
+            and *not* size independently cacheable - so each really does want an image of its
+            own at its full size, rather than sharing a small exemplar with the others.
+
+            Note that all of them are kept alive to the end of the scenario. Cache entries are
+            keyed weakly, so a component that goes out of scope takes its entry with it - and a
+            scenario which let that happen would be asserting that an empty cache fits in a
+            budget, which every implementation manages.
+        """
+            var painted = (1..24).collect { n ->
+                var box = UI.box().withStyle( it -> it
+                                .borderRadius(9)
+                                .gradient( g -> g.colors(new Color(9 * n, 40, 200 - 7 * n),
+                                                         new Color(30, 5 * n, 90)) )
+                            ).get(JBox)
+                box.setSize(500, 400)
+                8.times { Utility.renderSingleComponent(box) }
+                return box
+            }
+
+        then : 'Together they wanted more memory than the whole library budget, let alone this cache\'s share of it.'
+            painted.size() * 500 * 400 * 4 > budget
+        and : 'The cache did fill up, so this is not a scenario that passes by painting nothing.'
+            UI.runAndGet(()->ComponentExtension.globalStyleLayerCacheBytesReserved()) > 0
+        and : 'And yet it stayed inside the budget its mode named.'
+            UI.runAndGet(()->ComponentExtension.globalStyleLayerCacheBytesReserved()) <= layerBudget
+
+        when : """
+            The application then asks for a smaller budget and keeps painting.
+
+            This is the harder half. Shrinking the budget empties the cache, but emptying it
+            only releases the memory if the components still painting from those renderings let
+            go of them as well - and these components never change their style or their size, so
+            nothing about *them* prompts a second look. A cache that waited to be asked would
+            leave every one of these images retained and unaccounted for, and would then report
+            a comfortably small figure for the handful of entries it could still see.
+        """
+            CacheBudget.UNITS_OVERRIDE = 1.5
+            ComponentExtension.updateAllCachesFromLibraryConfig()
+            long smallerBudget = CacheBudget.totalBudgetBytes()
+            long smallerLayerBudget = UI.runAndGet(()->ComponentExtension.globalStyleLayerCacheByteBudget())
+            painted.each { box -> 12.times { Utility.renderSingleComponent(box) } }
+
+        then : 'The smaller promise holds too.'
+            smallerBudget < budget
+            UI.runAndGet(()->ComponentExtension.globalStyleLayerCacheBytesReserved()) <= smallerLayerBudget
+        and : """
+            And the cache refilled itself under the smaller budget rather than simply staying
+            empty - which is what stops everything asserted here from being a statement about
+            nothing. A budget too small to admit even one of these renderings would satisfy
+            every ceiling below without the cache doing any of the work they are about.
+        """
+            UI.runAndGet(()->ComponentExtension.globalStyleLayerCacheBytesReserved()) > 0
+        and : """
+            And the figure really is the whole story: every component either paints from an
+            entry the cache still counts, or does not paint from an entry at all. A retained
+            rendering that the accounting had lost sight of would show up right here.
+        """
+            var stillCached = painted.count { box ->
+                ComponentExtension.from(box).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            }
+            stillCached > 0
+            stillCached * 500 * 400 * 4 <= smallerLayerBudget
+        and : 'And the components are still alive, so their entries had every chance to survive.'
+            painted.every { it.width == 500 }
+    }
+
+    def 'A full cache still serves a component whose rendering it already holds.'()
+    {
+        reportInfo """
+            Cached renderings are keyed on the style configuration and shared process wide
+            rather than owned per component, so a hundred identically styled table cells
+            render one image between them and blit it a hundred times. That sharing is most
+            of what the cache is for.
+
+            Which is why running out of budget must not simply mean saying no. It means
+            running out of budget for a *new* rendering; a component asking for one the cache
+            already holds needs no budget of its own, because attaching to an image that
+            exists allocates nothing at all.
+
+            The distinction is the difference between a bounded cache and no cache. Without
+            it, an application that fills its budget once stops caching every component
+            created afterwards - including the ones asking for exactly what the cache is
+            already holding, which would then re-render on every paint with their image
+            sitting right there in the pool.
+        """
+        given : 'A deliberately small budget, and empty caches to start from.'
+            CacheBudget.UNITS_OVERRIDE = 3
+            ComponentExtension.updateAllCachesFromLibraryConfig()
+        and : """
+            A large component, built and painted until it either has a cached rendering or has
+            been refused one. Its number picks its colours, which is what decides whether two
+            of these wear the same style or not. The style is a gradient because that is heavy
+            enough to be worth caching and *not* size independently cacheable - so each really
+            does want a full sized image of its own rather than a small shared exemplar.
+        """
+            var paintLargeStyled = { int n ->
+                var box = UI.box().withStyle( it -> it
+                                .borderRadius(9)
+                                .gradient( g -> g.colors(new Color(9 * n, 40, 200 - 7 * n),
+                                                         new Color(30, 5 * n, 90)) )
+                            ).get(JBox)
+                box.setSize(500, 400)
+                8.times { Utility.renderSingleComponent(box) }
+                return box
+            }
+
+        when : """
+            The budget is filled with two dozen distinctly styled ones - all kept alive to the
+            end of the scenario, so that the entries they filled it with stay alive too.
+        """
+            var filling = (1..24).collect { n -> paintLargeStyled(n) }
+        then : 'It really is full: a component wearing a style never seen before is refused.'
+            var newcomer = paintLargeStyled(25)
+            ComponentExtension.from(newcomer).cachedRendering(UI.Layer.BACKGROUND).isEmpty()
+
+        when : 'A component is then created wearing a style the cache already holds.'
+            var twin = paintLargeStyled(1)
+        then : 'It is served from that existing rendering rather than being turned away.'
+            ComponentExtension.from(twin).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            ComponentExtension.from(twin).cacheHitCount(UI.Layer.BACKGROUND) > 0
+        and : """
+            And sharing it really was free: the cache is still inside the budget it was already
+            filling before the twin existed.
+        """
+            UI.runAndGet(()->ComponentExtension.globalStyleLayerCacheBytesReserved() <= ComponentExtension.globalStyleLayerCacheByteBudget())
+        and : 'The components which filled it are all still alive, so their entries are too.'
+            filling.every { it.width == 500 }
     }
 
     def 'Stretch tiling can be turned off at runtime, restoring exact-size cache keys.'()
