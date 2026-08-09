@@ -56,7 +56,7 @@ import java.util.function.BiConsumer;
  *      <li><b>the render input</b> ({@code _layerRenderData}) - always the actual configuration
  *          at the real component size. All direct-render fallbacks receive it, and it determines
  *          the destination geometry of the final cache blit.</li>
- *      <li><b>the cache key</b> ({@code _cacheKey}) - the canonical (possibly exemplar sized)
+ *      <li><b>the cache key</b> ({@code Cached._key}) - the canonical (possibly exemplar sized)
  *          form of the render input. It keys the entry in the global cache, it is what the
  *          renderer receives when filling the shared image, and its strong reference is what
  *          keeps the weakly keyed entry alive.</li>
@@ -94,13 +94,22 @@ final class LayerCache
         _CACHE.clear();
     }
 
+    // Sum type based states
+    private interface CacheState {
+        final class Uncached implements CacheState { static final Uncached INSTANCE = new Uncached(); }
+        final class Cached implements CacheState {
+            final Pooled<LayerRenderConf> _key;
+            final CachedImage             _image;
+            Cached( Pooled<LayerRenderConf> key, CachedImage image ) {
+                _key   = key;
+                _image = image;
+            }
+        }
+    }
 
     private final UI.Layer          _layer;
-    private @Nullable CachedImage   _localCache;
     private LayerRenderConf         _layerRenderData;
-    private Pooled<LayerRenderConf> _cacheKey;
-    private int                     _cacheHitsUntilAllocation;
-    private boolean                 _isInitialized;
+    private CacheState              _state;
     private int                     _paintCacheHitCount  = 0; // paint() served entirely from a rendered cache image
     private int                     _paintCacheMissCount = 0; // paint() had to invoke the renderer (caching disabled, or the cache was not yet rendered)
 
@@ -108,9 +117,7 @@ final class LayerCache
     public LayerCache( UI.Layer layer ) {
         _layer                    = Objects.requireNonNull(layer);
         _layerRenderData          = LayerRenderConf.none();
-        _cacheKey                 = new Pooled<>(_layerRenderData);
-        _cacheHitsUntilAllocation = -1;
-        _isInitialized            = false;
+        _state                    = CacheState.Uncached.INSTANCE;
     }
 
     int paintCacheHitCount()  { return _paintCacheHitCount;  }
@@ -118,17 +125,17 @@ final class LayerCache
     int paintCacheMissCount() { return _paintCacheMissCount; }
 
     public @Nullable BufferedImage renderedImage() {
-        return _localCache != null && _localCache.isRendered() ? _localCache.getImage() : null;
+        if ( !(_state instanceof CacheState.Cached) )
+            return null;
+        final CachedImage image = ((CacheState.Cached) _state)._image;
+        return image.isRendered() ? image.getImage() : null;
     }
 
     public void validate( ComponentConf newConf )
     {
         if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) ) {
-            _localCache               = null;
-            _cacheHitsUntilAllocation = -1;
-            _isInitialized            = false;
             _layerRenderData          = LayerRenderConf.none();
-            _cacheKey                 = new Pooled<>(_layerRenderData);
+            _state                    = CacheState.Uncached.INSTANCE;
             return;
         }
 
@@ -136,48 +143,24 @@ final class LayerCache
 
         // We try to canonicalizd to a size independent conf for 9 patch based caching:
         final LayerRenderConf keyConf = CacheBudget.tilingEnabled()
-                                                ? _canonicalize(_layerRenderData)
-                                                : _layerRenderData;
+                                            ? _canonicalize(_layerRenderData)
+                                            : _layerRenderData;
 
-        final boolean cacheStateChanged = !_cacheKey.get().equals(keyConf);
-        final boolean validationNeeded  = !_isInitialized || cacheStateChanged;
-
-        _isInitialized = true;
-
-        if ( validationNeeded ) {
-            _cacheHitsUntilAllocation = _cachingMakesSenseFor(keyConf);
-        }
-
-        if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
-            _cacheHitsUntilAllocation = -1;
-            _localCache               = null;
-            _isInitialized            = false;
-            _cacheKey                 = new Pooled<>(_layerRenderData);
+        if ( _state instanceof CacheState.Cached && ((CacheState.Cached) _state)._key.get().equals(keyConf) )
             return;
-        }
 
-        if ( _localCache == null || cacheStateChanged ) {
-            // Now we bind the configuration to a new entry:
-            _localCache = null;
-            Pooled<LayerRenderConf> layerRenderConf = new Pooled<>(keyConf).intern();
-            /*
-                We store a pooled ref as the key because this key object is also the key in the global
-                (weak) hash map based cache whose reachability determines if the cached image is
-                garbage collected or not! So in order to avoid the cache being freed too early, we need to keep a strong
-                reference to the key object for all LayerCache instances that make use of the
-                corresponding cached image (the value of a particular key in the global cache).
-                And so a pooled object has a higher likely hood of being strongly referenced somewhere.
-            */
-            CachedImage bufferedImage = _CACHE.get(layerRenderConf);
+        final int hitsUntilAllocation = _cachingMakesSenseFor(keyConf);
+        if ( hitsUntilAllocation < 0 ) {
+            _state = CacheState.Uncached.INSTANCE;
+        } else {
+            final Pooled<LayerRenderConf> key = new Pooled<>(keyConf).intern();
 
-            if ( bufferedImage == null ) {
-                Size size = layerRenderConf.get().boxModel().size();
-                bufferedImage = new CachedImage(size, _cacheHitsUntilAllocation);
-                _CACHE.put(layerRenderConf, bufferedImage);
+            CachedImage image = _CACHE.get(key);
+            if (image == null) {
+                image = new CachedImage(keyConf.boxModel().size(), hitsUntilAllocation);
+                _CACHE.put(key, image);
             }
-            _cacheKey = layerRenderConf;
-
-            _localCache = bufferedImage;
+            _state = new CacheState.Cached(key, image);
         }
     }
 
@@ -188,14 +171,15 @@ final class LayerCache
         if ( size.widthOrElse(0f) == 0f || size.heightOrElse(0f) == 0f )
             return;
 
-        if ( _cacheHitsUntilAllocation < 0 ) { // -1 means caching does not make sense
+        if ( !(_state instanceof CacheState.Cached) ) {
             renderer.accept(_layerRenderData, g);
             _paintCacheMissCount++;
             return;
         }
 
-        final CachedImage image        = _localCache;
-        final LayerRenderConf cacheKey = _cacheKey.get();
+        final CacheState.Cached cached = (CacheState.Cached) _state;
+        final CachedImage image        = cached._image;
+        final LayerRenderConf cacheKey = cached._key.get();
         /*
             A cache key size differing from the actual size means the entry is the small
             exemplar rendering, and painting means reconstructing the actual size from it
@@ -207,17 +191,6 @@ final class LayerCache
         if ( isTiled && !_isBlitCompatible(g.getTransform()) ) {
             renderer.accept(_layerRenderData, g);
             _paintCacheMissCount++;
-            return;
-        }
-
-        if ( image == null ) {
-            renderer.accept(_layerRenderData, g);
-            _paintCacheMissCount++;
-            log.error(
-                "Caching enabled for layer '{}', but the local buffer is null; rendered without cache. " +
-                "Hit countdown until allocation is '{}'.",
-                _layer, _cacheHitsUntilAllocation
-            );
             return;
         }
 
