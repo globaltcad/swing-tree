@@ -1,5 +1,6 @@
 package swingtree.style;
 
+import org.jspecify.annotations.Nullable;
 import sprouts.Tuple;
 import swingtree.UI;
 import swingtree.layout.Size;
@@ -29,7 +30,7 @@ final class StyleLayerCache
     private final UI.Layer         _layer;
     private final BiConsumer<LayerRenderConf, Graphics2D> _renderer;
     private LayerPartitionCache[]  _parts;
-    private boolean                _isSplitAroundNoises;
+    private PartitioningPolicies   _splitMode;
     private LayerRenderConf        _uncachedPartition;
     private Size                   _lastSize;
     private int                    _paintsAtThisSize;
@@ -41,9 +42,9 @@ final class StyleLayerCache
     StyleLayerCache( UI.Layer layer ) {
         _layer                 = Objects.requireNonNull(layer);
         _renderer              = ( conf, graphics ) -> StyleRenderer.renderStyleOn(_layer, conf, graphics);
-        _parts                 = new LayerPartitionCache[] { new LayerPartitionCache(layer, LayerRenderConfPartitions.WHOLE) };
-        _isSplitAroundNoises   = false;
-        _uncachedPartition = LayerRenderConf.none();
+        _splitMode             = PartitioningPolicies.NONE;
+        _parts                 = PartitioningPolicies.NONE.newPartsFor(layer);
+        _uncachedPartition     = LayerRenderConf.none();
         _lastSize              = Size.unknown();
         _paintsAtThisSize      = PAINTS_UNTIL_REJOINED;
     }
@@ -56,24 +57,32 @@ final class StyleLayerCache
         final LayerRenderConf full = newConf.renderConfFor(_layer);
         // Note that _isResizing() records the size and so must run on every validation:
         final boolean isResizing = _isResizing(newConf.currentBounds().size());
-        final boolean split = isResizing && _canBeSplitAroundNoises(full);
-        if ( split != _isSplitAroundNoises ) {
-            _isSplitAroundNoises = split;
-            _parts = split
-                    ? new LayerPartitionCache[] {
-                            new LayerPartitionCache(_layer, LayerRenderConfPartitions.UNDER_NOISE),
-                            new LayerPartitionCache(_layer, LayerRenderConfPartitions.OVER_NOISE)
-                        }
-                    : new LayerPartitionCache[] {
-                            new LayerPartitionCache(_layer, LayerRenderConfPartitions.WHOLE)
-                        };
+        final PartitioningPolicies mode = _splitModeFor(full, isResizing);
+        if ( mode != _splitMode ) {
+            _splitMode = mode;
+            _parts     = mode.newPartsFor(_layer);
         }
         for ( LayerPartitionCache part : _parts )
             part.validate(newConf, isResizing);
 
-        _uncachedPartition = split
-                ? LayerRenderConfPartitions.NOISES.restrict(full)
-                : LayerRenderConf.none();
+        _uncachedPartition = mode.uncachedPartitionOf(full);
+    }
+
+    private PartitioningPolicies _splitModeFor(LayerRenderConf full, boolean isResizing ) {
+        if ( _canBeSplitAroundPainters(full) )
+            return PartitioningPolicies.AROUND_PAINTERS;
+        if ( isResizing && _canBeSplitAroundNoises(full) )
+            return PartitioningPolicies.AROUND_NOISES;
+        return PartitioningPolicies.NONE;
+    }
+
+    private boolean _canBeSplitAroundPainters( LayerRenderConf conf ) {
+        if ( !conf.layer().hasPaintersWhichCannotBeCached() )
+            return false; // Nothing to cut around, or nothing that stops the layer being cached whole.
+        final LayerRenderConf underPainters = LayerRenderConfPartitions.UNDER_PAINTERS.restrict(conf);
+        if ( underPainters.rendersNothing() )
+            return false; // The painters are all there is, so a cut would only add bookkeeping.
+        return LayerPartitionCache.wouldBeAdmitted(_layer, underPainters);
     }
 
     private boolean _isResizing( Size size ) {
@@ -88,12 +97,7 @@ final class StyleLayerCache
     private static boolean _canBeSplitAroundNoises( LayerRenderConf conf ) {
         if ( !conf.layer().hasRenderableNoises() )
             return false; // Nothing to cut around.
-        /*
-            Size independent caching is switched off, so a cut could win nothing anyway - but this
-            is stated here rather than left to the checks below, because that switch is the
-            documented safety hatch for restoring the classic exact-size caching (see
-            SwingTree.setCacheTilingEnabled), and a layer painted in pieces is not that.
-        */
+
         if ( !CacheBudget.tilingEnabled() )
             return false;
         if ( !StyleRenderer.allNoisesAreCheapToReplay(conf) )
@@ -111,19 +115,19 @@ final class StyleLayerCache
         boolean anythingRenderedFromStyle = false;
         boolean anythingRenderedFromCache = false;
         for ( int i = 0; i < _parts.length; i++ ) {
-            // The lifted out noises go between the parts - which is the only reason a layer
-            // ever has more than one part, so "not before the first" locates them exactly:
-            if ( i > 0 ) {
+            LayerPartitionCache.PaintOutcome outcome = _parts[i].paint(g2d, _renderer);
+            anythingRendered          |= ( outcome != LayerPartitionCache.PaintOutcome.NOTHING_RENDERED   );
+            anythingRenderedFromStyle |= ( outcome == LayerPartitionCache.PaintOutcome.RENDERED_FROM_STYLE);
+            anythingRenderedFromCache |= ( outcome == LayerPartitionCache.PaintOutcome.RENDERED_FROM_CACHE);
+            // The lifted out piece always sits directly after the first cached part: between
+            // the two parts of a noise cut, and on top of the single part of a painter cut.
+            if ( i == 0 ) {
                 final Size size = _uncachedPartition.boxModel().size();
                 if ( size.hasPositiveWidth() && size.hasPositiveHeight() ) {
                     StyleRenderer.renderStyleOn(_layer, _uncachedPartition, g2d);
                     anythingRendered = true;
                 }
             }
-            LayerPartitionCache.PaintOutcome outcome = _parts[i].paint(g2d, _renderer);
-            anythingRendered          |= ( outcome != LayerPartitionCache.PaintOutcome.NOTHING_RENDERED   );
-            anythingRenderedFromStyle |= ( outcome == LayerPartitionCache.PaintOutcome.RENDERED_FROM_STYLE);
-            anythingRenderedFromCache |= ( outcome == LayerPartitionCache.PaintOutcome.RENDERED_FROM_CACHE);
         }
 
         if ( _paintsAtThisSize < PAINTS_UNTIL_REJOINED )
@@ -146,6 +150,49 @@ final class StyleLayerCache
                 images.add(rendered);
         }
         return Tuple.of(BufferedImage.class, images);
+    }
+
+
+    /**
+     *  The shapes a layer is cached in. Each one names the cached parts it consists of and the
+     *  piece (if any) which is instead replayed onto the destination after the first of them -
+     *  see {@link LayerRenderConfPartitions} for why a layer is ever cut at all.
+     */
+    private enum PartitioningPolicies
+    {
+        /** One cached rendering of everything. */
+        NONE( Tuple.of(LayerRenderConfPartitions.WHOLE), null ),
+        /** Cut around the noises, so that everything else keeps a size independent cache
+         *  entry across a resize. Temporary: only while the component is resizing. */
+        AROUND_NOISES(
+            Tuple.of(LayerRenderConfPartitions.UNDER_NOISE, LayerRenderConfPartitions.OVER_NOISE),
+            LayerRenderConfPartitions.NOISES
+        ),
+        /** Cut around the user painters, so that a layer which carries one is cacheable at
+         *  all rather than being re-rendered whole on every paint. */
+        AROUND_PAINTERS(
+            Tuple.of(LayerRenderConfPartitions.UNDER_PAINTERS),
+            LayerRenderConfPartitions.PAINTERS
+        );
+
+        private final Tuple<LayerRenderConfPartitions> _cachedParts;
+        private final @Nullable LayerRenderConfPartitions _replayedPart;
+
+        PartitioningPolicies(Tuple<LayerRenderConfPartitions> cachedParts, @Nullable LayerRenderConfPartitions replayedPart ) {
+            _cachedParts  = cachedParts;
+            _replayedPart = replayedPart;
+        }
+
+        LayerPartitionCache[] newPartsFor( UI.Layer layer ) {
+            LayerPartitionCache[] parts = new LayerPartitionCache[_cachedParts.size()];
+            for ( int i = 0; i < parts.length; i++ )
+                parts[i] = new LayerPartitionCache(layer, _cachedParts.get(i));
+            return parts;
+        }
+
+        LayerRenderConf uncachedPartitionOf (LayerRenderConf full ) {
+            return ( _replayedPart == null ? LayerRenderConf.none() : _replayedPart.restrict(full) );
+        }
     }
 
 }
