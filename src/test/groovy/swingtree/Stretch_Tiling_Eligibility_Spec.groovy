@@ -329,7 +329,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             rendering tied to a size which is still changing does not commit its image to the
             first component that asks for it - see `Style_Render_Caching_Spec` for why - so
             this second paint is what makes the exact-size image below exist at all. It is
-            still one paint too few for the size to count as settled, so the noise decision
+            still too few paints for the size to count as settled, so the noise decision
             this scenario is about is unchanged by it.
         """
             Utility.renderSingleComponent(small)
