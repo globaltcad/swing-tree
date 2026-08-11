@@ -79,6 +79,7 @@ final class LayerPartitionCache
     private static final int    PIXELS_PER_UNIT_OF_AGGRESSIVENESS = 256 * 256; // Determines how many pixels a single unit of cache aggressiveness can cache
     private static final double EAGER_ALLOCATION_FRIENDLINESS     = 0.1; // Has to be between 0 and 1!
     private static final int    MAX_CACHE_HIT_COUNT               = 12;
+    private static final int    HITS_UNTIL_ALLOCATION_WHILE_RESIZING = 1;
     private static final int    STRETCH_BAND                      = 2; // Freely stretchable band between the slice insets; one pixel suffices mathematically, two give slack.
     private static final int    SAFETY_MARGIN                     = 2; // Added to every slice inset to absorb antialiasing bleed and artifact adjustments in the renderer.
     private static final int    BYTES_PER_PIXEL                   = 4; // Every cached rendering is 32 bit ARGB, see CachedImage._allocate.
@@ -157,9 +158,7 @@ final class LayerPartitionCache
         if ( _state instanceof CacheState.Cached && ((CacheState.Cached) _state)._key.get().equals(keyConf) )
             return;
 
-        final int hitsUntilAllocation = _isPointlessToMintWhileResizing(keyConf, _layerRenderData, isResizing)
-                                                ? _hitsForReusingAFinishedRendering(keyConf)
-                                                : _cachingMakesSenseFor(_layer, keyConf);
+        final int hitsUntilAllocation = _hitsUntilAllocationFor(keyConf, _layerRenderData, isResizing);
         if ( hitsUntilAllocation < 0 ) {
             _state = CacheState.Uncached.INSTANCE;
         } else {
@@ -249,15 +248,36 @@ final class LayerPartitionCache
         return outcome;
     }
 
-    private static boolean _isPointlessToMintWhileResizing(
+    private int _hitsUntilAllocationFor(
         LayerRenderConf cacheKey, LayerRenderConf renderInput, boolean isResizing
     ) {
-        if ( !isResizing )
-            return false;
-        if ( !cacheKey.boxModel().size().equals(renderInput.boxModel().size()) )
-            return false; // Size independent, so the resize does not invalidate it at all.
+        if ( !_isKeyedOnAChangingSize(cacheKey, renderInput, isResizing) )
+            return _cachingMakesSenseFor(_layer, cacheKey);
+
+        if ( _isTooLargeToMintWhileResizing(cacheKey) )
+            return _hitsForReusingAFinishedRendering(cacheKey);
+
+        final int hits = _cachingMakesSenseFor(_layer, cacheKey);
+        if ( hits < 0 || _isTrivialToMintWhileResizing(cacheKey) )
+            return hits;
+        return Math.max(HITS_UNTIL_ALLOCATION_WHILE_RESIZING, hits);
+    }
+
+    private static boolean _isKeyedOnAChangingSize(
+        LayerRenderConf cacheKey, LayerRenderConf renderInput, boolean isResizing
+    ) {
+        return isResizing && cacheKey.boxModel().size().equals(renderInput.boxModel().size());
+    }
+
+    private static boolean _isTooLargeToMintWhileResizing( LayerRenderConf cacheKey ) {
         final Size size = cacheKey.boxModel().size();
         return size.widthOrElse(0f) * size.heightOrElse(0f) > _eagerAllocationLimit();
+    }
+
+    private static boolean _isTrivialToMintWhileResizing( LayerRenderConf cacheKey ) {
+        final Size size = cacheKey.boxModel().size();
+        final int trivialAllocationLimit = (int) ( _eagerAllocationLimit() * EAGER_ALLOCATION_FRIENDLINESS );
+        return size.widthOrElse(0f) * size.heightOrElse(0f) <= trivialAllocationLimit;
     }
 
     private static int _hitsForReusingAFinishedRendering( LayerRenderConf cacheKey ) {

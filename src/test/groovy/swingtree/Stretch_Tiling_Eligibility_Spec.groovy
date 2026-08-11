@@ -324,6 +324,16 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             [[500, 300], [520, 310], [540, 320]].each { w, h -> // far over it
                 large.setSize(w, h); Utility.renderSingleComponent(large)
             }
+        and : """
+            Each is then painted once more at the size it arrived at, without moving. A
+            rendering tied to a size which is still changing does not commit its image to the
+            first component that asks for it - see `Style_Render_Caching_Spec` for why - so
+            this second paint is what makes the exact-size image below exist at all. It is
+            still too few paints for the size to count as settled, so the noise decision
+            this scenario is about is unchanged by it.
+        """
+            Utility.renderSingleComponent(small)
+            Utility.renderSingleComponent(large)
 
         then : 'The large one had its noise lifted out, leaving the rounded fill cached as an exemplar.'
             ComponentExtension.from(large).cachedRendering(UI.Layer.BACKGROUND).size() == 1
@@ -381,6 +391,14 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
                 twoColoured.setSize(w, h); Utility.renderSingleComponent(twoColoured)
                 oneColoured.setSize(w, h); Utility.renderSingleComponent(oneColoured)
             }
+        and : """
+            And each is painted once more without moving, which is what commits an image tied
+            to a size that is still changing (see `Style_Render_Caching_Spec`). One paint is
+            not enough for the size to count as settled, so nothing about the noise decision
+            below changes.
+        """
+            Utility.renderSingleComponent(twoColoured)
+            Utility.renderSingleComponent(oneColoured)
 
         then : 'The two coloured noise was too small to be worth replaying, so it stayed baked in.'
             ComponentExtension.from(twoColoured).cachedRendering(UI.Layer.BACKGROUND).size() == 1
@@ -433,6 +451,12 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
                 button.setSize(w, h)
                 Utility.renderSingleComponent(button)
             }
+        and : """
+            And painted once more where it came to rest, which is what commits an image tied
+            to a size that is still changing (see `Style_Render_Caching_Spec`); one paint is
+            far too few for the size to count as settled.
+        """
+            Utility.renderSingleComponent(button)
 
         then : 'It was not cut: there is a single cached image, not one per side of the noise.'
             ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1
