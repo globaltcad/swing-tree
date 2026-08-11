@@ -258,7 +258,9 @@ final class LayerPartitionCache
             return _hitsForReusingAFinishedRendering(cacheKey);
 
         final int hits = _cachingMakesSenseFor(_layer, cacheKey);
-        return hits < 0 ? hits : Math.max(HITS_UNTIL_ALLOCATION_WHILE_RESIZING, hits);
+        if ( hits < 0 || _isTrivialToMintWhileResizing(cacheKey) )
+            return hits;
+        return Math.max(HITS_UNTIL_ALLOCATION_WHILE_RESIZING, hits);
     }
 
     private static boolean _isKeyedOnAChangingSize(
@@ -270,6 +272,12 @@ final class LayerPartitionCache
     private static boolean _isTooLargeToMintWhileResizing( LayerRenderConf cacheKey ) {
         final Size size = cacheKey.boxModel().size();
         return size.widthOrElse(0f) * size.heightOrElse(0f) > _eagerAllocationLimit();
+    }
+
+    private static boolean _isTrivialToMintWhileResizing( LayerRenderConf cacheKey ) {
+        final Size size = cacheKey.boxModel().size();
+        final int trivialAllocationLimit = (int) ( _eagerAllocationLimit() * EAGER_ALLOCATION_FRIENDLINESS );
+        return size.widthOrElse(0f) * size.heightOrElse(0f) <= trivialAllocationLimit;
     }
 
     private static int _hitsForReusingAFinishedRendering( LayerRenderConf cacheKey ) {
