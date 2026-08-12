@@ -18,6 +18,7 @@ import examples.sequencer.SequencerViewModel;
 import examples.stylepicker.studio.LookSheet;
 import examples.stylepicker.studio.StyleStudioView;
 import examples.stylepicker.studio.StyleStudioViewModel;
+import examples.stylish.BevelUIView;
 import examples.stylish.GlassUIView;
 import examples.stylish.SoftUIView;
 import examples.team.mvi.TeamView;
@@ -141,6 +142,10 @@ public final class ViewResizeBenchmark
             return new GlassUIView();
         }),
         SOFT("soft", frame -> new SoftUIView()),
+        BEVEL("bevel", frame -> {
+            FlatLightLaf.setup();
+            return new BevelUIView();
+        }),
         LINEN("linen", frame -> LinenShowcaseView.createView()),
         STUDIO("studio", frame -> {
             FlatLightLaf.setup();
