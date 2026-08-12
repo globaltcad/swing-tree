@@ -4142,7 +4142,7 @@ class Individual_Component_Styling_Spec extends Specification
                 The border of a SwingTree style consists of four parts:
                 the top, right, bottom, and left sides, each of which can have
                 a different color and thickness.
-                Where two of them meet, they are divided by a miter, which is the
+                Where two of them meet, they are divided by a miter joint, which is the
                 straight line running from the outer corner of the component
                 to the inner corner where the two sides end.
                 <br>
@@ -4153,7 +4153,7 @@ class Individual_Component_Styling_Spec extends Specification
 
                 As you can see, the border of the `JBox` type has a different color
                 on each side and a thickness of 6-12 pixels.
-                Note how the miters lean towards the thinner of the two sides they
+                Note how the miter joints lean towards the thinner of the two sides they
                 divide, so that a thick side is given the larger share of the corner.
             """
         given : """

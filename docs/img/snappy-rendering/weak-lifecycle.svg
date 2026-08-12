@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 470" width="900" height="470" role="img" aria-label="Three moments in the life of a cached rendering: two components sharing one interned description and one image, then one of them restyling onto a different description, then both disappearing and the garbage collector reclaiming pool slot, cache entry and pixels together.">
+  <style>
+    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    .h{font-weight:700;font-size:13px}.hs{font-weight:700;font-size:11.5px;letter-spacing:.05em}
+    .s{font-size:12px}.xs{font-size:10.5px}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10px}
+    .t{fill:#1f2933}.m{fill:#5b6b7a}.cTeal{fill:#0d9488}.cViolet{fill:#6d28d9}.cRose{fill:#be123c}
+    .card{fill:#eef2f6;stroke:#cbd5e1}
+    .pool{fill:none;stroke:#94a3b8;stroke-dasharray:5 4}
+    .box{fill:none;stroke:#1f2933;stroke-width:1.3}
+    .swTeal{fill:#0d9488;fill-opacity:.28;stroke:#0d9488}
+    .swViolet{fill:#6d28d9;fill-opacity:.28;stroke:#6d28d9}
+    .strong{stroke:#0d9488;stroke-width:2.2;fill:none;marker-end:url(#w-at)}
+    .strongV{stroke:#6d28d9;stroke-width:2.2;fill:none;marker-end:url(#w-av)}
+    .weak{stroke:#94a3b8;stroke-width:1.3;fill:none;stroke-dasharray:5 4;marker-end:url(#w-a)}
+    .gone{opacity:.32}
+    .xmark{stroke:#be123c;stroke-width:1.8}
+    .sEdge{stroke:#cbd5e1}
+    .mk{fill:#94a3b8}.mkT{fill:#0d9488}.mkV{fill:#6d28d9}
+    @media (prefers-color-scheme:dark){
+      .t{fill:#e6edf3}.m{fill:#9aa7b4}
+      .cTeal{fill:#2dd4bf}.cViolet{fill:#a78bfa}.cRose{fill:#fb7185}
+      .card{fill:#161b22;stroke:#30363d}
+      .pool{stroke:#4b5563}
+      .box{stroke:#e6edf3}
+      .swTeal{fill:#2dd4bf;stroke:#2dd4bf}
+      .swViolet{fill:#a78bfa;stroke:#a78bfa}
+      .strong{stroke:#2dd4bf}.strongV{stroke:#a78bfa}.weak{stroke:#4b5563}
+      .xmark{stroke:#fb7185}
+      .sEdge{stroke:#30363d}
+      .mk{fill:#4b5563}.mkT{fill:#2dd4bf}.mkV{fill:#a78bfa}
+    }
+  </style>
+  <defs>
+    <marker id="w-a"  viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path class="mk"  d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="w-at" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path class="mkT" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="w-av" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path class="mkV" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <text class="t h" x="12" y="22">Nobody frees anything. Three moments, and the same rule each time.</text>
+  <text class="m s" x="12" y="44">A thick arrow is a strong reference; a dashed one is weak. Only live components draw thick arrows, and only thick arrows keep pixels alive.</text>
+
+  <!-- ================================================== 1 ================================================== -->
+  <g transform="translate(12,0)">
+    <text class="cTeal hs" x="0" y="80">① TWO BUTTONS, ONE STYLE</text>
+
+    <rect class="card" x="0"   y="92" width="124" height="32" rx="7"/>
+    <text class="t xs"  x="14" y="112">Button A</text>
+    <rect class="card" x="144" y="92" width="124" height="32" rx="7"/>
+    <text class="t xs"  x="158" y="112">Button B</text>
+
+    <path class="strong" d="M62 128 C 62 152, 104 150, 116 168"/>
+    <path class="strong" d="M206 128 C 206 152, 164 150, 152 168"/>
+
+    <rect class="pool" x="0" y="156" width="268" height="104" rx="8"/>
+    <text class="m xs" x="12" y="174">interner pool · holds every slot weakly</text>
+    <rect class="box" x="12" y="182" width="244" height="62" rx="6"/>
+    <rect class="swTeal" x="24" y="194" width="38" height="38" rx="8"/>
+    <text class="t xs"  x="74" y="210">one canonical</text>
+    <text class="t xs"  x="74" y="226">description</text>
+    <text class="mono m" x="170" y="220">interned</text>
+
+    <path class="weak" d="M134 286 V 250"/>
+    <text class="m xs" x="142" y="272">weak key</text>
+
+    <rect class="card" x="12" y="288" width="244" height="56" rx="7"/>
+    <rect class="swTeal" x="26" y="300" width="32" height="32" rx="7"/>
+    <text class="t xs" x="70" y="312">one rendered image</text>
+    <text class="m xs" x="70" y="328">A and B blit the same pixels</text>
+
+    <text class="m xs" x="0" y="372">Two equal descriptions were collapsed onto one</text>
+    <text class="m xs" x="0" y="388">object, so sharing the image took no code at all.</text>
+  </g>
+
+  <!-- ================================================== 2 ================================================== -->
+  <g transform="translate(316,0)">
+    <text class="cViolet hs" x="0" y="80">② BUTTON A IS RESTYLED</text>
+
+    <rect class="card" x="0"   y="92" width="124" height="32" rx="7"/>
+    <text class="t xs"  x="14" y="112">Button A</text>
+    <rect class="card" x="144" y="92" width="124" height="32" rx="7"/>
+    <text class="t xs"  x="158" y="112">Button B</text>
+
+    <path class="strongV" d="M62 128 V 168"/>
+    <path class="strong"  d="M206 128 V 168"/>
+
+    <rect class="pool" x="0" y="156" width="268" height="104" rx="8"/>
+    <text class="m xs" x="12" y="174">interner pool · holds every slot weakly</text>
+    <rect class="box" x="12"  y="182" width="112" height="62" rx="6"/>
+    <rect class="swViolet" x="24" y="194" width="38" height="38" rx="8"/>
+    <text class="t xs" x="70" y="216">new</text>
+    <rect class="box" x="144" y="182" width="112" height="62" rx="6"/>
+    <rect class="swTeal" x="156" y="194" width="38" height="38" rx="8"/>
+    <text class="t xs" x="202" y="216">old</text>
+
+    <path class="weak" d="M62 286 V 250"/>
+    <path class="weak" d="M206 286 V 250"/>
+
+    <rect class="card" x="0"   y="288" width="124" height="56" rx="7"/>
+    <rect class="swViolet" x="12" y="300" width="32" height="32" rx="7"/>
+    <text class="m xs" x="52" y="320">rendered</text>
+    <rect class="card" x="144" y="288" width="124" height="56" rx="7"/>
+    <rect class="swTeal" x="156" y="300" width="32" height="32" rx="7"/>
+    <text class="m xs" x="196" y="320">still here</text>
+
+    <text class="m xs" x="0" y="372">A different appearance is a different object, so the</text>
+    <text class="m xs" x="0" y="388">lookup simply misses. B still pins the old image.</text>
+  </g>
+
+  <!-- ================================================== 3 ================================================== -->
+  <g transform="translate(620,0)">
+    <text class="cRose hs" x="0" y="80">③ THE WINDOW IS CLOSED</text>
+
+    <g class="gone">
+      <rect class="card" x="0"   y="92" width="124" height="32" rx="7"/>
+      <text class="t xs"  x="14" y="112">Button A</text>
+      <rect class="card" x="144" y="92" width="124" height="32" rx="7"/>
+      <text class="t xs"  x="158" y="112">Button B</text>
+    </g>
+    <path class="xmark" d="M96 100 l16 16 M112 100 l-16 16"/>
+    <path class="xmark" d="M240 100 l16 16 M256 100 l-16 16"/>
+    <text class="cRose xs" x="0" y="146">no strong arrows left</text>
+
+    <rect class="pool" x="0" y="156" width="268" height="104" rx="8"/>
+    <text class="m xs" x="12" y="174">interner pool · holds every slot weakly</text>
+    <g class="gone">
+      <rect class="box" x="12"  y="182" width="112" height="62" rx="6"/>
+      <rect class="swViolet" x="24" y="194" width="38" height="38" rx="8"/>
+      <rect class="box" x="144" y="182" width="112" height="62" rx="6"/>
+      <rect class="swTeal" x="156" y="194" width="38" height="38" rx="8"/>
+    </g>
+
+    <g class="gone">
+      <rect class="card" x="0"   y="288" width="124" height="56" rx="7"/>
+      <rect class="swViolet" x="12" y="300" width="32" height="32" rx="7"/>
+      <rect class="card" x="144" y="288" width="124" height="56" rx="7"/>
+      <rect class="swTeal" x="156" y="300" width="32" height="32" rx="7"/>
+    </g>
+
+    <text class="cRose xs" x="0" y="372">Pool slots, cache entries and pixels become</text>
+    <text class="cRose xs" x="0" y="388">unreachable together, and are collected together.</text>
+  </g>
+
+  <line class="sEdge" x1="12" y1="412" x2="888" y2="412"/>
+  <text class="m s" x="12" y="434">There is no eviction policy in any of this, and no <tspan class="mono">dispose()</tspan> anyone can forget to call. The single rule that makes it work: <tspan class="cRose">a cached image must never</tspan></text>
+  <text class="cRose s" x="12" y="452">hold a reference back to the description that produced it.<tspan class="m">&#160;&#160;A weakly keyed entry that points at its own key is an entry that lives forever.</tspan></text>
+</svg>

@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" width="900" height="340" role="img" aria-label="In a component-dense styled view under FlatLaf, most of a frame is Look-and-Feel painting that SwingTree wraps but cannot cache; SwingTree's own rendering is a small slice.">
+  <style>
+    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    .h{font-weight:700;font-size:13px}.s{font-size:11.5px}.xs{font-size:10.5px}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    .t{fill:#1f2933}.m{fill:#5b6b7a}
+    .segBorder{fill:#be123c;fill-opacity:.6}
+    .segBodies{fill:#b45309;fill-opacity:.6}
+    .segTree{fill:#0d9488;fill-opacity:.85}
+    .segRest{fill:#94a3b8;fill-opacity:.4}
+    .ax{stroke:#cbd5e1}
+    .lTeal{stroke:#0d9488}
+    @media (prefers-color-scheme:dark){
+      .t{fill:#e6edf3}.m{fill:#9aa7b4}
+      .segBorder{fill:#fb7185}.segBodies{fill:#fbbf24}.segTree{fill:#2dd4bf}.segRest{fill:#64748b}
+      .ax{stroke:#30363d}
+      .lTeal{stroke:#2dd4bf}
+    }
+  </style>
+
+  <text class="t h" x="12" y="20">Who actually spends the frame?</text>
+  <text class="m xs" x="12" y="38">One repaint of a heavily styled view. Bar length is the measured repaint time; the segments are shares of sampled on-EDT time.</text>
+  <text class="m xs" x="12" y="54">Indicative rather than a controlled A/B — the two views differ in window size and component count.</text>
+
+  <g class="m xs">
+    <line class="ax" x1="150" y1="82" x2="850" y2="82"/>
+    <line class="ax" x1="150" y1="78" x2="150" y2="86"/>
+    <line class="ax" x1="468" y1="78" x2="468" y2="86"/>
+    <line class="ax" x1="850" y1="78" x2="850" y2="86"/>
+    <text x="150" y="74" text-anchor="middle">0</text>
+    <text x="468" y="74" text-anchor="middle">5 ms</text>
+    <text x="850" y="74" text-anchor="middle">11 ms</text>
+  </g>
+
+  <text class="t s" x="12" y="112">under FlatLaf — 298 components — <tspan class="mono">10.83 ms</tspan></text>
+  <g transform="translate(150,122)">
+    <rect class="segBorder" x="0"   y="0" width="338" height="34"/>
+    <rect class="segBodies" x="338" y="0" width="138" height="34"/>
+    <rect class="segTree"   x="476" y="0" width="41"  height="34"/>
+    <rect class="segRest"   x="517" y="0" width="173" height="34"/>
+    <text class="t xs" x="8"   y="22">wrapped LaF border — 49 %</text>
+    <text class="t xs" x="346" y="22">bodies — 20 %</text>
+    <text class="m xs" x="525" y="22">everything else — 25 %</text>
+  </g>
+  <line class="lTeal" x1="646" y1="158" x2="646" y2="176"/>
+  <text class="m xs" x="642" y="190" text-anchor="end">SwingTree’s own style rendering and cache blits — 5–7 %</text>
+
+  <text class="t s" x="12" y="226">under a SwingTree-native Look-and-Feel — 122 components — <tspan class="mono">1.22 ms</tspan></text>
+  <rect class="segTree" x="150" y="236" width="78" height="34"/>
+  <text class="m xs" x="240" y="257">no foreign border to delegate to, so nearly all of this is style engine — and most of it is cache blits</text>
+
+  <text class="m s" x="12" y="296">SwingTree paints <tspan font-style="italic">on top of</tspan> whatever Look-and-Feel you installed, and it faithfully delegates to that LaF’s own border and body painting. That delegation cannot be</text>
+  <text class="m s" x="12" y="314">cached: a third-party delegate may read any component property, any UIManager value, or its own mutable fields, and a cache key that missed one bit would not fail</text>
+  <text class="m s" x="12" y="332">loudly — it would show a stale border forever. So the honest reading is that the frame above is mostly not SwingTree’s to spend, and mostly not SwingTree’s to save.</text>
+</svg>

@@ -523,7 +523,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
     {
         reportInfo """
             When each border edge has its own color, the edges meet in diagonal
-            miter seams, like on a picture frame. A seam between two *adjacent*
+            miter joints, like on a picture frame. A seam between two *adjacent*
             edges leaves the corner in a direction fixed by their two widths, so
             it sits in the same place whatever the component's size, and the
             corner can be copied from an exemplar.

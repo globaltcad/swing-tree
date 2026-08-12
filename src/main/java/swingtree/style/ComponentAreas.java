@@ -396,12 +396,12 @@ final class ComponentAreas
      *  Calculates the border-edge regions of the component's box model in the form of an array
      *  of 4 {@link Area} objects, one per edge, in the order top, right, bottom and left.
      *  Together they tile the margin box, so filling them with four different colors paints a
-     *  border whose color changes along a miter at each corner.
+     *  border whose color changes along a miter joint at each corner.
      *  <p>
      *  A point belongs to the edge which is closest to it <i>relative to that edge's own border
      *  width</i>. This places every corner seam on the straight line running from the outer
-     *  corner of the margin box through the matching inner corner, which is where a mitered
-     *  corner joint belongs. For edges of equal width that line is the corner's diagonal, so a
+     *  corner of the margin box through the matching inner corner, which is where the miter
+     *  joint of a corner belongs. For edges of equal width that line is the corner's diagonal, so a
      *  box as wide as it is tall is divided into four triangles, whereas a box wider than it is
      *  tall gets triangles at the left and right and trapeziums at the top and bottom.
      *  <p>

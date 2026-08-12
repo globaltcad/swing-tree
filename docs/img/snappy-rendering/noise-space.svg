@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" width="900" height="380" role="img" aria-label="Procedural noise is pre-rendered into a fixed grid of tiles anchored at the noise origin, so resizing a component only changes which tiles are drawn, never what is in them.">
+  <style>
+    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    .h{font-weight:700;font-size:13px}.s{font-size:11.5px}.xs{font-size:10.5px}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    .t{fill:#1f2933}.m{fill:#5b6b7a}
+    .cTeal{fill:#0d9488}.cAmber{fill:#b45309}.cViolet{fill:#6d28d9}
+    .field{fill:#0d9488;fill-opacity:.18}
+    .grid{stroke:#1f2933;stroke-width:1;opacity:.4;stroke-dasharray:5 4}
+    .frame{fill:none;stroke:#cbd5e1}
+    .origin{stroke:#6d28d9;stroke-width:1.8}
+    .before{fill:none;stroke:#0d9488;stroke-width:2;stroke-dasharray:6 4}
+    .fresh{fill:#b45309;fill-opacity:.16}
+    .idx{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:9px;fill:#1f2933;opacity:.5}
+    .after{fill:none;stroke:#b45309;stroke-width:2;stroke-dasharray:6 4}
+    @media (prefers-color-scheme:dark){
+      .t{fill:#e6edf3}.m{fill:#9aa7b4}
+      .cTeal{fill:#2dd4bf}.cAmber{fill:#fbbf24}.cViolet{fill:#a78bfa}
+      .field{fill:#2dd4bf}
+      .grid{stroke:#e6edf3}
+      .frame{stroke:#30363d}
+      .origin{stroke:#a78bfa}
+      .before{stroke:#2dd4bf}.after{stroke:#fbbf24}
+      .fresh{fill:#fbbf24}
+      .idx{fill:#e6edf3}
+    }
+  </style>
+  <defs>
+    <filter id="nz" x="0" y="0" width="100%" height="100%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.022" numOctaves="4" seed="11" stitchTiles="stitch"/>
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer><feFuncA type="linear" slope="0.5"/></feComponentTransfer>
+    </filter>
+  </defs>
+
+  <text class="t h" x="12" y="20">Noise lives in its own coordinate space</text>
+  <text class="m xs" x="12" y="38">A noise pixel is a function of its position relative to the noise origin — not of the component. So the field is pre-rendered once, in 256 × 256 tiles, and blitted.</text>
+
+  <rect class="field" x="20" y="58" width="460" height="230"/>
+  <rect x="20" y="58" width="460" height="230" filter="url(#nz)" opacity=".75"/>
+  <rect class="frame" x="20" y="58" width="460" height="230"/>
+
+  <g>
+    <rect class="fresh" x="296" y="58"  width="184" height="184"/>
+    <rect class="fresh" x="20"  y="242" width="460" height="46"/>
+  </g>
+
+  <g class="idx">
+    <text x="24"  y="72">-1,-1</text><text x="116" y="72">0,-1</text><text x="208" y="72">1,-1</text><text x="300" y="72">2,-1</text><text x="392" y="72">3,-1</text>
+    <text x="24"  y="164">-1,0</text><text x="116" y="164">0,0</text><text x="208" y="164">1,0</text><text x="300" y="164">2,0</text><text x="392" y="164">3,0</text>
+    <text x="24"  y="256">-1,1</text><text x="116" y="256">0,1</text><text x="208" y="256">1,1</text><text x="300" y="256">2,1</text><text x="392" y="256">3,1</text>
+  </g>
+
+  <g class="grid">
+    <line x1="112" y1="58" x2="112" y2="288"/>
+    <line x1="204" y1="58" x2="204" y2="288"/>
+    <line x1="296" y1="58" x2="296" y2="288"/>
+    <line x1="388" y1="58" x2="388" y2="288"/>
+    <line x1="20" y1="150" x2="480" y2="150"/>
+    <line x1="20" y1="242" x2="480" y2="242"/>
+  </g>
+
+  <g>
+    <line class="origin" x1="96" y1="150" x2="128" y2="150"/>
+    <line class="origin" x1="112" y1="134" x2="112" y2="166"/>
+    <text class="cViolet xs" x="20" y="306">✛  noise origin — the whole tile grid hangs off this one point, and tile 0,0 starts here</text>
+    <text class="cAmber xs"  x="20" y="324">▧  the nine tiles the wider size newly reaches — the six it already had are reused untouched</text>
+  </g>
+
+  <rect class="before" x="66" y="104" width="184" height="120"/>
+  <text class="cTeal xs" x="72" y="120">before</text>
+  <rect class="after" x="66" y="104" width="340" height="160"/>
+  <text class="cAmber xs" x="336" y="258">after the drag</text>
+
+  <g transform="translate(516,58)">
+    <text class="t h" x="0" y="14">What a resize changes</text>
+    <text class="m s" x="0" y="36">Only <tspan font-style="italic">which</tspan> tiles are visible, and where on screen they land.</text>
+    <text class="m s" x="0" y="54">The tiles themselves are addressed by their integer index</text>
+    <text class="m s" x="0" y="72">in noise space, so not one of them is invalidated.</text>
+
+    <text class="t h" x="0" y="112">Why tiles at all</text>
+    <text class="m s" x="0" y="134">Java2D rasterizes a <tspan class="mono">Paint</tspan> in fixed 32 × 32 chunks. Filling a</text>
+    <text class="m s" x="0" y="152">window-sized background through the paint pipeline is</text>
+    <text class="m s" x="0" y="170">therefore thousands of tiny composites, all of them</text>
+    <text class="m s" x="0" y="188">running the noise function per pixel. Blitting a handful</text>
+    <text class="m s" x="0" y="206">of 256 × 256 images instead is a different order of cost.</text>
+
+    <text class="m s" x="0" y="242" font-style="italic">Small areas keep the direct paint path — below about</text>
+    <text class="m s" x="0" y="260" font-style="italic">64 × 64 pixels the tile machinery would be the slower one.</text>
+  </g>
+
+  <text class="m xs" x="12" y="356">This is also what makes a noise cheap enough to lift out of its layer’s cached image during a resize: replaying it is a few blits, not a per-pixel sweep.</text>
+</svg>

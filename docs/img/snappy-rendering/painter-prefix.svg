@@ -1,0 +1,108 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 356" width="900" height="356" role="img" aria-label="Painters on one layer run in name order. Only the ones whose names sort before the first uncacheable painter are baked into the cached image; from that painter upwards everything is replayed on every paint, including painters that could have been cached. Hoisting one of those into the image would change the stacking order, and therefore the picture.">
+  <style>
+    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    .h{font-weight:700;font-size:14px}.s{font-size:12px}.xs{font-size:10.5px}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:11px}
+    .t{fill:#1f2933}.m{fill:#5b6b7a}
+    .sEdge{stroke:#cbd5e1}
+    .frame{fill:none;stroke:#cbd5e1}
+    .cacheable{fill:#0d9488;fill-opacity:.20;stroke:#0d9488;stroke-width:1.4}
+    .opaquePainter{fill:#be123c;fill-opacity:.16;stroke:#be123c;stroke-width:1.4;stroke-dasharray:5 3}
+    .baked{fill:#0d9488;fill-opacity:.10;stroke:#0d9488;stroke-width:1.4;stroke-dasharray:4 3}
+    .replay{fill:none;stroke:#b45309;stroke-width:1.4;stroke-dasharray:4 3}
+    .cut{stroke:#1f2933;stroke-width:1.4;stroke-dasharray:5 3;opacity:.7}
+    .good{fill:#0f7a43}.bad{fill:#be123c}.warn{fill:#b45309}
+    .shapeA{fill:#1d4ed8}
+    .shapeB{fill:#b45309}
+    .onShape{fill:#ffffff;font-size:10px}
+    .lead{stroke:#94a3b8;stroke-width:1;fill:none}
+    @media (prefers-color-scheme:dark){
+      .t{fill:#e6edf3}.m{fill:#9aa7b4}
+      .sEdge{stroke:#30363d}.frame{stroke:#30363d}
+      .cacheable{fill:#2dd4bf;stroke:#2dd4bf}
+      .opaquePainter{fill:#fb7185;stroke:#fb7185}
+      .baked{fill:#2dd4bf;stroke:#2dd4bf}
+      .replay{stroke:#fbbf24}
+      .cut{stroke:#e6edf3}
+      .good{fill:#34d399}.bad{fill:#fb7185}.warn{fill:#fbbf24}
+      .shapeA{fill:#3b82f6}.shapeB{fill:#d97706}
+      .lead{stroke:#4b5563}
+    }
+  </style>
+
+  <text class="t h" x="12" y="22">Four painters on one layer, in the order they run</text>
+  <text class="m xs" x="12" y="40">Painters are addressed by name and painted in name order, bottom to top. Two of these were declared with <tspan class="mono">Painter.of(value, ..)</tspan>, one is a bare lambda.</text>
+
+  <!-- ============================ the stack ============================ -->
+  <g transform="translate(12,64)">
+    <rect class="cacheable"     x="0" y="156" width="250" height="34"/>
+    <text class="t mono"  x="12" y="177">"backdrop"</text>
+    <text class="good xs" x="150" y="177">cacheable</text>
+
+    <rect class="cacheable"     x="0" y="118" width="250" height="34"/>
+    <text class="t mono"  x="12" y="139">"grid"</text>
+    <text class="good xs" x="150" y="139">cacheable</text>
+
+    <rect class="opaquePainter" x="0" y="80" width="250" height="34"/>
+    <text class="t mono" x="12" y="101">"marker"</text>
+    <text class="bad xs" x="150" y="101">a lambda — opaque</text>
+
+    <rect class="cacheable"     x="0" y="42" width="250" height="34"/>
+    <text class="t mono"  x="12" y="63">"overlay"</text>
+    <text class="good xs" x="150" y="63">cacheable</text>
+
+    <line class="cut" x1="-8" y1="116" x2="300" y2="116"/>
+    <text class="m xs" x="258" y="112">the cut</text>
+
+    <text class="m xs" x="0" y="18">↑ painted last</text>
+    <text class="m xs" x="0" y="212">↓ painted first</text>
+  </g>
+
+  <!-- ============================ what the engine does ============================ -->
+  <g transform="translate(330,64)">
+    <text class="t h" x="0" y="-2">What ends up where</text>
+
+    <rect class="replay" x="0" y="16" width="220" height="52"/>
+    <text class="t mono"  x="12" y="38">"marker" + "overlay"</text>
+    <text class="warn xs" x="12" y="56">replayed on every single paint</text>
+
+    <rect class="baked"  x="0" y="80" width="220" height="52"/>
+    <text class="t mono"  x="12" y="102">"backdrop" + "grid"</text>
+    <text class="good xs" x="12" y="120">baked into the cached image</text>
+
+    <text class="m xs" x="0" y="158">The cut falls at the first uncacheable painter</text>
+    <text class="m xs" x="0" y="174">by name, so only the longest cacheable</text>
+    <text class="m xs" x="0" y="190"><tspan font-style="italic">prefix</tspan> is ever baked in. Note that</text>
+    <text class="m xs" x="0" y="206"><tspan class="mono">"overlay"</tspan> is cacheable and still misses out.</text>
+  </g>
+
+  <!-- ============================ why not hoist ============================ -->
+  <g transform="translate(600,64)">
+    <text class="t h" x="0" y="-2">Why it cannot be hoisted</text>
+
+    <g transform="translate(0,20)">
+      <rect class="frame" x="0" y="0" width="130" height="86"/>
+      <rect class="shapeB" x="30" y="24" width="72" height="38"/>
+      <circle class="shapeA" cx="58" cy="46" r="28"/>
+      <text class="onShape" x="40" y="50">overlay</text>
+      <text class="good xs" x="0" y="104">as declared — overlay on top</text>
+    </g>
+
+    <g transform="translate(160,20)">
+      <rect class="frame" x="0" y="0" width="130" height="86"/>
+      <circle class="shapeA" cx="58" cy="46" r="28"/>
+      <rect class="shapeB" x="30" y="24" width="72" height="38"/>
+      <text class="onShape" x="56" y="47">marker</text>
+      <text class="bad xs" x="0" y="104">hoisted — marker on top</text>
+    </g>
+
+    <text class="m xs" x="0" y="158">Painters on a layer may overlap, so pulling a</text>
+    <text class="m xs" x="0" y="174">cacheable one underneath an uncacheable one</text>
+    <text class="m xs" x="0" y="190">would reorder them. Keeping a prefix keeps</text>
+    <text class="m xs" x="0" y="206">every painter where its name put it.</text>
+  </g>
+
+  <line class="sEdge" x1="12" y1="302" x2="888" y2="302"/>
+  <text class="m s" x="12" y="324">So if you want a painter cached, give it a name that sorts before every uncacheable one — which is the same thing as saying it should be painted</text>
+  <text class="m s" x="12" y="342">first. And a painter is only cacheable at all when you promise its output is a pure function of an immutable value: <tspan class="mono">Painter.of(value, ..)</tspan>.</text>
+</svg>

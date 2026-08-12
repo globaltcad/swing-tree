@@ -1,0 +1,130 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" width="900" height="400" role="img" aria-label="A small exemplar rendering is cut into nine regions: four corners copied 1 to 1, four edge bands stretched along their own axis, and a centre stretched in both, reassembling the full component size.">
+  <style>
+    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    .h{font-weight:700;font-size:14px}.s{font-size:12px}.xs{font-size:10.5px}
+    .t{fill:#1f2933}.m{fill:#5b6b7a}
+    .body{fill:#0d9488;fill-opacity:.22;stroke:#0d9488;stroke-width:3}
+    .shadow{fill:#1f2933;opacity:.20}
+    .rCorner{fill:#6d28d9;fill-opacity:.20}
+    .rHoriz{fill:#b45309;fill-opacity:.28}
+    .rVert{fill:#1d4ed8;fill-opacity:.30}
+    .rCentre{fill:#0f7a43;fill-opacity:.32}
+    .frame{fill:none;stroke:#cbd5e1}
+    .sEdge{stroke:#cbd5e1}
+    .cut{stroke:#1f2933;stroke-width:1;stroke-dasharray:4 3;opacity:.55}
+    .flow{stroke:#94a3b8;stroke-width:1.4;fill:none;marker-end:url(#af)}
+    .str{stroke:#1f2933;stroke-width:1.2;fill:none;opacity:.7;marker-end:url(#as);marker-start:url(#as)}
+    .mkL{fill:#94a3b8}.mkI{fill:#1f2933;opacity:.7}
+    @media (prefers-color-scheme:dark){
+      .t{fill:#e6edf3}.m{fill:#9aa7b4}
+      .body{fill:#2dd4bf;stroke:#2dd4bf}
+      .shadow{fill:#000000;opacity:.45}
+      .rCorner{fill:#a78bfa}.rHoriz{fill:#fbbf24}.rVert{fill:#60a5fa}.rCentre{fill:#34d399}
+      .frame{stroke:#30363d}.sEdge{stroke:#30363d}
+      .cut{stroke:#e6edf3}
+      .flow{stroke:#4b5563}
+      .str{stroke:#e6edf3}
+      .mkL{fill:#4b5563}.mkI{fill:#e6edf3;opacity:.7}
+    }
+  </style>
+  <defs>
+    <filter id="blur" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="5"/></filter>
+    <marker id="af" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mkL" d="M0 0 L10 5 L0 10 z"/></marker>
+    <marker id="as" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path class="mkI" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <text class="t h" x="12" y="22">The exemplar</text>
+  <text class="m xs" x="12" y="40">the smallest size at which</text>
+  <text class="m xs" x="12" y="54">every style pixel still exists</text>
+
+  <!-- ============================ exemplar ============================ -->
+  <g transform="translate(20,90)">
+    <rect class="shadow" x="12" y="14" width="88" height="88" rx="22" filter="url(#blur)"/>
+    <rect class="body" x="10" y="10" width="92" height="92" rx="22"/>
+
+    <g>
+      <rect class="rCorner" x="0"  y="0"  width="50" height="50"/>
+      <rect class="rCorner" x="62" y="0"  width="50" height="50"/>
+      <rect class="rCorner" x="0"  y="62" width="50" height="50"/>
+      <rect class="rCorner" x="62" y="62" width="50" height="50"/>
+      <rect class="rHoriz"  x="50" y="0"  width="12" height="50"/>
+      <rect class="rHoriz"  x="50" y="62" width="12" height="50"/>
+      <rect class="rVert"   x="0"  y="50" width="50" height="12"/>
+      <rect class="rVert"   x="62" y="50" width="50" height="12"/>
+      <rect class="rCentre" x="50" y="50" width="12" height="12"/>
+    </g>
+
+    <rect class="frame" x="0" y="0" width="112" height="112"/>
+    <line class="cut" x1="50" y1="-8" x2="50" y2="120"/>
+    <line class="cut" x1="62" y1="-8" x2="62" y2="120"/>
+    <line class="cut" x1="-8" y1="50" x2="120" y2="50"/>
+    <line class="cut" x1="-8" y1="62" x2="120" y2="62"/>
+
+    <path class="str" d="M0 130 H 50"/>
+    <text class="m xs" x="6" y="148">inset</text>
+    <path class="str" d="M50 130 H 62"/>
+    <text class="m xs" x="46" y="164">band</text>
+  </g>
+
+  <text class="m xs" x="20" y="272">margin + border + corner arc + shadow reach,</text>
+  <text class="m xs" x="20" y="286">then a couple of free pixels between them</text>
+
+  <!-- ============================ the mapping ============================ -->
+  <path class="flow" d="M152 146 H 254"/>
+  <text class="m xs" x="156" y="138">nine blits</text>
+  <text class="m xs" x="156" y="166">no re-render</text>
+
+  <!-- ============================ reconstruction ============================ -->
+  <text class="t h" x="284" y="22">The component, at whatever size it happens to be</text>
+
+  <g transform="translate(284,48)">
+    <rect class="shadow" x="14" y="16" width="560" height="164" rx="22" filter="url(#blur)"/>
+    <rect class="body" x="10" y="10" width="568" height="172" rx="22"/>
+
+    <g>
+      <rect class="rCorner" x="0"   y="0"   width="50"  height="50"/>
+      <rect class="rCorner" x="538" y="0"   width="50"  height="50"/>
+      <rect class="rCorner" x="0"   y="142" width="50"  height="50"/>
+      <rect class="rCorner" x="538" y="142" width="50"  height="50"/>
+      <rect class="rHoriz"  x="50"  y="0"   width="488" height="50"/>
+      <rect class="rHoriz"  x="50"  y="142" width="488" height="50"/>
+      <rect class="rVert"   x="0"   y="50"  width="50"  height="92"/>
+      <rect class="rVert"   x="538" y="50"  width="50"  height="92"/>
+      <rect class="rCentre" x="50"  y="50"  width="488" height="92"/>
+    </g>
+
+    <rect class="frame" x="0" y="0" width="588" height="192"/>
+    <line class="cut" x1="50"  y1="-8" x2="50"  y2="200"/>
+    <line class="cut" x1="538" y1="-8" x2="538" y2="200"/>
+    <line class="cut" x1="-8"  y1="50"  x2="596" y2="50"/>
+    <line class="cut" x1="-8"  y1="142" x2="596" y2="142"/>
+
+    <text class="t xs" x="10"  y="30" opacity=".85">1:1</text>
+    <text class="t xs" x="548" y="30" opacity=".85">1:1</text>
+    <text class="t xs" x="10"  y="172" opacity=".85">1:1</text>
+    <text class="t xs" x="548" y="172" opacity=".85">1:1</text>
+
+    <path class="str" d="M70 26 H 518"/>
+    <path class="str" d="M70 166 H 518"/>
+    <path class="str" d="M25 66 V 126"/>
+    <path class="str" d="M563 66 V 126"/>
+    <path class="str" d="M120 96 H 468"/>
+    <path class="str" d="M294 62 V 130"/>
+  </g>
+
+  <!-- ============================ legend ============================ -->
+  <g transform="translate(284,282)">
+    <rect class="rCorner" x="0"   y="0"  width="12" height="12" fill-opacity=".55"/>
+    <rect class="rHoriz"  x="230" y="0"  width="12" height="12" fill-opacity=".65"/>
+    <rect class="rVert"   x="0"   y="22" width="12" height="12" fill-opacity=".65"/>
+    <rect class="rCentre" x="230" y="22" width="12" height="12" fill-opacity=".65"/>
+    <text class="m xs" x="18"  y="10">corners — copied, never scaled</text>
+    <text class="m xs" x="248" y="10">top / bottom — stretched horizontally</text>
+    <text class="m xs" x="18"  y="32">left / right — stretched vertically</text>
+    <text class="m xs" x="248" y="32">centre — stretched both ways</text>
+  </g>
+
+  <line class="sEdge" x1="12" y1="336" x2="888" y2="336"/>
+  <text class="m s" x="12" y="360">This is exact, not approximate — but only because the style holds to one promise: the body is homogeneous, and each edge repeats along its own axis.</text>
+  <text class="m s" x="12" y="380">A flat fill, a border and a shadow keep that promise. A gradient, a noise, an image, a text or a custom painter does not, so those are never tiled.</text>
+</svg>

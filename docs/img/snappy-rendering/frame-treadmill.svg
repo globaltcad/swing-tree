@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 390" width="900" height="390" role="img" aria-label="Two timelines of one window drag. Plain Swing repeats the full render work on every frame; SwingTree does it once and then blits.">
+  <style>
+    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    .h{font-weight:700;font-size:15px}.s{font-size:12px}.xs{font-size:11px}
+    .t{fill:#1f2933}.m{fill:#5b6b7a}
+    .fTeal{fill:#0d9488}.fAmber{fill:#b45309}.fViolet{fill:#6d28d9}
+    .sEdge{stroke:#cbd5e1}
+    @media (prefers-color-scheme:dark){
+      .t{fill:#e6edf3}.m{fill:#9aa7b4}
+      .fTeal{fill:#2dd4bf}.fAmber{fill:#fbbf24}.fViolet{fill:#a78bfa}
+      .sEdge{stroke:#30363d}
+    }
+  </style>
+
+  <!-- ================= row 1 : plain Swing ================= -->
+  <text class="t h" x="0" y="26">Plain Swing — one window drag, six frames</text>
+  <line class="sEdge" x1="0" y1="162" x2="900" y2="162"/>
+
+  <g opacity=".85">
+    <g><rect class="fViolet" x="8"   y="62" width="130" height="38"/><rect class="fAmber" x="8"   y="100" width="130" height="46"/><rect class="fTeal" x="8"   y="146" width="130" height="16"/></g>
+    <g><rect class="fViolet" x="150" y="62" width="130" height="38"/><rect class="fAmber" x="150" y="100" width="130" height="46"/><rect class="fTeal" x="150" y="146" width="130" height="16"/></g>
+    <g><rect class="fViolet" x="292" y="62" width="130" height="38"/><rect class="fAmber" x="292" y="100" width="130" height="46"/><rect class="fTeal" x="292" y="146" width="130" height="16"/></g>
+    <g><rect class="fViolet" x="434" y="62" width="130" height="38"/><rect class="fAmber" x="434" y="100" width="130" height="46"/><rect class="fTeal" x="434" y="146" width="130" height="16"/></g>
+    <g><rect class="fViolet" x="576" y="62" width="130" height="38"/><rect class="fAmber" x="576" y="100" width="130" height="46"/><rect class="fTeal" x="576" y="146" width="130" height="16"/></g>
+    <g><rect class="fViolet" x="718" y="62" width="130" height="38"/><rect class="fAmber" x="718" y="100" width="130" height="46"/><rect class="fTeal" x="718" y="146" width="130" height="16"/></g>
+  </g>
+
+  <g class="m xs">
+    <text x="8"   y="55">turn the style into paths, again</text>
+    <text x="292" y="55">and again</text>
+    <text x="434" y="55">and again</text>
+    <text x="576" y="55">and again</text>
+    <text x="718" y="55">and again</text>
+  </g>
+
+  <!-- ================= row 2 : SwingTree ================= -->
+  <text class="t h" x="0" y="220">SwingTree — the same six frames</text>
+  <line class="sEdge" x1="0" y1="356" x2="900" y2="356"/>
+
+  <g opacity=".85">
+    <g><rect class="fViolet" x="8" y="256" width="130" height="38"/><rect class="fAmber" x="8" y="294" width="130" height="46"/><rect class="fTeal" x="8" y="340" width="130" height="16"/></g>
+    <rect class="fTeal" x="150" y="340" width="130" height="16"/>
+    <rect class="fTeal" x="292" y="340" width="130" height="16"/>
+    <rect class="fTeal" x="434" y="340" width="130" height="16"/>
+    <rect class="fTeal" x="576" y="340" width="130" height="16"/>
+    <rect class="fTeal" x="718" y="340" width="130" height="16"/>
+  </g>
+  <text class="m xs" x="8"   y="249">rendered once, into an image</text>
+  <text class="m xs" x="152" y="334">the other five are a blit of those very same pixels</text>
+
+  <!-- ================= legend ================= -->
+  <g transform="translate(0,382)" opacity=".85">
+    <rect class="fViolet" x="0"   y="-9" width="11" height="11"/>
+    <rect class="fAmber"  x="160" y="-9" width="11" height="11"/>
+    <rect class="fTeal"   x="620" y="-9" width="11" height="11"/>
+  </g>
+  <g transform="translate(0,382)">
+    <text class="m xs" x="16"  y="0">path &amp; geometry work</text>
+    <text class="m xs" x="176" y="0">antialiased coverage mask — software, even onto a GPU surface</text>
+    <text class="m xs" x="636" y="0">upload &amp; composite</text>
+  </g>
+</svg>

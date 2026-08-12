@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 250" width="900" height="250" role="img" aria-label="With an exemplar key, every size in a drag maps onto the same small rendering: one render, one entry, and every later frame is a reassembly of the same pixels.">
+  <style>
+    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    .h{font-weight:700;font-size:14px}.s{font-size:12px}.xs{font-size:10.5px}
+    .t{fill:#1f2933}.m{fill:#5b6b7a}.cTeal{fill:#0d9488}
+    .comp{fill:#0d9488;fill-opacity:.16;stroke:#0d9488;stroke-width:1.4}
+    .keep{fill:#0d9488;fill-opacity:.3;stroke:#0d9488;stroke-width:1.6}
+    .sEdge{stroke:#cbd5e1}
+    .dropT{stroke:#0d9488;stroke-width:1.3;fill:none;marker-end:url(#at2)}
+    .mkT{fill:#0d9488}
+    @media (prefers-color-scheme:dark){
+      .t{fill:#e6edf3}.m{fill:#9aa7b4}.cTeal{fill:#2dd4bf}
+      .comp{fill:#2dd4bf;stroke:#2dd4bf}
+      .keep{fill:#2dd4bf;stroke:#2dd4bf}
+      .sEdge{stroke:#30363d}
+      .dropT{stroke:#2dd4bf}
+      .mkT{fill:#2dd4bf}
+    }
+  </style>
+  <defs>
+    <marker id="at2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="mkT" d="M0 0 L10 5 L0 10 z"/></marker>
+  </defs>
+
+  <text class="t h" x="12" y="20">The very same five frames, keyed on the exemplar</text>
+  <text class="m s" x="12" y="42">The size is replaced by the smallest size that still holds every distinct pixel, so all five frames ask</text>
+  <text class="m s" x="12" y="60">the same question. The first one answers it; the rest reassemble their own width from the answer.</text>
+
+  <g>
+    <rect class="comp" x="150" y="80" width="56"  height="30" rx="9"/>
+    <rect class="comp" x="272" y="80" width="72"  height="30" rx="9"/>
+    <rect class="comp" x="410" y="80" width="88"  height="30" rx="9"/>
+    <rect class="comp" x="564" y="80" width="104" height="30" rx="9"/>
+    <rect class="comp" x="734" y="80" width="120" height="30" rx="9"/>
+  </g>
+
+  <g>
+    <path class="dropT" d="M178 116 C 178 152, 400 146, 418 176"/>
+    <path class="dropT" d="M308 116 C 308 152, 408 152, 426 176"/>
+    <path class="dropT" d="M454 116 C 454 152, 428 156, 436 176"/>
+    <path class="dropT" d="M616 116 C 616 152, 470 152, 452 176"/>
+    <path class="dropT" d="M794 116 C 794 152, 480 146, 460 176"/>
+  </g>
+
+  <rect class="keep" x="412" y="180" width="56" height="34" rx="6"/>
+  <text class="cTeal xs" x="482" y="194">one rendering, a few dozen pixels square</text>
+  <text class="m xs"     x="482" y="210">and every later size is nine blits away from it</text>
+
+  <line class="sEdge" x1="12" y1="228" x2="888" y2="228"/>
+  <text class="cTeal s" x="12" y="248">one render · one allocation · one upload · four reuses — and the count stops growing there, however long the drag lasts</text>
+</svg>

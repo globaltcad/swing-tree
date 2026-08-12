@@ -45,9 +45,10 @@ import java.util.function.BiConsumer;
  *  must be homogeneous, and each edge must be homogeneous along its own axis</b>. Flat
  *  background/foundation fills, borders and shadows satisfy it. Gradients, noises, images, texts
  *  and custom painters do not, their pixels depending on the full component bounds. A border
- *  with a different color per edge satisfies it as long as its miters land in the same place at
- *  every size, which {@link #_borderEdgeSeamsAreSizeIndependent} decides. The eligibility check
- *  must stay conservative, because an over-eager rule produces subtly wrong pixels, not a crash.
+ *  with a different color per edge satisfies it as long as its miter joints land in the same
+ *  place at every size, which {@link #_borderEdgeSeamsAreSizeIndependent} decides. The
+ *  eligibility check must stay conservative, because an over-eager rule produces subtly wrong
+ *  pixels, not a crash.
  *  Ineligible or too small configurations keep the classic exact-size key and behave exactly as
  *  they did before stretch tiling existed. <br>
  *  <br>

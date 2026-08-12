@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 310" width="900" height="310" role="img" aria-label="Why the exemplar is sized as twice the larger inset plus a band: a smaller size overlaps its corners, an asymmetric one puts the renderer's centre line inside a corner, and the symmetric one keeps it in the free band.">
+  <style>
+    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    .h{font-weight:700;font-size:13px}.xs{font-size:10.5px}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:10.5px}
+    .t{fill:#1f2933}.m{fill:#5b6b7a}
+    .cRose{fill:#be123c}.cAmber{fill:#b45309}.cTeal{fill:#0d9488}
+    .cornerL{fill:#6d28d9;fill-opacity:.22}
+    .cornerR{fill:#1d4ed8;fill-opacity:.22}
+    .band{fill:#0f7a43;fill-opacity:.32}
+    .box{fill:none;stroke:#cbd5e1}
+    .sEdge{stroke:#cbd5e1}
+    .mid{stroke:#be123c;stroke-width:1.4;stroke-dasharray:6 3 2 3}
+    @media (prefers-color-scheme:dark){
+      .t{fill:#e6edf3}.m{fill:#9aa7b4}
+      .cRose{fill:#fb7185}.cAmber{fill:#fbbf24}.cTeal{fill:#2dd4bf}
+      .cornerL{fill:#a78bfa}.cornerR{fill:#60a5fa}.band{fill:#34d399}
+      .box{stroke:#30363d}.sEdge{stroke:#30363d}
+      .mid{stroke:#fb7185}
+    }
+  </style>
+
+  <text class="t h" x="12" y="22">How small may the exemplar be?</text>
+  <text class="m xs" x="12" y="42">The four corners hold every pixel whose value depends on where an edge is. Whatever sits between opposite corners simply repeats — so that is all the exemplar has to contain.</text>
+
+  <!-- ============ 1 : too small ============ -->
+  <g transform="translate(12,82)">
+    <text class="cRose h" x="0" y="0">✕  too small</text>
+    <text class="m xs" x="0" y="18">left inset 20 + right inset 60 &gt; width</text>
+    <g transform="translate(0,34)">
+      <rect class="box" x="0" y="0" width="128" height="76"/>
+      <rect class="cornerL" x="0" y="0" width="40"  height="76"/>
+      <rect class="cornerR" x="8" y="0" width="120" height="76"/>
+      <text class="cRose xs" x="9" y="44">overlap</text>
+    </g>
+    <text class="m xs" x="0" y="140">The corner arcs would have to share pixels.</text>
+    <text class="m xs" x="0" y="156">Such a component is simply not tiled: it keeps</text>
+    <text class="m xs" x="0" y="172">the ordinary exact-size cache entry.</text>
+  </g>
+
+  <!-- ============ 2 : asymmetric ============ -->
+  <g transform="translate(310,82)">
+    <text class="cAmber h" x="0" y="0">~  it would just fit</text>
+    <text class="m xs" x="0" y="18">left + right + band  =  20 + 60 + 12</text>
+    <g transform="translate(0,34)">
+      <rect class="box" x="0" y="0" width="184" height="76"/>
+      <rect class="cornerL" x="0"  y="0" width="40"  height="76"/>
+      <rect class="cornerR" x="64" y="0" width="120" height="76"/>
+      <rect class="band"    x="40" y="0" width="24"  height="76"/>
+      <line class="mid" x1="92" y1="-6" x2="92" y2="82"/>
+      <text class="cRose xs" x="97" y="14">centre</text>
+      <text class="cRose xs" x="97" y="70">inside the corner</text>
+    </g>
+    <text class="m xs" x="0" y="140">The renderer splits some of its own work at the</text>
+    <text class="m xs" x="0" y="156">component centre. Here that line lands inside a</text>
+    <text class="m xs" x="0" y="172">corner — a seam the reconstruction would copy.</text>
+  </g>
+
+  <!-- ============ 3 : symmetric ============ -->
+  <g transform="translate(620,82)">
+    <text class="cTeal h" x="0" y="0">✓  what is actually used</text>
+    <text class="m xs" x="0" y="18">2 × max(left, right) + band  =  2 × 60 + 12</text>
+    <g transform="translate(0,34)">
+      <rect class="box" x="0" y="0" width="264" height="76"/>
+      <rect class="cornerL" x="0"   y="0" width="120" height="76"/>
+      <rect class="cornerR" x="144" y="0" width="120" height="76"/>
+      <rect class="band"    x="120" y="0" width="24"  height="76"/>
+      <line class="mid" x1="132" y1="-6" x2="132" y2="82"/>
+      <text class="cRose xs" x="137" y="14">centre</text>
+      <text class="cTeal xs" x="137" y="70">inside the band</text>
+    </g>
+    <text class="m xs" x="0" y="140">Symmetric, so the centre line always falls into</text>
+    <text class="m xs" x="0" y="156">the free band. A few wasted pixels buy pixel</text>
+    <text class="m xs" x="0" y="172">identity with a real rendering of any size.</text>
+  </g>
+
+  <line class="sEdge" x1="12" y1="278" x2="888" y2="278"/>
+  <text class="mono m" x="12" y="298">inset  =  margin + base outline + border width + the larger adjacent corner arc + shadow reach  +  2 px of antialiasing slack</text>
+</svg>
