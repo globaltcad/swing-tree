@@ -51,15 +51,25 @@ public final class LinenShowcaseView extends JPanel
      *  then renders this view inside a SwingTree-managed window.
      */
     public static void main(String... args) {
+        UI.show("Linen — a SwingTree-backed Look and Feel", frame -> createView());
+        EventProcessor.DECOUPLED.join();
+    }
+
+    /**
+     *  Installs the {@link LinenLookAndFeel} and builds the showcase under the
+     *  {@link AccentSheet}, which is what {@link #main(String...)} shows. It exists so
+     *  that callers outside this package - the resize benchmark among them - can build
+     *  the very same view, since the style sheet it needs is not visible to them.
+     *
+     *  @return The showcase view, styled the way the application shows it.
+     */
+    public static JPanel createView() {
         try {
             UIManager.setLookAndFeel(new LinenLookAndFeel());
         } catch (Exception e) {
             throw new RuntimeException("Could not install LinenLookAndFeel", e);
         }
-        UI.show("Linen — a SwingTree-backed Look and Feel",
-            frame -> UI.use(new AccentSheet(), LinenShowcaseView::new)
-        );
-        EventProcessor.DECOUPLED.join();
+        return UI.use(new AccentSheet(), LinenShowcaseView::new);
     }
 
     public LinenShowcaseView() {
