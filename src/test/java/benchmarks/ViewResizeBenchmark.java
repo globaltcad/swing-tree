@@ -4,12 +4,22 @@ import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 import examples.almanack.mvi.AlmanackView;
 import examples.almanack.mvi.AlmanackViewModel;
+import examples.breathing.mvi.BreathingView;
+import examples.breathing.mvi.BreathingViewModel;
+import examples.budget.mvi.BudgetView;
+import examples.budget.mvi.BudgetViewModel;
 import examples.chat.mvi.ChatView;
 import examples.chat.mvi.ChatViewModel;
+import examples.laf.LinenShowcaseView;
 import examples.scribe.CelestialScribe;
 import examples.scribe.CosmosViewModel;
 import examples.sequencer.SequencerView;
 import examples.sequencer.SequencerViewModel;
+import examples.stylepicker.studio.LookSheet;
+import examples.stylepicker.studio.StyleStudioView;
+import examples.stylepicker.studio.StyleStudioViewModel;
+import examples.stylish.GlassUIView;
+import examples.stylish.SoftUIView;
 import examples.team.mvi.TeamView;
 import examples.trains.mvi.TrainStyle;
 import examples.trains.mvi.TrainsView;
@@ -62,7 +72,8 @@ import java.util.Map;
  *  <p>
  *  Which UI is measured is chosen with {@code -Dbenchmark.view=<name>}, where the name is one
  *  of {@code chat}, {@code sequencer}, {@code trains}, {@code team}, {@code scribe},
- *  {@code almanack}, {@code garden} - or {@code all}, or a comma separated list, which
+ *  {@code almanack}, {@code garden}, {@code glass}, {@code soft}, {@code linen},
+ *  {@code studio}, {@code budget}, {@code breathing} - or {@code all}, or a comma separated list, which
  *  measures several of them back to back and prints one comparison table at the end. That is
  *  the interesting mode when profiling, because a bottleneck that only one styling idiom
  *  triggers is indistinguishable from a universal one until a second UI disagrees.
@@ -124,6 +135,24 @@ public final class ViewResizeBenchmark
         GARDEN("garden", frame -> {
             FlatDarkLaf.setup();
             return new ThemeGardenView(frame::pack);
+        }),
+        GLASS("glass", frame -> {
+            FlatLightLaf.setup();
+            return new GlassUIView();
+        }),
+        SOFT("soft", frame -> new SoftUIView()),
+        LINEN("linen", frame -> LinenShowcaseView.createView()),
+        STUDIO("studio", frame -> {
+            FlatLightLaf.setup();
+            return new StyleStudioView(Var.of(StyleStudioViewModel.initial()), new LookSheet());
+        }),
+        BUDGET("budget", frame -> {
+            FlatLightLaf.setup();
+            return new BudgetView(Var.of(BudgetViewModel.initial()));
+        }),
+        BREATHING("breathing", frame -> {
+            FlatDarkLaf.setup();
+            return new BreathingView(Var.of(new BreathingViewModel()));
         });
 
         private final String name;
