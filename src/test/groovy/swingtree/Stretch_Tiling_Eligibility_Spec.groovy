@@ -519,43 +519,49 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
     }
 
-    def 'Per edge border colors tolerate resizing only with square corners.'()
+    def 'A rounded border with a color per edge resizes for free when its edges are equally thick.'()
     {
         reportInfo """
             When each border edge has its own color, the edges meet in diagonal
-            miter seams, like on a picture frame. With square corners those
-            seams live entirely inside the fixed corner regions. But when the
-            corners are *rounded*, the seams reach through the rounded arc
-            towards the component center, and their slope follows the component
-            aspect ratio — so the corner pixels themselves change with the
-            component size. Rounded per-edge-colored borders therefore keep
-            the classic behavior and re-render on resize, while square ones
-            resize for free.
+            miter seams, like on a picture frame. A seam between two *adjacent*
+            edges leaves the corner in a direction fixed by their two widths, so
+            it sits in the same place whatever the component's size, and the
+            corner can be copied from an exemplar.
+
+            The seams between two *opposite* edges do move with the size: the one
+            dividing the top from the bottom is a horizontal line, and it sits
+            proportionally further down the taller the component gets. That is
+            harmless while it stays clear of the corners, which it does whenever
+            the two widths it divides are equal, since then it runs across the
+            middle. Lopsided widths pull it towards the thinner edge, and a
+            thin enough edge lets it wander into a corner — at which point the
+            corners are no longer size independent and the style has to keep the
+            classic behavior of re-rendering on every size.
         """
-        given : 'Two buttons with per-edge border colors, one square, one rounded, both warmed up.'
-            var square  = buttonWith({ it.borderWidths(2, 3, 4, 5).borderColors("#8a1e1e", "#1e8a1e", "#1e1e8a", "#8a8a1e") })
-            var rounded = buttonWith({ it.borderWidths(2, 3, 4, 5).borderColors("#8a1e1e", "#1e8a1e", "#1e1e8a", "#8a8a1e").borderRadius(16) })
-            square.setSize(220, 160)
-            rounded.setSize(220, 160)
-            var squareExt  = ComponentExtension.from(square)
-            var roundedExt = ComponentExtension.from(rounded)
-            2.times { Utility.renderSingleComponent(square) }
-            2.times { Utility.renderSingleComponent(rounded) }
+        given : 'Two rounded buttons with per-edge border colors, one with even widths, one lopsided.'
+            var even     = buttonWith({ it.borderWidths(4, 4, 4, 4).borderColors("#8a1e1e", "#1e8a1e", "#1e1e8a", "#8a8a1e").borderRadius(16) })
+            var lopsided = buttonWith({ it.borderWidths(2, 3, 4, 5).borderColors("#8a1e1e", "#1e8a1e", "#1e1e8a", "#8a8a1e").borderRadius(16) })
+            even.setSize(220, 160)
+            lopsided.setSize(220, 160)
+            var evenExt     = ComponentExtension.from(even)
+            var lopsidedExt = ComponentExtension.from(lopsided)
+            2.times { Utility.renderSingleComponent(even) }
+            2.times { Utility.renderSingleComponent(lopsided) }
         expect : 'Both are cached and serving hits at their initial size.'
-            squareExt.cachedRendering(UI.Layer.BORDER).isNotEmpty()  && squareExt.cacheHitCount(UI.Layer.BORDER)  >= 1
-            roundedExt.cachedRendering(UI.Layer.BORDER).isNotEmpty() && roundedExt.cacheHitCount(UI.Layer.BORDER) >= 1
+            evenExt.cachedRendering(UI.Layer.BORDER).isNotEmpty()     && evenExt.cacheHitCount(UI.Layer.BORDER)     >= 1
+            lopsidedExt.cachedRendering(UI.Layer.BORDER).isNotEmpty() && lopsidedExt.cacheHitCount(UI.Layer.BORDER) >= 1
 
         when : 'Both buttons are resized and painted again.'
-            int squareMisses  = squareExt.cacheMissCount(UI.Layer.BORDER)
-            int roundedMisses = roundedExt.cacheMissCount(UI.Layer.BORDER)
-            square.setSize(420, 240)
-            rounded.setSize(420, 240)
-            Utility.renderSingleComponent(square)
-            Utility.renderSingleComponent(rounded)
-        then : 'The square cornered button was reconstructed from the cache...'
-            squareExt.cacheMissCount(UI.Layer.BORDER) == squareMisses
-        and : '...while the rounded one needed a fresh rendering.'
-            roundedExt.cacheMissCount(UI.Layer.BORDER) > roundedMisses
+            int evenMisses     = evenExt.cacheMissCount(UI.Layer.BORDER)
+            int lopsidedMisses = lopsidedExt.cacheMissCount(UI.Layer.BORDER)
+            even.setSize(420, 240)
+            lopsided.setSize(420, 240)
+            Utility.renderSingleComponent(even)
+            Utility.renderSingleComponent(lopsided)
+        then : 'The evenly bordered button was reconstructed from the cache...'
+            evenExt.cacheMissCount(UI.Layer.BORDER) == evenMisses
+        and : '...while the lopsided one needed a fresh rendering.'
+            lopsidedExt.cacheMissCount(UI.Layer.BORDER) > lopsidedMisses
     }
 
     def 'Small components keep the classic exact size caching until they grow large enough.'()
@@ -685,6 +691,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             "uniformly colored rounded border"             | UI.Layer.BORDER     | "compressed atlas" | { it.border(3, "#17385d").borderRadius(14) }
             "per-edge border widths, one color, rounded"   | UI.Layer.BORDER     | "compressed atlas" | { it.borderWidths(1, 2, 3, 4).borderColor("#0f2f4f").borderRadius(12) }
             "per-edge border colors, square corners"       | UI.Layer.BORDER     | "compressed atlas" | { it.borderWidths(2, 2, 2, 2).borderColors("#7a2020", "#207a20", "#20207a", "#7a7a20") }
+            "per-edge border colors, rounded, even widths" | UI.Layer.BORDER     | "compressed atlas" | { it.borderWidths(3, 3, 3, 3).borderColors("#7a2020", "#207a20", "#20207a", "#7a7a20").borderRadius(16) }
             "an outset drop shadow"                        | UI.Layer.CONTENT    | "compressed atlas" | { it.shadowColor("#0a0a14").shadowBlurRadius(6).shadowSpreadRadius(2).borderRadius(12) }
             "an inset shadow"                              | UI.Layer.CONTENT    | "compressed atlas" | { it.shadowColor("#141414").shadowBlurRadius(5).shadowIsInset(true).borderRadius(10) }
             "an offset shadow"                             | UI.Layer.CONTENT    | "compressed atlas" | { it.shadowColor("#101018").shadowBlurRadius(4).shadowOffset(3, 5).borderRadius(8) }
@@ -705,7 +712,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             "a noise texture at a settled size"            | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(10).noise(n -> n.colors("#202020", "#dedede")) }
             "a background image"                           | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(10).image(img -> img.image(ICON)) }
             "styled text"                                  | UI.Layer.CONTENT    | "full size"        | { it.text(t -> t.content("Full size")) }
-            "per-edge border colors with rounded corners"  | UI.Layer.BORDER     | "full size"        | { it.borderWidths(2, 3, 4, 5).borderColors("#6a1010", "#106a10", "#10106a", "#6a6a10").borderRadius(16) }
+            "per-edge colors, rounded, lopsided widths"    | UI.Layer.BORDER     | "full size"        | { it.borderWidths(2, 3, 4, 5).borderColors("#6a1010", "#106a10", "#10106a", "#6a6a10").borderRadius(16) }
             "a rounded background poisoned by a gradient"  | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(16).backgroundColor("#0f4f2f").gradient(g -> g.colors("#903060", "#309060")) }
     }
 
