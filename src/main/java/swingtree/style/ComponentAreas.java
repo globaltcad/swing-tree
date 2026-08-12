@@ -7,8 +7,10 @@ import swingtree.layout.Size;
 import java.awt.*;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Area;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
+import java.util.Arrays;
 import java.util.Map;
 import java.util.WeakHashMap;
 
@@ -391,75 +393,114 @@ final class ComponentAreas
 
 
     /**
-     *  Calculates the border-edge areas of the components box model in the form of
-     *  an array of 4 {@link Area} objects, each representing the area of a single edge.
-     *  So the top, right, bottom and left edge areas are returned in that order.
+     *  Calculates the border-edge regions of the component's box model in the form of an array
+     *  of 4 {@link Area} objects, one per edge, in the order top, right, bottom and left.
+     *  Together they tile the margin box, so filling them with four different colors paints a
+     *  border whose color changes along a miter at each corner.
      *  <p>
-     *  Each area is essentially just a polygon which consists of 5 points,
-     *  two of which are the margin based border corners and the other three
-     *  are the inner border width based corners as well as a center point.
+     *  A point belongs to the edge which is closest to it <i>relative to that edge's own border
+     *  width</i>. This places every corner seam on the straight line running from the outer
+     *  corner of the margin box through the matching inner corner, which is where a mitered
+     *  corner joint belongs. For edges of equal width that line is the corner's diagonal, so a
+     *  box as wide as it is tall is divided into four triangles, whereas a box wider than it is
+     *  tall gets triangles at the left and right and trapeziums at the top and bottom.
+     *  <p>
+     *  Each such comparison of two scaled distances is cross multiplied into an affine
+     *  inequality, which stays well defined when a border width is zero and makes a region the
+     *  intersection of the margin box with three half planes.
+     *  <p>
+     *  The corner seams are therefore a function of the border widths alone and never of the
+     *  size of the component, which is what makes a corner look the same at every aspect ratio.
+     *  Only the two seams between opposite edges move with the size, and those lie within the
+     *  {@link UI.ComponentArea#INTERIOR}, which is not part of any border.
+     *  <p>
+     *  An edge of zero width is given an empty region and its neighbours reach across it.
      *
      * @param boxModel The box model of the component
      * @return An array of 4 {@link Area} objects representing the border-edge areas
      */
-    private static Area[] calculateEdgeBorderAreas( BoxModelConf boxModel) {
+    private static Area[] calculateEdgeBorderAreas( BoxModelConf boxModel ) {
         final Size    size   = boxModel.size();
         final Outline margin = boxModel.margin();
         final Outline widths = boxModel.widths();
-        final float   width  = size.widthOrElse(0f);
-        final float   height = size.heightOrElse(0f);
 
-        final float topLeftX     = margin.left().orElse(0f);
-        final float topLeftY     = margin.top().orElse(0f);
-        final float topRightX    = width - margin.right().orElse(0f);
-        final float topRightY    = topLeftY;
-        final float bottomLeftX  = topLeftX;
-        final float bottomLeftY  = height - margin.bottom().orElse(0f);
-        final float bottomRightX = topRightX;
-        final float bottomRightY = bottomLeftY;
+        final double boxLeft   = Math.max(margin.left().orElse(0f), 0f);
+        final double boxTop    = Math.max(margin.top().orElse(0f),  0f);
+        final double boxWidth  = size.widthOrElse(0f)  - boxLeft - Math.max(margin.right().orElse(0f),  0f);
+        final double boxHeight = size.heightOrElse(0f) - boxTop  - Math.max(margin.bottom().orElse(0f), 0f);
 
-        final float innerTopLeftX     = topLeftX + widths.left().orElse(0f);
-        final float innerTopLeftY     = topLeftY + widths.top().orElse(0f);
-        final float innerTopRightX    = topRightX - widths.right().orElse(0f);
-        final float innerTopRightY    = innerTopLeftY;
-        final float innerBottomLeftX  = bottomLeftX + widths.left().orElse(0f);
-        final float innerBottomLeftY  = bottomLeftY - widths.bottom().orElse(0f);
-        final float innerBottomRightX = bottomRightX - widths.right().orElse(0f);
-        final float innerBottomRightY = innerBottomLeftY;
-
-        final float innerCenterX = (innerTopLeftX + innerTopRightX) / 2f;
-        final float innerCenterY = (innerTopLeftY + innerBottomLeftY) / 2f;
-
-        Area[] edgeAreas = new Area[4];
-        { // TOP:
-            edgeAreas[0] = new Area(new Polygon(
-                new int[] {(int)innerCenterX, (int)innerTopLeftX, (int)topLeftX, (int)topRightX, (int)innerTopRightX},
-                new int[] {(int)innerCenterY, (int)innerTopLeftY, (int)topLeftY, (int)topRightY, (int)innerTopRightY},
-                5
-            ));
+        final Area[] edgeAreas = new Area[4];
+        if ( boxWidth <= 0 || boxHeight <= 0 ) {
+            for ( int edge = 0; edge < 4; edge++ )
+                edgeAreas[edge] = new Area();
+            return edgeAreas;
         }
-        { // RIGHT:
-            edgeAreas[1] = new Area(new Polygon(
-                new int[] {(int)innerCenterX, (int)innerTopRightX, (int)topRightX, (int)bottomRightX, (int)innerBottomRightX},
-                new int[] {(int)innerCenterY, (int)innerTopRightY, (int)topRightY, (int)bottomRightY, (int)innerBottomRightY},
-                5
-            ));
-        }
-        { // BOTTOM:
-            edgeAreas[2] = new Area(new Polygon(
-                new int[] {(int)innerCenterX, (int)innerBottomRightX, (int)bottomRightX, (int)bottomLeftX, (int)innerBottomLeftX},
-                new int[] {(int)innerCenterY, (int)innerBottomRightY, (int)bottomRightY, (int)bottomLeftY, (int)innerBottomLeftY},
-                5
-            ));
-        }
-        { // LEFT:
-            edgeAreas[3] = new Area(new Polygon(
-                new int[] {(int)innerCenterX, (int)innerBottomLeftX, (int)bottomLeftX, (int)topLeftX, (int)innerTopLeftX},
-                new int[] {(int)innerCenterY, (int)innerBottomLeftY, (int)bottomLeftY, (int)topLeftY, (int)innerTopLeftY},
-                5
-            ));
+
+        final double[] edgeWidth = {
+                            Math.max(widths.top().orElse(0f),    0f),
+                            Math.max(widths.right().orElse(0f),  0f),
+                            Math.max(widths.bottom().orElse(0f), 0f),
+                            Math.max(widths.left().orElse(0f),   0f)
+                        };
+        final double[][] distanceToEdge = { // As affine {x, y, constant} coefficients:
+                            {  0,  1, 0         }, // top
+                            { -1,  0, boxWidth  }, // right
+                            {  0, -1, boxHeight }, // bottom
+                            {  1,  0, 0         }  // left
+                        };
+
+        for ( int edge = 0; edge < 4; edge++ ) {
+            double[] region = { 0, 0, boxWidth, 0, boxWidth, boxHeight, 0, boxHeight };
+            for ( int other = 0; other < 4 && region.length >= 6; other++ ) {
+                if ( other == edge )
+                    continue;
+                region = _clippedToHalfPlane(region,
+                            distanceToEdge[edge][0] * edgeWidth[other] - distanceToEdge[other][0] * edgeWidth[edge],
+                            distanceToEdge[edge][1] * edgeWidth[other] - distanceToEdge[other][1] * edgeWidth[edge],
+                            distanceToEdge[edge][2] * edgeWidth[other] - distanceToEdge[other][2] * edgeWidth[edge]
+                        );
+            }
+            edgeAreas[edge] = _areaOf(region, boxLeft, boxTop);
         }
         return edgeAreas;
+    }
+
+    /**
+     *  Clips a convex polygon, given as alternating x and y coordinates, against the half plane
+     *  {@code a * x + b * y + c <= 0}, and returns the remaining polygon in the same form.
+     *  A polygon of fewer than three points is empty.
+     */
+    private static double[] _clippedToHalfPlane( final double[] polygon, final double a, final double b, final double c ) {
+        final double[] clipped = new double[polygon.length + 2];
+        int size = 0;
+        for ( int point = 0; point < polygon.length; point += 2 ) {
+            final int next = ( point + 2 ) % polygon.length;
+            final double x = polygon[point], y = polygon[point+1];
+            final double nextX = polygon[next], nextY = polygon[next+1];
+            final double side     = a * x     + b * y     + c;
+            final double nextSide = a * nextX + b * nextY + c;
+            if ( side <= 0 ) {
+                clipped[size++] = x;
+                clipped[size++] = y;
+            }
+            if ( ( side < 0 && nextSide > 0 ) || ( side > 0 && nextSide < 0 ) ) {
+                final double crossing = side / ( side - nextSide );
+                clipped[size++] = x + crossing * ( nextX - x );
+                clipped[size++] = y + crossing * ( nextY - y );
+            }
+        }
+        return Arrays.copyOf(clipped, size);
+    }
+
+    private static Area _areaOf( final double[] polygon, final double offsetX, final double offsetY ) {
+        if ( polygon.length < 6 )
+            return new Area();
+        final Path2D.Double path = new Path2D.Double();
+        path.moveTo(offsetX + polygon[0], offsetY + polygon[1]);
+        for ( int point = 2; point < polygon.length; point += 2 )
+            path.lineTo(offsetX + polygon[point], offsetY + polygon[point+1]);
+        path.closePath();
+        return new Area(path);
     }
 
 }

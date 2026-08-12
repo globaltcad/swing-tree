@@ -4140,21 +4140,21 @@ class Individual_Component_Styling_Spec extends Specification
     {
         reportInfo """
                 The border of a SwingTree style consists of four parts:
-                the top, right, bottom, and left sides, which are divided cleanily
-                by the diagonal lines of the rectengular bounds of a component.
-                Each of these sides can have a different color  
-                and thickness.
+                the top, right, bottom, and left sides, each of which can have
+                a different color and thickness.
+                Where two of them meet, they are divided by a miter, which is the
+                straight line running from the outer corner of the component
+                to the inner corner where the two sides end.
                 <br>
-                In this example we style a `JBox` type to with a border that 
+                In this example we style a `JBox` type to with a border that
                 has thick border and different colors on each side.
-                
+
                 ${Utility.linkSnapshot('components/thick-border-with-different-colors.png')}
 
                 As you can see, the border of the `JBox` type has a different color
                 on each side and a thickness of 6-12 pixels.
-                Note that they are almost triangular in shape, 
-                which is due to the diagonal shreshold lines of the 
-                rectangular bounds of the component.
+                Note how the miters lean towards the thinner of the two sides they
+                divide, so that a thick side is given the larger share of the corner.
             """
         given : """
             We first set a scaling factor to simulate a platform with higher DPI.
