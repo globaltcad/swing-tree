@@ -126,7 +126,7 @@ final class StyleRenderer
      *          why that is checked before filling it in one go, without antialiasing.</li>
      *      <li>A {@link RoundRectangle2D} curves only inside its four corner boxes, so it is
      *          filled as antialiasing-free bands plus antialiased corners.
-     *          See {@link #_fillRoundRectangleInParts}.</li>
+     *          See {@link #_fillRoundRectangleInPartsFast}.</li>
      *  </ul>
      *  Anything else, like a fractional {@link Rectangle2D} or a rotated transform, keeps
      *  antialiasing and is filled exactly as it always was.
@@ -142,7 +142,7 @@ final class StyleRenderer
             _fillWithoutAntialiasing(g2d, shape);
             return;
         }
-        if ( shape instanceof RoundRectangle2D && _fillRoundRectangleInParts(g2d, (RoundRectangle2D) shape, transform) )
+        if ( shape instanceof RoundRectangle2D && _fillRoundRectangleInPartsFast(g2d, (RoundRectangle2D) shape, transform) )
             return;
 
         g2d.fill(shape);
@@ -150,8 +150,6 @@ final class StyleRenderer
 
     /**
      *  Fills the given shapes with antialiasing switched off and then switches it back on.
-     *  The caller is responsible for establishing that it was on to begin with and that
-     *  these particular shapes do not need it, see {@link #_fillShapeFast}.
      */
     private static void _fillWithoutAntialiasing( final Graphics2D g2d, final Shape... shapes ) {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
@@ -164,25 +162,13 @@ final class StyleRenderer
     }
 
     /**
-     *  Fills a rounded rectangle as three antialiasing-free bands plus four antialiased
-     *  corners, and reports whether it could.
-     *  <p>
-     *  A rounded rectangle curves only inside its four corner boxes. Everything between them is
-     *  an axis aligned rectangle whose pixels are <i>fully</i> covered, so antialiasing has
-     *  nothing to smooth there and yields the same pixels either way, just far more slowly
-     *  (for the reason given in {@link #_fillShapeFast}). The bands and the corner boxes tile the
-     *  shape's bounding box without overlapping, which is what lets the parts add up to the
-     *  whole instead of blending twice along their seams.
-     *  <p>
-     *  All of this is laid out in <i>user</i> space, because that is where the {@link Paint} is
-     *  anchored and drawing the parts under any other transform would slide the gradient
-     *  underneath them. The cut lines therefore have to already land on whole device pixels
-     *  instead of being rounded onto them, and if they do not, we simply hand the shape back
-     *  to be filled undivided.
+     *  Tries to fill a rounded rectangle as three antialiasing-free bands plus four antialiased
+     *  corners, and reports whether it succeeded or not. The rounded corners is rendered with
+     *  antialiasing turned on (see {@link #_fillShapeFast}).
      *
      * @return {@code true} when the shape was filled, {@code false} when the caller must fill it.
      */
-    private static boolean _fillRoundRectangleInParts(
+    private static boolean _fillRoundRectangleInPartsFast(
         final Graphics2D       g2d,
         final RoundRectangle2D round,
         final AffineTransform  transform
