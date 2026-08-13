@@ -44,13 +44,12 @@ import java.util.function.BiConsumer;
  *  The reconstruction is exact, not an approximation, but it rests on an invariant: <b>the body
  *  must be homogeneous, and each edge must be homogeneous along its own axis</b>. Flat
  *  background/foundation fills, borders and shadows satisfy it. Gradients, noises, images, texts
- *  and custom painters do not (their pixels depend on the full component bounds), and neither do
- *  per-edge border colors combined with corner arcs (the diagonal color seam between two
- *  differently colored edges runs towards the component center, so inside a rounded corner its
- *  slope - and thereby the corner pixels - depends on the component aspect ratio). The
- *  eligibility check must stay conservative, because an over-eager rule produces subtly wrong
- *  pixels, not a crash. Ineligible or too small configurations keep the classic exact-size key
- *  and behave exactly as they did before stretch tiling existed. <br>
+ *  and custom painters do not, their pixels depending on the full component bounds. A border
+ *  with a different color per edge satisfies it as long as its miters land in the same place at
+ *  every size, which {@link #_borderEdgeSeamsAreSizeIndependent} decides. The eligibility check
+ *  must stay conservative, because an over-eager rule produces subtly wrong pixels, not a crash.
+ *  Ineligible or too small configurations keep the classic exact-size key and behave exactly as
+ *  they did before stretch tiling existed. <br>
  *  <br>
  *  Two related configurations are therefore managed here, and telling them apart is essential
  *  for understanding this class:
@@ -395,6 +394,10 @@ final class LayerPartitionCache
 
         final Outline sliceInsets = _sliceInsets(conf);
         final Size    canonical   = _canonicalSize(sliceInsets);
+
+        if ( !_borderEdgeSeamsAreSizeIndependent(conf, sliceInsets, canonical) )
+            return conf;
+
         final Size    actual      = conf.boxModel().size();
 
         final boolean strictlyLarger =
@@ -436,14 +439,53 @@ final class LayerPartitionCache
             if ( !painter.equals(PainterConf.none()) )
                 return false; // We cannot know what a custom painter does.
 
-        // Shadows and flat base/border colors are eligible, except for the
-        // per-edge border color seam inside rounded corners (see class javadoc):
-        final BorderColorsConf borderColors = conf.baseColors().borderColor();
-        if ( !borderColors.equals(BorderColorsConf.none()) && !borderColors.isHomogeneous() )
-            if ( conf.boxModel().hasAnyNonZeroArcs() )
-                return false;
-
         return true;
+    }
+
+    /**
+     *  Whether the seams of a border with a different color per edge fall in the same place in
+     *  the exemplar as they do at any larger size, which is what lets such a border be
+     *  reconstructed from an exemplar rather than re-rendered per size. <br>
+     *  <br>
+     *  Note that the border edges divide the <i>margin box</i> rather than the component: the
+     *  seams are placed within, and the slice insets measured from, two different origins, so the
+     *  margins have to be taken out of both before they can be compared.
+     * @see ComponentAreas#getEdgeAreas() For more context related code...
+     */
+    private static boolean _borderEdgeSeamsAreSizeIndependent(
+        LayerRenderConf conf,
+        Outline         sliceInsets,
+        Size            exemplar
+    ) {
+        final BorderColorsConf borderColors = conf.baseColors().borderColor();
+        if ( borderColors.equals(BorderColorsConf.none()) || borderColors.isHomogeneous() )
+            return true;
+        if ( !conf.boxModel().hasAnyNonZeroArcs() )
+            return true;
+
+        final Outline widths = conf.boxModel().widths();
+        final float   top    = _positive(widths.top());
+        final float   right  = _positive(widths.right());
+        final float   bottom = _positive(widths.bottom());
+        final float   left   = _positive(widths.left());
+        if ( top <= 0 || right <= 0 || bottom <= 0 || left <= 0 )
+            return false;
+
+        final Outline margin       = conf.boxModel().margin();
+        final float   marginTop    = _positive(margin.top());
+        final float   marginRight  = _positive(margin.right());
+        final float   marginBottom = _positive(margin.bottom());
+        final float   marginLeft   = _positive(margin.left());
+
+        final float boxWidth  = exemplar.widthOrElse(0f)  - marginLeft - marginRight;
+        final float boxHeight = exemplar.heightOrElse(0f) - marginTop  - marginBottom;
+        if ( boxWidth <= 0 || boxHeight <= 0 )
+            return false;
+
+        return boxHeight * top    > ( _positive(sliceInsets.top())    - marginTop    ) * ( top  + bottom )
+            && boxHeight * bottom > ( _positive(sliceInsets.bottom()) - marginBottom ) * ( top  + bottom )
+            && boxWidth  * left   > ( _positive(sliceInsets.left())   - marginLeft   ) * ( left + right  )
+            && boxWidth  * right  > ( _positive(sliceInsets.right())  - marginRight  ) * ( left + right  );
     }
 
     /**
@@ -511,10 +553,11 @@ final class LayerPartitionCache
 
     /**
      *  The exemplar size for the supplied slice insets: {@code 2 * max(insetA, insetB) + band}
-     *  per axis. Symmetric, because some rendering internals (corner shadow clip boxes and
-     *  border edge polygons) split their work at the component <i>center</i> - the symmetric
-     *  size guarantees the exemplar's center line falls into the repeating band, keeping those
-     *  artifacts pixel-identical to a real rendering of any larger size.
+     *  per axis. Symmetric, because some rendering internals split their work at the component
+     *  <i>center</i> - corner shadow clip boxes meet there, and so do the seams between two
+     *  opposite border edges. The symmetric size guarantees the exemplar's center line falls
+     *  into the repeating band, keeping those artifacts pixel-identical to a real rendering of
+     *  any larger size.
      */
     private static Size _canonicalSize( Outline sliceInsets ) {
         final float maxHorizontal = Math.max(sliceInsets.left().orElse(0f), sliceInsets.right().orElse(0f));

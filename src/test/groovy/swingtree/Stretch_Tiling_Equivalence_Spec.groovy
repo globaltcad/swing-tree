@@ -147,6 +147,11 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
                                                                                                      .borderRadiusAt(UI.Corner.BOTTOM_RIGHT, 24, 24) }
             "uniformly colored rounded border"          | UI.Layer.BORDER     | 400   | 100    | { it.border(3, "#202430").borderRadius(16) }
             "per-edge border colors, square corners"    | UI.Layer.BORDER     | 300   | 150    | { it.borderWidths(1, 2, 3, 4).borderColors("#a03030", "#30a030", "#3030a0", "#a0a030") }
+            "per-edge border colors, rounded, wide"     | UI.Layer.BORDER     | 480   | 140    | { it.borderWidths(4, 4, 4, 4).borderColors("#a03030", "#30a030", "#3030a0", "#a0a030").borderRadius(20) }
+            "per-edge border colors, rounded, tall"     | UI.Layer.BORDER     | 140   | 480    | { it.borderWidths(4, 4, 4, 4).borderColors("#a03030", "#30a030", "#3030a0", "#a0a030").borderRadius(20) }
+            "per-edge colors, rounded, thin and round"  | UI.Layer.BORDER     | 520   | 180    | { it.borderWidths(2, 2, 2, 2).borderColors("#a03030", "#30a030", "#3030a0", "#a0a030").borderRadius(48) }
+            "per-edge colors, rounded, margined"        | UI.Layer.BORDER     | 420   | 200    | { it.margin(10).borderWidths(12, 4, 10, 4).borderColors("#a03030", "#30a030", "#3030a0", "#a0a030").borderRadius(8) }
+            "per-edge colors, rounded, side margins"    | UI.Layer.BORDER     | 420   | 200    | { it.margin(2, 8, 2, 8).borderWidths(4, 4, 4, 4).borderColors("#a03030", "#30a030", "#3030a0", "#a0a030").borderRadius(12) }
             "outset drop shadow with offset"            | UI.Layer.CONTENT    | 350   | 120    | { it.shadowColor("#101010").shadowBlurRadius(6).shadowSpreadRadius(2).shadowOffset(2, 3).borderRadius(12) }
             "inset shadow"                              | UI.Layer.CONTENT    | 350   | 120    | { it.shadowColor("#242424").shadowBlurRadius(4).shadowIsInset(true).borderRadius(10) }
             "two named shadows, one in, one out"        | UI.Layer.CONTENT    | 320   | 300    | { it.borderRadius(14)
