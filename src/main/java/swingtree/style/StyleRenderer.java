@@ -31,14 +31,6 @@ final class StyleRenderer
 {
     /**
      *  The smallest area, in device pixels, for which splitting a rounded fill into parts pays.
-     *  <p>
-     *  The split trades one fill for seven, so it only wins once the interior it keeps out of
-     *  the antialiasing pipe is worth more than six extra fill invocations. Above this
-     *  threshold a gradient fill was measured 3x to 10x faster on an accelerated surface,
-     *  growing with the area; below it the two strategies are indistinguishable, and the
-     *  measurements themselves stop being repeatable. So the threshold deliberately sits above
-     *  the noise floor rather than at the apparent crossover.
-     *  See {@code benchmarks.RoundedGradientBenchmark}.
      */
     private static final int SMALLEST_AREA_WORTH_SPLITTING = 32768; // device pixels
 
@@ -124,16 +116,8 @@ final class StyleRenderer
     }
 
     /**
-     *  Fills a shape, with antialiasing switched off over every part of it that provably has
-     *  no partially covered pixels for antialiasing to smooth.
-     *  <p>
-     *  This matters a great deal, because antialiasing is not just a per-pixel cost: it makes
-     *  {@code Graphics2D.fill(..)} rasterize a coverage mask for the whole shape in software
-     *  before compositing anything, <i>even when the destination is hardware accelerated</i>
-     *  (on X11 for example the {@link Paint} is only ever handed to the X server when
-     *  antialiasing is off). For a style layer covering a maximized window that is millions of
-     *  mask pixels per fill, on every frame of a live resize, and nearly all of them come out
-     *  fully opaque anyway.
+     *  Fills a shape as fast as possible, by switching antialiasing off over every part of it that provably has
+     *  no non-axis aligned outline (for rounded corners for example we cannot tun off antialiasing).
      *  <p>
      *  So two kinds of shape get a faster treatment here:
      *  <ul>
@@ -145,9 +129,7 @@ final class StyleRenderer
      *          See {@link #_fillRoundRectangleInParts}.</li>
      *  </ul>
      *  Anything else, like a fractional {@link Rectangle2D} or a rotated transform, keeps
-     *  antialiasing and is filled exactly as it always was. Note that every precondition is
-     *  checked rather than assumed, because being too eager here yields subtly wrong pixels
-     *  instead of an error.
+     *  antialiasing and is filled exactly as it always was.
      */
     private static void _fillShape( final Graphics2D g2d, final Shape shape ) {
         if ( !RenderingHints.VALUE_ANTIALIAS_ON.equals(g2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING)) ) {
