@@ -443,9 +443,14 @@ final class LayerPartitionCache
     }
 
     /**
-     *  Whether the miters of a border with a different color per edge fall in the same place in
+     *  Whether the seams of a border with a different color per edge fall in the same place in
      *  the exemplar as they do at any larger size, which is what lets such a border be
-     *  reconstructed from an exemplar rather than re-rendered per size.
+     *  reconstructed from an exemplar rather than re-rendered per size. <br>
+     *  <br>
+     *  Note that the border edges divide the <i>margin box</i> rather than the component: the
+     *  seams are placed within, and the slice insets measured from, two different origins, so the
+     *  margins have to be taken out of both before they can be compared.
+     * @see ComponentAreas#getEdgeAreas() For more context related code...
      */
     private static boolean _borderEdgeSeamsAreSizeIndependent(
         LayerRenderConf conf,
@@ -466,13 +471,21 @@ final class LayerPartitionCache
         if ( top <= 0 || right <= 0 || bottom <= 0 || left <= 0 )
             return false;
 
-        final float exemplarWidth  = exemplar.widthOrElse(0f);
-        final float exemplarHeight = exemplar.heightOrElse(0f);
+        final Outline margin       = conf.boxModel().margin();
+        final float   marginTop    = _positive(margin.top());
+        final float   marginRight  = _positive(margin.right());
+        final float   marginBottom = _positive(margin.bottom());
+        final float   marginLeft   = _positive(margin.left());
 
-        return exemplarHeight * top    > _positive(sliceInsets.top())    * ( top  + bottom )
-            && exemplarHeight * bottom > _positive(sliceInsets.bottom()) * ( top  + bottom )
-            && exemplarWidth  * left   > _positive(sliceInsets.left())   * ( left + right  )
-            && exemplarWidth  * right  > _positive(sliceInsets.right())  * ( left + right  );
+        final float boxWidth  = exemplar.widthOrElse(0f)  - marginLeft - marginRight;
+        final float boxHeight = exemplar.heightOrElse(0f) - marginTop  - marginBottom;
+        if ( boxWidth <= 0 || boxHeight <= 0 )
+            return false;
+
+        return boxHeight * top    > ( _positive(sliceInsets.top())    - marginTop    ) * ( top  + bottom )
+            && boxHeight * bottom > ( _positive(sliceInsets.bottom()) - marginBottom ) * ( top  + bottom )
+            && boxWidth  * left   > ( _positive(sliceInsets.left())   - marginLeft   ) * ( left + right  )
+            && boxWidth  * right  > ( _positive(sliceInsets.right())  - marginRight  ) * ( left + right  );
     }
 
     /**
