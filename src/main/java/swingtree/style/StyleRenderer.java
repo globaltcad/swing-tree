@@ -131,7 +131,7 @@ final class StyleRenderer
      *  Anything else, like a fractional {@link Rectangle2D} or a rotated transform, keeps
      *  antialiasing and is filled exactly as it always was.
      */
-    private static void _fillShape( final Graphics2D g2d, final Shape shape ) {
+    private static void _fillShapeFast( final Graphics2D g2d, final Shape shape ) {
         if ( !RenderingHints.VALUE_ANTIALIAS_ON.equals(g2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING)) ) {
             g2d.fill(shape); // Nothing to gain, antialiasing is already off.
             return;
@@ -151,7 +151,7 @@ final class StyleRenderer
     /**
      *  Fills the given shapes with antialiasing switched off and then switches it back on.
      *  The caller is responsible for establishing that it was on to begin with and that
-     *  these particular shapes do not need it, see {@link #_fillShape}.
+     *  these particular shapes do not need it, see {@link #_fillShapeFast}.
      */
     private static void _fillWithoutAntialiasing( final Graphics2D g2d, final Shape... shapes ) {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
@@ -170,7 +170,7 @@ final class StyleRenderer
      *  A rounded rectangle curves only inside its four corner boxes. Everything between them is
      *  an axis aligned rectangle whose pixels are <i>fully</i> covered, so antialiasing has
      *  nothing to smooth there and yields the same pixels either way, just far more slowly
-     *  (for the reason given in {@link #_fillShape}). The bands and the corner boxes tile the
+     *  (for the reason given in {@link #_fillShapeFast}). The bands and the corner boxes tile the
      *  shape's bounding box without overlapping, which is what lets the parts add up to the
      *  whole instead of blending twice along their seams.
      *  <p>
@@ -281,18 +281,18 @@ final class StyleRenderer
             Shape bodyArea = conf.areas().get(UI.ComponentArea.BODY);
             if ( !StyleUtil.shapesAreEqual(fullArea, bodyArea) ) {
                 g2d.setColor(foundationColor);
-                _fillShape(g2d, fullArea); // Filling everything is a bit cheaper than UI.ComponentArea.EXTERIOR!
+                _fillShapeFast(g2d, fullArea); // Filling everything is a bit cheaper than UI.ComponentArea.EXTERIOR!
             }
             g2d.setColor(backgroundColor);
-            _fillShape(g2d, bodyArea);
+            _fillShapeFast(g2d, bodyArea);
         } else {
             if ( foundationColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
                 g2d.setColor(foundationColor);
-                _fillShape(g2d, conf.areas().get(UI.ComponentArea.EXTERIOR));
+                _fillShapeFast(g2d, conf.areas().get(UI.ComponentArea.EXTERIOR));
             }
             if ( backgroundColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
                 g2d.setColor(backgroundColor);
-                _fillShape(g2d, conf.areas().get(UI.ComponentArea.BODY));
+                _fillShapeFast(g2d, conf.areas().get(UI.ComponentArea.BODY));
             }
         }
     }
@@ -311,7 +311,7 @@ final class StyleRenderer
                 Objects.requireNonNull(borderArea);
                 if ( colors.isHomogeneous() ) {
                     g2d.setColor(colors.bottom().orElse(UI.Color.BLACK));
-                    _fillShape(g2d, borderArea);
+                    _fillShapeFast(g2d, borderArea);
                 } else {
                     // The border area clipped to each edge region. These intersections are a pure
                     // function of the (immutable) box model, so they are computed once and cached in
@@ -922,14 +922,14 @@ final class StyleRenderer
     ) {
         if ( gradient.colors().length == 1 ) {
             g2d.setColor(gradient.colors()[0]);
-            _fillShape(g2d, conf.areas().get(gradient.area()));
+            _fillShapeFast(g2d, conf.areas().get(gradient.area()));
         }
         else {
             final Paint paint = _createGradientPaint(conf.boxModel(), gradient);
             if ( paint != null ) {
                 Shape areaToFill = conf.areas().get(gradient.area());
                 g2d.setPaint(paint);
-                _fillShape(g2d, areaToFill);
+                _fillShapeFast(g2d, areaToFill);
             }
         }
     }
@@ -1408,7 +1408,7 @@ final class StyleRenderer
     ) {
         if ( style.primer().isPresent() ) {
             g2d.setColor(style.primer().get());
-            _fillShape(g2d, conf.areas().get(style.clipArea()));
+            _fillShapeFast(g2d, conf.areas().get(style.clipArea()));
         }
 
         style.image().ifPresent( imageIcon -> {
@@ -1547,7 +1547,7 @@ final class StyleRenderer
                         Paint oldPaint = g2d.getPaint();
                         try {
                             g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));
-                            _fillShape(g2d, conf.areas().get(UI.ComponentArea.BODY));
+                            _fillShapeFast(g2d, conf.areas().get(UI.ComponentArea.BODY));
                         } finally {
                             g2d.setPaint(oldPaint);
                         }
@@ -2047,7 +2047,7 @@ final class StyleRenderer
             final Color[] colors = noise.get().colors();
             if ( colors.length == 1 ) {
                 g2d.setPaint(colors[0]);
-                _fillShape(g2d, areaToFill);
+                _fillShapeFast(g2d, areaToFill);
                 return;
             }
 
@@ -2062,7 +2062,7 @@ final class StyleRenderer
             if ( !usesLargeTiles(bounds) ) {
                 // Small area (or tile caching disabled): the per-pixel Paint pipeline is fine here.
                 g2d.setPaint(getCachedNoisePaint(center, noise));
-                _fillShape(g2d, areaToFill);
+                _fillShapeFast(g2d, areaToFill);
             } else {
                 // Large area: blit pre-rendered large tiles to dodge the 32x32 Paint pipeline.
                 _renderWithLargeTiles(center, noise, areaToFill, bounds, g2d);
