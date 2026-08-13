@@ -537,6 +537,11 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             thin enough edge lets it wander into a corner — at which point the
             corners are no longer size independent and the style has to keep the
             classic behavior of re-rendering on every size.
+
+            "The middle" here means the middle of the box the border encloses,
+            not of the component: a margin holds the border away from the
+            component's edges, so it is the margin box the seams divide, and a
+            margin moves them along with it.
         """
         given : 'Two rounded buttons with per-edge border colors, one with even widths, one lopsided.'
             var even     = buttonWith({ it.borderWidths(4, 4, 4, 4).borderColors("#8a1e1e", "#1e8a1e", "#1e1e8a", "#8a8a1e").borderRadius(16) })
@@ -692,6 +697,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             "per-edge border widths, one color, rounded"   | UI.Layer.BORDER     | "compressed atlas" | { it.borderWidths(1, 2, 3, 4).borderColor("#0f2f4f").borderRadius(12) }
             "per-edge border colors, square corners"       | UI.Layer.BORDER     | "compressed atlas" | { it.borderWidths(2, 2, 2, 2).borderColors("#7a2020", "#207a20", "#20207a", "#7a7a20") }
             "per-edge border colors, rounded, even widths" | UI.Layer.BORDER     | "compressed atlas" | { it.borderWidths(3, 3, 3, 3).borderColors("#7a2020", "#207a20", "#20207a", "#7a7a20").borderRadius(16) }
+            "per-edge border colors, rounded, margined"    | UI.Layer.BORDER     | "compressed atlas" | { it.margin(10).borderWidths(12, 4, 10, 4).borderColors("#7a2020", "#207a20", "#20207a", "#7a7a20").borderRadius(8) }
             "an outset drop shadow"                        | UI.Layer.CONTENT    | "compressed atlas" | { it.shadowColor("#0a0a14").shadowBlurRadius(6).shadowSpreadRadius(2).borderRadius(12) }
             "an inset shadow"                              | UI.Layer.CONTENT    | "compressed atlas" | { it.shadowColor("#141414").shadowBlurRadius(5).shadowIsInset(true).borderRadius(10) }
             "an offset shadow"                             | UI.Layer.CONTENT    | "compressed atlas" | { it.shadowColor("#101018").shadowBlurRadius(4).shadowOffset(3, 5).borderRadius(8) }
