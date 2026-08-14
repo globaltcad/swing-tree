@@ -100,7 +100,7 @@ final class StyleLayerCache
 
         if ( !CacheBudget.tilingEnabled() )
             return false;
-        if ( !StyleRenderer.allNoisesAreCheapToReplay(conf) )
+        if ( !StyleRenderer.allNoisesAreCheapToRepaint(conf) )
             return false; // Replaying this noise every paint would cost more than it saves.
         return _isWorthCuttingOut(LayerRenderConfPartitions.UNDER_NOISE.restrict(conf))
             && _isWorthCuttingOut(LayerRenderConfPartitions.OVER_NOISE.restrict(conf));

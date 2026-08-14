@@ -1053,14 +1053,14 @@ final class StyleRenderer
      *  paint - the condition {@link StyleLayerCache} needs before it may lift them out of the
      *  layer's cached image. <br>
      *  <br>
-     *  Cheap means one of the two things {@link NoisePaintCache#renderNoise} does that are not
-     *  a per-pixel rasterization: a handful of {@link NoisePaintCache#usesLargeTiles pre-rendered
-     *  tile blits}, or - for a noise of a single colour, which the renderer degenerates to a flat
-     *  fill before it ever considers tiles - one shape fill. Everything else goes through the
-     *  per-pixel {@link Paint} pipeline, which is fine once into a software image but ruinous
-     *  repeated straight onto an accelerated surface.
+     *  Cheap means {@link NoisePaintCache#renderNoise} does one of the following things:<br>
+     *  <ul>
+     *      <li>it does not draw any noise at all, because there is no {@link NoiseConf}</li>
+     *      <li>{@link NoisePaintCache#renderNoise} draws large noise tiles from a tile cache (see {@link NoisePaintCache#usesLargeTiles})</li>
+     *      <li>or it draws a noise of a single colour, which the renderer degenerates to a flat fill before it ever considers tiles</li>
+     *  </ul>
      */
-    static boolean allNoisesAreCheapToReplay( LayerRenderConf conf ) {
+    static boolean allNoisesAreCheapToRepaint(LayerRenderConf conf ) {
         for ( Pooled<NoiseConf> noise : conf.layer().noises().sortedByNames() ) {
             if ( noise.get().colors().length <= 1 )
                 continue; // Draws nothing, or a single flat fill - neither constrains anything.
@@ -2060,7 +2060,7 @@ final class StyleRenderer
          *  bounds: {@code true} for the pre-rendered tile blits, {@code false} for the per-pixel
          *  {@link Paint} pipeline. <br>
          *  <br>
-         *  {@link StyleLayerCache} asks through {@link #allNoisesAreCheapToReplay}, because it
+         *  {@link StyleLayerCache} asks through {@link #allNoisesAreCheapToRepaint}, because it
          *  may only lift a noise out of its layer's cached image when drawing it again is cheap:
          *  a tile blit is a handful of pixmap composites, whereas the {@link Paint} pipeline
          *  turns the same area into thousands of 32x32 mask compositions - fine into a software
