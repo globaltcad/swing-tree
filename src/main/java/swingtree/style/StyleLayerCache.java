@@ -55,8 +55,8 @@ final class StyleLayerCache
 
     void validate( ComponentConf newConf ) {
         final LayerRenderConf full = newConf.renderConfFor(_layer);
-        // Note that _isResizing() records the size and so must run on every validation:
-        final boolean isResizing = _isResizing(newConf.currentBounds().size());
+        _recordSize(newConf.currentBounds().size());
+        final boolean isResizing = _isResizing();
         final PartitioningPolicy policy = _partitioningPolicyFor(full, isResizing);
         if ( policy != _partitioningPolicy ) {
             _partitioningPolicy = policy;
@@ -85,12 +85,15 @@ final class StyleLayerCache
         return LayerPartitionCache.wouldBeAdmitted(_layer, underPainters);
     }
 
-    private boolean _isResizing( Size size ) {
-        if ( !size.equals(_lastSize) ) {
-            final boolean grewFromNothing = !_lastSize.hasPositiveWidth() || !_lastSize.hasPositiveHeight();
-            _lastSize         = size;
-            _paintsAtThisSize = grewFromNothing ? PAINTS_UNTIL_REJOINED : 0;
-        }
+    private void _recordSize( Size size ) {
+        if ( size.equals(_lastSize) )
+            return;
+        final boolean grewFromNothing = !_lastSize.hasPositiveWidth() || !_lastSize.hasPositiveHeight();
+        _lastSize         = size;
+        _paintsAtThisSize = grewFromNothing ? PAINTS_UNTIL_REJOINED : 0;
+    }
+
+    private boolean _isResizing() {
         return _paintsAtThisSize < PAINTS_UNTIL_REJOINED;
     }
 
@@ -101,7 +104,7 @@ final class StyleLayerCache
         if ( !CacheBudget.tilingEnabled() )
             return false;
         if ( !StyleRenderer.allNoisesAreCheapToRepaint(conf) )
-            return false; // Replaying this noise every paint would cost more than it saves.
+            return false; // Repainting this noise every paint would cost more than it saves.
         return _isWorthCuttingOut(LayerRenderConfPartition.UNDER_NOISE.restrict(conf))
             && _isWorthCuttingOut(LayerRenderConfPartition.OVER_NOISE.restrict(conf));
     }
@@ -155,8 +158,8 @@ final class StyleLayerCache
 
     /**
      *  The shapes a layer is cached in. Each one names the cached parts it consists of and the
-     *  piece (if any) which is instead replayed onto the destination after the first of them -
-     *  see {@link LayerRenderConfPartition} for why a layer is ever cut at all.
+     *  uncached piece (if any), which is instead rendered straight onto the destination after
+     *  the first of them - see {@link LayerRenderConfPartition} for why a layer is ever cut.
      */
     private enum PartitioningPolicy
     {
@@ -176,11 +179,11 @@ final class StyleLayerCache
         );
 
         private final Tuple<LayerRenderConfPartition>    _cachedParts;
-        private final @Nullable LayerRenderConfPartition _replayedPart;
+        private final @Nullable LayerRenderConfPartition _uncachedPart;
 
-        PartitioningPolicy( Tuple<LayerRenderConfPartition> cachedParts, @Nullable LayerRenderConfPartition replayedPart ) {
+        PartitioningPolicy( Tuple<LayerRenderConfPartition> cachedParts, @Nullable LayerRenderConfPartition uncachedPart ) {
             _cachedParts  = cachedParts;
-            _replayedPart = replayedPart;
+            _uncachedPart = uncachedPart;
         }
 
         LayerPartitionCache[] newPartsFor( UI.Layer layer ) {
@@ -191,7 +194,7 @@ final class StyleLayerCache
         }
 
         LayerRenderConf uncachedPartitionOf( LayerRenderConf full ) {
-            return ( _replayedPart == null ? LayerRenderConf.none() : _replayedPart.restrict(full) );
+            return ( _uncachedPart == null ? LayerRenderConf.none() : _uncachedPart.restrict(full) );
         }
     }
 
