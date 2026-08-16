@@ -10,7 +10,7 @@ import java.util.Comparator;
  *  can be "narrowed down" or "restricted" to a new {@link LayerRenderConf} instance.
  *  This narrowed down version of a layer render configuration can then be used to
  *  feed the different {@link LayerPartitionCache}s of a {@link StyleLayerCache}.
- *  The purpose of this is to created cached renderings from simplified style
+ *  The purpose of this is to create cached renderings from simplified style
  *  configurations in order to improve cache hit rate and robustness.<br>
  *  <br>
  *  <b>A style consists of, and is rendered in, the following order:</b>
@@ -37,7 +37,7 @@ enum LayerRenderConfPartitions
     UNDER_NOISE,
     /** The noises themselves, replayed on every paint rather than cached - which is cheap
      *  because the noise tile cache one level down keeps them in a size independent noise
-     *  space. {@link StyleLayerCache} never hands this part to a {@link LayerPartCache}. */
+     *  space. {@link StyleLayerCache} never hands this part to a {@link LayerPartitionCache}. */
     NOISES,
     /** Everything the renderer draws after the noises: shadows, texts and painters. */
     OVER_NOISE,
@@ -45,7 +45,7 @@ enum LayerRenderConfPartitions
      *  that can never be cached - see {@link #PAINTERS}. */
     UNDER_PAINTERS,
     /** The user painters, replayed straight onto the destination on every paint. Unlike
-     *  {@link #NOISES} this is not cheap - it is arbitrary user code  */
+     *  {@link #NOISES} this is not cheap - it is arbitrary user code. */
     PAINTERS;
 
     /**

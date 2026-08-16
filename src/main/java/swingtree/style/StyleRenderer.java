@@ -116,8 +116,9 @@ final class StyleRenderer
     }
 
     /**
-     *  Fills a shape as fast as possible, by switching antialiasing off over every part of it that provably has
-     *  no non-axis aligned outline (for rounded corners for example we cannot tun off antialiasing).
+     *  Fills a shape as fast as possible, by switching antialiasing off over every part of it that
+     *  provably has no non-axis aligned outline (over a rounded corner, for example, we cannot
+     *  turn antialiasing off).
      *  <p>
      *  So two kinds of shape get a faster treatment here:
      *  <ul>
@@ -163,8 +164,7 @@ final class StyleRenderer
 
     /**
      *  Tries to fill a rounded rectangle as three antialiasing-free bands plus four antialiased
-     *  corners, and reports whether it succeeded or not. The rounded corners is rendered with
-     *  antialiasing turned on (see {@link #_fillShapeFast}).
+     *  corners, and reports whether it succeeded or not.
      *
      * @return {@code true} when the shape was filled, {@code false} when the caller must fill it.
      */

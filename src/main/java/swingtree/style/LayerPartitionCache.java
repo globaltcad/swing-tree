@@ -149,7 +149,6 @@ final class LayerPartitionCache
             return;
         }
 
-        // We try to canonicalizd to a size independent conf for 9 patch based caching:
         final LayerRenderConf keyConf = CacheBudget.tilingEnabled()
                                             ? _canonicalize(_layerRenderData)
                                             : _layerRenderData;
@@ -338,22 +337,22 @@ final class LayerPartitionCache
             if ( !painter.equals(PainterConf.none()) && painter.painter().canBeCached() )
                 heavyStyleCount++;
 
-        final BaseColorConf baseCoors = state.baseColors();
-        final BoxModelConf  boxModel  = state.boxModel();
-        final boolean       isRounded = boxModel.hasAnyNonZeroArcs();
+        final BaseColorConf baseColors = state.baseColors();
+        final BoxModelConf  boxModel   = state.boxModel();
+        final boolean       isRounded  = boxModel.hasAnyNonZeroArcs();
 
         if ( layer == UI.Layer.BORDER ) {
             boolean hasWidth = !Outline.none().equals(boxModel.widths());
-            boolean hasColoring = !baseCoors.borderColor().equals(BorderColorsConf.none());
+            boolean hasColoring = !baseColors.borderColor().equals(BorderColorsConf.none());
             if ( hasWidth && hasColoring )
                 heavyStyleCount++;
         }
         if ( layer == UI.Layer.BACKGROUND ) {
             boolean roundedOrHasMargin = isRounded || !boxModel.margin().equals(Outline.none());
             if ( roundedOrHasMargin ) {
-                if ( baseCoors.backgroundColor().filter( c -> c.getAlpha() > 0 ).isPresent() )
+                if ( baseColors.backgroundColor().filter( c -> c.getAlpha() > 0 ).isPresent() )
                     heavyStyleCount++;
-                if ( baseCoors.foundationColor().filter( c -> c.getAlpha() > 0 ).isPresent() )
+                if ( baseColors.foundationColor().filter( c -> c.getAlpha() > 0 ).isPresent() )
                     heavyStyleCount++;
             }
         }

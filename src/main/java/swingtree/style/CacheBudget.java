@@ -151,9 +151,8 @@ final class CacheBudget {
         return b;
     }
 
-    /** The total budget re-expressed as a count of {@code 4 MiB} units. Replaces the former
-     *  {@code LayerPartCache.DYNAMIC_CACHE_AGGRESSIVENESS()} scalar; the image caches multiply it
-     *  by a pixels-per-unit constant to decide which images are small enough to cache. */
+    /** The total budget re-expressed as a count of {@code 4 MiB} units. The image caches multiply
+     *  it by a pixels-per-unit constant to decide which images are small enough to cache. */
     static double units() {
         if ( UNITS_OVERRIDE >= 0 )
             return UNITS_OVERRIDE;                       // honour the test hook exactly, without byte-conversion drift
