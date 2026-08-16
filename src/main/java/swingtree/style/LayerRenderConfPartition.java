@@ -84,7 +84,7 @@ enum LayerRenderConfPartition
                                     .withNoises(StyleConfLayer._NO_NOISES)
                            );
             case UNDER_PAINTERS:
-                return conf.withLayer( conf.layer().withPainters(_paintersBefore(conf, true)) );
+                return conf.withLayer( conf.layer().withPainters(_paintersBeforeTheFirstUncacheableOne(conf)) );
             case PAINTERS:
                 return conf.withBaseColors(BaseColorConf.none())
                            .withLayer(
@@ -94,19 +94,29 @@ enum LayerRenderConfPartition
                                     .withNoises(StyleConfLayer._NO_NOISES)
                                     .withShadows(StyleConfLayer._NO_SHADOWS)
                                     .withTexts(StyleConfLayer._NO_TEXTS)
-                                    .withPainters(_paintersBefore(conf, false))
+                                    .withPainters(_paintersFromTheFirstUncacheableOne(conf))
                            );
         }
         throw new IllegalStateException("Unknown style layer part: " + this);
     }
 
-    private static NamedConfigs<PainterConf> _paintersBefore( LayerRenderConf conf, boolean wantPrefix ) {
+    private static NamedConfigs<PainterConf> _paintersBeforeTheFirstUncacheableOne( LayerRenderConf conf ) {
+        return _paintersSplitAtTheFirstUncacheableOne(conf, true);
+    }
+
+    private static NamedConfigs<PainterConf> _paintersFromTheFirstUncacheableOne( LayerRenderConf conf ) {
+        return _paintersSplitAtTheFirstUncacheableOne(conf, false);
+    }
+
+    private static NamedConfigs<PainterConf> _paintersSplitAtTheFirstUncacheableOne(
+        LayerRenderConf conf, boolean wantThoseBefore
+    ) {
         final NamedConfigs<PainterConf> painters = conf.layer().painters();
         final @Nullable String cut = _firstUncacheablePainterName(painters);
         if ( cut == null )
-            return ( wantPrefix ? painters : StyleConfLayer._NO_PAINTERS ); // Nothing to replay.
+            return ( wantThoseBefore ? painters : StyleConfLayer._NO_PAINTERS ); // All of them are cacheable.
         return painters.namedStylesStream()
-                       .filter( named -> ( named.name().compareTo(cut) < 0 ) == wantPrefix )
+                       .filter( named -> ( named.name().compareTo(cut) < 0 ) == wantThoseBefore )
                        .filter( named -> !named.style().equals(PainterConf.none()) )
                        .reduce( StyleConfLayer._NO_PAINTERS,
                                 ( keptSoFar, named ) -> keptSoFar.withNamedStyle(named.name(), named.style()),
