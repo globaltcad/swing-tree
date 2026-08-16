@@ -29,7 +29,7 @@ import java.util.Comparator;
  *      to see the above list unfold...
  *  </i>
  */
-enum LayerRenderConfPartitions
+enum LayerRenderConfPartition
 {
     /** The entire layer, used when there is nothing to split around. */
     WHOLE,

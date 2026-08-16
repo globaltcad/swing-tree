@@ -18,8 +18,8 @@ import java.util.WeakHashMap;
 import java.util.function.BiConsumer;
 
 /**
- *  A {@link BufferedImage} based cache for the rendering of one {@link LayerRenderConfPartitions} of a
- *  particular layer of a component's style - which is ordinarily {@link LayerRenderConfPartitions#WHOLE},
+ *  A {@link BufferedImage} based cache for the rendering of one {@link LayerRenderConfPartition} of a
+ *  particular layer of a component's style - which is ordinarily {@link LayerRenderConfPartition#WHOLE},
  *  the entire layer. <br>
  *  Caching is keyed by the deeply immutable {@link LayerRenderConf} of that part: as long as it
  *  stays equal across paint calls, the cached image is blitted instead of re-rendered, and when
@@ -116,12 +116,12 @@ final class LayerPartitionCache
     }
 
     private final UI.Layer          _layer;
-    private final LayerRenderConfPartitions _part;
+    private final LayerRenderConfPartition _part;
     private LayerRenderConf         _layerRenderData;
     private CacheState              _state;
 
 
-    public LayerPartitionCache( UI.Layer layer, LayerRenderConfPartitions part ) {
+    public LayerPartitionCache( UI.Layer layer, LayerRenderConfPartition part ) {
         _layer                    = Objects.requireNonNull(layer);
         _part                     = Objects.requireNonNull(part);
         _layerRenderData          = LayerRenderConf.none();

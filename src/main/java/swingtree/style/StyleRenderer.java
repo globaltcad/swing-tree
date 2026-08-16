@@ -1060,7 +1060,7 @@ final class StyleRenderer
      *      <li>or it draws a noise of a single colour, which the renderer degenerates to a flat fill before it ever considers tiles</li>
      *  </ul>
      */
-    static boolean allNoisesAreCheapToRepaint(LayerRenderConf conf ) {
+    static boolean allNoisesAreCheapToRepaint( LayerRenderConf conf ) {
         for ( Pooled<NoiseConf> noise : conf.layer().noises().sortedByNames() ) {
             if ( noise.get().colors().length <= 1 )
                 continue; // Draws nothing, or a single flat fill - neither constrains anything.
