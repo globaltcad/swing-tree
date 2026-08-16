@@ -54,7 +54,7 @@ import java.util.function.BiConsumer;
  *  Two related configurations are therefore managed here, and telling them apart is essential
  *  for understanding this class:
  *  <ul>
- *      <li><b>the render input</b> ({@code _layerRenderData}) - always the actual configuration
+ *      <li><b>the render input</b> ({@code _renderInput}) - always the actual configuration
  *          at the real component size. All direct-render fallbacks receive it, and it determines
  *          the destination geometry of the final cache blit.</li>
  *      <li><b>the cache key</b> ({@code Cached._key}) - the canonical (possibly exemplar sized)
@@ -115,17 +115,17 @@ final class LayerPartitionCache
         }
     }
 
-    private final UI.Layer          _layer;
+    private final UI.Layer                 _layer;
     private final LayerRenderConfPartition _part;
-    private LayerRenderConf         _layerRenderData;
-    private CacheState              _state;
+    private LayerRenderConf                _renderInput;
+    private CacheState                     _state;
 
 
     public LayerPartitionCache( UI.Layer layer, LayerRenderConfPartition part ) {
-        _layer                    = Objects.requireNonNull(layer);
-        _part                     = Objects.requireNonNull(part);
-        _layerRenderData          = LayerRenderConf.none();
-        _state                    = CacheState.Nothing.INSTANCE;
+        _layer       = Objects.requireNonNull(layer);
+        _part        = Objects.requireNonNull(part);
+        _renderInput = LayerRenderConf.none();
+        _state       = CacheState.Nothing.INSTANCE;
     }
 
     public @Nullable BufferedImage renderedImage() {
@@ -138,25 +138,25 @@ final class LayerPartitionCache
     public void validate( ComponentConf newConf, boolean isResizing )
     {
         if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) ) {
-            _layerRenderData          = LayerRenderConf.none();
-            _state                    = CacheState.Nothing.INSTANCE;
+            _renderInput = LayerRenderConf.none();
+            _state       = CacheState.Nothing.INSTANCE;
             return;
         }
 
-        _layerRenderData = _part.restrict(newConf.renderConfFor(_layer));
-        if ( _layerRenderData.rendersNothing() ) {
+        _renderInput = _part.restrict(newConf.renderConfFor(_layer));
+        if ( _renderInput.rendersNothing() ) {
             _state = CacheState.Nothing.INSTANCE;
             return;
         }
 
         final LayerRenderConf keyConf = CacheBudget.tilingEnabled()
-                                            ? _canonicalize(_layerRenderData)
-                                            : _layerRenderData;
+                                            ? _canonicalize(_renderInput)
+                                            : _renderInput;
 
         if ( _state instanceof CacheState.Cached && ((CacheState.Cached) _state)._key.get().equals(keyConf) )
             return;
 
-        final int hitsUntilAllocation = _hitsUntilAllocationFor(keyConf, _layerRenderData, isResizing);
+        final int hitsUntilAllocation = _hitsUntilAllocationFor(keyConf, _renderInput, isResizing);
         if ( hitsUntilAllocation < 0 ) {
             _state = CacheState.Uncached.INSTANCE;
         } else {
@@ -173,7 +173,7 @@ final class LayerPartitionCache
 
     PaintOutcome paint( Graphics2D g, BiConsumer<LayerRenderConf, Graphics2D> renderer )
     {
-        final Size size = _layerRenderData.boxModel().size();
+        final Size size = _renderInput.boxModel().size();
 
         if ( _state instanceof CacheState.Nothing )
             return PaintOutcome.NOTHING_RENDERED;
@@ -182,7 +182,7 @@ final class LayerPartitionCache
             return PaintOutcome.NOTHING_RENDERED;
 
         if ( !(_state instanceof CacheState.Cached) ) {
-            renderer.accept(_layerRenderData, g);
+            renderer.accept(_renderInput, g);
             return PaintOutcome.RENDERED_FROM_STYLE;
         }
 
@@ -198,7 +198,7 @@ final class LayerPartitionCache
         */
         final boolean isTiled = !cacheKey.boxModel().size().equals(size);
         if ( isTiled && !_isBlitCompatible(g.getTransform()) ) {
-            renderer.accept(_layerRenderData, g);
+            renderer.accept(_renderInput, g);
             return PaintOutcome.RENDERED_FROM_STYLE;
         }
 
@@ -211,7 +211,7 @@ final class LayerPartitionCache
                     It will need a few more hits to be ready...
                     So we just do normal rendering instead:
                 */
-                renderer.accept(_layerRenderData, g);
+                renderer.accept(_renderInput, g);
                 return PaintOutcome.RENDERED_FROM_STYLE;
             }
             try {
@@ -293,27 +293,27 @@ final class LayerPartitionCache
         return (int) ( _maxCacheableImageArea() * EAGER_ALLOCATION_FRIENDLINESS );
     }
 
-    static boolean wouldBeAdmitted( UI.Layer layer, LayerRenderConf state ) {
-        return _cachingMakesSenseFor(layer, state) >= 0;
+    static boolean wouldBeAdmitted( UI.Layer layer, LayerRenderConf conf ) {
+        return _cachingMakesSenseFor(layer, conf) >= 0;
     }
 
-    private static int _cachingMakesSenseFor( UI.Layer layer, LayerRenderConf state )
+    private static int _cachingMakesSenseFor( UI.Layer layer, LayerRenderConf conf )
     {
         final int maxEntries = _maxCacheEntries();
         if ( maxEntries <= 0 || _CACHE.size() >= maxEntries )
             return -1; // Caching disabled or cache already too full, don't admit more entries.
 
-        final Size size = state.boxModel().size();
+        final Size size = conf.boxModel().size();
 
         if ( !size.hasPositiveWidth() || !size.hasPositiveHeight() )
             return -1; // The component does not have a size that can be displayed.
 
-        if ( state.layer().hasPaintersWhichCannotBeCached() )
+        if ( conf.layer().hasPaintersWhichCannotBeCached() )
             return -1; // We don't know what the painters will do, so we don't cache their painting!
 
         int heavyStyleCount = 0;
 
-        for ( ImageConf imageConf : state.layer().images().sortedByNames() )
+        for ( ImageConf imageConf : conf.layer().images().sortedByNames() )
             if ( !imageConf.equals(ImageConf.none()) && imageConf.image().isPresent() ) {
                 ImageIcon icon = imageConf.image().get();
                 boolean isSpecialIcon = ( icon.getClass() != ImageIcon.class && icon.getClass() != ScalableImageIcon.class );
@@ -321,24 +321,24 @@ final class LayerPartitionCache
                 if ( isSpecialIcon || hasSize )
                     heavyStyleCount++;
             }
-        for ( GradientConf gradient : state.layer().gradients().sortedByNames() )
+        for ( GradientConf gradient : conf.layer().gradients().sortedByNames() )
             if ( !gradient.equals(GradientConf.none()) && gradient.colors().length > 0 )
                 heavyStyleCount++;
-        for ( Pooled<NoiseConf> noise : state.layer().noises().sortedByNames() )
+        for ( Pooled<NoiseConf> noise : conf.layer().noises().sortedByNames() )
             if ( !noise.get().equals(NoiseConf.none()) && noise.get().colors().length > 0 )
                 heavyStyleCount += 2;
-        for ( TextConf text : state.layer().texts().sortedByNames() )
+        for ( TextConf text : conf.layer().texts().sortedByNames() )
             if ( !text.equals(TextConf.none()) && !text.content().isEmpty() )
                 heavyStyleCount++;
-        for ( ShadowConf shadow : state.layer().shadows().sortedByNames() )
+        for ( ShadowConf shadow : conf.layer().shadows().sortedByNames() )
             if ( !shadow.equals(ShadowConf.none()) && shadow.color().isPresent() )
                 heavyStyleCount++;
-        for ( PainterConf painter : state.layer().painters().sortedByNames() )
+        for ( PainterConf painter : conf.layer().painters().sortedByNames() )
             if ( !painter.equals(PainterConf.none()) && painter.painter().canBeCached() )
                 heavyStyleCount++;
 
-        final BaseColorConf baseColors = state.baseColors();
-        final BoxModelConf  boxModel   = state.boxModel();
+        final BaseColorConf baseColors = conf.baseColors();
+        final BoxModelConf  boxModel   = conf.boxModel();
         final boolean       isRounded  = boxModel.hasAnyNonZeroArcs();
 
         if ( layer == UI.Layer.BORDER ) {
