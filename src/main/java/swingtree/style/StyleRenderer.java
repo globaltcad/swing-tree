@@ -130,7 +130,7 @@ final class StyleRenderer
      *          See {@link #_fillRoundRectangleInPartsFast}.</li>
      *  </ul>
      *  Anything else, like a fractional {@link Rectangle2D} or a rotated transform, keeps
-     *  antialiasing and is filled exactly as it always was.
+     *  antialiasing and is filled in one go.
      */
     private static void _fillShapeFast( final Graphics2D g2d, final Shape shape ) {
         if ( !RenderingHints.VALUE_ANTIALIAS_ON.equals(g2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING)) ) {
@@ -194,34 +194,22 @@ final class StyleRenderer
         if ( arcW <= 0 || arcH <= 0 )
             return false; // Not actually rounded; an undivided fill of it is already optimal.
 
-        /*
-            Every cut line has to sit on a whole device pixel. Otherwise a band edge and the
-            corner clip meeting it would disagree about which pixel they own, and the seam
-            between them would come out either doubly blended or not covered at all.
-        */
         final double[] cutX = { x, x + arcW, x + w - arcW, x + w };
         final double[] cutY = { y, y + arcH, y + h - arcH, y + h };
-        for ( double cut : cutX )
-            if ( !_isWhole(cut * scaleX + translateX) )
-                return false;
-        for ( double cut : cutY )
-            if ( !_isWhole(cut * scaleY + translateY) )
-                return false;
+        if ( !_allCutsAreWholeDevicePixels(cutX, scaleX, translateX) )
+            return false;
+        if ( !_allCutsAreWholeDevicePixels(cutY, scaleY, translateY) )
+            return false;
 
-        /*
-            First the interior, which holds nearly all of the area and none of the curvature.
-            A band may be empty when the arc spans the full width or height, in which case its
-            neighbours already cover everything and filling it is a no-op.
-        */
+        // The bands, which hold nearly all of the area and none of the curvature.
+        // A band is empty when the arc spans the full width or height, which fills nothing.
         _fillWithoutAntialiasing(g2d,
             new Rectangle2D.Double(cutX[0], cutY[1], w,                 cutY[2] - cutY[1]), // Between the corners.
             new Rectangle2D.Double(cutX[1], cutY[0], cutX[2] - cutX[1], arcH),              // Above them,
             new Rectangle2D.Double(cutX[1], cutY[2], cutX[2] - cutX[1], arcH)               // and below them.
         );
-        /*
-            And then the four corner boxes, each filled with the whole shape clipped to it, so
-            that the curve is rasterized by exactly the code which would have drawn it anyway.
-        */
+        // And then the four corner boxes, each filled with the whole shape clipped to it, so
+        // that the curve is rasterized by exactly the code which would have drawn it anyway.
         for ( int corner = 0; corner < 4; corner++ ) {
             final double cornerX = ( corner == 1 || corner == 3 ) ? cutX[2] : cutX[0];
             final double cornerY = ( corner >= 2 )                ? cutY[2] : cutY[0];
@@ -233,6 +221,20 @@ final class StyleRenderer
                 cornerG2d.dispose();
             }
         }
+        return true;
+    }
+
+    /**
+     *  Whether every cut line lands on a whole device pixel. A cut between two pixels would
+     *  make the band and the corner clip meeting there disagree about which pixel they own,
+     *  leaving a seam that is either blended twice or not covered at all.
+     */
+    private static boolean _allCutsAreWholeDevicePixels(
+        final double[] cuts, final double scale, final double translate
+    ) {
+        for ( double cut : cuts )
+            if ( !_isWhole(cut * scale + translate) )
+                return false;
         return true;
     }
 
@@ -2045,31 +2047,22 @@ final class StyleRenderer
 
             final Rectangle bounds = areaToFill.getBounds();
 
-            if ( !usesLargeTiles(bounds) ) {
-                // Small area (or tile caching disabled): the per-pixel Paint pipeline is fine here.
+            if ( usesLargeTiles(bounds) )
+                _renderWithLargeTiles(center, noise, areaToFill, bounds, g2d);
+            else {
                 g2d.setPaint(_getCachedNoisePaint(center, noise));
                 _fillShapeFast(g2d, areaToFill);
-            } else {
-                // Large area: blit pre-rendered large tiles to dodge the 32x32 Paint pipeline.
-                _renderWithLargeTiles(center, noise, areaToFill, bounds, g2d);
             }
         }
 
         /**
-         *  Which of the two strategies {@link #renderNoise} will use for an area of these
-         *  bounds: {@code true} for the pre-rendered tile blits, {@code false} for the per-pixel
-         *  {@link Paint} pipeline. <br>
+         *  Which of the two strategies {@link #renderNoise} uses for an area of these bounds:
+         *  {@code true} for the pre-rendered tile blits, {@code false} for the per-pixel
+         *  {@link Paint} pipeline. Only the former is cheap enough to repeat on every paint,
+         *  which is what {@link #allNoisesAreCheapToRepaint} asks about. <br>
          *  <br>
-         *  {@link StyleLayerCache} asks through {@link #allNoisesAreCheapToRepaint}, because it
-         *  may only lift a noise out of its layer's cached image when drawing it again is cheap:
-         *  a tile blit is a handful of pixmap composites, whereas the {@link Paint} pipeline
-         *  turns the same area into thousands of 32x32 mask compositions - fine into a software
-         *  image, ruinous straight onto the screen. Sharing this one predicate keeps the two
-         *  decisions in agreement. <br>
-         *  <br>
-         *  Note that this only speaks for the noises {@link #renderNoise} gets as far as asking
-         *  about: a single coloured one is a flat fill decided before this, so a caller reasoning
-         *  about replay cost has to account for that case itself.
+         *  Note that a single coloured noise is a flat fill decided before this is ever asked,
+         *  so a caller reasoning about repaint cost has to account for that case itself.
          */
         static boolean usesLargeTiles( Rectangle bounds ) {
             final long area = (long) bounds.width * bounds.height;
