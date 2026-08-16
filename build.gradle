@@ -37,6 +37,11 @@ tasks.withType(JavaCompile).configureEach {
 repositories {
     mavenCentral()
     maven { url = 'https://jitpack.io' }
+    // Serves the jsvg snapshot which is verified on this branch (see the jsvg dependency below):
+    maven {
+        url = 'https://central.sonatype.com/repository/maven-snapshots/'
+        mavenContent { snapshotsOnly() }
+    }
 }
 
 dependencies {
@@ -62,8 +67,8 @@ dependencies {
     }
     api("com.github.weisj:jsvg") {
         version {
-            require("[2.0.0, 3.0.0)") // Allows 2.0.0 and above, but not 3.0.0+
-            prefer("2.0.0") // Default if user doesn't specify
+            // Verification of the fix for https://github.com/weisJ/jsvg/issues/169 :
+            strictly("2.1.1-SNAPSHOT")
         }
     }
     api("io.github.globaltcad:sprouts") {
