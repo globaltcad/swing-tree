@@ -26,7 +26,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
-import java.util.regex.Pattern;
 
 /**
  *   A specialized {@link ImageIcon} subclass that allows you to use SVG based icon images in your GUI.
@@ -74,9 +73,6 @@ import java.util.regex.Pattern;
 public final class SvgIcon extends ImageIcon
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(SvgIcon.class);
-    // A viewBox is a run of numbers separated by whitespace and/or commas; we keep the
-    // splitter precompiled (and use Pattern.split rather than the surprising String.split).
-    private static final Pattern VIEW_BOX_SEPARATOR = Pattern.compile("[\\s,]+");
     private static final UI.FitComponent DEFAULT_FIT_COMPONENT = UI.FitComponent.UNDEFINED;
     private static final UI.Placement    DEFAULT_PLACEMENT     = UI.Placement.UNDEFINED;
     private static final int             NO_SIZE               = -1;
@@ -223,8 +219,7 @@ public final class SvgIcon extends ImageIcon
      *         meaning that it will be rendered according to the size of the component
      */
     public static SvgIcon of( SVGDocument svgDocument ) {
-        FloatSize docSize = svgDocument.size();
-        RawSVG args = new RawSVG(svgDocument, Size.unknown(), Unit.UNKNOWN, Unit.UNKNOWN, docSize.width, docSize.height);
+        RawSVG args = new RawSVG(svgDocument, Size.unknown(), Unit.UNKNOWN, Unit.UNKNOWN);
         return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT, DEFAULT_OPACITY);
     }
 
@@ -240,14 +235,13 @@ public final class SvgIcon extends ImageIcon
      *          with a custom width and height defined by the supplied {@link Size}.
      */
     public static SvgIcon of( SVGDocument svgDocument, Size size ) {
-        FloatSize docSize = svgDocument.size();
-        RawSVG args = new RawSVG(svgDocument, size, Unit.UNKNOWN, Unit.UNKNOWN, docSize.width, docSize.height);
+        RawSVG args = new RawSVG(svgDocument, size, Unit.UNKNOWN, Unit.UNKNOWN);
         return new SvgIcon(args, DEFAULT_FIT_COMPONENT, DEFAULT_PLACEMENT, DEFAULT_OPACITY);
     }
 
     private static RawSVG _loadSvgDocument(@Nullable URL svgUrl, Size size ) {
         if ( svgUrl == null )
-            return new RawSVG(null, size, Unit.UNKNOWN, Unit.UNKNOWN, -1, -1);
+            return new RawSVG(null, size, Unit.UNKNOWN, Unit.UNKNOWN);
         return _loadSvgDocument( processor -> {
             SVGLoader loader = new SVGLoader();
             return loader.load(svgUrl, LoaderContext.builder().preProcessor(processor).build());
@@ -265,68 +259,27 @@ public final class SvgIcon extends ImageIcon
         SVGDocument tempSVGDocument = null;
         Unit widthUnit  = Unit.UNKNOWN;
         Unit heightUnit = Unit.UNKNOWN;
-        float docWidth  = -1;
-        float docHeight = -1;
         try {
             AtomicReference<String> widthUnitString = new AtomicReference<>("");
             AtomicReference<String> heightUnitString = new AtomicReference<>("");
-            AtomicReference<float[]> declaredDocSize = new AtomicReference<>(null);
             tempSVGDocument = loader.apply(dom->{
-                String width  = dom.attribute("width", "");
-                String height = dom.attribute("height", "");
-                String widthUnitOfDocument  = _parseUnitFrom(width);
-                String heightUnitOfDocument = _parseUnitFrom(height);
-                widthUnitString.set(widthUnitOfDocument);
-                heightUnitString.set(heightUnitOfDocument);
-                /*
-                    Since version 2.1.0, jsvg no longer stretches a document to fill the view box
-                    passed to `SVGDocument.render(component, graphics, viewBox)`. Instead, the
-                    document's intrinsic width/height is first fitted into that view box
-                    uniformly ("xMidYMid meet" style), which shrinks and centers the rendering
-                    whenever the intrinsic aspect ratio differs from the aspect ratio of the
-                    view box passed to the render method (and the document's own
-                    `preserveAspectRatio` attribute cannot opt out of this).
-                    To get the same rendering on all jsvg versions, we normalize the intrinsic
-                    size to 100% of the render view box, which turns that fitting step into
-                    an exact fill, and keep track of the declared size ourselves
-                    (see the usages of `RawSVG.docWidth` and `RawSVG.docHeight`).
-                    We only do this for pixel and percentage based dimensions, other units
-                    (like pt, em, ...) resolve to pixels in ways we do not want to replicate here.
-                */
-                float[] viewBoxSize = _parseViewBoxWidthHeightFrom(dom.attribute("viewBox", ""));
-                boolean unitsSupportNormalization = _isNormalizableUnit(widthUnitOfDocument)
-                                                 && _isNormalizableUnit(heightUnitOfDocument);
-                if ( viewBoxSize != null && unitsSupportNormalization ) {
-                    declaredDocSize.set(new float[]{
-                            _declaredDimensionFrom(width,  viewBoxSize[0]),
-                            _declaredDimensionFrom(height, viewBoxSize[1])
-                        });
-                    dom.setAttribute("width",  "100%");
-                    dom.setAttribute("height", "100%");
-                }
+                widthUnitString.set(_parseUnitFrom(dom.attribute("width", "")));
+                heightUnitString.set(_parseUnitFrom(dom.attribute("height", "")));
             });
             widthUnit = _unitOf(Objects.requireNonNull(widthUnitString.get()));
             heightUnit = _unitOf(Objects.requireNonNull(heightUnitString.get()));
-            float[] declaredSize = declaredDocSize.get();
-            if ( declaredSize != null ) {
-                docWidth  = declaredSize[0];
-                docHeight = declaredSize[1];
-            } else if ( tempSVGDocument != null ) {
-                docWidth  = tempSVGDocument.size().width;
-                docHeight = tempSVGDocument.size().height;
-            }
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Failed to load SVG document! ", e);
         }
         if ( tempSVGDocument != null ) {
             if ( widthUnit != Unit.UNKNOWN && !size.hasPositiveWidth() ) {
-                size = size.withWidth(docWidth);
+                size = size.withWidth(tempSVGDocument.size().width);
             }
             if ( heightUnit != Unit.UNKNOWN && !size.hasPositiveHeight() ) {
-                size = size.withHeight(docHeight);
+                size = size.withHeight(tempSVGDocument.size().height);
             }
         }
-        return new RawSVG(tempSVGDocument, size, widthUnit, heightUnit, docWidth, docHeight);
+        return new RawSVG(tempSVGDocument, size, widthUnit, heightUnit);
     }
 
     private static Unit _unitOf(String unitString) {
@@ -351,39 +304,6 @@ public final class SvgIcon extends ImageIcon
             return "px"; // Default to pixels if no unit is specified
         }
         return unit.trim(); // There may be a space between the number and the unit!
-    }
-
-    private static boolean _isNormalizableUnit( String unitString ) {
-        return unitString.isEmpty() || unitString.equals("px") || unitString.equals("%");
-    }
-
-    private static float @Nullable [] _parseViewBoxWidthHeightFrom( String viewBox ) {
-        // The '-1' limit keeps trailing empty tokens instead of silently dropping them,
-        // which makes the split behaviour explicit; the 'length != 4' guard below rejects
-        // anything that is not exactly the four viewBox numbers anyway.
-        String[] parts = VIEW_BOX_SEPARATOR.split(viewBox.trim(), -1);
-        if ( parts.length != 4 )
-            return null;
-        try {
-            float width  = Float.parseFloat(parts[2]);
-            float height = Float.parseFloat(parts[3]);
-            if ( width <= 0 || height <= 0 )
-                return null;
-            return new float[]{ width, height };
-        } catch (NumberFormatException e) {
-            return null;
-        }
-    }
-
-    private static float _declaredDimensionFrom( String numberWithUnit, float viewBoxDimension ) {
-        // Percentages are reported as raw numbers and missing attributes resolve
-        // to the view box dimension, just like `SVGDocument.size()` reports them.
-        String number = numberWithUnit.trim().replaceAll("^([-+]?\\d*\\.?\\d+).*$", "$1");
-        try {
-            return Float.parseFloat(number);
-        } catch (NumberFormatException e) {
-            return viewBoxDimension;
-        }
     }
 
     private SvgIcon(
@@ -907,18 +827,13 @@ public final class SvgIcon extends ImageIcon
     public Size getSvgSize() {
         if ( _core.svgDocument == null )
             return Size.unknown();
-        return Size.of(_core.docWidth, _core.docHeight);
+        FloatSize svgSize = _core.svgDocument.size();
+        return Size.of(svgSize.width, svgSize.height);
     }
 
     /**
      *  Allows you to access the underlying {@link SVGDocument} that is used to render the icon.
-     *  <b>
-     *      Note that if the source SVG declared both a view box and pixel or percentage
-     *      based width/height attributes, then the document returned here has these
-     *      width/height attributes normalized to "100%" so that rendering behaves
-     *      consistently across jsvg versions. Use {@link #getSvgSize()} to access
-     *      the size which the source SVG originally declared.
-     *  </b>
+     *
      * @return The underlying {@link SVGDocument} that is used to render the icon.
      */
     public @Nullable SVGDocument getSvgDocument() {
@@ -1072,9 +987,9 @@ public final class SvgIcon extends ImageIcon
 
         if ( _core.svgDocument != null ) {
             if (width < 0)
-                width = (int) UI.scale(_core.docWidth);
+                width = (int) UI.scale(_core.svgDocument.size().width);
             if (height < 0)
-                height = (int) UI.scale(_core.docHeight);
+                height = (int) UI.scale(_core.svgDocument.size().height);
         }
 
         // We create a new buffered image, render into it, and then return it.
@@ -1216,6 +1131,7 @@ public final class SvgIcon extends ImageIcon
             return Size.unknown();
         final int iconWidth  = getIconWidth();
         final int iconHeight = getIconHeight();
+        final FloatSize svgSize = _core.svgDocument.size();
 
         float finalWidth  = ( iconWidth  > 0 || areaWidth  < 0 ? iconWidth  : -1 );
         float finalHeight = ( iconHeight > 0 || areaHeight < 0 ? iconHeight : -1 );
@@ -1227,7 +1143,7 @@ public final class SvgIcon extends ImageIcon
                     finalWidth = areaWidth * _size.width().get() / 100f;
                     hasPercentageScaling = true;
                 } else {
-                    finalWidth = _core.docWidth;
+                    finalWidth = svgSize.width;
                 }
             }
             finalHeight = iconHeight;
@@ -1236,7 +1152,7 @@ public final class SvgIcon extends ImageIcon
                     finalHeight = areaHeight * _size.height().get() / 100f;
                     hasPercentageScaling = true;
                 } else {
-                    finalHeight = _core.docHeight;
+                    finalHeight = svgSize.height;
                 }
             }
             if ( !hasPercentageScaling ) {
@@ -1329,8 +1245,9 @@ public final class SvgIcon extends ImageIcon
         ViewBox viewBox = new ViewBox(x, y, !sizeIsUnknown ? iconWidth : areaWidth, !sizeIsUnknown ? iconHeight : areaHeight);
 
         if ( fitComponent == UI.FitComponent.NO || fitComponent == UI.FitComponent.UNDEFINED ) {
-            float newWidth   = iconWidth  >= 0 ? iconWidth  : _core.docWidth;
-            float newHeight  = iconHeight >= 0 ? iconHeight : _core.docHeight;
+            final FloatSize svgSize = _core.svgDocument.size();
+            float newWidth   = iconWidth  >= 0 ? iconWidth  : svgSize.width;
+            float newHeight  = iconHeight >= 0 ? iconHeight : svgSize.height;
             final FloatSize viewBoxSize = _core.svgDocument.viewBox().size();
             newWidth   = newWidth  >= 0 ? newWidth  : viewBoxSize.width;
             newHeight  = newHeight >= 0 ? newHeight : viewBoxSize.height;
@@ -1495,7 +1412,8 @@ public final class SvgIcon extends ImageIcon
         String svgDocument        = Optional.ofNullable(_core.svgDocument)
                                             .map(it -> {
                                                 String docClass = it.getClass().getSimpleName();
-                                                return docClass + "[width=" + _core.docWidth + ", height=" + _core.docHeight + "]";
+                                                FloatSize size = it.size();
+                                                return docClass + "[width=" + size.width + ", height=" + size.height + "]";
                                             })
                                             .orElse("?");
         return typeName + "[" +
@@ -1566,8 +1484,9 @@ public final class SvgIcon extends ImageIcon
                 aspectRatio2 = svgSize.width().get() / svgSize.height().get();
         } else {
             if ( _core.widthUnit != Unit.PERCENTAGE && _core.heightUnit != Unit.PERCENTAGE ) {
-                if (_core.docWidth > 0 && _core.docHeight > 0)
-                    aspectRatio2 = _core.docWidth / _core.docHeight;
+                FloatSize svgSize = _core.svgDocument.size();
+                if (svgSize.width > 0 && svgSize.height > 0)
+                    aspectRatio2 = svgSize.width / svgSize.height;
             } else {
                 // Percentages do not represent the innate ratio! So let's use the viewbox ratio:
                 aspectRatio2 = aspectRatio1;
@@ -1602,28 +1521,11 @@ public final class SvgIcon extends ImageIcon
         final Size                  size;
         final Unit                  widthUnit;
         final Unit                  heightUnit;
-        /*
-            The width and height the document declared through its width/height attributes,
-            equal to what `svgDocument.size()` would report without the load time
-            normalization of these attributes (see `_loadSvgDocument(Function,Size)`).
-            So percentages are raw numbers and missing attributes resolve to the view box size.
-        */
-        final float                 docWidth;
-        final float                 docHeight;
-        private RawSVG(
-            @Nullable SVGDocument svgDocument,
-            Size size,
-            Unit widthUnit,
-            Unit heightUnit,
-            float docWidth,
-            float docHeight
-        ) {
+        private RawSVG(@Nullable SVGDocument svgDocument, Size size, Unit widthUnit, Unit heightUnit) {
             this.svgDocument = svgDocument;
             this.size        = size;
             this.widthUnit   = widthUnit;
             this.heightUnit  = heightUnit;
-            this.docWidth    = docWidth;
-            this.docHeight   = docHeight;
         }
     }
 }
