@@ -805,13 +805,13 @@ final class StyleRenderer
     private static final class ShadowGradientCache {
 
         /** Absolute ceiling on retained per-{@code gradientStart} stop arrays. The live cap
-         *  (see {@link #maxCachedStops()}) only drops below this on a constrained byte budget. */
+         *  (see {@link #_maxCachedStops()}) only drops below this on a constrained byte budget. */
         private static final int MAX_CACHED_STOPS = 16;
 
         /** Upper bound on retained per-{@code gradientStart} stop arrays, derived from this
          *  cache's slice of the shared {@link CacheBudget} byte budget and clamped to
          *  {@link #MAX_CACHED_STOPS}. {@code 0} disables stop caching. */
-        private static int maxCachedStops() {
+        private static int _maxCachedStops() {
             return Math.min(MAX_CACHED_STOPS, CacheBudget.maxEntriesFor(CacheBudget.Kind.SHADOW_GRADIENT));
         }
 
@@ -822,7 +822,7 @@ final class StyleRenderer
                 new LinkedHashMap<Float,GradientStops>(16, 0.75f, true) {
                     @Override
                     protected boolean removeEldestEntry( Map.Entry<Float,GradientStops> eldest ) {
-                        return size() > maxCachedStops();
+                        return size() > _maxCachedStops();
                     }
                 };
 
@@ -881,7 +881,7 @@ final class StyleRenderer
             }
             fractions[lead - 1 + n] = 1f; // guard against float rounding on the last fraction
             final GradientStops stops = new GradientStops(fractions, colors);
-            if ( maxCachedStops() > 0 )
+            if ( _maxCachedStops() > 0 )
                 _stopsByStart.put(gradientStart, stops);
             return stops;
         }
@@ -911,7 +911,7 @@ final class StyleRenderer
             _fillShapeFast(g2d, conf.areas().get(gradient.area()));
         }
         else {
-            final Paint paint = _createGradientPaint(conf.boxModel(), gradient);
+            final Paint paint = createGradientPaint(conf.boxModel(), gradient);
             if ( paint != null ) {
                 Shape areaToFill = conf.areas().get(gradient.area());
                 g2d.setPaint(paint);
@@ -920,7 +920,7 @@ final class StyleRenderer
         }
     }
 
-    static @Nullable Paint _createGradientPaint(
+    static @Nullable Paint createGradientPaint(
         final BoxModelConf boxModel,
         final GradientConf gradient
     ) {
@@ -1087,7 +1087,7 @@ final class StyleRenderer
      *  {@link Paint} object is required (e.g. font painting) and the large-tile blitting
      *  strategy of {@link #_renderNoise} is not applicable.
      */
-    static Paint _createNoisePaint(
+    static Paint createNoisePaint(
         final BoxModelConf      boxModel,
         final Pooled<NoiseConf> noise
     ) {
@@ -1121,8 +1121,8 @@ final class StyleRenderer
             */
 
             // project the center (cx,cy) onto the lines:
-            corner1 = projectPointOntoLine(corner1, new Point2D.Float(nx, ny), new Point2D.Float(cx, cy));
-            corner2 = projectPointOntoLine(corner2, new Point2D.Float(nx, ny), new Point2D.Float(cx, cy));
+            corner1 = _projectPointOntoLine(corner1, new Point2D.Float(nx, ny), new Point2D.Float(cx, cy));
+            corner2 = _projectPointOntoLine(corner2, new Point2D.Float(nx, ny), new Point2D.Float(cx, cy));
         }
 
         final UI.Cycle cycle  = gradient.cycle();
@@ -1222,7 +1222,7 @@ final class StyleRenderer
         }
     }
 
-    private static Point2D.Float projectPointOntoLine(
+    private static Point2D.Float _projectPointOntoLine(
         final Point2D.Float A,
         final Point2D.Float n,
         final Point2D.Float C
@@ -1564,10 +1564,10 @@ final class StyleRenderer
 
         final Tuple<Pooled<Paragraph>> textToRender  = text.content();
         final UI.ComponentArea     clipArea          = text.clipArea();
-        final UI.Placement         placement         = findDesiredPlacementFrom(text);
+        final UI.Placement         placement         = _findDesiredPlacementFrom(text);
         final boolean              wrapLines         = text.wrapLines();
         // Computing the area available for text rendering after applying the offset and insets:
-        final Bounds textBounds = _computeTextBounds(text, boxModel);
+        final Bounds textBounds = computeTextBounds(text, boxModel);
         try {
             Font font = Optional.ofNullable(initialFont).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
             font = text.fontConf().createDerivedFrom(font, boxModel).orElse(font);
@@ -1595,7 +1595,7 @@ final class StyleRenderer
         }
     }
 
-    static Bounds _computeTextBounds(final TextConf text, final BoxModelConf boxModel) {
+    static Bounds computeTextBounds(final TextConf text, final BoxModelConf boxModel) {
         final UI.ComponentBoundary placementBoundary = text.placementBoundary();
         final Offset               offset            = text.offset();
         final Outline              insets            = boxModel.insetsFor(placementBoundary);
@@ -1609,18 +1609,18 @@ final class StyleRenderer
         return Bounds.of(leftX, topY, localWidth, localHeight);
     }
 
-    private static UI.Placement findDesiredPlacementFrom(TextConf text) {
+    private static UI.Placement _findDesiredPlacementFrom(TextConf text) {
         UI.Placement chosenPlacement = text.placement();
         if ( chosenPlacement == UI.Placement.UNDEFINED ) {
             // We determine the placement of the text from the font configuration if not explicitly set:
             UI.HorizontalAlignment horizontalAlignment = text.fontConf().horizontalAlignment();
             UI.VerticalAlignment verticalAlignment = text.fontConf().verticalAlignment();
-            chosenPlacement = placementOf(horizontalAlignment, verticalAlignment);
+            chosenPlacement = _placementOf(horizontalAlignment, verticalAlignment);
         }
         return chosenPlacement;
     }
 
-    static UI.Placement placementOf(
+    private static UI.Placement _placementOf(
         UI.HorizontalAlignment horizontalAlignment, 
         UI.VerticalAlignment verticalAlignment
     ) {
@@ -1993,7 +1993,7 @@ final class StyleRenderer
         /** Upper bound on retained large tiles (~256 KiB each), from this cache's slice of
          *  the shared {@link CacheBudget} byte budget. {@code 0} disables tile caching.
          *  Read live (not snapshotted) so a runtime cache-mode change takes effect at once. */
-        private static int maxCachedTiles() {
+        private static int _maxCachedTiles() {
             return CacheBudget.maxEntriesFor(CacheBudget.Kind.NOISE_TILE);
         }
 
@@ -2019,7 +2019,7 @@ final class StyleRenderer
                 new LinkedHashMap<Long,BufferedImage>(16, 0.75f, true) {
                     @Override
                     protected boolean removeEldestEntry( Map.Entry<Long,BufferedImage> eldest ) {
-                        return size() > maxCachedTiles();
+                        return size() > _maxCachedTiles();
                     }
                 };
 
@@ -2047,7 +2047,7 @@ final class StyleRenderer
 
             if ( !usesLargeTiles(bounds) ) {
                 // Small area (or tile caching disabled): the per-pixel Paint pipeline is fine here.
-                g2d.setPaint(getCachedNoisePaint(center, noise));
+                g2d.setPaint(_getCachedNoisePaint(center, noise));
                 _fillShapeFast(g2d, areaToFill);
             } else {
                 // Large area: blit pre-rendered large tiles to dodge the 32x32 Paint pipeline.
@@ -2073,7 +2073,7 @@ final class StyleRenderer
          */
         static boolean usesLargeTiles( Rectangle bounds ) {
             final long area = (long) bounds.width * bounds.height;
-            return area > LARGE_AREA_THRESHOLD && maxCachedTiles() > 0;
+            return area > LARGE_AREA_THRESHOLD && _maxCachedTiles() > 0;
         }
 
         /**
@@ -2170,10 +2170,10 @@ final class StyleRenderer
                     insets.left().orElse(0f) + noise.get().offset().x(),
                     insets.top().orElse(0f) + noise.get().offset().y()
             );
-            return getCachedNoisePaint(center, noise);
+            return _getCachedNoisePaint(center, noise);
         }
 
-        private NoiseGradientPaint getCachedNoisePaint(
+        private NoiseGradientPaint _getCachedNoisePaint(
             final Point2D.Float     center,
             final Pooled<NoiseConf> noise
         ) {
