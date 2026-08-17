@@ -14,12 +14,12 @@ import java.util.function.BiConsumer;
 
 /**
  *  Caches and paints one {@link UI.Layer} of a component's style, by composing the
- *  {@link LayerRenderConfPartitions}s that layer is made of. <br>
+ *  {@link LayerRenderConfPartition}s that layer is made of. <br>
  *  <br>
- *  Ordinarily a layer is a single {@link LayerRenderConfPartitions#WHOLE} part, and this is then nothing
+ *  Ordinarily a layer is a single {@link LayerRenderConfPartition#WHOLE} part, and this is then nothing
  *  more than a wrapper around the one {@link LayerPartitionCache} holding it. The reason it exists is
  *  that a layer mixing style which caches in incompatible ways cannot be one rasterization, and
- *  then it is painted as several parts in order - see {@link LayerRenderConfPartitions} for what those parts
+ *  then it is painted as several parts in order - see {@link LayerRenderConfPartition} for what those parts
  *  are and why source-over compositing makes painting them one after another identical to
  *  painting the layer whole.
  */
@@ -30,7 +30,7 @@ final class StyleLayerCache
     private final UI.Layer         _layer;
     private final BiConsumer<LayerRenderConf, Graphics2D> _renderer;
     private LayerPartitionCache[]  _parts;
-    private PartitioningPolicies   _splitMode;
+    private PartitioningPolicy     _partitioningPolicy;
     private LayerRenderConf        _uncachedPartition;
     private Size                   _lastSize;
     private int                    _paintsAtThisSize;
@@ -40,13 +40,13 @@ final class StyleLayerCache
 
 
     StyleLayerCache( UI.Layer layer ) {
-        _layer                 = Objects.requireNonNull(layer);
-        _renderer              = ( conf, graphics ) -> StyleRenderer.renderStyleOn(_layer, conf, graphics);
-        _splitMode             = PartitioningPolicies.NONE;
-        _parts                 = PartitioningPolicies.NONE.newPartsFor(layer);
-        _uncachedPartition     = LayerRenderConf.none();
-        _lastSize              = Size.unknown();
-        _paintsAtThisSize      = PAINTS_UNTIL_REJOINED;
+        _layer               = Objects.requireNonNull(layer);
+        _renderer            = ( conf, graphics ) -> StyleRenderer.renderStyleOn(_layer, conf, graphics);
+        _partitioningPolicy  = PartitioningPolicy.NONE;
+        _parts               = PartitioningPolicy.NONE.newPartsFor(layer);
+        _uncachedPartition   = LayerRenderConf.none();
+        _lastSize            = Size.unknown();
+        _paintsAtThisSize    = PAINTS_UNTIL_REJOINED;
     }
 
     int paintCacheHitCount() { return _paintCacheHitCount; }
@@ -55,42 +55,45 @@ final class StyleLayerCache
 
     void validate( ComponentConf newConf ) {
         final LayerRenderConf full = newConf.renderConfFor(_layer);
-        // Note that _isResizing() records the size and so must run on every validation:
-        final boolean isResizing = _isResizing(newConf.currentBounds().size());
-        final PartitioningPolicies mode = _splitModeFor(full, isResizing);
-        if ( mode != _splitMode ) {
-            _splitMode = mode;
-            _parts     = mode.newPartsFor(_layer);
+        _recordSize(newConf.currentBounds().size());
+        final boolean isResizing = _isResizing();
+        final PartitioningPolicy policy = _partitioningPolicyFor(full, isResizing);
+        if ( policy != _partitioningPolicy ) {
+            _partitioningPolicy = policy;
+            _parts              = policy.newPartsFor(_layer);
         }
         for ( LayerPartitionCache part : _parts )
             part.validate(newConf, isResizing);
 
-        _uncachedPartition = mode.uncachedPartitionOf(full);
+        _uncachedPartition = policy.uncachedPartitionOf(full);
     }
 
-    private PartitioningPolicies _splitModeFor(LayerRenderConf full, boolean isResizing ) {
+    private PartitioningPolicy _partitioningPolicyFor( LayerRenderConf full, boolean isResizing ) {
         if ( _canBeSplitAroundPainters(full) )
-            return PartitioningPolicies.AROUND_PAINTERS;
+            return PartitioningPolicy.AROUND_PAINTERS;
         if ( isResizing && _canBeSplitAroundNoises(full) )
-            return PartitioningPolicies.AROUND_NOISES;
-        return PartitioningPolicies.NONE;
+            return PartitioningPolicy.AROUND_NOISES;
+        return PartitioningPolicy.NONE;
     }
 
     private boolean _canBeSplitAroundPainters( LayerRenderConf conf ) {
         if ( !conf.layer().hasPaintersWhichCannotBeCached() )
             return false; // Nothing to cut around, or nothing that stops the layer being cached whole.
-        final LayerRenderConf underPainters = LayerRenderConfPartitions.UNDER_PAINTERS.restrict(conf);
+        final LayerRenderConf underPainters = LayerRenderConfPartition.UNDER_PAINTERS.restrict(conf);
         if ( underPainters.rendersNothing() )
             return false; // The painters are all there is, so a cut would only add bookkeeping.
         return LayerPartitionCache.wouldBeAdmitted(_layer, underPainters);
     }
 
-    private boolean _isResizing( Size size ) {
-        if ( !size.equals(_lastSize) ) {
-            final boolean grewFromNothing = !_lastSize.hasPositiveWidth() || !_lastSize.hasPositiveHeight();
-            _lastSize         = size;
-            _paintsAtThisSize = grewFromNothing ? PAINTS_UNTIL_REJOINED : 0;
-        }
+    private void _recordSize( Size size ) {
+        if ( size.equals(_lastSize) )
+            return;
+        final boolean grewFromNothing = !_lastSize.hasPositiveWidth() || !_lastSize.hasPositiveHeight();
+        _lastSize         = size;
+        _paintsAtThisSize = grewFromNothing ? PAINTS_UNTIL_REJOINED : 0;
+    }
+
+    private boolean _isResizing() {
         return _paintsAtThisSize < PAINTS_UNTIL_REJOINED;
     }
 
@@ -100,10 +103,10 @@ final class StyleLayerCache
 
         if ( !CacheBudget.tilingEnabled() )
             return false;
-        if ( !StyleRenderer.allNoisesAreCheapToReplay(conf) )
-            return false; // Replaying this noise every paint would cost more than it saves.
-        return _isWorthCuttingOut(LayerRenderConfPartitions.UNDER_NOISE.restrict(conf))
-            && _isWorthCuttingOut(LayerRenderConfPartitions.OVER_NOISE.restrict(conf));
+        if ( !StyleRenderer.allNoisesAreCheapToRepaint(conf) )
+            return false; // Repainting this noise every paint would cost more than it saves.
+        return _isWorthCuttingOut(LayerRenderConfPartition.UNDER_NOISE.restrict(conf))
+            && _isWorthCuttingOut(LayerRenderConfPartition.OVER_NOISE.restrict(conf));
     }
 
     private static boolean _isWorthCuttingOut( LayerRenderConf part ) {
@@ -155,32 +158,32 @@ final class StyleLayerCache
 
     /**
      *  The shapes a layer is cached in. Each one names the cached parts it consists of and the
-     *  piece (if any) which is instead replayed onto the destination after the first of them -
-     *  see {@link LayerRenderConfPartitions} for why a layer is ever cut at all.
+     *  uncached piece (if any), which is instead rendered straight onto the destination after
+     *  the first of them - see {@link LayerRenderConfPartition} for why a layer is ever cut.
      */
-    private enum PartitioningPolicies
+    private enum PartitioningPolicy
     {
         /** One cached rendering of everything. */
-        NONE( Tuple.of(LayerRenderConfPartitions.WHOLE), null ),
+        NONE( Tuple.of(LayerRenderConfPartition.WHOLE), null ),
         /** Cut around the noises, so that everything else keeps a size independent cache
          *  entry across a resize. Temporary: only while the component is resizing. */
         AROUND_NOISES(
-            Tuple.of(LayerRenderConfPartitions.UNDER_NOISE, LayerRenderConfPartitions.OVER_NOISE),
-            LayerRenderConfPartitions.NOISES
+            Tuple.of(LayerRenderConfPartition.UNDER_NOISE, LayerRenderConfPartition.OVER_NOISE),
+            LayerRenderConfPartition.NOISES
         ),
         /** Cut around the user painters, so that a layer which carries one is cacheable at
          *  all rather than being re-rendered whole on every paint. */
         AROUND_PAINTERS(
-            Tuple.of(LayerRenderConfPartitions.UNDER_PAINTERS),
-            LayerRenderConfPartitions.PAINTERS
+            Tuple.of(LayerRenderConfPartition.UNDER_PAINTERS),
+            LayerRenderConfPartition.PAINTERS
         );
 
-        private final Tuple<LayerRenderConfPartitions> _cachedParts;
-        private final @Nullable LayerRenderConfPartitions _replayedPart;
+        private final Tuple<LayerRenderConfPartition>    _cachedParts;
+        private final @Nullable LayerRenderConfPartition _uncachedPart;
 
-        PartitioningPolicies(Tuple<LayerRenderConfPartitions> cachedParts, @Nullable LayerRenderConfPartitions replayedPart ) {
+        PartitioningPolicy( Tuple<LayerRenderConfPartition> cachedParts, @Nullable LayerRenderConfPartition uncachedPart ) {
             _cachedParts  = cachedParts;
-            _replayedPart = replayedPart;
+            _uncachedPart = uncachedPart;
         }
 
         LayerPartitionCache[] newPartsFor( UI.Layer layer ) {
@@ -190,8 +193,8 @@ final class StyleLayerCache
             return parts;
         }
 
-        LayerRenderConf uncachedPartitionOf (LayerRenderConf full ) {
-            return ( _replayedPart == null ? LayerRenderConf.none() : _replayedPart.restrict(full) );
+        LayerRenderConf uncachedPartitionOf( LayerRenderConf full ) {
+            return ( _uncachedPart == null ? LayerRenderConf.none() : _uncachedPart.restrict(full) );
         }
     }
 

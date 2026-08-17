@@ -100,7 +100,7 @@ final class LayerRenderConf
 
     /**
      *  Returns a new {@link LayerRenderConf} with the supplied base colors and everything
-     *  else unchanged. Used by {@link LayerRenderConfPartitions} to narrow this configuration down to
+     *  else unchanged. Used by {@link LayerRenderConfPartition} to narrow this configuration down to
      *  a single part of the layer.
      */
     LayerRenderConf withBaseColors( BaseColorConf baseColors ) {
@@ -113,7 +113,7 @@ final class LayerRenderConf
 
     /**
      *  Returns a new {@link LayerRenderConf} with the supplied style layer and everything
-     *  else unchanged. Used by {@link LayerRenderConfPartitions} to narrow this configuration down to
+     *  else unchanged. Used by {@link LayerRenderConfPartition} to narrow this configuration down to
      *  a single part of the layer.
      */
     LayerRenderConf withLayer( StyleConfLayer layer ) {

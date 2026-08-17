@@ -124,9 +124,9 @@ final class FontPaintConf
         if (_paint != null)
             return _paint;
         if (_noise != null)
-            return StyleRenderer._createNoisePaint(boxModelConf, _noise);
+            return StyleRenderer.createNoisePaint(boxModelConf, _noise);
         if (_gradient != null)
-            return StyleRenderer._createGradientPaint(boxModelConf, _gradient);
+            return StyleRenderer.createGradientPaint(boxModelConf, _gradient);
         return null;
     }
 

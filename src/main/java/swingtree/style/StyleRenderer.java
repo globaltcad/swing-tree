@@ -31,14 +31,6 @@ final class StyleRenderer
 {
     /**
      *  The smallest area, in device pixels, for which splitting a rounded fill into parts pays.
-     *  <p>
-     *  The split trades one fill for seven, so it only wins once the interior it keeps out of
-     *  the antialiasing pipe is worth more than six extra fill invocations. Above this
-     *  threshold a gradient fill was measured 3x to 10x faster on an accelerated surface,
-     *  growing with the area; below it the two strategies are indistinguishable, and the
-     *  measurements themselves stop being repeatable. So the threshold deliberately sits above
-     *  the noise floor rather than at the apparent crossover.
-     *  See {@code benchmarks.RoundedGradientBenchmark}.
      */
     private static final int SMALLEST_AREA_WORTH_SPLITTING = 32768; // device pixels
 
@@ -124,16 +116,9 @@ final class StyleRenderer
     }
 
     /**
-     *  Fills a shape, with antialiasing switched off over every part of it that provably has
-     *  no partially covered pixels for antialiasing to smooth.
-     *  <p>
-     *  This matters a great deal, because antialiasing is not just a per-pixel cost: it makes
-     *  {@code Graphics2D.fill(..)} rasterize a coverage mask for the whole shape in software
-     *  before compositing anything, <i>even when the destination is hardware accelerated</i>
-     *  (on X11 for example the {@link Paint} is only ever handed to the X server when
-     *  antialiasing is off). For a style layer covering a maximized window that is millions of
-     *  mask pixels per fill, on every frame of a live resize, and nearly all of them come out
-     *  fully opaque anyway.
+     *  Fills a shape as fast as possible, by switching antialiasing off over every part of it that
+     *  provably has no non-axis aligned outline (over a rounded corner, for example, we cannot
+     *  turn antialiasing off).
      *  <p>
      *  So two kinds of shape get a faster treatment here:
      *  <ul>
@@ -142,14 +127,12 @@ final class StyleRenderer
      *          why that is checked before filling it in one go, without antialiasing.</li>
      *      <li>A {@link RoundRectangle2D} curves only inside its four corner boxes, so it is
      *          filled as antialiasing-free bands plus antialiased corners.
-     *          See {@link #_fillRoundRectangleInParts}.</li>
+     *          See {@link #_fillRoundRectangleInPartsFast}.</li>
      *  </ul>
      *  Anything else, like a fractional {@link Rectangle2D} or a rotated transform, keeps
-     *  antialiasing and is filled exactly as it always was. Note that every precondition is
-     *  checked rather than assumed, because being too eager here yields subtly wrong pixels
-     *  instead of an error.
+     *  antialiasing and is filled in one go.
      */
-    private static void _fillShape( final Graphics2D g2d, final Shape shape ) {
+    private static void _fillShapeFast( final Graphics2D g2d, final Shape shape ) {
         if ( !RenderingHints.VALUE_ANTIALIAS_ON.equals(g2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING)) ) {
             g2d.fill(shape); // Nothing to gain, antialiasing is already off.
             return;
@@ -160,7 +143,7 @@ final class StyleRenderer
             _fillWithoutAntialiasing(g2d, shape);
             return;
         }
-        if ( shape instanceof RoundRectangle2D && _fillRoundRectangleInParts(g2d, (RoundRectangle2D) shape, transform) )
+        if ( shape instanceof RoundRectangle2D && _fillRoundRectangleInPartsFast(g2d, (RoundRectangle2D) shape, transform) )
             return;
 
         g2d.fill(shape);
@@ -168,8 +151,6 @@ final class StyleRenderer
 
     /**
      *  Fills the given shapes with antialiasing switched off and then switches it back on.
-     *  The caller is responsible for establishing that it was on to begin with and that
-     *  these particular shapes do not need it, see {@link #_fillShape}.
      */
     private static void _fillWithoutAntialiasing( final Graphics2D g2d, final Shape... shapes ) {
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
@@ -182,25 +163,12 @@ final class StyleRenderer
     }
 
     /**
-     *  Fills a rounded rectangle as three antialiasing-free bands plus four antialiased
-     *  corners, and reports whether it could.
-     *  <p>
-     *  A rounded rectangle curves only inside its four corner boxes. Everything between them is
-     *  an axis aligned rectangle whose pixels are <i>fully</i> covered, so antialiasing has
-     *  nothing to smooth there and yields the same pixels either way, just far more slowly
-     *  (for the reason given in {@link #_fillShape}). The bands and the corner boxes tile the
-     *  shape's bounding box without overlapping, which is what lets the parts add up to the
-     *  whole instead of blending twice along their seams.
-     *  <p>
-     *  All of this is laid out in <i>user</i> space, because that is where the {@link Paint} is
-     *  anchored and drawing the parts under any other transform would slide the gradient
-     *  underneath them. The cut lines therefore have to already land on whole device pixels
-     *  instead of being rounded onto them, and if they do not, we simply hand the shape back
-     *  to be filled undivided.
+     *  Tries to fill a rounded rectangle as three antialiasing-free bands plus four antialiased
+     *  corners, and reports whether it succeeded or not.
      *
      * @return {@code true} when the shape was filled, {@code false} when the caller must fill it.
      */
-    private static boolean _fillRoundRectangleInParts(
+    private static boolean _fillRoundRectangleInPartsFast(
         final Graphics2D       g2d,
         final RoundRectangle2D round,
         final AffineTransform  transform
@@ -226,34 +194,22 @@ final class StyleRenderer
         if ( arcW <= 0 || arcH <= 0 )
             return false; // Not actually rounded; an undivided fill of it is already optimal.
 
-        /*
-            Every cut line has to sit on a whole device pixel. Otherwise a band edge and the
-            corner clip meeting it would disagree about which pixel they own, and the seam
-            between them would come out either doubly blended or not covered at all.
-        */
         final double[] cutX = { x, x + arcW, x + w - arcW, x + w };
         final double[] cutY = { y, y + arcH, y + h - arcH, y + h };
-        for ( double cut : cutX )
-            if ( !_isWhole(cut * scaleX + translateX) )
-                return false;
-        for ( double cut : cutY )
-            if ( !_isWhole(cut * scaleY + translateY) )
-                return false;
+        if ( !_allCutsAreWholeDevicePixels(cutX, scaleX, translateX) )
+            return false;
+        if ( !_allCutsAreWholeDevicePixels(cutY, scaleY, translateY) )
+            return false;
 
-        /*
-            First the interior, which holds nearly all of the area and none of the curvature.
-            A band may be empty when the arc spans the full width or height, in which case its
-            neighbours already cover everything and filling it is a no-op.
-        */
+        // The bands, which hold nearly all of the area and none of the curvature.
+        // A band is empty when the arc spans the full width or height, which fills nothing.
         _fillWithoutAntialiasing(g2d,
             new Rectangle2D.Double(cutX[0], cutY[1], w,                 cutY[2] - cutY[1]), // Between the corners.
             new Rectangle2D.Double(cutX[1], cutY[0], cutX[2] - cutX[1], arcH),              // Above them,
             new Rectangle2D.Double(cutX[1], cutY[2], cutX[2] - cutX[1], arcH)               // and below them.
         );
-        /*
-            And then the four corner boxes, each filled with the whole shape clipped to it, so
-            that the curve is rasterized by exactly the code which would have drawn it anyway.
-        */
+        // And then the four corner boxes, each filled with the whole shape clipped to it, so
+        // that the curve is rasterized by exactly the code which would have drawn it anyway.
         for ( int corner = 0; corner < 4; corner++ ) {
             final double cornerX = ( corner == 1 || corner == 3 ) ? cutX[2] : cutX[0];
             final double cornerY = ( corner >= 2 )                ? cutY[2] : cutY[0];
@@ -265,6 +221,20 @@ final class StyleRenderer
                 cornerG2d.dispose();
             }
         }
+        return true;
+    }
+
+    /**
+     *  Whether every cut line lands on a whole device pixel. A cut between two pixels would
+     *  make the band and the corner clip meeting there disagree about which pixel they own,
+     *  leaving a seam that is either blended twice or not covered at all.
+     */
+    private static boolean _allCutsAreWholeDevicePixels(
+        final double[] cuts, final double scale, final double translate
+    ) {
+        for ( double cut : cuts )
+            if ( !_isWhole(cut * scale + translate) )
+                return false;
         return true;
     }
 
@@ -299,18 +269,18 @@ final class StyleRenderer
             Shape bodyArea = conf.areas().get(UI.ComponentArea.BODY);
             if ( !StyleUtil.shapesAreEqual(fullArea, bodyArea) ) {
                 g2d.setColor(foundationColor);
-                _fillShape(g2d, fullArea); // Filling everything is a bit cheaper than UI.ComponentArea.EXTERIOR!
+                _fillShapeFast(g2d, fullArea); // Filling everything is a bit cheaper than UI.ComponentArea.EXTERIOR!
             }
             g2d.setColor(backgroundColor);
-            _fillShape(g2d, bodyArea);
+            _fillShapeFast(g2d, bodyArea);
         } else {
             if ( foundationColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
                 g2d.setColor(foundationColor);
-                _fillShape(g2d, conf.areas().get(UI.ComponentArea.EXTERIOR));
+                _fillShapeFast(g2d, conf.areas().get(UI.ComponentArea.EXTERIOR));
             }
             if ( backgroundColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
                 g2d.setColor(backgroundColor);
-                _fillShape(g2d, conf.areas().get(UI.ComponentArea.BODY));
+                _fillShapeFast(g2d, conf.areas().get(UI.ComponentArea.BODY));
             }
         }
     }
@@ -329,7 +299,7 @@ final class StyleRenderer
                 Objects.requireNonNull(borderArea);
                 if ( colors.isHomogeneous() ) {
                     g2d.setColor(colors.bottom().orElse(UI.Color.BLACK));
-                    _fillShape(g2d, borderArea);
+                    _fillShapeFast(g2d, borderArea);
                 } else {
                     // The border area clipped to each edge region. These intersections are a pure
                     // function of the (immutable) box model, so they are computed once and cached in
@@ -837,13 +807,13 @@ final class StyleRenderer
     private static final class ShadowGradientCache {
 
         /** Absolute ceiling on retained per-{@code gradientStart} stop arrays. The live cap
-         *  (see {@link #maxCachedStops()}) only drops below this on a constrained byte budget. */
+         *  (see {@link #_maxCachedStops()}) only drops below this on a constrained byte budget. */
         private static final int MAX_CACHED_STOPS = 16;
 
         /** Upper bound on retained per-{@code gradientStart} stop arrays, derived from this
          *  cache's slice of the shared {@link CacheBudget} byte budget and clamped to
          *  {@link #MAX_CACHED_STOPS}. {@code 0} disables stop caching. */
-        private static int maxCachedStops() {
+        private static int _maxCachedStops() {
             return Math.min(MAX_CACHED_STOPS, CacheBudget.maxEntriesFor(CacheBudget.Kind.SHADOW_GRADIENT));
         }
 
@@ -854,7 +824,7 @@ final class StyleRenderer
                 new LinkedHashMap<Float,GradientStops>(16, 0.75f, true) {
                     @Override
                     protected boolean removeEldestEntry( Map.Entry<Float,GradientStops> eldest ) {
-                        return size() > maxCachedStops();
+                        return size() > _maxCachedStops();
                     }
                 };
 
@@ -913,7 +883,7 @@ final class StyleRenderer
             }
             fractions[lead - 1 + n] = 1f; // guard against float rounding on the last fraction
             final GradientStops stops = new GradientStops(fractions, colors);
-            if ( maxCachedStops() > 0 )
+            if ( _maxCachedStops() > 0 )
                 _stopsByStart.put(gradientStart, stops);
             return stops;
         }
@@ -940,19 +910,19 @@ final class StyleRenderer
     ) {
         if ( gradient.colors().length == 1 ) {
             g2d.setColor(gradient.colors()[0]);
-            _fillShape(g2d, conf.areas().get(gradient.area()));
+            _fillShapeFast(g2d, conf.areas().get(gradient.area()));
         }
         else {
-            final Paint paint = _createGradientPaint(conf.boxModel(), gradient);
+            final Paint paint = createGradientPaint(conf.boxModel(), gradient);
             if ( paint != null ) {
                 Shape areaToFill = conf.areas().get(gradient.area());
                 g2d.setPaint(paint);
-                _fillShape(g2d, areaToFill);
+                _fillShapeFast(g2d, areaToFill);
             }
         }
     }
 
-    static @Nullable Paint _createGradientPaint(
+    static @Nullable Paint createGradientPaint(
         final BoxModelConf boxModel,
         final GradientConf gradient
     ) {
@@ -1085,14 +1055,14 @@ final class StyleRenderer
      *  paint - the condition {@link StyleLayerCache} needs before it may lift them out of the
      *  layer's cached image. <br>
      *  <br>
-     *  Cheap means one of the two things {@link NoisePaintCache#renderNoise} does that are not
-     *  a per-pixel rasterization: a handful of {@link NoisePaintCache#usesLargeTiles pre-rendered
-     *  tile blits}, or - for a noise of a single colour, which the renderer degenerates to a flat
-     *  fill before it ever considers tiles - one shape fill. Everything else goes through the
-     *  per-pixel {@link Paint} pipeline, which is fine once into a software image but ruinous
-     *  repeated straight onto an accelerated surface.
+     *  Cheap means {@link NoisePaintCache#renderNoise} does one of the following things:<br>
+     *  <ul>
+     *      <li>it does not draw any noise at all, because there is no {@link NoiseConf}</li>
+     *      <li>{@link NoisePaintCache#renderNoise} draws large noise tiles from a tile cache (see {@link NoisePaintCache#usesLargeTiles})</li>
+     *      <li>or it draws a noise of a single colour, which the renderer degenerates to a flat fill before it ever considers tiles</li>
+     *  </ul>
      */
-    static boolean allNoisesAreCheapToReplay( LayerRenderConf conf ) {
+    static boolean allNoisesAreCheapToRepaint( LayerRenderConf conf ) {
         for ( Pooled<NoiseConf> noise : conf.layer().noises().sortedByNames() ) {
             if ( noise.get().colors().length <= 1 )
                 continue; // Draws nothing, or a single flat fill - neither constrains anything.
@@ -1119,7 +1089,7 @@ final class StyleRenderer
      *  {@link Paint} object is required (e.g. font painting) and the large-tile blitting
      *  strategy of {@link #_renderNoise} is not applicable.
      */
-    static Paint _createNoisePaint(
+    static Paint createNoisePaint(
         final BoxModelConf      boxModel,
         final Pooled<NoiseConf> noise
     ) {
@@ -1153,8 +1123,8 @@ final class StyleRenderer
             */
 
             // project the center (cx,cy) onto the lines:
-            corner1 = projectPointOntoLine(corner1, new Point2D.Float(nx, ny), new Point2D.Float(cx, cy));
-            corner2 = projectPointOntoLine(corner2, new Point2D.Float(nx, ny), new Point2D.Float(cx, cy));
+            corner1 = _projectPointOntoLine(corner1, new Point2D.Float(nx, ny), new Point2D.Float(cx, cy));
+            corner2 = _projectPointOntoLine(corner2, new Point2D.Float(nx, ny), new Point2D.Float(cx, cy));
         }
 
         final UI.Cycle cycle  = gradient.cycle();
@@ -1254,7 +1224,7 @@ final class StyleRenderer
         }
     }
 
-    private static Point2D.Float projectPointOntoLine(
+    private static Point2D.Float _projectPointOntoLine(
         final Point2D.Float A,
         final Point2D.Float n,
         final Point2D.Float C
@@ -1426,7 +1396,7 @@ final class StyleRenderer
     ) {
         if ( style.primer().isPresent() ) {
             g2d.setColor(style.primer().get());
-            _fillShape(g2d, conf.areas().get(style.clipArea()));
+            _fillShapeFast(g2d, conf.areas().get(style.clipArea()));
         }
 
         style.image().ifPresent( imageIcon -> {
@@ -1565,7 +1535,7 @@ final class StyleRenderer
                         Paint oldPaint = g2d.getPaint();
                         try {
                             g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));
-                            _fillShape(g2d, conf.areas().get(UI.ComponentArea.BODY));
+                            _fillShapeFast(g2d, conf.areas().get(UI.ComponentArea.BODY));
                         } finally {
                             g2d.setPaint(oldPaint);
                         }
@@ -1596,10 +1566,10 @@ final class StyleRenderer
 
         final Tuple<Pooled<Paragraph>> textToRender  = text.content();
         final UI.ComponentArea     clipArea          = text.clipArea();
-        final UI.Placement         placement         = findDesiredPlacementFrom(text);
+        final UI.Placement         placement         = _findDesiredPlacementFrom(text);
         final boolean              wrapLines         = text.wrapLines();
         // Computing the area available for text rendering after applying the offset and insets:
-        final Bounds textBounds = _computeTextBounds(text, boxModel);
+        final Bounds textBounds = computeTextBounds(text, boxModel);
         try {
             Font font = Optional.ofNullable(initialFont).orElse(new Font(Font.DIALOG, Font.PLAIN, UI.scale(12)));
             font = text.fontConf().createDerivedFrom(font, boxModel).orElse(font);
@@ -1627,7 +1597,7 @@ final class StyleRenderer
         }
     }
 
-    static Bounds _computeTextBounds(final TextConf text, final BoxModelConf boxModel) {
+    static Bounds computeTextBounds(final TextConf text, final BoxModelConf boxModel) {
         final UI.ComponentBoundary placementBoundary = text.placementBoundary();
         final Offset               offset            = text.offset();
         final Outline              insets            = boxModel.insetsFor(placementBoundary);
@@ -1641,18 +1611,18 @@ final class StyleRenderer
         return Bounds.of(leftX, topY, localWidth, localHeight);
     }
 
-    private static UI.Placement findDesiredPlacementFrom(TextConf text) {
+    private static UI.Placement _findDesiredPlacementFrom(TextConf text) {
         UI.Placement chosenPlacement = text.placement();
         if ( chosenPlacement == UI.Placement.UNDEFINED ) {
             // We determine the placement of the text from the font configuration if not explicitly set:
             UI.HorizontalAlignment horizontalAlignment = text.fontConf().horizontalAlignment();
             UI.VerticalAlignment verticalAlignment = text.fontConf().verticalAlignment();
-            chosenPlacement = placementOf(horizontalAlignment, verticalAlignment);
+            chosenPlacement = _placementOf(horizontalAlignment, verticalAlignment);
         }
         return chosenPlacement;
     }
 
-    static UI.Placement placementOf(
+    private static UI.Placement _placementOf(
         UI.HorizontalAlignment horizontalAlignment, 
         UI.VerticalAlignment verticalAlignment
     ) {
@@ -2025,7 +1995,7 @@ final class StyleRenderer
         /** Upper bound on retained large tiles (~256 KiB each), from this cache's slice of
          *  the shared {@link CacheBudget} byte budget. {@code 0} disables tile caching.
          *  Read live (not snapshotted) so a runtime cache-mode change takes effect at once. */
-        private static int maxCachedTiles() {
+        private static int _maxCachedTiles() {
             return CacheBudget.maxEntriesFor(CacheBudget.Kind.NOISE_TILE);
         }
 
@@ -2051,7 +2021,7 @@ final class StyleRenderer
                 new LinkedHashMap<Long,BufferedImage>(16, 0.75f, true) {
                     @Override
                     protected boolean removeEldestEntry( Map.Entry<Long,BufferedImage> eldest ) {
-                        return size() > maxCachedTiles();
+                        return size() > _maxCachedTiles();
                     }
                 };
 
@@ -2065,7 +2035,7 @@ final class StyleRenderer
             final Color[] colors = noise.get().colors();
             if ( colors.length == 1 ) {
                 g2d.setPaint(colors[0]);
-                _fillShape(g2d, areaToFill);
+                _fillShapeFast(g2d, areaToFill);
                 return;
             }
 
@@ -2077,35 +2047,26 @@ final class StyleRenderer
 
             final Rectangle bounds = areaToFill.getBounds();
 
-            if ( !usesLargeTiles(bounds) ) {
-                // Small area (or tile caching disabled): the per-pixel Paint pipeline is fine here.
-                g2d.setPaint(getCachedNoisePaint(center, noise));
-                _fillShape(g2d, areaToFill);
-            } else {
-                // Large area: blit pre-rendered large tiles to dodge the 32x32 Paint pipeline.
+            if ( usesLargeTiles(bounds) )
                 _renderWithLargeTiles(center, noise, areaToFill, bounds, g2d);
+            else {
+                g2d.setPaint(_getCachedNoisePaint(center, noise));
+                _fillShapeFast(g2d, areaToFill);
             }
         }
 
         /**
-         *  Which of the two strategies {@link #renderNoise} will use for an area of these
-         *  bounds: {@code true} for the pre-rendered tile blits, {@code false} for the per-pixel
-         *  {@link Paint} pipeline. <br>
+         *  Which of the two strategies {@link #renderNoise} uses for an area of these bounds:
+         *  {@code true} for the pre-rendered tile blits, {@code false} for the per-pixel
+         *  {@link Paint} pipeline. Only the former is cheap enough to repeat on every paint,
+         *  which is what {@link #allNoisesAreCheapToRepaint} asks about. <br>
          *  <br>
-         *  {@link StyleLayerCache} asks through {@link #allNoisesAreCheapToReplay}, because it
-         *  may only lift a noise out of its layer's cached image when drawing it again is cheap:
-         *  a tile blit is a handful of pixmap composites, whereas the {@link Paint} pipeline
-         *  turns the same area into thousands of 32x32 mask compositions - fine into a software
-         *  image, ruinous straight onto the screen. Sharing this one predicate keeps the two
-         *  decisions in agreement. <br>
-         *  <br>
-         *  Note that this only speaks for the noises {@link #renderNoise} gets as far as asking
-         *  about: a single coloured one is a flat fill decided before this, so a caller reasoning
-         *  about replay cost has to account for that case itself.
+         *  Note that a single coloured noise is a flat fill decided before this is ever asked,
+         *  so a caller reasoning about repaint cost has to account for that case itself.
          */
         static boolean usesLargeTiles( Rectangle bounds ) {
             final long area = (long) bounds.width * bounds.height;
-            return area > LARGE_AREA_THRESHOLD && maxCachedTiles() > 0;
+            return area > LARGE_AREA_THRESHOLD && _maxCachedTiles() > 0;
         }
 
         /**
@@ -2202,10 +2163,10 @@ final class StyleRenderer
                     insets.left().orElse(0f) + noise.get().offset().x(),
                     insets.top().orElse(0f) + noise.get().offset().y()
             );
-            return getCachedNoisePaint(center, noise);
+            return _getCachedNoisePaint(center, noise);
         }
 
-        private NoiseGradientPaint getCachedNoisePaint(
+        private NoiseGradientPaint _getCachedNoisePaint(
             final Point2D.Float     center,
             final Pooled<NoiseConf> noise
         ) {
