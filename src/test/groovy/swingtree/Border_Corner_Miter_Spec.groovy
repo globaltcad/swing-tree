@@ -13,23 +13,23 @@ import utility.Utility
 import java.awt.image.BufferedImage
 import java.util.concurrent.TimeUnit
 
-@Title("Border Corner Miters")
+@Title("Border Corner Miter Joints")
 @Narrative('''
 
     A SwingTree border has four sides, and each of them may be given its own
     colour and its own thickness. Where two sides meet, one colour has to stop
     and the other has to start, and the line along which that happens is called
-    a **miter**. Everybody has seen one: it is the diagonal joint in a picture
-    frame.
+    a **miter joint**. Everybody has seen one: it is the diagonal seam in the
+    corner of a picture frame.
 
-    A miter belongs to its corner. Which pixels of the top-left corner are
+    A miter joint belongs to its corner. Which pixels of the top-left corner are
     painted in the top colour and which in the left colour is a question about
     the two border widths meeting there and about nothing else. So making a
     component wider has to leave its corners exactly as they were and lengthen
     only the straight stretches of border between them. Where that fails,
     dragging a window wider quietly redraws the corner of every component in it.
 
-    Concretely, four equally thick sides put the miter on the corner's diagonal,
+    Concretely, four equally thick sides put the miter joint on the corner's diagonal,
     which cuts a square component into four triangles, and cuts a wide one into
     two triangles at the left and right ends and two trapeziums along the top
     and bottom.
@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit
       them?** They must, since neither has the better claim to it. Here the
       pixels of each colour are counted and the counts compared.
     - **Does a border of four colours cover the same pixels a border of one
-      colour covers?** It must, or a miter has a gap running along it. Here the
+      colour covers?** It must, or a miter joint has a gap running along it. Here the
       two are painted separately and compared on coverage alone.
 
     The four garish colours used throughout are a measuring instrument rather
@@ -74,7 +74,7 @@ class Border_Corner_Miter_Spec extends Specification
 
     /**
      *  How many pixels of the given image one of the four border colours painted. Only pixels
-     *  it covered completely are counted: a pixel the miter runs through is painted partly by
+     *  it covered completely are counted: a pixel the miter joint runs through is painted partly by
      *  each of two sides, and would otherwise be counted once for both of them.
      */
     private static int pixelsPaintedIn( BufferedImage image, String color ) {
@@ -115,9 +115,9 @@ class Border_Corner_Miter_Spec extends Specification
             hands from one side to the other.
 
             Rounded corners are what make this a real question. Where a corner is square,
-            the miter between the two sides lies wholly inside it and there is nothing to
+            the miter joint between the two sides lies wholly inside it and there is nothing to
             argue about. Where it is rounded, the border curves away from the corner
-            point, so the miter has to reach further inwards to cross that curve.
+            point, so the miter joint has to reach further inwards to cross that curve.
             Reaching *towards the middle of the component* is the tempting way to make it
             reach far enough, and it is the wrong one: from the corner of a wide
             component, the middle lies in quite a different direction than it does from
@@ -129,7 +129,7 @@ class Border_Corner_Miter_Spec extends Specification
             more than a quarter of full scale in any one channel, alpha included.
 
             A quarter, because the one thing two JDKs do not agree on to the last bit is how
-            a pixel the miter runs through is divided between the two sides sharing it. That
+            a pixel the miter joint runs through is divided between the two sides sharing it. That
             fraction is the rasterizer's business, and JDK 8 rounds it differently than JDK 9
             and later do — by up to a sixth of full scale along a diagonal seam. A pixel which
             genuinely changed hands is not a rounding difference: it trades one of the four
@@ -226,7 +226,7 @@ class Border_Corner_Miter_Spec extends Specification
     ) {
         reportInfo """
             When the two sides meeting at a corner are equally thick, neither has a claim
-            on more of that corner than the other, so the miter between them is the
+            on more of that corner than the other, so the miter joint between them is the
             corner's own diagonal. That is something the pixels can be asked about
             directly: count how many of them each of the two sides painted, and the two
             counts have to agree — give or take the couple of pixels sitting squarely on
@@ -237,7 +237,7 @@ class Border_Corner_Miter_Spec extends Specification
             Equal halves at all four corners of a component 900 pixels wide and 160 tall
             leaves only one possibility for what lies between those corners: the left and
             right sides are triangles, and the top and bottom are trapeziums stretching
-            the long way across. A miter aimed at the middle of the component instead
+            the long way across. A miter joint aimed at the middle of the component instead
             would hand the top and bottom the lion's share of every corner and leave the
             left and right sides slivers, and the counts below would be nowhere near
             equal.
@@ -245,7 +245,7 @@ class Border_Corner_Miter_Spec extends Specification
             The style is chosen to make that difference as plain as it can be: a generous
             corner radius with a thin border. The wider the curve and the thinner the
             border, the further the curve sweeps away from the corner point and the
-            longer the stretch of it the miter has to cross — so the more of the corner
+            longer the stretch of it the miter joint has to cross — so the more of the corner
             there is for the two sides to disagree over. A thick border on a tight radius
             hides the question, because there the curve is over and done with before the
             two sides have finished meeting.
@@ -318,7 +318,7 @@ class Border_Corner_Miter_Spec extends Specification
             Giving the four sides four different colours changes which colour lands
             where. It must not change *whether* anything lands there: a border made of
             four colours has to cover exactly the border a single colour covers, with no
-            thread of background showing through along a miter.
+            thread of background showing through along a miter joint.
 
             So the same component is painted twice, once with four colours and once with
             one, and the two are compared on their alpha channel alone. Alpha is how much
@@ -327,8 +327,8 @@ class Border_Corner_Miter_Spec extends Specification
             which colour arrived deliberately out of it.
 
             The comparison allows the four coloured border to fall a quarter short along
-            a miter, and no further. A quarter, because a miter is a diagonal drawn across
-            a grid of square pixels, and the pixels it passes through belong to both sides
+            a miter joint, and no further. A quarter, because a miter joint is a diagonal
+            drawn across a grid of square pixels, and the pixels it passes through belong to both sides
             at once. Each side covers part of such a pixel and paints it only that much,
             which is how a diagonal edge is kept from looking like a staircase — anti
             aliasing. Two half covered paints laid over one another come to three quarters
@@ -346,13 +346,13 @@ class Border_Corner_Miter_Spec extends Specification
             to that.
 
             A **gap** is neither of those, and it is what this scenario is on watch for.
-            Two sides which disagree about where their shared miter lies leave a thread of
+            Two sides which disagree about where their shared miter joint lies leave a thread of
             pixels that neither of them paints at all — hundreds of them, running the
-            length of the miter, and losing coverage by far more than a third.
+            length of the miter joint, and losing coverage by far more than a third.
 
             Display scales that put the border widths *between* whole pixels are where
             such a disagreement is likely, which is why they are in the table below. A
-            miter drawn at a rounded off position and a miter drawn at the true one part
+            miter joint drawn at a rounded off position and a miter joint drawn at the true one part
             company by well under a pixel — invisible as a shift, and glaring as a gap.
         """
         given : """

@@ -4,9 +4,14 @@
 > **TL;DR** — If you are building a **desktop application on the JVM** and you
 > value **control, transparency and debuggability** as much as a modern,
 > declarative developer experience, SwingTree is very likely a great fit.
-> If you need mobile, web, or a GPU-composited rendering engine with hot-reload
-> previews, it is honestly not the tool for you — and we'll point you at the
-> right one below.
+> If you need mobile or web, or your iteration loop depends on hot reload and
+> live design previews, it is honestly not the tool for you — and we'll point you
+> at the right one below.
+>
+> One thing that is **not** on that second list: rendering performance. Heavily
+> styled, animated, live-resized SwingTree UIs are smooth, because the style
+> engine caches what it draws instead of redrawing it — see
+> [Snappy Rendering](./Snappy-Rendering.md).
 
 This page exists to help you make that call *quickly and honestly*, before you
 invest a day reading the rest of the [wiki](./README.md). We are not going to
@@ -26,8 +31,10 @@ Answer these and you'll know:
 | Do you have an **existing Swing codebase** you want to modernize *incrementally* (no rewrite)? | ✅✅ SwingTree is almost certainly your best option. |
 | Do you value being able to **set a breakpoint anywhere**, read a real stack trace, and understand every line — over framework "magic"? | ✅✅ This is exactly what we optimize for. |
 | Do you want **immutable, testable application state** decoupled from the UI? | ✅✅ See [MVI / MVL](./Functional-MVVM.md) and [Data-Oriented SwingTree](./Data-Oriented-SwingTree.md). |
+| Do you want a **heavily styled, animated, resizable** UI — shadows, gradients, themes — that still feels smooth? | ✅ That is what the [render cache](./Snappy-Rendering.md) is for, and it is on by default. |
 | Do you need to ship to **mobile or the web** from the same codebase? | ❌ Use Compose Multiplatform, Flutter, or a web stack. |
-| Do you need a **GPU compositor, hot reload, or live design previews**? | ❌ Compose / web tooling will make you happier. |
+| Do you need **hot reload or live design previews** in your edit-run loop? | ❌ Compose / web tooling will make you happier. |
+| Do you need **shader-level rendering** — 3D, video, per-pixel GPU effects? | ❌ That is below Swing's floor; reach for Skia, LWJGL or JavaFX. |
 | Is a **huge third-party component ecosystem** a hard requirement? | ❌ The web (React/Vue) wins that one outright. |
 
 If you ticked the green rows, keep reading. If you ticked the red ones, we'd
@@ -71,9 +78,19 @@ What this means concretely:
   that raw Swing can't do.
 
 The flip side, stated plainly: because the floor is Swing, SwingTree inherits
-Swing's ceiling. There is no Skia/GPU compositor, the theming envelope is bounded
-by the underlying LaF, and you live with Swing's HiDPI/IME history (SwingTree
-smooths a lot of this, but it cannot rewrite AWT).
+Swing's ceiling. There is no retained scene graph and no shader access, the
+theming envelope is bounded by the underlying LaF, and you live with Swing's
+HiDPI/IME history (SwingTree smooths a lot of this, but it cannot rewrite AWT).
+
+What that ceiling is *not*, despite the folklore, is a software rasterizer.
+Java2D drives accelerated pipelines on every desktop platform (Direct3D or
+OpenGL on Windows, Metal on macOS, XRender or OpenGL on Linux), and SwingTree's
+style engine is built to stay on them: rendered styles live in GPU-resident
+images and are blitted rather than redrawn. The practical limit is that
+*rasterizing new antialiased geometry* is CPU work — which is exactly why the
+engine goes to such lengths not to do it twice. See
+[Snappy Rendering](./Snappy-Rendering.md) if you want the full picture, including
+the parts SwingTree cannot fix.
 
 ---
 
@@ -95,6 +112,13 @@ SwingTree:
   invokes for you (`peek`, `apply`, `withStyle`, event handlers, lens functions)
   in try/catch + SLF4J logging, so one bad value renders a smaller UI instead of a
   blank window. See [Sane Error Handling](./Sane-Error-Handling.md).
+- **There is an inspector.** Press `Ctrl + Shift + I` over a running window and
+  you get browser-style developer tools: hold `Ctrl` and click any component to
+  see its resolved style, its layout configuration, and — this is the good part —
+  a **stack trace of the code that built it**, so "where does this panel come
+  from?" is a click rather than an archaeology project. The same window exposes
+  live library settings (UI scale, render cache mode) you can change on a running
+  app.
 
 If your instinct when evaluating a framework is *"but what is it actually doing?"*,
 you are our kind of developer.
@@ -144,6 +168,30 @@ If you maintain a Swing application today, you do **not** have to choose between
 SwingTree one panel at a time, in the language and build you already use. For most
 teams in that situation, this is the deciding factor.
 
+### 5. Heavy styling does not mean heavy frames ###
+
+Raw Swing is an immediate-mode toolkit: nothing is retained between frames, so a
+plain repaint redoes all of its work — including the expensive part, rasterizing
+antialiased shadows, borders and rounded shapes. Drag a window edge and that
+happens sixty times a second for inputs that never changed.
+
+SwingTree's style engine retains that work. It renders a styled component's
+expensive, stable pixels once, holds them in a display-compatible (typically
+GPU-resident) image keyed by the component's immutable style description, and
+blits on subsequent paints. For styles built from flat fills, borders and shadows
+it goes a step further and keys them **independently of the component size**, so
+a live resize re-renders nothing at all. That is why the heavily styled examples
+in this repository — the chat client, the theme garden, the style studio — stay
+smooth while being dragged.
+
+The honest caveat, with numbers: in a component-dense UI under a third-party
+Look-and-Feel, most of a frame is spent by *that Look-and-Feel* painting its own
+borders and component bodies, which SwingTree wraps but cannot cache. In one
+298-component view that was 69% of the frame, against 5–7% for the style engine's
+own rendering. You can only cache what you can key, and a foreign delegate's
+inputs cannot be enumerated. [Snappy Rendering](./Snappy-Rendering.md) has the
+mechanisms, the measurements, and a clear statement of where the approach stops.
+
 ---
 
 ## Why you might *not* want it ##
@@ -153,10 +201,19 @@ We'd rather lose you here than have you frustrated later.
 - **You need mobile or web.** SwingTree is desktop-JVM only. For "write once, run
   on Android/iOS/desktop," look at **Compose Multiplatform** or **Flutter**. For the
   browser, look at **React**, **Vue**, **Svelte**, or **Solid**.
-- **You want a GPU compositor and live previews.** **Jetpack Compose / Compose
-  Multiplatform** render with Skia and offer `@Preview` + hot reload. SwingTree has
-  no hot reload, and rendering is Swing's (CPU) painting pipeline. If your iteration
-  loop is sacred, Compose will feel faster.
+- **Your iteration loop depends on hot reload.** **Jetpack Compose / Compose
+  Multiplatform** offer `@Preview` and hot reload; SwingTree has neither, so you
+  restart the app to see a change. If a sub-second edit-to-pixels loop is
+  non-negotiable for you, Compose will feel better to work in. (SwingTree's answer
+  is different in kind: the [dev tools](#1-control-and-transparency-are-first-class-values)
+  let you change styling-relevant settings on the *running* app and click your way
+  from a pixel back to the line that produced it.)
+- **You need to render below Swing's floor.** Real-time 3D, video pipelines,
+  per-pixel shader effects, or thousands of independently animated primitives at
+  120 Hz are not what a `JComponent` tree is for. Reach for Skia, LWJGL, or
+  JavaFX. Ordinary application UI — even a heavily styled and animated one — is
+  a different question, and is answered in
+  [Snappy Rendering](./Snappy-Rendering.md).
 - **Maximum conciseness matters more than transparency.** Kotlin DSLs (Compose, the
   [JetBrains UI DSL](https://plugins.jetbrains.com/docs/intellij/kotlin-ui-dsl-version-2.html))
   and Vue's compiler-driven reactivity express the same UI in fewer characters than
@@ -191,6 +248,8 @@ A fair, opinionated summary. "Best" is per-axis; no framework wins everything.
 | **Runtime weight** | **Tiny library** | Large runtime + compiler | Small (Swing-based) | Library + VDOM | Library + reactivity |
 | **Type-safe markup** | ✅ compile-checked | ✅ compile-checked | ✅ | ⚠️ partial (JSX exprs) | ⚠️ template strings |
 | **Debuggability** | **Best in class** | Recomposition can be opaque | Good | VDOM indirection | Reactivity indirection |
+| **Styled-UI frame cost** | Cached & blitted; free resize for flat/bordered/shadowed styles | GPU-composited (Skia) | Raw Swing painting | Browser compositor | Browser compositor |
+| **Runtime inspector** | ✅ built in (`Ctrl+Shift+I`, click → source trace) | Layout Inspector (Android) | ❌ | ✅ DevTools | ✅ DevTools |
 | **Hot reload / preview** | ❌ | ✅ | ❌ | ✅ | ✅ |
 | **Conciseness** | Good (Java tax) | **Excellent** | Excellent (its niche) | Good | **Excellent** |
 | **Incremental Swing adoption** | **✅ unique strength** | ❌ | ➖ (its own niche) | ❌ | ❌ |
@@ -199,9 +258,12 @@ A fair, opinionated summary. "Best" is per-axis; no framework wins everything.
 A few honest notes on the closest neighbors:
 
 - **Compose Multiplatform** is the obvious modern alternative on the JVM and is
-  excellent — pick it for greenfield projects that want modern rendering, Kotlin
-  terseness, and that hot-reload loop. SwingTree's edge is *incremental Swing
-  adoption*, *no new language*, and *no runtime to reason around*.
+  excellent — pick it for greenfield projects that want Kotlin terseness, that
+  hot-reload loop, and a single codebase reaching beyond the desktop. SwingTree's
+  edge is *incremental Swing adoption*, *no new language*, and *no runtime to
+  reason around*. Rendering is not the deciding axis: Compose composites on the
+  GPU, SwingTree caches and blits, and both are comfortably fast enough for
+  application UI. Judge them on the other rows.
 - **JetBrains UI DSL** proves the builder-DSL approach works beautifully on
   Swing — but it's scoped to IDE settings panels. SwingTree is the general-purpose
   version of that idea.
@@ -217,16 +279,18 @@ A few honest notes on the closest neighbors:
 
 ```mermaid
 graph TD
-    A[Building a UI] --> B{Target platform?}
-    B -- Web --> W[Use React / Vue / Svelte]
-    B -- Mobile + more --> M[Use Compose Multiplatform / Flutter]
-    B -- JVM Desktop --> C{Existing Swing code?}
-    C -- Yes --> ST[Use SwingTree — incremental, no rewrite]
-    C -- No --> D{Need GPU rendering + hot reload?}
-    D -- Yes --> CMP[Lean Compose Multiplatform]
-    D -- No --> E{Value control, transparency, type-safety, testable immutable state?}
-    E -- Yes --> ST2[Use SwingTree]
-    E -- Not especially --> CMP2[Either works — try both, pick the feel you like]
+    A["Building a UI"] --> B{"Target platform?"}
+    B -- "Web" --> W["Use React / Vue / Svelte"]
+    B -- "Mobile + more" --> M["Use Compose Multiplatform / Flutter"]
+    B -- "JVM desktop" --> R{"3D, video or shader-level rendering?"}
+    R -- "Yes" --> GFX["Use JavaFX / Skia / LWJGL"]
+    R -- "No, ordinary app UI" --> C{"Existing Swing code?"}
+    C -- "Yes" --> ST["Use SwingTree — incremental, no rewrite"]
+    C -- "No" --> D{"Is hot reload non-negotiable?"}
+    D -- "Yes" --> CMP["Lean Compose Multiplatform"]
+    D -- "No" --> E{"Value control, transparency, type-safety,<br/>testable immutable state?"}
+    E -- "Yes" --> ST2["Use SwingTree"]
+    E -- "Not especially" --> CMP2["Either works — try both, pick the feel you like"]
 ```
 
 ---
@@ -254,4 +318,19 @@ If that felt good, the natural next steps are:
 - [Functional MVVM (MVI / MVL)](./Functional-MVVM.md) — the recommended architecture.
 - [The wiki index](./README.md) — every guide, with a recommended reading path.
 
-And if it didn't — that's fine too. We meant it about using the right tool. 🌱
+**And if "but is it actually smooth?" is your real question**, don't take our word
+for it. Clone the repository, run one of the heavily styled examples (say
+[`ThemeGardenView`](../../src/test/java/examples/zen/ThemeGardenView.java) or
+[`ChatView`](../../src/test/java/examples/chat/mvi/ChatView.java)), and drag the
+window edge around. Then press `Ctrl + Shift + I`, set the cache mode to
+`DISABLED`, and drag it again. The difference between those two drags is the
+subject of [Snappy Rendering](./Snappy-Rendering.md). There is also a
+reproducible benchmark in the repo:
+
+```bash
+./gradlew runResizeBenchmark                          # one example UI
+./gradlew runResizeBenchmark -Dbenchmark.view=all     # every example, as a comparison table
+```
+
+And if none of it is for you, that's fine too. We meant it about using the right
+tool. 🌱

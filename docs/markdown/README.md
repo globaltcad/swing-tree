@@ -67,7 +67,7 @@ fans out from there.
 
 | Guide | What it covers |
 |---|---|
-| [Snappy Rendering](./Snappy-Rendering.md) | How SwingTree keeps resizes and animations smooth where plain Swing stutters — the internal render caches, and the one `CacheMode` knob that tunes the memory ⇄ CPU trade-off (and scales it to the machine's RAM). |
+| [Snappy Rendering](./Snappy-Rendering.md) | A deep dive into the style engine's rendering optimizations: why an immutable style value makes cache invalidation disappear, how nine-slice reconstruction makes a live resize cost nothing to re-render, the caches underneath it — and what the profiler says SwingTree still *can't* fix. Plus the one `CacheMode` knob, for the impatient. |
 | [HiDPI Scaling](./HiDPI-Scaling.md) | "Developer pixels" vs "component pixels", how SwingTree scales inputs up and outputs down for you, the scaling-aware delegate accessors, and the double-scaling trap behind the deprecated `component()`. |
 | [Building a Look-and-Feel](./Building-A-Look-And-Feel.md) | An onramp for advanced users who want to ship a custom `LookAndFeel` backed by the SwingTree style engine — the `SwingTreeStyledComponentUI` contract, the three styling layers, and what the engine handles for you vs. what you implement. |
 

@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 360" width="900" height="360" role="img" aria-label="Filling a rounded rectangle with antialiasing rasterizes a coverage mask for the whole shape; splitting it into square bands plus four corner boxes limits the mask to the corners.">
+  <style>
+    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    .h{font-weight:700;font-size:13px}.s{font-size:11.5px}.xs{font-size:10.5px}
+    .t{fill:#1f2933}.m{fill:#5b6b7a}
+    .cTeal{fill:#0d9488}.cRose{fill:#be123c}
+    .fill{fill:#0d9488;fill-opacity:.26}
+    .outline{fill:none;stroke:#0d9488;stroke-width:2}
+    .cut{stroke:#1f2933;stroke-width:1;stroke-dasharray:4 3;opacity:.55}
+    .hatchBg{fill:#b45309;fill-opacity:.10}
+    .hatchLn{stroke:#b45309;stroke-width:2.4;stroke-opacity:.6}
+    @media (prefers-color-scheme:dark){
+      .t{fill:#e6edf3}.m{fill:#9aa7b4}
+      .cTeal{fill:#2dd4bf}.cRose{fill:#fb7185}
+      .fill{fill:#2dd4bf}
+      .outline{stroke:#2dd4bf}
+      .cut{stroke:#e6edf3}
+      .hatchBg{fill:#fbbf24}
+      .hatchLn{stroke:#fbbf24}
+    }
+  </style>
+  <defs>
+    <pattern id="mask" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <rect class="hatchBg" width="6" height="6"/>
+      <line class="hatchLn" x1="0" y1="0" x2="0" y2="6"/>
+    </pattern>
+    <clipPath id="cTL"><rect x="500" y="90"  width="44" height="44"/></clipPath>
+    <clipPath id="cTR"><rect x="816" y="90"  width="44" height="44"/></clipPath>
+    <clipPath id="cBL"><rect x="500" y="226" width="44" height="44"/></clipPath>
+    <clipPath id="cBR"><rect x="816" y="226" width="44" height="44"/></clipPath>
+  </defs>
+
+  <text class="t h" x="12" y="20">Antialiasing is not a per-pixel cost, it is a whole-shape cost</text>
+  <text class="m xs" x="12" y="38">Turning it on makes Java2D rasterize a coverage mask for the entire shape in software before compositing anything — even when the destination is GPU-backed.</text>
+
+  <!-- ================= left : one antialiased fill ================= -->
+  <g>
+    <text class="t h" x="30" y="76">One fill, antialiased</text>
+    <rect class="fill" x="30" y="90" width="360" height="180" rx="44"/>
+    <rect x="30" y="90" width="360" height="180" rx="44" fill="url(#mask)"/>
+    <rect class="outline" x="30" y="90" width="360" height="180" rx="44"/>
+    <text class="cRose xs" x="30" y="294">64 800 mask pixels — for a shape whose interior is entirely opaque</text>
+  </g>
+
+  <!-- ================= right : split ================= -->
+  <g>
+    <text class="t h" x="500" y="76">Three bands plus four corners</text>
+
+    <rect class="fill" x="500" y="134" width="360" height="92"/>
+    <rect class="fill" x="544" y="90"  width="272" height="44"/>
+    <rect class="fill" x="544" y="226" width="272" height="44"/>
+
+    <g clip-path="url(#cTL)"><rect class="fill" x="500" y="90" width="360" height="180" rx="44"/></g>
+    <g clip-path="url(#cTR)"><rect class="fill" x="500" y="90" width="360" height="180" rx="44"/></g>
+    <g clip-path="url(#cBL)"><rect class="fill" x="500" y="90" width="360" height="180" rx="44"/></g>
+    <g clip-path="url(#cBR)"><rect class="fill" x="500" y="90" width="360" height="180" rx="44"/></g>
+
+    <rect x="500" y="90"  width="44" height="44" fill="url(#mask)"/>
+    <rect x="816" y="90"  width="44" height="44" fill="url(#mask)"/>
+    <rect x="500" y="226" width="44" height="44" fill="url(#mask)"/>
+    <rect x="816" y="226" width="44" height="44" fill="url(#mask)"/>
+
+    <rect class="outline" x="500" y="90" width="360" height="180" rx="44"/>
+    <line class="cut" x1="544" y1="86" x2="544" y2="274"/>
+    <line class="cut" x1="816" y1="86" x2="816" y2="274"/>
+    <line class="cut" x1="496" y1="134" x2="864" y2="134"/>
+    <line class="cut" x1="496" y1="226" x2="864" y2="226"/>
+
+    <text class="cTeal xs" x="500" y="294">7 744 mask pixels — the curvature only ever lives inside those four boxes</text>
+  </g>
+
+  <g>
+    <rect x="412" y="146" width="14" height="14" fill="url(#mask)"/>
+    <text class="m xs" x="404" y="180">rasterized</text>
+    <text class="m xs" x="404" y="194">coverage</text>
+    <text class="m xs" x="404" y="208">mask</text>
+  </g>
+
+  <text class="m s" x="12" y="330">Taken only when the cut lines land on whole device pixels — otherwise a band and the corner beside it disagree about who owns the seam, and the</text>
+  <text class="m s" x="12" y="350">join shows. And only above an area at which the split pays for its six extra fills; below that, the two strategies are indistinguishable.</text>
+</svg>

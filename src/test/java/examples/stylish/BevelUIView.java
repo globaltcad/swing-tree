@@ -21,8 +21,8 @@ import static swingtree.UI.*;
  *  four colours and a border width, with no gradient, no image and no shadow involved.
  *  <p>
  *  For the rendering engine it is a demanding thing to be asked for, because those four edges
- *  have to meet somewhere. Each corner is divided by a miter, and these corners are also
- *  <i>rounded</i>, so every miter has to cross an arc rather than a straight join. This view
+ *  have to meet somewhere. Each corner is divided by a miter joint, and these corners are also
+ *  <i>rounded</i>, so every miter joint has to cross an arc rather than a straight join. This view
  *  puts sixty-four of them on screen at once and asks for them to survive a window drag.
  */
 public class BevelUIView extends Panel

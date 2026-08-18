@@ -1,0 +1,97 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 366" width="900" height="366" role="img" aria-label="A soft shadow's blended colour ramp depends only on colour, direction and falloff, while the distances at which those colours are placed depend on the geometry. The expensive half is computed once and reused; the cheap half is recomputed freely.">
+  <style>
+    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    .h{font-weight:700;font-size:13px}.hs{font-weight:700;font-size:11.5px;letter-spacing:.05em}
+    .s{font-size:11.5px}.xs{font-size:10.5px}
+    .t{fill:#1f2933}.m{fill:#5b6b7a}.cTeal{fill:#0d9488}.cAmber{fill:#b45309}
+    .card{fill:none;stroke:#cbd5e1}
+    .sEdge{stroke:#cbd5e1}
+    .tick{stroke:#1f2933;opacity:.3}
+    .arw{stroke:#0d9488;stroke-width:1.6;fill:none;marker-end:url(#sh-a)}
+    .mkT{fill:#0d9488}
+    .box{fill:none;stroke:#1f2933;stroke-width:1.4}
+    .band{fill:none;stroke:#0d9488}
+    .gs{stop-color:#0d9488}
+    @media (prefers-color-scheme:dark){
+      .t{fill:#e6edf3}.m{fill:#9aa7b4}.cTeal{fill:#2dd4bf}.cAmber{fill:#fbbf24}
+      .card{stroke:#30363d}.sEdge{stroke:#30363d}
+      .tick{stroke:#e6edf3}
+      .arw{stroke:#2dd4bf}.mkT{fill:#2dd4bf}
+      .box{stroke:#e6edf3}
+      .band{stroke:#2dd4bf}
+      .gs{stop-color:#2dd4bf}
+    }
+  </style>
+  <defs>
+    <marker id="sh-a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse"><path class="mkT" d="M0 0 L10 5 L0 10 z"/></marker>
+    <linearGradient id="ramp" x1="0" y1="0" x2="1" y2="0">
+      <stop class="gs" offset="0"   stop-opacity=".7"/>
+      <stop class="gs" offset=".35" stop-opacity=".34"/>
+      <stop class="gs" offset=".7"  stop-opacity=".1"/>
+      <stop class="gs" offset="1"   stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <text class="t h" x="12" y="20">A soft shadow is two computations, and only one of them knows about geometry</text>
+  <text class="m s" x="12" y="42">Finding the seam between them is what makes the expensive one worth caching.</text>
+
+  <!-- ============ left : the colours ============ -->
+  <text class="cTeal hs" x="12" y="78">THE EXPENSIVE HALF · THE COLOURS</text>
+  <rect x="12" y="90" width="380" height="44" fill="url(#ramp)"/>
+  <rect class="card" x="12" y="90" width="380" height="44"/>
+  <g class="tick">
+    <line x1="44"  y1="90" x2="44"  y2="134"/><line x1="76"  y1="90" x2="76"  y2="134"/>
+    <line x1="108" y1="90" x2="108" y2="134"/><line x1="140" y1="90" x2="140" y2="134"/>
+    <line x1="172" y1="90" x2="172" y2="134"/><line x1="204" y1="90" x2="204" y2="134"/>
+    <line x1="236" y1="90" x2="236" y2="134"/><line x1="268" y1="90" x2="268" y2="134"/>
+    <line x1="300" y1="90" x2="300" y2="134"/><line x1="332" y1="90" x2="332" y2="134"/>
+  </g>
+  <text class="m xs" x="12" y="152">dozens of alpha-blended colour stops, one per band of the falloff, and the</text>
+  <text class="m xs" x="12" y="168">slowest thing about drawing a shadow</text>
+  <text class="cTeal xs" x="12" y="192">They are a function of the shadow’s colour, its inset/outset direction and its</text>
+  <text class="cTeal xs" x="12" y="208">falloff curve — and of nothing else. No width, no height, no corner radius.</text>
+
+  <!-- ============ right : the distances ============ -->
+  <text class="cAmber hs" x="470" y="78">THE CHEAP HALF · THE DISTANCES</text>
+
+  <g transform="translate(470,92)">
+    <!-- corner A : radius 16, blur 8 -->
+    <g transform="translate(0,20)">
+      <path class="box" d="M44 120 L44 60 A 16 16 0 0 1 60 44 L 170 44"/>
+      <g class="band">
+        <path d="M44 60 A 16 16 0 0 1 60 44" stroke-width="3" opacity=".62"/>
+        <path d="M41 60 A 19 19 0 0 1 60 41" stroke-width="3" opacity=".5"/>
+        <path d="M38 60 A 22 22 0 0 1 60 38" stroke-width="3" opacity=".38"/>
+        <path d="M35 60 A 25 25 0 0 1 60 35" stroke-width="3" opacity=".28"/>
+        <path d="M32 60 A 28 28 0 0 1 60 32" stroke-width="3" opacity=".19"/>
+        <path d="M29 60 A 31 31 0 0 1 60 29" stroke-width="3" opacity=".11"/>
+        <path d="M26 60 A 34 34 0 0 1 60 26" stroke-width="3" opacity=".05"/>
+      </g>
+      <text class="m xs" x="30" y="140">corner radius 16 · blur 8</text>
+    </g>
+
+    <!-- corner B : radius 40, blur 20 -->
+    <g transform="translate(196,0)">
+      <path class="box" d="M36 140 L36 76 A 40 40 0 0 1 76 36 L 200 36"/>
+      <g class="band">
+        <path d="M36 76 A 40 40 0 0 1 76 36" stroke-width="5" opacity=".62"/>
+        <path d="M31 76 A 45 45 0 0 1 76 31" stroke-width="5" opacity=".5"/>
+        <path d="M26 76 A 50 50 0 0 1 76 26" stroke-width="5" opacity=".38"/>
+        <path d="M21 76 A 55 55 0 0 1 76 21" stroke-width="5" opacity=".28"/>
+        <path d="M16 76 A 60 60 0 0 1 76 16" stroke-width="5" opacity=".19"/>
+        <path d="M11 76 A 65 65 0 0 1 76 11" stroke-width="5" opacity=".11"/>
+        <path d="M6  76 A 70 70 0 0 1 76 6"  stroke-width="5" opacity=".05"/>
+      </g>
+      <text class="m xs" x="22" y="160">corner radius 40 · blur 20</text>
+    </g>
+  </g>
+
+  <text class="cAmber xs" x="470" y="284">The very same seven colours, laid down at different distances. Working out those</text>
+  <text class="cAmber xs" x="470" y="300">distances is a handful of floats, so nobody bothers to remember them.</text>
+
+  <path class="arw" d="M200 216 C 200 268, 380 258, 462 262"/>
+
+  <line class="sEdge" x1="12" y1="318" x2="888" y2="318"/>
+  <text class="t s"  x="12" y="340">One blended ramp serves four corners and four edges of the same shadow, on every frame, and every other component whose shadow matches.</text>
+  <text class="m s"  x="12" y="360">The move worth stealing: before caching a computation, look for the line inside it where geometry stops mattering, and cache only that side of it.</text>
+</svg>

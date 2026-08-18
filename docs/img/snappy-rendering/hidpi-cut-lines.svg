@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 412" width="900" height="412" role="img" aria-label="At a fractional HiDPI scale a tile boundary falls in the middle of a device pixel. Rounding each of the nine rectangles on its own lets neighbours disagree about who owns that pixel, leaving a one pixel gap in one place and a doubly blended overlap in another. Transforming the cut lines once and sharing them between adjacent tiles makes both impossible.">
+  <style>
+    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    .h{font-weight:700;font-size:14px}.s{font-size:12px}.xs{font-size:10.5px}
+    .t{fill:#1f2933}.m{fill:#5b6b7a}
+    .px{fill:none;stroke:#cbd5e1;stroke-width:.8}
+    .sEdge{stroke:#cbd5e1}
+    .tileA{fill:#0d9488;fill-opacity:.34}
+    .tileB{fill:#6d28d9;fill-opacity:.34}
+    .dbl{fill:#1f2933;fill-opacity:.42}
+    .hole{fill:none;stroke:#be123c;stroke-width:1.6;stroke-dasharray:3 2}
+    .bad{fill:#be123c}
+    .good{fill:#0f7a43}
+    .lead{stroke:#94a3b8;stroke-width:1;fill:none}
+    .cut{stroke:#1f2933;stroke-width:1.2;stroke-dasharray:4 3;opacity:.65}
+    .exact{stroke:#b45309;stroke-width:1.6}
+    @media (prefers-color-scheme:dark){
+      .t{fill:#e6edf3}.m{fill:#9aa7b4}
+      .px{stroke:#30363d}.sEdge{stroke:#30363d}
+      .tileA{fill:#2dd4bf}.tileB{fill:#a78bfa}
+      .dbl{fill:#000000;fill-opacity:.6}
+      .hole{stroke:#fb7185}.bad{fill:#fb7185}.good{fill:#34d399}
+      .lead{stroke:#4b5563}
+      .cut{stroke:#e6edf3}
+      .exact{stroke:#fbbf24}
+    }
+  </style>
+
+  <text class="t h" x="12" y="22">A tile boundary at a fractional UI scale</text>
+  <text class="m xs" x="12" y="40">A cut line 25 user pixels in lands on device coordinate 37.5 at a scale of 1.5×, in the middle of the pixel numbered 37.</text>
+
+  <!-- ============================ the ruler ============================ -->
+  <g transform="translate(12,52)">
+    <rect class="px" x="0"   y="0" width="26" height="24"/>
+    <rect class="px" x="26"  y="0" width="26" height="24"/>
+    <rect class="px" x="52"  y="0" width="26" height="24"/>
+    <rect class="px" x="78"  y="0" width="26" height="24"/>
+    <rect class="px" x="104" y="0" width="26" height="24"/>
+    <text class="m xs" x="10"  y="38">35</text>
+    <text class="m xs" x="36"  y="38">36</text>
+    <text class="m xs" x="62"  y="38">37</text>
+    <text class="m xs" x="88"  y="38">38</text>
+    <text class="m xs" x="114" y="38">39</text>
+
+    <line class="exact" x1="65" y1="-6" x2="65" y2="30"/>
+    <line class="cut"   x1="78" y1="-6" x2="78" y2="30"/>
+    <text class="m xs" x="152" y="10">37.5 falls <tspan class="bad">inside</tspan> pixel 37, where no pixel edge is,</text>
+    <text class="m xs" x="152" y="26">so the boundary rounds to the edge numbered 38.</text>
+  </g>
+
+  <!-- ============================ panel A : independent rounding ============================ -->
+  <g transform="translate(12,150)">
+    <text class="t h" x="0" y="0">Nine rectangles, each rounded on its own</text>
+    <text class="m xs" x="0" y="18">a tile's start rounds from its own origin, its end from origin + size</text>
+
+    <g transform="translate(0,32)">
+      <g>
+        <rect class="px" x="0"   y="0"  width="26" height="26"/><rect class="px" x="26"  y="0"  width="26" height="26"/><rect class="px" x="52"  y="0"  width="26" height="26"/><rect class="px" x="78"  y="0"  width="26" height="26"/><rect class="px" x="104" y="0"  width="26" height="26"/><rect class="px" x="130" y="0"  width="26" height="26"/><rect class="px" x="156" y="0"  width="26" height="26"/><rect class="px" x="182" y="0"  width="26" height="26"/><rect class="px" x="208" y="0"  width="26" height="26"/>
+        <rect class="px" x="0"   y="26" width="26" height="26"/><rect class="px" x="26"  y="26" width="26" height="26"/><rect class="px" x="52"  y="26" width="26" height="26"/><rect class="px" x="78"  y="26" width="26" height="26"/><rect class="px" x="104" y="26" width="26" height="26"/><rect class="px" x="130" y="26" width="26" height="26"/><rect class="px" x="156" y="26" width="26" height="26"/><rect class="px" x="182" y="26" width="26" height="26"/><rect class="px" x="208" y="26" width="26" height="26"/>
+        <rect class="px" x="0"   y="52" width="26" height="26"/><rect class="px" x="26"  y="52" width="26" height="26"/><rect class="px" x="52"  y="52" width="26" height="26"/><rect class="px" x="78"  y="52" width="26" height="26"/><rect class="px" x="104" y="52" width="26" height="26"/><rect class="px" x="130" y="52" width="26" height="26"/><rect class="px" x="156" y="52" width="26" height="26"/><rect class="px" x="182" y="52" width="26" height="26"/><rect class="px" x="208" y="52" width="26" height="26"/>
+        <rect class="px" x="0"   y="78" width="26" height="26"/><rect class="px" x="26"  y="78" width="26" height="26"/><rect class="px" x="52"  y="78" width="26" height="26"/><rect class="px" x="78"  y="78" width="26" height="26"/><rect class="px" x="104" y="78" width="26" height="26"/><rect class="px" x="130" y="78" width="26" height="26"/><rect class="px" x="156" y="78" width="26" height="26"/><rect class="px" x="182" y="78" width="26" height="26"/><rect class="px" x="208" y="78" width="26" height="26"/>
+      </g>
+
+      <!-- upper junction: corner ends at 37, band starts at 38 -->
+      <rect class="tileA" x="0"   y="0" width="78"  height="52"/>
+      <rect class="tileB" x="104" y="0" width="130" height="52"/>
+      <rect class="hole"  x="78"  y="0" width="26"  height="52"/>
+      <path class="lead" d="M104 12 H 250"/>
+      <text class="bad xs" x="256" y="16">a gap — left to nobody</text>
+
+      <!-- lower junction: both claim the same column -->
+      <rect class="tileA" x="0"  y="52" width="104" height="52"/>
+      <rect class="tileB" x="78" y="52" width="156" height="52"/>
+      <rect class="dbl"   x="78" y="52" width="26"  height="52"/>
+      <path class="lead" d="M104 92 H 250"/>
+      <text class="bad xs" x="256" y="96">an overlap — blended twice</text>
+    </g>
+
+    <text class="m xs" x="0" y="158">round(origin) + round(size) need not equal round(origin + size), so two</text>
+    <text class="m xs" x="0" y="174">neighbours disagree. On a soft shadow one kind of disagreement shows as a</text>
+    <text class="m xs" x="0" y="190">dark hairline along the seam, and the other as a bright one.</text>
+  </g>
+
+  <!-- ============================ panel B : shared cut lines ============================ -->
+  <g transform="translate(468,150)">
+    <text class="t h" x="0" y="0">Four cut lines per axis, rounded once</text>
+    <text class="m xs" x="0" y="18">every tile takes two adjacent entries out of the same array</text>
+
+    <g transform="translate(0,32)">
+      <g>
+        <rect class="px" x="0"   y="0"  width="26" height="26"/><rect class="px" x="26"  y="0"  width="26" height="26"/><rect class="px" x="52"  y="0"  width="26" height="26"/><rect class="px" x="78"  y="0"  width="26" height="26"/><rect class="px" x="104" y="0"  width="26" height="26"/><rect class="px" x="130" y="0"  width="26" height="26"/><rect class="px" x="156" y="0"  width="26" height="26"/><rect class="px" x="182" y="0"  width="26" height="26"/><rect class="px" x="208" y="0"  width="26" height="26"/>
+        <rect class="px" x="0"   y="26" width="26" height="26"/><rect class="px" x="26"  y="26" width="26" height="26"/><rect class="px" x="52"  y="26" width="26" height="26"/><rect class="px" x="78"  y="26" width="26" height="26"/><rect class="px" x="104" y="26" width="26" height="26"/><rect class="px" x="130" y="26" width="26" height="26"/><rect class="px" x="156" y="26" width="26" height="26"/><rect class="px" x="182" y="26" width="26" height="26"/><rect class="px" x="208" y="26" width="26" height="26"/>
+        <rect class="px" x="0"   y="52" width="26" height="26"/><rect class="px" x="26"  y="52" width="26" height="26"/><rect class="px" x="52"  y="52" width="26" height="26"/><rect class="px" x="78"  y="52" width="26" height="26"/><rect class="px" x="104" y="52" width="26" height="26"/><rect class="px" x="130" y="52" width="26" height="26"/><rect class="px" x="156" y="52" width="26" height="26"/><rect class="px" x="182" y="52" width="26" height="26"/><rect class="px" x="208" y="52" width="26" height="26"/>
+        <rect class="px" x="0"   y="78" width="26" height="26"/><rect class="px" x="26"  y="78" width="26" height="26"/><rect class="px" x="52"  y="78" width="26" height="26"/><rect class="px" x="78"  y="78" width="26" height="26"/><rect class="px" x="104" y="78" width="26" height="26"/><rect class="px" x="130" y="78" width="26" height="26"/><rect class="px" x="156" y="78" width="26" height="26"/><rect class="px" x="182" y="78" width="26" height="26"/><rect class="px" x="208" y="78" width="26" height="26"/>
+      </g>
+
+      <rect class="tileA" x="0"  y="0"  width="78"  height="104"/>
+      <rect class="tileB" x="78" y="0"  width="156" height="104"/>
+      <line class="cut" x1="78" y1="-10" x2="78" y2="114"/>
+      <path class="lead" d="M78 52 H 250"/>
+      <text class="good xs" x="256" y="56">38, read by both sides</text>
+    </g>
+
+    <text class="m xs" x="0" y="158">The corner tile ends exactly where the band tile begins, because both read</text>
+    <text class="m xs" x="0" y="174">the same number. The seam is not made unlikely, it is made impossible.</text>
+  </g>
+
+  <line class="sEdge" x1="12" y1="358" x2="888" y2="358"/>
+  <text class="m s" x="12" y="380">Sampling gets the same treatment: interpolation is nearest-neighbour, so stretching a constant source band yields an exactly constant destination</text>
+  <text class="m s" x="12" y="398">band, and no tile can pick up a colour from the far side of its own boundary — which bilinear filtering would happily do, along every seam.</text>
+</svg>

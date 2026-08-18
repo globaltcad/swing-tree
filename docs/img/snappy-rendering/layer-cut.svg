@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 430" width="900" height="430" role="img" aria-label="A style layer that mixes cacheable and uncacheable ingredients is cut into parts: the cacheable parts keep a cache entry and the odd one out is replayed on top.">
+  <style>
+    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    .h{font-weight:700;font-size:13px}.s{font-size:11.5px}.xs{font-size:10.5px}
+    .t{fill:#1f2933}.m{fill:#5b6b7a}
+    .cTeal{fill:#0d9488}.cRose{fill:#be123c}
+    .ok{fill:#0d9488;fill-opacity:.20;stroke:#cbd5e1}
+    .no{fill:#be123c;fill-opacity:.20;stroke:#cbd5e1}
+    .warn{fill:#b45309;fill-opacity:.24;stroke:#cbd5e1}
+    .br{fill:none;stroke:#0d9488;stroke-width:1.6}
+    .brR{fill:none;stroke:#be123c;stroke-width:1.6}
+    .sEdge{stroke:#cbd5e1}
+    @media (prefers-color-scheme:dark){
+      .t{fill:#e6edf3}.m{fill:#9aa7b4}
+      .cTeal{fill:#2dd4bf}.cRose{fill:#fb7185}
+      .ok{fill:#2dd4bf;stroke:#30363d}
+      .no{fill:#fb7185;stroke:#30363d}
+      .warn{fill:#fbbf24;stroke:#30363d}
+      .br{stroke:#2dd4bf}.brR{stroke:#fb7185}
+      .sEdge{stroke:#30363d}
+    }
+  </style>
+
+  <text class="t h" x="12" y="20">A layer is rendered bottom to top, in a fixed order</text>
+  <text class="m xs" x="12" y="38">fill → border → images → gradients → noises → shadows → text → painters.  One ingredient that cannot be cached used to poison the whole layer.</text>
+
+  <!-- ================= column 1 ================= -->
+  <g transform="translate(12,66)">
+    <text class="t h" x="0" y="0">No cut</text>
+    <text class="m xs" x="0" y="16">one layer, one rasterization</text>
+    <g transform="translate(0,28)">
+      <rect class="no" x="0" y="0"   width="200" height="30"/><text class="t s" x="10" y="20">custom painter</text>
+      <rect class="no" x="0" y="30"  width="200" height="30"/><text class="t s" x="10" y="50">drop shadow</text>
+      <rect class="no" x="0" y="60"  width="200" height="30"/><text class="t s" x="10" y="80">gradient</text>
+      <rect class="no" x="0" y="90"  width="200" height="30"/><text class="t s" x="10" y="110">border</text>
+      <rect class="no" x="0" y="120" width="200" height="30"/><text class="t s" x="10" y="140">flat fill</text>
+      <path class="brR" d="M212 4 h 10 v 142 h -10"/>
+      <text class="cRose xs" x="228" y="68">re-rendered</text>
+      <text class="cRose xs" x="228" y="84">every paint</text>
+    </g>
+    <text class="m xs" x="0" y="216">A painter is arbitrary user code, so nothing</text>
+    <text class="m xs" x="0" y="232">containing it may be cached — and the shadow</text>
+    <text class="m xs" x="0" y="248">underneath it pays the bill.</text>
+  </g>
+
+  <!-- ================= column 2 ================= -->
+  <g transform="translate(322,66)">
+    <text class="t h" x="0" y="0">Cut around the painters</text>
+    <text class="m xs" x="0" y="16">one cached image + a replay on top</text>
+    <g transform="translate(0,28)">
+      <rect class="warn" x="0" y="0"   width="230" height="30"/><text class="t s" x="10" y="20">custom painter</text>
+      <rect class="ok"   x="0" y="30"  width="230" height="30"/><text class="t s" x="10" y="50">drop shadow</text>
+      <rect class="ok"   x="0" y="60"  width="230" height="30"/><text class="t s" x="10" y="80">gradient</text>
+      <rect class="ok"   x="0" y="90"  width="230" height="30"/><text class="t s" x="10" y="110">border</text>
+      <rect class="ok"   x="0" y="120" width="230" height="30"/><text class="t s" x="10" y="140">flat fill</text>
+      <path class="brR" d="M242 4 h 8 v 22 h -8"/>
+      <text class="cRose xs" x="254" y="20">replayed</text>
+      <path class="br" d="M242 34 h 10 v 112 h -10"/>
+      <text class="cTeal xs" x="258" y="92">cached</text>
+    </g>
+    <text class="m xs" x="0" y="216">The cut is only made when the cache would</text>
+    <text class="m xs" x="0" y="232">actually take what is left — otherwise the</text>
+    <text class="m xs" x="0" y="248">bookkeeping costs more than the blit saves.</text>
+  </g>
+
+  <!-- ================= column 3 ================= -->
+  <g transform="translate(632,66)">
+    <text class="t h" x="0" y="0">Cut around the noises</text>
+    <text class="m xs" x="0" y="16">two cached images, one replay between</text>
+    <g transform="translate(0,28)">
+      <rect class="ok"   x="0" y="0"   width="190" height="30"/><text class="t s" x="10" y="20">drop shadow</text>
+      <rect class="warn" x="0" y="30"  width="190" height="30"/><text class="t s" x="10" y="50">noise</text>
+      <rect class="ok"   x="0" y="60"  width="190" height="30"/><text class="t s" x="10" y="80">gradient</text>
+      <rect class="ok"   x="0" y="90"  width="190" height="30"/><text class="t s" x="10" y="110">border</text>
+      <rect class="ok"   x="0" y="120" width="190" height="30"/><text class="t s" x="10" y="140">flat fill</text>
+      <path class="br"  d="M202 4 h 8 v 22 h -8"/>
+      <text class="cTeal xs" x="214" y="20">cached</text>
+      <path class="brR" d="M202 34 h 8 v 22 h -8"/>
+      <text class="cRose xs" x="214" y="50">replayed</text>
+      <path class="br"  d="M202 64 h 8 v 82 h -8"/>
+      <text class="cTeal xs" x="214" y="110">cached</text>
+    </g>
+    <text class="m xs" x="0" y="216">Only while the component is resizing, and only</text>
+    <text class="m xs" x="0" y="232">when the noise is cheap to draw again. The two</text>
+    <text class="m xs" x="0" y="248">halves then survive the drag as exemplars.</text>
+  </g>
+
+  <line class="sEdge" x1="12" y1="352" x2="888" y2="352"/>
+  <text class="t h" x="12" y="378">Why is this allowed at all?</text>
+  <text class="m s" x="12" y="398">Because the layer is composited source-over onto the destination. Drawing part A, then part B, onto the same surface produces exactly the pixels of drawing</text>
+  <text class="m s" x="12" y="416">A-then-B into one image and blitting that image. The cut is a regrouping of the same operations, in the same order — not a different rendering.</text>
+</svg>

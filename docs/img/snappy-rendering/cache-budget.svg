@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" width="900" height="400" role="img" aria-label="The total cache budget is a fraction of physical RAM clamped between a floor and a cap, then partitioned across the four caches.">
+  <style>
+    text{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+    .h{font-weight:700;font-size:13px}.s{font-size:11.5px}.xs{font-size:10.5px}
+    .t{fill:#1f2933}.m{fill:#5b6b7a}
+    .cRose{fill:#be123c}.cViolet{fill:#6d28d9}.cTeal{fill:#0d9488}.cAmber{fill:#b45309}
+    .fTeal{fill:#0d9488}.fAmber{fill:#b45309}.fViolet{fill:#6d28d9}.fGreen{fill:#0f7a43}
+    .ax{stroke:#cbd5e1;stroke-width:1}
+    .gl{stroke:#cbd5e1;stroke-width:1;stroke-dasharray:2 4}
+    .capline{stroke:#94a3b8;stroke-width:1;stroke-dasharray:3 3}
+    .cv{fill:none;stroke-width:2.2;stroke-linejoin:round}
+    .lRose{stroke:#be123c}.lViolet{stroke:#6d28d9}.lTeal{stroke:#0d9488}.lAmber{stroke:#b45309}
+    @media (prefers-color-scheme:dark){
+      .t{fill:#e6edf3}.m{fill:#9aa7b4}
+      .cRose{fill:#fb7185}.cViolet{fill:#a78bfa}.cTeal{fill:#2dd4bf}.cAmber{fill:#fbbf24}
+      .fTeal{fill:#2dd4bf}.fAmber{fill:#fbbf24}.fViolet{fill:#a78bfa}.fGreen{fill:#34d399}
+      .ax{stroke:#30363d}.gl{stroke:#30363d}.capline{stroke:#4b5563}
+      .lRose{stroke:#fb7185}.lViolet{stroke:#a78bfa}.lTeal{stroke:#2dd4bf}.lAmber{stroke:#fbbf24}
+    }
+  </style>
+
+  <text class="t h" x="12" y="20">One knob, scaled to the machine</text>
+  <text class="m xs" x="12" y="38">The mode does not name a number of megabytes. It names a fraction of physical RAM, clamped between a floor — so a small device still caches something —</text>
+  <text class="m xs" x="12" y="54">and a cap, so that a 256 GiB workstation does not hand gigabytes to a UI cache.</text>
+
+  <g>
+    <line class="ax" x1="70" y1="76"  x2="70"  y2="276"/>
+    <line class="ax" x1="70" y1="276" x2="440" y2="276"/>
+    <g class="gl">
+      <line x1="70" y1="226" x2="440" y2="226"/>
+      <line x1="70" y1="176" x2="440" y2="176"/>
+      <line x1="70" y1="126" x2="440" y2="126"/>
+      <line x1="70" y1="76"  x2="440" y2="76"/>
+    </g>
+    <g class="m xs" text-anchor="end">
+      <text x="62" y="280">0</text>
+      <text x="62" y="230">128</text>
+      <text x="62" y="180">256</text>
+      <text x="62" y="130">384</text>
+      <text x="62" y="80">512</text>
+    </g>
+    <text class="m xs" x="14" y="70">MB</text>
+
+    <line class="capline" x1="290" y1="76" x2="290" y2="276"/>
+    <text class="m xs" x="296" y="110">from here on, every</text>
+    <text class="m xs" x="296" y="124">mode sits at its cap</text>
+
+    <g class="m xs" text-anchor="middle">
+      <text x="70"  y="292">1</text><text x="114" y="292">2</text><text x="158" y="292">4</text>
+      <text x="202" y="292">8</text><text x="246" y="292">16</text><text x="290" y="292">32</text>
+      <text x="334" y="292">64</text><text x="378" y="292">128</text><text x="422" y="292">256</text>
+    </g>
+    <text class="m xs" x="255" y="312" text-anchor="middle">physical RAM (GiB)</text>
+    <text class="m xs" x="74" y="308">↑ the floor</text>
+
+    <polyline class="cv lRose"   points="70,251 114,251 158,244 202,211.9 246,147.9 290,76 334,76 378,76 422,76"/>
+    <polyline class="cv lViolet" points="70,263.5 114,263.5 158,260 202,244 246,211.9 290,176 334,176 378,176 422,176"/>
+    <polyline class="cv lTeal"   points="70,269.8 114,269.8 158,268.2 202,260 246,244 290,226 334,226 378,226 422,226"/>
+    <polyline class="cv lAmber"  points="70,272.9 114,272.9 158,272.1 202,268.2 246,260 290,251 334,251 378,251 422,251"/>
+
+    <g class="xs">
+      <text class="cRose"   x="450" y="72">AGGRESSIVE — 2 %</text>
+      <text class="cViolet" x="450" y="172">GENEROUS — 1 %</text>
+      <text class="cTeal"   x="450" y="222">BALANCED — 0.5 %  ★ the default</text>
+      <text class="cAmber"  x="450" y="247">CONSERVATIVE — 0.25 %</text>
+      <text class="m"       x="450" y="272">DISABLED</text>
+    </g>
+  </g>
+
+  <!-- ================= partition ================= -->
+  <line class="ax" x1="12" y1="330" x2="888" y2="330"/>
+  <text class="t h" x="12" y="358">…then split four ways</text>
+  <g transform="translate(190,346)">
+    <rect class="fTeal"   x="0"   y="0" width="270" height="16" fill-opacity=".7"/>
+    <rect class="fAmber"  x="270" y="0" width="180" height="16" fill-opacity=".7"/>
+    <rect class="fViolet" x="450" y="0" width="90"  height="16" fill-opacity=".7"/>
+    <rect class="fGreen"  x="540" y="0" width="60"  height="16" fill-opacity=".7"/>
+    <text class="m xs" x="0"   y="32">style layers 45 %</text>
+    <text class="m xs" x="272" y="32">noise tiles 30 %</text>
+    <text class="m xs" x="452" y="32">text 15 %</text>
+    <text class="m xs" x="542" y="32">shadows 10 %</text>
+  </g>
+</svg>
