@@ -634,6 +634,48 @@ class Declarative_Tables_Spec extends Specification
             table.getValueAt(0, 2) == "1"
     }
 
+    def 'A `Tuple` based table can also be bound further down the chain, through `withModel(..)`.'()
+    {
+        reportInfo """
+            `UI.table(..)` and `UI.table().withModel(..)` are two spellings of the same
+            thing. The factory is the shorter one for when the table is the whole
+            declaration, and the builder method is for when you have already begun a
+            table and want to bind its data further down the chain, after configuring
+            something else about it first.
+
+            Both come in a two argument spelling which leaves the editability out. That
+            reads as read only, which is the safe thing to default to.
+        """
+        given : 'A property holding two rows of cells.'
+            var rows = Var.of(Tuple.of(
+                            Tuple.of("Alice", "30"),
+                            Tuple.of("Bob",   "42")
+                        ))
+        and : 'A table which binds that property through the builder, without naming an editability:'
+            var table =
+                    UI.table()
+                    .id("people")
+                    .withModel(UI.CellOrder.ROW_MAJOR, rows)
+                    .get(JTable)
+
+        expect : 'Everything we declared before the binding survived it.'
+            table.getName() == "people"
+        and : 'The table shows the two rows held by the property.'
+            table.getRowCount() == 2
+            table.getColumnCount() == 2
+            table.getValueAt(0, 0) == "Alice"
+            table.getValueAt(1, 1) == "42"
+        and : 'Its cells are read only, because we did not ask for anything else.'
+            !table.isCellEditable(0, 0)
+
+        when : 'We add a row to the property...'
+            rows.update({ it.add(Tuple.of("Carol", "27")) })
+            UI.sync()
+        then : '...the table follows it, exactly as it would have through `UI.table(..)`.'
+            table.getRowCount() == 3
+            table.getValueAt(2, 0) == "Carol"
+    }
+
     def 'The cells of an editable `Tuple` based table are written back into the property.'()
     {
         reportInfo """

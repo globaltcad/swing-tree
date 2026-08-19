@@ -113,6 +113,46 @@ class Table_Data_Spec extends Specification
             TableData.of(UI.CellOrder.ROW_MAJOR, "A", "B").getRowCount() == 0
     }
 
+    def 'A table can be described completely, in a single call, through the full `TableData.of(..)` factory.'()
+    {
+        reportInfo """
+            The short `TableData.of(..)` factories are conveniences which leave something
+            out and fill in a default for you: no column classes, no column names, always
+            read only. This longer one spells out everything a table has, namely how its
+            cells are stored, whether the user may edit them, what the columns are called,
+            what type each column holds, and the cells themselves.
+
+            Reach for it when the whole description arrives from somewhere else in one
+            piece, from a parsed file or a server response, say, so that you do not have
+            to rebuild it column by column.
+        """
+        given : 'A complete description of a small, editable, row major table.'
+            var data = TableData.of(
+                            UI.CellOrder.ROW_MAJOR,
+                            UI.Editability.EDITABLE,
+                            Tuple.ofNullable(String, "Name", "Age"),
+                            Tuple.of(Class, String, Integer),
+                            Tuple.of(
+                                Tuple.ofNullable(Object, "Alice", 30),
+                                Tuple.ofNullable(Object, "Bob",   42)
+                            )
+                        )
+
+        expect : 'Each of the five things we spelled out reads straight back off the table.'
+            data.cellOrder() == UI.CellOrder.ROW_MAJOR
+            data.editability() == UI.Editability.EDITABLE
+            data.columnNames() == Tuple.ofNullable(String, "Name", "Age")
+            data.columnClasses() == Tuple.of(Class, String, Integer)
+            data.getRow(0) == TableData.row("Alice", 30)
+            data.getRow(1) == TableData.row("Bob", 42)
+        and : 'Its two dimensions follow from the cells, so there is nothing to keep in sync by hand.'
+            data.getRowCount() == 2
+            data.getColumnCount() == 2
+        and : 'The column classes are what a `JTable` consults to pick its renderers and editors.'
+            data.getColumnClass(0) == String
+            data.getColumnClass(1) == Integer
+    }
+
     def 'Rows can be added, replaced and removed, one at a time or in ranges.'()
     {
         reportInfo """
@@ -370,6 +410,88 @@ class Table_Data_Spec extends Specification
         then : '...that works out too.'
             narrower.getColumnCount() == 1
             narrower.getColumn(0) == Tuple.ofNullable(Object, "c", "d")
+    }
+
+    def 'Changing the cell order of a table reinterprets its cells, which transposes what it shows.'()
+    {
+        reportInfo """
+            The cell order says how the cells are *stored*, not how they are displayed,
+            which means that changing it does not move a single cell. It only changes
+            which axis the outer `Tuple` is read along, so a table whose cells stay
+            exactly where they are comes out transposed.
+
+            Reach for `withCellOrder(..)` when you realise that the cells were the other
+            way around all along, and not when you want to flip a table on screen.
+        """
+        given : 'A row major table of two rows, three cells wide, which the user may edit.'
+            var rowMajor = TableData.of(UI.CellOrder.ROW_MAJOR, Tuple.of(
+                                Tuple.ofNullable(Object, "a", "b", "c"),
+                                Tuple.ofNullable(Object, "d", "e", "f")
+                            )).asEditable()
+
+        expect : 'It reads as the two by three table you would expect.'
+            rowMajor.getRowCount() == 2
+            rowMajor.getColumnCount() == 3
+            rowMajor.getRow(0) == TableData.row("a", "b", "c")
+            rowMajor.getRow(1) == TableData.row("d", "e", "f")
+
+        when : 'We declare the very same cells to be stored column by column instead...'
+            var columnMajor = rowMajor.withCellOrder(UI.CellOrder.COLUMN_MAJOR)
+        then : '...the table turns onto its side: three rows of two cells each.'
+            columnMajor.getRowCount() == 3
+            columnMajor.getColumnCount() == 2
+            columnMajor.getRow(0) == TableData.row("a", "d")
+            columnMajor.getRow(1) == TableData.row("b", "e")
+            columnMajor.getRow(2) == TableData.row("c", "f")
+        and : 'Nothing actually moved, the cells are literally the ones we handed in.'
+            columnMajor.cells() === rowMajor.cells()
+        and : 'Editability is a separate matter, so it came through the change untouched.'
+            columnMajor.isEditable()
+        and : 'Asking for the cell order it already has hands back the very same table.'
+            columnMajor.withCellOrder(UI.CellOrder.COLUMN_MAJOR) === columnMajor
+    }
+
+    def 'The cell order and the editability of a table are two independent axes.'()
+    {
+        reportInfo """
+            A table stores its cells one way and permits (or forbids) edits another, and
+            the two have nothing to do with each other. `cellOrder()` and `editability()`
+            report them separately, and changing one always leaves the other exactly as
+            it was.
+
+            That is the whole point of them being separate: you can turn editing on
+            without any risk of transposing your table by accident.
+        """
+        given : 'A table of two rows, built with the given cell order and editability.'
+            var data = TableData.of(cellOrder, Tuple.of(
+                                Tuple.ofNullable(Object, "Alice", 30),
+                                Tuple.ofNullable(Object, "Bob",   42)
+                            )).withEditability(editability)
+
+        expect : 'It reports both axes exactly as we asked for them.'
+            data.cellOrder() == cellOrder
+            data.editability() == editability
+        and : 'The two enums answer the same questions the table does.'
+            data.cellOrder().isRowMajor() == (cellOrder == UI.CellOrder.ROW_MAJOR)
+            data.isEditable() == editability.isEditable()
+
+        when : 'We flip the editability over to the other constant...'
+            var flipped = data.withEditability(otherEditability)
+        then : '...only that axis changed, the cell order stayed exactly where it was.'
+            flipped.editability() == otherEditability
+            flipped.cellOrder() == cellOrder
+        and : 'And because no cell was touched, the table still shows what it showed before.'
+            flipped.getRow(0) == data.getRow(0)
+            flipped.getRow(1) == data.getRow(1)
+            flipped.getRowCount() == data.getRowCount()
+            flipped.getColumnCount() == data.getColumnCount()
+
+        where : 'We flip the editability in both directions, in both cell orders.'
+            cellOrder                 | editability              || otherEditability
+            UI.CellOrder.ROW_MAJOR    | UI.Editability.READ_ONLY || UI.Editability.EDITABLE
+            UI.CellOrder.ROW_MAJOR    | UI.Editability.EDITABLE  || UI.Editability.READ_ONLY
+            UI.CellOrder.COLUMN_MAJOR | UI.Editability.READ_ONLY || UI.Editability.EDITABLE
+            UI.CellOrder.COLUMN_MAJOR | UI.Editability.EDITABLE  || UI.Editability.READ_ONLY
     }
 
     def 'A ragged table reads as though its holes were filled with nulls.'()
