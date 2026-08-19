@@ -19,11 +19,11 @@ import java.util.Locale;
  *  <p>
  *  Note how the expense list is simply a {@link TableData} field: an immutable
  *  value describing the <em>whole</em> table (cells, column names, column
- *  classes, its {@link UI.CellOrder} and its {@link UI.Editability}) that the view binds to a
- *  {@code Var<TableData>}. There is no {@code TableModel} to implement and no
- *  event to fire — change the value and the table follows. Because the layout is
- *  {@link UI.Editability#EDITABLE}, the user's inline edits flow straight
- *  back into this value as a new {@code TableData}.
+ *  classes, its {@link UI.CellOrder} and its {@link UI.Editability}) that the view
+ *  binds to a {@code Var<TableData>}. There is no {@code TableModel} to implement
+ *  and no event to fire — change the value and the table follows. Because its
+ *  editability is {@link UI.Editability#EDITABLE}, the user's inline edits flow
+ *  straight back into this value as a new {@code TableData}.
  */
 @With @Getter @Accessors(fluent = true) @AllArgsConstructor
 public final class BudgetViewModel {

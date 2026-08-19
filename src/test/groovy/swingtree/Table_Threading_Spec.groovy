@@ -400,7 +400,7 @@ class Table_Threading_Spec extends Specification
             var table = UI.runAndGet({
                 UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)
             })
-        expect : 'The table is read only, because we did not ask for an editable layout.'
+        expect : 'The table is read only, because we did not ask for an editable table.'
             UI.runAndGet({ !table.isCellEditable(0, 1) })
 
         when : 'A write sneaks into the model through the model API on the UI thread anyway...'

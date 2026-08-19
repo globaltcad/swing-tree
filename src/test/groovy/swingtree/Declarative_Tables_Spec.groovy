@@ -25,8 +25,9 @@ import java.awt.*
     API allows you to supply simple collection based data as a data source for your table.
 
     Note that the **recommended** way of modelling a table is the `TableData` value,
-    which describes an entire table (its cells, column names, column classes and layout)
-    as a single immutable value that you hold in a property and bind to a table.
+    which describes an entire table (its cells, column names, column classes, cell order
+    and editability) as a single immutable value that you hold in a property and bind
+    to a table.
     See the `Table_Data_Spec` for what that looks like, and read on here for the older,
     pull based data sources, which are still supported and still handy for a quick table
     over data you already hold somewhere else.
@@ -578,7 +579,7 @@ class Declarative_Tables_Spec extends Specification
         and : 'The columns have the default (spreadsheet style) names.'
             table.getColumnName(0) == "A"
             table.getColumnName(1) == "B"
-        and : 'The cells are read only, because we did not ask for an editable layout.'
+        and : 'The cells are read only, because we did not ask for an editable table.'
             !table.isCellEditable(0, 0)
 
         when : 'We change the property by adding a row...'
@@ -849,10 +850,10 @@ class Declarative_Tables_Spec extends Specification
     {
         reportInfo """
             A `TableData` is the most complete description of the contents of
-            a table: it carries the cells, the column names, the column classes and
-            the layout of the data, all in a single immutable value. So if you hold
-            such a value in a property, then that property alone describes your
-            whole table, which is why you may bind it directly.
+            a table: it carries the cells, the column names, the column classes, the
+            cell order and the editability of the data, all in a single immutable
+            value. So if you hold such a value in a property, then that property alone
+            describes your whole table, which is why you may bind it directly.
             Note that no `updateTableOn(..)` binding is needed here, because the
             table listens to the property itself.
         """
