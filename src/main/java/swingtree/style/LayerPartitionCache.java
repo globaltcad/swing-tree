@@ -704,7 +704,7 @@ final class LayerPartitionCache
          *  produce one pixel gaps or double blended overlaps. Nearest neighbor interpolation
          *  ensures that stretching a constant source band produces an exactly constant
          *  destination band and that sampling never bleeds across tile boundaries. <br>
-         *  Note: Antialiasing is switched off when a till is a simple fill color for performance reasons. <br>
+         *  Note: Antialiasing is switched off for the whole reconstruction so that solid FillColor tiles can be drawn efficiently. <br>
          *
          * @param g The destination graphics to draw the tiles into.
          * @param canonicalConf The exemplar configuration this image was rendered from,
