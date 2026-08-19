@@ -25,9 +25,9 @@ public interface TableListDataSource<E> {
 
     /**
      *  When passed to {@link swingtree.UIForTable#withModel(UI.CellOrder, UI.Editability, TableListDataSource)},
-     *  this method is called continuously by you table to fetch the current {@link List}
-     *  based table data. It is not cached or stored insider the table, so if you
-     *  do not want to rebuild the list based model over and over again make sure this
+     *  this method is called continuously by your table to fetch the current {@link List}
+     *  based table data. It is not cached or stored inside the table, so if you
+     *  do not want to rebuild the list based model over and over again, make sure this
      *  list data source always returns the same object instead of rebuilding it eagerly...
      *
      * @return A list matrix which will be used to populate the table.
