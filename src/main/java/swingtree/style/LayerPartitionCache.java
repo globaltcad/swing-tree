@@ -11,6 +11,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DirectColorModel;
+import java.awt.image.Raster;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -609,14 +613,24 @@ final class LayerPartitionCache
     {
         /** Indices into the {@link #_stretchTiles} array. */
         private static final int TOP = 0, LEFT = 1, CENTER = 2, RIGHT = 3, BOTTOM = 4;
+        private interface StretchTile {
+            final class Nothing implements StretchTile {
+                static final Nothing INSTANCE = new Nothing();
+            }
+            final class FillColor implements StretchTile {
+                final Color _color;
+                FillColor( Color color ) { _color = color; }
+            }
+            final class Image implements StretchTile {
+                final BufferedImage _image;
+                Image( BufferedImage image ) { _image = image; }
+            }
+        }
 
         private final int                      _width;
         private final int                      _height;
         private @Nullable BufferedImage        _image;
-        /** The five dedicated stretchable tiles (four edge bands + center), lazily
-         *  extracted on the first stretch tiled paint (see {@link #_extractStretchTiles}
-         *  for why they cannot be blitted straight out of {@link #_image}). */
-        private BufferedImage @Nullable []     _stretchTiles;
+        private StretchTile @Nullable []       _stretchTiles;
         private boolean                        _isRendered;
         private int                            _numberOfHitsUntilAllocation;
 
@@ -634,13 +648,14 @@ final class LayerPartitionCache
         long reservedBytes() {
             long total = (long) _width * _height * BYTES_PER_PIXEL;
             if ( _stretchTiles != null )
-                for ( BufferedImage tile : _stretchTiles )
-                    total += _bytesOf(tile);
+                for ( StretchTile tile : _stretchTiles )
+                    if ( tile instanceof StretchTile.Image )
+                        total += _bytesOf(((StretchTile.Image) tile)._image);
             return total;
         }
 
-        private static long _bytesOf( @Nullable BufferedImage image ) {
-            return ( image == null ? 0 : (long) image.getWidth() * image.getHeight() * BYTES_PER_PIXEL );
+        private static long _bytesOf( BufferedImage image ) {
+            return (long) image.getWidth() * image.getHeight() * BYTES_PER_PIXEL;
         }
 
         private static BufferedImage _allocate( @Nullable GraphicsConfiguration gc, int width, int height ) {
@@ -689,6 +704,7 @@ final class LayerPartitionCache
          *  produce one pixel gaps or double blended overlaps. Nearest neighbor interpolation
          *  ensures that stretching a constant source band produces an exactly constant
          *  destination band and that sampling never bleeds across tile boundaries. <br>
+         *  Note: Antialiasing is switched off when a till is a simple fill color for performance reasons. <br>
          *
          * @param g The destination graphics to draw the tiles into.
          * @param canonicalConf The exemplar configuration this image was rendered from,
@@ -707,7 +723,7 @@ final class LayerPartitionCache
             final int insetBottom = (int) _positive(insets.bottom());
             final int insetLeft   = (int) _positive(insets.left());
 
-            BufferedImage[] tiles = _stretchTiles;
+            StretchTile[] tiles = _stretchTiles;
             if ( tiles == null ) {
                 tiles = _extractStretchTiles(g.getDeviceConfiguration(), image, insetTop, insetRight, insetBottom, insetLeft);
                 _stretchTiles = tiles;
@@ -744,6 +760,7 @@ final class LayerPartitionCache
             try {
                 g2.setTransform(new AffineTransform()); // We draw in device space.
                 g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
                 // The four corners, 1:1 sub-rectangle copies from the exemplar image:
                 _drawRegion(g2, image, dx[0], dy[0], dx[1], dy[1], sx[0], sy[0], sx[1], sy[1]); // top-left
                 _drawRegion(g2, image, dx[2], dy[0], dx[3], dy[1], sx[2], sy[0], sx[3], sy[1]); // top-right
@@ -773,29 +790,36 @@ final class LayerPartitionCache
          *  manifested as long component edges losing their shadows. A scaled blit whose
          *  source is a <i>whole image</i> measures pixel perfect even at extreme ratios -
          *  so each stretched tile gets its own image, while the corner tiles (copied 1:1,
-         *  never stretched) keep sourcing the exemplar image directly.
+         *  never stretched) keep sourcing the exemplar image directly. <br>
+         *  <br>
+         *  A region that turns out to be empty or single colored needs no image and no blit
+         *  at all - see {@link StretchTile} for what those cases are and what is done with
+         *  them instead.
          */
-        private static BufferedImage[] _extractStretchTiles(
+        private static StretchTile[] _extractStretchTiles(
             final @Nullable GraphicsConfiguration gc,
             final BufferedImage image,
             final int insetTop, final int insetRight, final int insetBottom, final int insetLeft
         ) {
             final int width  = image.getWidth();
             final int height = image.getHeight();
-            final BufferedImage[] tiles = new BufferedImage[5];
-            tiles[TOP]    = _copyRegion(gc, image, insetLeft,          0,                    width - insetRight, insetTop           );
-            tiles[LEFT]   = _copyRegion(gc, image, 0,                  insetTop,             insetLeft,          height - insetBottom);
-            tiles[CENTER] = _copyRegion(gc, image, insetLeft,          insetTop,             width - insetRight, height - insetBottom);
-            tiles[RIGHT]  = _copyRegion(gc, image, width - insetRight, insetTop,             width,              height - insetBottom);
-            tiles[BOTTOM] = _copyRegion(gc, image, insetLeft,          height - insetBottom, width - insetRight, height             );
+            final StretchTile[] tiles = new StretchTile[5];
+            tiles[TOP]    = _extractTile(gc, image, insetLeft,          0,                    width - insetRight, insetTop           );
+            tiles[LEFT]   = _extractTile(gc, image, 0,                  insetTop,             insetLeft,          height - insetBottom);
+            tiles[CENTER] = _extractTile(gc, image, insetLeft,          insetTop,             width - insetRight, height - insetBottom);
+            tiles[RIGHT]  = _extractTile(gc, image, width - insetRight, insetTop,             width,              height - insetBottom);
+            tiles[BOTTOM] = _extractTile(gc, image, insetLeft,          height - insetBottom, width - insetRight, height             );
             return tiles;
         }
 
-        private static BufferedImage _copyRegion(
+        private static StretchTile _extractTile(
             final @Nullable GraphicsConfiguration gc,
             final BufferedImage source,
             final int x1, final int y1, final int x2, final int y2
         ) {
+            final @Nullable StretchTile bufferless = _scanForBufferlessTile(source, x1, y1, x2, y2);
+            if ( bufferless != null )
+                return bufferless;
             final int width  = Math.max(1, x2 - x1);
             final int height = Math.max(1, y2 - y1);
             final BufferedImage region = _allocate(gc, width, height);
@@ -806,7 +830,51 @@ final class LayerPartitionCache
             } finally {
                 g.dispose();
             }
-            return region;
+            return new StretchTile.Image(region);
+        }
+
+        private static @Nullable StretchTile _scanForBufferlessTile(
+            final BufferedImage image,
+            final int x1, final int y1, final int x2, final int y2
+        ) {
+            final ColorModel colorModel = image.getColorModel();
+            if ( !(colorModel instanceof DirectColorModel) || !colorModel.hasAlpha() )
+                return null;
+            final Raster raster = image.getRaster();
+            if ( raster.getTransferType() != DataBuffer.TYPE_INT || raster.getNumDataElements() != 1 )
+                return null;
+            final int alphaMask = ((DirectColorModel) colorModel).getAlphaMask();
+            final int startX = Math.max(0, x1);
+            final int startY = Math.max(0, y1);
+            final int width  = Math.min(image.getWidth(),  x2) - startX;
+            final int endY   = Math.min(image.getHeight(), y2);
+            if ( width <= 0 || endY <= startY )
+                return StretchTile.Nothing.INSTANCE;
+
+            final int[] row = new int[width];
+            int     alphaBits = 0;
+            int     firstPixel = 0;
+            boolean isUniform  = true;
+            for ( int y = startY; y < endY; y++ ) {
+                raster.getDataElements(startX, y, width, 1, row);
+                if ( y == startY )
+                    firstPixel = row[0];
+                for ( int i = 0; i < width; i++ ) {
+                    final int pixel = row[i];
+                    alphaBits |= pixel;
+                    isUniform &= ( pixel == firstPixel );
+                }
+                if ( !isUniform && (alphaBits & alphaMask) != 0 )
+                    return null; // Neither empty nor uniform, so an image it is.
+            }
+            if ( (alphaBits & alphaMask) == 0 )
+                return StretchTile.Nothing.INSTANCE;
+            if ( !isUniform )
+                return null;
+            final int argb = colorModel.getRGB(firstPixel);
+            if ( (argb >>> 24) != 0xFF )
+                return null;
+            return new StretchTile.FillColor(new Color(argb, true));
         }
 
         private static void _drawRegion(
@@ -820,12 +888,20 @@ final class LayerPartitionCache
         }
 
         private static void _drawStretched(
-            final Graphics2D g2, final BufferedImage tile,
+            final Graphics2D g2, final StretchTile tile,
             final int dx1, final int dy1, final int dx2, final int dy2
         ) {
+            if ( tile instanceof StretchTile.Nothing )
+                return;
             if ( dx2 <= dx1 || dy2 <= dy1 )
                 return; // Degenerate tile, nothing to draw.
-            g2.drawImage(tile, dx1, dy1, dx2, dy2, 0, 0, tile.getWidth(), tile.getHeight(), null);
+            if ( tile instanceof StretchTile.FillColor ) {
+                g2.setColor(((StretchTile.FillColor) tile)._color);
+                g2.fillRect(dx1, dy1, dx2 - dx1, dy2 - dy1);
+                return;
+            }
+            final BufferedImage image = ((StretchTile.Image) tile)._image;
+            g2.drawImage(image, dx1, dy1, dx2, dy2, 0, 0, image.getWidth(), image.getHeight(), null);
         }
     }
 
