@@ -24,7 +24,7 @@ import java.util.List;
 public interface TableListDataSource<E> {
 
     /**
-     *  When passed to {@link swingtree.UIForTable#withModel(UI.ListData, TableListDataSource)},
+     *  When passed to {@link swingtree.UIForTable#withModel(UI.CellOrder, UI.Editability, TableListDataSource)},
      *  this method is called continuously by you table to fetch the current {@link List}
      *  based table data. It is not cached or stored insider the table, so if you
      *  do not want to rebuild the list based model over and over again make sure this

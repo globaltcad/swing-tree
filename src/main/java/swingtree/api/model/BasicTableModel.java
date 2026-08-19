@@ -32,7 +32,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *  property and bind through {@link swingtree.UI#table(sprouts.Var)}:
  *  <pre>{@code
  *      Var<TableData> data = Var.of(
- *              TableData.of(UI.ListData.ROW_MAJOR, "A", "B")
+ *              TableData.of(UI.CellOrder.ROW_MAJOR, "A", "B")
  *                  .addRow(1, 2)
  *          );
  *

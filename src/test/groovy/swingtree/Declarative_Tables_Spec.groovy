@@ -54,7 +54,7 @@ class Declarative_Tables_Spec extends Specification
         """
         given : 'A simple table UI with a map based data table model.'
             var ui =
-                    UI.table(UI.MapData.EDITABLE, { ["X":["a", "b", "c"], "Y":["1", "2", "3"]] })
+                    UI.table(UI.Editability.EDITABLE, { ["X":["a", "b", "c"], "Y":["1", "2", "3"]] })
         and : 'We actually build the component:'
             var table = ui.get(JTable)
 
@@ -75,7 +75,7 @@ class Declarative_Tables_Spec extends Specification
             In the table defined below we create a list data based column major table. 
         """
         given :
-            var ui = UI.table(UI.ListData.COLUMN_MAJOR_EDITABLE, { [["a", "b", "c"], ["x", "y", "z"]] })
+            var ui = UI.table(UI.CellOrder.COLUMN_MAJOR, UI.Editability.EDITABLE, { [["a", "b", "c"], ["x", "y", "z"]] })
         and : 'We actually build the component:'
             var table = ui.get(JTable)
 
@@ -153,7 +153,7 @@ class Declarative_Tables_Spec extends Specification
 
         and : 'A simple table UI with a nested list based data table model.'
             var ui =
-                        UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data })
+                        UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, { data })
                         .updateTableOn(event as Event)
         and : 'We actually build the component:'
             var table = ui.get(JTable)
@@ -183,7 +183,7 @@ class Declarative_Tables_Spec extends Specification
 
         and : 'A simple table UI with a nested list based data table model.'
             var ui =
-                        UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data.get() })
+                        UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, { data.get() })
                         .updateTableOn(data.view())
         and : 'We actually build the component:'
             var table = ui.get(JTable)
@@ -504,7 +504,7 @@ class Declarative_Tables_Spec extends Specification
             var event = Event.create()
         and : 'A row major list based table bound to the update event.'
             var model =
-                    UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data })
+                    UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, { data })
                     .updateTableOn(event as Event)
                     .get(JTable).getModel()
         and : 'A listener recording the events it receives.'
@@ -566,7 +566,7 @@ class Declarative_Tables_Spec extends Specification
                                 Tuple.of("Bob",   "42")
                             ))
         and : 'A table built from this property:'
-            var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)
+            var table = UI.table(UI.CellOrder.ROW_MAJOR, rows).get(JTable)
 
         expect : 'The table displays the rows of the property.'
             table.getRowCount() == 2
@@ -597,12 +597,12 @@ class Declarative_Tables_Spec extends Specification
             table.getValueAt(0, 2) == "extra"
     }
 
-    def 'The layout of a `Tuple` based table can be configured to be column major.'()
+    def 'The cell order of a `Tuple` based table can be configured to be column major.'()
     {
         reportInfo """
             Just like for the list based data sources, you may tell the table
             how to interpret the matrix you hand it, through one of the
-            `UI.ListData` constants. In a column major layout the outer `Tuple`
+            `UI.CellOrder` constants. In a column major cell order the outer `Tuple`
             holds the columns of the table and each inner `Tuple` the cells of
             a column, which the table transposes for you.
         """
@@ -612,7 +612,7 @@ class Declarative_Tables_Spec extends Specification
                                 Tuple.of("x", "y", "z")
                             ))
         and : 'A table built from this property, declared to be column major:'
-            var table = UI.table(UI.ListData.COLUMN_MAJOR, columns).get(JTable)
+            var table = UI.table(UI.CellOrder.COLUMN_MAJOR, columns).get(JTable)
 
         expect : 'The two tuples are displayed as the two columns of a 3 row table.'
             table.getRowCount() == 3
@@ -636,18 +636,18 @@ class Declarative_Tables_Spec extends Specification
     def 'The cells of an editable `Tuple` based table are written back into the property.'()
     {
         reportInfo """
-            If you declare one of the editable `UI.ListData` layouts and hand the
-            table a mutable `Var`, then the user may edit the cells of the table.
+            If you declare `UI.Editability.EDITABLE` and hand the table a mutable
+            `Var`, then the user may edit the cells of the table.
             Such an edit is written back into the property, which means your
             application state stays the single source of truth for the table.
         """
-        given : 'A property holding a matrix of cell values, in the given layout.'
+        given : 'A property holding a matrix of cell values, in the given cell order.'
             var cells = Var.of(Tuple.of(
                                 Tuple.of("a", "b"),
                                 Tuple.of("x", "y")
                             ))
         and : 'A table built from this property, declared to be editable:'
-            var table = UI.table(layout, cells).get(JTable)
+            var table = UI.table(cellOrder, UI.Editability.EDITABLE, cells).get(JTable)
 
         expect : 'The table considers its cells editable.'
             table.isCellEditable(0, 0)
@@ -655,34 +655,34 @@ class Declarative_Tables_Spec extends Specification
         when : 'The user edits a cell through the regular `JTable` API...'
             table.setValueAt("!", 1, 0)
             UI.sync()
-        then : '...the edit landed in the property, at the place the layout dictates.'
+        then : '...the edit landed in the property, at the place the cell order dictates.'
             cells.get() == Tuple.of(expectedFirst, expectedSecond)
         and : 'The table of course displays the new value.'
             table.getValueAt(1, 0) == "!"
 
-        where : 'We check this for both editable layouts.'
-            layout                            || expectedFirst          | expectedSecond
-            UI.ListData.ROW_MAJOR_EDITABLE    || Tuple.of("a", "b")     | Tuple.of("!", "y")
-            UI.ListData.COLUMN_MAJOR_EDITABLE || Tuple.of("a", "!")     | Tuple.of("x", "y")
+        where : 'We check this for both cell orders.'
+            cellOrder                   || expectedFirst          | expectedSecond
+            UI.CellOrder.ROW_MAJOR      || Tuple.of("a", "b")     | Tuple.of("!", "y")
+            UI.CellOrder.COLUMN_MAJOR   || Tuple.of("a", "!")     | Tuple.of("x", "y")
     }
 
-    def 'A `Tuple` based table is read only if either its layout or its property is read only.'()
+    def 'A `Tuple` based table is read only if either its editability or its property says so.'()
     {
         reportInfo """
-            Editability of a tuple based table needs two things: an editable
-            layout, and a property which can actually receive the edit. A read
-            only `Val` cannot, which is why it always yields a read only table,
-            even if you ask for an editable layout. Any edit which sneaks in
+            Editability of a tuple based table needs two things: permission through
+            `UI.Editability.EDITABLE`, and a property which can actually receive the
+            edit. A read only `Val` cannot, which is why it always yields a read only
+            table, even if you ask for an editable one. Any edit which sneaks in
             through the model API anyway is silently ignored instead of
             corrupting the table.
         """
         given : 'A tuple of cells, wrapped in the given kind of property.'
             var tuple = Tuple.of(Tuple.of("a", "b"))
             var property = ( mutable ? Var.of(tuple) : Val.of(tuple) )
-        and : 'A table built from this property, with the given layout:'
-            var table = UI.table(layout, property).get(JTable)
+        and : 'A table built from this property, with the given editability:'
+            var table = UI.table(UI.CellOrder.ROW_MAJOR, editability, property).get(JTable)
 
-        expect : 'The table is only editable if both the layout and the property allow it.'
+        expect : 'The table is only editable if both the editability and the property allow it.'
             table.isCellEditable(0, 0) == isEditable
 
         when : 'We push an edit through the model API regardless...'
@@ -692,12 +692,12 @@ class Declarative_Tables_Spec extends Specification
             noExceptionThrown()
             table.getValueAt(0, 0) == ( isEditable ? "!" : "a" )
 
-        where : 'We check every combination of layout and property mutability.'
-            layout                         | mutable || isEditable
-            UI.ListData.ROW_MAJOR_EDITABLE | true    || true
-            UI.ListData.ROW_MAJOR_EDITABLE | false   || false
-            UI.ListData.ROW_MAJOR          | true    || false
-            UI.ListData.ROW_MAJOR          | false   || false
+        where : 'We check every combination of editability and property mutability.'
+            editability                    | mutable || isEditable
+            UI.Editability.EDITABLE        | true    || true
+            UI.Editability.EDITABLE        | false   || false
+            UI.Editability.READ_ONLY       | true    || false
+            UI.Editability.READ_ONLY       | false   || false
     }
 
     def 'A `Tuple` based table survives empty, ragged and out of bounds data.'()
@@ -716,7 +716,7 @@ class Declarative_Tables_Spec extends Specification
                                 Tuple.of(String)
                             ))
         and : 'A table built from this property:'
-            var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)
+            var table = UI.table(UI.CellOrder.ROW_MAJOR, rows).get(JTable)
             var model = table.getModel()
 
         expect : 'The table is as wide as the longest row.'
@@ -754,8 +754,8 @@ class Declarative_Tables_Spec extends Specification
             var rows = Var.ofNullable(Tuple, null)
             var readOnlyRows = Val.ofNullable(Tuple, null)
         and : 'A table bound to each of them:'
-            var table = UI.table(UI.ListData.ROW_MAJOR_EDITABLE, rows).get(JTable)
-            var readOnlyTable = UI.table(UI.ListData.ROW_MAJOR, readOnlyRows).get(JTable)
+            var table = UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, rows).get(JTable)
+            var readOnlyTable = UI.table(UI.CellOrder.ROW_MAJOR, readOnlyRows).get(JTable)
 
         expect : 'Both tables read as empty instead of being broken.'
             table.getRowCount() == 0
@@ -798,7 +798,7 @@ class Declarative_Tables_Spec extends Specification
                                 Tuple.of("B", "2"),
                                 Tuple.of("C", "3")
                             ))
-            var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)
+            var table = UI.table(UI.CellOrder.ROW_MAJOR, rows).get(JTable)
         and : 'A listener recording the table model events in a readable form.'
             var events = []
             table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)
@@ -858,7 +858,7 @@ class Declarative_Tables_Spec extends Specification
         """
         given : 'A property holding a fully described table.'
             var model = Var.of(
-                            TableData.of(UI.ListData.ROW_MAJOR, "Name", "Age")
+                            TableData.of(UI.CellOrder.ROW_MAJOR, "Name", "Age")
                                 .setColumnClassAt(0, String)
                                 .setColumnClassAt(1, Integer)
                                 .addRow("Alice", 30)
@@ -885,17 +885,19 @@ class Declarative_Tables_Spec extends Specification
             table.getValueAt(2, 0) == "Carol"
     }
 
-    def 'A `TableData` property based table is read only if either its layout or its property is read only.'()
+    def 'A `TableData` property based table is read only if either its value or its property is read only.'()
     {
         reportInfo """
             Just like for a `Tuple` based table, two conditions have to be met before
-            the user may edit the cells of a `TableData` based table: the layout
-            of the snapshot has to be one of the `*_EDITABLE` constants, and the
+            the user may edit the cells of a `TableData` based table: the snapshot
+            itself has to permit it (see `TableData::asEditable`), and the
             property has to be a mutable `Var` which can actually receive the edit.
             If either is missing, then the table is simply read only.
         """
-        given : 'A table with the given layout, held by a property of the given mutability.'
-            var data  = TableData.of(layout).addRow("a", "b")
+        given : 'A table with the given editability, held by a property of the given mutability.'
+            var data  = TableData.of(UI.CellOrder.ROW_MAJOR)
+                                 .withEditability(editability)
+                                 .addRow("a", "b")
             var model = mutable ? Var.of(data) : Val.of(data)
         and : 'A table bound to that property:'
             var table = UI.table(model).get(JTable)
@@ -904,11 +906,11 @@ class Declarative_Tables_Spec extends Specification
             table.isCellEditable(0, 0) == editable
 
         where :
-            layout                          | mutable || editable
-            UI.ListData.ROW_MAJOR_EDITABLE  | true    || true
-            UI.ListData.ROW_MAJOR_EDITABLE  | false   || false
-            UI.ListData.ROW_MAJOR           | true    || false
-            UI.ListData.ROW_MAJOR           | false   || false
+            editability               | mutable || editable
+            UI.Editability.EDITABLE   | true    || true
+            UI.Editability.EDITABLE   | false   || false
+            UI.Editability.READ_ONLY  | true    || false
+            UI.Editability.READ_ONLY  | false   || false
     }
 
     def 'A `Var` exposed as a read only `Val` cannot be edited through the table.'()
@@ -925,7 +927,7 @@ class Declarative_Tables_Spec extends Specification
         """
         given : 'A mutable `Var` holding an editable snapshot.'
             var backing = Var.of(
-                            TableData.of(UI.ListData.ROW_MAJOR_EDITABLE)
+                            TableData.of(UI.CellOrder.ROW_MAJOR).asEditable()
                                 .addRow("a", "b")
                         )
         and : '''
@@ -958,7 +960,7 @@ class Declarative_Tables_Spec extends Specification
         """
         given : 'A property holding an editable snapshot, and a table bound to it.'
             var model = Var.of(
-                            TableData.of(UI.ListData.ROW_MAJOR_EDITABLE)
+                            TableData.of(UI.CellOrder.ROW_MAJOR).asEditable()
                                 .addRow("a", "b")
                                 .addRow("c", "d")
                         )
@@ -993,7 +995,7 @@ class Declarative_Tables_Spec extends Specification
         """
         given : 'A property holding a named table, and a table bound to it.'
             var model = Var.of(
-                            TableData.of(UI.ListData.ROW_MAJOR, "First", "Second")
+                            TableData.of(UI.CellOrder.ROW_MAJOR, "First", "Second")
                                 .addRow("a", "b")
                         )
             var table = UI.table(model).get(JTable)

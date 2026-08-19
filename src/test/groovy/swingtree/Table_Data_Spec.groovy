@@ -20,7 +20,8 @@ import javax.swing.event.TableModelListener
     "where does the data of my table live?".
 
     It is a single immutable value describing an entire table: its cells, the name
-    and class of every column, and the layout tying the two together. You hold one
+    and class of every column, the cell order tying the two together, and whether
+    the user may edit any of it. You hold one
     in a property, you bind that property to a table, and from then on your business
     logic never touches Swing again - it merely produces the next version of a value.
 
@@ -46,7 +47,7 @@ class Table_Data_Spec extends Specification
             not have to wrap anything.
         """
         given : 'A table with three named columns and two rows.'
-            var data = TableData.of(UI.ListData.ROW_MAJOR, "Name", "Age", "City")
+            var data = TableData.of(UI.CellOrder.ROW_MAJOR, "Name", "Age", "City")
                             .addRow("Alice", 30, "Rome")
                             .addRow("Bob",   42, "Oslo")
 
@@ -76,8 +77,8 @@ class Table_Data_Spec extends Specification
             the same columns and cells are equal to each other.
         """
         given : 'A table, and a second one built exactly the same way.'
-            var data  = TableData.of(UI.ListData.ROW_MAJOR, "A", "B").addRow("x", "y")
-            var other = TableData.of(UI.ListData.ROW_MAJOR, "A", "B").addRow("x", "y")
+            var data  = TableData.of(UI.CellOrder.ROW_MAJOR, "A", "B").addRow("x", "y")
+            var other = TableData.of(UI.CellOrder.ROW_MAJOR, "A", "B").addRow("x", "y")
 
         expect : 'The two are equal and agree on their hash code.'
             data == other
@@ -106,10 +107,10 @@ class Table_Data_Spec extends Specification
             TableData.empty().getValueAt(0, 0) == null
             TableData.empty().getRow(0).isEmpty()
         and : 'A table with columns but no rows is still empty, because it has nothing to show.'
-            TableData.of(UI.ListData.ROW_MAJOR, "A", "B").isEmpty()
+            TableData.of(UI.CellOrder.ROW_MAJOR, "A", "B").isEmpty()
         and : 'But it does know about its columns, which is what a table header needs.'
-            TableData.of(UI.ListData.ROW_MAJOR, "A", "B").getColumnCount() == 2
-            TableData.of(UI.ListData.ROW_MAJOR, "A", "B").getRowCount() == 0
+            TableData.of(UI.CellOrder.ROW_MAJOR, "A", "B").getColumnCount() == 2
+            TableData.of(UI.CellOrder.ROW_MAJOR, "A", "B").getRowCount() == 0
     }
 
     def 'Rows can be added, replaced and removed, one at a time or in ranges.'()
@@ -120,7 +121,7 @@ class Table_Data_Spec extends Specification
             so adding a hundred rows repaints once rather than a hundred times.
         """
         given : 'A table with two columns and three rows.'
-            var data = TableData.of(UI.ListData.ROW_MAJOR, "A", "B")
+            var data = TableData.of(UI.CellOrder.ROW_MAJOR, "A", "B")
                             .addRow("a1", "b1")
                             .addRow("a2", "b2")
                             .addRow("a3", "b3")
@@ -175,7 +176,7 @@ class Table_Data_Spec extends Specification
             separate list of headers in sync by hand.
         """
         given : 'A table with two columns and two rows.'
-            var data = TableData.of(UI.ListData.ROW_MAJOR, "Name", "Age")
+            var data = TableData.of(UI.CellOrder.ROW_MAJOR, "Name", "Age")
                             .addRow("Alice", 30)
                             .addRow("Bob",   42)
 
@@ -221,7 +222,7 @@ class Table_Data_Spec extends Specification
             happens to hold cells already.
         """
         given : 'A column major table whose two columns exist only as metadata so far.'
-            var data = TableData.of(UI.ListData.COLUMN_MAJOR, "A", "B")
+            var data = TableData.of(UI.CellOrder.COLUMN_MAJOR, "A", "B")
 
         when : 'We insert a column, with cells, between the two...'
             var grown = data.addColumnAt(1, "X", String, TableData.row("x1", "x2"))
@@ -235,7 +236,7 @@ class Table_Data_Spec extends Specification
             grown.getColumnName(2) == "B"
             grown.getColumn(2) == TableData.row(null, null)
         and : 'A row major table built the very same way agrees on every single cell.'
-            var rowMajorTwin = TableData.of(UI.ListData.ROW_MAJOR, "A", "B")
+            var rowMajorTwin = TableData.of(UI.CellOrder.ROW_MAJOR, "A", "B")
                                     .addColumnAt(1, "X", String, TableData.row("x1", "x2"))
             grown.getRowCount() == rowMajorTwin.getRowCount()
             grown.getColumnCount() == rowMajorTwin.getColumnCount()
@@ -256,7 +257,7 @@ class Table_Data_Spec extends Specification
             load a different file.
         """
         given : 'A modest table of two string columns.'
-            var data = TableData.of(UI.ListData.ROW_MAJOR, "Name", "City")
+            var data = TableData.of(UI.CellOrder.ROW_MAJOR, "Name", "City")
                             .addRow("Alice", "Rome")
 
         expect : 'It starts out as plain untyped columns.'
@@ -290,7 +291,7 @@ class Table_Data_Spec extends Specification
     def 'The class of a column can change on the fly, which is how a table changes its renderers.'()
     {
         given : 'A table whose single column is untyped.'
-            var data = TableData.of(UI.ListData.ROW_MAJOR, "Done").addRow(true)
+            var data = TableData.of(UI.CellOrder.ROW_MAJOR, "Done").addRow(true)
 
         expect : 'It starts out as a plain object column.'
             data.getColumnClass(0) == Object
@@ -306,30 +307,36 @@ class Table_Data_Spec extends Specification
     def 'A table can be made editable (or read only) without touching a cell.'()
     {
         reportInfo """
-            Whether the user may edit the cells is part of the layout, so flipping it
-            is a change of the value like any other. Note that a table also has to live
-            in a mutable `Var` before an edit has anywhere to go.
+            Whether the user may edit the cells is a property of the table value, so
+            flipping it is a change of the value like any other. Because editability is
+            separate from the cell order, flipping it can never disturb how the cells
+            are read. Note that a table also has to live in a mutable `Var` before an
+            edit has anywhere to go.
         """
         given : 'A read only table.'
-            var data = TableData.of(UI.ListData.ROW_MAJOR, "A").addRow("x")
+            var data = TableData.of(UI.CellOrder.ROW_MAJOR, "A").addRow("x")
 
         expect : 'It does not permit editing.'
             !data.isEditable()
 
-        when : 'We switch its layout to the editable one...'
-            var editable = data.withLayout(UI.ListData.ROW_MAJOR_EDITABLE)
+        when : 'We make it editable...'
+            var editable = data.asEditable()
         then : '...it does, and not a single cell moved.'
             editable.isEditable()
             editable.getValueAt(0, 0) == "x"
             editable.cells() == data.cells()
-        and : 'Asking for the layout it already has hands back the very same table.'
-            editable.withLayout(UI.ListData.ROW_MAJOR_EDITABLE) === editable
+        and : 'Its cell order came through untouched.'
+            editable.cellOrder() == data.cellOrder()
+        and : 'Asking for the editability it already has hands back the very same table.'
+            editable.asEditable() === editable
+        and : 'Making it read only again gives us back an equal table.'
+            editable.asReadOnly() == data
     }
 
     def 'A column major table speaks in rows and columns just like a row major one.'()
     {
         reportInfo """
-            The layout only decides how the cells are *stored*. Everything else on this
+            The cell order only decides how the cells are *stored*. Everything else on this
             class talks in `(row, column)` terms regardless, so a column major table
             grows a row just as happily as a row major one does - it is merely a little
             more work for it internally, which is one reason to prefer row major for
@@ -340,8 +347,8 @@ class Table_Data_Spec extends Specification
                             Tuple.ofNullable(Object, "a", "b"),
                             Tuple.ofNullable(Object, "c", "d")
                         )
-            var rowMajor    = TableData.of(UI.ListData.ROW_MAJOR, cells)
-            var columnMajor = TableData.of(UI.ListData.COLUMN_MAJOR, cells)
+            var rowMajor    = TableData.of(UI.CellOrder.ROW_MAJOR, cells)
+            var columnMajor = TableData.of(UI.CellOrder.COLUMN_MAJOR, cells)
 
         expect : 'They are different values, because they show different tables.'
             rowMajor != columnMajor
@@ -373,7 +380,7 @@ class Table_Data_Spec extends Specification
             cells nobody filled in simply read as `null`.
         """
         given : 'A deliberately ragged table.'
-            var data = TableData.of(UI.ListData.ROW_MAJOR, Tuple.of(
+            var data = TableData.of(UI.CellOrder.ROW_MAJOR, Tuple.of(
                             Tuple.ofNullable(Object, "a", "b", "c"),
                             Tuple.ofNullable(Object, "d"),
                             Tuple.ofNullable(Object)
@@ -399,7 +406,7 @@ class Table_Data_Spec extends Specification
             naming a column nobody has filled in yet simply adds an empty column.
         """
         given : 'A table with one filled column, but three names.'
-            var data = TableData.of(UI.ListData.ROW_MAJOR, "A")
+            var data = TableData.of(UI.CellOrder.ROW_MAJOR, "A")
                             .addRow("x")
                             .setColumnNames("A", "B", "C")
 
@@ -415,13 +422,14 @@ class Table_Data_Spec extends Specification
     def 'A table has a string representation which tells you what it holds.'()
     {
         given : 'A small table.'
-            var data = TableData.of(UI.ListData.ROW_MAJOR, Tuple.of(
+            var data = TableData.of(UI.CellOrder.ROW_MAJOR, Tuple.of(
                             Tuple.ofNullable(Object, "a", "b"),
                             Tuple.ofNullable(Object, "c", "d")
                         ))
 
         expect : 'It describes itself usefully.'
-            data.toString() == "TableData[layout=ROW_MAJOR, rowCount=2, columnCount=2, " +
+            data.toString() == "TableData[cellOrder=ROW_MAJOR, editability=READ_ONLY, " +
+                                    "rowCount=2, columnCount=2, " +
                                     "columnNames=Tuple<String?>[], " +
                                     "cells=Tuple<TupleWithDiff>[Tuple<Object?>[a, b], Tuple<Object?>[c, d]]]"
     }
@@ -435,7 +443,7 @@ class Table_Data_Spec extends Specification
         """
         given : 'A property holding a table, bound to a real JTable.'
             var model = Var.of(
-                            TableData.of(UI.ListData.ROW_MAJOR, "Name", "Age")
+                            TableData.of(UI.CellOrder.ROW_MAJOR, "Name", "Age")
                                 .addRow("Alice", 30)
                                 .addRow("Bob",   42)
                         )
@@ -489,7 +497,7 @@ class Table_Data_Spec extends Specification
         """
         given : 'A property holding a table of three rows, bound to a JTable.'
             var model = Var.of(
-                            TableData.of(UI.ListData.ROW_MAJOR, "A")
+                            TableData.of(UI.CellOrder.ROW_MAJOR, "A")
                                 .addRow("a1").addRow("a2").addRow("a3")
                         )
             var table = UI.table(model).get(JTable)

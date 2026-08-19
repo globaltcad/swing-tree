@@ -12,7 +12,7 @@ as **data**. Meet `TableData`:
 
 ```java
 var data =
-    TableData.of(UI.ListData.ROW_MAJOR, "Name", "Age", "City")
+    TableData.of(UI.CellOrder.ROW_MAJOR, "Name", "Age", "City")
         .addRow("Alice", 30, "Rome")
         .addRow("Bob",   42, "Oslo");
 ```
@@ -26,7 +26,7 @@ Put it in a property and show it:
 
 ```java
 Var<TableData> data = Var.of(
-        TableData.of(UI.ListData.ROW_MAJOR, "Name", "Age", "City")
+        TableData.of(UI.CellOrder.ROW_MAJOR, "Name", "Age", "City")
             .addRow("Alice", 30, "Rome")
             .addRow("Bob",   42, "Oslo")
     );
@@ -80,7 +80,7 @@ another value:
 
 ```java
 data.set(
-    TableData.of(UI.ListData.ROW_MAJOR, "Id", "Score")
+    TableData.of(UI.CellOrder.ROW_MAJOR, "Id", "Score")
         .setColumnClassAt(0, Integer.class)
         .setColumnClassAt(1, Double.class)
         .addRow(1, 9.5)
@@ -143,8 +143,8 @@ data.update( it -> it.setRowsAt(10, updatedRows) );  // ONE update event
 Adding a hundred rows one at a time gives you a hundred events. Adding them with
 `addRows(..)` gives you one. Same data, one hundredth of the repainting.
 
-There is one honest caveat. All of the above is true for a **row major** layout
-(`UI.ListData.ROW_MAJOR`), where the cells are stored as rows, so a change to a row
+There is one honest caveat. All of the above is true for a **row major** cell order
+(`UI.CellOrder.ROW_MAJOR`), where the cells are stored as rows, so a change to a row
 is a change the table can act on directly. A `COLUMN_MAJOR` table stores columns, so
 a change to it never lines up with a row range and the table has to rebuild. Column
 major is there because some data genuinely is column shaped — but if your table is
@@ -157,12 +157,13 @@ big and lively, store it row major.
 Two things have to be true before a user may edit a cell, and both of them are the
 kind of thing you would want to be explicit about anyway:
 
-1. The layout has to say so — use one of the `*_EDITABLE` constants.
+1. The value has to say so — call `asEditable()` on it.
 2. The data has to live in a mutable `Var`, so that the edit has somewhere to go.
 
 ```java
 Var<TableData> data = Var.of(
-        TableData.of(UI.ListData.ROW_MAJOR_EDITABLE, "Name", "Age")
+        TableData.of(UI.CellOrder.ROW_MAJOR, "Name", "Age")
+            .asEditable()
             .addRow("Alice", 30)
     );
 
@@ -170,12 +171,17 @@ UI.table(data);
 ```
 
 Now an edit made in the UI flows straight back into your property, as a new value.
-Bind a `Val` instead of a `Var`, or use a non-editable layout, and the table is
+Bind a `Val` instead of a `Var`, or leave the value read only, and the table is
 simply read only. Flipping between the two is itself just a change of the value:
 
 ```java
-data.update( it -> it.withLayout(UI.ListData.ROW_MAJOR_EDITABLE) );
+data.update( TableData::asEditable );
 ```
+
+Note that editability is a thing of its own, quite separate from the cell order
+(`UI.CellOrder`, above), which is why turning editing on can never disturb how your
+cells are read. You say what may be edited without saying anything about how the
+data is stored.
 
 ---
 
@@ -241,10 +247,10 @@ thing `TableData` never needs.
 The same applies to the collection based factories:
 
 ```java
-UI.table(UI.ListData.ROW_MAJOR_EDITABLE, () -> listOfRows)
+UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, () -> listOfRows)
 .updateTableOn(dataChanged);
 
-UI.table(UI.MapData.EDITABLE, () -> mapOfColumns)
+UI.table(UI.Editability.EDITABLE, () -> mapOfColumns)
 .updateTableOn(dataChanged);
 ```
 
@@ -264,7 +270,7 @@ Var<Tuple<Tuple<String>>> rows = Var.of(Tuple.of(
         Tuple.of("Bob",   "42")
     ));
 
-UI.table(UI.ListData.ROW_MAJOR, rows);
+UI.table(UI.CellOrder.ROW_MAJOR, rows);
 ```
 
 This is really just `TableData` with the column names and classes left out — in fact

@@ -64,7 +64,7 @@ class Table_Renderer_Spec extends Specification
             In the table defined below we create a list data based row major table. 
         """
         given : 'A simple table UI with a nested list based data table model.'
-            var ui = UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { [["a", "b", "c"], ["1", "2", "3"]] })
+            var ui = UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, { [["a", "b", "c"], ["1", "2", "3"]] })
         and : 'A component built using the above UI declaration:'
             var table = ui.get(JTable)
         and : """
@@ -103,7 +103,7 @@ class Table_Renderer_Spec extends Specification
             In the table defined below we create a list data based column major table. 
         """
         given :
-            var ui = UI.table(UI.ListData.COLUMN_MAJOR_EDITABLE, { [["a", "b", "c"], ["1", "2", "3"]] })
+            var ui = UI.table(UI.CellOrder.COLUMN_MAJOR, UI.Editability.EDITABLE, { [["a", "b", "c"], ["1", "2", "3"]] })
         and : 'A component built using the above UI declaration:'
             var table = ui.get(JTable)
         and : """
@@ -144,7 +144,7 @@ class Table_Renderer_Spec extends Specification
         """
         given : 'A simple table UI with a map based data table model.'
             var ui =
-                    UI.table(UI.MapData.EDITABLE, { ["X":["a", "b", "c"], "Y":["1", "2", "3"]] })
+                    UI.table(UI.Editability.EDITABLE, { ["X":["a", "b", "c"], "Y":["1", "2", "3"]] })
         and : 'A component built using the above UI declaration:'
             var table = ui.get(JTable)
         and : """
@@ -191,7 +191,7 @@ class Table_Renderer_Spec extends Specification
                 and a default renderer used for all columns.
             """
             var ui =
-                        UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { [[1, 2, 3], [7, 8, 9]] })
+                        UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, { [[1, 2, 3], [7, 8, 9]] })
                         .withCells(
                             it -> it.when(Integer).asText( cell -> cell.entryAsString()+"!" )
                         )

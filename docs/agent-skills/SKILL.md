@@ -1166,13 +1166,14 @@ button.onClick(it -> { vm.update(BreathingViewModel::begin); UI.animate(vm, Brea
 ### Tables — model them as **data** (`TableData`), never as a `TableModel`
 
 `TableData` (`swingtree.api.model`) is an **immutable value describing a whole
-table**: cells + column names + column classes + a `UI.ListData` layout. Put it in a
+table**: cells + column names + column classes + a `UI.CellOrder` + a
+`UI.Editability`. Put it in a
 `Var`, bind it, done — no model subclass, no `updateTableOn(..)`, no event to fire,
 and thread-safe by construction (§11). **This is the preferred way to build tables.**
 
 ```java
 Var<TableData> data = Var.of(
-    TableData.of(UI.ListData.ROW_MAJOR, "Name", "Age")   // columns first, no rows yet
+    TableData.of(UI.CellOrder.ROW_MAJOR, "Name", "Age")  // columns first, no rows yet
         .addRow("Alice", 30)
         .addRow("Bob",   42)
 );
@@ -1185,11 +1186,11 @@ Every method returns a **new** `TableData` (verbs mirror `Tuple`, §4):
 
 | | |
 |---|---|
-| read | `getValueAt(r,c)`, `getRow(r)`, `getColumn(c)`, `getRowCount()`, `getColumnCount()`, `isEmpty()`, `indexOfColumn(name)`, `getColumnName(i)`, `getColumnClass(i)`, `isEditable()`, `layout()`, `cells()`, `columnNames()`, `columnClasses()` |
+| read | `getValueAt(r,c)`, `getRow(r)`, `getColumn(c)`, `getRowCount()`, `getColumnCount()`, `isEmpty()`, `indexOfColumn(name)`, `getColumnName(i)`, `getColumnClass(i)`, `isEditable()`, `cellOrder()`, `editability()`, `cells()`, `columnNames()`, `columnClasses()` |
 | cell | `setCellAt(r, c, value)` — **not** `setValueAt` (that is `TableModel`'s *mutator*) |
 | rows | `addRow(vals…)`, `addRowAt(i, vals…)`, `addRows(t)`, `addRowsAt(i, t)`, `setRowAt(i, vals…)`, `setRowsAt(i, t)`, `removeRowAt(i)`, `removeRowsAt(i, n)`, `removeAllRows()` |
 | columns | `addColumn(name, cls, vals)`, `addColumnAt(i, ..)`, `setColumnAt(i, vals)`, `removeColumnAt(i)`, `removeColumnsAt(i, n)`, `setColumnNameAt(i, name)`, `setColumnClassAt(i, cls)`, `setColumnNames(..)`, `setColumnClasses(..)` |
-| whole | `setCells(t)`, `withLayout(listData)`, `TableData.empty()`, `TableData.row(vals…)` |
+| whole | `setCells(t)`, `withCellOrder(..)`, `withEditability(..)` / `asEditable()` / `asReadOnly()`, `TableData.empty()`, `TableData.row(vals…)` |
 
 Rows, columns, names, classes and both counts may **all change at any time** —
 reshaping a table is just another value, not a special case. Indices rot when columns
@@ -1202,11 +1203,13 @@ add repaints that row, not the table. **Prefer range ops**: `addRows(..)` /
 `removeRowsAt(..)` / `setRowsAt(..)` emit **one** event instead of N.
 (`COLUMN_MAJOR` stores columns, so a change never maps onto a row range and it must
 rebuild — use `ROW_MAJOR` for big/lively tables. All methods still speak
-`(row, column)` in either layout.)
+`(row, column)` in either cell order.)
 
-**Editable needs BOTH** a `*_EDITABLE` layout **and** a mutable `Var` — a `Val`, or a
-`Var` with a non-editable layout, yields a read-only table. Edits flow back into the
-property as a new value. Flip it live with `it.withLayout(ROW_MAJOR_EDITABLE)`.
+**Editable needs BOTH** an editable value **and** a mutable `Var` — a `Val`, or a
+`Var` holding a read-only value, yields a read-only table. Edits flow back into the
+property as a new value. Flip it live with `it.asEditable()` / `it.asReadOnly()`
+(or `it.withEditability(..)`); because editability is separate from `cellOrder()`,
+flipping it can never transpose the table.
 
 `getColumnClass` drives the `JTable`'s renderer/editor, so
 `setColumnClassAt(i, Boolean.class)` buys you check boxes for free.
@@ -1225,10 +1228,11 @@ UI.table().withModel(m -> m.colName(i -> headers[i]).colCount(() -> headers.leng
     .rowCount(() -> data.length).getsEntryAt((r,c) -> data[r][c])
     .setsEntryAt((r,c,val) -> data[r][c] = (int) val)
     .isEditableIf(() -> true).updateOn(dataChangedEvent));   // must .fire() by hand
-UI.table(UI.ListData.ROW_MAJOR_EDITABLE, () -> listOfRows).updateTableOn(evt);
-UI.table(UI.MapData.EDITABLE, () -> mapOfColumns).updateTableOn(evt);
-UI.table(UI.ListData.ROW_MAJOR, tupleVar);   // Var<Tuple<Tuple<E>>>: TableData minus the
+UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, () -> listOfRows).updateTableOn(evt);
+UI.table(UI.Editability.EDITABLE, () -> mapOfColumns).updateTableOn(evt);
+UI.table(UI.CellOrder.ROW_MAJOR, tupleVar);  // Var<Tuple<Tuple<E>>>: TableData minus the
                                              // column metadata; keeps the diff fast-path
+                                             // (add UI.Editability.EDITABLE to let users edit)
 ```
 `BasicTableModel` is only a *description of where the data lives* — SwingTree wraps it
 in a thread-safe model of its own, so `JTable.getModel()` does **not** return the
@@ -1448,8 +1452,9 @@ painting, a peeked component, a third-party widget): `UI.scale(int|float|double)
 6. **Hold a strong reference (a view field) to any lens used only by a raw
    `onChange` subscription** — weak observation will GC it and silently break (§9c).
 7. **Tables: bind a `Var<TableData>`; don't reach for a `TableModel` or a pull-based
-   data source** (§10). An editable table needs **both** a `*_EDITABLE` layout **and**
-   a mutable `Var` — either alone is silently read-only. Use **`ROW_MAJOR`** (the
+   data source** (§10). An editable table needs **both** an editable value
+   (`asEditable()`) **and** a mutable `Var` — either alone is silently read-only.
+   Use **`ROW_MAJOR`** (the
    diff-driven, incremental path) and **range ops** (`addRows`/`removeRowsAt`/
    `setRowsAt`) for bulk changes; per-row loops emit one event each.
 8. **Never read property values inside a plain `withStyle` lambda** — use the
@@ -1516,11 +1521,12 @@ panel.addAll(items, (Var<Item> it) -> itemView(it));      // per-item lens ⇒ I
 panel.addAll(roTuple, (Item it) -> itemView(it));         // read-only value ⇒ no HasId needed
 
 // tables (§10) — an immutable value describing the WHOLE table; bind it and it follows
-Var<TableData> d = Var.of(TableData.of(UI.ListData.ROW_MAJOR, "Name","Age").addRow("Alice",30));
+Var<TableData> d = Var.of(TableData.of(UI.CellOrder.ROW_MAJOR, "Name","Age").addRow("Alice",30));
 UI.table(d);  d.update(it -> it.addRow("Bob", 42));      // no updateTableOn/Event needed
 it.setCellAt(r,c,v) / .addRowAt(i,vals…) / .removeRowAt(i) / .setColumnClassAt(i,Boolean.class)
 it.addRows(t) / .removeRowsAt(i,n) / .setRowsAt(i,t)     // range ops ⇒ ONE table event, not N
-// editable ⇔ *_EDITABLE layout AND a mutable Var; ROW_MAJOR ⇒ incremental (diff) updates
+d.update(TableData::asEditable);                          // editability is its own axis, cannot transpose
+// editable ⇔ an editable value AND a mutable Var; ROW_MAJOR ⇒ incremental (diff) updates
 
 // events
 .onClick / .onMouseEnter / .onMouseClick / .onKeyPress / .onResize (it -> ...)

@@ -10,12 +10,13 @@ import java.util.Objects;
 
 /**
  *  An immutable value describing the entire contents of a table: its cells, the
- *  name and class of every column, and the {@link UI.ListData} layout tying the
- *  two together. Hold one of these in a {@link sprouts.Var} property, bind that
- *  property to a table, and you have a complete, thread safe, reactive table:
+ *  name and class of every column, the {@link UI.CellOrder} tying the two together,
+ *  and whether the user may edit any of it. Hold one of these in a {@link sprouts.Var}
+ *  property, bind that property to a table, and you have a complete, thread safe,
+ *  reactive table:
  *  <pre>{@code
  *  Var<TableData> data = Var.of(
- *          TableData.of(UI.ListData.ROW_MAJOR, "Name", "Age")
+ *          TableData.of(UI.CellOrder.ROW_MAJOR, "Name", "Age")
  *              .addRow("Alice", 30)
  *              .addRow("Bob",   42)
  *      );
@@ -32,7 +33,8 @@ import java.util.Objects;
  *
  *  Every method on this class which sounds like it changes something really returns
  *  a <i>new</i> {@link TableData}, leaving the one you called it on untouched. Two
- *  tables with the same layout, columns and cells are {@link #equals(Object)} to each
+ *  tables with the same cell order, editability, columns and cells are
+ *  {@link #equals(Object)} to each
  *  other and have the same {@link #hashCode()}, which is what lets a table tell
  *  whether anything actually changed.
  *  <p>
@@ -52,19 +54,19 @@ import java.util.Objects;
  *  <h2>It is cheap to update</h2>
  *
  *  A {@link Tuple} remembers how it was derived from its predecessor, and a
- *  {@link UI.ListData#ROW_MAJOR} table passes that knowledge straight to the
+ *  {@link UI.CellOrder#ROW_MAJOR} table passes that knowledge straight to the
  *  {@link javax.swing.JTable}: adding, removing or changing a handful of rows only
  *  repaints those rows, rather than rebuilding the whole table. This is why a row
- *  major layout is the right default for large, frequently changing tables.
+ *  major cell order is the right default for large, frequently changing tables.
  *
- *  <h2>Rows and columns, whatever the layout</h2>
+ *  <h2>Rows and columns, whatever the cell order</h2>
  *
- *  The {@link #layout()} decides how the {@link #cells()} are <i>stored</i>: in a
- *  {@link UI.ListData#ROW_MAJOR} table the outer {@link Tuple} holds the rows and
+ *  The {@link #cellOrder()} decides how the {@link #cells()} are <i>stored</i>: in a
+ *  {@link UI.CellOrder#ROW_MAJOR} table the outer {@link Tuple} holds the rows and
  *  each inner {@link Tuple} holds the cells of one row, whereas in a
- *  {@link UI.ListData#COLUMN_MAJOR} table the outer {@link Tuple} holds the columns.
+ *  {@link UI.CellOrder#COLUMN_MAJOR} table the outer {@link Tuple} holds the columns.
  *  That is a storage detail: every method on this class speaks in {@code (row, column)}
- *  terms no matter which layout you picked, so {@link #addRow(Object...)} adds a row
+ *  terms no matter which cell order you picked, so {@link #addRow(Object...)} adds a row
  *  to a column major table just as happily (it is merely a little more work for it).
  */
 public final class TableData
@@ -80,7 +82,8 @@ public final class TableData
     private static final Tuple<Class<?>>                EMPTY_CLASSES = Tuple.of(CLASS_TYPE);
 
     private static final TableData EMPTY = new TableData(
-            UI.ListData.ROW_MAJOR, EMPTY_NAMES, EMPTY_CLASSES, EMPTY_LINES
+            UI.CellOrder.ROW_MAJOR, UI.Editability.READ_ONLY,
+            EMPTY_NAMES, EMPTY_CLASSES, EMPTY_LINES
         );
 
     /**
@@ -96,24 +99,26 @@ public final class TableData
      *  Creates a table which has columns but no rows yet, which is how most tables
      *  start out in life:
      *  <pre>{@code
-     *  TableData.of(UI.ListData.ROW_MAJOR, "Name", "Age", "City")
+     *  TableData.of(UI.CellOrder.ROW_MAJOR, "Name", "Age", "City")
      *  }</pre>
      *  The columns are all of type {@link Object} until you say otherwise through
-     *  {@link #setColumnClassAt(int, Class)}.
+     *  {@link #setColumnClassAt(int, Class)}, and the table is read only until you
+     *  say otherwise through {@link #asEditable()}.
      *
-     * @param layout      The {@link UI.ListData} layout of the table, which also decides
-     *                    whether the user may edit its cells ({@code *_EDITABLE}).
+     * @param cellOrder   The {@link UI.CellOrder} deciding how the cells of the table
+     *                    are stored, see {@link #cellOrder()}.
      * @param columnNames The names of the columns, one per column.
      * @return A new {@link TableData} with the given columns and no rows.
      */
-    public static TableData of( UI.ListData layout, String... columnNames ) {
-        Objects.requireNonNull(layout);
+    public static TableData of( UI.CellOrder cellOrder, String... columnNames ) {
+        Objects.requireNonNull(cellOrder);
         Objects.requireNonNull(columnNames);
         List<Class<?>> classes = new ArrayList<>(columnNames.length);
         for ( int i = 0; i < columnNames.length; i++ )
             classes.add(Object.class);
         return new TableData(
-                    layout,
+                    cellOrder,
+                    UI.Editability.READ_ONLY,
                     Tuple.ofNullable(String.class, columnNames),
                     Tuple.of(CLASS_TYPE, classes),
                     EMPTY_LINES
@@ -122,24 +127,25 @@ public final class TableData
 
     /**
      *  Creates a table from nothing but its cells, whose dimensions are derived from
-     *  them: the major axis of the {@code layout} is as long as the outer {@link Tuple},
+     *  them: the major axis of the {@code cellOrder} is as long as the outer {@link Tuple},
      *  and the minor axis is as long as the longest inner {@link Tuple} (so a ragged
      *  matrix reads as though it were padded with {@code null} cells).
      *  The columns have no names, which makes a table fall back to the default
      *  (spreadsheet style) names, and they are all of type {@link Object}.
+     *  The table is read only until you say otherwise through {@link #asEditable()}.
      *
-     * @param layout The {@link UI.ListData} layout describing how {@code cells} is to be interpreted.
-     * @param cells  The cell values, an immutable tuple of rows (or columns, see {@code layout}),
-     *               each of which is an immutable tuple of cell values.
+     * @param cellOrder The {@link UI.CellOrder} describing how {@code cells} is to be interpreted.
+     * @param cells     The cell values, an immutable tuple of rows (or columns, see {@code cellOrder}),
+     *                  each of which is an immutable tuple of cell values.
      * @return A new {@link TableData}.
      */
     public static TableData of(
-        UI.ListData                    layout,
+        UI.CellOrder                   cellOrder,
         Tuple<Tuple<@Nullable Object>> cells
     ) {
-        Objects.requireNonNull(layout);
+        Objects.requireNonNull(cellOrder);
         Objects.requireNonNull(cells);
-        return new TableData(layout, EMPTY_NAMES, EMPTY_CLASSES, cells);
+        return new TableData(cellOrder, UI.Editability.READ_ONLY, EMPTY_NAMES, EMPTY_CLASSES, cells);
     }
 
     /**
@@ -150,22 +156,24 @@ public final class TableData
      *  rows only two cells wide still has three columns, the last of which reads as
      *  {@code null}. This is what lets a table have columns but no rows.
      *
-     * @param layout        The {@link UI.ListData} layout describing how {@code cells} is to be interpreted.
+     * @param cellOrder     The {@link UI.CellOrder} describing how {@code cells} is to be interpreted.
+     * @param editability   The {@link UI.Editability} deciding whether the user may edit the cells.
      * @param columnNames   The column names, one per column, where {@code null} means
      *                      "fall back to the default (spreadsheet style) name".
      * @param columnClasses The column classes, one per column, which a {@link javax.swing.JTable}
      *                      consults to pick a renderer and an editor.
-     * @param cells         The cell values, an immutable tuple of rows (or columns, see {@code layout}),
+     * @param cells         The cell values, an immutable tuple of rows (or columns, see {@code cellOrder}),
      *                      each of which is an immutable tuple of cell values.
      * @return A new {@link TableData}.
      */
     public static TableData of(
-        UI.ListData                    layout,
+        UI.CellOrder                   cellOrder,
+        UI.Editability                 editability,
         Tuple<@Nullable String>        columnNames,
         Tuple<Class<?>>                columnClasses,
         Tuple<Tuple<@Nullable Object>> cells
     ) {
-        return new TableData(layout, columnNames, columnClasses, cells);
+        return new TableData(cellOrder, editability, columnNames, columnClasses, cells);
     }
 
     /**
@@ -181,7 +189,8 @@ public final class TableData
         return Tuple.ofNullable(Object.class, values);
     }
 
-    private final UI.ListData                    _layout;
+    private final UI.CellOrder                   _cellOrder;
+    private final UI.Editability                 _editability;
     private final Tuple<@Nullable String>        _columnNames;
     private final Tuple<Class<?>>                _columnClasses;
     private final Tuple<Tuple<@Nullable Object>> _cells;
@@ -196,12 +205,14 @@ public final class TableData
     private final int _columnCount;
 
     private TableData(
-        UI.ListData                    layout,
+        UI.CellOrder                   cellOrder,
+        UI.Editability                 editability,
         Tuple<@Nullable String>        columnNames,
         Tuple<Class<?>>                columnClasses,
         Tuple<Tuple<@Nullable Object>> cells
     ) {
-        _layout        = Objects.requireNonNull(layout);
+        _cellOrder     = Objects.requireNonNull(cellOrder);
+        _editability   = Objects.requireNonNull(editability);
         _columnNames   = Objects.requireNonNull(columnNames);
         _columnClasses = Objects.requireNonNull(columnClasses);
         _cells         = Objects.requireNonNull(cells);
@@ -211,7 +222,7 @@ public final class TableData
             longestLine = Math.max(longestLine, line.size());
         int describedColumns = Math.max(columnNames.size(), columnClasses.size());
 
-        if ( layout.isRowMajor() ) {
+        if ( cellOrder.isRowMajor() ) {
             _rowCount    = cells.size();
             _columnCount = Math.max(describedColumns, longestLine);
         } else {
@@ -223,22 +234,30 @@ public final class TableData
     // ---- Reading ----
 
     /**
-     *  The layout deciding how the {@link #cells()} of this table are stored, and
-     *  whether the user may edit them.
-     *  @return The {@link UI.ListData} layout of this table.
+     *  The cell order deciding whether the {@link #cells()} of this table are stored
+     *  row by row or column by column.
+     *  @return The {@link UI.CellOrder} of this table.
      */
-    public UI.ListData layout() {
-        return _layout;
+    public UI.CellOrder cellOrder() {
+        return _cellOrder;
     }
 
     /**
-     *  Tells whether the user is allowed to edit the cells of this table, which is
-     *  the case for the {@code *_EDITABLE} layouts. Note that a table also needs to
-     *  live in a mutable {@link sprouts.Var} before an edit has anywhere to go.
-     *  @return True if the layout of this table permits cell editing.
+     *  Tells whether the user is allowed to edit the cells of this table.
+     *  @return The {@link UI.Editability} of this table.
+     */
+    public UI.Editability editability() {
+        return _editability;
+    }
+
+    /**
+     *  Tells whether the user is allowed to edit the cells of this table. Note that a
+     *  table also needs to live in a mutable {@link sprouts.Var} before an edit has
+     *  anywhere to go.
+     *  @return True if the {@link #editability()} of this table permits cell editing.
      */
     public boolean isEditable() {
-        return _layout.isEditable();
+        return _editability.isEditable();
     }
 
     /** Returns the number of rows in this table. @return The row count. */
@@ -262,7 +281,7 @@ public final class TableData
 
     /**
      *  Reads the value of a single cell, always in {@code (row, column)} terms,
-     *  irrespective of the {@link #layout()} of this table.
+     *  irrespective of the {@link #cellOrder()} of this table.
      * @param rowIndex    The row index of the cell.
      * @param columnIndex The column index of the cell.
      * @return The value of the cell, or {@code null} if the indices are out of bounds.
@@ -282,7 +301,7 @@ public final class TableData
     public Tuple<@Nullable Object> getRow( int rowIndex ) {
         if ( rowIndex < 0 || rowIndex >= _rowCount )
             return EMPTY_LINE;
-        if ( _layout.isRowMajor() )
+        if ( _cellOrder.isRowMajor() )
             return _padTo(_lineAt(rowIndex), _columnCount);
         return _gatherAcrossLines(rowIndex, _columnCount);
     }
@@ -296,7 +315,7 @@ public final class TableData
     public Tuple<@Nullable Object> getColumn( int columnIndex ) {
         if ( columnIndex < 0 || columnIndex >= _columnCount )
             return EMPTY_LINE;
-        if ( !_layout.isRowMajor() )
+        if ( !_cellOrder.isRowMajor() )
             return _padTo(_lineAt(columnIndex), _rowCount);
         return _gatherAcrossLines(columnIndex, _rowCount);
     }
@@ -342,11 +361,11 @@ public final class TableData
     }
 
     /**
-     *  The raw cell values of this table, in the order described by its {@link #layout()}.
+     *  The raw cell values of this table, in the order described by its {@link #cellOrder()}.
      *  This is exposed so that a table model can reuse the very same immutable
      *  structure without copying it, and so that you may reach for the full
      *  {@link Tuple} API when this class does not have the operation you need.
-     *  @return The immutable tuple of rows (or columns, see {@link #layout()}).
+     *  @return The immutable tuple of rows (or columns, see {@link #cellOrder()}).
      */
     public Tuple<Tuple<@Nullable Object>> cells() {
         return _cells;
@@ -465,7 +484,7 @@ public final class TableData
         Objects.requireNonNull(rows);
         if ( rowIndex < 0 || rowIndex > _rowCount || rows.isEmpty() )
             return this;
-        if ( _layout.isRowMajor() )
+        if ( _cellOrder.isRowMajor() )
             return _withCells(_cells.addAllAt(rowIndex, rows));
         return _withCells(_insertMinors(rowIndex, rows, _rowCount));
     }
@@ -506,7 +525,7 @@ public final class TableData
         Objects.requireNonNull(rows);
         if ( rowIndex < 0 || rows.isEmpty() || rowIndex + rows.size() > _rowCount )
             return this;
-        if ( _layout.isRowMajor() )
+        if ( _cellOrder.isRowMajor() )
             return _withCells(_cells.setAllAt(rowIndex, rows));
         return _withCells(_replaceMinors(rowIndex, rows));
     }
@@ -532,7 +551,7 @@ public final class TableData
     public TableData removeRowsAt( int rowIndex, int count ) {
         if ( rowIndex < 0 || count <= 0 || rowIndex + count > _rowCount )
             return this;
-        if ( _layout.isRowMajor() )
+        if ( _cellOrder.isRowMajor() )
             return _withCells(_cells.removeAt(rowIndex, count));
         return _withCells(_removeMinors(rowIndex, count));
     }
@@ -584,13 +603,13 @@ public final class TableData
         Tuple<@Nullable String> names   = _padNamesTo(_columnCount).addAt(columnIndex, columnName);
         Tuple<Class<?>>         classes = _padClassesTo(_columnCount).addAt(columnIndex, columnClass);
         Tuple<Tuple<@Nullable Object>> cells =
-                _layout.isRowMajor()
+                _cellOrder.isRowMajor()
                     ? _insertMinors(columnIndex, Tuple.of(LINE_TYPE, values), _columnCount)
                     // Metadata may describe more columns than the cells fill, so the
                     // cells are padded up to the insertion point first - clamping the
                     // index instead would land the new cells under the wrong column.
                     : _padLines(columnIndex).addAllAt(columnIndex, Tuple.of(LINE_TYPE, values));
-        return new TableData(_layout, names, classes, cells);
+        return new TableData(_cellOrder, _editability, names, classes, cells);
     }
 
     /**
@@ -605,7 +624,7 @@ public final class TableData
         Objects.requireNonNull(values);
         if ( columnIndex < 0 || columnIndex >= _columnCount )
             return this;
-        if ( !_layout.isRowMajor() )
+        if ( !_cellOrder.isRowMajor() )
             return _withCells(_padLines(columnIndex + 1).setAt(columnIndex, values));
         return _withCells(_replaceMinors(columnIndex, Tuple.of(LINE_TYPE, values)));
     }
@@ -633,10 +652,10 @@ public final class TableData
         Tuple<@Nullable String> names   = _removeFrom(_padNamesTo(_columnCount), columnIndex, count);
         Tuple<Class<?>>         classes = _removeFrom(_padClassesTo(_columnCount), columnIndex, count);
         Tuple<Tuple<@Nullable Object>> cells =
-                _layout.isRowMajor()
+                _cellOrder.isRowMajor()
                     ? _removeMinors(columnIndex, count)
                     : _removeFrom(_cells, columnIndex, count);
-        return new TableData(_layout, names, classes, cells);
+        return new TableData(_cellOrder, _editability, names, classes, cells);
     }
 
     /**
@@ -653,7 +672,8 @@ public final class TableData
         if ( Objects.equals(getColumnName(columnIndex), columnName) )
             return this;
         return new TableData(
-                    _layout,
+                    _cellOrder,
+                    _editability,
                     _padNamesTo(_columnCount).setAt(columnIndex, columnName),
                     _columnClasses,
                     _cells
@@ -679,7 +699,7 @@ public final class TableData
      */
     public TableData setColumnNames( Tuple<@Nullable String> columnNames ) {
         Objects.requireNonNull(columnNames);
-        return new TableData(_layout, columnNames, _columnClasses, _cells);
+        return new TableData(_cellOrder, _editability, columnNames, _columnClasses, _cells);
     }
 
     /**
@@ -698,7 +718,8 @@ public final class TableData
         if ( getColumnClass(columnIndex).equals(columnClass) )
             return this;
         return new TableData(
-                    _layout,
+                    _cellOrder,
+                    _editability,
                     _columnNames,
                     _padClassesTo(_columnCount).setAt(columnIndex, columnClass),
                     _cells
@@ -712,14 +733,14 @@ public final class TableData
      */
     public TableData setColumnClasses( Tuple<Class<?>> columnClasses ) {
         Objects.requireNonNull(columnClasses);
-        return new TableData(_layout, _columnNames, columnClasses, _cells);
+        return new TableData(_cellOrder, _editability, _columnNames, columnClasses, _cells);
     }
 
     // ---- Changing everything ----
 
     /**
-     *  Replaces all of the cells of this table at once, keeping its layout and columns.
-     * @param cells The new cell values, an immutable tuple of rows (or columns, see {@link #layout()}).
+     *  Replaces all of the cells of this table at once, keeping its cell order, editability and columns.
+     * @param cells The new cell values, an immutable tuple of rows (or columns, see {@link #cellOrder()}).
      * @return A new {@link TableData} with the new cells.
      */
     public TableData setCells( Tuple<Tuple<@Nullable Object>> cells ) {
@@ -728,35 +749,72 @@ public final class TableData
     }
 
     /**
-     *  Changes the layout of this table, which is how you make a table editable
-     *  (or read only again) without touching a single cell:
+     *  Changes the cell order of this table, which is how you tell it to read the very
+     *  same {@link #cells()} along the other axis:
      *  <pre>{@code
-     *  data.withLayout(UI.ListData.ROW_MAJOR_EDITABLE)
+     *  data.withCellOrder(UI.CellOrder.COLUMN_MAJOR)
      *  }</pre>
-     *  <b>Careful:</b> the layout also decides how the {@link #cells()} are read, so
-     *  switching between a {@code ROW_MAJOR*} and a {@code COLUMN_MAJOR*} layout
-     *  reinterprets the very same cells along the other axis, which transposes what
-     *  the table shows.
+     *  <b>Careful:</b> this reinterprets the cells rather than rearranging them, so a
+     *  table whose cells stay put comes out transposed. Use it when you know the cells
+     *  were the other way around all along, not to flip a table on screen.
      *
-     * @param layout The new {@link UI.ListData} layout of this table.
-     * @return A new {@link TableData} with the given layout, or this table unchanged
+     * @param cellOrder The new {@link UI.CellOrder} of this table.
+     * @return A new {@link TableData} with the given cell order, or this table unchanged
      *         if it already has it.
      */
-    public TableData withLayout( UI.ListData layout ) {
-        Objects.requireNonNull(layout);
-        if ( _layout == layout )
+    public TableData withCellOrder( UI.CellOrder cellOrder ) {
+        Objects.requireNonNull(cellOrder);
+        if ( _cellOrder == cellOrder )
             return this;
-        return new TableData(layout, _columnNames, _columnClasses, _cells);
+        return new TableData(cellOrder, _editability, _columnNames, _columnClasses, _cells);
+    }
+
+    /**
+     *  Changes whether the user may edit this table, without touching a single cell
+     *  and without any risk of disturbing how the cells are read:
+     *  <pre>{@code
+     *  data.withEditability(UI.Editability.EDITABLE)
+     *  }</pre>
+     *  Note that an editable table also has to live in a mutable {@link sprouts.Var}
+     *  before an edit has anywhere to go.
+     *
+     * @param editability The new {@link UI.Editability} of this table.
+     * @return A new {@link TableData} with the given editability, or this table unchanged
+     *         if it already has it.
+     */
+    public TableData withEditability( UI.Editability editability ) {
+        Objects.requireNonNull(editability);
+        if ( _editability == editability )
+            return this;
+        return new TableData(_cellOrder, editability, _columnNames, _columnClasses, _cells);
+    }
+
+    /**
+     *  Permits the user to edit the cells of this table, shorthand for
+     *  {@code withEditability(UI.Editability.EDITABLE)}.
+     * @return A new editable {@link TableData}, or this table unchanged if it already is.
+     */
+    public TableData asEditable() {
+        return withEditability(UI.Editability.EDITABLE);
+    }
+
+    /**
+     *  Forbids the user to edit the cells of this table, shorthand for
+     *  {@code withEditability(UI.Editability.READ_ONLY)}.
+     * @return A new read only {@link TableData}, or this table unchanged if it already is.
+     */
+    public TableData asReadOnly() {
+        return withEditability(UI.Editability.READ_ONLY);
     }
 
     // ---- Internals ----
 
     private int _majorOf( int rowIndex, int columnIndex ) {
-        return _layout.isRowMajor() ? rowIndex : columnIndex;
+        return _cellOrder.isRowMajor() ? rowIndex : columnIndex;
     }
 
     private int _minorOf( int rowIndex, int columnIndex ) {
-        return _layout.isRowMajor() ? columnIndex : rowIndex;
+        return _cellOrder.isRowMajor() ? columnIndex : rowIndex;
     }
 
     private Tuple<@Nullable Object> _lineAt( int majorIndex ) {
@@ -875,7 +933,7 @@ public final class TableData
     private TableData _withCells( Tuple<Tuple<@Nullable Object>> cells ) {
         if ( cells.equals(_cells) )
             return this;
-        return new TableData(_layout, _columnNames, _columnClasses, cells);
+        return new TableData(_cellOrder, _editability, _columnNames, _columnClasses, cells);
     }
 
     @Override
@@ -884,7 +942,8 @@ public final class TableData
         if ( !(obj instanceof TableData) ) return false;
         TableData other = (TableData) obj;
         // Note that the two dimensions are derived from the state below, so they take care of themselves.
-        return _layout == other._layout
+        return _cellOrder == other._cellOrder
+            && _editability == other._editability
             && _columnNames.equals(other._columnNames)
             && _columnClasses.equals(other._columnClasses)
             && _cells.equals(other._cells);
@@ -892,13 +951,14 @@ public final class TableData
 
     @Override
     public int hashCode() {
-        return Objects.hash(_layout, _columnNames, _columnClasses, _cells);
+        return Objects.hash(_cellOrder, _editability, _columnNames, _columnClasses, _cells);
     }
 
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "[" +
-                    "layout="      + _layout        + ", " +
+                    "cellOrder="   + _cellOrder     + ", " +
+                    "editability=" + _editability   + ", " +
                     "rowCount="    + _rowCount      + ", " +
                     "columnCount=" + _columnCount   + ", " +
                     "columnNames=" + _columnNames   + ", " +

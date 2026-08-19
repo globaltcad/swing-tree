@@ -170,7 +170,7 @@ public class NamedFieldsView extends JPanel {
         .add(
             UI.scrollPane().withMaxWidth(300)
             .add(
-                UI.table(UI.MapData.EDITABLE,()->{
+                UI.table(UI.Editability.EDITABLE,()->{
                     return data;
                 })
                 .withCells( it -> it

@@ -154,7 +154,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  through methods like {@link CellConf#view(Component)} or {@link CellConf#updateView(Configurator)}.
      *  Here an example of how this method may be used:
      * <pre>{@code
-     *     UI.table(UI.ListData.ROW_MAJOR_EDITABLE, ()->List.of(List.of(1, 2, 3), List.of(7, 8, 9)) )
+     *     UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, ()->List.of(List.of(1, 2, 3), List.of(7, 8, 9)) )
      *     .withCellForColumn(0, cell -> cell
      *          .updateView( comp -> comp
      *              .orGet(JLabel::new) // initialize a new JLabel if not already present
@@ -265,7 +265,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  through methods like {@link CellConf#view(Component)} or {@link CellConf#updateView(Configurator)}.
      *  Here an example of how this method may be used:
      * <pre>{@code
-     *     UI.table(UI.ListData.ROW_MAJOR_EDITABLE, ()->List.of(List.of(1, 2, 3), List.of(7, 8, 9)) )
+     *     UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, ()->List.of(List.of(1, 2, 3), List.of(7, 8, 9)) )
      *     .withCellForColumn(0, cell -> cell
      *          .updateView( comp -> comp
      *              .orGet(JLabel::new) // initialize a new JLabel if not already present
@@ -430,7 +430,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  Here code snippet demonstrating how this method may be used
      *  as part of a UI declaration:
      *  <pre>{@code
-     *      UI.table(UI.MapData.EDITABLE,()->{
+     *      UI.table(UI.Editability.EDITABLE,()->{
      *          Map<String, List<String>> data = new LinkedHashMap<>();
      *          data.put("A", List.of("A1", "A2", "A3"));
      *          data.put("B", List.of("B1", "B2", "B3"));
@@ -629,7 +629,8 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  Binds the table to a read only property holding an immutable
      *  {@link TableData} value, which is the most complete way of describing
      *  the contents of a table: it carries the cells, the column names, the column
-     *  classes and the {@link UI.ListData} layout of the data, all in a single value.
+     *  classes, the {@link UI.CellOrder} of the data and its {@link UI.Editability},
+     *  all in a single value.
      *  <p>
      *  Because a {@link TableData} is deeply immutable, the table works with the
      *  property value itself as its UI thread owned snapshot (so the AWT Event Dispatch
@@ -641,7 +642,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  incrementally, instead of rebuilding the whole table.
      *  <p>
      *  The cells of a table bound like this are always read only. Use
-     *  {@link #withModel(Var)} together with one of the {@code *_EDITABLE} layouts
+     *  {@link #withModel(Var)} together with {@link TableData#asEditable()}
      *  if you want the user to be able to edit them.
      *  <pre>{@code
      *  Val<TableData> model = vm.tableModel();
@@ -666,10 +667,10 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  right away (so that the table does not flicker) and then written back into this
      *  property on the application thread.
      *  <p>
-     *  Note that the cells only actually become editable if the {@link TableData#layout()}
-     *  of the bound value is one of the {@code *_EDITABLE} constants of {@link UI.ListData}.
-     *  This mirrors {@link #withModel(UI.ListData, Val)}, where the very same two conditions
-     *  (an editable layout and a mutable property) decide the matter.
+     *  Note that the cells only actually become editable if the bound value says so
+     *  through {@link TableData#isEditable()}, see {@link TableData#asEditable()}.
+     *  This mirrors {@link #withModel(UI.CellOrder, UI.Editability, Val)}, where the very
+     *  same two conditions (an editable value and a mutable property) decide the matter.
      *  <pre>{@code
      *  Var<TableData> model = vm.tableModel();
      *  UI.table().withModel(model);
@@ -680,7 +681,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      */
     public final UIForTable<T> withModel( Var<TableData> model ) {
         NullUtil.nullArgCheck(model, "model", Var.class);
-        // A mutable 'Var' overload yields an editable table (if the layout allows it),
+        // A mutable 'Var' overload yields an editable table (if the value allows it),
         // so unlike the 'Val' overload it must not funnel through as read only.
         return _withTableData(model, true);
     }
@@ -701,23 +702,23 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
 
     /**
      *  Binds the table to a {@link Tuple} based, fully thread safe and reactive
-     *  data source, whose layout is described by the supplied {@link UI.ListData}
-     *  constant: for a {@code ROW_MAJOR*} layout the outer {@link Tuple} holds the
-     *  rows and each inner {@link Tuple} the cells of a row, whereas for a
-     *  {@code COLUMN_MAJOR*} layout the outer {@link Tuple} holds the columns and
-     *  each inner {@link Tuple} the cells of a column.
+     *  data source, whose cells are stored in the order described by the supplied
+     *  {@link UI.CellOrder} constant: for {@link UI.CellOrder#ROW_MAJOR} the outer
+     *  {@link Tuple} holds the rows and each inner {@link Tuple} the cells of a row,
+     *  whereas for {@link UI.CellOrder#COLUMN_MAJOR} the outer {@link Tuple} holds
+     *  the columns and each inner {@link Tuple} the cells of a column.
      *  <p>
      *  This is the recommended way to model dynamic, application thread owned
      *  table data: because a {@link Tuple} is deeply immutable, the table works
      *  with a UI thread owned snapshot of it (so the AWT Event Dispatch Thread
      *  never reads application thread owned mutable state). The table updates
      *  itself automatically whenever the property changes, so no
-     *  {@code updateTableOn(..)} binding is needed. For a row major layout, the
+     *  {@code updateTableOn(..)} binding is needed. For a row major cell order, the
      *  change diff carried by the tuple is furthermore used to sync row
      *  insertions, removals and updates to the {@link JTable} incrementally,
      *  instead of rebuilding the whole table.
      *  <p>
-     *  If you pass one of the {@code *_EDITABLE} constants <i>and</i> a mutable
+     *  If you pass {@link UI.Editability#EDITABLE} <i>and</i> a mutable
      *  {@link Var}, then the user may edit the cells of the table, in which case
      *  the edits are written back into the property on the application thread.
      *  A read only {@link Val} always yields a read only table.
@@ -726,23 +727,42 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *      Tuple.of("Alice", "30"),
      *      Tuple.of("Bob",   "42")
      *  ));
-     *  UI.table().withModel(UI.ListData.ROW_MAJOR_EDITABLE, rows);
+     *  UI.table().withModel(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, rows);
      *  }</pre>
      *
-     * @param dataFormat The layout of the supplied cells, see {@link UI.ListData}.
+     * @param cellOrder The order in which the supplied cells are stored, see {@link UI.CellOrder}.
+     * @param editability Whether the user may edit the cells, see {@link UI.Editability}.
      * @param cells A property holding a {@link Tuple} of {@link Tuple}s of cell values.
      * @return This builder node, to allow for method chaining.
      * @param <E> The common type of the cell values.
      */
-    public final <E> UIForTable<T> withModel( UI.ListData dataFormat, Val<Tuple<Tuple<E>>> cells ) {
-        NullUtil.nullArgCheck(dataFormat, "dataFormat", UI.ListData.class);
+    public final <E> UIForTable<T> withModel(
+        UI.CellOrder cellOrder, UI.Editability editability, Val<Tuple<Tuple<E>>> cells
+    ) {
+        NullUtil.nullArgCheck(cellOrder, "cellOrder", UI.CellOrder.class);
+        NullUtil.nullArgCheck(editability, "editability", UI.Editability.class);
         NullUtil.nullArgCheck(cells, "cells", Val.class);
-        // A tuple based table has only this one overload, so its editability is
-        // driven by the runtime mutability of the cells property (which decides
-        // whether '_asSnapshotProperty' zooms into a mutable snapshot or merely
-        // views a read only one), matching what that method does internally.
-        boolean editable = cells instanceof Var && cells.isMutable();
-        return _withTableData(_asSnapshotProperty(dataFormat, cells), editable);
+        // Editing needs both permission and somewhere to put the edit, so the
+        // requested editability is combined with the runtime mutability of the cells
+        // property (which also decides whether '_asSnapshotProperty' zooms into a
+        // mutable snapshot or merely views a read only one).
+        boolean editable = editability.isEditable() && cells instanceof Var && cells.isMutable();
+        return _withTableData(_asSnapshotProperty(cellOrder, editability, cells), editable);
+    }
+
+    /**
+     *  Binds the table to a read only {@link Tuple} based, fully thread safe and
+     *  reactive data source, exactly like
+     *  {@link #withModel(UI.CellOrder, UI.Editability, Val)} does with
+     *  {@link UI.Editability#READ_ONLY}.
+     *
+     * @param cellOrder The order in which the supplied cells are stored, see {@link UI.CellOrder}.
+     * @param cells A property holding a {@link Tuple} of {@link Tuple}s of cell values.
+     * @return This builder node, to allow for method chaining.
+     * @param <E> The common type of the cell values.
+     */
+    public final <E> UIForTable<T> withModel( UI.CellOrder cellOrder, Val<Tuple<Tuple<E>>> cells ) {
+        return withModel(cellOrder, UI.Editability.READ_ONLY, cells);
     }
 
     /**
@@ -757,13 +777,17 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *  its way back into the original property, whereas read only cells only need a view.
      */
     @SuppressWarnings("unchecked")
-    private static <E> Val<TableData> _asSnapshotProperty( UI.ListData dataFormat, Val<Tuple<Tuple<E>>> cells ) {
+    private static <E> Val<TableData> _asSnapshotProperty(
+        UI.CellOrder cellOrder, UI.Editability editability, Val<Tuple<Tuple<E>>> cells
+    ) {
+        TableData empty = TableData.empty().withCellOrder(cellOrder).withEditability(editability);
         Function<Tuple<Tuple<E>>, TableData> toSnapshot = tuple ->
                 tuple == null
                     // A nullable property may hold no tuple at all (data not loaded
                     // yet, say), which simply reads as an empty table.
-                    ? TableData.empty().withLayout(dataFormat)
-                    : TableData.of(dataFormat, (Tuple<Tuple<@Nullable Object>>)(Tuple<?>) tuple);
+                    ? empty
+                    : TableData.of(cellOrder, (Tuple<Tuple<@Nullable Object>>)(Tuple<?>) tuple)
+                               .withEditability(editability);
         /*
             Careful: a read only property may well be a 'Var' instance, which is why
             its mutability has to be checked explicitly (a lens onto an immutable
@@ -773,7 +797,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
             // The null object flavour of 'zoomTo' is what makes a lens over a
             // nullable property well defined: a null tuple reads as the empty table.
             return ((Var<Tuple<Tuple<E>>>) cells).zoomTo(
-                        TableData.empty().withLayout(dataFormat),
+                        empty,
                         Lens.of(
                             toSnapshot,
                             (oldCells, snapshot) -> (Tuple<Tuple<E>>)(Tuple<?>) snapshot.cells()
@@ -805,19 +829,24 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *      Use {@link #updateTableOn(sprouts.Event)} to bind an update {@link sprouts.Event} to the table model.</b>
      *  <p>
      *  <b>Consider {@link #withModel(Var)} with a {@link TableData} value instead:</b> it
-     *  describes the whole table (cells, column names, column classes and layout) as a
-     *  single immutable value which a property hands to the table, so the table updates
+     *  describes the whole table (cells, column names, column classes, cell order and
+     *  editability) as a single immutable value which a property hands to the table, so the table updates
      *  itself, it is thread safe by construction, and it syncs row changes incrementally
      *  instead of rebuilding. The data source here can only ever refresh everything.
      *
-     * @param mode An enum which configures the layout as well as modifiability of the table in a readable fashion.
+     * @param cellOrder An enum which configures whether the outer list holds the rows
+     *                  or the columns of the table, see {@link UI.CellOrder}.
+     * @param editability An enum which configures whether the user may edit the cells,
+     *                    see {@link UI.Editability}.
      * @param dataSource The {@link TableListDataSource} returning a list matrix which will be used to populate the table.
      * @return This builder node.
      * @param <E> The type of the table entry {@link Object}s.
      */
-    public final <E> UIForTable<T> withModel( UI.ListData mode, TableListDataSource<E> dataSource ) {
-        boolean isRowMajor = mode.isRowMajor();
-        boolean isEditable = mode.isEditable();
+    public final <E> UIForTable<T> withModel(
+        UI.CellOrder cellOrder, UI.Editability editability, TableListDataSource<E> dataSource
+    ) {
+        boolean isRowMajor = cellOrder.isRowMajor();
+        boolean isEditable = editability.isEditable();
         if ( isRowMajor )
             return _with( thisComponent ->
                     _installModel(thisComponent, new ListBasedTableModel<E>(isEditable, dataSource)
@@ -890,19 +919,20 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      *      Use {@link #updateTableOn(sprouts.Event)} to bind an update {@link sprouts.Event} to the table model.</b>
      *  <p>
      *  <b>Consider {@link #withModel(Var)} with a {@link TableData} value instead:</b> it
-     *  describes the whole table (cells, column names, column classes and layout) as a
-     *  single immutable value which a property hands to the table, so the table updates
+     *  describes the whole table (cells, column names, column classes, cell order and
+     *  editability) as a single immutable value which a property hands to the table, so the table updates
      *  itself, it is thread safe by construction, and it syncs row changes incrementally
      *  instead of rebuilding. The data source here can only ever refresh everything.
      *
-     * @param mode An enum which configures the modifiability of the table in a readable fashion.
+     * @param editability An enum which configures whether the user may edit the cells,
+     *                    see {@link UI.Editability}.
      * @param dataSource The {@link TableMapDataSource} returning a column major map based matrix which will be used to populate the table.
      * @return This builder node.
      * @param <E> The type of the table entry {@link Object}s.
      */
-    public final <E> UIForTable<T> withModel( UI.MapData mode, TableMapDataSource<E> dataSource ) {
+    public final <E> UIForTable<T> withModel( UI.Editability editability, TableMapDataSource<E> dataSource ) {
         return _with( thisComponent -> {
-                    _installModel(thisComponent, new MapBasedColumnMajorTableModel<>(mode.isEditable(), dataSource));
+                    _installModel(thisComponent, new MapBasedColumnMajorTableModel<>(editability.isEditable(), dataSource));
                 })
                 ._this();
     }
