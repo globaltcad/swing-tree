@@ -311,66 +311,68 @@ public final class UI extends UIFactoryMethods
     }
 
     /**
-     *  Defines whether the list based data model of a {@link JTable} is row or column major
-     *  and whether it is editable or not.
-     *  See {@link UI#table(swingtree.UI.ListData, TableListDataSource)}
-     *  or {@link UIForTable#withModel(swingtree.UI.ListData, TableListDataSource)}
+     *  Defines along which axis the cells of a {@link JTable} are stored: either
+     *  row by row (row major), where the outer sequence holds the rows and each
+     *  inner sequence the cells of one row, or column by column (column major),
+     *  where the outer sequence holds the columns.
+     *  <p>
+     *  This is a storage detail rather than a display detail, because a table always
+     *  shows rows and columns and every API here speaks in {@code (row, column)} terms.
+     *  It matters for performance though: only a {@link #ROW_MAJOR} table can forward
+     *  a change to a single row to the {@link JTable} as a targeted row event, so
+     *  large and frequently changing tables belong in a row major order.
+     *  <p>
+     *  See {@link UI#table(swingtree.UI.CellOrder, TableListDataSource)} or
+     *  {@link swingtree.api.model.TableData#of(swingtree.UI.CellOrder, String...)}
      *  for more information about the usage of this enum.
+     *
+     * @see Editability
      */
     @Immutable
-    public enum ListData implements UIEnum<ListData>
+    public enum CellOrder implements UIEnum<CellOrder>
     {
-        COLUMN_MAJOR,
         ROW_MAJOR,
-        COLUMN_MAJOR_EDITABLE,
-        ROW_MAJOR_EDITABLE;
-
-        /**
-         *  Tells if the data of a table using this layout may be edited by the user.
-         *  @return True if this is one of the {@code *_EDITABLE} constants.
-         */
-        public final boolean isEditable() {
-            switch ( this ) {
-                case COLUMN_MAJOR:
-                case ROW_MAJOR:
-                    return false;
-                case COLUMN_MAJOR_EDITABLE:
-                case ROW_MAJOR_EDITABLE:
-                    return true;
-            }
-            throw new RuntimeException();
-        }
+        COLUMN_MAJOR;
 
         /**
          *  Tells if the outer list (or {@link sprouts.Tuple}) of a data source using
-         *  this layout holds the rows of the table (row major) or its columns (column major).
-         *  @return True if this is one of the {@code ROW_MAJOR*} constants.
+         *  this cell order holds the rows of the table (row major) or its columns
+         *  (column major).
+         *  @return True if this is {@link #ROW_MAJOR}.
          */
         public final boolean isRowMajor() {
             switch ( this ) {
-                case COLUMN_MAJOR:
-                case COLUMN_MAJOR_EDITABLE:
-                    return false;
-                case ROW_MAJOR:
-                case ROW_MAJOR_EDITABLE:
-                    return true;
+                case ROW_MAJOR:    return true;
+                case COLUMN_MAJOR: return false;
             }
             throw new RuntimeException();
         }
     }
 
     /**
-     *  Defines whether the data model of a {@link JTable} should be editable or not.
-     *  See {@link UI#table(swingtree.UI.MapData, TableMapDataSource)} or
-     *  {@link UIForTable#withModel(swingtree.UI.MapData, TableMapDataSource)}
+     *  Defines whether the user may edit the cells of a {@link JTable} or only read them.
+     *  <p>
+     *  Note that permitting edits is only half of what an editable table needs: the
+     *  data also has to live in a mutable {@link sprouts.Var} property, so that an
+     *  edit has somewhere to go. Data bound through a read only {@link sprouts.Val}
+     *  yields a read only table whatever this says.
+     *  <p>
+     *  See {@link UI#table(swingtree.UI.Editability, TableMapDataSource)} or
+     *  {@link swingtree.api.model.TableData#withEditability(swingtree.UI.Editability)}
      *  for more information about the usage of this enum.
+     *
+     * @see CellOrder
      */
     @Immutable
-    public enum MapData implements UIEnum<MapData>
+    public enum Editability implements UIEnum<Editability>
     {
         EDITABLE, READ_ONLY;
 
-        final boolean isEditable() {
+        /**
+         *  Tells if the cells of a table using this setting may be edited by the user.
+         *  @return True if this is {@link #EDITABLE}.
+         */
+        public final boolean isEditable() {
             switch ( this ) {
                 case EDITABLE :  return true;
                 case READ_ONLY : return false;

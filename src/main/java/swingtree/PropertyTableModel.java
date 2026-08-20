@@ -88,7 +88,7 @@ final class PropertyTableModel extends AbstractSnapshotTableModel
             _fireEverythingChanged();
             return;
         }
-        if ( !next.layout().isRowMajor() ) {
+        if ( !next.cellOrder().isRowMajor() ) {
             // The cells tuple describes columns, so its diff says nothing about row ranges.
             fireTableDataChanged();
             return;
@@ -128,7 +128,7 @@ final class PropertyTableModel extends AbstractSnapshotTableModel
     private static boolean _structureChanged( @Nullable TableData previous, TableData next ) {
         return previous == null
             || next.getColumnCount() != previous.getColumnCount()
-            || next.layout().isRowMajor() != previous.layout().isRowMajor()
+            || next.cellOrder().isRowMajor() != previous.cellOrder().isRowMajor()
             || !next.columnNames().equals(previous.columnNames())
             || !next.columnClasses().equals(previous.columnClasses());
     }
@@ -159,7 +159,7 @@ final class PropertyTableModel extends AbstractSnapshotTableModel
     @Override protected Class<?> _liveColumnClass( int columnIndex ) { return _modelOrEmpty().getColumnClass(columnIndex); }
 
     /**
-     *  A snapshot based table is only editable if the layout of its snapshot says so
+     *  A snapshot based table is only editable if the snapshot itself says so
      *  <i>and</i> the binding intends it to be: {@code _editable} is only set when the
      *  table was bound through a {@link Var} overload (see {@code UIForTable.withModel}),
      *  never through a read only {@link Val} overload. This matters because a read only
@@ -170,14 +170,14 @@ final class PropertyTableModel extends AbstractSnapshotTableModel
      *  defensive guard for the {@code (Var)} cast in {@link #_liveSetValueAt}.
      */
     @Override protected boolean _liveCellEditable( int rowIndex, int columnIndex ) {
-        return _editable && _modelOrEmpty().layout().isEditable() && _model instanceof Var && _model.isMutable();
+        return _editable && _modelOrEmpty().isEditable() && _model instanceof Var && _model.isMutable();
     }
 
     @Override
     @SuppressWarnings("unchecked")
     protected void _liveSetValueAt( @Nullable Object value, int rowIndex, int columnIndex ) {
         if ( !_liveCellEditable(rowIndex, columnIndex) )
-            return; // A read only source (or layout) cannot receive edits.
+            return; // A read only source (or value) cannot receive edits.
         // Note that 'setCellAt' returns the snapshot unchanged if the indices went
         // out of bounds in the meantime, in which case the edit no longer applies.
         ((Var<TableData>) _model).update(From.VIEW, snapshot -> snapshot.setCellAt(rowIndex, columnIndex, value));

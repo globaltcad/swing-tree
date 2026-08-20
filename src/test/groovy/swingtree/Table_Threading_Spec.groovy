@@ -89,7 +89,7 @@ class Table_Threading_Spec extends Specification
                                 Tuple.of("Bob",   "42")
                             ))
             var table = UI.runAndGet({
-                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.ListData.ROW_MAJOR, rows)).get(JTable)
+                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)
             })
         expect : 'The table offers the two initial rows.'
             table.rowCount == 2
@@ -129,7 +129,7 @@ class Table_Threading_Spec extends Specification
         and : 'A `Tuple` based table under mutation pressure, in decoupled mode.'
             var rows = Var.of(Tuple.of(Tuple.of("A", "1"), Tuple.of("B", "2")))
             var table = UI.runAndGet({
-                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.ListData.ROW_MAJOR, rows)).get(JTable)
+                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)
             })
         and : 'A list collecting every inconsistency a render pass may observe.'
             var violations = new CopyOnWriteArrayList<String>()
@@ -182,7 +182,7 @@ class Table_Threading_Spec extends Specification
                                 Tuple.of("C", "3")
                             ))
             var table = UI.runAndGet({
-                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.ListData.ROW_MAJOR, rows)).get(JTable)
+                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)
             })
         and : 'A listener recording the raw table model events.'
             var events = new CopyOnWriteArrayList<TableModelEvent>()
@@ -262,7 +262,7 @@ class Table_Threading_Spec extends Specification
             var update = Event.create()
             var table = UI.runAndGet({
                 UI.use(EventProcessor.DECOUPLED, ()->
-                    UI.table(UI.ListData.ROW_MAJOR, { data } as swingtree.api.model.TableListDataSource)
+                    UI.table(UI.CellOrder.ROW_MAJOR, { data } as swingtree.api.model.TableListDataSource)
                         .updateTableOn((sprouts.Observable) update)
                 ).get(JTable)
             })
@@ -294,7 +294,7 @@ class Table_Threading_Spec extends Specification
             var update = Event.create()
             var table = UI.runAndGet({
                 UI.use(EventProcessor.DECOUPLED, ()->
-                    UI.table(UI.ListData.COLUMN_MAJOR, { data } as swingtree.api.model.TableListDataSource)
+                    UI.table(UI.CellOrder.COLUMN_MAJOR, { data } as swingtree.api.model.TableListDataSource)
                         .updateTableOn((sprouts.Observable) update)
                 ).get(JTable)
             })
@@ -327,7 +327,7 @@ class Table_Threading_Spec extends Specification
             var update = Event.create()
             var table = UI.runAndGet({
                 UI.use(EventProcessor.DECOUPLED, ()->
-                    UI.table(UI.MapData.READ_ONLY, { data } as swingtree.api.model.TableMapDataSource)
+                    UI.table(UI.Editability.READ_ONLY, { data } as swingtree.api.model.TableMapDataSource)
                         .updateTableOn((sprouts.Observable) update)
                 ).get(JTable)
             })
@@ -363,7 +363,7 @@ class Table_Threading_Spec extends Specification
                             ))
             var table = UI.runAndGet({
                 UI.use(EventProcessor.DECOUPLED, ()->
-                    UI.table(UI.ListData.ROW_MAJOR_EDITABLE, rows)
+                    UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, rows)
                 ).get(JTable)
             })
         expect : 'The table considers its cells editable.'
@@ -398,9 +398,9 @@ class Table_Threading_Spec extends Specification
                                 Tuple.of("Bob",   "42")
                             ))
             var table = UI.runAndGet({
-                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.ListData.ROW_MAJOR, rows)).get(JTable)
+                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)
             })
-        expect : 'The table is read only, because we did not ask for an editable layout.'
+        expect : 'The table is read only, because we did not ask for an editable table.'
             UI.runAndGet({ !table.isCellEditable(0, 1) })
 
         when : 'A write sneaks into the model through the model API on the UI thread anyway...'
@@ -469,7 +469,7 @@ class Table_Threading_Spec extends Specification
         and : 'A property of rows and a table in decoupled mode.'
             var rows = Var.of(Tuple.of(Tuple.of("start", "0")))
             var table = UI.runAndGet({
-                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.ListData.ROW_MAJOR, rows)).get(JTable)
+                UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)
             })
 
         when : 'We enqueue 100 row mutations for the application thread, while the UI thread performs 50 renderer style read passes.'

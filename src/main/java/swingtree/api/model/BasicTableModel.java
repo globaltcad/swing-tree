@@ -28,11 +28,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *  }</pre>
  *  <b>Note that {@link TableData} is the recommended way of modelling a table in
  *  SwingTree.</b> It is a single immutable value describing the whole table (cells,
- *  column names, column classes and layout), which you hold in a {@link sprouts.Var}
- *  property and bind through {@link swingtree.UI#table(sprouts.Var)}:
+ *  column names, column classes, cell order and editability), which you hold in a
+ *  {@link sprouts.Var} property and bind through {@link swingtree.UI#table(sprouts.Var)}:
  *  <pre>{@code
  *      Var<TableData> data = Var.of(
- *              TableData.of(UI.ListData.ROW_MAJOR, "A", "B")
+ *              TableData.of(UI.CellOrder.ROW_MAJOR, "A", "B")
  *                  .addRow(1, 2)
  *          );
  *

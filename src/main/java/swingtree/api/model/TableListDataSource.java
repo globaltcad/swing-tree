@@ -11,7 +11,7 @@ import java.util.List;
  *  <p>
  *  <b>Note that {@link TableData} is the recommended way of modelling a table in
  *  SwingTree.</b> It is a single immutable value describing the whole table (cells,
- *  column names, column classes and layout), which you hold in a
+ *  column names, column classes, cell order and editability), which you hold in a
  *  {@link sprouts.Var} property and bind through {@link swingtree.UI#table(sprouts.Var)}.
  *  A table bound like that updates itself, is thread safe by construction, and syncs
  *  row changes to the {@link javax.swing.JTable} incrementally rather than rebuilding
@@ -24,10 +24,10 @@ import java.util.List;
 public interface TableListDataSource<E> {
 
     /**
-     *  When passed to {@link swingtree.UIForTable#withModel(UI.ListData, TableListDataSource)},
-     *  this method is called continuously by you table to fetch the current {@link List}
-     *  based table data. It is not cached or stored insider the table, so if you
-     *  do not want to rebuild the list based model over and over again make sure this
+     *  When passed to {@link swingtree.UIForTable#withModel(UI.CellOrder, UI.Editability, TableListDataSource)},
+     *  this method is called continuously by your table to fetch the current {@link List}
+     *  based table data. It is not cached or stored inside the table, so if you
+     *  do not want to rebuild the list based model over and over again, make sure this
      *  list data source always returns the same object instead of rebuilding it eagerly...
      *
      * @return A list matrix which will be used to populate the table.

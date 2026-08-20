@@ -5702,8 +5702,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  Creates a declarative UI builder for a {@link JTable} bound to a read only
      *  property holding an immutable {@link TableData} value, which is the most
      *  complete way of describing the contents of a table: it carries the cells, the
-     *  column names, the column classes and the {@link UI.ListData} layout of the
-     *  data, all in a single value.
+     *  column names, the column classes, the {@link UI.CellOrder} of the data and
+     *  its {@link UI.Editability}, all in a single value.
      *  <p>
      *  Because a {@link TableData} is deeply immutable, the table works with the
      *  property value itself as its UI thread owned snapshot (so the AWT Event
@@ -5713,8 +5713,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  through the change diff carried by the cells.
      *  <p>
      *  The cells of a table bound like this are read only, use {@link #table(Var)}
-     *  together with one of the {@code *_EDITABLE} layouts if you want the user to
-     *  be able to edit them.
+     *  together with {@link TableData#asEditable()} if you want the user to be able
+     *  to edit them.
      *  <pre>{@code
      *  Val<TableData> model = vm.tableModel();
      *  UI.table(model);
@@ -5736,9 +5736,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  the table does not flicker) and then written back into the property on the
      *  application thread.
      *  <p>
-     *  Note that the cells only actually become editable if the
-     *  {@link TableData#layout()} of the bound value is one of the
-     *  {@code *_EDITABLE} constants of {@link UI.ListData}.
+     *  Note that the cells only actually become editable if the bound value says so
+     *  through {@link TableData#isEditable()}, see {@link TableData#asEditable()}.
      *  <pre>{@code
      *  Var<TableData> model = vm.tableModel();
      *  UI.table(model);
@@ -5753,43 +5752,73 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
-     *  Creates a declarative UI builder for a {@link JTable} bound to a fully
-     *  thread safe, reactive {@link Tuple} based data source, whose layout is
-     *  described by the supplied {@link UI.ListData} constant: for a
-     *  {@code ROW_MAJOR*} layout the outer {@link Tuple} holds the rows and each
-     *  inner {@link Tuple} the cells of a row, whereas for a {@code COLUMN_MAJOR*}
-     *  layout the outer {@link Tuple} holds the columns and each inner
-     *  {@link Tuple} the cells of a column.
+     *  Creates a declarative UI builder for a read only {@link JTable} bound to a
+     *  fully thread safe, reactive {@link Tuple} based data source, whose cells are
+     *  stored in the order described by the supplied {@link UI.CellOrder} constant:
+     *  for {@link UI.CellOrder#ROW_MAJOR} the outer {@link Tuple} holds the rows and
+     *  each inner {@link Tuple} the cells of a row, whereas for
+     *  {@link UI.CellOrder#COLUMN_MAJOR} the outer {@link Tuple} holds the columns
+     *  and each inner {@link Tuple} the cells of a column.
      *  <p>
      *  This is the recommended factory for dynamic, application thread owned table
      *  data: the table works with a UI thread owned snapshot of the immutable
      *  tuple (so the AWT Event Dispatch Thread never touches application thread
      *  owned mutable state), and it updates itself automatically whenever the
-     *  property changes. For a row major layout, row changes are furthermore
+     *  property changes. For a row major cell order, row changes are furthermore
      *  synced to the table incrementally, through the change diff carried by the
      *  tuple.
-     *  <p>
-     *  If you pass one of the {@code *_EDITABLE} constants <i>and</i> a mutable
-     *  {@link sprouts.Var}, then the user may edit the cells of the table, in
-     *  which case the edits are written back into the property on the application
-     *  thread. A read only {@link Val} always yields a read only table.
      *  <pre>{@code
      *  var rows = Var.of(Tuple.of(
      *      Tuple.of("Alice", "30"),
      *      Tuple.of("Bob",   "42")
      *  ));
-     *  UI.table(UI.ListData.ROW_MAJOR_EDITABLE, rows);
+     *  UI.table(UI.CellOrder.ROW_MAJOR, rows);
      *  }</pre>
+     *  Use {@link #table(UI.CellOrder, UI.Editability, Val)} if the user should be
+     *  able to edit the cells.
      *
-     * @param dataFormat The layout of the supplied cells, see {@link UI.ListData}.
+     * @param cellOrder The order in which the supplied cells are stored, see {@link UI.CellOrder}.
      * @param cells A property holding a {@link Tuple} of {@link Tuple}s of cell values.
      * @return A fluent builder instance for a new {@link JTable}.
      * @param <E> The common type of the cell values.
      */
-    public static <E> UIForTable<JTable> table( UI.ListData dataFormat, Val<Tuple<Tuple<E>>> cells ) {
-        NullUtil.nullArgCheck(dataFormat, "dataFormat", UI.ListData.class);
+    public static <E> UIForTable<JTable> table( UI.CellOrder cellOrder, Val<Tuple<Tuple<E>>> cells ) {
+        NullUtil.nullArgCheck(cellOrder, "cellOrder", UI.CellOrder.class);
         NullUtil.nullArgCheck(cells, "cells", Val.class);
-        return table().withModel(dataFormat, cells);
+        return table().withModel(cellOrder, UI.Editability.READ_ONLY, cells);
+    }
+
+    /**
+     *  Creates a declarative UI builder for a {@link JTable} bound to a fully thread
+     *  safe, reactive {@link Tuple} based data source, exactly like
+     *  {@link #table(UI.CellOrder, Val)} does, except that you also say whether the
+     *  user may edit the cells.
+     *  <p>
+     *  If you pass {@link UI.Editability#EDITABLE} <i>and</i> a mutable
+     *  {@link sprouts.Var}, then the user may edit the cells of the table, in which
+     *  case the edits are written back into the property on the application thread.
+     *  A read only {@link Val} always yields a read only table.
+     *  <pre>{@code
+     *  var rows = Var.of(Tuple.of(
+     *      Tuple.of("Alice", "30"),
+     *      Tuple.of("Bob",   "42")
+     *  ));
+     *  UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, rows);
+     *  }</pre>
+     *
+     * @param cellOrder The order in which the supplied cells are stored, see {@link UI.CellOrder}.
+     * @param editability Whether the user may edit the cells, see {@link UI.Editability}.
+     * @param cells A property holding a {@link Tuple} of {@link Tuple}s of cell values.
+     * @return A fluent builder instance for a new {@link JTable}.
+     * @param <E> The common type of the cell values.
+     */
+    public static <E> UIForTable<JTable> table(
+        UI.CellOrder cellOrder, UI.Editability editability, Val<Tuple<Tuple<E>>> cells
+    ) {
+        NullUtil.nullArgCheck(cellOrder, "cellOrder", UI.CellOrder.class);
+        NullUtil.nullArgCheck(editability, "editability", UI.Editability.class);
+        NullUtil.nullArgCheck(cells, "cells", Val.class);
+        return table().withModel(cellOrder, editability, cells);
     }
 
     /**
@@ -5802,20 +5831,55 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *      Use {@link UIForTable#updateTableOn(sprouts.Event)} to bind an update {@link Event} to the table model.</b>
      *  <p>
      *  <b>Consider {@link #table(Var)} with a {@link TableData} value instead:</b> it
-     *  describes the whole table (cells, column names, column classes and layout) as a
-     *  single immutable value which a property hands to the table, so the table updates
+     *  describes the whole table (cells, column names, column classes, cell order and
+     *  editability) as a single immutable value which a property hands to the table, so the table updates
      *  itself, it is thread safe by construction, and it syncs row changes incrementally
      *  instead of rebuilding. The data source here can only ever refresh everything.
      *
-     * @param dataFormat An enum which configures the layout as well as the modifiability of the table in a readable fashion.
+     * @param cellOrder An enum which configures whether the outer list holds the rows
+     *                  or the columns of the table, see {@link UI.CellOrder}.
      * @param dataSource The {@link TableListDataSource} returning a list matrix which will be used to populate the table.
      * @return This builder node.
      * @param <E> The type of the table entry {@link Object}s.
      */
-    public static <E> UIForTable<JTable> table( UI.ListData dataFormat, TableListDataSource<E> dataSource ) {
-        NullUtil.nullArgCheck(dataFormat, "dataFormat", UI.ListData.class);
+    public static <E> UIForTable<JTable> table( UI.CellOrder cellOrder, TableListDataSource<E> dataSource ) {
+        NullUtil.nullArgCheck(cellOrder, "cellOrder", UI.CellOrder.class);
         NullUtil.nullArgCheck(dataSource, "dataSource", TableListDataSource.class);
-        return table().withModel(dataFormat, dataSource);
+        return table().withModel(cellOrder, UI.Editability.READ_ONLY, dataSource);
+    }
+
+    /**
+     *  Use this to create a new {@link JTable} with a table model whose data can be represented based
+     *  on a {@link java.util.List} of {@link java.util.List}s of entries, and which the user may edit.
+     *  This is the same as {@link #table(UI.CellOrder, TableListDataSource)}, except that you
+     *  also say whether the user may edit the cells.
+     *  <p>
+     *      <b>Please note that when the data of the provided data source changes (i.e. when the data source
+     *      is a {@link java.util.List} which gets modified), the table model will not be updated automatically!
+     *      Use {@link UIForTable#updateTableOn(sprouts.Event)} to bind an update {@link Event} to the table model.</b>
+     *  <p>
+     *  <b>Consider {@link #table(Var)} with a {@link TableData} value instead:</b> it
+     *  describes the whole table (cells, column names, column classes, cell order and
+     *  editability) as a single immutable value which a property hands to the table, so
+     *  the table updates itself, it is thread safe by construction, and it syncs row
+     *  changes incrementally instead of rebuilding. The data source here can only ever
+     *  refresh everything.
+     *
+     * @param cellOrder An enum which configures whether the outer list holds the rows
+     *                  or the columns of the table, see {@link UI.CellOrder}.
+     * @param editability An enum which configures whether the user may edit the cells,
+     *                    see {@link UI.Editability}.
+     * @param dataSource The {@link TableListDataSource} returning a list matrix which will be used to populate the table.
+     * @return This builder node.
+     * @param <E> The type of the table entry {@link Object}s.
+     */
+    public static <E> UIForTable<JTable> table(
+        UI.CellOrder cellOrder, UI.Editability editability, TableListDataSource<E> dataSource
+    ) {
+        NullUtil.nullArgCheck(cellOrder, "cellOrder", UI.CellOrder.class);
+        NullUtil.nullArgCheck(editability, "editability", UI.Editability.class);
+        NullUtil.nullArgCheck(dataSource, "dataSource", TableListDataSource.class);
+        return table().withModel(cellOrder, editability, dataSource);
     }
 
     /**
@@ -5828,20 +5892,21 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  Use {@link UIForTable#updateTableOn(sprouts.Event)} to bind an update {@link Event} to the table model.</b>
      *  <p>
      *  <b>Consider {@link #table(Var)} with a {@link TableData} value instead:</b> it
-     *  describes the whole table (cells, column names, column classes and layout) as a
-     *  single immutable value which a property hands to the table, so the table updates
+     *  describes the whole table (cells, column names, column classes, cell order and
+     *  editability) as a single immutable value which a property hands to the table, so the table updates
      *  itself, it is thread safe by construction, and it syncs row changes incrementally
      *  instead of rebuilding. The data source here can only ever refresh everything.
      *
-     * @param dataFormat An enum which configures the modifiability of the table in a readable fashion.
+     * @param editability An enum which configures whether the user may edit the cells,
+     *                    see {@link UI.Editability}.
      * @param dataSource The {@link TableMapDataSource} returning a column major map-based matrix which will be used to populate the table.
      * @return This builder node.
      * @param <E> The type of the table entry {@link Object}s.
      */
-    public static <E> UIForTable<JTable> table( UI.MapData dataFormat, TableMapDataSource<E> dataSource ) {
-        NullUtil.nullArgCheck(dataFormat, "dataFormat", UI.ListData.class);
+    public static <E> UIForTable<JTable> table( UI.Editability editability, TableMapDataSource<E> dataSource ) {
+        NullUtil.nullArgCheck(editability, "editability", UI.Editability.class);
         NullUtil.nullArgCheck(dataSource, "dataSource", TableMapDataSource.class);
-        return table().withModel(dataFormat, dataSource);
+        return table().withModel(editability, dataSource);
     }
 
     /**

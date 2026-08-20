@@ -201,7 +201,7 @@ public final class BudgetView extends JPanel {
                 .withStyle(it -> it.backgroundColor(CARD).border(0, CARD).padding(0, 10, 0, 10))
                 .add(
                     // The whole binding: an immutable TableData value in a mutable
-                    // property. A ROW_MAJOR_EDITABLE layout + a Var makes it editable,
+                    // property. An editable TableData value + a Var makes it editable,
                     // and edits are written back into the property as a new value.
                     table(expenses)
                     .peek(t -> {

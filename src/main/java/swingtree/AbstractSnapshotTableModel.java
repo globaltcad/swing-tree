@@ -157,7 +157,7 @@ abstract class AbstractSnapshotTableModel extends AbstractTableModel
      *  <p>
      *  Note that the {@code _liveXxx} accessors already speak in {@code (row, column)}
      *  terms (a column major data source transposes in its accessors), which is why
-     *  the snapshot taken here is always {@link UI.ListData#ROW_MAJOR}.
+     *  the snapshot taken here is always {@link UI.CellOrder#ROW_MAJOR}.
      *
      * @return A new immutable snapshot of the current table contents.
      */
@@ -184,7 +184,8 @@ abstract class AbstractSnapshotTableModel extends AbstractTableModel
             table with columns but no rows as wide as it should be.
          */
         return TableData.of(
-            UI.ListData.ROW_MAJOR,
+            UI.CellOrder.ROW_MAJOR,
+            UI.Editability.READ_ONLY,
             Tuple.ofNullable(String.class, names),
             Tuple.of((Class<Class<?>>)(Class<?>) Class.class, classes),
             Tuple.of((Class<Tuple<@Nullable Object>>)(Class<?>) Tuple.class, rowTuples)

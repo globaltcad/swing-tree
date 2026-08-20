@@ -29,7 +29,7 @@ public class AdvancedTableExample extends JPanel {
         .add("grow, push",
             UI.scrollPane()
             .add(
-                UI.table(UI.MapData.EDITABLE,()->{
+                UI.table(UI.Editability.EDITABLE,()->{
                     return data;
                 })
                 .withCells( it -> it
