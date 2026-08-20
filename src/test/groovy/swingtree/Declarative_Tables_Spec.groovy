@@ -97,15 +97,12 @@ class Declarative_Tables_Spec extends Specification
     def 'A `List` based table can also be bound further down the chain, through `withModel(..)`.'()
     {
         reportInfo """
-            Just like the property based bindings, the older pull based data sources come
-            in a factory spelling (`UI.table(..)`) and a builder spelling
-            (`UI.table().withModel(..)`). Reach for the builder one when you have already
-            begun declaring a table and want to configure something about it before saying
-            where its data comes from.
+            The list based data sources bind either way too: through `UI.table(..)`, or
+            through `UI.table().withModel(..)` once you have configured the table.
 
-            The two argument spelling leaves the editability out, which reads as read only.
-            And because a list is a *pull* based source, the table only looks at it when
-            something tells it to, which is what `updateTableOn(..)` is for.
+            Two things are worth knowing here. Without a `UI.Editability` the table is
+            read only. And a list is a *pull* based source, so the table reads it only
+            when told to. That is what `updateTableOn(..)` is for.
         """
         given : 'A mutable list of rows, and an event with which to announce changes to it.'
             var rows = [["Alice", "30"], ["Bob", "42"]]
@@ -148,13 +145,12 @@ class Declarative_Tables_Spec extends Specification
     def 'The `withModel(UI.CellOrder, ..)` shorthand reads your list along whichever axis you name.'()
     {
         reportInfo """
-            A list of lists is an ambiguous thing: the very same nesting can mean "a list
-            of rows" or "a list of columns". The `UI.CellOrder` you pass says which of the
-            two you meant, and the table transposes the nesting for you when you meant
-            columns.
+            A list of lists is ambiguous: the same nesting can mean a list of rows or a
+            list of columns. The `UI.CellOrder` you pass says which one you meant. If you
+            meant columns, the table transposes the nesting for you.
 
-            Note that this two argument spelling always yields a read only table. Pass a
-            `UI.Editability` as well if the user should be able to edit the cells.
+            This two argument form always gives you a read only table. Add a
+            `UI.Editability` if the user should be able to edit the cells.
         """
         given : 'One nested list, which could just as well describe rows or columns.'
             var cells = [["a", "b", "c"], ["x", "y", "z"]]
@@ -723,14 +719,12 @@ class Declarative_Tables_Spec extends Specification
     def 'A `Tuple` based table can also be bound further down the chain, through `withModel(..)`.'()
     {
         reportInfo """
-            `UI.table(..)` and `UI.table().withModel(..)` are two spellings of the same
-            thing. The factory is the shorter one for when the table is the whole
-            declaration, and the builder method is for when you have already begun a
-            table and want to bind its data further down the chain, after configuring
-            something else about it first.
+            `UI.table(..)` and `UI.table().withModel(..)` do the same thing. Use the
+            factory when the table is the whole declaration. Use `withModel(..)` when you
+            want to configure the table first and bind its data afterwards.
 
-            Both come in a two argument spelling which leaves the editability out. That
-            reads as read only, which is the safe thing to default to.
+            Both can be called without a `UI.Editability`, in which case the table is
+            read only.
         """
         given : 'A property holding two rows of cells.'
             var rows = Var.of(Tuple.of(

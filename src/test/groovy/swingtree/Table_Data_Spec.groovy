@@ -116,15 +116,14 @@ class Table_Data_Spec extends Specification
     def 'A table can be described completely, in a single call, through the full `TableData.of(..)` factory.'()
     {
         reportInfo """
-            The short `TableData.of(..)` factories are conveniences which leave something
-            out and fill in a default for you: no column classes, no column names, always
-            read only. This longer one spells out everything a table has, namely how its
-            cells are stored, whether the user may edit them, what the columns are called,
-            what type each column holds, and the cells themselves.
+            A table is made of five things: the cells, the column names, the column
+            classes, the cell order and the editability. The short `TableData.of(..)`
+            factories only take some of these and fill in defaults for the rest. This
+            longer one takes all five.
 
-            Reach for it when the whole description arrives from somewhere else in one
-            piece, from a parsed file or a server response, say, so that you do not have
-            to rebuild it column by column.
+            Use it when you already hold the whole description, for example after parsing
+            a file or reading a server response. It saves you from building the table up
+            one column at a time.
         """
         given : 'A complete description of a small, editable, row major table.'
             var data = TableData.of(
@@ -415,13 +414,12 @@ class Table_Data_Spec extends Specification
     def 'Changing the cell order of a table reinterprets its cells, which transposes what it shows.'()
     {
         reportInfo """
-            The cell order says how the cells are *stored*, not how they are displayed,
-            which means that changing it does not move a single cell. It only changes
-            which axis the outer `Tuple` is read along, so a table whose cells stay
-            exactly where they are comes out transposed.
+            The cell order says how the cells are *stored*, not how they are displayed.
+            Changing it therefore moves no cells at all. It only changes which axis the
+            outer `Tuple` is read along, which means the same cells come out transposed.
 
-            Reach for `withCellOrder(..)` when you realise that the cells were the other
-            way around all along, and not when you want to flip a table on screen.
+            Use `withCellOrder(..)` when the cells were the other way around all along.
+            It is not a way to flip a table on screen.
         """
         given : 'A row major table of two rows, three cells wide, which the user may edit.'
             var rowMajor = TableData.of(UI.CellOrder.ROW_MAJOR, Tuple.of(
@@ -454,13 +452,12 @@ class Table_Data_Spec extends Specification
     def 'The cell order and the editability of a table are two independent axes.'()
     {
         reportInfo """
-            A table stores its cells one way and permits (or forbids) edits another, and
-            the two have nothing to do with each other. `cellOrder()` and `editability()`
-            report them separately, and changing one always leaves the other exactly as
-            it was.
+            Cell order and editability are two separate things. `cellOrder()` says how
+            the cells are stored, `editability()` says whether the user may change them.
+            Changing one never changes the other.
 
-            That is the whole point of them being separate: you can turn editing on
-            without any risk of transposing your table by accident.
+            That is exactly why they are two enums instead of one: turning editing on
+            cannot transpose your table by accident.
         """
         given : 'A table of two rows, built with the given cell order and editability.'
             var data = TableData.of(cellOrder, Tuple.of(
