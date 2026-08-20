@@ -2609,7 +2609,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *      The reason being that for most components the {@link JComponent#getSize()} property is entirely managed by
      *      a {@link LayoutManager}, and so the dimensions you specify here may be overridden by it and end up not having any effect.
      *  </i>
-     * @param size The width and height size {@link Dimension}.
+     * @param size The width and height as a {@link Size}.
      * @return A new {@link ComponentStyleDelegate} with the provided {@link Size} (width and height) set to be later
      *          applied to the underlying component when the final {@link StyleConf} is applied.
      * @see #prefSize(Size) the typical way to specify a preferred size to the layout manager
