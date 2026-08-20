@@ -2601,11 +2601,18 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
-     *  Defines the size of this {@link JComponent}. <br>
+     *  Defines the size of this {@link JComponent} explicitly instead of going through a layout manager. <br>
      *  This ultimately translates to {@link JComponent#setSize(Dimension)} on the underlying component. <br>
-     * @param size The width and height size {@link Dimension}.
+     *  <b>
+     *      Note that in most scenarios you would want to use {@link #prefSize(Size)} instead of this method.
+     *  </b><i>
+     *      The reason being that for most components the {@link JComponent#getSize()} property is entirely managed by
+     *      a {@link LayoutManager}, and so the dimensions you specify here may be overridden by it and end up not having any effect.
+     *  </i>
+     * @param size The width and height as a {@link Size}.
      * @return A new {@link ComponentStyleDelegate} with the provided {@link Size} (width and height) set to be later
      *          applied to the underlying component when the final {@link StyleConf} is applied.
+     * @see #prefSize(Size) the typical way to specify a preferred size to the layout manager
      */
     public ComponentStyleDelegate<C> size( Size size ) {
         Objects.requireNonNull(size);
@@ -2613,12 +2620,19 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
-     *  Defines the size of this {@link JComponent}. <br>
+     *  Defines the size of this {@link JComponent} explicitly instead of going through a layout manager. <br>
      *  This ultimately translates to {@link JComponent#setSize(Dimension)} on the underlying component. <br>
+     *  <b>
+     *      Note that in most scenarios you would want to use {@link #prefSize(double, double)} instead of this method.
+     *  </b><i>
+     *      The reason being that for most components the {@link JComponent#getSize()} property is entirely managed by
+     *      a {@link LayoutManager}, and so the dimensions you specify here may be overridden by it and end up not having any effect.
+     *  </i>
      * @param width The width.
      * @param height The height.
      * @return A new {@link ComponentStyleDelegate} with the provided size (width and height) {@link Dimension} set to be later
      *          applied to the underlying component when the final {@link StyleConf} is applied.
+     * @see #prefSize(double, double) the typical way to specify a preferred size to the layout manager
      */
     public ComponentStyleDelegate<C> size( double width, double height ) {
         return _withStyle(_styleConf._withDimensionality(_styleConf.dimensionality()._withWidth(width)._withHeight(height)));
@@ -2626,22 +2640,30 @@ public final class ComponentStyleDelegate<C extends JComponent>
 
 
     /**
-     *  Defines the width of this {@link JComponent}. <br>
+     *  Defines the width of this {@link JComponent} explicitly instead of going through a layout manager. <br>
      *  This ultimately translates to {@link JComponent#setSize(Dimension)} on the underlying component. <br>
+     *  <b>Note that in most scenarios you would want to use {@link #prefWidth(double)} instead of this method.</b><i>
+     *  The reason being that for most components the {@link JComponent#getWidth()} property is entirely managed by
+     *  a {@link LayoutManager}, and so the dimensions you specify here may be overridden by it and end up not having any effect.</i>
      * @param width The width.
      * @return A new {@link ComponentStyleDelegate} with the provided width set to be later
      *          applied to the underlying component when the final {@link StyleConf} is applied.
+     * @see #prefWidth(double) the typical way to specify a preferred width to the layout manager
      */
     public ComponentStyleDelegate<C> width( double width ) {
         return _withStyle(_styleConf._withDimensionality(_styleConf.dimensionality()._withWidth(width)));
     }
 
     /**
-     *  Defines the height of this {@link JComponent}. <br>
+     *  Defines the height of this {@link JComponent} explicitly instead of going through a layout manager. <br>
      *  This ultimately translates to {@link JComponent#setSize(Dimension)} on the underlying component. <br>
+     *  <b>Note that in most scenarios you would want to use {@link #prefHeight(double)} instead of this method.</b><i>
+     *  The reason being that for most components the {@link JComponent#getHeight()} property is entirely managed by
+     *  a {@link LayoutManager}, and so the dimensions you specify here may be overridden by it and end up not having any effect.</i>
      * @param height The height.
      * @return A new {@link ComponentStyleDelegate} with the provided height set to be later
      *          applied to the underlying component when the final {@link StyleConf} is applied.
+     * @see #prefHeight(double) the typical way to specify a preferred height to the layout manager
      */
     public ComponentStyleDelegate<C> height( double height ) {
         return _withStyle(_styleConf._withDimensionality(_styleConf.dimensionality()._withHeight(height)));

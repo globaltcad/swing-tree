@@ -801,12 +801,16 @@ public final class ChatView extends JPanel {
             .withStyle(theme, (t, it) -> {
                 Theme.Palette p = t.palette();
                 return it
-                    .size(diameter, diameter)
+                    .prefSize(diameter, diameter)
                     .backgroundColor(p.hueWash(member.hue()))
                     .borderRadius(100)
                     .border(2, p.presence(member.presence()))
                     .componentFont(f -> f
-                        .family(FONT).size(Math.max(10, diameter / 3)).weight(2f).color(p.hue(member.hue())));
+                        .family(FONT)
+                        .size(Math.max(10, diameter / 3))
+                        .weight(2f)
+                        .color(p.hue(member.hue()))
+                    );
             });
     }
 
