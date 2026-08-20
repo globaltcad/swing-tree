@@ -10,6 +10,7 @@ import sprouts.Val
 import sprouts.Var
 import swingtree.api.model.BasicTableModel
 import swingtree.api.model.TableData
+import swingtree.api.model.TableListDataSource
 import swingtree.threading.EventProcessor
 
 import javax.swing.*
@@ -91,6 +92,91 @@ class Declarative_Tables_Spec extends Specification
             table.getValueAt(1, 1) == "y"
             table.getValueAt(2, 0) == "c"
             table.getValueAt(2, 1) == "z"
+    }
+
+    def 'A `List` based table can also be bound further down the chain, through `withModel(..)`.'()
+    {
+        reportInfo """
+            Just like the property based bindings, the older pull based data sources come
+            in a factory spelling (`UI.table(..)`) and a builder spelling
+            (`UI.table().withModel(..)`). Reach for the builder one when you have already
+            begun declaring a table and want to configure something about it before saying
+            where its data comes from.
+
+            The two argument spelling leaves the editability out, which reads as read only.
+            And because a list is a *pull* based source, the table only looks at it when
+            something tells it to, which is what `updateTableOn(..)` is for.
+        """
+        given : 'A mutable list of rows, and an event with which to announce changes to it.'
+            var rows = [["Alice", "30"], ["Bob", "42"]]
+            var update = Event.create()
+        and : 'A table which configures itself first and only then binds the list:'
+            var table =
+                    UI.table()
+                    .id("people")
+                    .withModel(UI.CellOrder.ROW_MAJOR, { rows } as TableListDataSource)
+                    .updateTableOn(update as Event)
+                    .get(JTable)
+        and : 'A listener recording every event the table model announces.'
+            var events = []
+            table.getModel().addTableModelListener({ TableModelEvent e -> events << e } as TableModelListener)
+
+        expect : 'What we declared before the binding survived it.'
+            table.getName() == "people"
+        and : 'The table shows the two rows of the list.'
+            table.getRowCount() == 2
+            table.getColumnCount() == 2
+            table.getValueAt(0, 0) == "Alice"
+            table.getValueAt(1, 1) == "42"
+        and : 'Its cells are read only, because we did not ask for anything else.'
+            !table.isCellEditable(0, 0)
+
+        when : 'We add a row to the list without telling the table about it...'
+            rows.add(["Carol", "27"])
+        then : '...the table stays quiet, so a table on screen would still be painting two rows.'
+            events.isEmpty()
+
+        when : 'We fire the update event...'
+            update.fire()
+            UI.sync()
+        then : '...the table announces the change and reads the third row.'
+            !events.isEmpty()
+            table.getRowCount() == 3
+            table.getValueAt(2, 0) == "Carol"
+    }
+
+    def 'The `withModel(UI.CellOrder, ..)` shorthand reads your list along whichever axis you name.'()
+    {
+        reportInfo """
+            A list of lists is an ambiguous thing: the very same nesting can mean "a list
+            of rows" or "a list of columns". The `UI.CellOrder` you pass says which of the
+            two you meant, and the table transposes the nesting for you when you meant
+            columns.
+
+            Note that this two argument spelling always yields a read only table. Pass a
+            `UI.Editability` as well if the user should be able to edit the cells.
+        """
+        given : 'One nested list, which could just as well describe rows or columns.'
+            var cells = [["a", "b", "c"], ["x", "y", "z"]]
+        and : 'A table which reads it along the cell order under test:'
+            var table =
+                    UI.table()
+                    .withModel(cellOrder, { cells } as TableListDataSource)
+                    .get(JTable)
+
+        when : 'We read the first row back out of the table.'
+            var firstRow = (0..<table.getColumnCount()).collect({ table.getValueAt(0, it) })
+        then : 'The nesting was interpreted along exactly the axis we named.'
+            table.getRowCount() == rowCount
+            table.getColumnCount() == columnCount
+            firstRow == expectedFirstRow
+        and : 'Either way the table is read only, because we named no editability.'
+            !table.isCellEditable(0, 0)
+
+        where : 'We read one and the same nested list first as rows, and then as columns.'
+            cellOrder                 | rowCount | columnCount || expectedFirstRow
+            UI.CellOrder.ROW_MAJOR    | 2        | 3           || ["a", "b", "c"]
+            UI.CellOrder.COLUMN_MAJOR | 3        | 2           || ["a", "x"]
     }
 
     def 'We can pass an `Event` to the table model to trigger updates.'()

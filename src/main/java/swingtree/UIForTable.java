@@ -910,6 +910,25 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
     }
 
     /**
+     *  Binds the table to a read only {@link List} based data source, exactly like
+     *  {@link #withModel(UI.CellOrder, UI.Editability, TableListDataSource)} does with
+     *  {@link UI.Editability#READ_ONLY}.
+     *  <p>
+     *      <b>Please note that when the data of the provided data source changes (i.e. when the data source
+     *      is a {@link List} and the list is modified), the table model will not be updated automatically!
+     *      Use {@link #updateTableOn(sprouts.Event)} to bind an update {@link sprouts.Event} to the table model.</b>
+     *
+     * @param cellOrder An enum which configures whether the outer list holds the rows
+     *                  or the columns of the table, see {@link UI.CellOrder}.
+     * @param dataSource The {@link TableListDataSource} returning a list matrix which will be used to populate the table.
+     * @return This builder node.
+     * @param <E> The type of the table entry {@link Object}s.
+     */
+    public final <E> UIForTable<T> withModel( UI.CellOrder cellOrder, TableListDataSource<E> dataSource ) {
+        return withModel(cellOrder, UI.Editability.READ_ONLY, dataSource);
+    }
+
+    /**
      *  Use this instead of {@link JTable#setModel(TableModel)} if your table data can be represented based
      *  on a map of column names to lists of table entries (basically a column major matrix).  <br>
      *  This method will automatically create a {@link AbstractTableModel} instance for you.
