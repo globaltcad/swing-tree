@@ -6,7 +6,6 @@ import swingtree.components.JSplitButton;
 
 import javax.swing.JMenuItem;
 import java.awt.event.ActionEvent;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
