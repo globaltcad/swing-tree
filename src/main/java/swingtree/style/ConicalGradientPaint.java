@@ -41,6 +41,8 @@ package swingtree.style;
  */
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import swingtree.SwingTree;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -69,6 +71,8 @@ import java.util.HashMap;
  * @author hansolo
  */
 final class ConicalGradientPaint implements Paint {
+
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ConicalGradientPaint.class);
 
     /**
      * Cache for the context - when the bounds, center, and transform are unchanged, then the context is the same
@@ -517,7 +521,7 @@ final class ConicalGradientPaint implements Paint {
                 return raster;
             }
             catch (NoninvertibleTransformException ex) {
-                System.err.println(ex);
+                log.error(SwingTree.get().logMarker(), "Failed to compute the raster of a conical gradient.", ex);
                 return null;
             }
         }
