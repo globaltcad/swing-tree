@@ -527,6 +527,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      * @param height      the height dimensions
      * @param rowStart    the beginning of the row
      * @param rowEnd      the ending of the row
+     * @param ltr         whether the layout is left-to-right (true) or right-to-left (false)
      * @param useBaseline Whether or not to align on baseline.
      * @param ascent      Ascent for the components. This is only valid if
      *                    useBaseline is true.
