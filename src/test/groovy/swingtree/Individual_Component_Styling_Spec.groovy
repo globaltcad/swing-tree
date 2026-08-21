@@ -392,7 +392,7 @@ class Individual_Component_Styling_Spec extends Specification
             ${Utility.linkSnapshot('components/icon-in-a-box-with-nested-shadows.png')}
 
             This test was actually born after we found a finicky little shadow clipping
-            bug specific to `JIcon` and `JBox`, which are custom components with unque behavior.
+            bug specific to `JIcon` and `JBox`, which are custom components with unique behavior.
             So this is an important regression test as well!
         """
         given : """
