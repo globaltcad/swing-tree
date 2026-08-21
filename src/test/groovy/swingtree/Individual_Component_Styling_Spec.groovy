@@ -2984,7 +2984,7 @@ class Individual_Component_Styling_Spec extends Specification
             The style API allows you to configure custom paint styles for the font of your components.
             Usually the paint of a font is used to fill out the bounds of the characters.
             It may be a gradient, noise function or a custom `java.awt.Paint` implementation.
-            This example demonstrates different font paint confgurations.
+            This example demonstrates different font paint configurations.
 
             ${Utility.linkSnapshot('components/font-style-with-custom-paint.png')}
 
