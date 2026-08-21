@@ -14,7 +14,6 @@ import javax.swing.plaf.basic.BasicButtonUI;
 import javax.swing.plaf.basic.BasicLabelUI;
 import javax.swing.plaf.basic.BasicPanelUI;
 import javax.swing.plaf.basic.BasicTextFieldUI;
-import javax.swing.text.JTextComponent;
 import java.awt.Graphics;
 import java.awt.Insets;
 import java.beans.PropertyChangeEvent;
