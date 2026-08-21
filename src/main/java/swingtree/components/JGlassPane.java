@@ -73,6 +73,9 @@ public class JGlassPane extends JPanel implements StylableComponent
 
     private final EventListenerList listeners = new EventListenerList();
     private final Map<String, Painter> activePaintJobs = new LinkedHashMap<>();
+    /**
+     *  The root pane to which this glass pane is attached, if any.
+     */
     protected @Nullable JRootPane rootPane;
 
     /**
@@ -184,6 +187,10 @@ public class JGlassPane extends JPanel implements StylableComponent
         });
     }
 
+    /**
+     *  Creates a new JGlassPane and automatically attaches it to the specified root pane.
+     *  @param rootPane The root pane to attach this glass pane to.
+     */
     public JGlassPane(JRootPane rootPane) {
         this();
         Objects.requireNonNull(rootPane);
