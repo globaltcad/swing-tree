@@ -121,7 +121,7 @@ class Noise_Function_Spec extends Specification
                 method.getParameterTypes()[0] == float.class &&
                 method.getParameterTypes()[1] == float.class
             )
-        expect : 'Every one of them has exactly one noise type constant exposing it.'
+        expect : 'NoiseType exposes the same number of public noise functions.'
             UI.NoiseType.values().length == noiseFunctions.size()
     }
 
