@@ -717,6 +717,10 @@ public final class NoiseFunctions
     /**
      *  A turbulent marble texture: a regular striped pattern is distorted by several
      *  octaves of value noise, bending the stripes into organic, swirling veins.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the marble texture intensity at the given location.
      */
     public static float marble( float xIn, float yIn ) {
         final float scale = 28;
@@ -731,6 +735,10 @@ public final class NoiseFunctions
     /**
      *  Concentric, slightly distorted growth rings reminiscent of a cross-cut piece
      *  of timber. The rings are warped by fractal noise to give them a natural grain.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the wood grain intensity at the given location.
      */
     public static float wood( float xIn, float yIn ) {
         final float scale = 48;
@@ -745,6 +753,10 @@ public final class NoiseFunctions
     /**
      *  A smooth, flowing interference pattern built from a handful of summed sine
      *  waves - the classic "plasma" demo effect, great for vivid color gradients.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the plasma intensity at the given location.
      */
     public static float plasma( float xIn, float yIn ) {
         final double scale = 36;
@@ -762,6 +774,10 @@ public final class NoiseFunctions
     /**
      *  Soft, billowing clouds produced by fractal Brownian motion and a sigmoid
      *  contrast curve which crisps the cloud edges up against the open sky.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the cloud density at the given location.
      */
     public static float clouds( float xIn, float yIn ) {
         final float scale = 64;
@@ -772,6 +788,10 @@ public final class NoiseFunctions
     /**
      *  A network of thin cracks separating irregular plates, computed from the
      *  difference between the two closest Worley (Voronoi) feature points.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the crack pattern intensity at the given location.
      */
     public static float cracks( float xIn, float yIn ) {
         final float scale = 28;
@@ -782,6 +802,10 @@ public final class NoiseFunctions
     /**
      *  A swirling vortex created by rotating the sampling angle as a function of
      *  the radius and an underlying fractal noise field.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the vortex intensity at the given location.
      */
     public static float vortex( float xIn, float yIn ) {
         final float scale = 40;
@@ -796,6 +820,10 @@ public final class NoiseFunctions
     /**
      *  A fluid, organic flow field produced by "domain warping": fractal noise is
      *  sampled at coordinates that are themselves displaced by other fractal noise.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the flow field intensity at the given location.
      */
     public static float flow( float xIn, float yIn ) {
         final float scale = 56;
@@ -816,6 +844,10 @@ public final class NoiseFunctions
      *  the mid value by the local gradient: {@code |field - 0.5| / |gradient|} is an
      *  estimate of the true distance to the contour, so the bolt keeps the same
      *  width regardless of how steep the field is (no fat blobs on flat spots).
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the lightning bolt intensity at the given location.
      */
     public static float lightning( float xIn, float yIn ) {
         final float scale = 110;
