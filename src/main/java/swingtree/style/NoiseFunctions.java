@@ -718,8 +718,8 @@ public final class NoiseFunctions
      *  A turbulent marble texture: a regular striped pattern is distorted by several
      *  octaves of value noise, bending the stripes into organic, swirling veins.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the marble texture intensity at the given location.
      */
     public static float marble( float xIn, float yIn ) {
@@ -736,8 +736,8 @@ public final class NoiseFunctions
      *  Concentric, slightly distorted growth rings reminiscent of a cross-cut piece
      *  of timber. The rings are warped by fractal noise to give them a natural grain.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the wood grain intensity at the given location.
      */
     public static float wood( float xIn, float yIn ) {
@@ -754,8 +754,8 @@ public final class NoiseFunctions
      *  A smooth, flowing interference pattern built from a handful of summed sine
      *  waves - the classic "plasma" demo effect, great for vivid color gradients.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the plasma intensity at the given location.
      */
     public static float plasma( float xIn, float yIn ) {
@@ -775,8 +775,8 @@ public final class NoiseFunctions
      *  Soft, billowing clouds produced by fractal Brownian motion and a sigmoid
      *  contrast curve which crisps the cloud edges up against the open sky.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the cloud density at the given location.
      */
     public static float clouds( float xIn, float yIn ) {
@@ -789,8 +789,8 @@ public final class NoiseFunctions
      *  A network of thin cracks separating irregular plates, computed from the
      *  difference between the two closest Worley (Voronoi) feature points.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the crack pattern intensity at the given location.
      */
     public static float cracks( float xIn, float yIn ) {
@@ -803,8 +803,8 @@ public final class NoiseFunctions
      *  A swirling vortex created by rotating the sampling angle as a function of
      *  the radius and an underlying fractal noise field.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the vortex intensity at the given location.
      */
     public static float vortex( float xIn, float yIn ) {
@@ -821,8 +821,8 @@ public final class NoiseFunctions
      *  A fluid, organic flow field produced by "domain warping": fractal noise is
      *  sampled at coordinates that are themselves displaced by other fractal noise.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the flow field intensity at the given location.
      */
     public static float flow( float xIn, float yIn ) {
@@ -845,8 +845,8 @@ public final class NoiseFunctions
      *  estimate of the true distance to the contour, so the bolt keeps the same
      *  width regardless of how steep the field is (no fat blobs on flat spots).
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the lightning bolt intensity at the given location.
      */
     public static float lightning( float xIn, float yIn ) {
@@ -933,8 +933,8 @@ public final class NoiseFunctions
      *  lit midrib and faint herringbone side veins, and leaves further back are shaded
      *  darker for depth.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the foliage texture intensity at the given location.
      */
     public static float foliage( float xIn, float yIn ) {
@@ -1024,8 +1024,8 @@ public final class NoiseFunctions
      *  halving amplitude. The neutral, all purpose cloud field other looks are built
      *  from, and the one to reach for when a background just needs to stop being flat.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the fractal noise intensity at the given location.
      */
     public static float fractal( float xIn, float yIn ) {
@@ -1037,8 +1037,8 @@ public final class NoiseFunctions
      *  Wispy, veined noise, made by creasing the noise field at every zero crossing
      *  instead of rounding it off. Reads as smoke, steam or weathered stone.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the turbulent noise intensity at the given location.
      */
     public static float turbulence( float xIn, float yIn ) {
@@ -1049,8 +1049,8 @@ public final class NoiseFunctions
      *  A branching network of sharp crests separated by smooth valleys, the way a
      *  mountain range looks from above. The opposite character to {@link #clouds}.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the ridge pattern intensity at the given location.
      */
     public static float ridges( float xIn, float yIn ) {
@@ -1061,8 +1061,8 @@ public final class NoiseFunctions
      *  Finely brushed metal: streaks stretched far along the horizontal axis at three
      *  different frequencies, under a broad, soft sheen.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the brushed metal texture intensity at the given location.
      */
     public static float brushedMetal( float xIn, float yIn ) {
@@ -1082,8 +1082,8 @@ public final class NoiseFunctions
      *  angles. Each scratch fades in and out along its length instead of crossing the
      *  whole surface.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the scratch pattern intensity at the given location.
      */
     public static float scratches( float xIn, float yIn ) {
@@ -1112,8 +1112,8 @@ public final class NoiseFunctions
      *  Poured concrete: broad cement mottling, a fine sandy grit and scattered air pockets
      *  whose positions are pushed off their lattice so they do not fall into rows.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the concrete texture intensity at the given location.
      */
     public static float concrete( float xIn, float yIn ) {
@@ -1130,8 +1130,8 @@ public final class NoiseFunctions
      *  Uncoated paper: crossed short fibres, scattered flecks and a faint unevenness in
      *  the pulp. Subtle enough to sit under text.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the paper texture intensity at the given location.
      */
     public static float paper( float xIn, float yIn ) {
@@ -1150,8 +1150,8 @@ public final class NoiseFunctions
      *  Wind blown sand: long ripples curving with the wind direction, over a fine grain
      *  and slow rises and dips of the dunes underneath.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the sand texture intensity at the given location.
      */
     public static float sand( float xIn, float yIn ) {
@@ -1166,8 +1166,8 @@ public final class NoiseFunctions
      *  Full grain leather: a network of soft creases enclosing rounded pebbles, with a
      *  fine grain over the top.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the leather texture intensity at the given location.
      */
     public static float leather( float xIn, float yIn ) {
@@ -1182,8 +1182,8 @@ public final class NoiseFunctions
      *  Denim: the diagonal ribs of a twill weave, crossed by warp and weft threads, with
      *  slubs in the yarn and gentle fading across the cloth.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the denim texture intensity at the given location.
      */
     public static float denim( float xIn, float yIn ) {
@@ -1204,8 +1204,8 @@ public final class NoiseFunctions
      *  A brick wall in running bond, every course offset by half a brick. Each brick
      *  carries its own fired tone and the mortar joints sit between them.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the brick texture intensity at the given location.
      */
     public static float bricks( float xIn, float yIn ) {
@@ -1231,8 +1231,8 @@ public final class NoiseFunctions
      *  Herringbone parquet: planks laid at right angles in a zig zag, each with its own
      *  tone and a grain running along its length.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the herringbone texture intensity at the given location.
      */
     public static float herringbone( float xIn, float yIn ) {
@@ -1259,8 +1259,8 @@ public final class NoiseFunctions
      *  A honeycomb of tight packed hexagonal cells, each shaded like a shallow dome and
      *  separated by dark walls.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the honeycomb texture intensity at the given location.
      */
     public static float honeycomb( float xIn, float yIn ) {
@@ -1285,8 +1285,8 @@ public final class NoiseFunctions
      *  Plain woven cloth: strands passing over and under one another, rounded across their
      *  width, shaded where they dip below the crossing strand.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the weave texture intensity at the given location.
      */
     public static float weave( float xIn, float yIn ) {
@@ -1313,8 +1313,8 @@ public final class NoiseFunctions
      *  A print halftone screen: a grid of dots on the classic 45 degree angle, whose size
      *  follows an underlying tone. The look of newsprint and comic shading.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the halftone dot intensity at the given location.
      */
     public static float halftone( float xIn, float yIn ) {
@@ -1333,8 +1333,8 @@ public final class NoiseFunctions
      *  Overlapping scales in offset rows, each row laid over the one behind it. Reads as
      *  fish or reptile skin, or as a roof of shingles.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the scale texture intensity at the given location.
      */
     public static float scales( float xIn, float yIn ) {
@@ -1370,8 +1370,8 @@ public final class NoiseFunctions
      *  A printed circuit board: right angled and quarter turn traces running between
      *  occasional ring shaped solder pads.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the circuit board texture intensity at the given location.
      */
     public static float circuit( float xIn, float yIn ) {
@@ -1406,8 +1406,8 @@ public final class NoiseFunctions
      *  Soap foam: overlapping bubbles of differing size, each domed by its own curvature
      *  and outlined by a bright film at the rim.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the bubble foam texture intensity at the given location.
      */
     public static float bubbles( float xIn, float yIn ) {
@@ -1441,8 +1441,8 @@ public final class NoiseFunctions
      *  A four tone camouflage pattern: irregular patches with torn, interlocking edges,
      *  quantised into flat bands of colour.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the camouflage pattern intensity at the given location.
      */
     public static float camouflage( float xIn, float yIn ) {
@@ -1457,8 +1457,8 @@ public final class NoiseFunctions
      *  The rippling net of light cast on the floor of a swimming pool: two overlaid webs
      *  of bright cell edges, brightest where they meet.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the caustics pattern intensity at the given location.
      */
     public static float caustics( float xIn, float yIn ) {
@@ -1480,8 +1480,8 @@ public final class NoiseFunctions
      *  Ice crystals creeping across a cold window: jagged, feathery veins branching out
      *  between fern like fronds, over a finely frosted surface.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the frost crystal intensity at the given location.
      */
     public static float frost( float xIn, float yIn ) {
@@ -1501,8 +1501,8 @@ public final class NoiseFunctions
      *  A column of smoke drifting upward, stretched along the vertical axis and sheared
      *  sideways so the plume curls as it rises.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the smoke density at the given location.
      */
     public static float smoke( float xIn, float yIn ) {
@@ -1517,8 +1517,8 @@ public final class NoiseFunctions
      *  A field of stars, each with a bright core and a soft halo, scattered over a faint
      *  nebula. Made for dark backgrounds.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the star field brightness at the given location.
      */
     public static float stars( float xIn, float yIn ) {
@@ -1550,8 +1550,8 @@ public final class NoiseFunctions
      *  An open water swell: long parallel crests, gently meandering, each breaking into a
      *  thin line of foam at its peak.
      *
-     *  @param xIn The x-coordinate in pixel space.
-     *  @param yIn The y-coordinate in pixel space.
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
      *  @return A float in the range [0, 1] representing the water wave intensity at the given location.
      */
     public static float waves( float xIn, float yIn ) {
