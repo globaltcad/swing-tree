@@ -82,7 +82,10 @@ public class AbstractDelegate<C extends JComponent>
         return color == UI.Color.UNDEFINED;
     }
 
-
+    /**
+     *  Returns the delegated component wrapped by this delegate.
+     *  @return The delegated component instance.
+     */
     protected final C _component() {
         return _component;
     }

@@ -22,7 +22,13 @@ public abstract class AbstractTextComponentDelegate
     private final int offset;
     private final int length;
 
-
+    /**
+     *  Creates a new text component delegate with the specified parameters.
+     *  @param textComponent The text component being delegated.
+     *  @param filterBypass The filter bypass for document modification.
+     *  @param offset The offset within the document.
+     *  @param length The length of the affected text range.
+     */
     protected AbstractTextComponentDelegate(
         JTextComponent textComponent,
         DocumentFilter.FilterBypass filterBypass,
@@ -35,6 +41,11 @@ public abstract class AbstractTextComponentDelegate
         this.length = length;
     }
 
+    /**
+     *  Returns the text component associated with this delegate.
+     *  @return The text component.
+     *  @throws IllegalStateException If called from a thread other than the Swing event dispatch thread.
+     */
     public JTextComponent getComponent() {
         // We make sure that only the Swing thread can access the component:
         if (UI.thisIsUIThread())
