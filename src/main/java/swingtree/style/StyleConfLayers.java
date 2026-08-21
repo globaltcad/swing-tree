@@ -10,10 +10,8 @@ import swingtree.api.Configurator;
 import swingtree.layout.Bounds;
 
 import javax.swing.JComponent;
-import java.awt.Component;
 import java.awt.Font;
 import java.awt.Graphics2D;
-import java.awt.Shape;
 import java.awt.font.FontRenderContext;
 import java.awt.image.BufferedImage;
 import java.util.*;
