@@ -852,7 +852,7 @@ class Styles_Spec extends Specification
         int uiScale
     ) {
         reportInfo """
-            In in SwingTree's Style API you can create multiple sub-styles for shadows,
+            In SwingTree's Style API you can create multiple sub-styles for shadows,
             by giving them unique names. However, if the style does not make sense, or would
             provably not lead to any visual result, SwingTree will optimize it away under the hood.
         """
