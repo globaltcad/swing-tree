@@ -13,7 +13,6 @@ import swingtree.style.ComponentExtension;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.*;
-import java.awt.Font;
 import java.awt.TextComponent;
 import java.util.ArrayList;
 import java.util.Objects;
