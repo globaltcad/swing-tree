@@ -16,14 +16,37 @@ public final class AnimationStatus implements Progress
 {
     private final static Logger log = org.slf4j.LoggerFactory.getLogger(AnimationStatus.class);
 
+    /**
+     *  Creates an animation status for the specified time within the animation's lifespan.
+     *  @param lifeSpan The lifespan of the animation.
+     *  @param stride The stride (progression or regression) of the animation.
+     *  @param event The action event that triggered this animation status.
+     *  @param now The current time in milliseconds.
+     *  @return An animation status representing the progress at the specified time.
+     */
     public static AnimationStatus of( LifeSpan lifeSpan, Stride stride, ActionEvent event, long now ) {
         return _of(lifeSpan, stride, event, now, false);
     }
 
+    /**
+     *  Creates an animation status for the end of the specified iteration.
+     *  @param lifeSpan The lifespan of the animation.
+     *  @param stride The stride (progression or regression) of the animation.
+     *  @param event The action event that triggered this animation status.
+     *  @param iteration The iteration number.
+     *  @return An animation status representing the progress at the end of the specified iteration.
+     */
     public static AnimationStatus endOf( LifeSpan lifeSpan, Stride stride, ActionEvent event, long iteration ) {
         return _of(lifeSpan, stride, event, lifeSpan.getEndTimeIn(TimeUnit.MILLISECONDS, iteration), true);
     }
 
+    /**
+     *  Creates an animation status for the start of the animation.
+     *  @param lifeSpan The lifespan of the animation.
+     *  @param stride The stride (progression or regression) of the animation.
+     *  @param event The action event that triggered this animation status.
+     *  @return An animation status representing the progress at the start of the animation.
+     */
     public static AnimationStatus startOf( LifeSpan lifeSpan, Stride stride, ActionEvent event ) {
         return _of(lifeSpan, stride, event, lifeSpan.getStartTimeIn(TimeUnit.MILLISECONDS), false);
     }
