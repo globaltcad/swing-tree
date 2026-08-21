@@ -932,6 +932,10 @@ public final class NoiseFunctions
      *  edge, and its surface is broken up by value-noise mottling. Each leaf carries a
      *  lit midrib and faint herringbone side veins, and leaves further back are shaded
      *  darker for depth.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the foliage texture intensity at the given location.
      */
     public static float foliage( float xIn, float yIn ) {
         final float scale = 72;
@@ -1019,6 +1023,10 @@ public final class NoiseFunctions
      *  Plain fractal Brownian motion: several octaves of value noise summed with
      *  halving amplitude. The neutral, all purpose cloud field other looks are built
      *  from, and the one to reach for when a background just needs to stop being flat.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the fractal noise intensity at the given location.
      */
     public static float fractal( float xIn, float yIn ) {
         double field = _fractalNoise( xIn / 46.0, yIn / 46.0, 6 );
@@ -1028,6 +1036,10 @@ public final class NoiseFunctions
     /**
      *  Wispy, veined noise, made by creasing the noise field at every zero crossing
      *  instead of rounding it off. Reads as smoke, steam or weathered stone.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the turbulent noise intensity at the given location.
      */
     public static float turbulence( float xIn, float yIn ) {
         return (float) _clamp01( _turbulentNoise( xIn / 62.0, yIn / 62.0, 6 ) * 1.32 );
@@ -1036,6 +1048,10 @@ public final class NoiseFunctions
     /**
      *  A branching network of sharp crests separated by smooth valleys, the way a
      *  mountain range looks from above. The opposite character to {@link #clouds}.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the ridge pattern intensity at the given location.
      */
     public static float ridges( float xIn, float yIn ) {
         return (float) _clamp01( _ridgedNoise( xIn / 90.0, yIn / 90.0, 6 ) * 1.15 );
@@ -1044,6 +1060,10 @@ public final class NoiseFunctions
     /**
      *  Finely brushed metal: streaks stretched far along the horizontal axis at three
      *  different frequencies, under a broad, soft sheen.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the brushed metal texture intensity at the given location.
      */
     public static float brushedMetal( float xIn, float yIn ) {
         double fineStreaks  = _valueNoise( xIn / 50.0,  yIn * 1.15 );
@@ -1061,6 +1081,10 @@ public final class NoiseFunctions
      *  A worn metal surface, scuffed by sparse straight scratches running at several
      *  angles. Each scratch fades in and out along its length instead of crossing the
      *  whole surface.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the scratch pattern intensity at the given location.
      */
     public static float scratches( float xIn, float yIn ) {
         double marks = 0;
@@ -1087,6 +1111,10 @@ public final class NoiseFunctions
     /**
      *  Poured concrete: broad cement mottling, a fine sandy grit and scattered air pockets
      *  whose positions are pushed off their lattice so they do not fall into rows.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the concrete texture intensity at the given location.
      */
     public static float concrete( float xIn, float yIn ) {
         double mottling = _fractalNoise( xIn / 30.0, yIn / 30.0, 5 );
@@ -1101,6 +1129,10 @@ public final class NoiseFunctions
     /**
      *  Uncoated paper: crossed short fibres, scattered flecks and a faint unevenness in
      *  the pulp. Subtle enough to sit under text.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the paper texture intensity at the given location.
      */
     public static float paper( float xIn, float yIn ) {
         double fibresAcross = _valueNoise( xIn * 1.9, yIn * 0.30 );
@@ -1117,6 +1149,10 @@ public final class NoiseFunctions
     /**
      *  Wind blown sand: long ripples curving with the wind direction, over a fine grain
      *  and slow rises and dips of the dunes underneath.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the sand texture intensity at the given location.
      */
     public static float sand( float xIn, float yIn ) {
         double windDrift = _fractalNoise( xIn / 150.0, yIn / 150.0, 3 ) - 0.5;
@@ -1129,6 +1165,10 @@ public final class NoiseFunctions
     /**
      *  Full grain leather: a network of soft creases enclosing rounded pebbles, with a
      *  fine grain over the top.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the leather texture intensity at the given location.
      */
     public static float leather( float xIn, float yIn ) {
         double pebbleEdge = _worleyEdgeGap( xIn / 15.0, yIn / 15.0 );
@@ -1141,6 +1181,10 @@ public final class NoiseFunctions
     /**
      *  Denim: the diagonal ribs of a twill weave, crossed by warp and weft threads, with
      *  slubs in the yarn and gentle fading across the cloth.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the denim texture intensity at the given location.
      */
     public static float denim( float xIn, float yIn ) {
         double twillPhase = ( xIn * 0.5 + yIn ) * 0.36;
@@ -1159,6 +1203,10 @@ public final class NoiseFunctions
     /**
      *  A brick wall in running bond, every course offset by half a brick. Each brick
      *  carries its own fired tone and the mortar joints sit between them.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the brick texture intensity at the given location.
      */
     public static float bricks( float xIn, float yIn ) {
         final double courseHeight = 24;
@@ -1182,6 +1230,10 @@ public final class NoiseFunctions
     /**
      *  Herringbone parquet: planks laid at right angles in a zig zag, each with its own
      *  tone and a grain running along its length.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the herringbone texture intensity at the given location.
      */
     public static float herringbone( float xIn, float yIn ) {
         final double plankLength = 60;
@@ -1206,6 +1258,10 @@ public final class NoiseFunctions
     /**
      *  A honeycomb of tight packed hexagonal cells, each shaded like a shallow dome and
      *  separated by dark walls.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the honeycomb texture intensity at the given location.
      */
     public static float honeycomb( float xIn, float yIn ) {
         final double combWidth = 30;
@@ -1228,6 +1284,10 @@ public final class NoiseFunctions
     /**
      *  Plain woven cloth: strands passing over and under one another, rounded across their
      *  width, shaded where they dip below the crossing strand.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the weave texture intensity at the given location.
      */
     public static float weave( float xIn, float yIn ) {
         final double strandWidth = 15;
@@ -1252,6 +1312,10 @@ public final class NoiseFunctions
     /**
      *  A print halftone screen: a grid of dots on the classic 45 degree angle, whose size
      *  follows an underlying tone. The look of newsprint and comic shading.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the halftone dot intensity at the given location.
      */
     public static float halftone( float xIn, float yIn ) {
         final double dotPitch = 13;
@@ -1268,6 +1332,10 @@ public final class NoiseFunctions
     /**
      *  Overlapping scales in offset rows, each row laid over the one behind it. Reads as
      *  fish or reptile skin, or as a roof of shingles.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the scale texture intensity at the given location.
      */
     public static float scales( float xIn, float yIn ) {
         final double scaleWidth = 30;
