@@ -3,8 +3,6 @@ package swingtree;
 import net.miginfocom.layout.AC;
 import net.miginfocom.layout.CC;
 import net.miginfocom.layout.LC;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import swingtree.api.Configurator;
 import swingtree.layout.*;
 
