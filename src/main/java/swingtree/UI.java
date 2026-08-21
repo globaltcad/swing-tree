@@ -1729,13 +1729,19 @@ public final class UI extends UIFactoryMethods
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {inheritDoc} */
+    /**
+     *  {inheritDoc}
+     *  @param <E> The type of items in the combo box.
+     */
     public static class ComboBox<E> extends JComboBox<E> implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {inheritDoc} */
+    /**
+     *  {inheritDoc}
+     *  @param <E> The type of items in the list view.
+     */
     public static class ListView<E> extends JList<E> implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
