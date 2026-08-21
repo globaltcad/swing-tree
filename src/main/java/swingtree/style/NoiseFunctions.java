@@ -45,25 +45,28 @@ public final class NoiseFunctions
     }
 
     private static double _coordinateToGradValue( int kernelSize, float xIn, float yIn ) {
-        final int maxDistance  = kernelSize / 2;
-        final double sampleRate = 0.5;
+        final int    maxDistance        = kernelSize / 2;
+        final int    baseX              = Math.round( xIn );
+        final int    baseY              = Math.round( yIn );
+        final double maxDistanceSquared = (double) maxDistance * maxDistance;
         double sum = 0;
         for ( int y = 0; y < kernelSize; y++ ) {
+            final int    ry  = ( y - maxDistance ) + baseY;
+            final double vy  = ry - yIn;
+            final double vy2 = vy * vy;
+            if ( vy2 >= maxDistanceSquared )
+                continue; // No cell in this row can be near enough to matter.
             for ( int x = 0; x < kernelSize; x++ ) {
-                final float xi = ( x - maxDistance ) + xIn;
-                final float yi = ( y - maxDistance ) + yIn;
-                final int rx = Math.round( xi );
-                final int ry = Math.round( yi );
-                final byte score = _fastPseudoRandomByteSeedFrom( ry, rx );
-                final boolean takeSample = (255 * sampleRate -128) < score;
-                if ( takeSample ) {
-                    final double vx = rx - xIn;
-                    final double vy = ry - yIn;
-                    final double distance = Math.sqrt( vx * vx + vy * vy );
-                    final double relevance = Math.max(0, 1.0 - distance / maxDistance);
-                    final double frac = _fastPseudoRandomDoubleFrom(rx, ry) - 0.5;
-                    sum += ( frac * (relevance*relevance) );
-                }
+                final int rx = ( x - maxDistance ) + baseX;
+                if ( _fastPseudoRandomByteSeedFrom( ry, rx ) < 0 )
+                    continue; // This cell holds no grain.
+                final double vx              = rx - xIn;
+                final double distanceSquared = vx * vx + vy2;
+                if ( distanceSquared >= maxDistanceSquared )
+                    continue; // Relevance would clamp to zero.
+                final double relevance = 1.0 - Math.sqrt( distanceSquared ) / maxDistance;
+                final double frac      = _fastPseudoRandomDoubleFrom(rx, ry) - 0.5;
+                sum += ( frac * (relevance*relevance) );
             }
         }
         return sum;

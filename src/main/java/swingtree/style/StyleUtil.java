@@ -82,20 +82,29 @@ final class StyleUtil
         if ( Objects.equals(clipA, clipB) )
             return clipA;
 
-        Shape finalClip = null;
+        if ( clipA == null )
+            return clipB;
+        if ( clipB == null )
+            return clipA;
 
-        if ( clipA == null && clipB != null )
-            finalClip = clipB;
-
-        if ( clipA != null && clipB == null )
-            finalClip = clipA;
-
-        if ( clipA != null && clipB != null ) {
-            Area intersected = new Area(clipB);
-            intersected.intersect(new Area(clipA));
-            finalClip = intersected;
+        // An Area intersection is full boolean path geometry, and ~80% of calls do not need
+        // it: usually one clip already contains the other, or both are rectangles. These
+        // shortcuts describe the same region, and like the null cases above they can hand
+        // back an argument, so callers must not mutate what they get.
+        if ( clipB instanceof Rectangle2D && clipB.contains(clipA.getBounds2D()) )
+            return clipA;
+        if ( clipA instanceof Rectangle2D && clipA.contains(clipB.getBounds2D()) )
+            return clipB;
+        if ( clipA instanceof Rectangle2D && clipB instanceof Rectangle2D ) {
+            final Rectangle2D a = (Rectangle2D) clipA;
+            final Rectangle2D b = (Rectangle2D) clipB;
+            if ( a.intersects(b) )
+                return a.createIntersection(b);
         }
-        return finalClip;
+
+        Area intersected = new Area(clipB);
+        intersected.intersect(new Area(clipA));
+        return intersected;
     }
 
     @SuppressWarnings("ReferenceEquality")
