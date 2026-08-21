@@ -4,10 +4,8 @@ import swingtree.UI;
 import swingtree.UIForBox;
 import swingtree.components.JBox;
 
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import java.awt.Color;
-import java.awt.Component;
 import java.util.concurrent.TimeUnit;
 
 import static swingtree.UI.*;
