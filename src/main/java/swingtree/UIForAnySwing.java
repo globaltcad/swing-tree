@@ -4080,8 +4080,8 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     /**
      *  Use this to set the font of the wrapped {@link JComponent}.
-     *  If the library and look and feel has a {@link UI#scale()} facter
-     *  other than {@code 1.0}, then the font size fill be scaled accordingly...<br>
+     *  If the library and look and feel has a {@link UI#scale()} factor
+     *  other than {@code 1.0}, then the font size will be scaled accordingly...<br>
      *  <b>
      *      To ensure reliable and consistent scaling when working with font,
      *      we recommend using {@link #withFont(UI.Font)} instead of
