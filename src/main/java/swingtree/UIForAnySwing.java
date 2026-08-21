@@ -4691,7 +4691,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *  The provided lambda will be invoked when the component was moved.
      *  This will internally translate to a {@link ComponentListener} implementation.
      *
-     * @param onMoved The action lambda which will be executed once the component was moved / its position canged.
+     * @param onMoved The action lambda which will be executed once the component was moved / its position changed.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I onMoved( Action<ComponentDelegate<C, ComponentEvent>> onMoved ) {
