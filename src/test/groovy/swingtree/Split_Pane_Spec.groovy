@@ -12,7 +12,7 @@ import javax.swing.JSplitPane
 @Title("Split Panes")
 @Narrative('''
 
-   In this specification you can can not only see how to use the Swing-Tree API to 
+   In this specification you can not only see how to use the Swing-Tree API to 
    create and configure split panes but also how to bind them to your view model model.
    The layout alignment of a split pane for example can be bound to a property in your view model.
 
