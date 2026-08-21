@@ -57,7 +57,7 @@ class Icon_Caching_Spec extends Specification
         """
         given : 'First we clear the library context so that there is no state leftover from other tests:'
             SwingTree.initialize()
-        and : 'We creat a bunch of different icon declarations.'
+        and : 'We create a bunch of different icon declarations.'
             var icon1 = IconDeclaration.of("img/trees.png")
             var icon2 = IconDeclaration.of("img/plus.svg")
             var icon3 = IconDeclaration.of(Size.unknown(), "img/a-window-svg")
