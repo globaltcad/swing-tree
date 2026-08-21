@@ -300,7 +300,7 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
      *     Note that the percentage is calculated based on the split pane's
      *     current size, so if the split pane changes its size, the divider location
      *     will be recalculated.
-     * <p>
+     *
      * @param percentage A property dynamically determining a double value between 0 and 1, representing the percentage of the split pane's
      * @return This very instance, which enables builder-style method chaining.
      */

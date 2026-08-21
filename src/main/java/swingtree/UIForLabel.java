@@ -282,7 +282,6 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
      * the value of text is null or empty string, nothing is displayed.
      * <p>
      * The default value of this property is null.
-     * <p>
      *
      * @param text The new text to be set for the wrapped label.
      * @return This very builder to allow for method chaining.
