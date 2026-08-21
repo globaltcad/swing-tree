@@ -178,6 +178,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *                 </li>
      *             </ul>
      */
+    @Deprecated
     public Optional<Container> parent() { return Optional.ofNullable(_component.getParent()); }
 
     /**
