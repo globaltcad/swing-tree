@@ -1397,7 +1397,7 @@ class Individual_Component_Styling_Spec extends Specification
                 for configuring the grounding of a component, which
                 is a sort of background for every style layer.
                 <br>
-                Here you can see an example of multipl labels with different grounding styles. <br>
+                Here you can see an example of multiple labels with different grounding styles. <br>
                 
                 ${Utility.linkSnapshot('components/image-panels-collage.png')}
 
