@@ -44,6 +44,7 @@ public class AbstractDelegate<C extends JComponent>
     private final C _component;
 
     /**
+     * @param nullable Whether the component parameter may be null.
      * @param component The component that is delegated.
      * @param handle A component that is used as a starting point for traversing the component tree,
      *               usually the same component as the one that is delegated.
