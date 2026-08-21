@@ -906,14 +906,8 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     private boolean _hasParentFilter( JComponent aComponent ) {
-        ComponentExtension<?> extension = from(aComponent);
-        ComponentConf conf = extension.getConf();
-        if ( conf.equals(ComponentConf.none()) )
-            return false;
-        StyleConf style = conf.style();
-        if ( style.equals(StyleConf.none()) )
-            return false;
-        return !style.layers().filter().equals(FilterConf.none());
+        FilterConf otherFilter = from(aComponent).getConf().style().layers().filter();
+        return !otherFilter.equals(FilterConf.none());
     }
 
     /**
