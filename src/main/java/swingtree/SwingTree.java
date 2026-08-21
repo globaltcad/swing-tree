@@ -1101,6 +1101,9 @@ public void setCacheMode( SwingTreeInitConfig.CacheMode cacheMode ) {
 
         private void _initialize()
         {
+            if ( initialized )
+                return; // Avoid doing initializing work again...
+
             boolean updated = _initialize( _getDefaultFont() );
             if ( updated )
                 _setScalePropertyListeners();
