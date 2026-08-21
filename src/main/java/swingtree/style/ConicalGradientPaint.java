@@ -29,8 +29,8 @@ package swingtree.style;
  *  Modifications 2018, by Kevin Kieffer
  *  The following modifications have been made and noted with "KK" in the comments:
  *  1. Added caches for the PaintContext and the Rasters, to speed up repaints when nothing has changed
- *  2. Apply the inverse trasform prior to calcuating the angle - this allows graphics transforms (such as rotations, shears) to affect the angle
- *  3. Replace the Pythag + arcos calculation with an arctan calcuation
+ *  2. Apply the inverse transform prior to calculating the angle - this allows graphics transforms (such as rotations, shears) to affect the angle
+ *  3. Replace the Pythag + arcos calculation with an arctan calculation
  *  4. Adjust the colors at 0.0, 1.0 (top dead center) to blend the first and last defined color (rather than setting them to the first color)
  *
  *  Adopted from https://github.com/kkieffer/jZELD/blob/master/src/main/java/com/github/kkieffer/jzeld/attributes/ConicalGradientPaint.java
@@ -140,7 +140,7 @@ final class ConicalGradientPaint implements Paint {
     }
 
     /**
-     * Enhanced constructor which takes the FRACTIONS in degress from 0.0f to 360.0f and
+     * Enhanced constructor which takes the FRACTIONS in degrees from 0.0f to 360.0f and
      * also an GIVEN_OFFSET in degrees around the rotation CENTER
      * @param usesDegrees true if fractions are in degrees, false if fractions are in 0.0 to 1.0
      * @param center the center of the gradient
