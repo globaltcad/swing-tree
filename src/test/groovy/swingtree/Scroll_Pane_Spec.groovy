@@ -51,7 +51,7 @@ class Scroll_Pane_Spec extends Specification
     def 'Use the `UI.ScrollBarPolicy` enum to configure the scroll pane scroll bars.'()
     {
         reportInfo """
-            Note that this is based on the rather non-desciptive `with` method.
+            Note that this is based on the rather non-descriptive `with` method.
             We are using it because the type and name of the enum instance
             already describe the scroll bar policy.
             You will find this pattern in other places in Swing-Tree,
@@ -73,7 +73,7 @@ class Scroll_Pane_Spec extends Specification
     def 'Configure both the horizontal and vertical scroll policy individually.'()
     {
         reportInfo """
-            Note that this is based on the rather non-desciptive `withHorizontal` 
+            Note that this is based on the rather non-descriptive `withHorizontal`
             and `withVertical` methods.
             We are using them because the type and name of the enum instance
             already describe the scroll bar policy.
