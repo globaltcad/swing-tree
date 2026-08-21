@@ -45,7 +45,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 
 /**
@@ -4237,7 +4236,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to register and catch generic {@link MouseListener} based mouse release events on this UI component.
      *  This method adds the provided consumer lambda to
-     *  an an{@link MouseListener} instance to the component.
+     *  an {@link MouseListener} instance to the component.
      *  <br><br>
      *
      * @param onRelease The lambda instance which will be passed to the button component as {@link MouseListener}.
@@ -4264,7 +4263,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to register and catch generic {@link MouseListener} based mouse press events on this UI component.
      *  This method adds the provided consumer lambda to
-     *  an an{@link MouseListener} instance to the component.
+     *  an {@link MouseListener} instance to the component.
      *  <br><br>
      *
      * @param onPress The lambda instance which will be passed to the button component as {@link MouseListener}.
@@ -4499,7 +4498,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to register and catch generic {@link MouseListener} based mouse drag events on this UI component.
      *  This method adds the provided consumer lambda to
-     *  an an{@link MouseListener} instance to the component.
+     *  an {@link MouseListener} instance to the component.
      *  <br><br>
      *  The {@link ComponentDragEventDelegate} received by the {@link Action} lambda
      *  exposes both component and drag event
@@ -4551,7 +4550,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to register and catch generic {@link MouseListener} based mouse move events on this UI component.
      *  This method adds the provided consumer lambda to
-     *  an an{@link MouseListener} instance to the component.
+     *  an {@link MouseListener} instance to the component.
      *  <br><br>
      *
      * @param onMove The lambda instance which will be passed to the button component as {@link MouseListener}.
@@ -4589,7 +4588,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to register and catch generic {@link MouseListener} based mouse wheel events on this UI component.
      *  This method adds the provided consumer lambda to
-     *  an an{@link MouseListener} instance to the component.
+     *  an {@link MouseListener} instance to the component.
      *  <br><br>
      *
      * @param onWheel The lambda instance which will be passed to the button component as {@link MouseListener}.
@@ -4614,7 +4613,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to register and catch mouse wheel up movement events on this UI component.
      *  This method adds the provided consumer lambda to
-     *  an an{@link MouseListener} instance to the component.
+     *  an {@link MouseListener} instance to the component.
      *  <br><br>
      * @param onWheelUp The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
@@ -4639,7 +4638,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     /**
      *  Use this to register and catch mouse wheel down movement events on this UI component.
      *  This method adds the provided consumer lambda to
-     *  an an{@link MouseListener} instance to the component.
+     *  an {@link MouseListener} instance to the component.
      *  <br><br>
      * @param onWheelDown The lambda instance which will be passed to the button component as {@link MouseListener}.
      * @return This very instance, which enables builder-style method chaining.
