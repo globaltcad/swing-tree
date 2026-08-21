@@ -529,7 +529,7 @@ public class AbstractDelegate<C extends JComponent>
 
     /**
      *  Allows you to specify new bounds for the delegated component in "developer pixel space"
-     *  and then have them scaled and set as "component pixel size", which may be scaled for hgigh
+     *  and then have them scaled and set as "component pixel size", which may be scaled for high
      *  DPI environments by the {@link UI#scale()} factor.
      *  This method returns the delegate itself, so you can chain calls to this method.
      *  <p>
