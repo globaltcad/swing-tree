@@ -147,7 +147,7 @@ class Combo_Box_Spec extends Specification
             combo.model.getElementAt(2) == "C"
     }
 
-    def 'The options of an editable combo box are only editable if their items list is modifyable.'()
+    def 'The options of an editable combo box are only editable if their items list is modifiable.'()
     {
         given : 'We create a combo box and make it editable.'
             var ui = UI.comboBox(Collections.unmodifiableList(["A", "B", "C"]))
