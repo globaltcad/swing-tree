@@ -35,6 +35,21 @@ import java.awt.Graphics;
  *          shadow disappears.</li>
  *  </ul>
  *
+ *  <h2>Semantic variants</h2>
+ *  Which <i>colours</i> the states above resolve to is decided by
+ *  {@link LinenVariant}, read from the component's style group tags. A button
+ *  tagged {@code .group(LinenVariant.PRIMARY)} is filled with the moss accent, a
+ *  {@link LinenVariant#DANGER} one with faded brick, and a
+ *  {@link LinenVariant#QUIET} one carries neither surface nor border until the
+ *  pointer arrives. Everything else — radius, padding, the focus border that
+ *  grows while the margin shrinks to absorb it — is shared across the variants.
+ *  <p>
+ *  This is deliberately a LAF-owned enum rather than something an application
+ *  spells out in its own {@code StyleSheet}: a style sheet is resolved
+ *  <em>before</em> the look-and-feel, so a LAF that sets a background
+ *  unconditionally would overwrite the application's brand colour. See
+ *  {@link LinenVariant} for the full explanation.
+ *
  *  <p>All numeric inputs (radius, padding, shadow offsets, …) are in
  *  developer pixels and are scaled automatically by SwingTree for HiDPI.
  *
@@ -85,22 +100,19 @@ public final class LinenButtonUI
         boolean enabled  = b.isEnabled();
         boolean pressed  = enabled && m.isArmed() && m.isPressed();
         boolean selected = enabled && m.isSelected();
+        boolean sunken   = pressed || selected;
         boolean rollover = enabled && m.isRollover() && !pressed;
         boolean focused  = enabled && b.isFocusOwner();
 
-        Color   surface;
-        if      (!enabled)            surface = LinenPalette.SURFACE_DISABLED;
-        else if (pressed || selected) surface = LinenPalette.SURFACE_PRESSED;
-        else if (rollover)            surface = LinenPalette.SURFACE_HOVER;
-        else                          surface = LinenPalette.SURFACE;
+        LinenVariant variant = LinenVariant.of(b);
 
-        Color   foreground = enabled ? LinenPalette.TEXT   : LinenPalette.TEXT_DISABLED;
-        Color   border     = focused ? LinenPalette.ACCENT : LinenPalette.BORDER;
-        double  borderW    = focused ? 2 : 1;
+        Color   surface = variant.surface(enabled, sunken, rollover);
+        Color   border  = variant.border(enabled, focused, rollover);
+        double  borderW = focused ? 2 : 1;
         // Outer margin shrinks by the same delta the border grows so the
         // component's overall footprint stays constant on focus — no layout
         // shift in the surrounding tree.
-        double  margin     = focused ? 0 : 1;
+        double  margin  = focused ? 0 : 1;
 
         it = it
                 .margin(margin)
@@ -109,12 +121,12 @@ public final class LinenButtonUI
                 .borderWidth(borderW)
                 .borderColor(border)
                 .backgroundColor(surface)
-                .foregroundColor(foreground);
+                .foregroundColor(variant.foreground(enabled));
 
         if (!enabled)
             return it;
 
-        if (pressed || selected) {
+        if (sunken) {
             // Pressed: subtle inset shadow for a tactile push-in feel.
             return it
                     .shadowColor(new Color(0, 0, 0, 55))
@@ -123,16 +135,21 @@ public final class LinenButtonUI
                     .shadowOffset(0, 1)
                     .shadowIsInset(true);
         }
+        if (!variant.isRaised()) {
+            // A quiet control lies flat in whatever it sits on: no shadow to
+            // lift it off the surface, and no gradient over a fill it may not
+            // even have.
+            return it;
+        }
         // Resting + hovered share the same shape; hover deepens the shadow.
         int   blur   = rollover ? 8 : 3;
-        int   spread = rollover ? -1 : -1;
         int   alpha  = rollover ? 55 : 25;
         int   yOff   = rollover ? 2 : 1;
-        Color top    = rollover ? LinenPalette.SURFACE_HOVER : LinenPalette.SURFACE;
+        Color top    = variant.surface(true, false, true);
         return it
                 .shadowColor(new Color(0, 0, 0, alpha))
                 .shadowBlurRadius(blur)
-                .shadowSpreadRadius(spread)
+                .shadowSpreadRadius(-1)
                 .shadowOffset(0, yOff)
                 .shadowIsInset(false)
                 .gradient(g -> g
