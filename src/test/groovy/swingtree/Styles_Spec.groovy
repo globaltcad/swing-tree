@@ -1147,7 +1147,7 @@ class Styles_Spec extends Specification
             When transitioning from the first to the second color, the red color will leak through.
             So an interpolated color might be (128, 0, 0, 128) instead of (0, 0, 0, 255).
             
-            You might want this lind of effect to happen, but if you don't then you can always
+            You might want this kind of effect to happen, but if you don't then you can always
             use the `UI.Color.TRANSPARENT` constant, which is a color that the style engine
             will turn into a color that is also transparent, but otherwise an interpolation
             between the two neighbouring colors. 
