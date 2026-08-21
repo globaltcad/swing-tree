@@ -25,7 +25,7 @@ class Example_Spec extends Specification {
     }
 
     /**
-     *  What you are seeing might be weired at first but fear not!
+     *  What you are seeing might be weird at first but fear not!
      *  In Groovy one can use Strings to define method names, Spock uses
      *  this fact to allow us to define readable names for unit tests!
      */
