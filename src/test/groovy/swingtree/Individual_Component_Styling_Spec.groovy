@@ -3118,7 +3118,7 @@ class Individual_Component_Styling_Spec extends Specification
             Usually the purpose of client properties is to give a particular look and feel
             implementation a way to configure how a particular component should be painted.
         """
-        given : 'We create a simple toggle button with a few abitrary properties.'
+        given : 'We create a simple toggle button with a few arbitrary properties.'
             var ui =
                     UI.toggleButton("Toggle Me").withStyle( it -> it
                         .property("my.custom.property.1", "Hello World!")
