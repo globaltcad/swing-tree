@@ -126,7 +126,7 @@ public interface BasicTableModel extends TableModel
 
     /**
      *  The class below is a functional builder for creating a lambda based implementation of the {@link BasicTableModel}.
-     *  This allows fo a boilerplate free functional API.
+     *  This allows for a boilerplate free functional API.
      *
      * @param <E> Common type for all entry items in the table.
      */
