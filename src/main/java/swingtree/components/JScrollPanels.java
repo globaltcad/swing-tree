@@ -435,7 +435,7 @@ public class JScrollPanels extends UI.ScrollPane
      *
      * @param type The component type which ought to be found.
      * @param <T> The component type which ought to be found.
-     * @return The found entry panel matching the provided type class and predicate lambda.
+     * @return An {@link Optional} containing the found entry component of the specified type, or empty if not found.
      * @deprecated This is part of the {@link EntryViewModel} based selection machinery,
      *             which is deprecated in favour of modelling the selection as plain data
      *             in tuple bound entries. See {@link EntryViewModel} for the migration pattern.
