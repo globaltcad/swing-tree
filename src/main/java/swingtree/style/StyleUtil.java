@@ -91,9 +91,9 @@ final class StyleUtil
         // it: usually one clip already contains the other, or both are rectangles. These
         // shortcuts describe the same region, and like the null cases above they can hand
         // back an argument, so callers must not mutate what they get.
-        if ( clipB instanceof Rectangle2D && ((Rectangle2D) clipB).contains(clipA.getBounds2D()) )
+        if ( clipB instanceof Rectangle2D && clipB.contains(clipA.getBounds2D()) )
             return clipA;
-        if ( clipA instanceof Rectangle2D && ((Rectangle2D) clipA).contains(clipB.getBounds2D()) )
+        if ( clipA instanceof Rectangle2D && clipA.contains(clipB.getBounds2D()) )
             return clipB;
         if ( clipA instanceof Rectangle2D && clipB instanceof Rectangle2D ) {
             final Rectangle2D a = (Rectangle2D) clipA;
