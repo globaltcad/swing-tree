@@ -1,7 +1,6 @@
 package examples.simple;
 
 import swingtree.UI;
-import swingtree.api.IconDeclaration;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
