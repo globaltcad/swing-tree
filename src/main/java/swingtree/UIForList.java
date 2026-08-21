@@ -368,6 +368,8 @@ public final class UIForList<E, L extends JList<E>> extends UIForAnySwing<UIForL
      *  thread! Instead, this model works with a UI thread owned snapshot of the items,
      *  which is refreshed through the change events of the property list.
      *  This is the same threading convention that the combo box models follow.
+     *
+     * @param <E> The type of the list elements.
      */
     private static class ValsListModel<E> extends AbstractListModel<E>
     {
