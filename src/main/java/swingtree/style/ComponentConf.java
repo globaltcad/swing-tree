@@ -15,12 +15,14 @@ import java.util.Objects;
 @SuppressWarnings("Immutable")
 final class ComponentConf
 {
+    private static final ComponentConf _NONE = new ComponentConf(
+                                                    StyleConf.none(),
+                                                    Bounds.none(),
+                                                    Outline.none()
+                                                );
+
     public static ComponentConf none() {
-        return new ComponentConf(
-                    StyleConf.none(),
-                    Bounds.none(),
-                    Outline.none()
-                );
+        return _NONE;
     }
 
     private final StyleConf _styleConf;
