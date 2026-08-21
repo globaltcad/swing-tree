@@ -454,7 +454,7 @@ class Individual_Component_Styling_Spec extends Specification
 
             ${Utility.linkSnapshot('components/rounded-non-opaque-panel.png')}
 
-            You may have nticed this big empty space to the right of this text.
+            You may have noticed this big empty space to the right of this text.
             This is actually an image of the panel we are rendering.
             And what you see in this image is...
             well, nothing. It is a fully transparent image.
