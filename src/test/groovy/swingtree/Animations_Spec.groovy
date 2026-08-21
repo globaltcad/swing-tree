@@ -73,7 +73,7 @@ class Animations_Spec extends Specification
             state.get().color.getRed() < 10
             state.get().color.getGreen() == 255
             state.get().color.getBlue() < 10
-        and : 'We can savely assume that the initial model still has the same state.'
+        and : 'We can safely assume that the initial model still has the same state.'
             model.text == "Hello World!"
             model.color == Color.BLACK
     }
