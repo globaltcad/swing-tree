@@ -20,9 +20,6 @@ public class MadeWithNetBeansEditor extends javax.swing.JPanel {
         Thread.sleep(100000);
     }
 
-	/**
-	 * Creates new form UiExampleForm
-	 */
 	public MadeWithNetBeansEditor() {
 		initComponents();
 	}
