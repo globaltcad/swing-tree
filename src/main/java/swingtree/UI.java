@@ -1390,7 +1390,7 @@ public final class UI extends UIFactoryMethods
      * The 'invokeLater' execution will happen after all pending AWT events have been processed.
      * This method should be used when an application thread needs to update the GUI.
      * Any exceptions thrown in the supplied runnable, <b>which are not considered fatal</b>,
-     * will be caught and logged. <b>Fatal exceptions like thead interrupts, are re-thrown!</b>
+     * will be caught and logged. <b>Fatal exceptions like thread interrupts, are re-thrown!</b>
      *
      * @param runnable the instance of {@code Runnable} which needs to be run by the GUI thread.
      * @see #runNow
@@ -1588,8 +1588,8 @@ public final class UI extends UIFactoryMethods
      * this method does not throw an exception if it is called from the
      * event dispatching thread. Instead, it just executes the runnable
      * immediately. Any exceptions thrown in the supplied runnable, <b>which
-     * ae not considered fatal</b>, will be caught and logged. <b>Fatal exceptions
-     * like thead interrupts, are re-thrown!</b>
+     * are not considered fatal</b>, will be caught and logged. <b>Fatal exceptions
+     * like thread interrupts, are re-thrown!</b>
      *
      * @param runnable the instance of {@code Runnable}
      * @see #run
