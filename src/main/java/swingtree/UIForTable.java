@@ -965,7 +965,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
      * @param event The event to be bound.
      * @return This builder node, for chaining.
      * @see #updateTableOn(Observable) To access a more general API that can update the table from any
-     *                                 kind of reative source like a {@link Var#view()} or {@link Vals#view()}...
+     *                                 kind of reactive source like a {@link Var#view()} or {@link Vals#view()}...
      */
     public final UIForTable<T> updateTableOn( Event event ) {
         Objects.requireNonNull(event);
