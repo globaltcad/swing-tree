@@ -36,47 +36,85 @@ public class JIcon extends JLabel implements StylableComponent
         the icon when it changes.
     */
 
+    /**
+     *  Constructs a JIcon with an icon loaded from the specified file path.
+     *  @param path The file path to the icon resource.
+     */
     public JIcon(String path) {
         super(_getFromCacheOrLoadFrom(IconDeclaration.of(path)));
         updateUI();
         dynamicIcon = null;
     }
 
+    /**
+     *  Constructs a JIcon with the specified icon declaration.
+     *  @param declaration The icon declaration specifying which icon to display.
+     */
     public JIcon(IconDeclaration declaration) {
         super(_getFromCacheOrLoadFrom(declaration));
         dynamicIcon = null;
     }
 
+    /**
+     *  Constructs a JIcon with the specified icon.
+     *  @param icon The icon to display.
+     */
     public JIcon(Icon icon) {
         super(icon);
         updateUI();
         dynamicIcon = null;
     }
 
+    /**
+     *  Constructs a JIcon with the specified size and icon.
+     *  @param size The desired size for the icon.
+     *  @param icon The icon to display.
+     */
     public JIcon( Size size, Icon icon ) {
         super(UI.scaleIconTo(size, icon));
         updateUI();
         dynamicIcon = null;
     }
 
+    /**
+     *  Constructs a JIcon with the specified icon, text, and horizontal alignment.
+     *  @param icon The icon to display.
+     *  @param text The text to display alongside the icon.
+     *  @param horizontalAlignment The horizontal alignment of the icon and text.
+     */
     public JIcon(Icon icon, String text, int horizontalAlignment) {
         super(text, icon, horizontalAlignment);
         updateUI();
         dynamicIcon = null;
     }
 
+    /**
+     *  Constructs a JIcon with the specified text and horizontal alignment.
+     *  @param text The text to display.
+     *  @param horizontalAlignment The horizontal alignment of the text.
+     */
     public JIcon(String text, int horizontalAlignment) {
         super(text, horizontalAlignment);
         updateUI();
         dynamicIcon = null;
     }
 
+    /**
+     *  Constructs a JIcon with the specified icon path and text.
+     *  @param path The file path to the icon resource.
+     *  @param text The text to display alongside the icon.
+     */
     public JIcon(String path, String text) {
         super(text, _getFromCacheOrLoadFrom(IconDeclaration.of(path)), CENTER);
         updateUI();
         dynamicIcon = null;
     }
 
+    /**
+     *  Constructs a JIcon with a dynamically bound icon declaration.
+     *  The icon will update whenever the declaration property changes.
+     *  @param declaration A property holding the icon declaration to display.
+     */
     public JIcon( Val<IconDeclaration> declaration ) {
         ComponentExtension.from(this).storeBoundObservable(
                 declaration.view().onChange(From.ALL, it -> {
@@ -90,6 +128,9 @@ public class JIcon extends JLabel implements StylableComponent
         dynamicIcon = declaration;
     }
 
+    /**
+     *  Constructs an empty JIcon with no icon initially displayed.
+     */
     public JIcon() {
         super();
         updateUI();
