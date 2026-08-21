@@ -1369,6 +1369,10 @@ public final class NoiseFunctions
     /**
      *  A printed circuit board: right angled and quarter turn traces running between
      *  occasional ring shaped solder pads.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the circuit board texture intensity at the given location.
      */
     public static float circuit( float xIn, float yIn ) {
         final double trackPitch = 26;
@@ -1401,6 +1405,10 @@ public final class NoiseFunctions
     /**
      *  Soap foam: overlapping bubbles of differing size, each domed by its own curvature
      *  and outlined by a bright film at the rim.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the bubble foam texture intensity at the given location.
      */
     public static float bubbles( float xIn, float yIn ) {
         final double foamSize = 24;
@@ -1432,6 +1440,10 @@ public final class NoiseFunctions
     /**
      *  A four tone camouflage pattern: irregular patches with torn, interlocking edges,
      *  quantised into flat bands of colour.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the camouflage pattern intensity at the given location.
      */
     public static float camouflage( float xIn, float yIn ) {
         double warpX = _turbulentNoise( xIn / 30.0 + 3.1, yIn / 30.0 - 5.7, 3 ) - 0.37;
@@ -1444,6 +1456,10 @@ public final class NoiseFunctions
     /**
      *  The rippling net of light cast on the floor of a swimming pool: two overlaid webs
      *  of bright cell edges, brightest where they meet.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the caustics pattern intensity at the given location.
      */
     public static float caustics( float xIn, float yIn ) {
         double x = xIn / 46.0;
@@ -1463,6 +1479,10 @@ public final class NoiseFunctions
     /**
      *  Ice crystals creeping across a cold window: jagged, feathery veins branching out
      *  between fern like fronds, over a finely frosted surface.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the frost crystal intensity at the given location.
      */
     public static float frost( float xIn, float yIn ) {
         double featherX = _turbulentNoise( xIn / 18.0 + 5.1, yIn / 18.0 - 2.3, 4 ) - 0.37;
@@ -1480,6 +1500,10 @@ public final class NoiseFunctions
     /**
      *  A column of smoke drifting upward, stretched along the vertical axis and sheared
      *  sideways so the plume curls as it rises.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the smoke density at the given location.
      */
     public static float smoke( float xIn, float yIn ) {
         double x = xIn / 80.0;
@@ -1492,6 +1516,10 @@ public final class NoiseFunctions
     /**
      *  A field of stars, each with a bright core and a soft halo, scattered over a faint
      *  nebula. Made for dark backgrounds.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the star field brightness at the given location.
      */
     public static float stars( float xIn, float yIn ) {
         final double fieldSize = 22;
@@ -1521,6 +1549,10 @@ public final class NoiseFunctions
     /**
      *  An open water swell: long parallel crests, gently meandering, each breaking into a
      *  thin line of foam at its peak.
+     *
+     *  @param xIn The x-coordinate in pixel space.
+     *  @param yIn The y-coordinate in pixel space.
+     *  @return A float in the range [0, 1] representing the water wave intensity at the given location.
      */
     public static float waves( float xIn, float yIn ) {
         double swellDrift  = _fractalNoise( xIn / 300.0, yIn / 300.0, 3 ) - 0.5;
