@@ -2,9 +2,7 @@ package examples.games.notepicker.mvi;
 
 import lombok.*;
 import lombok.experimental.Accessors;
-import sprouts.Event;
 import sprouts.From;
-import sprouts.Val;
 import sprouts.Var;
 import swingtree.UI;
 import swingtree.animation.*;
