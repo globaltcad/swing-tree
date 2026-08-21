@@ -186,6 +186,13 @@ public class JScrollPanels extends UI.ScrollPane
         addEntry(null, entryViewModel, viewSupplier);
     }
 
+    /**
+     *  Adds an entry at a specific index without constraints.
+     *  @param index The index at which the entry should be added.
+     *  @param entryViewModel The entry view model to add.
+     *  @param viewSupplier The supplier to create the view for the entry.
+     *  @param <M> The type of the entry view model.
+     */
     public <M extends EntryViewModel> void addEntryAt( int index, M entryViewModel, ViewSupplier<M> viewSupplier) {
         Objects.requireNonNull(entryViewModel);
         EntryPanel entryPanel = _createEntryPanel(null, entryViewModel, viewSupplier, index);
