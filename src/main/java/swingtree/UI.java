@@ -3649,8 +3649,8 @@ public final class UI extends UIFactoryMethods
      *  </b><br>
      * @see UIForAnySwing#withFont(Font) For the most common usecase of this class.
      * @see UIForAnySwing#withFont(Val) To configure a reactive font for a component.
-     * @see UIForAnySwing#withStyle(Styler) and more specifically {@link ComponentStyleDelegate#font(UI.Font)}
-     *      to configure the font of a component through the SwingTree style API.
+     * @see UIForAnySwing#withStyle(Styler) to configure the font through the SwingTree style API
+     * @see ComponentStyleDelegate#font(UI.Font) for more specific font configuration options
      */
     public static final class Font
     {
