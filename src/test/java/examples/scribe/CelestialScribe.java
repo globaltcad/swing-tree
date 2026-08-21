@@ -8,7 +8,6 @@ import sprouts.From;
 import sprouts.Tuple;
 import sprouts.Val;
 import sprouts.Var;
-import sprouts.Viewable;
 import swingtree.UI;
 import swingtree.UIForAnySwing;
 import swingtree.api.Layout;
