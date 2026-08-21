@@ -10,6 +10,27 @@ public final class NoiseFunctions
     private static final long PRIME_1 = 12055296811267L;
     private static final long PRIME_2 = 53982894593057L;
 
+    private static final double[] SEED_BYTE_TO_UNIT_DOUBLE = new double[256];
+    static {
+        for ( int i = 0; i < 256; i++ )
+            SEED_BYTE_TO_UNIT_DOUBLE[i] = i / 255.0;
+    }
+
+    private static final int SCRATCH_FAMILIES = 4;
+    private static final double[] SCRATCH_ANGLE_SIN = new double[SCRATCH_FAMILIES];
+    private static final double[] SCRATCH_ANGLE_COS = new double[SCRATCH_FAMILIES];
+    static {
+        for ( int i = 0; i < SCRATCH_FAMILIES; i++ ) {
+            final double angle = 0.24 + i * 0.9;
+            SCRATCH_ANGLE_SIN[i] = Math.sin(angle);
+            SCRATCH_ANGLE_COS[i] = Math.cos(angle);
+        }
+    }
+
+    private static final double HALFTONE_SCREEN_ANGLE = 0.3926990816987241;
+    private static final double HALFTONE_SCREEN_SIN = Math.sin(HALFTONE_SCREEN_ANGLE);
+    private static final double HALFTONE_SCREEN_COS = Math.cos(HALFTONE_SCREEN_ANGLE);
+
     private static final double OCTAVE_TURN_SIN = 0.479425538604203;
     private static final double OCTAVE_TURN_COS = 0.8775825618903728;
 
@@ -90,13 +111,13 @@ public final class NoiseFunctions
     private static double _coordinateToGradTileValue( int kernelSize, float xIn, float yIn ) {
         final int maxDistance  = kernelSize / 2;
         final double sampleRate = 0.5;
+        final int[] columns = _roundedKernelLine( kernelSize, xIn );
+        final int[] rows    = _roundedKernelLine( kernelSize, yIn );
         double sum = 0;
         for ( int y = 0; y < kernelSize; y++ ) {
+            final int ry = rows[y];
             for ( int x = 0; x < kernelSize; x++ ) {
-                final float xi = ( x - maxDistance ) + xIn;
-                final float yi = ( y - maxDistance ) + yIn;
-                final int rx = Math.round( xi );
-                final int ry = Math.round( yi );
+                final int rx = columns[x];
                 final byte score = _fastPseudoRandomByteSeedFrom( ry, rx );
                 final boolean takeSample = (255 * sampleRate -128) < score;
                 if ( takeSample ) {
@@ -134,7 +155,7 @@ public final class NoiseFunctions
                 if ( takeSample ) {
                     final double vx = rx - xIn;
                     final double vy = ry - yIn;
-                    final double distance = Math.sqrt( vx*vx % 2 + vy*vy % 2);
+                    final double distance = Math.sqrt( _wrapAround(vx*vx, 2) + _wrapAround(vy*vy, 2) );
                     double relevance = Math.max(0, 1.0 - distance / maxDistance);
                     final double frac = _fastPseudoRandomDoubleFrom(rx, ry) - 0.5;
                     relevance = Math.min(1, (relevance * relevance) * 1.5);
@@ -219,13 +240,15 @@ public final class NoiseFunctions
     private static double _coordinateToHazeValue( int kernelSize, float xIn, float yIn ) {
         final int maxDistance  = kernelSize / 2;
         final double sampleRate = 0.5;
+        final int[] columns    = _roundedKernelLine( kernelSize, xIn );
+        final int[] rows       = _roundedKernelLine( kernelSize, yIn );
+        final int[] subColumns = _roundedKernelLine( kernelSize, xIn, 3 );
+        final int[] subRows    = _roundedKernelLine( kernelSize, yIn, 3 );
         double sum = 0;
         for ( int y = 0; y < kernelSize; y++ ) {
+            final int ry = rows[y];
             for ( int x = 0; x < kernelSize; x++ ) {
-                final float xi = ( x - maxDistance ) + xIn;
-                final float yi = ( y - maxDistance ) + yIn;
-                final int rx = Math.round( xi );
-                final int ry = Math.round( yi );
+                final int rx = columns[x];
                 final byte score = _fastPseudoRandomByteSeedFrom( ry, rx );
                 final boolean takeSample = (255 * sampleRate -128) < score;
                 if ( takeSample ) {
@@ -236,8 +259,8 @@ public final class NoiseFunctions
                     final double distance = Math.sqrt( Math.max(diagonalMax, horizontalAndVerticalMax) * 2 );
                     final double relevance = Math.max(0, 1.0 - distance / maxDistance);
                     final double frac = _fastPseudoRandomDoubleFrom(rx, ry) - 0.5;
-                    final int rx2 = Math.round( xi * 3 );
-                    final int ry2 = Math.round( yi * 3 );
+                    final int rx2 = subColumns[x];
+                    final int ry2 = subRows[y];
                     final double subNoise = 1 + (_fastPseudoRandomDoubleFrom(rx2, ry2) - 0.5) / 5;
                     sum += ( frac * (relevance*subNoise) );
                 }
@@ -256,21 +279,21 @@ public final class NoiseFunctions
     private static double _coordinateToSpiralValue(int kernelSize, float xIn, float yIn ) {
         final int maxDistance  = kernelSize / 2;
         final double sampleRate = 0.75;
+        final int[] columns = _roundedKernelLine( kernelSize, xIn );
+        final int[] rows    = _roundedKernelLine( kernelSize, yIn );
         double result = 0;
         for ( int y = 0; y < kernelSize; y++ ) {
+            final int ry = rows[y];
             for ( int x = 0; x < kernelSize; x++ ) {
-                final float xi = ( x - maxDistance ) + xIn;
-                final float yi = ( y - maxDistance ) + yIn;
-                final int rx = Math.round( xi );
-                final int ry = Math.round( yi );
+                final int rx = columns[x];
                 final double vx = rx - xIn;
                 final double vy = ry - yIn;
-                final double distance = Math.sqrt( vx * vx + vy * vy );
-                final double relevance = 1.0 - distance / maxDistance;
-                if ( relevance >= 0 ) {
+                final double reach = vx * vx + vy * vy;
+                if ( reach <= maxDistance * maxDistance ) {
                     final byte score = _fastPseudoRandomByteSeedFrom( ry, rx );
                     final boolean takeSample = (255 * sampleRate - 128) < score;
                     if ( takeSample ) {
+                        final double relevance = 1.0 - Math.sqrt( reach ) / maxDistance;
                         final double frac = _fastPseudoRandomDoubleFrom(rx, ry) - 0.5;
                         final double relevance2 = relevance * relevance;
                         // We are calculating the angle between (xIn,yIn) and (rx,ry):
@@ -749,8 +772,7 @@ public final class NoiseFunctions
      */
     public static float cracks( float xIn, float yIn ) {
         final float scale = 28;
-        final double[] f1f2 = _worleyF1F2(xIn / scale, yIn / scale);
-        final double edge = f1f2[1] - f1f2[0];
+        final double edge = _worleyEdgeGap(xIn / scale, yIn / scale);
         return (float) _sigmoid( ( edge - 0.06 ) * 30 );
     }
 
@@ -900,6 +922,9 @@ public final class NoiseFunctions
                 final double dx = x - leafX;
                 final double dy = y - leafY;
 
+                if ( _isOutsideLeafBounds(dx, dy, LEAF_MIN_HALF_LENGTH + LEAF_HALF_LENGTH_SPREAD) )
+                    continue; // Out of reach of even the largest possible leaf.
+
                 final double halfLength = LEAF_MIN_HALF_LENGTH
                                         + _fastPseudoRandomDoubleFrom( gx - 1597, gy - 2749 ) * LEAF_HALF_LENGTH_SPREAD;
 
@@ -1004,15 +1029,20 @@ public final class NoiseFunctions
      */
     public static float scratches( float xIn, float yIn ) {
         double marks = 0;
-        for ( int i = 0; i < 4; i++ ) {
-            double angle = 0.24 + i * 0.9;
-            double sin = Math.sin(angle);
-            double cos = Math.cos(angle);
+        for ( int i = 0; i < SCRATCH_FAMILIES; i++ ) {
+            double sin = SCRATCH_ANGLE_SIN[i];
+            double cos = SCRATCH_ANGLE_COS[i];
             double along  = ( xIn * cos - yIn * sin ) / 190.0 + i * 31.7;
             double across = ( xIn * sin + yIn * cos ) / 1.9 + i * 57.3;
-            double line = Math.pow( _valueNoise( along, across ), 14 );
             double interrupted = _valueNoise( along * 9.0 + i * 13.9, across * 0.31 );
-            marks = Math.max( marks, line * _smoothStep( _clamp01( ( interrupted - 0.5 ) * 4.5 ) ) );
+            double visible = _smoothStep( _clamp01( ( interrupted - 0.5 ) * 4.5 ) );
+            if ( visible > 0 ) {
+                double crest = _valueNoise( along, across );
+                double crestSquared = crest * crest;
+                double crestToTheFourth = crestSquared * crestSquared;
+                double line = crestToTheFourth * crestToTheFourth * crestToTheFourth * crestSquared;
+                marks = Math.max( marks, line * visible );
+            }
         }
         double patina = _fractalNoise( xIn / 70.0, yIn / 70.0, 3 );
         double dust   = _valueNoise( xIn * 1.7, yIn * 1.7 );
@@ -1028,8 +1058,8 @@ public final class NoiseFunctions
         double grit     = _valueNoise( xIn * 1.4, yIn * 1.4 );
         double pitDriftX = _fractalNoise( xIn / 19.0 + 4.7, yIn / 19.0 - 9.1, 2 ) - 0.5;
         double pitDriftY = _fractalNoise( xIn / 19.0 - 6.3, yIn / 19.0 + 2.5, 2 ) - 0.5;
-        double[] f1f2   = _worleyF1F2( xIn / 11.0 + pitDriftX * 0.8, yIn / 11.0 + pitDriftY * 0.8 );
-        double pits     = _smoothStep( _clamp01( f1f2[0] * 2.4 ) );
+        double toNearestPit = _worleyNearestDistance( xIn / 11.0 + pitDriftX * 0.8, yIn / 11.0 + pitDriftY * 0.8 );
+        double pits         = _smoothStep( _clamp01( toNearestPit * 2.4 ) );
         return (float) _clamp01( 0.30 + mottling * 0.62 + ( grit - 0.5 ) * 0.28 - ( 1 - pits ) * 0.35 );
     }
 
@@ -1066,8 +1096,8 @@ public final class NoiseFunctions
      *  fine grain over the top.
      */
     public static float leather( float xIn, float yIn ) {
-        double[] f1f2 = _worleyF1F2( xIn / 15.0, yIn / 15.0 );
-        double creases = _smoothStep( _clamp01( ( f1f2[1] - f1f2[0] ) * 2.6 ) );
+        double pebbleEdge = _worleyEdgeGap( xIn / 15.0, yIn / 15.0 );
+        double creases = _smoothStep( _clamp01( pebbleEdge * 2.6 ) );
         double grain   = _valueNoise( xIn * 1.7, yIn * 1.7 );
         double bloom   = _fractalNoise( xIn / 60.0, yIn / 60.0, 3 );
         return (float) _clamp01( 0.16 + creases * 0.62 + ( grain - 0.5 ) * 0.24 + ( bloom - 0.5 ) * 0.3 );
@@ -1129,7 +1159,8 @@ public final class NoiseFunctions
         double across = lyingAlong ? v : u;
         double along  = lyingAlong ? u : v;
         double inPlank = _wrapAround( across, plankWidth ) / plankWidth;
-        double toEnd = Math.min( _wrapAround( along, plankLength ), plankLength - _wrapAround( along, plankLength ) );
+        double alongPlank = _wrapAround( along, plankLength );
+        double toEnd = Math.min( alongPlank, plankLength - alongPlank );
         double joint = _smoothStep( _clamp01( ( Math.min( inPlank, 1 - inPlank ) * plankWidth - 1.2 ) / 1.6 ) )
                      * _smoothStep( _clamp01( ( toEnd - 1.2 ) / 1.6 ) );
         double grain = _valueNoise( along * 0.25, across * 3.0 );
@@ -1188,12 +1219,9 @@ public final class NoiseFunctions
      *  follows an underlying tone. The look of newsprint and comic shading.
      */
     public static float halftone( float xIn, float yIn ) {
-        final double screenAngle = 0.3926990816987241;
         final double dotPitch = 13;
-        double sin = Math.sin(screenAngle);
-        double cos = Math.cos(screenAngle);
-        double sx = ( xIn * cos - yIn * sin ) / dotPitch;
-        double sy = ( xIn * sin + yIn * cos ) / dotPitch;
+        double sx = ( xIn * HALFTONE_SCREEN_COS - yIn * HALFTONE_SCREEN_SIN ) / dotPitch;
+        double sy = ( xIn * HALFTONE_SCREEN_SIN + yIn * HALFTONE_SCREEN_COS ) / dotPitch;
         double dx = sx - Math.floor(sx) - 0.5;
         double dy = sy - Math.floor(sy) - 0.5;
         double toDotCenter = Math.sqrt( dx*dx + dy*dy );
@@ -1224,7 +1252,8 @@ public final class NoiseFunctions
             if ( radius > 1 )
                 continue;
             double edgeShadow   = _smoothStep( _clamp01( ( 0.94 - radius ) * 11 ) );
-            double rimHighlight = Math.pow( _clamp01( ( radius - 0.6 ) / 0.34 ), 3 ) * 0.42;
+            double towardRim = _clamp01( ( radius - 0.6 ) / 0.34 );
+            double rimHighlight = towardRim * towardRim * towardRim * 0.42;
             double tone  = _fastPseudoRandomDoubleFrom( (float) column, (float) row );
             double sheen = _valueNoise( xIn * 0.55, yIn * 0.55 );
             double shade = 0.10 + downScale * 0.40 + ( 1 - radius ) * 0.24
@@ -1287,7 +1316,9 @@ public final class NoiseFunctions
                 double distance = _distanceBetween( bubbleX, bubbleY, x, y );
                 if ( distance < radius ) {
                     double curvature = Math.sqrt( 1 - ( distance / radius ) * ( distance / radius ) );
-                    double rim = Math.pow( distance / radius, 6 );
+                    double towardRim = distance / radius;
+                    double towardRimCubed = towardRim * towardRim * towardRim;
+                    double rim = towardRimCubed * towardRimCubed;
                     film = Math.max( film, 0.25 + curvature * 0.35 + rim * 0.7 );
                 }
             }
@@ -1316,10 +1347,12 @@ public final class NoiseFunctions
         double y = yIn / 46.0;
         double warpX = _fractalNoise( x + 2.3, y - 1.1, 2 ) - 0.5;
         double warpY = _fractalNoise( x - 3.7, y + 4.9, 2 ) - 0.5;
-        double[] wideCells = _worleyF1F2( x + warpX * 1.1, y + warpY * 1.1 );
-        double[] fineCells = _worleyF1F2( x * 1.9 - warpY * 1.4, y * 1.9 + warpX * 1.4 );
-        double wideWeb = Math.pow( 1 - _clamp01( ( wideCells[1] - wideCells[0] ) * 2.6 ), 3 );
-        double fineWeb = Math.pow( 1 - _clamp01( ( fineCells[1] - fineCells[0] ) * 3.2 ), 3 );
+        double wideCellEdge = _worleyEdgeGap( x + warpX * 1.1, y + warpY * 1.1 );
+        double fineCellEdge = _worleyEdgeGap( x * 1.9 - warpY * 1.4, y * 1.9 + warpX * 1.4 );
+        double wideCore = 1 - _clamp01( wideCellEdge * 2.6 );
+        double fineCore = 1 - _clamp01( fineCellEdge * 3.2 );
+        double wideWeb = wideCore * wideCore * wideCore;
+        double fineWeb = fineCore * fineCore * fineCore;
         double shimmer = _valueNoise( xIn / 26.0, yIn / 26.0 );
         return (float) _clamp01( wideWeb * 0.85 + fineWeb * 0.55 + ( shimmer - 0.5 ) * 0.12 );
     }
@@ -1331,9 +1364,12 @@ public final class NoiseFunctions
     public static float frost( float xIn, float yIn ) {
         double featherX = _turbulentNoise( xIn / 18.0 + 5.1, yIn / 18.0 - 2.3, 4 ) - 0.37;
         double featherY = _turbulentNoise( xIn / 18.0 - 7.7, yIn / 18.0 + 8.9, 4 ) - 0.37;
-        double[] f1f2 = _worleyF1F2( xIn / 38.0 + featherX * 0.42, yIn / 38.0 + featherY * 0.42 );
-        double spines    = Math.pow( 1 - _clamp01( ( f1f2[1] - f1f2[0] ) * 3.4 ), 3 );
-        double dendrites = Math.pow( 1 - _turbulentNoise( xIn / 17.0, yIn / 17.0, 5 ), 5 );
+        double crystalEdge = _worleyEdgeGap( xIn / 38.0 + featherX * 0.42, yIn / 38.0 + featherY * 0.42 );
+        double spineCore = 1 - _clamp01( crystalEdge * 3.4 );
+        double frondCore = 1 - _turbulentNoise( xIn / 17.0, yIn / 17.0, 5 );
+        double frondCoreSquared = frondCore * frondCore;
+        double spines    = spineCore * spineCore * spineCore;
+        double dendrites = frondCoreSquared * frondCoreSquared * frondCore;
         double icedGlass = _valueNoise( xIn * 1.3, yIn * 1.3 );
         return (float) _clamp01( spines * 0.9 + dendrites * 0.75 + ( icedGlass - 0.5 ) * 0.16 );
     }
@@ -1393,7 +1429,9 @@ public final class NoiseFunctions
                       + Math.sin( secondSwell ) * 0.34;
         double crest = _clamp01( ( height / 1.64 + 1 ) / 2 );
         double body  = Math.pow( crest, 2.8 ) * 0.60;
-        double foam  = Math.pow( crest, 10 ) * 0.55;
+        double crestSquared = crest * crest;
+        double crestToTheFifth = crestSquared * crestSquared * crest;
+        double foam  = crestToTheFifth * crestToTheFifth * 0.55;
         double chop  = _valueNoise( xIn / 6.0, yIn / 6.0 );
         return (float) _clamp01( body + foam + ( chop - 0.5 ) * 0.11 );
     }
@@ -1486,35 +1524,76 @@ public final class NoiseFunctions
     }
 
     /**
-     *  Returns the distances to the closest and second-closest Worley feature
-     *  points around the given coordinate as a {@code [F1, F2]} pair.
+     *  The distance from the given coordinate to the closest Worley (Voronoi) feature point,
+     *  which is small inside a cell and largest at the cell corners.
      */
-    private static double[] _worleyF1F2( double x, double y ) {
+    private static double _worleyNearestDistance( double x, double y ) {
         final int cellX = (int) Math.floor(x);
         final int cellY = (int) Math.floor(y);
-        double f1 = Double.POSITIVE_INFINITY;
-        double f2 = Double.POSITIVE_INFINITY;
+        double nearest = Double.POSITIVE_INFINITY;
         for ( int oy = -1; oy <= 1; oy++ ) {
             for ( int ox = -1; ox <= 1; ox++ ) {
                 final int gx = cellX + ox;
                 final int gy = cellY + oy;
                 final double px = gx + _fastPseudoRandomDoubleFrom( gx, gy );
                 final double py = gy + _fastPseudoRandomDoubleFrom( gy, -gx );
-                final double distance = _distanceBetween( px, py, x, y );
-                if ( distance < f1 ) {
-                    f2 = f1;
-                    f1 = distance;
-                } else if ( distance < f2 ) {
-                    f2 = distance;
+                final double reach = ( px - x ) * ( px - x ) + ( py - y ) * ( py - y );
+                if ( reach < nearest )
+                    nearest = reach;
+            }
+        }
+        return Math.sqrt( nearest );
+    }
+
+    /**
+     *  How much further the second closest Worley (Voronoi) feature point is than the closest
+     *  one. This vanishes exactly on the border between two cells, which is what draws the
+     *  cell walls of a Voronoi diagram.
+     */
+    private static double _worleyEdgeGap( double x, double y ) {
+        final int cellX = (int) Math.floor(x);
+        final int cellY = (int) Math.floor(y);
+        double nearest       = Double.POSITIVE_INFINITY;
+        double secondNearest = Double.POSITIVE_INFINITY;
+        for ( int oy = -1; oy <= 1; oy++ ) {
+            for ( int ox = -1; ox <= 1; ox++ ) {
+                final int gx = cellX + ox;
+                final int gy = cellY + oy;
+                final double px = gx + _fastPseudoRandomDoubleFrom( gx, gy );
+                final double py = gy + _fastPseudoRandomDoubleFrom( gy, -gx );
+                final double reach = ( px - x ) * ( px - x ) + ( py - y ) * ( py - y );
+                if ( reach < nearest ) {
+                    secondNearest = nearest;
+                    nearest = reach;
+                } else if ( reach < secondNearest ) {
+                    secondNearest = reach;
                 }
             }
         }
-        return new double[]{ f1, f2 };
+        return Math.sqrt( secondNearest ) - Math.sqrt( nearest );
     }
 
     private static double _wrapAround( double value, double period ) {
+        if ( value >= 0 && value < period )
+            return value;
         final double wrapped = value % period;
         return wrapped < 0 ? wrapped + period : wrapped;
+    }
+
+    private static int[] _roundedKernelLine( int kernelSize, float coordinate ) {
+        final int maxDistance = kernelSize / 2;
+        final int[] line = new int[kernelSize];
+        for ( int i = 0; i < kernelSize; i++ )
+            line[i] = Math.round( ( i - maxDistance ) + coordinate );
+        return line;
+    }
+
+    private static int[] _roundedKernelLine( int kernelSize, float coordinate, float frequency ) {
+        final int maxDistance = kernelSize / 2;
+        final int[] line = new int[kernelSize];
+        for ( int i = 0; i < kernelSize; i++ )
+            line[i] = Math.round( ( ( i - maxDistance ) + coordinate ) * frequency );
+        return line;
     }
 
     private static double _smoothStep( double t ) {
@@ -1582,6 +1661,8 @@ public final class NoiseFunctions
     }
 
     private static double _rippleAmplitude( double distance, double random ) {
+        if ( distance == 0 )
+            return 0;
         double impactForce = ( 3 + 32 * random );
         double amplitude = distance * Math.sin( ( 1 + Math.pow( distance, 2 ) ) * impactForce );
         double fadeAway = ( 0.5 + random );
@@ -1606,9 +1687,7 @@ public final class NoiseFunctions
      * @return A pseudo random double in the range 0.0 to 1.0
      */
     private static double _fastPseudoRandomDoubleFrom( float x, float y ) {
-        final byte randomByte = _fastPseudoRandomByteSeedFrom(x, y);
-        // The byte is in the range -128 to 127, so -128 is 0.0 and 127 is 1.0
-        return (randomByte + 128) / 255.0;
+        return SEED_BYTE_TO_UNIT_DOUBLE[ _fastPseudoRandomByteSeedFrom(x, y) + 128 ];
     }
 
     private static byte _fastPseudoRandomByteSeedFrom( float a, float b ) {
