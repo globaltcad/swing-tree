@@ -2205,7 +2205,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  {@link #componentFont(Configurator)}.
      *
      * @param strikeThrough Whether the font should be struck through or not.
-     * @return A new {@link ComponentStyleDelegate} with the provided font struck throughness.
+     * @return A new {@link ComponentStyleDelegate} with the strikethrough applied.
      */
     public ComponentStyleDelegate<C> fontStrikeThrough( boolean strikeThrough ) {
         return _withFont( f -> f.strikeThrough(strikeThrough) );
