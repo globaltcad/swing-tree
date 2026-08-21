@@ -95,12 +95,12 @@ class Individual_Component_Styling_Spec extends Specification
             If the progress has reached 1 in this concrete example, then the component
             will look like the fancily styled label on the right.
 
-            If the progress is 0 on the other hand, the comoponent will look
+            If the progress is 0 on the other hand, the component will look
             like a regular label. Take a look:
     
             ${Utility.linkSnapshot('components/pre-transitioning-label.png')}
 
-            Except for the text it is almost completely unrecongnizable from the previous image, 
+            Except for the text it is almost completely unrecognizable from the previous image, 
             right? :)
         """
         given : 'We first define a flag property that we will use to control the transition:'
