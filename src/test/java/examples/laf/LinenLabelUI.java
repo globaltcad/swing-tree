@@ -23,6 +23,15 @@ import java.awt.Graphics;
  *  {@code super.paint(..)}, this is enough to skin every label without
  *  fighting Swing's own paint code.
  *  <p>
+ *  It deliberately paints no background, not even for the cell renderer of a
+ *  selected table or list row. One renderer instance stands in for every cell,
+ *  while the style engine keys a component's gathered style and its rendered
+ *  layers on the <i>component</i> — so a per-cell decision made here lands on
+ *  whichever cell is painted next rather than on the one it was made for.
+ *  Selection is therefore filled by the owner, which knows which rows are
+ *  selected and is painted once: see {@link LinenTableUI} and
+ *  {@link LinenListUI}.
+ *  <p>
  *  The class is {@code final}; override per-label with
  *  {@code .withStyle(it -> it.foregroundColor(..))} or globally from a
  *  {@link swingtree.style.StyleSheet}.

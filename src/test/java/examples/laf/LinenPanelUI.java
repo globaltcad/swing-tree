@@ -9,17 +9,26 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicPanelUI;
+import java.awt.Color;
 import java.awt.Graphics;
 
 /**
  *  The {@link JPanel} UI delegate of the {@link LinenLookAndFeel}.
  *  <p>
- *  Linen panels are drawn in the warm cream {@link LinenPalette#BACKGROUND}
- *  colour with a barely visible <i>stochastic</i> noise overlay painted in
+ *  By default a Linen panel is drawn in the warm cream
+ *  {@link LinenPalette#BACKGROUND} colour with a barely visible
+ *  <i>stochastic</i> noise overlay painted in
  *  {@link LinenPalette#TEXTURE_LIGHT} / {@link LinenPalette#TEXTURE_DARK}.
  *  The two texture colours are within a few RGB steps of the base background,
  *  so the result reads as a subtle grain — like sun-bleached linen fabric —
  *  rather than as visual noise.
+ *  <p>
+ *  A real window needs more than one kind of surface, so a panel tagged with a
+ *  {@link LinenSurface} is painted as that instead: {@link LinenSurface#CARD} as
+ *  a raised, rounded, hairlined sheet with no grain, {@link LinenSurface#RAIL}
+ *  as a flat strip of the same colour, and {@link LinenSurface#TRANSPARENT} as
+ *  nothing at all. Only the fill and the grain are decided here — padding,
+ *  spacing and per-edge borders stay free for the application to set.
  *  <p>
  *  Both the colour and the noise are pure SwingTree style entries, so an
  *  application can suppress the texture entirely from a
@@ -56,15 +65,32 @@ public final class LinenPanelUI
     public boolean canForwardPaintingToSwingTree() { return true; }
 
     @Override
+    @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
     public ComponentStyleDelegate<JPanel> style(ComponentStyleDelegate<JPanel> it) {
-        return it
-                .backgroundColor(LinenPalette.BACKGROUND)
-                .foregroundColor(LinenPalette.TEXT)
-                .noise(n -> n
-                        .function(UI.NoiseType.STOCHASTIC)
-                        .colors(LinenPalette.TEXTURE_LIGHT, LinenPalette.TEXTURE_DARK)
-                        .scale(0.6)
-                        .clipTo(UI.ComponentArea.BODY)
-                );
+        it = it.foregroundColor(LinenPalette.TEXT);
+        switch ( LinenSurface.of(it.component()) ) {
+            case CARD:
+                return it
+                        .backgroundColor(LinenPalette.SURFACE)
+                        .borderRadius(14)
+                        .border(1, LinenPalette.BORDER_SOFT)
+                        .shadowColor(new Color(0x3D, 0x35, 0x2A, 28))
+                        .shadowBlurRadius(14)
+                        .shadowSpreadRadius(-2)
+                        .shadowOffset(0, 3);
+            case RAIL:
+                return it.backgroundColor(LinenPalette.SURFACE);
+            case TRANSPARENT:
+                return it.backgroundColor(LinenPalette.TRANSPARENT);
+            default:
+                return it
+                        .backgroundColor(LinenPalette.BACKGROUND)
+                        .noise(n -> n
+                                .function(UI.NoiseType.STOCHASTIC)
+                                .colors(LinenPalette.TEXTURE_LIGHT, LinenPalette.TEXTURE_DARK)
+                                .scale(0.6)
+                                .clipTo(UI.ComponentArea.BODY)
+                        );
+        }
     }
 }

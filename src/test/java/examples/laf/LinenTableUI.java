@@ -10,6 +10,7 @@ import javax.swing.JTable;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicTableUI;
 import java.awt.Dimension;
+import java.awt.Rectangle;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
@@ -48,8 +49,33 @@ public final class LinenTableUI
     public void paint(Graphics g, JComponent c) {
         ComponentExtension.from(c).paintBackground(g, g2 -> {
             LinenPaint.applyAaHints((Graphics2D) g2);
+            paintSelectionBands((Graphics2D) g2, (JTable) c);
             super.paint(g2, c);
         });
+    }
+
+    /**
+     *  Fills a band behind each selected row.
+     *  <p>
+     *  Swing's own mechanism — a cell renderer that arrives wearing the table's
+     *  selection colour — cannot work under a SwingTree-backed look-and-feel:
+     *  one renderer instance stands in for every cell, while the style engine
+     *  keys a component's gathered style and its rendered layers on the
+     *  component, so a per-cell colour decided in {@link LinenLabelUI} lands on
+     *  whichever cell happens to be painted next. The table, on the other hand,
+     *  knows exactly which rows are selected and is painted once, so the band
+     *  belongs here. The renderers on top are not opaque, so the band shows
+     *  through them.
+     */
+    private static void paintSelectionBands(Graphics2D g, JTable table) {
+        int[] selected = table.getSelectedRows();
+        if (selected.length == 0)
+            return;
+        g.setColor(LinenPalette.ACCENT_SOFT);
+        for (int row : selected) {
+            Rectangle band = table.getCellRect(row, 0, true);
+            g.fillRect(0, band.y, table.getWidth(), band.height);
+        }
     }
 
     @Override

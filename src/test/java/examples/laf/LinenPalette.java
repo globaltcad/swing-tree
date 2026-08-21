@@ -72,4 +72,30 @@ public final class LinenPalette
 
     /** Dark noise speck — see {@link #TEXTURE_LIGHT}. */
     public static final Color TEXTURE_DARK     = new Color(0xF0, 0xEC, 0xE3);
+
+    /** Filled surface of a {@link LinenVariant#PRIMARY} control — deep moss. */
+    public static final Color PRIMARY          = new Color(0x36, 0x5C, 0x3B);
+
+    /** {@link #PRIMARY} with the pointer over it. */
+    public static final Color PRIMARY_HOVER    = new Color(0x41, 0x6B, 0x46);
+
+    /** {@link #PRIMARY} while pressed or selected. */
+    public static final Color PRIMARY_PRESSED  = new Color(0x2B, 0x4A, 0x30);
+
+    /** Filled surface of a {@link LinenVariant#DANGER} control — faded brick. */
+    public static final Color DANGER           = new Color(0x8B, 0x3A, 0x3A);
+
+    /** {@link #DANGER} with the pointer over it. */
+    public static final Color DANGER_HOVER     = new Color(0x9C, 0x45, 0x45);
+
+    /** {@link #DANGER} while pressed or selected. */
+    public static final Color DANGER_PRESSED   = new Color(0x74, 0x2E, 0x2E);
+
+    /** Text laid over {@link #PRIMARY} or {@link #DANGER} — the cream of the
+     *  window background, so a filled control reads as a hole punched in it. */
+    public static final Color ON_FILLED        = new Color(0xFA, 0xF6, 0xEC);
+
+    /** Fully transparent — what a {@link LinenVariant#QUIET} control paints
+     *  instead of a surface, so whatever it sits on shows through untouched. */
+    public static final Color TRANSPARENT      = new Color(0, 0, 0, 0);
 }

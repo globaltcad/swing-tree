@@ -54,13 +54,38 @@ public final class LinenScrollPaneUI
     public boolean canForwardPaintingToSwingTree() { return true; }
 
     @Override
+    @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
     public ComponentStyleDelegate<JScrollPane> style(ComponentStyleDelegate<JScrollPane> it) {
-        return it
-                .backgroundColor(LinenPalette.SURFACE_FIELD)
-                .foregroundColor(LinenPalette.TEXT)
-                .borderRadius(8)
-                .borderWidth(1)
-                .borderColor(LinenPalette.BORDER)
-                .padding(2);
+        it = it.foregroundColor(LinenPalette.TEXT);
+        switch ( LinenSurface.of(it.component()) ) {
+            case TRANSPARENT:
+                // A page-level scroll region: it *is* the page, so it must not
+                // draw a field around it.
+                return it
+                        .backgroundColor(LinenPalette.TRANSPARENT)
+                        .borderWidth(0)
+                        .borderRadius(0)
+                        .padding(0);
+            case CARD:
+                return it
+                        .backgroundColor(LinenPalette.SURFACE)
+                        .borderRadius(8)
+                        .borderWidth(1)
+                        .borderColor(LinenPalette.BORDER_SOFT)
+                        .padding(2);
+            case RAIL:
+                return it
+                        .backgroundColor(LinenPalette.SURFACE)
+                        .borderWidth(0)
+                        .borderRadius(0)
+                        .padding(0);
+            default:
+                return it
+                        .backgroundColor(LinenPalette.SURFACE_FIELD)
+                        .borderRadius(8)
+                        .borderWidth(1)
+                        .borderColor(LinenPalette.BORDER)
+                        .padding(2);
+        }
     }
 }

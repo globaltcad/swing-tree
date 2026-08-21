@@ -47,9 +47,14 @@ public final class LinenViewportUI
     public boolean canForwardPaintingToSwingTree() { return true; }
 
     @Override
+    @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
     public ComponentStyleDelegate<JViewport> style(ComponentStyleDelegate<JViewport> it) {
-        return it
-                .backgroundColor(LinenPalette.SURFACE_FIELD)
-                .foregroundColor(LinenPalette.TEXT);
+        it = it.foregroundColor(LinenPalette.TEXT);
+        switch ( LinenSurface.of(it.component()) ) {
+            case TRANSPARENT: return it.backgroundColor(LinenPalette.TRANSPARENT);
+            case CARD:
+            case RAIL:        return it.backgroundColor(LinenPalette.SURFACE);
+            default:          return it.backgroundColor(LinenPalette.SURFACE_FIELD);
+        }
     }
 }

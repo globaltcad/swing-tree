@@ -35,19 +35,28 @@ public final class LinenTextAreaUI
         super.installUI(c);
         ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
         LinenFocus.repaintOnFocus(c, c); // text components don't self-repaint on focus
+        LinenSelection.repaintOnSelectionChange((javax.swing.text.JTextComponent) c); // ...nor enough of themselves on a selection change
     }
 
     @Override
     public void uninstallUI(JComponent c) {
+        LinenSelection.uninstall((javax.swing.text.JTextComponent) c);
         LinenFocus.uninstall(c, c);
         super.uninstallUI(c);
     }
 
+    /**
+     *  The text-painting pass goes through the {@code final}
+     *  {@link javax.swing.plaf.basic.BasicTextUI#paint(Graphics, JComponent)}
+     *  rather than through {@code paintSafely(..)} directly, because that is
+     *  what takes the document's read lock while the view renders. See
+     *  {@link LinenTextFieldUI#update(Graphics, JComponent)} for why it matters.
+     */
     @Override
     public void update(Graphics g, JComponent c) {
         ComponentExtension.from(c).paintBackground(g, g2 -> {
             LinenPaint.applyAaHints((java.awt.Graphics2D) g2);
-            paintSafely(g2);
+            super.paint(g2, c);
         });
     }
 
