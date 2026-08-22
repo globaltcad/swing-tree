@@ -38,6 +38,15 @@ public final class NoiseFunctions
     private NoiseFunctions(){}
 
 
+    /**
+     *  Stochastic pseudorandom grain produced by summing randomly sampled gradients
+     *  within a neighborhood, then squashing the result through a sine wave for a
+     *  characteristic speckled look.
+     *
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
+     *  @return A float in the range [0, 1] representing the stochastic grain intensity at the given location.
+     */
     public static float stochastic( float xIn, float yIn ) {
         int kernelSize = 8;
         double sum = _coordinateToGradValue(kernelSize, xIn, yIn);
@@ -72,6 +81,14 @@ public final class NoiseFunctions
         return sum;
     }
 
+    /**
+     *  Undulating hills and valleys: the stochastic field is modulated with multiple
+     *  sine waves to create smooth, flowing topology with natural ridges and crests.
+     *
+     *  @param xIn The x coordinate in translated, scaled and rotated virtual space.
+     *  @param yIn The y coordinate in translated, scaled and rotated virtual space.
+     *  @return A float in the range [0, 1] representing the terrain topology height at the given location.
+     */
     public static float smoothTopology( float xIn, float yIn ) {
         float scale = 6;
         return (float) ((Math.sin(stochastic(xIn/scale, yIn/scale) * 6 * Math.PI) + 1)/2);
