@@ -379,7 +379,7 @@ public class NoteGuesserView extends Panel
                 g2d.fillOval(ovalX, ovalY, ovalW, ovalH);
             }
 
-            boolean isJustPlaying = vm.playMode() == true;
+            boolean isJustPlaying = vm.playMode();
 
             // Finally we draw all the note labels on the left side of the scale:
             String note = vm.noteNameOf(ni);

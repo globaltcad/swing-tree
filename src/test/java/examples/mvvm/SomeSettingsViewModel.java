@@ -4,8 +4,6 @@ import sprouts.From;
 import sprouts.Var;
 import sprouts.Viewable;
 
-import javax.swing.text.View;
-
 public class SomeSettingsViewModel
 {
     public enum Type

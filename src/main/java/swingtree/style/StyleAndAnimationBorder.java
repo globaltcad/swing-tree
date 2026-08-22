@@ -117,8 +117,8 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
 
                  Ideally this would be logged in the logging framework of the user
                  who implemented the Border,
-                 but we don't know which logging framework that is, so we just print
-                 the stack trace to the console so that any developers can see what went wrong.
+                 but we don't know which logging framework that is, so we report it
+                 through SwingTree's own logger so that developers can see what went wrong.
             */
             log.error(SwingTree.get().logMarker(), "Exception while painting former border '{}': ", _formerBorder, ex);
         }

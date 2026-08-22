@@ -44,6 +44,7 @@ public class AbstractDelegate<C extends JComponent>
     private final C _component;
 
     /**
+     * @param nullable Whether the component parameter may be null.
      * @param component The component that is delegated.
      * @param handle A component that is used as a starting point for traversing the component tree,
      *               usually the same component as the one that is delegated.
@@ -81,7 +82,10 @@ public class AbstractDelegate<C extends JComponent>
         return color == UI.Color.UNDEFINED;
     }
 
-
+    /**
+     *  Returns the delegated component wrapped by this delegate.
+     *  @return The delegated component instance.
+     */
     protected final C _component() {
         return _component;
     }
@@ -528,7 +532,7 @@ public class AbstractDelegate<C extends JComponent>
 
     /**
      *  Allows you to specify new bounds for the delegated component in "developer pixel space"
-     *  and then have them scaled and set as "component pixel size", which may be scaled for hgigh
+     *  and then have them scaled and set as "component pixel size", which may be scaled for high
      *  DPI environments by the {@link UI#scale()} factor.
      *  This method returns the delegate itself, so you can chain calls to this method.
      *  <p>

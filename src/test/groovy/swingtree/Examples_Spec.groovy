@@ -202,7 +202,7 @@ class Examples_Spec extends Specification
 
             As you can see, the component centered in the middle of
             the view has a glass effect, which consists of a blur
-            as well as a scling on the background provided by the parent.
+            as well as a scaling on the background provided by the parent.
 
             Under the hood, this works by rendering the parent into 
             a buffered image and then when a child component is rendered,
@@ -575,7 +575,7 @@ class Examples_Spec extends Specification
             and an identically looking implementation based on 
             NetBeans's GUI Editor.
             ${Utility.link('This class', MadeWithNetBeansEditor)} 
-            is an implementation that is editor based, wherease
+            is an implementation that is editor based, whereas
             ${Utility.link('this class', MadeWithSwingTree)} 
             uses SwingTree to achieve the same appearance.
             

@@ -21,3 +21,7 @@ gradle-app.setting
 # test data :
 
 Data/
+
+# Python bytecode cache from the tooling scripts under tools/ :
+__pycache__/
+*.pyc

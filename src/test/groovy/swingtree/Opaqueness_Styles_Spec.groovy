@@ -547,7 +547,7 @@ class Opaqueness_Styles_Spec extends Specification
             panel.isOpaque() == true
     }
 
-    def 'A component with a border color having a transitional alpha chanel is only opaque when the color is opaque'()
+    def 'A component with a border color having a transitional alpha channel is only opaque when the color is opaque'()
     {
         reportInfo """
  

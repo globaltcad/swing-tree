@@ -193,7 +193,7 @@ class Basic_UI_Exception_Spec extends Specification
             is why SwingTree will try to prevent you from doing so.
             
             One way to do this is to throw an exception if you try to reuse a builder node.
-            SwingTree will also mark the state of used builder nodes as as disposed and
+            SwingTree will also mark the state of used builder nodes as disposed and
             cut off any reference to the underlying Swing component.
         """
         given : 'We create a simple UI builder node for a panel.'

@@ -84,7 +84,7 @@ class Options_Pane_Spec extends Specification
             We mock the `JOptionPane` API through a package private delegate, 
             the `swingtree.dialogs.OptionsDialogSummoner` API.
             Note that this is a super simple delegate for the `JOptionPane` factory methods.
-            We do this this for mocking the `JOptionPane` API in this specification.
+            We do this for mocking the `JOptionPane` API in this specification.
             This stuff is package private so please ignore this little implementation detail
             in your own code. 
         """
@@ -133,7 +133,7 @@ class Options_Pane_Spec extends Specification
             which is a simple delegate for some of the static `JOptionPane` methods used
             to creating dialogs in raw Swing.
             
-            We this this for mocking the `JOptionPane` API in this specification.
+            We do this for mocking the `JOptionPane` API in this specification.
             This stuff is package private so please ignore this little implementation detail
             in your own code. 
         """
@@ -181,7 +181,7 @@ class Options_Pane_Spec extends Specification
             We mock the `JOptionPane` API through a package private delegate, 
             the `swingtree.dialogs.OptionsDialogSummoner` API.
             Note that this is a super simple delegate for the `JOptionPane` factory methods.
-            We do this this for mocking the `JOptionPane` API in this specification.
+            We do this for mocking the `JOptionPane` API in this specification.
             This stuff is package private so please ignore this little implementation detail
             in your own code. 
         """
@@ -230,7 +230,7 @@ class Options_Pane_Spec extends Specification
             We mock the `JOptionPane` API through a package private delegate, 
             the `swingtree.dialogs.OptionsDialogSummoner` API.
             Note that this is a super simple delegate for the `JOptionPane` factory methods.
-            We do this this for mocking the `JOptionPane` API in this specification.
+            We do this for mocking the `JOptionPane` API in this specification.
             This stuff is package private so please ignore this little implementation detail
             in your own code. 
         """
@@ -279,7 +279,7 @@ class Options_Pane_Spec extends Specification
             We mock the `JOptionPane` API through a package private delegate, 
             the `swingtree.dialogs.OptionsDialogSummoner` API.
             Note that this is a super simple delegate for the `JOptionPane` factory methods.
-            We do this this for mocking the `JOptionPane` API in this specification.
+            We do this for mocking the `JOptionPane` API in this specification.
             This stuff is package private so please ignore this little implementation detail
             in your own code. 
         """
@@ -328,7 +328,7 @@ class Options_Pane_Spec extends Specification
             We first mock the `JOptionPane` API through a package private delegate, 
             the `swingtree.dialogs.OptionsDialogSummoner` API.
             Note that this is a super simple delegate for the `JOptionPane` factory methods.
-            We do this this for mocking the `JOptionPane` API in this specification.
+            We do this for mocking the `JOptionPane` API in this specification.
             This stuff is package private so please ignore this little implementation detail
             in your own code. 
         """
@@ -377,7 +377,7 @@ class Options_Pane_Spec extends Specification
             We first mock the `JOptionPane` API through a package private delegate, 
             the `swingtree.dialogs.OptionsDialogSummoner` API.
             Note that this is a super simple delegate for the `JOptionPane` factory methods.
-            We do this this for mocking the `JOptionPane` API in this specification.
+            We do this for mocking the `JOptionPane` API in this specification.
             This stuff is package private so please ignore this little implementation detail
             in your own code. 
         """
@@ -419,7 +419,7 @@ class Options_Pane_Spec extends Specification
             We first mock the `JOptionPane` API through a package private delegate, 
             the `swingtree.dialogs.OptionsDialogSummoner` API.
             Note that this is a super simple delegate for the `JOptionPane` factory methods.
-            We do this this for mocking the `JOptionPane` API in this specification.
+            We do this for mocking the `JOptionPane` API in this specification.
             This stuff is package private so please ignore this little implementation detail
             in your own code. 
         """
@@ -460,7 +460,7 @@ class Options_Pane_Spec extends Specification
             We first mock the `JOptionPane` API through a package private delegate, 
             the `swingtree.dialogs.OptionsDialogSummoner` API.
             Note that this is a super simple delegate for the `JOptionPane` factory methods.
-            We do this this for mocking the `JOptionPane` API in this specification.
+            We do this for mocking the `JOptionPane` API in this specification.
             This stuff is package private so please ignore this little implementation detail
             in your own code. 
         """
@@ -500,7 +500,7 @@ class Options_Pane_Spec extends Specification
             We first mock the `JOptionPane` API through a package private delegate, 
             the `swingtree.dialogs.OptionsDialogSummoner` API.
             Note that this is a super simple delegate for the `JOptionPane` factory methods.
-            We do this this for mocking the `JOptionPane` API in this specification.
+            We do this for mocking the `JOptionPane` API in this specification.
             This stuff is package private so please ignore this little implementation detail
             in your own code. 
         """
@@ -540,7 +540,7 @@ class Options_Pane_Spec extends Specification
             We first mock the `JOptionPane` API through a package private delegate, 
             the `swingtree.dialogs.OptionsDialogSummoner` API.
             Note that this is a super simple delegate for the `JOptionPane` factory methods.
-            We do this this for mocking the `JOptionPane` API in this specification.
+            We do this for mocking the `JOptionPane` API in this specification.
             This stuff is package private so please ignore this little implementation detail
             in your own code. 
         """
@@ -580,7 +580,7 @@ class Options_Pane_Spec extends Specification
             We first mock the `JOptionPane` API through a package private delegate, 
             the `swingtree.dialogs.OptionsDialogSummoner` API.
             Note that this is a super simple delegate for the `JOptionPane` factory methods.
-            We do this this for mocking the `JOptionPane` API in this specification.
+            We do this for mocking the `JOptionPane` API in this specification.
             This stuff is package private so please ignore this little implementation detail
             in your own code. 
         """
@@ -620,7 +620,7 @@ class Options_Pane_Spec extends Specification
             We first mock the `JOptionPane` API through a package private delegate, 
             the `swingtree.dialogs.OptionsDialogSummoner` API.
             Note that this is a super simple delegate for the `JOptionPane` factory methods.
-            We do this this for mocking the `JOptionPane` API in this specification.
+            We do this for mocking the `JOptionPane` API in this specification.
             This stuff is package private so please ignore this little implementation detail
             in your own code.
         """
@@ -662,7 +662,7 @@ class Options_Pane_Spec extends Specification
             the `swingtree.dialogs.OptionsDialogSummoner` API.
             
             Note that this is a super simple delegate for the `JOptionPane` factory methods.
-            We do this this for mocking the `JOptionPane` API in this specification.
+            We do this for mocking the `JOptionPane` API in this specification.
             
             This stuff is package private so please ignore this little implementation detail
             in your own code.

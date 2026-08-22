@@ -178,6 +178,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *                 </li>
      *             </ul>
      */
+    @Deprecated
     public Optional<Container> parent() { return Optional.ofNullable(_component.getParent()); }
 
     /**
@@ -1988,6 +1989,11 @@ public final class ComponentStyleDelegate<C extends JComponent>
         return _withStyle(_styleConf.property(key, value));
     }
 
+    /**
+     *  Applies a filter configuration to the parent layer of the component's style.
+     *  @param filterStyler A configurator for the filter configuration.
+     *  @return A new ComponentStyleDelegate with the filter applied to the parent layer.
+     */
     public ComponentStyleDelegate<C> parentFilter( Configurator<FilterConf> filterStyler ) {
         Objects.requireNonNull(filterStyler);
         return _withStyle(_styleConf._withLayers(_styleConf.layers().filter(filterStyler)));
@@ -2205,7 +2211,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  {@link #componentFont(Configurator)}.
      *
      * @param strikeThrough Whether the font should be struck through or not.
-     * @return A new {@link ComponentStyleDelegate} with the provided font struck throughness.
+     * @return A new {@link ComponentStyleDelegate} with the strikethrough applied.
      */
     public ComponentStyleDelegate<C> fontStrikeThrough( boolean strikeThrough ) {
         return _withFont( f -> f.strikeThrough(strikeThrough) );

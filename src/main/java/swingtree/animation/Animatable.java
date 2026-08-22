@@ -77,7 +77,7 @@ public final class Animatable<M>
      * @param <T> The type of model that is animated.
      * @return An {@link Animatable} instance that animates the supplied value.
      * @throws NullPointerException If any of the arguments is {@code null}.
-     * @see #of(LifeTime, AnimationTransformation) for an {@link Animatable} without an initial value.
+     * @see #of(LifeTime, AnimationTransformation) alternative constructor without an initial value.
      */
     public static <T> Animatable<T> of(
         LifeTime                   lifeTime,
@@ -101,7 +101,7 @@ public final class Animatable<M>
      * @param <T> The type model that is animated.
      * @return An {@link Animatable} instance that animates the supplied value.
      * @throws NullPointerException If any of the arguments is {@code null}.
-     * @see #of(LifeTime, Object, AnimationTransformation) for an {@link Animatable} with an initial value.
+     * @see #of(LifeTime, Object, AnimationTransformation) alternative constructor with an initial value.
      */
     public static <T> Animatable<T> of(
         LifeTime        lifeTime,
@@ -142,8 +142,8 @@ public final class Animatable<M>
      *  transformation is used as the initial state of the animation.
      *
      * @return The initial model instance of the animation state or an empty {@link Optional}.
-     * @see #of(LifeTime, AnimationTransformation) for an {@link Animatable} without an initial value.
-     * @see #of(LifeTime, Object, AnimationTransformation) for an {@link Animatable} with an initial value.
+     * @see #of(LifeTime, AnimationTransformation) constructor without an initial value.
+     * @see #of(LifeTime, Object, AnimationTransformation) constructor with an initial value.
      */
     public Optional<M> initialState() {
         return Optional.ofNullable(_initialValue);

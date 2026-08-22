@@ -109,6 +109,13 @@ public final class DragAwayComponentConf<C extends JComponent>
 {
     private static final Action NO_ACTION = e -> {};
 
+    /**
+     *  Creates a new drag away configuration for the specified component.
+     *  @param <C> The type of the component to be dragged away.
+     *  @param component The component to be dragged away.
+     *  @param mousePosition The initial mouse position of the drag operation.
+     *  @return A new drag away configuration.
+     */
     public static <C extends JComponent> DragAwayComponentConf<C> of(
         C        component,
         Position mousePosition

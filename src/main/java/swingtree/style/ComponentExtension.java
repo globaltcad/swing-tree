@@ -222,6 +222,12 @@ public final class ComponentExtension<C extends JComponent>
         return Optional.ofNullable(_bufferedImage);
     }
 
+    /**
+     *  Adds a drag away configurator to this component extension.
+     *  The configurator will be invoked to provide drag away configuration based on the mouse position.
+     *  @param supplier A function that provides a drag away configuration given a mouse position.
+     *  @throws IllegalStateException If a drag away configurator has already been set.
+     */
     public void addDragAwayConf( Function<Position, DragAwayComponentConf<C>> supplier ) {
         if ( _dragAwayConfigurator == null )
             _dragAwayConfigurator = supplier;

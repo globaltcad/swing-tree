@@ -177,7 +177,9 @@ public final class Keyboard
         HELP(KeyEvent.VK_HELP), META(KeyEvent.VK_META), BACK_QUOTE(KeyEvent.VK_BACK_QUOTE),
         QUOTE(KeyEvent.VK_QUOTE);
 
-
+        /**
+         *  The key code value corresponding to the {@link KeyEvent} virtual key constants.
+         */
         public final int code;
 
         Key( int keyCode ) { this.code = keyCode; }

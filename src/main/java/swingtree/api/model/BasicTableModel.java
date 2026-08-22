@@ -98,35 +98,101 @@ public interface BasicTableModel extends TableModel
     /**
      *  Implementations of this functional interface translate to the {@link TableModel#getRowCount()} method.
      */
-    @FunctionalInterface interface RowCount { int get(); }
+    @FunctionalInterface
+    interface RowCount {
+        /**
+         *  Gets the row count.
+         *  @return The row count value.
+         */
+        int get();
+    }
+
     /**
      *  Implementations of this functional interface translate to the {@link TableModel#getColumnCount()} method.
      */
-    @FunctionalInterface interface ColumnCount { int get(); }
+    @FunctionalInterface
+    interface ColumnCount {
+        /**
+         *  Gets the column count.
+         *  @return The column count value.
+         */
+        int get();
+    }
+
     /**
      *  Implementations of this functional interface translate to the {@link TableModel#getValueAt(int, int)} method.
+     *  @param <E> The type of table entries.
      */
-    @FunctionalInterface interface EntryGetter<E> { E get(int rowIndex, int colIndex); }
+    @FunctionalInterface
+    interface EntryGetter<E> {
+        /**
+         *  Gets the entry at the specified row and column.
+         *  @param rowIndex The row index.
+         *  @param colIndex The column index.
+         *  @return The entry at the specified position.
+         */
+        E get(int rowIndex, int colIndex);
+    }
+
     /**
      *  Implementations of this functional interface translate to the {@link TableModel#setValueAt(Object, int, int)} method.
+     *  @param <E> The type of table entries.
      */
-    @FunctionalInterface interface EntrySetter<E> { void set(int rowIndex, int colIndex, E aValue); }
+    @FunctionalInterface
+    interface EntrySetter<E> {
+        /**
+         *  Sets the entry at the specified row and column.
+         *  @param rowIndex The row index.
+         *  @param colIndex The column index.
+         *  @param aValue The new value for the entry.
+         */
+        void set(int rowIndex, int colIndex, E aValue);
+    }
+
     /**
      *  Implementations of this functional interface translate to the {@link TableModel#getColumnClass(int)} method.
+     *  @param <E> The type of table entries.
      */
-    @FunctionalInterface interface ColumnClass<E> { Class<? extends E> get(int colIndex); }
+    @FunctionalInterface
+    interface ColumnClass<E> {
+        /**
+         *  Gets the class of the column at the specified index.
+         *  @param colIndex The column index.
+         *  @return The class of the column.
+         */
+        Class<? extends E> get(int colIndex);
+    }
+
     /**
      *  Implementations of this functional interface translate to the {@link TableModel#isCellEditable(int, int)} method.
      */
-    @FunctionalInterface interface CellEditable { boolean is(int rowIndex, int colIndex); }
+    @FunctionalInterface
+    interface CellEditable {
+        /**
+         *  Determines if the cell at the specified row and column is editable.
+         *  @param rowIndex The row index.
+         *  @param colIndex The column index.
+         *  @return True if the cell is editable, false otherwise.
+         */
+        boolean is(int rowIndex, int colIndex);
+    }
+
     /**
      *  Implementations of this functional interface translate to the {@link TableModel#getColumnName(int)} method.
      */
-    @FunctionalInterface interface ColumnName { String get(int colIndex); }
+    @FunctionalInterface
+    interface ColumnName {
+        /**
+         *  Gets the name of the column at the specified index.
+         *  @param colIndex The column index.
+         *  @return The name of the column.
+         */
+        String get(int colIndex);
+    }
 
     /**
      *  The class below is a functional builder for creating a lambda based implementation of the {@link BasicTableModel}.
-     *  This allows fo a boilerplate free functional API.
+     *  This allows for a boilerplate free functional API.
      *
      * @param <E> Common type for all entry items in the table.
      */
@@ -166,6 +232,10 @@ public interface BasicTableModel extends TableModel
         private final @Nullable ColumnName     columnName;
         private final @Nullable Observable     observableEvent;
 
+         /**
+          *  Creates a new builder for a basic table model.
+          *  @param commonEntryType The common type for all entry items in the table.
+          */
          public Builder( Class<E> commonEntryType ) {
              this(
                  Objects.requireNonNull(commonEntryType),

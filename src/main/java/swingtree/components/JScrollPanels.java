@@ -186,6 +186,13 @@ public class JScrollPanels extends UI.ScrollPane
         addEntry(null, entryViewModel, viewSupplier);
     }
 
+    /**
+     *  Adds an entry at a specific index without constraints.
+     *  @param index The index at which the entry should be added.
+     *  @param entryViewModel The entry view model to add.
+     *  @param viewSupplier The supplier to create the view for the entry.
+     *  @param <M> The type of the entry view model.
+     */
     public <M extends EntryViewModel> void addEntryAt( int index, M entryViewModel, ViewSupplier<M> viewSupplier) {
         Objects.requireNonNull(entryViewModel);
         EntryPanel entryPanel = _createEntryPanel(null, entryViewModel, viewSupplier, index);
@@ -435,7 +442,7 @@ public class JScrollPanels extends UI.ScrollPane
      *
      * @param type The component type which ought to be found.
      * @param <T> The component type which ought to be found.
-     * @return The found entry panel matching the provided type class and predicate lambda.
+     * @return An {@link Optional} containing the found entry component of the specified type, or empty if not found.
      * @deprecated This is part of the {@link EntryViewModel} based selection machinery,
      *             which is deprecated in favour of modelling the selection as plain data
      *             in tuple bound entries. See {@link EntryViewModel} for the migration pattern.

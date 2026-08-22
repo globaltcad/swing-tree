@@ -47,7 +47,7 @@ class Table_Renderer_Spec extends Specification
 
         when : 'We attach the interpreter to a table renderer which we then attach to the table.'
             ui = ui.withCellsForColumn("A", it->it.when(String).as(render) )
-        and : 'We we access the resulting TableCellRenderer instance from the UI.'
+        and : 'We access the resulting TableCellRenderer instance from the UI.'
             var found = ui.get(JTable).getColumn("A").cellRenderer
         and : 'Finally we access the component from the renderer (which is responsible for the actual rendering).'
             UI.runAndGet({found.getTableCellRendererComponent(new JTable(), "1", false, false, 0, 0)})
@@ -83,7 +83,7 @@ class Table_Renderer_Spec extends Specification
         when : 'We build a table renderer for strings and pass our mocked renderer to it.'
             ui = ui.withCellsForColumn(1, it->it.when(String).as(render) )
             table = ui.get(JTable)
-        and : 'We we access the resulting TableCellRenderer instance from the UI.'
+        and : 'We access the resulting TableCellRenderer instance from the UI.'
             var found = table
                         .columnModel
                         .getColumn(1)
@@ -164,7 +164,7 @@ class Table_Renderer_Spec extends Specification
         when : 'We build a table renderer for strings and pass our mocked renderer to it.'
             ui = ui.withCellsForColumn(1, it->it.when(String).as(render) )
             table = ui.get(JTable)
-        and : 'We we access the resulting TableCellRenderer instance from the UI.'
+        and : 'We access the resulting TableCellRenderer instance from the UI.'
             var found = table
                                 .columnModel
                                 .getColumn(1)

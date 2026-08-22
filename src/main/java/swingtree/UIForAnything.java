@@ -135,7 +135,7 @@ public abstract class UIForAnything<I, C extends E, E extends Component>
      *      .add( UI.button("Login")).onClick( () -> login() );
      *    );
      *  }</pre>
-     *  Here we use theis method to build a panel
+     *  Here we use this method to build a panel
      *  with different content depending on whether the user is logged in or not.
      *  <br><br>
      *

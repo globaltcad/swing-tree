@@ -258,7 +258,7 @@ public final class NoiseConf implements Simplifiable<NoiseConf>
      *  Define the offset of the noise gradient which is the start position of the noise gradient
      *  on the x and y-axis. <br>
      *  Note that the offset is relative to the component that the noise gradient is applied to.
-     *  <p>
+     *
      * @param x The noise gradient start offset on the x-axis.
      * @param y The noise gradient start offset on the y-axis.
      * @return A new noise gradient style with the specified offset.

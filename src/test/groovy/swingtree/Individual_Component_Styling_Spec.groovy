@@ -95,12 +95,12 @@ class Individual_Component_Styling_Spec extends Specification
             If the progress has reached 1 in this concrete example, then the component
             will look like the fancily styled label on the right.
 
-            If the progress is 0 on the other hand, the comoponent will look
+            If the progress is 0 on the other hand, the component will look
             like a regular label. Take a look:
     
             ${Utility.linkSnapshot('components/pre-transitioning-label.png')}
 
-            Except for the text it is almost completely unrecongnizable from the previous image, 
+            Except for the text it is almost completely unrecognizable from the previous image, 
             right? :)
         """
         given : 'We first define a flag property that we will use to control the transition:'
@@ -392,7 +392,7 @@ class Individual_Component_Styling_Spec extends Specification
             ${Utility.linkSnapshot('components/icon-in-a-box-with-nested-shadows.png')}
 
             This test was actually born after we found a finicky little shadow clipping
-            bug specific to `JIcon` and `JBox`, which are custom components with unque behavior.
+            bug specific to `JIcon` and `JBox`, which are custom components with unique behavior.
             So this is an important regression test as well!
         """
         given : """
@@ -454,7 +454,7 @@ class Individual_Component_Styling_Spec extends Specification
 
             ${Utility.linkSnapshot('components/rounded-non-opaque-panel.png')}
 
-            You may have nticed this big empty space to the right of this text.
+            You may have noticed this big empty space to the right of this text.
             This is actually an image of the panel we are rendering.
             And what you see in this image is...
             well, nothing. It is a fully transparent image.
@@ -1397,7 +1397,7 @@ class Individual_Component_Styling_Spec extends Specification
                 for configuring the grounding of a component, which
                 is a sort of background for every style layer.
                 <br>
-                Here you can see an example of multipl labels with different grounding styles. <br>
+                Here you can see an example of multiple labels with different grounding styles. <br>
                 
                 ${Utility.linkSnapshot('components/image-panels-collage.png')}
 
@@ -2984,7 +2984,7 @@ class Individual_Component_Styling_Spec extends Specification
             The style API allows you to configure custom paint styles for the font of your components.
             Usually the paint of a font is used to fill out the bounds of the characters.
             It may be a gradient, noise function or a custom `java.awt.Paint` implementation.
-            This example demonstrates different font paint confgurations.
+            This example demonstrates different font paint configurations.
 
             ${Utility.linkSnapshot('components/font-style-with-custom-paint.png')}
 
@@ -3118,7 +3118,7 @@ class Individual_Component_Styling_Spec extends Specification
             Usually the purpose of client properties is to give a particular look and feel
             implementation a way to configure how a particular component should be painted.
         """
-        given : 'We create a simple toggle button with a few abitrary properties.'
+        given : 'We create a simple toggle button with a few arbitrary properties.'
             var ui =
                     UI.toggleButton("Toggle Me").withStyle( it -> it
                         .property("my.custom.property.1", "Hello World!")

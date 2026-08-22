@@ -10,7 +10,6 @@ import javax.swing.JComponent;
 import java.awt.*;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  *  An internal class that holds immutable configuration data

@@ -58,6 +58,8 @@ public final class ShadowFractions
      *  perfectly straight falloff. <b>Falloff:</b> {@code f(t) = 1 - t}.
      *  As a straight line is fully described by its two endpoints, this needs only two
      *  fractions and so allocates the smallest possible tuple.
+     *
+     *  @return A tuple of shadow falloff fractions sampled at evenly spaced positions.
      */
     public static Tuple<Float> flat() {
         Tuple<Float> fractions = FLAT;
@@ -69,6 +71,8 @@ public final class ShadowFractions
     /**
      *  A smooth, symmetric S-curve, a cheap polynomial approximation of {@link #blur()}.
      *  <b>Falloff (the "smoothstep" function):</b> {@code f(t) = 1 - t}<sup>2</sup>{@code (3 - 2t)}.
+     *
+     *  @return A tuple of shadow falloff fractions sampled at evenly spaced positions.
      */
     public static Tuple<Float> penumbra() {
         Tuple<Float> fractions = PENUMBRA;
@@ -84,6 +88,8 @@ public final class ShadowFractions
      *  <p>
      *  <b>Falloff (normalized error function, with steepness {@code k}):</b><br>
      *  {@code f(t) = (erf(k/2) - erf(k(t - 1/2))) / (2 * erf(k/2))}
+     *
+     *  @return A tuple of shadow falloff fractions sampled at evenly spaced positions.
      */
     public static Tuple<Float> blur() {
         Tuple<Float> fractions = BLUR;
@@ -98,6 +104,8 @@ public final class ShadowFractions
      *  <p>
      *  <b>Falloff (normalized Gaussian bell, with width {@code k}):</b><br>
      *  {@code f(t) = (exp(-k t}<sup>2</sup>{@code ) - exp(-k)) / (1 - exp(-k))}
+     *
+     *  @return A tuple of shadow falloff fractions sampled at evenly spaced positions.
      */
     public static Tuple<Float> glow() {
         Tuple<Float> fractions = GLOW;
@@ -112,6 +120,8 @@ public final class ShadowFractions
      *  <p>
      *  <b>Falloff (normalized exponential decay, with rate {@code k}):</b><br>
      *  {@code f(t) = (exp(-k t) - exp(-k)) / (1 - exp(-k))}
+     *
+     *  @return A tuple of shadow falloff fractions sampled at evenly spaced positions.
      */
     public static Tuple<Float> contact() {
         Tuple<Float> fractions = CONTACT;
@@ -125,6 +135,8 @@ public final class ShadowFractions
      *  <p>
      *  <b>Falloff (quantized linear, with {@code N} bands):</b><br>
      *  {@code f(t) = round((1 - t) * (N - 1)) / (N - 1)}
+     *
+     *  @return A tuple of shadow falloff fractions sampled at evenly spaced positions.
      */
     public static Tuple<Float> stairs() {
         Tuple<Float> fractions = STAIRS;
@@ -138,6 +150,8 @@ public final class ShadowFractions
      *  <p>
      *  <b>Falloff (damped cosine, with {@code k} ripples):</b><br>
      *  {@code f(t) = (1 - t) * (1/2 + 1/2 * cos(2}&pi;{@code k t))}, with {@code k = 3}
+     *
+     *  @return A tuple of shadow falloff fractions sampled at evenly spaced positions.
      */
     public static Tuple<Float> ripple() {
         Tuple<Float> fractions = RIPPLE;
@@ -151,6 +165,8 @@ public final class ShadowFractions
      *  <p>
      *  <b>Falloff (decaying sawtooth, with {@code k} louvers):</b><br>
      *  {@code f(t) = (1 - t) * (1 - frac(k t))}, with {@code k = 4}
+     *
+     *  @return A tuple of shadow falloff fractions sampled at evenly spaced positions.
      */
     public static Tuple<Float> sawtooth() {
         Tuple<Float> fractions = SAWTOOTH;
@@ -162,6 +178,8 @@ public final class ShadowFractions
     /**
      *  Ease-out-bounce, inverted so the shadow settles toward transparency.
      *  <b>Falloff:</b> {@code f(t) = 1 - easeOutBounce(t)}.
+     *
+     *  @return A tuple of shadow falloff fractions sampled at evenly spaced positions.
      */
     public static Tuple<Float> bounce() {
         Tuple<Float> fractions = BOUNCE;

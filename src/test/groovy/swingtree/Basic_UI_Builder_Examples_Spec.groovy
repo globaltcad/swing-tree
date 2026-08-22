@@ -117,7 +117,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
         and : 'We can also traverse the tree to find the children of the children.'
             box.components[1].components[0] instanceof JPanel
             box.components[1].components[1] instanceof JPanel
-        and : 'All the JPanel instances created with the `box()` factory methods are non-opacque and without insets!'
+        and : 'All the JPanel instances created with the `box()` factory methods are non-opaque and without insets!'
             box.isOpaque() == false
             box.components[0].isOpaque() == false
             box.components[1].isOpaque() == false
@@ -223,7 +223,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
         """
         given : 'We create a simple property to model the selection.'
             var sel = Var.of(Keyboard.Key.A)
-        and : 'We creat a combo box with a cell renderer that renders the enum value as a lower case string.'
+        and : 'We create a combo box with a cell renderer that renders the enum value as a lower case string.'
             var ui =
                     UI.comboBox(sel)
                     .withCells(it -> it

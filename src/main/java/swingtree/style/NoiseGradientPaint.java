@@ -2,6 +2,8 @@ package swingtree.style;
 
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import swingtree.SwingTree;
 import swingtree.api.NoiseFunction;
 
 import java.awt.*;
@@ -22,6 +24,8 @@ import java.util.stream.Stream;
 
 final class NoiseGradientPaint implements Paint
 {
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(NoiseGradientPaint.class);
+
     /**
      * Cache for the context - when the bounds, center, and transform are unchanged, then the context is the same
      */
@@ -395,7 +399,7 @@ final class NoiseGradientPaint implements Paint
                 return raster;
             }
             catch (Exception ex) {
-                System.err.println(ex);
+                log.error(SwingTree.get().logMarker(), "Failed to compute the raster of a noise gradient.", ex);
                 return null;
             }
         }

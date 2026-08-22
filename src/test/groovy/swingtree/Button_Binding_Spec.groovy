@@ -15,7 +15,7 @@ import javax.swing.*
 @Narrative('''
     
     As a developer, I want to bind a button to a property so 
-    that is is updated when the property changes.
+    that is updated when the property changes.
     Binding is a powerful feature that allows us to create
     UIs which are not only decoupled from the business logic of
     an application, but also make it easy to create UIs which

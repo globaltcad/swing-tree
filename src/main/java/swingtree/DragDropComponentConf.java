@@ -52,6 +52,12 @@ public final class DragDropComponentConf<C extends JComponent>
     private static final Action NO_ACTION = e -> {};
     private static final Logger log = LoggerFactory.getLogger(DragDropComponentConf.class);
 
+    /**
+     *  Creates a new drop configuration for the specified component.
+     *  @param <C> The type of the component to accept drops.
+     *  @param component The component to accept drops.
+     *  @return A new drop configuration.
+     */
     public static <C extends JComponent> DragDropComponentConf<C> of(
         C component
     ) {

@@ -249,6 +249,7 @@ final class TextLayoutEngine {
      * @param boundsWidth  Available width ({@code < 0} means unbounded).
      * @param wrapLines    Whether to wrap text at word boundaries when it exceeds the available width.
      * @param obstacles    Shapes (in component coordinates) the text must not overlap.
+     * @param boxModelConf Box model configuration for text layout calculations.
      * @return Ordered list of {@link LayoutLine}s ready for Phase 2 height measurement and rendering.
      */
     private static List<LayoutLine> _buildLayoutLines(

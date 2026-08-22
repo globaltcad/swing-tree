@@ -577,6 +577,7 @@ public final class SwingTree
     /**
      *  Returns whether the UI scaling mode is enabled as is specified by
      *  the system property {@code swingtree.uiScale.enabled}.
+     *  @return True if UI scaling is enabled, false otherwise.
      */
     public boolean isUiScaleFactorEnabled() {
         return _config.isUiScaleFactorEnabled();
@@ -585,6 +586,8 @@ public final class SwingTree
     /**
      * Applies a custom scale factor given in system property "swingtree.uiScale"
      * to the given font.
+     * @param font The font to scale.
+     * @return A scaled version of the font, or the original font if scaling is disabled or invalid.
      */
     public Font scale( Font font ) {
         if( !isUiScaleFactorEnabled() )
@@ -600,7 +603,9 @@ public final class SwingTree
 
     /**
      * Converts the current scale factor given in system property "swingtree.uiScale"
-     * to a font size and then returns a new font derived from the provided one, with that new size!
+     * to a font size and then returns a new font derived from the provided one, with that new size.
+     * @param font The font to scale.
+     * @return A font derived from the provided one with a new size based on the scale factor.
      */
     public Font applyScaleAsFontSize( Font font ) {
         if( !isUiScaleFactorEnabled() )

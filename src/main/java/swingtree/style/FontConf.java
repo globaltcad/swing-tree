@@ -949,7 +949,7 @@ public final class FontConf
 
     /**
      * Returns an updated font config with the specified vertical alignment policy, that
-     *      * expresses text to be placed in certain positions alongside the certical axis.
+     * expresses text to be placed in certain positions alongside the vertical axis.
      * This property is not relevant for all components, as it can only be applied to methods
      * like {@link JLabel#setVerticalAlignment(int)} and {@link AbstractButton#setVerticalAlignment(int)},
      * which not all components have!

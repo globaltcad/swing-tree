@@ -429,7 +429,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     /**
      *  Use this to create a builder for the {@link JPanel} UI component.
      *  This is in essence a convenience method for {@code UI.of(new JPanel()).withLayout(attr)}. <br>
-     *  This method is typiclly used alongside the {@link UI#LC()} factory
+     *  This method is typically used alongside the {@link UI#LC()} factory
      *  method to create a layout attributes/constraints builder, like so: <br>
      *  <pre>{@code
      *      UI.panel(
