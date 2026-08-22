@@ -161,7 +161,7 @@ public final class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAny
 <span class="fc" id="L161">                Bounds bounds = Bounds.none();</span>
 <span class="pc bpc" id="L162" title="1 of 2 branches missed.">                if ( visibleRect != null )</span>
 <span class="nc" id="L163">                    bounds = Bounds.of(visibleRect);</span>
-<span class="pc bpc" id="L164" title="1 of 2 branches missed.">                UI.Align align = (orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL);</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">                UI.Align align = (orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL);</span>
 <span class="fc" id="L165">                return delegate.unitIncrement(bounds, align, direction);</span>
 <span class="nc" id="L166">            } catch ( Exception e ) {</span>
 <span class="nc" id="L167">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating unit increment for scrollable component.&quot;, e);</span>
@@ -176,7 +176,7 @@ public final class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAny
 <span class="fc" id="L176">                Bounds bounds = Bounds.none();</span>
 <span class="pc bpc" id="L177" title="1 of 2 branches missed.">                if ( visibleRect != null )</span>
 <span class="nc" id="L178">                    bounds = Bounds.of(visibleRect);</span>
-<span class="pc bpc" id="L179" title="1 of 2 branches missed.">                UI.Align align = (orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL);</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">                UI.Align align = (orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL);</span>
 <span class="fc" id="L180">                return delegate.blockIncrement(bounds, align, direction);</span>
 <span class="nc" id="L181">            } catch ( Exception e ) {</span>
 <span class="nc" id="L182">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating block increment for scrollable component.&quot;, e);</span>
@@ -211,7 +211,7 @@ public final class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAny
             JScrollPane parent, JComponent child, Configurator&lt;ScrollableComponentDelegate&gt; configurator
     ) {
 <span class="fc" id="L213">        ScrollableComponentDelegate delegate = ScrollableComponentDelegate.of(</span>
-<span class="fc" id="L214">                                                    parent, child, Size.of(child.getPreferredSize())</span>
+<span class="fc" id="L214">                                                    parent, child, () -&gt; Size.of(child.getPreferredSize())</span>
                                                 );
         try {
 <span class="fc" id="L217">            delegate = configurator.configure(delegate);</span>

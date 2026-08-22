@@ -1253,7 +1253,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            In in SwingTree's Style API you can create multiple sub-styles for shadows,\n            by giving them unique names. However, if the style does not make sense, or would\n            provably not lead to any visual result, SwingTree will optimize it away under the hood.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            In SwingTree's Style API you can create multiple sub-styles for shadows,\n            by giving them unique names. However, if the style does not make sense, or would\n            provably not lead to any visual result, SwingTree will optimize it away under the hood.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We first setup the global environment stuff (library context and DPI scale):","code":["SwingTree.initializeUsing {it.uiScaleFactor(uiScale)}"]},
@@ -1274,7 +1274,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            In in SwingTree's Style API you can create multiple sub-styles for shadows,\n            by giving them unique names. However, if the style does not make sense, or would\n            provably not lead to any visual result, SwingTree will optimize it away under the hood.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            In SwingTree's Style API you can create multiple sub-styles for shadows,\n            by giving them unique names. However, if the style does not make sense, or would\n            provably not lead to any visual result, SwingTree will optimize it away under the hood.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We first setup the global environment stuff (library context and DPI scale):","code":["SwingTree.initializeUsing {it.uiScaleFactor(uiScale)}"]},
@@ -1295,7 +1295,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            In in SwingTree's Style API you can create multiple sub-styles for shadows,\n            by giving them unique names. However, if the style does not make sense, or would\n            provably not lead to any visual result, SwingTree will optimize it away under the hood.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            In SwingTree's Style API you can create multiple sub-styles for shadows,\n            by giving them unique names. However, if the style does not make sense, or would\n            provably not lead to any visual result, SwingTree will optimize it away under the hood.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We first setup the global environment stuff (library context and DPI scale):","code":["SwingTree.initializeUsing {it.uiScaleFactor(uiScale)}"]},
@@ -1316,7 +1316,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            In in SwingTree's Style API you can create multiple sub-styles for shadows,\n            by giving them unique names. However, if the style does not make sense, or would\n            provably not lead to any visual result, SwingTree will optimize it away under the hood.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            In SwingTree's Style API you can create multiple sub-styles for shadows,\n            by giving them unique names. However, if the style does not make sense, or would\n            provably not lead to any visual result, SwingTree will optimize it away under the hood.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We first setup the global environment stuff (library context and DPI scale):","code":["SwingTree.initializeUsing {it.uiScaleFactor(uiScale)}"]},
@@ -1559,7 +1559,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            When using a color with an alpha value of 0 in the color list of a gradient,\n            then during the transition to a neighbouring color with an alpha of 255, the \n            \"true color\" of the transparent color will leak through.\n\n            So lets say we have two neighbouring colors (255, 0, 0, 0) and (0,0,0,255).\n            When transitioning from the first to the second color, the red color will leak through.\n            So an interpolated color might be (128, 0, 0, 128) instead of (0, 0, 0, 255).\n\n            You might want this lind of effect to happen, but if you don't then you can always\n            use the `UI.Color.TRANSPARENT` constant, which is a color that the style engine\n            will turn into a color that is also transparent, but otherwise an interpolation\n            between the two neighbouring colors. \n        "]
+      "tags":{},"see":[],"extraInfo":["\n            When using a color with an alpha value of 0 in the color list of a gradient,\n            then during the transition to a neighbouring color with an alpha of 255, the \n            \"true color\" of the transparent color will leak through.\n\n            So lets say we have two neighbouring colors (255, 0, 0, 0) and (0,0,0,255).\n            When transitioning from the first to the second color, the red color will leak through.\n            So an interpolated color might be (128, 0, 0, 128) instead of (0, 0, 0, 255).\n\n            You might want this kind of effect to happen, but if you don't then you can always\n            use the `UI.Color.TRANSPARENT` constant, which is a color that the style engine\n            will turn into a color that is also transparent, but otherwise an interpolation\n            between the two neighbouring colors. \n        "]
       },
       "blocks":[
         {"kind":"given","text":"\n            We first create a simple text pane with a gradient style that transitions\n            through various colors, including some transparent colors.\n        ","code":["var ui = UI.textPane()","            .withStyle( it -> it","                .gradient(UI.Layer.BACKGROUND, g -> g","                    .colors(","                        Color.RED,","                        UI.Color.TRANSPARENT,","                        Color.BLUE,","                        new java.awt.Color(0, 255, 0, 0), // transparent green","                        Color.WHITE","                    )","                    .span(UI.Span.TOP_TO_BOTTOM)","                    .type(UI.GradientType.LINEAR)","                )","            )"]},

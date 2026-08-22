@@ -368,48 +368,50 @@ public final class UIForList&lt;E, L extends JList&lt;E&gt;&gt; extends UIForAny
      *  thread! Instead, this model works with a UI thread owned snapshot of the items,
      *  which is refreshed through the change events of the property list.
      *  This is the same threading convention that the combo box models follow.
+     *
+     * @param &lt;E&gt; The type of the list elements.
      */
     private static class ValsListModel&lt;E&gt; extends AbstractListModel&lt;E&gt;
     {
         private volatile List&lt;E&gt; _entriesSnapshot; // The UI thread owned copy of the state of the bound property list.
 
-<span class="fc" id="L376">        public ValsListModel( Vals&lt;E&gt; entries ) {</span>
-<span class="fc" id="L377">            Objects.requireNonNull(entries, &quot;entries&quot;);</span>
-<span class="fc" id="L378">            _entriesSnapshot = _snapshotOf(entries.toList());</span>
-<span class="fc" id="L379">        }</span>
+<span class="fc" id="L378">        public ValsListModel( Vals&lt;E&gt; entries ) {</span>
+<span class="fc" id="L379">            Objects.requireNonNull(entries, &quot;entries&quot;);</span>
+<span class="fc" id="L380">            _entriesSnapshot = _snapshotOf(entries.toList());</span>
+<span class="fc" id="L381">        }</span>
 
         private static &lt;E&gt; List&lt;E&gt; _snapshotOf( List&lt;E&gt; entries ) {
-<span class="fc" id="L382">            return Collections.unmodifiableList(new ArrayList&lt;&gt;(entries));</span>
+<span class="fc" id="L384">            return Collections.unmodifiableList(new ArrayList&lt;&gt;(entries));</span>
         }
 
         @Override public int getSize() {
-<span class="fc" id="L386">            return _entriesSnapshot.size();</span>
+<span class="fc" id="L388">            return _entriesSnapshot.size();</span>
         }
         @Override public @Nullable E getElementAt(int i ) {
-<span class="fc" id="L389">            List&lt;E&gt; snapshot = _entriesSnapshot;</span>
-<span class="pc bpc" id="L390" title="2 of 4 branches missed.">            if ( i &lt; 0 || i &gt;= snapshot.size() )</span>
-<span class="nc" id="L391">                return null;</span>
-<span class="fc" id="L392">            return snapshot.get(i);</span>
+<span class="fc" id="L391">            List&lt;E&gt; snapshot = _entriesSnapshot;</span>
+<span class="pc bpc" id="L392" title="2 of 4 branches missed.">            if ( i &lt; 0 || i &gt;= snapshot.size() )</span>
+<span class="nc" id="L393">                return null;</span>
+<span class="fc" id="L394">            return snapshot.get(i);</span>
         }
 
         public void fire( ValsDelegate&lt;E&gt; v ) {
             // The delegate values are deep copies captured at change time,
             // so they may be safely adopted as the new UI owned snapshot here.
-<span class="fc" id="L398">            List&lt;E&gt; newSnapshot = _snapshotOf(v.currentValues().toList());</span>
-<span class="fc" id="L399">            _entriesSnapshot = newSnapshot;</span>
-<span class="fc" id="L400">            int index = v.index().orElse(-1);</span>
-<span class="pc bpc" id="L401" title="1 of 2 branches missed.">            if ( index &lt; 0 ) {</span>
-<span class="nc" id="L402">                fireContentsChanged( this, 0, newSnapshot.size() );</span>
-<span class="nc" id="L403">                return;</span>
+<span class="fc" id="L400">            List&lt;E&gt; newSnapshot = _snapshotOf(v.currentValues().toList());</span>
+<span class="fc" id="L401">            _entriesSnapshot = newSnapshot;</span>
+<span class="fc" id="L402">            int index = v.index().orElse(-1);</span>
+<span class="pc bpc" id="L403" title="1 of 2 branches missed.">            if ( index &lt; 0 ) {</span>
+<span class="nc" id="L404">                fireContentsChanged( this, 0, newSnapshot.size() );</span>
+<span class="nc" id="L405">                return;</span>
             }
-<span class="pc bpc" id="L405" title="2 of 4 branches missed.">            switch ( v.change() ) {</span>
-<span class="fc" id="L406">                case ADD:    fireIntervalAdded(   this, index, index + v.newValues().size() ); break;</span>
-<span class="fc" id="L407">                case REMOVE: fireIntervalRemoved( this, index, index + v.oldValues().size() ); break;</span>
-<span class="nc" id="L408">                case SET:    fireContentsChanged( this, index, index + v.newValues().size() ); break;</span>
+<span class="pc bpc" id="L407" title="2 of 4 branches missed.">            switch ( v.change() ) {</span>
+<span class="fc" id="L408">                case ADD:    fireIntervalAdded(   this, index, index + v.newValues().size() ); break;</span>
+<span class="fc" id="L409">                case REMOVE: fireIntervalRemoved( this, index, index + v.oldValues().size() ); break;</span>
+<span class="nc" id="L410">                case SET:    fireContentsChanged( this, index, index + v.newValues().size() ); break;</span>
                 default:
-<span class="nc" id="L410">                    fireContentsChanged( this, 0, newSnapshot.size() );</span>
+<span class="nc" id="L412">                    fireContentsChanged( this, 0, newSnapshot.size() );</span>
             }
-<span class="fc" id="L412">        }</span>
+<span class="fc" id="L414">        }</span>
     }
 
 }

@@ -9,7 +9,7 @@ import java.util.function.Supplier;
  *  This {@link EventProcessor} implementation is called lenient because it does not
  *  throw any exceptions when a task is not registered by the UI thread.
  *  When this processor is installed
- *  all the event handling will typically be done by the UI thead (the AWT event dispatch thread, short EDT)
+ *  all the event handling will typically be done by the UI thread (the AWT event dispatch thread, short EDT)
  *  simply because all the Swing component events will be executed on the EDT,
  *  however this will not be enforced. &lt;br&gt;
  *  Note that this {@link EventProcessor} will effectively couple the UI

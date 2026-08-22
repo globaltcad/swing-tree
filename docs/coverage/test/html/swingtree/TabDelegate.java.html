@@ -5,8 +5,6 @@ import sprouts.Action;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseEvent;
-import java.util.List;
-import java.util.function.Supplier;
 
 /**
  *  A {@link JTabbedPane} delegate providing useful context information to various {@link sprouts.Action} listeners
@@ -18,23 +16,23 @@ import java.util.function.Supplier;
  */
 public final class TabDelegate extends ComponentMouseEventDelegate&lt;JTabbedPane&gt;
 {
-<span class="fc" id="L21">    private final int _selectedTabIndex = _component().getSelectedIndex();</span>
-<span class="fc" id="L22">    private final int _tabIndex = _component().indexAtLocation(getEvent().getX(), getEvent().getY());</span>
+<span class="fc" id="L19">    private final int _selectedTabIndex = _component().getSelectedIndex();</span>
+<span class="fc" id="L20">    private final int _tabIndex = _component().indexAtLocation(getEvent().getX(), getEvent().getY());</span>
 
 
     public TabDelegate(
         JTabbedPane component,
         MouseEvent  event
     ) {
-<span class="fc" id="L29">        super(component, event);</span>
-<span class="fc" id="L30">    }</span>
+<span class="fc" id="L27">        super(component, event);</span>
+<span class="fc" id="L28">    }</span>
 
     /**
      *  Exposes the index of the currently selected tab.
      * @return The index of the clicked tab.
      */
     public final int selectedTabIndex() {
-<span class="nc" id="L37">        return _selectedTabIndex;</span>
+<span class="nc" id="L35">        return _selectedTabIndex;</span>
     }
 
     /**
@@ -46,7 +44,7 @@ public final class TabDelegate extends ComponentMouseEventDelegate&lt;JTabbedPan
      * @return The index of the clicked tab.
      */
     public final int tabIndex() {
-<span class="fc" id="L49">        return _tabIndex;</span>
+<span class="fc" id="L47">        return _tabIndex;</span>
     }
 
     /**
@@ -55,7 +53,7 @@ public final class TabDelegate extends ComponentMouseEventDelegate&lt;JTabbedPan
      * @return True if the clicked tab is the currently selected tab.
      */
     public final boolean tabIsSelected() {
-<span class="nc bnc" id="L58" title="All 2 branches missed.">        return selectedTabIndex() == tabIndex();</span>
+<span class="nc bnc" id="L56" title="All 2 branches missed.">        return selectedTabIndex() == tabIndex();</span>
     }
 
     /**
@@ -63,12 +61,12 @@ public final class TabDelegate extends ComponentMouseEventDelegate&lt;JTabbedPan
      * @return The component of the clicked tab.
      */
     public final JComponent tabComponent() {
-<span class="nc" id="L66">        Component found = get().getComponentAt(tabIndex());</span>
-<span class="nc bnc" id="L67" title="All 2 branches missed.">        if ( found instanceof JComponent )</span>
-<span class="nc" id="L68">            return (JComponent) found;</span>
+<span class="nc" id="L64">        Component found = get().getComponentAt(tabIndex());</span>
+<span class="nc bnc" id="L65" title="All 2 branches missed.">        if ( found instanceof JComponent )</span>
+<span class="nc" id="L66">            return (JComponent) found;</span>
         else
-<span class="nc" id="L70">            throw new RuntimeException(</span>
-<span class="nc" id="L71">                    &quot;The component at index &quot; + tabIndex() + &quot; is not a JComponent&quot;</span>
+<span class="nc" id="L68">            throw new RuntimeException(</span>
+<span class="nc" id="L69">                    &quot;The component at index &quot; + tabIndex() + &quot; is not a JComponent&quot;</span>
                 );
     }
 

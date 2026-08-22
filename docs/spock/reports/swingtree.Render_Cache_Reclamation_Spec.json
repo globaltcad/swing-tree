@@ -1,0 +1,310 @@
+{
+  "className":"swingtree.Render_Cache_Reclamation_Spec",
+  "title":"The Render Cache Cleans Up After Itself",
+  "narrative":"SwingTree caches the rendered pixels of a component's style in a process wide\n    pool, shared by every component whose style is `equal`. Sharing is the point:\n    a table of two hundred identically styled cells renders one image and blits it\n    two hundred times.\n\n    A pool like that has to know when to let go, and SwingTree's answer is that it\n    never decides at all — the entries are keyed *weakly* by the style\n    configuration, so an entry lives exactly as long as some live component still\n    holds that configuration, and not a moment longer. Close a dialog, drop a view,\n    switch a theme, and the images those components were using become unreachable\n    and are reclaimed by the garbage collector like any other object.\n\n    That is easy to break and expensive to break. One strong reference held\n    somewhere in the style engine — a listener, a registry, a \"last rendered\"\n    field — would pin every image any component ever painted for the lifetime of\n    the application, and because the cache is bounded, a pool full of images\n    belonging to components that no longer exist stops admitting the ones that do.\n    A leak here does not merely waste memory, it silently turns the cache off.\n\n    These scenarios therefore build components, paint them, drop them, and insist\n    that the memory comes back — across every shape the cache has: images keyed on\n    the exact component size, images keyed size independently, and the two cases\n    where a single layer is cached in more than one piece.",
+  "subjects":["swingtree.style.ComponentExtension"],
+  "statistics":{
+    "runs":"12",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A component that goes out of scope takes its cached renderings with it. (a flat rounded background) [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the whole contract, exercised on one styling idiom at a time. A component\n            is built, sized and painted until its style really is in the cache; then the last\n            reference to it is dropped and the garbage collector is given its chance.\n\n            Both halves are asserted, and both matter. That the cache *grew* is what stops this\n            from being a scenario about an empty cache, which any implementation passes. That\n            it then came back to where it started is the contract itself — measured in bytes as\n            well as in entries, because the cache is bounded by bytes, so an entry that lingers\n            is an entry that keeps a future component out.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"An empty cache to measure against.","code":["final var styleLayerEntries = {return UI.runAndGet({ComponentExtension.globalRenderCacheEntryCounts().toMap()[\"style layers\"]})}","final var globalStyleLayerCacheBytesReserved = {UI.runAndGet({ComponentExtension.globalStyleLayerCacheBytesReserved()})}","var entriesBefore = styleLayerEntries()","var bytesBefore = globalStyleLayerCacheBytesReserved()"]},
+
+        {"kind":"when","text":"\n            A component with this style is painted often enough to be cached, and then dropped.\n            It is built inside a helper rather than in a local variable on purpose: a local\n            would still be reachable from this scenario's own stack frame when the collector\n            runs, and the scenario would then be pinning the very reference it is testing.\n        ","code":["var box = (JComponent) builder.call()","box.setSize(260, 150)","12.times { Utility.renderSingleComponent(box) }","var ghost = new WeakReference<>(box)","box = null"]},
+
+        {"kind":"then","text":"While it was alive, its style really was cached - so there is something to reclaim.","code":["styleLayerEntries() > entriesBefore","globalStyleLayerCacheBytesReserved() > bytesBefore"]},
+
+        {"kind":"when","text":"The garbage collector gets its chance.","code":["var componentWasCollected = eventually(24, { ghost.get() == null })"]},
+
+        {"kind":"then","text":"The component itself is gone, which is the precondition for everything below.","code":["componentWasCollected"]},
+
+        {"kind":"and","text":"\n            And so are its cached renderings: no entry, and no byte of image, outlives the\n            component it belonged to.\n        ","code":["eventually(24, { styleLayerEntries() <= entriesBefore })","globalStyleLayerCacheBytesReserved() <= bytesBefore"]},
+
+        {"kind":"where","text":"","code":{"description":["\"a flat rounded background\"","\"a gradient\"","\"a shadow\"","\"painted text\"","\"a background image\"","\"a coloured border\"","\"a noise\"","\"a cacheable painter\"","\"a layer cut around its painter\"","\"several layers at once\""],"builder":["{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(14).margin(6) }).get(JBox) }","{ UI.box().withStyle({ it.borderRadius(9).gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) ) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#6f4f2f\").borderRadius(18)\n                                            .shadow(UI.Layer.CONTENT, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(7).spreadRadius(1)) }).get(JBox) }","{ UI.box().withStyle({ it.text( t -> t.content(\"Reclaim me\") ) }).get(JBox) }","{ UI.box().withStyle({ it.borderRadius(10)\n                                            .image( img -> img.image(swingtree.api.IconDeclaration.of(\"img/swing.png\")) ) }).get(JBox) }","{ UI.box().withStyle({ it.border(4, \"#903030\").borderRadius(10).backgroundColor(\"#e8e0d0\") }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(12)\n                                            .noise(UI.Layer.BACKGROUND, \"grain\", n -> n.colors(\"#101010\", \"#e0e0e0\")) }).get(JBox) }","{ UI.box().withStyle({ it.painter(UI.Layer.BACKGROUND, \"mark\", swingtree.api.Painter.of(\"k\", { g ->\n                                            g.setColor(new Color(240, 120, 30)); g.fillOval(10, 10, 60, 40)\n                                         })) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(14)\n                                            .painter(UI.Layer.BACKGROUND, \"mark\", { g ->\n                                                g.setColor(new Color(30, 200, 160)); g.fillRect(20, 20, 60, 40)\n                                            }) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#3f5f2f\").foundationColor(\"#e0e8d0\").borderRadius(16).margin(8)\n                                            .gradient(UI.Layer.BACKGROUND, \"sky\", g -> g.colors(new Color(80, 120, 200), new Color(20, 30, 60)))\n                                            .shadow(UI.Layer.CONTENT, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(6)) }).get(JBox) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A component that goes out of scope takes its cached renderings with it. (a gradient) [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the whole contract, exercised on one styling idiom at a time. A component\n            is built, sized and painted until its style really is in the cache; then the last\n            reference to it is dropped and the garbage collector is given its chance.\n\n            Both halves are asserted, and both matter. That the cache *grew* is what stops this\n            from being a scenario about an empty cache, which any implementation passes. That\n            it then came back to where it started is the contract itself — measured in bytes as\n            well as in entries, because the cache is bounded by bytes, so an entry that lingers\n            is an entry that keeps a future component out.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"An empty cache to measure against.","code":["final var styleLayerEntries = {return UI.runAndGet({ComponentExtension.globalRenderCacheEntryCounts().toMap()[\"style layers\"]})}","final var globalStyleLayerCacheBytesReserved = {UI.runAndGet({ComponentExtension.globalStyleLayerCacheBytesReserved()})}","var entriesBefore = styleLayerEntries()","var bytesBefore = globalStyleLayerCacheBytesReserved()"]},
+
+        {"kind":"when","text":"\n            A component with this style is painted often enough to be cached, and then dropped.\n            It is built inside a helper rather than in a local variable on purpose: a local\n            would still be reachable from this scenario's own stack frame when the collector\n            runs, and the scenario would then be pinning the very reference it is testing.\n        ","code":["var box = (JComponent) builder.call()","box.setSize(260, 150)","12.times { Utility.renderSingleComponent(box) }","var ghost = new WeakReference<>(box)","box = null"]},
+
+        {"kind":"then","text":"While it was alive, its style really was cached - so there is something to reclaim.","code":["styleLayerEntries() > entriesBefore","globalStyleLayerCacheBytesReserved() > bytesBefore"]},
+
+        {"kind":"when","text":"The garbage collector gets its chance.","code":["var componentWasCollected = eventually(24, { ghost.get() == null })"]},
+
+        {"kind":"then","text":"The component itself is gone, which is the precondition for everything below.","code":["componentWasCollected"]},
+
+        {"kind":"and","text":"\n            And so are its cached renderings: no entry, and no byte of image, outlives the\n            component it belonged to.\n        ","code":["eventually(24, { styleLayerEntries() <= entriesBefore })","globalStyleLayerCacheBytesReserved() <= bytesBefore"]},
+
+        {"kind":"where","text":"","code":{"description":["\"a flat rounded background\"","\"a gradient\"","\"a shadow\"","\"painted text\"","\"a background image\"","\"a coloured border\"","\"a noise\"","\"a cacheable painter\"","\"a layer cut around its painter\"","\"several layers at once\""],"builder":["{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(14).margin(6) }).get(JBox) }","{ UI.box().withStyle({ it.borderRadius(9).gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) ) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#6f4f2f\").borderRadius(18)\n                                            .shadow(UI.Layer.CONTENT, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(7).spreadRadius(1)) }).get(JBox) }","{ UI.box().withStyle({ it.text( t -> t.content(\"Reclaim me\") ) }).get(JBox) }","{ UI.box().withStyle({ it.borderRadius(10)\n                                            .image( img -> img.image(swingtree.api.IconDeclaration.of(\"img/swing.png\")) ) }).get(JBox) }","{ UI.box().withStyle({ it.border(4, \"#903030\").borderRadius(10).backgroundColor(\"#e8e0d0\") }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(12)\n                                            .noise(UI.Layer.BACKGROUND, \"grain\", n -> n.colors(\"#101010\", \"#e0e0e0\")) }).get(JBox) }","{ UI.box().withStyle({ it.painter(UI.Layer.BACKGROUND, \"mark\", swingtree.api.Painter.of(\"k\", { g ->\n                                            g.setColor(new Color(240, 120, 30)); g.fillOval(10, 10, 60, 40)\n                                         })) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(14)\n                                            .painter(UI.Layer.BACKGROUND, \"mark\", { g ->\n                                                g.setColor(new Color(30, 200, 160)); g.fillRect(20, 20, 60, 40)\n                                            }) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#3f5f2f\").foundationColor(\"#e0e8d0\").borderRadius(16).margin(8)\n                                            .gradient(UI.Layer.BACKGROUND, \"sky\", g -> g.colors(new Color(80, 120, 200), new Color(20, 30, 60)))\n                                            .shadow(UI.Layer.CONTENT, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(6)) }).get(JBox) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A component that goes out of scope takes its cached renderings with it. (a shadow) [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the whole contract, exercised on one styling idiom at a time. A component\n            is built, sized and painted until its style really is in the cache; then the last\n            reference to it is dropped and the garbage collector is given its chance.\n\n            Both halves are asserted, and both matter. That the cache *grew* is what stops this\n            from being a scenario about an empty cache, which any implementation passes. That\n            it then came back to where it started is the contract itself — measured in bytes as\n            well as in entries, because the cache is bounded by bytes, so an entry that lingers\n            is an entry that keeps a future component out.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"An empty cache to measure against.","code":["final var styleLayerEntries = {return UI.runAndGet({ComponentExtension.globalRenderCacheEntryCounts().toMap()[\"style layers\"]})}","final var globalStyleLayerCacheBytesReserved = {UI.runAndGet({ComponentExtension.globalStyleLayerCacheBytesReserved()})}","var entriesBefore = styleLayerEntries()","var bytesBefore = globalStyleLayerCacheBytesReserved()"]},
+
+        {"kind":"when","text":"\n            A component with this style is painted often enough to be cached, and then dropped.\n            It is built inside a helper rather than in a local variable on purpose: a local\n            would still be reachable from this scenario's own stack frame when the collector\n            runs, and the scenario would then be pinning the very reference it is testing.\n        ","code":["var box = (JComponent) builder.call()","box.setSize(260, 150)","12.times { Utility.renderSingleComponent(box) }","var ghost = new WeakReference<>(box)","box = null"]},
+
+        {"kind":"then","text":"While it was alive, its style really was cached - so there is something to reclaim.","code":["styleLayerEntries() > entriesBefore","globalStyleLayerCacheBytesReserved() > bytesBefore"]},
+
+        {"kind":"when","text":"The garbage collector gets its chance.","code":["var componentWasCollected = eventually(24, { ghost.get() == null })"]},
+
+        {"kind":"then","text":"The component itself is gone, which is the precondition for everything below.","code":["componentWasCollected"]},
+
+        {"kind":"and","text":"\n            And so are its cached renderings: no entry, and no byte of image, outlives the\n            component it belonged to.\n        ","code":["eventually(24, { styleLayerEntries() <= entriesBefore })","globalStyleLayerCacheBytesReserved() <= bytesBefore"]},
+
+        {"kind":"where","text":"","code":{"description":["\"a flat rounded background\"","\"a gradient\"","\"a shadow\"","\"painted text\"","\"a background image\"","\"a coloured border\"","\"a noise\"","\"a cacheable painter\"","\"a layer cut around its painter\"","\"several layers at once\""],"builder":["{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(14).margin(6) }).get(JBox) }","{ UI.box().withStyle({ it.borderRadius(9).gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) ) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#6f4f2f\").borderRadius(18)\n                                            .shadow(UI.Layer.CONTENT, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(7).spreadRadius(1)) }).get(JBox) }","{ UI.box().withStyle({ it.text( t -> t.content(\"Reclaim me\") ) }).get(JBox) }","{ UI.box().withStyle({ it.borderRadius(10)\n                                            .image( img -> img.image(swingtree.api.IconDeclaration.of(\"img/swing.png\")) ) }).get(JBox) }","{ UI.box().withStyle({ it.border(4, \"#903030\").borderRadius(10).backgroundColor(\"#e8e0d0\") }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(12)\n                                            .noise(UI.Layer.BACKGROUND, \"grain\", n -> n.colors(\"#101010\", \"#e0e0e0\")) }).get(JBox) }","{ UI.box().withStyle({ it.painter(UI.Layer.BACKGROUND, \"mark\", swingtree.api.Painter.of(\"k\", { g ->\n                                            g.setColor(new Color(240, 120, 30)); g.fillOval(10, 10, 60, 40)\n                                         })) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(14)\n                                            .painter(UI.Layer.BACKGROUND, \"mark\", { g ->\n                                                g.setColor(new Color(30, 200, 160)); g.fillRect(20, 20, 60, 40)\n                                            }) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#3f5f2f\").foundationColor(\"#e0e8d0\").borderRadius(16).margin(8)\n                                            .gradient(UI.Layer.BACKGROUND, \"sky\", g -> g.colors(new Color(80, 120, 200), new Color(20, 30, 60)))\n                                            .shadow(UI.Layer.CONTENT, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(6)) }).get(JBox) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A component that goes out of scope takes its cached renderings with it. (painted text) [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the whole contract, exercised on one styling idiom at a time. A component\n            is built, sized and painted until its style really is in the cache; then the last\n            reference to it is dropped and the garbage collector is given its chance.\n\n            Both halves are asserted, and both matter. That the cache *grew* is what stops this\n            from being a scenario about an empty cache, which any implementation passes. That\n            it then came back to where it started is the contract itself — measured in bytes as\n            well as in entries, because the cache is bounded by bytes, so an entry that lingers\n            is an entry that keeps a future component out.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"An empty cache to measure against.","code":["final var styleLayerEntries = {return UI.runAndGet({ComponentExtension.globalRenderCacheEntryCounts().toMap()[\"style layers\"]})}","final var globalStyleLayerCacheBytesReserved = {UI.runAndGet({ComponentExtension.globalStyleLayerCacheBytesReserved()})}","var entriesBefore = styleLayerEntries()","var bytesBefore = globalStyleLayerCacheBytesReserved()"]},
+
+        {"kind":"when","text":"\n            A component with this style is painted often enough to be cached, and then dropped.\n            It is built inside a helper rather than in a local variable on purpose: a local\n            would still be reachable from this scenario's own stack frame when the collector\n            runs, and the scenario would then be pinning the very reference it is testing.\n        ","code":["var box = (JComponent) builder.call()","box.setSize(260, 150)","12.times { Utility.renderSingleComponent(box) }","var ghost = new WeakReference<>(box)","box = null"]},
+
+        {"kind":"then","text":"While it was alive, its style really was cached - so there is something to reclaim.","code":["styleLayerEntries() > entriesBefore","globalStyleLayerCacheBytesReserved() > bytesBefore"]},
+
+        {"kind":"when","text":"The garbage collector gets its chance.","code":["var componentWasCollected = eventually(24, { ghost.get() == null })"]},
+
+        {"kind":"then","text":"The component itself is gone, which is the precondition for everything below.","code":["componentWasCollected"]},
+
+        {"kind":"and","text":"\n            And so are its cached renderings: no entry, and no byte of image, outlives the\n            component it belonged to.\n        ","code":["eventually(24, { styleLayerEntries() <= entriesBefore })","globalStyleLayerCacheBytesReserved() <= bytesBefore"]},
+
+        {"kind":"where","text":"","code":{"description":["\"a flat rounded background\"","\"a gradient\"","\"a shadow\"","\"painted text\"","\"a background image\"","\"a coloured border\"","\"a noise\"","\"a cacheable painter\"","\"a layer cut around its painter\"","\"several layers at once\""],"builder":["{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(14).margin(6) }).get(JBox) }","{ UI.box().withStyle({ it.borderRadius(9).gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) ) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#6f4f2f\").borderRadius(18)\n                                            .shadow(UI.Layer.CONTENT, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(7).spreadRadius(1)) }).get(JBox) }","{ UI.box().withStyle({ it.text( t -> t.content(\"Reclaim me\") ) }).get(JBox) }","{ UI.box().withStyle({ it.borderRadius(10)\n                                            .image( img -> img.image(swingtree.api.IconDeclaration.of(\"img/swing.png\")) ) }).get(JBox) }","{ UI.box().withStyle({ it.border(4, \"#903030\").borderRadius(10).backgroundColor(\"#e8e0d0\") }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(12)\n                                            .noise(UI.Layer.BACKGROUND, \"grain\", n -> n.colors(\"#101010\", \"#e0e0e0\")) }).get(JBox) }","{ UI.box().withStyle({ it.painter(UI.Layer.BACKGROUND, \"mark\", swingtree.api.Painter.of(\"k\", { g ->\n                                            g.setColor(new Color(240, 120, 30)); g.fillOval(10, 10, 60, 40)\n                                         })) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(14)\n                                            .painter(UI.Layer.BACKGROUND, \"mark\", { g ->\n                                                g.setColor(new Color(30, 200, 160)); g.fillRect(20, 20, 60, 40)\n                                            }) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#3f5f2f\").foundationColor(\"#e0e8d0\").borderRadius(16).margin(8)\n                                            .gradient(UI.Layer.BACKGROUND, \"sky\", g -> g.colors(new Color(80, 120, 200), new Color(20, 30, 60)))\n                                            .shadow(UI.Layer.CONTENT, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(6)) }).get(JBox) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A component that goes out of scope takes its cached renderings with it. (a background image) [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the whole contract, exercised on one styling idiom at a time. A component\n            is built, sized and painted until its style really is in the cache; then the last\n            reference to it is dropped and the garbage collector is given its chance.\n\n            Both halves are asserted, and both matter. That the cache *grew* is what stops this\n            from being a scenario about an empty cache, which any implementation passes. That\n            it then came back to where it started is the contract itself — measured in bytes as\n            well as in entries, because the cache is bounded by bytes, so an entry that lingers\n            is an entry that keeps a future component out.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"An empty cache to measure against.","code":["final var styleLayerEntries = {return UI.runAndGet({ComponentExtension.globalRenderCacheEntryCounts().toMap()[\"style layers\"]})}","final var globalStyleLayerCacheBytesReserved = {UI.runAndGet({ComponentExtension.globalStyleLayerCacheBytesReserved()})}","var entriesBefore = styleLayerEntries()","var bytesBefore = globalStyleLayerCacheBytesReserved()"]},
+
+        {"kind":"when","text":"\n            A component with this style is painted often enough to be cached, and then dropped.\n            It is built inside a helper rather than in a local variable on purpose: a local\n            would still be reachable from this scenario's own stack frame when the collector\n            runs, and the scenario would then be pinning the very reference it is testing.\n        ","code":["var box = (JComponent) builder.call()","box.setSize(260, 150)","12.times { Utility.renderSingleComponent(box) }","var ghost = new WeakReference<>(box)","box = null"]},
+
+        {"kind":"then","text":"While it was alive, its style really was cached - so there is something to reclaim.","code":["styleLayerEntries() > entriesBefore","globalStyleLayerCacheBytesReserved() > bytesBefore"]},
+
+        {"kind":"when","text":"The garbage collector gets its chance.","code":["var componentWasCollected = eventually(24, { ghost.get() == null })"]},
+
+        {"kind":"then","text":"The component itself is gone, which is the precondition for everything below.","code":["componentWasCollected"]},
+
+        {"kind":"and","text":"\n            And so are its cached renderings: no entry, and no byte of image, outlives the\n            component it belonged to.\n        ","code":["eventually(24, { styleLayerEntries() <= entriesBefore })","globalStyleLayerCacheBytesReserved() <= bytesBefore"]},
+
+        {"kind":"where","text":"","code":{"description":["\"a flat rounded background\"","\"a gradient\"","\"a shadow\"","\"painted text\"","\"a background image\"","\"a coloured border\"","\"a noise\"","\"a cacheable painter\"","\"a layer cut around its painter\"","\"several layers at once\""],"builder":["{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(14).margin(6) }).get(JBox) }","{ UI.box().withStyle({ it.borderRadius(9).gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) ) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#6f4f2f\").borderRadius(18)\n                                            .shadow(UI.Layer.CONTENT, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(7).spreadRadius(1)) }).get(JBox) }","{ UI.box().withStyle({ it.text( t -> t.content(\"Reclaim me\") ) }).get(JBox) }","{ UI.box().withStyle({ it.borderRadius(10)\n                                            .image( img -> img.image(swingtree.api.IconDeclaration.of(\"img/swing.png\")) ) }).get(JBox) }","{ UI.box().withStyle({ it.border(4, \"#903030\").borderRadius(10).backgroundColor(\"#e8e0d0\") }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(12)\n                                            .noise(UI.Layer.BACKGROUND, \"grain\", n -> n.colors(\"#101010\", \"#e0e0e0\")) }).get(JBox) }","{ UI.box().withStyle({ it.painter(UI.Layer.BACKGROUND, \"mark\", swingtree.api.Painter.of(\"k\", { g ->\n                                            g.setColor(new Color(240, 120, 30)); g.fillOval(10, 10, 60, 40)\n                                         })) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(14)\n                                            .painter(UI.Layer.BACKGROUND, \"mark\", { g ->\n                                                g.setColor(new Color(30, 200, 160)); g.fillRect(20, 20, 60, 40)\n                                            }) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#3f5f2f\").foundationColor(\"#e0e8d0\").borderRadius(16).margin(8)\n                                            .gradient(UI.Layer.BACKGROUND, \"sky\", g -> g.colors(new Color(80, 120, 200), new Color(20, 30, 60)))\n                                            .shadow(UI.Layer.CONTENT, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(6)) }).get(JBox) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A component that goes out of scope takes its cached renderings with it. (a coloured border) [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the whole contract, exercised on one styling idiom at a time. A component\n            is built, sized and painted until its style really is in the cache; then the last\n            reference to it is dropped and the garbage collector is given its chance.\n\n            Both halves are asserted, and both matter. That the cache *grew* is what stops this\n            from being a scenario about an empty cache, which any implementation passes. That\n            it then came back to where it started is the contract itself — measured in bytes as\n            well as in entries, because the cache is bounded by bytes, so an entry that lingers\n            is an entry that keeps a future component out.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"An empty cache to measure against.","code":["final var styleLayerEntries = {return UI.runAndGet({ComponentExtension.globalRenderCacheEntryCounts().toMap()[\"style layers\"]})}","final var globalStyleLayerCacheBytesReserved = {UI.runAndGet({ComponentExtension.globalStyleLayerCacheBytesReserved()})}","var entriesBefore = styleLayerEntries()","var bytesBefore = globalStyleLayerCacheBytesReserved()"]},
+
+        {"kind":"when","text":"\n            A component with this style is painted often enough to be cached, and then dropped.\n            It is built inside a helper rather than in a local variable on purpose: a local\n            would still be reachable from this scenario's own stack frame when the collector\n            runs, and the scenario would then be pinning the very reference it is testing.\n        ","code":["var box = (JComponent) builder.call()","box.setSize(260, 150)","12.times { Utility.renderSingleComponent(box) }","var ghost = new WeakReference<>(box)","box = null"]},
+
+        {"kind":"then","text":"While it was alive, its style really was cached - so there is something to reclaim.","code":["styleLayerEntries() > entriesBefore","globalStyleLayerCacheBytesReserved() > bytesBefore"]},
+
+        {"kind":"when","text":"The garbage collector gets its chance.","code":["var componentWasCollected = eventually(24, { ghost.get() == null })"]},
+
+        {"kind":"then","text":"The component itself is gone, which is the precondition for everything below.","code":["componentWasCollected"]},
+
+        {"kind":"and","text":"\n            And so are its cached renderings: no entry, and no byte of image, outlives the\n            component it belonged to.\n        ","code":["eventually(24, { styleLayerEntries() <= entriesBefore })","globalStyleLayerCacheBytesReserved() <= bytesBefore"]},
+
+        {"kind":"where","text":"","code":{"description":["\"a flat rounded background\"","\"a gradient\"","\"a shadow\"","\"painted text\"","\"a background image\"","\"a coloured border\"","\"a noise\"","\"a cacheable painter\"","\"a layer cut around its painter\"","\"several layers at once\""],"builder":["{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(14).margin(6) }).get(JBox) }","{ UI.box().withStyle({ it.borderRadius(9).gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) ) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#6f4f2f\").borderRadius(18)\n                                            .shadow(UI.Layer.CONTENT, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(7).spreadRadius(1)) }).get(JBox) }","{ UI.box().withStyle({ it.text( t -> t.content(\"Reclaim me\") ) }).get(JBox) }","{ UI.box().withStyle({ it.borderRadius(10)\n                                            .image( img -> img.image(swingtree.api.IconDeclaration.of(\"img/swing.png\")) ) }).get(JBox) }","{ UI.box().withStyle({ it.border(4, \"#903030\").borderRadius(10).backgroundColor(\"#e8e0d0\") }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(12)\n                                            .noise(UI.Layer.BACKGROUND, \"grain\", n -> n.colors(\"#101010\", \"#e0e0e0\")) }).get(JBox) }","{ UI.box().withStyle({ it.painter(UI.Layer.BACKGROUND, \"mark\", swingtree.api.Painter.of(\"k\", { g ->\n                                            g.setColor(new Color(240, 120, 30)); g.fillOval(10, 10, 60, 40)\n                                         })) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(14)\n                                            .painter(UI.Layer.BACKGROUND, \"mark\", { g ->\n                                                g.setColor(new Color(30, 200, 160)); g.fillRect(20, 20, 60, 40)\n                                            }) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#3f5f2f\").foundationColor(\"#e0e8d0\").borderRadius(16).margin(8)\n                                            .gradient(UI.Layer.BACKGROUND, \"sky\", g -> g.colors(new Color(80, 120, 200), new Color(20, 30, 60)))\n                                            .shadow(UI.Layer.CONTENT, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(6)) }).get(JBox) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A component that goes out of scope takes its cached renderings with it. (a noise) [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the whole contract, exercised on one styling idiom at a time. A component\n            is built, sized and painted until its style really is in the cache; then the last\n            reference to it is dropped and the garbage collector is given its chance.\n\n            Both halves are asserted, and both matter. That the cache *grew* is what stops this\n            from being a scenario about an empty cache, which any implementation passes. That\n            it then came back to where it started is the contract itself — measured in bytes as\n            well as in entries, because the cache is bounded by bytes, so an entry that lingers\n            is an entry that keeps a future component out.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"An empty cache to measure against.","code":["final var styleLayerEntries = {return UI.runAndGet({ComponentExtension.globalRenderCacheEntryCounts().toMap()[\"style layers\"]})}","final var globalStyleLayerCacheBytesReserved = {UI.runAndGet({ComponentExtension.globalStyleLayerCacheBytesReserved()})}","var entriesBefore = styleLayerEntries()","var bytesBefore = globalStyleLayerCacheBytesReserved()"]},
+
+        {"kind":"when","text":"\n            A component with this style is painted often enough to be cached, and then dropped.\n            It is built inside a helper rather than in a local variable on purpose: a local\n            would still be reachable from this scenario's own stack frame when the collector\n            runs, and the scenario would then be pinning the very reference it is testing.\n        ","code":["var box = (JComponent) builder.call()","box.setSize(260, 150)","12.times { Utility.renderSingleComponent(box) }","var ghost = new WeakReference<>(box)","box = null"]},
+
+        {"kind":"then","text":"While it was alive, its style really was cached - so there is something to reclaim.","code":["styleLayerEntries() > entriesBefore","globalStyleLayerCacheBytesReserved() > bytesBefore"]},
+
+        {"kind":"when","text":"The garbage collector gets its chance.","code":["var componentWasCollected = eventually(24, { ghost.get() == null })"]},
+
+        {"kind":"then","text":"The component itself is gone, which is the precondition for everything below.","code":["componentWasCollected"]},
+
+        {"kind":"and","text":"\n            And so are its cached renderings: no entry, and no byte of image, outlives the\n            component it belonged to.\n        ","code":["eventually(24, { styleLayerEntries() <= entriesBefore })","globalStyleLayerCacheBytesReserved() <= bytesBefore"]},
+
+        {"kind":"where","text":"","code":{"description":["\"a flat rounded background\"","\"a gradient\"","\"a shadow\"","\"painted text\"","\"a background image\"","\"a coloured border\"","\"a noise\"","\"a cacheable painter\"","\"a layer cut around its painter\"","\"several layers at once\""],"builder":["{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(14).margin(6) }).get(JBox) }","{ UI.box().withStyle({ it.borderRadius(9).gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) ) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#6f4f2f\").borderRadius(18)\n                                            .shadow(UI.Layer.CONTENT, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(7).spreadRadius(1)) }).get(JBox) }","{ UI.box().withStyle({ it.text( t -> t.content(\"Reclaim me\") ) }).get(JBox) }","{ UI.box().withStyle({ it.borderRadius(10)\n                                            .image( img -> img.image(swingtree.api.IconDeclaration.of(\"img/swing.png\")) ) }).get(JBox) }","{ UI.box().withStyle({ it.border(4, \"#903030\").borderRadius(10).backgroundColor(\"#e8e0d0\") }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(12)\n                                            .noise(UI.Layer.BACKGROUND, \"grain\", n -> n.colors(\"#101010\", \"#e0e0e0\")) }).get(JBox) }","{ UI.box().withStyle({ it.painter(UI.Layer.BACKGROUND, \"mark\", swingtree.api.Painter.of(\"k\", { g ->\n                                            g.setColor(new Color(240, 120, 30)); g.fillOval(10, 10, 60, 40)\n                                         })) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(14)\n                                            .painter(UI.Layer.BACKGROUND, \"mark\", { g ->\n                                                g.setColor(new Color(30, 200, 160)); g.fillRect(20, 20, 60, 40)\n                                            }) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#3f5f2f\").foundationColor(\"#e0e8d0\").borderRadius(16).margin(8)\n                                            .gradient(UI.Layer.BACKGROUND, \"sky\", g -> g.colors(new Color(80, 120, 200), new Color(20, 30, 60)))\n                                            .shadow(UI.Layer.CONTENT, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(6)) }).get(JBox) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A component that goes out of scope takes its cached renderings with it. (a cacheable painter) [7]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the whole contract, exercised on one styling idiom at a time. A component\n            is built, sized and painted until its style really is in the cache; then the last\n            reference to it is dropped and the garbage collector is given its chance.\n\n            Both halves are asserted, and both matter. That the cache *grew* is what stops this\n            from being a scenario about an empty cache, which any implementation passes. That\n            it then came back to where it started is the contract itself — measured in bytes as\n            well as in entries, because the cache is bounded by bytes, so an entry that lingers\n            is an entry that keeps a future component out.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"An empty cache to measure against.","code":["final var styleLayerEntries = {return UI.runAndGet({ComponentExtension.globalRenderCacheEntryCounts().toMap()[\"style layers\"]})}","final var globalStyleLayerCacheBytesReserved = {UI.runAndGet({ComponentExtension.globalStyleLayerCacheBytesReserved()})}","var entriesBefore = styleLayerEntries()","var bytesBefore = globalStyleLayerCacheBytesReserved()"]},
+
+        {"kind":"when","text":"\n            A component with this style is painted often enough to be cached, and then dropped.\n            It is built inside a helper rather than in a local variable on purpose: a local\n            would still be reachable from this scenario's own stack frame when the collector\n            runs, and the scenario would then be pinning the very reference it is testing.\n        ","code":["var box = (JComponent) builder.call()","box.setSize(260, 150)","12.times { Utility.renderSingleComponent(box) }","var ghost = new WeakReference<>(box)","box = null"]},
+
+        {"kind":"then","text":"While it was alive, its style really was cached - so there is something to reclaim.","code":["styleLayerEntries() > entriesBefore","globalStyleLayerCacheBytesReserved() > bytesBefore"]},
+
+        {"kind":"when","text":"The garbage collector gets its chance.","code":["var componentWasCollected = eventually(24, { ghost.get() == null })"]},
+
+        {"kind":"then","text":"The component itself is gone, which is the precondition for everything below.","code":["componentWasCollected"]},
+
+        {"kind":"and","text":"\n            And so are its cached renderings: no entry, and no byte of image, outlives the\n            component it belonged to.\n        ","code":["eventually(24, { styleLayerEntries() <= entriesBefore })","globalStyleLayerCacheBytesReserved() <= bytesBefore"]},
+
+        {"kind":"where","text":"","code":{"description":["\"a flat rounded background\"","\"a gradient\"","\"a shadow\"","\"painted text\"","\"a background image\"","\"a coloured border\"","\"a noise\"","\"a cacheable painter\"","\"a layer cut around its painter\"","\"several layers at once\""],"builder":["{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(14).margin(6) }).get(JBox) }","{ UI.box().withStyle({ it.borderRadius(9).gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) ) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#6f4f2f\").borderRadius(18)\n                                            .shadow(UI.Layer.CONTENT, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(7).spreadRadius(1)) }).get(JBox) }","{ UI.box().withStyle({ it.text( t -> t.content(\"Reclaim me\") ) }).get(JBox) }","{ UI.box().withStyle({ it.borderRadius(10)\n                                            .image( img -> img.image(swingtree.api.IconDeclaration.of(\"img/swing.png\")) ) }).get(JBox) }","{ UI.box().withStyle({ it.border(4, \"#903030\").borderRadius(10).backgroundColor(\"#e8e0d0\") }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(12)\n                                            .noise(UI.Layer.BACKGROUND, \"grain\", n -> n.colors(\"#101010\", \"#e0e0e0\")) }).get(JBox) }","{ UI.box().withStyle({ it.painter(UI.Layer.BACKGROUND, \"mark\", swingtree.api.Painter.of(\"k\", { g ->\n                                            g.setColor(new Color(240, 120, 30)); g.fillOval(10, 10, 60, 40)\n                                         })) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(14)\n                                            .painter(UI.Layer.BACKGROUND, \"mark\", { g ->\n                                                g.setColor(new Color(30, 200, 160)); g.fillRect(20, 20, 60, 40)\n                                            }) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#3f5f2f\").foundationColor(\"#e0e8d0\").borderRadius(16).margin(8)\n                                            .gradient(UI.Layer.BACKGROUND, \"sky\", g -> g.colors(new Color(80, 120, 200), new Color(20, 30, 60)))\n                                            .shadow(UI.Layer.CONTENT, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(6)) }).get(JBox) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A component that goes out of scope takes its cached renderings with it. (a layer cut around its painter) [8]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the whole contract, exercised on one styling idiom at a time. A component\n            is built, sized and painted until its style really is in the cache; then the last\n            reference to it is dropped and the garbage collector is given its chance.\n\n            Both halves are asserted, and both matter. That the cache *grew* is what stops this\n            from being a scenario about an empty cache, which any implementation passes. That\n            it then came back to where it started is the contract itself — measured in bytes as\n            well as in entries, because the cache is bounded by bytes, so an entry that lingers\n            is an entry that keeps a future component out.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"An empty cache to measure against.","code":["final var styleLayerEntries = {return UI.runAndGet({ComponentExtension.globalRenderCacheEntryCounts().toMap()[\"style layers\"]})}","final var globalStyleLayerCacheBytesReserved = {UI.runAndGet({ComponentExtension.globalStyleLayerCacheBytesReserved()})}","var entriesBefore = styleLayerEntries()","var bytesBefore = globalStyleLayerCacheBytesReserved()"]},
+
+        {"kind":"when","text":"\n            A component with this style is painted often enough to be cached, and then dropped.\n            It is built inside a helper rather than in a local variable on purpose: a local\n            would still be reachable from this scenario's own stack frame when the collector\n            runs, and the scenario would then be pinning the very reference it is testing.\n        ","code":["var box = (JComponent) builder.call()","box.setSize(260, 150)","12.times { Utility.renderSingleComponent(box) }","var ghost = new WeakReference<>(box)","box = null"]},
+
+        {"kind":"then","text":"While it was alive, its style really was cached - so there is something to reclaim.","code":["styleLayerEntries() > entriesBefore","globalStyleLayerCacheBytesReserved() > bytesBefore"]},
+
+        {"kind":"when","text":"The garbage collector gets its chance.","code":["var componentWasCollected = eventually(24, { ghost.get() == null })"]},
+
+        {"kind":"then","text":"The component itself is gone, which is the precondition for everything below.","code":["componentWasCollected"]},
+
+        {"kind":"and","text":"\n            And so are its cached renderings: no entry, and no byte of image, outlives the\n            component it belonged to.\n        ","code":["eventually(24, { styleLayerEntries() <= entriesBefore })","globalStyleLayerCacheBytesReserved() <= bytesBefore"]},
+
+        {"kind":"where","text":"","code":{"description":["\"a flat rounded background\"","\"a gradient\"","\"a shadow\"","\"painted text\"","\"a background image\"","\"a coloured border\"","\"a noise\"","\"a cacheable painter\"","\"a layer cut around its painter\"","\"several layers at once\""],"builder":["{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(14).margin(6) }).get(JBox) }","{ UI.box().withStyle({ it.borderRadius(9).gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) ) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#6f4f2f\").borderRadius(18)\n                                            .shadow(UI.Layer.CONTENT, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(7).spreadRadius(1)) }).get(JBox) }","{ UI.box().withStyle({ it.text( t -> t.content(\"Reclaim me\") ) }).get(JBox) }","{ UI.box().withStyle({ it.borderRadius(10)\n                                            .image( img -> img.image(swingtree.api.IconDeclaration.of(\"img/swing.png\")) ) }).get(JBox) }","{ UI.box().withStyle({ it.border(4, \"#903030\").borderRadius(10).backgroundColor(\"#e8e0d0\") }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(12)\n                                            .noise(UI.Layer.BACKGROUND, \"grain\", n -> n.colors(\"#101010\", \"#e0e0e0\")) }).get(JBox) }","{ UI.box().withStyle({ it.painter(UI.Layer.BACKGROUND, \"mark\", swingtree.api.Painter.of(\"k\", { g ->\n                                            g.setColor(new Color(240, 120, 30)); g.fillOval(10, 10, 60, 40)\n                                         })) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(14)\n                                            .painter(UI.Layer.BACKGROUND, \"mark\", { g ->\n                                                g.setColor(new Color(30, 200, 160)); g.fillRect(20, 20, 60, 40)\n                                            }) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#3f5f2f\").foundationColor(\"#e0e8d0\").borderRadius(16).margin(8)\n                                            .gradient(UI.Layer.BACKGROUND, \"sky\", g -> g.colors(new Color(80, 120, 200), new Color(20, 30, 60)))\n                                            .shadow(UI.Layer.CONTENT, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(6)) }).get(JBox) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A component that goes out of scope takes its cached renderings with it. (several layers at once) [9]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the whole contract, exercised on one styling idiom at a time. A component\n            is built, sized and painted until its style really is in the cache; then the last\n            reference to it is dropped and the garbage collector is given its chance.\n\n            Both halves are asserted, and both matter. That the cache *grew* is what stops this\n            from being a scenario about an empty cache, which any implementation passes. That\n            it then came back to where it started is the contract itself — measured in bytes as\n            well as in entries, because the cache is bounded by bytes, so an entry that lingers\n            is an entry that keeps a future component out.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"An empty cache to measure against.","code":["final var styleLayerEntries = {return UI.runAndGet({ComponentExtension.globalRenderCacheEntryCounts().toMap()[\"style layers\"]})}","final var globalStyleLayerCacheBytesReserved = {UI.runAndGet({ComponentExtension.globalStyleLayerCacheBytesReserved()})}","var entriesBefore = styleLayerEntries()","var bytesBefore = globalStyleLayerCacheBytesReserved()"]},
+
+        {"kind":"when","text":"\n            A component with this style is painted often enough to be cached, and then dropped.\n            It is built inside a helper rather than in a local variable on purpose: a local\n            would still be reachable from this scenario's own stack frame when the collector\n            runs, and the scenario would then be pinning the very reference it is testing.\n        ","code":["var box = (JComponent) builder.call()","box.setSize(260, 150)","12.times { Utility.renderSingleComponent(box) }","var ghost = new WeakReference<>(box)","box = null"]},
+
+        {"kind":"then","text":"While it was alive, its style really was cached - so there is something to reclaim.","code":["styleLayerEntries() > entriesBefore","globalStyleLayerCacheBytesReserved() > bytesBefore"]},
+
+        {"kind":"when","text":"The garbage collector gets its chance.","code":["var componentWasCollected = eventually(24, { ghost.get() == null })"]},
+
+        {"kind":"then","text":"The component itself is gone, which is the precondition for everything below.","code":["componentWasCollected"]},
+
+        {"kind":"and","text":"\n            And so are its cached renderings: no entry, and no byte of image, outlives the\n            component it belonged to.\n        ","code":["eventually(24, { styleLayerEntries() <= entriesBefore })","globalStyleLayerCacheBytesReserved() <= bytesBefore"]},
+
+        {"kind":"where","text":"","code":{"description":["\"a flat rounded background\"","\"a gradient\"","\"a shadow\"","\"painted text\"","\"a background image\"","\"a coloured border\"","\"a noise\"","\"a cacheable painter\"","\"a layer cut around its painter\"","\"several layers at once\""],"builder":["{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(14).margin(6) }).get(JBox) }","{ UI.box().withStyle({ it.borderRadius(9).gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) ) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#6f4f2f\").borderRadius(18)\n                                            .shadow(UI.Layer.CONTENT, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(7).spreadRadius(1)) }).get(JBox) }","{ UI.box().withStyle({ it.text( t -> t.content(\"Reclaim me\") ) }).get(JBox) }","{ UI.box().withStyle({ it.borderRadius(10)\n                                            .image( img -> img.image(swingtree.api.IconDeclaration.of(\"img/swing.png\")) ) }).get(JBox) }","{ UI.box().withStyle({ it.border(4, \"#903030\").borderRadius(10).backgroundColor(\"#e8e0d0\") }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(12)\n                                            .noise(UI.Layer.BACKGROUND, \"grain\", n -> n.colors(\"#101010\", \"#e0e0e0\")) }).get(JBox) }","{ UI.box().withStyle({ it.painter(UI.Layer.BACKGROUND, \"mark\", swingtree.api.Painter.of(\"k\", { g ->\n                                            g.setColor(new Color(240, 120, 30)); g.fillOval(10, 10, 60, 40)\n                                         })) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#2f4f6f\").borderRadius(14)\n                                            .painter(UI.Layer.BACKGROUND, \"mark\", { g ->\n                                                g.setColor(new Color(30, 200, 160)); g.fillRect(20, 20, 60, 40)\n                                            }) }).get(JBox) }","{ UI.box().withStyle({ it.backgroundColor(\"#3f5f2f\").foundationColor(\"#e0e8d0\").borderRadius(16).margin(8)\n                                            .gradient(UI.Layer.BACKGROUND, \"sky\", g -> g.colors(new Color(80, 120, 200), new Color(20, 30, 60)))\n                                            .shadow(UI.Layer.CONTENT, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(6)) }).get(JBox) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A layer cut into pieces while resizing releases every piece.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A layer holding a noise is not cached as one image while the component is being\n            resized: the noise is lifted out and replayed, and what sits under and over it is\n            cached separately. One layer, several entries - and a reclamation bug that only\n            drops the first of them would be invisible to a scenario that never resizes\n            anything.\n\n            So this one drags the component through a range of sizes, exactly as a window edge\n            would, before dropping it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"An empty cache to measure against.","code":["final var styleLayerEntries = {return UI.runAndGet({ComponentExtension.globalRenderCacheEntryCounts().toMap()[\"style layers\"]})}","final var globalStyleLayerCacheBytesReserved = {UI.runAndGet({ComponentExtension.globalStyleLayerCacheBytesReserved()})}","var entriesBefore = styleLayerEntries()","var bytesBefore = globalStyleLayerCacheBytesReserved()"]},
+
+        {"kind":"when","text":"A noise bearing component is dragged through a range of sizes, and then dropped.","code":["var box = UI.box().withStyle( { it.backgroundColor(\"#2f4f6f\").borderRadius(12).margin(5)","                    .noise(UI.Layer.BACKGROUND, \"grain\", n -> n.colors(\"#101010\", \"#e0e0e0\"))","                    .shadow(UI.Layer.BACKGROUND, \"glow\", s -> s.color(\"#0a0a14\").blurRadius(6)) }","                )","                .get(JBox)","(0..9).each { i ->","    box.setSize(220 + i * 12, 150 + i * 7)","    Utility.renderSingleComponent(box)","}","var ghost = new WeakReference<>(box)","box = null"]},
+
+        {"kind":"then","text":"The drag really did fill the cache with more than a single entry.","code":["styleLayerEntries() > entriesBefore + 1"]},
+
+        {"kind":"when","text":"The garbage collector gets its chance.","code":["var componentWasCollected = eventually(24, { ghost.get() == null })"]},
+
+        {"kind":"then","text":"Every piece went with the component, not just the first.","code":["componentWasCollected","eventually(24, { styleLayerEntries() <= entriesBefore })","globalStyleLayerCacheBytesReserved() <= bytesBefore"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Dropping one of two identically styled components does not disturb the other.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The flip side of the contract, and the reason it cannot simply be \"free the entry\n            when a component is disposed\": entries are *shared*. Two identically styled\n            components have one image between them, so it must survive the first of them being\n            dropped and only go when the last one does.\n\n            A cache that reclaimed per component rather than per reachable style would fail\n            this while passing every scenario above.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two identically styled components, both painted until the style is cached.","code":["var styler = { conf -> conf.borderRadius(11).margin(4)","                           .gradient( g -> g.colors(new Color(90, 30, 140), new Color(20, 90, 140)) ) }","var survivor = UI.box().withStyle(styler as swingtree.api.Styler).get(JBox)","survivor.setSize(260, 150)","var box = UI.box().withStyle(styler as swingtree.api.Styler).get(JBox)","box.setSize(260, 150)","12.times { Utility.renderSingleComponent(box) }","var ghost = new WeakReference<>(box)","box = null // Causing the component + style conf garbage collection","8.times { Utility.renderSingleComponent(survivor) }"]},
+
+        {"kind":"expect","text":"They shared a single entry rather than minting one each.","code":["ComponentExtension.from(survivor).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()","ComponentExtension.from(survivor).cacheHitCount(UI.Layer.BACKGROUND) >= 1"]},
+
+        {"kind":"when","text":"One of the two is dropped and collected.","code":["var twinWasCollected = eventually(24, { ghost.get() == null })"]},
+
+        {"kind":"then","text":"It really is gone.","code":["twinWasCollected"]},
+
+        {"kind":"and","text":"\n            The shared rendering stayed, because the survivor still holds that style - and it\n            keeps being served from the cache rather than having to render again.\n        ","code":["var hitsBefore = ComponentExtension.from(survivor).cacheHitCount(UI.Layer.BACKGROUND)","var missesBefore = ComponentExtension.from(survivor).cacheMissCount(UI.Layer.BACKGROUND)","Utility.renderSingleComponent(survivor)","ComponentExtension.from(survivor).cacheHitCount(UI.Layer.BACKGROUND) == hitsBefore + 1","ComponentExtension.from(survivor).cacheMissCount(UI.Layer.BACKGROUND) == missesBefore"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

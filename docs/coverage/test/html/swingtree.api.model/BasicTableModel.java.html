@@ -28,11 +28,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
  *  }&lt;/pre&gt;
  *  &lt;b&gt;Note that {@link TableData} is the recommended way of modelling a table in
  *  SwingTree.&lt;/b&gt; It is a single immutable value describing the whole table (cells,
- *  column names, column classes and layout), which you hold in a {@link sprouts.Var}
- *  property and bind through {@link swingtree.UI#table(sprouts.Var)}:
+ *  column names, column classes, cell order and editability), which you hold in a
+ *  {@link sprouts.Var} property and bind through {@link swingtree.UI#table(sprouts.Var)}:
  *  &lt;pre&gt;{@code
  *      Var&lt;TableData&gt; data = Var.of(
- *              TableData.of(UI.ListData.ROW_MAJOR, &quot;A&quot;, &quot;B&quot;)
+ *              TableData.of(UI.CellOrder.ROW_MAJOR, &quot;A&quot;, &quot;B&quot;)
  *                  .addRow(1, 2)
  *          );
  *
@@ -98,35 +98,101 @@ public interface BasicTableModel extends TableModel
     /**
      *  Implementations of this functional interface translate to the {@link TableModel#getRowCount()} method.
      */
-    @FunctionalInterface interface RowCount { int get(); }
+    @FunctionalInterface
+    interface RowCount {
+        /**
+         *  Gets the row count.
+         *  @return The row count value.
+         */
+        int get();
+    }
+
     /**
      *  Implementations of this functional interface translate to the {@link TableModel#getColumnCount()} method.
      */
-    @FunctionalInterface interface ColumnCount { int get(); }
+    @FunctionalInterface
+    interface ColumnCount {
+        /**
+         *  Gets the column count.
+         *  @return The column count value.
+         */
+        int get();
+    }
+
     /**
      *  Implementations of this functional interface translate to the {@link TableModel#getValueAt(int, int)} method.
+     *  @param &lt;E&gt; The type of table entries.
      */
-    @FunctionalInterface interface EntryGetter&lt;E&gt; { E get(int rowIndex, int colIndex); }
+    @FunctionalInterface
+    interface EntryGetter&lt;E&gt; {
+        /**
+         *  Gets the entry at the specified row and column.
+         *  @param rowIndex The row index.
+         *  @param colIndex The column index.
+         *  @return The entry at the specified position.
+         */
+        E get(int rowIndex, int colIndex);
+    }
+
     /**
      *  Implementations of this functional interface translate to the {@link TableModel#setValueAt(Object, int, int)} method.
+     *  @param &lt;E&gt; The type of table entries.
      */
-    @FunctionalInterface interface EntrySetter&lt;E&gt; { void set(int rowIndex, int colIndex, E aValue); }
+    @FunctionalInterface
+    interface EntrySetter&lt;E&gt; {
+        /**
+         *  Sets the entry at the specified row and column.
+         *  @param rowIndex The row index.
+         *  @param colIndex The column index.
+         *  @param aValue The new value for the entry.
+         */
+        void set(int rowIndex, int colIndex, E aValue);
+    }
+
     /**
      *  Implementations of this functional interface translate to the {@link TableModel#getColumnClass(int)} method.
+     *  @param &lt;E&gt; The type of table entries.
      */
-    @FunctionalInterface interface ColumnClass&lt;E&gt; { Class&lt;? extends E&gt; get(int colIndex); }
+    @FunctionalInterface
+    interface ColumnClass&lt;E&gt; {
+        /**
+         *  Gets the class of the column at the specified index.
+         *  @param colIndex The column index.
+         *  @return The class of the column.
+         */
+        Class&lt;? extends E&gt; get(int colIndex);
+    }
+
     /**
      *  Implementations of this functional interface translate to the {@link TableModel#isCellEditable(int, int)} method.
      */
-    @FunctionalInterface interface CellEditable { boolean is(int rowIndex, int colIndex); }
+    @FunctionalInterface
+    interface CellEditable {
+        /**
+         *  Determines if the cell at the specified row and column is editable.
+         *  @param rowIndex The row index.
+         *  @param colIndex The column index.
+         *  @return True if the cell is editable, false otherwise.
+         */
+        boolean is(int rowIndex, int colIndex);
+    }
+
     /**
      *  Implementations of this functional interface translate to the {@link TableModel#getColumnName(int)} method.
      */
-    @FunctionalInterface interface ColumnName { String get(int colIndex); }
+    @FunctionalInterface
+    interface ColumnName {
+        /**
+         *  Gets the name of the column at the specified index.
+         *  @param colIndex The column index.
+         *  @return The name of the column.
+         */
+        String get(int colIndex);
+    }
 
     /**
      *  The class below is a functional builder for creating a lambda based implementation of the {@link BasicTableModel}.
-     *  This allows fo a boilerplate free functional API.
+     *  This allows for a boilerplate free functional API.
      *
      * @param &lt;E&gt; Common type for all entry items in the table.
      */
@@ -134,25 +200,25 @@ public interface BasicTableModel extends TableModel
      {
          private static class FixedColumnNames implements ColumnName {
             final Tuple&lt;String&gt; names;
-<span class="fc" id="L137">             private FixedColumnNames(String... names) {</span>
-<span class="fc" id="L138">                 this.names = Tuple.of(String.class, names);</span>
-<span class="fc" id="L139">             }</span>
+<span class="fc" id="L203">             private FixedColumnNames(String... names) {</span>
+<span class="fc" id="L204">                 this.names = Tuple.of(String.class, names);</span>
+<span class="fc" id="L205">             }</span>
              @Override
              public String get(int colIndex) {
-<span class="pc bpc" id="L142" title="1 of 4 branches missed.">                 return colIndex &lt; 0 || colIndex &gt;= names.size() ? &quot;&quot; : names.get(colIndex);</span>
+<span class="pc bpc" id="L208" title="1 of 4 branches missed.">                 return colIndex &lt; 0 || colIndex &gt;= names.size() ? &quot;&quot; : names.get(colIndex);</span>
              }
          }
 
          private static class FixedColumnClasses implements ColumnClass {
              private final Class&lt;?&gt; commonEntryType;
              final Tuple&lt;Class&gt; classes;
-<span class="fc" id="L149">             private FixedColumnClasses(Class&lt;?&gt; commonEntryType, Class&lt;?&gt;... names) {</span>
-<span class="fc" id="L150">                 this.commonEntryType = commonEntryType;</span>
-<span class="fc" id="L151">                 this.classes = Tuple.of(Class.class, names);</span>
-<span class="fc" id="L152">             }</span>
+<span class="fc" id="L215">             private FixedColumnClasses(Class&lt;?&gt; commonEntryType, Class&lt;?&gt;... names) {</span>
+<span class="fc" id="L216">                 this.commonEntryType = commonEntryType;</span>
+<span class="fc" id="L217">                 this.classes = Tuple.of(Class.class, names);</span>
+<span class="fc" id="L218">             }</span>
              @Override
              public Class get(int colIndex) {
-<span class="pc bpc" id="L155" title="2 of 4 branches missed.">                 return colIndex &lt; 0 || colIndex &gt;= classes.size() ? commonEntryType : classes.get(colIndex);</span>
+<span class="pc bpc" id="L221" title="2 of 4 branches missed.">                 return colIndex &lt; 0 || colIndex &gt;= classes.size() ? commonEntryType : classes.get(colIndex);</span>
              }
          }
 
@@ -166,9 +232,13 @@ public interface BasicTableModel extends TableModel
         private final @Nullable ColumnName     columnName;
         private final @Nullable Observable     observableEvent;
 
+         /**
+          *  Creates a new builder for a basic table model.
+          *  @param commonEntryType The common type for all entry items in the table.
+          */
          public Builder( Class&lt;E&gt; commonEntryType ) {
-<span class="fc" id="L170">             this(</span>
-<span class="fc" id="L171">                 Objects.requireNonNull(commonEntryType),</span>
+<span class="fc" id="L240">             this(</span>
+<span class="fc" id="L241">                 Objects.requireNonNull(commonEntryType),</span>
                  null,
                  null,
                  null,
@@ -178,7 +248,7 @@ public interface BasicTableModel extends TableModel
                  null,
                  null
              );
-<span class="fc" id="L181">         }</span>
+<span class="fc" id="L251">         }</span>
 
          private Builder(
              Class&lt;E&gt;                 commonEntryType,
@@ -190,17 +260,17 @@ public interface BasicTableModel extends TableModel
              @Nullable CellEditable   cellEditable,
              @Nullable ColumnName     columnName,
              @Nullable Observable     observableEvent
-<span class="fc" id="L193">         ) {</span>
-<span class="fc" id="L194">             this.commonEntryType = Objects.requireNonNull(commonEntryType);</span>
-<span class="fc" id="L195">             this.rowCount        = rowCount;</span>
-<span class="fc" id="L196">             this.colCount        = colCount;</span>
-<span class="fc" id="L197">             this.entryGetter     = entryGetter;</span>
-<span class="fc" id="L198">             this.entrySetter     = entrySetter;</span>
-<span class="fc" id="L199">             this.columnClass     = columnClass;</span>
-<span class="fc" id="L200">             this.cellEditable    = cellEditable;</span>
-<span class="fc" id="L201">             this.columnName      = columnName;</span>
-<span class="fc" id="L202">             this.observableEvent = observableEvent;</span>
-<span class="fc" id="L203">         }</span>
+<span class="fc" id="L263">         ) {</span>
+<span class="fc" id="L264">             this.commonEntryType = Objects.requireNonNull(commonEntryType);</span>
+<span class="fc" id="L265">             this.rowCount        = rowCount;</span>
+<span class="fc" id="L266">             this.colCount        = colCount;</span>
+<span class="fc" id="L267">             this.entryGetter     = entryGetter;</span>
+<span class="fc" id="L268">             this.entrySetter     = entrySetter;</span>
+<span class="fc" id="L269">             this.columnClass     = columnClass;</span>
+<span class="fc" id="L270">             this.cellEditable    = cellEditable;</span>
+<span class="fc" id="L271">             this.columnName      = columnName;</span>
+<span class="fc" id="L272">             this.observableEvent = observableEvent;</span>
+<span class="fc" id="L273">         }</span>
 
          /**
           *  Use this to define the lambda which dynamically determines the row count of the table model.
@@ -208,9 +278,9 @@ public interface BasicTableModel extends TableModel
           * @return This builder instance.
           */
         public Builder&lt;E&gt; rowCount( RowCount rowCount ) {
-<span class="pc bpc" id="L211" title="1 of 2 branches missed.">            if ( rowCount == null ) throw new IllegalArgumentException(&quot;rowCount cannot be null&quot;);</span>
-<span class="fc bfc" id="L212" title="All 2 branches covered.">            if ( this.rowCount != null ) throw new IllegalStateException(RowCount.class.getSimpleName()+&quot; already set&quot;);</span>
-<span class="fc" id="L213">            return new Builder&lt;&gt;(</span>
+<span class="pc bpc" id="L281" title="1 of 2 branches missed.">            if ( rowCount == null ) throw new IllegalArgumentException(&quot;rowCount cannot be null&quot;);</span>
+<span class="fc bfc" id="L282" title="All 2 branches covered.">            if ( this.rowCount != null ) throw new IllegalStateException(RowCount.class.getSimpleName()+&quot; already set&quot;);</span>
+<span class="fc" id="L283">            return new Builder&lt;&gt;(</span>
                     commonEntryType, rowCount, colCount, entryGetter, entrySetter,
                     columnClass, cellEditable, columnName, observableEvent
                 );
@@ -221,9 +291,9 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder&lt;E&gt; colCount( ColumnCount columnCount ) {
-<span class="fc bfc" id="L224" title="All 2 branches covered.">            if ( columnCount == null ) throw new IllegalArgumentException(&quot;columnCount cannot be null&quot;);</span>
-<span class="pc bpc" id="L225" title="1 of 2 branches missed.">            if ( this.colCount != null ) throw new IllegalStateException(ColumnCount.class.getSimpleName()+&quot; already set&quot;);</span>
-<span class="fc" id="L226">            return new Builder&lt;&gt;(</span>
+<span class="fc bfc" id="L294" title="All 2 branches covered.">            if ( columnCount == null ) throw new IllegalArgumentException(&quot;columnCount cannot be null&quot;);</span>
+<span class="pc bpc" id="L295" title="1 of 2 branches missed.">            if ( this.colCount != null ) throw new IllegalStateException(ColumnCount.class.getSimpleName()+&quot; already set&quot;);</span>
+<span class="fc" id="L296">            return new Builder&lt;&gt;(</span>
                     commonEntryType, rowCount, columnCount, entryGetter, entrySetter,
                     columnClass, cellEditable, columnName, observableEvent
                 );
@@ -234,9 +304,9 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder&lt;E&gt; getsEntryAt(EntryGetter&lt;E&gt; entryGetter) {
-<span class="pc bpc" id="L237" title="1 of 2 branches missed.">            if ( entryGetter == null ) throw new IllegalArgumentException(&quot;valueAt cannot be null&quot;);</span>
-<span class="pc bpc" id="L238" title="1 of 2 branches missed.">            if ( this.entryGetter != null ) throw new IllegalStateException(EntryGetter.class.getSimpleName()+&quot; already set&quot;);</span>
-<span class="fc" id="L239">            return new Builder&lt;&gt;(</span>
+<span class="pc bpc" id="L307" title="1 of 2 branches missed.">            if ( entryGetter == null ) throw new IllegalArgumentException(&quot;valueAt cannot be null&quot;);</span>
+<span class="pc bpc" id="L308" title="1 of 2 branches missed.">            if ( this.entryGetter != null ) throw new IllegalStateException(EntryGetter.class.getSimpleName()+&quot; already set&quot;);</span>
+<span class="fc" id="L309">            return new Builder&lt;&gt;(</span>
                     commonEntryType, rowCount, colCount, entryGetter, entrySetter,
                     columnClass, cellEditable, columnName, observableEvent
                 );
@@ -247,9 +317,9 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder&lt;E&gt; setsEntryAt(EntrySetter&lt;E&gt; entrySetter) {
-<span class="pc bpc" id="L250" title="1 of 2 branches missed.">            if ( entrySetter == null ) throw new IllegalArgumentException(&quot;setValueAt cannot be null&quot;);</span>
-<span class="pc bpc" id="L251" title="1 of 2 branches missed.">            if ( this.entrySetter != null ) throw new IllegalStateException(EntrySetter.class.getSimpleName()+&quot; already set&quot;);</span>
-<span class="fc" id="L252">            return new Builder&lt;&gt;(</span>
+<span class="pc bpc" id="L320" title="1 of 2 branches missed.">            if ( entrySetter == null ) throw new IllegalArgumentException(&quot;setValueAt cannot be null&quot;);</span>
+<span class="pc bpc" id="L321" title="1 of 2 branches missed.">            if ( this.entrySetter != null ) throw new IllegalStateException(EntrySetter.class.getSimpleName()+&quot; already set&quot;);</span>
+<span class="fc" id="L322">            return new Builder&lt;&gt;(</span>
                     commonEntryType, rowCount, colCount, entryGetter, entrySetter,
                     columnClass, cellEditable, columnName, observableEvent
                 );
@@ -260,9 +330,9 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder&lt;E&gt; colClass( ColumnClass&lt;E&gt; columnClass ) {
-<span class="pc bpc" id="L263" title="1 of 2 branches missed.">            if ( columnClass == null ) throw new IllegalArgumentException(&quot;columnClass cannot be null&quot;);</span>
-<span class="pc bpc" id="L264" title="1 of 2 branches missed.">            if ( this.columnClass != null ) throw new IllegalStateException(ColumnClass.class.getSimpleName()+&quot; already set&quot;);</span>
-<span class="fc" id="L265">            return new Builder&lt;&gt;(</span>
+<span class="pc bpc" id="L333" title="1 of 2 branches missed.">            if ( columnClass == null ) throw new IllegalArgumentException(&quot;columnClass cannot be null&quot;);</span>
+<span class="pc bpc" id="L334" title="1 of 2 branches missed.">            if ( this.columnClass != null ) throw new IllegalStateException(ColumnClass.class.getSimpleName()+&quot; already set&quot;);</span>
+<span class="fc" id="L335">            return new Builder&lt;&gt;(</span>
                     commonEntryType, rowCount, colCount, entryGetter, entrySetter,
                     columnClass, cellEditable, columnName, observableEvent
                 );
@@ -273,8 +343,8 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder&lt;E&gt; colClasses( Class&lt;? extends E&gt;... classes ) {
-<span class="pc bpc" id="L276" title="1 of 2 branches missed.">            if ( classes == null ) throw new IllegalArgumentException(&quot;classes cannot be null&quot;);</span>
-<span class="fc" id="L277">            return colClass(new FixedColumnClasses(commonEntryType, classes));</span>
+<span class="pc bpc" id="L346" title="1 of 2 branches missed.">            if ( classes == null ) throw new IllegalArgumentException(&quot;classes cannot be null&quot;);</span>
+<span class="fc" id="L347">            return colClass(new FixedColumnClasses(commonEntryType, classes));</span>
         }
         /**
          *  Accepts a lambda allowing the {@link javax.swing.JTable} to determine if the cell at a given row and column is editable.
@@ -282,9 +352,9 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder&lt;E&gt; isEditableIf( CellEditable cellEditable ) {
-<span class="pc bpc" id="L285" title="1 of 2 branches missed.">            if ( cellEditable == null ) throw new IllegalArgumentException(&quot;cellEditable cannot be null&quot;);</span>
-<span class="pc bpc" id="L286" title="1 of 2 branches missed.">            if ( this.cellEditable != null ) throw new IllegalStateException(CellEditable.class.getSimpleName()+&quot; already set&quot;);</span>
-<span class="fc" id="L287">            return new Builder&lt;&gt;(</span>
+<span class="pc bpc" id="L355" title="1 of 2 branches missed.">            if ( cellEditable == null ) throw new IllegalArgumentException(&quot;cellEditable cannot be null&quot;);</span>
+<span class="pc bpc" id="L356" title="1 of 2 branches missed.">            if ( this.cellEditable != null ) throw new IllegalStateException(CellEditable.class.getSimpleName()+&quot; already set&quot;);</span>
+<span class="fc" id="L357">            return new Builder&lt;&gt;(</span>
                     commonEntryType, rowCount, colCount, entryGetter, entrySetter,
                     columnClass, cellEditable, columnName, observableEvent
                 );
@@ -295,10 +365,10 @@ public interface BasicTableModel extends TableModel
           * @return This builder instance.
           */
         public Builder&lt;E&gt; colName( ColumnName columnName ) {
-<span class="pc bpc" id="L298" title="1 of 2 branches missed.">            if ( columnName == null ) throw new IllegalArgumentException(&quot;columnName cannot be null&quot;);</span>
-<span class="pc bpc" id="L299" title="1 of 2 branches missed.">            if (this.columnName != null)</span>
-<span class="nc" id="L300">                throw new IllegalStateException(ColumnName.class.getSimpleName() + &quot; already set&quot;);</span>
-<span class="fc" id="L301">            return new Builder&lt;&gt;(</span>
+<span class="pc bpc" id="L368" title="1 of 2 branches missed.">            if ( columnName == null ) throw new IllegalArgumentException(&quot;columnName cannot be null&quot;);</span>
+<span class="pc bpc" id="L369" title="1 of 2 branches missed.">            if (this.columnName != null)</span>
+<span class="nc" id="L370">                throw new IllegalStateException(ColumnName.class.getSimpleName() + &quot; already set&quot;);</span>
+<span class="fc" id="L371">            return new Builder&lt;&gt;(</span>
                     commonEntryType, rowCount, colCount, entryGetter, entrySetter,
                     columnClass, cellEditable, columnName, observableEvent
                 );
@@ -309,8 +379,8 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder&lt;E&gt; colNames( String... names ) {
-<span class="pc bpc" id="L312" title="1 of 2 branches missed.">            if ( names == null ) throw new IllegalArgumentException(&quot;names cannot be null&quot;);</span>
-<span class="fc" id="L313">            return colName(new FixedColumnNames(names));</span>
+<span class="pc bpc" id="L382" title="1 of 2 branches missed.">            if ( names == null ) throw new IllegalArgumentException(&quot;names cannot be null&quot;);</span>
+<span class="fc" id="L383">            return colName(new FixedColumnNames(names));</span>
         }
         /**
          *  Use this to define the event which will be fired when the table model is updated.
@@ -318,9 +388,9 @@ public interface BasicTableModel extends TableModel
          * @return This builder instance.
          */
         public Builder&lt;E&gt; updateOn( Observable updateEvent ) {
-<span class="pc bpc" id="L321" title="1 of 2 branches missed.">            if ( updateEvent == null ) throw new IllegalArgumentException(&quot;updateEvent cannot be null&quot;);</span>
-<span class="pc bpc" id="L322" title="1 of 2 branches missed.">            if ( this.observableEvent != null ) throw new IllegalStateException(Event.class.getSimpleName()+&quot; already set&quot;);</span>
-<span class="fc" id="L323">            return new Builder&lt;&gt;(</span>
+<span class="pc bpc" id="L391" title="1 of 2 branches missed.">            if ( updateEvent == null ) throw new IllegalArgumentException(&quot;updateEvent cannot be null&quot;);</span>
+<span class="pc bpc" id="L392" title="1 of 2 branches missed.">            if ( this.observableEvent != null ) throw new IllegalStateException(Event.class.getSimpleName()+&quot; already set&quot;);</span>
+<span class="fc" id="L393">            return new Builder&lt;&gt;(</span>
                     commonEntryType, rowCount, colCount, entryGetter, entrySetter,
                     columnClass, cellEditable, columnName, updateEvent
                 );
@@ -330,60 +400,60 @@ public interface BasicTableModel extends TableModel
          * @return The {@link BasicTableModel} instance.
          */
         @Override public BasicTableModel build() {
-<span class="fc" id="L333">            FunTableModel tm = new FunTableModel();</span>
-<span class="fc bfc" id="L334" title="All 2 branches covered.">            if ( observableEvent != null )</span>
-<span class="fc" id="L335">                observableEvent.subscribe(()-&gt;</span>
+<span class="fc" id="L403">            FunTableModel tm = new FunTableModel();</span>
+<span class="fc bfc" id="L404" title="All 2 branches covered.">            if ( observableEvent != null )</span>
+<span class="fc" id="L405">                observableEvent.subscribe(()-&gt;</span>
                     // We merely tell whoever reads this model that the data changed.
                     // The thread safe model which SwingTree wraps around this listens
                     // in, and it is that model which decides how to thread and fire the
                     // refresh, based on the event processor it was installed with.
-<span class="fc" id="L340">                    tm.fireDataChanged()</span>
+<span class="fc" id="L410">                    tm.fireDataChanged()</span>
                 );
-<span class="fc" id="L342">            return tm;</span>
+<span class="fc" id="L412">            return tm;</span>
         }
 
-<span class="fc" id="L345">         private class FunTableModel implements BasicTableModel {</span>
+<span class="fc" id="L415">         private class FunTableModel implements BasicTableModel {</span>
              /*
                 A table built through this builder is a plain data source, so the only
                 change signal it has is the one configured through 'updateOn(..)'.
                 The list is copy on write because the signal above may be raised on the
                 application thread while the UI thread installs the table.
               */
-<span class="fc" id="L352">             private final List&lt;TableModelListener&gt; listeners = new CopyOnWriteArrayList&lt;&gt;();</span>
+<span class="fc" id="L422">             private final List&lt;TableModelListener&gt; listeners = new CopyOnWriteArrayList&lt;&gt;();</span>
 
-<span class="fc bfc" id="L354" title="All 2 branches covered.">             @Override public int getRowCount() { return rowCount == null ? 0 : rowCount.get(); }</span>
+<span class="fc bfc" id="L424" title="All 2 branches covered.">             @Override public int getRowCount() { return rowCount == null ? 0 : rowCount.get(); }</span>
              @Override public int getColumnCount() {
-<span class="fc bfc" id="L356" title="All 2 branches covered.">                 if (colCount == null) {</span>
-<span class="fc bfc" id="L357" title="All 2 branches covered.">                     if ( columnClass instanceof FixedColumnClasses ) {</span>
-<span class="fc" id="L358">                         return ((FixedColumnClasses)columnClass).classes.size();</span>
+<span class="fc bfc" id="L426" title="All 2 branches covered.">                 if (colCount == null) {</span>
+<span class="fc bfc" id="L427" title="All 2 branches covered.">                     if ( columnClass instanceof FixedColumnClasses ) {</span>
+<span class="fc" id="L428">                         return ((FixedColumnClasses)columnClass).classes.size();</span>
                      }
-<span class="fc bfc" id="L360" title="All 2 branches covered.">                     if ( columnName instanceof FixedColumnNames ) {</span>
-<span class="fc" id="L361">                         return ((FixedColumnNames)columnName).names.size();</span>
+<span class="fc bfc" id="L430" title="All 2 branches covered.">                     if ( columnName instanceof FixedColumnNames ) {</span>
+<span class="fc" id="L431">                         return ((FixedColumnNames)columnName).names.size();</span>
                      }
                  }
-<span class="fc bfc" id="L364" title="All 2 branches covered.">                 return colCount == null ? 0 : colCount.get();</span>
+<span class="fc bfc" id="L434" title="All 2 branches covered.">                 return colCount == null ? 0 : colCount.get();</span>
              }
-<span class="fc bfc" id="L366" title="All 2 branches covered.">             @Override public @Nullable Object getValueAt(int rowIndex, int colIndex) { return entryGetter == null ? null : entryGetter.get(rowIndex, colIndex); }</span>
-<span class="fc bfc" id="L367" title="All 2 branches covered.">             @Override public void setValueAt(@Nullable Object value, int rowIndex, int colIndex) { if ( entrySetter != null ) entrySetter.set(rowIndex, colIndex, (E) value); }</span>
-<span class="fc bfc" id="L368" title="All 2 branches covered.">             @Override public Class&lt;?&gt; getColumnClass(int colIndex) { return columnClass == null ? Object.class : columnClass.get(colIndex); }</span>
-<span class="fc bfc" id="L369" title="All 4 branches covered.">             @Override public boolean isCellEditable(int rowIndex, int colIndex) { return cellEditable != null &amp;&amp; cellEditable.is(rowIndex, colIndex); }</span>
+<span class="fc bfc" id="L436" title="All 2 branches covered.">             @Override public @Nullable Object getValueAt(int rowIndex, int colIndex) { return entryGetter == null ? null : entryGetter.get(rowIndex, colIndex); }</span>
+<span class="fc bfc" id="L437" title="All 2 branches covered.">             @Override public void setValueAt(@Nullable Object value, int rowIndex, int colIndex) { if ( entrySetter != null ) entrySetter.set(rowIndex, colIndex, (E) value); }</span>
+<span class="fc bfc" id="L438" title="All 2 branches covered.">             @Override public Class&lt;?&gt; getColumnClass(int colIndex) { return columnClass == null ? Object.class : columnClass.get(colIndex); }</span>
+<span class="fc bfc" id="L439" title="All 4 branches covered.">             @Override public boolean isCellEditable(int rowIndex, int colIndex) { return cellEditable != null &amp;&amp; cellEditable.is(rowIndex, colIndex); }</span>
              @Override public @Nullable String getColumnName(int colIndex) {
-<span class="fc bfc" id="L371" title="All 2 branches covered.">                 if (columnName == null) {</span>
-<span class="fc bfc" id="L372" title="All 2 branches covered.">                     if ( columnClass instanceof FixedColumnClasses ) {</span>
-<span class="fc" id="L373">                         return ((FixedColumnClasses)columnClass).get(colIndex).getSimpleName();</span>
+<span class="fc bfc" id="L441" title="All 2 branches covered.">                 if (columnName == null) {</span>
+<span class="fc bfc" id="L442" title="All 2 branches covered.">                     if ( columnClass instanceof FixedColumnClasses ) {</span>
+<span class="fc" id="L443">                         return ((FixedColumnClasses)columnClass).get(colIndex).getSimpleName();</span>
                      }
-<span class="fc" id="L375">                     return null; // A null name lets the table fall back to the default (spreadsheet style) column name.</span>
+<span class="fc" id="L445">                     return null; // A null name lets the table fall back to the default (spreadsheet style) column name.</span>
                  }
-<span class="fc" id="L377">                 return columnName.get(colIndex);</span>
+<span class="fc" id="L447">                 return columnName.get(colIndex);</span>
              }
-<span class="fc" id="L379">             @Override public void addTableModelListener(TableModelListener l) { listeners.add(l); }</span>
-<span class="nc" id="L380">             @Override public void removeTableModelListener(TableModelListener l) { listeners.remove(l); }</span>
+<span class="fc" id="L449">             @Override public void addTableModelListener(TableModelListener l) { listeners.add(l); }</span>
+<span class="nc" id="L450">             @Override public void removeTableModelListener(TableModelListener l) { listeners.remove(l); }</span>
 
              private void fireDataChanged() {
-<span class="fc" id="L383">                 TableModelEvent event = new TableModelEvent(this);</span>
-<span class="fc bfc" id="L384" title="All 2 branches covered.">                 for ( TableModelListener listener : listeners )</span>
-<span class="fc" id="L385">                     listener.tableChanged(event);</span>
-<span class="fc" id="L386">             }</span>
+<span class="fc" id="L453">                 TableModelEvent event = new TableModelEvent(this);</span>
+<span class="fc bfc" id="L454" title="All 2 branches covered.">                 for ( TableModelListener listener : listeners )</span>
+<span class="fc" id="L455">                     listener.tableChanged(event);</span>
+<span class="fc" id="L456">             }</span>
          }
 
      }

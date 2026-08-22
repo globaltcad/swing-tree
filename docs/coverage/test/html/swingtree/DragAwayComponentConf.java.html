@@ -109,11 +109,18 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
 {
 <span class="nc" id="L110">    private static final Action NO_ACTION = e -&gt; {};</span>
 
+    /**
+     *  Creates a new drag away configuration for the specified component.
+     *  @param &lt;C&gt; The type of the component to be dragged away.
+     *  @param component The component to be dragged away.
+     *  @param mousePosition The initial mouse position of the drag operation.
+     *  @return A new drag away configuration.
+     */
     public static &lt;C extends JComponent&gt; DragAwayComponentConf&lt;C&gt; of(
         C        component,
         Position mousePosition
     ) {
-<span class="nc" id="L116">        return new DragAwayComponentConf&lt;&gt;(</span>
+<span class="nc" id="L123">        return new DragAwayComponentConf&lt;&gt;(</span>
                 component, mousePosition, true, 1, UI.Cursor.DEFAULT, null, null,
                 UI.DragAction.COPY_OR_MOVE, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION, NO_ACTION
         );
@@ -152,23 +159,23 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
         Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDropActionChanged,
         Action&lt;ComponentDelegate&lt;C, DragSourceEvent&gt;&gt;     onDragExit,
         Action&lt;ComponentDelegate&lt;C, DragSourceDropEvent&gt;&gt; onDragDropEnd
-<span class="nc" id="L155">    ) {</span>
-<span class="nc" id="L156">        _component           = Objects.requireNonNull(component);</span>
-<span class="nc" id="L157">        _mousePosition       = Objects.requireNonNull(mousePosition);</span>
-<span class="nc" id="L158">        _enabled             = enabled;</span>
-<span class="nc" id="L159">        _opacity             = opacity;</span>
-<span class="nc" id="L160">        _cursor              = Objects.requireNonNull(cursor);</span>
-<span class="nc" id="L161">        _customDragImage     = customDragImage;</span>
-<span class="nc" id="L162">        _payload             = payload;</span>
-<span class="nc" id="L163">        _dragAction          = Objects.requireNonNull(dragAction);</span>
-<span class="nc" id="L164">        _onDragStart         = Objects.requireNonNull(onDragStart);</span>
-<span class="nc" id="L165">        _onDragEnter         = Objects.requireNonNull(onDragEnter);</span>
-<span class="nc" id="L166">        _onDragMove          = Objects.requireNonNull(onDragMove);</span>
-<span class="nc" id="L167">        _onDragOver          = Objects.requireNonNull(onDragOver);</span>
-<span class="nc" id="L168">        _onDropActionChanged = Objects.requireNonNull(onDropActionChanged);</span>
-<span class="nc" id="L169">        _onDragExit          = Objects.requireNonNull(onDragExit);</span>
-<span class="nc" id="L170">        _onDragDropEnd       = Objects.requireNonNull(onDragDropEnd);</span>
-<span class="nc" id="L171">    }</span>
+<span class="nc" id="L162">    ) {</span>
+<span class="nc" id="L163">        _component           = Objects.requireNonNull(component);</span>
+<span class="nc" id="L164">        _mousePosition       = Objects.requireNonNull(mousePosition);</span>
+<span class="nc" id="L165">        _enabled             = enabled;</span>
+<span class="nc" id="L166">        _opacity             = opacity;</span>
+<span class="nc" id="L167">        _cursor              = Objects.requireNonNull(cursor);</span>
+<span class="nc" id="L168">        _customDragImage     = customDragImage;</span>
+<span class="nc" id="L169">        _payload             = payload;</span>
+<span class="nc" id="L170">        _dragAction          = Objects.requireNonNull(dragAction);</span>
+<span class="nc" id="L171">        _onDragStart         = Objects.requireNonNull(onDragStart);</span>
+<span class="nc" id="L172">        _onDragEnter         = Objects.requireNonNull(onDragEnter);</span>
+<span class="nc" id="L173">        _onDragMove          = Objects.requireNonNull(onDragMove);</span>
+<span class="nc" id="L174">        _onDragOver          = Objects.requireNonNull(onDragOver);</span>
+<span class="nc" id="L175">        _onDropActionChanged = Objects.requireNonNull(onDropActionChanged);</span>
+<span class="nc" id="L176">        _onDragExit          = Objects.requireNonNull(onDragExit);</span>
+<span class="nc" id="L177">        _onDragDropEnd       = Objects.requireNonNull(onDragDropEnd);</span>
+<span class="nc" id="L178">    }</span>
 
     /**
      *  Exposes the component that can be dragged away by the user.
@@ -178,7 +185,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return The component to be dragged away.
      */
     public C component() {
-<span class="nc" id="L181">        return _component;</span>
+<span class="nc" id="L188">        return _component;</span>
     }
 
     /**
@@ -189,7 +196,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return The mouse position of the drag operation.
      */
     public Position mousePosition() {
-<span class="nc" id="L192">        return _mousePosition;</span>
+<span class="nc" id="L199">        return _mousePosition;</span>
     }
 
     /**
@@ -200,7 +207,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return The x-coordinate of the mouse position of the drag operation.
      */
     public double mouseX() {
-<span class="nc" id="L203">        return _mousePosition.x();</span>
+<span class="nc" id="L210">        return _mousePosition.x();</span>
     }
 
     /**
@@ -211,7 +218,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return The y-coordinate of the mouse position of the drag operation.
      */
     public double mouseY() {
-<span class="nc" id="L214">        return _mousePosition.y();</span>
+<span class="nc" id="L221">        return _mousePosition.y();</span>
     }
 
     /**
@@ -222,7 +229,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return &lt;code&gt;true&lt;/code&gt; if the drag away operation is enabled, &lt;code&gt;false&lt;/code&gt; otherwise.
      */
     public boolean enabled() {
-<span class="nc" id="L225">        return _enabled;</span>
+<span class="nc" id="L232">        return _enabled;</span>
     }
 
     /**
@@ -235,7 +242,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      *         ranging from 0.0 to 1.0.
      */
     public double opacity() {
-<span class="nc" id="L238">        return _opacity;</span>
+<span class="nc" id="L245">        return _opacity;</span>
     }
 
     /**
@@ -247,7 +254,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return The cursor to be used during the drag operation.
      */
     public UI.Cursor cursor() {
-<span class="nc" id="L250">        return _cursor;</span>
+<span class="nc" id="L257">        return _cursor;</span>
     }
 
     /**
@@ -263,7 +270,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      *         or &lt;code&gt;Optional.empty()&lt;/code&gt; if no custom drag image is set.
      */
     public Optional&lt;Image&gt; customDragImage() {
-<span class="nc" id="L266">        return Optional.ofNullable(_customDragImage);</span>
+<span class="nc" id="L273">        return Optional.ofNullable(_customDragImage);</span>
     }
 
     /**
@@ -277,7 +284,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      *         custom {@link Transferable} object is set.
      */
     public Optional&lt;Transferable&gt; payload() {
-<span class="nc" id="L280">        return Optional.ofNullable(_payload);</span>
+<span class="nc" id="L287">        return Optional.ofNullable(_payload);</span>
     }
 
     /**
@@ -290,7 +297,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return The drag action of this drag away operation.
      */
     public UI.DragAction dragAction() {
-<span class="nc" id="L293">        return _dragAction;</span>
+<span class="nc" id="L300">        return _dragAction;</span>
     }
 
     /**
@@ -302,7 +309,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return The {@link Action} that is invoked when the drag operation is initiated.
      */
     public Action&lt;ComponentDelegate&lt;C, DragGestureEvent&gt;&gt; onDragStart() {
-<span class="nc" id="L305">        return _onDragStart;</span>
+<span class="nc" id="L312">        return _onDragStart;</span>
     }
 
     /**
@@ -328,7 +335,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      *         a platform-dependent drop site.
      */
     public Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDragEnter() {
-<span class="nc" id="L331">        return _onDragEnter;</span>
+<span class="nc" id="L338">        return _onDragEnter;</span>
     }
 
     /**
@@ -345,7 +352,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return The {@link Action} that is invoked whenever the mouse is moved during a drag operation.
      */
     public Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDragMove() {
-<span class="nc" id="L348">        return _onDragMove;</span>
+<span class="nc" id="L355">        return _onDragMove;</span>
     }
 
     /**
@@ -370,7 +377,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return The {@link Action} that is invoked as the cursor's hotspot moves over a platform-dependent drop site.
      */
     public Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDragOver() {
-<span class="nc" id="L373">        return _onDragOver;</span>
+<span class="nc" id="L380">        return _onDragOver;</span>
     }
 
     /**
@@ -390,7 +397,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return The {@link Action} that is invoked when the user has modified the drop gesture.
      */
     public Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDropActionChanged() {
-<span class="nc" id="L393">        return _onDropActionChanged;</span>
+<span class="nc" id="L400">        return _onDropActionChanged;</span>
     }
 
     /**
@@ -426,7 +433,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return The {@link Action} that is invoked as the cursor's hotspot exits a platform-dependent drop site.
      */
     public Action&lt;ComponentDelegate&lt;C, DragSourceEvent&gt;&gt; onDragExit() {
-<span class="nc" id="L429">        return _onDragExit;</span>
+<span class="nc" id="L436">        return _onDragExit;</span>
     }
 
     /**
@@ -448,7 +455,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      *         operation is complete.
      */
     public Action&lt;ComponentDelegate&lt;C, DragSourceDropEvent&gt;&gt; onDragDropEnd() {
-<span class="nc" id="L451">        return _onDragDropEnd;</span>
+<span class="nc" id="L458">        return _onDragDropEnd;</span>
     }
 
     /**
@@ -458,7 +465,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return A new {@link DragAwayComponentConf} instance with the updated enabled state.
      */
     public DragAwayComponentConf&lt;C&gt; enabled( boolean enabled ) {
-<span class="nc" id="L461">        return new DragAwayComponentConf&lt;&gt;(</span>
+<span class="nc" id="L468">        return new DragAwayComponentConf&lt;&gt;(</span>
                 _component, _mousePosition, enabled, _opacity, _cursor, _customDragImage, _payload, _dragAction,
                 _onDragStart, _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
             );
@@ -482,7 +489,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return A new {@link DragAwayComponentConf} instance with the updated opacity.
      */
     public DragAwayComponentConf&lt;C&gt; opacity( double opacity ) {
-<span class="nc" id="L485">        return new DragAwayComponentConf&lt;&gt;(</span>
+<span class="nc" id="L492">        return new DragAwayComponentConf&lt;&gt;(</span>
                 _component, _mousePosition, _enabled, opacity, _cursor, _customDragImage, _payload, _dragAction,
                 _onDragStart, _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
@@ -498,7 +505,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return A new {@link DragAwayComponentConf} instance with the updated cursor.
      */
     public DragAwayComponentConf&lt;C&gt; cursor( UI.Cursor cursor ) {
-<span class="nc" id="L501">        return new DragAwayComponentConf&lt;&gt;(</span>
+<span class="nc" id="L508">        return new DragAwayComponentConf&lt;&gt;(</span>
                 _component, _mousePosition, _enabled, _opacity, cursor, _customDragImage, _payload, _dragAction,
                 _onDragStart, _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
@@ -517,8 +524,8 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return A new {@link DragAwayComponentConf} instance with the updated custom drag image.
      */
     public DragAwayComponentConf&lt;C&gt; customDragImage( Image customDragImage ) {
-<span class="nc" id="L520">        Objects.requireNonNull(customDragImage);</span>
-<span class="nc" id="L521">        return new DragAwayComponentConf&lt;&gt;(</span>
+<span class="nc" id="L527">        Objects.requireNonNull(customDragImage);</span>
+<span class="nc" id="L528">        return new DragAwayComponentConf&lt;&gt;(</span>
                 _component, _mousePosition, _enabled, _opacity, _cursor, customDragImage, _payload, _dragAction,
                 _onDragStart, _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
@@ -538,8 +545,8 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return A new {@link DragAwayComponentConf} instance with the updated custom drag image.
      */
     public DragAwayComponentConf&lt;C&gt; customDragImage( IconDeclaration icon ) {
-<span class="nc" id="L541">        Objects.requireNonNull(icon);</span>
-<span class="nc" id="L542">        return icon.find().map(ImageIcon::getImage).map(this::customDragImage).orElse(this);</span>
+<span class="nc" id="L548">        Objects.requireNonNull(icon);</span>
+<span class="nc" id="L549">        return icon.find().map(ImageIcon::getImage).map(this::customDragImage).orElse(this);</span>
     }
 
     /**
@@ -555,7 +562,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return A new {@link DragAwayComponentConf} instance with the updated custom drag image.
      */
     public DragAwayComponentConf&lt;C&gt; customDragImage( String path ) {
-<span class="nc" id="L558">        return customDragImage(IconDeclaration.of(path));</span>
+<span class="nc" id="L565">        return customDragImage(IconDeclaration.of(path));</span>
     }
 
     /**
@@ -573,7 +580,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return A new {@link DragAwayComponentConf} instance with the updated {@link Transferable} object.
      */
     public DragAwayComponentConf&lt;C&gt; payload( Transferable payload ) {
-<span class="nc" id="L576">        return new DragAwayComponentConf&lt;&gt;(</span>
+<span class="nc" id="L583">        return new DragAwayComponentConf&lt;&gt;(</span>
                 _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, payload, _dragAction,
                 _onDragStart, _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
@@ -591,7 +598,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      *         of the {@link StringSelection} subtype.
      */
     public DragAwayComponentConf&lt;C&gt; payload( String payload ) {
-<span class="nc" id="L594">        return payload(new StringSelection(payload));</span>
+<span class="nc" id="L601">        return payload(new StringSelection(payload));</span>
     }
 
     /**
@@ -613,7 +620,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return A new {@link DragAwayComponentConf} instance with the updated drag action.
      */
     public DragAwayComponentConf&lt;C&gt; dragAction( UI.DragAction dragAction ) {
-<span class="nc" id="L616">        return new DragAwayComponentConf&lt;&gt;(</span>
+<span class="nc" id="L623">        return new DragAwayComponentConf&lt;&gt;(</span>
                 _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload, dragAction,
                 _onDragStart, _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
@@ -640,7 +647,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return A new {@link DragAwayComponentConf} instance with the updated {@link Action} for onDragStart.
      */
     public DragAwayComponentConf&lt;C&gt; onDragStart( Action&lt;ComponentDelegate&lt;C, DragGestureEvent&gt;&gt; onDragStart ) {
-<span class="nc" id="L643">        return new DragAwayComponentConf&lt;&gt;(</span>
+<span class="nc" id="L650">        return new DragAwayComponentConf&lt;&gt;(</span>
                 _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload, _dragAction,
                 onDragStart, _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
@@ -670,7 +677,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return A new {@link DragAwayComponentConf} instance with the updated {@link Action} for onDragEnter.
      */
     public DragAwayComponentConf&lt;C&gt; onDragEnter( Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDragEnter ) {
-<span class="nc" id="L673">        return new DragAwayComponentConf&lt;&gt;(</span>
+<span class="nc" id="L680">        return new DragAwayComponentConf&lt;&gt;(</span>
                 _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload, _dragAction,
                 _onDragStart, onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
@@ -691,7 +698,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return A new {@link DragAwayComponentConf} instance with the updated {@link Action} for onDragMove.
      */
     public DragAwayComponentConf&lt;C&gt; onDragMove( Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDragMove ) {
-<span class="nc" id="L694">        return new DragAwayComponentConf&lt;&gt;(</span>
+<span class="nc" id="L701">        return new DragAwayComponentConf&lt;&gt;(</span>
                 _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload, _dragAction,
                 _onDragStart, _onDragEnter, onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
@@ -720,7 +727,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return A new {@link DragAwayComponentConf} instance with the updated {@link Action} for onDragOver.
      */
     public DragAwayComponentConf&lt;C&gt; onDragOver( Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDragOver ) {
-<span class="nc" id="L723">        return new DragAwayComponentConf&lt;&gt;(</span>
+<span class="nc" id="L730">        return new DragAwayComponentConf&lt;&gt;(</span>
                 _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload, _dragAction,
                 _onDragStart, _onDragEnter, _onDragMove, onDragOver, _onDropActionChanged, _onDragExit, _onDragDropEnd
         );
@@ -744,7 +751,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return A new {@link DragAwayComponentConf} instance with the updated {@link Action} for onDropActionChanged.
      */
     public DragAwayComponentConf&lt;C&gt; onDropActionChanged( Action&lt;ComponentDelegate&lt;C, DragSourceDragEvent&gt;&gt; onDropActionChanged ) {
-<span class="nc" id="L747">        return new DragAwayComponentConf&lt;&gt;(</span>
+<span class="nc" id="L754">        return new DragAwayComponentConf&lt;&gt;(</span>
                 _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload, _dragAction,
                 _onDragStart, _onDragEnter, _onDragMove, _onDragOver, onDropActionChanged, _onDragExit, _onDragDropEnd
         );
@@ -784,7 +791,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return A new {@link DragAwayComponentConf} instance with the updated {@link Action} for onDragExit.
      */
     public DragAwayComponentConf&lt;C&gt; onDragExit( Action&lt;ComponentDelegate&lt;C, DragSourceEvent&gt;&gt; onDragExit ) {
-<span class="nc" id="L787">        return new DragAwayComponentConf&lt;&gt;(</span>
+<span class="nc" id="L794">        return new DragAwayComponentConf&lt;&gt;(</span>
                 _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload, _dragAction,
                 _onDragStart, _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, onDragExit, _onDragDropEnd
         );
@@ -810,7 +817,7 @@ public final class DragAwayComponentConf&lt;C extends JComponent&gt;
      * @return A new {@link DragAwayComponentConf} instance with the updated {@link Action} for onDragDropEnd.
      */
     public DragAwayComponentConf&lt;C&gt; onDragDropEnd( Action&lt;ComponentDelegate&lt;C, DragSourceDropEvent&gt;&gt; onDragDropEnd ) {
-<span class="nc" id="L813">        return new DragAwayComponentConf&lt;&gt;(</span>
+<span class="nc" id="L820">        return new DragAwayComponentConf&lt;&gt;(</span>
                 _component, _mousePosition, _enabled, _opacity, _cursor, _customDragImage, _payload, _dragAction,
                 _onDragStart, _onDragEnter, _onDragMove, _onDragOver, _onDropActionChanged, _onDragExit, onDragDropEnd
         );

@@ -157,7 +157,7 @@ import java.util.Objects;
      *  &lt;p&gt;
      *  Note that the {@code _liveXxx} accessors already speak in {@code (row, column)}
      *  terms (a column major data source transposes in its accessors), which is why
-     *  the snapshot taken here is always {@link UI.ListData#ROW_MAJOR}.
+     *  the snapshot taken here is always {@link UI.CellOrder#ROW_MAJOR}.
      *
      * @return A new immutable snapshot of the current table contents.
      */
@@ -184,50 +184,51 @@ import java.util.Objects;
             table with columns but no rows as wide as it should be.
          */
 <span class="fc" id="L186">        return TableData.of(</span>
-            UI.ListData.ROW_MAJOR,
-<span class="fc" id="L188">            Tuple.ofNullable(String.class, names),</span>
-<span class="fc" id="L189">            Tuple.of((Class&lt;Class&lt;?&gt;&gt;)(Class&lt;?&gt;) Class.class, classes),</span>
-<span class="fc" id="L190">            Tuple.of((Class&lt;Tuple&lt;@Nullable Object&gt;&gt;)(Class&lt;?&gt;) Tuple.class, rowTuples)</span>
+            UI.CellOrder.ROW_MAJOR,
+            UI.Editability.READ_ONLY,
+<span class="fc" id="L189">            Tuple.ofNullable(String.class, names),</span>
+<span class="fc" id="L190">            Tuple.of((Class&lt;Class&lt;?&gt;&gt;)(Class&lt;?&gt;) Class.class, classes),</span>
+<span class="fc" id="L191">            Tuple.of((Class&lt;Tuple&lt;@Nullable Object&gt;&gt;)(Class&lt;?&gt;) Tuple.class, rowTuples)</span>
         );
     }
 
     // ---- TableModel reads: snapshot when present, otherwise live. ----
 
     @Override public int getRowCount() {
-<span class="fc" id="L197">        TableData snap = _snapshot;</span>
-<span class="fc bfc" id="L198" title="All 2 branches covered.">        return snap == null ? Math.max(0, _liveRowCount()) : snap.getRowCount();</span>
+<span class="fc" id="L198">        TableData snap = _snapshot;</span>
+<span class="fc bfc" id="L199" title="All 2 branches covered.">        return snap == null ? Math.max(0, _liveRowCount()) : snap.getRowCount();</span>
     }
 
     @Override public int getColumnCount() {
-<span class="fc" id="L202">        TableData snap = _snapshot;</span>
-<span class="fc bfc" id="L203" title="All 2 branches covered.">        return snap == null ? Math.max(0, _liveColumnCount()) : snap.getColumnCount();</span>
+<span class="fc" id="L203">        TableData snap = _snapshot;</span>
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        return snap == null ? Math.max(0, _liveColumnCount()) : snap.getColumnCount();</span>
     }
 
     @Override public @Nullable Object getValueAt( int rowIndex, int columnIndex ) {
-<span class="fc" id="L207">        TableData snap = _snapshot;</span>
-<span class="fc bfc" id="L208" title="All 2 branches covered.">        return snap == null ? _liveValueAt(rowIndex, columnIndex) : snap.getValueAt(rowIndex, columnIndex);</span>
+<span class="fc" id="L208">        TableData snap = _snapshot;</span>
+<span class="fc bfc" id="L209" title="All 2 branches covered.">        return snap == null ? _liveValueAt(rowIndex, columnIndex) : snap.getValueAt(rowIndex, columnIndex);</span>
     }
 
     @Override public String getColumnName( int columnIndex ) {
-<span class="fc" id="L212">        TableData snap = _snapshot;</span>
-<span class="fc bfc" id="L213" title="All 2 branches covered.">        String name = snap == null ? _liveColumnName(columnIndex) : snap.getColumnName(columnIndex);</span>
-<span class="fc bfc" id="L214" title="All 2 branches covered.">        return name == null ? super.getColumnName(columnIndex) : name;</span>
+<span class="fc" id="L213">        TableData snap = _snapshot;</span>
+<span class="fc bfc" id="L214" title="All 2 branches covered.">        String name = snap == null ? _liveColumnName(columnIndex) : snap.getColumnName(columnIndex);</span>
+<span class="fc bfc" id="L215" title="All 2 branches covered.">        return name == null ? super.getColumnName(columnIndex) : name;</span>
     }
 
     @Override public Class&lt;?&gt; getColumnClass( int columnIndex ) {
-<span class="fc" id="L218">        TableData snap = _snapshot;</span>
-<span class="fc bfc" id="L219" title="All 2 branches covered.">        return snap == null ? _liveColumnClass(columnIndex) : snap.getColumnClass(columnIndex);</span>
+<span class="fc" id="L219">        TableData snap = _snapshot;</span>
+<span class="fc bfc" id="L220" title="All 2 branches covered.">        return snap == null ? _liveColumnClass(columnIndex) : snap.getColumnClass(columnIndex);</span>
     }
 
     @Override public boolean isCellEditable( int rowIndex, int columnIndex ) {
         // Editability is a per-cell predicate consulted by the JTable on the UI
         // thread only when the user initiates editing, not during bulk painting,
         // so we let it read live (it typically reads near static configuration).
-<span class="fc" id="L226">        return _liveCellEditable(rowIndex, columnIndex);</span>
+<span class="fc" id="L227">        return _liveCellEditable(rowIndex, columnIndex);</span>
     }
 
     @Override public void setValueAt( @Nullable Object value, int rowIndex, int columnIndex ) {
-<span class="fc bfc" id="L230" title="All 2 branches covered.">        if ( _isDecoupled() ) {</span>
+<span class="fc bfc" id="L231" title="All 2 branches covered.">        if ( _isDecoupled() ) {</span>
             /*
                 A cell edit made by the user is applied to the UI thread owned snapshot
                 right away, so that the table does not flicker back to the old value
@@ -237,23 +238,23 @@ import java.util.Objects;
                 Any other write (a programmatic one, say) simply travels to the data
                 source, whose change signal then refreshes the snapshot as usual.
              */
-<span class="fc" id="L240">            TableData snap = _snapshot;</span>
-<span class="pc bpc" id="L241" title="2 of 6 branches missed.">            if ( snap != null &amp;&amp; UI.thisIsUIThread() &amp;&amp; _liveCellEditable(rowIndex, columnIndex) ) {</span>
-<span class="fc" id="L242">                TableData next = snap.setCellAt(rowIndex, columnIndex, value);</span>
+<span class="fc" id="L241">            TableData snap = _snapshot;</span>
+<span class="pc bpc" id="L242" title="2 of 6 branches missed.">            if ( snap != null &amp;&amp; UI.thisIsUIThread() &amp;&amp; _liveCellEditable(rowIndex, columnIndex) ) {</span>
+<span class="fc" id="L243">                TableData next = snap.setCellAt(rowIndex, columnIndex, value);</span>
                 // 'setCellAt' returns an unchanged snapshot (out of bounds, or the same
                 // value) whose contents equal the old one, in which case there is nothing
                 // to swap in or fire. A cell edit is a rare user action, so the value
                 // comparison here is never on a hot path.
-<span class="pc bpc" id="L247" title="1 of 2 branches missed.">                if ( !next.equals(snap) ) {</span>
-<span class="fc" id="L248">                    _snapshot = next;</span>
-<span class="fc" id="L249">                    fireTableCellUpdated(rowIndex, columnIndex);</span>
+<span class="pc bpc" id="L248" title="1 of 2 branches missed.">                if ( !next.equals(snap) ) {</span>
+<span class="fc" id="L249">                    _snapshot = next;</span>
+<span class="fc" id="L250">                    fireTableCellUpdated(rowIndex, columnIndex);</span>
                 }
             }
-<span class="fc" id="L252">            _publishToAppThread(() -&gt; _liveSetValueAt(value, rowIndex, columnIndex));</span>
-<span class="fc" id="L253">        } else {</span>
-<span class="fc" id="L254">            _liveSetValueAt(value, rowIndex, columnIndex);</span>
+<span class="fc" id="L253">            _publishToAppThread(() -&gt; _liveSetValueAt(value, rowIndex, columnIndex));</span>
+<span class="fc" id="L254">        } else {</span>
+<span class="fc" id="L255">            _liveSetValueAt(value, rowIndex, columnIndex);</span>
         }
-<span class="fc" id="L256">    }</span>
+<span class="fc" id="L257">    }</span>
 
     // ---- The live data source accessors implemented by concrete models. ----
 

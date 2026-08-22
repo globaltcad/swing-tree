@@ -33,7 +33,7 @@
 
         {"kind":"and","text":"The view model has the correct color.","code":["state.get().color.getRed() < 10","state.get().color.getGreen() == 255","state.get().color.getBlue() < 10"]},
 
-        {"kind":"and","text":"We can savely assume that the initial model still has the same state.","code":["model.text == \"Hello World!\"","model.color == Color.BLACK"]}
+        {"kind":"and","text":"We can safely assume that the initial model still has the same state.","code":["model.text == \"Hello World!\"","model.color == Color.BLACK"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

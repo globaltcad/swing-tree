@@ -53,8 +53,8 @@ public final class MigAddConstraint extends AbstractConstraint implements AddCon
 	 * @return a new {@link MigAddConstraint} with the provided layout constraints merged with this one
 	 */
 	public MigAddConstraint and( String... layoutConstraints ) {
-<span class="nc" id="L56">		MigAddConstraint attr = new MigAddConstraint( layoutConstraints );</span>
-<span class="nc" id="L57">		return (MigAddConstraint) _and( attr, new MigAddConstraint() );</span>
+<span class="fc" id="L56">		MigAddConstraint attr = new MigAddConstraint( layoutConstraints );</span>
+<span class="fc" id="L57">		return (MigAddConstraint) _and( attr, new MigAddConstraint() );</span>
 	}
 
 	@Override

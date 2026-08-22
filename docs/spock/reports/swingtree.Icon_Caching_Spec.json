@@ -23,7 +23,7 @@
       "blocks":[
         {"kind":"given","text":"First we clear the library context so that there is no state leftover from other tests:","code":["SwingTree.initialize()"]},
 
-        {"kind":"and","text":"We creat a bunch of different icon declarations.","code":["var icon1 = IconDeclaration.of(\"img/trees.png\")","var icon2 = IconDeclaration.of(\"img/plus.svg\")","var icon3 = IconDeclaration.of(Size.unknown(), \"img/a-window-svg\")","var icon4 = IconDeclaration.of(Size.of(-1, 32), \"img/seed.png\")","var icon5 = IconDeclaration.ofSvg(\"<svg width=\\\"24\\\" height=\\\"24\\\" viewBox=\\\"0 0 16 16\\\"><circle cx=\\\"8\\\" cy=\\\"8\\\" r=\\\"6\\\" fill=\\\"red\\\"/></svg>\")"]},
+        {"kind":"and","text":"We create a bunch of different icon declarations.","code":["var icon1 = IconDeclaration.of(\"img/trees.png\")","var icon2 = IconDeclaration.of(\"img/plus.svg\")","var icon3 = IconDeclaration.of(Size.unknown(), \"img/a-window-svg\")","var icon4 = IconDeclaration.of(Size.of(-1, 32), \"img/seed.png\")","var icon5 = IconDeclaration.ofSvg(\"<svg width=\\\"24\\\" height=\\\"24\\\" viewBox=\\\"0 0 16 16\\\"><circle cx=\\\"8\\\" cy=\\\"8\\\" r=\\\"6\\\" fill=\\\"red\\\"/></svg>\")"]},
 
         {"kind":"expect","text":"Initially the cache is empty!","code":["SwingTree.get().getIconCache().isEmpty()"]},
 

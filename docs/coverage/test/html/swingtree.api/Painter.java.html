@@ -97,7 +97,7 @@ public interface Painter
      * @param &lt;D&gt; The type of the data object to use as a cache key.
      */
     static &lt;D&gt; Painter of( D data, Painter painter ) {
-<span class="nc" id="L100">        return new CachablePainter(data, painter);</span>
+<span class="fc" id="L100">        return new CachablePainter(data, painter);</span>
     }
 
     /**

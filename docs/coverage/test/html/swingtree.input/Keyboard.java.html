@@ -177,10 +177,12 @@ public final class Keyboard
 <span class="fc" id="L177">        HELP(KeyEvent.VK_HELP), META(KeyEvent.VK_META), BACK_QUOTE(KeyEvent.VK_BACK_QUOTE),</span>
 <span class="fc" id="L178">        QUOTE(KeyEvent.VK_QUOTE);</span>
 
-
+        /**
+         *  The key code value corresponding to the {@link KeyEvent} virtual key constants.
+         */
         public final int code;
 
-<span class="fc" id="L183">        Key( int keyCode ) { this.code = keyCode; }</span>
+<span class="fc" id="L185">        Key( int keyCode ) { this.code = keyCode; }</span>
 
         /**
          *  This method checks if this key is currently pressed on the keyboard
@@ -189,12 +191,12 @@ public final class Keyboard
          * @return The truth value determining if this key is currently pressed on the keyboard.
          */
         public boolean isPressed() {
-<span class="nc" id="L192">            return Keyboard.get().isPressed(this);</span>
+<span class="nc" id="L194">            return Keyboard.get().isPressed(this);</span>
         }
 
     }
 
-<span class="nc" id="L197">    private final List&lt;Key&gt; _pressed = new ArrayList&lt;&gt;();</span>
+<span class="nc" id="L199">    private final List&lt;Key&gt; _pressed = new ArrayList&lt;&gt;();</span>
 
     /**
      *  This method checks if the supplied {@link Key} is currently pressed on the keyboard.
@@ -205,49 +207,49 @@ public final class Keyboard
      *                              use {@link Key#NONE} instead to check if no key is currently pressed.
      */
     public boolean isPressed( Key key ) {
-<span class="nc" id="L208">        Objects.requireNonNull(key);</span>
-<span class="nc" id="L209">        synchronized ( this ) {</span>
-<span class="nc bnc" id="L210" title="All 2 branches missed.">            if ( key == Key.NONE )</span>
-<span class="nc" id="L211">                return _pressed.isEmpty();</span>
+<span class="nc" id="L210">        Objects.requireNonNull(key);</span>
+<span class="nc" id="L211">        synchronized ( this ) {</span>
+<span class="nc bnc" id="L212" title="All 2 branches missed.">            if ( key == Key.NONE )</span>
+<span class="nc" id="L213">                return _pressed.isEmpty();</span>
 
-<span class="nc" id="L213">            return _pressed.contains(key);</span>
+<span class="nc" id="L215">            return _pressed.contains(key);</span>
         }
     }
 
 
-<span class="nc" id="L218">    private Keyboard() {</span>
-<span class="nc" id="L219">        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {</span>
+<span class="nc" id="L220">    private Keyboard() {</span>
+<span class="nc" id="L221">        KeyboardFocusManager.getCurrentKeyboardFocusManager().addKeyEventDispatcher(new KeyEventDispatcher() {</span>
             @Override
             public boolean dispatchKeyEvent(KeyEvent ke) {
-<span class="nc" id="L222">                synchronized (this) {</span>
-<span class="nc bnc" id="L223" title="All 3 branches missed.">                    switch ( ke.getID() ) {</span>
+<span class="nc" id="L224">                synchronized (this) {</span>
+<span class="nc bnc" id="L225" title="All 3 branches missed.">                    switch ( ke.getID() ) {</span>
                         case KeyEvent.KEY_PRESSED: {
-<span class="nc" id="L225">                                Key k = _fromKeyEvent(ke);</span>
-<span class="nc bnc" id="L226" title="All 4 branches missed.">                                if ( k != Key.NONE &amp;&amp; !_pressed.contains(k) )</span>
-<span class="nc" id="L227">                                    _pressed.add(k);</span>
+<span class="nc" id="L227">                                Key k = _fromKeyEvent(ke);</span>
+<span class="nc bnc" id="L228" title="All 4 branches missed.">                                if ( k != Key.NONE &amp;&amp; !_pressed.contains(k) )</span>
+<span class="nc" id="L229">                                    _pressed.add(k);</span>
                             }
-<span class="nc" id="L229">                            break;</span>
+<span class="nc" id="L231">                            break;</span>
 
                         case KeyEvent.KEY_RELEASED: {
-<span class="nc" id="L232">                                Key k = _fromKeyEvent(ke);</span>
-<span class="nc bnc" id="L233" title="All 2 branches missed.">                                if ( k != Key.NONE )</span>
-<span class="nc" id="L234">                                    _pressed.remove(k);</span>
+<span class="nc" id="L234">                                Key k = _fromKeyEvent(ke);</span>
+<span class="nc bnc" id="L235" title="All 2 branches missed.">                                if ( k != Key.NONE )</span>
+<span class="nc" id="L236">                                    _pressed.remove(k);</span>
                             }
                             break;
                     }
-<span class="nc" id="L238">                    return false;</span>
+<span class="nc" id="L240">                    return false;</span>
                 }
             }
         });
-<span class="nc" id="L242">    }</span>
+<span class="nc" id="L244">    }</span>
 
     private static Key _fromKeyEvent( KeyEvent keyEvent ) {
-<span class="nc bnc" id="L245" title="All 2 branches missed.">        for ( Key key : Key.values() ) {</span>
-<span class="nc bnc" id="L246" title="All 2 branches missed.">            if ( key.code == keyEvent.getKeyCode() ) {</span>
-<span class="nc" id="L247">                return key;</span>
+<span class="nc bnc" id="L247" title="All 2 branches missed.">        for ( Key key : Key.values() ) {</span>
+<span class="nc bnc" id="L248" title="All 2 branches missed.">            if ( key.code == keyEvent.getKeyCode() ) {</span>
+<span class="nc" id="L249">                return key;</span>
             }
         }
-<span class="nc" id="L250">        return Key.NONE;</span>
+<span class="nc" id="L252">        return Key.NONE;</span>
     }
 
 }

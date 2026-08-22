@@ -1,10 +1,10 @@
 {
   "className":"swingtree.Declarative_Tables_Spec",
   "title":"Creating Tables",
-  "narrative":"Swing-Tree exposes a user friendly API for defining tables in a declarative manner.\n    You don't necessarily have to implement your own table model, because the Swing-Tree\n    API allows you to supply simple collection based data as a data source for your table.\n\n    Note that the **recommended** way of modelling a table is the `TableData` value,\n    which describes an entire table (its cells, column names, column classes and layout)\n    as a single immutable value that you hold in a property and bind to a table.\n    See the `Table_Data_Spec` for what that looks like, and read on here for the older,\n    pull based data sources, which are still supported and still handy for a quick table\n    over data you already hold somewhere else.",
+  "narrative":"Swing-Tree exposes a user friendly API for defining tables in a declarative manner.\n    You don't necessarily have to implement your own table model, because the Swing-Tree\n    API allows you to supply simple collection based data as a data source for your table.\n\n    Note that the **recommended** way of modelling a table is the `TableData` value,\n    which describes an entire table (its cells, column names, column classes, cell order\n    and editability) as a single immutable value that you hold in a property and bind\n    to a table.\n    See the `Table_Data_Spec` for what that looks like, and read on here for the older,\n    pull based data sources, which are still supported and still handy for a quick table\n    over data you already hold somewhere else.",
   "subjects":["swingtree.UIForTable","swingtree.api.model.BasicTableModel"],
   "statistics":{
-    "runs":"43",
+    "runs":"47",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -21,7 +21,7 @@
       "tags":{},"see":[],"extraInfo":["\n            Note that you can actually pass a provider lambda for a map of header names to column lists \n            to the table factory method and it will create a table model for you, which is based on the provided \n            map provider. This will always result in a column major table. \n            <p>\n            Note that this data source is pull based: the table reads it whenever it feels\n            like it, and it has no way of knowing when your map changed. Prefer a\n            `TableData` value in a property (see the `Table_Data_Spec`) unless you really\n            do have a map lying around which you would rather not copy.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A simple table UI with a map based data table model.","code":["var ui =","        UI.table(UI.MapData.EDITABLE, { [\"X\":[\"a\", \"b\", \"c\"], \"Y\":[\"1\", \"2\", \"3\"]] })"]},
+        {"kind":"given","text":"A simple table UI with a map based data table model.","code":["var ui =","        UI.table(UI.Editability.EDITABLE, { [\"X\":[\"a\", \"b\", \"c\"], \"Y\":[\"1\", \"2\", \"3\"]] })"]},
 
         {"kind":"and","text":"We actually build the component:","code":["var table = ui.get(JTable)"]},
 
@@ -38,11 +38,88 @@
       "tags":{},"see":[],"extraInfo":["\n            A simple list of lists provider can be supplied to the table factory method\n            and it will be enough to create a simple table model for you.\n            In the table defined below we create a list data based column major table. \n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["var ui = UI.table(UI.ListData.COLUMN_MAJOR_EDITABLE, { [[\"a\", \"b\", \"c\"], [\"x\", \"y\", \"z\"]] })"]},
+        {"kind":"given","text":"","code":["var ui = UI.table(UI.CellOrder.COLUMN_MAJOR, UI.Editability.EDITABLE, { [[\"a\", \"b\", \"c\"], [\"x\", \"y\", \"z\"]] })"]},
 
         {"kind":"and","text":"We actually build the component:","code":["var table = ui.get(JTable)"]},
 
         {"kind":"expect","text":"The table UI has the following state:","code":["table.getColumnName(0) == \"A\" // default column names","table.getColumnName(1) == \"B\"","table.getRowCount() == 3","table.getColumnCount() == 2","table.getValueAt(0, 0) == \"a\"","table.getValueAt(0, 1) == \"x\"","table.getValueAt(1, 0) == \"b\"","table.getValueAt(1, 1) == \"y\"","table.getValueAt(2, 0) == \"c\"","table.getValueAt(2, 1) == \"z\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `List` based table can also be bound further down the chain, through `withModel(..)`.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The list based data sources bind either way too: through `UI.table(..)`, or\n            through `UI.table().withModel(..)` once you have configured the table.\n\n            Two things are worth knowing here. Without a `UI.Editability` the table is\n            read only. And a list is a *pull* based source, so the table reads it only\n            when told to. That is what `updateTableOn(..)` is for.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A mutable list of rows, and an event with which to announce changes to it.","code":["var rows = [[\"Alice\", \"30\"], [\"Bob\", \"42\"]]","var update = Event.create()"]},
+
+        {"kind":"and","text":"A table which configures itself first and only then binds the list:","code":["var table =","        UI.table()","        .id(\"people\")","        .withModel(UI.CellOrder.ROW_MAJOR, { rows } as TableListDataSource)","        .updateTableOn(update as Event)","        .get(JTable)"]},
+
+        {"kind":"and","text":"A listener recording every event the table model announces.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << e } as TableModelListener)"]},
+
+        {"kind":"expect","text":"What we declared before the binding survived it.","code":["table.getName() == \"people\""]},
+
+        {"kind":"and","text":"The table shows the two rows of the list.","code":["table.getRowCount() == 2","table.getColumnCount() == 2","table.getValueAt(0, 0) == \"Alice\"","table.getValueAt(1, 1) == \"42\""]},
+
+        {"kind":"and","text":"Its cells are read only, because we did not ask for anything else.","code":["!table.isCellEditable(0, 0)"]},
+
+        {"kind":"when","text":"We add a row to the list without telling the table about it...","code":["rows.add([\"Carol\", \"27\"])"]},
+
+        {"kind":"then","text":"...the table stays quiet, so a table on screen would still be painting two rows.","code":["events.isEmpty()"]},
+
+        {"kind":"when","text":"We fire the update event...","code":["update.fire()","UI.sync()"]},
+
+        {"kind":"then","text":"...the table announces the change and reads the third row.","code":["!events.isEmpty()","table.getRowCount() == 3","table.getValueAt(2, 0) == \"Carol\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `withModel(UI.CellOrder, ..)` shorthand reads your list along whichever axis you name. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A list of lists is ambiguous: the same nesting can mean a list of rows or a\n            list of columns. The `UI.CellOrder` you pass says which one you meant. If you\n            meant columns, the table transposes the nesting for you.\n\n            This two argument form always gives you a read only table. Add a\n            `UI.Editability` if the user should be able to edit the cells.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"One nested list, which could just as well describe rows or columns.","code":["var cells = [[\"a\", \"b\", \"c\"], [\"x\", \"y\", \"z\"]]"]},
+
+        {"kind":"and","text":"A table which reads it along the cell order under test:","code":["var table =","        UI.table()","        .withModel(cellOrder, { cells } as TableListDataSource)","        .get(JTable)"]},
+
+        {"kind":"when","text":"We read the first row back out of the table.","code":["var firstRow = (0..<table.getColumnCount()).collect({ table.getValueAt(0, it) })"]},
+
+        {"kind":"then","text":"The nesting was interpreted along exactly the axis we named.","code":["table.getRowCount() == rowCount","table.getColumnCount() == columnCount","firstRow == expectedFirstRow"]},
+
+        {"kind":"and","text":"Either way the table is read only, because we named no editability.","code":["!table.isCellEditable(0, 0)"]},
+
+        {"kind":"where","text":"We read one and the same nested list first as rows, and then as columns.","code":{"cellOrder":["UI.CellOrder.ROW_MAJOR","UI.CellOrder.COLUMN_MAJOR"],"rowCount":["2","3"],"columnCount":["3","2"],"expectedFirstRow":["[\"a\", \"b\", \"c\"]","[\"a\", \"x\"]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The `withModel(UI.CellOrder, ..)` shorthand reads your list along whichever axis you name. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A list of lists is ambiguous: the same nesting can mean a list of rows or a\n            list of columns. The `UI.CellOrder` you pass says which one you meant. If you\n            meant columns, the table transposes the nesting for you.\n\n            This two argument form always gives you a read only table. Add a\n            `UI.Editability` if the user should be able to edit the cells.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"One nested list, which could just as well describe rows or columns.","code":["var cells = [[\"a\", \"b\", \"c\"], [\"x\", \"y\", \"z\"]]"]},
+
+        {"kind":"and","text":"A table which reads it along the cell order under test:","code":["var table =","        UI.table()","        .withModel(cellOrder, { cells } as TableListDataSource)","        .get(JTable)"]},
+
+        {"kind":"when","text":"We read the first row back out of the table.","code":["var firstRow = (0..<table.getColumnCount()).collect({ table.getValueAt(0, it) })"]},
+
+        {"kind":"then","text":"The nesting was interpreted along exactly the axis we named.","code":["table.getRowCount() == rowCount","table.getColumnCount() == columnCount","firstRow == expectedFirstRow"]},
+
+        {"kind":"and","text":"Either way the table is read only, because we named no editability.","code":["!table.isCellEditable(0, 0)"]},
+
+        {"kind":"where","text":"We read one and the same nested list first as rows, and then as columns.","code":{"cellOrder":["UI.CellOrder.ROW_MAJOR","UI.CellOrder.COLUMN_MAJOR"],"rowCount":["2","3"],"columnCount":["3","2"],"expectedFirstRow":["[\"a\", \"b\", \"c\"]","[\"a\", \"x\"]"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -82,7 +159,7 @@
       "blocks":[
         {"kind":"given","text":"A simple event and some data.","code":["var event = Event.create()","var data = [[1, 2, 3], [7, 8, 9]]"]},
 
-        {"kind":"and","text":"A simple table UI with a nested list based data table model.","code":["var ui =","            UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data })","            .updateTableOn(event as Event)"]},
+        {"kind":"and","text":"A simple table UI with a nested list based data table model.","code":["var ui =","            UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, { data })","            .updateTableOn(event as Event)"]},
 
         {"kind":"and","text":"We actually build the component:","code":["var table = ui.get(JTable)"]},
 
@@ -103,7 +180,7 @@
       "blocks":[
         {"kind":"given","text":"A simple property holding some data.","code":["var data = Var.of([[1, 2, 3], [7, 8, 9]])"]},
 
-        {"kind":"and","text":"A simple table UI with a nested list based data table model.","code":["var ui =","            UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data.get() })","            .updateTableOn(data.view())"]},
+        {"kind":"and","text":"A simple table UI with a nested list based data table model.","code":["var ui =","            UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, { data.get() })","            .updateTableOn(data.view())"]},
 
         {"kind":"and","text":"We actually build the component:","code":["var table = ui.get(JTable)"]},
 
@@ -287,7 +364,7 @@
       "blocks":[
         {"kind":"given","text":"A mutable matrix and an update event.","code":["var data = [[1, 2], [3, 4]]","var event = Event.create()"]},
 
-        {"kind":"and","text":"A row major list based table bound to the update event.","code":["var model =","        UI.table(UI.ListData.ROW_MAJOR_EDITABLE, { data })","        .updateTableOn(event as Event)","        .get(JTable).getModel()"]},
+        {"kind":"and","text":"A row major list based table bound to the update event.","code":["var model =","        UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, { data })","        .updateTableOn(event as Event)","        .get(JTable).getModel()"]},
 
         {"kind":"and","text":"A listener recording the events it receives.","code":["var events = []","model.addTableModelListener({ TableModelEvent e -> events << e } as TableModelListener)"]},
 
@@ -331,13 +408,13 @@
       "blocks":[
         {"kind":"given","text":"A property holding a row major matrix of cell values.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"Alice\", \"30\"),","                    Tuple.of(\"Bob\",   \"42\")","                ))"]},
 
-        {"kind":"and","text":"A table built from this property:","code":["var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+        {"kind":"and","text":"A table built from this property:","code":["var table = UI.table(UI.CellOrder.ROW_MAJOR, rows).get(JTable)"]},
 
         {"kind":"expect","text":"The table displays the rows of the property.","code":["table.getRowCount() == 2","table.getColumnCount() == 2","table.getValueAt(0, 0) == \"Alice\"","table.getValueAt(0, 1) == \"30\"","table.getValueAt(1, 0) == \"Bob\"","table.getValueAt(1, 1) == \"42\""]},
 
         {"kind":"and","text":"The columns have the default (spreadsheet style) names.","code":["table.getColumnName(0) == \"A\"","table.getColumnName(1) == \"B\""]},
 
-        {"kind":"and","text":"The cells are read only, because we did not ask for an editable layout.","code":["!table.isCellEditable(0, 0)"]},
+        {"kind":"and","text":"The cells are read only, because we did not ask for an editable table.","code":["!table.isCellEditable(0, 0)"]},
 
         {"kind":"when","text":"We change the property by adding a row...","code":["rows.update({ it.add(Tuple.of(\"Carol\", \"27\")) })","UI.sync()"]},
 
@@ -351,16 +428,16 @@
     },
   
     {
-      "id":"The layout of a `Tuple` based table can be configured to be column major.",
+      "id":"The cell order of a `Tuple` based table can be configured to be column major.",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Just like for the list based data sources, you may tell the table\n            how to interpret the matrix you hand it, through one of the\n            `UI.ListData` constants. In a column major layout the outer `Tuple`\n            holds the columns of the table and each inner `Tuple` the cells of\n            a column, which the table transposes for you.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Just like for the list based data sources, you may tell the table\n            how to interpret the matrix you hand it, through one of the\n            `UI.CellOrder` constants. In a column major cell order the outer `Tuple`\n            holds the columns of the table and each inner `Tuple` the cells of\n            a column, which the table transposes for you.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A property holding a column major matrix of cell values.","code":["var columns = Var.of(Tuple.of(","                    Tuple.of(\"a\", \"b\", \"c\"),","                    Tuple.of(\"x\", \"y\", \"z\")","                ))"]},
 
-        {"kind":"and","text":"A table built from this property, declared to be column major:","code":["var table = UI.table(UI.ListData.COLUMN_MAJOR, columns).get(JTable)"]},
+        {"kind":"and","text":"A table built from this property, declared to be column major:","code":["var table = UI.table(UI.CellOrder.COLUMN_MAJOR, columns).get(JTable)"]},
 
         {"kind":"expect","text":"The two tuples are displayed as the two columns of a 3 row table.","code":["table.getRowCount() == 3","table.getColumnCount() == 2","table.getValueAt(0, 0) == \"a\"","table.getValueAt(0, 1) == \"x\"","table.getValueAt(1, 0) == \"b\"","table.getValueAt(1, 1) == \"y\"","table.getValueAt(2, 0) == \"c\"","table.getValueAt(2, 1) == \"z\""]},
 
@@ -372,26 +449,51 @@
     },
   
     {
+      "id":"A `Tuple` based table can also be bound further down the chain, through `withModel(..)`.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `UI.table(..)` and `UI.table().withModel(..)` do the same thing. Use the\n            factory when the table is the whole declaration. Use `withModel(..)` when you\n            want to configure the table first and bind its data afterwards.\n\n            Both can be called without a `UI.Editability`, in which case the table is\n            read only.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding two rows of cells.","code":["var rows = Var.of(Tuple.of(","                Tuple.of(\"Alice\", \"30\"),","                Tuple.of(\"Bob\",   \"42\")","            ))"]},
+
+        {"kind":"and","text":"A table which binds that property through the builder, without naming an editability:","code":["var table =","        UI.table()","        .id(\"people\")","        .withModel(UI.CellOrder.ROW_MAJOR, rows)","        .get(JTable)"]},
+
+        {"kind":"expect","text":"Everything we declared before the binding survived it.","code":["table.getName() == \"people\""]},
+
+        {"kind":"and","text":"The table shows the two rows held by the property.","code":["table.getRowCount() == 2","table.getColumnCount() == 2","table.getValueAt(0, 0) == \"Alice\"","table.getValueAt(1, 1) == \"42\""]},
+
+        {"kind":"and","text":"Its cells are read only, because we did not ask for anything else.","code":["!table.isCellEditable(0, 0)"]},
+
+        {"kind":"when","text":"We add a row to the property...","code":["rows.update({ it.add(Tuple.of(\"Carol\", \"27\")) })","UI.sync()"]},
+
+        {"kind":"then","text":"...the table follows it, exactly as it would have through `UI.table(..)`.","code":["table.getRowCount() == 3","table.getValueAt(2, 0) == \"Carol\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
       "id":"The cells of an editable `Tuple` based table are written back into the property. [0]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            If you declare one of the editable `UI.ListData` layouts and hand the\n            table a mutable `Var`, then the user may edit the cells of the table.\n            Such an edit is written back into the property, which means your\n            application state stays the single source of truth for the table.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            If you declare `UI.Editability.EDITABLE` and hand the table a mutable\n            `Var`, then the user may edit the cells of the table.\n            Such an edit is written back into the property, which means your\n            application state stays the single source of truth for the table.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property holding a matrix of cell values, in the given layout.","code":["var cells = Var.of(Tuple.of(","                    Tuple.of(\"a\", \"b\"),","                    Tuple.of(\"x\", \"y\")","                ))"]},
+        {"kind":"given","text":"A property holding a matrix of cell values, in the given cell order.","code":["var cells = Var.of(Tuple.of(","                    Tuple.of(\"a\", \"b\"),","                    Tuple.of(\"x\", \"y\")","                ))"]},
 
-        {"kind":"and","text":"A table built from this property, declared to be editable:","code":["var table = UI.table(layout, cells).get(JTable)"]},
+        {"kind":"and","text":"A table built from this property, declared to be editable:","code":["var table = UI.table(cellOrder, UI.Editability.EDITABLE, cells).get(JTable)"]},
 
         {"kind":"expect","text":"The table considers its cells editable.","code":["table.isCellEditable(0, 0)"]},
 
         {"kind":"when","text":"The user edits a cell through the regular `JTable` API...","code":["table.setValueAt(\"!\", 1, 0)","UI.sync()"]},
 
-        {"kind":"then","text":"...the edit landed in the property, at the place the layout dictates.","code":["cells.get() == Tuple.of(expectedFirst, expectedSecond)"]},
+        {"kind":"then","text":"...the edit landed in the property, at the place the cell order dictates.","code":["cells.get() == Tuple.of(expectedFirst, expectedSecond)"]},
 
         {"kind":"and","text":"The table of course displays the new value.","code":["table.getValueAt(1, 0) == \"!\""]},
 
-        {"kind":"where","text":"We check this for both editable layouts.","code":{"layout":["UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.COLUMN_MAJOR_EDITABLE"],"expectedFirst":["Tuple.of(\"a\", \"b\")","Tuple.of(\"a\", \"!\")"],"expectedSecond":["Tuple.of(\"!\", \"y\")","Tuple.of(\"x\", \"y\")"]}}
+        {"kind":"where","text":"We check this for both cell orders.","code":{"cellOrder":["UI.CellOrder.ROW_MAJOR","UI.CellOrder.COLUMN_MAJOR"],"expectedFirst":["Tuple.of(\"a\", \"b\")","Tuple.of(\"a\", \"!\")"],"expectedSecond":["Tuple.of(\"!\", \"y\")","Tuple.of(\"x\", \"y\")"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -401,114 +503,114 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            If you declare one of the editable `UI.ListData` layouts and hand the\n            table a mutable `Var`, then the user may edit the cells of the table.\n            Such an edit is written back into the property, which means your\n            application state stays the single source of truth for the table.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            If you declare `UI.Editability.EDITABLE` and hand the table a mutable\n            `Var`, then the user may edit the cells of the table.\n            Such an edit is written back into the property, which means your\n            application state stays the single source of truth for the table.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property holding a matrix of cell values, in the given layout.","code":["var cells = Var.of(Tuple.of(","                    Tuple.of(\"a\", \"b\"),","                    Tuple.of(\"x\", \"y\")","                ))"]},
+        {"kind":"given","text":"A property holding a matrix of cell values, in the given cell order.","code":["var cells = Var.of(Tuple.of(","                    Tuple.of(\"a\", \"b\"),","                    Tuple.of(\"x\", \"y\")","                ))"]},
 
-        {"kind":"and","text":"A table built from this property, declared to be editable:","code":["var table = UI.table(layout, cells).get(JTable)"]},
+        {"kind":"and","text":"A table built from this property, declared to be editable:","code":["var table = UI.table(cellOrder, UI.Editability.EDITABLE, cells).get(JTable)"]},
 
         {"kind":"expect","text":"The table considers its cells editable.","code":["table.isCellEditable(0, 0)"]},
 
         {"kind":"when","text":"The user edits a cell through the regular `JTable` API...","code":["table.setValueAt(\"!\", 1, 0)","UI.sync()"]},
 
-        {"kind":"then","text":"...the edit landed in the property, at the place the layout dictates.","code":["cells.get() == Tuple.of(expectedFirst, expectedSecond)"]},
+        {"kind":"then","text":"...the edit landed in the property, at the place the cell order dictates.","code":["cells.get() == Tuple.of(expectedFirst, expectedSecond)"]},
 
         {"kind":"and","text":"The table of course displays the new value.","code":["table.getValueAt(1, 0) == \"!\""]},
 
-        {"kind":"where","text":"We check this for both editable layouts.","code":{"layout":["UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.COLUMN_MAJOR_EDITABLE"],"expectedFirst":["Tuple.of(\"a\", \"b\")","Tuple.of(\"a\", \"!\")"],"expectedSecond":["Tuple.of(\"!\", \"y\")","Tuple.of(\"x\", \"y\")"]}}
+        {"kind":"where","text":"We check this for both cell orders.","code":{"cellOrder":["UI.CellOrder.ROW_MAJOR","UI.CellOrder.COLUMN_MAJOR"],"expectedFirst":["Tuple.of(\"a\", \"b\")","Tuple.of(\"a\", \"!\")"],"expectedSecond":["Tuple.of(\"!\", \"y\")","Tuple.of(\"x\", \"y\")"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
   
     {
-      "id":"A `Tuple` based table is read only if either its layout or its property is read only. [0]",
+      "id":"A `Tuple` based table is read only if either its editability or its property says so. [0]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Editability of a tuple based table needs two things: an editable\n            layout, and a property which can actually receive the edit. A read\n            only `Val` cannot, which is why it always yields a read only table,\n            even if you ask for an editable layout. Any edit which sneaks in\n            through the model API anyway is silently ignored instead of\n            corrupting the table.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Editability of a tuple based table needs two things: permission through\n            `UI.Editability.EDITABLE`, and a property which can actually receive the\n            edit. A read only `Val` cannot, which is why it always yields a read only\n            table, even if you ask for an editable one. Any edit which sneaks in\n            through the model API anyway is silently ignored instead of\n            corrupting the table.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A tuple of cells, wrapped in the given kind of property.","code":["var tuple = Tuple.of(Tuple.of(\"a\", \"b\"))","var property = ( mutable ? Var.of(tuple) : Val.of(tuple) )"]},
 
-        {"kind":"and","text":"A table built from this property, with the given layout:","code":["var table = UI.table(layout, property).get(JTable)"]},
+        {"kind":"and","text":"A table built from this property, with the given editability:","code":["var table = UI.table(UI.CellOrder.ROW_MAJOR, editability, property).get(JTable)"]},
 
-        {"kind":"expect","text":"The table is only editable if both the layout and the property allow it.","code":["table.isCellEditable(0, 0) == isEditable"]},
+        {"kind":"expect","text":"The table is only editable if both the editability and the property allow it.","code":["table.isCellEditable(0, 0) == isEditable"]},
 
         {"kind":"when","text":"We push an edit through the model API regardless...","code":["table.getModel().setValueAt(\"!\", 0, 0)","UI.sync()"]},
 
         {"kind":"then","text":"...it is only honored if the table is actually editable.","code":["noExceptionThrown()","table.getValueAt(0, 0) == ( isEditable ? \"!\" : \"a\" )"]},
 
-        {"kind":"where","text":"We check every combination of layout and property mutability.","code":{"layout":["UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR","UI.ListData.ROW_MAJOR"],"mutable":["true","false","true","false"],"isEditable":["true","false","false","false"]}}
+        {"kind":"where","text":"We check every combination of editability and property mutability.","code":{"editability":["UI.Editability.EDITABLE","UI.Editability.EDITABLE","UI.Editability.READ_ONLY","UI.Editability.READ_ONLY"],"mutable":["true","false","true","false"],"isEditable":["true","false","false","false"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
   
     {
-      "id":"A `Tuple` based table is read only if either its layout or its property is read only. [1]",
+      "id":"A `Tuple` based table is read only if either its editability or its property says so. [1]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Editability of a tuple based table needs two things: an editable\n            layout, and a property which can actually receive the edit. A read\n            only `Val` cannot, which is why it always yields a read only table,\n            even if you ask for an editable layout. Any edit which sneaks in\n            through the model API anyway is silently ignored instead of\n            corrupting the table.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Editability of a tuple based table needs two things: permission through\n            `UI.Editability.EDITABLE`, and a property which can actually receive the\n            edit. A read only `Val` cannot, which is why it always yields a read only\n            table, even if you ask for an editable one. Any edit which sneaks in\n            through the model API anyway is silently ignored instead of\n            corrupting the table.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A tuple of cells, wrapped in the given kind of property.","code":["var tuple = Tuple.of(Tuple.of(\"a\", \"b\"))","var property = ( mutable ? Var.of(tuple) : Val.of(tuple) )"]},
 
-        {"kind":"and","text":"A table built from this property, with the given layout:","code":["var table = UI.table(layout, property).get(JTable)"]},
+        {"kind":"and","text":"A table built from this property, with the given editability:","code":["var table = UI.table(UI.CellOrder.ROW_MAJOR, editability, property).get(JTable)"]},
 
-        {"kind":"expect","text":"The table is only editable if both the layout and the property allow it.","code":["table.isCellEditable(0, 0) == isEditable"]},
+        {"kind":"expect","text":"The table is only editable if both the editability and the property allow it.","code":["table.isCellEditable(0, 0) == isEditable"]},
 
         {"kind":"when","text":"We push an edit through the model API regardless...","code":["table.getModel().setValueAt(\"!\", 0, 0)","UI.sync()"]},
 
         {"kind":"then","text":"...it is only honored if the table is actually editable.","code":["noExceptionThrown()","table.getValueAt(0, 0) == ( isEditable ? \"!\" : \"a\" )"]},
 
-        {"kind":"where","text":"We check every combination of layout and property mutability.","code":{"layout":["UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR","UI.ListData.ROW_MAJOR"],"mutable":["true","false","true","false"],"isEditable":["true","false","false","false"]}}
+        {"kind":"where","text":"We check every combination of editability and property mutability.","code":{"editability":["UI.Editability.EDITABLE","UI.Editability.EDITABLE","UI.Editability.READ_ONLY","UI.Editability.READ_ONLY"],"mutable":["true","false","true","false"],"isEditable":["true","false","false","false"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
   
     {
-      "id":"A `Tuple` based table is read only if either its layout or its property is read only. [2]",
+      "id":"A `Tuple` based table is read only if either its editability or its property says so. [2]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Editability of a tuple based table needs two things: an editable\n            layout, and a property which can actually receive the edit. A read\n            only `Val` cannot, which is why it always yields a read only table,\n            even if you ask for an editable layout. Any edit which sneaks in\n            through the model API anyway is silently ignored instead of\n            corrupting the table.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Editability of a tuple based table needs two things: permission through\n            `UI.Editability.EDITABLE`, and a property which can actually receive the\n            edit. A read only `Val` cannot, which is why it always yields a read only\n            table, even if you ask for an editable one. Any edit which sneaks in\n            through the model API anyway is silently ignored instead of\n            corrupting the table.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A tuple of cells, wrapped in the given kind of property.","code":["var tuple = Tuple.of(Tuple.of(\"a\", \"b\"))","var property = ( mutable ? Var.of(tuple) : Val.of(tuple) )"]},
 
-        {"kind":"and","text":"A table built from this property, with the given layout:","code":["var table = UI.table(layout, property).get(JTable)"]},
+        {"kind":"and","text":"A table built from this property, with the given editability:","code":["var table = UI.table(UI.CellOrder.ROW_MAJOR, editability, property).get(JTable)"]},
 
-        {"kind":"expect","text":"The table is only editable if both the layout and the property allow it.","code":["table.isCellEditable(0, 0) == isEditable"]},
+        {"kind":"expect","text":"The table is only editable if both the editability and the property allow it.","code":["table.isCellEditable(0, 0) == isEditable"]},
 
         {"kind":"when","text":"We push an edit through the model API regardless...","code":["table.getModel().setValueAt(\"!\", 0, 0)","UI.sync()"]},
 
         {"kind":"then","text":"...it is only honored if the table is actually editable.","code":["noExceptionThrown()","table.getValueAt(0, 0) == ( isEditable ? \"!\" : \"a\" )"]},
 
-        {"kind":"where","text":"We check every combination of layout and property mutability.","code":{"layout":["UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR","UI.ListData.ROW_MAJOR"],"mutable":["true","false","true","false"],"isEditable":["true","false","false","false"]}}
+        {"kind":"where","text":"We check every combination of editability and property mutability.","code":{"editability":["UI.Editability.EDITABLE","UI.Editability.EDITABLE","UI.Editability.READ_ONLY","UI.Editability.READ_ONLY"],"mutable":["true","false","true","false"],"isEditable":["true","false","false","false"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
   
     {
-      "id":"A `Tuple` based table is read only if either its layout or its property is read only. [3]",
+      "id":"A `Tuple` based table is read only if either its editability or its property says so. [3]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Editability of a tuple based table needs two things: an editable\n            layout, and a property which can actually receive the edit. A read\n            only `Val` cannot, which is why it always yields a read only table,\n            even if you ask for an editable layout. Any edit which sneaks in\n            through the model API anyway is silently ignored instead of\n            corrupting the table.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Editability of a tuple based table needs two things: permission through\n            `UI.Editability.EDITABLE`, and a property which can actually receive the\n            edit. A read only `Val` cannot, which is why it always yields a read only\n            table, even if you ask for an editable one. Any edit which sneaks in\n            through the model API anyway is silently ignored instead of\n            corrupting the table.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A tuple of cells, wrapped in the given kind of property.","code":["var tuple = Tuple.of(Tuple.of(\"a\", \"b\"))","var property = ( mutable ? Var.of(tuple) : Val.of(tuple) )"]},
 
-        {"kind":"and","text":"A table built from this property, with the given layout:","code":["var table = UI.table(layout, property).get(JTable)"]},
+        {"kind":"and","text":"A table built from this property, with the given editability:","code":["var table = UI.table(UI.CellOrder.ROW_MAJOR, editability, property).get(JTable)"]},
 
-        {"kind":"expect","text":"The table is only editable if both the layout and the property allow it.","code":["table.isCellEditable(0, 0) == isEditable"]},
+        {"kind":"expect","text":"The table is only editable if both the editability and the property allow it.","code":["table.isCellEditable(0, 0) == isEditable"]},
 
         {"kind":"when","text":"We push an edit through the model API regardless...","code":["table.getModel().setValueAt(\"!\", 0, 0)","UI.sync()"]},
 
         {"kind":"then","text":"...it is only honored if the table is actually editable.","code":["noExceptionThrown()","table.getValueAt(0, 0) == ( isEditable ? \"!\" : \"a\" )"]},
 
-        {"kind":"where","text":"We check every combination of layout and property mutability.","code":{"layout":["UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR","UI.ListData.ROW_MAJOR"],"mutable":["true","false","true","false"],"isEditable":["true","false","false","false"]}}
+        {"kind":"where","text":"We check every combination of editability and property mutability.","code":{"editability":["UI.Editability.EDITABLE","UI.Editability.EDITABLE","UI.Editability.READ_ONLY","UI.Editability.READ_ONLY"],"mutable":["true","false","true","false"],"isEditable":["true","false","false","false"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -523,7 +625,7 @@
       "blocks":[
         {"kind":"given","text":"A property holding a ragged matrix, including an empty row.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"a\", \"b\", \"c\"),","                    Tuple.of(\"d\"),","                    Tuple.of(String)","                ))"]},
 
-        {"kind":"and","text":"A table built from this property:","code":["var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)","var model = table.getModel()"]},
+        {"kind":"and","text":"A table built from this property:","code":["var table = UI.table(UI.CellOrder.ROW_MAJOR, rows).get(JTable)","var model = table.getModel()"]},
 
         {"kind":"expect","text":"The table is as wide as the longest row.","code":["model.getRowCount() == 3","model.getColumnCount() == 3"]},
 
@@ -548,7 +650,7 @@
       "blocks":[
         {"kind":"given","text":"A mutable and a read only nullable property, neither holding a tuple yet.","code":["var rows = Var.ofNullable(Tuple, null)","var readOnlyRows = Val.ofNullable(Tuple, null)"]},
 
-        {"kind":"and","text":"A table bound to each of them:","code":["var table = UI.table(UI.ListData.ROW_MAJOR_EDITABLE, rows).get(JTable)","var readOnlyTable = UI.table(UI.ListData.ROW_MAJOR, readOnlyRows).get(JTable)"]},
+        {"kind":"and","text":"A table bound to each of them:","code":["var table = UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, rows).get(JTable)","var readOnlyTable = UI.table(UI.CellOrder.ROW_MAJOR, readOnlyRows).get(JTable)"]},
 
         {"kind":"expect","text":"Both tables read as empty instead of being broken.","code":["table.getRowCount() == 0","table.getColumnCount() == 0","readOnlyTable.getRowCount() == 0","readOnlyTable.getColumnCount() == 0"]},
 
@@ -571,7 +673,7 @@
       "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.CellOrder.ROW_MAJOR, rows).get(JTable)"]},
 
         {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
 
@@ -594,7 +696,7 @@
       "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.CellOrder.ROW_MAJOR, rows).get(JTable)"]},
 
         {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
 
@@ -617,7 +719,7 @@
       "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.CellOrder.ROW_MAJOR, rows).get(JTable)"]},
 
         {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
 
@@ -640,7 +742,7 @@
       "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.CellOrder.ROW_MAJOR, rows).get(JTable)"]},
 
         {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
 
@@ -663,7 +765,7 @@
       "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.CellOrder.ROW_MAJOR, rows).get(JTable)"]},
 
         {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
 
@@ -686,7 +788,7 @@
       "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.CellOrder.ROW_MAJOR, rows).get(JTable)"]},
 
         {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
 
@@ -709,7 +811,7 @@
       "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.CellOrder.ROW_MAJOR, rows).get(JTable)"]},
 
         {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
 
@@ -732,7 +834,7 @@
       "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.CellOrder.ROW_MAJOR, rows).get(JTable)"]},
 
         {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
 
@@ -755,7 +857,7 @@
       "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.CellOrder.ROW_MAJOR, rows).get(JTable)"]},
 
         {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
 
@@ -778,7 +880,7 @@
       "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.CellOrder.ROW_MAJOR, rows).get(JTable)"]},
 
         {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
 
@@ -801,7 +903,7 @@
       "tags":{},"see":[],"extraInfo":["\n            A `Tuple` does not merely tell you that it changed, it also tells you\n            *how* it changed. A tuple based table exploits this: instead of\n            blindly rebuilding itself on every change, it translates a row\n            insertion into a `fireTableRowsInserted`, a removal into a\n            `fireTableRowsDeleted` and an in place change into a\n            `fireTableRowsUpdated`, which is what keeps updates to large tables\n            cheap. Only a change which cannot be expressed as a single row range,\n            or one which changes the shape of the table, makes it fall back to a\n            full rebuild (a structure change followed by a data change).\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.ListData.ROW_MAJOR, rows).get(JTable)"]},
+        {"kind":"given","text":"A property holding 3 rows of 2 cells each, and a table bound to it.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.table(UI.CellOrder.ROW_MAJOR, rows).get(JTable)"]},
 
         {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
 
@@ -821,10 +923,10 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            A `TableData` is the most complete description of the contents of\n            a table: it carries the cells, the column names, the column classes and\n            the layout of the data, all in a single immutable value. So if you hold\n            such a value in a property, then that property alone describes your\n            whole table, which is why you may bind it directly.\n            Note that no `updateTableOn(..)` binding is needed here, because the\n            table listens to the property itself.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            A `TableData` is the most complete description of the contents of\n            a table: it carries the cells, the column names, the column classes, the\n            cell order and the editability of the data, all in a single immutable\n            value. So if you hold such a value in a property, then that property alone\n            describes your whole table, which is why you may bind it directly.\n            Note that no `updateTableOn(..)` binding is needed here, because the\n            table listens to the property itself.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property holding a fully described table.","code":["var model = Var.of(","                TableData.of(UI.ListData.ROW_MAJOR, \"Name\", \"Age\")","                    .setColumnClassAt(0, String)","                    .setColumnClassAt(1, Integer)","                    .addRow(\"Alice\", 30)","                    .addRow(\"Bob\",   42)","            )"]},
+        {"kind":"given","text":"A property holding a fully described table.","code":["var model = Var.of(","                TableData.of(UI.CellOrder.ROW_MAJOR, \"Name\", \"Age\")","                    .setColumnClassAt(0, String)","                    .setColumnClassAt(1, Integer)","                    .addRow(\"Alice\", 30)","                    .addRow(\"Bob\",   42)","            )"]},
 
         {"kind":"and","text":"A table built from this property:","code":["var table = UI.table(model).get(JTable)"]},
 
@@ -840,77 +942,77 @@
     },
   
     {
-      "id":"A `TableData` property based table is read only if either its layout or its property is read only. [0]",
+      "id":"A `TableData` property based table is read only if either its value or its property is read only. [0]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Just like for a `Tuple` based table, two conditions have to be met before\n            the user may edit the cells of a `TableData` based table: the layout\n            of the snapshot has to be one of the `*_EDITABLE` constants, and the\n            property has to be a mutable `Var` which can actually receive the edit.\n            If either is missing, then the table is simply read only.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Just like for a `Tuple` based table, two conditions have to be met before\n            the user may edit the cells of a `TableData` based table: the snapshot\n            itself has to permit it (see `TableData::asEditable`), and the\n            property has to be a mutable `Var` which can actually receive the edit.\n            If either is missing, then the table is simply read only.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A table with the given layout, held by a property of the given mutability.","code":["var data  = TableData.of(layout).addRow(\"a\", \"b\")","var model = mutable ? Var.of(data) : Val.of(data)"]},
+        {"kind":"given","text":"A table with the given editability, held by a property of the given mutability.","code":["var data  = TableData.of(UI.CellOrder.ROW_MAJOR)","                     .withEditability(editability)","                     .addRow(\"a\", \"b\")","var model = mutable ? Var.of(data) : Val.of(data)"]},
 
         {"kind":"and","text":"A table bound to that property:","code":["var table = UI.table(model).get(JTable)"]},
 
         {"kind":"expect","text":"The table only lets the user edit if both conditions are met.","code":["table.isCellEditable(0, 0) == editable"]},
 
-        {"kind":"where","text":"","code":{"layout":["UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR","UI.ListData.ROW_MAJOR"],"mutable":["true","false","true","false"],"editable":["true","false","false","false"]}}
+        {"kind":"where","text":"","code":{"editability":["UI.Editability.EDITABLE","UI.Editability.EDITABLE","UI.Editability.READ_ONLY","UI.Editability.READ_ONLY"],"mutable":["true","false","true","false"],"editable":["true","false","false","false"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
   
     {
-      "id":"A `TableData` property based table is read only if either its layout or its property is read only. [1]",
+      "id":"A `TableData` property based table is read only if either its value or its property is read only. [1]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Just like for a `Tuple` based table, two conditions have to be met before\n            the user may edit the cells of a `TableData` based table: the layout\n            of the snapshot has to be one of the `*_EDITABLE` constants, and the\n            property has to be a mutable `Var` which can actually receive the edit.\n            If either is missing, then the table is simply read only.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Just like for a `Tuple` based table, two conditions have to be met before\n            the user may edit the cells of a `TableData` based table: the snapshot\n            itself has to permit it (see `TableData::asEditable`), and the\n            property has to be a mutable `Var` which can actually receive the edit.\n            If either is missing, then the table is simply read only.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A table with the given layout, held by a property of the given mutability.","code":["var data  = TableData.of(layout).addRow(\"a\", \"b\")","var model = mutable ? Var.of(data) : Val.of(data)"]},
+        {"kind":"given","text":"A table with the given editability, held by a property of the given mutability.","code":["var data  = TableData.of(UI.CellOrder.ROW_MAJOR)","                     .withEditability(editability)","                     .addRow(\"a\", \"b\")","var model = mutable ? Var.of(data) : Val.of(data)"]},
 
         {"kind":"and","text":"A table bound to that property:","code":["var table = UI.table(model).get(JTable)"]},
 
         {"kind":"expect","text":"The table only lets the user edit if both conditions are met.","code":["table.isCellEditable(0, 0) == editable"]},
 
-        {"kind":"where","text":"","code":{"layout":["UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR","UI.ListData.ROW_MAJOR"],"mutable":["true","false","true","false"],"editable":["true","false","false","false"]}}
+        {"kind":"where","text":"","code":{"editability":["UI.Editability.EDITABLE","UI.Editability.EDITABLE","UI.Editability.READ_ONLY","UI.Editability.READ_ONLY"],"mutable":["true","false","true","false"],"editable":["true","false","false","false"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
   
     {
-      "id":"A `TableData` property based table is read only if either its layout or its property is read only. [2]",
+      "id":"A `TableData` property based table is read only if either its value or its property is read only. [2]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Just like for a `Tuple` based table, two conditions have to be met before\n            the user may edit the cells of a `TableData` based table: the layout\n            of the snapshot has to be one of the `*_EDITABLE` constants, and the\n            property has to be a mutable `Var` which can actually receive the edit.\n            If either is missing, then the table is simply read only.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Just like for a `Tuple` based table, two conditions have to be met before\n            the user may edit the cells of a `TableData` based table: the snapshot\n            itself has to permit it (see `TableData::asEditable`), and the\n            property has to be a mutable `Var` which can actually receive the edit.\n            If either is missing, then the table is simply read only.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A table with the given layout, held by a property of the given mutability.","code":["var data  = TableData.of(layout).addRow(\"a\", \"b\")","var model = mutable ? Var.of(data) : Val.of(data)"]},
+        {"kind":"given","text":"A table with the given editability, held by a property of the given mutability.","code":["var data  = TableData.of(UI.CellOrder.ROW_MAJOR)","                     .withEditability(editability)","                     .addRow(\"a\", \"b\")","var model = mutable ? Var.of(data) : Val.of(data)"]},
 
         {"kind":"and","text":"A table bound to that property:","code":["var table = UI.table(model).get(JTable)"]},
 
         {"kind":"expect","text":"The table only lets the user edit if both conditions are met.","code":["table.isCellEditable(0, 0) == editable"]},
 
-        {"kind":"where","text":"","code":{"layout":["UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR","UI.ListData.ROW_MAJOR"],"mutable":["true","false","true","false"],"editable":["true","false","false","false"]}}
+        {"kind":"where","text":"","code":{"editability":["UI.Editability.EDITABLE","UI.Editability.EDITABLE","UI.Editability.READ_ONLY","UI.Editability.READ_ONLY"],"mutable":["true","false","true","false"],"editable":["true","false","false","false"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
   
     {
-      "id":"A `TableData` property based table is read only if either its layout or its property is read only. [3]",
+      "id":"A `TableData` property based table is read only if either its value or its property is read only. [3]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Just like for a `Tuple` based table, two conditions have to be met before\n            the user may edit the cells of a `TableData` based table: the layout\n            of the snapshot has to be one of the `*_EDITABLE` constants, and the\n            property has to be a mutable `Var` which can actually receive the edit.\n            If either is missing, then the table is simply read only.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Just like for a `Tuple` based table, two conditions have to be met before\n            the user may edit the cells of a `TableData` based table: the snapshot\n            itself has to permit it (see `TableData::asEditable`), and the\n            property has to be a mutable `Var` which can actually receive the edit.\n            If either is missing, then the table is simply read only.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A table with the given layout, held by a property of the given mutability.","code":["var data  = TableData.of(layout).addRow(\"a\", \"b\")","var model = mutable ? Var.of(data) : Val.of(data)"]},
+        {"kind":"given","text":"A table with the given editability, held by a property of the given mutability.","code":["var data  = TableData.of(UI.CellOrder.ROW_MAJOR)","                     .withEditability(editability)","                     .addRow(\"a\", \"b\")","var model = mutable ? Var.of(data) : Val.of(data)"]},
 
         {"kind":"and","text":"A table bound to that property:","code":["var table = UI.table(model).get(JTable)"]},
 
         {"kind":"expect","text":"The table only lets the user edit if both conditions are met.","code":["table.isCellEditable(0, 0) == editable"]},
 
-        {"kind":"where","text":"","code":{"layout":["UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR_EDITABLE","UI.ListData.ROW_MAJOR","UI.ListData.ROW_MAJOR"],"mutable":["true","false","true","false"],"editable":["true","false","false","false"]}}
+        {"kind":"where","text":"","code":{"editability":["UI.Editability.EDITABLE","UI.Editability.EDITABLE","UI.Editability.READ_ONLY","UI.Editability.READ_ONLY"],"mutable":["true","false","true","false"],"editable":["true","false","false","false"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -923,7 +1025,7 @@
       "tags":{},"see":[],"extraInfo":["\n            A view model routinely keeps its state in a `Var` but exposes only a read\n            only `Val` of it to the outside (a `public Val<TableData> tableModel()`\n            over a `private Var<TableData>`, say). If such a `Val` is bound through the\n            read only `withModel(Val)` overload, then the table must be read only, no\n            matter that the reference happens to point at a mutable `Var` at runtime:\n            the overload the user picked is what expresses the intent, not the runtime\n            type of the property. Anything else would let edits leak into state the\n            view model never meant to expose.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A mutable `Var` holding an editable snapshot.","code":["var backing = Var.of(","                TableData.of(UI.ListData.ROW_MAJOR_EDITABLE)","                    .addRow(\"a\", \"b\")","            )"]},
+        {"kind":"given","text":"A mutable `Var` holding an editable snapshot.","code":["var backing = Var.of(","                TableData.of(UI.CellOrder.ROW_MAJOR).asEditable()","                    .addRow(\"a\", \"b\")","            )"]},
 
         {"kind":"and","text":"\n                A table bound to it through the read only overload. The `(Val)` cast\n                is what picks that overload here, just as a Java caller holding a\n                `Val` reference (a view model exposing its `Var` as a `Val`, say)\n                would pick it, rather than Groovy dispatching on the runtime `Var`.\n            ","code":["var table = UI.table((Val) backing).get(JTable)"]},
 
@@ -944,7 +1046,7 @@
       "tags":{},"see":[],"extraInfo":["\n            A `Var` holding an editable `TableData` is a two way binding: an edit\n            made through the table model finds its way back into the property, and the\n            property in turn is what the table reads. Note that the snapshot is a value,\n            so the property receives a new snapshot rather than a mutated one.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property holding an editable snapshot, and a table bound to it.","code":["var model = Var.of(","                TableData.of(UI.ListData.ROW_MAJOR_EDITABLE)","                    .addRow(\"a\", \"b\")","                    .addRow(\"c\", \"d\")","            )","var table = UI.table(model).get(JTable)"]},
+        {"kind":"given","text":"A property holding an editable snapshot, and a table bound to it.","code":["var model = Var.of(","                TableData.of(UI.CellOrder.ROW_MAJOR).asEditable()","                    .addRow(\"a\", \"b\")","                    .addRow(\"c\", \"d\")","            )","var table = UI.table(model).get(JTable)"]},
 
         {"kind":"and","text":"We remember the initial snapshot, so that we can tell it was not mutated.","code":["var initial = model.get()"]},
 
@@ -967,7 +1069,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The columns of a table are not just its cells: a `TableData` also\n            describes the name and class of every column. A `JTable` can only pick\n            those up through a table structure change, so the model has to recognize\n            a change of the columns as being structural.\n            <p>\n            Note how deliberate this is: below we rename a column and edit a row in\n            one and the same change. The row edit alone would be synced through a\n            targeted row update (the cells carry a diff which says so), and a row\n            update would leave the table sitting on its old header. Recognizing the\n            renamed column is what makes the model fall back to a full rebuild here.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property holding a named table, and a table bound to it.","code":["var model = Var.of(","                TableData.of(UI.ListData.ROW_MAJOR, \"First\", \"Second\")","                    .addRow(\"a\", \"b\")","            )","var table = UI.table(model).get(JTable)"]},
+        {"kind":"given","text":"A property holding a named table, and a table bound to it.","code":["var model = Var.of(","                TableData.of(UI.CellOrder.ROW_MAJOR, \"First\", \"Second\")","                    .addRow(\"a\", \"b\")","            )","var table = UI.table(model).get(JTable)"]},
 
         {"kind":"and","text":"A listener recording the table model events in a readable form.","code":["var events = []","table.getModel().addTableModelListener({ TableModelEvent e -> events << describe(e) } as TableModelListener)"]},
 

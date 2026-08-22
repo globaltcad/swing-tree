@@ -29,8 +29,8 @@
  *  Modifications 2018, by Kevin Kieffer
  *  The following modifications have been made and noted with &quot;KK&quot; in the comments:
  *  1. Added caches for the PaintContext and the Rasters, to speed up repaints when nothing has changed
- *  2. Apply the inverse trasform prior to calcuating the angle - this allows graphics transforms (such as rotations, shears) to affect the angle
- *  3. Replace the Pythag + arcos calculation with an arctan calcuation
+ *  2. Apply the inverse transform prior to calculating the angle - this allows graphics transforms (such as rotations, shears) to affect the angle
+ *  3. Replace the Pythag + arcos calculation with an arctan calculation
  *  4. Adjust the colors at 0.0, 1.0 (top dead center) to blend the first and last defined color (rather than setting them to the first color)
  *
  *  Adopted from https://github.com/kkieffer/jZELD/blob/master/src/main/java/com/github/kkieffer/jzeld/attributes/ConicalGradientPaint.java
@@ -41,6 +41,8 @@
  */
 
 import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import swingtree.SwingTree;
 
 import java.awt.*;
 import java.awt.geom.AffineTransform;
@@ -70,6 +72,8 @@ import java.util.HashMap;
  */
 final class ConicalGradientPaint implements Paint {
 
+<span class="fc" id="L75">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ConicalGradientPaint.class);</span>
+
     /**
      * Cache for the context - when the bounds, center, and transform are unchanged, then the context is the same
      */
@@ -85,12 +89,12 @@ final class ConicalGradientPaint implements Paint {
             Point2D center,
             AffineTransform transform,
             ConicalGradientPaintContext context
-<span class="fc" id="L88">        ) {</span>
-<span class="fc" id="L89">            _bounds        = bounds;</span>
-<span class="fc" id="L90">            _center        = center;</span>
-<span class="fc" id="L91">            _transform     = transform;</span>
-<span class="fc" id="L92">            _cachedContext = context;</span>
-<span class="fc" id="L93">        }</span>
+<span class="fc" id="L92">        ) {</span>
+<span class="fc" id="L93">            _bounds        = bounds;</span>
+<span class="fc" id="L94">            _center        = center;</span>
+<span class="fc" id="L95">            _transform     = transform;</span>
+<span class="fc" id="L96">            _cachedContext = context;</span>
+<span class="fc" id="L97">        }</span>
 
         /**
          * KK: Get the cached context - if it matches the supplied arguments.  If the arguments aren't equal to the cached version, return null
@@ -104,10 +108,10 @@ final class ConicalGradientPaint implements Paint {
                 Point2D         center, 
                 AffineTransform transform
         ) {
-<span class="nc bnc" id="L107" title="All 6 branches missed.">            if (_bounds.equals(bounds) &amp;&amp; _center.equals(center) &amp;&amp; _transform.equals(transform))</span>
-<span class="nc" id="L108">                return _cachedContext;</span>
+<span class="nc bnc" id="L111" title="All 6 branches missed.">            if (_bounds.equals(bounds) &amp;&amp; _center.equals(center) &amp;&amp; _transform.equals(transform))</span>
+<span class="nc" id="L112">                return _cachedContext;</span>
             else
-<span class="nc" id="L110">                return null;</span>
+<span class="nc" id="L114">                return null;</span>
         }
     }
 
@@ -132,11 +136,11 @@ final class ConicalGradientPaint implements Paint {
      * @throws IllegalArgumentException if fractions and colors are not of the same size.
      */
     public ConicalGradientPaint(final Point2D center, final float[] GIVEN_FRACTIONS, final Color[] GIVEN_COLORS) throws IllegalArgumentException {
-<span class="nc" id="L135">        this(false, center, 0.0f, GIVEN_FRACTIONS, GIVEN_COLORS);</span>
-<span class="nc" id="L136">    }</span>
+<span class="nc" id="L139">        this(false, center, 0.0f, GIVEN_FRACTIONS, GIVEN_COLORS);</span>
+<span class="nc" id="L140">    }</span>
 
     /**
-     * Enhanced constructor which takes the FRACTIONS in degress from 0.0f to 360.0f and
+     * Enhanced constructor which takes the FRACTIONS in degrees from 0.0f to 360.0f and
      * also an GIVEN_OFFSET in degrees around the rotation CENTER
      * @param usesDegrees true if fractions are in degrees, false if fractions are in 0.0 to 1.0
      * @param center the center of the gradient
@@ -153,27 +157,27 @@ final class ConicalGradientPaint implements Paint {
         final Color[] colors
     )
     throws IllegalArgumentException
-<span class="fc" id="L156">    {</span>
+<span class="fc" id="L160">    {</span>
         // Check that fractions and colors are of the same size
-<span class="pc bpc" id="L158" title="1 of 2 branches missed.">        if (fractions.length != colors.length) {</span>
-<span class="nc" id="L159">            throw new IllegalArgumentException(&quot;Fractions and colors must be equal in size&quot;);</span>
+<span class="pc bpc" id="L162" title="1 of 2 branches missed.">        if (fractions.length != colors.length) {</span>
+<span class="nc" id="L163">            throw new IllegalArgumentException(&quot;Fractions and colors must be equal in size&quot;);</span>
         }
 
-<span class="fc" id="L162">        final java.util.List&lt;Float&gt; fractionList = new java.util.ArrayList&lt;Float&gt;(fractions.length);</span>
+<span class="fc" id="L166">        final java.util.List&lt;Float&gt; fractionList = new java.util.ArrayList&lt;Float&gt;(fractions.length);</span>
         final float finalOffset;
-<span class="pc bpc" id="L164" title="1 of 2 branches missed.">        if (usesDegrees) {</span>
-<span class="fc" id="L165">            final float degFraction = 1f / 360f;</span>
-<span class="fc bfc" id="L166" title="All 2 branches covered.">            if (Float.compare((offset * degFraction), -0.5f) == 0) {</span>
-<span class="fc" id="L167">                finalOffset = -0.5f;</span>
-<span class="pc bpc" id="L168" title="1 of 2 branches missed.">            } else if (Float.compare((offset * degFraction), 0.5f) == 0) {</span>
-<span class="nc" id="L169">                finalOffset = 0.5f;</span>
+<span class="pc bpc" id="L168" title="1 of 2 branches missed.">        if (usesDegrees) {</span>
+<span class="fc" id="L169">            final float degFraction = 1f / 360f;</span>
+<span class="fc bfc" id="L170" title="All 2 branches covered.">            if (Float.compare((offset * degFraction), -0.5f) == 0) {</span>
+<span class="fc" id="L171">                finalOffset = -0.5f;</span>
+<span class="pc bpc" id="L172" title="1 of 2 branches missed.">            } else if (Float.compare((offset * degFraction), 0.5f) == 0) {</span>
+<span class="nc" id="L173">                finalOffset = 0.5f;</span>
             } else {
-<span class="fc" id="L171">                finalOffset = (offset * degFraction);</span>
+<span class="fc" id="L175">                finalOffset = (offset * degFraction);</span>
             }
-<span class="fc bfc" id="L173" title="All 2 branches covered.">            for (final float fraction : fractions) {</span>
-<span class="fc" id="L174">                fractionList.add((fraction * degFraction));</span>
+<span class="fc bfc" id="L177" title="All 2 branches covered.">            for (final float fraction : fractions) {</span>
+<span class="fc" id="L178">                fractionList.add((fraction * degFraction));</span>
             }
-<span class="fc" id="L176">        } else {</span>
+<span class="fc" id="L180">        } else {</span>
             // Now it seems to work with rotation of 0.5f, below is the old code to correct the problem
 //            if (GIVEN_OFFSET == -0.5)
 //            {
@@ -189,73 +193,73 @@ final class ConicalGradientPaint implements Paint {
 //            }
 //            else
             {
-<span class="nc" id="L192">                finalOffset = offset;</span>
+<span class="nc" id="L196">                finalOffset = offset;</span>
             }
-<span class="nc bnc" id="L194" title="All 2 branches missed.">            for (final float fraction : fractions) {</span>
-<span class="nc" id="L195">                fractionList.add(fraction);</span>
+<span class="nc bnc" id="L198" title="All 2 branches missed.">            for (final float fraction : fractions) {</span>
+<span class="nc" id="L199">                fractionList.add(fraction);</span>
             }
         }
 
         // Check for valid offset
-<span class="pc bpc" id="L200" title="2 of 4 branches missed.">        if (finalOffset &gt; 0.5f || finalOffset &lt; -0.5f) {</span>
-<span class="nc" id="L201">            throw new IllegalArgumentException(&quot;Offset has to be in the range of -0.5 to 0.5&quot;);</span>
+<span class="pc bpc" id="L204" title="2 of 4 branches missed.">        if (finalOffset &gt; 0.5f || finalOffset &lt; -0.5f) {</span>
+<span class="nc" id="L205">            throw new IllegalArgumentException(&quot;Offset has to be in the range of -0.5 to 0.5&quot;);</span>
         }
 
-<span class="fc" id="L204">        _angleOffset = offset;</span>
+<span class="fc" id="L208">        _angleOffset = offset;</span>
 
         // Adjust fractions and colors array in the case where startvalue != 0.0f and/or endvalue != 1.0f
-<span class="fc" id="L207">        final java.util.List&lt;Color&gt; colorList = new java.util.ArrayList&lt;Color&gt;(colors.length);</span>
-<span class="fc" id="L208">        colorList.addAll(java.util.Arrays.asList(colors));</span>
+<span class="fc" id="L211">        final java.util.List&lt;Color&gt; colorList = new java.util.ArrayList&lt;Color&gt;(colors.length);</span>
+<span class="fc" id="L212">        colorList.addAll(java.util.Arrays.asList(colors));</span>
 
         //KK: Calculate the Color at the top dead center (mix between first and last)
-<span class="fc" id="L211">        final Color start = colorList.get(0);</span>
-<span class="fc" id="L212">        final Color last = colorList.get(colorList.size()-1);</span>
-<span class="fc" id="L213">        final float centerVal = 1.0f - fractionList.get(fractionList.size()-1);</span>
-<span class="fc" id="L214">        final float lastToStartRange = centerVal + fractionList.get(0);</span>
+<span class="fc" id="L215">        final Color start = colorList.get(0);</span>
+<span class="fc" id="L216">        final Color last = colorList.get(colorList.size()-1);</span>
+<span class="fc" id="L217">        final float centerVal = 1.0f - fractionList.get(fractionList.size()-1);</span>
+<span class="fc" id="L218">        final float lastToStartRange = centerVal + fractionList.get(0);</span>
 
-<span class="fc" id="L216">        final float firstFraction = fractionList.get(0);</span>
-<span class="fc" id="L217">        final float lastFraction  = fractionList.get(fractionList.size()-1);</span>
+<span class="fc" id="L220">        final float firstFraction = fractionList.get(0);</span>
+<span class="fc" id="L221">        final float lastFraction  = fractionList.get(fractionList.size()-1);</span>
 
-<span class="pc bpc" id="L219" title="2 of 4 branches missed.">        if ( firstFraction != 0f || lastFraction != 1f ) {</span>
-<span class="nc" id="L220">            Color centerColor = getColorFromFraction(last, start, (int)(lastToStartRange * 10000), (int)(centerVal * 10000));</span>
+<span class="pc bpc" id="L223" title="2 of 4 branches missed.">        if ( firstFraction != 0f || lastFraction != 1f ) {</span>
+<span class="nc" id="L224">            Color centerColor = getColorFromFraction(last, start, (int)(lastToStartRange * 10000), (int)(centerVal * 10000));</span>
 
             // Assure that fractions start with 0.0f
-<span class="nc bnc" id="L223" title="All 2 branches missed.">            if (firstFraction != 0.0f) {</span>
-<span class="nc" id="L224">                fractionList.add(0, 0.0f);</span>
-<span class="nc" id="L225">                colorList.add(0, centerColor);</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">            if (firstFraction != 0.0f) {</span>
+<span class="nc" id="L228">                fractionList.add(0, 0.0f);</span>
+<span class="nc" id="L229">                colorList.add(0, centerColor);</span>
             }
 
             // Assure that fractions end with 1.0f
-<span class="nc bnc" id="L229" title="All 2 branches missed.">            if (lastFraction != 1.0f) {</span>
-<span class="nc" id="L230">                fractionList.add(1.0f);</span>
-<span class="nc" id="L231">                colorList.add(centerColor);</span>
+<span class="nc bnc" id="L233" title="All 2 branches missed.">            if (lastFraction != 1.0f) {</span>
+<span class="nc" id="L234">                fractionList.add(1.0f);</span>
+<span class="nc" id="L235">                colorList.add(centerColor);</span>
             }
         }
 
         // Set the values
-<span class="fc" id="L236">        _center = center;</span>
-<span class="fc" id="L237">        _colors = colorList.toArray(new Color[colorList.size()]);</span>
+<span class="fc" id="L240">        _center = center;</span>
+<span class="fc" id="L241">        _colors = colorList.toArray(new Color[colorList.size()]);</span>
 
         // Prepare lookup table for the angles of each fraction
-<span class="fc" id="L240">        final int MAX_FRACTIONS = fractionList.size();</span>
-<span class="fc" id="L241">        _fractionOffsets = new float[MAX_FRACTIONS];</span>
-<span class="fc bfc" id="L242" title="All 2 branches covered.">        for (int i = 0; i &lt; MAX_FRACTIONS; i++) {</span>
-<span class="fc" id="L243">            _fractionOffsets[i] = fractionList.get(i) * 360f;</span>
+<span class="fc" id="L244">        final int MAX_FRACTIONS = fractionList.size();</span>
+<span class="fc" id="L245">        _fractionOffsets = new float[MAX_FRACTIONS];</span>
+<span class="fc bfc" id="L246" title="All 2 branches covered.">        for (int i = 0; i &lt; MAX_FRACTIONS; i++) {</span>
+<span class="fc" id="L247">            _fractionOffsets[i] = fractionList.get(i) * 360f;</span>
         }
 
         // Prepare lookup tables for the color stepsize of each color
-<span class="fc" id="L247">        _redStepLookup = new float[_colors.length];</span>
-<span class="fc" id="L248">        _greenStepLookup = new float[_colors.length];</span>
-<span class="fc" id="L249">        _blueStepLookup = new float[_colors.length];</span>
-<span class="fc" id="L250">        _alphaStepLookup = new float[_colors.length];</span>
+<span class="fc" id="L251">        _redStepLookup = new float[_colors.length];</span>
+<span class="fc" id="L252">        _greenStepLookup = new float[_colors.length];</span>
+<span class="fc" id="L253">        _blueStepLookup = new float[_colors.length];</span>
+<span class="fc" id="L254">        _alphaStepLookup = new float[_colors.length];</span>
 
-<span class="fc bfc" id="L252" title="All 2 branches covered.">        for (int i = 0; i &lt; (_colors.length - 1); i++) {</span>
-<span class="fc" id="L253">            _redStepLookup[i] = ((_colors[i + 1].getRed() - _colors[i].getRed()) * INT_TO_FLOAT_CONST) / (_fractionOffsets[i + 1] - _fractionOffsets[i]);</span>
-<span class="fc" id="L254">            _greenStepLookup[i] = ((_colors[i + 1].getGreen() - _colors[i].getGreen()) * INT_TO_FLOAT_CONST) / (_fractionOffsets[i + 1] - _fractionOffsets[i]);</span>
-<span class="fc" id="L255">            _blueStepLookup[i] = ((_colors[i + 1].getBlue() - _colors[i].getBlue()) * INT_TO_FLOAT_CONST) / (_fractionOffsets[i + 1] - _fractionOffsets[i]);</span>
-<span class="fc" id="L256">            _alphaStepLookup[i] = ((_colors[i + 1].getAlpha() - _colors[i].getAlpha()) * INT_TO_FLOAT_CONST) / (_fractionOffsets[i + 1] - _fractionOffsets[i]);</span>
+<span class="fc bfc" id="L256" title="All 2 branches covered.">        for (int i = 0; i &lt; (_colors.length - 1); i++) {</span>
+<span class="fc" id="L257">            _redStepLookup[i] = ((_colors[i + 1].getRed() - _colors[i].getRed()) * INT_TO_FLOAT_CONST) / (_fractionOffsets[i + 1] - _fractionOffsets[i]);</span>
+<span class="fc" id="L258">            _greenStepLookup[i] = ((_colors[i + 1].getGreen() - _colors[i].getGreen()) * INT_TO_FLOAT_CONST) / (_fractionOffsets[i + 1] - _fractionOffsets[i]);</span>
+<span class="fc" id="L259">            _blueStepLookup[i] = ((_colors[i + 1].getBlue() - _colors[i].getBlue()) * INT_TO_FLOAT_CONST) / (_fractionOffsets[i + 1] - _fractionOffsets[i]);</span>
+<span class="fc" id="L260">            _alphaStepLookup[i] = ((_colors[i + 1].getAlpha() - _colors[i].getAlpha()) * INT_TO_FLOAT_CONST) / (_fractionOffsets[i + 1] - _fractionOffsets[i]);</span>
         }
-<span class="fc" id="L258">    }</span>
+<span class="fc" id="L262">    }</span>
 
     /**
      * With the START_COLOR at the beginning and the DESTINATION_COLOR at the end of the given RANGE the method will calculate
@@ -276,37 +280,37 @@ final class ConicalGradientPaint implements Paint {
         final int RANGE,
         final int VALUE
     ) {
-<span class="nc" id="L279">        final float SOURCE_RED   = START_COLOR.getRed()   * INT_TO_FLOAT_CONST;</span>
-<span class="nc" id="L280">        final float SOURCE_GREEN = START_COLOR.getGreen() * INT_TO_FLOAT_CONST;</span>
-<span class="nc" id="L281">        final float SOURCE_BLUE  = START_COLOR.getBlue()  * INT_TO_FLOAT_CONST;</span>
-<span class="nc" id="L282">        final float SOURCE_ALPHA = START_COLOR.getAlpha() * INT_TO_FLOAT_CONST;</span>
+<span class="nc" id="L283">        final float SOURCE_RED   = START_COLOR.getRed()   * INT_TO_FLOAT_CONST;</span>
+<span class="nc" id="L284">        final float SOURCE_GREEN = START_COLOR.getGreen() * INT_TO_FLOAT_CONST;</span>
+<span class="nc" id="L285">        final float SOURCE_BLUE  = START_COLOR.getBlue()  * INT_TO_FLOAT_CONST;</span>
+<span class="nc" id="L286">        final float SOURCE_ALPHA = START_COLOR.getAlpha() * INT_TO_FLOAT_CONST;</span>
 
-<span class="nc" id="L284">        final float DESTINATION_RED   = DESTINATION_COLOR.getRed()   * INT_TO_FLOAT_CONST;</span>
-<span class="nc" id="L285">        final float DESTINATION_GREEN = DESTINATION_COLOR.getGreen() * INT_TO_FLOAT_CONST;</span>
-<span class="nc" id="L286">        final float DESTINATION_BLUE  = DESTINATION_COLOR.getBlue()  * INT_TO_FLOAT_CONST;</span>
-<span class="nc" id="L287">        final float DESTINATION_ALPHA = DESTINATION_COLOR.getAlpha() * INT_TO_FLOAT_CONST;</span>
+<span class="nc" id="L288">        final float DESTINATION_RED   = DESTINATION_COLOR.getRed()   * INT_TO_FLOAT_CONST;</span>
+<span class="nc" id="L289">        final float DESTINATION_GREEN = DESTINATION_COLOR.getGreen() * INT_TO_FLOAT_CONST;</span>
+<span class="nc" id="L290">        final float DESTINATION_BLUE  = DESTINATION_COLOR.getBlue()  * INT_TO_FLOAT_CONST;</span>
+<span class="nc" id="L291">        final float DESTINATION_ALPHA = DESTINATION_COLOR.getAlpha() * INT_TO_FLOAT_CONST;</span>
 
-<span class="nc" id="L289">        final float RED_DELTA   = DESTINATION_RED   - SOURCE_RED;</span>
-<span class="nc" id="L290">        final float GREEN_DELTA = DESTINATION_GREEN - SOURCE_GREEN;</span>
-<span class="nc" id="L291">        final float BLUE_DELTA  = DESTINATION_BLUE  - SOURCE_BLUE;</span>
-<span class="nc" id="L292">        final float ALPHA_DELTA = DESTINATION_ALPHA - SOURCE_ALPHA;</span>
+<span class="nc" id="L293">        final float RED_DELTA   = DESTINATION_RED   - SOURCE_RED;</span>
+<span class="nc" id="L294">        final float GREEN_DELTA = DESTINATION_GREEN - SOURCE_GREEN;</span>
+<span class="nc" id="L295">        final float BLUE_DELTA  = DESTINATION_BLUE  - SOURCE_BLUE;</span>
+<span class="nc" id="L296">        final float ALPHA_DELTA = DESTINATION_ALPHA - SOURCE_ALPHA;</span>
 
-<span class="nc" id="L294">        final float RED_FRACTION   = RED_DELTA   / RANGE;</span>
-<span class="nc" id="L295">        final float GREEN_FRACTION = GREEN_DELTA / RANGE;</span>
-<span class="nc" id="L296">        final float BLUE_FRACTION  = BLUE_DELTA  / RANGE;</span>
-<span class="nc" id="L297">        final float ALPHA_FRACTION = ALPHA_DELTA / RANGE;</span>
+<span class="nc" id="L298">        final float RED_FRACTION   = RED_DELTA   / RANGE;</span>
+<span class="nc" id="L299">        final float GREEN_FRACTION = GREEN_DELTA / RANGE;</span>
+<span class="nc" id="L300">        final float BLUE_FRACTION  = BLUE_DELTA  / RANGE;</span>
+<span class="nc" id="L301">        final float ALPHA_FRACTION = ALPHA_DELTA / RANGE;</span>
 
-<span class="nc" id="L299">        float red   = SOURCE_RED   + RED_FRACTION   * VALUE;</span>
-<span class="nc" id="L300">        float green = SOURCE_GREEN + GREEN_FRACTION * VALUE;</span>
-<span class="nc" id="L301">        float blue  = SOURCE_BLUE  + BLUE_FRACTION  * VALUE;</span>
-<span class="nc" id="L302">        float alpha = SOURCE_ALPHA + ALPHA_FRACTION * VALUE;</span>
+<span class="nc" id="L303">        float red   = SOURCE_RED   + RED_FRACTION   * VALUE;</span>
+<span class="nc" id="L304">        float green = SOURCE_GREEN + GREEN_FRACTION * VALUE;</span>
+<span class="nc" id="L305">        float blue  = SOURCE_BLUE  + BLUE_FRACTION  * VALUE;</span>
+<span class="nc" id="L306">        float alpha = SOURCE_ALPHA + ALPHA_FRACTION * VALUE;</span>
 
-<span class="nc bnc" id="L304" title="All 4 branches missed.">        red   = red   &lt; 0f ? 0f : (red   &gt; 1f ? 1f : red);</span>
-<span class="nc bnc" id="L305" title="All 4 branches missed.">        green = green &lt; 0f ? 0f : (green &gt; 1f ? 1f : green);</span>
-<span class="nc bnc" id="L306" title="All 4 branches missed.">        blue  = blue  &lt; 0f ? 0f : (blue  &gt; 1f ? 1f : blue);</span>
-<span class="nc bnc" id="L307" title="All 4 branches missed.">        alpha = alpha &lt; 0f ? 0f : (alpha &gt; 1f ? 1f : alpha);</span>
+<span class="nc bnc" id="L308" title="All 4 branches missed.">        red   = red   &lt; 0f ? 0f : (red   &gt; 1f ? 1f : red);</span>
+<span class="nc bnc" id="L309" title="All 4 branches missed.">        green = green &lt; 0f ? 0f : (green &gt; 1f ? 1f : green);</span>
+<span class="nc bnc" id="L310" title="All 4 branches missed.">        blue  = blue  &lt; 0f ? 0f : (blue  &gt; 1f ? 1f : blue);</span>
+<span class="nc bnc" id="L311" title="All 4 branches missed.">        alpha = alpha &lt; 0f ? 0f : (alpha &gt; 1f ? 1f : alpha);</span>
 
-<span class="nc" id="L309">        return new Color(red, green, blue, alpha);</span>
+<span class="nc" id="L313">        return new Color(red, green, blue, alpha);</span>
     }
 
 
@@ -319,74 +323,74 @@ final class ConicalGradientPaint implements Paint {
 
 
         //KK - speed up repaints by caching the context
-<span class="pc bpc" id="L322" title="1 of 2 branches missed.">        if (_cached != null) {</span>
-<span class="nc" id="L323">            ConicalGradientPaintContext c = _cached.get(DEVICE_BOUNDS, _center, TRANSFORM);</span>
-<span class="nc bnc" id="L324" title="All 2 branches missed.">            if (c != null)</span>
-<span class="nc" id="L325">                return c;</span>
+<span class="pc bpc" id="L326" title="1 of 2 branches missed.">        if (_cached != null) {</span>
+<span class="nc" id="L327">            ConicalGradientPaintContext c = _cached.get(DEVICE_BOUNDS, _center, TRANSFORM);</span>
+<span class="nc bnc" id="L328" title="All 2 branches missed.">            if (c != null)</span>
+<span class="nc" id="L329">                return c;</span>
         }
 
-<span class="fc" id="L328">        ConicalGradientPaintContext context = new ConicalGradientPaintContext(_center, TRANSFORM);</span>
-<span class="fc" id="L329">        _cached = new CachedContext(DEVICE_BOUNDS, _center, TRANSFORM, context);</span>
+<span class="fc" id="L332">        ConicalGradientPaintContext context = new ConicalGradientPaintContext(_center, TRANSFORM);</span>
+<span class="fc" id="L333">        _cached = new CachedContext(DEVICE_BOUNDS, _center, TRANSFORM, context);</span>
 
-<span class="fc" id="L331">        return context;</span>
+<span class="fc" id="L335">        return context;</span>
     }
 
     @Override
     public int getTransparency() {
-<span class="fc" id="L336">        return Transparency.TRANSLUCENT;</span>
+<span class="fc" id="L340">        return Transparency.TRANSLUCENT;</span>
     }
 
     @Override
     public int hashCode() {
-<span class="nc" id="L341">        int hash = 7;</span>
-<span class="nc" id="L342">        hash = 97 * hash + _center.hashCode();</span>
-<span class="nc" id="L343">        hash = 97 * hash + Float.floatToIntBits(_angleOffset);</span>
-<span class="nc" id="L344">        hash = 97 * hash + java.util.Arrays.hashCode(_fractionOffsets);</span>
-<span class="nc" id="L345">        hash = 97 * hash + java.util.Arrays.hashCode(_redStepLookup);</span>
-<span class="nc" id="L346">        hash = 97 * hash + java.util.Arrays.hashCode(_greenStepLookup);</span>
-<span class="nc" id="L347">        hash = 97 * hash + java.util.Arrays.hashCode(_blueStepLookup);</span>
-<span class="nc" id="L348">        hash = 97 * hash + java.util.Arrays.hashCode(_alphaStepLookup);</span>
-<span class="nc" id="L349">        hash = 97 * hash + java.util.Arrays.hashCode(_colors);</span>
-<span class="nc" id="L350">        return hash;</span>
+<span class="nc" id="L345">        int hash = 7;</span>
+<span class="nc" id="L346">        hash = 97 * hash + _center.hashCode();</span>
+<span class="nc" id="L347">        hash = 97 * hash + Float.floatToIntBits(_angleOffset);</span>
+<span class="nc" id="L348">        hash = 97 * hash + java.util.Arrays.hashCode(_fractionOffsets);</span>
+<span class="nc" id="L349">        hash = 97 * hash + java.util.Arrays.hashCode(_redStepLookup);</span>
+<span class="nc" id="L350">        hash = 97 * hash + java.util.Arrays.hashCode(_greenStepLookup);</span>
+<span class="nc" id="L351">        hash = 97 * hash + java.util.Arrays.hashCode(_blueStepLookup);</span>
+<span class="nc" id="L352">        hash = 97 * hash + java.util.Arrays.hashCode(_alphaStepLookup);</span>
+<span class="nc" id="L353">        hash = 97 * hash + java.util.Arrays.hashCode(_colors);</span>
+<span class="nc" id="L354">        return hash;</span>
     }
 
     @Override
     public boolean equals(final Object OBJ) {
-<span class="nc bnc" id="L355" title="All 2 branches missed.">        if (this == OBJ) {</span>
-<span class="nc" id="L356">            return true;</span>
+<span class="nc bnc" id="L359" title="All 2 branches missed.">        if (this == OBJ) {</span>
+<span class="nc" id="L360">            return true;</span>
         }
-<span class="nc bnc" id="L358" title="All 2 branches missed.">        if (OBJ == null) {</span>
-<span class="nc" id="L359">            return false;</span>
+<span class="nc bnc" id="L362" title="All 2 branches missed.">        if (OBJ == null) {</span>
+<span class="nc" id="L363">            return false;</span>
         }
-<span class="nc bnc" id="L361" title="All 2 branches missed.">        if (getClass() != OBJ.getClass()) {</span>
-<span class="nc" id="L362">            return false;</span>
-        }
-<span class="nc" id="L364">        final ConicalGradientPaint OTHER = (ConicalGradientPaint) OBJ;</span>
-<span class="nc bnc" id="L365" title="All 2 branches missed.">        if (!_center.equals(OTHER._center)) {</span>
+<span class="nc bnc" id="L365" title="All 2 branches missed.">        if (getClass() != OBJ.getClass()) {</span>
 <span class="nc" id="L366">            return false;</span>
         }
-<span class="nc bnc" id="L368" title="All 2 branches missed.">        if (Float.floatToIntBits(_angleOffset) != Float.floatToIntBits(OTHER._angleOffset)) {</span>
-<span class="nc" id="L369">            return false;</span>
+<span class="nc" id="L368">        final ConicalGradientPaint OTHER = (ConicalGradientPaint) OBJ;</span>
+<span class="nc bnc" id="L369" title="All 2 branches missed.">        if (!_center.equals(OTHER._center)) {</span>
+<span class="nc" id="L370">            return false;</span>
         }
-<span class="nc bnc" id="L371" title="All 2 branches missed.">        if (!java.util.Arrays.equals(_fractionOffsets, OTHER._fractionOffsets)) {</span>
-<span class="nc" id="L372">            return false;</span>
+<span class="nc bnc" id="L372" title="All 2 branches missed.">        if (Float.floatToIntBits(_angleOffset) != Float.floatToIntBits(OTHER._angleOffset)) {</span>
+<span class="nc" id="L373">            return false;</span>
         }
-<span class="nc bnc" id="L374" title="All 2 branches missed.">        if (!java.util.Arrays.equals(_redStepLookup, OTHER._redStepLookup)) {</span>
-<span class="nc" id="L375">            return false;</span>
+<span class="nc bnc" id="L375" title="All 2 branches missed.">        if (!java.util.Arrays.equals(_fractionOffsets, OTHER._fractionOffsets)) {</span>
+<span class="nc" id="L376">            return false;</span>
         }
-<span class="nc bnc" id="L377" title="All 2 branches missed.">        if (!java.util.Arrays.equals(_greenStepLookup, OTHER._greenStepLookup)) {</span>
-<span class="nc" id="L378">            return false;</span>
+<span class="nc bnc" id="L378" title="All 2 branches missed.">        if (!java.util.Arrays.equals(_redStepLookup, OTHER._redStepLookup)) {</span>
+<span class="nc" id="L379">            return false;</span>
         }
-<span class="nc bnc" id="L380" title="All 2 branches missed.">        if (!java.util.Arrays.equals(_blueStepLookup, OTHER._blueStepLookup)) {</span>
-<span class="nc" id="L381">            return false;</span>
+<span class="nc bnc" id="L381" title="All 2 branches missed.">        if (!java.util.Arrays.equals(_greenStepLookup, OTHER._greenStepLookup)) {</span>
+<span class="nc" id="L382">            return false;</span>
         }
-<span class="nc bnc" id="L383" title="All 2 branches missed.">        if (!java.util.Arrays.equals(_alphaStepLookup, OTHER._alphaStepLookup)) {</span>
-<span class="nc" id="L384">            return false;</span>
+<span class="nc bnc" id="L384" title="All 2 branches missed.">        if (!java.util.Arrays.equals(_blueStepLookup, OTHER._blueStepLookup)) {</span>
+<span class="nc" id="L385">            return false;</span>
         }
-<span class="nc bnc" id="L386" title="All 2 branches missed.">        if (!java.util.Arrays.equals(_colors, OTHER._colors)) {</span>
-<span class="nc" id="L387">            return false;</span>
+<span class="nc bnc" id="L387" title="All 2 branches missed.">        if (!java.util.Arrays.equals(_alphaStepLookup, OTHER._alphaStepLookup)) {</span>
+<span class="nc" id="L388">            return false;</span>
         }
-<span class="nc" id="L389">        return true;</span>
+<span class="nc bnc" id="L390" title="All 2 branches missed.">        if (!java.util.Arrays.equals(_colors, OTHER._colors)) {</span>
+<span class="nc" id="L391">            return false;</span>
+        }
+<span class="nc" id="L393">        return true;</span>
     }
 
     private final class ConicalGradientPaintContext implements PaintContext
@@ -395,130 +399,130 @@ final class ConicalGradientPaint implements Paint {
         private final HashMap&lt;Long, WritableRaster&gt; _cachedRasters;
         private final AffineTransform _transform;
 
-<span class="fc" id="L398">        public ConicalGradientPaintContext(final Point2D CENTER, AffineTransform transform) {</span>
-<span class="fc" id="L399">            _cachedRasters = new HashMap&lt;&gt;();</span>
-<span class="fc" id="L400">            _transform = transform;</span>
+<span class="fc" id="L402">        public ConicalGradientPaintContext(final Point2D CENTER, AffineTransform transform) {</span>
+<span class="fc" id="L403">            _cachedRasters = new HashMap&lt;&gt;();</span>
+<span class="fc" id="L404">            _transform = transform;</span>
             try {
-<span class="fc" id="L402">                _center = transform.transform(CENTER, null);  //user to device</span>
-<span class="nc" id="L403">            } catch (Exception ex) {</span>
-<span class="nc" id="L404">                throw new RuntimeException(ex);</span>
-<span class="fc" id="L405">            }</span>
-<span class="fc" id="L406">        }</span>
-
-        @Override
-        public void dispose() {
+<span class="fc" id="L406">                _center = transform.transform(CENTER, null);  //user to device</span>
+<span class="nc" id="L407">            } catch (Exception ex) {</span>
+<span class="nc" id="L408">                throw new RuntimeException(ex);</span>
+<span class="fc" id="L409">            }</span>
 <span class="fc" id="L410">        }</span>
 
         @Override
+        public void dispose() {
+<span class="fc" id="L414">        }</span>
+
+        @Override
         public java.awt.image.ColorModel getColorModel() {
-<span class="fc" id="L414">            return ColorModel.getRGBdefault();</span>
+<span class="fc" id="L418">            return ColorModel.getRGBdefault();</span>
         }
 
         @Override
         public @Nullable Raster getRaster(final int X, final int Y, final int TILE_WIDTH, final int TILE_HEIGHT) {
 
             try {
-<span class="fc" id="L421">                long index = ((long)X &lt;&lt; 32) | (long)Y;</span>
-<span class="fc" id="L422">                WritableRaster raster = _cachedRasters.get(index);</span>
+<span class="fc" id="L425">                long index = ((long)X &lt;&lt; 32) | (long)Y;</span>
+<span class="fc" id="L426">                WritableRaster raster = _cachedRasters.get(index);</span>
 
-<span class="pc bpc" id="L424" title="1 of 2 branches missed.">                if (raster == null)</span>
-<span class="fc" id="L425">                    raster = getColorModel().createCompatibleWritableRaster(TILE_WIDTH, TILE_HEIGHT);  // Create raster for given colormodel</span>
+<span class="pc bpc" id="L428" title="1 of 2 branches missed.">                if (raster == null)</span>
+<span class="fc" id="L429">                    raster = getColorModel().createCompatibleWritableRaster(TILE_WIDTH, TILE_HEIGHT);  // Create raster for given colormodel</span>
                 else
-<span class="nc" id="L427">                    return raster;</span>
+<span class="nc" id="L431">                    return raster;</span>
 
                 //get the rotation center in device space
-<span class="fc" id="L430">                final double ROTATION_CENTER_X = -X + _center.getX();</span>
-<span class="fc" id="L431">                final double ROTATION_CENTER_Y = -Y + _center.getY();</span>
+<span class="fc" id="L434">                final double ROTATION_CENTER_X = -X + _center.getX();</span>
+<span class="fc" id="L435">                final double ROTATION_CENTER_Y = -Y + _center.getY();</span>
 
                 //Convert to user space
-<span class="fc" id="L434">                Point2D rotationCenter = _transform.inverseTransform(new Point2D.Double(ROTATION_CENTER_X, ROTATION_CENTER_Y), null); //device to user</span>
+<span class="fc" id="L438">                Point2D rotationCenter = _transform.inverseTransform(new Point2D.Double(ROTATION_CENTER_X, ROTATION_CENTER_Y), null); //device to user</span>
 
 
-<span class="fc" id="L437">                final int MAX = _fractionOffsets.length - 1;</span>
+<span class="fc" id="L441">                final int MAX = _fractionOffsets.length - 1;</span>
 
                 // KK: use memory allocated by raster directly
                 // Create data array with place for red, green, blue and alpha values
-<span class="fc" id="L441">                final int[] data = new int[(TILE_WIDTH * TILE_HEIGHT * 4)];</span>
+<span class="fc" id="L445">                final int[] data = new int[(TILE_WIDTH * TILE_HEIGHT * 4)];</span>
                 //final int[] data = new int[4];
 
                 double dx;
                 double dy;
                 double angle;
-<span class="fc" id="L447">                double currentRed = 0;</span>
-<span class="fc" id="L448">                double currentGreen = 0;</span>
-<span class="fc" id="L449">                double currentBlue = 0;</span>
-<span class="fc" id="L450">                double currentAlpha = 0;</span>
+<span class="fc" id="L451">                double currentRed = 0;</span>
+<span class="fc" id="L452">                double currentGreen = 0;</span>
+<span class="fc" id="L453">                double currentBlue = 0;</span>
+<span class="fc" id="L454">                double currentAlpha = 0;</span>
 
-<span class="fc bfc" id="L452" title="All 2 branches covered.">                for (int tileY = 0; tileY &lt; TILE_HEIGHT; tileY++) {</span>
-<span class="fc bfc" id="L453" title="All 2 branches covered.">                    for (int tileX = 0; tileX &lt; TILE_WIDTH; tileX++) {</span>
+<span class="fc bfc" id="L456" title="All 2 branches covered.">                for (int tileY = 0; tileY &lt; TILE_HEIGHT; tileY++) {</span>
+<span class="fc bfc" id="L457" title="All 2 branches covered.">                    for (int tileX = 0; tileX &lt; TILE_WIDTH; tileX++) {</span>
 
-<span class="fc" id="L455">                        Point2D d = _transform.inverseTransform(new Point2D.Double(tileX, tileY), null); //device to user</span>
+<span class="fc" id="L459">                        Point2D d = _transform.inverseTransform(new Point2D.Double(tileX, tileY), null); //device to user</span>
 
 
                         // Calculate the distance between the current position and the rotation angle
-<span class="fc" id="L459">                        dx = d.getX() - rotationCenter.getX();</span>
-<span class="fc" id="L460">                        dy = d.getY() - rotationCenter.getY();</span>
+<span class="fc" id="L463">                        dx = d.getX() - rotationCenter.getX();</span>
+<span class="fc" id="L464">                        dy = d.getY() - rotationCenter.getY();</span>
 
                         //KK: simplify by just taking the arctangent
-<span class="fc" id="L463">                        double distance = Math.sqrt(dx * dx + dy * dy);</span>
+<span class="fc" id="L467">                        double distance = Math.sqrt(dx * dx + dy * dy);</span>
 
                         // Avoid division by zero
-<span class="fc bfc" id="L466" title="All 2 branches covered.">                        if (distance == 0) {</span>
-<span class="fc" id="L467">                            distance = 1;</span>
+<span class="fc bfc" id="L470" title="All 2 branches covered.">                        if (distance == 0) {</span>
+<span class="fc" id="L471">                            distance = 1;</span>
                         }
 
                         // 0 degree on top
-<span class="fc" id="L471">                        angle = Math.abs(Math.toDegrees(Math.acos(dx / distance)));</span>
+<span class="fc" id="L475">                        angle = Math.abs(Math.toDegrees(Math.acos(dx / distance)));</span>
                         //angle = Math.abs(Math.toDegrees(-Math.atan2(dy, dx)));
 
-<span class="fc bfc" id="L474" title="All 4 branches covered.">                        if (dx &gt;= 0 &amp;&amp; dy &lt;= 0) {</span>
-<span class="fc" id="L475">                            angle = 90.0 - angle;</span>
-<span class="pc bpc" id="L476" title="1 of 4 branches missed.">                        } else if (dx &gt;= 0 &amp;&amp; dy &gt;= 0) {</span>
-<span class="fc" id="L477">                            angle += 90.0;</span>
-<span class="pc bpc" id="L478" title="1 of 4 branches missed.">                        } else if (dx &lt;= 0 &amp;&amp; dy &gt;= 0) {</span>
-<span class="fc" id="L479">                            angle += 90.0;</span>
-<span class="pc bpc" id="L480" title="2 of 4 branches missed.">                        } else if (dx &lt;= 0 &amp;&amp; dy &lt;= 0) {</span>
-<span class="fc" id="L481">                            angle = 450.0 - angle;</span>
+<span class="fc bfc" id="L478" title="All 4 branches covered.">                        if (dx &gt;= 0 &amp;&amp; dy &lt;= 0) {</span>
+<span class="fc" id="L479">                            angle = 90.0 - angle;</span>
+<span class="pc bpc" id="L480" title="1 of 4 branches missed.">                        } else if (dx &gt;= 0 &amp;&amp; dy &gt;= 0) {</span>
+<span class="fc" id="L481">                            angle += 90.0;</span>
+<span class="pc bpc" id="L482" title="1 of 4 branches missed.">                        } else if (dx &lt;= 0 &amp;&amp; dy &gt;= 0) {</span>
+<span class="fc" id="L483">                            angle += 90.0;</span>
+<span class="pc bpc" id="L484" title="2 of 4 branches missed.">                        } else if (dx &lt;= 0 &amp;&amp; dy &lt;= 0) {</span>
+<span class="fc" id="L485">                            angle = 450.0 - angle;</span>
                         }
 
-<span class="fc" id="L484">                        angle += _angleOffset;</span>
+<span class="fc" id="L488">                        angle += _angleOffset;</span>
 
-<span class="fc bfc" id="L486" title="All 2 branches covered.">                        if (angle &gt; 360.0) {</span>
-<span class="fc" id="L487">                            angle -= 360.0;</span>
-<span class="fc bfc" id="L488" title="All 2 branches covered.">                        } else if (angle &lt; 0.0) {</span>
-<span class="fc" id="L489">                            angle += 360.0;</span>
+<span class="fc bfc" id="L490" title="All 2 branches covered.">                        if (angle &gt; 360.0) {</span>
+<span class="fc" id="L491">                            angle -= 360.0;</span>
+<span class="fc bfc" id="L492" title="All 2 branches covered.">                        } else if (angle &lt; 0.0) {</span>
+<span class="fc" id="L493">                            angle += 360.0;</span>
                         }
 
                         // Check for each angle in fractionAngles array
-<span class="fc bfc" id="L493" title="All 2 branches covered.">                        for (int i = 0; i &lt; MAX; i++) {</span>
-<span class="fc bfc" id="L494" title="All 2 branches covered.">                            if ((angle &gt;= _fractionOffsets[i])) {</span>
-<span class="fc" id="L495">                                currentRed   = _colors[i].getRed() * INT_TO_FLOAT_CONST + (angle - _fractionOffsets[i]) * _redStepLookup[i];</span>
-<span class="fc" id="L496">                                currentGreen = _colors[i].getGreen() * INT_TO_FLOAT_CONST + (angle - _fractionOffsets[i]) * _greenStepLookup[i];</span>
-<span class="fc" id="L497">                                currentBlue  = _colors[i].getBlue() * INT_TO_FLOAT_CONST + (angle - _fractionOffsets[i]) * _blueStepLookup[i];</span>
-<span class="fc" id="L498">                                currentAlpha = _colors[i].getAlpha() * INT_TO_FLOAT_CONST + (angle - _fractionOffsets[i]) * _alphaStepLookup[i];</span>
+<span class="fc bfc" id="L497" title="All 2 branches covered.">                        for (int i = 0; i &lt; MAX; i++) {</span>
+<span class="fc bfc" id="L498" title="All 2 branches covered.">                            if ((angle &gt;= _fractionOffsets[i])) {</span>
+<span class="fc" id="L499">                                currentRed   = _colors[i].getRed() * INT_TO_FLOAT_CONST + (angle - _fractionOffsets[i]) * _redStepLookup[i];</span>
+<span class="fc" id="L500">                                currentGreen = _colors[i].getGreen() * INT_TO_FLOAT_CONST + (angle - _fractionOffsets[i]) * _greenStepLookup[i];</span>
+<span class="fc" id="L501">                                currentBlue  = _colors[i].getBlue() * INT_TO_FLOAT_CONST + (angle - _fractionOffsets[i]) * _blueStepLookup[i];</span>
+<span class="fc" id="L502">                                currentAlpha = _colors[i].getAlpha() * INT_TO_FLOAT_CONST + (angle - _fractionOffsets[i]) * _alphaStepLookup[i];</span>
                             }
                         }
 
                         // Fill data array with calculated color values
-<span class="fc" id="L503">                        final int BASE = (tileY * TILE_WIDTH + tileX) * 4;</span>
+<span class="fc" id="L507">                        final int BASE = (tileY * TILE_WIDTH + tileX) * 4;</span>
 
-<span class="fc" id="L505">                        data[BASE + 0] = (int) Math.round(currentRed   * 255);</span>
-<span class="fc" id="L506">                        data[BASE + 1] = (int) Math.round(currentGreen * 255);</span>
-<span class="fc" id="L507">                        data[BASE + 2] = (int) Math.round(currentBlue  * 255);</span>
-<span class="fc" id="L508">                        data[BASE + 3] = (int) Math.round(currentAlpha * 255);</span>
+<span class="fc" id="L509">                        data[BASE + 0] = (int) Math.round(currentRed   * 255);</span>
+<span class="fc" id="L510">                        data[BASE + 1] = (int) Math.round(currentGreen * 255);</span>
+<span class="fc" id="L511">                        data[BASE + 2] = (int) Math.round(currentBlue  * 255);</span>
+<span class="fc" id="L512">                        data[BASE + 3] = (int) Math.round(currentAlpha * 255);</span>
                         //raster.setPixel(tileX, tileY, data);
                     }
                 }
 
                 // Fill the raster with the data
-<span class="fc" id="L514">                raster.setPixels(0, 0, TILE_WIDTH, TILE_HEIGHT, data);</span>
+<span class="fc" id="L518">                raster.setPixels(0, 0, TILE_WIDTH, TILE_HEIGHT, data);</span>
 
-<span class="fc" id="L516">                _cachedRasters.put(index, raster);</span>
-<span class="fc" id="L517">                return raster;</span>
+<span class="fc" id="L520">                _cachedRasters.put(index, raster);</span>
+<span class="fc" id="L521">                return raster;</span>
             }
-<span class="nc" id="L519">            catch (NoninvertibleTransformException ex) {</span>
-<span class="nc" id="L520">                System.err.println(ex);</span>
-<span class="nc" id="L521">                return null;</span>
+<span class="nc" id="L523">            catch (NoninvertibleTransformException ex) {</span>
+<span class="nc" id="L524">                log.error(SwingTree.get().logMarker(), &quot;Failed to compute the raster of a conical gradient.&quot;, ex);</span>
+<span class="nc" id="L525">                return null;</span>
             }
         }
 

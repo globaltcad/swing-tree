@@ -22,25 +22,36 @@ public abstract class AbstractTextComponentDelegate
     private final int offset;
     private final int length;
 
-
+    /**
+     *  Creates a new text component delegate with the specified parameters.
+     *  @param textComponent The text component being delegated.
+     *  @param filterBypass The filter bypass for document modification.
+     *  @param offset The offset within the document.
+     *  @param length The length of the affected text range.
+     */
     protected AbstractTextComponentDelegate(
         JTextComponent textComponent,
         DocumentFilter.FilterBypass filterBypass,
         int offset,
         int length
-<span class="fc" id="L31">    ) {</span>
-<span class="fc" id="L32">        this.textComponent = Objects.requireNonNull(textComponent);</span>
-<span class="fc" id="L33">        this.filterBypass = filterBypass;</span>
-<span class="fc" id="L34">        this.offset = offset;</span>
-<span class="fc" id="L35">        this.length = length;</span>
-<span class="fc" id="L36">    }</span>
+<span class="fc" id="L37">    ) {</span>
+<span class="fc" id="L38">        this.textComponent = Objects.requireNonNull(textComponent);</span>
+<span class="fc" id="L39">        this.filterBypass = filterBypass;</span>
+<span class="fc" id="L40">        this.offset = offset;</span>
+<span class="fc" id="L41">        this.length = length;</span>
+<span class="fc" id="L42">    }</span>
 
+    /**
+     *  Returns the text component associated with this delegate.
+     *  @return The text component.
+     *  @throws IllegalStateException If called from a thread other than the Swing event dispatch thread.
+     */
     public JTextComponent getComponent() {
         // We make sure that only the Swing thread can access the component:
-<span class="pc bpc" id="L40" title="1 of 2 branches missed.">        if (UI.thisIsUIThread())</span>
-<span class="fc" id="L41">            return textComponent;</span>
+<span class="pc bpc" id="L51" title="1 of 2 branches missed.">        if (UI.thisIsUIThread())</span>
+<span class="fc" id="L52">            return textComponent;</span>
         else
-<span class="nc" id="L43">            throw new IllegalStateException(</span>
+<span class="nc" id="L54">            throw new IllegalStateException(</span>
                     &quot;Text component can only be accessed by the Swing thread.&quot;
             );
     }
@@ -53,7 +64,7 @@ public abstract class AbstractTextComponentDelegate
      * @return The {@link DocumentFilter.FilterBypass} object that can be used to modify the document.
      */
     public DocumentFilter.FilterBypass getFilterBypass() {
-<span class="nc" id="L56">        return filterBypass;</span>
+<span class="nc" id="L67">        return filterBypass;</span>
     }
 
     /**
@@ -61,7 +72,7 @@ public abstract class AbstractTextComponentDelegate
      *  @return The offset at which the text change occurred.
      */
     public int getOffset() {
-<span class="fc" id="L64">        return offset;</span>
+<span class="fc" id="L75">        return offset;</span>
     }
 
     /**
@@ -69,7 +80,7 @@ public abstract class AbstractTextComponentDelegate
      *  @return The length of the text change.
      */
     public int getLength() {
-<span class="fc" id="L72">        return length;</span>
+<span class="fc" id="L83">        return length;</span>
     }
 
 }

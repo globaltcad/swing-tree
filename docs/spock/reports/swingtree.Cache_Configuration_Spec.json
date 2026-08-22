@@ -4,7 +4,7 @@
   "narrative":"Every one of SwingTree's internal rendering caches – style layer images,\n    noise tiles, shadow gradients and text layouts – draws its\n    memory budget from a single, unified source: the `CacheMode` configured on\n    the `SwingTree` library context, combined with the amount of system RAM.\n\n    A higher mode keeps more rendered results in memory so subsequent repaints\n    can blit them instead of re-rendering (faster, but more memory); the\n    `DISABLED` mode turns caching off entirely. The mode can be selected at\n    startup or changed at runtime, in which case the caches drop their now-excess\n    memory immediately and repopulate under the new budget.\n\n    These scenarios pin the contract down through the *public* API\n    (`SwingTree.get().getCacheMode()` / `setCacheMode(..)` and the\n    `ComponentExtension` cache observers) so they survive internal refactors; the\n    one non-public touch-point is the `CacheBudget.UNITS_OVERRIDE` test hook, used\n    purely to make the otherwise RAM-dependent budget deterministic regardless of\n    the runner's physical memory.",
   "subjects":["swingtree.SwingTree","swingtree.SwingTreeInitConfig","swingtree.style.ComponentExtension"],
   "statistics":{
-    "runs":"5",
+    "runs":"6",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -46,7 +46,7 @@
 
         {"kind":"when","text":"We render it twice.","code":["2.times { Utility.renderSingleComponent(button) }"]},
 
-        {"kind":"then","text":"Its background layer is never promoted to a cached image.","code":["!ext.cachedRendering(UI.Layer.BACKGROUND).isPresent()"]}
+        {"kind":"then","text":"Its background layer is never promoted to a cached image.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -93,6 +93,33 @@
         {"kind":"when","text":"We re-enable tiling, let one paint repopulate the canonical rendering, and resize again.","code":["SwingTree.get().setCacheTilingEnabled(true)","button.setSize(360, 120)","Utility.renderSingleComponent(button)","int missesAfterRepopulation = ext.cacheMissCount(UI.Layer.BACKGROUND)","button.setSize(400, 130)","Utility.renderSingleComponent(button)"]},
 
         {"kind":"then","text":"Resizing is miss-resistant again.","code":["SwingTree.get().isCacheTilingEnabled()","ext.cacheMissCount(UI.Layer.BACKGROUND) == missesAfterRepopulation"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Turning stretch tiling off also stops layers being cut around their noises.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `setCacheTilingEnabled(false)` is the safety hatch for going back to\n            the classic exact-size caching, and a layer painted in several pieces\n            is not that either. So the switch covers both: with it off, a\n            noise-bearing layer is one cached image at the component's own size,\n            being dragged or not, exactly as it was before any of this existed.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A deterministic budget, and a big button with a noise over a rounded fill.","code":["CacheBudget.UNITS_OVERRIDE = 10","ComponentExtension.updateAllCachesFromLibraryConfig()","var button =","    UI.button(\"Grain me\")","      .withStyle( it -> it","            .borderRadius(16)","            .backgroundColor(new Color(30, 90, 138))","            .noise(\"grain\", n -> n.colors(new Color(32, 32, 32), new Color(222, 222, 222)))","      )","      .get(JButton)","var ext = ComponentExtension.from(button)"]},
+
+        {"kind":"when","text":"It is dragged with the hatch open, which is when a layer gets cut.","code":["[[500, 300], [560, 320], [620, 340]].each { w, h ->","    button.setSize(w, h)","    Utility.renderSingleComponent(button)","}"]},
+
+        {"kind":"then","text":"What is cached is the size independent exemplar of everything but the noise.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()","ext.cachedRendering(UI.Layer.BACKGROUND).all( image -> image.width < 620 )"]},
+
+        {"kind":"when","text":"The hatch is closed and it is dragged further.","code":["SwingTree.get().setCacheTilingEnabled(false)","[[660, 360], [700, 380]].each { w, h ->","    button.setSize(w, h)","    Utility.renderSingleComponent(button)","}"]},
+
+        {"kind":"then","text":"\n            The exemplar is gone: the layer was not cut, so there is nothing size independent\n            left to cache, and a full sized image is not worth allocating for a size the drag\n            is about to leave behind anyway.\n        ","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()"]},
+
+        {"kind":"when","text":"The drag ends, and it is painted a few times at that final size.","code":["6.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"then","text":"The layer is one whole image at the component size, noise and all.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1","ext.cachedRendering(UI.Layer.BACKGROUND).first().width  == 700","ext.cachedRendering(UI.Layer.BACKGROUND).first().height == 380"]},
+
+        {"kind":"cleanup","text":"","code":["SwingTree.get().setCacheTilingEnabled(true)","CacheBudget.UNITS_OVERRIDE = -1","ComponentExtension.updateAllCachesFromLibraryConfig()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

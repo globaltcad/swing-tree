@@ -3,8 +3,6 @@
 import net.miginfocom.layout.AC;
 import net.miginfocom.layout.CC;
 import net.miginfocom.layout.LC;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import swingtree.api.Configurator;
 import swingtree.layout.*;
 
@@ -77,7 +75,7 @@ import swingtree.layout.*;
  */
 public abstract class UILayoutConstants
 {
-<span class="nc" id="L80">    UILayoutConstants() { throw new UnsupportedOperationException(); }</span>
+<span class="nc" id="L78">    UILayoutConstants() { throw new UnsupportedOperationException(); }</span>
 
     // Common Mig layout constants:
 
@@ -93,7 +91,7 @@ public abstract class UILayoutConstants
      *  to the panel factory method (e.g. {@code UI.panel(FILL)})
      *  rather than to {@code .add(..)} calls.
      */
-<span class="fc" id="L96">    public static LayoutConstraint FILL   = LayoutConstraint.of(&quot;fill&quot;);</span>
+<span class="fc" id="L94">    public static LayoutConstraint FILL   = LayoutConstraint.of(&quot;fill&quot;);</span>
 
     /**
      *  Makes the layout claim all available &lt;b&gt;horizontal&lt;/b&gt; space
@@ -107,7 +105,7 @@ public abstract class UILayoutConstants
      *  to the panel factory method (e.g. {@code UI.panel(FILL_X)})
      *  rather than to {@code .add(..)} calls.
      */
-<span class="fc" id="L110">    public static LayoutConstraint FILL_X = LayoutConstraint.of(&quot;fillx&quot;);</span>
+<span class="fc" id="L108">    public static LayoutConstraint FILL_X = LayoutConstraint.of(&quot;fillx&quot;);</span>
 
     /**
      *  Makes the layout claim all available &lt;b&gt;vertical&lt;/b&gt; space
@@ -121,7 +119,7 @@ public abstract class UILayoutConstants
      *  to the panel factory method (e.g. {@code UI.panel(FILL_Y)})
      *  rather than to {@code .add(..)} calls.
      */
-<span class="fc" id="L124">    public static LayoutConstraint FILL_Y = LayoutConstraint.of(&quot;filly&quot;);</span>
+<span class="fc" id="L122">    public static LayoutConstraint FILL_Y = LayoutConstraint.of(&quot;filly&quot;);</span>
     /**
      *  Shorthand for {@link #INSETS(int)}.
      *  Sets the same padding on all four sides of the container.
@@ -129,7 +127,7 @@ public abstract class UILayoutConstants
      * @param insets The padding size in pixels, applied equally to top, left, bottom, and right.
      * @return A layout constraint that adds uniform inner padding around the container's content.
      */
-<span class="fc" id="L132">    public static LayoutConstraint INS( int insets) { return INSETS(insets); }</span>
+<span class="fc" id="L130">    public static LayoutConstraint INS( int insets) { return INSETS(insets); }</span>
 
     /**
      *  Sets &lt;b&gt;uniform inner padding&lt;/b&gt; around the entire container content.
@@ -145,7 +143,7 @@ public abstract class UILayoutConstants
      * @param insets The padding size in pixels, applied equally to top, left, bottom, and right.
      * @return A layout constraint that adds uniform inner padding around the container's content.
      */
-<span class="fc" id="L148">    public static LayoutConstraint INSETS( int insets) { return LayoutConstraint.of(&quot;insets &quot; + insets); }</span>
+<span class="fc" id="L146">    public static LayoutConstraint INSETS( int insets) { return LayoutConstraint.of(&quot;insets &quot; + insets); }</span>
 
     /**
      *  Shorthand for {@link #INSETS(int, int, int, int)}.
@@ -157,7 +155,7 @@ public abstract class UILayoutConstants
      * @param right  Padding to the right of the content, in pixels.
      * @return A layout constraint that adds the specified inner padding around the container's content.
      */
-<span class="fc" id="L160">    public static LayoutConstraint INS( int top, int left, int bottom, int right) { return INSETS(top, left, bottom, right); }</span>
+<span class="fc" id="L158">    public static LayoutConstraint INS( int top, int left, int bottom, int right) { return INSETS(top, left, bottom, right); }</span>
 
     /**
      *  Sets &lt;b&gt;individual inner padding&lt;/b&gt; for each side of the container.
@@ -176,7 +174,7 @@ public abstract class UILayoutConstants
      * @param right  Padding to the right of the content, in pixels.
      * @return A layout constraint that adds the specified inner padding around the container's content.
      */
-<span class="fc" id="L179">    public static LayoutConstraint INSETS( int top, int left, int bottom, int right) { return LayoutConstraint.of(&quot;insets &quot; + top + &quot; &quot; + left + &quot; &quot; + bottom + &quot; &quot; + right); }</span>
+<span class="fc" id="L177">    public static LayoutConstraint INSETS( int top, int left, int bottom, int right) { return LayoutConstraint.of(&quot;insets &quot; + top + &quot; &quot; + left + &quot; &quot; + bottom + &quot; &quot; + right); }</span>
     /**
      *  Turns on &lt;b&gt;auto-wrapping&lt;/b&gt; so that the layout grid moves to a new row
      *  after every {@code times} components.
@@ -191,7 +189,7 @@ public abstract class UILayoutConstants
      * @param times The number of components per row before wrapping to the next row.
      * @return A layout constraint that enables automatic row wrapping.
      */
-<span class="fc" id="L194">    public static LayoutConstraint WRAP( int times) { return LayoutConstraint.of( &quot;wrap &quot; + times ); }</span>
+<span class="fc" id="L192">    public static LayoutConstraint WRAP( int times) { return LayoutConstraint.of( &quot;wrap &quot; + times ); }</span>
 
     /**
      *  Sets the &lt;b&gt;default gap&lt;/b&gt; between grid cells to a platform-relative size.
@@ -205,7 +203,7 @@ public abstract class UILayoutConstants
      * @param size The relative gap size.
      * @return A layout constraint that sets platform-relative spacing between cells.
      */
-<span class="fc" id="L208">    public static LayoutConstraint GAP_REL( int size) { return LayoutConstraint.of( &quot;gap rel &quot; + size ); }</span>
+<span class="fc" id="L206">    public static LayoutConstraint GAP_REL( int size) { return LayoutConstraint.of( &quot;gap rel &quot; + size ); }</span>
 
     /**
      *  Sets the layout's flow direction to &lt;b&gt;horizontal&lt;/b&gt; (left to right).
@@ -215,7 +213,7 @@ public abstract class UILayoutConstants
      *  &lt;p&gt;
      *  This is a &lt;b&gt;layout-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L218">    public static LayoutConstraint FLOW_X   = LayoutConstraint.of(&quot;flowx&quot;);</span>
+<span class="fc" id="L216">    public static LayoutConstraint FLOW_X   = LayoutConstraint.of(&quot;flowx&quot;);</span>
 
     /**
      *  Sets the layout's flow direction to &lt;b&gt;vertical&lt;/b&gt; (top to bottom).
@@ -225,7 +223,7 @@ public abstract class UILayoutConstants
      *  &lt;p&gt;
      *  This is a &lt;b&gt;layout-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L228">    public static LayoutConstraint FLOW_Y   = LayoutConstraint.of(&quot;flowy&quot;);</span>
+<span class="fc" id="L226">    public static LayoutConstraint FLOW_Y   = LayoutConstraint.of(&quot;flowy&quot;);</span>
 
     /**
      *  Disables the grid entirely and puts the layout into &lt;b&gt;flow-only mode&lt;/b&gt;.
@@ -236,7 +234,7 @@ public abstract class UILayoutConstants
      *  &lt;p&gt;
      *  This is a &lt;b&gt;layout-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L239">    public static LayoutConstraint NO_GRID  = LayoutConstraint.of(&quot;nogrid&quot;);</span>
+<span class="fc" id="L237">    public static LayoutConstraint NO_GRID  = LayoutConstraint.of(&quot;nogrid&quot;);</span>
 
     /**
      *  Tells the layout engine to &lt;b&gt;skip its internal caching&lt;/b&gt;.
@@ -248,7 +246,7 @@ public abstract class UILayoutConstants
      *  This is a &lt;b&gt;layout-level&lt;/b&gt; constraint.
      *  Only use it when you actually observe layout anomalies.
      */
-<span class="fc" id="L251">    public static LayoutConstraint NO_CACHE = LayoutConstraint.of(&quot;nocache&quot;);</span>
+<span class="fc" id="L249">    public static LayoutConstraint NO_CACHE = LayoutConstraint.of(&quot;nocache&quot;);</span>
 
     /**
      *  Turns on &lt;b&gt;visual debug painting&lt;/b&gt; for the container.
@@ -259,7 +257,7 @@ public abstract class UILayoutConstants
      *  This is a &lt;b&gt;layout-level&lt;/b&gt; constraint.
      *  Remove it before shipping — it is purely a development aid.
      */
-<span class="fc" id="L262">    public static LayoutConstraint DEBUG    = LayoutConstraint.of(&quot;debug&quot;);</span>
+<span class="fc" id="L260">    public static LayoutConstraint DEBUG    = LayoutConstraint.of(&quot;debug&quot;);</span>
 
     /**
      *  A &lt;b&gt;component-level&lt;/b&gt; constraint that tells the layout to
@@ -270,7 +268,7 @@ public abstract class UILayoutConstants
      *  Use this when you don't want global auto-wrapping via {@link #WRAP(int)}
      *  but need a line break at a specific point.
      */
-<span class="fc" id="L273">    public static MigAddConstraint WRAP = MigAddConstraint.of(&quot;wrap&quot;);</span>
+<span class="fc" id="L271">    public static MigAddConstraint WRAP = MigAddConstraint.of(&quot;wrap&quot;);</span>
 
     /**
      *  Makes this component &lt;b&gt;span across all remaining columns&lt;/b&gt; in the current row.
@@ -279,7 +277,7 @@ public abstract class UILayoutConstants
      *  &lt;p&gt;
      *  This is a &lt;b&gt;component-level&lt;/b&gt; constraint, passed to {@code .add(SPAN, ...)}.
      */
-<span class="fc" id="L282">    public static MigAddConstraint SPAN = MigAddConstraint.of(&quot;SPAN&quot;);</span>
+<span class="fc" id="L280">    public static MigAddConstraint SPAN = MigAddConstraint.of(&quot;SPAN&quot;);</span>
 
     /**
      *  Makes this component &lt;b&gt;span across {@code times} columns&lt;/b&gt; in the current row.
@@ -291,7 +289,7 @@ public abstract class UILayoutConstants
      * @param times The number of columns to merge into a single cell.
      * @return A constraint that widens this component's cell by the given column count.
      */
-<span class="fc" id="L294">    public static MigAddConstraint SPAN(int times ) { return MigAddConstraint.of( &quot;span &quot; + times ); }</span>
+<span class="fc" id="L292">    public static MigAddConstraint SPAN(int times ) { return MigAddConstraint.of( &quot;span &quot; + times ); }</span>
 
     /**
      *  Makes this component &lt;b&gt;span across {@code xTimes} columns and {@code yTimes} rows&lt;/b&gt;,
@@ -305,7 +303,7 @@ public abstract class UILayoutConstants
      * @param yTimes The number of rows to span.
      * @return A constraint that merges columns and rows into a single cell for this component.
      */
-<span class="fc" id="L308">    public static MigAddConstraint SPAN(int xTimes, int yTimes ) { return MigAddConstraint.of( &quot;span &quot; + xTimes + &quot; &quot; + yTimes ); }</span>
+<span class="fc" id="L306">    public static MigAddConstraint SPAN(int xTimes, int yTimes ) { return MigAddConstraint.of( &quot;span &quot; + xTimes + &quot; &quot; + yTimes ); }</span>
 
     /**
      *  Makes this component &lt;b&gt;span across {@code times} columns&lt;/b&gt; only
@@ -316,7 +314,7 @@ public abstract class UILayoutConstants
      * @param times The number of columns to merge.
      * @return A constraint that widens the cell horizontally by the given column count.
      */
-<span class="fc" id="L319">    public static MigAddConstraint SPAN_X(int times ) { return MigAddConstraint.of( &quot;spanx &quot; + times ); }</span>
+<span class="fc" id="L317">    public static MigAddConstraint SPAN_X(int times ) { return MigAddConstraint.of( &quot;spanx &quot; + times ); }</span>
 
     /**
      *  Makes this component &lt;b&gt;span across {@code times} rows&lt;/b&gt; only
@@ -327,7 +325,7 @@ public abstract class UILayoutConstants
      * @param times The number of rows to merge.
      * @return A constraint that extends the cell vertically by the given row count.
      */
-<span class="fc" id="L330">    public static MigAddConstraint SPAN_Y(int times ) { return MigAddConstraint.of( &quot;spany &quot; + times ); }</span>
+<span class="fc" id="L328">    public static MigAddConstraint SPAN_Y(int times ) { return MigAddConstraint.of( &quot;spany &quot; + times ); }</span>
     /**
      *  Tells this component to &lt;b&gt;eagerly expand in both directions&lt;/b&gt;
      *  to fill any extra space in its cell.
@@ -340,7 +338,7 @@ public abstract class UILayoutConstants
      *  &lt;p&gt;
      *  This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L343">    public static MigAddConstraint GROW   = MigAddConstraint.of(&quot;grow&quot;);</span>
+<span class="fc" id="L341">    public static MigAddConstraint GROW   = MigAddConstraint.of(&quot;grow&quot;);</span>
 
     /**
      *  Tells this component to &lt;b&gt;eagerly expand horizontally&lt;/b&gt;
@@ -349,7 +347,7 @@ public abstract class UILayoutConstants
      *  &lt;p&gt;
      *  This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L352">    public static MigAddConstraint GROW_X = MigAddConstraint.of(&quot;growx&quot;);</span>
+<span class="fc" id="L350">    public static MigAddConstraint GROW_X = MigAddConstraint.of(&quot;growx&quot;);</span>
 
     /**
      *  Tells this component to &lt;b&gt;eagerly expand vertically&lt;/b&gt;
@@ -358,7 +356,7 @@ public abstract class UILayoutConstants
      *  &lt;p&gt;
      *  This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L361">    public static MigAddConstraint GROW_Y = MigAddConstraint.of(&quot;growy&quot;);</span>
+<span class="fc" id="L359">    public static MigAddConstraint GROW_Y = MigAddConstraint.of(&quot;growy&quot;);</span>
 
     /**
      *  Tells this component to grow in both directions with a specific &lt;b&gt;weight&lt;/b&gt;.
@@ -372,7 +370,7 @@ public abstract class UILayoutConstants
      * @param weight The relative grow weight (default is 100 when using {@link #GROW}).
      * @return A constraint that makes the component grow with the specified weight.
      */
-<span class="fc" id="L375">    public static MigAddConstraint GROW(int weight ) { return MigAddConstraint.of( &quot;grow &quot; + weight ); }</span>
+<span class="fc" id="L373">    public static MigAddConstraint GROW(int weight ) { return MigAddConstraint.of( &quot;grow &quot; + weight ); }</span>
 
     /**
      *  Tells this component to &lt;b&gt;grow horizontally&lt;/b&gt; with a specific weight.
@@ -384,7 +382,7 @@ public abstract class UILayoutConstants
      * @param weight The relative horizontal grow weight.
      * @return A constraint that makes the component grow horizontally with the specified weight.
      */
-<span class="nc" id="L387">    public static MigAddConstraint GROW_X(int weight ) { return MigAddConstraint.of( &quot;growx &quot; + weight ); }</span>
+<span class="nc" id="L385">    public static MigAddConstraint GROW_X(int weight ) { return MigAddConstraint.of( &quot;growx &quot; + weight ); }</span>
 
     /**
      *  Tells this component to &lt;b&gt;grow vertically&lt;/b&gt; with a specific weight.
@@ -396,7 +394,7 @@ public abstract class UILayoutConstants
      * @param weight The relative vertical grow weight.
      * @return A constraint that makes the component grow vertically with the specified weight.
      */
-<span class="nc" id="L399">    public static MigAddConstraint GROW_Y(int weight ) { return MigAddConstraint.of( &quot;growy &quot; + weight ); }</span>
+<span class="nc" id="L397">    public static MigAddConstraint GROW_Y(int weight ) { return MigAddConstraint.of( &quot;growy &quot; + weight ); }</span>
     /**
      *  Allows this component to &lt;b&gt;shrink in both directions&lt;/b&gt;
      *  when the container is too small to fit everything at preferred size.
@@ -407,7 +405,7 @@ public abstract class UILayoutConstants
      *  &lt;p&gt;
      *  This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L410">    public static MigAddConstraint SHRINK   = MigAddConstraint.of(&quot;shrink&quot;);</span>
+<span class="fc" id="L408">    public static MigAddConstraint SHRINK   = MigAddConstraint.of(&quot;shrink&quot;);</span>
 
     /**
      *  Allows this component to &lt;b&gt;shrink horizontally&lt;/b&gt;
@@ -415,7 +413,7 @@ public abstract class UILayoutConstants
      *  &lt;p&gt;
      *  This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L418">    public static MigAddConstraint SHRINK_X = MigAddConstraint.of(&quot;shrinkx&quot;);</span>
+<span class="fc" id="L416">    public static MigAddConstraint SHRINK_X = MigAddConstraint.of(&quot;shrinkx&quot;);</span>
 
     /**
      *  Allows this component to &lt;b&gt;shrink vertically&lt;/b&gt;
@@ -423,7 +421,7 @@ public abstract class UILayoutConstants
      *  &lt;p&gt;
      *  This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L426">    public static MigAddConstraint SHRINK_Y = MigAddConstraint.of(&quot;shrinky&quot;);</span>
+<span class="fc" id="L424">    public static MigAddConstraint SHRINK_Y = MigAddConstraint.of(&quot;shrinky&quot;);</span>
 
     /**
      *  Sets how &lt;b&gt;willingly&lt;/b&gt; this component shrinks in both directions
@@ -437,7 +435,7 @@ public abstract class UILayoutConstants
      * @param weight The relative shrink weight (default is 100).
      * @return A constraint that controls how much this component shrinks relative to others.
      */
-<span class="nc" id="L440">    public static MigAddConstraint SHRINK(int weight )  { return MigAddConstraint.of(&quot;shrink &quot;+weight); }</span>
+<span class="nc" id="L438">    public static MigAddConstraint SHRINK(int weight )  { return MigAddConstraint.of(&quot;shrink &quot;+weight); }</span>
 
     /**
      *  Sets how willingly this component &lt;b&gt;shrinks horizontally&lt;/b&gt;
@@ -448,7 +446,7 @@ public abstract class UILayoutConstants
      * @param weight The relative horizontal shrink weight.
      * @return A constraint controlling horizontal shrink eagerness.
      */
-<span class="nc" id="L451">    public static MigAddConstraint SHRINK_X(int weight )  { return MigAddConstraint.of(&quot;shrinkx &quot;+weight); }</span>
+<span class="nc" id="L449">    public static MigAddConstraint SHRINK_X(int weight )  { return MigAddConstraint.of(&quot;shrinkx &quot;+weight); }</span>
 
     /**
      *  Sets how willingly this component &lt;b&gt;shrinks vertically&lt;/b&gt;
@@ -459,7 +457,7 @@ public abstract class UILayoutConstants
      * @param weight The relative vertical shrink weight.
      * @return A constraint controlling vertical shrink eagerness.
      */
-<span class="nc" id="L462">    public static MigAddConstraint SHRINK_Y(int weight )  { return MigAddConstraint.of(&quot;shrinky &quot;+weight); }</span>
+<span class="nc" id="L460">    public static MigAddConstraint SHRINK_Y(int weight )  { return MigAddConstraint.of(&quot;shrinky &quot;+weight); }</span>
 
     /**
      *  Sets the &lt;b&gt;shrink priority&lt;/b&gt; for this component.
@@ -476,7 +474,7 @@ public abstract class UILayoutConstants
      * @param priority The shrink priority (higher = shrinks sooner).
      * @return A constraint that sets the component's shrink priority.
      */
-<span class="nc" id="L479">    public static MigAddConstraint SHRINK_PRIO( int priority )  { return MigAddConstraint.of(&quot;shrinkprio &quot;+priority); }</span>
+<span class="nc" id="L477">    public static MigAddConstraint SHRINK_PRIO( int priority )  { return MigAddConstraint.of(&quot;shrinkprio &quot;+priority); }</span>
     /**
      *  Makes the &lt;b&gt;row and column&lt;/b&gt; that this component sits in
      *  &lt;b&gt;greedily absorb&lt;/b&gt; all leftover space in the container.
@@ -488,7 +486,7 @@ public abstract class UILayoutConstants
      *  &lt;p&gt;
      *  This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L491">    public static MigAddConstraint PUSH     = MigAddConstraint.of(&quot;push&quot;);</span>
+<span class="fc" id="L489">    public static MigAddConstraint PUSH     = MigAddConstraint.of(&quot;push&quot;);</span>
 
     /**
      *  Makes the &lt;b&gt;column&lt;/b&gt; that this component sits in
@@ -497,7 +495,7 @@ public abstract class UILayoutConstants
      *  &lt;p&gt;
      *  This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L500">    public static MigAddConstraint PUSH_X   = MigAddConstraint.of(&quot;pushx&quot;);</span>
+<span class="fc" id="L498">    public static MigAddConstraint PUSH_X   = MigAddConstraint.of(&quot;pushx&quot;);</span>
 
     /**
      *  Makes the &lt;b&gt;row&lt;/b&gt; that this component sits in
@@ -506,7 +504,7 @@ public abstract class UILayoutConstants
      *  &lt;p&gt;
      *  This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L509">    public static MigAddConstraint PUSH_Y   = MigAddConstraint.of(&quot;pushy&quot;);</span>
+<span class="fc" id="L507">    public static MigAddConstraint PUSH_Y   = MigAddConstraint.of(&quot;pushy&quot;);</span>
 
     /**
      *  Makes the row and column absorb leftover space with a specific &lt;b&gt;weight&lt;/b&gt;.
@@ -518,7 +516,7 @@ public abstract class UILayoutConstants
      * @param weight The relative push weight.
      * @return A constraint that makes the component's row and column push with the given weight.
      */
-<span class="nc" id="L521">    public static MigAddConstraint PUSH( int weight )  { return MigAddConstraint.of(&quot;push &quot;+weight); }</span>
+<span class="nc" id="L519">    public static MigAddConstraint PUSH( int weight )  { return MigAddConstraint.of(&quot;push &quot;+weight); }</span>
 
     /**
      *  Makes the column absorb leftover horizontal space with a specific &lt;b&gt;weight&lt;/b&gt;.
@@ -528,7 +526,7 @@ public abstract class UILayoutConstants
      * @param weight The relative horizontal push weight.
      * @return A constraint that makes the column push horizontally with the given weight.
      */
-<span class="nc" id="L531">    public static MigAddConstraint PUSH_X( int weight ) { return MigAddConstraint.of(&quot;pushx &quot;+weight); }</span>
+<span class="nc" id="L529">    public static MigAddConstraint PUSH_X( int weight ) { return MigAddConstraint.of(&quot;pushx &quot;+weight); }</span>
 
     /**
      *  Makes the row absorb leftover vertical space with a specific &lt;b&gt;weight&lt;/b&gt;.
@@ -538,7 +536,7 @@ public abstract class UILayoutConstants
      * @param weight The relative vertical push weight.
      * @return A constraint that makes the row push vertically with the given weight.
      */
-<span class="fc" id="L541">    public static MigAddConstraint PUSH_Y( int weight ) { return MigAddConstraint.of(&quot;pushy &quot;+weight); }</span>
+<span class="fc" id="L539">    public static MigAddConstraint PUSH_Y( int weight ) { return MigAddConstraint.of(&quot;pushy &quot;+weight); }</span>
     /**
      *  &lt;b&gt;Skips&lt;/b&gt; over a number of cells in the grid flow
      *  before placing this component.
@@ -550,7 +548,7 @@ public abstract class UILayoutConstants
      * @param cells The number of cells to jump over.
      * @return A constraint that skips the specified number of grid cells.
      */
-<span class="fc" id="L553">    public static MigAddConstraint SKIP( int cells ) { return MigAddConstraint.of(&quot;skip &quot;+cells); }</span>
+<span class="fc" id="L551">    public static MigAddConstraint SKIP( int cells ) { return MigAddConstraint.of(&quot;skip &quot;+cells); }</span>
 
     /**
      *  &lt;b&gt;Splits&lt;/b&gt; the current cell into {@code cells} sub-slots,
@@ -566,7 +564,7 @@ public abstract class UILayoutConstants
      * @param cells The number of sub-slots to create in this cell.
      * @return A constraint that splits the cell for multiple components.
      */
-<span class="fc" id="L569">    public static MigAddConstraint SPLIT( int cells ) { return MigAddConstraint.of(&quot;split &quot;+cells); }</span>
+<span class="fc" id="L567">    public static MigAddConstraint SPLIT( int cells ) { return MigAddConstraint.of(&quot;split &quot;+cells); }</span>
 
     /**
      *  Overrides this component's &lt;b&gt;width&lt;/b&gt; with explicit minimum, preferred, and maximum values (in pixels).
@@ -582,7 +580,7 @@ public abstract class UILayoutConstants
      * @param max  The maximum width in pixels.
      * @return A constraint that overrides the component's width bounds.
      */
-<span class="fc" id="L585">    public static MigAddConstraint WIDTH( int min, int pref, int max ) { return MigAddConstraint.of(&quot;width &quot;+min+&quot;:&quot;+pref+&quot;:&quot;+max); }</span>
+<span class="fc" id="L583">    public static MigAddConstraint WIDTH( int min, int pref, int max ) { return MigAddConstraint.of(&quot;width &quot;+min+&quot;:&quot;+pref+&quot;:&quot;+max); }</span>
 
     /**
      *  Overrides this component's &lt;b&gt;height&lt;/b&gt; with explicit minimum, preferred, and maximum values (in pixels).
@@ -598,7 +596,7 @@ public abstract class UILayoutConstants
      * @param max  The maximum height in pixels.
      * @return A constraint that overrides the component's height bounds.
      */
-<span class="fc" id="L601">    public static MigAddConstraint HEIGHT( int min, int pref, int max ) { return MigAddConstraint.of(&quot;height &quot;+min+&quot;:&quot;+pref+&quot;:&quot;+max); }</span>
+<span class="fc" id="L599">    public static MigAddConstraint HEIGHT( int min, int pref, int max ) { return MigAddConstraint.of(&quot;height &quot;+min+&quot;:&quot;+pref+&quot;:&quot;+max); }</span>
 
     /**
      *  Applies &lt;b&gt;uniform padding&lt;/b&gt; around this component in absolute pixels.
@@ -614,7 +612,7 @@ public abstract class UILayoutConstants
      * @param size The padding in pixels, applied equally to all four sides.
      * @return A constraint that pads the component's bounds.
      */
-<span class="fc" id="L617">    public static MigAddConstraint PAD( int size ) { return PAD(size, size, size, size); }</span>
+<span class="fc" id="L615">    public static MigAddConstraint PAD( int size ) { return PAD(size, size, size, size); }</span>
 
     /**
      *  Applies &lt;b&gt;individual padding&lt;/b&gt; around this component in absolute pixels.
@@ -631,66 +629,66 @@ public abstract class UILayoutConstants
      * @param right  Padding to the right, in pixels.
      * @return A constraint that pads the component's bounds on each side.
      */
-<span class="fc" id="L634">    public static MigAddConstraint PAD( int top, int left, int bottom, int right ) { return MigAddConstraint.of(&quot;pad &quot;+top+&quot; &quot;+left+&quot; &quot;+bottom+&quot; &quot;+right); }</span>
+<span class="fc" id="L632">    public static MigAddConstraint PAD( int top, int left, int bottom, int right ) { return MigAddConstraint.of(&quot;pad &quot;+top+&quot; &quot;+left+&quot; &quot;+bottom+&quot; &quot;+right); }</span>
     /**
      *  Centres this component &lt;b&gt;both horizontally and vertically&lt;/b&gt; within its cell.
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L639">    public static MigAddConstraint ALIGN_CENTER = MigAddConstraint.of(&quot;align center&quot;);</span>
+<span class="fc" id="L637">    public static MigAddConstraint ALIGN_CENTER = MigAddConstraint.of(&quot;align center&quot;);</span>
 
     /**
      *  Pushes this component to the &lt;b&gt;left edge&lt;/b&gt; of its cell.
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L645">    public static MigAddConstraint ALIGN_LEFT = MigAddConstraint.of(&quot;align left&quot;);</span>
+<span class="fc" id="L643">    public static MigAddConstraint ALIGN_LEFT = MigAddConstraint.of(&quot;align left&quot;);</span>
 
     /**
      *  Pushes this component to the &lt;b&gt;right edge&lt;/b&gt; of its cell.
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L651">    public static MigAddConstraint ALIGN_RIGHT = MigAddConstraint.of(&quot;align right&quot;);</span>
+<span class="fc" id="L649">    public static MigAddConstraint ALIGN_RIGHT = MigAddConstraint.of(&quot;align right&quot;);</span>
 
     /**
      *  Centres this component &lt;b&gt;horizontally&lt;/b&gt; within its cell,
      *  without affecting its vertical position.
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L658">    public static MigAddConstraint ALIGN_X_CENTER = MigAddConstraint.of(&quot;alignx center&quot;);</span>
+<span class="fc" id="L656">    public static MigAddConstraint ALIGN_X_CENTER = MigAddConstraint.of(&quot;alignx center&quot;);</span>
 
     /**
      *  Pushes this component to the &lt;b&gt;left edge&lt;/b&gt; of its cell
      *  (horizontal axis only).
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L665">    public static MigAddConstraint ALIGN_X_LEFT = MigAddConstraint.of(&quot;alignx left&quot;);</span>
+<span class="fc" id="L663">    public static MigAddConstraint ALIGN_X_LEFT = MigAddConstraint.of(&quot;alignx left&quot;);</span>
 
     /**
      *  Pushes this component to the &lt;b&gt;right edge&lt;/b&gt; of its cell
      *  (horizontal axis only).
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L672">    public static MigAddConstraint ALIGN_X_RIGHT = MigAddConstraint.of(&quot;alignx right&quot;);</span>
+<span class="fc" id="L670">    public static MigAddConstraint ALIGN_X_RIGHT = MigAddConstraint.of(&quot;alignx right&quot;);</span>
 
     /**
      *  Centres this component &lt;b&gt;vertically&lt;/b&gt; within its cell,
      *  without affecting its horizontal position.
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L679">    public static MigAddConstraint ALIGN_Y_CENTER = MigAddConstraint.of(&quot;aligny center&quot;);</span>
+<span class="fc" id="L677">    public static MigAddConstraint ALIGN_Y_CENTER = MigAddConstraint.of(&quot;aligny center&quot;);</span>
 
     /**
      *  Pushes this component to the &lt;b&gt;bottom edge&lt;/b&gt; of its cell
      *  (vertical axis only).
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L686">    public static MigAddConstraint ALIGN_Y_BOTTOM = MigAddConstraint.of(&quot;aligny bottom&quot;);</span>
+<span class="fc" id="L684">    public static MigAddConstraint ALIGN_Y_BOTTOM = MigAddConstraint.of(&quot;aligny bottom&quot;);</span>
 
     /**
      *  Pushes this component to the &lt;b&gt;top edge&lt;/b&gt; of its cell
      *  (vertical axis only).
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L693">    public static MigAddConstraint ALIGN_Y_TOP = MigAddConstraint.of(&quot;aligny top&quot;);</span>
+<span class="fc" id="L691">    public static MigAddConstraint ALIGN_Y_TOP = MigAddConstraint.of(&quot;aligny top&quot;);</span>
 
     /**
      *  Aligns this component within its cell according to the given {@link UI.Side}.
@@ -699,41 +697,41 @@ public abstract class UILayoutConstants
      * @param pos The side/direction to align toward.
      * @return A constraint that aligns the component as specified.
      */
-<span class="nc" id="L702">    public static MigAddConstraint ALIGN( UI.Side pos ) { return MigAddConstraint.of(pos.toMigAlign()); }</span>
+<span class="nc" id="L700">    public static MigAddConstraint ALIGN( UI.Side pos ) { return MigAddConstraint.of(pos.toMigAlign()); }</span>
     /**
      *  Shorthand to align this component at the &lt;b&gt;top&lt;/b&gt; of its cell.
      *  Equivalent to {@link #ALIGN_Y_TOP}.
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L708">    public static MigAddConstraint TOP = MigAddConstraint.of(&quot;top&quot;);</span>
+<span class="fc" id="L706">    public static MigAddConstraint TOP = MigAddConstraint.of(&quot;top&quot;);</span>
 
     /**
      *  Shorthand to align this component at the &lt;b&gt;right&lt;/b&gt; of its cell.
      *  Equivalent to {@link #ALIGN_X_RIGHT}.
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L715">    public static MigAddConstraint RIGHT = MigAddConstraint.of(&quot;right&quot;);</span>
+<span class="fc" id="L713">    public static MigAddConstraint RIGHT = MigAddConstraint.of(&quot;right&quot;);</span>
 
     /**
      *  Shorthand to align this component at the &lt;b&gt;bottom&lt;/b&gt; of its cell.
      *  Equivalent to {@link #ALIGN_Y_BOTTOM}.
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L722">    public static MigAddConstraint BOTTOM = MigAddConstraint.of(&quot;bottom&quot;);</span>
+<span class="fc" id="L720">    public static MigAddConstraint BOTTOM = MigAddConstraint.of(&quot;bottom&quot;);</span>
 
     /**
      *  Shorthand to align this component at the &lt;b&gt;left&lt;/b&gt; of its cell.
      *  Equivalent to {@link #ALIGN_X_LEFT}.
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L729">    public static MigAddConstraint LEFT = MigAddConstraint.of(&quot;left&quot;);</span>
+<span class="fc" id="L727">    public static MigAddConstraint LEFT = MigAddConstraint.of(&quot;left&quot;);</span>
 
     /**
      *  Shorthand to &lt;b&gt;centre&lt;/b&gt; this component in its cell (both axes).
      *  Equivalent to {@link #ALIGN_CENTER}.
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L736">    public static MigAddConstraint CENTER = MigAddConstraint.of(&quot;center&quot;);</span>
+<span class="fc" id="L734">    public static MigAddConstraint CENTER = MigAddConstraint.of(&quot;center&quot;);</span>
     /**
      *  Adds a fixed-size gap to the &lt;b&gt;left&lt;/b&gt; of this component.
      *  The gap is empty space measured in pixels that separates this component
@@ -743,7 +741,7 @@ public abstract class UILayoutConstants
      * @param size Gap size in pixels.
      * @return A constraint adding a left-side gap.
      */
-<span class="nc" id="L746">    public static MigAddConstraint GAP_LEFT(int size) { return MigAddConstraint.of(&quot;gapleft &quot;+size); }</span>
+<span class="nc" id="L744">    public static MigAddConstraint GAP_LEFT(int size) { return MigAddConstraint.of(&quot;gapleft &quot;+size); }</span>
 
     /**
      *  Adds a fixed-size gap to the &lt;b&gt;right&lt;/b&gt; of this component.
@@ -752,7 +750,7 @@ public abstract class UILayoutConstants
      * @param size Gap size in pixels.
      * @return A constraint adding a right-side gap.
      */
-<span class="nc" id="L755">    public static MigAddConstraint GAP_RIGHT(int size) { return MigAddConstraint.of(&quot;gapright &quot;+size); }</span>
+<span class="nc" id="L753">    public static MigAddConstraint GAP_RIGHT(int size) { return MigAddConstraint.of(&quot;gapright &quot;+size); }</span>
 
     /**
      *  Adds a fixed-size gap &lt;b&gt;above&lt;/b&gt; this component.
@@ -761,7 +759,7 @@ public abstract class UILayoutConstants
      * @param size Gap size in pixels.
      * @return A constraint adding a top-side gap.
      */
-<span class="nc" id="L764">    public static MigAddConstraint GAP_TOP(int size) { return MigAddConstraint.of(&quot;gaptop &quot;+size); }</span>
+<span class="nc" id="L762">    public static MigAddConstraint GAP_TOP(int size) { return MigAddConstraint.of(&quot;gaptop &quot;+size); }</span>
 
     /**
      *  Adds a fixed-size gap &lt;b&gt;below&lt;/b&gt; this component.
@@ -770,7 +768,7 @@ public abstract class UILayoutConstants
      * @param size Gap size in pixels.
      * @return A constraint adding a bottom-side gap.
      */
-<span class="nc" id="L773">    public static MigAddConstraint GAP_BOTTOM(int size) { return MigAddConstraint.of(&quot;gapbottom &quot;+size); }</span>
+<span class="nc" id="L771">    public static MigAddConstraint GAP_BOTTOM(int size) { return MigAddConstraint.of(&quot;gapbottom &quot;+size); }</span>
 
     /**
      *  Adds an &lt;b&gt;expanding (pushing) gap&lt;/b&gt; to the &lt;b&gt;left&lt;/b&gt; of this component.
@@ -779,28 +777,28 @@ public abstract class UILayoutConstants
      *  Think of it as an invisible spring pushing from the left.
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L782">    public static MigAddConstraint GAP_LEFT_PUSH = MigAddConstraint.of(&quot;gapleft push&quot;);</span>
+<span class="fc" id="L780">    public static MigAddConstraint GAP_LEFT_PUSH = MigAddConstraint.of(&quot;gapleft push&quot;);</span>
 
     /**
      *  Adds an &lt;b&gt;expanding (pushing) gap&lt;/b&gt; to the &lt;b&gt;right&lt;/b&gt; of this component.
      *  The gap absorbs all available leftover space, shoving this component to the left.
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L789">    public static MigAddConstraint GAP_RIGHT_PUSH = MigAddConstraint.of(&quot;gapright push&quot;);</span>
+<span class="fc" id="L787">    public static MigAddConstraint GAP_RIGHT_PUSH = MigAddConstraint.of(&quot;gapright push&quot;);</span>
 
     /**
      *  Adds an &lt;b&gt;expanding (pushing) gap&lt;/b&gt; &lt;b&gt;above&lt;/b&gt; this component.
      *  The gap absorbs all available leftover space, shoving this component downward.
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L796">    public static MigAddConstraint GAP_TOP_PUSH = MigAddConstraint.of(&quot;gaptop push&quot;);</span>
+<span class="fc" id="L794">    public static MigAddConstraint GAP_TOP_PUSH = MigAddConstraint.of(&quot;gaptop push&quot;);</span>
 
     /**
      *  Adds an &lt;b&gt;expanding (pushing) gap&lt;/b&gt; &lt;b&gt;below&lt;/b&gt; this component.
      *  The gap absorbs all available leftover space, shoving this component upward.
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L803">    public static MigAddConstraint GAP_BOTTOM_PUSH = MigAddConstraint.of(&quot;gapbottom push&quot;);</span>
+<span class="fc" id="L801">    public static MigAddConstraint GAP_BOTTOM_PUSH = MigAddConstraint.of(&quot;gapbottom push&quot;);</span>
     /**
      *  &lt;b&gt;Docks&lt;/b&gt; this component against the &lt;b&gt;top edge&lt;/b&gt; of the container.
      *  The component stretches across the full container width and
@@ -810,7 +808,7 @@ public abstract class UILayoutConstants
      *  multiple docked components stacking in the order they are added.
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L813">    public static MigAddConstraint DOCK_NORTH = MigAddConstraint.of(&quot;dock north&quot;);</span>
+<span class="fc" id="L811">    public static MigAddConstraint DOCK_NORTH = MigAddConstraint.of(&quot;dock north&quot;);</span>
 
     /**
      *  &lt;b&gt;Docks&lt;/b&gt; this component against the &lt;b&gt;bottom edge&lt;/b&gt; of the container.
@@ -818,7 +816,7 @@ public abstract class UILayoutConstants
      *  &quot;cuts off&quot; a horizontal strip at the bottom.
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L821">    public static MigAddConstraint DOCK_SOUTH = MigAddConstraint.of(&quot;dock south&quot;);</span>
+<span class="fc" id="L819">    public static MigAddConstraint DOCK_SOUTH = MigAddConstraint.of(&quot;dock south&quot;);</span>
 
     /**
      *  &lt;b&gt;Docks&lt;/b&gt; this component against the &lt;b&gt;right edge&lt;/b&gt; of the container.
@@ -826,7 +824,7 @@ public abstract class UILayoutConstants
      *  north/south docks) and &quot;cuts off&quot; a vertical strip on the right.
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L829">    public static MigAddConstraint DOCK_EAST  = MigAddConstraint.of(&quot;dock east&quot;);</span>
+<span class="fc" id="L827">    public static MigAddConstraint DOCK_EAST  = MigAddConstraint.of(&quot;dock east&quot;);</span>
 
     /**
      *  &lt;b&gt;Docks&lt;/b&gt; this component against the &lt;b&gt;left edge&lt;/b&gt; of the container.
@@ -834,7 +832,7 @@ public abstract class UILayoutConstants
      *  north/south docks) and &quot;cuts off&quot; a vertical strip on the left.
      *  &lt;p&gt;This is a &lt;b&gt;component-level&lt;/b&gt; constraint.
      */
-<span class="fc" id="L837">    public static MigAddConstraint DOCK_WEST  = MigAddConstraint.of(&quot;dock west&quot;);</span>
+<span class="fc" id="L835">    public static MigAddConstraint DOCK_WEST  = MigAddConstraint.of(&quot;dock west&quot;);</span>
 
     /**
      *  &lt;b&gt;Docks&lt;/b&gt; this component against the edge of the container
@@ -844,13 +842,13 @@ public abstract class UILayoutConstants
      * @param pos The side of the container to dock against.
      * @return A docking constraint for the specified side.
      */
-<span class="nc" id="L847">    public static MigAddConstraint DOCK( UI.Side pos ) { return MigAddConstraint.of(&quot;dock &quot; + pos.toDirectionString()); }</span>
+<span class="nc" id="L845">    public static MigAddConstraint DOCK( UI.Side pos ) { return MigAddConstraint.of(&quot;dock &quot; + pos.toDirectionString()); }</span>
 
     /**
      *  A factory method for creating a {@link net.miginfocom.layout.LC} instance.
      * @return A {@link net.miginfocom.layout.LC} instance.
      */
-<span class="nc" id="L853">    public static LC LC() { return new LC(); }</span>
+<span class="nc" id="L851">    public static LC LC() { return new LC(); }</span>
     /**
      *  A factory method for creating an {@link net.miginfocom.layout.AC} (Axis Constraints) instance.
      *  Use this when you need to define &lt;b&gt;column or row constraints&lt;/b&gt; programmatically
@@ -860,7 +858,7 @@ public abstract class UILayoutConstants
      *
      * @return A fresh {@link net.miginfocom.layout.AC} instance.
      */
-<span class="nc" id="L863">    public static AC AC() { return new AC(); }</span>
+<span class="nc" id="L861">    public static AC AC() { return new AC(); }</span>
 
     /**
      *  A factory method for creating a {@link net.miginfocom.layout.CC} (Component Constraints) instance.
@@ -870,7 +868,7 @@ public abstract class UILayoutConstants
      *
      * @return A fresh {@link net.miginfocom.layout.CC} instance.
      */
-<span class="nc" id="L873">    public static CC CC() { return new CC(); }</span>
+<span class="nc" id="L871">    public static CC CC() { return new CC(); }</span>
 
     /**
      *  A factory method for creating an {@link swingtree.layout.AddConstraint} of the
@@ -921,7 +919,7 @@ public abstract class UILayoutConstants
      *         a {@link swingtree.layout.ResponsiveGridFlowLayout} layout manager.
      */
     public static FlowCell AUTO_SPAN( Configurator&lt;FlowCellConf&gt; configurator ) {
-<span class="fc" id="L924">        return new FlowCell(configurator);</span>
+<span class="fc" id="L922">        return new FlowCell(configurator);</span>
     }
 
     /**
@@ -961,13 +959,13 @@ public abstract class UILayoutConstants
      *         a {@link swingtree.layout.ResponsiveGridFlowLayout} layout manager.
      */
     public static FlowCell AUTO_SPAN( int numberOfCells ) {
-<span class="nc" id="L964">        return new FlowCell(it-&gt;it</span>
-<span class="nc" id="L965">                .verySmall(numberOfCells)</span>
-<span class="nc" id="L966">                .small(numberOfCells)</span>
-<span class="nc" id="L967">                .medium(numberOfCells)</span>
-<span class="nc" id="L968">                .large(numberOfCells)</span>
-<span class="nc" id="L969">                .veryLarge(numberOfCells)</span>
-<span class="nc" id="L970">                .oversize(numberOfCells)</span>
+<span class="nc" id="L962">        return new FlowCell(it-&gt;it</span>
+<span class="nc" id="L963">                .verySmall(numberOfCells)</span>
+<span class="nc" id="L964">                .small(numberOfCells)</span>
+<span class="nc" id="L965">                .medium(numberOfCells)</span>
+<span class="nc" id="L966">                .large(numberOfCells)</span>
+<span class="nc" id="L967">                .veryLarge(numberOfCells)</span>
+<span class="nc" id="L968">                .oversize(numberOfCells)</span>
         );
     }
 }

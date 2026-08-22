@@ -17,12 +17,12 @@ import java.util.Objects;
  *  &lt;p&gt;
  *  &lt;b&gt;Warning to maintainers:&lt;/b&gt; the component {@link swingtree.layout.Size} carried by the
  *  {@link #boxModel()} must remain the &lt;i&gt;only&lt;/i&gt; size dependent property reachable from here.
- *  {@link LayerCache} relies on it: for stretch tileable styles it derives a size independent
+ *  {@link LayerPartitionCache} relies on it: for stretch tileable styles it derives a size independent
  *  cache key by swapping in a smaller size through {@link #withBoxModel(BoxModelConf)} and
  *  reconstructs any actual size from the resulting rendering. A newly added field whose value
  *  (or whose rendering) depends on the component size would silently break that reconstruction,
  *  producing subtly wrong pixels rather than a failure. Should such a field become necessary,
- *  it must also be rejected by {@code LayerCache._isStretchTileable}.
+ *  it must also be rejected by {@code LayerPartitionCache._isStretchTileable}.
  */
 @Immutable
 @SuppressWarnings(&quot;Immutable&quot;)
@@ -87,7 +87,7 @@ final class LayerRenderConf
 
     /**
      *  Returns a new {@link LayerRenderConf} with the supplied box model
-     *  and everything else unchanged. Used by {@link LayerCache} to derive
+     *  and everything else unchanged. Used by {@link LayerPartitionCache} to derive
      *  a size independent canonical render configuration from this one.
      */
     LayerRenderConf withBoxModel( BoxModelConf boxModelConf ) {
@@ -98,31 +98,59 @@ final class LayerRenderConf
 
 <span class="fc" id="L99">    BaseColorConf baseColors() { return _baseColor; }</span>
 
-<span class="fc" id="L101">    StyleConfLayer layer() { return _layer; }</span>
+    /**
+     *  Returns a new {@link LayerRenderConf} with the supplied base colors and everything
+     *  else unchanged. Used by {@link LayerRenderConfPartition} to narrow this configuration down to
+     *  a single part of the layer.
+     */
+    LayerRenderConf withBaseColors( BaseColorConf baseColors ) {
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        if ( baseColors.equals(_baseColor) )</span>
+<span class="fc" id="L108">            return this;</span>
+<span class="fc" id="L109">        return of(_boxModelConf.get(), baseColors, _layer);</span>
+    }
 
-<span class="fc" id="L103">    ComponentAreas areas() { return ComponentAreas.of(_boxModelConf); }</span>
+<span class="fc" id="L112">    StyleConfLayer layer() { return _layer; }</span>
+
+    /**
+     *  Returns a new {@link LayerRenderConf} with the supplied style layer and everything
+     *  else unchanged. Used by {@link LayerRenderConfPartition} to narrow this configuration down to
+     *  a single part of the layer.
+     */
+    LayerRenderConf withLayer( StyleConfLayer layer ) {
+<span class="fc bfc" id="L120" title="All 2 branches covered.">        if ( layer.equals(_layer) )</span>
+<span class="fc" id="L121">            return this;</span>
+<span class="fc" id="L122">        return of(_boxModelConf.get(), _baseColor, layer);</span>
+    }
+
+    /** Whether handing this to the style renderer would put no pixels anywhere - a common
+     *  outcome of narrowing a configuration down to a {@link StyleLayerPart}. */
+    boolean rendersNothing() {
+<span class="fc bfc" id="L128" title="All 4 branches covered.">        return _baseColor.equals(BaseColorConf.none()) &amp;&amp; _layer.isNone();</span>
+    }
+
+<span class="fc" id="L131">    ComponentAreas areas() { return ComponentAreas.of(_boxModelConf); }</span>
 
 
     @Override
     public int hashCode() {
-<span class="fc" id="L108">        return Objects.hash(_boxModelConf, _baseColor, _layer);</span>
+<span class="fc" id="L136">        return Objects.hash(_boxModelConf, _baseColor, _layer);</span>
     }
 
     @Override
     public boolean equals( Object o ) {
-<span class="fc bfc" id="L113" title="All 2 branches covered.">        if ( o == this ) return true;</span>
-<span class="pc bpc" id="L114" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
-<span class="pc bpc" id="L115" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
-<span class="fc" id="L116">        LayerRenderConf other = (LayerRenderConf) o;</span>
-<span class="fc bfc" id="L117" title="All 2 branches covered.">        return Objects.equals(_boxModelConf, other._boxModelConf) &amp;&amp;</span>
-<span class="fc bfc" id="L118" title="All 2 branches covered.">               Objects.equals(_baseColor, other._baseColor) &amp;&amp;</span>
-<span class="fc bfc" id="L119" title="All 2 branches covered.">               Objects.equals(_layer, other._layer);</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        if ( o == this ) return true;</span>
+<span class="pc bpc" id="L142" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
+<span class="pc bpc" id="L143" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
+<span class="fc" id="L144">        LayerRenderConf other = (LayerRenderConf) o;</span>
+<span class="fc bfc" id="L145" title="All 2 branches covered.">        return Objects.equals(_boxModelConf, other._boxModelConf) &amp;&amp;</span>
+<span class="fc bfc" id="L146" title="All 2 branches covered.">               Objects.equals(_baseColor, other._baseColor) &amp;&amp;</span>
+<span class="fc bfc" id="L147" title="All 2 branches covered.">               Objects.equals(_layer, other._layer);</span>
     }
 
     @Override
     public String toString() {
-<span class="nc" id="L124">        return getClass().getSimpleName()+&quot;[&quot; +</span>
-<span class="nc" id="L125">                    &quot;boxModel=&quot; + _boxModelConf.get() + &quot;, &quot; +</span>
+<span class="nc" id="L152">        return getClass().getSimpleName()+&quot;[&quot; +</span>
+<span class="nc" id="L153">                    &quot;boxModel=&quot; + _boxModelConf.get() + &quot;, &quot; +</span>
                     &quot;baseColor=&quot; + _baseColor + &quot;, &quot; +
                     &quot;layer=&quot; + _layer +
                 ']';

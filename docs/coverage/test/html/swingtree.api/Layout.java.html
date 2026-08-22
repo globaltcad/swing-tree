@@ -1068,7 +1068,7 @@ public interface Layout
 <span class="fc" id="L1068">                    boolean childrenChanged = false;</span>
 <span class="fc bfc" id="L1069" title="All 2 branches covered.">                    for ( Pair&lt;Integer, MigAddConstraint&gt; entry : _childConstraints ) {</span>
 <span class="fc" id="L1070">                        int i = entry.first();</span>
-<span class="pc bpc" id="L1071" title="2 of 4 branches missed.">                        if ( i &lt; 0 || i &gt;= children.length ) continue;</span>
+<span class="pc bpc" id="L1071" title="1 of 4 branches missed.">                        if ( i &lt; 0 || i &gt;= children.length ) continue;</span>
 <span class="fc" id="L1072">                        Object desired  = entry.second().toConstraintForLayoutManager();</span>
 <span class="fc" id="L1073">                        Object existing = migLayout.getComponentConstraints(children[i]);</span>
 <span class="fc bfc" id="L1074" title="All 2 branches covered.">                        if ( !desired.equals(existing) ) {</span>
@@ -1076,7 +1076,7 @@ public interface Layout
 <span class="fc" id="L1076">                            childrenChanged = true;</span>
                         }
 <span class="fc" id="L1078">                    }</span>
-<span class="pc bpc" id="L1079" title="1 of 2 branches missed.">                    if ( childrenChanged )</span>
+<span class="fc bfc" id="L1079" title="All 2 branches covered.">                    if ( childrenChanged )</span>
 <span class="fc" id="L1080">                        component.revalidate();</span>
                 }
             }

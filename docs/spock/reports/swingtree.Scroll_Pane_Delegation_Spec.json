@@ -1,0 +1,129 @@
+{
+  "className":"swingtree.Scroll_Pane_Delegation_Spec",
+  "title":"The Box a Scroll Pane puts around your Content",
+  "narrative":"A viewport holds exactly one view and has no layout manager to interpret a constraint\n    with, and the `Scrollable` interface can only be implemented by inheriting from it. So\n    when you configure a scroll pane declaratively, SwingTree slips a thin box between the\n    viewport and your content: the box carries the layout manager, and it answers the\n    viewport's `Scrollable` questions from your configurator.\n\n    The box is meant to be invisible in every other respect. Whatever your content says\n    about how small, how large and how big it would like to be, the box says the same, and\n    asking it any of those three questions must leave the other two exactly as they were.\n\n    That last sentence is the one worth writing tests for, and it is not as easy to test as\n    it sounds. Each of the three size methods of the box answers from the content but also\n    writes the answer back into itself, because several places in SwingTree and in the look\n    and feels ask a component whether a size was explicitly set on it. A mistake in one of\n    those write-backs is invisible to a test that only reads the answers - the answer comes\n    from the content either way - and shows up only as a component that keeps changing\n    underneath everyone listening to it. This specification therefore watches what the box\n    does to itself, not just what it says.",
+  "subjects":["swingtree.UIForScrollPane","javax.swing.JScrollPane"],
+  "statistics":{
+    "runs":"5",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"Asking the box for one size never changes another. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The three size questions are independent of each other, so answering one of them\n            has no business touching the answer to the others. Note that we cannot check this\n            by simply reading the other two back, because the box answers all three from the\n            content and would go on doing so even if it had corrupted its own record. What\n            gives it away is the component telling everyone that a size changed, so that is\n            what we listen for.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scroll pane with some content in it.","code":["var scrollPane =","        UI.scrollPane( conf -> conf.fitWidth(true) )","        .add(","            UI.panel(\"fill\")","            .withMinSize(40, 20)","            .withMaxSize(400, 300)","        )","        .get(JScrollPane)"]},
+
+        {"kind":"and","text":"The box SwingTree slipped in between the viewport and the content.","code":["var box = UI.runAndGet({ (JComponent) scrollPane.getViewport().getView() })"]},
+
+        {"kind":"and","text":"A record of every size the box announces as changed.","code":["var announced = []","UI.runNow({","    box.addPropertyChangeListener({ event ->","        if ( event.propertyName in [\"minimumSize\", \"maximumSize\", \"preferredSize\"] )","            announced.add(event.propertyName)","    } as PropertyChangeListener)","})"]},
+
+        {"kind":"when","text":"We ask it one of the three questions, a few times over.","code":["UI.runNow({ 3.times { question.call(box) } })"]},
+
+        {"kind":"then","text":"The only size it can possibly have changed is the one we asked about.","code":["announced.every { it == expectedProperty }"]},
+
+        {"kind":"where","text":"We ask each of the three questions in turn.","code":{"expectedProperty":["\"minimumSize\"","\"maximumSize\"","\"preferredSize\""],"question":["{ JComponent it -> it.getMinimumSize()   }","{ JComponent it -> it.getMaximumSize()   }","{ JComponent it -> it.getPreferredSize() }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Asking the box for one size never changes another. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The three size questions are independent of each other, so answering one of them\n            has no business touching the answer to the others. Note that we cannot check this\n            by simply reading the other two back, because the box answers all three from the\n            content and would go on doing so even if it had corrupted its own record. What\n            gives it away is the component telling everyone that a size changed, so that is\n            what we listen for.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scroll pane with some content in it.","code":["var scrollPane =","        UI.scrollPane( conf -> conf.fitWidth(true) )","        .add(","            UI.panel(\"fill\")","            .withMinSize(40, 20)","            .withMaxSize(400, 300)","        )","        .get(JScrollPane)"]},
+
+        {"kind":"and","text":"The box SwingTree slipped in between the viewport and the content.","code":["var box = UI.runAndGet({ (JComponent) scrollPane.getViewport().getView() })"]},
+
+        {"kind":"and","text":"A record of every size the box announces as changed.","code":["var announced = []","UI.runNow({","    box.addPropertyChangeListener({ event ->","        if ( event.propertyName in [\"minimumSize\", \"maximumSize\", \"preferredSize\"] )","            announced.add(event.propertyName)","    } as PropertyChangeListener)","})"]},
+
+        {"kind":"when","text":"We ask it one of the three questions, a few times over.","code":["UI.runNow({ 3.times { question.call(box) } })"]},
+
+        {"kind":"then","text":"The only size it can possibly have changed is the one we asked about.","code":["announced.every { it == expectedProperty }"]},
+
+        {"kind":"where","text":"We ask each of the three questions in turn.","code":{"expectedProperty":["\"minimumSize\"","\"maximumSize\"","\"preferredSize\""],"question":["{ JComponent it -> it.getMinimumSize()   }","{ JComponent it -> it.getMaximumSize()   }","{ JComponent it -> it.getPreferredSize() }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Asking the box for one size never changes another. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The three size questions are independent of each other, so answering one of them\n            has no business touching the answer to the others. Note that we cannot check this\n            by simply reading the other two back, because the box answers all three from the\n            content and would go on doing so even if it had corrupted its own record. What\n            gives it away is the component telling everyone that a size changed, so that is\n            what we listen for.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scroll pane with some content in it.","code":["var scrollPane =","        UI.scrollPane( conf -> conf.fitWidth(true) )","        .add(","            UI.panel(\"fill\")","            .withMinSize(40, 20)","            .withMaxSize(400, 300)","        )","        .get(JScrollPane)"]},
+
+        {"kind":"and","text":"The box SwingTree slipped in between the viewport and the content.","code":["var box = UI.runAndGet({ (JComponent) scrollPane.getViewport().getView() })"]},
+
+        {"kind":"and","text":"A record of every size the box announces as changed.","code":["var announced = []","UI.runNow({","    box.addPropertyChangeListener({ event ->","        if ( event.propertyName in [\"minimumSize\", \"maximumSize\", \"preferredSize\"] )","            announced.add(event.propertyName)","    } as PropertyChangeListener)","})"]},
+
+        {"kind":"when","text":"We ask it one of the three questions, a few times over.","code":["UI.runNow({ 3.times { question.call(box) } })"]},
+
+        {"kind":"then","text":"The only size it can possibly have changed is the one we asked about.","code":["announced.every { it == expectedProperty }"]},
+
+        {"kind":"where","text":"We ask each of the three questions in turn.","code":{"expectedProperty":["\"minimumSize\"","\"maximumSize\"","\"preferredSize\""],"question":["{ JComponent it -> it.getMinimumSize()   }","{ JComponent it -> it.getMaximumSize()   }","{ JComponent it -> it.getPreferredSize() }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The box settles down: asking it the same things again changes nothing.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Every write-back the box performs is a `PropertyChangeEvent`, and a component\n            that fires those forever is a component that keeps waking up whatever listens to\n            it. So the box has to reach a fixed point: once it has recorded what its content\n            says, asking it again has to be silent.\n\n            This is the shape a mix-up between two of the sizes takes. Writing one size into\n            another's field makes the two disagree by construction, so each question undoes\n            what the previous one recorded and the box never stops announcing changes - even\n            though every single answer it gives is correct.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scroll pane with some content in it.","code":["var scrollPane =","        UI.scrollPane( conf -> conf.fitWidth(true) )","        .add(","            UI.panel(\"fill\")","            .withMinSize(40, 20)","            .withMaxSize(400, 300)","        )","        .get(JScrollPane)"]},
+
+        {"kind":"and","text":"The box SwingTree slipped in between the viewport and the content.","code":["var box = UI.runAndGet({ (JComponent) scrollPane.getViewport().getView() })"]},
+
+        {"kind":"and","text":"A record of every size the box announces as changed.","code":["var announced = []","UI.runNow({","    box.addPropertyChangeListener({ event ->","        if ( event.propertyName in [\"minimumSize\", \"maximumSize\", \"preferredSize\"] )","            announced.add(event.propertyName)","    } as PropertyChangeListener)","})"]},
+
+        {"kind":"when","text":"We ask the box all three questions, over and over, the way a layout pass does.","code":["UI.runNow({","    20.times { box.getMinimumSize(); box.getMaximumSize(); box.getPreferredSize() }","})"]},
+
+        {"kind":"then","text":"\n            It announced a change at most once per size - the first time it recorded what its\n            content said - and then went quiet.\n        ","code":["announced.count(\"minimumSize\")   <= 1","announced.count(\"maximumSize\")   <= 1","announced.count(\"preferredSize\") <= 1"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The box reports exactly the sizes of the content it wraps.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            And of course the answers themselves have to be the content's answers. This is\n            the part that is easy to test, and it is here so that the two tests above cannot\n            be satisfied by a box that has simply stopped answering.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A content component with a mind of its own about how it wants to be sized.","code":["var content =","        UI.panel(\"fill\")","        .withMinSize(40, 20)","        .withMaxSize(400, 300)","        .get(JPanel)"]},
+
+        {"kind":"and","text":"A scroll pane wrapped around it, and the box SwingTree slipped in between.","code":["var scrollPane =","        UI.scrollPane( conf -> conf.fitWidth(true) )","        .add(UI.of(content))","        .get(JScrollPane)","var box = UI.runAndGet({ (JComponent) scrollPane.getViewport().getView() })"]},
+
+        {"kind":"expect","text":"The box says exactly what the content says.","code":["UI.runAndGet({ box.getMinimumSize()   }) == UI.runAndGet({ content.getMinimumSize()   })","UI.runAndGet({ box.getMaximumSize()   }) == UI.runAndGet({ content.getMaximumSize()   })","UI.runAndGet({ box.getPreferredSize() }) == UI.runAndGet({ content.getPreferredSize() })"]},
+
+        {"kind":"when","text":"The content changes its mind,","code":["UI.runNow({ content.setMinimumSize(new Dimension(123, 45)) })"]},
+
+        {"kind":"then","text":"the box changes its mind with it.","code":["UI.runAndGet({ box.getMinimumSize() }) == new Dimension(123, 45)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

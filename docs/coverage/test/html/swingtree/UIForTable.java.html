@@ -154,7 +154,7 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      *  through methods like {@link CellConf#view(Component)} or {@link CellConf#updateView(Configurator)}.
      *  Here an example of how this method may be used:
      * &lt;pre&gt;{@code
-     *     UI.table(UI.ListData.ROW_MAJOR_EDITABLE, ()-&gt;List.of(List.of(1, 2, 3), List.of(7, 8, 9)) )
+     *     UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, ()-&gt;List.of(List.of(1, 2, 3), List.of(7, 8, 9)) )
      *     .withCellForColumn(0, cell -&gt; cell
      *          .updateView( comp -&gt; comp
      *              .orGet(JLabel::new) // initialize a new JLabel if not already present
@@ -265,7 +265,7 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      *  through methods like {@link CellConf#view(Component)} or {@link CellConf#updateView(Configurator)}.
      *  Here an example of how this method may be used:
      * &lt;pre&gt;{@code
-     *     UI.table(UI.ListData.ROW_MAJOR_EDITABLE, ()-&gt;List.of(List.of(1, 2, 3), List.of(7, 8, 9)) )
+     *     UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, ()-&gt;List.of(List.of(1, 2, 3), List.of(7, 8, 9)) )
      *     .withCellForColumn(0, cell -&gt; cell
      *          .updateView( comp -&gt; comp
      *              .orGet(JLabel::new) // initialize a new JLabel if not already present
@@ -430,7 +430,7 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      *  Here code snippet demonstrating how this method may be used
      *  as part of a UI declaration:
      *  &lt;pre&gt;{@code
-     *      UI.table(UI.MapData.EDITABLE,()-&gt;{
+     *      UI.table(UI.Editability.EDITABLE,()-&gt;{
      *          Map&lt;String, List&lt;String&gt;&gt; data = new LinkedHashMap&lt;&gt;();
      *          data.put(&quot;A&quot;, List.of(&quot;A1&quot;, &quot;A2&quot;, &quot;A3&quot;));
      *          data.put(&quot;B&quot;, List.of(&quot;B1&quot;, &quot;B2&quot;, &quot;B3&quot;));
@@ -629,7 +629,8 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      *  Binds the table to a read only property holding an immutable
      *  {@link TableData} value, which is the most complete way of describing
      *  the contents of a table: it carries the cells, the column names, the column
-     *  classes and the {@link UI.ListData} layout of the data, all in a single value.
+     *  classes, the {@link UI.CellOrder} of the data and its {@link UI.Editability},
+     *  all in a single value.
      *  &lt;p&gt;
      *  Because a {@link TableData} is deeply immutable, the table works with the
      *  property value itself as its UI thread owned snapshot (so the AWT Event Dispatch
@@ -641,7 +642,7 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      *  incrementally, instead of rebuilding the whole table.
      *  &lt;p&gt;
      *  The cells of a table bound like this are always read only. Use
-     *  {@link #withModel(Var)} together with one of the {@code *_EDITABLE} layouts
+     *  {@link #withModel(Var)} together with {@link TableData#asEditable()}
      *  if you want the user to be able to edit them.
      *  &lt;pre&gt;{@code
      *  Val&lt;TableData&gt; model = vm.tableModel();
@@ -652,11 +653,11 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      * @return This builder node, to allow for method chaining.
      */
     public final UIForTable&lt;T&gt; withModel( Val&lt;TableData&gt; model ) {
-<span class="fc" id="L655">        NullUtil.nullArgCheck(model, &quot;model&quot;, Val.class);</span>
+<span class="fc" id="L656">        NullUtil.nullArgCheck(model, &quot;model&quot;, Val.class);</span>
         // A read only 'Val' overload always yields a read only table, even if the
         // reference happens to point at a 'Var' at runtime (a view model exposing its
         // 'Var' as a 'Val', say). The overload the user picked is what expresses intent.
-<span class="fc" id="L659">        return _withTableData(model, false);</span>
+<span class="fc" id="L660">        return _withTableData(model, false);</span>
     }
 
     /**
@@ -666,10 +667,10 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      *  right away (so that the table does not flicker) and then written back into this
      *  property on the application thread.
      *  &lt;p&gt;
-     *  Note that the cells only actually become editable if the {@link TableData#layout()}
-     *  of the bound value is one of the {@code *_EDITABLE} constants of {@link UI.ListData}.
-     *  This mirrors {@link #withModel(UI.ListData, Val)}, where the very same two conditions
-     *  (an editable layout and a mutable property) decide the matter.
+     *  Note that the cells only actually become editable if the bound value says so
+     *  through {@link TableData#isEditable()}, see {@link TableData#asEditable()}.
+     *  This mirrors {@link #withModel(UI.CellOrder, UI.Editability, Val)}, where the very
+     *  same two conditions (an editable value and a mutable property) decide the matter.
      *  &lt;pre&gt;{@code
      *  Var&lt;TableData&gt; model = vm.tableModel();
      *  UI.table().withModel(model);
@@ -679,10 +680,10 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      * @return This builder node, to allow for method chaining.
      */
     public final UIForTable&lt;T&gt; withModel( Var&lt;TableData&gt; model ) {
-<span class="fc" id="L682">        NullUtil.nullArgCheck(model, &quot;model&quot;, Var.class);</span>
-        // A mutable 'Var' overload yields an editable table (if the layout allows it),
+<span class="fc" id="L683">        NullUtil.nullArgCheck(model, &quot;model&quot;, Var.class);</span>
+        // A mutable 'Var' overload yields an editable table (if the value allows it),
         // so unlike the 'Val' overload it must not funnel through as read only.
-<span class="fc" id="L685">        return _withTableData(model, true);</span>
+<span class="fc" id="L686">        return _withTableData(model, true);</span>
     }
 
     /**
@@ -693,31 +694,31 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      *  make a table editable when a {@link Var} is bound through a read only {@link Val}.
      */
     private UIForTable&lt;T&gt; _withTableData( Val&lt;TableData&gt; model, boolean editable ) {
-<span class="fc" id="L696">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L697">                    _installModel(thisComponent, new PropertyTableModel(model, editable));</span>
-<span class="fc" id="L698">                })</span>
-<span class="fc" id="L699">                ._this();</span>
+<span class="fc" id="L697">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L698">                    _installModel(thisComponent, new PropertyTableModel(model, editable));</span>
+<span class="fc" id="L699">                })</span>
+<span class="fc" id="L700">                ._this();</span>
     }
 
     /**
      *  Binds the table to a {@link Tuple} based, fully thread safe and reactive
-     *  data source, whose layout is described by the supplied {@link UI.ListData}
-     *  constant: for a {@code ROW_MAJOR*} layout the outer {@link Tuple} holds the
-     *  rows and each inner {@link Tuple} the cells of a row, whereas for a
-     *  {@code COLUMN_MAJOR*} layout the outer {@link Tuple} holds the columns and
-     *  each inner {@link Tuple} the cells of a column.
+     *  data source, whose cells are stored in the order described by the supplied
+     *  {@link UI.CellOrder} constant: for {@link UI.CellOrder#ROW_MAJOR} the outer
+     *  {@link Tuple} holds the rows and each inner {@link Tuple} the cells of a row,
+     *  whereas for {@link UI.CellOrder#COLUMN_MAJOR} the outer {@link Tuple} holds
+     *  the columns and each inner {@link Tuple} the cells of a column.
      *  &lt;p&gt;
      *  This is the recommended way to model dynamic, application thread owned
      *  table data: because a {@link Tuple} is deeply immutable, the table works
      *  with a UI thread owned snapshot of it (so the AWT Event Dispatch Thread
      *  never reads application thread owned mutable state). The table updates
      *  itself automatically whenever the property changes, so no
-     *  {@code updateTableOn(..)} binding is needed. For a row major layout, the
+     *  {@code updateTableOn(..)} binding is needed. For a row major cell order, the
      *  change diff carried by the tuple is furthermore used to sync row
      *  insertions, removals and updates to the {@link JTable} incrementally,
      *  instead of rebuilding the whole table.
      *  &lt;p&gt;
-     *  If you pass one of the {@code *_EDITABLE} constants &lt;i&gt;and&lt;/i&gt; a mutable
+     *  If you pass {@link UI.Editability#EDITABLE} &lt;i&gt;and&lt;/i&gt; a mutable
      *  {@link Var}, then the user may edit the cells of the table, in which case
      *  the edits are written back into the property on the application thread.
      *  A read only {@link Val} always yields a read only table.
@@ -726,23 +727,42 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      *      Tuple.of(&quot;Alice&quot;, &quot;30&quot;),
      *      Tuple.of(&quot;Bob&quot;,   &quot;42&quot;)
      *  ));
-     *  UI.table().withModel(UI.ListData.ROW_MAJOR_EDITABLE, rows);
+     *  UI.table().withModel(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, rows);
      *  }&lt;/pre&gt;
      *
-     * @param dataFormat The layout of the supplied cells, see {@link UI.ListData}.
+     * @param cellOrder The order in which the supplied cells are stored, see {@link UI.CellOrder}.
+     * @param editability Whether the user may edit the cells, see {@link UI.Editability}.
      * @param cells A property holding a {@link Tuple} of {@link Tuple}s of cell values.
      * @return This builder node, to allow for method chaining.
      * @param &lt;E&gt; The common type of the cell values.
      */
-    public final &lt;E&gt; UIForTable&lt;T&gt; withModel( UI.ListData dataFormat, Val&lt;Tuple&lt;Tuple&lt;E&gt;&gt;&gt; cells ) {
-<span class="fc" id="L738">        NullUtil.nullArgCheck(dataFormat, &quot;dataFormat&quot;, UI.ListData.class);</span>
-<span class="fc" id="L739">        NullUtil.nullArgCheck(cells, &quot;cells&quot;, Val.class);</span>
-        // A tuple based table has only this one overload, so its editability is
-        // driven by the runtime mutability of the cells property (which decides
-        // whether '_asSnapshotProperty' zooms into a mutable snapshot or merely
-        // views a read only one), matching what that method does internally.
-<span class="pc bpc" id="L744" title="1 of 4 branches missed.">        boolean editable = cells instanceof Var &amp;&amp; cells.isMutable();</span>
-<span class="fc" id="L745">        return _withTableData(_asSnapshotProperty(dataFormat, cells), editable);</span>
+    public final &lt;E&gt; UIForTable&lt;T&gt; withModel(
+        UI.CellOrder cellOrder, UI.Editability editability, Val&lt;Tuple&lt;Tuple&lt;E&gt;&gt;&gt; cells
+    ) {
+<span class="fc" id="L742">        NullUtil.nullArgCheck(cellOrder, &quot;cellOrder&quot;, UI.CellOrder.class);</span>
+<span class="fc" id="L743">        NullUtil.nullArgCheck(editability, &quot;editability&quot;, UI.Editability.class);</span>
+<span class="fc" id="L744">        NullUtil.nullArgCheck(cells, &quot;cells&quot;, Val.class);</span>
+        // Editing needs both permission and somewhere to put the edit, so the
+        // requested editability is combined with the runtime mutability of the cells
+        // property (which also decides whether '_asSnapshotProperty' zooms into a
+        // mutable snapshot or merely views a read only one).
+<span class="pc bpc" id="L749" title="1 of 6 branches missed.">        boolean editable = editability.isEditable() &amp;&amp; cells instanceof Var &amp;&amp; cells.isMutable();</span>
+<span class="fc" id="L750">        return _withTableData(_asSnapshotProperty(cellOrder, editability, cells), editable);</span>
+    }
+
+    /**
+     *  Binds the table to a read only {@link Tuple} based, fully thread safe and
+     *  reactive data source, exactly like
+     *  {@link #withModel(UI.CellOrder, UI.Editability, Val)} does with
+     *  {@link UI.Editability#READ_ONLY}.
+     *
+     * @param cellOrder The order in which the supplied cells are stored, see {@link UI.CellOrder}.
+     * @param cells A property holding a {@link Tuple} of {@link Tuple}s of cell values.
+     * @return This builder node, to allow for method chaining.
+     * @param &lt;E&gt; The common type of the cell values.
+     */
+    public final &lt;E&gt; UIForTable&lt;T&gt; withModel( UI.CellOrder cellOrder, Val&lt;Tuple&lt;Tuple&lt;E&gt;&gt;&gt; cells ) {
+<span class="fc" id="L765">        return withModel(cellOrder, UI.Editability.READ_ONLY, cells);</span>
     }
 
     /**
@@ -757,29 +777,33 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      *  its way back into the original property, whereas read only cells only need a view.
      */
     @SuppressWarnings(&quot;unchecked&quot;)
-    private static &lt;E&gt; Val&lt;TableData&gt; _asSnapshotProperty( UI.ListData dataFormat, Val&lt;Tuple&lt;Tuple&lt;E&gt;&gt;&gt; cells ) {
-<span class="fc" id="L761">        Function&lt;Tuple&lt;Tuple&lt;E&gt;&gt;, TableData&gt; toSnapshot = tuple -&gt;</span>
-<span class="fc bfc" id="L762" title="All 2 branches covered.">                tuple == null</span>
+    private static &lt;E&gt; Val&lt;TableData&gt; _asSnapshotProperty(
+        UI.CellOrder cellOrder, UI.Editability editability, Val&lt;Tuple&lt;Tuple&lt;E&gt;&gt;&gt; cells
+    ) {
+<span class="fc" id="L783">        TableData empty = TableData.empty().withCellOrder(cellOrder).withEditability(editability);</span>
+<span class="fc" id="L784">        Function&lt;Tuple&lt;Tuple&lt;E&gt;&gt;, TableData&gt; toSnapshot = tuple -&gt;</span>
+<span class="fc bfc" id="L785" title="All 2 branches covered.">                tuple == null</span>
                     // A nullable property may hold no tuple at all (data not loaded
                     // yet, say), which simply reads as an empty table.
-<span class="fc" id="L765">                    ? TableData.empty().withLayout(dataFormat)</span>
-<span class="fc" id="L766">                    : TableData.of(dataFormat, (Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt;)(Tuple&lt;?&gt;) tuple);</span>
+<span class="fc" id="L788">                    ? empty</span>
+<span class="fc" id="L789">                    : TableData.of(cellOrder, (Tuple&lt;Tuple&lt;@Nullable Object&gt;&gt;)(Tuple&lt;?&gt;) tuple)</span>
+<span class="fc" id="L790">                               .withEditability(editability);</span>
         /*
             Careful: a read only property may well be a 'Var' instance, which is why
             its mutability has to be checked explicitly (a lens onto an immutable
             property would throw as soon as the user edits a cell).
          */
-<span class="pc bpc" id="L772" title="1 of 4 branches missed.">        if ( cells instanceof Var &amp;&amp; cells.isMutable() )</span>
+<span class="pc bpc" id="L796" title="1 of 4 branches missed.">        if ( cells instanceof Var &amp;&amp; cells.isMutable() )</span>
             // The null object flavour of 'zoomTo' is what makes a lens over a
             // nullable property well defined: a null tuple reads as the empty table.
-<span class="fc" id="L775">            return ((Var&lt;Tuple&lt;Tuple&lt;E&gt;&gt;&gt;) cells).zoomTo(</span>
-<span class="fc" id="L776">                        TableData.empty().withLayout(dataFormat),</span>
-<span class="fc" id="L777">                        Lens.of(</span>
+<span class="fc" id="L799">            return ((Var&lt;Tuple&lt;Tuple&lt;E&gt;&gt;&gt;) cells).zoomTo(</span>
+                        empty,
+<span class="fc" id="L801">                        Lens.of(</span>
                             toSnapshot,
-<span class="fc" id="L779">                            (oldCells, snapshot) -&gt; (Tuple&lt;Tuple&lt;E&gt;&gt;)(Tuple&lt;?&gt;) snapshot.cells()</span>
+<span class="fc" id="L803">                            (oldCells, snapshot) -&gt; (Tuple&lt;Tuple&lt;E&gt;&gt;)(Tuple&lt;?&gt;) snapshot.cells()</span>
                         )
                     );
-<span class="fc" id="L782">        return cells.viewAs(TableData.class, toSnapshot);</span>
+<span class="fc" id="L806">        return cells.viewAs(TableData.class, toSnapshot);</span>
     }
 
     /**
@@ -789,10 +813,10 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      *  before the {@link JTable} starts querying the model.
      */
     private void _installModel( T thisComponent, TableModel model ) {
-<span class="pc bpc" id="L792" title="1 of 2 branches missed.">        if ( model instanceof AbstractSnapshotTableModel )</span>
-<span class="fc" id="L793">            ((AbstractSnapshotTableModel) model)._setEventProcessor(_state().eventProcessor());</span>
-<span class="fc" id="L794">        thisComponent.setModel(model);</span>
-<span class="fc" id="L795">    }</span>
+<span class="pc bpc" id="L816" title="1 of 2 branches missed.">        if ( model instanceof AbstractSnapshotTableModel )</span>
+<span class="fc" id="L817">            ((AbstractSnapshotTableModel) model)._setEventProcessor(_state().eventProcessor());</span>
+<span class="fc" id="L818">        thisComponent.setModel(model);</span>
+<span class="fc" id="L819">    }</span>
 
     /**
      *  Use this instead of {@link JTable#setModel(TableModel)} if your table data can be represented by
@@ -805,79 +829,103 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      *      Use {@link #updateTableOn(sprouts.Event)} to bind an update {@link sprouts.Event} to the table model.&lt;/b&gt;
      *  &lt;p&gt;
      *  &lt;b&gt;Consider {@link #withModel(Var)} with a {@link TableData} value instead:&lt;/b&gt; it
-     *  describes the whole table (cells, column names, column classes and layout) as a
-     *  single immutable value which a property hands to the table, so the table updates
+     *  describes the whole table (cells, column names, column classes, cell order and
+     *  editability) as a single immutable value which a property hands to the table, so the table updates
      *  itself, it is thread safe by construction, and it syncs row changes incrementally
      *  instead of rebuilding. The data source here can only ever refresh everything.
      *
-     * @param mode An enum which configures the layout as well as modifiability of the table in a readable fashion.
+     * @param cellOrder An enum which configures whether the outer list holds the rows
+     *                  or the columns of the table, see {@link UI.CellOrder}.
+     * @param editability An enum which configures whether the user may edit the cells,
+     *                    see {@link UI.Editability}.
      * @param dataSource The {@link TableListDataSource} returning a list matrix which will be used to populate the table.
      * @return This builder node.
      * @param &lt;E&gt; The type of the table entry {@link Object}s.
      */
-    public final &lt;E&gt; UIForTable&lt;T&gt; withModel( UI.ListData mode, TableListDataSource&lt;E&gt; dataSource ) {
-<span class="fc" id="L819">        boolean isRowMajor = mode.isRowMajor();</span>
-<span class="fc" id="L820">        boolean isEditable = mode.isEditable();</span>
-<span class="fc bfc" id="L821" title="All 2 branches covered.">        if ( isRowMajor )</span>
-<span class="fc" id="L822">            return _with( thisComponent -&gt;</span>
-<span class="fc" id="L823">                    _installModel(thisComponent, new ListBasedTableModel&lt;E&gt;(isEditable, dataSource)</span>
-<span class="fc" id="L824">                    {</span>
-<span class="fc" id="L825">                        @Override protected int _liveRowCount() { return getData().size(); }</span>
+    public final &lt;E&gt; UIForTable&lt;T&gt; withModel(
+        UI.CellOrder cellOrder, UI.Editability editability, TableListDataSource&lt;E&gt; dataSource
+    ) {
+<span class="fc" id="L848">        boolean isRowMajor = cellOrder.isRowMajor();</span>
+<span class="fc" id="L849">        boolean isEditable = editability.isEditable();</span>
+<span class="fc bfc" id="L850" title="All 2 branches covered.">        if ( isRowMajor )</span>
+<span class="fc" id="L851">            return _with( thisComponent -&gt;</span>
+<span class="fc" id="L852">                    _installModel(thisComponent, new ListBasedTableModel&lt;E&gt;(isEditable, dataSource)</span>
+<span class="fc" id="L853">                    {</span>
+<span class="fc" id="L854">                        @Override protected int _liveRowCount() { return getData().size(); }</span>
                         @Override protected int _liveColumnCount() {
-<span class="fc" id="L827">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
-<span class="pc bpc" id="L828" title="1 of 2 branches missed.">                            return ( data.isEmpty() ? 0 : data.get(0).size() );</span>
+<span class="fc" id="L856">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="pc bpc" id="L857" title="1 of 2 branches missed.">                            return ( data.isEmpty() ? 0 : data.get(0).size() );</span>
                         }
                         @Override protected @Nullable Object _liveValueAt(int rowIndex, int columnIndex) {
-<span class="fc" id="L831">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="fc" id="L860">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
                             // Bound-check against the live data, never the (possibly stale)
                             // snapshot: this method feeds 'takeLiveSnapshot', which runs while
                             // the previous snapshot is still installed for the UI thread.
-<span class="pc bpc" id="L835" title="2 of 4 branches missed.">                            if ( rowIndex &lt; 0 || rowIndex &gt;= data.size() ) return null;</span>
-<span class="fc" id="L836">                            List&lt;E&gt; row = data.get(rowIndex);</span>
-<span class="pc bpc" id="L837" title="2 of 4 branches missed.">                            if ( columnIndex &lt; 0 || columnIndex &gt;= row.size() ) return null;</span>
-<span class="fc" id="L838">                            return row.get(columnIndex);</span>
+<span class="pc bpc" id="L864" title="2 of 4 branches missed.">                            if ( rowIndex &lt; 0 || rowIndex &gt;= data.size() ) return null;</span>
+<span class="fc" id="L865">                            List&lt;E&gt; row = data.get(rowIndex);</span>
+<span class="pc bpc" id="L866" title="2 of 4 branches missed.">                            if ( columnIndex &lt; 0 || columnIndex &gt;= row.size() ) return null;</span>
+<span class="fc" id="L867">                            return row.get(columnIndex);</span>
                         }
                         @Override protected void _liveSetValueAt(@Nullable Object aValue, int rowIndex, int columnIndex) {
-<span class="nc bnc" id="L841" title="All 2 branches missed.">                            if ( !isEditable ) return;</span>
-<span class="nc" id="L842">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
-<span class="nc bnc" id="L843" title="All 4 branches missed.">                            if ( rowIndex &lt; 0 || rowIndex &gt;= data.size() ) return;</span>
-<span class="nc" id="L844">                            List&lt;E&gt; row = data.get(rowIndex);</span>
-<span class="nc bnc" id="L845" title="All 4 branches missed.">                            if ( columnIndex &lt; 0 || columnIndex &gt;= row.size() ) return;</span>
-<span class="nc" id="L846">                            row.set(columnIndex, (E)aValue);</span>
-<span class="nc" id="L847">                        }</span>
+<span class="nc bnc" id="L870" title="All 2 branches missed.">                            if ( !isEditable ) return;</span>
+<span class="nc" id="L871">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="nc bnc" id="L872" title="All 4 branches missed.">                            if ( rowIndex &lt; 0 || rowIndex &gt;= data.size() ) return;</span>
+<span class="nc" id="L873">                            List&lt;E&gt; row = data.get(rowIndex);</span>
+<span class="nc bnc" id="L874" title="All 4 branches missed.">                            if ( columnIndex &lt; 0 || columnIndex &gt;= row.size() ) return;</span>
+<span class="nc" id="L875">                            row.set(columnIndex, (E)aValue);</span>
+<span class="nc" id="L876">                        }</span>
                     })
                 )
-<span class="fc" id="L850">                ._this();</span>
+<span class="fc" id="L879">                ._this();</span>
         else // isColumnMajor
-<span class="fc" id="L852">            return _with( thisComponent -&gt;</span>
-<span class="fc" id="L853">                    _installModel(thisComponent, new ListBasedTableModel&lt;E&gt;(isEditable, dataSource)</span>
-<span class="fc" id="L854">                    {</span>
+<span class="fc" id="L881">            return _with( thisComponent -&gt;</span>
+<span class="fc" id="L882">                    _installModel(thisComponent, new ListBasedTableModel&lt;E&gt;(isEditable, dataSource)</span>
+<span class="fc" id="L883">                    {</span>
                         @Override protected int _liveRowCount() {
-<span class="fc" id="L856">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
-<span class="pc bpc" id="L857" title="1 of 2 branches missed.">                            return (data.isEmpty() ? 0 : data.get(0).size());</span>
+<span class="fc" id="L885">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="pc bpc" id="L886" title="1 of 2 branches missed.">                            return (data.isEmpty() ? 0 : data.get(0).size());</span>
                         }
-<span class="fc" id="L859">                        @Override protected int _liveColumnCount() { return getData().size(); }</span>
+<span class="fc" id="L888">                        @Override protected int _liveColumnCount() { return getData().size(); }</span>
                         @Override protected @Nullable Object _liveValueAt( int rowIndex, int columnIndex ) {
-<span class="fc" id="L861">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="fc" id="L890">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
                             // Bound-check against the live data, never the (possibly stale)
                             // snapshot: this method feeds 'takeLiveSnapshot', which runs while
                             // the previous snapshot is still installed for the UI thread.
-<span class="pc bpc" id="L865" title="2 of 4 branches missed.">                            if ( columnIndex &lt; 0 || columnIndex &gt;= data.size() ) return null;</span>
-<span class="fc" id="L866">                            List&lt;E&gt; column = data.get(columnIndex);</span>
-<span class="pc bpc" id="L867" title="2 of 4 branches missed.">                            if ( rowIndex &lt; 0 || rowIndex &gt;= column.size() ) return null;</span>
-<span class="fc" id="L868">                            return column.get(rowIndex);</span>
+<span class="pc bpc" id="L894" title="2 of 4 branches missed.">                            if ( columnIndex &lt; 0 || columnIndex &gt;= data.size() ) return null;</span>
+<span class="fc" id="L895">                            List&lt;E&gt; column = data.get(columnIndex);</span>
+<span class="pc bpc" id="L896" title="2 of 4 branches missed.">                            if ( rowIndex &lt; 0 || rowIndex &gt;= column.size() ) return null;</span>
+<span class="fc" id="L897">                            return column.get(rowIndex);</span>
                         }
                         @Override protected void _liveSetValueAt(@Nullable Object aValue, int rowIndex, int columnIndex) {
-<span class="nc bnc" id="L871" title="All 2 branches missed.">                            if ( !isEditable ) return;</span>
-<span class="nc" id="L872">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
-<span class="nc bnc" id="L873" title="All 4 branches missed.">                            if ( columnIndex &lt; 0 || columnIndex &gt;= data.size() ) return;</span>
-<span class="nc" id="L874">                            List&lt;E&gt; column = data.get(columnIndex);</span>
-<span class="nc bnc" id="L875" title="All 4 branches missed.">                            if ( rowIndex &lt; 0 || rowIndex &gt;= column.size() ) return;</span>
-<span class="nc" id="L876">                            column.set(rowIndex, (E)aValue);</span>
-<span class="nc" id="L877">                        }</span>
+<span class="nc bnc" id="L900" title="All 2 branches missed.">                            if ( !isEditable ) return;</span>
+<span class="nc" id="L901">                            List&lt;List&lt;E&gt;&gt; data = getData();</span>
+<span class="nc bnc" id="L902" title="All 4 branches missed.">                            if ( columnIndex &lt; 0 || columnIndex &gt;= data.size() ) return;</span>
+<span class="nc" id="L903">                            List&lt;E&gt; column = data.get(columnIndex);</span>
+<span class="nc bnc" id="L904" title="All 4 branches missed.">                            if ( rowIndex &lt; 0 || rowIndex &gt;= column.size() ) return;</span>
+<span class="nc" id="L905">                            column.set(rowIndex, (E)aValue);</span>
+<span class="nc" id="L906">                        }</span>
                     })
                 )
-<span class="fc" id="L880">                ._this();</span>
+<span class="fc" id="L909">                ._this();</span>
+    }
+
+    /**
+     *  Binds the table to a read only {@link List} based data source, exactly like
+     *  {@link #withModel(UI.CellOrder, UI.Editability, TableListDataSource)} does with
+     *  {@link UI.Editability#READ_ONLY}.
+     *  &lt;p&gt;
+     *      &lt;b&gt;Please note that when the data of the provided data source changes (i.e. when the data source
+     *      is a {@link List} and the list is modified), the table model will not be updated automatically!
+     *      Use {@link #updateTableOn(sprouts.Event)} to bind an update {@link sprouts.Event} to the table model.&lt;/b&gt;
+     *
+     * @param cellOrder An enum which configures whether the outer list holds the rows
+     *                  or the columns of the table, see {@link UI.CellOrder}.
+     * @param dataSource The {@link TableListDataSource} returning a list matrix which will be used to populate the table.
+     * @return This builder node.
+     * @param &lt;E&gt; The type of the table entry {@link Object}s.
+     */
+    public final &lt;E&gt; UIForTable&lt;T&gt; withModel( UI.CellOrder cellOrder, TableListDataSource&lt;E&gt; dataSource ) {
+<span class="fc" id="L928">        return withModel(cellOrder, UI.Editability.READ_ONLY, dataSource);</span>
     }
 
     /**
@@ -890,21 +938,22 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      *      Use {@link #updateTableOn(sprouts.Event)} to bind an update {@link sprouts.Event} to the table model.&lt;/b&gt;
      *  &lt;p&gt;
      *  &lt;b&gt;Consider {@link #withModel(Var)} with a {@link TableData} value instead:&lt;/b&gt; it
-     *  describes the whole table (cells, column names, column classes and layout) as a
-     *  single immutable value which a property hands to the table, so the table updates
+     *  describes the whole table (cells, column names, column classes, cell order and
+     *  editability) as a single immutable value which a property hands to the table, so the table updates
      *  itself, it is thread safe by construction, and it syncs row changes incrementally
      *  instead of rebuilding. The data source here can only ever refresh everything.
      *
-     * @param mode An enum which configures the modifiability of the table in a readable fashion.
+     * @param editability An enum which configures whether the user may edit the cells,
+     *                    see {@link UI.Editability}.
      * @param dataSource The {@link TableMapDataSource} returning a column major map based matrix which will be used to populate the table.
      * @return This builder node.
      * @param &lt;E&gt; The type of the table entry {@link Object}s.
      */
-    public final &lt;E&gt; UIForTable&lt;T&gt; withModel( UI.MapData mode, TableMapDataSource&lt;E&gt; dataSource ) {
-<span class="fc" id="L904">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L905">                    _installModel(thisComponent, new MapBasedColumnMajorTableModel&lt;&gt;(mode.isEditable(), dataSource));</span>
-<span class="fc" id="L906">                })</span>
-<span class="fc" id="L907">                ._this();</span>
+    public final &lt;E&gt; UIForTable&lt;T&gt; withModel( UI.Editability editability, TableMapDataSource&lt;E&gt; dataSource ) {
+<span class="fc" id="L953">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L954">                    _installModel(thisComponent, new MapBasedColumnMajorTableModel&lt;&gt;(editability.isEditable(), dataSource));</span>
+<span class="fc" id="L955">                })</span>
+<span class="fc" id="L956">                ._this();</span>
     }
 
     /**
@@ -916,11 +965,11 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      * @param event The event to be bound.
      * @return This builder node, for chaining.
      * @see #updateTableOn(Observable) To access a more general API that can update the table from any
-     *                                 kind of reative source like a {@link Var#view()} or {@link Vals#view()}...
+     *                                 kind of reactive source like a {@link Var#view()} or {@link Vals#view()}...
      */
     public final UIForTable&lt;T&gt; updateTableOn( Event event ) {
-<span class="fc" id="L922">        Objects.requireNonNull(event);</span>
-<span class="fc" id="L923">        return this.updateTableOn(event.observable());</span>
+<span class="fc" id="L971">        Objects.requireNonNull(event);</span>
+<span class="fc" id="L972">        return this.updateTableOn(event.observable());</span>
     }
 
     /**
@@ -935,42 +984,42 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
      * @see #updateTableOn(Event) For a convenience method specifically for the {@link Event} type.
      */
     public final UIForTable&lt;T&gt; updateTableOn( Observable observable ) {
-<span class="fc" id="L938">        Objects.requireNonNull(observable);</span>
-<span class="fc" id="L939">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L940">                    WeakReference&lt;T&gt; thisComponentRef = new WeakReference&lt;&gt;(thisComponent);</span>
-<span class="fc" id="L941">                    ComponentExtension.from(thisComponent).storeBoundObservable(</span>
-<span class="fc" id="L942">                        observable.subscribe(()-&gt; {</span>
-<span class="fc" id="L943">                            T innerComponent = thisComponentRef.get();</span>
-<span class="pc bpc" id="L944" title="1 of 2 branches missed.">                            if (innerComponent == null)</span>
-<span class="nc" id="L945">                                return;</span>
-<span class="fc" id="L946">                            TableModel model = innerComponent.getModel();</span>
-<span class="pc bpc" id="L947" title="1 of 2 branches missed.">                            if ( model instanceof AbstractSnapshotTableModel ) {</span>
+<span class="fc" id="L987">        Objects.requireNonNull(observable);</span>
+<span class="fc" id="L988">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L989">                    WeakReference&lt;T&gt; thisComponentRef = new WeakReference&lt;&gt;(thisComponent);</span>
+<span class="fc" id="L990">                    ComponentExtension.from(thisComponent).storeBoundObservable(</span>
+<span class="fc" id="L991">                        observable.subscribe(()-&gt; {</span>
+<span class="fc" id="L992">                            T innerComponent = thisComponentRef.get();</span>
+<span class="pc bpc" id="L993" title="1 of 2 branches missed.">                            if (innerComponent == null)</span>
+<span class="nc" id="L994">                                return;</span>
+<span class="fc" id="L995">                            TableModel model = innerComponent.getModel();</span>
+<span class="pc bpc" id="L996" title="1 of 2 branches missed.">                            if ( model instanceof AbstractSnapshotTableModel ) {</span>
                                 // Our own thread safe models own the threading of the refresh:
                                 // under the decoupled protocol they snapshot on this (application)
                                 // thread and then publish the swap to the UI thread, whereas under
                                 // the coupled protocol they simply fire the change events on the UI thread.
-<span class="fc" id="L952">                                ((AbstractSnapshotTableModel)model).refresh();</span>
+<span class="fc" id="L1001">                                ((AbstractSnapshotTableModel)model).refresh();</span>
                             }
                             else
-<span class="nc" id="L955">                                _runInUI(()-&gt;{</span>
-<span class="nc" id="L956">                                    T inner = thisComponentRef.get();</span>
-<span class="nc bnc" id="L957" title="All 2 branches missed.">                                    if (inner == null)</span>
-<span class="nc" id="L958">                                        return;</span>
-<span class="nc" id="L959">                                    TableModel innerModel = inner.getModel();</span>
-<span class="nc bnc" id="L960" title="All 2 branches missed.">                                    if ( innerModel instanceof AbstractTableModel ) {</span>
+<span class="nc" id="L1004">                                _runInUI(()-&gt;{</span>
+<span class="nc" id="L1005">                                    T inner = thisComponentRef.get();</span>
+<span class="nc bnc" id="L1006" title="All 2 branches missed.">                                    if (inner == null)</span>
+<span class="nc" id="L1007">                                        return;</span>
+<span class="nc" id="L1008">                                    TableModel innerModel = inner.getModel();</span>
+<span class="nc bnc" id="L1009" title="All 2 branches missed.">                                    if ( innerModel instanceof AbstractTableModel ) {</span>
                                         // We want the table model update to be as thorough as possible, so we
                                         // will fire a table structure changed event, followed by a table data
                                         // changed event.
-<span class="nc" id="L964">                                        ((AbstractTableModel)innerModel).fireTableStructureChanged();</span>
-<span class="nc" id="L965">                                        ((AbstractTableModel)innerModel).fireTableDataChanged();</span>
+<span class="nc" id="L1013">                                        ((AbstractTableModel)innerModel).fireTableStructureChanged();</span>
+<span class="nc" id="L1014">                                        ((AbstractTableModel)innerModel).fireTableDataChanged();</span>
                                     }
                                     else
-<span class="nc" id="L968">                                        throw new IllegalStateException(&quot;The table model is not an AbstractTableModel instance.&quot;);</span>
-<span class="nc" id="L969">                                });</span>
-<span class="fc" id="L970">                        })</span>
+<span class="nc" id="L1017">                                        throw new IllegalStateException(&quot;The table model is not an AbstractTableModel instance.&quot;);</span>
+<span class="nc" id="L1018">                                });</span>
+<span class="fc" id="L1019">                        })</span>
                     );
-<span class="fc" id="L972">                })</span>
-<span class="fc" id="L973">                ._this();</span>
+<span class="fc" id="L1021">                })</span>
+<span class="fc" id="L1022">                ._this();</span>
     }
 
 
@@ -979,19 +1028,19 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
         private final TableListDataSource&lt;E&gt; dataSource;
         private final boolean isEditable;
 
-<span class="fc" id="L982">        ListBasedTableModel(boolean isEditable, TableListDataSource&lt;E&gt; dataSource) {</span>
-<span class="fc" id="L983">            this.isEditable = isEditable;</span>
-<span class="fc" id="L984">            this.dataSource = dataSource;</span>
-<span class="fc" id="L985">        }</span>
+<span class="fc" id="L1031">        ListBasedTableModel(boolean isEditable, TableListDataSource&lt;E&gt; dataSource) {</span>
+<span class="fc" id="L1032">            this.isEditable = isEditable;</span>
+<span class="fc" id="L1033">            this.dataSource = dataSource;</span>
+<span class="fc" id="L1034">        }</span>
 
-<span class="nc" id="L987">        @Override protected boolean _liveCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }</span>
-<span class="fc" id="L988">        @Override protected @Nullable String _liveColumnName( int columnIndex ) { return null; }</span>
-<span class="fc" id="L989">        @Override protected Class&lt;?&gt; _liveColumnClass( int columnIndex ) { return Object.class; }</span>
+<span class="fc" id="L1036">        @Override protected boolean _liveCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }</span>
+<span class="fc" id="L1037">        @Override protected @Nullable String _liveColumnName( int columnIndex ) { return null; }</span>
+<span class="fc" id="L1038">        @Override protected Class&lt;?&gt; _liveColumnClass( int columnIndex ) { return Object.class; }</span>
 
         protected List&lt;List&lt;E&gt;&gt; getData() {
-<span class="fc" id="L992">            List&lt;List&lt;E&gt;&gt; data = dataSource.get();</span>
-<span class="pc bpc" id="L993" title="1 of 2 branches missed.">            if ( data == null ) return new ArrayList&lt;&gt;(); // We really don't want null pointer in UIs.</span>
-<span class="fc" id="L994">            return data;</span>
+<span class="fc" id="L1041">            List&lt;List&lt;E&gt;&gt; data = dataSource.get();</span>
+<span class="pc bpc" id="L1042" title="1 of 2 branches missed.">            if ( data == null ) return new ArrayList&lt;&gt;(); // We really don't want null pointer in UIs.</span>
+<span class="fc" id="L1043">            return data;</span>
         }
     }
 
@@ -1001,47 +1050,47 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
         private final TableMapDataSource&lt;E&gt; dataSource;
         private final boolean isEditable;
 
-<span class="fc" id="L1004">        MapBasedTableModel(boolean isEditable, TableMapDataSource&lt;E&gt; dataSource) {</span>
-<span class="fc" id="L1005">            this.isEditable = isEditable;</span>
-<span class="fc" id="L1006">            this.dataSource = dataSource;</span>
-<span class="fc" id="L1007">        }</span>
+<span class="fc" id="L1053">        MapBasedTableModel(boolean isEditable, TableMapDataSource&lt;E&gt; dataSource) {</span>
+<span class="fc" id="L1054">            this.isEditable = isEditable;</span>
+<span class="fc" id="L1055">            this.dataSource = dataSource;</span>
+<span class="fc" id="L1056">        }</span>
 
         protected Map&lt;String, List&lt;E&gt;&gt; getData() {
-<span class="fc" id="L1010">            Map&lt;String, List&lt;E&gt;&gt; data = dataSource.get();</span>
-<span class="pc bpc" id="L1011" title="1 of 2 branches missed.">            if ( data == null ) return Collections.emptyMap(); // We really don't want null pointer in UIs.</span>
-<span class="fc" id="L1012">            return data;</span>
+<span class="fc" id="L1059">            Map&lt;String, List&lt;E&gt;&gt; data = dataSource.get();</span>
+<span class="pc bpc" id="L1060" title="1 of 2 branches missed.">            if ( data == null ) return Collections.emptyMap(); // We really don't want null pointer in UIs.</span>
+<span class="fc" id="L1061">            return data;</span>
         }
 
         @Override
         protected @Nullable String _liveColumnName(int column) {
-<span class="fc" id="L1017">            List&lt;String&gt; columnNames = new ArrayList&lt;&gt;(getData().keySet());</span>
-<span class="pc bpc" id="L1018" title="2 of 4 branches missed.">            if ( column &lt; 0 || column &gt;= columnNames.size() ) return null;</span>
-<span class="fc" id="L1019">            return columnNames.get(column);</span>
+<span class="fc" id="L1066">            List&lt;String&gt; columnNames = new ArrayList&lt;&gt;(getData().keySet());</span>
+<span class="pc bpc" id="L1067" title="2 of 4 branches missed.">            if ( column &lt; 0 || column &gt;= columnNames.size() ) return null;</span>
+<span class="fc" id="L1068">            return columnNames.get(column);</span>
         }
 
-<span class="fc" id="L1022">        @Override protected Class&lt;?&gt; _liveColumnClass( int columnIndex ) { return Object.class; }</span>
-<span class="nc" id="L1023">        @Override protected boolean _liveCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }</span>
+<span class="fc" id="L1071">        @Override protected Class&lt;?&gt; _liveColumnClass( int columnIndex ) { return Object.class; }</span>
+<span class="nc" id="L1072">        @Override protected boolean _liveCellEditable( int rowIndex, int columnIndex ) { return this.isEditable; }</span>
     }
 
     private static class MapBasedColumnMajorTableModel&lt;E&gt; extends MapBasedTableModel&lt;E&gt;
     {
         MapBasedColumnMajorTableModel(boolean isEditable, TableMapDataSource&lt;E&gt; dataSource) {
-<span class="fc" id="L1029">            super(isEditable, dataSource);</span>
-<span class="fc" id="L1030">        }</span>
+<span class="fc" id="L1078">            super(isEditable, dataSource);</span>
+<span class="fc" id="L1079">        }</span>
 
         @Override
         protected int _liveRowCount() {
-<span class="fc" id="L1034">            Map&lt;String, List&lt;E&gt;&gt; data = getData();</span>
-<span class="fc" id="L1035">            return data.values()</span>
-<span class="fc" id="L1036">                        .stream()</span>
-<span class="fc" id="L1037">                        .filter(Objects::nonNull) // Again, we don't want null pointer exceptions in UIs.</span>
-<span class="fc" id="L1038">                        .mapToInt(List::size)</span>
-<span class="fc" id="L1039">                        .max()</span>
-<span class="fc" id="L1040">                        .orElse(0);</span>
+<span class="fc" id="L1083">            Map&lt;String, List&lt;E&gt;&gt; data = getData();</span>
+<span class="fc" id="L1084">            return data.values()</span>
+<span class="fc" id="L1085">                        .stream()</span>
+<span class="fc" id="L1086">                        .filter(Objects::nonNull) // Again, we don't want null pointer exceptions in UIs.</span>
+<span class="fc" id="L1087">                        .mapToInt(List::size)</span>
+<span class="fc" id="L1088">                        .max()</span>
+<span class="fc" id="L1089">                        .orElse(0);</span>
         }
 
         @Override
-<span class="fc" id="L1044">        protected int _liveColumnCount() { return getData().size(); }</span>
+<span class="fc" id="L1093">        protected int _liveColumnCount() { return getData().size(); }</span>
 
         @Override
         protected @Nullable Object _liveValueAt( int rowIndex, int columnIndex ) {
@@ -1049,31 +1098,31 @@ public final class UIForTable&lt;T extends JTable&gt; extends UIForAnySwing&lt;U
             // this method feeds 'takeLiveSnapshot', which runs while the previous
             // snapshot is still installed for the UI thread. A negative column index
             // also has to be caught before 'skip(..)', which would otherwise throw.
-<span class="pc bpc" id="L1052" title="1 of 2 branches missed.">            if ( columnIndex &lt; 0 )</span>
-<span class="nc" id="L1053">                return null;</span>
-<span class="fc" id="L1054">            List&lt;E&gt; column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);</span>
-<span class="pc bpc" id="L1055" title="1 of 2 branches missed.">            if ( column == null )</span>
-<span class="nc" id="L1056">                return null;</span>
-<span class="pc bpc" id="L1057" title="2 of 4 branches missed.">            if ( rowIndex &lt; 0 || rowIndex &gt;= column.size() )</span>
-<span class="nc" id="L1058">                return null;</span>
-<span class="fc" id="L1059">            return column.get(rowIndex);</span>
+<span class="pc bpc" id="L1101" title="1 of 2 branches missed.">            if ( columnIndex &lt; 0 )</span>
+<span class="nc" id="L1102">                return null;</span>
+<span class="fc" id="L1103">            List&lt;E&gt; column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);</span>
+<span class="pc bpc" id="L1104" title="1 of 2 branches missed.">            if ( column == null )</span>
+<span class="nc" id="L1105">                return null;</span>
+<span class="pc bpc" id="L1106" title="2 of 4 branches missed.">            if ( rowIndex &lt; 0 || rowIndex &gt;= column.size() )</span>
+<span class="nc" id="L1107">                return null;</span>
+<span class="fc" id="L1108">            return column.get(rowIndex);</span>
         }
 
         @Override
         protected void _liveSetValueAt( @Nullable Object aValue, int rowIndex, int columnIndex ) {
-<span class="nc bnc" id="L1064" title="All 2 branches missed.">            if ( columnIndex &lt; 0 )</span>
-<span class="nc" id="L1065">                return;</span>
-<span class="nc" id="L1066">            List&lt;E&gt; column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);</span>
-<span class="nc bnc" id="L1067" title="All 2 branches missed.">            if ( column == null )</span>
-<span class="nc" id="L1068">                return;</span>
-<span class="nc bnc" id="L1069" title="All 4 branches missed.">            if ( rowIndex &lt; 0 || rowIndex &gt;= column.size() )</span>
-<span class="nc" id="L1070">                return;</span>
+<span class="nc bnc" id="L1113" title="All 2 branches missed.">            if ( columnIndex &lt; 0 )</span>
+<span class="nc" id="L1114">                return;</span>
+<span class="nc" id="L1115">            List&lt;E&gt; column = getData().values().stream().skip(columnIndex).findFirst().orElse(null);</span>
+<span class="nc bnc" id="L1116" title="All 2 branches missed.">            if ( column == null )</span>
+<span class="nc" id="L1117">                return;</span>
+<span class="nc bnc" id="L1118" title="All 4 branches missed.">            if ( rowIndex &lt; 0 || rowIndex &gt;= column.size() )</span>
+<span class="nc" id="L1119">                return;</span>
             try {
-<span class="nc" id="L1072">                column.set(rowIndex, (E) aValue);</span>
-<span class="nc" id="L1073">            } catch (Exception e) {</span>
-<span class="nc" id="L1074">                log.warn(SwingTree.get().logMarker(), &quot;Failed to set value in hash table based table model.&quot;, e);</span>
-<span class="nc" id="L1075">            }</span>
-<span class="nc" id="L1076">        }</span>
+<span class="nc" id="L1121">                column.set(rowIndex, (E) aValue);</span>
+<span class="nc" id="L1122">            } catch (Exception e) {</span>
+<span class="nc" id="L1123">                log.warn(SwingTree.get().logMarker(), &quot;Failed to set value in hash table based table model.&quot;, e);</span>
+<span class="nc" id="L1124">            }</span>
+<span class="nc" id="L1125">        }</span>
 
     }
 

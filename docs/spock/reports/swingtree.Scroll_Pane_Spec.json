@@ -4,7 +4,7 @@
   "narrative":"Just like for any other main component in Swing,\n    Swing-Tree also supports a nice API for\n    building UIs with scroll panes.\n\n    A scroll pane is a component that allows\n    the user to scroll through a larger view\n    of a component. It is a container that\n    contains a single component, called the\n    viewport. The viewport is the area that\n    is actually visible to the user.\n\n    The scroll pane also contains a set of\n    scrollbars that allow the user to scroll\n    the viewport.\n\n    In this specification, we will see how\n    to build a scroll pane with Swing-Tree.",
   "subjects":["swingtree.UIForScrollPane","javax.swing.JScrollPane"],
   "statistics":{
-    "runs":"9",
+    "runs":"16",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -18,7 +18,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Note that this is based on the rather non-desciptive `with` method.\n            We are using it because the type and name of the enum instance\n            already describe the scroll bar policy.\n            You will find this pattern in other places in Swing-Tree,\n            where the `with` method is used to configure a component\n            using an enum instance. \n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Note that this is based on the rather non-descriptive `with` method.\n            We are using it because the type and name of the enum instance\n            already describe the scroll bar policy.\n            You will find this pattern in other places in Swing-Tree,\n            where the `with` method is used to configure a component\n            using an enum instance. \n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a scroll pane with a custom scroll bar policy.","code":["var ui =","        UI.scrollPane()","        .withScrollBarPolicy(UI.Active.NEVER)"]},
@@ -35,7 +35,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Note that this is based on the rather non-desciptive `withHorizontal` \n            and `withVertical` methods.\n            We are using them because the type and name of the enum instance\n            already describe the scroll bar policy.\n            You will find this pattern in other places in Swing-Tree,\n            where the `with` method, or variations of it, are used to configure a component\n            in a fluent way.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Note that this is based on the rather non-descriptive `withHorizontal`\n            and `withVertical` methods.\n            We are using them because the type and name of the enum instance\n            already describe the scroll bar policy.\n            You will find this pattern in other places in Swing-Tree,\n            where the `with` method, or variations of it, are used to configure a component\n            in a fluent way.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a scroll pane with a custom scroll bar policy.","code":["var ui =","        UI.scrollPane()","        .withHorizontalScrollBarPolicy(UI.Active.NEVER)","        .withVerticalScrollBarPolicy(UI.Active.ALWAYS)"]},
@@ -162,6 +162,146 @@
     },
   
     {
+      "id":"The view of a configured scroll pane reports a preferred size which tracks its content.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When you configure a scroll pane through the `UI.scrollPane(Configurator)` factory\n            method, then SwingTree places a thin delegation box between the viewport and your\n            content component. The box exists so that the `Scrollable` behaviour can be supplied\n            declaratively instead of through inheritance, and it is meant to be completely\n            transparent with respect to sizing: whatever the content component says it needs,\n            the box says too.\n\n            This little test pins that transparency down for the case that tends to break it,\n            namely a content component which changes size after the box has already been\n            measured once. Note that we deliberately measure the box while it is in the\n            invalidated state, because that is the state it spends every layout pass in, and\n            because an invalid component does not receive `invalidate()` from its children a\n            second time. So a box which remembered its last measurement would answer with a\n            stale size here, and the scroll pane would then lay out and scroll a view that\n            does not exist anymore.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A label whose text we are going to grow later on, placed inside a configured scroll pane.","code":["var label = new JLabel(\"short\")","var ui =","    UI.frame(\"Scroll Pane Content Growth Test\")","    .peek(it -> it.setPreferredSize(new Dimension(400, 200)))","    .add(","        UI.scrollPane( conf -> conf.fitWidth(true) ).id(\"scroll\")","        .add(","            UI.panel(\"fill, ins 0\").id(\"content\")","            .add(\"grow\", UI.of(label))","        )","    )"]},
+
+        {"kind":"and","text":"We build the UI and let it lay itself out:","code":["var frame = ui.get(JFrame)","UI.runNow( () -> frame.pack() )"]},
+
+        {"kind":"and","text":"We look up the scroll pane as well as the delegation box acting as its view.","code":["var scrollPane = new Utility.Query(frame).find(JScrollPane, \"scroll\").orElseThrow(NoSuchElementException::new)","var content    = new Utility.Query(frame).find(JPanel, \"content\").orElseThrow(NoSuchElementException::new)","var view       = UI.runAndGet( () -> scrollPane.getViewport().getView() )"]},
+
+        {"kind":"expect","text":"Right after the first layout the box already agrees with its content.","code":["UI.runAndGet( () -> view.getPreferredSize() ) == UI.runAndGet( () -> content.getPreferredSize() )"]},
+
+        {"kind":"when","text":"The box enters the invalidated state it is in throughout every layout pass,","code":["UI.runNow( () -> view.invalidate() )"]},
+
+        {"kind":"and","text":"and it is measured while being in that state, just like a layout pass would do,","code":["var widthBefore = UI.runAndGet( () -> view.getPreferredSize() ).width"]},
+
+        {"kind":"and","text":"and the content then becomes substantially wider.","code":["UI.runNow( () -> label.setText(\"a piece of text which is a great deal longer than the previous one, by a wide margin indeed\") )"]},
+
+        {"kind":"then","text":"The box grew together with its content instead of reporting the size it had before.","code":["UI.runAndGet( () -> view.getPreferredSize() ).width > widthBefore"]},
+
+        {"kind":"and","text":"It still reports exactly what the content component itself reports.","code":["UI.runAndGet( () -> view.getPreferredSize() ) == UI.runAndGet( () -> content.getPreferredSize() )"]},
+
+        {"kind":"when","text":"We lay the whole frame out again and shrink the content back down,","code":["UI.runNow( () -> frame.validate() )","var widthOfWideContent = UI.runAndGet( () -> view.getPreferredSize() ).width","UI.runNow( () -> label.setText(\"short\") )"]},
+
+        {"kind":"then","text":"the box shrinks along with it.","code":["UI.runAndGet( () -> view.getPreferredSize() ).width < widthOfWideContent","UI.runAndGet( () -> view.getPreferredSize() ) == UI.runAndGet( () -> content.getPreferredSize() )"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Asking a configured scroll pane for a scroll increment does not measure its content.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A scroll pane configured through `UI.scrollPane(Configurator)` builds a fresh\n            configuration object for every single question the scroll pane asks it, and Swing\n            asks a handful of those per layout pass. Most of them are cheap questions whose\n            answer does not depend on how big the content is, like \"how far is one scroll\n            unit?\", and the same goes for every value the configurator supplies itself.\n\n            None of those should measure the content component, because measuring a densely\n            populated view is by far the most expensive thing a scroll pane ever does.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A content component whose layout manager counts how often it is measured.","code":["var layout  = new CountingLayout()","var ui =","    UI.frame(\"Scroll Increment Measurement Test\")","    .peek(it -> it.setPreferredSize(new Dimension(400, 200)))","    .add(","        UI.scrollPane( conf -> conf","            .unitIncrement(7)","            .blockIncrement(13)","            .fitWidth(true)","            .fitHeight(false)","        )","        .id(\"scroll\")","        .add(UI.of(new JPanel(layout)).id(\"content\"))","    )"]},
+
+        {"kind":"and","text":"We build the UI and let it lay itself out:","code":["var frame = ui.get(JFrame)","UI.runNow( () -> frame.pack() )"]},
+
+        {"kind":"and","text":"We look up the content as well as the delegation box acting as the view.","code":["var scrollPane = new Utility.Query(frame).find(JScrollPane, \"scroll\").orElseThrow(NoSuchElementException::new)","var content    = new Utility.Query(frame).find(JPanel, \"content\").orElseThrow(NoSuchElementException::new)","var view       = UI.runAndGet( () -> scrollPane.getViewport().getView() )"]},
+
+        {"kind":"when","text":"We invalidate the content so that no cached measurement can answer on its behalf,","code":["UI.runNow( () -> content.invalidate() )"]},
+
+        {"kind":"and","text":"we start counting from here,","code":["var measurementsBefore = layout.measurements"]},
+
+        {"kind":"and","text":"and then ask the view every question whose answer the configurator already supplied.","code":["var unitIncrement  = UI.runAndGet( () -> view.getScrollableUnitIncrement(null, SwingConstants.VERTICAL, 1) )","var blockIncrement = UI.runAndGet( () -> view.getScrollableBlockIncrement(null, SwingConstants.VERTICAL, 1) )","var tracksWidth    = UI.runAndGet( () -> view.getScrollableTracksViewportWidth() )","var tracksHeight   = UI.runAndGet( () -> view.getScrollableTracksViewportHeight() )"]},
+
+        {"kind":"then","text":"We receive exactly what was configured,","code":["unitIncrement  == 7","blockIncrement == 13","tracksWidth    == true","tracksHeight   == false"]},
+
+        {"kind":"and","text":"and the content was not measured a single time for any of it.","code":["layout.measurements == measurementsBefore"]},
+
+        {"kind":"when","text":"We ask for the preferred viewport size, which the configurator did not supply,","code":["var preferredViewportSize = UI.runAndGet( () -> view.getPreferredScrollableViewportSize() )"]},
+
+        {"kind":"then","text":"the content is measured after all, because now the answer does depend on it.","code":["preferredViewportSize == new Dimension(300, 200)","layout.measurements > measurementsBefore"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A scroll pane still derives the viewport fitting defaults from the content it was given. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `fitWidth` and `fitHeight` flags of the scroll configuration API have defaults\n            which are derived from the content: a content component which is already smaller\n            than the viewport has nothing to scroll and may just as well be stretched to fill\n            it, whereas one which is larger must keep its own size so that it can be scrolled.\n\n            These defaults are computed only when they are actually read, so this test makes\n            sure that deferring them did not quietly change what they are.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scroll pane with an identity configurator, so that all defaults survive.","code":["var content = new JPanel(new CountingLayout(width: contentWidth, height: contentHeight))","var ui =","    UI.frame(\"Scroll Fitting Defaults Test\")","    .peek(it -> it.setPreferredSize(new Dimension(400, 300)))","    .add(","        UI.scrollPane( conf -> conf ).id(\"scroll\")","        .withScrollBarPolicy(UI.Active.NEVER)","        .add(UI.of(content))","    )"]},
+
+        {"kind":"and","text":"We build the UI and let it lay itself out:","code":["var frame = ui.get(JFrame)","UI.runNow( () -> frame.pack() )","var scrollPane = new Utility.Query(frame).find(JScrollPane, \"scroll\").orElseThrow(NoSuchElementException::new)","var view       = UI.runAndGet( () -> scrollPane.getViewport().getView() )"]},
+
+        {"kind":"expect","text":"The viewport only takes over a dimension the content does not need for itself.","code":["UI.runAndGet( () -> view.getScrollableTracksViewportWidth()  ) == expectedToFitWidth","UI.runAndGet( () -> view.getScrollableTracksViewportHeight() ) == expectedToFitHeight"]},
+
+        {"kind":"where","text":"","code":{"contentWidth":["50","5000","50","5000"],"contentHeight":["50","50","5000","5000"],"expectedToFitWidth":["true","false","true","false"],"expectedToFitHeight":["true","true","false","false"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A scroll pane still derives the viewport fitting defaults from the content it was given. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `fitWidth` and `fitHeight` flags of the scroll configuration API have defaults\n            which are derived from the content: a content component which is already smaller\n            than the viewport has nothing to scroll and may just as well be stretched to fill\n            it, whereas one which is larger must keep its own size so that it can be scrolled.\n\n            These defaults are computed only when they are actually read, so this test makes\n            sure that deferring them did not quietly change what they are.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scroll pane with an identity configurator, so that all defaults survive.","code":["var content = new JPanel(new CountingLayout(width: contentWidth, height: contentHeight))","var ui =","    UI.frame(\"Scroll Fitting Defaults Test\")","    .peek(it -> it.setPreferredSize(new Dimension(400, 300)))","    .add(","        UI.scrollPane( conf -> conf ).id(\"scroll\")","        .withScrollBarPolicy(UI.Active.NEVER)","        .add(UI.of(content))","    )"]},
+
+        {"kind":"and","text":"We build the UI and let it lay itself out:","code":["var frame = ui.get(JFrame)","UI.runNow( () -> frame.pack() )","var scrollPane = new Utility.Query(frame).find(JScrollPane, \"scroll\").orElseThrow(NoSuchElementException::new)","var view       = UI.runAndGet( () -> scrollPane.getViewport().getView() )"]},
+
+        {"kind":"expect","text":"The viewport only takes over a dimension the content does not need for itself.","code":["UI.runAndGet( () -> view.getScrollableTracksViewportWidth()  ) == expectedToFitWidth","UI.runAndGet( () -> view.getScrollableTracksViewportHeight() ) == expectedToFitHeight"]},
+
+        {"kind":"where","text":"","code":{"contentWidth":["50","5000","50","5000"],"contentHeight":["50","50","5000","5000"],"expectedToFitWidth":["true","false","true","false"],"expectedToFitHeight":["true","true","false","false"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A scroll pane still derives the viewport fitting defaults from the content it was given. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `fitWidth` and `fitHeight` flags of the scroll configuration API have defaults\n            which are derived from the content: a content component which is already smaller\n            than the viewport has nothing to scroll and may just as well be stretched to fill\n            it, whereas one which is larger must keep its own size so that it can be scrolled.\n\n            These defaults are computed only when they are actually read, so this test makes\n            sure that deferring them did not quietly change what they are.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scroll pane with an identity configurator, so that all defaults survive.","code":["var content = new JPanel(new CountingLayout(width: contentWidth, height: contentHeight))","var ui =","    UI.frame(\"Scroll Fitting Defaults Test\")","    .peek(it -> it.setPreferredSize(new Dimension(400, 300)))","    .add(","        UI.scrollPane( conf -> conf ).id(\"scroll\")","        .withScrollBarPolicy(UI.Active.NEVER)","        .add(UI.of(content))","    )"]},
+
+        {"kind":"and","text":"We build the UI and let it lay itself out:","code":["var frame = ui.get(JFrame)","UI.runNow( () -> frame.pack() )","var scrollPane = new Utility.Query(frame).find(JScrollPane, \"scroll\").orElseThrow(NoSuchElementException::new)","var view       = UI.runAndGet( () -> scrollPane.getViewport().getView() )"]},
+
+        {"kind":"expect","text":"The viewport only takes over a dimension the content does not need for itself.","code":["UI.runAndGet( () -> view.getScrollableTracksViewportWidth()  ) == expectedToFitWidth","UI.runAndGet( () -> view.getScrollableTracksViewportHeight() ) == expectedToFitHeight"]},
+
+        {"kind":"where","text":"","code":{"contentWidth":["50","5000","50","5000"],"contentHeight":["50","50","5000","5000"],"expectedToFitWidth":["true","false","true","false"],"expectedToFitHeight":["true","true","false","false"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A scroll pane still derives the viewport fitting defaults from the content it was given. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `fitWidth` and `fitHeight` flags of the scroll configuration API have defaults\n            which are derived from the content: a content component which is already smaller\n            than the viewport has nothing to scroll and may just as well be stretched to fill\n            it, whereas one which is larger must keep its own size so that it can be scrolled.\n\n            These defaults are computed only when they are actually read, so this test makes\n            sure that deferring them did not quietly change what they are.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A scroll pane with an identity configurator, so that all defaults survive.","code":["var content = new JPanel(new CountingLayout(width: contentWidth, height: contentHeight))","var ui =","    UI.frame(\"Scroll Fitting Defaults Test\")","    .peek(it -> it.setPreferredSize(new Dimension(400, 300)))","    .add(","        UI.scrollPane( conf -> conf ).id(\"scroll\")","        .withScrollBarPolicy(UI.Active.NEVER)","        .add(UI.of(content))","    )"]},
+
+        {"kind":"and","text":"We build the UI and let it lay itself out:","code":["var frame = ui.get(JFrame)","UI.runNow( () -> frame.pack() )","var scrollPane = new Utility.Query(frame).find(JScrollPane, \"scroll\").orElseThrow(NoSuchElementException::new)","var view       = UI.runAndGet( () -> scrollPane.getViewport().getView() )"]},
+
+        {"kind":"expect","text":"The viewport only takes over a dimension the content does not need for itself.","code":["UI.runAndGet( () -> view.getScrollableTracksViewportWidth()  ) == expectedToFitWidth","UI.runAndGet( () -> view.getScrollableTracksViewportHeight() ) == expectedToFitHeight"]},
+
+        {"kind":"where","text":"","code":{"contentWidth":["50","5000","50","5000"],"contentHeight":["50","50","5000","5000"],"expectedToFitWidth":["true","false","true","false"],"expectedToFitHeight":["true","true","false","false"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
       "id":"You can add a custom ´Scrollable´ component to a scroll pane with layout constraints that work.",
       "result":"PASS",
       "duration":"?",
@@ -180,6 +320,31 @@
         {"kind":"then","text":"The content panels have the covariance relative to their viewport.","code":["content1.getSize().getWidth()  == scroll1.getViewport().getSize().getWidth()","content1.getSize().getHeight() <  scroll1.getViewport().getSize().getHeight()","content2.getSize().getWidth()  == scroll2.getViewport().getSize().getWidth()","content2.getSize().getHeight() <  scroll2.getViewport().getSize().getHeight()"]},
 
         {"kind":"and","text":"The content components are in fact of the custom scrollable type we use for testing.","code":["content1 instanceof CustomScrollablePanel","content2 instanceof CustomScrollablePanel"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The layout constraints of a custom ´Scrollable´ component are actually applied to it.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Adding a component to a scroll pane together with layout constraints is something\n            regular Swing has no answer for, because a viewport holds exactly one view and no\n            layout manager to interpret a constraint with. SwingTree supplies the missing\n            layout manager by slipping a thin box in between, and this has to happen for a\n            content component implementing `Scrollable` just as much as for any other one --\n            the box then simply passes the scroll behaviour of its child on to the scroll pane,\n            so that nothing is lost by the indirection.\n\n            Here we give the very same custom `Scrollable` component to two scroll panes, one\n            of them with a size constraint, and then check that the constraint made a\n            difference. Note that the component in question reports that it wants to track the\n            width of its viewport, so without the box in between it would be stretched to the\n            full viewport width and the constraint would simply evaporate.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two scroll panes with the same custom `Scrollable` content, one of them constrained.","code":["var ui =","    UI.frame(\"Scrollable Constraints Test\")","    .peek(it -> it.setPreferredSize(new Dimension(600, 400)))","    .add(","        UI.panel(\"fill, wrap 1\", \"[grow]\", \"[grow][grow]\").withPrefSize(600, 400)","        .add(\"grow, push\",","            UI.scrollPane().id(\"scroll-unconstrained\")","            .add(","                UI.of(new CustomScrollablePanel()).id(\"content-unconstrained\")","                .add(UI.label(\"Hello\"))","            )","        )","        .add(\"grow, push\",","            UI.scrollPane().id(\"scroll-constrained\")","            .add(\"width 250px\",","                UI.of(new CustomScrollablePanel()).id(\"content-constrained\")","                .add(UI.label(\"Hello\"))","            )","        )","    )"]},
+
+        {"kind":"and","text":"We build the UI and let it lay itself out:","code":["var frame = ui.get(JFrame)","UI.runNow( () -> frame.pack() )"]},
+
+        {"kind":"and","text":"We look up the two scroll panes and their content components.","code":["var unconstrainedScroll  = new Utility.Query(frame).find(JScrollPane, \"scroll-unconstrained\").orElseThrow(NoSuchElementException::new)","var constrainedScroll    = new Utility.Query(frame).find(JScrollPane, \"scroll-constrained\").orElseThrow(NoSuchElementException::new)","var unconstrainedContent = new Utility.Query(frame).find(JPanel, \"content-unconstrained\").orElseThrow(NoSuchElementException::new)","var constrainedContent   = new Utility.Query(frame).find(JPanel, \"content-constrained\").orElseThrow(NoSuchElementException::new)"]},
+
+        {"kind":"expect","text":"The unconstrained content does what its own `Scrollable` implementation asks for.","code":["unconstrainedContent.getWidth() == unconstrainedScroll.getViewport().getWidth()"]},
+
+        {"kind":"and","text":"The constrained content has the width we demanded of it instead.","code":["constrainedContent.getWidth()  == 250"]},
+
+        {"kind":"and","text":"Its viewport is in fact wider than that, which is what makes the constraint visible at all.","code":["constrainedScroll.getViewport().getWidth() > 250"]},
+
+        {"kind":"and","text":"\n            The scroll behaviour of the content survived the indirection: the view of the\n            constrained scroll pane answers the very same questions its content would.\n        ","code":["UI.runAndGet( () -> constrainedScroll.getViewport().getView().getScrollableTracksViewportWidth()  ) == true","UI.runAndGet( () -> constrainedScroll.getViewport().getView().getScrollableTracksViewportHeight() ) == false","UI.runAndGet( () -> constrainedScroll.getViewport().getView().getScrollableUnitIncrement(null, SwingConstants.VERTICAL, 1) ) == 10","UI.runAndGet( () -> constrainedScroll.getViewport().getView().getScrollableBlockIncrement(null, SwingConstants.VERTICAL, 1) ) == 10"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

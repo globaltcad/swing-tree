@@ -1,7 +1,7 @@
 {
   "className":"swingtree.Button_Binding_Spec",
   "title":"Button Binding",
-  "narrative":"As a developer, I want to bind a button to a property so\n    that is is updated when the property changes.\n    Binding is a powerful feature that allows us to create\n    UIs which are not only decoupled from the business logic of\n    an application, but also make it easy to create UIs which\n    are dynamic and reactive.\n\n    A typical use case for button types is to bind\n    their selection state to a property in the view model.\n    This property may be boolean based, or something entirely\n    different.",
+  "narrative":"As a developer, I want to bind a button to a property so\n    that is updated when the property changes.\n    Binding is a powerful feature that allows us to create\n    UIs which are not only decoupled from the business logic of\n    an application, but also make it easy to create UIs which\n    are dynamic and reactive.\n\n    A typical use case for button types is to bind\n    their selection state to a property in the view model.\n    This property may be boolean based, or something entirely\n    different.",
   "subjects":["swingtree.UIForAnyButton","swingtree.UIForToggleButton","swingtree.UIForRadioButton"],
   "statistics":{
     "runs":"9",
