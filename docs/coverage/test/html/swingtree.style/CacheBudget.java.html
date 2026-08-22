@@ -151,65 +151,64 @@ final class CacheBudget {
 <span class="fc" id="L151">        return b;</span>
     }
 
-    /** The total budget re-expressed as a count of {@code 4 MiB} units. Replaces the former
-     *  {@code LayerCache.DYNAMIC_CACHE_AGGRESSIVENESS()} scalar; the image caches multiply it
-     *  by a pixels-per-unit constant to decide which images are small enough to cache. */
+    /** The total budget re-expressed as a count of {@code 4 MiB} units. The image caches multiply
+     *  it by a pixels-per-unit constant to decide which images are small enough to cache. */
     static double units() {
-<span class="fc bfc" id="L158" title="All 2 branches covered.">        if ( UNITS_OVERRIDE &gt;= 0 )</span>
-<span class="fc" id="L159">            return UNITS_OVERRIDE;                       // honour the test hook exactly, without byte-conversion drift</span>
-<span class="fc" id="L160">        return totalBudgetBytes() / (double) BYTES_PER_UNIT;</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">        if ( UNITS_OVERRIDE &gt;= 0 )</span>
+<span class="fc" id="L158">            return UNITS_OVERRIDE;                       // honour the test hook exactly, without byte-conversion drift</span>
+<span class="fc" id="L159">        return totalBudgetBytes() / (double) BYTES_PER_UNIT;</span>
     }
 
     /** The slice of the total byte budget allotted to the given cache kind. */
     static long bytesFor( Kind kind ) {
-<span class="fc" id="L165">        return (long) (totalBudgetBytes() * kind.weight);</span>
+<span class="fc" id="L164">        return (long) (totalBudgetBytes() * kind.weight);</span>
     }
 
     /** The number of native entries (images / tiles / arrays) the kind's byte slice buys,
      *  using its representative per-entry cost. {@code 0} when caching is off. */
     static int maxEntriesFor( Kind kind ) {
-<span class="fc" id="L171">        return (int) Math.max(0, bytesFor(kind) / kind.bytesPerEntry);</span>
+<span class="fc" id="L170">        return (int) Math.max(0, bytesFor(kind) / kind.bytesPerEntry);</span>
     }
 
     /** Lazily resolved &quot;is stretch tiling allowed&quot; flag from the library configuration,
      *  cached here (like the byte budget) so the per-paint hot path never touches the
      *  {@link SwingTree} singleton. {@code null} means &quot;not resolved yet&quot;. */
-<span class="fc" id="L177">    private static volatile @org.jspecify.annotations.Nullable Boolean _tilingEnabled = null;</span>
+<span class="fc" id="L176">    private static volatile @org.jspecify.annotations.Nullable Boolean _tilingEnabled = null;</span>
 
     /** Whether eligible style renderings may be cached independently of the component
      *  size using stretch tiling (see {@link SwingTree#setCacheTilingEnabled(boolean)}).
      *  Resolved lazily from the library configuration, like the byte budget. */
     static boolean tilingEnabled() {
-<span class="fc" id="L183">        Boolean enabled = _tilingEnabled;</span>
-<span class="fc bfc" id="L184" title="All 2 branches covered.">        if ( enabled == null ) {</span>
-<span class="fc" id="L185">            enabled = _resolveTilingEnabled();</span>
-<span class="fc" id="L186">            _tilingEnabled = enabled;</span>
+<span class="fc" id="L182">        Boolean enabled = _tilingEnabled;</span>
+<span class="fc bfc" id="L183" title="All 2 branches covered.">        if ( enabled == null ) {</span>
+<span class="fc" id="L184">            enabled = _resolveTilingEnabled();</span>
+<span class="fc" id="L185">            _tilingEnabled = enabled;</span>
         }
-<span class="fc" id="L188">        return enabled;</span>
+<span class="fc" id="L187">        return enabled;</span>
     }
 
     private static boolean _resolveTilingEnabled() {
         try {
-<span class="fc" id="L193">            return SwingTree.get().isCacheTilingEnabled();</span>
-<span class="nc" id="L194">        } catch ( Throwable t ) {</span>
-<span class="nc" id="L195">            log.debug(&quot;Could not resolve the cache tiling flag from the SwingTree context; assuming enabled.&quot;, t);</span>
-<span class="nc" id="L196">            return true;</span>
+<span class="fc" id="L192">            return SwingTree.get().isCacheTilingEnabled();</span>
+<span class="nc" id="L193">        } catch ( Throwable t ) {</span>
+<span class="nc" id="L194">            log.debug(&quot;Could not resolve the cache tiling flag from the SwingTree context; assuming enabled.&quot;, t);</span>
+<span class="nc" id="L195">            return true;</span>
         }
     }
 
     /** Forces the next budget read to re-resolve the mode from the live library
      *  configuration. Called whenever the configuration may have changed. */
     static void markUnresolved() {
-<span class="fc" id="L203">        _budgetBytes = UNRESOLVED;</span>
-<span class="fc" id="L204">        _tilingEnabled = null;</span>
-<span class="fc" id="L205">    }</span>
+<span class="fc" id="L202">        _budgetBytes = UNRESOLVED;</span>
+<span class="fc" id="L203">        _tilingEnabled = null;</span>
+<span class="fc" id="L204">    }</span>
 
     private static CacheMode _currentMode() {
         try {
-<span class="fc" id="L209">            return SwingTree.get().getCacheMode();</span>
-<span class="nc" id="L210">        } catch ( Throwable t ) {</span>
-<span class="nc" id="L211">            log.debug(&quot;Could not resolve the cache mode from the SwingTree context; assuming BALANCED.&quot;, t);</span>
-<span class="nc" id="L212">            return CacheMode.BALANCED;</span>
+<span class="fc" id="L208">            return SwingTree.get().getCacheMode();</span>
+<span class="nc" id="L209">        } catch ( Throwable t ) {</span>
+<span class="nc" id="L210">            log.debug(&quot;Could not resolve the cache mode from the SwingTree context; assuming BALANCED.&quot;, t);</span>
+<span class="nc" id="L211">            return CacheMode.BALANCED;</span>
         }
     }
 
@@ -219,33 +218,33 @@ final class CacheBudget {
         final double fraction;
         final long   floor;
         final long   cap;
-<span class="pc bpc" id="L222" title="4 of 6 branches missed.">        switch ( mode ) {</span>
-<span class="fc" id="L223">            case DISABLED:     return 0L;</span>
-<span class="nc" id="L224">            case CONSERVATIVE: fraction = 0.0025; floor =  8 * MiB; cap =  64 * MiB; break;</span>
-<span class="fc" id="L225">            case BALANCED:     fraction = 0.0050; floor = 16 * MiB; cap = 128 * MiB; break;</span>
-<span class="nc" id="L226">            case GENEROUS:     fraction = 0.0100; floor = 32 * MiB; cap = 256 * MiB; break;</span>
-<span class="nc" id="L227">            case AGGRESSIVE:   fraction = 0.0200; floor = 64 * MiB; cap = 512 * MiB; break;</span>
-<span class="nc" id="L228">            default:           fraction = 0.0050; floor = 16 * MiB; cap = 128 * MiB; break;</span>
+<span class="pc bpc" id="L221" title="4 of 6 branches missed.">        switch ( mode ) {</span>
+<span class="fc" id="L222">            case DISABLED:     return 0L;</span>
+<span class="nc" id="L223">            case CONSERVATIVE: fraction = 0.0025; floor =  8 * MiB; cap =  64 * MiB; break;</span>
+<span class="fc" id="L224">            case BALANCED:     fraction = 0.0050; floor = 16 * MiB; cap = 128 * MiB; break;</span>
+<span class="nc" id="L225">            case GENEROUS:     fraction = 0.0100; floor = 32 * MiB; cap = 256 * MiB; break;</span>
+<span class="nc" id="L226">            case AGGRESSIVE:   fraction = 0.0200; floor = 64 * MiB; cap = 512 * MiB; break;</span>
+<span class="nc" id="L227">            default:           fraction = 0.0050; floor = 16 * MiB; cap = 128 * MiB; break;</span>
         }
-<span class="fc" id="L230">        long raw = (long) (_SYSTEM_RAM_BYTES * fraction);</span>
-<span class="fc" id="L231">        return Math.min(cap, Math.max(floor, raw));</span>
+<span class="fc" id="L229">        long raw = (long) (_SYSTEM_RAM_BYTES * fraction);</span>
+<span class="fc" id="L230">        return Math.min(cap, Math.max(floor, raw));</span>
     }
 
     private static double _detectSystemRamGiB() {
         try {
-<span class="fc" id="L236">            java.lang.management.OperatingSystemMXBean os = java.lang.management.ManagementFactory.getOperatingSystemMXBean();</span>
-<span class="pc bpc" id="L237" title="1 of 2 branches missed.">            if ( os instanceof com.sun.management.OperatingSystemMXBean ) {</span>
-<span class="fc" id="L238">                long totalBytes = ((com.sun.management.OperatingSystemMXBean) os).getTotalPhysicalMemorySize();</span>
-<span class="pc bpc" id="L239" title="1 of 2 branches missed.">                if ( totalBytes &gt; 0 )</span>
-<span class="fc" id="L240">                    return totalBytes / (double) (1L &lt;&lt; 30);</span>
+<span class="fc" id="L235">            java.lang.management.OperatingSystemMXBean os = java.lang.management.ManagementFactory.getOperatingSystemMXBean();</span>
+<span class="pc bpc" id="L236" title="1 of 2 branches missed.">            if ( os instanceof com.sun.management.OperatingSystemMXBean ) {</span>
+<span class="fc" id="L237">                long totalBytes = ((com.sun.management.OperatingSystemMXBean) os).getTotalPhysicalMemorySize();</span>
+<span class="pc bpc" id="L238" title="1 of 2 branches missed.">                if ( totalBytes &gt; 0 )</span>
+<span class="fc" id="L239">                    return totalBytes / (double) (1L &lt;&lt; 30);</span>
             }
-<span class="nc" id="L242">        } catch ( Throwable t ) {</span>
-<span class="nc" id="L243">            log.debug(&quot;Could not query system RAM, falling back to JVM max heap.&quot;, t);</span>
-<span class="nc" id="L244">        }</span>
+<span class="nc" id="L241">        } catch ( Throwable t ) {</span>
+<span class="nc" id="L242">            log.debug(&quot;Could not query system RAM, falling back to JVM max heap.&quot;, t);</span>
+<span class="nc" id="L243">        }</span>
         // Fallback: JVM max heap (usually a fraction of physical RAM)
-<span class="nc" id="L246">        double maxHeap = Runtime.getRuntime().maxMemory() / (double) (1L &lt;&lt; 30);</span>
+<span class="nc" id="L245">        double maxHeap = Runtime.getRuntime().maxMemory() / (double) (1L &lt;&lt; 30);</span>
         // We multiply by 4, since the system will have a lot more RAM:
-<span class="nc" id="L248">        return maxHeap * 4;</span>
+<span class="nc" id="L247">        return maxHeap * 4;</span>
     }
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

@@ -2211,7 +2211,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            SwingTree is a library specifically designed to create UIs using declarative code.\n            Using its API in procedural code is messy and error prone, which\n            is why SwingTree will try to prevent you from doing so.\n\n            One way to do this is to throw an exception if you try to reuse a builder node.\n            SwingTree will also mark the state of used builder nodes as as disposed and\n            cut off any reference to the underlying Swing component.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            SwingTree is a library specifically designed to create UIs using declarative code.\n            Using its API in procedural code is messy and error prone, which\n            is why SwingTree will try to prevent you from doing so.\n\n            One way to do this is to throw an exception if you try to reuse a builder node.\n            SwingTree will also mark the state of used builder nodes as disposed and\n            cut off any reference to the underlying Swing component.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a simple UI builder node for a panel.","code":["var ui = UI.panel()"]},

@@ -31,7 +31,7 @@
 
         {"kind":"expect","text":"Initially the two lists are empty.","code":["proresses.isEmpty()","cycles.isEmpty()"]},
 
-        {"kind":"when","text":"We trigger the animation.","code":["event.fire()","Thread.sleep(100)","UI.sync()","button.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We trigger the animation.","code":["event.fire()","Thread.sleep(100)","UI.sync()","Utility.paintWithoutWindow(button, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"\n            The progress of the animation will always end with 1.\n        ","code":["proresses.last() == 1"]},
 
@@ -54,7 +54,7 @@
 
         {"kind":"expect","text":"\n            When the user clicks on the label, the border width of the label\n            will be animated from 0 to 10 over the course of 100 milliseconds\n            and the background color will be animated from transparent to orange.\n            But initially the label will not have any border or background color.\n            So let's check that.\n        ","code":["label.border == null","label.background == new Color(238, 238, 238) // default background color of a JLabel","label.foreground == new Color(51, 51, 51) // default foreground color of a JLabel","label.getUI() instanceof MetalLabelUI"]},
 
-        {"kind":"when","text":"We simulate a user click event programmatically","code":["label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))","Thread.sleep(100)","UI.sync()","label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We simulate a user click event programmatically","code":["label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))","Thread.sleep(100)","UI.sync()","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The label will have a border and the custom colors...","code":["new PollingConditions(timeout: 10, initialDelay: 0, factor: 1.25).eventually {","    assert label.border != null","}","label.background != new Color(238, 238, 238)","label.foreground == new Color(51, 51, 51)","label.getUI() instanceof MetalLabelUI"]}
       ],
@@ -75,7 +75,7 @@
 
         {"kind":"expect","text":"\n            When the user clicks on the label, the border width of the label\n            will be animated from 0 to 10 over the course of 100 milliseconds\n            and the background color will be animated from transparent to orange.\n            But initially the label will not have any border or background color.\n            So let's check that.\n        ","code":["label.border == null","label.font.size <= 13","label.getUI() instanceof MetalLabelUI"]},
 
-        {"kind":"when","text":"We simulate a user click event programmatically","code":["label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))","Thread.sleep(1_000)","UI.sync()","label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We simulate a user click event programmatically","code":["label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))","Thread.sleep(1_000)","UI.sync()","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The label will have a border and a background color.","code":["label.border != null","label.font.size > 13"]},
 
@@ -96,11 +96,11 @@
 
         {"kind":"expect","text":"It has the expected initial state.","code":["label.border == null","label.background == new Color(238, 238, 238) // default background color of a JLabel","label.foreground == new Color(51, 51, 51) // default foreground color of a JLabel","label.getUI() instanceof MetalLabelUI"]},
 
-        {"kind":"when","text":"We simulate a user click event programmatically","code":["label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))","Thread.sleep(50)","UI.sync()","label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We simulate a user click event programmatically","code":["label.dispatchEvent(new MouseEvent(label, MouseEvent.MOUSE_CLICKED, System.currentTimeMillis(), 0, 0, 0, 1, false))","Thread.sleep(50)","UI.sync()","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"\n            The label will have a custom border installed.\n        ","code":["new PollingConditions(timeout: 10, initialDelay: 0, factor: 1.25).eventually {","    assert label.border != null","}","label.background != new Color(238, 238, 238)","label.foreground == new Color(51, 51, 51)","label.getUI() instanceof MetalLabelUI"]},
 
-        {"kind":"when","text":"We wait for the animation to end...","code":["Thread.sleep(2000)","UI.sync()","label.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We wait for the animation to end...","code":["Thread.sleep(2000)","UI.sync()","Utility.paintWithoutWindow(label, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"\n            The border will have been uninstalled.\n        ","code":["new PollingConditions(timeout: 10, initialDelay: 0, factor: 1.25).eventually {","    assert label.border == null","}","label.background == new Color(238, 238, 238)","label.foreground == new Color(51, 51, 51)","label.getUI() instanceof MetalLabelUI"]}
       ],
@@ -121,7 +121,7 @@
 
         {"kind":"expect","text":"\n            Initially the button will the default button border and background color.\n        ","code":["button.border instanceof CompoundBorder","button.background == new Color(238, 238, 238) // default background color of a JButton","button.foreground == new Color(51, 51, 51) // default foreground color of a JButton","button.getUI() instanceof MetalButtonUI"]},
 
-        {"kind":"when","text":"We simulate a user click event programmatically","code":["button.doClick()","Thread.sleep(100)","UI.sync()","UI.runNow({button.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())})"]},
+        {"kind":"when","text":"We simulate a user click event programmatically","code":["button.doClick()","Thread.sleep(100)","UI.sync()","UI.runNow({Utility.paintWithoutWindow(button, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())})"]},
 
         {"kind":"then","text":"The label will have a border and a background color.","code":["!(button.border instanceof CompoundBorder)","button.background != new Color(238, 238, 238)","button.foreground == new Color(51, 51, 51)","!(button.getUI() instanceof MetalButtonUI)"]}
       ],

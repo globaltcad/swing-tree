@@ -293,7 +293,7 @@ import java.util.function.Predicate;
 <span class="fc" id="L293">                _restoreForegroundIfFontColorWasInstalled(owner, newStyle);</span>
 <span class="fc" id="L294">                _restoreStyleOwnedSizesOf(owner);</span>
 <span class="fc" id="L295">                _restoreViewportBackgroundOf(owner);</span>
-<span class="fc" id="L296">                _updateViewportOpaquenessOf(owner);</span>
+<span class="fc" id="L296">                _updateViewportOpaquenessOf(owner, newStyle);</span>
 
 <span class="fc" id="L298">                return _updateEngine(owner, engine, newStyle);</span>
             }
@@ -315,7 +315,7 @@ import java.util.function.Predicate;
 <span class="fc" id="L315">        final boolean hasBackground                      = newStyle.base().backgroundColor().isPresent();</span>
 <span class="fc" id="L316">        final boolean hasMargin                          = newStyle.margin().isPositive();</span>
 <span class="fc" id="L317">        final boolean hasOpaqueBorder                    = newStyle.border().colors().isFullyOpaque();</span>
-<span class="fc bfc" id="L318" title="All 2 branches covered.">        final boolean isNaturallyTransparent             = ( _initialIsOpaque == false ); // We categorize based on the initial state of the flag.</span>
+<span class="fc bfc" id="L318" title="All 2 branches covered.">        final boolean isNaturallyTransparent             = !_initialIsOpaque; // We categorize based on the initial state of the flag.</span>
 <span class="fc bfc" id="L319" title="All 6 branches covered.">        final boolean backgroundIsActuallyBackground =</span>
                                     !( owner instanceof JTabbedPane  ) &amp;&amp; // The LaFs interpret the tab buttons as background
                                     !( owner instanceof JSlider      ) &amp;&amp; // The track color is usually considered the background
@@ -519,7 +519,7 @@ import java.util.function.Predicate;
 
 <span class="fc" id="L520">        backgroundSetter.run();</span>
 
-<span class="fc" id="L522">        _updateViewportOpaquenessOf(owner);</span>
+<span class="fc" id="L522">        _updateViewportOpaquenessOf(owner, newStyle);</span>
         /*
             Note that the above call has to happen after every code path which
             may still change the opaqueness or background color of the owner,
@@ -552,29 +552,56 @@ import java.util.function.Predicate;
      *  turns opaque again, the viewport has to reclaim its opaqueness, or else Swing's
      *  repaint manager keeps climbing past it to find an opaque ancestor, and every
      *  little repaint inside the scroll pane costs more than it should, forever.
+     *  &lt;p&gt;
+     *  There is a third party in this though, namely the style engine itself:
+     *  Everything it renders for a scroll pane, be it an inset shadow, a gradient
+     *  or a rounded background, is painted before the children of the scroll pane,
+     *  which means the viewport lies on top of all of it.
+     *  An opaque viewport would simply wipe these renderings away with its flat
+     *  background color, so it may only make its promise when the style engine
+     *  has nothing to show underneath it.
      *
      * @param owner The component whose viewport should be synchronized, only scroll panes have one.
+     * @param style The style of the owner, which tells us if the style engine paints below the viewport.
      */
-    private void _updateViewportOpaquenessOf( final C owner ) {
-<span class="fc bfc" id="L559" title="All 2 branches covered.">        if ( !(owner instanceof JScrollPane) )</span>
-<span class="fc" id="L560">            return;</span>
+    private void _updateViewportOpaquenessOf( final C owner, final StyleConf style ) {
+<span class="fc bfc" id="L568" title="All 2 branches covered.">        if ( !(owner instanceof JScrollPane) )</span>
+<span class="fc" id="L569">            return;</span>
 
-<span class="fc" id="L562">        JViewport viewport = ((JScrollPane) owner).getViewport();</span>
-<span class="pc bpc" id="L563" title="1 of 2 branches missed.">        if ( viewport == null )</span>
-<span class="nc" id="L564">            return;</span>
+<span class="fc" id="L571">        JViewport viewport = ((JScrollPane) owner).getViewport();</span>
+<span class="pc bpc" id="L572" title="1 of 2 branches missed.">        if ( viewport == null )</span>
+<span class="nc" id="L573">            return;</span>
 
-<span class="fc" id="L566">        Color   viewportBackground   = viewport.getBackground();</span>
-<span class="pc bpc" id="L567" title="1 of 4 branches missed.">        boolean viewportFillsItsArea = viewportBackground != null &amp;&amp; viewportBackground.getAlpha() == 255;</span>
-<span class="pc bpc" id="L568" title="1 of 4 branches missed.">        boolean shouldBeOpaque       = owner.isOpaque() &amp;&amp; viewportFillsItsArea;</span>
+<span class="fc" id="L575">        Color   viewportBackground   = viewport.getBackground();</span>
+<span class="pc bpc" id="L576" title="1 of 4 branches missed.">        boolean viewportFillsItsArea = viewportBackground != null &amp;&amp; viewportBackground.getAlpha() == 255;</span>
+<span class="pc bpc" id="L577" title="1 of 6 branches missed.">        boolean shouldBeOpaque       = owner.isOpaque() &amp;&amp; viewportFillsItsArea &amp;&amp; !_stylePaintsBelowViewportOf(style);</span>
         /*
             Note that a viewport without its own background color inherits the one of
             the scroll pane, which the style engine may well have set to the fully
             transparent 'UI.Color.UNDEFINED' so that it can paint the background itself.
             The viewport cannot do that painting, so it also cannot claim to be opaque.
         */
-<span class="fc bfc" id="L575" title="All 2 branches covered.">        if ( viewport.isOpaque() != shouldBeOpaque )</span>
-<span class="fc" id="L576">            viewport.setOpaque(shouldBeOpaque);</span>
-<span class="fc" id="L577">    }</span>
+<span class="fc bfc" id="L584" title="All 2 branches covered.">        if ( viewport.isOpaque() != shouldBeOpaque )</span>
+<span class="fc" id="L585">            viewport.setOpaque(shouldBeOpaque);</span>
+<span class="fc" id="L586">    }</span>
+
+    /**
+     *  Determines if the supplied style makes the style engine render anything
+     *  in the area which the viewport of a scroll pane covers.
+     *  This is the case for all layers except the foreground layer, because they
+     *  are all painted before the children of a component, and it is also the case
+     *  for a border radius, whose rounded corners reach into the rectangular
+     *  bounds of the viewport.
+     *
+     * @param style The style of a scroll pane.
+     * @return {@code true} if the style engine paints something below the viewport.
+     */
+    private static boolean _stylePaintsBelowViewportOf( final StyleConf style ) {
+<span class="fc bfc" id="L600" title="All 2 branches covered.">        return style.border().hasAnyNonZeroArcs()</span>
+<span class="fc bfc" id="L601" title="All 2 branches covered.">            || !style.layer(UI.Layer.BACKGROUND).isNone()</span>
+<span class="fc bfc" id="L602" title="All 2 branches covered.">            || !style.layer(UI.Layer.CONTENT).isNone()</span>
+<span class="pc bpc" id="L603" title="1 of 2 branches missed.">            || !style.layer(UI.Layer.BORDER).isNone();</span>
+    }
 
     /**
      *  Gives the viewport of a scroll pane its original background color back,
@@ -582,173 +609,173 @@ import java.util.function.Predicate;
      *  background color down to the viewport.
      *  Without this, a scroll pane whose styling was removed again would keep
      *  a translucent viewport, and with it the loss of opaqueness
-     *  which {@link #_updateViewportOpaquenessOf(JComponent)} derives from it.
+     *  which {@link #_updateViewportOpaquenessOf(JComponent, StyleConf)} derives from it.
      *
      * @param owner The component whose viewport should be restored, only scroll panes have one.
      */
     private void _restoreViewportBackgroundOf( final C owner ) {
-<span class="fc bfc" id="L590" title="All 4 branches covered.">        if ( !(owner instanceof JScrollPane) || _initialViewportBackground == null )</span>
-<span class="fc" id="L591">            return;</span>
+<span class="fc bfc" id="L617" title="All 4 branches covered.">        if ( !(owner instanceof JScrollPane) || _initialViewportBackground == null )</span>
+<span class="fc" id="L618">            return;</span>
 
-<span class="fc" id="L593">        JViewport viewport = ((JScrollPane) owner).getViewport();</span>
-<span class="pc bpc" id="L594" title="2 of 4 branches missed.">        if ( viewport != null &amp;&amp; !Objects.equals( viewport.getBackground(), _initialViewportBackground ) )</span>
-<span class="fc" id="L595">            viewport.setBackground(_initialViewportBackground);</span>
+<span class="fc" id="L620">        JViewport viewport = ((JScrollPane) owner).getViewport();</span>
+<span class="pc bpc" id="L621" title="2 of 4 branches missed.">        if ( viewport != null &amp;&amp; !Objects.equals( viewport.getBackground(), _initialViewportBackground ) )</span>
+<span class="fc" id="L622">            viewport.setBackground(_initialViewportBackground);</span>
 
-<span class="fc" id="L597">        _initialViewportBackground = null;</span>
-<span class="fc" id="L598">    }</span>
+<span class="fc" id="L624">        _initialViewportBackground = null;</span>
+<span class="fc" id="L625">    }</span>
 
     @SuppressWarnings(&quot;ReferenceEquality&quot;)
     private final boolean _isTransparentConstant( final Color color ) {
-<span class="fc bfc" id="L602" title="All 2 branches covered.">        return color == UI.Color.TRANSPARENT;</span>
+<span class="fc bfc" id="L629" title="All 2 branches covered.">        return color == UI.Color.TRANSPARENT;</span>
     }
 
     @SuppressWarnings(&quot;ReferenceEquality&quot;)
     boolean backgroundWasChangedSomewhereElse( C owner ) {
-<span class="fc bfc" id="L607" title="All 2 branches covered.">        if ( _lastInsideBackgroundColor != null ) {</span>
-<span class="fc bfc" id="L608" title="All 2 branches covered.">            if ( _lastInsideBackgroundColor != owner.getBackground() ) {</span>
-<span class="fc" id="L609">                return true;</span>
+<span class="fc bfc" id="L634" title="All 2 branches covered.">        if ( _lastInsideBackgroundColor != null ) {</span>
+<span class="fc bfc" id="L635" title="All 2 branches covered.">            if ( _lastInsideBackgroundColor != owner.getBackground() ) {</span>
+<span class="fc" id="L636">                return true;</span>
             }
         }
-<span class="fc" id="L612">        return false;</span>
+<span class="fc" id="L639">        return false;</span>
     }
 
     private void _applyGenericBaseStyleTo( final C owner, final StyleConf styleConf )
     {
-<span class="fc" id="L617">        final BaseConf base = styleConf.base();</span>
+<span class="fc" id="L644">        final BaseConf base = styleConf.base();</span>
 
         // A solid *font* color is the more specific property and wins over the base foreground
         // color — it is applied through the same channel by _applyFontStyleTo (which runs after
         // this), so applying the base color here would only cause a set/override ping-pong.
-<span class="fc bfc" id="L622" title="All 2 branches covered.">        boolean fontColorTakesPrecedence = styleConf.font().solidColor() != null;</span>
+<span class="fc bfc" id="L649" title="All 2 branches covered.">        boolean fontColorTakesPrecedence = styleConf.font().solidColor() != null;</span>
 
-<span class="fc bfc" id="L624" title="All 6 branches covered.">        if ( !fontColorTakesPrecedence &amp;&amp; base.foregroundColor().isPresent() &amp;&amp; !Objects.equals( owner.getForeground(), base.foregroundColor().get() ) ) {</span>
-<span class="fc" id="L625">            Color newColor = base.foregroundColor().get();</span>
-<span class="fc bfc" id="L626" title="All 2 branches covered.">            if ( StyleUtil.isUndefinedColor(newColor) )</span>
-<span class="fc" id="L627">                newColor = null;</span>
+<span class="fc bfc" id="L651" title="All 6 branches covered.">        if ( !fontColorTakesPrecedence &amp;&amp; base.foregroundColor().isPresent() &amp;&amp; !Objects.equals( owner.getForeground(), base.foregroundColor().get() ) ) {</span>
+<span class="fc" id="L652">            Color newColor = base.foregroundColor().get();</span>
+<span class="fc bfc" id="L653" title="All 2 branches covered.">            if ( StyleUtil.isUndefinedColor(newColor) )</span>
+<span class="fc" id="L654">                newColor = null;</span>
 
-<span class="fc bfc" id="L629" title="All 2 branches covered.">            if ( !Objects.equals( owner.getForeground(), newColor ) )</span>
-<span class="fc" id="L630">                owner.setForeground( newColor );</span>
+<span class="fc bfc" id="L656" title="All 2 branches covered.">            if ( !Objects.equals( owner.getForeground(), newColor ) )</span>
+<span class="fc" id="L657">                owner.setForeground( newColor );</span>
         }
 
-<span class="fc" id="L633">        base.cursor().ifPresent( cursor -&gt; {</span>
-<span class="fc bfc" id="L634" title="All 2 branches covered.">            if ( !Objects.equals( owner.getCursor(), cursor ) )</span>
-<span class="fc" id="L635">                owner.setCursor( cursor );</span>
-<span class="fc" id="L636">        });</span>
+<span class="fc" id="L660">        base.cursor().ifPresent( cursor -&gt; {</span>
+<span class="fc bfc" id="L661" title="All 2 branches covered.">            if ( !Objects.equals( owner.getCursor(), cursor ) )</span>
+<span class="fc" id="L662">                owner.setCursor( cursor );</span>
+<span class="fc" id="L663">        });</span>
 
-<span class="fc bfc" id="L638" title="All 2 branches covered.">        if ( base.orientation() != UI.ComponentOrientation.UNKNOWN ) {</span>
-<span class="fc" id="L639">            ComponentOrientation currentOrientation = owner.getComponentOrientation();</span>
-<span class="fc" id="L640">            UI.ComponentOrientation newOrientation = base.orientation();</span>
-<span class="pc bpc" id="L641" title="1 of 3 branches missed.">            switch ( newOrientation ) {</span>
+<span class="fc bfc" id="L665" title="All 2 branches covered.">        if ( base.orientation() != UI.ComponentOrientation.UNKNOWN ) {</span>
+<span class="fc" id="L666">            ComponentOrientation currentOrientation = owner.getComponentOrientation();</span>
+<span class="fc" id="L667">            UI.ComponentOrientation newOrientation = base.orientation();</span>
+<span class="pc bpc" id="L668" title="1 of 3 branches missed.">            switch ( newOrientation ) {</span>
                 case LEFT_TO_RIGHT:
-<span class="fc bfc" id="L643" title="All 2 branches covered.">                    if ( !Objects.equals( currentOrientation, ComponentOrientation.LEFT_TO_RIGHT ) )</span>
-<span class="fc" id="L644">                        owner.applyComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);</span>
+<span class="fc bfc" id="L670" title="All 2 branches covered.">                    if ( !Objects.equals( currentOrientation, ComponentOrientation.LEFT_TO_RIGHT ) )</span>
+<span class="fc" id="L671">                        owner.applyComponentOrientation(ComponentOrientation.LEFT_TO_RIGHT);</span>
                     break;
                 case RIGHT_TO_LEFT:
-<span class="fc bfc" id="L647" title="All 2 branches covered.">                    if ( !Objects.equals( currentOrientation, ComponentOrientation.RIGHT_TO_LEFT ) )</span>
-<span class="fc" id="L648">                        owner.applyComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);</span>
+<span class="fc bfc" id="L674" title="All 2 branches covered.">                    if ( !Objects.equals( currentOrientation, ComponentOrientation.RIGHT_TO_LEFT ) )</span>
+<span class="fc" id="L675">                        owner.applyComponentOrientation(ComponentOrientation.RIGHT_TO_LEFT);</span>
                     break;
                 default:
-<span class="nc bnc" id="L651" title="All 2 branches missed.">                    if ( !Objects.equals( currentOrientation, ComponentOrientation.UNKNOWN ) )</span>
-<span class="nc" id="L652">                        owner.applyComponentOrientation(ComponentOrientation.UNKNOWN);</span>
+<span class="nc bnc" id="L678" title="All 2 branches missed.">                    if ( !Objects.equals( currentOrientation, ComponentOrientation.UNKNOWN ) )</span>
+<span class="nc" id="L679">                        owner.applyComponentOrientation(ComponentOrientation.UNKNOWN);</span>
                     break;
             }
         }
-<span class="fc" id="L656">    }</span>
+<span class="fc" id="L683">    }</span>
 
     private void _applyIconStyleTo( final C owner, StyleConf styleConf )
     {
-<span class="fc" id="L660">        final BaseConf base = styleConf.base();</span>
+<span class="fc" id="L687">        final BaseConf base = styleConf.base();</span>
 
-<span class="fc" id="L662">        UI.FitComponent fit = base.fit();</span>
-<span class="fc" id="L663">        base.icon().ifPresent( icon -&gt; {</span>
-<span class="nc bnc" id="L664" title="All 2 branches missed.">            if ( icon instanceof SvgIcon) {</span>
-<span class="nc" id="L665">                SvgIcon svgIcon = (SvgIcon) icon;</span>
-<span class="nc" id="L666">                icon = svgIcon.withFitComponent(fit);</span>
+<span class="fc" id="L689">        UI.FitComponent fit = base.fit();</span>
+<span class="fc" id="L690">        base.icon().ifPresent( icon -&gt; {</span>
+<span class="nc bnc" id="L691" title="All 2 branches missed.">            if ( icon instanceof SvgIcon) {</span>
+<span class="nc" id="L692">                SvgIcon svgIcon = (SvgIcon) icon;</span>
+<span class="nc" id="L693">                icon = svgIcon.withFitComponent(fit);</span>
             }
-<span class="nc bnc" id="L668" title="All 2 branches missed.">            if ( owner instanceof AbstractButton ) {</span>
-<span class="nc" id="L669">                AbstractButton button = (AbstractButton) owner;</span>
-<span class="nc bnc" id="L670" title="All 2 branches missed.">                if ( !Objects.equals( button.getIcon(), icon ) )</span>
-<span class="nc" id="L671">                    button.setIcon( icon );</span>
+<span class="nc bnc" id="L695" title="All 2 branches missed.">            if ( owner instanceof AbstractButton ) {</span>
+<span class="nc" id="L696">                AbstractButton button = (AbstractButton) owner;</span>
+<span class="nc bnc" id="L697" title="All 2 branches missed.">                if ( !Objects.equals( button.getIcon(), icon ) )</span>
+<span class="nc" id="L698">                    button.setIcon( icon );</span>
             }
-<span class="nc bnc" id="L673" title="All 2 branches missed.">            if ( owner instanceof JLabel ) {</span>
-<span class="nc" id="L674">                JLabel label = (JLabel) owner;</span>
-<span class="nc bnc" id="L675" title="All 2 branches missed.">                if ( !Objects.equals( label.getIcon(), icon ) )</span>
-<span class="nc" id="L676">                    label.setIcon( icon );</span>
+<span class="nc bnc" id="L700" title="All 2 branches missed.">            if ( owner instanceof JLabel ) {</span>
+<span class="nc" id="L701">                JLabel label = (JLabel) owner;</span>
+<span class="nc bnc" id="L702" title="All 2 branches missed.">                if ( !Objects.equals( label.getIcon(), icon ) )</span>
+<span class="nc" id="L703">                    label.setIcon( icon );</span>
             }
-<span class="nc bnc" id="L678" title="All 2 branches missed.">            if ( owner instanceof JIcon ) {</span>
-<span class="nc" id="L679">                JIcon jIcon = (JIcon) owner;</span>
-<span class="nc bnc" id="L680" title="All 2 branches missed.">                if ( !Objects.equals( jIcon.getIcon(), icon ) )</span>
-<span class="nc" id="L681">                    jIcon.setIcon( icon );</span>
+<span class="nc bnc" id="L705" title="All 2 branches missed.">            if ( owner instanceof JIcon ) {</span>
+<span class="nc" id="L706">                JIcon jIcon = (JIcon) owner;</span>
+<span class="nc bnc" id="L707" title="All 2 branches missed.">                if ( !Objects.equals( jIcon.getIcon(), icon ) )</span>
+<span class="nc" id="L708">                    jIcon.setIcon( icon );</span>
             }
-<span class="nc" id="L683">        });</span>
-<span class="fc" id="L684">    }</span>
+<span class="nc" id="L710">        });</span>
+<span class="fc" id="L711">    }</span>
 
     private void _applyLayoutStyleTo( final C owner, final StyleConf style )
     {
-<span class="fc" id="L688">        final LayoutConf layoutConf = style.layout();</span>
+<span class="fc" id="L715">        final LayoutConf layoutConf = style.layout();</span>
         // Generic Layout stuff:
 
-<span class="fc" id="L691">        layoutConf.alignmentX().ifPresent( alignmentX -&gt; {</span>
-<span class="fc bfc" id="L692" title="All 2 branches covered.">            if ( !Objects.equals( owner.getAlignmentX(), alignmentX ) )</span>
-<span class="fc" id="L693">                owner.setAlignmentX( alignmentX );</span>
-<span class="fc" id="L694">        });</span>
+<span class="fc" id="L718">        layoutConf.alignmentX().ifPresent( alignmentX -&gt; {</span>
+<span class="fc bfc" id="L719" title="All 2 branches covered.">            if ( !Objects.equals( owner.getAlignmentX(), alignmentX ) )</span>
+<span class="fc" id="L720">                owner.setAlignmentX( alignmentX );</span>
+<span class="fc" id="L721">        });</span>
 
-<span class="fc" id="L696">        layoutConf.alignmentY().ifPresent( alignmentY -&gt; {</span>
-<span class="fc bfc" id="L697" title="All 2 branches covered.">            if ( !Objects.equals( owner.getAlignmentY(), alignmentY ) )</span>
-<span class="fc" id="L698">                owner.setAlignmentY( alignmentY );</span>
-<span class="fc" id="L699">        });</span>
+<span class="fc" id="L723">        layoutConf.alignmentY().ifPresent( alignmentY -&gt; {</span>
+<span class="fc bfc" id="L724" title="All 2 branches covered.">            if ( !Objects.equals( owner.getAlignmentY(), alignmentY ) )</span>
+<span class="fc" id="L725">                owner.setAlignmentY( alignmentY );</span>
+<span class="fc" id="L726">        });</span>
 
         // Install Generic Layout:
-<span class="fc" id="L702">        layoutConf.layout().installFor(owner);</span>
+<span class="fc" id="L729">        layoutConf.layout().installFor(owner);</span>
 
         // Now on to MigLayout installation details:
 
-<span class="fc" id="L706">        Optional&lt;Float&gt; alignmentX = layoutConf.alignmentX();</span>
-<span class="fc" id="L707">        Optional&lt;Float&gt; alignmentY = layoutConf.alignmentY();</span>
+<span class="fc" id="L733">        Optional&lt;Float&gt; alignmentX = layoutConf.alignmentX();</span>
+<span class="fc" id="L734">        Optional&lt;Float&gt; alignmentY = layoutConf.alignmentY();</span>
 
-<span class="pc bpc" id="L709" title="1 of 4 branches missed.">        if ( !alignmentX.isPresent() &amp;&amp; !alignmentY.isPresent() )</span>
-<span class="fc" id="L710">            return;</span>
+<span class="pc bpc" id="L736" title="1 of 4 branches missed.">        if ( !alignmentX.isPresent() &amp;&amp; !alignmentY.isPresent() )</span>
+<span class="fc" id="L737">            return;</span>
 
-<span class="fc bfc" id="L712" title="All 2 branches covered.">        LayoutManager layoutManager = ( owner.getParent() == null ? null : owner.getParent().getLayout() );</span>
-<span class="fc bfc" id="L713" title="All 2 branches covered.">        if ( layoutManager instanceof MigLayout ) {</span>
-<span class="fc" id="L714">            MigLayout migLayout = (MigLayout) layoutManager;</span>
-<span class="fc" id="L715">            Object rawComponentConstraints = migLayout.getComponentConstraints(owner);</span>
-<span class="pc bpc" id="L716" title="1 of 2 branches missed.">            if ( rawComponentConstraints instanceof String )</span>
-<span class="nc" id="L717">                rawComponentConstraints = ConstraintParser.parseComponentConstraint(rawComponentConstraints.toString());</span>
+<span class="fc bfc" id="L739" title="All 2 branches covered.">        LayoutManager layoutManager = ( owner.getParent() == null ? null : owner.getParent().getLayout() );</span>
+<span class="fc bfc" id="L740" title="All 2 branches covered.">        if ( layoutManager instanceof MigLayout ) {</span>
+<span class="fc" id="L741">            MigLayout migLayout = (MigLayout) layoutManager;</span>
+<span class="fc" id="L742">            Object rawComponentConstraints = migLayout.getComponentConstraints(owner);</span>
+<span class="pc bpc" id="L743" title="1 of 2 branches missed.">            if ( rawComponentConstraints instanceof String )</span>
+<span class="nc" id="L744">                rawComponentConstraints = ConstraintParser.parseComponentConstraint(rawComponentConstraints.toString());</span>
 
-<span class="pc bpc" id="L719" title="1 of 2 branches missed.">            CC componentConstraints = (rawComponentConstraints instanceof CC ? (CC) rawComponentConstraints : null);</span>
+<span class="pc bpc" id="L746" title="1 of 2 branches missed.">            CC componentConstraints = (rawComponentConstraints instanceof CC ? (CC) rawComponentConstraints : null);</span>
 
-<span class="pc bpc" id="L721" title="1 of 2 branches missed.">            final CC finalComponentConstraints = ( componentConstraints == null ? new CC() : componentConstraints );</span>
+<span class="pc bpc" id="L748" title="1 of 2 branches missed.">            final CC finalComponentConstraints = ( componentConstraints == null ? new CC() : componentConstraints );</span>
 
-<span class="fc" id="L723">            String x = alignmentX.map( a -&gt; (int) ( a * 100f ) )</span>
-<span class="fc" id="L724">                                  .map( a -&gt; a + &quot;%&quot; )</span>
-<span class="fc" id="L725">                                  .orElse(&quot;&quot;);</span>
+<span class="fc" id="L750">            String x = alignmentX.map( a -&gt; (int) ( a * 100f ) )</span>
+<span class="fc" id="L751">                                  .map( a -&gt; a + &quot;%&quot; )</span>
+<span class="fc" id="L752">                                  .orElse(&quot;&quot;);</span>
 
-<span class="fc" id="L727">            String y = alignmentY.map( a -&gt; (int) ( a * 100f ) )</span>
-<span class="fc" id="L728">                                  .map( a -&gt; a + &quot;%&quot; )</span>
-<span class="fc" id="L729">                                  .orElse(&quot;&quot;);</span>
+<span class="fc" id="L754">            String y = alignmentY.map( a -&gt; (int) ( a * 100f ) )</span>
+<span class="fc" id="L755">                                  .map( a -&gt; a + &quot;%&quot; )</span>
+<span class="fc" id="L756">                                  .orElse(&quot;&quot;);</span>
 
-<span class="fc" id="L731">            DimConstraint horizontalDimConstraint = finalComponentConstraints.getHorizontal();</span>
-<span class="fc" id="L732">            DimConstraint verticalDimConstraint   = finalComponentConstraints.getVertical();</span>
+<span class="fc" id="L758">            DimConstraint horizontalDimConstraint = finalComponentConstraints.getHorizontal();</span>
+<span class="fc" id="L759">            DimConstraint verticalDimConstraint   = finalComponentConstraints.getVertical();</span>
 
-<span class="fc" id="L734">            UnitValue xAlign = horizontalDimConstraint.getAlign();</span>
-<span class="fc" id="L735">            UnitValue yAlign = verticalDimConstraint.getAlign();</span>
+<span class="fc" id="L761">            UnitValue xAlign = horizontalDimConstraint.getAlign();</span>
+<span class="fc" id="L762">            UnitValue yAlign = verticalDimConstraint.getAlign();</span>
 
-<span class="pc bpc" id="L737" title="2 of 4 branches missed.">            boolean xChange = !x.equals( xAlign == null ? &quot;&quot; : xAlign.getConstraintString() );</span>
-<span class="pc bpc" id="L738" title="2 of 4 branches missed.">            boolean yChange = !y.equals( yAlign == null ? &quot;&quot; : yAlign.getConstraintString() );</span>
+<span class="pc bpc" id="L764" title="2 of 4 branches missed.">            boolean xChange = !x.equals( xAlign == null ? &quot;&quot; : xAlign.getConstraintString() );</span>
+<span class="pc bpc" id="L765" title="2 of 4 branches missed.">            boolean yChange = !y.equals( yAlign == null ? &quot;&quot; : yAlign.getConstraintString() );</span>
 
-<span class="pc bpc" id="L740" title="2 of 4 branches missed.">            if ( !x.isEmpty() &amp;&amp; xChange )</span>
-<span class="fc" id="L741">                finalComponentConstraints.alignX(x);</span>
+<span class="pc bpc" id="L767" title="2 of 4 branches missed.">            if ( !x.isEmpty() &amp;&amp; xChange )</span>
+<span class="fc" id="L768">                finalComponentConstraints.alignX(x);</span>
 
-<span class="pc bpc" id="L743" title="2 of 4 branches missed.">            if ( !y.isEmpty() &amp;&amp; yChange )</span>
-<span class="fc" id="L744">                finalComponentConstraints.alignY(y);</span>
+<span class="pc bpc" id="L770" title="2 of 4 branches missed.">            if ( !y.isEmpty() &amp;&amp; yChange )</span>
+<span class="fc" id="L771">                finalComponentConstraints.alignY(y);</span>
 
-<span class="pc bpc" id="L746" title="3 of 4 branches missed.">            if ( xChange || yChange ) {</span>
-<span class="fc" id="L747">                migLayout.setComponentConstraints(owner, finalComponentConstraints);</span>
-<span class="fc" id="L748">                owner.getParent().revalidate();</span>
+<span class="pc bpc" id="L773" title="3 of 4 branches missed.">            if ( xChange || yChange ) {</span>
+<span class="fc" id="L774">                migLayout.setComponentConstraints(owner, finalComponentConstraints);</span>
+<span class="fc" id="L775">                owner.getParent().revalidate();</span>
             }
         }
-<span class="fc" id="L751">    }</span>
+<span class="fc" id="L778">    }</span>
 
     /**
      *  Restores the component's minimum/maximum sizes to what they were before the style engine first
@@ -757,89 +784,89 @@ import java.util.function.Predicate;
      *  as a fold animation) would keep the component from shrinking to fit its content.
      */
     private void _restoreStyleOwnedSizesOf( final C owner ) {
-<span class="fc" id="L760">        boolean changed = false;</span>
-<span class="fc bfc" id="L761" title="All 2 branches covered.">        if ( _styleOwnsMinSize ) {</span>
-<span class="fc" id="L762">            owner.setMinimumSize(_initialMinSize);</span>
-<span class="fc" id="L763">            _styleOwnsMinSize = false;</span>
-<span class="fc" id="L764">            _initialMinSize = null;</span>
-<span class="fc" id="L765">            changed = true;</span>
+<span class="fc" id="L787">        boolean changed = false;</span>
+<span class="fc bfc" id="L788" title="All 2 branches covered.">        if ( _styleOwnsMinSize ) {</span>
+<span class="fc" id="L789">            owner.setMinimumSize(_initialMinSize);</span>
+<span class="fc" id="L790">            _styleOwnsMinSize = false;</span>
+<span class="fc" id="L791">            _initialMinSize = null;</span>
+<span class="fc" id="L792">            changed = true;</span>
         }
-<span class="fc bfc" id="L767" title="All 2 branches covered.">        if ( _styleOwnsMaxSize ) {</span>
-<span class="fc" id="L768">            owner.setMaximumSize(_initialMaxSize);</span>
-<span class="fc" id="L769">            _styleOwnsMaxSize = false;</span>
-<span class="fc" id="L770">            _initialMaxSize = null;</span>
-<span class="fc" id="L771">            changed = true;</span>
+<span class="fc bfc" id="L794" title="All 2 branches covered.">        if ( _styleOwnsMaxSize ) {</span>
+<span class="fc" id="L795">            owner.setMaximumSize(_initialMaxSize);</span>
+<span class="fc" id="L796">            _styleOwnsMaxSize = false;</span>
+<span class="fc" id="L797">            _initialMaxSize = null;</span>
+<span class="fc" id="L798">            changed = true;</span>
         }
-<span class="pc bpc" id="L773" title="1 of 4 branches missed.">        if ( changed &amp;&amp; owner.getParent() != null )</span>
-<span class="nc" id="L774">            owner.getParent().revalidate();</span>
-<span class="fc" id="L775">    }</span>
+<span class="pc bpc" id="L800" title="1 of 4 branches missed.">        if ( changed &amp;&amp; owner.getParent() != null )</span>
+<span class="nc" id="L801">            owner.getParent().revalidate();</span>
+<span class="fc" id="L802">    }</span>
 
     private void _applyDimensionalityStyleTo( final C owner, final StyleConf styleConf )
     {
-<span class="fc" id="L779">        final DimensionalityConf dimensionalityConf = styleConf.dimensionality();</span>
+<span class="fc" id="L806">        final DimensionalityConf dimensionalityConf = styleConf.dimensionality();</span>
 
-<span class="fc bfc" id="L781" title="All 4 branches covered.">        if ( dimensionalityConf.minWidth().isPresent() || dimensionalityConf.minHeight().isPresent() ) {</span>
-<span class="fc bfc" id="L782" title="All 2 branches covered.">            if ( !_styleOwnsMinSize ) {</span>
-<span class="fc bfc" id="L783" title="All 2 branches covered.">                _initialMinSize = owner.isMinimumSizeSet() ? owner.getMinimumSize() : null;</span>
-<span class="fc" id="L784">                _styleOwnsMinSize = true;</span>
+<span class="fc bfc" id="L808" title="All 4 branches covered.">        if ( dimensionalityConf.minWidth().isPresent() || dimensionalityConf.minHeight().isPresent() ) {</span>
+<span class="fc bfc" id="L809" title="All 2 branches covered.">            if ( !_styleOwnsMinSize ) {</span>
+<span class="fc bfc" id="L810" title="All 2 branches covered.">                _initialMinSize = owner.isMinimumSizeSet() ? owner.getMinimumSize() : null;</span>
+<span class="fc" id="L811">                _styleOwnsMinSize = true;</span>
             }
-<span class="fc" id="L786">            Dimension minSize = owner.getMinimumSize();</span>
+<span class="fc" id="L813">            Dimension minSize = owner.getMinimumSize();</span>
 
-<span class="pc bpc" id="L788" title="1 of 2 branches missed.">            int minWidth  = dimensionalityConf.minWidth().orElse(minSize == null ? 0 : minSize.width);</span>
-<span class="pc bpc" id="L789" title="1 of 2 branches missed.">            int minHeight = dimensionalityConf.minHeight().orElse(minSize == null ? 0 : minSize.height);</span>
+<span class="pc bpc" id="L815" title="1 of 2 branches missed.">            int minWidth  = dimensionalityConf.minWidth().orElse(minSize == null ? 0 : minSize.width);</span>
+<span class="pc bpc" id="L816" title="1 of 2 branches missed.">            int minHeight = dimensionalityConf.minHeight().orElse(minSize == null ? 0 : minSize.height);</span>
 
-<span class="fc" id="L791">            Dimension newMinSize = new Dimension(minWidth, minHeight);</span>
+<span class="fc" id="L818">            Dimension newMinSize = new Dimension(minWidth, minHeight);</span>
 
-<span class="fc bfc" id="L793" title="All 2 branches covered.">            if ( ! newMinSize.equals(minSize) )</span>
-<span class="fc" id="L794">                owner.setMinimumSize(newMinSize);</span>
-<span class="fc" id="L795">        }</span>
-<span class="fc bfc" id="L796" title="All 2 branches covered.">        else if ( _styleOwnsMinSize ) {</span>
+<span class="fc bfc" id="L820" title="All 2 branches covered.">            if ( ! newMinSize.equals(minSize) )</span>
+<span class="fc" id="L821">                owner.setMinimumSize(newMinSize);</span>
+<span class="fc" id="L822">        }</span>
+<span class="fc bfc" id="L823" title="All 2 branches covered.">        else if ( _styleOwnsMinSize ) {</span>
             // The style no longer specifies a minimum size, so we restore the original one.
             // Without this, a stale override (e.g. left by a transitional/animated style)
             // would keep the component from shrinking to fit its (possibly reduced) content.
-<span class="fc" id="L800">            owner.setMinimumSize(_initialMinSize);</span>
-<span class="fc" id="L801">            _styleOwnsMinSize = false;</span>
-<span class="fc" id="L802">            _initialMinSize = null;</span>
-<span class="pc bpc" id="L803" title="1 of 2 branches missed.">            if ( owner.getParent() != null )</span>
-<span class="nc" id="L804">                owner.getParent().revalidate();</span>
+<span class="fc" id="L827">            owner.setMinimumSize(_initialMinSize);</span>
+<span class="fc" id="L828">            _styleOwnsMinSize = false;</span>
+<span class="fc" id="L829">            _initialMinSize = null;</span>
+<span class="pc bpc" id="L830" title="1 of 2 branches missed.">            if ( owner.getParent() != null )</span>
+<span class="nc" id="L831">                owner.getParent().revalidate();</span>
         }
 
-<span class="fc bfc" id="L807" title="All 4 branches covered.">        if ( dimensionalityConf.maxWidth().isPresent() || dimensionalityConf.maxHeight().isPresent() ) {</span>
-<span class="fc bfc" id="L808" title="All 2 branches covered.">            if ( !_styleOwnsMaxSize ) {</span>
-<span class="pc bpc" id="L809" title="1 of 2 branches missed.">                _initialMaxSize = owner.isMaximumSizeSet() ? owner.getMaximumSize() : null;</span>
-<span class="fc" id="L810">                _styleOwnsMaxSize = true;</span>
+<span class="fc bfc" id="L834" title="All 4 branches covered.">        if ( dimensionalityConf.maxWidth().isPresent() || dimensionalityConf.maxHeight().isPresent() ) {</span>
+<span class="fc bfc" id="L835" title="All 2 branches covered.">            if ( !_styleOwnsMaxSize ) {</span>
+<span class="pc bpc" id="L836" title="1 of 2 branches missed.">                _initialMaxSize = owner.isMaximumSizeSet() ? owner.getMaximumSize() : null;</span>
+<span class="fc" id="L837">                _styleOwnsMaxSize = true;</span>
             }
-<span class="fc" id="L812">            Dimension maxSize = owner.getMaximumSize();</span>
+<span class="fc" id="L839">            Dimension maxSize = owner.getMaximumSize();</span>
 
-<span class="pc bpc" id="L814" title="1 of 2 branches missed.">            int maxWidth  = dimensionalityConf.maxWidth().orElse(maxSize == null  ? Integer.MAX_VALUE : maxSize.width);</span>
-<span class="pc bpc" id="L815" title="1 of 2 branches missed.">            int maxHeight = dimensionalityConf.maxHeight().orElse(maxSize == null ? Integer.MAX_VALUE : maxSize.height);</span>
+<span class="pc bpc" id="L841" title="1 of 2 branches missed.">            int maxWidth  = dimensionalityConf.maxWidth().orElse(maxSize == null  ? Integer.MAX_VALUE : maxSize.width);</span>
+<span class="pc bpc" id="L842" title="1 of 2 branches missed.">            int maxHeight = dimensionalityConf.maxHeight().orElse(maxSize == null ? Integer.MAX_VALUE : maxSize.height);</span>
 
-<span class="fc" id="L817">            Dimension newMaxSize = new Dimension(maxWidth, maxHeight);</span>
+<span class="fc" id="L844">            Dimension newMaxSize = new Dimension(maxWidth, maxHeight);</span>
 
-<span class="fc bfc" id="L819" title="All 2 branches covered.">            if ( !newMaxSize.equals(maxSize) )</span>
-<span class="fc" id="L820">                owner.setMaximumSize(newMaxSize);</span>
-<span class="fc" id="L821">        }</span>
-<span class="pc bpc" id="L822" title="1 of 2 branches missed.">        else if ( _styleOwnsMaxSize ) {</span>
-<span class="nc" id="L823">            owner.setMaximumSize(_initialMaxSize);</span>
-<span class="nc" id="L824">            _styleOwnsMaxSize = false;</span>
-<span class="nc" id="L825">            _initialMaxSize = null;</span>
-<span class="nc bnc" id="L826" title="All 2 branches missed.">            if ( owner.getParent() != null )</span>
-<span class="nc" id="L827">                owner.getParent().revalidate();</span>
+<span class="fc bfc" id="L846" title="All 2 branches covered.">            if ( !newMaxSize.equals(maxSize) )</span>
+<span class="fc" id="L847">                owner.setMaximumSize(newMaxSize);</span>
+<span class="fc" id="L848">        }</span>
+<span class="pc bpc" id="L849" title="1 of 2 branches missed.">        else if ( _styleOwnsMaxSize ) {</span>
+<span class="nc" id="L850">            owner.setMaximumSize(_initialMaxSize);</span>
+<span class="nc" id="L851">            _styleOwnsMaxSize = false;</span>
+<span class="nc" id="L852">            _initialMaxSize = null;</span>
+<span class="nc bnc" id="L853" title="All 2 branches missed.">            if ( owner.getParent() != null )</span>
+<span class="nc" id="L854">                owner.getParent().revalidate();</span>
         }
 
-<span class="fc bfc" id="L830" title="All 4 branches covered.">        if ( dimensionalityConf.preferredWidth().isPresent() || dimensionalityConf.preferredHeight().isPresent() ) {</span>
-<span class="fc" id="L831">            Dimension prefSize = owner.getPreferredSize();</span>
+<span class="fc bfc" id="L857" title="All 4 branches covered.">        if ( dimensionalityConf.preferredWidth().isPresent() || dimensionalityConf.preferredHeight().isPresent() ) {</span>
+<span class="fc" id="L858">            Dimension prefSize = owner.getPreferredSize();</span>
 
-<span class="pc bpc" id="L833" title="1 of 2 branches missed.">            int prefWidth  = dimensionalityConf.preferredWidth().orElse(prefSize == null ? 0 : prefSize.width);</span>
-<span class="pc bpc" id="L834" title="1 of 2 branches missed.">            int prefHeight = dimensionalityConf.preferredHeight().orElse(prefSize == null ? 0 : prefSize.height);</span>
+<span class="pc bpc" id="L860" title="1 of 2 branches missed.">            int prefWidth  = dimensionalityConf.preferredWidth().orElse(prefSize == null ? 0 : prefSize.width);</span>
+<span class="pc bpc" id="L861" title="1 of 2 branches missed.">            int prefHeight = dimensionalityConf.preferredHeight().orElse(prefSize == null ? 0 : prefSize.height);</span>
 
-<span class="fc" id="L836">            Dimension newPrefSize = new Dimension(prefWidth, prefHeight);</span>
+<span class="fc" id="L863">            Dimension newPrefSize = new Dimension(prefWidth, prefHeight);</span>
 
-<span class="fc bfc" id="L838" title="All 2 branches covered.">            if ( !newPrefSize.equals(prefSize) ) {</span>
-<span class="fc" id="L839">                owner.setPreferredSize(newPrefSize);</span>
+<span class="fc bfc" id="L865" title="All 2 branches covered.">            if ( !newPrefSize.equals(prefSize) ) {</span>
+<span class="fc" id="L866">                owner.setPreferredSize(newPrefSize);</span>
                 // Trigger a re-layout of the parent container, because preferred size changes can affect the layout:
-<span class="fc bfc" id="L841" title="All 2 branches covered.">                if ( owner.getParent() != null )</span>
-<span class="fc" id="L842">                    owner.getParent().revalidate();</span>
+<span class="fc bfc" id="L868" title="All 2 branches covered.">                if ( owner.getParent() != null )</span>
+<span class="fc" id="L869">                    owner.getParent().revalidate();</span>
             }
             // Note: unlike the minimum/maximum size, we intentionally do NOT remember and restore the
             // preferred size when the style stops specifying it. The preferred size is only a hint and
@@ -847,45 +874,45 @@ import java.util.function.Predicate;
             // expects the last computed value to remain in place when it is switched off.
         }
 
-<span class="fc bfc" id="L850" title="All 4 branches covered.">        if ( dimensionalityConf.width().isPresent() || dimensionalityConf.height().isPresent() ) {</span>
-<span class="fc" id="L851">            Dimension size = owner.getSize();</span>
+<span class="fc bfc" id="L877" title="All 4 branches covered.">        if ( dimensionalityConf.width().isPresent() || dimensionalityConf.height().isPresent() ) {</span>
+<span class="fc" id="L878">            Dimension size = owner.getSize();</span>
 
-<span class="pc bpc" id="L853" title="1 of 2 branches missed.">            int width  = dimensionalityConf.width().orElse(size == null ? 0 : size.width);</span>
-<span class="pc bpc" id="L854" title="1 of 2 branches missed.">            int height = dimensionalityConf.height().orElse(size == null ? 0 : size.height);</span>
+<span class="pc bpc" id="L880" title="1 of 2 branches missed.">            int width  = dimensionalityConf.width().orElse(size == null ? 0 : size.width);</span>
+<span class="pc bpc" id="L881" title="1 of 2 branches missed.">            int height = dimensionalityConf.height().orElse(size == null ? 0 : size.height);</span>
 
-<span class="fc" id="L856">            Dimension newSize = new Dimension(width, height);</span>
+<span class="fc" id="L883">            Dimension newSize = new Dimension(width, height);</span>
 
-<span class="fc bfc" id="L858" title="All 2 branches covered.">            if ( !newSize.equals(size) )</span>
-<span class="fc" id="L859">                owner.setSize(newSize);</span>
+<span class="fc bfc" id="L885" title="All 2 branches covered.">            if ( !newSize.equals(size) )</span>
+<span class="fc" id="L886">                owner.setSize(newSize);</span>
         }
-<span class="fc" id="L861">    }</span>
+<span class="fc" id="L888">    }</span>
 
     private void _applyFontStyleTo( final C owner, final StyleConf styleConf )
     {
-<span class="fc" id="L865">        final FontConf fontConf = styleConf.font();</span>
-<span class="fc bfc" id="L866" title="All 2 branches covered.">        if ( FontConf.none().equals(fontConf) ) {</span>
-<span class="pc bpc" id="L867" title="1 of 4 branches missed.">            if ( _initialFont != null &amp;&amp; !Objects.equals(_initialFont, owner.getFont()) ) {</span>
-<span class="nc" id="L868">                owner.setFont(_initialFont);</span>
-<span class="nc" id="L869">                _initialFont = null;</span>
+<span class="fc" id="L892">        final FontConf fontConf = styleConf.font();</span>
+<span class="fc bfc" id="L893" title="All 2 branches covered.">        if ( FontConf.none().equals(fontConf) ) {</span>
+<span class="pc bpc" id="L894" title="1 of 4 branches missed.">            if ( _initialFont != null &amp;&amp; !Objects.equals(_initialFont, owner.getFont()) ) {</span>
+<span class="nc" id="L895">                owner.setFont(_initialFont);</span>
+<span class="nc" id="L896">                _initialFont = null;</span>
             }
-<span class="fc" id="L871">            _restoreForegroundIfFontColorWasInstalled(owner, styleConf);</span>
-<span class="fc" id="L872">            return;</span>
-<span class="fc bfc" id="L873" title="All 2 branches covered.">        } else if ( _initialFont == null ) {</span>
-<span class="fc" id="L874">            _initialFont = owner.getFont();</span>
+<span class="fc" id="L898">            _restoreForegroundIfFontColorWasInstalled(owner, styleConf);</span>
+<span class="fc" id="L899">            return;</span>
+<span class="fc bfc" id="L900" title="All 2 branches covered.">        } else if ( _initialFont == null ) {</span>
+<span class="fc" id="L901">            _initialFont = owner.getFont();</span>
         }
 
-<span class="fc bfc" id="L877" title="All 2 branches covered.">        if ( owner instanceof JTextComponent ) {</span>
-<span class="fc" id="L878">            JTextComponent tc = (JTextComponent) owner;</span>
-<span class="fc bfc" id="L879" title="All 4 branches covered.">            if ( fontConf.selectionColor().isPresent() &amp;&amp; ! Objects.equals( tc.getSelectionColor(), fontConf.selectionColor().get() ) )</span>
-<span class="fc" id="L880">                tc.setSelectionColor(fontConf.selectionColor().get());</span>
+<span class="fc bfc" id="L904" title="All 2 branches covered.">        if ( owner instanceof JTextComponent ) {</span>
+<span class="fc" id="L905">            JTextComponent tc = (JTextComponent) owner;</span>
+<span class="fc bfc" id="L906" title="All 4 branches covered.">            if ( fontConf.selectionColor().isPresent() &amp;&amp; ! Objects.equals( tc.getSelectionColor(), fontConf.selectionColor().get() ) )</span>
+<span class="fc" id="L907">                tc.setSelectionColor(fontConf.selectionColor().get());</span>
         }
 
-<span class="fc" id="L883">        fontConf</span>
-<span class="fc" id="L884">             .createDerivedWithoutSolidColorFrom(owner.getFont(), owner)</span>
-<span class="fc" id="L885">             .ifPresent( newFont -&gt; {</span>
-<span class="fc bfc" id="L886" title="All 2 branches covered.">                    if ( !newFont.equals(owner.getFont()) )</span>
-<span class="fc" id="L887">                        owner.setFont( newFont );</span>
-<span class="fc" id="L888">                });</span>
+<span class="fc" id="L910">        fontConf</span>
+<span class="fc" id="L911">             .createDerivedWithoutSolidColorFrom(owner.getFont(), owner)</span>
+<span class="fc" id="L912">             .ifPresent( newFont -&gt; {</span>
+<span class="fc bfc" id="L913" title="All 2 branches covered.">                    if ( !newFont.equals(owner.getFont()) )</span>
+<span class="fc" id="L914">                        owner.setFont( newFont );</span>
+<span class="fc" id="L915">                });</span>
 
         /*
             A SOLID font color deliberately does not travel inside the font (it would flip
@@ -897,18 +924,18 @@ import java.util.function.Predicate;
             takes precedence, see _applyGenericBaseStyleTo), and the pre-style foreground
             is remembered and restored just like '_initialFont' above.
         */
-<span class="fc" id="L900">        Color solidFontColor = fontConf.solidColor();</span>
-<span class="fc bfc" id="L901" title="All 2 branches covered.">        if ( solidFontColor != null ) {</span>
-<span class="fc bfc" id="L902" title="All 2 branches covered.">            if ( _initialForeground == null )</span>
-<span class="fc" id="L903">                _initialForeground = owner.getForeground();</span>
-<span class="fc bfc" id="L904" title="All 2 branches covered.">            if ( !Objects.equals(owner.getForeground(), solidFontColor) )</span>
-<span class="fc" id="L905">                owner.setForeground(solidFontColor);</span>
+<span class="fc" id="L927">        Color solidFontColor = fontConf.solidColor();</span>
+<span class="fc bfc" id="L928" title="All 2 branches covered.">        if ( solidFontColor != null ) {</span>
+<span class="fc bfc" id="L929" title="All 2 branches covered.">            if ( _initialForeground == null )</span>
+<span class="fc" id="L930">                _initialForeground = owner.getForeground();</span>
+<span class="fc bfc" id="L931" title="All 2 branches covered.">            if ( !Objects.equals(owner.getForeground(), solidFontColor) )</span>
+<span class="fc" id="L932">                owner.setForeground(solidFontColor);</span>
         }
         else
-<span class="fc" id="L908">            _restoreForegroundIfFontColorWasInstalled(owner, styleConf);</span>
+<span class="fc" id="L935">            _restoreForegroundIfFontColorWasInstalled(owner, styleConf);</span>
 
-<span class="fc" id="L910">        _installLayoutInfoFromFontConf(fontConf, owner);</span>
-<span class="fc" id="L911">    }</span>
+<span class="fc" id="L937">        _installLayoutInfoFromFontConf(fontConf, owner);</span>
+<span class="fc" id="L938">    }</span>
 
     /** Ends the solid font color's ownership of the foreground property. If the current style
      *  still defines a base 'foregroundColor', that base color — already applied earlier in this
@@ -917,64 +944,64 @@ import java.util.function.Predicate;
      *  (matching the base color's own set-only semantics). Only when nothing else claims the
      *  channel is the pre-style foreground actually restored. */
     private void _restoreForegroundIfFontColorWasInstalled( C owner, StyleConf styleConf ) {
-<span class="fc bfc" id="L920" title="All 2 branches covered.">        if ( _initialForeground != null ) {</span>
-<span class="fc bfc" id="L921" title="All 2 branches covered.">            if ( styleConf.base().foregroundColor().isPresent() )</span>
-<span class="fc" id="L922">                _initialForeground = null; // the base style owns the foreground now</span>
+<span class="fc bfc" id="L947" title="All 2 branches covered.">        if ( _initialForeground != null ) {</span>
+<span class="fc bfc" id="L948" title="All 2 branches covered.">            if ( styleConf.base().foregroundColor().isPresent() )</span>
+<span class="fc" id="L949">                _initialForeground = null; // the base style owns the foreground now</span>
             else {
-<span class="pc bpc" id="L924" title="1 of 2 branches missed.">                if ( !Objects.equals(owner.getForeground(), _initialForeground) )</span>
-<span class="fc" id="L925">                    owner.setForeground(_initialForeground);</span>
-<span class="fc" id="L926">                _initialForeground = null;</span>
+<span class="pc bpc" id="L951" title="1 of 2 branches missed.">                if ( !Objects.equals(owner.getForeground(), _initialForeground) )</span>
+<span class="fc" id="L952">                    owner.setForeground(_initialForeground);</span>
+<span class="fc" id="L953">                _initialForeground = null;</span>
             }
         }
-<span class="fc" id="L929">    }</span>
+<span class="fc" id="L956">    }</span>
 
     @SuppressWarnings(&quot;DoNotCall&quot;)
     private static void _installLayoutInfoFromFontConf(FontConf fontConf, JComponent owner) {
-<span class="fc" id="L933">        LibraryInternalCrossPackageStyleUtil.applyFontConfAlignmentsToComponent(fontConf, owner);</span>
-<span class="fc" id="L934">    }</span>
+<span class="fc" id="L960">        LibraryInternalCrossPackageStyleUtil.applyFontConfAlignmentsToComponent(fontConf, owner);</span>
+<span class="fc" id="L961">    }</span>
 
     private void _applyPropertiesTo( final C owner, final StyleConf styleConf ) {
-<span class="fc" id="L937">        styleConf.properties().forEach( property -&gt; {</span>
-<span class="fc" id="L938">            Object oldValue = owner.getClientProperty(property.name());</span>
-<span class="pc bpc" id="L939" title="1 of 2 branches missed.">            if ( property.style().equals(oldValue) )</span>
-<span class="nc" id="L940">                return;</span>
+<span class="fc" id="L964">        styleConf.properties().forEach( property -&gt; {</span>
+<span class="fc" id="L965">            Object oldValue = owner.getClientProperty(property.name());</span>
+<span class="pc bpc" id="L966" title="1 of 2 branches missed.">            if ( property.style().equals(oldValue) )</span>
+<span class="nc" id="L967">                return;</span>
 
-<span class="pc bpc" id="L942" title="1 of 2 branches missed.">            if ( property.style().isEmpty() )</span>
-<span class="nc" id="L943">                owner.putClientProperty(property.name(), null); // remove property</span>
+<span class="pc bpc" id="L969" title="1 of 2 branches missed.">            if ( property.style().isEmpty() )</span>
+<span class="nc" id="L970">                owner.putClientProperty(property.name(), null); // remove property</span>
             else
-<span class="fc" id="L945">                owner.putClientProperty(property.name(), property.style());</span>
-<span class="fc" id="L946">        });</span>
-<span class="fc" id="L947">    }</span>
+<span class="fc" id="L972">                owner.putClientProperty(property.name(), property.style());</span>
+<span class="fc" id="L973">        });</span>
+<span class="fc" id="L974">    }</span>
 
     private void _doComboBoxMarginAdjustment( final C owner, final StyleConf styleConf ) {
-<span class="fc bfc" id="L950" title="All 2 branches covered.">        if ( owner instanceof JComboBox ) {</span>
-<span class="fc" id="L951">            int bottom = styleConf.margin().bottom().map(Number::intValue).orElse(0);</span>
+<span class="fc bfc" id="L977" title="All 2 branches covered.">        if ( owner instanceof JComboBox ) {</span>
+<span class="fc" id="L978">            int bottom = styleConf.margin().bottom().map(Number::intValue).orElse(0);</span>
             // We adjust the position of the popup menu:
             try {
-<span class="nc" id="L954">                Point location = owner.getLocationOnScreen();</span>
-<span class="nc" id="L955">                int x = location.x;</span>
-<span class="nc" id="L956">                int y = location.y + owner.getHeight() - bottom;</span>
-<span class="nc" id="L957">                JComboBox&lt;?&gt; comboBox = (JComboBox&lt;?&gt;) owner;</span>
-<span class="nc" id="L958">                JPopupMenu popup = (JPopupMenu) comboBox.getAccessibleContext().getAccessibleChild(0);</span>
-<span class="nc" id="L959">                Point oldLocation = popup.getLocation();</span>
-<span class="nc bnc" id="L960" title="All 6 branches missed.">                if ( popup.isShowing() &amp;&amp; (oldLocation.x != x || oldLocation.y != y) )</span>
-<span class="nc" id="L961">                    popup.setLocation(x, y);</span>
-<span class="fc" id="L962">            } catch ( Exception e ) {</span>
+<span class="nc" id="L981">                Point location = owner.getLocationOnScreen();</span>
+<span class="nc" id="L982">                int x = location.x;</span>
+<span class="nc" id="L983">                int y = location.y + owner.getHeight() - bottom;</span>
+<span class="nc" id="L984">                JComboBox&lt;?&gt; comboBox = (JComboBox&lt;?&gt;) owner;</span>
+<span class="nc" id="L985">                JPopupMenu popup = (JPopupMenu) comboBox.getAccessibleContext().getAccessibleChild(0);</span>
+<span class="nc" id="L986">                Point oldLocation = popup.getLocation();</span>
+<span class="nc bnc" id="L987" title="All 6 branches missed.">                if ( popup.isShowing() &amp;&amp; (oldLocation.x != x || oldLocation.y != y) )</span>
+<span class="nc" id="L988">                    popup.setLocation(x, y);</span>
+<span class="fc" id="L989">            } catch ( Exception e ) {</span>
                 // ignore
-<span class="nc" id="L964">            }</span>
+<span class="nc" id="L991">            }</span>
         }
-<span class="fc" id="L966">    }</span>
+<span class="fc" id="L993">    }</span>
 
     private void _uninstallCustomBorderBasedStyleAndAnimationRenderer( C owner ) {
-<span class="fc" id="L969">        Border currentBorder = owner.getBorder();</span>
-<span class="fc bfc" id="L970" title="All 2 branches covered.">        if ( currentBorder == null )</span>
-<span class="fc" id="L971">            return;</span>
+<span class="fc" id="L996">        Border currentBorder = owner.getBorder();</span>
+<span class="fc bfc" id="L997" title="All 2 branches covered.">        if ( currentBorder == null )</span>
+<span class="fc" id="L998">            return;</span>
 
-<span class="fc bfc" id="L973" title="All 2 branches covered.">        if ( currentBorder instanceof StyleAndAnimationBorder) {</span>
-<span class="fc" id="L974">            StyleAndAnimationBorder&lt;?&gt; border = (StyleAndAnimationBorder&lt;?&gt;) currentBorder;</span>
-<span class="fc" id="L975">            owner.setBorder(border.getFormerBorder());</span>
+<span class="fc bfc" id="L1000" title="All 2 branches covered.">        if ( currentBorder instanceof StyleAndAnimationBorder) {</span>
+<span class="fc" id="L1001">            StyleAndAnimationBorder&lt;?&gt; border = (StyleAndAnimationBorder&lt;?&gt;) currentBorder;</span>
+<span class="fc" id="L1002">            owner.setBorder(border.getFormerBorder());</span>
         }
-<span class="fc" id="L977">    }</span>
+<span class="fc" id="L1004">    }</span>
 
     /**
      *  Note that the foreground painter is intended to paint over all children of the component, &lt;br&gt;
@@ -993,44 +1020,44 @@ import java.util.function.Predicate;
      * @param c The component to make all children transparent.
      */
     private void _makeAllChildrenTransparent( JComponent c ) {
-<span class="pc bpc" id="L996" title="1 of 2 branches missed.">        if ( !c.isVisible() )</span>
-<span class="nc" id="L997">            return;</span>
+<span class="pc bpc" id="L1023" title="1 of 2 branches missed.">        if ( !c.isVisible() )</span>
+<span class="nc" id="L1024">            return;</span>
 
-<span class="fc bfc" id="L999" title="All 2 branches covered.">        if ( c.isOpaque() )</span>
-<span class="fc" id="L1000">            c.setOpaque(false);</span>
+<span class="fc bfc" id="L1026" title="All 2 branches covered.">        if ( c.isOpaque() )</span>
+<span class="fc" id="L1027">            c.setOpaque(false);</span>
 
-<span class="fc bfc" id="L1002" title="All 2 branches covered.">        for ( Component child : c.getComponents() ) {</span>
-<span class="pc bpc" id="L1003" title="1 of 2 branches missed.">            if ( child instanceof JComponent ) {</span>
-<span class="fc" id="L1004">                JComponent jChild = (JComponent) child;</span>
-<span class="fc" id="L1005">                _makeAllChildrenTransparent(jChild);</span>
+<span class="fc bfc" id="L1029" title="All 2 branches covered.">        for ( Component child : c.getComponents() ) {</span>
+<span class="pc bpc" id="L1030" title="1 of 2 branches missed.">            if ( child instanceof JComponent ) {</span>
+<span class="fc" id="L1031">                JComponent jChild = (JComponent) child;</span>
+<span class="fc" id="L1032">                _makeAllChildrenTransparent(jChild);</span>
             }
         }
-<span class="fc" id="L1008">    }</span>
+<span class="fc" id="L1035">    }</span>
 
     private void _establishDefaultBackgroundColorFor(JComponent owner) {
-<span class="fc" id="L1011">        Class&lt;?&gt; type = owner.getClass();</span>
-<span class="fc" id="L1012">        JComponent other = null;</span>
+<span class="fc" id="L1038">        Class&lt;?&gt; type = owner.getClass();</span>
+<span class="fc" id="L1039">        JComponent other = null;</span>
         try {
-<span class="fc" id="L1014">            other = (JComponent) type.getDeclaredConstructor().newInstance();</span>
-<span class="nc" id="L1015">        } catch (Exception e) {</span>
-<span class="nc" id="L1016">            log.debug(SwingTree.get().logMarker(),</span>
+<span class="fc" id="L1041">            other = (JComponent) type.getDeclaredConstructor().newInstance();</span>
+<span class="nc" id="L1042">        } catch (Exception e) {</span>
+<span class="nc" id="L1043">            log.debug(SwingTree.get().logMarker(),</span>
                     &quot;Failed to instantiate component '{}' as part of an &quot; +
                     &quot;attempt to get the default color of said type!&quot;,
-<span class="nc" id="L1019">                    type.getName(), e</span>
+<span class="nc" id="L1046">                    type.getName(), e</span>
                 );
-<span class="fc" id="L1021">        }</span>
-<span class="fc" id="L1022">        Color defaultBackgroundColor = null;</span>
-<span class="pc bpc" id="L1023" title="1 of 2 branches missed.">        if ( other != null ) {</span>
-<span class="fc" id="L1024">            defaultBackgroundColor = other.getBackground();</span>
+<span class="fc" id="L1048">        }</span>
+<span class="fc" id="L1049">        Color defaultBackgroundColor = null;</span>
+<span class="pc bpc" id="L1050" title="1 of 2 branches missed.">        if ( other != null ) {</span>
+<span class="fc" id="L1051">            defaultBackgroundColor = other.getBackground();</span>
         }
-<span class="fc bfc" id="L1026" title="All 2 branches covered.">        if ( defaultBackgroundColor == null ) {</span>
-<span class="fc bfc" id="L1027" title="All 2 branches covered.">            if ( owner.isBackgroundSet() ) // is this is false then the component already has it set to null!</span>
-<span class="fc" id="L1028">                owner.setBackground(defaultBackgroundColor);</span>
+<span class="fc bfc" id="L1053" title="All 2 branches covered.">        if ( defaultBackgroundColor == null ) {</span>
+<span class="fc bfc" id="L1054" title="All 2 branches covered.">            if ( owner.isBackgroundSet() ) // is this is false then the component already has it set to null!</span>
+<span class="fc" id="L1055">                owner.setBackground(defaultBackgroundColor);</span>
         } else {
-<span class="pc bpc" id="L1030" title="1 of 2 branches missed.">            if ( !Objects.equals(owner.getBackground(), defaultBackgroundColor) )</span>
-<span class="fc" id="L1031">                owner.setBackground(defaultBackgroundColor);</span>
+<span class="pc bpc" id="L1057" title="1 of 2 branches missed.">            if ( !Objects.equals(owner.getBackground(), defaultBackgroundColor) )</span>
+<span class="fc" id="L1058">                owner.setBackground(defaultBackgroundColor);</span>
         }
-<span class="fc" id="L1033">    }</span>
+<span class="fc" id="L1060">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

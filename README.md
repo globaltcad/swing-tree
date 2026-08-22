@@ -169,7 +169,7 @@ instead of guessing.
 <dependency>
   <groupId>io.github.globaltcad</groupId>
   <artifactId>swing-tree</artifactId>
-  <version>0.24.1</version>
+  <version>0.25.0</version>
 </dependency>
 ```
 
@@ -178,11 +178,11 @@ instead of guessing.
 ## 📥 Getting started with Gradle ##
 Groovy DSL:
 ```groovy
-implementation 'io.github.globaltcad:swing-tree:0.24.1'
+implementation 'io.github.globaltcad:swing-tree:0.25.0'
 ```
 Kotlin DSL:
 ```kotlin
-implementation("io.github.globaltcad:swing-tree:0.24.1")
+implementation("io.github.globaltcad:swing-tree:0.25.0")
 ```
 ---
 
@@ -201,7 +201,7 @@ allprojects {
 ...either by specifying the version tag:
 ```groovy
 dependencies {
-	implementation 'com.github.globaltcad:swing-tree:0.24.1'
+	implementation 'com.github.globaltcad:swing-tree:0.25.0'
 }
 ```
 ...or by using a custom commit hash instead:

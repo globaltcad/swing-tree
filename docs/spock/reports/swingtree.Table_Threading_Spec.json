@@ -21,7 +21,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The application thread must be able to update the rows of a table at\n            any time, even while the UI thread is completely unresponsive. We\n            park the UI thread behind a latch and add a row from this thread:\n            the mutation must return immediately (if it secretly waited for the\n            UI thread, this feature would hang and trip its timeout), and the\n            table must keep offering its old snapshot of the rows until the UI\n            thread is released and catches up.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property of rows and a table built in decoupled mode.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"Alice\", \"30\"),","                    Tuple.of(\"Bob\",   \"42\")","                ))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.ListData.ROW_MAJOR, rows)).get(JTable)","})"]},
+        {"kind":"given","text":"A property of rows and a table built in decoupled mode.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"Alice\", \"30\"),","                    Tuple.of(\"Bob\",   \"42\")","                ))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)","})"]},
 
         {"kind":"expect","text":"The table offers the two initial rows.","code":["table.rowCount == 2"]},
 
@@ -44,7 +44,7 @@
       "blocks":[
         {"kind":"given","text":"A log spy, so that silently logged errors fail this test.","code":["var log = LogSpy.attach()"]},
 
-        {"kind":"and","text":"A `Tuple` based table under mutation pressure, in decoupled mode.","code":["var rows = Var.of(Tuple.of(Tuple.of(\"A\", \"1\"), Tuple.of(\"B\", \"2\")))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.ListData.ROW_MAJOR, rows)).get(JTable)","})"]},
+        {"kind":"and","text":"A `Tuple` based table under mutation pressure, in decoupled mode.","code":["var rows = Var.of(Tuple.of(Tuple.of(\"A\", \"1\"), Tuple.of(\"B\", \"2\")))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)","})"]},
 
         {"kind":"and","text":"A list collecting every inconsistency a render pass may observe.","code":["var violations = new CopyOnWriteArrayList<String>()"]},
 
@@ -69,7 +69,7 @@
       "tags":{},"see":[],"extraInfo":["\n            Because a `Tuple` carries a description of how it changed, the table\n            model does not blindly rebuild itself whenever the application thread\n            hands it a new tuple. It translates a row insertion into a targeted\n            `fireTableRowsInserted` instead, even across the thread boundary,\n            which is what keeps updates to large tables cheap. (Which kind of\n            change maps onto which events is specified exhaustively in the\n            `Declarative_Tables_Spec`, here we merely make sure that the diff\n            survives the trip from the application thread to the UI thread.)\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property of rows and a table built in decoupled mode.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.ListData.ROW_MAJOR, rows)).get(JTable)","})"]},
+        {"kind":"given","text":"A property of rows and a table built in decoupled mode.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)","})"]},
 
         {"kind":"and","text":"A listener recording the raw table model events.","code":["var events = new CopyOnWriteArrayList<TableModelEvent>()","table.getModel().addTableModelListener({ TableModelEvent e -> events << e } as TableModelListener)"]},
 
@@ -111,7 +111,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The older list based data source is snapshotted on the application\n            thread when its update signal fires, while the previous snapshot is\n            still installed for the UI thread. That snapshot must bound-check the\n            live rows against the *live* list, not against the stale snapshot\n            dimensions. Otherwise a grown table would snapshot its freshly added\n            rows as phantom nulls.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A mutable row major matrix and a list based table in decoupled mode.","code":["var data = new CopyOnWriteArrayList<List<String>>([['a', '1'], ['b', '2']])","var update = Event.create()","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.table(UI.ListData.ROW_MAJOR, { data } as swingtree.api.model.TableListDataSource)","            .updateTableOn((sprouts.Observable) update)","    ).get(JTable)","})"]},
+        {"kind":"given","text":"A mutable row major matrix and a list based table in decoupled mode.","code":["var data = new CopyOnWriteArrayList<List<String>>([['a', '1'], ['b', '2']])","var update = Event.create()","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.table(UI.CellOrder.ROW_MAJOR, { data } as swingtree.api.model.TableListDataSource)","            .updateTableOn((sprouts.Observable) update)","    ).get(JTable)","})"]},
 
         {"kind":"expect","text":"The table starts with the two initial rows.","code":["table.rowCount == 2","table.getValueAt(1, 0) == 'b'"]},
 
@@ -130,7 +130,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The same bound-checking flaw would bite the column major flavour of the\n            list based model when a column is added: the new column must be\n            snapshotted from the live data, not rejected because it lies beyond the\n            column count of the stale snapshot.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A mutable column major matrix (two columns) and a table in decoupled mode.","code":["var data = new CopyOnWriteArrayList<List<String>>([['a', 'b'], ['1', '2']])","var update = Event.create()","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.table(UI.ListData.COLUMN_MAJOR, { data } as swingtree.api.model.TableListDataSource)","            .updateTableOn((sprouts.Observable) update)","    ).get(JTable)","})"]},
+        {"kind":"given","text":"A mutable column major matrix (two columns) and a table in decoupled mode.","code":["var data = new CopyOnWriteArrayList<List<String>>([['a', 'b'], ['1', '2']])","var update = Event.create()","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.table(UI.CellOrder.COLUMN_MAJOR, { data } as swingtree.api.model.TableListDataSource)","            .updateTableOn((sprouts.Observable) update)","    ).get(JTable)","})"]},
 
         {"kind":"expect","text":"The table starts as a two column, two row table.","code":["table.columnCount == 2","table.rowCount == 2"]},
 
@@ -149,7 +149,7 @@
       "tags":{},"see":[],"extraInfo":["\n            The map based (column major) model shares the same snapshot aware bounds\n            helper, so a column that grows past the previous row count would have its\n            new rows snapshotted as phantom nulls. The live snapshot must read the\n            live map instead.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A mutable, order preserving map of two columns, and a table in decoupled mode.","code":["var data = new LinkedHashMap<String, List<String>>()","data.put('X', new ArrayList<String>(['a', 'b']))","data.put('Y', new ArrayList<String>(['1', '2']))","var update = Event.create()","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.table(UI.MapData.READ_ONLY, { data } as swingtree.api.model.TableMapDataSource)","            .updateTableOn((sprouts.Observable) update)","    ).get(JTable)","})"]},
+        {"kind":"given","text":"A mutable, order preserving map of two columns, and a table in decoupled mode.","code":["var data = new LinkedHashMap<String, List<String>>()","data.put('X', new ArrayList<String>(['a', 'b']))","data.put('Y', new ArrayList<String>(['1', '2']))","var update = Event.create()","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.table(UI.Editability.READ_ONLY, { data } as swingtree.api.model.TableMapDataSource)","            .updateTableOn((sprouts.Observable) update)","    ).get(JTable)","})"]},
 
         {"kind":"expect","text":"The table starts as a two column, two row table.","code":["table.columnCount == 2","table.rowCount == 2"]},
 
@@ -168,7 +168,7 @@
       "tags":{},"see":[],"extraInfo":["\n            When the user edits a cell of an editable `Tuple` based table, the UI\n            thread must not reach into the application thread owned property to\n            store the edit. Instead the edit is applied to the UI thread owned\n            snapshot immediately (so the table never flickers back to the old\n            value), and the write-back into the property is handed to the\n            application thread, where it happens when that thread gets to it.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property of rows and an editable table built in decoupled mode.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"Alice\", \"30\"),","                    Tuple.of(\"Bob\",   \"42\")","                ))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.table(UI.ListData.ROW_MAJOR_EDITABLE, rows)","    ).get(JTable)","})"]},
+        {"kind":"given","text":"A property of rows and an editable table built in decoupled mode.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"Alice\", \"30\"),","                    Tuple.of(\"Bob\",   \"42\")","                ))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, rows)","    ).get(JTable)","})"]},
 
         {"kind":"expect","text":"The table considers its cells editable.","code":["UI.runAndGet({ table.isCellEditable(0, 0) })"]},
 
@@ -193,9 +193,9 @@
       "tags":{},"see":[],"extraInfo":["\n            The UI thread owned snapshot of a table must never show something the\n            data source never accepted. So when a write reaches a read only model\n            (which the user cannot trigger, but application code may), the model\n            must not apply it to its snapshot optimistically, because the data\n            source will drop it and nothing would ever correct the table again.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A property of rows and a read only table built in decoupled mode.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"Alice\", \"30\"),","                    Tuple.of(\"Bob\",   \"42\")","                ))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.ListData.ROW_MAJOR, rows)).get(JTable)","})"]},
+        {"kind":"given","text":"A property of rows and a read only table built in decoupled mode.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"Alice\", \"30\"),","                    Tuple.of(\"Bob\",   \"42\")","                ))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)","})"]},
 
-        {"kind":"expect","text":"The table is read only, because we did not ask for an editable layout.","code":["UI.runAndGet({ !table.isCellEditable(0, 1) })"]},
+        {"kind":"expect","text":"The table is read only, because we did not ask for an editable table.","code":["UI.runAndGet({ !table.isCellEditable(0, 1) })"]},
 
         {"kind":"when","text":"A write sneaks into the model through the model API on the UI thread anyway...","code":["UI.runNow({ table.getModel().setValueAt(\"31\", 0, 1) })","letBothWorldsSettle()"]},
 
@@ -237,7 +237,7 @@
       "blocks":[
         {"kind":"given","text":"A log spy and a continuously draining application thread.","code":["var log = LogSpy.attach()","var app = ApplicationThread.startDraining()"]},
 
-        {"kind":"and","text":"A property of rows and a table in decoupled mode.","code":["var rows = Var.of(Tuple.of(Tuple.of(\"start\", \"0\")))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.ListData.ROW_MAJOR, rows)).get(JTable)","})"]},
+        {"kind":"and","text":"A property of rows and a table in decoupled mode.","code":["var rows = Var.of(Tuple.of(Tuple.of(\"start\", \"0\")))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)","})"]},
 
         {"kind":"when","text":"We enqueue 100 row mutations for the application thread, while the UI thread performs 50 renderer style read passes.","code":["100.times { step ->","    EventProcessor.DECOUPLED.registerAppEvent({","        if ( step % 2 == 0 )","            rows.update({ it.add(Tuple.of(\"row-$step\".toString(), step.toString())) })","        else if ( rows.get().size() > 1 )","            rows.update({ it.removeFirst() })","    })","}","50.times { step ->","    UI.runNow({","        int count = table.rowCount","        for ( int r = 0; r < count; r++ )","            table.getValueAt(r, 0)","    })","}"]},
 
@@ -264,7 +264,7 @@
       "blocks":[
         {"kind":"given","text":"A log spy and a continuously draining application thread.","code":["var log = LogSpy.attach()","var app = ApplicationThread.startDraining()"]},
 
-        {"kind":"and","text":"A property of rows and a table in decoupled mode.","code":["var rows = Var.of(Tuple.of(Tuple.of(\"start\", \"0\")))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.ListData.ROW_MAJOR, rows)).get(JTable)","})"]},
+        {"kind":"and","text":"A property of rows and a table in decoupled mode.","code":["var rows = Var.of(Tuple.of(Tuple.of(\"start\", \"0\")))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)","})"]},
 
         {"kind":"when","text":"We enqueue 100 row mutations for the application thread, while the UI thread performs 50 renderer style read passes.","code":["100.times { step ->","    EventProcessor.DECOUPLED.registerAppEvent({","        if ( step % 2 == 0 )","            rows.update({ it.add(Tuple.of(\"row-$step\".toString(), step.toString())) })","        else if ( rows.get().size() > 1 )","            rows.update({ it.removeFirst() })","    })","}","50.times { step ->","    UI.runNow({","        int count = table.rowCount","        for ( int r = 0; r < count; r++ )","            table.getValueAt(r, 0)","    })","}"]},
 
@@ -291,7 +291,7 @@
       "blocks":[
         {"kind":"given","text":"A log spy and a continuously draining application thread.","code":["var log = LogSpy.attach()","var app = ApplicationThread.startDraining()"]},
 
-        {"kind":"and","text":"A property of rows and a table in decoupled mode.","code":["var rows = Var.of(Tuple.of(Tuple.of(\"start\", \"0\")))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.ListData.ROW_MAJOR, rows)).get(JTable)","})"]},
+        {"kind":"and","text":"A property of rows and a table in decoupled mode.","code":["var rows = Var.of(Tuple.of(Tuple.of(\"start\", \"0\")))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)","})"]},
 
         {"kind":"when","text":"We enqueue 100 row mutations for the application thread, while the UI thread performs 50 renderer style read passes.","code":["100.times { step ->","    EventProcessor.DECOUPLED.registerAppEvent({","        if ( step % 2 == 0 )","            rows.update({ it.add(Tuple.of(\"row-$step\".toString(), step.toString())) })","        else if ( rows.get().size() > 1 )","            rows.update({ it.removeFirst() })","    })","}","50.times { step ->","    UI.runNow({","        int count = table.rowCount","        for ( int r = 0; r < count; r++ )","            table.getValueAt(r, 0)","    })","}"]},
 
@@ -318,7 +318,7 @@
       "blocks":[
         {"kind":"given","text":"A log spy and a continuously draining application thread.","code":["var log = LogSpy.attach()","var app = ApplicationThread.startDraining()"]},
 
-        {"kind":"and","text":"A property of rows and a table in decoupled mode.","code":["var rows = Var.of(Tuple.of(Tuple.of(\"start\", \"0\")))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.ListData.ROW_MAJOR, rows)).get(JTable)","})"]},
+        {"kind":"and","text":"A property of rows and a table in decoupled mode.","code":["var rows = Var.of(Tuple.of(Tuple.of(\"start\", \"0\")))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)","})"]},
 
         {"kind":"when","text":"We enqueue 100 row mutations for the application thread, while the UI thread performs 50 renderer style read passes.","code":["100.times { step ->","    EventProcessor.DECOUPLED.registerAppEvent({","        if ( step % 2 == 0 )","            rows.update({ it.add(Tuple.of(\"row-$step\".toString(), step.toString())) })","        else if ( rows.get().size() > 1 )","            rows.update({ it.removeFirst() })","    })","}","50.times { step ->","    UI.runNow({","        int count = table.rowCount","        for ( int r = 0; r < count; r++ )","            table.getValueAt(r, 0)","    })","}"]},
 
@@ -345,7 +345,7 @@
       "blocks":[
         {"kind":"given","text":"A log spy and a continuously draining application thread.","code":["var log = LogSpy.attach()","var app = ApplicationThread.startDraining()"]},
 
-        {"kind":"and","text":"A property of rows and a table in decoupled mode.","code":["var rows = Var.of(Tuple.of(Tuple.of(\"start\", \"0\")))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.ListData.ROW_MAJOR, rows)).get(JTable)","})"]},
+        {"kind":"and","text":"A property of rows and a table in decoupled mode.","code":["var rows = Var.of(Tuple.of(Tuple.of(\"start\", \"0\")))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)","})"]},
 
         {"kind":"when","text":"We enqueue 100 row mutations for the application thread, while the UI thread performs 50 renderer style read passes.","code":["100.times { step ->","    EventProcessor.DECOUPLED.registerAppEvent({","        if ( step % 2 == 0 )","            rows.update({ it.add(Tuple.of(\"row-$step\".toString(), step.toString())) })","        else if ( rows.get().size() > 1 )","            rows.update({ it.removeFirst() })","    })","}","50.times { step ->","    UI.runNow({","        int count = table.rowCount","        for ( int r = 0; r < count; r++ )","            table.getValueAt(r, 0)","    })","}"]},
 

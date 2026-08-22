@@ -88,7 +88,7 @@ final class PropertyTableModel extends AbstractSnapshotTableModel
 <span class="fc" id="L88">            _fireEverythingChanged();</span>
 <span class="fc" id="L89">            return;</span>
         }
-<span class="fc bfc" id="L91" title="All 2 branches covered.">        if ( !next.layout().isRowMajor() ) {</span>
+<span class="fc bfc" id="L91" title="All 2 branches covered.">        if ( !next.cellOrder().isRowMajor() ) {</span>
             // The cells tuple describes columns, so its diff says nothing about row ranges.
 <span class="fc" id="L93">            fireTableDataChanged();</span>
 <span class="fc" id="L94">            return;</span>
@@ -128,7 +128,7 @@ final class PropertyTableModel extends AbstractSnapshotTableModel
     private static boolean _structureChanged( @Nullable TableData previous, TableData next ) {
 <span class="pc bpc" id="L129" title="1 of 2 branches missed.">        return previous == null</span>
 <span class="fc bfc" id="L130" title="All 2 branches covered.">            || next.getColumnCount() != previous.getColumnCount()</span>
-<span class="pc bpc" id="L131" title="1 of 2 branches missed.">            || next.layout().isRowMajor() != previous.layout().isRowMajor()</span>
+<span class="pc bpc" id="L131" title="1 of 2 branches missed.">            || next.cellOrder().isRowMajor() != previous.cellOrder().isRowMajor()</span>
 <span class="fc bfc" id="L132" title="All 2 branches covered.">            || !next.columnNames().equals(previous.columnNames())</span>
 <span class="fc bfc" id="L133" title="All 2 branches covered.">            || !next.columnClasses().equals(previous.columnClasses());</span>
     }
@@ -159,7 +159,7 @@ final class PropertyTableModel extends AbstractSnapshotTableModel
 <span class="nc" id="L159">    @Override protected Class&lt;?&gt; _liveColumnClass( int columnIndex ) { return _modelOrEmpty().getColumnClass(columnIndex); }</span>
 
     /**
-     *  A snapshot based table is only editable if the layout of its snapshot says so
+     *  A snapshot based table is only editable if the snapshot itself says so
      *  &lt;i&gt;and&lt;/i&gt; the binding intends it to be: {@code _editable} is only set when the
      *  table was bound through a {@link Var} overload (see {@code UIForTable.withModel}),
      *  never through a read only {@link Val} overload. This matters because a read only
@@ -170,14 +170,14 @@ final class PropertyTableModel extends AbstractSnapshotTableModel
      *  defensive guard for the {@code (Var)} cast in {@link #_liveSetValueAt}.
      */
     @Override protected boolean _liveCellEditable( int rowIndex, int columnIndex ) {
-<span class="pc bpc" id="L173" title="1 of 8 branches missed.">        return _editable &amp;&amp; _modelOrEmpty().layout().isEditable() &amp;&amp; _model instanceof Var &amp;&amp; _model.isMutable();</span>
+<span class="pc bpc" id="L173" title="1 of 8 branches missed.">        return _editable &amp;&amp; _modelOrEmpty().isEditable() &amp;&amp; _model instanceof Var &amp;&amp; _model.isMutable();</span>
     }
 
     @Override
     @SuppressWarnings(&quot;unchecked&quot;)
     protected void _liveSetValueAt( @Nullable Object value, int rowIndex, int columnIndex ) {
 <span class="fc bfc" id="L179" title="All 2 branches covered.">        if ( !_liveCellEditable(rowIndex, columnIndex) )</span>
-<span class="fc" id="L180">            return; // A read only source (or layout) cannot receive edits.</span>
+<span class="fc" id="L180">            return; // A read only source (or value) cannot receive edits.</span>
         // Note that 'setCellAt' returns the snapshot unchanged if the indices went
         // out of bounds in the meantime, in which case the edit no longer applies.
 <span class="fc" id="L183">        ((Var&lt;TableData&gt;) _model).update(From.VIEW, snapshot -&gt; snapshot.setCellAt(rowIndex, columnIndex, value));</span>

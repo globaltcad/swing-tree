@@ -7751,11 +7751,11 @@
 
         {"kind":"expect","text":"Initially the component does not have an explicit minimum size:","code":["!panel.isMinimumSizeSet()"]},
 
-        {"kind":"when","text":"We activate the style and let the component paint, which gathers and installs the style:","code":["applyStyle = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We activate the style and let the component paint, which gathers and installs the style:","code":["applyStyle = true","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The style engine has installed an explicit, larger minimum size:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
 
-        {"kind":"when","text":"We deactivate the style again and let the component paint:","code":["applyStyle = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We deactivate the style again and let the component paint:","code":["applyStyle = false","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The component is restored to its natural minimum size, free to shrink again:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]}
       ],
@@ -7776,11 +7776,11 @@
 
         {"kind":"expect","text":"No explicit size of this kind is set initially:","code":["!isSet(panel)"]},
 
-        {"kind":"when","text":"The style is activated and the component painted:","code":["applyStyle = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"The style is activated and the component painted:","code":["applyStyle = true","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The size of this kind is now explicitly set by the style engine:","code":["isSet(panel)"]},
 
-        {"kind":"when","text":"The style is removed again and the component painted:","code":["applyStyle = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"The style is removed again and the component painted:","code":["applyStyle = false","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The component returns to its natural size of this kind:","code":["!isSet(panel)","sizeOf(panel) == natural"]},
 
@@ -7803,11 +7803,11 @@
 
         {"kind":"expect","text":"No explicit size of this kind is set initially:","code":["!isSet(panel)"]},
 
-        {"kind":"when","text":"The style is activated and the component painted:","code":["applyStyle = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"The style is activated and the component painted:","code":["applyStyle = true","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The size of this kind is now explicitly set by the style engine:","code":["isSet(panel)"]},
 
-        {"kind":"when","text":"The style is removed again and the component painted:","code":["applyStyle = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"The style is removed again and the component painted:","code":["applyStyle = false","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The component returns to its natural size of this kind:","code":["!isSet(panel)","sizeOf(panel) == natural"]},
 
@@ -7828,13 +7828,13 @@
 
         {"kind":"expect","text":"Initially there is no explicit preferred size:","code":["!panel.isPreferredSizeSet()"]},
 
-        {"kind":"when","text":"We activate the style and paint:","code":["applyStyle = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We activate the style and paint:","code":["applyStyle = true","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The preferred size is now explicitly set by the style engine:","code":["panel.isPreferredSizeSet()"]},
 
         {"kind":"and","text":"We remember the preferred size that was installed:","code":["var installed = panel.getPreferredSize()"]},
 
-        {"kind":"when","text":"We remove the style again and paint:","code":["applyStyle = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We remove the style again and paint:","code":["applyStyle = false","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The preferred size sticks at the last value, it is deliberately not reset:","code":["panel.isPreferredSizeSet()","panel.getPreferredSize() == installed"]}
       ],
@@ -7853,11 +7853,11 @@
 
         {"kind":"expect","text":"The directly defined minimum size is in place:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize() == new Dimension(42, 84)"]},
 
-        {"kind":"when","text":"The style overrides the minimum height and the component paints:","code":["applyStyle = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"The style overrides the minimum height and the component paints:","code":["applyStyle = true","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The styled minimum height takes effect:","code":["panel.getMinimumSize().height > 84"]},
 
-        {"kind":"when","text":"The style is removed again and the component paints:","code":["applyStyle = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"The style is removed again and the component paints:","code":["applyStyle = false","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The component's own minimum size is faithfully restored:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize() == new Dimension(42, 84)"]}
       ],
@@ -7874,11 +7874,11 @@
       "blocks":[
         {"kind":"given","text":"A content panel which a \"fold\" style clamps to a fixed height while active:","code":["var folding = true","var panel =","        UI.panel(\"fill\")","        .add(UI.label(\"Row A\"))","        .add(UI.label(\"Row B\"))","        .withSize(200, 100)","        .withStyle( it -> folding ? it.minHeight(50).maxHeight(50) : it )","        .get(JPanel)"]},
 
-        {"kind":"when","text":"The clamping (fold) style is active and the panel paints:","code":["panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"The clamping (fold) style is active and the panel paints:","code":["Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The panel is clamped: both a minimum and a maximum height are pinned:","code":["panel.isMinimumSizeSet()","panel.isMaximumSizeSet()"]},
 
-        {"kind":"when","text":"The animation completes, so the clamping style is gone, and the panel paints again:","code":["folding = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"The animation completes, so the clamping style is gone, and the panel paints again:","code":["folding = false","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The clamp is fully released, so the panel is free to size to its content again:","code":["!panel.isMinimumSizeSet()","!panel.isMaximumSizeSet()"]}
       ],
@@ -7899,11 +7899,11 @@
 
         {"kind":"and","text":"The leftover style on its own is a real (non-empty) style:","code":["!clamp","ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
 
-        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The minimum height is pinned:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
 
-        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The minimum size is restored to natural, even though the component is still styled:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]},
 
@@ -7928,11 +7928,11 @@
 
         {"kind":"and","text":"The leftover style on its own is a real (non-empty) style:","code":["!clamp","ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
 
-        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The minimum height is pinned:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
 
-        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The minimum size is restored to natural, even though the component is still styled:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]},
 
@@ -7957,11 +7957,11 @@
 
         {"kind":"and","text":"The leftover style on its own is a real (non-empty) style:","code":["!clamp","ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
 
-        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The minimum height is pinned:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
 
-        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The minimum size is restored to natural, even though the component is still styled:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]},
 
@@ -7986,11 +7986,11 @@
 
         {"kind":"and","text":"The leftover style on its own is a real (non-empty) style:","code":["!clamp","ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
 
-        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The minimum height is pinned:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
 
-        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The minimum size is restored to natural, even though the component is still styled:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]},
 
@@ -8015,11 +8015,11 @@
 
         {"kind":"and","text":"The leftover style on its own is a real (non-empty) style:","code":["!clamp","ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
 
-        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The minimum height is pinned:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
 
-        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The minimum size is restored to natural, even though the component is still styled:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]},
 
@@ -8044,11 +8044,11 @@
 
         {"kind":"and","text":"The leftover style on its own is a real (non-empty) style:","code":["!clamp","ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
 
-        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The minimum height is pinned:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
 
-        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The minimum size is restored to natural, even though the component is still styled:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]},
 
@@ -8073,11 +8073,11 @@
 
         {"kind":"and","text":"The leftover style on its own is a real (non-empty) style:","code":["!clamp","ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
 
-        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The minimum height is pinned:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
 
-        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The minimum size is restored to natural, even though the component is still styled:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]},
 
@@ -8102,11 +8102,11 @@
 
         {"kind":"and","text":"The leftover style on its own is a real (non-empty) style:","code":["!clamp","ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
 
-        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The minimum height is pinned:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
 
-        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The minimum size is restored to natural, even though the component is still styled:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]},
 
@@ -8131,11 +8131,11 @@
 
         {"kind":"and","text":"The leftover style on its own is a real (non-empty) style:","code":["!clamp","ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
 
-        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The minimum height is pinned:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
 
-        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The minimum size is restored to natural, even though the component is still styled:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]},
 
@@ -8160,11 +8160,11 @@
 
         {"kind":"and","text":"The leftover style on its own is a real (non-empty) style:","code":["!clamp","ComponentExtension.from(panel).getStyle() != StyleConf.none()"]},
 
-        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We apply the clamp and paint:","code":["clamp = true","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The minimum height is pinned:","code":["panel.isMinimumSizeSet()","panel.getMinimumSize().height > naturalMinimum.height"]},
 
-        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","panel.paint(new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
+        {"kind":"when","text":"We drop only the clamp, so the other styling stays, and paint:","code":["clamp = false","Utility.paintWithoutWindow(panel, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())"]},
 
         {"kind":"then","text":"The minimum size is restored to natural, even though the component is still styled:","code":["!panel.isMinimumSizeSet()","panel.getMinimumSize() == naturalMinimum"]},
 

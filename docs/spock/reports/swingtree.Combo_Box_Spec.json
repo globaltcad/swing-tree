@@ -117,7 +117,7 @@
     },
   
     {
-      "id":"The options of an editable combo box are only editable if their items list is modifyable.",
+      "id":"The options of an editable combo box are only editable if their items list is modifiable.",
       "result":"PASS",
       "duration":"?",
       "iterations":{
