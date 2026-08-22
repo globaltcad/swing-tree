@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>JIcon.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.components</a> &gt; <span class="el_source">JIcon.java</span></div><h1>JIcon.java</h1><pre class="source lang-java linenums">package swingtree.components;
+
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sprouts.From;
+import sprouts.Val;
+import swingtree.SwingTree;
+import swingtree.UI;
+import swingtree.api.IconDeclaration;
+import swingtree.layout.Size;
+import swingtree.style.ComponentExtension;
+import swingtree.style.StylableComponent;
+
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.plaf.ComponentUI;
+import java.awt.Graphics;
+
+/**
+ *  A {@link JLabel} subclass specifically designed to display icons only.
+ *  Although a {@link JLabel} already provides the ability to display icons,
+ *  this class is useful for styling purposes, as it is possible to specifically
+ *  target icons inside of {@link swingtree.style.StyleSheet}s.
+ */
+public class JIcon extends JLabel implements StylableComponent
+{
+<span class="fc" id="L29">    private static final Logger log = LoggerFactory.getLogger(JIcon.class);</span>
+
+    @SuppressWarnings(&quot;UnusedVariable&quot;)
+    private final @Nullable Val&lt;IconDeclaration&gt; dynamicIcon;
+    /*                                                ^
+        We need to keep a strong reference to the dynamic icon, otherwise
+        it will be garbage collected and the change listener will not update
+        the icon when it changes.
+    */
+
+    /**
+     *  Constructs a JIcon with an icon loaded from the specified file path.
+     *  @param path The file path to the icon resource.
+     */
+    public JIcon(String path) {
+<span class="fc" id="L44">        super(_getFromCacheOrLoadFrom(IconDeclaration.of(path)));</span>
+<span class="fc" id="L45">        updateUI();</span>
+<span class="fc" id="L46">        dynamicIcon = null;</span>
+<span class="fc" id="L47">    }</span>
+
+    /**
+     *  Constructs a JIcon with the specified icon declaration.
+     *  @param declaration The icon declaration specifying which icon to display.
+     */
+    public JIcon(IconDeclaration declaration) {
+<span class="fc" id="L54">        super(_getFromCacheOrLoadFrom(declaration));</span>
+<span class="fc" id="L55">        dynamicIcon = null;</span>
+<span class="fc" id="L56">    }</span>
+
+    /**
+     *  Constructs a JIcon with the specified icon.
+     *  @param icon The icon to display.
+     */
+    public JIcon(Icon icon) {
+<span class="fc" id="L63">        super(icon);</span>
+<span class="fc" id="L64">        updateUI();</span>
+<span class="fc" id="L65">        dynamicIcon = null;</span>
+<span class="fc" id="L66">    }</span>
+
+    /**
+     *  Constructs a JIcon with the specified size and icon.
+     *  @param size The desired size for the icon.
+     *  @param icon The icon to display.
+     */
+    public JIcon( Size size, Icon icon ) {
+<span class="fc" id="L74">        super(UI.scaleIconTo(size, icon));</span>
+<span class="fc" id="L75">        updateUI();</span>
+<span class="fc" id="L76">        dynamicIcon = null;</span>
+<span class="fc" id="L77">    }</span>
+
+    /**
+     *  Constructs a JIcon with the specified icon, text, and horizontal alignment.
+     *  @param icon The icon to display.
+     *  @param text The text to display alongside the icon.
+     *  @param horizontalAlignment The horizontal alignment of the icon and text.
+     */
+    public JIcon(Icon icon, String text, int horizontalAlignment) {
+<span class="nc" id="L86">        super(text, icon, horizontalAlignment);</span>
+<span class="nc" id="L87">        updateUI();</span>
+<span class="nc" id="L88">        dynamicIcon = null;</span>
+<span class="nc" id="L89">    }</span>
+
+    /**
+     *  Constructs a JIcon with the specified text and horizontal alignment.
+     *  @param text The text to display.
+     *  @param horizontalAlignment The horizontal alignment of the text.
+     */
+    public JIcon(String text, int horizontalAlignment) {
+<span class="nc" id="L97">        super(text, horizontalAlignment);</span>
+<span class="nc" id="L98">        updateUI();</span>
+<span class="nc" id="L99">        dynamicIcon = null;</span>
+<span class="nc" id="L100">    }</span>
+
+    /**
+     *  Constructs a JIcon with the specified icon path and text.
+     *  @param path The file path to the icon resource.
+     *  @param text The text to display alongside the icon.
+     */
+    public JIcon(String path, String text) {
+<span class="nc" id="L108">        super(text, _getFromCacheOrLoadFrom(IconDeclaration.of(path)), CENTER);</span>
+<span class="nc" id="L109">        updateUI();</span>
+<span class="nc" id="L110">        dynamicIcon = null;</span>
+<span class="nc" id="L111">    }</span>
+
+    /**
+     *  Constructs a JIcon with a dynamically bound icon declaration.
+     *  The icon will update whenever the declaration property changes.
+     *  @param declaration A property holding the icon declaration to display.
+     */
+<span class="fc" id="L118">    public JIcon( Val&lt;IconDeclaration&gt; declaration ) {</span>
+<span class="fc" id="L119">        ComponentExtension.from(this).storeBoundObservable(</span>
+<span class="fc" id="L120">                declaration.view().onChange(From.ALL, it -&gt; {</span>
+<span class="fc" id="L121">                    UI.runNow(()-&gt;{</span>
+<span class="fc" id="L122">                        setIcon(_getFromCacheOrLoadFrom(it.currentValue().orElseThrowUnchecked()));</span>
+<span class="fc" id="L123">                    });</span>
+<span class="fc" id="L124">                })</span>
+        );
+<span class="fc" id="L126">        declaration.ifPresent( it -&gt; setIcon(_getFromCacheOrLoadFrom(it)) );</span>
+<span class="fc" id="L127">        updateUI();</span>
+<span class="fc" id="L128">        dynamicIcon = declaration;</span>
+<span class="fc" id="L129">    }</span>
+
+    /**
+     *  Constructs an empty JIcon with no icon initially displayed.
+     */
+    public JIcon() {
+<span class="nc" id="L135">        super();</span>
+<span class="nc" id="L136">        updateUI();</span>
+<span class="nc" id="L137">        dynamicIcon = null;</span>
+<span class="nc" id="L138">    }</span>
+
+    /** {@inheritDoc} */
+    @Override public void paintComponent(Graphics g){
+<span class="fc" id="L142">        paintBackground(g, super::paintComponent);</span>
+<span class="fc" id="L143">    }</span>
+
+    /** {@inheritDoc} */
+    @Override public void paintChildren(Graphics g) {
+<span class="fc" id="L147">        paintForeground(g, super::paintChildren);</span>
+<span class="fc" id="L148">    }</span>
+
+    @Override public void setUISilently( ComponentUI ui ) {
+<span class="nc" id="L151">        this.ui = ui;</span>
+<span class="nc" id="L152">    }</span>
+
+    @Override
+    public void updateUI() {
+<span class="fc" id="L156">        ComponentExtension.from(this).installCustomUIIfPossible();</span>
+        /*
+            The JIcon is a SwingTree native component type, so it also
+            enjoys the perks of having a SwingTree based look and feel!
+        */
+<span class="fc" id="L161">    }</span>
+
+    @SuppressWarnings(&quot;NullAway&quot;)
+    private static @Nullable ImageIcon _getFromCacheOrLoadFrom( IconDeclaration declaration ) {
+<span class="fc bfc" id="L165" title="All 2 branches covered.">        if ( !UI.thisIsUIThread() ) {</span>
+<span class="fc" id="L166">            log.warn(SwingTree.get().logMarker(),</span>
+                &quot;Loading an icon off the UI thread. &quot; +
+                &quot;This may lead to unexpected behavior and should be avoided.&quot;,
+                new Throwable(&quot;Stack trace for debugging purposes.&quot;)
+            );
+<span class="fc" id="L171">            return UI.runAndGet(()-&gt;_getFromCacheOrLoadFrom(declaration));</span>
+        }
+
+<span class="fc" id="L174">        return UI.findIcon(declaration).orElse(null);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

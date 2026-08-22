@@ -1,0 +1,495 @@
+{
+  "className":"swingtree.Style_Render_Caching_Spec",
+  "title":"Style Render Caching",
+  "narrative":"SwingTree's style API can express rather elaborate visuals: rounded\n    backgrounds, gradients, shadows, painted text, noise, sized images,\n    coloured borders, ... rendering all of that on every repaint is not\n    free. SwingTree therefore transparently caches the *rendered output*\n    of a layer's style configuration into a `BufferedImage`, keyed by the\n    deeply-immutable style configuration object itself. As long as the\n    style configuration of a layer is `equal` across paint calls, the\n    cached image is simply blitted onto the component – no fresh rendering\n    happens.\n\n    This specification documents that behaviour **through the public\n    SwingTree API only**, by:\n\n      1. Building components the way an application would (`UI.button(...).withStyle(...)`),\n      2. Painting them with the regular paint pipeline (`Utility.renderSingleComponent(...)`\n         which ultimately calls `JComponent.paint(g)`),\n      3. Observing the resulting cache state via `ComponentExtension.cachedRendering(layer).isNotEmpty()`,\n         `ComponentExtension.cacheHitCount(layer)` and `ComponentExtension.cacheMissCount(layer)`.\n\n    Crucially, this spec does **not** instantiate any of SwingTree's internal\n    style classes directly, nor does it mock a `Graphics2D` to count cache\n    side effects. The point is that the caching mechanism is observable\n    from the outside and that this living documentation can therefore\n    survive aggressive internal refactors.\n\n    A note on the single fixture poke we still do: the `setupSpec` block\n    pins `CacheBudget.UNITS_OVERRIDE` to a deterministic value. That global\n    controls how eagerly small images get allocated and is otherwise derived\n    from the configured cache mode and system RAM, which\n    would make tests flaky across CI runners. Pinning it removes the\n    *only* coupling and is purely a fixture concern – nothing in the\n    actual scenarios below speaks to internal classes.",
+  "subjects":["swingtree.style.ComponentExtension","swingtree.UI"],
+  "statistics":{
+    "runs":"21",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A heavily styled component caches its background after the first paint.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Caching only kicks in for layers that contain at least one *heavy*\n            style ingredient. A rounded background colour together with a\n            non-zero margin is enough to qualify, but in this scenario we go\n            for an unmistakably heavy style so that the test passes regardless\n            of any threshold tuning: a rounded background, a shadow and an\n            explicit size.\n\n            We render the component once, observe that the background layer\n            has produced a cached image, then render it again and observe\n            that the *next* paint was served from the cache rather than\n            re-running the renderer (i.e. the hit count went up while the\n            miss count did not).\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A button styled with a rounded background.","code":["var button =","    UI.button(\"Hello!\")","      .withStyle( it -> it","            .size(120, 60)","            .borderRadius(20)","            .backgroundColor(Color.BLUE)","            .foundationColor(Color.WHITE)","      )","      .get(JButton)"]},
+
+        {"kind":"and","text":"We grab the public extension associated with the component.","code":["var ext = ComponentExtension.from(button)"]},
+
+        {"kind":"when","text":"We render the component once through the regular paint pipeline.","code":["Utility.renderSingleComponent(button)"]},
+
+        {"kind":"then","text":"The background layer has produced a cached rendering after that first paint.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]},
+
+        {"kind":"and","text":"The renderer was invoked at least once to produce the cached image.","code":["ext.cacheMissCount(UI.Layer.BACKGROUND) >= 1","ext.cacheHitCount(UI.Layer.BACKGROUND)  == 0"]},
+
+        {"kind":"when","text":"We render the same component a second time.","code":["int missesBeforeRepaint = ext.cacheMissCount(UI.Layer.BACKGROUND)","Utility.renderSingleComponent(button)"]},
+
+        {"kind":"then","text":"The hit counter went up – the second paint was served from the cache.","code":["ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1"]},
+
+        {"kind":"and","text":"And the miss counter did *not* increase – no fresh rendering was needed.","code":["ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeRepaint"]},
+
+        {"kind":"and","text":"The cached rendering is, of course, still there.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The cache reports a layer as a tuple of images, one per separately cached part.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A layer is not limited in how much style it may carry, and not all\n            style caches the same way. A flat colour or a shadow is constant\n            along the component edges, so it can be kept as one small image and\n            stretched back to any size, whereas a gradient or painted text has\n            to be kept at the component's real size. When a single layer mixes\n            such parts, one image cannot represent both, so `cachedRendering(..)`\n            hands back a *tuple*: empty when nothing is cached, one image for the\n            ordinary case where the whole layer rasterizes together, and several\n            when the cache had to split the layer up. They come in paint order.\n\n            Here we look at the ordinary case, which is what a layer carrying a\n            single kind of style produces.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A button whose background layer carries one kind of style.","code":["var button =","    UI.button(\"Hello!\")","      .withStyle( it -> it","            .size(120, 60)","            .borderRadius(20)","            .backgroundColor(Color.BLUE)","            .foundationColor(Color.WHITE)","      )","      .get(JButton)"]},
+
+        {"kind":"and","text":"We grab the public extension associated with the component.","code":["var ext = ComponentExtension.from(button)"]},
+
+        {"kind":"when","text":"We paint it through the regular paint pipeline.","code":["2.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"then","text":"The background layer rasterized into a single cached image.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1"]},
+
+        {"kind":"and","text":"A layer without any style of its own has nothing to show.","code":["ext.cachedRendering(UI.Layer.FOREGROUND).isEmpty()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The hit and miss counts keep counting when a layer changes how it is cached.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `cacheHitCount(..)` and `cacheMissCount(..)` are cumulative for the\n            lifetime of a component: together they say how often this component\n            painted the layer, split into the paints a cache served and the\n            paints it had to render. Nothing that happens to the cache\n            underneath may take a recorded paint back, or a monitoring view\n            watching these numbers would see a component un-paint itself.\n\n            That is worth pinning down, because a layer is not always cached in\n            the same shape. A layer carrying a noise is cached as one image at a\n            settled size, but while the component is being resized it is cached\n            as the part *under* the noise and the part *over* it, with the noise\n            replayed in between, so that everything around it resizes for free.\n            Those are different cache entries, entered and left mid-life, and the\n            counters have to run straight through it.\n\n            Here a button big enough for that to happen is painted, dragged, and\n            left alone again, and we simply count paints.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A button with a noise over a rounded background.","code":["var button =","    UI.button(\"Grain me\")","      .withStyle( it -> it","            .borderRadius(16)","            .backgroundColor(Color.BLUE)","            .noise(\"grain\", n -> n.colors(Color.BLACK, Color.WHITE))","      )","      .get(JButton)","button.setSize(400, 240)","var ext = ComponentExtension.from(button)"]},
+
+        {"kind":"when","text":"We paint it three times at a settled size.","code":["3.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"then","text":"Every one of those paints was counted, as a hit or as a miss.","code":["ext.cacheHitCount(UI.Layer.BACKGROUND) + ext.cacheMissCount(UI.Layer.BACKGROUND) == 3"]},
+
+        {"kind":"and","text":"And the cache did serve some of them, so there is something to lose.","code":["ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1"]},
+
+        {"kind":"when","text":"It is dragged, so the layer is cut around its noise.","code":["[[440, 260], [480, 280], [520, 300]].each { w, h ->","    button.setSize(w, h)","    Utility.renderSingleComponent(button)","}"]},
+
+        {"kind":"then","text":"Not one of the earlier paints was forgotten, and the new ones were counted too.","code":["ext.cacheHitCount(UI.Layer.BACKGROUND) + ext.cacheMissCount(UI.Layer.BACKGROUND) == 6"]},
+
+        {"kind":"when","text":"The drag ends and the layer becomes a single rasterization again.","code":["12.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"then","text":"Still nothing was taken back.","code":["ext.cacheHitCount(UI.Layer.BACKGROUND) + ext.cacheMissCount(UI.Layer.BACKGROUND) == 18"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A paint no cache took part in is counted as a miss, not lost.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The counters must add up to the number of paints even for the layer\n            that gives the cache the least to work with: one whose entire style\n            is a noise.\n\n            While such a component is resized, the noise is lifted out and\n            replayed, and what is left under and over it is *nothing at all* —\n            so there is nothing to cache, nothing to render, and the layer is\n            painted entirely by that replay. It would be easy for such a paint\n            to fall between the two counters and simply vanish, and it would be\n            wrong to call it a hit, since no cache took part in it. It counts as\n            a miss, which is also the honest reading of these numbers: the cache\n            did nothing for this paint.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A box whose background layer is a noise and absolutely nothing else.","code":["var box =","    UI.box()","      .withStyle( it -> it.noise(\"grain\", n -> n.colors(Color.BLACK, Color.WHITE)) )","      .get(JBox)","var ext = ComponentExtension.from(box)","box.setSize(300, 200)"]},
+
+        {"kind":"when","text":"It is painted at a settled size, and then dragged.","code":["3.times { Utility.renderSingleComponent(box) }","int countedWhenSettled = ext.cacheHitCount(UI.Layer.BACKGROUND) + ext.cacheMissCount(UI.Layer.BACKGROUND)","[[320, 210], [340, 220], [360, 230]].each { w, h ->","    box.setSize(w, h)","    Utility.renderSingleComponent(box)","}"]},
+
+        {"kind":"then","text":"Every paint of both phases is accounted for.","code":["countedWhenSettled == 3","ext.cacheHitCount(UI.Layer.BACKGROUND) + ext.cacheMissCount(UI.Layer.BACKGROUND) == 6"]},
+
+        {"kind":"and","text":"And the drag paints, which no cache served, are misses.","code":["ext.cacheMissCount(UI.Layer.BACKGROUND) >= 3"]},
+
+        {"kind":"and","text":"Which is consistent with there being nothing cached for that layer mid-drag.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A plain, undecorated component is *never* cached.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Caching is opt-in: SwingTree only allocates a cache image for a\n            given layer when that layer contains a *heavy* style ingredient\n            (a rounded base colour with a margin, a gradient, a shadow,\n            painted text, sized images, ...). For an undecorated component\n            this is never the case, so no allocation should ever happen –\n            no matter how many times it is repainted.\n\n            This is important to assert because it documents the trade-off\n            of the caching mechanism: it specifically targets the\n            workloads where rendering is expensive enough that paying for\n            a `BufferedImage` is worth it. For trivial paints, the cache\n            machinery deliberately stays out of the way.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A bog-standard label without any SwingTree style.","code":["var label = UI.label(\"Hello!\").get(JLabel)","var ext   = ComponentExtension.from(label)"]},
+
+        {"kind":"when","text":"We render it several times in a row.","code":["Utility.renderSingleComponent(label)","Utility.renderSingleComponent(label)","Utility.renderSingleComponent(label)"]},
+
+        {"kind":"then","text":"No layer ever produced a cached rendering.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()","ext.cachedRendering(UI.Layer.CONTENT).isEmpty()","ext.cachedRendering(UI.Layer.BORDER).isEmpty()","ext.cachedRendering(UI.Layer.FOREGROUND).isEmpty()"]},
+
+        {"kind":"and","text":"And the cache hit counter for the background never increased.","code":["ext.cacheHitCount(UI.Layer.BACKGROUND)  == 0"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Multiple components with the exact same heavy style share a single cached rendering.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Because cache entries are keyed by the (deeply immutable) style\n            configuration object itself, components with structurally\n            identical styles end up sharing a single rendered image in the\n            global pool. Concretely: the first component to be painted\n            populates the cache, and every subsequent component with the\n            same style finds the rendering already there and goes straight\n            to a hit on its very first paint, without ever invoking the\n            style renderer itself.\n\n            This is one of the most attractive properties of immutability-\n            keyed caching and the reason why repeating rich styles across\n            many components is essentially free.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A common styler shared by several buttons.","code":["def common = { conf -> conf","    .size(140, 50)","    .borderRadius(16)","    .backgroundColor(new Color(40, 120, 200))","    .foundationColor(Color.WHITE)","}"]},
+
+        {"kind":"and","text":"Five buttons that all share the styler – like a row of toolbar buttons.","code":["def buttons = (1..5).collect {","    UI.button(\"Btn \" + it).withStyle(common as swingtree.api.Styler).get(JButton)","}"]},
+
+        {"kind":"and","text":"And the matching extensions to query the cache state through.","code":["def exts = buttons.collect { ComponentExtension.from(it) }"]},
+
+        {"kind":"when","text":"We render every button exactly once.","code":["buttons.each { Utility.renderSingleComponent(it) }"]},
+
+        {"kind":"then","text":"Every button reports that its background layer is cached.","code":["exts.every { it.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty() }"]},
+
+        {"kind":"and","text":"\n            The first button to render had to actually invoke the style\n            renderer – there was nothing in the cache yet, so it counts\n            as a miss with no hits:\n        ","code":["exts[0].cacheMissCount(UI.Layer.BACKGROUND) >= 1","exts[0].cacheHitCount(UI.Layer.BACKGROUND)  == 0"]},
+
+        {"kind":"and","text":"\n            Every subsequent button, however, found the cached image\n            already installed by an earlier sibling and was therefore\n            served from the cache on its very first paint – no fresh\n            rendering invocation needed:\n        ","code":["exts[1..-1].every { it.cacheMissCount(UI.Layer.BACKGROUND) == 0 }","exts[1..-1].every { it.cacheHitCount(UI.Layer.BACKGROUND)  >= 1 }"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Changing the style configuration invalidates the cached rendering.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The cache key is the (immutable) style configuration. So when a\n            view-model-driven property changes the style produced by the\n            styler, the resulting layer configuration changes too, the\n            cached image for the *old* configuration is dropped from this\n            component's local cache, and a fresh rendering happens on the\n            next paint.\n\n            We model this by having the styler read a colour from a\n            `Var<Color>` view-model property. After warming the cache for\n            RED, we mutate the property to GREEN and observe that:\n\n              - the next paint records a fresh miss (a new entry was\n                installed for the new style),\n              - hits resume once we paint that same new style a second time.\n\n            This is the documentation-quality demonstration that caching\n            and reactivity compose naturally: there is no special integration\n            code, just immutable values and equality.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A view-model-style property driving the background colour.","code":["Var<Color> tint = Var.of(Color.RED)"]},
+
+        {"kind":"and","text":"A button whose styler reads from that property.","code":["var button =","    UI.button(\"Tint me\")","      .withStyle( it -> it","            .size(120, 60)","            .borderRadius(18)","            .backgroundColor(tint.get())","            .foundationColor(Color.WHITE)","      )","      .get(JButton)","var ext = ComponentExtension.from(button)"]},
+
+        {"kind":"when","text":"We render the component twice with the initial RED tint to warm the cache.","code":["Utility.renderSingleComponent(button)","Utility.renderSingleComponent(button)"]},
+
+        {"kind":"then","text":"The cache is now populated and the second paint counted as a hit.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()","ext.cacheHitCount(UI.Layer.BACKGROUND)  >= 1"]},
+
+        {"kind":"when","text":"The view model produces a new tint and we paint again.","code":["int missesBeforeMutation = ext.cacheMissCount(UI.Layer.BACKGROUND)","int hitsBeforeMutation   = ext.cacheHitCount(UI.Layer.BACKGROUND)","tint.set(Color.GREEN)","Utility.renderSingleComponent(button)"]},
+
+        {"kind":"then","text":"A fresh miss is recorded for the new style configuration...","code":["ext.cacheMissCount(UI.Layer.BACKGROUND) > missesBeforeMutation"]},
+
+        {"kind":"and","text":"...and the hit count did *not* go up: invalidation forced a re-render, not a blit.","code":["ext.cacheHitCount(UI.Layer.BACKGROUND) == hitsBeforeMutation"]},
+
+        {"kind":"when","text":"We paint that same new (GREEN) style a second time.","code":["int missesBeforeBlit = ext.cacheMissCount(UI.Layer.BACKGROUND)","int hitsBeforeBlit   = ext.cacheHitCount(UI.Layer.BACKGROUND)","Utility.renderSingleComponent(button)"]},
+
+        {"kind":"then","text":"It is served from the cache again – the cache repopulated after invalidation.","code":["ext.cacheHitCount(UI.Layer.BACKGROUND)  > hitsBeforeBlit","ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeBlit","ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Resizing a styled component does not invalidate its cached rendering.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The component size is part of the style configuration, so naively\n            the cache would miss on every single frame of a live resize (think\n            of a user dragging the window edge) - historically the most\n            expensive repaint scenario for styled components.\n\n            SwingTree avoids this through *stretch tiling*: for styles whose\n            pixels are constant along the component edges (flat colours,\n            borders, shadows - which is the vast majority of real styles),\n            the cache key is made size independent and any component size is\n            reconstructed from one small cached rendering by copying the\n            corners and stretching the edges. The observable consequence,\n            documented here: resizing produces cache *hits*, not misses.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A button with a rounded background, warmed up at its initial size.","code":["var button =","    UI.button(\"Resize me\")","      .withStyle( it -> it","            .borderRadius(20)","            .backgroundColor(new Color(10, 80, 160))","            .foundationColor(new Color(245, 245, 240))","      )","      .get(JButton)","button.setSize(120, 60) // Size set on the component itself, so resizing below actually takes effect.","var ext = ComponentExtension.from(button)","Utility.renderSingleComponent(button)","Utility.renderSingleComponent(button)"]},
+
+        {"kind":"expect","text":"The cache is warm.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()","ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1"]},
+
+        {"kind":"when","text":"The component grows substantially and is painted again.","code":["int missesBeforeResize = ext.cacheMissCount(UI.Layer.BACKGROUND)","int hitsBeforeResize   = ext.cacheHitCount(UI.Layer.BACKGROUND)","button.setSize(300, 90)","Utility.renderSingleComponent(button)"]},
+
+        {"kind":"then","text":"The resize actually took effect (the style engine did not override it).","code":["button.width == 300 && button.height == 90"]},
+
+        {"kind":"and","text":"The paint was served from the cache - no fresh rendering despite the new size!","code":["ext.cacheHitCount(UI.Layer.BACKGROUND)  > hitsBeforeResize","ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeResize","ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]},
+
+        {"kind":"when","text":"The component shrinks to yet another size and is painted again.","code":["int missesBeforeShrink = ext.cacheMissCount(UI.Layer.BACKGROUND)","button.setSize(150, 70)","Utility.renderSingleComponent(button)"]},
+
+        {"kind":"then","text":"Still no fresh rendering - every size maps onto the same cached rendering.","code":["ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeShrink","ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Shrinking a styled component to a zero size releases its cached rendering.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A cached style-layer image is only worth keeping while the component\n            can actually be rendered. When a component collapses to a zero width\n            or height - because a layout hid it, a split pane divider was dragged\n            all the way over, a tab was deselected, ... - it is effectively\n            non-renderable, and holding on to its (potentially large) cached\n            `BufferedImage` for as long as the component lives would be a pure\n            memory cost with no payoff.\n\n            SwingTree therefore drops the local reference to the cached rendering\n            the moment a component validates at a zero size, so the image can be\n            reclaimed promptly. The observable consequence, documented here: after\n            a component shrinks to `0` in either dimension, `cachedRendering(..)`\n            reports that there is no cached image anymore. Should the component\n            regain a real size later on, the cache simply repopulates from scratch.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A button with a rounded background, warmed up at a real size.","code":["var button =","    UI.button(\"Collapse me\")","      .withStyle( it -> it","            .borderRadius(20)","            .backgroundColor(new Color(10, 80, 160))","            .foundationColor(new Color(245, 245, 240))","      )","      .get(JButton)","button.setSize(120, 60) // Size set on the component itself, so collapsing below actually takes effect.","var ext = ComponentExtension.from(button)","Utility.renderSingleComponent(button)"]},
+
+        {"kind":"expect","text":"The cache is warm - the background layer produced a cached rendering.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]},
+
+        {"kind":"when","text":"\n            The component collapses to a zero height and its style is re-validated -\n            exactly what happens when a layout resizes it to nothing (a paint alone\n            would not do, since `JComponent.paint` bails out at a zero size).\n        ","code":["button.setSize(120, 0)","ext.gatherApplyAndInstallStyle(true)"]},
+
+        {"kind":"then","text":"The cached rendering was released - nothing keeps the image reachable through this component anymore.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()"]},
+
+        {"kind":"when","text":"The component regains a real size and is painted once more.","code":["button.setSize(120, 60)","Utility.renderSingleComponent(button)"]},
+
+        {"kind":"then","text":"The cache repopulates from scratch - the rendering is available again.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Components of different sizes but the same style share a single cached rendering.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Cache sharing between equally styled components used to require\n            them to also have exactly equal sizes. With size independent\n            (stretch tiled) cache keys, a whole toolbar of differently sized\n            buttons with one common style shares one single cached rendering:\n            only the very first one to paint invokes the style renderer,\n            every other one goes straight to a cache hit on its first paint.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two buttons sharing a styler but deliberately sized differently.","code":["def common = { conf -> conf","    .borderRadius(14)","    .backgroundColor(new Color(120, 60, 10))","    .foundationColor(new Color(250, 248, 244))","}","var first  = UI.button(\"First\").withStyle(common as swingtree.api.Styler).get(JButton)","var second = UI.button(\"Second\").withStyle(common as swingtree.api.Styler).get(JButton)","first.setSize(200, 80)","second.setSize(340, 120)","var firstExt  = ComponentExtension.from(first)","var secondExt = ComponentExtension.from(second)"]},
+
+        {"kind":"when","text":"Both are rendered once, the differently sized one second.","code":["Utility.renderSingleComponent(first)","Utility.renderSingleComponent(second)"]},
+
+        {"kind":"then","text":"The first paint of the first button populated the shared cache entry.","code":["firstExt.cacheMissCount(UI.Layer.BACKGROUND) >= 1","firstExt.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]},
+
+        {"kind":"and","text":"The second button was served from the cache on its very first paint, despite its different size.","code":["secondExt.cacheMissCount(UI.Layer.BACKGROUND) == 0","secondExt.cacheHitCount(UI.Layer.BACKGROUND)  >= 1"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Styles which cannot be stretch tiled still re-render on every resize.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Not every style survives being cut into nine stretchable tiles:\n            a gradient for example spans the full component, so its pixels\n            genuinely differ at every size. Such styles keep the classic\n            exact-size cache key, and resizing them re-renders - exactly\n            the behaviour all styles had before stretch tiling existed.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A button with a gradient background (heavy, cacheable, but not tileable).","code":["var button =","    UI.button(\"Gradient\")","      .withStyle( it -> it","            .borderRadius(10)","            .gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) )","      )","      .get(JButton)","button.setSize(120, 60) // Size set on the component itself, so resizing below actually takes effect.","var ext = ComponentExtension.from(button)","Utility.renderSingleComponent(button)","Utility.renderSingleComponent(button)"]},
+
+        {"kind":"expect","text":"The gradient is cached and served from the cache at a stable size.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()","ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1"]},
+
+        {"kind":"when","text":"The component is resized and painted again.","code":["int missesBeforeResize = ext.cacheMissCount(UI.Layer.BACKGROUND)","int hitsBeforeResize   = ext.cacheHitCount(UI.Layer.BACKGROUND)","button.setSize(300, 90)","Utility.renderSingleComponent(button)"]},
+
+        {"kind":"then","text":"The new size required a fresh rendering (a miss), not a cache hit.","code":["ext.cacheMissCount(UI.Layer.BACKGROUND) > missesBeforeResize","ext.cacheHitCount(UI.Layer.BACKGROUND)  == hitsBeforeResize"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A large exact-size rendering is not minted while the component is being resized.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A cached rendering earns its keep by being blitted more than once. An entry keyed\n            on the exact component size, for a component whose size is currently changing, is\n            the one case where that cannot happen: it is allocated, rendered into, blitted\n            once, and invalidated by the very next frame. For a large image that is strictly\n            more work than having drawn straight onto the destination - a multi megabyte\n            allocation per frame, and a software blit rather than an accelerated one, because\n            Java2D only promotes an image to a server side pixmap after several uses.\n\n            So while the size is in flux, a *large* exact-size entry is not minted at all.\n            Note the two qualifiers: a stretch tileable style is keyed size independently and\n            is not affected, and small entries are always minted - see the scenario after this\n            one for why that second exception is essential.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A gradient styled button - heavy enough to cache, too gradient-y to stretch tile.","code":["var button =","    UI.button(\"Wide\")","      .withStyle( it -> it","            .borderRadius(10)","            .gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) )","      )","      .get(JButton)","var ext = ComponentExtension.from(button)"]},
+
+        {"kind":"and","text":"It is large: above the size up to which an image is worth allocating eagerly.","code":["button.setSize(600, 400)"]},
+
+        {"kind":"when","text":"It is painted a few times at its first size, which is a birth rather than a resize.","code":["8.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"then","text":"It is cached, as any heavy style of this size would be.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]},
+
+        {"kind":"when","text":"The component is then resized and painted again.","code":["button.setSize(620, 400)","Utility.renderSingleComponent(button)"]},
+
+        {"kind":"then","text":"No image was minted for the new size.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()"]},
+
+        {"kind":"when","text":"The size settles and the component keeps being painted.","code":["8.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"then","text":"Caching resumes, because the reason to suppress it is gone.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A component dragged through fresh sizes leaves no finished renderings behind.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A cached rendering pays for itself by being blitted more than once. During a live\n            resize of a style that cannot be stretch tiled, an entry keyed on the exact\n            component size can almost never manage that: it would be allocated, rendered into,\n            blitted once, and thrown away by the very next frame, which arrives at a width no\n            frame has had before. Measured on one of the example UIs shipped with SwingTree,\n            that came to roughly three megabytes of freshly allocated image memory *per drag\n            frame*, of which more than nine tenths was never read a second time.\n\n            So an entry whose key contains a size that is currently changing is not allocated\n            on the spot any more. The entry itself is still created, and it still waits in the\n            shared pool where any other component with the very same style can find it - but\n            the pixel memory behind it is only committed once a second user actually asks for\n            it. A component being dragged on its own never produces that second user, and\n            therefore never pays for an image it would immediately discard.\n\n            Below, the component is first painted at a settled size, where the ordinary rule\n            applies and it does get a cached rendering. It is then dragged across four widths\n            it has never had, and none of those frames leaves a rendering behind. As soon as\n            the size stops changing, caching returns of its own accord.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A gradient styled button, heavy enough to be cached, but not stretch tileable.","code":["var button =","    UI.button(\"Drag me\")","      .withStyle( it -> it","            .borderRadius(10)","            .gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) )","      )","      .get(JButton)","var ext = ComponentExtension.from(button)"]},
+
+        {"kind":"and","text":"It sits at a settled size, painted often enough to be cached there.","code":["button.setSize(100, 60)","2.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"expect","text":"A rendering exists, because nothing about this size is in flux.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]},
+
+        {"kind":"when","text":"The component is dragged across four widths it has never had before.","code":["var renderingsPerFrame = []","[120, 140, 160, 180].each { width ->","    button.setSize(width, 60)","    Utility.renderSingleComponent(button)","    renderingsPerFrame << ext.cachedRendering(UI.Layer.BACKGROUND).size()","}"]},
+
+        {"kind":"then","text":"The component really did arrive at the last of those widths.","code":["button.width == 180"]},
+
+        {"kind":"and","text":"Not one of those frames left a finished rendering behind.","code":["renderingsPerFrame == [0, 0, 0, 0]"]},
+
+        {"kind":"when","text":"The drag ends and the component keeps being painted at its final size.","code":["2.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"then","text":"Caching resumes on its own, because the reason to hold back is gone.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Equally styled components resizing together still end up sharing one rendering.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the guard rail on the scenario above, and the reason the entry is still\n            created rather than skipped altogether. Renderings are keyed on the style\n            configuration and not on the component, so a window full of identically styled\n            cells produces *one* rendering that all of them blit. That kind of sharing happens\n            within a single frame and survives a resize perfectly well - refusing it would\n            turn one rendering per frame into dozens.\n\n            What \"wait for a second user\" therefore means in a UI of equally styled siblings\n            is only this: the first sibling to be painted renders straight onto the screen,\n            and the second one commits the shared image. Every sibling after that blits it,\n            and - because they were all pointed at the same entry - the first one finds it\n            waiting on its next repaint too, without having asked for it again.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two buttons carrying the exact same style.","code":["def styler = { conf -> conf","    .borderRadius(10)","    .gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) )","}","var first  = UI.button(\"A\").withStyle(styler as swingtree.api.Styler).get(JButton)","var second = UI.button(\"B\").withStyle(styler as swingtree.api.Styler).get(JButton)","var firstExt  = ComponentExtension.from(first)","var secondExt = ComponentExtension.from(second)"]},
+
+        {"kind":"and","text":"Both are painted once at a common size, so that neither is newborn any more.","code":["first.setSize(100, 60)","second.setSize(100, 60)","Utility.renderSingleComponent(first)","Utility.renderSingleComponent(second)"]},
+
+        {"kind":"when","text":"Both are resized to a common new size, and the first one is painted there.","code":["first.setSize(120, 60)","second.setSize(120, 60)","Utility.renderSingleComponent(first)"]},
+
+        {"kind":"then","text":"It rendered onto the screen without committing an image, as the scenario above showed.","code":["firstExt.cachedRendering(UI.Layer.BACKGROUND).isEmpty()"]},
+
+        {"kind":"when","text":"The second one is painted at that very same size.","code":["Utility.renderSingleComponent(second)"]},
+
+        {"kind":"then","text":"It found the waiting entry and committed the shared image.","code":["secondExt.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]},
+
+        {"kind":"and","text":"Which the first component now has as well, without having painted again.","code":["firstExt.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]},
+
+        {"kind":"when","text":"Both are painted once more.","code":["Utility.renderSingleComponent(first)","Utility.renderSingleComponent(second)"]},
+
+        {"kind":"then","text":"Both were served from that one shared rendering.","code":["firstExt.cacheHitCount(UI.Layer.BACKGROUND)  >= 1","secondExt.cacheHitCount(UI.Layer.BACKGROUND) >= 1"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A resizing component still uses a large rendering that already exists.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            What the rule above suppresses is *minting*, and only that. If a finished rendering\n            for exactly this style and size happens to be there already, using it costs no\n            allocation and no rendering at all - it is a blit, which is strictly cheaper than\n            the fresh render that refusing it would force. There is nothing to save by saying\n            no.\n\n            And this is not a corner case, because renderings are keyed globally on the style\n            rather than per component: a component being dragged through a size at which an\n            identically styled sibling already sits finds that sibling's rendering waiting for\n            it. Refusing it would re-render a page sized layer in order to avoid an allocation\n            that was never going to happen.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A large gradient style, too gradient-y to be stretch tiled, in two components.","code":["def styler = { conf -> conf","    .borderRadius(10)","    .gradient( g -> g.colors(new Color(40, 160, 90), new Color(160, 40, 90)) )","}","var settled  = UI.button(\"Settled\").withStyle(styler as swingtree.api.Styler).get(JButton)","var resizing = UI.button(\"Resizing\").withStyle(styler as swingtree.api.Styler).get(JButton)","var resizingExt = ComponentExtension.from(resizing)"]},
+
+        {"kind":"and","text":"\n            The first one sits still at a large size until its rendering exists. It is kept\n            alive for the rest of the scenario on purpose: renderings are held weakly by the\n            style they belong to, so a sibling that went out of scope would take the very\n            entry this scenario is about with it.\n        ","code":["settled.setSize(400, 200)","6.times { Utility.renderSingleComponent(settled) }","assert ComponentExtension.from(settled).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]},
+
+        {"kind":"when","text":"The second component is dragged, arriving at the size the first one holds.","code":["resizing.setSize(360, 200)","Utility.renderSingleComponent(resizing)","resizing.setSize(400, 200)","Utility.renderSingleComponent(resizing)"]},
+
+        {"kind":"then","text":"It was served from the existing rendering rather than rendering the layer again.","code":["resizingExt.cacheHitCount(UI.Layer.BACKGROUND) >= 1"]},
+
+        {"kind":"and","text":"The sibling is still alive, which is what kept that rendering reachable.","code":["settled.width == 400"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A layer whose only content is a cacheable painter is cached.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A painter is ordinarily opaque to the library: it is user code, so what it draws\n            cannot be assumed to be a function of anything SwingTree can compare, and a layer\n            carrying one is therefore not cached.\n\n            `Painter.of(data, painter)` is the user lifting exactly that restriction: it\n            promises that the painting is a pure function of the supplied data object, which is\n            immutable and has proper `equals`/`hashCode`. That promise is what makes the painter\n            usable as part of a cache key - so a layer holding nothing but such a painter is\n            cached like any other heavy style, and the painter runs once instead of on every\n            paint.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A component whose only styling is a cacheable painter.","code":["var runs = new java.util.concurrent.atomic.AtomicInteger()","var painter = swingtree.api.Painter.of(\"the-key\", { g ->","                    runs.incrementAndGet()","                    g.setColor(new Color(240, 120, 30))","                    g.fillOval(10, 10, 40, 30)","                })","var box = UI.box().withStyle( it -> it.painter(UI.Layer.BACKGROUND, \"mark\", painter) ).get(JBox)","box.setSize(200, 120)","var ext = ComponentExtension.from(box)"]},
+
+        {"kind":"when","text":"It is painted a handful of times.","code":["5.times { Utility.renderSingleComponent(box) }"]},
+
+        {"kind":"then","text":"There is a cached rendering of that layer.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]},
+
+        {"kind":"and","text":"And the painter really did run only while that rendering was being made.","code":["runs.get() == 1","ext.cacheHitCount(UI.Layer.BACKGROUND) >= 3"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A cacheable painter ahead of an uncacheable one is baked into the cached image.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A user painter is arbitrary code, so SwingTree cannot know what it draws and cannot\n            cache it - which would ordinarily sink the whole layer it sits on, a layer being\n            cached as a single rasterization. Such a layer is therefore cut in two: everything\n            cacheable is rendered into an image, and the painter is replayed over that image on\n            every paint.\n\n            `Painter.of(data, painter)` changes which side a painter falls on. It is the user\n            promising that the painting is a pure function of an immutable value, so a painter\n            declared that way can go *into* the cached image - and that is what this pins: it\n            runs once, while the uncacheable painter beside it keeps running on every paint.\n\n            Where exactly the cut falls is decided by order. The renderer runs painters in the\n            order of their names, and the cut is taken at the *first* uncacheable one:\n            everything before it is baked in, everything from it onwards is replayed. That\n            keeps every painter in its original position relative to every other, which is what\n            makes the cut incapable of changing a single pixel. A cacheable painter which sorts\n            *after* an uncacheable one is therefore left where it is.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A style with a cacheable painter named ahead of an uncacheable one.","code":["var cacheableRuns = new java.util.concurrent.atomic.AtomicInteger()","var lambdaRuns    = new java.util.concurrent.atomic.AtomicInteger()","var cacheable = swingtree.api.Painter.of(\"key\", { g ->","                    cacheableRuns.incrementAndGet()","                    g.setColor(new Color(240, 120, 30)); g.fillOval(20, 20, 60, 40)","                })","var box = UI.box().withStyle( it -> it","                .backgroundColor(\"#2f4f6f\").borderRadius(14)","                .painter(UI.Layer.BACKGROUND, \"a-cacheable\", cacheable)","                .painter(UI.Layer.BACKGROUND, \"b-uncacheable\", { g ->","                    lambdaRuns.incrementAndGet()","                    g.setColor(new Color(30, 200, 160)); g.fillRect(40, 30, 90, 50)","                })","            ).get(JBox)","box.setSize(300, 160)"]},
+
+        {"kind":"when","text":"It is painted five times.","code":["5.times { Utility.renderSingleComponent(box) }"]},
+
+        {"kind":"then","text":"The cacheable painter ran once, into the cached image.","code":["cacheableRuns.get() == 1"]},
+
+        {"kind":"and","text":"While the uncacheable one ran on every single paint, as it must.","code":["lambdaRuns.get() == 5"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A cacheable painter behind an uncacheable one keeps running, so that order is preserved.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            SwingTree cannot cache what a user painter draws, because it is arbitrary code, so\n            a layer carrying one is cut in two: what can be cached is rendered into an image,\n            and the painter is replayed over that image on every paint. A painter created with\n            `Painter.of(data, painter)` is the exception - there the user promises that the\n            painting is a pure function of an immutable value, so it can be baked into the\n            image instead of being replayed.\n\n            That raises the question of *which* cacheable painters are taken into the image,\n            and what this scenario pins is the deliberate limit on the answer: only those which\n            sort ahead of every uncacheable one.\n\n            The reason is that painters on a layer are run in the order of their names and may\n            overlap, so which of them end up inside the image decides what the component looks\n            like. Taking a cacheable painter out from behind an uncacheable one would move it\n            underneath, changing the picture - silently, and in code the library never sees. So\n            a painter which sorts *after* an uncacheable one is left where it is and keeps\n            being replayed, even though its promise would have allowed caching it.\n\n            A user who wants such a painter cached can have it, by naming it so that it sorts\n            ahead of the uncacheable one - which is the same thing as saying it should be\n            painted first.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A cacheable and an uncacheable painter, the cacheable one named so that it sorts second.","code":["var cacheableRuns = new java.util.concurrent.atomic.AtomicInteger()","var cacheable = swingtree.api.Painter.of(\"key\", { g ->","                    cacheableRuns.incrementAndGet()","                    g.setColor(new Color(240, 120, 30)); g.fillOval(20, 20, 60, 40)","                })","var box = UI.box().withStyle( it -> it","                .backgroundColor(\"#2f4f6f\").borderRadius(14)","                .painter(UI.Layer.BACKGROUND, \"a-uncacheable\", { g ->","                    g.setColor(new Color(30, 200, 160)); g.fillRect(40, 30, 90, 50)","                })","                .painter(UI.Layer.BACKGROUND, \"b-cacheable\", cacheable)","            ).get(JBox)","box.setSize(300, 160)"]},
+
+        {"kind":"when","text":"It is painted five times.","code":["5.times { Utility.renderSingleComponent(box) }"]},
+
+        {"kind":"then","text":"The cacheable painter ran every time, because caching it would have reordered it.","code":["cacheableRuns.get() == 5"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Two identically styled components share a cached rendering even if they name their painters differently.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Cached renderings are keyed on the style configuration and shared globally, so a UI\n            full of identically styled components renders one image and blits it for all of\n            them. A layer carrying an uncacheable painter is cut in two, and what is cached is\n            then everything *except* the painter - so what is cached is identical for two\n            components which differ only in their painter.\n\n            The *name* of the painter must therefore not survive into that key. A name is how a\n            style is addressed while it is being configured, not something the user expects to\n            change what is drawn - so two components whose only difference is that one calls its\n            painter \"mark\" and the other calls it \"logo\" have to share the one cached image.\n            Were they not to, each would mint an entry of its own, and since the number of\n            entries is capped, that debris would lock other components out of the cache too.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two boxes with the same background, each with an uncacheable painter of its own name.","code":["var first = UI.box().withStyle( it -> it","                .backgroundColor(new Color(35, 95, 125)).borderRadius(11).margin(4)","                .painter(UI.Layer.BACKGROUND, \"mark\", { g ->","                    g.setColor(new Color(240, 120, 30)); g.fillOval(10, 10, 40, 30)","                })","            ).get(JBox)","var second = UI.box().withStyle( it -> it","                .backgroundColor(new Color(35, 95, 125)).borderRadius(11).margin(4)","                .painter(UI.Layer.BACKGROUND, \"logo\", { g ->","                    g.setColor(new Color(30, 200, 160)); g.fillRect(20, 20, 30, 20)","                })","            ).get(JBox)","first.setSize(260, 140)","second.setSize(260, 140)"]},
+
+        {"kind":"when","text":"The first one is painted until its background is cached.","code":["3.times { Utility.renderSingleComponent(first) }"]},
+
+        {"kind":"then","text":"It is: the painter was cut out of the layer, so the rest of it could be cached.","code":["ComponentExtension.from(first).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]},
+
+        {"kind":"when","text":"The second one is painted for the very first time.","code":["Utility.renderSingleComponent(second)"]},
+
+        {"kind":"then","text":"It found the image the first one had already rendered, instead of rendering again.","code":["ComponentExtension.from(second).cacheHitCount(UI.Layer.BACKGROUND)  == 1","ComponentExtension.from(second).cacheMissCount(UI.Layer.BACKGROUND) == 0"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A painter baked into a cached image does not tie it to the names of the painters replayed over it.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Rendered layers are cached globally and keyed on the style itself, so any number of\n            identically styled components render once between them and blit that single image.\n            Anything which makes two equivalent styles compare as *different* therefore costs\n            both memory and rendering - and because the number of cached images is capped, it\n            pushes other components out of the cache as well.\n\n            A user painter complicates this, because SwingTree cannot know what arbitrary code\n            draws and so cannot cache it. A layer carrying one is cut in two: everything else\n            goes into the cached image, and the painter is replayed on top of it on every\n            paint. `Painter.of(data, painter)` is the exception - it is the user promising that\n            the painting is a pure function of an immutable value, and that promise is what\n            lets such a painter be baked into the image like any other style.\n\n            One layer can therefore hold both kinds at once, which is the case below, and what\n            this scenario pins is which parts of the style may decide whether two components\n            share the resulting image: only the parts the image actually contains. Both\n            components here draw the same background and the same cacheable painter, so it is\n            the same image. All that differs is the *name* each gave the painter that is\n            replayed on top - and a name that contributes no pixel to an image has no business\n            deciding whether that image can be found again.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Two components sharing a background and a cacheable painter, differing only in the name of an uncacheable one.","code":["var cacheable = swingtree.api.Painter.of(\"shared-key\", { g ->","                    g.setColor(new Color(250, 200, 60)); g.fillOval(12, 12, 50, 34)","                })","def build = { String lambdaName, Color color -> UI.box().withStyle( it -> it","                    .backgroundColor(new Color(45, 80, 115)).borderRadius(13).margin(5)","                    .painter(UI.Layer.BACKGROUND, \"a-cacheable\", cacheable)","                    .painter(UI.Layer.BACKGROUND, lambdaName, { g ->","                        g.setColor(color); g.fillRect(24, 24, 34, 22)","                    })","                ).get(JBox)","}","var first  = build(\"m-mark\", new Color(240, 120, 30))","var second = build(\"z-logo\", new Color(30, 200, 160))","first.setSize(280, 150)","second.setSize(280, 150)"]},
+
+        {"kind":"when","text":"The first one is painted until its background is cached.","code":["3.times { Utility.renderSingleComponent(first) }"]},
+
+        {"kind":"then","text":"It is - the cut put the background and the cacheable painter into one image.","code":["ComponentExtension.from(first).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]},
+
+        {"kind":"when","text":"The second one is painted for the very first time.","code":["Utility.renderSingleComponent(second)"]},
+
+        {"kind":"then","text":"It found that very image, rather than minting one of its own.","code":["ComponentExtension.from(second).cacheHitCount(UI.Layer.BACKGROUND)  == 1","ComponentExtension.from(second).cacheMissCount(UI.Layer.BACKGROUND) == 0"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Caching is per-layer: a heavy background does not imply a cached foreground.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            SwingTree's style engine keeps a separate cache per layer\n            (`BACKGROUND`, `CONTENT`, `BORDER`, `FOREGROUND`). A heavy\n            style on one layer must not pull a sibling layer into the\n            cache; if a layer carries no expensive ingredients of its\n            own, it stays uncached.\n\n            This is what lets SwingTree make targeted decisions: if you\n            give a button a fancy gradient background but a plain\n            foreground, only the background pays the cost-and-benefit\n            of caching. Conversely, layers like `FOREGROUND` are *only*\n            cached when the styler explicitly puts heavy ingredients on\n            them (e.g. via `it.shadow(UI.Layer.FOREGROUND, ...)` or\n            `it.painter(UI.Layer.FOREGROUND, ...)`).\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A button with a heavy *background* style and nothing on the foreground.","code":["var button =","    UI.button(\"Bg only\")","      .withStyle( it -> it","            .size(120, 60)","            .borderRadius(18)","            .backgroundColor(new Color(80, 30, 150))","            .foundationColor(Color.WHITE)","      )","      .get(JButton)","var ext = ComponentExtension.from(button)"]},
+
+        {"kind":"when","text":"We render the component once.","code":["Utility.renderSingleComponent(button)"]},
+
+        {"kind":"then","text":"The background layer is cached, just like in the other scenarios.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]},
+
+        {"kind":"and","text":"But the foreground layer was skipped by the cache because it carries no heavy ingredients.","code":["ext.cachedRendering(UI.Layer.FOREGROUND).isEmpty()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}
