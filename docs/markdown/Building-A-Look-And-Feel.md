@@ -560,7 +560,7 @@ public void uninitialize() {
 > is garbage-collected and your LAF silently stops responding to font
 > changes. A `private` field on the LAF instance is the canonical place.
 
-The `LinenLookAndFeel` example in `src/test/java/examples/laf` does
+The `SwingTreeLookAndFeel` example in `src/test/java/examples/laf` does
 exactly this — its `_fontView` field plus `_propagateFont(..)` helper
 are the reference implementation.
 

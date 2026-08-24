@@ -1,8 +1,7 @@
 package examples.laf.app;
 
-import examples.laf.LinenPalette;
-import examples.laf.LinenSurface;
-import examples.laf.LinenVariant;
+import examples.laf.SwingTreeLookAndFeel.Surface;
+import examples.laf.SwingTreeLookAndFeel.Variant;
 import sprouts.From;
 import sprouts.Tuple;
 import sprouts.Val;
@@ -41,11 +40,13 @@ import java.util.concurrent.TimeUnit;
 
 import static swingtree.UI.*;
 
+import static examples.laf.SwingTreeLookAndFeel.palette;
+
 /**
  *  <h1>Flaxen — the order book of a small weaving atelier</h1>
  *
  *  A working desktop application, built with SwingTree and painted by the
- *  {@link examples.laf.LinenLookAndFeel}. It exists to answer a question a
+ *  {@link examples.laf.SwingTreeLookAndFeel}. It exists to answer a question a
  *  component gallery cannot: <em>what does this look-and-feel feel like when
  *  somebody is actually using it all day?</em> So there is a real order book to
  *  edit, real looms that make progress, a store room that runs down as cloth
@@ -104,12 +105,12 @@ import static swingtree.UI.*;
  *  Linen paints through the same style engine the application does, and its
  *  layer of the cascade is resolved <em>after</em> the application's
  *  {@link AtelierSheet}. So this view asks the look-and-feel for the surfaces
- *  and the button roles it wants — {@code .group(LinenSurface.CARD)},
- *  {@code .group(LinenVariant.PRIMARY)} — rather than painting them itself, and
+ *  and the button roles it wants — {@code .group(Surface.CARD)},
+ *  {@code .group(Variant.PRIMARY)} — rather than painting them itself, and
  *  the sheet is left to do what the LAF does not: typography. The two files say
  *  more about why.
  *
- *  @see examples.laf.LinenLookAndFeel
+ *  @see examples.laf.SwingTreeLookAndFeel
  *  @see AtelierViewModel
  */
 public final class AtelierView extends JPanel
@@ -394,9 +395,9 @@ public final class AtelierView extends JPanel
 
     private UIForAnySwing<?, ?> header() {
         return
-            panel().group(LinenSurface.RAIL)
+            panel().group(Surface.RAIL)
             .withLayout("fill, ins 12 20 12 20, gap 14, hidemode 3", "[][grow][]")
-            .withStyle( it -> it.borderAt(UI.Edge.BOTTOM, 1, LinenPalette.BORDER) )
+            .withStyle( it -> it.borderAt(UI.Edge.BOTTOM, 1, palette().border()) )
             .add(GROW_Y,
                 // Not a logo: a live picture of the cloth currently on the bench,
                 // woven from the selected commission's own weave and fibre.
@@ -413,10 +414,10 @@ public final class AtelierView extends JPanel
             )
             .add(RIGHT,
                 box(FLOW_X.and(INS(0)).and(GAP_REL(6)))
-                .add(button(journalButtonText).group(LinenVariant.QUIET)
+                .add(button(journalButtonText).group(Variant.QUIET)
                      .withTooltip("Open the day book")
                      .onClick( it -> journalOpen.set(From.VIEW, !journalOpen.get()) ))
-                .add(button(loomsButtonText).group(LinenVariant.QUIET)
+                .add(button(loomsButtonText).group(Variant.QUIET)
                      .withTooltip("Start or stop the loom floor")
                      .onClick( it -> vm.update(AtelierViewModel::toggleLooms) ))
             );
@@ -433,12 +434,12 @@ public final class AtelierView extends JPanel
      */
     private UIForAnySwing<?, ?> toolStrip() {
         return
-            panel().group(LinenSurface.RAIL)
+            panel().group(Surface.RAIL)
             .withLayout("fillx, ins 8 16 8 16, gap 12, hidemode 3")
-            .withStyle( it -> it.borderAt(UI.Edge.BOTTOM, 1, LinenPalette.BORDER_SOFT) )
+            .withStyle( it -> it.borderAt(UI.Edge.BOTTOM, 1, palette().borderSoft()) )
             .add(LEFT,
                 toolBar().withMinSize(0, 0)
-                .add(button("＋  Docket").group(LinenVariant.PRIMARY)
+                .add(button("＋  Docket").group(Variant.PRIMARY)
                      .withTooltip("Open a new commission")
                      .onClick( it -> vm.update(AtelierViewModel::addOrder) ))
                 .add(button("⧉  Copy").isEnabledIf(hasSelection)
@@ -448,7 +449,7 @@ public final class AtelierView extends JPanel
                      .withTooltip("Move the selected commission to the next station")
                      .onClick( it -> vm.update(AtelierViewModel::advanceSelected) ))
                 .add(separator(Align.VERTICAL))
-                .add(button("✕  Strike out").group(LinenVariant.DANGER).isEnabledIf(hasSelection)
+                .add(button("✕  Strike out").group(Variant.DANGER).isEnabledIf(hasSelection)
                      .withTooltip("Take the selected commission out of the book")
                      .onClick( it -> confirmAndStrike() ))
             );
@@ -470,7 +471,7 @@ public final class AtelierView extends JPanel
             )
             .add(toggleButton("Rush only", rushOnly)
                  .withTooltip("Show only the commissions somebody is waiting on"))
-            .add(button("✕").group(LinenVariant.QUIET).isVisibleIf(isFiltered)
+            .add(button("✕").group(Variant.QUIET).isVisibleIf(isFiltered)
                  .withTooltip("Clear every filter")
                  .onClick( it -> vm.update(AtelierViewModel::clearFilters) ));
     }
@@ -484,11 +485,11 @@ public final class AtelierView extends JPanel
             // TRANSPARENT tells Linen not to paint this scroll region — and its
             // viewport — as a sunken field. It is the page itself, so the
             // window's cream and grain must run straight through it.
-            scrollPane( conf -> conf.fitWidth(true) ).group(LinenSurface.TRANSPARENT)
+            scrollPane( conf -> conf.fitWidth(true) ).group(Surface.TRANSPARENT)
             .withHorizontalScrollBarPolicy(UI.Active.NEVER)
             .withScrollIncrement(26)
             .add(
-                panel().group(LinenSurface.TRANSPARENT)
+                panel().group(Surface.TRANSPARENT)
                 .withFlowLayout(UI.HorizontalAlignment.LEFT, 16, 16)
                 .withMinSize(0, 0)                     // a grid's minimum is the SUM of its children's
                 .withPrefSize(PAGE_REFERENCE_WIDTH, 0) // ...and this is where the bands sit
@@ -510,7 +511,7 @@ public final class AtelierView extends JPanel
      */
     private UIForAnySwing<?, ?> materialsCard() {
         return
-            panel().group(LinenSurface.CARD)
+            panel().group(Surface.CARD)
             .withFlowLayout(UI.HorizontalAlignment.LEFT, 10, 10)
             .withMinSize(0, 0)
             .withPrefSize(MATERIALS_REFERENCE_WIDTH, 0)
@@ -532,7 +533,7 @@ public final class AtelierView extends JPanel
      */
     private UIForAnySwing<?, ?> storeRail() {
         return
-            panel().group(LinenSurface.TRANSPARENT)
+            panel().group(Surface.TRANSPARENT)
             .withFlowLayout(UI.HorizontalAlignment.LEFT, 8, 8)
             .withMinSize(0, 0)
             .withPrefSize(MATERIALS_REFERENCE_WIDTH, 0)
@@ -556,12 +557,12 @@ public final class AtelierView extends JPanel
 
     private UIForPanel<JPanel> yarnChipBody( Yarn yarn ) {
         return
-            panel().group(LinenSurface.TRANSPARENT)
+            panel().group(Surface.TRANSPARENT)
             .withLayout("fill, ins 7 9 7 9, gap 7, hidemode 3", "[14!][grow][]")
             .withStyle( it -> it
                 .borderRadius(9)
-                .border(1, yarn.isLow() ? LinenPalette.DANGER : LinenPalette.BORDER_SOFT)
-                .backgroundColor(LinenPalette.SURFACE_FIELD)
+                .border(1, yarn.isLow() ? palette().danger() : palette().borderSoft())
+                .backgroundColor(palette().surfaceField())
             )
             .withCursor(UI.Cursor.HAND)
             .withTooltip(yarn.isLow() ? "Running low — reorder from the mill"
@@ -571,7 +572,7 @@ public final class AtelierView extends JPanel
             .add(GROW_Y,
                 box().withPrefSize(14, 14)
                 .withStyle( it -> it.backgroundColor(yarn.fibre().shade()).borderRadius(4)
-                                    .border(1, LinenPalette.BORDER) )
+                                    .border(1, palette().border()) )
             )
             .add(GROW_X.and("wmin 0"), label(yarn.fibre().label()).group(Skin.META))
             .add(RIGHT, label(yarn.metresInStock() + " m").group(Skin.META));
@@ -596,7 +597,7 @@ public final class AtelierView extends JPanel
                         vm.update(AtelierViewModel::connectMill);
                 })
             )
-            .add(button(millButtonText).group(LinenVariant.PRIMARY)
+            .add(button(millButtonText).group(Variant.PRIMARY)
                  .withTooltip("Sign in, then restock every shelf")
                  .onClick( it -> vm.update( m -> m.millConnected() ? m.reorderYarn() : m.connectMill() ) ));
     }
@@ -605,7 +606,7 @@ public final class AtelierView extends JPanel
 
     private UIForAnySwing<?, ?> bookCard() {
         return
-            panel().group(LinenSurface.CARD)
+            panel().group(Surface.CARD)
             .withLayout("fill, wrap 1, ins 14 16 16 16, gap 8, hidemode 3")
             .withStyle(bookHeight, (tall, it) -> it.prefSize(540, tall))
             .add(GROW_X.and("wmin 0"),
@@ -660,7 +661,7 @@ public final class AtelierView extends JPanel
                 .add(RIGHT, label(loomsRunning.viewAsString( on -> on ? "running" : "stopped" )).group(Skin.META))
             )
             .add(GROW.and(PUSH).and("wmin 0"),
-                scrollPane().group(LinenSurface.TRANSPARENT)
+                scrollPane().group(Surface.TRANSPARENT)
                 .withHorizontalScrollBarPolicy(UI.Active.NEVER)
                 .add(
                     // The looms bind the *mutable* overload, which hands each row
@@ -682,10 +683,10 @@ public final class AtelierView extends JPanel
         Val<Boolean> threaded = entry.viewAs(Boolean.class, loom -> !loom.isIdle());
 
         return
-            panel().group(LinenSurface.TRANSPARENT)
+            panel().group(Surface.TRANSPARENT)
             .withLayout("fill, ins 7 10 7 10, gap 8 3, hidemode 3", "[grow][][]")
-            .withStyle( it -> it.borderRadius(9).border(1, LinenPalette.BORDER_SOFT)
-                                .backgroundColor(LinenPalette.SURFACE_FIELD) )
+            .withStyle( it -> it.borderRadius(9).border(1, palette().borderSoft())
+                                .backgroundColor(palette().surfaceField()) )
             .add("cell 0 0, growx, wmin 0",
                 box(FILL).withLayout("fill, ins 0, gap 8, hidemode 3", "[][grow]")
                 .add(label(entry.viewAsString(Loom::name)))
@@ -696,7 +697,7 @@ public final class AtelierView extends JPanel
                 .withTooltip("Hold this loom without stopping the whole floor")
             )
             .add("cell 2 0",
-                button("▸").group(LinenVariant.QUIET).isEnabledIf(threaded)
+                button("▸").group(Variant.QUIET).isEnabledIf(threaded)
                 .withTooltip("Show the commission this loom is weaving")
                 .onClick( it -> vm.update( m -> m.select(entry.get().orderRef()) ) )
             )
@@ -707,7 +708,7 @@ public final class AtelierView extends JPanel
 
     private UIForAnySwing<?, ?> editorCard() {
         return
-            panel().group(LinenSurface.CARD)
+            panel().group(Surface.CARD)
             .withLayout("fill, wrap 1, ins 14 16 16 16, gap 8, hidemode 3")
             .withStyle(bookHeight, (tall, it) -> it.prefSize(400, tall))
             .add(GROW_X.and("wmin 0"), label(orderTitle).group(Skin.CARD_TITLE))
@@ -725,7 +726,7 @@ public final class AtelierView extends JPanel
 
     private UIForAnySwing<?, ?> commissionTab() {
         return
-            panel().group(LinenSurface.TRANSPARENT)
+            panel().group(Surface.TRANSPARENT)
             .withLayout("fill, wrap 2, ins 14, gap 8 8, hidemode 3", "[90::120][grow]")
             .add(fieldLabel("Client"))
             .add(GROW_X.and("wmin 0"), textField(client).isEnabledIf(hasSelection))
@@ -754,7 +755,7 @@ public final class AtelierView extends JPanel
 
     private UIForAnySwing<?, ?> clothTab() {
         return
-            panel().group(LinenSurface.TRANSPARENT)
+            panel().group(Surface.TRANSPARENT)
             .withLayout("fillx, wrap 2, ins 14, gap 10 8, hidemode 3", "[90::120][grow]")
             .add("span, growx",
                 box(FILL).withLayout("fill, ins 0, gap 12", "[130!][grow]")
@@ -806,14 +807,14 @@ public final class AtelierView extends JPanel
      */
     private UIForAnySwing<?, ?> docketTab() {
         return
-            panel().group(LinenSurface.TRANSPARENT)
+            panel().group(Surface.TRANSPARENT)
             .withLayout("fill, wrap 1, ins 14, gap 8, hidemode 3")
             .add(GROW.and(PUSH).and("wmin 0"),
                 scrollPane().withPrefSize(280, 240)
                 .add(editorPane().peek(this::captureDocket))
             )
             .add(RIGHT,
-                button("Print delivery note").group(LinenVariant.PRIMARY).isEnabledIf(hasSelection)
+                button("Print delivery note").group(Variant.PRIMARY).isEnabledIf(hasSelection)
                 .onClick( it -> vm.update( m -> m.note("Printed the delivery note for #" + m.selected().ref() + ".") ) )
             );
     }
@@ -827,9 +828,9 @@ public final class AtelierView extends JPanel
      */
     private UIForAnySwing<?, ?> dayBookDrawer() {
         return
-            panel().group(LinenSurface.RAIL).isVisibleIf(journalOpen)
+            panel().group(Surface.RAIL).isVisibleIf(journalOpen)
             .withLayout("fill, wrap 1, ins 10 20 10 20, gap 6, hidemode 3")
-            .withStyle( it -> it.borderAt(UI.Edge.TOP, 1, LinenPalette.BORDER) )
+            .withStyle( it -> it.borderAt(UI.Edge.TOP, 1, palette().border()) )
             .add(GROW_X, label("DAY BOOK").group(Skin.SECTION))
             .add(GROW_X.and("wmin 0"),
                 scrollPane().withPrefSize(600, 120)
@@ -839,9 +840,9 @@ public final class AtelierView extends JPanel
 
     private UIForAnySwing<?, ?> statusBar() {
         return
-            panel().group(LinenSurface.RAIL)
+            panel().group(Surface.RAIL)
             .withLayout("fill, ins 6 20 6 20, gap 14, hidemode 3", "[grow][120!][]")
-            .withStyle( it -> it.borderAt(UI.Edge.TOP, 1, LinenPalette.BORDER_SOFT) )
+            .withStyle( it -> it.borderAt(UI.Edge.TOP, 1, palette().borderSoft()) )
             .add(GROW_X.and("wmin 0"), label(status).group(Skin.STATUS))
             .add(GROW_X, progressBar(Align.HORIZONTAL, workload)
                  .withTooltip("How far the whole book has come, weighted by metres"))
