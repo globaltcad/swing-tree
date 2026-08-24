@@ -135,6 +135,62 @@ class Icon_Caching_Spec extends Specification
             eventually(10, ()->SwingTree.get().getIconCache().isEmpty())
     }
 
+    def 'A component styled with an inline SVG keeps that SVG parsed for as long as it lives.'()
+    {
+        reportInfo """
+            The feature above holds every `IconDeclaration` in a local variable, which is one
+            way to use the icon cache but not the common one. A style is far more often written
+            like this:
+
+            `UI.panel().withStyle( it -> it.image( img -> img.svg(SOME_SVG_STRING) ) )`
+
+            Here the caller never sees a declaration at all. One is created inside `svg(..)`,
+            used to look the icon up, and dropped again -- and since the icon cache is keyed
+            *weakly* by declarations, there would then be nothing left in the world to keep the
+            entry alive. The parsed SVG document would be thrown away by the very next garbage
+            collection, and the next repaint of that component would have to parse the XML all
+            over again. On a window which repaints continuously that is a re-parse roughly
+            every second, forever.
+
+            So a style which resolved an icon has to hold on to the declaration it resolved it
+            from. The scenario below pins that down from the outside: nothing but the styled
+            component itself refers to the icon, the garbage collector is then given every
+            chance to run, and the icon must still be the one that was parsed at the start.
+
+            The second half is just as important as the first: once the component is gone, the
+            entry has to go too. An icon cache that never lets go is not a fix, it is a leak.
+        """
+        given : 'A clean library context, so that no icon from another feature is in the cache.'
+            SwingTree.initialize()
+        and : 'An SVG document in a plain string. Note that a string is not a declaration and keeps nothing alive.'
+            var svg = "<svg width=\"24\" height=\"24\" viewBox=\"0 0 16 16\"><rect x=\"2\" y=\"2\" width=\"12\" height=\"12\" fill=\"blue\"/></svg>"
+        expect : 'The cache starts out empty.'
+            SwingTree.get().getIconCache().isEmpty()
+
+        when : 'We style a panel with that SVG, without ever holding an icon declaration ourselves.'
+            var panel = UI.panel().withStyle( it -> it.image( img -> img.svg(svg) ) ).get(JPanel)
+        then : 'The SVG was parsed once and put into the cache.'
+            SwingTree.get().getIconCache().size() == 1
+
+        when : 'We remember which icon that produced, and then let the garbage collector run.'
+            var parsedOnce = UI.findIcon(IconDeclaration.ofSvg(svg)).orElse(null)
+            waitForGarbageCollection()
+            waitForGarbageCollection()
+        then : """
+            The entry survived, because the panel we are still holding refers to the
+            declaration it was resolved from.
+        """
+            SwingTree.get().getIconCache().size() == 1
+        and : 'Asking for the icon again hands back the very same object, so nothing was parsed a second time.'
+            UI.findIcon(IconDeclaration.ofSvg(svg)).orElse(null) === parsedOnce
+
+        when : 'We now drop the panel, which leaves nothing in the world referring to that SVG.'
+            panel = null
+            parsedOnce = null
+        then : 'The cache lets go of it, exactly as a weakly keyed cache should.'
+            eventually(10, ()->SwingTree.get().getIconCache().isEmpty())
+    }
+
     def 'The `IconDeclaration` factory methods produce pooled objects.'()
     {
         given :
