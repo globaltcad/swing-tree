@@ -109,7 +109,7 @@ final class LayerPartitionCache
     // Sum type based states
     private interface CacheState {
         final class Nothing  implements CacheState { static final Nothing  INSTANCE = new Nothing();  }
-        final class Uncached implements CacheState { static final Uncached INSTANCE = new Uncached(); }
+        final class Rejected implements CacheState { static final Rejected INSTANCE = new Rejected(); }
         final class Cached   implements CacheState {
             final Pooled<LayerRenderConf> _key;
             final CachedImage             _image;
@@ -131,6 +131,14 @@ final class LayerPartitionCache
         _part        = Objects.requireNonNull(part);
         _renderInput = LayerRenderConf.none();
         _state       = CacheState.Nothing.INSTANCE;
+    }
+
+    /** A part has no admission decisions left open if it is either cached, or there
+     *  is nothing to cache. But a part that was refused admission may be admitted later, because
+     *  that decision also depends on how full the global cache is, so it has to be re-validated
+     *  and offered again on the next paint. */
+    boolean admissionDecisionLeftOpen() {
+        return _state instanceof CacheState.Rejected;
     }
 
     public @Nullable BufferedImage renderedImage() {
@@ -163,7 +171,7 @@ final class LayerPartitionCache
 
         final int hitsUntilAllocation = _hitsUntilAllocationFor(keyConf, _renderInput, isResizing);
         if ( hitsUntilAllocation < 0 ) {
-            _state = CacheState.Uncached.INSTANCE;
+            _state = CacheState.Rejected.INSTANCE; // The cache refused admission!
         } else {
             final Pooled<LayerRenderConf> key = new Pooled<>(keyConf).intern();
 

@@ -243,6 +243,55 @@ class Cache_Configuration_Spec extends Specification
             ComponentExtension.updateAllCachesFromLibraryConfig()
     }
 
+    def 'Flipping the stretch tiling hatch reaches a component that is not changing at all.'()
+    {
+        reportInfo """
+            The tiling switch is a debugging hatch: someone who suspects a
+            reconstructed rendering of being wrong flips it and looks at the very
+            same component again. That component is typically sitting still - the
+            window is not being dragged and nothing in its style is animating - so
+            the switch has to reach a component whose configuration has not changed
+            since its last paint, not merely one that is about to be resized.
+
+            Which of the two cache keyings is in force is visible in the rendering
+            the component holds on to: a stretch tiled layer caches one small
+            exemplar that every size is reconstructed from, whereas the classic
+            keying the hatch restores caches the component's own size.
+        """
+        given : 'A deterministic budget and a large, flatly coloured, stretch tileable button.'
+            CacheBudget.UNITS_OVERRIDE = 10
+            ComponentExtension.updateAllCachesFromLibraryConfig()
+            var button =
+                UI.button("Hold still")
+                  .withStyle( it -> it
+                        .borderRadius(20)
+                        .backgroundColor(new Color(60, 130, 90))
+                        .foundationColor(new Color(240, 240, 235))
+                  )
+                  .get(JButton)
+            button.setSize(300, 120)
+            var ext = ComponentExtension.from(button)
+
+        when : 'It is painted a number of times, without ever changing in any way.'
+            6.times { Utility.renderSingleComponent(button) }
+        then : 'What it holds is the small exemplar that every size is reconstructed from.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1
+            ext.cachedRendering(UI.Layer.BACKGROUND).first().width < 300
+
+        when : 'The hatch is closed, and it is painted again - still without changing anything.'
+            SwingTree.get().setCacheTilingEnabled(false)
+            6.times { Utility.renderSingleComponent(button) }
+        then : 'It now holds a rendering of its own size, which is the classic keying.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1
+            ext.cachedRendering(UI.Layer.BACKGROUND).first().width  == 300
+            ext.cachedRendering(UI.Layer.BACKGROUND).first().height == 120
+
+        cleanup : 'We open the hatch again and hand the library back its own budget.'
+            SwingTree.get().setCacheTilingEnabled(true)
+            CacheBudget.UNITS_OVERRIDE = -1
+            ComponentExtension.updateAllCachesFromLibraryConfig()
+    }
+
     def 'The live cache monitoring snapshot covers every global rendering cache.'()
     {
         reportInfo """

@@ -27,6 +27,21 @@ final class StyleLayerCache
 {
     private static final int PAINTS_UNTIL_REJOINED = 4;
 
+    // Sum type based states of what this cache was last brought in line with
+    private interface Validation {
+        final class None implements Validation { static final None INSTANCE = new None(); }
+        final class Done implements Validation {
+            final ComponentConf _conf;
+            final boolean       _whileResizing;
+            final boolean       _withTiling;
+            Done( ComponentConf conf, boolean whileResizing, boolean withTiling ) {
+                _conf          = conf;
+                _whileResizing = whileResizing;
+                _withTiling    = withTiling;
+            }
+        }
+    }
+
     private final UI.Layer         _layer;
     private final BiConsumer<LayerRenderConf, Graphics2D> _renderer;
     private LayerPartitionCache[]  _parts;
@@ -34,6 +49,7 @@ final class StyleLayerCache
     private LayerRenderConf        _uncachedPartition;
     private Size                   _lastSize;
     private int                    _paintsAtThisSize;
+    private Validation             _validation;
 
     private int _paintCacheHitCount  = 0;
     private int _paintCacheMissCount = 0;
@@ -47,6 +63,7 @@ final class StyleLayerCache
         _uncachedPartition   = LayerRenderConf.none();
         _lastSize            = Size.unknown();
         _paintsAtThisSize    = PAINTS_UNTIL_REJOINED;
+        _validation          = Validation.None.INSTANCE;
     }
 
     int paintCacheHitCount() { return _paintCacheHitCount; }
@@ -54,9 +71,13 @@ final class StyleLayerCache
     int paintCacheMissCount() { return _paintCacheMissCount; }
 
     void validate( ComponentConf newConf ) {
-        final LayerRenderConf full = newConf.renderConfFor(_layer);
         _recordSize(newConf.currentBounds().size());
-        final boolean isResizing = _isResizing();
+        final boolean isResizing   = _isResizing();
+        final boolean tilingIsOn   = CacheBudget.tilingEnabled();
+        if ( _isSettledAndSameAsLastValidation(newConf, isResizing, tilingIsOn) )
+            return; // We avoid validation work if nothing changed!
+
+        final LayerRenderConf full = newConf.renderConfFor(_layer);
         final PartitioningPolicy policy = _partitioningPolicyFor(full, isResizing);
         if ( policy != _partitioningPolicy ) {
             _partitioningPolicy = policy;
@@ -66,6 +87,20 @@ final class StyleLayerCache
             part.validate(newConf, isResizing);
 
         _uncachedPartition = policy.uncachedPartitionOf(full);
+        _validation        = new Validation.Done(newConf, isResizing, tilingIsOn);
+    }
+
+    @SuppressWarnings("ReferenceEquality") // Identity means the configuration is literally the one validated against.
+    private boolean _isSettledAndSameAsLastValidation(ComponentConf conf, boolean isResizing, boolean tilingIsOn ) {
+        if ( !(_validation instanceof Validation.Done) )
+            return false;
+        final Validation.Done done = (Validation.Done) _validation;
+        if ( done._conf != conf || done._whileResizing != isResizing || done._withTiling != tilingIsOn )
+            return false;
+        for ( LayerPartitionCache part : _parts )
+            if ( part.admissionDecisionLeftOpen() )
+                return false; // The cache is NOT settled because at least one part has a rejected cache attempt!
+        return true;
     }
 
     private PartitioningPolicy _partitioningPolicyFor( LayerRenderConf full, boolean isResizing ) {
