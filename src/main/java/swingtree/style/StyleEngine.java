@@ -69,22 +69,23 @@ final class StyleEngine
         return Optional.empty();
     }
 
+    @SuppressWarnings("ReferenceEquality") // Identity means the configuration is literally the one already installed.
     StyleEngine update(
         final Bounds      newBounds,
         final StyleConf   newStyle,
         final Outline     marginCorrection
     ) {
-        final StyleEngine engine = this;
-        final ComponentConf currentConf = engine.getComponentConf();
+        final ComponentConf currentConf = getComponentConf();
         final Pair<BoxModelConf, ComponentConf> boxModelAndComponentConfs = _calculateBoxModelAndComponentConfs(newBounds, newStyle, marginCorrection, currentConf);
-        final BoxModelConf newBoxModelConf = boxModelAndComponentConfs.first();
         final ComponentConf newConf = boxModelAndComponentConfs.second();
 
-        final StyleLayerCache[] layerCaches = engine.getLayerCaches();
-        for ( StyleLayerCache layerCache : layerCaches )
+        for ( StyleLayerCache layerCache : _layerCaches )
             layerCache.validate(newConf);
 
-        return new StyleEngine(new Pooled<>(newBoxModelConf), new Pooled<>(newConf), _layerCaches);
+        if ( newConf == currentConf )
+            return this;
+
+        return new StyleEngine(new Pooled<>(boxModelAndComponentConfs.first()), new Pooled<>(newConf), _layerCaches);
     }
 
     static sprouts.Pair<BoxModelConf, ComponentConf> _calculateBoxModelAndComponentConfs(
@@ -101,7 +102,7 @@ final class StyleEngine
         if ( sameStyle && sameBounds && sameCorrection )
             newConf = previousConf;
         else
-            newConf = new ComponentConf(newStyle, newBounds, marginCorrection);
+            newConf = new ComponentConf(sameStyle ? previousConf.style() : newStyle, newBounds, marginCorrection);
 
         BoxModelConf newBoxModelConf = BoxModelConf.of(newConf.style().border(), newConf.areaMarginCorrection(), newConf.currentBounds().size());
         return Pair.of(newBoxModelConf, newConf);
