@@ -280,11 +280,12 @@ public final class AtelierView extends JPanel
         // Model → view for the one thing Swing owns rather than we: which row of
         // the table is highlighted. Deferred to the next EDT cycle because the
         // table's own rebinding is triggered by the very same model change and
-        // may not have happened yet.
-        Viewable.cast(selectedRef).onChange(From.ALL, it ->
-            UI.runLater(() -> highlightSelectedRow(it.currentValue().orElse(""))));
-        Viewable.cast(materialFilter).onChange(From.ALL, it ->
-            UI.runLater(() -> syncTreeSelection(it.currentValue().orElse(""))));
+        // may not have happened yet. Both read the model when they run rather
+        // than closing over the value the event carried: two of these can be
+        // queued at once, and a deferred write of an outdated value is one the
+        // Swing selection would report straight back as a fresh model change.
+        Viewable.cast(selectedRef).onChange(From.ALL, it -> UI.runLater(this::highlightSelectedRow));
+        Viewable.cast(materialFilter).onChange(From.ALL, it -> UI.runLater(this::syncTreeSelection));
         Viewable.cast(order).onChange(From.ALL, it ->
             UI.run(() -> writeDocket(it.currentValue().orElse(Order.none()))));
         Viewable.cast(journal).onChange(From.ALL, it ->
@@ -968,7 +969,7 @@ public final class AtelierView extends JPanel
         widthOf(table, AtelierViewModel.COL_STAGE,   88);
         // The book opens with a commission already chosen, and the highlight has
         // to say so; the subscription below only ever hears about *changes*.
-        UI.runLater(() -> highlightSelectedRow(vm.get().selectedRef()));
+        UI.runLater(this::highlightSelectedRow);
         table.getSelectionModel().addListSelectionListener( event -> {
             if ( event.getValueIsAdjusting() || syncingSelection )
                 return;
@@ -980,10 +981,11 @@ public final class AtelierView extends JPanel
         });
     }
 
-    private void highlightSelectedRow( String ref ) {
+    private void highlightSelectedRow() {
         JTable table = this.bookTable;
         if ( table == null )
             return;
+        String ref = selectedRef.get();
         syncingSelection = true;
         try {
             int column = refColumn(table);
@@ -1065,10 +1067,11 @@ public final class AtelierView extends JPanel
         });
     }
 
-    private void syncTreeSelection( String filter ) {
+    private void syncTreeSelection() {
         JTree tree = this.materialsTree;
         if ( tree == null )
             return;
+        String filter = materialFilter.get();
         if ( filter.isEmpty() ) {
             tree.clearSelection();
             return;

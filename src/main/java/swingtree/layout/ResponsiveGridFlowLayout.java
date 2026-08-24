@@ -24,6 +24,22 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
     private static final int NUMBER_OF_COLUMNS = 12;
     private static final Logger log = LoggerFactory.getLogger(ResponsiveGridFlowLayout.class);
 
+    // Sum type based states of what this layout remembers of the last size it was asked for:
+    private interface Measurement {
+        final class Nothing implements Measurement { static final Nothing INSTANCE = new Nothing(); }
+        final class Taken implements Measurement {
+            final Container target;
+            final int       width;
+            final Dimension size;
+            Taken( Container target, int width, Dimension size ) {
+                this.target = target;
+                this.width = width;
+                this.size = size;
+            }
+        }
+    }
+
+    private Measurement            _measurement = Measurement.Nothing.INSTANCE;
     private UI.HorizontalAlignment _alignmentCode;
     private int                    _horizontalGapSize;
     private int                    _verticalGapSize;
@@ -108,6 +124,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      */
     public void setAlignment(UI.HorizontalAlignment align) {
         _alignmentCode = align;
+        _discardMeasurement();
     }
 
     /**
@@ -136,6 +153,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      */
     public void setHorizontalGapSize(int size) {
         _horizontalGapSize = size;
+        _discardMeasurement();
     }
 
     /**
@@ -163,6 +181,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      */
     public void setVerticalGapSize(int size) {
         _verticalGapSize = size;
+        _discardMeasurement();
     }
 
     /**
@@ -175,6 +194,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      */
     public void setAlignOnBaseline(boolean alignOnBaseline) {
         this._alignOnBaseline = alignOnBaseline;
+        _discardMeasurement();
     }
 
     /**
@@ -259,6 +279,31 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
      * @return The preferred size of the given container at the given width.
      */
     public Dimension preferredLayoutSizeAtWidth( Container target, int width ) {
+        synchronized (target.getTreeLock()) {
+            // For maximum performance we re-use previous measurements up until the layout gets invalidated!
+            if ( _measurement instanceof Measurement.Taken ) {
+                final Measurement.Taken taken = (Measurement.Taken) _measurement;
+                if ( taken.target == target && taken.width == width && target.isValid() )
+                    return new Dimension(taken.size);
+            }
+            // We could not re-use -> so we take anew measurement:
+            Dimension measured = _measureAtWidth(target, width);
+            _measurement = new Measurement.Taken(target, width, measured);
+            return new Dimension(measured);
+        }
+    }
+
+    /**
+     *  Forgets the last measurement, which every change this layout cannot otherwise
+     *  hear about has to do. Swing reports changes to the container through
+     *  {@link #invalidateLayout(Container)}, but a change to this layout manager itself
+     *  is invisible to it, so its setters have to invalidate as well...
+     */
+    private void _discardMeasurement() {
+        _measurement = Measurement.Nothing.INSTANCE;
+    }
+
+    private Dimension _measureAtWidth( Container target, int width ) {
         synchronized (target.getTreeLock()) {
             final Insets insets = target.getInsets();
             final int hgap = UI.scale(_horizontalGapSize);
@@ -822,7 +867,7 @@ public final class ResponsiveGridFlowLayout implements LayoutManager2 {
 
     @Override
     public void invalidateLayout(Container target) {
-
+        _discardMeasurement();
     }
 
     public Optional<Cell> cellFromCellConf(
