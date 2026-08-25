@@ -1419,7 +1419,7 @@ final class StyleRenderer
             if ( oldClip != null )
                 newClip = StyleUtil.intersect( newClip, oldClip );
 
-            g2d.setClip(newClip);
+            g2d.clip(newClip);
 
             if ( imageIcon instanceof SvgIcon ) {
                 SvgIcon svgIcon = (SvgIcon) imageIcon;
@@ -1587,7 +1587,7 @@ final class StyleRenderer
             // We merge the new clip with the old one:
             if ( oldClip != null )
                 newClip = StyleUtil.intersect( newClip, oldClip );
-            g2d.setClip(newClip);
+            g2d.clip(newClip);
             _renderTextInternal(g2d, font, textBounds, placement, lines, totalHeight);
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Unexpected error while rendering text: '{}'\n", textToRender, e);
@@ -1908,18 +1908,42 @@ final class StyleRenderer
             }
         }
 
-        if ( !kernel.equals(KernelConf.none()) ) {
-            Kernel awtKernel = kernel.toAwtKernel();
+        final @Nullable Kernel awtKernel = kernel.equals(KernelConf.none()) ? null : kernel.toAwtKernel();
+        final int              blurReach = (int) Math.ceil(Math.max(0, blur));
+
+        /*
+            For optimal performance: We only onvolve the part of the parent which is covered by this component,
+            narrowed to whatever Swing asked to have repainted + some padding for the convolution blur reach!
+        */
+        Rectangle window = new Rectangle(0, 0, filtered.getWidth(), filtered.getHeight());
+        if ( awtKernel != null || blurReach > 0 ) {
+            int reachX = blurReach + ( awtKernel == null ? 0 : awtKernel.getWidth()  / 2 );
+            int reachY = blurReach + ( awtKernel == null ? 0 : awtKernel.getHeight() / 2 );
+            Rectangle drawn = new Rectangle(0, 0, (int) Math.ceil(width), (int) Math.ceil(height));
+            Shape requested = g2d.getClip();
+            if ( requested != null )
+                drawn = drawn.intersection(requested.getBounds());
+            drawn.translate(offsetX, offsetY);
+            window = window.intersection(new Rectangle(
+                            drawn.x - reachX,
+                            drawn.y - reachY,
+                            drawn.width  + 2 * reachX,
+                            drawn.height + 2 * reachY
+                        ));
+            if ( window.isEmpty() )
+                return;
+            filtered = _regionOf(filtered, window);
+        }
+
+        if ( awtKernel != null ) {
             ConvolveOp convolve = new ConvolveOp(awtKernel, ConvolveOp.EDGE_NO_OP, null);
             filtered = convolve.filter(filtered, null);
         }
 
-        if ( blur > 0 ) {
-            Kernel blurKernelHorizontal = _makeKernel(blur, false);
-            ConvolveOp blurOp = new ConvolveOp(blurKernelHorizontal, ConvolveOp.EDGE_NO_OP, null);
+        if ( blurReach > 0 ) {
+            ConvolveOp blurOp = new ConvolveOp(_makeKernel(blur, false), ConvolveOp.EDGE_NO_OP, null);
             BufferedImage blurred = blurOp.filter(filtered, null);
-            Kernel blurKernelVertical = _makeKernel(blur, true);
-            blurOp = new ConvolveOp(blurKernelVertical, ConvolveOp.EDGE_NO_OP, null);
+            blurOp = new ConvolveOp(_makeKernel(blur, true), ConvolveOp.EDGE_NO_OP, null);
             filtered = blurOp.filter(blurred, filtered);
         }
 
@@ -1927,13 +1951,29 @@ final class StyleRenderer
         try {
             ComponentAreas areas = ComponentAreas.of(boxModelConf);
             Shape newClip = areas.get(filterConf.area());
-            g2d.setClip(newClip);
-            g2d.drawImage(filtered, -offsetX, -offsetY, null);
+            g2d.clip(newClip);
+            g2d.drawImage(filtered, window.x - offsetX, window.y - offsetY, null);
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Failed to successfully render filtered parent buffer!", e);
         } finally {
             g2d.setClip(oldClip);
         }
+    }
+
+    /**
+     *  Copies one rectangle out of an image, so that the convolutions run over that rectangle
+     *  alone and write into a buffer of this method's making.
+     */
+    private static BufferedImage _regionOf( final BufferedImage source, final Rectangle window ) {
+        BufferedImage region = new BufferedImage(window.width, window.height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D regionGraphics = region.createGraphics();
+        try {
+            regionGraphics.setComposite(AlphaComposite.Src);
+            regionGraphics.drawImage(source, -window.x, -window.y, null);
+        } finally {
+            regionGraphics.dispose();
+        }
+        return region;
     }
 
     private static Kernel _makeKernel( final float radius, final boolean transpose ) {
