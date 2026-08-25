@@ -14,6 +14,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
+import java.awt.Rectangle;
 
 /**
  *  The {@link JComboBox} UI delegate. The outer surface mirrors a text field; the drop-down
@@ -59,6 +60,19 @@ public final class SwingTreeComboBoxUI
 
     @Override
     public boolean canForwardPaintingToSwingTree() { return true; }
+
+    /**
+     *  Swing fills the strip a combo box shows its value in from the {@code ComboBox.background}
+     *  default rather than from the component, which lays a hard rectangle of one fixed colour
+     *  over whatever the style rule has just painted - over its rounded corners, and over its
+     *  translucency if it had any. The rule has already filled the surface, so nothing is drawn
+     *  here unless nothing styles combo boxes at all.
+     */
+    @Override
+    public void paintCurrentValueBackground( Graphics g, Rectangle bounds, boolean hasFocus ) {
+        if ( !SwingTreeLookAndFeel.styles(comboBox.getClass()) )
+            super.paintCurrentValueBackground(g, bounds, hasFocus);
+    }
 
     @Override
     protected JButton createArrowButton() {

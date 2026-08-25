@@ -52,7 +52,7 @@ public final class LinenShowcaseView
     public static JPanel createView() {
         SwingTreeLookAndFeel.initializeUsing( it -> it
             .stylePreset(SwingTreeLookAndFeel.StylePreset.LINEN)
-            .symbolPreset(SwingTreeLookAndFeel.SymbolPreset.FLAT)
+            .symbolPreset(SwingTreeLookAndFeel.SymbolPreset.LINEN)
         );
         AtelierSheet sheet = new AtelierSheet();
         return UI.use(sheet, () -> new AtelierView(Var.of(AtelierViewModel.initial()), sheet));

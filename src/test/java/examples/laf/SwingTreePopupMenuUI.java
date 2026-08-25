@@ -6,7 +6,6 @@ import swingtree.style.ComponentStyleDelegate;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.plaf.ComponentUI;
-import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.BasicPopupMenuUI;
 import java.awt.Graphics;
 
@@ -24,11 +23,6 @@ public final class SwingTreePopupMenuUI
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        JPopupMenu menu = (JPopupMenu) c;
-        // The style engine paints the frame, so clear the border - but only when it is a
-        // look-and-feel default (a UIResource); see SwingTreeScrollPaneUI for why.
-        if ( menu.getBorder() instanceof UIResource && SwingTreeLookAndFeel.styles(c.getClass()) )
-            menu.setBorder(null);
         SwingTreeLookAndFeel.installStyleOn(c);
     }
 

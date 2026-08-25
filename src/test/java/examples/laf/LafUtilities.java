@@ -5,7 +5,10 @@ import swingtree.style.ComponentExtension;
 
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JPanel;
 import javax.swing.JSpinner;
+import javax.swing.SwingUtilities;
+import javax.swing.JViewport;
 import javax.swing.UIManager;
 import javax.swing.event.CaretListener;
 import javax.swing.text.JTextComponent;
@@ -223,6 +226,33 @@ final class LafUtilities
      *  Whether a combo box should be drawn as focused. An editable one hands the focus to its
      *  editor, so asking the combo box itself returns {@code false} forever.
      */
+    /**
+     *  Whether a text component is the inside of a control that already carries a surface of its
+     *  own - the page inside a scroll pane, or the editor inside a spinner - so that a rule
+     *  giving it a box of its own would draw one box inside another.
+     *
+     * @param text the text component being styled
+     * @return {@code true} if something around it has already been given a surface
+     */
+    static boolean isInsideAnotherControl( JTextComponent text ) {
+        return text.getParent() instanceof JViewport || isControlInternal(text);
+    }
+
+    /**
+     *  Whether Swing put this component inside a control which already carries a surface of its
+     *  own. A spinner's editor is a {@link JPanel} the application never declared, holding a text
+     *  field it never declared either, and an editable combo box has an editor of the same kind;
+     *  all of them sit inside a box the control around them has already been given, so a rule
+     *  filling one of them paints over that control.
+     *
+     * @param inner the component being styled
+     * @return {@code true} if it is a piece of a control's own machinery
+     */
+    static boolean isControlInternal( JComponent inner ) {
+        return SwingUtilities.getAncestorOfClass(JSpinner.class, inner) != null
+            || SwingUtilities.getAncestorOfClass(JComboBox.class, inner) != null;
+    }
+
     static boolean hasFocus( JComboBox<?> combo ) {
         if ( combo.isFocusOwner() )
             return true;

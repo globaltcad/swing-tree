@@ -173,7 +173,105 @@ final class Palettes
             .dangerPressed  (rgb(0xB71C1C))
             .onFilled       (rgb(0xFFFFFF));
 
+    /**
+     *  Bold, unmixed colour on a plain sheet, the way flat design uses it: nothing here is a
+     *  shade of anything else, because with no shadow and no gradient to carry meaning the
+     *  colour has to carry all of it.
+     */
+    static final Palette VIVID = Palette.neutral()
+            .background     (rgb(0xF2F2F2))
+            .surface        (rgb(0xFFFFFF))
+            .surfaceHover   (rgb(0xE6E6E6))
+            .surfacePressed (rgb(0xD4D4D4))
+            .surfaceDisabled(rgb(0xEDEDED))
+            .surfaceField   (rgb(0xFFFFFF))
+            .border         (rgb(0x1A1A1A))
+            .borderSoft     (rgb(0xD6D6D6))
+            .text           (rgb(0x1A1A1A))
+            .textMuted      (rgb(0x6B6B6B))
+            .textDisabled   (rgb(0xB0B0B0))
+            .accent         (rgb(0x0078D7))
+            .accentSoft     (rgb(0xB5DCF7))
+            .textureLight   (rgb(0xF2F2F2))
+            .textureDark    (rgb(0xF2F2F2))
+            .primary        (rgb(0x107C10))
+            .primaryHover   (rgb(0x138A13))
+            .primaryPressed (rgb(0x0B5A0B))
+            .danger         (rgb(0xE81123))
+            .dangerHover    (rgb(0xF32636))
+            .dangerPressed  (rgb(0xC50F1F))
+            .onFilled       (rgb(0xFFFFFF));
+
+    /**
+     *  A bench in a workshop: worn leather, card stock, writing paper, brass fittings and felt.
+     *  Everything a skeuomorphic theme wants to pretend to be made of, and all of it light enough
+     *  that the dark ink on top stays readable.
+     */
+    static final Palette WORKSHOP = Palette.neutral()
+            .background     (rgb(0xA3947A))
+            .surface        (rgb(0xE0D6BE))
+            .surfaceHover   (rgb(0xEDE3CC))
+            .surfacePressed (rgb(0xC4B79A))
+            .surfaceDisabled(rgb(0xD2CAB6))
+            .surfaceField   (rgb(0xF7F1E1))
+            .border         (rgb(0x6F5F45))
+            .borderSoft     (rgb(0xA08F70))
+            .text           (rgb(0x33291C))
+            .textMuted      (rgb(0x6B5C45))
+            .textDisabled   (rgb(0x97896F))
+            .accent         (rgb(0xA87C2C))
+            .accentSoft     (rgb(0xE6D3A4))
+            .textureLight   (rgb(0xB0A188))
+            .textureDark    (rgb(0x94856B))
+            .primary        (rgb(0x47693D))
+            .primaryHover   (rgb(0x547A48))
+            .primaryPressed (rgb(0x375130))
+            .danger         (rgb(0x8E3B2E))
+            .dangerHover    (rgb(0xA2483A))
+            .dangerPressed  (rgb(0x6F2C22))
+            .onFilled       (rgb(0xF8F2E2));
+
+    /**
+     *  Night sky through a frosted pane: a deep indigo ground with a violet and a magenta bloom
+     *  in it, and white for everything the glass is made of. The two grain slots carry the two
+     *  blooms, since a glass theme has no grain to spend them on and everything it does have
+     *  depends on there being something vivid behind it.
+     */
+    static final Palette AURORA = Palette.neutral()
+            .background     (rgb(0x241A4D))
+            .surface        (rgb(0xFFFFFF))
+            .surfaceHover   (rgb(0xFFFFFF))
+            .surfacePressed (rgb(0xB9A9FF))
+            .surfaceDisabled(rgb(0x8E86B0))
+            .surfaceField   (rgba(0x120A28, 150))
+            .border         (rgb(0xFFFFFF))
+            .borderSoft     (rgb(0xC9C2E8))
+            .text           (rgb(0xF2EFFF))
+            .textMuted      (rgb(0xB7AEDC))
+            .textDisabled   (rgb(0x7C74A0))
+            .accent         (rgb(0x7DE2FF))
+            .accentSoft     (rgb(0x3B2E6E))
+            .textureLight   (rgb(0x6D3BFF))
+            .textureDark    (rgb(0xFF4FD8))
+            .primary        (rgb(0x6C5CE7))
+            .primaryHover   (rgb(0x7E6FF0))
+            .primaryPressed (rgb(0x5A4BD0))
+            .danger         (rgb(0xFF6B81))
+            .dangerHover    (rgb(0xFF8095))
+            .dangerPressed  (rgb(0xE05468))
+            .onFilled       (rgb(0xFFFFFF));
+
     private static Color rgb( int packed ) {
         return new Color((packed >> 16) & 0xFF, (packed >> 8) & 0xFF, packed & 0xFF);
+    }
+
+    /**
+     *  The same, at less than full opacity. A palette slot is normally solid, but Swing fills a
+     *  few areas - the strip a combo box shows its value in, the ground behind a list, a table
+     *  and a tree - straight from a {@code UIDefaults} colour rather than from the component, so
+     *  a theme made of glass has to hand it a colour it can see through.
+     */
+    private static Color rgba( int packed, int alpha ) {
+        return new Color((packed >> 16) & 0xFF, (packed >> 8) & 0xFF, packed & 0xFF, alpha);
     }
 }

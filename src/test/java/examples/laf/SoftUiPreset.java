@@ -51,7 +51,10 @@ import java.awt.Color;
  *  <p>
  *  Every one of those shades is computed from the palette by a fixed number of channel steps
  *  ({@link #LIGHT_STEP}), never named and never a fraction, which is what lets the same theme be
- *  lit on {@link Palettes#CLAY} and on a midnight blue without glaring on one of them.
+ *  lit on {@link Palettes#CLAY} and on a midnight blue without glaring on one of them. Each fade
+ *  also follows the falloff curve of the thing it stands for rather than a straight ramp - see
+ *  {@link #raised} and {@link #sunken} - and a shadow always reaches further than the highlight
+ *  facing it ({@link #SHEEN_REACH}), because in a real room it does.
  *  <p>
  *  Borders are given up almost entirely, since an outline would do the job the light is there to
  *  do. The exception is focus, which cannot be said with a shadow a resting control already has -
@@ -84,7 +87,16 @@ final class SoftUiPreset
      */
     private static final double INSET_DIMMING = 0.55;
     /** How far the two ends of a surface's own diagonal wash sit from its fill. */
-    private static final int CURVE_STEP = 7;
+    private static final int CURVE_STEP = 5;
+    /**
+     *  How far a highlight reaches compared with the shadow opposite it.
+     *  <p>
+     *  In a real room the two are never the same size. A shadow is an umbra widened by the whole
+     *  angular width of the light, so it spreads; a highlight is only the band where the surface
+     *  has turned far enough to face the lamp, so it stays near the edge. Giving both the same
+     *  reach is what makes a relief read as an outline drawn twice in two colours.
+     */
+    private static final double SHEEN_REACH = 0.75;
 
     /** The corner the light comes from, said once so every extrusion agrees. */
     private static final String LIT    = "lit";
@@ -159,10 +171,16 @@ final class SoftUiPreset
         ComponentStyleDelegate<C> it, Color fill, boolean inward
     ) {
         int step = inward ? -CURVE_STEP : CURVE_STEP;
+        // Most of a rounded rectangle's face points straight at the viewer and is therefore one
+        // even colour; only near the two shoulders does it turn far enough to catch or lose the
+        // light. So the wash is a plateau with a roll-off at each end, not a constant slope,
+        // which is the difference between a curved face and a flat one held at an angle.
         return it.gradient( g -> g
                 .span(UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT)
+                .fractions(0, 0.38, 0.62, 1)
                 .colors(
                     LafUtilities.shadeBySteps(fill, step),
+                    fill,
                     fill,
                     LafUtilities.shadeBySteps(fill, -step)
                 )
@@ -173,6 +191,13 @@ final class SoftUiPreset
      *  Extrudes a surface out of the panel behind it: light from the top left, shadow to the
      *  bottom right, both outside the shape.
      *  <p>
+     *  Each of the two fades along the curve that matches what it is. The shadow uses
+     *  {@link UI.ShadowType#BLUR}, the profile a hard edge takes on when it is convolved with a
+     *  blur, so it leaves the shape at full strength and arrives at nothing with no slope at
+     *  either end - which is what stops the surface looking as though it steps up out of the
+     *  panel rather than swelling out of it. The highlight uses {@link UI.ShadowType#GLOW}, a
+     *  bell, because a sheen is light bleeding off a shoulder and not an edge being cast.
+     *  <p>
      *  An outer shadow is drawn in the component's own margin and is cut off at the component
      *  bounds, so {@code reach} - the offset and the blur together - must never exceed the margin
      *  the caller set, or the soft glow ends in a hard rectangular edge.
@@ -180,23 +205,41 @@ final class SoftUiPreset
     private static <C extends JComponent> ComponentStyleDelegate<C> raised(
         ComponentStyleDelegate<C> it, Palette p, int reach
     ) {
-        int offset = Math.max(1, reach / 3);
-        int blur   = Math.max(1, reach - offset);
+        int sheen = Math.max(2, (int) Math.round(reach * SHEEN_REACH));
         return it
-                .shadow(LIT,    s -> s.color(lit(p)).offset(-offset, -offset).blurRadius(blur).isInset(false))
-                .shadow(SHADED, s -> s.color(shade(p)).offset(offset, offset).blurRadius(blur).isInset(false));
+                .shadow(LIT,    s -> s.color(lit(p))
+                                      .offset(-offsetOf(sheen), -offsetOf(sheen)).blurRadius(blurOf(sheen))
+                                      .type(UI.ShadowType.GLOW).isInset(false))
+                .shadow(SHADED, s -> s.color(shade(p))
+                                      .offset(offsetOf(reach), offsetOf(reach)).blurRadius(blurOf(reach))
+                                      .type(UI.ShadowType.BLUR).isInset(false));
     }
+
+    /** How far a shadow of the given reach is displaced from the shape casting it. */
+    private static int offsetOf( int reach ) { return Math.max(1, reach / 3); }
+
+    /** How much of a shadow of the given reach is spent fading out. */
+    private static int blurOf( int reach ) { return Math.max(1, reach - offsetOf(reach)); }
 
     /**
      *  The same light, turned around and moved inside, which is how a control says it is pressed
      *  and how an input says it is a hole.
+     *  <p>
+     *  Nothing is cast inside a groove: both sides of it are the same wall, turning towards the
+     *  light on one edge and away from it on the other. So both fades take the same symmetric
+     *  {@link UI.ShadowType#PENUMBRA} S-curve, and the wall rounds off into the floor instead of
+     *  meeting it at a line.
      */
     private static <C extends JComponent> ComponentStyleDelegate<C> sunken(
         ComponentStyleDelegate<C> it, Palette p, int depth
     ) {
         return it
-                .shadow(SHADED, s -> s.color(shadeInside(p)).offset(depth, depth).blurRadius(depth * 2).isInset(true))
-                .shadow(LIT,    s -> s.color(litInside(p)).offset(-depth, -depth).blurRadius(depth * 2).isInset(true));
+                .shadow(SHADED, s -> s.color(shadeInside(p))
+                                      .offset(depth, depth).blurRadius(depth * 2)
+                                      .type(UI.ShadowType.PENUMBRA).isInset(true))
+                .shadow(LIT,    s -> s.color(litInside(p))
+                                      .offset(-depth, -depth).blurRadius(depth * 2)
+                                      .type(UI.ShadowType.PENUMBRA).isInset(true));
     }
 
     // ── Surfaces ─────────────────────────────────────────────────────────

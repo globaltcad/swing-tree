@@ -22,6 +22,7 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.FontUIResource;
+import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.BasicLookAndFeel;
 import java.awt.Color;
 import java.awt.Container;
@@ -50,14 +51,14 @@ import java.util.concurrent.ConcurrentHashMap;
  *  <pre>{@code
  *    SwingTreeLookAndFeel.initializeUsing( it -> it
  *        .stylePreset(SwingTreeLookAndFeel.StylePreset.LINEN)
- *        .symbolPreset(SwingTreeLookAndFeel.SymbolPreset.FLAT)
+ *        .symbolPreset(SwingTreeLookAndFeel.SymbolPreset.LINEN)
  *        .overrideStyle(JButton.class, s -> s.borderRadius(2))       // replaces the preset rule
  *        .addStyle(JTextField.class, s -> s.backgroundColor("blue")) // applied on top of it
  *    );
  *  }</pre>
  *  {@link #initializeUsing(Configurator)} also refreshes every window that is already open, so it
  *  doubles as the way to switch themes at runtime. Configuring nothing yields
- *  {@link StylePreset#LINEN} drawn with {@link SymbolPreset#FLAT} symbols.
+ *  {@link StylePreset#LINEN} drawn with {@link SymbolPreset#LINEN} symbols.
  *
  *  <h2>How a component's style is resolved</h2>
  *  A rule is registered against a component <i>type</i> and applies to that type and every
@@ -250,12 +251,21 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
      *  previous theme chose to sit on a fill that is no longer painted - white on white. Here the
      *  component is handed the plain look-and-feel defaults for its own class instead, which is
      *  what "nothing styles this" is supposed to look like.
+     *  <p>
+     *  A component that <em>is</em> styled gives up the border Swing installed on it from
+     *  {@code Button.border}, {@code TextField.border} and the rest. Those are bevels drawn from
+     *  the {@code control*} colours, and the style engine keeps whatever border it found as the
+     *  one to fall back on wherever a rule leaves its own invisible - so under any theme without
+     *  outlines they would surface as a two-tone frame around every control. Only a border Swing
+     *  itself put there is dropped, so one the application set survives.
      *
      * @param c the component the delegate is being installed on
      */
     static void installStyleOn( JComponent c ) {
         if ( !styles(c.getClass()) )
             _restoreDefaultColours(c);
+        else if ( c.getBorder() instanceof UIResource )
+            c.setBorder(null);
         ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
     }
 
@@ -956,7 +966,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          */
         LINEN {
             @Override Tuple<StyleRule>     rules()            { return LinenPreset.rules(); }
-            @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.FLAT; }
+            @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.LINEN; }
             @Override public PalettePreset preferredPalette() { return PalettePreset.LINEN; }
             @Override String               displayName()      { return "Linen"; }
         },
@@ -994,6 +1004,57 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.MATERIAL; }
             @Override public PalettePreset preferredPalette() { return PalettePreset.MATERIAL; }
             @Override String               displayName()      { return "Material"; }
+        },
+        /**
+         *  Flat design: no shadow, no gradient, no bevel and no rounded corner anywhere. With
+         *  depth given up, colour does all the work - a control goes grey, then pale accent under
+         *  the pointer, then full accent with an inverted label when it is pressed - and the hard
+         *  rule around an input is what is left to say that it can be typed into.
+         */
+        FLAT {
+            @Override Tuple<StyleRule>     rules()            { return FlatDesignPreset.rules(); }
+            @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.FLAT; }
+            @Override public PalettePreset preferredPalette() { return PalettePreset.VIVID; }
+            @Override String               displayName()      { return "Flat"; }
+        },
+        /**
+         *  Skeuomorphism: every control pretends to be made of something. The window is a leather
+         *  bench, cards are paper lying on it, and anything you can press is a milled metal plate
+         *  - a grain, a top-to-bottom gradient and a one-pixel bevel, all three at once. Anything
+         *  you type into is a hole cut into the surface instead, and pressing a plate turns it
+         *  into exactly that hole.
+         */
+        SKEUOMORPHIC {
+            @Override Tuple<StyleRule>     rules()            { return SkeuomorphicPreset.rules(); }
+            @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.CARVED; }
+            @Override public PalettePreset preferredPalette() { return PalettePreset.WORKSHOP; }
+            @Override String               displayName()      { return "Skeuomorphic"; }
+        },
+        /**
+         *  Glassmorphism: frosted panes floating over something vivid. Nothing is opaque - a
+         *  surface is a wash of white with the window behind it actually blurred where it shows
+         *  through, a bright hairline along its bevel and a wide soft shadow underneath. The
+         *  window is a gradient rather than a colour, because glass with nothing behind it is
+         *  just a pale rectangle.
+         */
+        GLASSMORPHIC {
+            @Override Tuple<StyleRule>     rules()            { return GlassmorphicPreset.rules(); }
+            @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.GLASS; }
+            @Override public PalettePreset preferredPalette() { return PalettePreset.AURORA; }
+            @Override String               displayName()      { return "Glassmorphic"; }
+        },
+        /**
+         *  Polymorphism: a theme with no fixed appearance, only rules for arriving at one. It
+         *  reads what the palette leaves it to work with, how tall each control is and how deeply
+         *  each surface is nested, and derives everything from those three. Switching the palette
+         *  under it does not re-tint it, it rewrites it - which means it has to be seen in at
+         *  least two palettes to be seen at all.
+         */
+        POLYMORPHIC {
+            @Override Tuple<StyleRule>     rules()            { return PolymorphicPreset.rules(); }
+            @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.ADAPTIVE; }
+            @Override public PalettePreset preferredPalette() { return PalettePreset.MATERIAL; }
+            @Override String               displayName()      { return "Polymorphic"; }
         };
 
         /** @return the preset's style rules, most general first. */
@@ -1038,11 +1099,11 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             @Override Symbols symbols() { return BlankSymbols.INSTANCE; }
             @Override String  displayName() { return "Blank"; }
         },
-        /** Thin strokes, round caps, no bevels and no gradients: the geometry reads at a glance
-         *  and stays crisp at any scale factor. */
-        FLAT {
-            @Override Symbols symbols() { return FlatSymbols.INSTANCE; }
-            @Override String  displayName() { return "Flat"; }
+        /** Thin strokes, round caps, round dots and no fills to speak of: drawn the way a pen
+         *  draws, so the geometry reads at a glance and stays crisp at any scale factor. */
+        LINEN {
+            @Override Symbols symbols() { return LinenSymbols.INSTANCE; }
+            @Override String  displayName() { return "Linen"; }
         },
         /** Extruded: every glyph is the surface colour, lit from the top left and shadowed at the
          *  bottom right, so it reads as pressed out of the panel rather than drawn onto it. */
@@ -1061,6 +1122,30 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         MATERIAL {
             @Override Symbols symbols() { return MaterialSymbols.INSTANCE; }
             @Override String  displayName() { return "Material"; }
+        },
+        /** Rectangles and solid triangles: no radius, no rim, no halo and no shade, so a control
+         *  that is on is the same shape as one that is off, filled. */
+        FLAT {
+            @Override Symbols symbols() { return FlatSymbols.INSTANCE; }
+            @Override String  displayName() { return "Flat"; }
+        },
+        /** Cut into the surface or screwed onto it: every mark is drawn twice, dark on the line
+         *  and light one pixel below it, where the far wall of the groove catches the light. */
+        CARVED {
+            @Override Symbols symbols() { return CarvedSymbols.INSTANCE; }
+            @Override String  displayName() { return "Carved"; }
+        },
+        /** Cut from the same glass as everything else: a shape that is off is a wash you can see
+         *  the ground through, one that is on is the accent behind a brighter rim. */
+        GLASS {
+            @Override Symbols symbols() { return GlassSymbols.INSTANCE; }
+            @Override String  displayName() { return "Glass"; }
+        },
+        /** Not a set of its own but a choice between three of the others, remade from the palette
+         *  in force on every call. */
+        ADAPTIVE {
+            @Override Symbols symbols() { return AdaptiveSymbols.INSTANCE; }
+            @Override String  displayName() { return "Adaptive"; }
         };
 
         /** @return the symbol painter this preset stands for. */
@@ -1114,6 +1199,23 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         MATERIAL {
             @Override Palette palette() { return Palettes.MATERIAL; }
             @Override String  displayName() { return "Material"; }
+        },
+        /** Bold unmixed colour on a plain grey sheet: azure, forest green and pillar-box red, none
+         *  of them a shade of any other. */
+        VIVID {
+            @Override Palette palette() { return Palettes.VIVID; }
+            @Override String  displayName() { return "Vivid"; }
+        },
+        /** A bench in a workshop: worn leather, card stock, writing paper, brass and felt. */
+        WORKSHOP {
+            @Override Palette palette() { return Palettes.WORKSHOP; }
+            @Override String  displayName() { return "Workshop"; }
+        },
+        /** Night sky through a frosted pane: a deep indigo ground with a violet and a magenta
+         *  bloom in it, and white for everything the glass is made of. */
+        AURORA {
+            @Override Palette palette() { return Palettes.AURORA; }
+            @Override String  displayName() { return "Aurora"; }
         };
 
         /** @return the colours this preset stands for. */

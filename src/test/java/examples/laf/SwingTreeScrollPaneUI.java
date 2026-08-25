@@ -6,7 +6,6 @@ import swingtree.style.ComponentStyleDelegate;
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
 import javax.swing.plaf.ComponentUI;
-import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.BasicScrollPaneUI;
 import java.awt.Graphics;
 
@@ -26,12 +25,6 @@ public final class SwingTreeScrollPaneUI
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        JScrollPane pane = (JScrollPane) c;
-        // The style engine draws the frame, so the component border should be cleared - but only
-        // when it is a look-and-feel default (a UIResource). A border the application set
-        // explicitly is preserved so it survives a look-and-feel swap, honouring Swing's contract.
-        if ( pane.getBorder() instanceof UIResource && SwingTreeLookAndFeel.styles(c.getClass()) )
-            pane.setBorder(null);
         SwingTreeLookAndFeel.installStyleOn(c);
     }
 
