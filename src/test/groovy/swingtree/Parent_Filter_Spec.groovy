@@ -47,6 +47,14 @@ import java.util.concurrent.TimeUnit
     pane occupies the same rectangle in both renderings and the two can be compared pixel for
     pixel.
 
+    The last scenario is about a different way the same picture can go wrong. Swing repaints as
+    little as it can get away with: move the pointer onto a button and the only thing redrawn
+    is that button's rectangle, expressed as a clip on the graphics everything is painted
+    through. A filter still has to read the whole of the parent underneath its pane, because a
+    blur gathers colour from further away than the pixel it is computing. So what a pane shows
+    inside the repainted rectangle has to be the same whether that rectangle was the whole
+    window or a corner of one button.
+
 ''')
 @Subject([UI])
 @Timeout(value = 90, unit = TimeUnit.SECONDS)
@@ -241,5 +249,92 @@ class Parent_Filter_Spec extends Specification
             'a further neighbour does'   | true          | true         | false
             'all three neighbours do'    | true          | true         | true
             'only the furthest one does' | false         | false        | true
+    }
+
+    def 'A pane using `parentFilter(..)` shows the same thing when only part of the window is repainted. (#description)'(
+        String description, int clipX, int clipY, int clipWidth, int clipHeight
+    ) {
+        reportInfo """
+            Swing hands a component a graphics whose clip says which part of it is worth
+            redrawing, and redraws nothing else. Moving the pointer onto one button in a window
+            full of them sets that clip to the button, and every ancestor it is painted through
+            gets the same narrow clip.
+
+            The clip says what may be **drawn**. It does not say what may be **read**. A pane
+            blurring its parent needs the parent for a good distance around every pixel it
+            produces, including the parent from outside the rectangle being redrawn - so a
+            filter which only ever looks at the freshly repainted strip is looking at a parent
+            with a hole around it, and paints the hole.
+
+            The rows below repaint through three different rectangles: one lying wholly inside
+            the pane, one straddling its edge, and - as a control which must pass either way -
+            one covering the whole component, which is simply the full repaint again.
+        """
+        given : """
+            A parent painted in fine-grained noise, with a single pane over it blurring what is
+            behind it. The parent is inset by 40 pixels all round, so the pane sits well away
+            from the parent's own edges and nothing about this scenario depends on what a filter
+            does when it runs out of parent to read.
+        """
+            var parent =
+                    UI.panel("fill, ins 40")
+                    .withStyle( it -> it
+                        .backgroundColor(UI.Color.BLACK)
+                        .noise( n -> n
+                            .function(UI.NoiseType.STOCHASTIC)
+                            .scale(0.3)
+                            .colors(UI.Color.BLACK, UI.Color.WHITE) ) )
+                    .add("grow", UI.panel().withStyle( it -> it
+                            .backgroundColor(UI.Color.TRANSPARENT)
+                            .parentFilter( f -> f.blur(6) ) ))
+                    .get(JPanel)
+            parent.setSize(240, 160)
+            parent.doLayout()
+        and : """
+            A way of painting that parent through a clip of our choosing, which is the one thing
+            `Utility.renderSingleComponent` cannot be asked for: it always paints the component
+            whole, and a partial repaint is exactly what is under test here.
+        """
+            var paintedThroughClip = { int x, int y, int width, int height ->
+                return UI.runAndGet(() -> {
+                    var image = Utility.createDeterministicImage(240, 160)
+                    var graphics = Utility.createDeterministicGraphics(image)
+                    graphics.setClip(x, y, width, height)
+                    Utility.paintWithoutWindow(parent, graphics)
+                    graphics.dispose()
+                    return image
+                })
+            }
+        and : 'The same pixel count as before, over a rectangle of our choosing.'
+            var pixelsDifferingInside = { BufferedImage a, BufferedImage b,
+                                          int x, int y, int width, int height ->
+                int count = 0
+                for ( int row = y; row < y + height; row++ )
+                    for ( int column = x; column < x + width; column++ )
+                        for ( int channelShift : [0, 8, 16, 24] ) // blue, green, red and alpha
+                            if ( Math.abs(
+                                    ((a.getRGB(column, row) >> channelShift) & 0xff) -
+                                    ((b.getRGB(column, row) >> channelShift) & 0xff)
+                                 ) > 8 ) {
+                                count++
+                                break
+                            }
+                return count
+            }
+        and : 'The whole component painted in one go, which is what a partial repaint has to agree with.'
+            var fullRepaint = paintedThroughClip(0, 0, 240, 160)
+
+        when : 'Only the rectangle of this row is repainted:'
+            var partialRepaint = paintedThroughClip(clipX, clipY, clipWidth, clipHeight)
+
+        then : 'Inside that rectangle, the two are the same picture.'
+            pixelsDifferingInside(fullRepaint, partialRepaint,
+                                  clipX, clipY, clipWidth, clipHeight) == 0
+
+        where : 'The repainted rectangle sits inside the pane, across its edge, and around everything.'
+            description                      | clipX | clipY | clipWidth | clipHeight
+            'a rectangle inside the pane'    | 100   | 70    | 40        | 30
+            'a rectangle across its edge'    | 30    | 60    | 60        | 40
+            'the whole component (control)'  | 0     | 0     | 240       | 160
     }
 }
