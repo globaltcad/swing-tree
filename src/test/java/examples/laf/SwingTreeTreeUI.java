@@ -33,11 +33,18 @@ public final class SwingTreeTreeUI
     public void installUI( JComponent c ) {
         super.installUI(c);
         JTree tree = (JTree) c;
-        tree.setRowHeight(UI.scale(SwingTreeLookAndFeel.symbols().treeRowHeight()));
-        tree.setShowsRootHandles(true);
-        setExpandedIcon(GlyphIcons.treeExpanded());
-        setCollapsedIcon(GlyphIcons.treeCollapsed());
-        ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        if ( SwingTreeLookAndFeel.drawsOwnChrome() ) {
+            tree.setRowHeight(UI.scale(SwingTreeLookAndFeel.symbols().treeRowHeight()));
+            tree.setShowsRootHandles(true);
+            setExpandedIcon(GlyphIcons.treeExpanded());
+            setCollapsedIcon(GlyphIcons.treeCollapsed());
+        } else {
+            // See SwingTreeTableUI: a row shorter than the font in it is unreadable, not plain.
+            java.awt.Font font = tree.getFont();
+            int size = font == null ? UI.scale(13) : Math.round(font.getSize2D());
+            tree.setRowHeight(Math.round(size * 1.75f));
+        }
+        SwingTreeLookAndFeel.installStyleOn(c);
     }
 
     @Override
@@ -54,13 +61,19 @@ public final class SwingTreeTreeUI
     @Override
     public boolean canForwardPaintingToSwingTree() { return true; }
 
-    /** No vertical guide line between siblings. */
+    /** No vertical guide line between siblings, unless the symbol set has no opinion at all. */
     @Override
-    protected void paintVerticalLine( Graphics g, JComponent c, int x, int top, int bottom ) { /* off */ }
+    protected void paintVerticalLine( Graphics g, JComponent c, int x, int top, int bottom ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+            super.paintVerticalLine(g, c, x, top, bottom);
+    }
 
-    /** No horizontal guide line into a child. */
+    /** No horizontal guide line into a child, same caveat. */
     @Override
-    protected void paintHorizontalLine( Graphics g, JComponent c, int y, int left, int right ) { /* off */ }
+    protected void paintHorizontalLine( Graphics g, JComponent c, int y, int left, int right ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+            super.paintHorizontalLine(g, c, y, left, right);
+    }
 
     @Override
     public ComponentStyleDelegate<JTree> style( ComponentStyleDelegate<JTree> it ) throws Exception {

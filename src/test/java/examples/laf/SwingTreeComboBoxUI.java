@@ -39,7 +39,7 @@ public final class SwingTreeComboBoxUI
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        SwingTreeLookAndFeel.installStyleOn(c);
         // A non-editable combo owns focus itself and the inherited delegate repaints it, but an
         // editable combo's focus lives on its editor, so bridge that to a repaint of the whole.
         JComboBox<?> combo = (JComboBox<?>) c;
@@ -70,7 +70,9 @@ public final class SwingTreeComboBoxUI
     public boolean canForwardPaintingToSwingTree() { return true; }
 
     @Override
-    protected JButton createArrowButton() { return new ArrowButton(); }
+    protected JButton createArrowButton() {
+        return SwingTreeLookAndFeel.drawsOwnChrome() ? new ArrowButton() : super.createArrowButton();
+    }
 
     @Override
     public ComponentStyleDelegate<JComboBox<?>> style( ComponentStyleDelegate<JComboBox<?>> it ) throws Exception {

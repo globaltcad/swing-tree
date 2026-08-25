@@ -47,9 +47,9 @@ public final class SwingTreeTableHeaderUI
         // already falls back to this default, and installing ours per column would make it stick
         // after switching away, because other look and feels replace the header's default
         // renderer but do not clear per-column ones.
-        if ( isReplaceableLafDefault(header.getDefaultRenderer()) )
+        if ( SwingTreeLookAndFeel.drawsOwnChrome() && isReplaceableLafDefault(header.getDefaultRenderer()) )
             header.setDefaultRenderer(new HeaderRenderer());
-        ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        SwingTreeLookAndFeel.installStyleOn(c);
     }
 
     /**

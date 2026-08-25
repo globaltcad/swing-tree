@@ -34,9 +34,9 @@ public final class SwingTreePopupMenuUI
         JPopupMenu menu = (JPopupMenu) c;
         // The style engine paints the frame, so clear the border - but only when it is a
         // look-and-feel default (a UIResource); see SwingTreeScrollPaneUI for why.
-        if ( menu.getBorder() instanceof UIResource )
+        if ( menu.getBorder() instanceof UIResource && SwingTreeLookAndFeel.styles(c.getClass()) )
             menu.setBorder(null);
-        ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        SwingTreeLookAndFeel.installStyleOn(c);
     }
 
     @Override

@@ -38,7 +38,7 @@ public final class SwingTreeSliderUI
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        SwingTreeLookAndFeel.installStyleOn(c);
     }
 
     @Override
@@ -88,16 +88,23 @@ public final class SwingTreeSliderUI
 
     @Override
     protected Dimension getThumbSize() {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+            return super.getThumbSize();
         int side = UI.scale(SwingTreeLookAndFeel.symbols().sliderThumbDiameter());
         return new Dimension(side, side);
     }
 
-    /** The handle itself indicates focus, so no separate focus rectangle is drawn. */
+    /** The handle itself indicates focus, so no separate focus rectangle is drawn - unless the
+     *  symbol set has no handle of its own, in which case Swing's own indicator is the one there is. */
     @Override
-    public void paintFocus( Graphics g ) { /* the handle indicates focus */ }
+    public void paintFocus( Graphics g ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+            super.paintFocus(g);
+    }
 
     @Override
     public void paintTrack( Graphics g ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() ) { super.paintTrack(g); return; }
         boolean    horizontal = slider.getOrientation() == SwingConstants.HORIZONTAL;
         int        centre     = horizontal
                                     ? thumbRect.x + thumbRect.width / 2
@@ -115,6 +122,7 @@ public final class SwingTreeSliderUI
 
     @Override
     public void paintThumb( Graphics g ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() ) { super.paintThumb(g); return; }
         Graphics2D g2 = (Graphics2D) g.create();
         try {
             SwingTreeLookAndFeel.symbols().paintSliderThumb(
@@ -133,6 +141,8 @@ public final class SwingTreeSliderUI
 
     /** @return the smallest extent across the slider that still fits the handle, plus a margin. */
     private static int thickness() {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+            return 0;
         return UI.scale(SwingTreeLookAndFeel.symbols().sliderThumbDiameter() + 4);
     }
 }

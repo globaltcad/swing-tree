@@ -27,6 +27,8 @@ final class FlatSymbols implements Symbols
 
     private FlatSymbols() {}
 
+    @Override public boolean drawsItsOwnChrome() { return true; }
+
     @Override public int checkGlyphSize()        { return 14; }
     @Override public int arrowGlyphSize()        { return 12; }
     @Override public int comboArrowButtonSize()  { return 20; }

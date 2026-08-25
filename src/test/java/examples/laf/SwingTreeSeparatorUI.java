@@ -34,12 +34,17 @@ public final class SwingTreeSeparatorUI
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        SwingTreeLookAndFeel.installStyleOn(c);
     }
 
     @Override
     public void paint( Graphics g, JComponent c ) {
-        ComponentExtension.from(c).paintBackground(g, g2 -> drawHairline((Graphics2D) g2, (JSeparator) c));
+        ComponentExtension.from(c).paintBackground(g, g2 -> {
+            if ( SwingTreeLookAndFeel.drawsOwnChrome() )
+                drawHairline((Graphics2D) g2, (JSeparator) c);
+            else
+                super.paint(g2, c);
+        });
     }
 
     @Override
@@ -50,6 +55,8 @@ public final class SwingTreeSeparatorUI
 
     @Override
     public Dimension getPreferredSize( JComponent c ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+            return super.getPreferredSize(c);
         int thickness = thickness();
         return ((JSeparator) c).getOrientation() == SwingConstants.VERTICAL
                 ? new Dimension(thickness, 0)

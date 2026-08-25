@@ -36,9 +36,9 @@ public final class SwingTreeScrollPaneUI
         // The style engine draws the frame, so the component border should be cleared - but only
         // when it is a look-and-feel default (a UIResource). A border the application set
         // explicitly is preserved so it survives a look-and-feel swap, honouring Swing's contract.
-        if ( pane.getBorder() instanceof UIResource )
+        if ( pane.getBorder() instanceof UIResource && SwingTreeLookAndFeel.styles(c.getClass()) )
             pane.setBorder(null);
-        ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        SwingTreeLookAndFeel.installStyleOn(c);
     }
 
     @Override

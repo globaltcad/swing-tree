@@ -28,6 +28,22 @@ import java.awt.Rectangle;
  */
 interface Symbols
 {
+    /**
+     *  Whether this symbol set has chrome of its own at all.
+     *  <p>
+     *  A set answering {@code false} - the blank one - makes every delegate fall through to the
+     *  painting and the sizing its inherited {@code Basic*UI} would do, and leaves the tree handles
+     *  and the submenu arrow to Swing's own icons. Nothing else here is then called, which is why
+     *  the blank set is allowed to answer most of it with nothing.
+     *  <p>
+     *  The two exceptions are {@link #paintCheckGlyph} and {@link #paintRadioGlyph}, which are
+     *  asked of every set: the basic look and feel's own versions of those two are empty stubs, and
+     *  a control nobody can read is not what "no chrome" is supposed to mean.
+     *
+     * @return {@code true} if this set draws and sizes the chrome itself
+     */
+    boolean drawsItsOwnChrome();
+
     // ── Metrics, in developer pixels ─────────────────────────────────────
 
     /** @return the side length of the check-box and radio glyphs. */

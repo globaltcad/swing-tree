@@ -1,6 +1,7 @@
 package examples.laf;
 
 import sprouts.From;
+import sprouts.Tuple;
 import sprouts.Viewable;
 import swingtree.SwingTree;
 import swingtree.api.Configurator;
@@ -21,7 +22,6 @@ import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.basic.BasicLookAndFeel;
 import java.awt.Color;
 import java.awt.Window;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -229,6 +229,56 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
     static Symbols symbols() { return conf().symbols(); }
 
     /**
+     *  Whether the installed symbol set draws chrome of its own. When it does not - the blank one -
+     *  every delegate falls through to the painting and the sizing its inherited {@code Basic*UI}
+     *  would do, which is what turns this look and feel into plain Swing with the style engine
+     *  wired in and nothing else.
+     *
+     * @return {@code true} if the symbol set has chrome of its own
+     */
+    static boolean drawsOwnChrome() { return conf().symbols().drawsItsOwnChrome(); }
+
+    /**
+     *  Whether any rule styles components of the given type. A delegate asks before it makes room
+     *  for a style that is not coming.
+     *
+     * @param componentType the runtime class of the component
+     * @return {@code true} if some rule governs it
+     */
+    static boolean styles( Class<?> componentType ) { return conf().styles(componentType); }
+
+    /**
+     *  Installs the style engine on a component, and first hands the component back to Swing's own
+     *  defaults if nothing styles its type any more.
+     *  <p>
+     *  A style rule's colours do not only get painted, they get <em>installed</em>: the engine
+     *  calls {@code setForeground(..)} and {@code setBackground(..)} on the component itself. That
+     *  outlives the preset that asked for them, because Swing treats a colour it did not install as
+     *  the application's and refuses to overwrite it. Switching from a theme to
+     *  {@link StylePreset#BLANK} would therefore leave every button carrying the label colour the
+     *  previous theme chose to sit on a fill that is no longer painted - white on white. Here the
+     *  component is handed the plain look-and-feel defaults for its own class instead, which is
+     *  what "nothing styles this" is supposed to look like.
+     *
+     * @param c the component the delegate is being installed on
+     */
+    static void installStyleOn( JComponent c ) {
+        if ( !styles(c.getClass()) )
+            _restoreDefaultColours(c);
+        ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+    }
+
+    /** Re-reads the two colour defaults of a component's own UI class, e.g. "Button.background". */
+    private static void _restoreDefaultColours( JComponent c ) {
+        String id     = c.getUIClassID();
+        String prefix = id.endsWith("UI") ? id.substring(0, id.length() - 2) : id;
+        Color  bg     = UIManager.getColor(prefix + ".background");
+        Color  fg     = UIManager.getColor(prefix + ".foreground");
+        if ( bg != null ) c.setBackground(bg);
+        if ( fg != null ) c.setForeground(fg);
+    }
+
+    /**
      *  Runs the configured style rules of the component being styled. Every UI delegate's
      *  {@code style(..)} method is nothing but a call to this.
      *
@@ -368,17 +418,18 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         table.put("CheckBox.background",    ui(p.background()));
         table.put("CheckBox.foreground",    ui(p.text()));
         table.put("CheckBox.font",          baseFont);
-        table.put("CheckBox.icon",          GlyphIcons.checkBox());
         table.put("RadioButton.background", ui(p.background()));
         table.put("RadioButton.foreground", ui(p.text()));
         table.put("RadioButton.font",       baseFont);
-        table.put("RadioButton.icon",       GlyphIcons.radio());
 
         table.put("ProgressBar.background",          ui(p.surfaceDisabled()));
         table.put("ProgressBar.foreground",          ui(p.accent()));
         table.put("ProgressBar.selectionForeground", ui(p.surface()));
         table.put("ProgressBar.selectionBackground", ui(p.text()));
         table.put("ProgressBar.font",                baseFont);
+        // BasicLookAndFeel's own default here is a two-pixel green line, which is a debugging
+        // artefact from 1998 that no palette can make sense of.
+        table.put("ProgressBar.border",              BorderFactory.createEmptyBorder());
 
         table.put("Slider.background", ui(p.background()));
         table.put("Slider.foreground", ui(p.accent()));
@@ -451,8 +502,6 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         table.put("Tree.selectionBorderColor", ui(p.accent()));
         table.put("Tree.line",                 ui(p.borderSoft()));
         table.put("Tree.hash",                 ui(p.borderSoft()));
-        table.put("Tree.expandedIcon",         GlyphIcons.treeExpanded());
-        table.put("Tree.collapsedIcon",        GlyphIcons.treeCollapsed());
         table.put("Tree.font",                 baseFont);
 
         table.put("ToolBar.background",         ui(p.surface()));
@@ -481,14 +530,26 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         }
         table.put("Menu.acceleratorForeground",              ui(p.textMuted()));
         table.put("Menu.acceleratorSelectionForeground",     ui(p.text()));
-        table.put("Menu.arrowIcon",                          GlyphIcons.submenuArrow());
         table.put("MenuItem.acceleratorForeground",          ui(p.textMuted()));
         table.put("MenuItem.acceleratorSelectionForeground", ui(p.text()));
-        table.put("CheckBoxMenuItem.checkIcon",              GlyphIcons.checkBox());
-        table.put("RadioButtonMenuItem.checkIcon",           GlyphIcons.radio());
         table.put("PopupMenu.background",                    ui(p.surfaceField()));
         table.put("PopupMenu.foreground",                    ui(p.text()));
         table.put("PopupMenu.font",                          baseFont);
+
+        // The glyphs Swing draws through an icon rather than through a UI delegate. The check and
+        // the radio mark are installed whatever the symbol set says, because the basic look and
+        // feel's own versions of those two are empty stubs and a control nobody can read is not
+        // what "no styling" means. The rest have working basic defaults, so a symbol set with no
+        // chrome of its own leaves them alone.
+        table.put("CheckBox.icon",                 GlyphIcons.checkBox());
+        table.put("RadioButton.icon",              GlyphIcons.radio());
+        table.put("CheckBoxMenuItem.checkIcon",    GlyphIcons.checkBox());
+        table.put("RadioButtonMenuItem.checkIcon", GlyphIcons.radio());
+        if ( s.drawsItsOwnChrome() ) {
+            table.put("Tree.expandedIcon",  GlyphIcons.treeExpanded());
+            table.put("Tree.collapsedIcon", GlyphIcons.treeCollapsed());
+            table.put("Menu.arrowIcon",     GlyphIcons.submenuArrow());
+        }
 
         table.put("TabbedPane.background",            ui(p.background()));
         table.put("TabbedPane.foreground",            ui(p.text()));
@@ -541,62 +602,82 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
     public static final class Conf
     {
         static final Conf DEFAULT = new Conf(
-                StylePreset.LINEN, SymbolPreset.FLAT_AND_SIMPLE, null,
-                Collections.<StyleRule>emptyList(), Collections.<StyleRule>emptyList()
+                StylePreset.LINEN, null, null, null,
+                Tuple.of(StyleRule.class), Tuple.of(StyleRule.class)
         );
 
-        private final StylePreset     _stylePreset;
-        private final SymbolPreset    _symbolPreset;
-        private final Palette         _palette;   // null means "whatever the style preset brings"
-        private final List<StyleRule> _overrides;
-        private final List<StyleRule> _additions;
+        private final StylePreset      _stylePreset;
+        private final SymbolPreset     _symbolPreset;   // null means "whatever the style preset prefers"
+        private final PalettePreset    _palettePreset;  // null means the same
+        private final Palette          _palette;        // null means "whatever the palette preset brings"
+        private final Tuple<StyleRule> _overrides;
+        private final Tuple<StyleRule> _additions;
 
         /** Memoises the fold of preset, overrides and additions per component class, so that a
          *  style gathered on every paint costs a single map lookup. */
         private final Map<Class<?>, Styler<?>> _resolved = new ConcurrentHashMap<>();
 
         private Conf(
-            StylePreset     stylePreset,
-            SymbolPreset    symbolPreset,
-            Palette         palette,
-            List<StyleRule> overrides,
-            List<StyleRule> additions
+            StylePreset      stylePreset,
+            SymbolPreset     symbolPreset,
+            PalettePreset    palettePreset,
+            Palette          palette,
+            Tuple<StyleRule> overrides,
+            Tuple<StyleRule> additions
         ) {
-            _stylePreset  = stylePreset;
-            _symbolPreset = symbolPreset;
-            _palette      = palette;
-            _overrides    = overrides;
-            _additions    = additions;
+            _stylePreset   = stylePreset;
+            _symbolPreset  = symbolPreset;
+            _palettePreset = palettePreset;
+            _palette       = palette;
+            _overrides     = overrides;
+            _additions     = additions;
         }
 
         /**
-         *  Chooses the table of style rules the look and feel starts from. Switching it also
-         *  switches the palette, unless {@link #palette(Configurator)} has already been called.
+         *  Chooses the table of style rules the look and feel starts from. A preset also names the
+         *  symbol set and the palette it was designed against, so switching it switches the whole
+         *  look - unless {@link #symbolPreset(SymbolPreset)} or {@link #palettePreset(PalettePreset)}
+         *  has already been called, in which case that choice stands.
          *
          * @param preset the style preset to draw the default rules from
          * @return a new configuration using {@code preset}
          */
         public Conf stylePreset( StylePreset preset ) {
             Objects.requireNonNull(preset);
-            return new Conf(preset, _symbolPreset, _palette, _overrides, _additions);
+            return new Conf(preset, _symbolPreset, _palettePreset, _palette, _overrides, _additions);
         }
 
         /**
-         *  Chooses how the small pieces of geometry are drawn — check marks, chevrons, slider
-         *  handles, scrollbar thumbs, split-pane grips — and how thick the chrome around them is.
+         *  Chooses how the small pieces of geometry are drawn - check marks, arrows, slider
+         *  handles, scroll thumbs, split-pane grips - and how thick the chrome around them is.
          *
          * @param preset the symbol preset to draw the glyphs with
          * @return a new configuration using {@code preset}
          */
         public Conf symbolPreset( SymbolPreset preset ) {
             Objects.requireNonNull(preset);
-            return new Conf(_stylePreset, preset, _palette, _overrides, _additions);
+            return new Conf(_stylePreset, preset, _palettePreset, _palette, _overrides, _additions);
         }
 
         /**
-         *  Adjusts the named colours every preset reads from. The configurator receives the
-         *  palette resolved so far — the style preset's own on the first call — so only the
-         *  colours that actually change need to be named.
+         *  Chooses the named colours every rule and every symbol reads from. Because a preset asks
+         *  the palette for "the surface a raised control is filled with" rather than for a literal
+         *  colour, any palette can be paired with any style preset.
+         *  <p>
+         *  This also discards a palette built earlier with {@link #palette(Configurator)}: asking
+         *  for a different palette wholesale is a decision about all of the colours, not some.
+         *
+         * @param preset the palette preset to paint with
+         * @return a new configuration using {@code preset}
+         */
+        public Conf palettePreset( PalettePreset preset ) {
+            Objects.requireNonNull(preset);
+            return new Conf(_stylePreset, _symbolPreset, preset, null, _overrides, _additions);
+        }
+
+        /**
+         *  Adjusts individual named colours. The configurator receives the palette resolved so far,
+         *  so only the colours that actually change need to be named.
          *
          * @param configurator receives the current palette and returns the desired one
          * @return a new configuration using the returned palette
@@ -609,12 +690,12 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             } catch ( Exception e ) {
                 throw new IllegalArgumentException("Failed to configure the look and feel palette.", e);
             }
-            return new Conf(_stylePreset, _symbolPreset, configured, _overrides, _additions);
+            return new Conf(_stylePreset, _symbolPreset, _palettePreset, configured, _overrides, _additions);
         }
 
         /**
-         *  Replaces the preset's rule for {@code type} and every subtype of it. Use this when
-         *  the preset's idea of how a component looks is wrong for the application; use
+         *  Replaces the preset's rule for {@code type} and every subtype of it. Use this when the
+         *  preset's idea of how a component looks is wrong for the application; use
          *  {@link #addStyle(Class, Styler)} when it is merely incomplete.
          *
          * @param type   the component type the rule applies to, subtypes included
@@ -623,13 +704,14 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          * @return a new configuration carrying the rule
          */
         public <C extends JComponent> Conf overrideStyle( Class<C> type, Styler<C> styler ) {
-            return new Conf(_stylePreset, _symbolPreset, _palette, _appended(_overrides, type, styler), _additions);
+            return new Conf(_stylePreset, _symbolPreset, _palettePreset, _palette,
+                            _overrides.add(new StyleRule(type, styler)), _additions);
         }
 
         /**
          *  Applies {@code styler} on top of whatever rule already governs {@code type} and its
-         *  subtypes. Several additions may target the same type; they run in the order they
-         *  were registered.
+         *  subtypes. Several additions may target the same type; they run in the order they were
+         *  registered.
          *
          * @param type   the component type the rule applies to, subtypes included
          * @param styler the style rule to apply on top of the resolved one
@@ -637,23 +719,23 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          * @return a new configuration carrying the rule
          */
         public <C extends JComponent> Conf addStyle( Class<C> type, Styler<C> styler ) {
-            return new Conf(_stylePreset, _symbolPreset, _palette, _overrides, _appended(_additions, type, styler));
-        }
-
-        private static <C extends JComponent> List<StyleRule> _appended(
-            List<StyleRule> rules, Class<C> type, Styler<C> styler
-        ) {
-            List<StyleRule> extended = new ArrayList<>(rules.size() + 1);
-            extended.addAll(rules);
-            extended.add(new StyleRule(type, styler));
-            return Collections.unmodifiableList(extended);
+            return new Conf(_stylePreset, _symbolPreset, _palettePreset, _palette,
+                            _overrides, _additions.add(new StyleRule(type, styler)));
         }
 
         // ── read back by the look and feel and its delegates ──────────────
 
-        Palette palette() { return _palette == null ? _stylePreset.palette() : _palette; }
+        Palette palette() {
+            if ( _palette != null )
+                return _palette;
+            PalettePreset preset = _palettePreset != null ? _palettePreset : _stylePreset.preferredPalette();
+            return preset.palette();
+        }
 
-        Symbols symbols() { return _symbolPreset.symbols(); }
+        Symbols symbols() {
+            SymbolPreset preset = _symbolPreset != null ? _symbolPreset : _stylePreset.preferredSymbols();
+            return preset.symbols();
+        }
 
         String name() { return _stylePreset.displayName(); }
 
@@ -681,8 +763,19 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             return resolved;
         }
 
+        /**
+         *  Whether anything at all styles components of this type. A delegate asks before it makes
+         *  room for a style that is not coming: suppressing a button's own content-area fill is
+         *  right when a rule is going to paint one and wrong when nothing is, which is exactly the
+         *  difference between a theme and {@link StylePreset#BLANK}.
+         *
+         * @param componentType the runtime class of the component
+         * @return {@code true} if some rule governs it
+         */
+        boolean styles( Class<?> componentType ) { return stylerFor(componentType) != Styler.none(); }
+
         /** @return the rule of the most derived matching type, the last registered one winning ties. */
-        private static Styler<?> _mostSpecific( List<StyleRule> rules, Class<?> componentType ) {
+        private static Styler<?> _mostSpecific( Tuple<StyleRule> rules, Class<?> componentType ) {
             StyleRule best = null;
             for ( StyleRule rule : rules ) {
                 if ( !rule.appliesTo(componentType) )
@@ -840,49 +933,202 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
     }
 
     /**
-     *  The tables of {@link Styler} rules a {@link SwingTreeLookAndFeel} can be built from.
-     *  A preset brings both the rules and the palette they were designed against; an
-     *  application may then re-tint the palette or override individual rules through
-     *  {@link Conf}.
+     *  The tables of {@link Styler} rules a {@link SwingTreeLookAndFeel} can be built from. A
+     *  preset also names the {@link SymbolPreset} and {@link PalettePreset} it was designed
+     *  against; those are what a {@link Conf} falls back to when the application does not choose.
      */
     public enum StylePreset
     {
         /**
-         *  A calm, paper-like theme: cream surfaces, taupe borders, a deep olive accent for
-         *  focus and selection, and a barely perceptible woven grain on the window background.
+         *  No rules at all - the look and feel becomes plain Swing with the style engine wired in
+         *  and nothing else, which is what an {@code index.html} with no stylesheet looks like.
+         *  <p>
+         *  Every delegate notices that nothing styles its component type and stands down: a button
+         *  keeps its own content-area fill, a scroll pane keeps its own border, a table keeps
+         *  Swing's row height. Pair it with {@link SymbolPreset#BLANK} - which this preset asks for
+         *  by default - and nothing is painted by this look and feel at all. It is the starting
+         *  point for an application that wants to build its whole appearance itself out of
+         *  {@link Conf#addStyle(Class, Styler)} rules.
+         */
+        BLANK {
+            @Override Tuple<StyleRule>    rules()            { return Tuple.of(StyleRule.class); }
+            @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.BLANK; }
+            @Override public PalettePreset preferredPalette() { return PalettePreset.BLANK; }
+            @Override String           displayName()      { return "Blank"; }
+        },
+        /**
+         *  A calm, paper-like theme: cream surfaces, taupe borders, a deep olive accent for focus
+         *  and selection, and a barely perceptible woven grain on the window background.
          */
         LINEN {
-            @Override Palette         palette()     { return LinenPreset.PALETTE; }
-            @Override List<StyleRule> rules()       { return LinenPreset.rules(); }
-            @Override String          displayName() { return "Linen"; }
+            @Override Tuple<StyleRule>    rules()            { return LinenPreset.rules(); }
+            @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.FLAT_AND_SIMPLE; }
+            @Override public PalettePreset preferredPalette() { return PalettePreset.LINEN; }
+            @Override String           displayName()      { return "Linen"; }
+        },
+        /**
+         *  Neumorphism, or "soft UI": everything is the same colour as the window it sits on, and
+         *  is told apart from it only by being lit - a pale highlight up and to the left, a soft
+         *  shadow down and to the right. Pressing something turns the light around and it sinks
+         *  in. Generous radii, no borders anywhere, and text a shade softer than black.
+         */
+        SOFT_UI {
+            @Override Tuple<StyleRule>    rules()            { return SoftUiPreset.rules(); }
+            @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.SOFT; }
+            @Override public PalettePreset preferredPalette() { return PalettePreset.CLAY; }
+            @Override String           displayName()      { return "Soft UI"; }
+        },
+        /**
+         *  Frutiger Aero, the wet, glassy optimism of the middle 2000s: saturated fills under a
+         *  hard gloss that breaks across the middle, sky gradients behind everything, crisp
+         *  outlines and a drop shadow on every raised thing.
+         */
+        FRUTIGER_AERO {
+            @Override Tuple<StyleRule>    rules()            { return FrutigerAeroPreset.rules(); }
+            @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.GLOSSY; }
+            @Override public PalettePreset preferredPalette() { return PalettePreset.AERO; }
+            @Override String           displayName()      { return "Frutiger Aero"; }
+        },
+        /**
+         *  Material: flat fills with no gradient anywhere, a small 4-pixel radius, and depth said
+         *  entirely with elevation shadows. Buttons are outlined until they are the affirmative one
+         *  and then filled; text fields are filled boxes under a rule that thickens into the accent
+         *  when the field takes focus.
+         */
+        MATERIAL {
+            @Override Tuple<StyleRule>    rules()            { return MaterialPreset.rules(); }
+            @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.MATERIAL; }
+            @Override public PalettePreset preferredPalette() { return PalettePreset.MATERIAL; }
+            @Override String           displayName()      { return "Material"; }
         };
 
-        /** @return the palette the preset's rules were designed against. */
-        abstract Palette palette();
-
         /** @return the preset's style rules, most general first. */
-        abstract List<StyleRule> rules();
+        abstract Tuple<StyleRule> rules();
+
+        /**
+         *  The symbol set the rules were designed against, which a {@link Conf} uses unless the
+         *  application chooses one. Public because an application offering the user a choice of
+         *  presets wants to move the other two along with it.
+         *
+         * @return the preferred symbol preset
+         */
+        public abstract SymbolPreset preferredSymbols();
+
+        /**
+         *  The palette the rules were designed against, used and useful for the same reason as
+         *  {@link #preferredSymbols()}.
+         *
+         * @return the preferred palette preset
+         */
+        public abstract PalettePreset preferredPalette();
 
         /** @return the name the look and feel reports to {@link UIManager}. */
         abstract String displayName();
+
+        @Override public String toString() { return displayName(); }
     }
 
     /**
-     *  How the small pieces of geometry are drawn — a check mark, a radio dot, a drop-down
-     *  chevron, a slider handle, a scrollbar thumb, the grip on a split-pane divider — and how
-     *  thick the chrome they live in is. Independent of {@link StylePreset}: the same symbols
-     *  work in any palette, because they take their colours from it.
+     *  How the small pieces of geometry are drawn - a check mark, a radio dot, a drop-down arrow,
+     *  a slider handle, a scroll thumb, the grip on a split-pane divider - and how thick the chrome
+     *  they live in is. Independent of {@link StylePreset}: the same symbols work in any palette,
+     *  because they take their colours from it.
      */
     public enum SymbolPreset
     {
-        /** Thin strokes, round caps, no bevels and no gradients: the geometry reads at a
-         *  glance and stays crisp at any scale factor. */
+        /**
+         *  No symbols. Every delegate falls through to the painting and the sizing its inherited
+         *  {@code Basic*UI} would do, so the check marks, arrows, thumbs and grips are Swing's own.
+         */
+        BLANK {
+            @Override Symbols symbols() { return BlankSymbols.INSTANCE; }
+            @Override String  displayName() { return "Blank"; }
+        },
+        /** Thin strokes, round caps, no bevels and no gradients: the geometry reads at a glance
+         *  and stays crisp at any scale factor. */
         FLAT_AND_SIMPLE {
             @Override Symbols symbols() { return FlatSymbols.INSTANCE; }
+            @Override String  displayName() { return "Flat and simple"; }
+        },
+        /** Extruded: every glyph is the surface colour, lit from the top left and shadowed at the
+         *  bottom right, so it reads as pressed out of the panel rather than drawn onto it. */
+        SOFT {
+            @Override Symbols symbols() { return SoftSymbols.INSTANCE; }
+            @Override String  displayName() { return "Soft"; }
+        },
+        /** Glass: saturated fills under a hard gloss that breaks across the middle, with a crisp
+         *  outline and a highlight along the top edge. */
+        GLOSSY {
+            @Override Symbols symbols() { return GlossySymbols.INSTANCE; }
+            @Override String  displayName() { return "Glossy"; }
+        },
+        /** Bold and geometric: filled shapes rather than outlined ones, solid triangles for arrows,
+         *  and thick strokes that stay legible at a glance. */
+        MATERIAL {
+            @Override Symbols symbols() { return MaterialSymbols.INSTANCE; }
+            @Override String  displayName() { return "Material"; }
         };
 
         /** @return the symbol painter this preset stands for. */
         abstract Symbols symbols();
+
+        /** @return the name to show a user choosing between presets. */
+        abstract String displayName();
+
+        @Override public String toString() { return displayName(); }
+    }
+
+    /**
+     *  The named colours a {@link StylePreset} paints with. Because a rule asks for "the surface a
+     *  raised control is filled with" rather than for a literal colour, any palette can be paired
+     *  with any style preset - which is what makes a dark Linen or a Material in paper tones a
+     *  one-line change rather than a fork.
+     */
+    public enum PalettePreset
+    {
+        /** What a browser shows a page with no stylesheet: a white sheet, black text, grey chrome
+         *  and one plain blue for anything active. */
+        BLANK {
+            @Override Palette palette() { return Palettes.BLANK; }
+            @Override String  displayName() { return "Blank"; }
+        },
+        /** Aged paper, raw linen and weathered taupe stone, with a deep olive accent. */
+        LINEN {
+            @Override Palette palette() { return Palettes.LINEN; }
+            @Override String  displayName() { return "Linen"; }
+        },
+        /** A dark room: near-black surfaces a few steps apart, cool grey text, and a bright blue
+         *  that is the only saturated thing on screen. */
+        MIDNIGHT {
+            @Override Palette palette() { return Palettes.MIDNIGHT; }
+            @Override String  displayName() { return "Midnight"; }
+        },
+        /** Sky, water and glass: pale cyan surfaces, a deep sea-blue accent, and the saturated
+         *  grass green that every piece of software from 2007 used for its affirmative button. */
+        AERO {
+            @Override Palette palette() { return Palettes.AERO; }
+            @Override String  displayName() { return "Aero"; }
+        },
+        /** One single cool grey for the window and everything standing on it, which is what soft UI
+         *  needs: with nothing to tell them apart by colour, the light has to do all the work. */
+        CLAY {
+            @Override Palette palette() { return Palettes.CLAY; }
+            @Override String  displayName() { return "Clay"; }
+        },
+        /** White cards on an off-white ground, near-black text, greys in even steps and one indigo
+         *  carrying every accent. */
+        MATERIAL {
+            @Override Palette palette() { return Palettes.MATERIAL; }
+            @Override String  displayName() { return "Material"; }
+        };
+
+        /** @return the colours this preset stands for. */
+        abstract Palette palette();
+
+        /** @return the name to show a user choosing between presets. */
+        abstract String displayName();
+
+        @Override public String toString() { return displayName(); }
     }
 
     /**

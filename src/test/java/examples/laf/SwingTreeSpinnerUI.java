@@ -37,7 +37,7 @@ public final class SwingTreeSpinnerUI
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        SwingTreeLookAndFeel.installStyleOn(c);
         // The spinner's outer border tracks its inner editor's focus, but focus never lands on
         // the spinner itself, so bridge the editor's focus to a repaint of the whole spinner.
         JSpinner  spinner = (JSpinner) c;
@@ -71,6 +71,8 @@ public final class SwingTreeSpinnerUI
 
     @Override
     protected Component createNextButton() {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+            return super.createNextButton();
         Component button = new StepperButton(true);
         installNextButtonListeners(button);
         return button;
@@ -78,6 +80,8 @@ public final class SwingTreeSpinnerUI
 
     @Override
     protected Component createPreviousButton() {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+            return super.createPreviousButton();
         Component button = new StepperButton(false);
         installPreviousButtonListeners(button);
         return button;

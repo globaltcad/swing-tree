@@ -40,9 +40,8 @@ import javax.swing.table.JTableHeader;
 import javax.swing.text.JTextComponent;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import sprouts.Tuple;
+
 import java.util.Objects;
 
 /**
@@ -55,43 +54,17 @@ import java.util.Objects;
  *  through a form never shifts the layout around it.
  *
  *  <h2>What is in here</h2>
- *  Two things, and nothing else: the {@linkplain #PALETTE colours} the theme was designed
- *  against, and the {@linkplain #rules() table of style rules} that paints with them. Every
- *  rule reads its colours from {@link SwingTreeLookAndFeel#palette()} rather than from
- *  {@link #PALETTE} directly, so an application which re-tints the palette through
- *  {@link SwingTreeLookAndFeel.Conf#palette(swingtree.api.Configurator)} gets a re-tinted
- *  Linen rather than a half-changed one.
+ *  One thing: the {@linkplain #rules() table of style rules}. The colours it was designed against
+ *  are {@link Palettes#LINEN}, but no rule names them - every one of them reads
+ *  {@link SwingTreeLookAndFeel#palette()} at paint time, so pairing Linen with a different
+ *  {@link SwingTreeLookAndFeel.PalettePreset} gives a re-tinted Linen rather than a half-changed
+ *  one.
  *
  *  @see SwingTreeLookAndFeel.StylePreset#LINEN
  */
 final class LinenPreset
 {
     private LinenPreset() {}
-
-    /** The colours Linen was designed against: aged paper, raw linen and weathered taupe stone. */
-    static final Palette PALETTE = Palette.neutral()
-            .background     (new Color(0xF5, 0xF1, 0xE8))
-            .surface        (new Color(0xFB, 0xF8, 0xF0))
-            .surfaceHover   (new Color(0xFF, 0xFC, 0xF5))
-            .surfacePressed (new Color(0xE8, 0xE2, 0xD4))
-            .surfaceDisabled(new Color(0xEF, 0xEB, 0xE0))
-            .surfaceField   (new Color(0xFC, 0xFA, 0xF3))
-            .border         (new Color(0xC9, 0xC0, 0xAB))
-            .borderSoft     (new Color(0xDC, 0xD4, 0xBE))
-            .text           (new Color(0x3D, 0x35, 0x2A))
-            .textMuted      (new Color(0x8A, 0x7F, 0x6A))
-            .textDisabled   (new Color(0xB5, 0xAC, 0x9B))
-            .accent         (new Color(0x7A, 0x6E, 0x55))
-            .accentSoft     (new Color(0xD8, 0xCC, 0xAE))
-            .textureLight   (new Color(0xF9, 0xF5, 0xEC))
-            .textureDark    (new Color(0xF0, 0xEC, 0xE3))
-            .primary        (new Color(0x36, 0x5C, 0x3B))
-            .primaryHover   (new Color(0x41, 0x6B, 0x46))
-            .primaryPressed (new Color(0x2B, 0x4A, 0x30))
-            .danger         (new Color(0x8B, 0x3A, 0x3A))
-            .dangerHover    (new Color(0x9C, 0x45, 0x45))
-            .dangerPressed  (new Color(0x74, 0x2E, 0x2E))
-            .onFilled       (new Color(0xFA, 0xF6, 0xEC));
 
     /** The shadow a pressed control sinks into. Hoisted because a style rule runs on every
      *  paint, and a colour that never changes has no business being allocated there. */
@@ -103,43 +76,41 @@ final class LinenPreset
     /** The shadow a floating surface - a popup, a tooltip - casts onto the window. */
     private static final Color FLOATING_SHADOW = new Color(0, 0, 0, 70);
 
-    private static final List<StyleRule> RULES = Collections.unmodifiableList(buildRules());
+    private static final Tuple<StyleRule> RULES = buildRules();
 
     /** @return the theme's style rules, one per component family. */
-    static List<StyleRule> rules() { return RULES; }
+    static Tuple<StyleRule> rules() { return RULES; }
 
-    private static List<StyleRule> buildRules() {
-        List<StyleRule> rules = new ArrayList<>();
-
-        rules.add(rule(JPanel.class, LinenPreset::panel));
-        rules.add(rule(AbstractButton.class, LinenPreset::button));
-        rules.add(rule(JCheckBox.class, LinenPreset::tickable));
-        rules.add(rule(JRadioButton.class, LinenPreset::tickable));
-        rules.add(rule(JMenuItem.class, LinenPreset::menuItem));
-        rules.add(rule(JMenuBar.class, LinenPreset::menuBar));
-        rules.add(rule(JPopupMenu.class, LinenPreset::popupMenu));
-        rules.add(rule(JLabel.class, LinenPreset::label));
-        rules.add(rule(JTextField.class, LinenPreset::field));
-        rules.add(rule(JTextArea.class, LinenPreset::page));
-        rules.add(rule(JEditorPane.class, LinenPreset::page));
-        rules.add(rule(JSeparator.class, LinenPreset::separator));
-        rules.add(rule(JToolTip.class, LinenPreset::toolTip));
-        rules.add(rule(JProgressBar.class, LinenPreset::progressBar));
-        rules.add(rule(JSlider.class, LinenPreset::slider));
-        rules.add(rule(JScrollBar.class, LinenPreset::scrollBar));
-        rules.add(rule(JScrollPane.class, LinenPreset::scrollPane));
-        rules.add(rule(JViewport.class, LinenPreset::viewport));
-        rules.add(rule(JComboBox.class, LinenPreset::comboBox));
-        rules.add(rule(JSpinner.class, LinenPreset::spinner));
-        rules.add(rule(JTabbedPane.class, LinenPreset::tabbedPane));
-        rules.add(rule(JList.class, LinenPreset::list));
-        rules.add(rule(JTable.class, LinenPreset::table));
-        rules.add(rule(JTableHeader.class, LinenPreset::tableHeader));
-        rules.add(rule(JTree.class, LinenPreset::tree));
-        rules.add(rule(JToolBar.class, LinenPreset::toolBar));
-        rules.add(rule(JSplitPane.class, LinenPreset::splitPane));
-
-        return rules;
+    private static Tuple<StyleRule> buildRules() {
+        return Tuple.of(
+            rule(JPanel.class, LinenPreset::panel),
+            rule(AbstractButton.class, LinenPreset::button),
+            rule(JCheckBox.class, LinenPreset::tickable),
+            rule(JRadioButton.class, LinenPreset::tickable),
+            rule(JMenuItem.class, LinenPreset::menuItem),
+            rule(JMenuBar.class, LinenPreset::menuBar),
+            rule(JPopupMenu.class, LinenPreset::popupMenu),
+            rule(JLabel.class, LinenPreset::label),
+            rule(JTextField.class, LinenPreset::field),
+            rule(JTextArea.class, LinenPreset::page),
+            rule(JEditorPane.class, LinenPreset::page),
+            rule(JSeparator.class, LinenPreset::separator),
+            rule(JToolTip.class, LinenPreset::toolTip),
+            rule(JProgressBar.class, LinenPreset::progressBar),
+            rule(JSlider.class, LinenPreset::slider),
+            rule(JScrollBar.class, LinenPreset::scrollBar),
+            rule(JScrollPane.class, LinenPreset::scrollPane),
+            rule(JViewport.class, LinenPreset::viewport),
+            rule(JComboBox.class, LinenPreset::comboBox),
+            rule(JSpinner.class, LinenPreset::spinner),
+            rule(JTabbedPane.class, LinenPreset::tabbedPane),
+            rule(JList.class, LinenPreset::list),
+            rule(JTable.class, LinenPreset::table),
+            rule(JTableHeader.class, LinenPreset::tableHeader),
+            rule(JTree.class, LinenPreset::tree),
+            rule(JToolBar.class, LinenPreset::toolBar),
+            rule(JSplitPane.class, LinenPreset::splitPane)
+        );
     }
 
     private static <C extends JComponent> StyleRule rule( Class<C> type, Styler<C> styler ) {
@@ -436,7 +407,7 @@ final class LinenPreset
         Palette      p       = SwingTreeLookAndFeel.palette();
         JComboBox<?> combo   = it.component();
         boolean      enabled = combo.isEnabled();
-        boolean      focused = enabled && comboHasFocus(combo);
+        boolean      focused = enabled && Focus.isOn(combo);
 
         return it
                 .margin(focused ? 0 : 1)
@@ -448,27 +419,12 @@ final class LinenPreset
                 .foregroundColor(enabled ? p.text() : p.textDisabled());
     }
 
-    /**
-     *  Reads the right focus flag for a combo box's outer border. A non-editable combo is
-     *  itself the focus owner; an editable one delegates focus to its editor component, so
-     *  {@code combo.isFocusOwner()} would never be true for it.
-     */
-    private static boolean comboHasFocus( JComboBox<?> combo ) {
-        if ( combo.isFocusOwner() )
-            return true;
-        if ( combo.isEditable() && combo.getEditor() != null ) {
-            java.awt.Component editor = combo.getEditor().getEditorComponent();
-            return editor != null && editor.isFocusOwner();
-        }
-        return false;
-    }
-
     @SuppressWarnings("deprecation")
     private static ComponentStyleDelegate<JSpinner> spinner( ComponentStyleDelegate<JSpinner> it ) {
         Palette  p       = SwingTreeLookAndFeel.palette();
         JSpinner spinner = it.component();
         boolean  enabled = spinner.isEnabled();
-        boolean  focused = enabled && spinnerEditorHasFocus(spinner);
+        boolean  focused = enabled && Focus.isOn(spinner);
 
         return it
                 .margin(focused ? 0 : 1)
@@ -478,20 +434,6 @@ final class LinenPreset
                 .borderColor(focused ? p.accent() : p.border())
                 .backgroundColor(enabled ? p.surfaceField() : p.surfaceDisabled())
                 .foregroundColor(enabled ? p.text() : p.textDisabled());
-    }
-
-    /**
-     *  A {@link JSpinner}'s editor is a wrapper component — a {@link JSpinner.DefaultEditor} by
-     *  default — that contains the actual input control, usually a formatted text field, as a
-     *  child. Focus therefore lives on the descendant, not on the wrapper, so
-     *  {@code editor.isFocusOwner()} would never return {@code true}. This walks one level in to
-     *  read the right focus flag for the spinner's outer border.
-     */
-    private static boolean spinnerEditorHasFocus( JSpinner spinner ) {
-        java.awt.Component editor = spinner.getEditor();
-        if ( editor instanceof JSpinner.DefaultEditor )
-            return ((JSpinner.DefaultEditor) editor).getTextField().isFocusOwner();
-        return editor != null && editor.isFocusOwner();
     }
 
     private static ComponentStyleDelegate<JSlider> slider( ComponentStyleDelegate<JSlider> it ) {

@@ -44,7 +44,7 @@ public final class SwingTreeTextPaneUI
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        SwingTreeLookAndFeel.installStyleOn(c);
         // A text component does not repaint itself when it gains or loses focus, and repaints
         // only a narrow damage rectangle when its selection changes - neither is enough for a
         // style that is re-gathered as part of the component's own paint cycle.

@@ -37,13 +37,15 @@ public final class SwingTreeProgressBarUI
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        SwingTreeLookAndFeel.installStyleOn(c);
     }
 
     @Override
     public Dimension getPreferredSize( JComponent c ) {
-        Dimension d     = super.getPreferredSize(c);
-        int       floor = UI.scale(SwingTreeLookAndFeel.symbols().progressBarThickness());
+        Dimension d = super.getPreferredSize(c);
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+            return d;
+        int floor = UI.scale(SwingTreeLookAndFeel.symbols().progressBarThickness());
         if ( ((JProgressBar) c).getOrientation() == SwingConstants.HORIZONTAL )
             d.height = Math.max(d.height, floor);
         else
@@ -67,6 +69,7 @@ public final class SwingTreeProgressBarUI
 
     @Override
     protected void paintDeterminate( Graphics g, JComponent c ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() ) { super.paintDeterminate(g, c); return; }
         JProgressBar bar   = (JProgressBar) c;
         double       ratio = fillRatio(bar);
         Graphics2D   g2    = (Graphics2D) g.create();

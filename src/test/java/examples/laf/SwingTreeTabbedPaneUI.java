@@ -41,7 +41,7 @@ public final class SwingTreeTabbedPaneUI
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        SwingTreeLookAndFeel.installStyleOn(c);
     }
 
     @Override
@@ -62,6 +62,8 @@ public final class SwingTreeTabbedPaneUI
 
     @Override
     protected Insets getTabInsets( int tabPlacement, int tabIndex ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+            return super.getTabInsets(tabPlacement, tabIndex);
         Symbols symbols = SwingTreeLookAndFeel.symbols();
         int     v       = UI.scale(symbols.tabPaddingVertical());
         int     h       = UI.scale(symbols.tabPaddingHorizontal());
@@ -70,6 +72,8 @@ public final class SwingTreeTabbedPaneUI
 
     @Override
     protected Insets getContentBorderInsets( int tabPlacement ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+            return super.getContentBorderInsets(tabPlacement);
         // A hairline on whichever side of the page the tabs sit.
         int n = UI.scale(1);
         switch ( tabPlacement ) {
@@ -83,13 +87,16 @@ public final class SwingTreeTabbedPaneUI
 
     @Override
     protected Insets getTabAreaInsets( int tabPlacement ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+            return super.getTabAreaInsets(tabPlacement);
         int gap = UI.scale(SwingTreeLookAndFeel.symbols().tabAreaGap());
         return new Insets(gap, gap, 0, gap);
     }
 
     @Override
     protected int calculateTabAreaHeight( int tabPlacement, int horizRunCount, int maxTabHeight ) {
-        return super.calculateTabAreaHeight(tabPlacement, horizRunCount, maxTabHeight) + UI.scale(2);
+        int basic = super.calculateTabAreaHeight(tabPlacement, horizRunCount, maxTabHeight);
+        return SwingTreeLookAndFeel.drawsOwnChrome() ? basic + UI.scale(2) : basic;
     }
 
     // ── Tab painting ─────────────────────────────────────────────────────
@@ -98,6 +105,10 @@ public final class SwingTreeTabbedPaneUI
     protected void paintTabBackground(
         Graphics g, int tabPlacement, int tabIndex, int x, int y, int w, int h, boolean isSelected
     ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() ) {
+            super.paintTabBackground(g, tabPlacement, tabIndex, x, y, w, h, isSelected);
+            return;
+        }
         boolean    rollover = getRolloverTab() == tabIndex && tabPane.isEnabledAt(tabIndex);
         Graphics2D g2       = (Graphics2D) g.create();
         try {
@@ -113,6 +124,10 @@ public final class SwingTreeTabbedPaneUI
     protected void paintTabBorder(
         Graphics g, int tabPlacement, int tabIndex, int x, int y, int w, int h, boolean isSelected
     ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() ) {
+            super.paintTabBorder(g, tabPlacement, tabIndex, x, y, w, h, isSelected);
+            return;
+        }
         if ( !isSelected )
             return;
         Graphics2D g2 = (Graphics2D) g.create();
@@ -131,6 +146,10 @@ public final class SwingTreeTabbedPaneUI
         Graphics g, int tabPlacement, Font font, FontMetrics metrics,
         int tabIndex, String title, Rectangle textRect, boolean isSelected
     ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() ) {
+            super.paintText(g, tabPlacement, font, metrics, tabIndex, title, textRect, isSelected);
+            return;
+        }
         SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
         Color colour;
         if ( !tabPane.isEnabledAt(tabIndex) ) colour = p.textDisabled();
@@ -153,10 +172,17 @@ public final class SwingTreeTabbedPaneUI
     protected void paintFocusIndicator(
         Graphics g, int tabPlacement, Rectangle[] rects,
         int tabIndex, Rectangle iconRect, Rectangle textRect, boolean isSelected
-    ) { /* the accent indicates the active tab */ }
+    ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+            super.paintFocusIndicator(g, tabPlacement, rects, tabIndex, iconRect, textRect, isSelected);
+    }
 
     @Override
     protected void paintContentBorder( Graphics g, int tabPlacement, int selectedIndex ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() ) {
+            super.paintContentBorder(g, tabPlacement, selectedIndex);
+            return;
+        }
         Graphics2D g2 = (Graphics2D) g.create();
         try {
             int n = Math.max(1, UI.scale(1));

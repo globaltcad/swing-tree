@@ -40,11 +40,13 @@ public final class SwingTreeScrollBarUI
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        SwingTreeLookAndFeel.installStyleOn(c);
     }
 
     @Override
     public Dimension getPreferredSize( JComponent c ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+            return super.getPreferredSize(c);
         int t = UI.scale(SwingTreeLookAndFeel.symbols().scrollBarThickness());
         return scrollbar.getOrientation() == JScrollBar.VERTICAL
                 ? new Dimension(t, t * 4)
@@ -63,10 +65,14 @@ public final class SwingTreeScrollBarUI
     public boolean canForwardPaintingToSwingTree() { return true; }
 
     @Override
-    protected JButton createDecreaseButton( int orientation ) { return zeroButton(); }
+    protected JButton createDecreaseButton( int orientation ) {
+        return SwingTreeLookAndFeel.drawsOwnChrome() ? zeroButton() : super.createDecreaseButton(orientation);
+    }
 
     @Override
-    protected JButton createIncreaseButton( int orientation ) { return zeroButton(); }
+    protected JButton createIncreaseButton( int orientation ) {
+        return SwingTreeLookAndFeel.drawsOwnChrome() ? zeroButton() : super.createIncreaseButton(orientation);
+    }
 
     /**
      *  The groove is the scroll bar's own styled background, which the style engine has already
@@ -77,10 +83,14 @@ public final class SwingTreeScrollBarUI
      *  groove looks like.
      */
     @Override
-    protected void paintTrack( Graphics g, JComponent c, Rectangle r ) { /* the styled background is the groove */ }
+    protected void paintTrack( Graphics g, JComponent c, Rectangle r ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+            super.paintTrack(g, c, r);
+    }
 
     @Override
     protected void paintThumb( Graphics g, JComponent c, Rectangle r ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() ) { super.paintThumb(g, c, r); return; }
         if ( r.width <= 0 || r.height <= 0 )
             return;
         Graphics2D g2 = (Graphics2D) g.create();

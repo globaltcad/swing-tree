@@ -31,7 +31,7 @@ public final class SwingTreeListUI
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        SwingTreeLookAndFeel.installStyleOn(c);
     }
 
     @Override
@@ -55,6 +55,8 @@ public final class SwingTreeListUI
      *  not opaque, so the band shows through them.
      */
     private static void paintSelectionBands( Graphics2D g, JList<?> list ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+            return; // Swing's own renderer is carrying the selection colour
         int[] selected = list.getSelectedIndices();
         if ( selected.length == 0 )
             return;

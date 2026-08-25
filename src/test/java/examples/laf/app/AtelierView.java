@@ -164,6 +164,10 @@ public final class AtelierView extends JPanel
     private final Var<AtelierViewModel> vm;
     private final AtelierSheet          sheet;
 
+    /** What the window is made of. Not view-model state: no commission depends on whether the
+     *  atelier is painted in paper or in glass. See {@link Appearance}. */
+    private final Appearance appearance;
+
     // ── Lenses into the one immutable root ────────────────────────────────
     // Kept as fields rather than locals: a lens is observed only weakly by its
     // parent, so anything consumed by a raw subscription — or simply reused
@@ -232,8 +236,9 @@ public final class AtelierView extends JPanel
     private boolean     syncingSelection;
 
     public AtelierView( Var<AtelierViewModel> vm, AtelierSheet sheet ) {
-        this.vm    = vm;
-        this.sheet = sheet;
+        this.vm         = vm;
+        this.sheet      = sheet;
+        this.appearance = new Appearance(sheet);
 
         looms          = vm.zoomTo(AtelierViewModel::looms,          AtelierViewModel::withLooms);
         search         = vm.zoomTo(AtelierViewModel::search,         AtelierViewModel::withSearch);
@@ -384,6 +389,8 @@ public final class AtelierView extends JPanel
                 .add(radioButtonMenuItem("All materials", allMaterials).peek(materials::add))
                 .add(radioButtonMenuItem("Plant fibres",  plantOnly).peek(materials::add))
                 .add(radioButtonMenuItem("Animal fibres", animalOnly).peek(materials::add))
+                .add(separator())
+                .add(appearance.menu())
             )
             .add(menu("Help").peek( m -> m.setMnemonic(KeyEvent.VK_H) )
                 .add(menuItem("About Flaxen…").onClick( it -> UI.message(

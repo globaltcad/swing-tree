@@ -36,14 +36,16 @@ public final class SwingTreeSplitPaneUI
         JSplitPane pane = (JSplitPane) c;
         // The style engine draws the frame, so clear the border - but only when it is a
         // look-and-feel default (a UIResource); see SwingTreeScrollPaneUI for why.
-        if ( pane.getBorder() instanceof UIResource )
-            pane.setBorder(null);
-        pane.setDividerSize(UI.scale(SwingTreeLookAndFeel.symbols().splitDividerThickness()));
-        // BasicSplitPaneUI defaults continuousLayout to false, i.e. dragging the divider draws
-        // only a placeholder marker line and the split repositions on mouse-release. Switch it
-        // on so the panes resize live while the user drags.
-        pane.setContinuousLayout(true);
-        ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        if ( SwingTreeLookAndFeel.drawsOwnChrome() ) {
+            if ( pane.getBorder() instanceof UIResource )
+                pane.setBorder(null);
+            pane.setDividerSize(UI.scale(SwingTreeLookAndFeel.symbols().splitDividerThickness()));
+            // BasicSplitPaneUI defaults continuousLayout to false, i.e. dragging the divider draws
+            // only a placeholder marker line and the split repositions on mouse-release. Switch it
+            // on so the panes resize live while the user drags.
+            pane.setContinuousLayout(true);
+        }
+        SwingTreeLookAndFeel.installStyleOn(c);
     }
 
     @Override
@@ -77,6 +79,8 @@ public final class SwingTreeSplitPaneUI
             // drag-arrow buttons some look and feels add). Decorations drawn before that would be
             // erased by the background fill on the way back up.
             super.paint(g);
+            if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+                return;
             Graphics2D g2 = (Graphics2D) g.create();
             try {
                 SwingTreeLookAndFeel.symbols().paintSplitGrip(

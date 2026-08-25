@@ -34,14 +34,18 @@ public final class SwingTreeButtonUI
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        AbstractButton b = (AbstractButton) c;
-        // The style engine paints the fill - Swing's own opaque fill would double-paint
-        // underneath rounded corners and the noise overlay.
-        b.setContentAreaFilled(false);
-        b.setBorderPainted(true);
-        b.setRolloverEnabled(true);
-        b.setFocusPainted(false);
-        ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        // Suppressing Swing's own fill is right when a rule is going to paint one in its place -
+        // it would otherwise double-paint underneath rounded corners and a noise overlay - and
+        // wrong when nothing is, which is what a blank style preset means. The style engine is
+        // installed either way: an application may still add a rule of its own.
+        if ( SwingTreeLookAndFeel.styles(c.getClass()) ) {
+            AbstractButton b = (AbstractButton) c;
+            b.setContentAreaFilled(false);
+            b.setBorderPainted(true);
+            b.setRolloverEnabled(true);
+            b.setFocusPainted(false);
+        }
+        SwingTreeLookAndFeel.installStyleOn(c);
     }
 
     @Override
