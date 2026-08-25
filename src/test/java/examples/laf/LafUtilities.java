@@ -61,6 +61,23 @@ final class LafUtilities
         );
     }
 
+    /**
+     *  The same colour a fixed number of channel steps lighter (positive) or darker (negative).
+     *  <p>
+     *  A <i>fraction</i> of the way to white moves a dark colour ten times as far as a light one -
+     *  the same 0.4 that lifts a pale grey by thirteen steps lifts near-black by ninety - so a
+     *  relief built out of fractions glares on a dark palette and disappears on a light one. A
+     *  fixed step behaves the way one light source falling on one material does.
+     */
+    static Color shadeBySteps( Color base, int steps ) {
+        return new Color(
+            Math.max(0, Math.min(255, base.getRed()   + steps)),
+            Math.max(0, Math.min(255, base.getGreen() + steps)),
+            Math.max(0, Math.min(255, base.getBlue()  + steps)),
+            base.getAlpha()
+        );
+    }
+
     /** The same colour at a different opacity, from 0 to 255. */
     static Color withOpacity( Color base, int alpha ) {
         return new Color(base.getRed(), base.getGreen(), base.getBlue(), Math.max(0, Math.min(255, alpha)));

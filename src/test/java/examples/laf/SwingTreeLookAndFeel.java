@@ -11,7 +11,10 @@ import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
+import javax.swing.JLayeredPane;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JToolTip;
 import javax.swing.JViewport;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
@@ -21,6 +24,7 @@ import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.basic.BasicLookAndFeel;
 import java.awt.Color;
+import java.awt.Container;
 import java.awt.Window;
 import java.util.Arrays;
 import java.util.Collections;
@@ -1217,6 +1221,8 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          * @return the first surface the component belongs to, or {@link #WINDOW}
          */
         static Surface of( JComponent component ) {
+            if ( _carriesAPopup(component) )
+                return TRANSPARENT;
             JComponent tagged = component;
             if ( component instanceof JViewport && component.getParent() instanceof JScrollPane )
                 tagged = (JScrollPane) component.getParent();
@@ -1225,6 +1231,26 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
                 if ( surface != WINDOW && extension.belongsToGroup(surface) )
                     return surface;
             return WINDOW;
+        }
+
+        /**
+         *  Whether Swing put this component here to carry a popup.
+         *  <p>
+         *  A popup is not shown as itself: {@code PopupFactory} wraps it in a plain
+         *  {@link javax.swing.JPanel} and hangs that in the window's
+         *  {@linkplain JLayeredPane#POPUP_LAYER popup layer}. The application never declared that
+         *  panel and cannot tag it, so a look and feel that paints every panel puts an opaque
+         *  rectangle exactly where the popup's own margin, radius and shadow were supposed to let
+         *  the window show through.
+         */
+        private static boolean _carriesAPopup( JComponent component ) {
+            Container parent = component.getParent();
+            if ( parent instanceof JLayeredPane
+              && ((JLayeredPane) parent).getLayer(component) >= JLayeredPane.POPUP_LAYER )
+                return true;
+            return component.getComponentCount() == 1
+                && ( component.getComponent(0) instanceof JPopupMenu
+                  || component.getComponent(0) instanceof JToolTip );
         }
     }
 }

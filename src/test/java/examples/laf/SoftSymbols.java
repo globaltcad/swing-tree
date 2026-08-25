@@ -29,6 +29,19 @@ final class SoftSymbols implements Symbols
 
     private SoftSymbols() {}
 
+    /**
+     *  How far the light and the shadow move from the surface they fall on, in channel steps.
+     *  Fixed steps rather than fractions, for the reason {@link SoftUiPreset} spells out: a
+     *  fraction of the way to white lifts a dark palette five times as far as a light one, which
+     *  is what turns every thumb and rim into a glowing bar on Midnight.
+     */
+    private static final int RIM_LIGHT    =  18;
+    private static final int RIM_DARK     = -34;
+    private static final int GROOVE_LIGHT =  16;
+    private static final int GROOVE_DARK  = -26;
+    private static final int EMBOSS_LIGHT =  19;
+    private static final int EMBOSS_DARK  = -34;
+
     @Override public boolean drawsItsOwnChrome() { return true; }
 
     @Override public int checkGlyphSize()        { return 17; }
@@ -129,7 +142,7 @@ final class SoftSymbols implements Symbols
         Color fill = enabled ? p.accent() : p.textDisabled();
         if ( horizontal ) {
             int y = track.y + (track.height - t) / 2;
-            g.setPaint(LafUtilities.verticalGradient(y, t, LafUtilities.shadeTowardsBlack(p.background(), 0.14), LafUtilities.shadeTowardsWhite(p.background(), 0.5)));
+            g.setPaint(LafUtilities.verticalGradient(y, t, LafUtilities.shadeBySteps(p.background(), GROOVE_DARK), LafUtilities.shadeBySteps(p.background(), GROOVE_LIGHT)));
             g.fill(new RoundRectangle2D.Float(track.x, y, track.width, t, arc, arc));
             int filled = inverted ? Math.max(0, track.x + track.width - thumbCentre)
                                   : Math.max(0, thumbCentre - track.x);
@@ -140,7 +153,7 @@ final class SoftSymbols implements Symbols
         } else {
             int x = track.x + (track.width - t) / 2;
             g.setPaint(LafUtilities.verticalGradient(track.y, track.height,
-                                   LafUtilities.shadeTowardsBlack(p.background(), 0.14), LafUtilities.shadeTowardsWhite(p.background(), 0.5)));
+                                   LafUtilities.shadeBySteps(p.background(), GROOVE_DARK), LafUtilities.shadeBySteps(p.background(), GROOVE_LIGHT)));
             g.fill(new RoundRectangle2D.Float(x, track.y, t, track.height, arc, arc));
             int filled = inverted ? Math.max(0, thumbCentre - track.y)
                                   : Math.max(0, track.y + track.height - thumbCentre);
@@ -271,8 +284,8 @@ final class SoftSymbols implements Symbols
     private static void strokeRim(
         Graphics2D g, java.awt.Shape body, Palette p, float y, float h, boolean inverted
     ) {
-        Color light = LafUtilities.shadeTowardsWhite(p.background(), 0.55);
-        Color dark  = LafUtilities.shadeTowardsBlack(p.background(), 0.22);
+        Color light = LafUtilities.shadeBySteps(p.background(), RIM_LIGHT);
+        Color dark  = LafUtilities.shadeBySteps(p.background(), RIM_DARK);
         g.setStroke(new BasicStroke(Math.max(1.4f, UI.scale(1.6f))));
         g.setPaint(LafUtilities.verticalGradient(y, h, inverted ? dark : light, inverted ? light : dark));
         g.draw(body);
@@ -285,7 +298,7 @@ final class SoftSymbols implements Symbols
         float lift = UI.scale(1f);
         Path2D.Float shape = LafUtilities.arrowShape(cx, cy, size, size * 0.62f, direction);
         g.translate(lift, lift);
-        g.setColor(LafUtilities.shadeTowardsWhite(p.background(), 0.6));
+        g.setColor(LafUtilities.shadeBySteps(p.background(), EMBOSS_LIGHT));
         g.fill(shape);
         g.translate(-lift, -lift);
         g.setColor(enabled ? p.textMuted() : p.textDisabled());
@@ -294,9 +307,9 @@ final class SoftSymbols implements Symbols
 
     private static void embossedDot( Graphics2D g, Palette p, float cx, float cy, float radius, boolean enabled ) {
         float lift = UI.scale(1f);
-        g.setColor(LafUtilities.shadeTowardsWhite(p.background(), 0.6));
+        g.setColor(LafUtilities.shadeBySteps(p.background(), EMBOSS_LIGHT));
         g.fill(new Ellipse2D.Float(cx - radius + lift, cy - radius + lift, 2 * radius, 2 * radius));
-        g.setColor(enabled ? LafUtilities.shadeTowardsBlack(p.background(), 0.20) : p.borderSoft());
+        g.setColor(enabled ? LafUtilities.shadeBySteps(p.background(), EMBOSS_DARK) : p.borderSoft());
         g.fill(new Ellipse2D.Float(cx - radius, cy - radius, 2 * radius, 2 * radius));
     }
 }
