@@ -621,6 +621,11 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *  style gathered on every paint costs a single map lookup. */
         private final Map<Class<?>, Styler<?>> _resolved = new ConcurrentHashMap<>();
 
+        /** The resolved symbol set behind the tile cache the delegates paint through. Both are
+         *  tied to this configuration, so the rasterized glyphs of a theme are dropped together
+         *  with the theme rather than outliving it. */
+        private final Symbols _symbols;
+
         private Conf(
             StylePreset      stylePreset,
             SymbolPreset     symbolPreset,
@@ -635,6 +640,8 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             _palette       = palette;
             _overrides     = overrides;
             _additions     = additions;
+            SymbolPreset symbols = symbolPreset != null ? symbolPreset : stylePreset.preferredSymbols();
+            _symbols       = new CachedSymbols(symbols.symbols(), palette());
         }
 
         /**
@@ -736,10 +743,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             return preset.palette();
         }
 
-        Symbols symbols() {
-            SymbolPreset preset = _symbolPreset != null ? _symbolPreset : _stylePreset.preferredSymbols();
-            return preset.symbols();
-        }
+        Symbols symbols() { return _symbols; }
 
         String name() { return _stylePreset.displayName(); }
 
