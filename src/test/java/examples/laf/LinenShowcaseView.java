@@ -14,13 +14,10 @@ import javax.swing.JPanel;
  *  {@linkplain SwingTreeLookAndFeel.StylePreset#LINEN Linen} preset and opens <b>Flaxen</b>, the
  *  order book of a small weaving atelier, built with SwingTree in {@link examples.laf.app}.
  *  <p>
- *  A component gallery — one tab per delegate, a row of buttons, a table of invented rows — can
- *  tell you that a look and feel <em>has</em> a check box. It cannot tell you whether the thing
- *  is pleasant to work in: whether a card reads as raised, whether a tool bar of six commands is
- *  calm or noisy, whether the focus border shifts the layout when you tab through a form,
- *  whether a table of real data is legible at a glance. So this showcase is an application.
- *  Everything the look and feel ships a UI delegate for is on screen, but each one is there
- *  because the workshop needs it, and it can be used for as long as you like.
+ *  A component gallery can tell you that a look and feel <em>has</em> a check box; it cannot tell
+ *  you whether the thing is pleasant to work in. So this showcase is a working application:
+ *  everything the look and feel ships a UI delegate for is on screen, but each one is there
+ *  because the workshop needs it.
  *  <p>
  *  Run it with:
  *  <pre>{@code
@@ -55,7 +52,7 @@ public final class LinenShowcaseView
     public static JPanel createView() {
         SwingTreeLookAndFeel.initializeUsing( it -> it
             .stylePreset(SwingTreeLookAndFeel.StylePreset.LINEN)
-            .symbolPreset(SwingTreeLookAndFeel.SymbolPreset.FLAT_AND_SIMPLE)
+            .symbolPreset(SwingTreeLookAndFeel.SymbolPreset.FLAT)
         );
         AtelierSheet sheet = new AtelierSheet();
         return UI.use(sheet, () -> new AtelierView(Var.of(AtelierViewModel.initial()), sheet));

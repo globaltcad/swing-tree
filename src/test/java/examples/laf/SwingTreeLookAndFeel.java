@@ -36,50 +36,37 @@ import java.util.concurrent.ConcurrentHashMap;
  *  hand written {@link java.awt.Graphics} code.
  *  <p>
  *  Where a traditional look and feel hard-codes its appearance across dozens of
- *  {@link javax.swing.plaf.ComponentUI} classes, this one keeps the appearance in data:
- *  a <b>palette</b> of named colours, a <b>style preset</b> which is nothing but a table of
- *  {@link Styler} functions keyed by component type, and a <b>symbol preset</b> which decides
- *  how the small pieces of geometry — a check mark, a drop-down chevron, a slider handle, the
- *  grip on a split pane divider — are drawn. Swapping any of the three changes the whole
- *  application, and an application may override or extend individual rules without forking
- *  anything.
+ *  {@link javax.swing.plaf.ComponentUI} classes, this one keeps it in data: a <b>palette</b> of
+ *  named colours, a <b>style preset</b> which is a table of {@link Styler} functions keyed by
+ *  component type, and a <b>symbol preset</b> which draws the small geometry no style rule can
+ *  express. Swapping any of the three changes the whole application, and an application may
+ *  override or extend individual rules without forking anything.
  *
  *  <h2>Installing it</h2>
  *  <pre>{@code
  *    SwingTreeLookAndFeel.initializeUsing( it -> it
  *        .stylePreset(SwingTreeLookAndFeel.StylePreset.LINEN)
- *        .symbolPreset(SwingTreeLookAndFeel.SymbolPreset.FLAT_AND_SIMPLE)
+ *        .symbolPreset(SwingTreeLookAndFeel.SymbolPreset.FLAT)
  *        .overrideStyle(JButton.class, s -> s.borderRadius(2))       // replaces the preset rule
  *        .addStyle(JTextField.class, s -> s.backgroundColor("blue")) // applied on top of it
  *    );
  *  }</pre>
- *  {@link #initializeUsing(Configurator)} builds the configuration, installs the look and feel
- *  through {@link UIManager#setLookAndFeel(javax.swing.LookAndFeel)} and refreshes every window
- *  that is already open, so it may also be called to switch themes at runtime.
- *  Passing no configuration at all — {@code new SwingTreeLookAndFeel()} — yields the
- *  {@link StylePreset#LINEN} preset drawn with {@link SymbolPreset#FLAT_AND_SIMPLE} symbols.
+ *  {@link #initializeUsing(Configurator)} also refreshes every window that is already open, so it
+ *  doubles as the way to switch themes at runtime. Configuring nothing yields
+ *  {@link StylePreset#LINEN} drawn with {@link SymbolPreset#FLAT} symbols.
  *
  *  <h2>How a component's style is resolved</h2>
  *  A rule is registered against a component <i>type</i> and applies to that type and every
- *  subtype of it. For a given component the most specific matching rule wins, which is how
- *  {@code JCheckBox} can be styled differently from the {@code AbstractButton} rule it would
- *  otherwise inherit. On top of that:
- *  <ol>
- *      <li>an {@link Conf#overrideStyle(Class, Styler)} rule <b>replaces</b> the preset rule
- *          for everything it matches,</li>
- *      <li>every matching {@link Conf#addStyle(Class, Styler)} rule is then applied on top,
- *          in the order it was registered.</li>
- *  </ol>
- *  Where two rules are registered for the very same type, the later one wins.
+ *  subtype of it; the most specific match wins, which is how {@code JCheckBox} can be styled
+ *  differently from the {@code AbstractButton} rule it would otherwise inherit. On top of that an
+ *  {@link Conf#overrideStyle(Class, Styler)} rule <b>replaces</b> the preset rule for everything
+ *  it matches, and every matching {@link Conf#addStyle(Class, Styler)} rule is then applied over
+ *  it in registration order. Between two rules for the very same type, the later one wins.
  *  <p>
- *  This whole cascade sits at the <b>second</b> of SwingTree's three style layers: an
- *  application's {@link swingtree.style.StyleSheet} is resolved before it, and a per-component
- *  {@code withStyle(..)} call after it. A look and feel therefore beats a style sheet, which is
- *  why the semantic roles an application wants to ask for — {@link Variant} for buttons and
- *  {@link Surface} for panels — are declared here and read back out of the component's style
- *  groups rather than being left to the application to paint.
- *
- *  <h2>Semantic roles</h2>
+ *  The cascade sits at the <b>second</b> of SwingTree's three style layers - after an
+ *  application's {@link swingtree.style.StyleSheet}, before a per-component {@code withStyle(..)}.
+ *  A look and feel therefore beats a style sheet, which is why the semantic roles an application
+ *  wants to ask for are declared here and read back out of the component's style groups:
  *  <pre>{@code
  *    UI.button("Ship it").group(SwingTreeLookAndFeel.Variant.PRIMARY)
  *    UI.panel().group(SwingTreeLookAndFeel.Surface.CARD)
@@ -495,7 +482,10 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
 
         table.put("Tree.background",           ui(p.surfaceField()));
         table.put("Tree.foreground",           ui(p.text()));
-        table.put("Tree.textBackground",       ui(p.surfaceField()));
+        // A tree cell renderer fills its own row with this before drawing the label. The tree
+        // underneath is already painted by its style rule, whatever colour that rule chose, so
+        // filling again would show as a box behind every label wherever the two disagree.
+        table.put("Tree.textBackground",       ui(Palette.TRANSPARENT));
         table.put("Tree.textForeground",       ui(p.text()));
         table.put("Tree.selectionBackground",  ui(p.accentSoft()));
         table.put("Tree.selectionForeground",  ui(p.text()));
@@ -951,20 +941,20 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *  {@link Conf#addStyle(Class, Styler)} rules.
          */
         BLANK {
-            @Override Tuple<StyleRule>    rules()            { return Tuple.of(StyleRule.class); }
+            @Override Tuple<StyleRule>     rules()            { return Tuple.of(StyleRule.class); }
             @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.BLANK; }
             @Override public PalettePreset preferredPalette() { return PalettePreset.BLANK; }
-            @Override String           displayName()      { return "Blank"; }
+            @Override String               displayName()      { return "Blank"; }
         },
         /**
          *  A calm, paper-like theme: cream surfaces, taupe borders, a deep olive accent for focus
          *  and selection, and a barely perceptible woven grain on the window background.
          */
         LINEN {
-            @Override Tuple<StyleRule>    rules()            { return LinenPreset.rules(); }
-            @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.FLAT_AND_SIMPLE; }
+            @Override Tuple<StyleRule>     rules()            { return LinenPreset.rules(); }
+            @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.FLAT; }
             @Override public PalettePreset preferredPalette() { return PalettePreset.LINEN; }
-            @Override String           displayName()      { return "Linen"; }
+            @Override String               displayName()      { return "Linen"; }
         },
         /**
          *  Neumorphism, or "soft UI": everything is the same colour as the window it sits on, and
@@ -973,10 +963,10 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *  in. Generous radii, no borders anywhere, and text a shade softer than black.
          */
         SOFT_UI {
-            @Override Tuple<StyleRule>    rules()            { return SoftUiPreset.rules(); }
+            @Override Tuple<StyleRule>     rules()            { return SoftUiPreset.rules(); }
             @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.SOFT; }
             @Override public PalettePreset preferredPalette() { return PalettePreset.CLAY; }
-            @Override String           displayName()      { return "Soft UI"; }
+            @Override String               displayName()      { return "Soft UI"; }
         },
         /**
          *  Frutiger Aero, the wet, glassy optimism of the middle 2000s: saturated fills under a
@@ -984,10 +974,10 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *  outlines and a drop shadow on every raised thing.
          */
         FRUTIGER_AERO {
-            @Override Tuple<StyleRule>    rules()            { return FrutigerAeroPreset.rules(); }
+            @Override Tuple<StyleRule>     rules()            { return FrutigerAeroPreset.rules(); }
             @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.GLOSSY; }
             @Override public PalettePreset preferredPalette() { return PalettePreset.AERO; }
-            @Override String           displayName()      { return "Frutiger Aero"; }
+            @Override String               displayName()      { return "Frutiger Aero"; }
         },
         /**
          *  Material: flat fills with no gradient anywhere, a small 4-pixel radius, and depth said
@@ -996,10 +986,10 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *  when the field takes focus.
          */
         MATERIAL {
-            @Override Tuple<StyleRule>    rules()            { return MaterialPreset.rules(); }
+            @Override Tuple<StyleRule>     rules()            { return MaterialPreset.rules(); }
             @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.MATERIAL; }
             @Override public PalettePreset preferredPalette() { return PalettePreset.MATERIAL; }
-            @Override String           displayName()      { return "Material"; }
+            @Override String               displayName()      { return "Material"; }
         };
 
         /** @return the preset's style rules, most general first. */
@@ -1046,9 +1036,9 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         },
         /** Thin strokes, round caps, no bevels and no gradients: the geometry reads at a glance
          *  and stays crisp at any scale factor. */
-        FLAT_AND_SIMPLE {
+        FLAT {
             @Override Symbols symbols() { return FlatSymbols.INSTANCE; }
-            @Override String  displayName() { return "Flat and simple"; }
+            @Override String  displayName() { return "Flat"; }
         },
         /** Extruded: every glyph is the surface colour, lit from the top left and shadowed at the
          *  bottom right, so it reads as pressed out of the panel rather than drawn onto it. */

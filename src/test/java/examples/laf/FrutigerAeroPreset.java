@@ -42,23 +42,17 @@ import java.awt.Color;
 
 /**
  *  <b>Frutiger Aero</b>: the wet, glassy optimism of software from about 2004 to 2012.
- *
- *  <h2>The idea</h2>
- *  Everything looks like it was moulded out of coloured glass and then rained on. The defining
- *  move is the <em>gloss</em>: a fill that is noticeably lighter across its top half, then breaks
- *  on a hard line at the middle and continues darker below, so the surface reads as a curved,
- *  reflective thing rather than a flat one. Around that go a crisp one-pixel outline a few shades
- *  darker than the fill, a generous radius, and a small drop shadow to lift it off the page. The
- *  page itself is a sky: a soft vertical gradient rather than a flat colour.
  *  <p>
- *  Pressing something turns the gloss upside down and sinks the shadow inward, which is exactly
- *  how a real reflective button behaves when you push it in.
- *
- *  <h2>What the palette has to supply</h2>
- *  Saturation. The idiom needs a colour it can put a highlight on, so {@link Palettes#AERO} gives
- *  it sky blues, a deep sea accent and the saturated grass green every affirmative button of the
- *  period used. Paired with a flatter palette the gloss still works, it is simply quieter - all
- *  four stops of every gradient are derived from the palette by {@link Shades}, never named.
+ *  Everything looks like it was moulded out of coloured glass and then rained on. The defining
+ *  move is the <em>gloss</em>: a fill noticeably lighter across its top half, breaking on a hard
+ *  line at the middle and continuing darker below, so the surface reads as curved rather than
+ *  flat. Around it go a crisp one-pixel outline a few shades darker than the fill, a generous
+ *  radius, and a small drop shadow. The page itself is a sky - a soft vertical gradient. Pressing
+ *  something turns the gloss upside down and sinks the shadow inward.
+ *  <p>
+ *  The idiom needs a colour it can put a highlight on, which is what {@link Palettes#AERO}
+ *  supplies. A flatter palette still works, it is simply quieter: all four stops of every gradient
+ *  are derived from the palette, never named.
  *
  *  @see SwingTreeLookAndFeel.StylePreset#FRUTIGER_AERO
  */
@@ -111,15 +105,11 @@ final class FrutigerAeroPreset
     /**
      *  The four stops that make a surface look like glass: bright at the top, dimming to the break,
      *  then a jump back up and a gentle darkening to the bottom edge.
-     *
-     * @param g    the gradient being configured
-     * @param base the colour the surface is nominally painted in
-     * @return the configured gradient
      */
     private static GradientConf gloss( GradientConf g, Color base ) {
         return g
-                .colors(Shades.lighter(base, 0.42), Shades.lighter(base, 0.14),
-                        base,                        Shades.darker(base, 0.12))
+                .colors(LafUtilities.shadeTowardsWhite(base, 0.42), LafUtilities.shadeTowardsWhite(base, 0.14),
+                        base,                        LafUtilities.shadeTowardsBlack(base, 0.12))
                 .fractions(0, BREAK, BREAK_END, 1)
                 .span(UI.Span.TOP_TO_BOTTOM)
                 .clipTo(UI.ComponentArea.BODY);
@@ -128,8 +118,8 @@ final class FrutigerAeroPreset
     /** The same glass, upside down, which is what a reflective thing does when pushed in. */
     private static GradientConf pressedGloss( GradientConf g, Color base ) {
         return g
-                .colors(Shades.darker(base, 0.16), Shades.darker(base, 0.04),
-                        base,                       Shades.lighter(base, 0.18))
+                .colors(LafUtilities.shadeTowardsBlack(base, 0.16), LafUtilities.shadeTowardsBlack(base, 0.04),
+                        base,                       LafUtilities.shadeTowardsWhite(base, 0.18))
                 .fractions(0, BREAK, BREAK_END, 1)
                 .span(UI.Span.TOP_TO_BOTTOM)
                 .clipTo(UI.ComponentArea.BODY);
@@ -138,7 +128,7 @@ final class FrutigerAeroPreset
     /** A soft vertical wash, for the large surfaces that are sky rather than glass. */
     private static GradientConf sky( GradientConf g, Color base ) {
         return g
-                .colors(Shades.lighter(base, 0.30), base)
+                .colors(LafUtilities.shadeTowardsWhite(base, 0.30), base)
                 .span(UI.Span.TOP_TO_BOTTOM)
                 .clipTo(UI.ComponentArea.BODY);
     }
@@ -168,7 +158,7 @@ final class FrutigerAeroPreset
                         .border(1, p.border())
                         .margin(4), 12, 46)
                         .gradient("glass", g -> g
-                                .colors(Shades.alpha(Color.WHITE, 190), Shades.alpha(Color.WHITE, 0))
+                                .colors(LafUtilities.withOpacity(Color.WHITE, 190), LafUtilities.withOpacity(Color.WHITE, 0))
                                 .fractions(0, 0.55)
                                 .span(UI.Span.TOP_TO_BOTTOM)
                                 .clipTo(UI.ComponentArea.BODY));
@@ -200,7 +190,7 @@ final class FrutigerAeroPreset
                         .borderRadius(10)
                         .border(1, p.border())
                         .padding(2)
-                        .shadowColor(Shades.alpha(p.text(), 46))
+                        .shadowColor(LafUtilities.withOpacity(p.text(), 46))
                         .shadowBlurRadius(5)
                         .shadowOffset(0, 2)
                         .shadowIsInset(true);
@@ -275,7 +265,7 @@ final class FrutigerAeroPreset
         Palette      p       = SwingTreeLookAndFeel.palette();
         JComboBox<?> combo   = it.component();
         boolean      enabled = combo.isEnabled();
-        boolean      focused = enabled && Focus.isOn(combo);
+        boolean      focused = enabled && LafUtilities.hasFocus(combo);
         Color        base    = enabled ? p.surfaceField() : p.surfaceDisabled();
         return it
                 .margin(focused ? 1 : 2)
@@ -293,7 +283,7 @@ final class FrutigerAeroPreset
         Palette  p       = SwingTreeLookAndFeel.palette();
         JSpinner spinner = it.component();
         boolean  enabled = spinner.isEnabled();
-        boolean  focused = enabled && Focus.isOn(spinner);
+        boolean  focused = enabled && LafUtilities.hasFocus(spinner);
         Color    base    = enabled ? p.surfaceField() : p.surfaceDisabled();
         return it
                 .margin(focused ? 1 : 2)
@@ -334,10 +324,10 @@ final class FrutigerAeroPreset
                 .borderColor(focused ? p.accent() : p.border())
                 .backgroundColor(editable ? p.surfaceField() : p.surfaceDisabled())
                 .foregroundColor(text.isEnabled() ? p.text() : p.textDisabled())
-                .shadow("sunk", s -> s.color(Shades.alpha(p.text(), 40)).offset(0, 2).blurRadius(4).isInset(true));
+                .shadow("sunk", s -> s.color(LafUtilities.withOpacity(p.text(), 40)).offset(0, 2).blurRadius(4).isInset(true));
         if ( !focused )
             return it;
-        return it.shadow("glow", s -> s.color(Shades.alpha(p.accent(), 110)).offset(0, 0).blurRadius(7).isInset(false));
+        return it.shadow("glow", s -> s.color(LafUtilities.withOpacity(p.accent(), 110)).offset(0, 0).blurRadius(7).isInset(false));
     }
 
     // ── The rest ─────────────────────────────────────────────────────────
@@ -409,7 +399,7 @@ final class FrutigerAeroPreset
                 .border(1, p.border())
                 .backgroundColor(p.surfaceDisabled())
                 .foregroundColor(p.primary())
-                .shadowColor(Shades.alpha(p.text(), 50))
+                .shadowColor(LafUtilities.withOpacity(p.text(), 50))
                 .shadowBlurRadius(4)
                 .shadowOffset(0, 1)
                 .shadowIsInset(true);

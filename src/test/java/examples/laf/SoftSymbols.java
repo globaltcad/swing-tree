@@ -12,11 +12,6 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.RoundRectangle2D;
 
-import static examples.laf.SymbolPainting.Direction;
-import static examples.laf.SymbolPainting.antialias;
-import static examples.laf.SymbolPainting.arrow;
-import static examples.laf.SymbolPainting.tick;
-import static examples.laf.SymbolPainting.topToBottom;
 
 /**
  *  Symbols for {@link SwingTreeLookAndFeel.StylePreset#SOFT_UI}: every glyph is the surface colour,
@@ -60,7 +55,7 @@ final class SoftSymbols implements Symbols
         Graphics2D g, Palette p, int x, int y, int w, int h,
         boolean enabled, boolean focused, boolean rollover, boolean pressed, boolean selected
     ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         int arc = UI.scale(6);
         RoundRectangle2D.Float body = new RoundRectangle2D.Float(x, y, w - 1, h - 1, arc, arc);
         g.setColor(surface(p, enabled, rollover));
@@ -70,7 +65,7 @@ final class SoftSymbols implements Symbols
             return;
         g.setColor(enabled ? p.accent() : p.textDisabled());
         g.setStroke(new BasicStroke(Math.max(1.6f, UI.scale(2f)), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        g.draw(tick(x, y, w, h));
+        g.draw(LafUtilities.tickShape(x, y, w, h));
     }
 
     @Override
@@ -78,7 +73,7 @@ final class SoftSymbols implements Symbols
         Graphics2D g, Palette p, int x, int y, int w, int h,
         boolean enabled, boolean focused, boolean rollover, boolean pressed, boolean selected
     ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         Ellipse2D.Float body = new Ellipse2D.Float(x, y, w - 1, h - 1);
         g.setColor(surface(p, enabled, rollover));
         g.fill(body);
@@ -97,19 +92,19 @@ final class SoftSymbols implements Symbols
         Graphics2D g, Palette p, int x, int y, int w, int h, boolean expanded, boolean enabled
     ) {
         embossedArrow(g, p, x + w / 2f, y + h / 2f, UI.scale(3.2f),
-                      expanded ? Direction.DOWN : Direction.RIGHT, enabled);
+                      expanded ? LafUtilities.Direction.DOWN : LafUtilities.Direction.RIGHT, enabled);
     }
 
     @Override
     public void paintSubmenuArrow( Graphics2D g, Palette p, int x, int y, int w, int h, boolean enabled ) {
-        embossedArrow(g, p, x + w / 2f, y + h / 2f, UI.scale(3.2f), Direction.RIGHT, enabled);
+        embossedArrow(g, p, x + w / 2f, y + h / 2f, UI.scale(3.2f), LafUtilities.Direction.RIGHT, enabled);
     }
 
     @Override
     public void paintComboArrow(
         Graphics2D g, Palette p, int w, int h, boolean enabled, boolean rollover, boolean pressed
     ) {
-        embossedArrow(g, p, w / 2f, h / 2f, UI.scale(3.6f), Direction.DOWN, enabled && !pressed);
+        embossedArrow(g, p, w / 2f, h / 2f, UI.scale(3.6f), LafUtilities.Direction.DOWN, enabled && !pressed);
     }
 
     @Override
@@ -118,7 +113,7 @@ final class SoftSymbols implements Symbols
         boolean enabled, boolean rollover, boolean pressed
     ) {
         embossedArrow(g, p, w / 2f, h / 2f, UI.scale(2.8f),
-                      up ? Direction.UP : Direction.DOWN, enabled && !pressed);
+                      up ? LafUtilities.Direction.UP : LafUtilities.Direction.DOWN, enabled && !pressed);
     }
 
     // ── Chrome ───────────────────────────────────────────────────────────
@@ -128,13 +123,13 @@ final class SoftSymbols implements Symbols
         Graphics2D g, Palette p, Rectangle track, int thumbCentre,
         boolean horizontal, boolean inverted, boolean enabled
     ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         int t   = Math.max(3, UI.scale(sliderTrackThickness()));
         int arc = t;
         Color fill = enabled ? p.accent() : p.textDisabled();
         if ( horizontal ) {
             int y = track.y + (track.height - t) / 2;
-            g.setPaint(topToBottom(y, t, Shades.darker(p.background(), 0.14), Shades.lighter(p.background(), 0.5)));
+            g.setPaint(LafUtilities.verticalGradient(y, t, LafUtilities.shadeTowardsBlack(p.background(), 0.14), LafUtilities.shadeTowardsWhite(p.background(), 0.5)));
             g.fill(new RoundRectangle2D.Float(track.x, y, track.width, t, arc, arc));
             int filled = inverted ? Math.max(0, track.x + track.width - thumbCentre)
                                   : Math.max(0, thumbCentre - track.x);
@@ -144,8 +139,8 @@ final class SoftSymbols implements Symbols
             }
         } else {
             int x = track.x + (track.width - t) / 2;
-            g.setPaint(topToBottom(track.y, track.height,
-                                   Shades.darker(p.background(), 0.14), Shades.lighter(p.background(), 0.5)));
+            g.setPaint(LafUtilities.verticalGradient(track.y, track.height,
+                                   LafUtilities.shadeTowardsBlack(p.background(), 0.14), LafUtilities.shadeTowardsWhite(p.background(), 0.5)));
             g.fill(new RoundRectangle2D.Float(x, track.y, t, track.height, arc, arc));
             int filled = inverted ? Math.max(0, thumbCentre - track.y)
                                   : Math.max(0, track.y + track.height - thumbCentre);
@@ -158,7 +153,7 @@ final class SoftSymbols implements Symbols
 
     @Override
     public void paintSliderThumb( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         Ellipse2D.Float body = new Ellipse2D.Float(r.x, r.y, r.width - 1, r.height - 1);
         g.setColor(enabled ? p.surface() : p.surfaceDisabled());
         g.fill(body);
@@ -166,25 +161,25 @@ final class SoftSymbols implements Symbols
         if ( !enabled )
             return;
         float dot = UI.scale(6f);
-        g.setColor(focused ? p.accent() : Shades.mix(p.accent(), p.surface(), 0.35));
+        g.setColor(focused ? p.accent() : LafUtilities.shadeTowards(p.accent(), p.surface(), 0.35));
         g.fill(new Ellipse2D.Float(r.x + dot, r.y + dot, r.width - 1 - 2 * dot, r.height - 1 - 2 * dot));
     }
 
     @Override
     public void paintScrollThumb( Graphics2D g, Palette p, Rectangle r, boolean active ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         int pad = UI.scale(3);
         int arc = UI.scale(10);
         RoundRectangle2D.Float body = new RoundRectangle2D.Float(
                 r.x + pad, r.y + pad, r.width - 2 * pad, r.height - 2 * pad, arc, arc);
-        g.setColor(active ? Shades.mix(p.surface(), p.accent(), 0.22) : p.surface());
+        g.setColor(active ? LafUtilities.shadeTowards(p.surface(), p.accent(), 0.22) : p.surface());
         g.fill(body);
         strokeRim(g, body, p, r.y + pad, r.height - 2 * pad, false);
     }
 
     @Override
     public void paintSplitGrip( Graphics2D g, Palette p, int w, int h, boolean horizontalSplit, boolean enabled ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         float radius = UI.scale(2f);
         int   step   = UI.scale(6);
         for ( int i = 0; i < 3; i++ ) {
@@ -196,7 +191,7 @@ final class SoftSymbols implements Symbols
 
     @Override
     public void paintDragHandle( Graphics2D g, Palette p, int w, int h, boolean horizontal ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         float radius = UI.scale(1.8f);
         int   step   = UI.scale(5);
         for ( int i = 0; i < 3; i++ ) {
@@ -212,18 +207,18 @@ final class SoftSymbols implements Symbols
     ) {
         if ( ratio <= 0 )
             return;
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         int   pad  = UI.scale(3);
         Color base = enabled ? p.accent() : p.textDisabled();
         if ( horizontal ) {
             int inner = h - 2 * pad;
             int fillW = Math.max(inner, (int) Math.round((w - 2 * pad) * ratio));
-            g.setPaint(topToBottom(pad, inner, Shades.lighter(base, 0.22), Shades.darker(base, 0.10)));
+            g.setPaint(LafUtilities.verticalGradient(pad, inner, LafUtilities.shadeTowardsWhite(base, 0.22), LafUtilities.shadeTowardsBlack(base, 0.10)));
             g.fill(new RoundRectangle2D.Float(pad, pad, fillW, inner, inner, inner));
         } else {
             int inner = w - 2 * pad;
             int fillH = Math.max(inner, (int) Math.round((h - 2 * pad) * ratio));
-            g.setPaint(topToBottom(h - pad - fillH, fillH, Shades.lighter(base, 0.22), Shades.darker(base, 0.10)));
+            g.setPaint(LafUtilities.verticalGradient(h - pad - fillH, fillH, LafUtilities.shadeTowardsWhite(base, 0.22), LafUtilities.shadeTowardsBlack(base, 0.10)));
             g.fill(new RoundRectangle2D.Float(pad, h - pad - fillH, inner, fillH, inner, inner));
         }
     }
@@ -234,7 +229,7 @@ final class SoftSymbols implements Symbols
     ) {
         if ( !selected && !rollover )
             return;
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         int arc = UI.scale(14);
         RoundRectangle2D.Float body = new RoundRectangle2D.Float(x, y, w, h, arc, arc);
         g.setColor(selected ? p.surface() : p.surfaceHover());
@@ -247,7 +242,7 @@ final class SoftSymbols implements Symbols
     public void paintTabAccent(
         Graphics2D g, Palette p, int x, int y, int w, int h, int tabPlacement, boolean enabled
     ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         int stripe = Math.max(2, UI.scale(3));
         int arc    = stripe;
         g.setColor(enabled ? p.accent() : p.textDisabled());
@@ -276,21 +271,21 @@ final class SoftSymbols implements Symbols
     private static void strokeRim(
         Graphics2D g, java.awt.Shape body, Palette p, float y, float h, boolean inverted
     ) {
-        Color light = Shades.lighter(p.background(), 0.55);
-        Color dark  = Shades.darker(p.background(), 0.22);
+        Color light = LafUtilities.shadeTowardsWhite(p.background(), 0.55);
+        Color dark  = LafUtilities.shadeTowardsBlack(p.background(), 0.22);
         g.setStroke(new BasicStroke(Math.max(1.4f, UI.scale(1.6f))));
-        g.setPaint(topToBottom(y, h, inverted ? dark : light, inverted ? light : dark));
+        g.setPaint(LafUtilities.verticalGradient(y, h, inverted ? dark : light, inverted ? light : dark));
         g.draw(body);
     }
 
     private static void embossedArrow(
-        Graphics2D g, Palette p, float cx, float cy, float size, Direction direction, boolean enabled
+        Graphics2D g, Palette p, float cx, float cy, float size, LafUtilities.Direction direction, boolean enabled
     ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         float lift = UI.scale(1f);
-        Path2D.Float shape = arrow(cx, cy, size, size * 0.62f, direction);
+        Path2D.Float shape = LafUtilities.arrowShape(cx, cy, size, size * 0.62f, direction);
         g.translate(lift, lift);
-        g.setColor(Shades.lighter(p.background(), 0.6));
+        g.setColor(LafUtilities.shadeTowardsWhite(p.background(), 0.6));
         g.fill(shape);
         g.translate(-lift, -lift);
         g.setColor(enabled ? p.textMuted() : p.textDisabled());
@@ -299,9 +294,9 @@ final class SoftSymbols implements Symbols
 
     private static void embossedDot( Graphics2D g, Palette p, float cx, float cy, float radius, boolean enabled ) {
         float lift = UI.scale(1f);
-        g.setColor(Shades.lighter(p.background(), 0.6));
+        g.setColor(LafUtilities.shadeTowardsWhite(p.background(), 0.6));
         g.fill(new Ellipse2D.Float(cx - radius + lift, cy - radius + lift, 2 * radius, 2 * radius));
-        g.setColor(enabled ? Shades.darker(p.background(), 0.20) : p.borderSoft());
+        g.setColor(enabled ? LafUtilities.shadeTowardsBlack(p.background(), 0.20) : p.borderSoft());
         g.fill(new Ellipse2D.Float(cx - radius, cy - radius, 2 * radius, 2 * radius));
     }
 }

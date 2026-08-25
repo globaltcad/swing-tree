@@ -2,7 +2,6 @@ package examples.laf;
 
 import swingtree.UI;
 import swingtree.api.laf.SwingTreeStyledComponentUI;
-import swingtree.style.ComponentExtension;
 import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.ButtonModel;
@@ -23,17 +22,12 @@ import java.awt.Insets;
  *  The popup window is rendered separately by Swing and inherits the popup-menu and list
  *  defaults; an application wanting more control over it can override the {@code ComboBox.list*}
  *  keys.
- *  <p>
- *  This class is an implementation detail of {@link SwingTreeLookAndFeel} and is only public
- *  because Swing instantiates a UI delegate reflectively through {@link javax.swing.UIDefaults}.
  */
 public final class SwingTreeComboBoxUI
         extends    BasicComboBoxUI
         implements SwingTreeStyledComponentUI<JComboBox<?>>
 {
-    /** Called by Swing reflectively to obtain the UI delegate.
-     *  @param c the component the delegate is created for
-     *  @return a new delegate */
+    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeComboBoxUI(); }
 
     @Override
@@ -44,23 +38,20 @@ public final class SwingTreeComboBoxUI
         // editable combo's focus lives on its editor, so bridge that to a repaint of the whole.
         JComboBox<?> combo = (JComboBox<?>) c;
         if ( combo.getEditor() != null )
-            LafFocus.repaintOnFocus(combo, combo.getEditor().getEditorComponent());
+            LafUtilities.repaintOnFocusChange(combo, combo.getEditor().getEditorComponent());
     }
 
     @Override
     public void uninstallUI( JComponent c ) {
         JComboBox<?> combo = (JComboBox<?>) c;
         if ( combo.getEditor() != null )
-            LafFocus.uninstall(combo, combo.getEditor().getEditorComponent());
+            LafUtilities.uninstallFocusRepaint(combo, combo.getEditor().getEditorComponent());
         super.uninstallUI(c);
     }
 
     @Override
     public void paint( Graphics g, JComponent c ) {
-        ComponentExtension.from(c).paintBackground(g, g2 -> {
-            LafPaint.applyAaHints((Graphics2D) g2);
-            super.paint(g2, c);
-        });
+        LafUtilities.paintStyled(g, c, g2 -> super.paint(g2, c));
     }
 
     @Override

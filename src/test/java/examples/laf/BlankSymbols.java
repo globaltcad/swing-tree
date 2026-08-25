@@ -20,18 +20,12 @@ import java.awt.geom.Ellipse2D;
  *  with the SwingTree style engine wired into every component and nothing painted on top - the
  *  starting point for an application that wants to build its whole appearance itself.
  *  <p>
- *  <h2>The two exceptions</h2>
- *  A check box and a radio button are drawn through an icon rather than by their delegate, and
- *  {@code BasicIconFactory}'s versions of both are <b>empty stubs</b> - the basic look and feel has
- *  never had a visible tick, because every look and feel derived from it supplies its own. Falling
- *  through there would leave a control that cannot be read, which is not what "no styling" means:
- *  a browser showing a page with no stylesheet still draws a real check box. So those two glyphs
- *  are drawn here, in the plainest form there is - a one-pixel outline and a mark, in the palette's
- *  own colours - and the look and feel installs them whatever the symbol set says.
- *  <p>
- *  Everything else is unreachable. It returns nothing and zero rather than throwing, because a look
- *  and feel that has lost a guard should leave a control undecorated rather than take the window
- *  down with it.
+ *  Two glyphs are drawn anyway. A check box and a radio button are drawn through an icon rather
+ *  than by their delegate, and {@code BasicIconFactory}'s versions of both are <b>empty stubs</b>,
+ *  so falling through would leave a control that cannot be read - which is not what "no styling"
+ *  means: a browser showing a page with no stylesheet still draws a real check box. Everything else
+ *  here is unreachable, and returns nothing rather than throwing, so a lost guard leaves a control
+ *  undecorated instead of taking the window down.
  */
 final class BlankSymbols implements Symbols
 {
@@ -63,7 +57,7 @@ final class BlankSymbols implements Symbols
         Graphics2D g, Palette p, int x, int y, int w, int h,
         boolean enabled, boolean focused, boolean rollover, boolean pressed, boolean selected
     ) {
-        SymbolPainting.antialias(g);
+        LafUtilities.antialiasShapes(g);
         g.setColor(enabled ? p.surfaceField() : p.surfaceDisabled());
         g.fillRect(x, y, w - 1, h - 1);
         g.setStroke(new BasicStroke(1f));
@@ -73,14 +67,14 @@ final class BlankSymbols implements Symbols
             return;
         g.setColor(enabled ? p.text() : p.textDisabled());
         g.setStroke(new BasicStroke(Math.max(1.5f, UI.scale(1.8f)), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        g.draw(SymbolPainting.tick(x, y, w, h));
+        g.draw(LafUtilities.tickShape(x, y, w, h));
     }
 
     @Override public void paintRadioGlyph(
         Graphics2D g, Palette p, int x, int y, int w, int h,
         boolean enabled, boolean focused, boolean rollover, boolean pressed, boolean selected
     ) {
-        SymbolPainting.antialias(g);
+        LafUtilities.antialiasShapes(g);
         g.setColor(enabled ? p.surfaceField() : p.surfaceDisabled());
         g.fill(new Ellipse2D.Float(x, y, w - 1, h - 1));
         g.setStroke(new BasicStroke(1f));

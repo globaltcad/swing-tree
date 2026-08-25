@@ -41,24 +41,18 @@ import java.awt.Color;
 
 /**
  *  <b>Soft UI</b>, or neumorphism: a theme in which nothing has a colour of its own.
- *
- *  <h2>The idea</h2>
+ *  <p>
  *  Every surface is the same colour as the window it sits on. What tells a button from the panel
  *  behind it is not a fill or a border but the <em>light</em>: a pale highlight up and to the left,
  *  a soft shadow down and to the right, as though the control had been pressed out of a sheet of
  *  clay. Press it and the light turns around - both shadows move inside - and it sinks back in.
- *  Text inputs are sunken from the start, because a hole is what you type into.
+ *  Text inputs are sunken from the start, because a hole is what you type into. The two shades the
+ *  light is made of are computed from the palette rather than named, so a palette other than
+ *  {@link Palettes#CLAY} re-lights the theme instead of breaking it.
  *  <p>
- *  That is the whole vocabulary, and it is why the palette matters more here than in any other
- *  preset: {@link Palettes#CLAY} gives the window and every surface on it one single grey, and the
- *  two shades the light is made of are computed from it by {@link Shades} rather than named, so
- *  pairing this preset with a different palette re-lights it instead of breaking it.
- *
- *  <h2>What it gives up</h2>
- *  Borders, almost entirely: an outline would do the job the light is there to do. The one
- *  exception is focus, which has to be unmistakable and cannot be said with a shadow that a
- *  resting control already has - so a focused control grows an accent ring, and gives the same
- *  amount back from its margin so the layout does not shift.
+ *  Borders are given up almost entirely, since an outline would do the job the light is there to
+ *  do. The exception is focus, which cannot be said with a shadow a resting control already has -
+ *  so a focused control grows an accent ring and gives the same amount back from its margin.
  *
  *  @see SwingTreeLookAndFeel.StylePreset#SOFT_UI
  */
@@ -67,10 +61,10 @@ final class SoftUiPreset
     private SoftUiPreset() {}
 
     /** How far towards white the lit side of an extrusion goes. */
-    private static final double LIGHT_AMOUNT = 0.55;
+    private static final double LIGHT_AMOUNT = 0.42;
     /** How far towards black the shadowed side goes. Less than the light, so the effect reads as
      *  a room lit from one corner rather than as a black outline. */
-    private static final double SHADE_AMOUNT = 0.22;
+    private static final double SHADE_AMOUNT = 0.16;
 
     /** The corner the light comes from, said once so every extrusion agrees. */
     private static final String LIT    = "lit";
@@ -113,38 +107,32 @@ final class SoftUiPreset
     // ── The light ────────────────────────────────────────────────────────
 
     /** @return the surface as it looks where the light falls on it. */
-    private static Color lit( Palette p ) { return Shades.lighter(p.background(), LIGHT_AMOUNT); }
+    private static Color lit( Palette p ) { return LafUtilities.shadeTowardsWhite(p.background(), LIGHT_AMOUNT); }
 
     /** @return the surface as it looks in its own shadow. */
-    private static Color shade( Palette p ) { return Shades.darker(p.background(), SHADE_AMOUNT); }
+    private static Color shade( Palette p ) { return LafUtilities.shadeTowardsBlack(p.background(), SHADE_AMOUNT); }
 
     /**
      *  Extrudes a surface out of the panel behind it: light from the top left, shadow to the
      *  bottom right, both outside the shape.
-     *
-     * @param it    the delegate to style
-     * @param p     the palette to take colours from
-     * @param depth how far the light and the shadow reach, in developer pixels
-     * @param <C> the component type
-     * @return the styled delegate
+     *  <p>
+     *  An outer shadow is drawn in the component's own margin and is cut off at the component
+     *  bounds, so {@code reach} - the offset and the blur together - must never exceed the margin
+     *  the caller set, or the soft glow ends in a hard rectangular edge.
      */
     private static <C extends JComponent> ComponentStyleDelegate<C> raised(
-        ComponentStyleDelegate<C> it, Palette p, int depth
+        ComponentStyleDelegate<C> it, Palette p, int reach
     ) {
+        int offset = Math.max(1, reach / 3);
+        int blur   = Math.max(1, reach - offset);
         return it
-                .shadow(LIT,    s -> s.color(lit(p)).offset(-depth, -depth).blurRadius(depth * 2).isInset(false))
-                .shadow(SHADED, s -> s.color(shade(p)).offset(depth, depth).blurRadius(depth * 2).isInset(false));
+                .shadow(LIT,    s -> s.color(lit(p)).offset(-offset, -offset).blurRadius(blur).isInset(false))
+                .shadow(SHADED, s -> s.color(shade(p)).offset(offset, offset).blurRadius(blur).isInset(false));
     }
 
     /**
      *  The same light, turned around and moved inside, which is how a control says it is pressed
      *  and how an input says it is a hole.
-     *
-     * @param it    the delegate to style
-     * @param p     the palette to take colours from
-     * @param depth how far the light and the shadow reach, in developer pixels
-     * @param <C> the component type
-     * @return the styled delegate
      */
     private static <C extends JComponent> ComponentStyleDelegate<C> sunken(
         ComponentStyleDelegate<C> it, Palette p, int depth
@@ -162,7 +150,7 @@ final class SoftUiPreset
         it = it.foregroundColor(p.text());
         switch ( Surface.of(it.component()) ) {
             case CARD:
-                return raised(it.backgroundColor(p.surface()).borderRadius(22).borderWidth(0).margin(8), p, 6);
+                return raised(it.backgroundColor(p.surface()).borderRadius(22).borderWidth(0).margin(8), p, 8);
             case RAIL:
                 return it.backgroundColor(p.surface()).borderWidth(0);
             case TRANSPARENT:
@@ -181,7 +169,7 @@ final class SoftUiPreset
             case TRANSPARENT:
                 return it.backgroundColor(Palette.TRANSPARENT).borderWidth(0).borderRadius(0).padding(0);
             case CARD:
-                return raised(it.backgroundColor(p.surface()).borderRadius(20).borderWidth(0).margin(6).padding(4), p, 5);
+                return raised(it.backgroundColor(p.surface()).borderRadius(20).borderWidth(0).margin(6).padding(4), p, 6);
             case RAIL:
                 return it.backgroundColor(p.surface()).borderWidth(0).borderRadius(0).padding(0);
             case WINDOW:
@@ -220,10 +208,12 @@ final class SoftUiPreset
 
         Variant variant = Variant.of(b);
 
+        // The margin is where the light and the shadow live, so it is never zero; a focus ring
+        // is grown out of it rather than added to the footprint.
+        int lift = focused ? 5 : 7;
+
         it = it
-                // The margin is where the light and the shadow live, so it is never zero; a focus
-                // ring is grown out of it rather than added to the footprint.
-                .margin(focused ? 4 : 6)
+                .margin(lift)
                 .padding(9, 20, 9, 20)
                 .borderRadius(16)
                 .borderWidth(focused ? 2 : 0)
@@ -237,7 +227,7 @@ final class SoftUiPreset
             return it; // lies flat in the panel until it is reached for
         if ( sunkenIn )
             return sunken(it, p, 3);
-        return raised(it, p, rollover ? 6 : 5);
+        return raised(it, p, rollover ? lift : lift - 2);
     }
 
     @SuppressWarnings("deprecation")
@@ -254,16 +244,17 @@ final class SoftUiPreset
         Palette      p       = SwingTreeLookAndFeel.palette();
         JComboBox<?> combo   = it.component();
         boolean      enabled = combo.isEnabled();
-        boolean      focused = enabled && Focus.isOn(combo);
+        boolean      focused = enabled && LafUtilities.hasFocus(combo);
+        int lift = focused ? 4 : 6;
         it = it
-                .margin(focused ? 3 : 5)
+                .margin(lift)
                 .padding(6, 10, 6, 6)
                 .borderRadius(14)
                 .borderWidth(focused ? 2 : 0)
                 .borderColor(focused ? p.accent() : Palette.TRANSPARENT)
                 .backgroundColor(enabled ? p.surface() : p.surfaceDisabled())
                 .foregroundColor(enabled ? p.text() : p.textDisabled());
-        return enabled ? raised(it, p, 4) : it;
+        return enabled ? raised(it, p, lift) : it;
     }
 
     @SuppressWarnings("deprecation")
@@ -271,16 +262,17 @@ final class SoftUiPreset
         Palette  p       = SwingTreeLookAndFeel.palette();
         JSpinner spinner = it.component();
         boolean  enabled = spinner.isEnabled();
-        boolean  focused = enabled && Focus.isOn(spinner);
+        boolean  focused = enabled && LafUtilities.hasFocus(spinner);
+        int lift = focused ? 4 : 6;
         it = it
-                .margin(focused ? 3 : 5)
+                .margin(lift)
                 .padding(4)
                 .borderRadius(14)
                 .borderWidth(focused ? 2 : 0)
                 .borderColor(focused ? p.accent() : Palette.TRANSPARENT)
                 .backgroundColor(enabled ? p.surface() : p.surfaceDisabled())
                 .foregroundColor(enabled ? p.text() : p.textDisabled());
-        return enabled ? raised(it, p, 4) : it;
+        return enabled ? raised(it, p, lift) : it;
     }
 
     // ── Inputs ───────────────────────────────────────────────────────────
@@ -360,7 +352,7 @@ final class SoftUiPreset
                 .borderRadius(14)
                 .borderWidth(0)
                 .backgroundColor(p.surface())
-                .foregroundColor(p.text()), p, 4);
+                .foregroundColor(p.text()), p, 5);
     }
 
     private static ComponentStyleDelegate<JSeparator> separator( ComponentStyleDelegate<JSeparator> it ) {
@@ -417,7 +409,7 @@ final class SoftUiPreset
                 .margin(6)
                 .padding(6, 10, 6, 10)
                 .borderRadius(18)
-                .borderWidth(0), p, 5);
+                .borderWidth(0), p, 6);
     }
 
     // ── Variant colours ──────────────────────────────────────────────────

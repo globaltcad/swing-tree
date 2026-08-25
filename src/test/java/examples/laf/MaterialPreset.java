@@ -41,8 +41,7 @@ import java.awt.Color;
 
 /**
  *  <b>Material</b>: flat surfaces at different heights above the page.
- *
- *  <h2>The idea</h2>
+ *  <p>
  *  Nothing is shaded, bevelled or glossy. Every surface is one flat colour with a small four-pixel
  *  radius, and the only thing that says one is above another is the shadow it casts - which is why
  *  the shadows here come in named steps ({@link #elevation}) rather than being tuned per component.
@@ -100,11 +99,6 @@ final class MaterialPreset
      *  How high above the page a surface sits. The idiom says depth with one thing only, so this is
      *  the one thing: a wide soft shadow for the distance and a tight dark one for the contact edge,
      *  both growing with the step.
-     *
-     * @param it   the delegate to style
-     * @param step how many steps up, from 0 (flat on the page) upwards
-     * @param <C> the component type
-     * @return the styled delegate
      */
     private static <C extends JComponent> ComponentStyleDelegate<C> elevation( ComponentStyleDelegate<C> it, int step ) {
         if ( step <= 0 )
@@ -222,7 +216,7 @@ final class MaterialPreset
         Palette      p       = SwingTreeLookAndFeel.palette();
         JComboBox<?> combo   = it.component();
         boolean      enabled = combo.isEnabled();
-        boolean      focused = enabled && Focus.isOn(combo);
+        boolean      focused = enabled && LafUtilities.hasFocus(combo);
         return underlined(it, p, enabled, focused, 6, 10, 4);
     }
 
@@ -231,7 +225,7 @@ final class MaterialPreset
         Palette  p       = SwingTreeLookAndFeel.palette();
         JSpinner spinner = it.component();
         boolean  enabled = spinner.isEnabled();
-        boolean  focused = enabled && Focus.isOn(spinner);
+        boolean  focused = enabled && LafUtilities.hasFocus(spinner);
         return underlined(it, p, enabled, focused, 4, 6, 4);
     }
 
@@ -323,7 +317,7 @@ final class MaterialPreset
                 .padding(6, 10, 6, 10)
                 .borderRadius(RADIUS)
                 .borderWidth(0)
-                .backgroundColor(Shades.alpha(p.text(), 229))
+                .backgroundColor(LafUtilities.withOpacity(p.text(), 229))
                 .foregroundColor(p.onFilled());
     }
 
@@ -398,7 +392,7 @@ final class MaterialPreset
             case QUIET:
             case NEUTRAL:
             default:      return sunken ? p.accentSoft()
-                               : rollover ? Shades.alpha(p.accent(), 28)
+                               : rollover ? LafUtilities.withOpacity(p.accent(), 28)
                                : Palette.TRANSPARENT;
         }
     }

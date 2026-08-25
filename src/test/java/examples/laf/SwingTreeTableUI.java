@@ -2,7 +2,6 @@ package examples.laf;
 
 import swingtree.UI;
 import swingtree.api.laf.SwingTreeStyledComponentUI;
-import swingtree.style.ComponentExtension;
 import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.JComponent;
@@ -19,17 +18,12 @@ import java.awt.Rectangle;
  *  them per instance with {@link JTable#setShowGrid(boolean)} - and the band behind a selected
  *  row is filled here rather than by the cell renderer, for the reason spelled out in
  *  {@link SwingTreeListUI}.
- *  <p>
- *  This class is an implementation detail of {@link SwingTreeLookAndFeel} and is only public
- *  because Swing instantiates a UI delegate reflectively through {@link javax.swing.UIDefaults}.
  */
 public final class SwingTreeTableUI
         extends    BasicTableUI
         implements SwingTreeStyledComponentUI<JTable>
 {
-    /** Called by Swing reflectively to obtain the UI delegate.
-     *  @param c the component the delegate is created for
-     *  @return a new delegate */
+    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeTableUI(); }
 
     @Override
@@ -52,9 +46,8 @@ public final class SwingTreeTableUI
 
     @Override
     public void paint( Graphics g, JComponent c ) {
-        ComponentExtension.from(c).paintBackground(g, g2 -> {
-            LafPaint.applyAaHints((Graphics2D) g2);
-            paintSelectionBands((Graphics2D) g2, (JTable) c);
+        LafUtilities.paintStyled(g, c, g2 -> {
+            paintSelectionBands(g2, (JTable) c);
             super.paint(g2, c);
         });
     }

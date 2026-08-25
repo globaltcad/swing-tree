@@ -18,7 +18,7 @@ import java.awt.geom.RoundRectangle2D;
  *  at a glance and stays crisp at any scale factor, because every stroke and radius is derived
  *  from {@link UI#scale(float)} rather than from a fixed bitmap.
  *  <p>
- *  This is the set behind {@link SwingTreeLookAndFeel.SymbolPreset#FLAT_AND_SIMPLE}. It is
+ *  This is the set behind {@link SwingTreeLookAndFeel.SymbolPreset#FLAT}. It is
  *  stateless, so a single instance serves the whole application.
  */
 final class FlatSymbols implements Symbols

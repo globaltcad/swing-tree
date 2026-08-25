@@ -2,7 +2,6 @@ package examples.laf;
 
 import swingtree.UI;
 import swingtree.api.laf.SwingTreeStyledComponentUI;
-import swingtree.style.ComponentExtension;
 import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.JButton;
@@ -24,17 +23,12 @@ import java.awt.Rectangle;
  *  default: Swing's convention is that the value is in raw component pixels, which would be
  *  wrong on a HiDPI display. It is computed here instead, from the symbol set's developer-pixel
  *  constant, at every layout pass.
- *  <p>
- *  This class is an implementation detail of {@link SwingTreeLookAndFeel} and is only public
- *  because Swing instantiates a UI delegate reflectively through {@link javax.swing.UIDefaults}.
  */
 public final class SwingTreeScrollBarUI
         extends    BasicScrollBarUI
         implements SwingTreeStyledComponentUI<JScrollBar>
 {
-    /** Called by Swing reflectively to obtain the UI delegate.
-     *  @param c the component the delegate is created for
-     *  @return a new delegate */
+    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeScrollBarUI(); }
 
     @Override
@@ -55,7 +49,7 @@ public final class SwingTreeScrollBarUI
 
     @Override
     public void paint( Graphics g, JComponent c ) {
-        ComponentExtension.from(c).paintBackground(g, g2 -> super.paint(g2, c));
+        LafUtilities.paintStyled(g, c, g2 -> super.paint(g2, c));
     }
 
     @Override

@@ -2,7 +2,6 @@ package examples.laf;
 
 import swingtree.UI;
 import swingtree.api.laf.SwingTreeStyledComponentUI;
-import swingtree.style.ComponentExtension;
 import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.JComponent;
@@ -17,17 +16,12 @@ import java.awt.Graphics2D;
 /**
  *  The {@link JSplitPane} UI delegate. The split pane itself carries no chrome; everything
  *  visible lives on the divider, whose centre line and grip the configured symbol set draws.
- *  <p>
- *  This class is an implementation detail of {@link SwingTreeLookAndFeel} and is only public
- *  because Swing instantiates a UI delegate reflectively through {@link javax.swing.UIDefaults}.
  */
 public final class SwingTreeSplitPaneUI
         extends    BasicSplitPaneUI
         implements SwingTreeStyledComponentUI<JSplitPane>
 {
-    /** Called by Swing reflectively to obtain the UI delegate.
-     *  @param c the component the delegate is created for
-     *  @return a new delegate */
+    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeSplitPaneUI(); }
 
     @Override
@@ -50,7 +44,7 @@ public final class SwingTreeSplitPaneUI
 
     @Override
     public void paint( Graphics g, JComponent c ) {
-        ComponentExtension.from(c).paintBackground(g, g2 -> super.paint(g2, c));
+        LafUtilities.paintStyled(g, c, g2 -> super.paint(g2, c));
     }
 
     @Override

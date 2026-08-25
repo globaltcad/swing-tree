@@ -2,7 +2,6 @@ package examples.laf;
 
 import swingtree.UI;
 import swingtree.api.laf.SwingTreeStyledComponentUI;
-import swingtree.style.ComponentExtension;
 import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.ButtonModel;
@@ -21,17 +20,12 @@ import java.awt.Insets;
  *  The {@link JSpinner} UI delegate. The spinner's surface is styled like a small text field;
  *  its two stepper buttons are flat and carry nothing but the symbol set's arrows. The editor
  *  inside receives its own delegate, so it picks up the same focus treatment.
- *  <p>
- *  This class is an implementation detail of {@link SwingTreeLookAndFeel} and is only public
- *  because Swing instantiates a UI delegate reflectively through {@link javax.swing.UIDefaults}.
  */
 public final class SwingTreeSpinnerUI
         extends    BasicSpinnerUI
         implements SwingTreeStyledComponentUI<JSpinner>
 {
-    /** Called by Swing reflectively to obtain the UI delegate.
-     *  @param c the component the delegate is created for
-     *  @return a new delegate */
+    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeSpinnerUI(); }
 
     @Override
@@ -43,7 +37,7 @@ public final class SwingTreeSpinnerUI
         JSpinner  spinner = (JSpinner) c;
         Component editor  = spinner.getEditor();
         if ( editor instanceof JSpinner.DefaultEditor )
-            LafFocus.repaintOnFocus(spinner, ((JSpinner.DefaultEditor) editor).getTextField());
+            LafUtilities.repaintOnFocusChange(spinner, ((JSpinner.DefaultEditor) editor).getTextField());
     }
 
     @Override
@@ -51,16 +45,13 @@ public final class SwingTreeSpinnerUI
         JSpinner  spinner = (JSpinner) c;
         Component editor  = spinner.getEditor();
         if ( editor instanceof JSpinner.DefaultEditor )
-            LafFocus.uninstall(spinner, ((JSpinner.DefaultEditor) editor).getTextField());
+            LafUtilities.uninstallFocusRepaint(spinner, ((JSpinner.DefaultEditor) editor).getTextField());
         super.uninstallUI(c);
     }
 
     @Override
     public void paint( Graphics g, JComponent c ) {
-        ComponentExtension.from(c).paintBackground(g, g2 -> {
-            LafPaint.applyAaHints((Graphics2D) g2);
-            super.paint(g2, c);
-        });
+        LafUtilities.paintStyled(g, c, g2 -> super.paint(g2, c));
     }
 
     @Override

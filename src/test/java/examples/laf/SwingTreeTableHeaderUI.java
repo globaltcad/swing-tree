@@ -2,7 +2,6 @@ package examples.laf;
 
 import swingtree.UI;
 import swingtree.api.laf.SwingTreeStyledComponentUI;
-import swingtree.style.ComponentExtension;
 import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.JComponent;
@@ -18,22 +17,16 @@ import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
 import java.awt.Component;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 
 /**
  *  The {@link JTableHeader} UI delegate. A header cell renderer is installed as the header's
  *  default so that the heading row reads as a quiet caption regardless of the table's model.
- *  <p>
- *  This class is an implementation detail of {@link SwingTreeLookAndFeel} and is only public
- *  because Swing instantiates a UI delegate reflectively through {@link javax.swing.UIDefaults}.
  */
 public final class SwingTreeTableHeaderUI
         extends    BasicTableHeaderUI
         implements SwingTreeStyledComponentUI<JTableHeader>
 {
-    /** Called by Swing reflectively to obtain the UI delegate.
-     *  @param c the component the delegate is created for
-     *  @return a new delegate */
+    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeTableHeaderUI(); }
 
     @Override
@@ -63,10 +56,7 @@ public final class SwingTreeTableHeaderUI
 
     @Override
     public void paint( Graphics g, JComponent c ) {
-        ComponentExtension.from(c).paintBackground(g, g2 -> {
-            LafPaint.applyAaHints((Graphics2D) g2);
-            super.paint(g2, c);
-        });
+        LafUtilities.paintStyled(g, c, g2 -> super.paint(g2, c));
     }
 
     @Override

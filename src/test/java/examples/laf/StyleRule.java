@@ -18,15 +18,7 @@ final class StyleRule
     private final Class<? extends JComponent> _type;
     private final Styler<?>                   _styler;
 
-    /**
-     *  Pairs a rule with the type it governs, keeping the two type parameters tied together at the
-     *  call site so a preset cannot register a button rule against a text field.
-     *
-     * @param type   the component type the rule applies to, subtypes included
-     * @param styler the rule
-     * @param <C> the component type
-     * @return the rule
-     */
+    /** Ties the two type parameters together, so a button rule cannot be registered against a text field. */
     static <C extends JComponent> StyleRule of( Class<C> type, Styler<C> styler ) {
         return new StyleRule(type, styler);
     }
@@ -40,10 +32,7 @@ final class StyleRule
 
     Styler<?> styler() { return _styler; }
 
-    /**
-     * @param componentType the runtime class of a component being styled
-     * @return {@code true} if this rule governs that class
-     */
+    /** Whether this rule governs the given runtime class. */
     boolean appliesTo( Class<?> componentType ) { return _type.isAssignableFrom(componentType); }
 
     @Override

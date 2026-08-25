@@ -1,7 +1,6 @@
 package examples.laf;
 
 import swingtree.api.laf.SwingTreeStyledComponentUI;
-import swingtree.style.ComponentExtension;
 import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.JComponent;
@@ -14,19 +13,12 @@ import java.awt.Graphics;
  *  The {@link JViewport} UI delegate. A viewport is a near-invisible window onto a scroll
  *  pane's child; it exists mostly to clip and translate. It is filled so that the area
  *  behind it - visible when the child does not fill it - matches the scroll pane's framing.
- *  <p>
- *  This class is an implementation detail of {@link SwingTreeLookAndFeel} and is only public
- *  because Swing instantiates a UI delegate reflectively through {@link javax.swing.UIDefaults}.
- *  Nothing about how it looks is decided here: the appearance comes from the configured style
- *  preset, and is reached through {@link SwingTreeLookAndFeel#applyStyle(ComponentStyleDelegate)}.
  */
 public final class SwingTreeViewportUI
         extends    BasicViewportUI
         implements SwingTreeStyledComponentUI<JViewport>
 {
-    /** Called by Swing reflectively to obtain the UI delegate.
-     *  @param c the component the delegate is created for
-     *  @return a new delegate */
+    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeViewportUI(); }
 
     @Override
@@ -37,7 +29,7 @@ public final class SwingTreeViewportUI
 
     @Override
     public void paint( Graphics g, JComponent c ) {
-        ComponentExtension.from(c).paintBackground(g, g2 -> super.paint(g2, c));
+        LafUtilities.paintStyled(g, c, g2 -> super.paint(g2, c));
     }
 
     @Override

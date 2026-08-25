@@ -1,7 +1,6 @@
 package examples.laf;
 
 import swingtree.api.laf.SwingTreeStyledComponentUI;
-import swingtree.style.ComponentExtension;
 import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.JComponent;
@@ -10,35 +9,19 @@ import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicEditorPaneUI;
 import javax.swing.text.JTextComponent;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 
 /**
  *  The {@link JEditorPane} UI delegate. Editor panes render HTML or rich text and are most
  *  often dropped inside a scroll pane; they are given the same surface as a text area so the
  *  pane reads as a single calm document.
  *  <p>
- *  The painting pass goes through the {@code final}
- *  {@link javax.swing.plaf.basic.BasicTextUI#paint(Graphics, JComponent)} rather than through
- *  {@code paintSafely(..)} directly, because that is what takes the document's read lock while
- *  the view renders - the documented guarantee "that the model won't change from the view of
- *  this thread while it's rendering". Calling {@code paintSafely(..)} straight gives that up: a
- *  document mutated while the view hierarchy is being rendered makes the view ask for text that
- *  is no longer there, and Swing answers with {@code StateInvariantError: Can't render: p0,p1}.
- *  Measured on a wrapped text area with a writer on another thread: 192 such errors in 400
- *  paints without the lock, none with it.
- *  <p>
- *  This class is an implementation detail of {@link SwingTreeLookAndFeel} and is only public
- *  because Swing instantiates a UI delegate reflectively through {@link javax.swing.UIDefaults}.
- *  Nothing about how it looks is decided here: the appearance comes from the configured style
- *  preset, and is reached through {@link SwingTreeLookAndFeel#applyStyle(ComponentStyleDelegate)}.
+ *  Painting takes the document read lock the way {@link SwingTreeTextFieldUI} describes.
  */
 public final class SwingTreeEditorPaneUI
         extends    BasicEditorPaneUI
         implements SwingTreeStyledComponentUI<JEditorPane>
 {
-    /** Called by Swing reflectively to obtain the UI delegate.
-     *  @param c the component the delegate is created for
-     *  @return a new delegate */
+    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeEditorPaneUI(); }
 
     @Override
@@ -48,23 +31,20 @@ public final class SwingTreeEditorPaneUI
         // A text component does not repaint itself when it gains or loses focus, and repaints
         // only a narrow damage rectangle when its selection changes - neither is enough for a
         // style that is re-gathered as part of the component's own paint cycle.
-        LafFocus.repaintOnFocus(c, c);
-        LafSelection.repaintOnSelectionChange((JTextComponent) c);
+        LafUtilities.repaintOnFocusChange(c, c);
+        LafUtilities.repaintOnSelectionChange((JTextComponent) c);
     }
 
     @Override
     public void uninstallUI( JComponent c ) {
-        LafSelection.uninstall((JTextComponent) c);
-        LafFocus.uninstall(c, c);
+        LafUtilities.uninstallSelectionRepaint((JTextComponent) c);
+        LafUtilities.uninstallFocusRepaint(c, c);
         super.uninstallUI(c);
     }
 
     @Override
     public void update( Graphics g, JComponent c ) {
-        ComponentExtension.from(c).paintBackground(g, g2 -> {
-            LafPaint.applyAaHints((Graphics2D) g2);
-            super.paint(g2, c);
-        });
+        LafUtilities.paintStyled(g, c, g2 -> super.paint(g2, c));
     }
 
     @Override

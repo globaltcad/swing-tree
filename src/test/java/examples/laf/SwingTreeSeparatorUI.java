@@ -2,7 +2,6 @@ package examples.laf;
 
 import swingtree.UI;
 import swingtree.api.laf.SwingTreeStyledComponentUI;
-import swingtree.style.ComponentExtension;
 import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.JComponent;
@@ -18,17 +17,12 @@ import java.awt.Graphics2D;
  *  The {@link JSeparator} UI delegate: one hairline across the full length of the separator,
  *  horizontal or vertical depending on its orientation. The line is as thick as the configured
  *  symbol set asks for, scaled through {@link UI#scale(int)} so it stays crisp on HiDPI displays.
- *  <p>
- *  This class is an implementation detail of {@link SwingTreeLookAndFeel} and is only public
- *  because Swing instantiates a UI delegate reflectively through {@link javax.swing.UIDefaults}.
  */
 public final class SwingTreeSeparatorUI
         extends    BasicSeparatorUI
         implements SwingTreeStyledComponentUI<JSeparator>
 {
-    /** Called by Swing reflectively to obtain the UI delegate.
-     *  @param c the component the delegate is created for
-     *  @return a new delegate */
+    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeSeparatorUI(); }
 
     @Override
@@ -39,9 +33,9 @@ public final class SwingTreeSeparatorUI
 
     @Override
     public void paint( Graphics g, JComponent c ) {
-        ComponentExtension.from(c).paintBackground(g, g2 -> {
+        LafUtilities.paintStyled(g, c, g2 -> {
             if ( SwingTreeLookAndFeel.drawsOwnChrome() )
-                drawHairline((Graphics2D) g2, (JSeparator) c);
+                drawHairline(g2, (JSeparator) c);
             else
                 super.paint(g2, c);
         });

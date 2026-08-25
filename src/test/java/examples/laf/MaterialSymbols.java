@@ -11,10 +11,6 @@ import java.awt.Rectangle;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
 
-import static examples.laf.SymbolPainting.Direction;
-import static examples.laf.SymbolPainting.antialias;
-import static examples.laf.SymbolPainting.arrow;
-import static examples.laf.SymbolPainting.tick;
 
 /**
  *  Symbols for {@link SwingTreeLookAndFeel.StylePreset#MATERIAL}: bold, flat and geometric.
@@ -60,7 +56,7 @@ final class MaterialSymbols implements Symbols
         Graphics2D g, Palette p, int x, int y, int w, int h,
         boolean enabled, boolean focused, boolean rollover, boolean pressed, boolean selected
     ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         int   arc    = UI.scale(3);
         float stroke = Math.max(1.6f, UI.scale(2f));
         Color mark   = enabled ? p.accent() : p.textDisabled();
@@ -70,7 +66,7 @@ final class MaterialSymbols implements Symbols
             g.fill(new RoundRectangle2D.Float(x, y, w - 1, h - 1, arc, arc));
             g.setColor(p.onFilled());
             g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g.draw(tick(x, y, w, h));
+            g.draw(LafUtilities.tickShape(x, y, w, h));
         } else {
             g.setColor(enabled ? p.textMuted() : p.textDisabled());
             g.setStroke(new BasicStroke(stroke));
@@ -84,7 +80,7 @@ final class MaterialSymbols implements Symbols
         Graphics2D g, Palette p, int x, int y, int w, int h,
         boolean enabled, boolean focused, boolean rollover, boolean pressed, boolean selected
     ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         float stroke = Math.max(1.6f, UI.scale(2f));
         float inset  = stroke / 2f;
         Color mark   = enabled ? p.accent() : p.textDisabled();
@@ -106,19 +102,19 @@ final class MaterialSymbols implements Symbols
         Graphics2D g, Palette p, int x, int y, int w, int h, boolean expanded, boolean enabled
     ) {
         solidArrow(g, p, x + w / 2f, y + h / 2f, UI.scale(3.6f),
-                   expanded ? Direction.DOWN : Direction.RIGHT, enabled);
+                   expanded ? LafUtilities.Direction.DOWN : LafUtilities.Direction.RIGHT, enabled);
     }
 
     @Override
     public void paintSubmenuArrow( Graphics2D g, Palette p, int x, int y, int w, int h, boolean enabled ) {
-        solidArrow(g, p, x + w / 2f, y + h / 2f, UI.scale(3.4f), Direction.RIGHT, enabled);
+        solidArrow(g, p, x + w / 2f, y + h / 2f, UI.scale(3.4f), LafUtilities.Direction.RIGHT, enabled);
     }
 
     @Override
     public void paintComboArrow(
         Graphics2D g, Palette p, int w, int h, boolean enabled, boolean rollover, boolean pressed
     ) {
-        solidArrow(g, p, w / 2f, h / 2f, UI.scale(4.2f), Direction.DOWN, enabled);
+        solidArrow(g, p, w / 2f, h / 2f, UI.scale(4.2f), LafUtilities.Direction.DOWN, enabled);
     }
 
     @Override
@@ -126,7 +122,7 @@ final class MaterialSymbols implements Symbols
         Graphics2D g, Palette p, int w, int h, boolean up,
         boolean enabled, boolean rollover, boolean pressed
     ) {
-        solidArrow(g, p, w / 2f, h / 2f, UI.scale(3.2f), up ? Direction.UP : Direction.DOWN, enabled);
+        solidArrow(g, p, w / 2f, h / 2f, UI.scale(3.2f), up ? LafUtilities.Direction.UP : LafUtilities.Direction.DOWN, enabled);
     }
 
     // ── Chrome ───────────────────────────────────────────────────────────
@@ -136,7 +132,7 @@ final class MaterialSymbols implements Symbols
         Graphics2D g, Palette p, Rectangle track, int thumbCentre,
         boolean horizontal, boolean inverted, boolean enabled
     ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         int   t     = Math.max(2, UI.scale(sliderTrackThickness()));
         int   arc   = t;
         Color fill  = enabled ? p.accent() : p.textDisabled();
@@ -166,10 +162,10 @@ final class MaterialSymbols implements Symbols
 
     @Override
     public void paintSliderThumb( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         if ( enabled && focused ) {
             // The halo a Material handle grows under the pointer, and keeps while it has focus.
-            g.setColor(Shades.alpha(p.accent(), 46));
+            g.setColor(LafUtilities.withOpacity(p.accent(), 46));
             float grow = UI.scale(5f);
             g.fill(new Ellipse2D.Float(r.x - grow, r.y - grow, r.width + 2 * grow, r.height + 2 * grow));
         }
@@ -179,23 +175,23 @@ final class MaterialSymbols implements Symbols
 
     @Override
     public void paintScrollThumb( Graphics2D g, Palette p, Rectangle r, boolean active ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         int pad = UI.scale(3);
         int arc = Math.min(r.width, r.height) - 2 * pad;
-        g.setColor(active ? p.accent() : Shades.alpha(p.text(), 70));
+        g.setColor(active ? p.accent() : LafUtilities.withOpacity(p.text(), 70));
         g.fill(new RoundRectangle2D.Float(r.x + pad, r.y + pad, r.width - 2 * pad, r.height - 2 * pad, arc, arc));
     }
 
     @Override
     public void paintSplitGrip( Graphics2D g, Palette p, int w, int h, boolean horizontalSplit, boolean enabled ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         g.setColor(p.borderSoft());
         if ( horizontalSplit )
             g.fillRect(w / 2, 0, Math.max(1, UI.scale(1)), h);
         else
             g.fillRect(0, h / 2, w, Math.max(1, UI.scale(1)));
 
-        g.setColor(enabled ? Shades.alpha(p.text(), 90) : p.borderSoft());
+        g.setColor(enabled ? LafUtilities.withOpacity(p.text(), 90) : p.borderSoft());
         float radius = UI.scale(1.5f);
         int   step   = UI.scale(5);
         for ( int i = 0; i < 3; i++ ) {
@@ -207,8 +203,8 @@ final class MaterialSymbols implements Symbols
 
     @Override
     public void paintDragHandle( Graphics2D g, Palette p, int w, int h, boolean horizontal ) {
-        antialias(g);
-        g.setColor(Shades.alpha(p.text(), 70));
+        LafUtilities.antialiasShapes(g);
+        g.setColor(LafUtilities.withOpacity(p.text(), 70));
         float radius = UI.scale(1.4f);
         int   step   = UI.scale(4);
         for ( int i = 0; i < 3; i++ ) {
@@ -224,7 +220,7 @@ final class MaterialSymbols implements Symbols
     ) {
         if ( ratio <= 0 )
             return;
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         g.setColor(enabled ? p.accent() : p.textDisabled());
         if ( horizontal ) {
             int fillW = Math.max(h, (int) Math.round(w * ratio));
@@ -243,8 +239,8 @@ final class MaterialSymbols implements Symbols
         // gets a wash, which is the closest a static paint comes to the idiom's ripple.
         if ( !rollover )
             return;
-        antialias(g);
-        g.setColor(Shades.alpha(p.accent(), 26));
+        LafUtilities.antialiasShapes(g);
+        g.setColor(LafUtilities.withOpacity(p.accent(), 26));
         g.fillRect(x, y, w, h);
     }
 
@@ -252,7 +248,7 @@ final class MaterialSymbols implements Symbols
     public void paintTabAccent(
         Graphics2D g, Palette p, int x, int y, int w, int h, int tabPlacement, boolean enabled
     ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         int stripe = Math.max(2, UI.scale(3));
         g.setColor(enabled ? p.accent() : p.textDisabled());
         switch ( tabPlacement ) {
@@ -273,16 +269,16 @@ final class MaterialSymbols implements Symbols
     ) {
         if ( !enabled || !( focused || rollover || pressed ) )
             return;
-        g.setColor(Shades.alpha(p.accent(), pressed ? 56 : 30));
+        g.setColor(LafUtilities.withOpacity(p.accent(), pressed ? 56 : 30));
         float grow = UI.scale(5f);
         g.fill(new Ellipse2D.Float(x - grow, y - grow, w + 2 * grow, h + 2 * grow));
     }
 
     private static void solidArrow(
-        Graphics2D g, Palette p, float cx, float cy, float size, Direction direction, boolean enabled
+        Graphics2D g, Palette p, float cx, float cy, float size, LafUtilities.Direction direction, boolean enabled
     ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         g.setColor(enabled ? p.textMuted() : p.textDisabled());
-        g.fill(arrow(cx, cy, size, size * 0.62f, direction));
+        g.fill(LafUtilities.arrowShape(cx, cy, size, size * 0.62f, direction));
     }
 }

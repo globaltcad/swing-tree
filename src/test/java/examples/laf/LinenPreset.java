@@ -45,20 +45,14 @@ import sprouts.Tuple;
 import java.util.Objects;
 
 /**
- *  <b>Linen</b>: a calm, paper-like theme for {@link SwingTreeLookAndFeel}.
- *
- *  <h2>Character</h2>
- *  Cream surfaces, taupe borders, a deep olive accent for focus and selection, and a barely
- *  perceptible noise grain on the window background that suggests woven fabric. A control that
- *  takes focus grows its border and gives the same amount back from its margin, so tabbing
- *  through a form never shifts the layout around it.
- *
- *  <h2>What is in here</h2>
- *  One thing: the {@linkplain #rules() table of style rules}. The colours it was designed against
- *  are {@link Palettes#LINEN}, but no rule names them - every one of them reads
- *  {@link SwingTreeLookAndFeel#palette()} at paint time, so pairing Linen with a different
- *  {@link SwingTreeLookAndFeel.PalettePreset} gives a re-tinted Linen rather than a half-changed
- *  one.
+ *  <b>Linen</b>: a calm, paper-like theme. Cream surfaces, taupe borders, a deep olive accent for
+ *  focus and selection, and a barely perceptible noise grain on the window background that suggests
+ *  woven fabric. A control that takes focus grows its border and gives the same amount back from
+ *  its margin, so tabbing through a form never shifts the layout around it.
+ *  <p>
+ *  No rule names a colour: every one reads {@link SwingTreeLookAndFeel#palette()} at paint time, so
+ *  pairing Linen with a palette other than {@link Palettes#LINEN} gives a re-tinted Linen rather
+ *  than a half-changed one.
  *
  *  @see SwingTreeLookAndFeel.StylePreset#LINEN
  */
@@ -407,7 +401,7 @@ final class LinenPreset
         Palette      p       = SwingTreeLookAndFeel.palette();
         JComboBox<?> combo   = it.component();
         boolean      enabled = combo.isEnabled();
-        boolean      focused = enabled && Focus.isOn(combo);
+        boolean      focused = enabled && LafUtilities.hasFocus(combo);
 
         return it
                 .margin(focused ? 0 : 1)
@@ -424,7 +418,7 @@ final class LinenPreset
         Palette  p       = SwingTreeLookAndFeel.palette();
         JSpinner spinner = it.component();
         boolean  enabled = spinner.isEnabled();
-        boolean  focused = enabled && Focus.isOn(spinner);
+        boolean  focused = enabled && LafUtilities.hasFocus(spinner);
 
         return it
                 .margin(focused ? 0 : 1)
@@ -518,16 +512,7 @@ final class LinenPreset
 
     // ── Variant colours ──────────────────────────────────────────────────
 
-    /**
-     *  The fill of one combination of button states.
-     *
-     * @param variant  the semantic role the button was tagged with
-     * @param p        the palette to take colours from
-     * @param enabled  whether the button can be pressed at all
-     * @param sunken   whether it is pressed or selected
-     * @param rollover whether the pointer is over it
-     * @return the surface colour to paint
-     */
+    /** The fill of one combination of button states. */
     private static Color surfaceOf( Variant variant, Palette p, boolean enabled, boolean sunken, boolean rollover ) {
         if ( !enabled )
             return variant == Variant.QUIET ? Palette.TRANSPARENT : p.surfaceDisabled();

@@ -11,11 +11,6 @@ import java.awt.Rectangle;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.RoundRectangle2D;
 
-import static examples.laf.SymbolPainting.Direction;
-import static examples.laf.SymbolPainting.antialias;
-import static examples.laf.SymbolPainting.arrow;
-import static examples.laf.SymbolPainting.gloss;
-import static examples.laf.SymbolPainting.tick;
 
 /**
  *  Symbols for {@link SwingTreeLookAndFeel.StylePreset#FRUTIGER_AERO}: everything is a piece of wet
@@ -58,11 +53,11 @@ final class GlossySymbols implements Symbols
         Graphics2D g, Palette p, int x, int y, int w, int h,
         boolean enabled, boolean focused, boolean rollover, boolean pressed, boolean selected
     ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         int arc = UI.scale(4);
         Color base = glyphFill(p, enabled, rollover, pressed, selected);
         RoundRectangle2D.Float body = new RoundRectangle2D.Float(x, y, w - 1, h - 1, arc, arc);
-        g.setPaint(gloss(y, h - 1, base));
+        g.setPaint(LafUtilities.glossGradient(y, h - 1, base));
         g.fill(body);
         outline(g, body, p, enabled, focused, base);
         sheen(g, x + UI.scale(1.5f), y + UI.scale(1.5f), w - 1 - UI.scale(3f), (h - 1) * 0.38f, arc);
@@ -70,7 +65,7 @@ final class GlossySymbols implements Symbols
             return;
         g.setColor(enabled ? p.onFilled() : p.textDisabled());
         g.setStroke(new BasicStroke(Math.max(1.5f, UI.scale(1.9f)), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        g.draw(tick(x, y, w, h));
+        g.draw(LafUtilities.tickShape(x, y, w, h));
     }
 
     @Override
@@ -78,10 +73,10 @@ final class GlossySymbols implements Symbols
         Graphics2D g, Palette p, int x, int y, int w, int h,
         boolean enabled, boolean focused, boolean rollover, boolean pressed, boolean selected
     ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         Color base = glyphFill(p, enabled, rollover, pressed, selected);
         Ellipse2D.Float body = new Ellipse2D.Float(x, y, w - 1, h - 1);
-        g.setPaint(gloss(y, h - 1, base));
+        g.setPaint(LafUtilities.glossGradient(y, h - 1, base));
         g.fill(body);
         outline(g, body, p, enabled, focused, base);
         g.setColor(new Color(255, 255, 255, 130));
@@ -101,19 +96,19 @@ final class GlossySymbols implements Symbols
         Graphics2D g, Palette p, int x, int y, int w, int h, boolean expanded, boolean enabled
     ) {
         droppedArrow(g, p, x + w / 2f, y + h / 2f, UI.scale(3.2f),
-                     expanded ? Direction.DOWN : Direction.RIGHT, enabled);
+                     expanded ? LafUtilities.Direction.DOWN : LafUtilities.Direction.RIGHT, enabled);
     }
 
     @Override
     public void paintSubmenuArrow( Graphics2D g, Palette p, int x, int y, int w, int h, boolean enabled ) {
-        droppedArrow(g, p, x + w / 2f, y + h / 2f, UI.scale(3.2f), Direction.RIGHT, enabled);
+        droppedArrow(g, p, x + w / 2f, y + h / 2f, UI.scale(3.2f), LafUtilities.Direction.RIGHT, enabled);
     }
 
     @Override
     public void paintComboArrow(
         Graphics2D g, Palette p, int w, int h, boolean enabled, boolean rollover, boolean pressed
     ) {
-        droppedArrow(g, p, w / 2f, h / 2f + UI.scale(0.5f), UI.scale(4f), Direction.DOWN,
+        droppedArrow(g, p, w / 2f, h / 2f + UI.scale(0.5f), UI.scale(4f), LafUtilities.Direction.DOWN,
                      enabled && !pressed);
     }
 
@@ -123,7 +118,7 @@ final class GlossySymbols implements Symbols
         boolean enabled, boolean rollover, boolean pressed
     ) {
         droppedArrow(g, p, w / 2f, h / 2f, UI.scale(3f),
-                     up ? Direction.UP : Direction.DOWN, enabled && !pressed);
+                     up ? LafUtilities.Direction.UP : LafUtilities.Direction.DOWN, enabled && !pressed);
     }
 
     // ── Chrome ───────────────────────────────────────────────────────────
@@ -133,14 +128,14 @@ final class GlossySymbols implements Symbols
         Graphics2D g, Palette p, Rectangle track, int thumbCentre,
         boolean horizontal, boolean inverted, boolean enabled
     ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         int   t     = Math.max(3, UI.scale(sliderTrackThickness()));
         int   arc   = t;
         Color fill  = enabled ? p.primary() : p.textDisabled();
         Color empty = p.surfaceDisabled();
         if ( horizontal ) {
             int y = track.y + (track.height - t) / 2;
-            g.setPaint(SymbolPainting.topToBottom(y, t, Shades.darker(empty, 0.16), Shades.lighter(empty, 0.30)));
+            g.setPaint(LafUtilities.verticalGradient(y, t, LafUtilities.shadeTowardsBlack(empty, 0.16), LafUtilities.shadeTowardsWhite(empty, 0.30)));
             g.fill(new RoundRectangle2D.Float(track.x, y, track.width, t, arc, arc));
             g.setColor(p.border());
             g.setStroke(new BasicStroke(Math.max(1f, UI.scale(1f))));
@@ -148,12 +143,12 @@ final class GlossySymbols implements Symbols
             int filled = inverted ? Math.max(0, track.x + track.width - thumbCentre)
                                   : Math.max(0, thumbCentre - track.x);
             if ( filled > 0 ) {
-                g.setPaint(gloss(y, t, fill));
+                g.setPaint(LafUtilities.glossGradient(y, t, fill));
                 g.fill(new RoundRectangle2D.Float(inverted ? thumbCentre : track.x, y, filled, t, arc, arc));
             }
         } else {
             int x = track.x + (track.width - t) / 2;
-            g.setColor(Shades.darker(empty, 0.08));
+            g.setColor(LafUtilities.shadeTowardsBlack(empty, 0.08));
             g.fill(new RoundRectangle2D.Float(x, track.y, t, track.height, arc, arc));
             g.setColor(p.border());
             g.setStroke(new BasicStroke(Math.max(1f, UI.scale(1f))));
@@ -162,7 +157,7 @@ final class GlossySymbols implements Symbols
                                   : Math.max(0, track.y + track.height - thumbCentre);
             if ( filled > 0 ) {
                 int top = inverted ? track.y : thumbCentre;
-                g.setPaint(gloss(top, filled, fill));
+                g.setPaint(LafUtilities.glossGradient(top, filled, fill));
                 g.fill(new RoundRectangle2D.Float(x, top, t, filled, arc, arc));
             }
         }
@@ -170,10 +165,10 @@ final class GlossySymbols implements Symbols
 
     @Override
     public void paintSliderThumb( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused ) {
-        antialias(g);
-        Color base = enabled ? ( focused ? Shades.lighter(p.accent(), 0.30) : p.surfaceField() ) : p.surfaceDisabled();
+        LafUtilities.antialiasShapes(g);
+        Color base = enabled ? ( focused ? LafUtilities.shadeTowardsWhite(p.accent(), 0.30) : p.surfaceField() ) : p.surfaceDisabled();
         Ellipse2D.Float body = new Ellipse2D.Float(r.x, r.y, r.width - 1, r.height - 1);
-        g.setPaint(gloss(r.y, r.height - 1, base));
+        g.setPaint(LafUtilities.glossGradient(r.y, r.height - 1, base));
         g.fill(body);
         g.setColor(enabled ? ( focused ? p.accent() : p.border() ) : p.borderSoft());
         g.setStroke(new BasicStroke(Math.max(1f, UI.scale(1.2f))));
@@ -185,22 +180,22 @@ final class GlossySymbols implements Symbols
 
     @Override
     public void paintScrollThumb( Graphics2D g, Palette p, Rectangle r, boolean active ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         int   pad  = UI.scale(2);
         int   arc  = UI.scale(8);
-        Color base = active ? p.accent() : Shades.mix(p.surface(), p.border(), 0.45);
+        Color base = active ? p.accent() : LafUtilities.shadeTowards(p.surface(), p.border(), 0.45);
         RoundRectangle2D.Float body = new RoundRectangle2D.Float(
                 r.x + pad, r.y + pad, r.width - 2 * pad, r.height - 2 * pad, arc, arc);
-        g.setPaint(gloss(r.y + pad, r.height - 2 * pad, base));
+        g.setPaint(LafUtilities.glossGradient(r.y + pad, r.height - 2 * pad, base));
         g.fill(body);
-        g.setColor(Shades.darker(base, 0.25));
+        g.setColor(LafUtilities.shadeTowardsBlack(base, 0.25));
         g.setStroke(new BasicStroke(Math.max(1f, UI.scale(1f))));
         g.draw(body);
     }
 
     @Override
     public void paintSplitGrip( Graphics2D g, Palette p, int w, int h, boolean horizontalSplit, boolean enabled ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         float radius = UI.scale(1.8f);
         int   step   = UI.scale(5);
         for ( int i = 0; i < 3; i++ ) {
@@ -212,7 +207,7 @@ final class GlossySymbols implements Symbols
 
     @Override
     public void paintDragHandle( Graphics2D g, Palette p, int w, int h, boolean horizontal ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         float radius = UI.scale(1.6f);
         int   step   = UI.scale(4);
         for ( int i = 0; i < 3; i++ ) {
@@ -228,18 +223,18 @@ final class GlossySymbols implements Symbols
     ) {
         if ( ratio <= 0 )
             return;
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         int   pad  = UI.scale(2);
         Color base = enabled ? p.primary() : p.textDisabled();
         if ( horizontal ) {
             int inner = h - 2 * pad;
             int fillW = Math.max(inner, (int) Math.round((w - 2 * pad) * ratio));
-            g.setPaint(gloss(pad, inner, base));
+            g.setPaint(LafUtilities.glossGradient(pad, inner, base));
             g.fill(new RoundRectangle2D.Float(pad, pad, fillW, inner, inner, inner));
         } else {
             int inner = w - 2 * pad;
             int fillH = Math.max(inner, (int) Math.round((h - 2 * pad) * ratio));
-            g.setPaint(gloss(h - pad - fillH, fillH, base));
+            g.setPaint(LafUtilities.glossGradient(h - pad - fillH, fillH, base));
             g.fill(new RoundRectangle2D.Float(pad, h - pad - fillH, inner, fillH, inner, inner));
         }
     }
@@ -250,11 +245,11 @@ final class GlossySymbols implements Symbols
     ) {
         if ( !selected && !rollover )
             return;
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         int   arc  = UI.scale(8);
         Color base = selected ? p.surfaceField() : p.surfaceHover();
         RoundRectangle2D.Float body = new RoundRectangle2D.Float(x, y, w, h, arc, arc);
-        g.setPaint(gloss(y, h, base));
+        g.setPaint(LafUtilities.glossGradient(y, h, base));
         g.fill(body);
         if ( !selected )
             return;
@@ -267,10 +262,10 @@ final class GlossySymbols implements Symbols
     public void paintTabAccent(
         Graphics2D g, Palette p, int x, int y, int w, int h, int tabPlacement, boolean enabled
     ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         int stripe = Math.max(2, UI.scale(3));
         int arc    = UI.scale(2);
-        g.setPaint(enabled ? SymbolPainting.topToBottom(y, h, Shades.lighter(p.accent(), 0.25), p.accent())
+        g.setPaint(enabled ? LafUtilities.verticalGradient(y, h, LafUtilities.shadeTowardsWhite(p.accent(), 0.25), p.accent())
                            : p.textDisabled());
         switch ( tabPlacement ) {
             case SwingConstants.BOTTOM:
@@ -295,7 +290,7 @@ final class GlossySymbols implements Symbols
     }
 
     private static void outline( Graphics2D g, java.awt.Shape body, Palette p, boolean enabled, boolean focused, Color base ) {
-        g.setColor(!enabled ? p.borderSoft() : focused ? p.accent() : Shades.darker(base, 0.30));
+        g.setColor(!enabled ? p.borderSoft() : focused ? p.accent() : LafUtilities.shadeTowardsBlack(base, 0.30));
         g.setStroke(new BasicStroke(Math.max(1f, UI.scale(1.1f))));
         g.draw(body);
     }
@@ -309,14 +304,14 @@ final class GlossySymbols implements Symbols
     }
 
     private static void droppedArrow(
-        Graphics2D g, Palette p, float cx, float cy, float size, Direction direction, boolean enabled
+        Graphics2D g, Palette p, float cx, float cy, float size, LafUtilities.Direction direction, boolean enabled
     ) {
-        antialias(g);
+        LafUtilities.antialiasShapes(g);
         float lift = UI.scale(1f);
         g.setColor(new Color(255, 255, 255, 170));
-        g.fill(arrow(cx, cy + lift, size, size * 0.6f, direction));
-        g.setColor(enabled ? Shades.darker(p.accent(), 0.15) : p.textDisabled());
-        g.fill(arrow(cx, cy, size, size * 0.6f, direction));
+        g.fill(LafUtilities.arrowShape(cx, cy + lift, size, size * 0.6f, direction));
+        g.setColor(enabled ? LafUtilities.shadeTowardsBlack(p.accent(), 0.15) : p.textDisabled());
+        g.fill(LafUtilities.arrowShape(cx, cy, size, size * 0.6f, direction));
     }
 
     private static void glassDot( Graphics2D g, Palette p, float cx, float cy, float radius, boolean enabled ) {

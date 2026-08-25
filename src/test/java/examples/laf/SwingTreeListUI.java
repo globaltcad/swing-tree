@@ -1,7 +1,6 @@
 package examples.laf;
 
 import swingtree.api.laf.SwingTreeStyledComponentUI;
-import swingtree.style.ComponentExtension;
 import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.JComponent;
@@ -15,17 +14,12 @@ import java.awt.Rectangle;
 /**
  *  The {@link JList} UI delegate. Entries are rendered by whatever cell renderer the list
  *  carries; the band behind a selected entry is filled here.
- *  <p>
- *  This class is an implementation detail of {@link SwingTreeLookAndFeel} and is only public
- *  because Swing instantiates a UI delegate reflectively through {@link javax.swing.UIDefaults}.
  */
 public final class SwingTreeListUI
         extends    BasicListUI
         implements SwingTreeStyledComponentUI<JList<?>>
 {
-    /** Called by Swing reflectively to obtain the UI delegate.
-     *  @param c the component the delegate is created for
-     *  @return a new delegate */
+    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeListUI(); }
 
     @Override
@@ -36,9 +30,8 @@ public final class SwingTreeListUI
 
     @Override
     public void paint( Graphics g, JComponent c ) {
-        ComponentExtension.from(c).paintBackground(g, g2 -> {
-            LafPaint.applyAaHints((Graphics2D) g2);
-            paintSelectionBands((Graphics2D) g2, (JList<?>) c);
+        LafUtilities.paintStyled(g, c, g2 -> {
+            paintSelectionBands(g2, (JList<?>) c);
             super.paint(g2, c);
         });
     }

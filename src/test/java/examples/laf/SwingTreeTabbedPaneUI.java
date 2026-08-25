@@ -2,7 +2,6 @@ package examples.laf;
 
 import swingtree.UI;
 import swingtree.api.laf.SwingTreeStyledComponentUI;
-import swingtree.style.ComponentExtension;
 import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.JComponent;
@@ -25,17 +24,12 @@ import java.awt.RenderingHints;
  *  colours, and the single hairline that separates the strip of tabs from the page below it.
  *  The four-sided box the inherited delegate draws by default is deliberately suppressed - it
  *  clashes with a rounded selected tab.
- *  <p>
- *  This class is an implementation detail of {@link SwingTreeLookAndFeel} and is only public
- *  because Swing instantiates a UI delegate reflectively through {@link javax.swing.UIDefaults}.
  */
 public final class SwingTreeTabbedPaneUI
         extends    BasicTabbedPaneUI
         implements SwingTreeStyledComponentUI<JTabbedPane>
 {
-    /** Called by Swing reflectively to obtain the UI delegate.
-     *  @param c the component the delegate is created for
-     *  @return a new delegate */
+    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeTabbedPaneUI(); }
 
     @Override
@@ -46,10 +40,7 @@ public final class SwingTreeTabbedPaneUI
 
     @Override
     public void paint( Graphics g, JComponent c ) {
-        ComponentExtension.from(c).paintBackground(g, g2 -> {
-            LafPaint.applyAaHints((Graphics2D) g2);
-            super.paint(g2, c);
-        });
+        LafUtilities.paintStyled(g, c, g2 -> super.paint(g2, c));
     }
 
     @Override
