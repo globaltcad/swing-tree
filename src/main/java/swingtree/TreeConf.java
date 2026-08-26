@@ -64,14 +64,7 @@ public final class TreeConf<I, N>
     private final boolean                                     _leafWhenEmpty;
 
     /*
-        Resolving the rule for a node is a pure function of the node's class and of the
-        rules declared here, both of which are fixed for the lifetime of one configuration.
-        It sits on the path of every 'getChildCount', every painted row and every step of
-        every lens, so the answer is memoized once per configuration rather than being
-        recomputed, and rather than each caller bringing a map of its own.
-
-        These two maps are the only mutable state in this class, they are caches whose
-        content is fully determined by the immutable fields above, and they are concurrent
+        Caches whose content is fully determined by the immutable fields above. Concurrent
         because a lens resolves rules on the application thread while the tree paints rows
         on the Event Dispatch Thread.
     */
@@ -306,13 +299,7 @@ public final class TreeConf<I, N>
         return _nodeType;
     }
 
-    /**
-     *  The id type, when the declaration named one. Selection paths are tuples of this
-     *  type, and a {@link Tuple} compares its element type as part of its equality, so
-     *  building one with the wrong type would make it unequal to the very value a bound
-     *  property holds. Where this is {@code null} the type is derived from the first id
-     *  actually seen, see {@code PropertyTreeModel}.
-     */
+    /** Null where no type was declared, in which case {@code PropertyTreeModel} derives one. */
     @Nullable Class<I> idType() {
         return _idType;
     }
@@ -325,10 +312,7 @@ public final class TreeConf<I, N>
         return !_rules.isEmpty();
     }
 
-    /**
-     *  Tells if any node type declared a text wither, which is what decides whether the
-     *  tree gets an in place rename editor at all.
-     */
+    /** Decides whether the tree gets an in place rename editor at all. */
     boolean hasRenamableRule() {
         for ( TreeNodeConf<N, ?> rule : _rules.values() )
             if ( rule.isRenamable() )
@@ -337,7 +321,6 @@ public final class TreeConf<I, N>
     }
 
     /**
-     *  Resolves the identity of a node, which is what {@link TreeNodeRef} paths are made of.
      *  A declared id getter wins over {@link HasId}, and a node offering neither falls back
      *  to itself, which still works for a static tree of distinct siblings.
      */
@@ -363,15 +346,9 @@ public final class TreeConf<I, N>
     }
 
     /**
-     *  Finds the most specific rule declared for the given node type.
-     *  "Most specific" means: among all rules whose type is assignable from the node's
-     *  type, the one whose type no other match is assignable from. So a rule for a
-     *  concrete record always beats a catch-all rule for the sealed interface above it.
-     *  <p>
-     *  A rule is chosen, never merged: the winning block is the whole answer, so a block
-     *  which refines a more general one has to restate the aspects it wants to keep.
-     *  Where two matching rules are unrelated to each other, such as two interfaces the
-     *  node implements side by side, the one declared first wins.
+     *  Among all rules whose type is assignable from the node's type, the one whose type no
+     *  other match is assignable from — so a concrete record beats the sealed interface
+     *  above it. Where two matches are unrelated, the one declared first wins.
      */
     private @Nullable TreeNodeConf<N, ?> _findRule( Class<?> type ) {
         @Nullable TreeNodeConf<N, ?> best = null;
@@ -409,9 +386,8 @@ public final class TreeConf<I, N>
     }
 
     /**
-     *  Tells whether a complaint about the given node type has still to be made, and
-     *  remembers that it now has been. A tree may refuse the very same write on the very
-     *  same branch type many times over, and one log entry says everything a hundred do.
+     *  Tells whether a complaint about the given node type has still to be made,
+     *  and remembers that it now has been.
      *
      * @param type The node type the complaint is about.
      * @return True the first time this configuration is asked about that type.

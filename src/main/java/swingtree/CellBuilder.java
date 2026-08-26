@@ -232,12 +232,7 @@ public final class CellBuilder<C extends JComponent, E> {
     static class SimpleTableCellRenderer implements TableCellRenderer, TableCellEditor, TreeCellRenderer, TreeCellEditor
     {
         private final DefaultTableCellRenderer _defaultRenderer = new DefaultTableCellRenderer();
-        /*
-            What a tree cell falls back to when no rule of this builder covers its value.
-            A bound tree passes its own renderer in here, so that a node type the builder
-            says nothing about is still labelled by the 'text(..)', 'icon(..)' and
-            'toolTip(..)' rules declared for it, rather than by its 'toString()'.
-        */
+        /* What a tree cell falls back to when no rule of this builder covers its value. */
         private final TreeCellRenderer _defaultTreeRenderer;
         private final InternalCellEditor _basicEditor;
         private BuiltCells<JTable,Object> _state;
@@ -727,10 +722,7 @@ public final class CellBuilder<C extends JComponent, E> {
             state = _addDefaultRendering(state);
             return new SimpleTableCellRenderer(state.componentType(), (BuiltCells) state);
         }
-        /*
-            No catch-all rendering rule is added here on purpose: leaving the lookup empty
-            for an uncovered type is exactly what makes it reach the fallback above.
-        */
+        // No catch-all rule on purpose: an empty lookup is what makes a type reach the fallback.
         return new SimpleTableCellRenderer(state.componentType(), (BuiltCells) state, fallback);
     }
 

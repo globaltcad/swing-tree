@@ -29,31 +29,25 @@ import java.util.Objects;
 /**
  *  A thread safe, reactive {@link TreeModel} whose contents are a single property holding a
  *  deeply immutable, nested data structure, traversed according to a {@link TreeConf}.
- *  <p>
- *  This is the tree analogue of {@code PropertyTableModel}, and it rests on the same
- *  observation: because the bound value is deeply immutable, the property value <em>is</em>
- *  the UI thread owned snapshot. Nothing is copied to hand it between the application thread
- *  and the AWT Event Dispatch Thread, and the Event Dispatch Thread never reads application
- *  thread owned mutable state.
+ *  Because the bound value is deeply immutable, the property value <em>is</em> the UI thread
+ *  owned snapshot: nothing is copied to hand it across, and the Event Dispatch Thread never
+ *  reads application thread owned mutable state.
  *  <p>
  *  Two design decisions are worth knowing about:
  *  <ul>
  *      <li><b>The nodes this model hands to the {@link JTree} are {@link TreeNodeRef} handles,
- *      not the user's own values.</b> A handle takes its identity from the path of ids down
- *      to the node, which is what keeps expanded paths and the selection alive across an edit
- *      (see {@link TreeNodeRef} for why value identity cannot do that). Everything that wants
- *      the real value asks {@link #valueOf(Object)}.</li>
- *      <li><b>An update costs what is on screen, not what exists.</b> When the root property
- *      changes, this model walks only the currently expanded region, and stops at every
- *      subtree whose value is reference identical to the one it had before. Persistent,
- *      structurally shared data makes that comparison true for everything the change did not
- *      touch, so editing one node in a tree of two hundred thousand visits a handful of them.</li>
+ *      not the user's own values</b>, which is what keeps expanded paths and the selection
+ *      alive across an edit (see {@link TreeNodeRef}). Everything wanting the real value asks
+ *      {@link #valueOf(Object)}.</li>
+ *      <li><b>An update costs what is on screen, not what exists.</b> {@link #applyNewRoot}
+ *      walks only the expanded region and stops at every subtree reference identical to the
+ *      one it had before, which structural sharing makes true for everything the change did
+ *      not touch. A change it cannot express as node events falls back to a structure change
+ *      plus a capture and restore of expansion and selection, which the id based handles
+ *      make invisible.</li>
  *  </ul>
- *  A structural change under an expanded node (an insertion, a removal, a reordering) is
- *  currently answered with a structure change event plus a capture and restore of the
- *  expanded paths and the selection, which is correct and, thanks to the id based handles,
- *  invisible to the user.
  *
+ * @param <I> The identity type of the nodes, which selection paths are made of.
  * @param <N> The common node type of the tree.
  */
 final class PropertyTreeModel<I, N> implements TreeModel
@@ -61,10 +55,9 @@ final class PropertyTreeModel<I, N> implements TreeModel
     private static final Logger log = LoggerFactory.getLogger(PropertyTreeModel.class);
 
     /**
-     *  Beyond this many materialised node handles the canonical map is dropped and rebuilt
-     *  lazily. Dropping it is always safe, because handle identity is the path of ids and
-     *  {@link #valueOf(Object)} falls back to the handle's own value, so a stale handle the
-     *  {@link JTree} still holds keeps resolving correctly.
+     *  Beyond this many handles the canonical map is dropped and rebuilt lazily. Dropping it
+     *  is always safe: identity is the path of ids, and a handle the {@link JTree} still
+     *  holds resolves through {@link #valueOf(Object)} either way.
      */
     private static final int MAX_CANONICAL_REFS = 100_000;
 
@@ -93,11 +86,6 @@ final class PropertyTreeModel<I, N> implements TreeModel
         _rootRef        = _newRootRef();
     }
 
-    /**
-     *  Tells this model which tree renders it, which it needs for exactly two things:
-     *  asking what is currently expanded (so an update can skip everything that is not),
-     *  and restoring expansion and selection after a structural change.
-     */
     void attachTo( JTree tree ) {
         _tree = new WeakReference<>(tree);
     }
@@ -107,10 +95,8 @@ final class PropertyTreeModel<I, N> implements TreeModel
     }
 
     /**
-     *  Tells whether an edit made in the tree actually has somewhere to go. This is not the
-     *  same question as which {@code UI.tree(..)} overload was used: a property may be
-     *  handed over through a mutable overload and still refuse writes, so the tree asks
-     *  here rather than assuming, and does not offer the user an editor it could not honour.
+     *  Not the same question as which {@code UI.tree(..)} overload was used: a property may
+     *  be handed over through a mutable overload and still refuse writes.
      */
     boolean isWritable() {
         return _writableRoot != null;
@@ -118,8 +104,8 @@ final class PropertyTreeModel<I, N> implements TreeModel
 
     /**
      *  Resolves the user's own node value behind whatever the {@link JTree} handed us.
-     *  Renderers, editors and event handlers all go through here rather than casting,
-     *  because a handle the tree kept across a dropped canonical map still answers correctly.
+     *  Everything goes through here rather than casting, because a handle the tree kept
+     *  across a dropped canonical map still answers correctly.
      */
     @Nullable Object valueOf( @Nullable Object node ) {
         if ( !(node instanceof TreeNodeRef) )
@@ -133,13 +119,10 @@ final class PropertyTreeModel<I, N> implements TreeModel
     }
 
     /**
-     *  A writable property focused on one single node of the tree, which is what makes an
-     *  edit anywhere in the structure produce one new root value. It is built from a path of
-     *  ids and a node value which the caller already holds, so that a delegate can read
-     *  everything it needs on the UI thread and then hand out the property from the
-     *  application thread, without ever reaching back into this model's UI thread owned
-     *  handles. Returns {@code null} when the tree was bound read only, because there is
-     *  then nothing to write into.
+     *  A writable property focused on one single node of the tree, or {@code null} for a
+     *  read only tree. It takes a path of ids and a value the caller already holds rather
+     *  than a handle, so a delegate can read what it needs on the UI thread and then build
+     *  the property from the application thread.
      */
     @Nullable Var<N> propertyFor( Object[] idPath, @Nullable N value ) {
         Var<N> writable = _writableRoot;
@@ -151,11 +134,8 @@ final class PropertyTreeModel<I, N> implements TreeModel
     // ---------------------------------------------------------------- TreeModel
 
     /**
-     *  The handle for the root of the bound value, or {@code null} when the property holds
-     *  nothing. A {@link TreeModel} answers "there is no tree at all" with a null root, and
-     *  a {@link JTree} draws no rows for one, which is what a property holding nothing
-     *  should look like. Wrapping the absent value in a handle instead would put a row
-     *  reading "null" on the screen.
+     *  Null when the property holds nothing, which a {@link JTree} draws as no rows at all.
+     *  Wrapping the absent value in a handle instead would put a row reading "null" on screen.
      */
     @Override
     public @Nullable Object getRoot() {
@@ -204,15 +184,10 @@ final class PropertyTreeModel<I, N> implements TreeModel
             return declared;
         if ( !rule.hasChildrenRule() )
             return true;
-        // A declared children rule makes a node a branch, empty or not, unless told otherwise:
         return _conf.leafWhenEmpty() && _childrenOf(node).isEmpty();
     }
 
-    /**
-     *  Receives an in place rename from the tree's cell editor and writes it back into the
-     *  bound property, through the lens focused on the edited node. The edit therefore
-     *  produces exactly one new root value with everything off the edited path shared.
-     */
+    /** Receives an in place rename from the cell editor and writes it back through a lens. */
     @Override
     public void valueForPathChanged( TreePath path, Object newValue ) {
         Object last = path.getLastPathComponent();
@@ -266,7 +241,7 @@ final class PropertyTreeModel<I, N> implements TreeModel
 
     /**
      *  Adopts a new root value and tells the {@link JTree} about it in the most targeted way
-     *  the change permits. Always runs on the UI thread.
+     *  the change permits. Runs on the UI thread.
      */
     void applyNewRoot( @Nullable N newRoot ) {
         @Nullable N previous = _snapshot;
@@ -283,10 +258,9 @@ final class PropertyTreeModel<I, N> implements TreeModel
             return;
         }
         /*
-            The node change events are collected rather than fired as they are discovered,
-            because a walk which ends up meeting a structural change discards them: a
-            structure change already tells the tree everything, and firing node changes
-            in front of it would only make the tree do work it is about to throw away.
+            Collected rather than fired as they are discovered, because a walk which ends up
+            meeting a structural change discards them: the structure change already tells the
+            tree everything, so firing node changes ahead of it is work it will throw away.
         */
         List<TreeNodeRef> changed = new ArrayList<>();
         boolean synced;
@@ -304,10 +278,9 @@ final class PropertyTreeModel<I, N> implements TreeModel
     }
 
     /**
-     *  Walks the changed region of the tree, collecting every node whose content actually
-     *  differs, and returns false as soon as it meets a change no node event can express
-     *  (a node that changed type, or a branch whose children were inserted, removed or
-     *  reordered), which the caller answers with a full rebuild instead.
+     *  Collects every node whose content differs, and returns false as soon as it meets a
+     *  change no node event can express — a node which changed type, or a branch whose
+     *  children were inserted, removed or reordered — which the caller answers with a rebuild.
      */
     private boolean _sync( TreeNodeRef ref, Object oldValue, Object newValue, List<TreeNodeRef> changed ) {
         if ( oldValue == newValue )
@@ -346,9 +319,8 @@ final class PropertyTreeModel<I, N> implements TreeModel
     }
 
     /**
-     *  The blunt but always correct update: announce a structure change and put the user's
-     *  expanded paths and selection back afterwards. Because node identity is a path of ids
-     *  rather than node content, both survive verbatim.
+     *  The blunt but always correct update: announce a structure change, then put the
+     *  expanded paths and the selection back, which id based identity lets them survive.
      */
     private void _rebuildEverything() {
         JTree tree = _treeOrNull();
@@ -361,23 +333,20 @@ final class PropertyTreeModel<I, N> implements TreeModel
         TreeNodeRef currentRoot = _rootRef;
         /*
             A root which has just become null leaves nothing to name a path with, so the
-            path of the root which is going away says "everything below here is gone"
-            instead. Both the JTree and its layout cache resolve the event against the
-            model's current root when the event names none, and that is null too, so an
-            event without a path would simply be ignored and the rows would stay.
+            outgoing root's path says "everything below here is gone" instead. An event
+            without a path is resolved against the model's current root, which is null too,
+            so it would simply be ignored and the rows would stay.
         */
         TreePath announced = ( currentRoot  != null ? currentRoot.path()
                              : previousRoot != null ? previousRoot.path()
                              : null );
 
         /*
-            A structure change makes the JTree drop every selected path before the
-            restore below can put them back, and it announces that as an ordinary
-            selection event. Anything bound to the selection would therefore see the
-            selection empty itself and fill again on every insertion, which is a lie
-            about what the user did. So the write back is muted for the length of the
-            rebuild and the settled selection is announced exactly once afterwards,
-            which also reports the truth when a selected node really did disappear.
+            A structure change makes the JTree drop every selected path before the restore
+            below can put them back, and announces that as an ordinary selection event, so a
+            bound selection would empty itself and fill again on every insertion. Muting the
+            write back for the length of the rebuild and announcing the settled selection
+            once afterwards also reports the truth when a selected node really did disappear.
         */
         _restructuring = true;
         try {
@@ -401,19 +370,16 @@ final class PropertyTreeModel<I, N> implements TreeModel
     }
 
     /**
-     *  Registers something to run when a structural rebuild has left the selection somewhere
-     *  other than where it found it, which is how a selection binding reports a node that
-     *  really did disappear without also reporting the intermediate empty selection the
-     *  rebuild passes through.
+     *  Runs when a rebuild left the selection somewhere other than where it found it, so a
+     *  binding can report that without also reporting the empty selection it passed through.
      */
     void onAfterRestructure( Runnable hook ) {
         _afterRestructure.add(Objects.requireNonNull(hook));
     }
 
     /**
-     *  Tells whether a structural rebuild is currently under way, which is the signal for
-     *  a selection binding to stay quiet: the tree is between announcing that everything
-     *  changed and having its selection put back, so nothing it reports right now is true.
+     *  While true the tree sits between announcing that everything changed and having its
+     *  selection put back, so nothing it reports about that selection is true yet.
      */
     boolean isRestructuring() {
         return _restructuring;
@@ -434,7 +400,7 @@ final class PropertyTreeModel<I, N> implements TreeModel
     private @Nullable TreeNodeRef _newRootRef() {
         @Nullable N snapshot = _snapshot;
         if ( snapshot == null )
-            return null; // The property holds nothing, so there is no tree to hand out.
+            return null;
         TreeNodeRef rootRef = TreeNodeRef.ofRoot(snapshot, _conf.idOf(snapshot));
         _canonical.put(rootRef, rootRef);
         return rootRef;
@@ -457,10 +423,6 @@ final class PropertyTreeModel<I, N> implements TreeModel
         }
     }
 
-    /**
-     *  Returns the one live handle for a child, creating it if this is the first time the
-     *  tree asks for it, and refreshing its value and index if it is not.
-     */
     private TreeNodeRef _canonicalChild( TreeNodeRef parent, @Nullable Object childValue, int index ) {
         TreeNodeRef probe = parent.child(_conf.idOf(childValue), childValue, index);
         TreeNodeRef existing = _canonical.get(probe);
@@ -478,10 +440,9 @@ final class PropertyTreeModel<I, N> implements TreeModel
     }
 
     /**
-     *  Two siblings sharing an id are indistinguishable to a tree which addresses a node by
-     *  its path of ids: they collapse onto one handle, so one of them is drawn twice and the
-     *  other never. Nothing can be done about it here, but saying so beats leaving the user
-     *  to work out why a row appeared twice.
+     *  Two siblings sharing an id collapse onto one handle, so one is drawn twice and the
+     *  other never. Nothing can be done about that here, but saying so beats leaving the
+     *  user to work out why a row appeared twice.
      */
     private void _warnAboutDuplicateSiblingIds( @Nullable Object childValue, int first, int second ) {
         if ( _warnedAboutDuplicates )
@@ -565,11 +526,7 @@ final class PropertyTreeModel<I, N> implements TreeModel
             tree.setSelectionPaths(paths.toArray(new TreePath[0]));
     }
 
-    /**
-     *  Turns a path of ids back into a live {@link TreePath}, or {@code null} when the node
-     *  it names is no longer in the tree. This is how expansion, selection and any other id
-     *  addressed state finds its way back after a structural change.
-     */
+    /** How expansion, selection and any other id addressed state finds its way back. */
     @Nullable TreePath pathForIds( Object[] idPath ) {
         TreeNodeRef current = _rootRef;
         if ( current == null || idPath.length == 0 || !Objects.equals(current.idPath()[0], idPath[0]) )
@@ -590,12 +547,8 @@ final class PropertyTreeModel<I, N> implements TreeModel
     }
 
     /**
-     *  Turns a selection path — a tuple of ids leading down from the root — into a live
-     *  {@link TreePath}, or {@code null} when it names nothing in the current value.
-     *  <p>
-     *  This is exact. A tuple of ids <i>is</i> the identity of a position in the tree, so
-     *  there is nothing to search for and nothing to be ambiguous about, which is why ids
-     *  only ever have to be unique among siblings.
+     *  Exact, never a search: a tuple of ids <i>is</i> the identity of a position in the
+     *  tree, which is why ids only ever have to be unique among siblings.
      */
     @Nullable TreePath pathForIdTuple( Tuple<I> idPath ) {
         if ( idPath.isEmpty() )
@@ -607,9 +560,8 @@ final class PropertyTreeModel<I, N> implements TreeModel
     }
 
     /**
-     *  The identity of the position a {@link TreePath} names: the ids leading down to it,
-     *  the root's own id first. This is what a selection binding writes into its property,
-     *  and it is taken from the path the user actually clicked rather than reconstructed.
+     *  The ids leading down to the position a {@link TreePath} names, taken from the path
+     *  the user actually clicked rather than reconstructed.
      *
      * @param path The tree path to describe, or {@code null} for "nothing".
      * @param idType The element type the resulting tuple must carry, because a
@@ -634,10 +586,9 @@ final class PropertyTreeModel<I, N> implements TreeModel
     }
 
     /**
-     *  A selection path is a tuple of a declared element type, so an id which is not of that
-     *  type cannot go into one. That happens when a node offers no identity at all and
-     *  {@link TreeConf#idOf(Object)} falls back to the node itself. Reporting "nothing
-     *  selected" and saying why beats throwing out of a Swing listener.
+     *  An id of the wrong type means a node offered no identity and {@link TreeConf#idOf}
+     *  fell back to the node itself. Reporting "nothing selected" and saying why beats
+     *  throwing out of a Swing listener.
      */
     private void _warnAboutIdType( @Nullable Object id, Class<I> idType ) {
         if ( _warnedAboutIdType )
@@ -651,10 +602,10 @@ final class PropertyTreeModel<I, N> implements TreeModel
     }
 
     /**
-     *  The element type selection path tuples are built with. A declared id type wins;
-     *  otherwise it is derived from the first id this model actually resolves, walking up
-     *  out of an anonymous class so that an enum constant with a body reports its enum
-     *  rather than the synthetic subclass Java gave it.
+     *  The element type selection path tuples are built with. A declared id type wins,
+     *  otherwise it is derived from an id this model actually resolves — walking up out of
+     *  an anonymous class, so an enum constant with a body reports its enum rather than the
+     *  synthetic subclass Java gave it.
      */
     @SuppressWarnings("unchecked")
     Class<I> idType() {

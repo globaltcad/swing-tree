@@ -30,12 +30,10 @@ import java.util.Optional;
 public final class TreeSelectionDelegate<I, N>
 {
     /*
-        Everything below is read once, on the UI thread, in the constructor. An action is
-        delivered on the application thread, and the node handles a bound tree keeps are
-        owned by the UI thread: reading them from here later would be a race under
-        EventProcessor.DECOUPLED. Node values and ids are deeply immutable, so a snapshot
-        of them is safe to hand across without a copy, and the lens property is built from
-        a path of ids which is immutable too.
+        Read once, on the UI thread, in the constructor. An action is delivered on the
+        application thread, and the node handles a bound tree keeps are owned by the UI
+        thread, so reading them from here later would be a race under DECOUPLED. Values,
+        ids and id paths are all immutable, so a snapshot of them needs no copy.
     */
     private final JTree                   _tree;
     private final PropertyTreeModel<I, N> _model;

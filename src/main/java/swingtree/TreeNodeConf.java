@@ -46,12 +46,11 @@ import java.util.function.Function;
  */
 public final class TreeNodeConf<N, B extends N>
 {
-    /**
-     *  The children rule is stored in an erased form so that the surrounding tree machinery
-     *  can apply it to any node without knowing its concrete type. The public API above it is
-     *  fully typed, and the {@code Tuple} handed to a wither is always the very tuple its own
-     *  getter produced (only with one entry exchanged), which is what makes the erasure sound.
-     */
+    /*
+        The children rule is erased so the tree machinery can apply it without knowing the
+        concrete node type. What makes that sound: the tuple handed to a wither is always the
+        very tuple its own getter produced, with at most one entry exchanged.
+    */
     private final Class<B>                                                    _type;
     private final @Nullable Function<Object, Tuple<Object>>                   _childrenGetter;
     private final @Nullable BiFunction<Object, Tuple<Object>, Object>         _childrenWither;

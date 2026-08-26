@@ -13,27 +13,20 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  *  A {@link Lens} focusing on a single node inside a deeply nested, immutable tree,
- *  identified by the path of ids leading down to it.
- *  <p>
- *  This is the tree shaped generalisation of the {@code TupleLens} behind
- *  {@code addAll(Var<Tuple<M>>, ..)}: reading walks down the path applying each level's
- *  {@code children(..)} rule and picking the child whose id matches, and writing walks the
- *  same way down and then rebuilds the chain bottom up, so that a change to a node nine
- *  levels deep produces exactly one new root value with everything off the path shared
- *  rather than copied.
+ *  identified by the path of ids leading down to it. Reading walks down the path by id;
+ *  writing walks down and rebuilds the chain bottom up, so a change nine levels deep
+ *  produces one new root value with everything off the path shared rather than copied.
  *  <p>
  *  Two properties of this lens matter a great deal:
  *  <ul>
- *      <li><b>It never touches the UI, nor anything the UI thread owns.</b> Resolving a focus
- *      needs nothing but the root <i>value</i> and the {@link TreeConf}, whose rule lookup is
- *      concurrent, so this lens may be evaluated on any thread. That is essential, because it
- *      runs whenever the root property changes, which under a decoupled UI happens on the
- *      application thread.</li>
- *      <li><b>It fails softly.</b> A node that has vanished from the tree (deleted, moved
- *      into a branch whose rule has no wither, ...) yields the last value this lens did
- *      resolve, and a write into it is dropped. A lens whose node is gone may still be bound
- *      to a view which is on its way out, and disturbing that view is worse than doing
- *      nothing. The very same policy is what the tuple item lens follows.</li>
+ *      <li><b>It never touches the UI, nor anything the UI thread owns.</b> It needs only
+ *      the root <i>value</i> and the {@link TreeConf}, whose rule lookup is concurrent, so
+ *      it may be evaluated on any thread. That is essential, because it runs whenever the
+ *      root property changes, which under a decoupled UI is the application thread.</li>
+ *      <li><b>It fails softly.</b> A node which has vanished from the tree yields the last
+ *      value this lens did resolve, and a write into it is dropped. A lens whose node is
+ *      gone may still be bound to a view on its way out, and disturbing that view is worse
+ *      than doing nothing. The tuple item lens follows the same policy.</li>
  *  </ul>
  *
  * @param <I> The identity type of the nodes, which the path is made of.
@@ -93,10 +86,6 @@ final class TreePathLens<I, N> implements Lens<N, N>
         }
     }
 
-    /**
-     *  Reads the node this lens focuses on out of the given root value,
-     *  or {@code null} if the path no longer leads anywhere.
-     */
     private @Nullable N _resolve( @Nullable N rootValue ) {
         if ( rootValue == null )
             return null;
@@ -116,10 +105,6 @@ final class TreePathLens<I, N> implements Lens<N, N>
         return _conf.nodeType().cast(current);
     }
 
-    /**
-     *  Collects one {@link Step} per level between the root and the focused node,
-     *  which is everything the write path needs to rebuild the chain bottom up.
-     */
     private @Nullable List<Step> _walk( @Nullable N rootValue ) {
         if ( rootValue == null )
             return null;
@@ -149,10 +134,9 @@ final class TreePathLens<I, N> implements Lens<N, N>
     }
 
     /**
-     *  Complains about a branch which has no wither to carry a write back up, once per
-     *  branch type and tree shape. The dedup lives on the configuration rather than on
-     *  this lens, because a lens is built afresh for every single edit, so a per lens
-     *  flag would repeat the same complaint on every keystroke that ends an edit.
+     *  The dedup lives on the configuration rather than on this lens, because a lens is
+     *  built afresh for every single edit, so a per lens flag would repeat the same
+     *  complaint on every keystroke that ends one.
      */
     private void _warnAboutReadOnlyBranch( Step step ) {
         Class<?> branchType = step.parent.getClass();

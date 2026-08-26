@@ -6,26 +6,18 @@ import javax.swing.tree.TreePath;
 import java.util.Arrays;
 
 /**
- *  The handle a {@link javax.swing.JTree} actually holds inside its
+ *  The handle a {@link javax.swing.JTree} holds inside its
  *  {@link javax.swing.tree.TreePath}s when it is bound to a property.
  *  <p>
- *  It exists because of a mismatch between value objects and {@link javax.swing.JTree}:
- *  the tree keys its expanded paths and its selection on {@link javax.swing.tree.TreePath},
- *  whose equality bottoms out in the equality of the nodes it contains. Records compare by
- *  content, so renaming a single leaf would produce a new leaf, a new parent, a new
- *  grandparent and a new root, making every path in the whole tree stale at once and
- *  collapsing everything the user had opened.
+ *  Its identity is the <b>path of ids</b> leading to the node, never the node's content.
+ *  A {@link javax.swing.tree.TreePath} compares by the nodes it contains, and value objects
+ *  compare by content, so identifying a node by its value would make renaming one leaf
+ *  invalidate every path in the tree at once and collapse everything the user had opened.
  *  <p>
- *  A {@link TreeNodeRef} therefore takes its identity from the <b>path of ids</b> leading to
- *  the node, which does not change when the node's content does. That is the same trick the
- *  {@code TupleLens} behind {@code addAll(Var<Tuple<M>>, ..)} plays with {@link sprouts.HasId},
- *  extended from one index to a whole path.
- *  <p>
- *  The node's current value, its parent and its index ride along in mutable fields, so that
- *  painting a row or firing an event costs a field read rather than a walk down from the
- *  root. Those fields are written only by {@link PropertyTreeModel} and only on the UI
- *  thread, and they deliberately take no part in {@link #equals(Object)}: two handles for
- *  the same path <i>are</i> the same node, whatever either of them currently holds.
+ *  Value, parent and index ride along in mutable fields written only by
+ *  {@link PropertyTreeModel} and only on the UI thread. They take no part in
+ *  {@link #equals(Object)}: two handles for the same path <i>are</i> the same node,
+ *  whatever either of them currently holds.
  */
 final class TreeNodeRef
 {
@@ -33,7 +25,7 @@ final class TreeNodeRef
     private final int                   _hash;
     private final @Nullable TreeNodeRef _parent;
     private @Nullable Object            _value; // UI thread owned, never part of identity.
-    private int                         _index; // Position among the parent's children.
+    private int                         _index;
 
     static TreeNodeRef ofRoot( @Nullable Object value, Object id ) {
         return new TreeNodeRef(new Object[]{id}, null, value, 0);
@@ -73,15 +65,11 @@ final class TreeNodeRef
         _index = index;
     }
 
-    /**
-     *  The ids leading from the root down to this node, the root's own id first.
-     *  Never mutated after construction.
-     */
+    /** Shared by reference with every caller, so it must never be mutated. */
     Object[] idPath() {
         return _idPath;
     }
 
-    /** The {@link TreePath} from the root down to this node, which is what tree events speak in. */
     TreePath path() {
         Object[] chain = new Object[_idPath.length];
         TreeNodeRef current = this;
@@ -111,9 +99,9 @@ final class TreeNodeRef
     }
 
     /**
+     *  Forwards to the node, because
      *  {@link javax.swing.JTree#convertValueToText(Object, boolean, boolean, boolean, int, boolean)}
-     *  falls back to this when no renderer has anything better to say, so it forwards to the
-     *  node itself instead of printing the handle.
+     *  falls back to this when no renderer has anything better to say.
      */
     @Override
     public String toString() {

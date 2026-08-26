@@ -143,14 +143,6 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
             return _this();
         return _with( thisComponent -> {
                     thisComponent.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-                    /*
-                        The path the user actually clicked is read here, on the UI thread, and
-                        handed over as ids. Nothing is reconstructed by searching, so the
-                        selection can never land on a different node than the one the user
-                        touched. The tuple is built with the element type the property already
-                        holds, because a Tuple compares its type as part of its equality, and
-                        an unequal write would echo back forever.
-                    */
                     Runnable writeBack = () -> {
                         Tuple<I> path = model.idTupleOf(
                                             thisComponent.getSelectionPath(),
@@ -411,10 +403,8 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
         Objects.requireNonNull(builder);
         PropertyTreeModel<I, N> model = _model;
         /*
-            A bound tree hands its own renderer over as the fallback, so that a node type
-            no 'when(..)' clause covers is still labelled by the 'text(..)', 'icon(..)' and
-            'toolTip(..)' rules declared for it. Without it, covering one type would silently
-            drop every declared label in the tree in favour of 'toString()'.
+            The tree's own renderer goes in as the fallback, so a node type no 'when(..)'
+            clause covers keeps the rules declared for it instead of falling to 'toString()'.
         */
         TreeCellRenderer renderer = builder.getForTree(
                                         model == null ? null : new DefaultBoundRenderer<>(model)
@@ -480,11 +470,6 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
 
     // -------------------------------------------------------------- Internals
 
-    /**
-     *  Installs the property binding produced by one of the {@code UI.tree(..)} factories.
-     *  This is where a tree gains its model, its default rendering and, if any node type
-     *  declares a text wither, its in place editing.
-     */
     static <I, N, T extends JTree> UIForTree<I, N, T> _bind(
         BuilderState<T> state, Val<N> root, TreeConf<I, N> conf, boolean writable
     ) {
@@ -521,11 +506,9 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
     }
 
     /**
-     *  The element type a selection path tuple must carry. It is taken from the value the
-     *  bound property already holds, because a {@link Tuple} compares its element type as
-     *  part of its equality: writing a tuple of the wrong type would never compare equal to
-     *  what the property holds, so the property would fire on every write and echo forever.
-     *  An empty declared type falls back to what the model derived from the tree itself.
+     *  Taken from the value the property already holds, because a {@link Tuple} compares its
+     *  element type as part of its equality: a tuple of the wrong type would never compare
+     *  equal to what the property holds, so every write would echo back forever.
      */
     private Class<I> _idTypeOf( Val<Tuple<I>> selection, PropertyTreeModel<I, N> model ) {
         Tuple<I> current = selection.orElseNull();
@@ -558,9 +541,8 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
     }
 
     /**
-     *  Turns paths of ids into rows of the tree. Each one resolves exactly, with no search
-     *  and no guessing; a path which no longer names anything simply takes no part in the
-     *  selection rather than clearing everything.
+     *  A path which no longer names anything simply takes no part in the selection,
+     *  rather than clearing it.
      */
     private void _selectPaths( JTree tree, PropertyTreeModel<I, N> model, List<Tuple<I>> idPaths ) {
         if ( idPaths.isEmpty() ) {
@@ -586,11 +568,7 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
     private static void _expandToDepth( JTree tree, int depth ) {
         if ( depth <= 0 )
             return;
-        /*
-            Expanding a row can add rows below it, so the row count is re-read on every
-            step instead of being captured up front. The depth check keeps this bounded
-            to the levels actually asked for, which is what makes it safe on a large tree.
-        */
+        // Expanding a row adds rows below it, so the count is re-read on every step:
         for ( int row = 0; row < tree.getRowCount(); row++ ) {
             TreePath path = tree.getPathForRow(row);
             if ( path != null && path.getPathCount() <= depth )
@@ -598,11 +576,7 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
         }
     }
 
-    /**
-     *  The renderer a bound tree gets by default: it unwraps the internal node handle and
-     *  then renders the node according to the {@code text(..)}, {@code icon(..)} and
-     *  {@code toolTip(..)} rules declared for its type.
-     */
+    /** Unwraps the node handle and renders the node by the rules declared for its type. */
     private static final class DefaultBoundRenderer<I, N> extends DefaultTreeCellRenderer
     {
         private final PropertyTreeModel<I, N> _model;
@@ -637,10 +611,7 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
             Component view = super.getTreeCellRendererComponent(
                 tree, text, selected, expanded, leaf, row, hasFocus
             );
-            /*
-                The icon has to be applied after the super call, because the default
-                renderer picks a leaf/open/closed icon of its own every single time.
-            */
+            // After the super call, which picks a leaf/open/closed icon of its own every time:
             if ( iconDeclaration != null ) {
                 Icon icon = iconDeclaration.find().orElse(null);
                 if ( icon != null )
@@ -651,10 +622,7 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
         }
     }
 
-    /**
-     *  Wraps a user supplied renderer so that it never sees the internal node handles a
-     *  bound tree keeps inside its paths.
-     */
+    /** Keeps a user supplied renderer from ever seeing the internal node handles. */
     private static final class UnwrappingRenderer implements TreeCellRenderer
     {
         private final PropertyTreeModel<?, ?> _model;
@@ -677,11 +645,9 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
     }
 
     /**
-     *  The in place rename editor a bound tree installs when at least one node type declares
-     *  a text wither. It differs from the plain Swing editor in exactly two places: it opens
-     *  showing the text the node's own {@code text(..)} rule produces rather than the node's
-     *  {@code toString()}, and it refuses to open on a node the user pointed at whose type
-     *  declared no wither to write the result back through.
+     *  Differs from the plain Swing editor in two places: it opens showing what the node's
+     *  {@code text(..)} rule produces rather than its {@code toString()}, and it refuses to
+     *  open on a node the user pointed at whose type declared no wither.
      */
     private static final class BoundCellEditor<I, N> extends DefaultTreeCellEditor
     {
