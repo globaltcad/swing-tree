@@ -106,7 +106,7 @@ Rules of `.add(..)`:
 | `textField(text)`, `textArea(text)`, `passwordField()`, `numericTextField(var)` | text inputs |
 | `comboBox(...)`, `slider(Align, min, max)`, `spinner(...)`, `progressBar(...)` | value pickers |
 | `separator()`, `scrollPane()`, `scrollPanels()`, `splitPane(Align)`, `tabbedPane()` | structure |
-| `table(Var<TableData>)`, `table()`, `list(...)`, `menu(...)`, `menuItem(...)`, `splitButton(text)` | data / menus (bind a `TableData` value — see §10) |
+| `table(Var<TableData>)`, `table()`, `tree(Var<N>, conf)`, `list(...)`, `menu(...)`, `menuItem(...)`, `splitButton(text)` | data / menus (bind a `TableData` value — see §10; a tree binds one nested value — see §10) |
 | `icon(path)`, `icon(w,h,path)` | `JIcon` (supports SVG, see §10) |
 
 `box(...)` vs `panel(...)`: a `JBox` is non-opaque with zero default insets — use it
@@ -1242,6 +1242,87 @@ Full prose: [Writing-Tables.md](https://github.com/globaltcad/swing-tree/blob/ma
 Executable catalogue of the whole `TableData` API:
 [Table_Data_Spec.groovy](https://github.com/globaltcad/swing-tree/blob/main/src/test/groovy/swingtree/Table_Data_Spec.groovy).
 
+### Trees — bind the nested value you already have (`UI.tree(..)`)
+
+A `JTree` binds to **one property holding a deeply immutable, nested value** plus a
+`TreeConf` saying which parts of it to zoom into. There is no `TreeModel`, no
+`DefaultMutableTreeNode` graph and no selection listener. Model the tree as a **sealed
+sum type**; one `nodesOf(..)` block per permitted subtype reads like one `case`:
+
+```java
+public sealed interface FsNode extends HasId<String> { String name(); }
+@With record Dir( String id, String name, Tuple<FsNode> entries ) implements FsNode {}
+@With record Doc( String id, String name, String body )           implements FsNode {}
+
+UI.tree(fileSystem, conf -> conf                       // Var<FsNode>
+    .nodesOf(Dir.class, it -> it
+        .children(Dir::entries, Dir::withEntries)      // + wither ⇒ structure writable
+        .text(Dir::name, Dir::withName)                // + wither ⇒ inline rename
+        .icon(d -> Icons.FOLDER).toolTip(d -> d.entries().size() + " entries")
+    )
+    .nodesOf(Doc.class, it -> it.text(Doc::name))      // no children rule ⇒ a leaf
+)
+.withSelection(selectedPath)                           // Var<Tuple<String>>: a PATH of ids, two-way
+.withRootVisible(false).withInitialExpansionDepth(2);
+```
+
+**The one rule to remember: a getter alone is read only, a getter *plus a wither* is a
+lens and therefore two-way.** Same rule as `Var.zoomTo(..)`, applied per node type.
+
+| | |
+|---|---|
+| `TreeConf` | `nodesOf(Class, conf)`, `nodesOf(conf)` (catch-all), `idOf(Function)`, `leafWhenEmpty(boolean)` |
+| `TreeNodeConf` | `children(getter[, wither])` / `children(Lens)`, `text(getter[, wither])`, `icon(..)`, `toolTip(..)`, `isLeaf(boolean)` |
+| `TreeConf` (paths) | `nodeAt(root, Tuple<I>)` → `Optional<N>`, `nodesAlong(root, Tuple<I>)` → `Tuple<N>` (breadcrumbs). Build one standalone with `TreeConf.of(N.class)` and bind it with `UI.tree(root, conf)`. |
+| `UIForTree` | `withSelection(Var\|Val<Tuple<I>>)`, `withSelectionPaths(Var<Tuple<Tuple<I>>>)`, `onSelection(..)`, `withRootVisible`, `isRootVisibleIf`, `withRootHandlesVisible`, `withRowHeight`, `withInitialExpansionDepth`, `withCells`/`withCell`/`withCellRenderer`/`withCellEditor`, `withModel(TreeModel)` |
+
+**Non-obvious things that will bite you:**
+- **The node type MUST have an identity** — `implements HasId<I>` (which is what the
+  2/3-arg `UI.tree(..)` overloads require), or name the id type and declare
+  `conf.idOf(n -> ..)` via `UI.tree(N.class, I.class, root, conf)`. `JTree` keys expansion
+  and selection on `TreePath`, whose equality bottoms out in node equality; records compare
+  by *content*, so without ids a single deep edit invalidates every path and the tree
+  collapses. Ids only need to be unique **among siblings**.
+- **A selection is a PATH, not a node** — `Var<Tuple<I>>`, the ids from the root down
+  (root's own id first; empty tuple = nothing selected; `["root"]` = the root). A node value
+  cannot name a *position*: the same value may sit in several places, since ids are only
+  sibling-unique. Resolve a path back to its node with `conf.nodeAt(root, path)` /
+  `conf.nodesAlong(root, path)`, e.g.
+  `Viewable.of(root, path, (r,p) -> conf.nodeAt(r,p).orElse(null))`.
+- **A children rule is what makes a type a branch**; a type without one is a leaf, and a
+  branch stays a branch while empty (`leafWhenEmpty(true)` opts out). Use
+  `isLeaf(false)` for a branch that is not loaded *yet*.
+- **The most specific rule is chosen, never merged.** A `nodesOf(Dir.class, ..)` block does
+  *not* inherit the `text(..)` of a catch-all `nodesOf(..)` block above it — a block reads
+  like one `case`, and a `case` does not fall into another. Restate what you want to keep.
+- **`withCells(..)` mixes with the rules**: a node type no `when(..)` clause covers keeps its
+  own `text(..)` / `icon(..)` / `toolTip(..)`. A plain `withCellRenderer(..)` does not — it
+  answers for every node and the rules no longer apply.
+- **Sibling ids must be unique.** Two children of one node sharing an id are one position, so
+  one is drawn twice and the other never; SwingTree logs a warning naming the id.
+- **An empty property is an empty tree**: a `Var.ofNullable(N.class, null)` root gives a tree
+  with no root and no rows, and it fills in when the property does.
+- **Heterogeneous trees**: name the common supertype **and** the id type, because types you
+  do not own cannot implement `HasId` —
+  `UI.tree(Object.class, String.class, company, conf -> conf.idOf(..).nodesOf(Company.class, ..)...)`.
+  (The 2/3-arg overloads require `N extends HasId<I>`, so `Object.class` will not compile with
+  them.) Children may be a different type from the node.
+- **A forgotten `nodesOf(..)` is not a compile error** (Java 8 target): the node becomes
+  a leaf labelled by `toString()` and SwingTree logs a warning naming the type.
+- **Editing needs both** a mutable `Var` *and* a `text(getter, wither)` rule; and every
+  branch above the edited node needs a children **wither**, or the write is dropped.
+- **Don't call `JTree.getLastSelectedPathComponent()`** on a bound tree — it returns an
+  internal handle. Use `withSelection(..)` or `onSelection(it -> it.lead())`, which speak
+  in your own node values. `it.property()` gives a `Var` lens onto the selected node.
+- Updates cost what is **on screen**, not what exists: the sync walk stops at any subtree
+  reference-identical to before (structural sharing) and never looks below a collapsed
+  branch.
+- Not yet built: `expanded(getter, wither)` (expansion as model state) and `view(..)`
+  (a bound component per node).
+
+Full prose: [Growing-Trees.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Growing-Trees.md).
+Executable catalogue: `Tree_Binding_Spec`, `Tree_Update_Spec`, `Tree_Selection_And_Editing_Spec`.
+
 ### Icons & SVG (first-class, HiDPI-crisp)
 
 SVG works **everywhere an icon can appear** (icons, buttons, labels, tabs,
@@ -1482,6 +1563,20 @@ painting, a peeked component, a third-party widget): `UI.scale(int|float|double)
     step outside HiDPI scaling, the style engine and decoupled-thread safety; reach
     for a `with*`/`is*If`/`on*`/`withStyle`/`withProperty` method first. `peek` is
     legitimate only when SwingTree wraps no equivalent (§12).
+16. **A bound tree's node type needs an identity** — `implements HasId<I>`, or name the id
+    type and declare `conf.idOf(n -> ..)`. `JTree` keys expansion and selection on `TreePath`, whose
+    equality bottoms out in node equality; records compare by *content*, so without ids
+    one deep edit invalidates every path at once and the whole tree collapses. Ids only
+    have to be unique **among siblings**. Related: never call
+    `JTree.getLastSelectedPathComponent()` on a bound tree — it hands back an internal
+    handle rather than your node. Use `withSelection(..)`, or
+    `onSelection(it -> it.lead())`, which speak in your own node values.
+17. **A tree selection is a PATH of ids (`Var<Tuple<I>>`), never a node.** A node value
+    cannot name a *position*, because ids are only sibling-unique and the same value may sit
+    in several places at once — so binding a node would silently select the wrong row and
+    could move the selection off the row the user just clicked. The root's id is the first
+    element, so `[]` means nothing is selected and `["root"]` means the root is. Get the node
+    back with `conf.nodeAt(root, path)`.
 
 ---
 
@@ -1527,6 +1622,16 @@ it.setCellAt(r,c,v) / .addRowAt(i,vals…) / .removeRowAt(i) / .setColumnClassAt
 it.addRows(t) / .removeRowsAt(i,n) / .setRowsAt(i,t)     // range ops ⇒ ONE table event, not N
 d.update(TableData::asEditable);                          // editability is its own axis, cannot transpose
 // editable ⇔ an editable value AND a mutable Var; ROW_MAJOR ⇒ incremental (diff) updates
+
+// trees (§10) — bind ONE nested immutable value; a rule per node type says where children live
+UI.tree(root, conf -> conf                                // Var<N>; N MUST have an identity (HasId / conf.idOf)
+    .nodesOf(Dir.class, it -> it.children(Dir::entries, Dir::withEntries)   // wither ⇒ writable
+                                .text(Dir::name, Dir::withName))            // wither ⇒ inline rename
+    .nodesOf(Doc.class, it -> it.text(Doc::name)))                          // no children rule ⇒ leaf
+.withSelection(sel)          // Var<Tuple<I>>: a PATH of ids, root first; empty = nothing selected
+.withRootVisible(false).withInitialExpansionDepth(2);     // withSelectionPaths(Var<Tuple<Tuple<I>>>) for many
+conf.nodeAt(root, path) / conf.nodesAlong(root, path)     // path -> the node / the breadcrumb chain
+UI.tree(Object.class, String.class, root, conf -> ..);    // heterogeneous: name the supertype AND the id type
 
 // events
 .onClick / .onMouseEnter / .onMouseClick / .onKeyPress / .onResize (it -> ...)
@@ -1605,6 +1710,7 @@ in the repo; the links below open each on GitHub.
 - [`scribe/CelestialScribe.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/scribe/CelestialScribe.java) — `Layout.none()` derived from data, styled text flowing around children.
 - [`dashboard/SalesDashboard.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/dashboard/SalesDashboard.java) — reactive `Var<Layout>` reflow.
 - [`almanack/mvi/AlmanackView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/almanack/mvi/AlmanackView.java) (+ `AlmanackViewModel`) — every tab binding mechanism in one field-notebook app: a two-way `Var<Integer>` selection index that may point at tabs which don't exist yet (deferred selection), `addAll(Val<Tuple<M>>, TabSupplier)` dynamic tabs, enum⇄index lenses, bound tab titles/tooltips/enabled flags.
+- [`laf/app/AtelierView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/laf/app/AtelierView.java) (+ `AtelierViewModel`, `MaterialNode`, `AtelierArt`) — **the reference for `UI.tree(..)`**, inside a whole order-book application painted by a custom look-and-feel: a materials tree bound to a `MaterialNode` sum type *derived* from the view model's shelves (so a fibre that runs low relabels itself and the user's open branches survive it), whose selection is a lens reading a filter `String` as a node and writing a node back as a filter `String` — one field driven by the tree, a radio group and a chip rail at once. Also a `Var<TableData>` order book, generated SVG swatches, and a twelve-column convergent page.
 - [`stylish/SoftUIView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/stylish/SoftUIView.java) — soft-UI style sheet, custom paint.
 - [`stylish/SvgViewer.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/stylish/SvgViewer.java) — SVG playground: one SVG rendered through four pipelines (`SvgIcon` in style API, `img.svg(..)` string, rasterized `getImage()`, component icon) with live `Placement`/`FitComponent` switching.
 - [`simple/ResponsiveLayout.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/simple/ResponsiveLayout.java) (+ `ResponsiveLayoutAlign`, `ResponsiveLayoutFill`) — the smallest `AUTO_SPAN` responsive flow demo.
@@ -1637,3 +1743,6 @@ For layout specifically:
 [Responsive-Layouts.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Responsive-Layouts.md)
 (grid mechanics, nesting rules, a debugging table) →
 [Reactive-Layouts.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Reactive-Layouts.md).
+For the data components:
+[Writing-Tables.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Writing-Tables.md) and
+[Growing-Trees.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Growing-Trees.md).
