@@ -337,4 +337,91 @@ class Parent_Filter_Spec extends Specification
             'a rectangle across its edge'    | 30    | 60    | 60        | 40
             'the whole component (control)'  | 0     | 0     | 240       | 160
     }
+
+    def 'Repainting part of a window over what is already on it leaves a `parentFilter(..)` pane alone. (#description)'(
+        String description, int clipX, int clipY, int clipWidth, int clipHeight
+    ) {
+        reportInfo """
+            This is the previous scenario as a user meets it. A window is already on screen, and
+            something small happens on it - the pointer arrives on a button, a caret blinks, a
+            progress bar ticks. Swing does not redraw the window; it redraws that rectangle,
+            over what is already there.
+
+            Nothing about the window has changed here, so redrawing any rectangle of it has to
+            leave it exactly as it was. That makes every pixel of the window an assertion,
+            rather than only the ones inside the rectangle, and so it catches two things at
+            once: a pane which paints the wrong thing inside the rectangle, and a pane which
+            paints anything at all outside it.
+
+            When this fails, what the user sees is a rectangular stain around whatever they
+            touched, which stays until something forces the whole window to be redrawn.
+        """
+        given : """
+            A parent painted in fine-grained noise, with two panes over it blurring what is
+            behind them - two, because a single pane cannot show whether the repaint of one
+            damages another.
+        """
+            var parent =
+                    UI.panel("fill, ins 20, gap 20")
+                    .withStyle( it -> it
+                        .backgroundColor(UI.Color.BLACK)
+                        .noise( n -> n
+                            .function(UI.NoiseType.STOCHASTIC)
+                            .scale(0.3)
+                            .colors(UI.Color.BLACK, UI.Color.WHITE) ) )
+                    .add("grow", UI.panel().withStyle( it -> it
+                            .backgroundColor(UI.Color.TRANSPARENT)
+                            .parentFilter( f -> f.blur(6) ) ))
+                    .add("grow", UI.panel().withStyle( it -> it
+                            .backgroundColor(UI.Color.TRANSPARENT)
+                            .parentFilter( f -> f.blur(6) ) ))
+                    .get(JPanel)
+            parent.setSize(240, 160)
+            parent.doLayout()
+        and : 'The window as it already sits on screen, which is simply a full repaint of it.'
+            var onScreen = UI.runAndGet(() -> {
+                var image = Utility.createDeterministicImage(240, 160)
+                var graphics = Utility.createDeterministicGraphics(image)
+                Utility.paintWithoutWindow(parent, graphics)
+                graphics.dispose()
+                return image
+            })
+
+        when : """
+            Swing redraws one rectangle of it, the way it does when something small happens:
+            over what is already there, through a clip which says how far the redraw reaches.
+        """
+            var afterRedraw = UI.runAndGet(() -> {
+                var image = Utility.createDeterministicImage(240, 160)
+                var graphics = Utility.createDeterministicGraphics(image)
+                graphics.drawImage(onScreen, 0, 0, null)
+                graphics.setClip(clipX, clipY, clipWidth, clipHeight)
+                Utility.paintWithoutWindow(parent, graphics)
+                graphics.dispose()
+                return image
+            })
+
+        and : 'Every pixel of the window is compared, not only the ones which were redrawn.'
+            int pixelsChanged = 0
+            for ( int y = 0; y < 160; y++ )
+                for ( int x = 0; x < 240; x++ )
+                    for ( int channelShift : [0, 8, 16, 24] ) // blue, green, red and alpha
+                        if ( Math.abs(
+                                ((onScreen.getRGB(x, y) >> channelShift) & 0xff) -
+                                ((afterRedraw.getRGB(x, y) >> channelShift) & 0xff)
+                             ) > 8 ) {
+                            pixelsChanged++
+                            break
+                        }
+
+        then : 'Nothing changed, because nothing had changed.'
+            pixelsChanged == 0
+
+        where : 'The redrawn rectangle lands on one pane, on both of them, and between them.'
+            description                  | clipX | clipY | clipWidth | clipHeight
+            'a spot on the left pane'    | 60    | 70    | 20        | 20
+            'a spot on the right pane'   | 160   | 70    | 20        | 20
+            'a strip across both'        | 20    | 75    | 200       | 10
+            'the gap between them'       | 110   | 20    | 20        | 120
+    }
 }
