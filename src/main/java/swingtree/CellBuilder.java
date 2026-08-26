@@ -232,13 +232,28 @@ public final class CellBuilder<C extends JComponent, E> {
     static class SimpleTableCellRenderer implements TableCellRenderer, TableCellEditor, TreeCellRenderer, TreeCellEditor
     {
         private final DefaultTableCellRenderer _defaultRenderer = new DefaultTableCellRenderer();
-        private final DefaultTreeCellRenderer _defaultTreeRenderer = new DefaultTreeCellRenderer();
+        /*
+            What a tree cell falls back to when no rule of this builder covers its value.
+            A bound tree passes its own renderer in here, so that a node type the builder
+            says nothing about is still labelled by the 'text(..)', 'icon(..)' and
+            'toolTip(..)' rules declared for it, rather than by its 'toString()'.
+        */
+        private final TreeCellRenderer _defaultTreeRenderer;
         private final InternalCellEditor _basicEditor;
         private BuiltCells<JTable,Object> _state;
 
         SimpleTableCellRenderer(Class<? extends JComponent> hostType, BuiltCells<JTable, Object> state) {
+            this(hostType, state, new DefaultTreeCellRenderer());
+        }
+
+        SimpleTableCellRenderer(
+            Class<? extends JComponent> hostType,
+            BuiltCells<JTable, Object> state,
+            TreeCellRenderer defaultTreeRenderer
+        ) {
             _basicEditor = new InternalCellEditor(hostType);
             _state = state;
+            _defaultTreeRenderer = defaultTreeRenderer;
         }
 
         BuiltCells<JTable,Object> getState(){
@@ -686,22 +701,37 @@ public final class CellBuilder<C extends JComponent, E> {
             SimpleTableCellRenderer renderer = new SimpleTableCellRenderer(state.componentType(), (BuiltCells) state);
             return renderer;
         } else
-            throw new IllegalArgumentException("Renderer was set up to be used for a JTable!");
+            throw new IllegalArgumentException(
+                "Renderer was not set up to be used for a JTable! " +
+                "(but for " + state.componentType().getSimpleName() + ")"
+            );
     }
 
-    TreeCellRenderer getForTree(@Nullable TableCellRenderer oldTableRenderer) {
+    /**
+     * Builds the {@link TreeCellRenderer} configured through this builder.
+     *
+     * @param fallback What to render a value with which no rule of this builder covers.
+     *                 A bound tree passes its own renderer, so that the {@code text(..)},
+     *                 {@code icon(..)} and {@code toolTip(..)} rules declared per node type
+     *                 still apply to every type the builder does not mention. Pass
+     *                 {@code null} to fall back to plain {@code toString()} rendering.
+     */
+    TreeCellRenderer getForTree(@Nullable TreeCellRenderer fallback) {
         BuiltCells<C,E> state = _state;
-        if (JTree.class.isAssignableFrom(state.componentType())) {
-            if ( oldTableRenderer instanceof SimpleTableCellRenderer ) {
-                SimpleTableCellRenderer oldRenderer = (SimpleTableCellRenderer) oldTableRenderer;
-                BuiltCells<JTable,Object> oldState = oldRenderer.getState();
-                state = oldState.addRenderLookups((Association) state.rendererLookup());
-            } else {
-                state = _addDefaultRendering(state);
-            }
+        if (!JTree.class.isAssignableFrom(state.componentType()))
+            throw new IllegalArgumentException(
+                "Renderer was not set up to be used for a JTree! " +
+                "(but for " + state.componentType().getSimpleName() + ")"
+            );
+        if ( fallback == null ) {
+            state = _addDefaultRendering(state);
             return new SimpleTableCellRenderer(state.componentType(), (BuiltCells) state);
-        } else
-            throw new IllegalArgumentException("Renderer was set up to be used for a JTree!");
+        }
+        /*
+            No catch-all rendering rule is added here on purpose: leaving the lookup empty
+            for an uncovered type is exactly what makes it reach the fallback above.
+        */
+        return new SimpleTableCellRenderer(state.componentType(), (BuiltCells) state, fallback);
     }
 
     /**

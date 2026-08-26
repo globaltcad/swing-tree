@@ -9,6 +9,7 @@ import sprouts.Val
 import sprouts.Var
 import swingtree.api.IconDeclaration
 import swingtree.threading.EventProcessor
+import utility.LogSpy
 import utility.SwingTreeTestConfigurator
 
 import javax.swing.JTree
@@ -287,11 +288,13 @@ class Tree_Binding_Spec extends Specification
     {
         reportInfo """
             Rules are looked up by the type of the node, and the most specific declared rule
-            wins. That makes it possible to state what is true of *every* node once and then
-            refine it for the one type that differs, instead of repeating a block per type.
+            wins. So a general rule can carry the types that have nothing special to say,
+            while the ones that do get a block of their own.
 
-            Here a rule on the `FsNode` interface labels everything by its name, and a rule
-            on `Dir` adds the children, which the general rule cannot know about.
+            Here a rule on the `FsNode` interface labels everything by its name, and a rule on
+            `Dir` gives directories their children. Note that the `Dir` block restates the
+            label: the winning rule is used whole, it does not inherit from the general one.
+            The scenario after next is about exactly that.
         """
         given : 'A tree with a rule for the shared interface and a more specific one for directories.'
             var fileSystem = Var.of(FsNode, dir("r", "root", doc("a", "notes.txt")))
@@ -517,6 +520,117 @@ class Tree_Binding_Spec extends Specification
                 "[root]",
                 "    - notes.txt",
             ]
+    }
+
+    def 'A cell view for one node type leaves every other type its own label.'()
+    {
+        reportInfo """
+            `withCells(..)` and the `text(..)` / `icon(..)` rules are not an either-or. A tree
+            usually needs a richer view for exactly one of its node types, and it would be a
+            poor trade to have to restate the label of every other type just to get it.
+
+            So a node type no `when(..)` clause covers keeps whatever its own rule says. Only
+            the types you actually name here are taken over.
+        """
+        given : 'A tree whose types are labelled by their rules, and one type given a cell view.'
+            var fileSystem = Var.of(FsNode, dir("r", "root",
+                                        dir("a", "assets", doc("a1", "logo.svg")),
+                                        doc("b", "README.md")
+                                    ))
+            var tree =
+                    UI.tree(FsNode, fileSystem, { conf -> conf
+                        .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })
+                        .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })
+                    })
+                    .withCells({ it
+                        .when(Doc).asText({ cell -> "\u00b7 " + cell.entry().map({ Doc d -> d.name() }).orElse("?") })
+                    })
+                    .withInitialExpansionDepth(3)
+                    .get(JTree)
+
+        expect : 'Documents use the cell view, and directories keep the label of their own rule.'
+            visibleRows(tree) == [
+                "root",
+                "    assets",
+                "        \u00b7 logo.svg",
+                "    \u00b7 README.md",
+            ]
+    }
+
+    def 'A more specific rule replaces a general one, it does not extend it.'()
+    {
+        reportInfo """
+            Rules are looked up per node type and the most specific match is the answer, whole.
+            It is worth being precise about what that means: the winning block is used *on its
+            own*, so a block declared for one type does not inherit the label of a catch-all
+            block above it.
+
+            The reason is that a `nodesOf(..)` block reads like one `case` of a `switch`, and a
+            `case` does not silently continue into another. If a type needs both the general
+            label and its own children, it says both.
+        """
+        given : 'A catch-all rule labelling everything, and a directory rule declaring only children.'
+            var fileSystem = Var.of(FsNode, dir("r", "root", doc("a", "notes.txt")))
+            var forgetful =
+                    UI.tree(FsNode, fileSystem, { conf -> conf
+                        .nodesOf({ it.text({ FsNode n -> n.name() }) })
+                        .nodesOf(Dir, { it.children({ Dir d -> d.entries() }) })
+                    })
+                    .get(JTree)
+
+        expect : 'The directory has no label of its own left, so it falls back to `toString()`.'
+            visibleRows(forgetful) == [
+                "Dir(root)",
+                "    notes.txt",
+            ]
+
+        when : 'The directory rule states the label it wants as well.'
+            var complete =
+                    UI.tree(FsNode, fileSystem, { conf -> conf
+                        .nodesOf({ it.text({ FsNode n -> n.name() }) })
+                        .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })
+                    })
+                    .get(JTree)
+
+        then : 'Both are labelled, each by the rule that won for its own type.'
+            visibleRows(complete) == [
+                "root",
+                "    notes.txt",
+            ]
+    }
+
+    def 'Two siblings sharing an id are reported rather than silently merged.'()
+    {
+        reportInfo """
+            An id has to be unique among siblings, and only among siblings, because the parent
+            is part of the address. Two children of one node sharing an id are genuinely
+            indistinguishable to a tree which addresses a node by its path of ids: they
+            collapse onto one position, so one of them is drawn twice and the other never.
+
+            Nothing can be done about that from inside the library, but a warning naming the
+            offending id beats leaving somebody to work out why a row appeared twice.
+        """
+        given : 'A folder holding two documents which were given the same id.'
+            var log = LogSpy.attach()
+            var fileSystem = Var.of(FsNode, dir("r", "root", doc("dup", "first.txt"), doc("dup", "second.txt")))
+            var tree =
+                    UI.tree(FsNode, fileSystem, { conf -> conf
+                        .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })
+                        .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })
+                    })
+                    .withInitialExpansionDepth(3)
+                    .get(JTree)
+
+        when : 'The tree is asked what it shows.'
+            var rows = visibleRows(tree)
+
+        then : 'SwingTree said what went wrong, naming the id the two share.'
+            log.warnings().any { it.contains("share the id 'dup'") }
+        and : 'And the two really are one position, which is the whole reason for the warning.'
+            rows.size() == 3
+
+        cleanup :
+            log.detach()
     }
 
     def 'A read only property yields a tree you can browse but not edit.'()

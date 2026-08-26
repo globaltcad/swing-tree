@@ -8,6 +8,7 @@ import sprouts.Tuple
 import sprouts.Val
 import sprouts.Var
 import swingtree.threading.EventProcessor
+import utility.LogSpy
 import utility.SwingTreeTestConfigurator
 
 import javax.swing.JTree
@@ -472,9 +473,12 @@ class Tree_Selection_And_Editing_Spec extends Specification
 
             That is a deliberate outcome rather than an error: declaring a read only rule is
             how you say a part of the structure is not the user's to rearrange. SwingTree logs
-            the dropped write once, naming the type of the branch which refused it.
+            the dropped write once, naming the type of the branch which refused it — once for
+            the whole tree, not once per keystroke, because a user who holds a key down in a
+            branch that will not take the result should not fill the log with it.
         """
         given : 'A tree in which directories expose their entries read only.'
+            var log = LogSpy.attach()
             var fileSystem = Var.of(FsNode, dir("r", "root",
                                         dir("a", "src", doc("a1", "App.java"))
                                     ))
@@ -487,18 +491,28 @@ class Tree_Selection_And_Editing_Spec extends Specification
                     .get(JTree)
             UI.runNow({ tree.expandRow(1) })
 
-        when : 'The user tries to rename a document below that branch.'
-            UI.runNow({ tree.getModel().valueForPathChanged(tree.getPathForRow(2), "Application.java") })
+        when : 'The user tries to rename a document below that branch, three times over.'
+            UI.runNow({
+                tree.getModel().valueForPathChanged(tree.getPathForRow(2), "Application.java")
+                tree.getModel().valueForPathChanged(tree.getPathForRow(2), "Program.java")
+                tree.getModel().valueForPathChanged(tree.getPathForRow(2), "Main.java")
+            })
 
         then : 'Nothing changed, because there was no way back up through the read only branch.'
             ((Doc) ((Dir) fileSystem.get().entries().get(0)).entries().get(0)).name() == "App.java"
             visibleRows(tree) == ["root", "    src", "        App.java"]
+        and : 'And it was said exactly once, naming the branch type which refused the write.'
+            log.warnings().findAll { it.contains("read only 'children(getter)'") }.size() == 1
+            log.warnings().any { it.contains("'Dir'") }
 
         when : 'The root itself is renamed, which needs no branch wither at all.'
             UI.runNow({ tree.getModel().valueForPathChanged(tree.getPathForRow(0), "workspace") })
 
         then : 'That edit does land, because nothing stood between it and the property.'
             fileSystem.get().name() == "workspace"
+
+        cleanup :
+            log.detach()
     }
 
     def 'A node type without a text wither cannot be renamed, even in an editable tree.'()

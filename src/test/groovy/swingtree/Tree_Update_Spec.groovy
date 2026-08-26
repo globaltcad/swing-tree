@@ -4,6 +4,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import sprouts.From
 import sprouts.Tuple
 import sprouts.Var
 import swingtree.threading.EventProcessor
@@ -16,6 +17,7 @@ import javax.swing.event.TreeModelListener
 import static swingtree.TreeSpecFileSystem.dir
 import static swingtree.TreeSpecFileSystem.doc
 import static swingtree.TreeSpecFileSystem.expandedRows
+import static swingtree.TreeSpecFileSystem.selectedRows
 import static swingtree.TreeSpecFileSystem.visibleRows
 
 @Title("Keeping a Bound Tree in Sync")
@@ -519,5 +521,133 @@ class Tree_Update_Spec extends Specification
         then : 'Nothing was announced, because nothing changed.'
             announcements == 0
             visibleRows(tree) == ["root", "    notes.txt"]
+    }
+
+    def 'A structural change leaves a bound selection exactly where it was.'()
+    {
+        reportInfo """
+            Restoring the user's selection after a structural change is only half the job. The
+            other half is not *lying* about it on the way there.
+
+            A structure change makes the `JTree` drop every selected path before the restore
+            can put it back, and it announces that as an ordinary selection event. A binding
+            which passed that on would tell the application "nothing is selected any more" on
+            every single insertion, and a detail pane listening to it would blink empty and
+            fill again each time somebody added a file in a folder nobody was looking at.
+
+            So the write back is muted for the length of the rebuild, and the settled selection
+            is compared with the one the rebuild started from: it is announced once at the end
+            if it really moved, and not at all if it did not. What reaches the property is what
+            is true after the tree has finished moving, and only when it is news.
+        """
+        given : 'A file system with a document selected somewhere inside it.'
+            var fileSystem = Var.of(FsNode, dir("r", "root",
+                                        dir("a", "assets", doc("a1", "logo.svg")),
+                                        doc("b", "README.md")
+                                    ))
+            var selection = Var.of(Tuple.of(String))
+            var tree =
+                    UI.tree(FsNode, fileSystem, { conf -> conf
+                        .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })
+                                          .text({ Dir d -> d.name() }) })
+                        .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })
+                    })
+                    .withSelection(selection)
+                    .withInitialExpansionDepth(3)
+                    .get(JTree)
+        and : 'A record of every value the selection property ever receives.'
+            var seen = []
+            selection.onChange(From.ALL, { seen.add(it.currentValue().orElseThrow().toList()) })
+
+        when : 'The logo is selected.'
+            UI.runNow({ selection.set(Tuple.of(String, ["r", "a", "a1"])) })
+        then : 'The property and the tree agree, and that was one change.'
+            selectedRows(tree) == ["logo.svg"]
+            seen == [["r", "a", "a1"]]
+
+        when : 'A new file appears somewhere else entirely, which is a structural change.'
+            seen.clear()
+            UI.runNow({ fileSystem.update({ Dir root -> root.withEntries(root.entries().add(doc("c", "CHANGELOG.md"))) }) })
+
+        then : 'It is on screen...'
+            visibleRows(tree).contains("    CHANGELOG.md")
+        and : '...the logo is still selected...'
+            selectedRows(tree) == ["logo.svg"]
+        and : '...and the property was never told anything else. No empty selection in between.'
+            seen.every { it == ["r", "a", "a1"] }
+            !seen.contains([])
+            selection.get().toList() == ["r", "a", "a1"]
+    }
+
+    def 'Deleting the selected node empties the selection, and says so once.'()
+    {
+        reportInfo """
+            The counterpart to the scenario above: muting the write back during a rebuild must
+            not swallow a change that really happened. When the selected node is the one that
+            was removed, there is nothing to restore, and the property has to hear about it.
+        """
+        given : 'A file system with a document selected, which we are about to delete.'
+            var fileSystem = Var.of(FsNode, dir("r", "root",
+                                        dir("a", "assets", doc("a1", "logo.svg"), doc("a2", "icon.svg"))
+                                    ))
+            var selection = Var.of(Tuple.of(String, "r", "a", "a1"))
+            var tree =
+                    UI.tree(FsNode, fileSystem, { conf -> conf
+                        .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })
+                                          .text({ Dir d -> d.name() }) })
+                        .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })
+                    })
+                    .withSelection(selection)
+                    .withInitialExpansionDepth(3)
+                    .get(JTree)
+        expect : 'The logo starts out selected.'
+            selectedRows(tree) == ["logo.svg"]
+
+        when : 'The selected document is removed from its folder.'
+            UI.runNow({ fileSystem.update({ Dir root ->
+                var assets = (Dir) root.entries().get(0)
+                root.withEntries(root.entries().setAt(0, assets.withEntries(assets.entries().removeFirst(1))))
+            }) })
+
+        then : 'It is gone from the screen, and the property says nothing is selected.'
+            visibleRows(tree) == ["root", "    assets", "        icon.svg"]
+            selectedRows(tree) == []
+            selection.get().isEmpty()
+    }
+
+    def 'A property holding nothing is an empty tree, not a tree holding nothing.'()
+    {
+        reportInfo """
+            A property may legitimately hold no value at all: a structure which has not
+            finished loading, a document nobody has opened yet. A `TreeModel` says "there is
+            no tree" by having no root, and a `JTree` draws no rows for one, which is what
+            an empty property should look like.
+
+            What it must *not* look like is a single row reading `null`, which is what
+            wrapping the absent value in a node would produce.
+        """
+        given : 'A property which holds no file system yet.'
+            var fileSystem = Var.ofNullable(FsNode, null)
+            var tree =
+                    UI.tree(FsNode, fileSystem, { conf -> conf
+                        .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })
+                        .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })
+                    })
+                    .get(JTree)
+
+        expect : 'The tree has no root and shows nothing.'
+            UI.runAndGet({ tree.getModel().getRoot() }) == null
+            visibleRows(tree) == []
+
+        when : 'The file system arrives.'
+            UI.runNow({ fileSystem.set(dir("r", "root", doc("a", "notes.txt"))) })
+        then : 'It is on screen, root opened, exactly as if it had been there all along.'
+            visibleRows(tree) == ["root", "    notes.txt"]
+
+        when : 'And it is taken away again.'
+            UI.runNow({ fileSystem.set(null) })
+        then : 'The tree goes empty rather than showing a node standing in for nothing.'
+            UI.runAndGet({ tree.getModel().getRoot() }) == null
+            visibleRows(tree) == []
     }
 }

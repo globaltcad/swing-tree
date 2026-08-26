@@ -17,6 +17,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
@@ -69,22 +70,24 @@ final class PropertyTreeModel<I, N> implements TreeModel
 
     private final Val<N>                        _root;
     private final @Nullable Var<N>              _writableRoot;
-    private final TreeConf<I, N>                   _conf;
-    private final Map<Class<?>, Object>         _ruleCache;
+    private final TreeConf<I, N>                _conf;
     private final EventProcessor                _eventProcessor;
     private final EventListenerList             _listeners = new EventListenerList();
     private final Map<TreeNodeRef, TreeNodeRef> _canonical = new HashMap<>();
+    private final List<Runnable>                _afterRestructure = new ArrayList<>();
 
     private @Nullable WeakReference<JTree> _tree;
     private @Nullable Class<I>             _derivedIdType;
     private @Nullable TreeNodeRef          _rootRef;
     private @Nullable N                    _snapshot;
+    private boolean                        _restructuring          = false;
+    private boolean                        _warnedAboutDuplicates  = false;
+    private boolean                        _warnedAboutIdType      = false;
 
     PropertyTreeModel( Val<N> root, TreeConf<I, N> conf, boolean writable, EventProcessor eventProcessor ) {
         _root           = Objects.requireNonNull(root);
         _conf           = Objects.requireNonNull(conf);
         _eventProcessor = Objects.requireNonNull(eventProcessor);
-        _ruleCache      = conf.newRuleCache();
         _writableRoot   = ( writable && root instanceof Var && root.isMutable() ) ? (Var<N>) root : null;
         _snapshot       = root.orElseNull();
         _rootRef        = _newRootRef();
@@ -126,7 +129,7 @@ final class PropertyTreeModel<I, N> implements TreeModel
     }
 
     @Nullable TreeNodeConf<N, ?> ruleOf( @Nullable Object node ) {
-        return _conf.ruleFor(valueOf(node), _ruleCache);
+        return _conf.ruleFor(valueOf(node));
     }
 
     /**
@@ -135,25 +138,37 @@ final class PropertyTreeModel<I, N> implements TreeModel
      *  when the tree was bound read only, because there is then nothing to write into.
      */
     @Nullable Var<N> propertyFor( @Nullable Object node ) {
-        Var<N> writable = _writableRoot;
-        if ( writable == null || !(node instanceof TreeNodeRef) )
+        if ( !(node instanceof TreeNodeRef) )
             return null;
         TreeNodeRef ref = (TreeNodeRef) node;
-        return writable.zoomTo(
-            new TreePathLens<>(_conf, _ruleCache, ref.idPath(), _conf.nodeType().cast(valueOf(ref)))
-        );
+        return propertyFor(ref.idPath(), _conf.nodeType().cast(valueOf(ref)));
+    }
+
+    /**
+     *  The same lens property, built from a path of ids and a node value which the caller
+     *  already holds. This is what lets a delegate read everything it needs on the UI
+     *  thread and then hand out the property from the application thread, without ever
+     *  reaching back into this model's UI thread owned handles.
+     */
+    @Nullable Var<N> propertyFor( Object[] idPath, @Nullable N value ) {
+        Var<N> writable = _writableRoot;
+        if ( writable == null )
+            return null;
+        return writable.zoomTo(new TreePathLens<>(_conf, idPath, value));
     }
 
     // ---------------------------------------------------------------- TreeModel
 
+    /**
+     *  The handle for the root of the bound value, or {@code null} when the property holds
+     *  nothing. A {@link TreeModel} answers "there is no tree at all" with a null root, and
+     *  a {@link JTree} draws no rows for one, which is what a property holding nothing
+     *  should look like. Wrapping the absent value in a handle instead would put a row
+     *  reading "null" on the screen.
+     */
     @Override
-    public Object getRoot() {
-        TreeNodeRef rootRef = _rootRef;
-        if ( rootRef == null ) {
-            rootRef = _newRootRef();
-            _rootRef = rootRef;
-        }
-        return rootRef;
+    public @Nullable Object getRoot() {
+        return _rootRef;
     }
 
     @Override
@@ -190,7 +205,7 @@ final class PropertyTreeModel<I, N> implements TreeModel
     @Override
     public boolean isLeaf( Object node ) {
         Object value = valueOf(node);
-        TreeNodeConf<N, ?> rule = _conf.ruleFor(value, _ruleCache);
+        TreeNodeConf<N, ?> rule = _conf.ruleFor(value);
         if ( rule == null )
             return true;
         Boolean declared = rule.declaredLeafState();
@@ -211,7 +226,7 @@ final class PropertyTreeModel<I, N> implements TreeModel
     public void valueForPathChanged( TreePath path, Object newValue ) {
         Object last = path.getLastPathComponent();
         Object value = valueOf(last);
-        TreeNodeConf<N, ?> rule = _conf.ruleFor(value, _ruleCache);
+        TreeNodeConf<N, ?> rule = _conf.ruleFor(value);
         Var<N> writable = _writableRoot;
         if ( value == null || rule == null )
             return;
@@ -237,7 +252,7 @@ final class PropertyTreeModel<I, N> implements TreeModel
         }
         N renamedNode = _conf.nodeType().cast(renamed);
         TreePathLens<I, N> lens = new TreePathLens<>(
-            _conf, _ruleCache, ((TreeNodeRef) last).idPath(), _conf.nodeType().cast(value)
+            _conf, ((TreeNodeRef) last).idPath(), _conf.nodeType().cast(value)
         );
         _eventProcessor.registerAppEvent(
             () -> writable.update(From.VIEW, root -> lens.wither(root, renamedNode))
@@ -313,7 +328,7 @@ final class PropertyTreeModel<I, N> implements TreeModel
         if ( !_isExpanded(ref) )
             return true; // Nothing below an unexpanded node is on screen, so nothing to do.
 
-        TreeNodeConf<N, ?> rule = _conf.ruleFor(newValue, _ruleCache);
+        TreeNodeConf<N, ?> rule = _conf.ruleFor(newValue);
         if ( rule == null || !rule.hasChildrenRule() )
             return true;
 
@@ -347,19 +362,86 @@ final class PropertyTreeModel<I, N> implements TreeModel
         List<Object[]> expanded = _captureExpandedIdPaths(tree);
         List<Object[]> selected = _captureSelectedIdPaths(tree);
 
+        TreeNodeRef previousRoot = _rootRef;
         _canonical.clear();
         _rootRef = _newRootRef();
+        TreeNodeRef currentRoot = _rootRef;
+        /*
+            A root which has just become null leaves nothing to name a path with, so the
+            path of the root which is going away says "everything below here is gone"
+            instead. Both the JTree and its layout cache resolve the event against the
+            model's current root when the event names none, and that is null too, so an
+            event without a path would simply be ignored and the rows would stay.
+        */
+        TreePath announced = ( currentRoot  != null ? currentRoot.path()
+                             : previousRoot != null ? previousRoot.path()
+                             : null );
 
-        _fireStructureChanged();
+        /*
+            A structure change makes the JTree drop every selected path before the
+            restore below can put them back, and it announces that as an ordinary
+            selection event. Anything bound to the selection would therefore see the
+            selection empty itself and fill again on every insertion, which is a lie
+            about what the user did. So the write back is muted for the length of the
+            rebuild and the settled selection is announced exactly once afterwards,
+            which also reports the truth when a selected node really did disappear.
+        */
+        _restructuring = true;
+        try {
+            _fireStructureChanged(announced);
+            _restoreExpanded(tree, expanded);
+            _restoreSelection(tree, selected);
+        } finally {
+            _restructuring = false;
+        }
+        if ( !_sameIdPaths(selected, _captureSelectedIdPaths(tree)) )
+            _announceSettledSelection();
+    }
 
-        _restoreExpanded(tree, expanded);
-        _restoreSelection(tree, selected);
+    private static boolean _sameIdPaths( List<Object[]> before, List<Object[]> after ) {
+        if ( before.size() != after.size() )
+            return false;
+        for ( int i = 0; i < before.size(); i++ )
+            if ( !Arrays.equals(before.get(i), after.get(i)) )
+                return false;
+        return true;
+    }
+
+    /**
+     *  Registers something to run when a structural rebuild has left the selection somewhere
+     *  other than where it found it, which is how a selection binding reports a node that
+     *  really did disappear without also reporting the intermediate empty selection the
+     *  rebuild passes through.
+     */
+    void onAfterRestructure( Runnable hook ) {
+        _afterRestructure.add(Objects.requireNonNull(hook));
+    }
+
+    /**
+     *  Tells whether a structural rebuild is currently under way, which is the signal for
+     *  a selection binding to stay quiet: the tree is between announcing that everything
+     *  changed and having its selection put back, so nothing it reports right now is true.
+     */
+    boolean isRestructuring() {
+        return _restructuring;
+    }
+
+    private void _announceSettledSelection() {
+        for ( Runnable hook : _afterRestructure )
+            try {
+                hook.run();
+            } catch (Exception e) {
+                log.error(SwingTree.get().logMarker(),
+                        "Failed to announce the selection of a bound tree after a structural change.", e);
+            }
     }
 
     // ------------------------------------------------------------------ Helpers
 
-    private TreeNodeRef _newRootRef() {
+    private @Nullable TreeNodeRef _newRootRef() {
         @Nullable N snapshot = _snapshot;
+        if ( snapshot == null )
+            return null; // The property holds nothing, so there is no tree to hand out.
         TreeNodeRef rootRef = TreeNodeRef.ofRoot(snapshot, _conf.idOf(snapshot));
         _canonical.put(rootRef, rootRef);
         return rootRef;
@@ -369,7 +451,7 @@ final class PropertyTreeModel<I, N> implements TreeModel
         Object value = valueOf(node);
         if ( value == null )
             return Tuple.of(Object.class);
-        TreeNodeConf<N, ?> rule = _conf.ruleFor(value, _ruleCache);
+        TreeNodeConf<N, ?> rule = _conf.ruleFor(value);
         if ( rule == null || !rule.hasChildrenRule() )
             return Tuple.of(Object.class);
         try {
@@ -390,6 +472,8 @@ final class PropertyTreeModel<I, N> implements TreeModel
         TreeNodeRef probe = parent.child(_conf.idOf(childValue), childValue, index);
         TreeNodeRef existing = _canonical.get(probe);
         if ( existing != null ) {
+            if ( existing.index() != index )
+                _warnAboutDuplicateSiblingIds(childValue, existing.index(), index);
             existing.updateValue(childValue);
             existing.updateIndex(index);
             return existing;
@@ -398,6 +482,24 @@ final class PropertyTreeModel<I, N> implements TreeModel
             _canonical.clear();
         _canonical.put(probe, probe);
         return probe;
+    }
+
+    /**
+     *  Two siblings sharing an id are indistinguishable to a tree which addresses a node by
+     *  its path of ids: they collapse onto one handle, so one of them is drawn twice and the
+     *  other never. Nothing can be done about it here, but saying so beats leaving the user
+     *  to work out why a row appeared twice.
+     */
+    private void _warnAboutDuplicateSiblingIds( @Nullable Object childValue, int first, int second ) {
+        if ( _warnedAboutDuplicates )
+            return;
+        _warnedAboutDuplicates = true;
+        log.warn(SwingTree.get().logMarker(),
+            "Two children at positions {} and {} below the same tree node share the id '{}'. " +
+            "A bound tree identifies a node by its path of ids, so the two are indistinguishable " +
+            "and only one of them will be shown. Make ids unique among siblings, either through " +
+            "'HasId.id()' or through 'TreeConf.idOf(..)'. Node: '{}'.",
+            first, second, _conf.idOf(childValue), childValue);
     }
 
     private @Nullable JTree _treeOrNull() {
@@ -476,8 +578,8 @@ final class PropertyTreeModel<I, N> implements TreeModel
      *  addressed state finds its way back after a structural change.
      */
     @Nullable TreePath pathForIds( Object[] idPath ) {
-        TreeNodeRef current = (TreeNodeRef) getRoot();
-        if ( idPath.length == 0 || !Objects.equals(current.idPath()[0], idPath[0]) )
+        TreeNodeRef current = _rootRef;
+        if ( current == null || idPath.length == 0 || !Objects.equals(current.idPath()[0], idPath[0]) )
             return null;
         for ( int level = 1; level < idPath.length; level++ ) {
             Tuple<Object> children = _childrenOf(current);
@@ -528,9 +630,31 @@ final class PropertyTreeModel<I, N> implements TreeModel
             return Tuple.of(idType);
         Object[] ids = ((TreeNodeRef) last).idPath();
         List<I> typed = new ArrayList<>(ids.length);
-        for ( Object id : ids )
+        for ( Object id : ids ) {
+            if ( !idType.isInstance(id) ) {
+                _warnAboutIdType(id, idType);
+                return Tuple.of(idType);
+            }
             typed.add(idType.cast(id));
+        }
         return Tuple.of(idType, typed);
+    }
+
+    /**
+     *  A selection path is a tuple of a declared element type, so an id which is not of that
+     *  type cannot go into one. That happens when a node offers no identity at all and
+     *  {@link TreeConf#idOf(Object)} falls back to the node itself. Reporting "nothing
+     *  selected" and saying why beats throwing out of a Swing listener.
+     */
+    private void _warnAboutIdType( @Nullable Object id, Class<I> idType ) {
+        if ( _warnedAboutIdType )
+            return;
+        _warnedAboutIdType = true;
+        log.warn(SwingTree.get().logMarker(),
+            "Cannot report the selected position of a bound tree, because the id '{}' of a node " +
+            "on the selected path is not a '{}'. Declare the identity of your node types, either " +
+            "through 'HasId.id()' or through 'TreeConf.idOf(..)'.",
+            id, idType.getSimpleName());
     }
 
     /**
@@ -581,9 +705,10 @@ final class PropertyTreeModel<I, N> implements TreeModel
             listener.treeNodesChanged(event);
     }
 
-    private void _fireStructureChanged() {
-        TreeNodeRef rootRef = (TreeNodeRef) getRoot();
-        TreeModelEvent event = new TreeModelEvent(this, rootRef.path(), null, null);
+    private void _fireStructureChanged( @Nullable TreePath path ) {
+        if ( path == null )
+            return; // There was no tree before this change and there is none after it.
+        TreeModelEvent event = new TreeModelEvent(this, path, null, null);
         for ( TreeModelListener listener : _listeners.getListeners(TreeModelListener.class) )
             listener.treeStructureChanged(event);
     }

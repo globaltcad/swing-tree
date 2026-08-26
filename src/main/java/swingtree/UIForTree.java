@@ -78,13 +78,28 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
      *  contents genuinely do not live in a property, or which already has a model you want
      *  to keep. A tree installed like this takes no part in any of the property binding this
      *  builder otherwise offers.
+     *  <p>
+     *  Installing one on a tree built by {@code UI.tree(rootProperty, ..)} replaces the bound
+     *  model, which leaves the binding with nothing to drive; SwingTree says so in the log
+     *  rather than leaving you to work out why the tree stopped following the property. Build
+     *  the tree with {@link UI#of(JTree)} instead when the contents are not a property.
      *
      * @param model The {@link TreeModel} to install.
      * @return This builder node, to allow for method chaining.
      */
     public final UIForTree<I, N, T> withModel( TreeModel model ) {
         Objects.requireNonNull(model, "model");
+        PropertyTreeModel<I, N> bound = _model;
         return _with( thisComponent -> {
+                    if ( bound != null ) {
+                        log.warn(SwingTree.get().logMarker(),
+                            "Replacing the bound model of a tree with a plain '{}'. The tree will no " +
+                            "longer follow the property it was built from. Use 'UI.of(someTree)' if " +
+                            "the contents of this tree are not supposed to live in a property.",
+                            model.getClass().getSimpleName());
+                        thisComponent.setCellRenderer(new DefaultTreeCellRenderer());
+                        thisComponent.setEditable(false);
+                    }
                     thisComponent.setModel(model);
                 })
                 ._this();
@@ -126,29 +141,35 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
             return _this();
         return _with( thisComponent -> {
                     thisComponent.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
-                    thisComponent.addTreeSelectionListener( event -> {
-                        /*
-                            The path the user actually clicked is read here, on the UI thread,
-                            and handed over as ids. Nothing is reconstructed by searching, so
-                            the selection can never land on a different node than the one the
-                            user touched. The tuple is built with the element type the property
-                            already holds, because a Tuple compares its type as part of its
-                            equality, and an unequal write would echo back forever.
-                        */
+                    /*
+                        The path the user actually clicked is read here, on the UI thread, and
+                        handed over as ids. Nothing is reconstructed by searching, so the
+                        selection can never land on a different node than the one the user
+                        touched. The tuple is built with the element type the property already
+                        holds, because a Tuple compares its type as part of its equality, and
+                        an unequal write would echo back forever.
+                    */
+                    Runnable writeBack = () -> {
                         Tuple<I> path = model.idTupleOf(
                                             thisComponent.getSelectionPath(),
                                             _idTypeOf(selection, model)
                                         );
                         _runInApp(() -> selection.set(From.VIEW, path));
+                    };
+                    thisComponent.addTreeSelectionListener( event -> {
+                        if ( model.isRestructuring() )
+                            return; // The tree is mid rebuild, so its selection means nothing yet.
+                        writeBack.run();
                     });
+                    model.onAfterRestructure(writeBack);
                 })
                 ._withOnShow( selection, (thisComponent, path) -> {
-                    _selectPaths(thisComponent, model, _asPaths(path, model));
+                    _selectPaths(thisComponent, model, _asPaths(path));
                 })
                 ._with( thisComponent -> {
                     Tuple<I> initial = selection.orElseNull();
                     if ( initial != null && !initial.isEmpty() )
-                        _selectPaths(thisComponent, model, _asPaths(initial, model));
+                        _selectPaths(thisComponent, model, _asPaths(initial));
                 })
                 ._this();
     }
@@ -170,12 +191,12 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
                     thisComponent.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
                 })
                 ._withOnShow( selection, (thisComponent, path) -> {
-                    _selectPaths(thisComponent, model, _asPaths(path, model));
+                    _selectPaths(thisComponent, model, _asPaths(path));
                 })
                 ._with( thisComponent -> {
                     Tuple<I> initial = selection.orElseNull();
                     if ( initial != null && !initial.isEmpty() )
-                        _selectPaths(thisComponent, model, _asPaths(initial, model));
+                        _selectPaths(thisComponent, model, _asPaths(initial));
                 })
                 ._this();
     }
@@ -196,7 +217,7 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
             return _this();
         return _with( thisComponent -> {
                     thisComponent.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);
-                    thisComponent.addTreeSelectionListener( event -> {
+                    Runnable writeBack = () -> {
                         Class<I> idType = _idTypeOfNested(selection, model);
                         TreePath[] paths = thisComponent.getSelectionPaths();
                         List<Tuple<I>> asIds = new ArrayList<>();
@@ -205,15 +226,21 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
                                 asIds.add(model.idTupleOf(path, idType));
                         Tuple<Tuple<I>> selected = Tuple.of(Tuple.classTyped(idType), asIds);
                         _runInApp(() -> selection.set(From.VIEW, selected));
+                    };
+                    thisComponent.addTreeSelectionListener( event -> {
+                        if ( model.isRestructuring() )
+                            return; // The tree is mid rebuild, so its selection means nothing yet.
+                        writeBack.run();
                     });
+                    model.onAfterRestructure(writeBack);
                 })
                 ._withOnShow( selection, (thisComponent, paths) -> {
-                    _selectPaths(thisComponent, model, _asPathList(paths, model));
+                    _selectPaths(thisComponent, model, _asPathList(paths));
                 })
                 ._with( thisComponent -> {
                     Tuple<Tuple<I>> initial = selection.orElseNull();
                     if ( initial != null && !initial.isEmpty() )
-                        _selectPaths(thisComponent, model, _asPathList(initial, model));
+                        _selectPaths(thisComponent, model, _asPathList(initial));
                 })
                 ._this();
     }
@@ -238,7 +265,7 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
         if ( model == null )
             return _this();
         return _with( thisComponent -> {
-                    thisComponent.addTreeSelectionListener( event -> {
+                    Runnable notify = () -> {
                         // Captured on the UI thread, delivered on the application thread:
                         TreeSelectionDelegate<I, N> delegate = new TreeSelectionDelegate<>(
                             thisComponent, model,
@@ -253,7 +280,13 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
                                         "Error occurred while processing a tree selection event.", e);
                             }
                         });
+                    };
+                    thisComponent.addTreeSelectionListener( event -> {
+                        if ( model.isRestructuring() )
+                            return; // The tree is mid rebuild, so its selection means nothing yet.
+                        notify.run();
                     });
+                    model.onAfterRestructure(notify);
                 })
                 ._this();
     }
@@ -323,10 +356,11 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
     }
 
     /**
-     *  Expands every branch down to the given depth when the tree is first shown, where a
-     *  depth of {@code 1} opens the root's own children, {@code 2} their children as well,
-     *  and so on. This is a convenience for the initial view only; expansion the user
-     *  performs afterwards is untouched by it.
+     *  Expands every branch down to the given depth, once, at the point this builder method
+     *  runs, where a depth of {@code 1} opens the root's own children, {@code 2} their
+     *  children as well, and so on. This is a convenience for the initial view only:
+     *  expansion the user performs afterwards is untouched by it, and so is everything the
+     *  bound property grows later.
      *
      * @param depth How many levels below the root to expand.
      * @return This builder node, to allow for method chaining.
@@ -352,6 +386,10 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
      *  as part of the node's own rule with {@link TreeNodeConf#text(java.util.function.Function)}
      *  and {@link TreeNodeConf#icon(java.util.function.Function)}. Reach for this method when
      *  a node needs a view a label cannot give it.
+     *  <p>
+     *  The two mix freely: a node type this builder says nothing about keeps the label, icon
+     *  and tool tip declared in its own rule, so covering one type here does not oblige you
+     *  to cover the rest.
      *
      * @param renderBuilder Configures the cell renderer.
      * @param <V> The type of the node values being rendered.
@@ -369,7 +407,16 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
             return _this();
         }
         Objects.requireNonNull(builder);
-        TreeCellRenderer renderer = builder.getForTree(null);
+        PropertyTreeModel<I, N> model = _model;
+        /*
+            A bound tree hands its own renderer over as the fallback, so that a node type
+            no 'when(..)' clause covers is still labelled by the 'text(..)', 'icon(..)' and
+            'toolTip(..)' rules declared for it. Without it, covering one type would silently
+            drop every declared label in the tree in favour of 'toString()'.
+        */
+        TreeCellRenderer renderer = builder.getForTree(
+                                        model == null ? null : new DefaultBoundRenderer<>(model)
+                                    );
         return withCellRenderer(renderer);
     }
 
@@ -393,6 +440,11 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
      *  Installs a plain Swing {@link TreeCellRenderer}. A bound tree keeps internal handles
      *  inside its paths, so the renderer is wrapped in one which unwraps them first: what
      *  reaches your renderer is always your own node value.
+     *  <p>
+     *  A renderer installed this way answers for <i>every</i> node, so the {@code text(..)},
+     *  {@code icon(..)} and {@code toolTip(..)} rules declared per node type no longer apply.
+     *  Use {@link #withCells(Configurator)} to cover only some node types and leave the rest
+     *  to their own rules.
      *
      * @param renderer The renderer to paint the nodes with.
      * @return This builder node, to allow for method chaining.
@@ -484,14 +536,14 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
         return model.idType();
     }
 
-    private List<Tuple<I>> _asPaths( @Nullable Tuple<I> path, PropertyTreeModel<I, N> model ) {
+    private List<Tuple<I>> _asPaths( @Nullable Tuple<I> path ) {
         List<Tuple<I>> paths = new ArrayList<>(1);
         if ( path != null && !path.isEmpty() )
             paths.add(path);
         return paths;
     }
 
-    private List<Tuple<I>> _asPathList( @Nullable Tuple<Tuple<I>> paths, PropertyTreeModel<I, N> model ) {
+    private List<Tuple<I>> _asPathList( @Nullable Tuple<Tuple<I>> paths ) {
         List<Tuple<I>> result = new ArrayList<>();
         if ( paths != null )
             for ( int i = 0; i < paths.size(); i++ ) {

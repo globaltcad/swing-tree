@@ -10,11 +10,12 @@ import sprouts.Tuple;
 import swingtree.api.Configurator;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Objects;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
 /**
@@ -49,6 +50,7 @@ import java.util.function.Function;
  *  Instances of this class are immutable values, so every method returns a new
  *  instance instead of modifying the receiver.
  *
+ * @param <I> The identity type of the nodes, which selection paths are made of.
  * @param <N> The common node type of the tree, typically a sealed interface.
  */
 public final class TreeConf<I, N>
@@ -60,6 +62,21 @@ public final class TreeConf<I, N>
     private final Association<Class<?>, TreeNodeConf<N, ?>>   _rules;
     private final @Nullable Function<N, I>                    _idGetter;
     private final boolean                                     _leafWhenEmpty;
+
+    /*
+        Resolving the rule for a node is a pure function of the node's class and of the
+        rules declared here, both of which are fixed for the lifetime of one configuration.
+        It sits on the path of every 'getChildCount', every painted row and every step of
+        every lens, so the answer is memoized once per configuration rather than being
+        recomputed, and rather than each caller bringing a map of its own.
+
+        These two maps are the only mutable state in this class, they are caches whose
+        content is fully determined by the immutable fields above, and they are concurrent
+        because a lens resolves rules on the application thread while the tree paints rows
+        on the Event Dispatch Thread.
+    */
+    private final Map<Class<?>, Object> _ruleMemo     = new ConcurrentHashMap<>();
+    private final Set<Class<?>>         _warnedAbout  = ConcurrentHashMap.newKeySet();
 
     /**
      *  Declares the shape of a tree whose nodes carry their own identity through
@@ -139,6 +156,11 @@ public final class TreeConf<I, N>
      *  A node whose type matches no block at all is treated as a leaf labelled by its
      *  {@link Object#toString()}, and SwingTree logs a warning naming the type, because
      *  that is almost always a forgotten case rather than an intent.
+     *  <p>
+     *  Where several blocks match a node, the most specific one wins and is used <i>on its
+     *  own</i>: a block is chosen, never merged with a more general one, in the same way one
+     *  {@code case} of a {@code switch} does not continue into another. A block which wants
+     *  the label of a catch-all block above it therefore has to declare that label too.
      *
      * @param type The concrete node type this block applies to.
      * @param conf Configures the behaviour of nodes of that type.
@@ -167,7 +189,8 @@ public final class TreeConf<I, N>
      *  Declares how <i>every</i> node behaves, which is the right thing when the tree is
      *  homogeneous and one rule covers all of it. It is exactly
      *  {@code nodesOf(theNodeType, conf)}, so a more specific block declared for a subtype
-     *  still wins over it.
+     *  wins over it — and, because the winning block is used on its own, replaces it rather
+     *  than adding to it. A subtype which wants what is declared here has to restate it.
      *
      * @param conf Configures the behaviour of all nodes.
      * @return An updated configuration.
@@ -251,12 +274,11 @@ public final class TreeConf<I, N>
             return empty;
         if ( !Objects.equals(idOf(root), path.get(0)) )
             return empty;
-        Map<Class<?>, Object> cache = newRuleCache();
         List<N> along = new ArrayList<>(path.size());
         Object current = root;
         along.add(_nodeType.cast(current));
         for ( int level = 1; level < path.size(); level++ ) {
-            TreeNodeConf<N, ?> rule = ruleFor(current, cache);
+            TreeNodeConf<N, ?> rule = ruleFor(current);
             if ( rule == null || !rule.hasChildrenRule() )
                 return empty;
             Tuple<Object> children;
@@ -345,6 +367,11 @@ public final class TreeConf<I, N>
      *  "Most specific" means: among all rules whose type is assignable from the node's
      *  type, the one whose type no other match is assignable from. So a rule for a
      *  concrete record always beats a catch-all rule for the sealed interface above it.
+     *  <p>
+     *  A rule is chosen, never merged: the winning block is the whole answer, so a block
+     *  which refines a more general one has to restate the aspects it wants to keep.
+     *  Where two matching rules are unrelated to each other, such as two interfaces the
+     *  node implements side by side, the one declared first wins.
      */
     private @Nullable TreeNodeConf<N, ?> _findRule( Class<?> type ) {
         @Nullable TreeNodeConf<N, ?> best = null;
@@ -357,27 +384,17 @@ public final class TreeConf<I, N>
         return best;
     }
 
-    /**
-     *  A per tree cache in front of the rule lookup. Resolving a rule is a pure function
-     *  of the node's class, but it sits on the path of every single {@code getChildCount}
-     *  and every painted row, so the result is memoized by the model rather than being
-     *  recomputed each time.
-     */
-    Map<Class<?>, Object> newRuleCache() {
-        return new HashMap<>();
-    }
-
     private static final Object NO_RULE = new Object();
     static final Object NULL_ID = new Object() {
         @Override public String toString() { return "null"; }
     };
 
     @SuppressWarnings("unchecked")
-    @Nullable TreeNodeConf<N, ?> ruleFor( @Nullable Object node, Map<Class<?>, Object> cache ) {
+    @Nullable TreeNodeConf<N, ?> ruleFor( @Nullable Object node ) {
         if ( node == null )
             return null;
         Class<?> type = node.getClass();
-        Object cached = cache.get(type);
+        Object cached = _ruleMemo.get(type);
         if ( cached == null ) {
             @Nullable TreeNodeConf<N, ?> found = _findRule(type);
             if ( found == null )
@@ -386,9 +403,21 @@ public final class TreeConf<I, N>
                         "labelled by its 'toString()'. Declare one through 'nodesOf({}.class, ..)'.",
                         type.getName(), type.getSimpleName());
             cached = ( found == null ? NO_RULE : found );
-            cache.put(type, cached);
+            _ruleMemo.put(type, cached);
         }
         return cached == NO_RULE ? null : (TreeNodeConf<N, ?>) cached;
+    }
+
+    /**
+     *  Tells whether a complaint about the given node type has still to be made, and
+     *  remembers that it now has been. A tree may refuse the very same write on the very
+     *  same branch type many times over, and one log entry says everything a hundred do.
+     *
+     * @param type The node type the complaint is about.
+     * @return True the first time this configuration is asked about that type.
+     */
+    boolean shouldWarnAbout( Class<?> type ) {
+        return _warnedAbout.add(type);
     }
 
     @Override

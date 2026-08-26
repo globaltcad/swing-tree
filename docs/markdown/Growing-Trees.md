@@ -337,6 +337,16 @@ and repaints them, rather than "everything changed, start over" — which the `J
 would answer by throwing away everything it knows, including the expansion you just
 went to such trouble to preserve.
 
+When a change *is* structural — a box packed or unpacked — that rebuild does happen, and
+expansion and selection are captured by id and put back. One detail of that is worth
+knowing about, because it would otherwise be a slow-burning bug in your application: a
+`JTree` drops its selection on the way through a rebuild, and a binding which passed that
+on would tell you "nothing is selected" every time anybody added anything, anywhere. It
+does not. The write-back is muted for the length of the rebuild and the settled selection
+announced once at the end, so what your property sees is what is true after the tree has
+finished moving — including, when the selected box really was unpacked, that nothing is
+selected any more.
+
 ---
 
 ## Trees that are not sum types ##
@@ -364,13 +374,20 @@ The children of a node do not have to be the same type as the node, which is wha
 this work at all. And because `nodesOf(..)` is typed on the class you passed it, the
 rules inside a `Department` block still receive a `Department` and not an `Object`.
 
-When several types share behaviour, declare it once and refine it where it differs —
+When several types share behaviour, declare it once and let the types that differ say so —
 the most specific rule for a node's type wins:
 
 ```java
-conf.nodesOf( it -> it.text(Packed::label) )               // everything has a label
-    .nodesOf(Box.class, it -> it.children(Box::contents))  // and boxes hold things
+conf.nodesOf( it -> it.text(Packed::label) )               // items are labelled by this...
+    .nodesOf(Box.class, it -> it.children(Box::contents)   // ...and boxes by their own block,
+                                .text(Box::label))         //    which has to say so itself
 ```
+
+Note the repeated `text(..)`. **The winning rule is chosen, not merged**: a block for one
+type is the whole answer for that type, so it does not inherit anything from the catch-all
+above it. A `nodesOf(..)` block reads like one `case` of a `switch`, and a `case` does not
+quietly continue into another one. Leave the `text(..)` off the `Box` block and boxes lose
+their labels to `toString()`.
 
 ---
 
@@ -394,6 +411,12 @@ paths are an internal matter and never surface — which is also why
 `JTree.getLastSelectedPathComponent()` is not a useful thing to call on a bound tree.
 Use `onSelection(..)`, or the bound property, and you will never want it.
 
+The two ways of saying how a node looks mix freely. A type no `when(..)` clause mentions
+keeps whatever its own `text(..)`, `icon(..)` and `toolTip(..)` say, so reaching for
+`withCells(..)` to give *one* case a real component does not cost you the labels of all the
+others. (`withCellRenderer(..)` is the blunt version and does: a renderer installed that way
+answers for every node, and the rules step aside.)
+
 Styling the tree itself is styling like anywhere else:
 
 ```java
@@ -408,6 +431,10 @@ bound tree always has exactly one root — and that root is very often a contain
 nobody needs to see. Hiding it turns your single rooted value into what looks like a
 forest of its children, and turns the top-level handles on so they can still be
 opened.
+
+A property may also hold *nothing*, which a `Var.ofNullable(Packed.class, null)` does while
+the move is still being loaded. That is an empty tree: no root, no rows, and no placeholder
+row reading `null`. It fills in the moment the property does.
 
 ---
 

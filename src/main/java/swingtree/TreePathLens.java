@@ -8,7 +8,6 @@ import sprouts.Tuple;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -25,9 +24,10 @@ import java.util.concurrent.atomic.AtomicReference;
  *  <p>
  *  Two properties of this lens matter a great deal:
  *  <ul>
- *      <li><b>It never touches the UI.</b> Resolving a focus needs nothing but the root
- *      <i>value</i>, so this lens may be evaluated on any thread. That is essential, because
- *      it runs whenever the root property changes, which under a decoupled UI happens on the
+ *      <li><b>It never touches the UI, nor anything the UI thread owns.</b> Resolving a focus
+ *      needs nothing but the root <i>value</i> and the {@link TreeConf}, whose rule lookup is
+ *      concurrent, so this lens may be evaluated on any thread. That is essential, because it
+ *      runs whenever the root property changes, which under a decoupled UI happens on the
  *      application thread.</li>
  *      <li><b>It fails softly.</b> A node that has vanished from the tree (deleted, moved
  *      into a branch whose rule has no wither, ...) yields the last value this lens did
@@ -36,21 +36,19 @@ import java.util.concurrent.atomic.AtomicReference;
  *      nothing. The very same policy is what the tuple item lens follows.</li>
  *  </ul>
  *
+ * @param <I> The identity type of the nodes, which the path is made of.
  * @param <N> The common node type of the tree.
  */
 final class TreePathLens<I, N> implements Lens<N, N>
 {
     private static final Logger log = LoggerFactory.getLogger(TreePathLens.class);
 
-    private final TreeConf<I, N>             _conf;
-    private final Map<Class<?>, Object>      _ruleCache;
-    private final Object[]                   _idPath;
+    private final TreeConf<I, N>               _conf;
+    private final Object[]                     _idPath;
     private final AtomicReference<@Nullable N> _lastResolved;
-    private boolean                          _warnedAboutReadOnlyWrite = false;
 
-    TreePathLens( TreeConf<I, N> conf, Map<Class<?>, Object> ruleCache, Object[] idPath, @Nullable N initial ) {
+    TreePathLens( TreeConf<I, N> conf, Object[] idPath, @Nullable N initial ) {
         _conf         = Objects.requireNonNull(conf);
-        _ruleCache    = Objects.requireNonNull(ruleCache);
         _idPath       = Objects.requireNonNull(idPath);
         _lastResolved = new AtomicReference<>(initial);
     }
@@ -106,7 +104,7 @@ final class TreePathLens<I, N> implements Lens<N, N>
             return null; // A different root entirely, so this path means nothing in it.
         Object current = rootValue;
         for ( int level = 1; level < _idPath.length; level++ ) {
-            TreeNodeConf<N, ?> rule = _conf.ruleFor(current, _ruleCache);
+            TreeNodeConf<N, ?> rule = _conf.ruleFor(current);
             if ( rule == null || !rule.hasChildrenRule() )
                 return null;
             Tuple<Object> children = rule.childrenOf(current);
@@ -130,7 +128,7 @@ final class TreePathLens<I, N> implements Lens<N, N>
         List<Step> steps = new ArrayList<>(_idPath.length - 1);
         Object current = rootValue;
         for ( int level = 1; level < _idPath.length; level++ ) {
-            TreeNodeConf<N, ?> rule = _conf.ruleFor(current, _ruleCache);
+            TreeNodeConf<N, ?> rule = _conf.ruleFor(current);
             if ( rule == null || !rule.hasChildrenRule() )
                 return null;
             Tuple<Object> children = rule.childrenOf(current);
@@ -150,21 +148,22 @@ final class TreePathLens<I, N> implements Lens<N, N>
         return -1;
     }
 
+    /**
+     *  Complains about a branch which has no wither to carry a write back up, once per
+     *  branch type and tree shape. The dedup lives on the configuration rather than on
+     *  this lens, because a lens is built afresh for every single edit, so a per lens
+     *  flag would repeat the same complaint on every keystroke that ends an edit.
+     */
     private void _warnAboutReadOnlyBranch( Step step ) {
-        if ( _warnedAboutReadOnlyBranch() )
+        Class<?> branchType = step.parent.getClass();
+        if ( !_conf.shouldWarnAbout(branchType) )
             return;
         log.warn(SwingTree.get().logMarker(),
             "Dropping a write to a tree node, because the branch of type '{}' above it was declared " +
             "with a read only 'children(getter)' rule. Declare it as 'children(getter, wither)' to " +
             "let edits below it travel back up into the bound property.",
-            step.parent.getClass().getSimpleName()
+            branchType.getSimpleName()
         );
-    }
-
-    private boolean _warnedAboutReadOnlyBranch() {
-        boolean warned = _warnedAboutReadOnlyWrite;
-        _warnedAboutReadOnlyWrite = true;
-        return warned;
     }
 
     /** One level of the descent from the root down to the focused node. */

@@ -29,10 +29,22 @@ import java.util.Optional;
  */
 public final class TreeSelectionDelegate<I, N>
 {
-    private final JTree                 _tree;
+    /*
+        Everything below is read once, on the UI thread, in the constructor. An action is
+        delivered on the application thread, and the node handles a bound tree keeps are
+        owned by the UI thread: reading them from here later would be a race under
+        EventProcessor.DECOUPLED. Node values and ids are deeply immutable, so a snapshot
+        of them is safe to hand across without a copy, and the lens property is built from
+        a path of ids which is immutable too.
+    */
+    private final JTree                   _tree;
     private final PropertyTreeModel<I, N> _model;
-    private final @Nullable TreePath    _leadPath;
-    private final TreePath[]            _selectedPaths;
+    private final @Nullable N             _lead;
+    private final @Nullable Object[]      _leadIdPath;
+    private final Tuple<N>                _selection;
+    private final Tuple<N>                _pathToLead;
+    private final Tuple<I>                _leadPath;
+    private final Tuple<Tuple<I>>         _selectionPaths;
 
     TreeSelectionDelegate(
         JTree                 tree,
@@ -40,10 +52,49 @@ public final class TreeSelectionDelegate<I, N>
         @Nullable TreePath    leadPath,
         @Nullable TreePath[]  selectedPaths
     ) {
-        _tree          = Objects.requireNonNull(tree);
-        _model         = Objects.requireNonNull(model);
-        _leadPath      = leadPath;
-        _selectedPaths = ( selectedPaths == null ? new TreePath[0] : selectedPaths );
+        _tree           = Objects.requireNonNull(tree);
+        _model          = Objects.requireNonNull(model);
+        TreePath[] paths = ( selectedPaths == null ? new TreePath[0] : selectedPaths );
+        Class<N> nodeType = model.conf().nodeType();
+        Class<I> idType   = model.idType();
+
+        _lead       = _nodeOf(model, leadPath);
+        _leadIdPath = _idPathOf(leadPath);
+        _leadPath   = model.idTupleOf(leadPath, idType);
+
+        List<N> selected = new ArrayList<>(paths.length);
+        List<Tuple<I>> selectedIds = new ArrayList<>(paths.length);
+        for ( TreePath path : paths ) {
+            N node = _nodeOf(model, path);
+            if ( node != null )
+                selected.add(node);
+            selectedIds.add(model.idTupleOf(path, idType));
+        }
+        _selection      = Tuple.of(nodeType, selected);
+        _selectionPaths = Tuple.of(Tuple.classTyped(idType), selectedIds);
+
+        List<N> trail = new ArrayList<>();
+        if ( leadPath != null )
+            for ( Object component : leadPath.getPath() ) {
+                Object value = model.valueOf(component);
+                if ( value != null )
+                    trail.add(nodeType.cast(value));
+            }
+        _pathToLead = Tuple.of(nodeType, trail);
+    }
+
+    private static @Nullable Object[] _idPathOf( @Nullable TreePath path ) {
+        if ( path == null )
+            return null;
+        Object last = path.getLastPathComponent();
+        return ( last instanceof TreeNodeRef ? ((TreeNodeRef) last).idPath() : null );
+    }
+
+    private static <I, N> @Nullable N _nodeOf( PropertyTreeModel<I, N> model, @Nullable TreePath path ) {
+        if ( path == null )
+            return null;
+        Object value = model.valueOf(path.getLastPathComponent());
+        return ( value == null ? null : model.conf().nodeType().cast(value) );
     }
 
     /**
@@ -60,7 +111,7 @@ public final class TreeSelectionDelegate<I, N>
      *  @return The node the selection now leads with.
      */
     public Optional<N> lead() {
-        return Optional.ofNullable(_nodeOf(_leadPath));
+        return Optional.ofNullable(_lead);
     }
 
     /**
@@ -69,13 +120,7 @@ public final class TreeSelectionDelegate<I, N>
      *  @return All selected nodes.
      */
     public Tuple<N> selection() {
-        List<N> nodes = new ArrayList<>(_selectedPaths.length);
-        for ( TreePath path : _selectedPaths ) {
-            N node = _nodeOf(path);
-            if ( node != null )
-                nodes.add(node);
-        }
-        return Tuple.of(_model.conf().nodeType(), nodes);
+        return _selection;
     }
 
     /**
@@ -85,15 +130,7 @@ public final class TreeSelectionDelegate<I, N>
      *  @return The nodes leading from the root to the selected node.
      */
     public Tuple<N> pathToLead() {
-        List<N> nodes = new ArrayList<>();
-        TreePath path = _leadPath;
-        if ( path != null )
-            for ( Object component : path.getPath() ) {
-                Object value = _model.valueOf(component);
-                if ( value != null )
-                    nodes.add(_model.conf().nodeType().cast(value));
-            }
-        return Tuple.of(_model.conf().nodeType(), nodes);
+        return _pathToLead;
     }
 
     /**
@@ -109,7 +146,7 @@ public final class TreeSelectionDelegate<I, N>
      *  @return The ids leading to the selected node.
      */
     public Tuple<I> leadPath() {
-        return _model.idTupleOf(_leadPath, _model.idType());
+        return _leadPath;
     }
 
     /**
@@ -119,11 +156,7 @@ public final class TreeSelectionDelegate<I, N>
      *  @return One path of ids per selected node.
      */
     public Tuple<Tuple<I>> selectionPaths() {
-        Class<I> idType = _model.idType();
-        List<Tuple<I>> paths = new ArrayList<>(_selectedPaths.length);
-        for ( TreePath path : _selectedPaths )
-            paths.add(_model.idTupleOf(path, idType));
-        return Tuple.of(Tuple.classTyped(idType), paths);
+        return _selectionPaths;
     }
 
     /**
@@ -137,24 +170,17 @@ public final class TreeSelectionDelegate<I, N>
      *  @return A lens property onto the selected node.
      */
     public Optional<Var<N>> property() {
-        TreePath path = _leadPath;
-        if ( path == null )
+        Object[] idPath = _leadIdPath;
+        if ( idPath == null )
             return Optional.empty();
-        return Optional.ofNullable(_model.propertyFor(path.getLastPathComponent()));
-    }
-
-    private @Nullable N _nodeOf( @Nullable TreePath path ) {
-        if ( path == null )
-            return null;
-        Object value = _model.valueOf(path.getLastPathComponent());
-        return ( value == null ? null : _model.conf().nodeType().cast(value) );
+        return Optional.ofNullable(_model.propertyFor(idPath, _lead));
     }
 
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "[" +
-                    "lead="      + lead().map(String::valueOf).orElse("none") + ", " +
-                    "selection=" + selection().size() + " node(s)" +
+                    "lead="      + ( _lead == null ? "none" : String.valueOf(_lead) ) + ", " +
+                    "selection=" + _selection.size() + " node(s)" +
                 "]";
     }
 }

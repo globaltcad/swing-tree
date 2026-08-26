@@ -1262,7 +1262,7 @@ UI.tree(fileSystem, conf -> conf                       // Var<FsNode>
     )
     .nodesOf(Doc.class, it -> it.text(Doc::name))      // no children rule ⇒ a leaf
 )
-.withSelection(selectedNode)                           // Var<FsNode>, two-way, null = none
+.withSelection(selectedPath)                           // Var<Tuple<String>>: a PATH of ids, two-way
 .withRootVisible(false).withInitialExpansionDepth(2);
 ```
 
@@ -1292,9 +1292,21 @@ lens and therefore two-way.** Same rule as `Var.zoomTo(..)`, applied per node ty
 - **A children rule is what makes a type a branch**; a type without one is a leaf, and a
   branch stays a branch while empty (`leafWhenEmpty(true)` opts out). Use
   `isLeaf(false)` for a branch that is not loaded *yet*.
-- **Heterogeneous trees**: name the common supertype —
-  `UI.tree(Object.class, company, conf -> conf.nodesOf(Company.class, ..)...)`. Children
-  may be a different type from the node.
+- **The most specific rule is chosen, never merged.** A `nodesOf(Dir.class, ..)` block does
+  *not* inherit the `text(..)` of a catch-all `nodesOf(..)` block above it — a block reads
+  like one `case`, and a `case` does not fall into another. Restate what you want to keep.
+- **`withCells(..)` mixes with the rules**: a node type no `when(..)` clause covers keeps its
+  own `text(..)` / `icon(..)` / `toolTip(..)`. A plain `withCellRenderer(..)` does not — it
+  answers for every node and the rules no longer apply.
+- **Sibling ids must be unique.** Two children of one node sharing an id are one position, so
+  one is drawn twice and the other never; SwingTree logs a warning naming the id.
+- **An empty property is an empty tree**: a `Var.ofNullable(N.class, null)` root gives a tree
+  with no root and no rows, and it fills in when the property does.
+- **Heterogeneous trees**: name the common supertype **and** the id type, because types you
+  do not own cannot implement `HasId` —
+  `UI.tree(Object.class, String.class, company, conf -> conf.idOf(..).nodesOf(Company.class, ..)...)`.
+  (The 2/3-arg overloads require `N extends HasId<I>`, so `Object.class` will not compile with
+  them.) Children may be a different type from the node.
 - **A forgotten `nodesOf(..)` is not a compile error** (Java 8 target): the node becomes
   a leaf labelled by `toString()` and SwingTree logs a warning naming the type.
 - **Editing needs both** a mutable `Var` *and* a `text(getter, wither)` rule; and every
