@@ -874,12 +874,10 @@ public final class ComponentExtension<C extends JComponent>
 
         try {
             if ( isNewPaintCycle && step == PaintStep.BACKGROUND && _hasChildWithParentFilter() ) {
-                int w = _owner.getWidth();
-                int h = _owner.getHeight();
-                _bufferedImage = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
-                _renderInto(_bufferedImage, step, graphics, superPaint);
+                _bufferedImage = _bufferTheSizeOfThisComponent(_bufferedImage);
+                _renderInto(_bufferedImage, step, graphics, superPaint, true);
             } else if ( _bufferedImage != null && step == PaintStep.BORDER ) {
-                _renderInto(_bufferedImage, step, graphics, superPaint);
+                _renderInto(_bufferedImage, step, graphics, superPaint, false);
             } else {
                 superPaint.accept((Graphics2D) graphics);
             }
@@ -888,14 +886,38 @@ public final class ComponentExtension<C extends JComponent>
         }
     }
 
-    private void _renderInto(BufferedImage buffer, PaintStep step, Graphics graphics, Consumer<Graphics2D> superPaint ) {
+    /**
+     *  Updates or creates the buffer a component's children read when applying a filter (like convolution).
+     *  It is re-used if possible...
+     */
+    private BufferedImage _bufferTheSizeOfThisComponent( @Nullable BufferedImage existing ) {
+        int width  = _owner.getWidth();
+        int height = _owner.getHeight();
+        if ( existing != null && existing.getWidth() == width && existing.getHeight() == height )
+            return existing;
+        return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    }
+
+    private void _renderInto(
+        BufferedImage buffer, PaintStep step, Graphics graphics,
+        Consumer<Graphics2D> superPaint, boolean startsANewFrame
+    ) {
         Graphics2D bufferGraphics = buffer.createGraphics();
         StyleUtil.transferConfigurations((Graphics2D) graphics, bufferGraphics);
         bufferGraphics.setClip(graphics.getClip());
         try {
+            if ( startsANewFrame ) {
+                // We re-use the parent buffer if possible, so we need to wipe it (mostly if the parent is non-opaque).
+                Composite formerComposite = bufferGraphics.getComposite();
+                bufferGraphics.setComposite(AlphaComposite.Clear);
+                bufferGraphics.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());
+                bufferGraphics.setComposite(formerComposite);
+            }
             superPaint.accept(bufferGraphics);
         } catch ( Exception e ) {
             log.error(SwingTree.get().logMarker(), "Error while painting step '"+step+"' into component buffer!", e);
+        } finally {
+            bufferGraphics.dispose();
         }
         graphics.drawImage(buffer, 0, 0, null);
     }
