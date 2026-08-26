@@ -13,6 +13,7 @@ import swingtree.api.IconDeclaration;
 
 import javax.swing.Icon;
 import javax.swing.JTree;
+import javax.swing.ToolTipManager;
 import javax.swing.tree.DefaultTreeCellEditor;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellEditor;
@@ -21,6 +22,7 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.Component;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.EventObject;
 import java.util.List;
@@ -109,7 +111,7 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
      *  Binds the selected position of the tree to a mutable property holding a
      *  <b>path of ids</b>, which keeps the two in sync in both directions: selecting a node
      *  writes the path leading to it into the property, and assigning a path selects the
-     *  node it names.
+     *  node it names, opening every branch above it and scrolling it into view.
      *  <pre>{@code
      *  Var<Tuple<String>> selectedPath = vm.zoomTo(Move::selectedPath, Move::withSelectedPath);
      *
@@ -495,6 +497,7 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
                     model.attachTo(thisComponent);
                     thisComponent.setModel(model);
                     thisComponent.setCellRenderer(new DefaultBoundRenderer<>(model));
+                    ToolTipManager.sharedInstance().registerComponent(thisComponent);
                     if ( model.isWritable() && conf.hasRenamableRule() ) {
                         thisComponent.setEditable(true);
                         thisComponent.setCellEditor(new BoundCellEditor<>(
@@ -677,8 +680,8 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
      *  The in place rename editor a bound tree installs when at least one node type declares
      *  a text wither. It differs from the plain Swing editor in exactly two places: it opens
      *  showing the text the node's own {@code text(..)} rule produces rather than the node's
-     *  {@code toString()}, and it refuses to open at all on a node type which declared no
-     *  wither to write the result back through.
+     *  {@code toString()}, and it refuses to open on a node the user pointed at whose type
+     *  declared no wither to write the result back through.
      */
     private static final class BoundCellEditor<I, N> extends DefaultTreeCellEditor
     {
@@ -705,11 +708,22 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
         public boolean isCellEditable( EventObject event ) {
             if ( !super.isCellEditable(event) )
                 return false;
-            TreePath path = lastPath;
+            TreePath path = _pathTargetedBy(event);
             if ( path == null )
-                return false;
+                return true;
             TreeNodeConf<N, ?> rule = _model.ruleOf(path.getLastPathComponent());
             return rule != null && rule.isRenamable();
+        }
+
+        private @Nullable TreePath _pathTargetedBy( @Nullable EventObject event ) {
+            if ( event instanceof MouseEvent && event.getSource() instanceof JTree ) {
+                MouseEvent click = (MouseEvent) event;
+                TreePath clicked = ((JTree) event.getSource())
+                                        .getPathForLocation(click.getX(), click.getY());
+                if ( clicked != null )
+                    return clicked;
+            }
+            return lastPath;
         }
     }
 }

@@ -179,10 +179,7 @@ public final class TreeConf<I, N>
             return this;
         }
         Objects.requireNonNull(nodeConf);
-        Association<Class<?>, TreeNodeConf<N, ?>> rules = _rules;
-        if ( rules.containsKey(type) )
-            rules = rules.remove(type);
-        return new TreeConf<>(_nodeType, _idType, rules.put(type, nodeConf), _idGetter, _leafWhenEmpty);
+        return new TreeConf<>(_nodeType, _idType, _rules.put(type, nodeConf), _idGetter, _leafWhenEmpty);
     }
 
     /**
@@ -241,14 +238,16 @@ public final class TreeConf<I, N>
      *  Val<FsNode> selectedNode = Viewable.of(fileSystem, selectedPath,
      *                                  (root, path) -> conf.nodeAt(root, path).orElse(null));
      *  }</pre>
-     *  The result is empty for the empty path (nothing is selected) and for a path which no
-     *  longer leads anywhere, which is what a path pointing into a since-deleted branch does.
+     *  The result is empty for the empty path (nothing is selected), for a path which no
+     *  longer leads anywhere, which is what a path pointing into a since-deleted branch does,
+     *  and for a root which is {@code null}, which is what a property holding nothing is.
      *
-     * @param root The root value of the tree, which is what the path is relative to.
+     * @param root The root value of the tree, which is what the path is relative to,
+     *             or {@code null} where the property holding it is empty.
      * @param path The ids leading from the root down to the node, the root's own id first.
      * @return The node at that path, or an empty optional if the path names nothing.
      */
-    public Optional<N> nodeAt( N root, Tuple<I> path ) {
+    public Optional<N> nodeAt( @Nullable N root, Tuple<I> path ) {
         Tuple<N> along = nodesAlong(root, path);
         return ( along.isEmpty() ? Optional.empty() : Optional.of(along.last()) );
     }
@@ -264,11 +263,12 @@ public final class TreeConf<I, N>
      *  The result is empty when the path names nothing, so a partial trail is never
      *  returned: either the whole path resolves or none of it does.
      *
-     * @param root The root value of the tree, which is what the path is relative to.
+     * @param root The root value of the tree, which is what the path is relative to,
+     *             or {@code null} where the property holding it is empty.
      * @param path The ids leading from the root down to the node, the root's own id first.
      * @return Every node from the root down to the named one, or an empty tuple.
      */
-    public Tuple<N> nodesAlong( N root, Tuple<I> path ) {
+    public Tuple<N> nodesAlong( @Nullable N root, Tuple<I> path ) {
         Tuple<N> empty = Tuple.of(_nodeType);
         if ( path.isEmpty() || root == null )
             return empty;

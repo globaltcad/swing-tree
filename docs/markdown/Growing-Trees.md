@@ -172,7 +172,8 @@ UI.tree(move, conf -> ..)
 ```
 
 Both directions, no listener. Clicking a box writes into the property; assigning to the
-property selects a row and scrolls it into view.
+property opens whatever boxes stood closed above the one it names, selects its row and
+scrolls it into view.
 
 But look at what the property holds. Not a box — **a path of ids**, leading from the root
 down to whatever is selected:

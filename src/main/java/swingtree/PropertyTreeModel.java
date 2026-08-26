@@ -134,21 +134,12 @@ final class PropertyTreeModel<I, N> implements TreeModel
 
     /**
      *  A writable property focused on one single node of the tree, which is what makes an
-     *  edit anywhere in the structure produce one new root value. Returns an empty optional
-     *  when the tree was bound read only, because there is then nothing to write into.
-     */
-    @Nullable Var<N> propertyFor( @Nullable Object node ) {
-        if ( !(node instanceof TreeNodeRef) )
-            return null;
-        TreeNodeRef ref = (TreeNodeRef) node;
-        return propertyFor(ref.idPath(), _conf.nodeType().cast(valueOf(ref)));
-    }
-
-    /**
-     *  The same lens property, built from a path of ids and a node value which the caller
-     *  already holds. This is what lets a delegate read everything it needs on the UI
-     *  thread and then hand out the property from the application thread, without ever
-     *  reaching back into this model's UI thread owned handles.
+     *  edit anywhere in the structure produce one new root value. It is built from a path of
+     *  ids and a node value which the caller already holds, so that a delegate can read
+     *  everything it needs on the UI thread and then hand out the property from the
+     *  application thread, without ever reaching back into this model's UI thread owned
+     *  handles. Returns {@code null} when the tree was bound read only, because there is
+     *  then nothing to write into.
      */
     @Nullable Var<N> propertyFor( Object[] idPath, @Nullable N value ) {
         Var<N> writable = _writableRoot;
@@ -225,6 +216,8 @@ final class PropertyTreeModel<I, N> implements TreeModel
     @Override
     public void valueForPathChanged( TreePath path, Object newValue ) {
         Object last = path.getLastPathComponent();
+        if ( !(last instanceof TreeNodeRef) )
+            return;
         Object value = valueOf(last);
         TreeNodeConf<N, ?> rule = _conf.ruleFor(value);
         Var<N> writable = _writableRoot;
@@ -672,19 +665,14 @@ final class PropertyTreeModel<I, N> implements TreeModel
         if ( derived != null )
             return derived;
         @Nullable N snapshot = _snapshot;
-        Class<?> found = Object.class;
-        if ( snapshot != null ) {
-            Object id = _conf.idOf(snapshot);
-            if ( id != null ) {
-                Class<?> c = id.getClass();
-                while ( c.isAnonymousClass() || c.isSynthetic() ) {
-                    Class<?> parent = c.getSuperclass();
-                    if ( parent == null )
-                        break;
-                    c = parent;
-                }
-                found = c;
-            }
+        if ( snapshot == null )
+            return (Class<I>) (Class<?>) Object.class;
+        Class<?> found = _conf.idOf(snapshot).getClass();
+        while ( found.isAnonymousClass() || found.isSynthetic() ) {
+            Class<?> parent = found.getSuperclass();
+            if ( parent == null )
+                break;
+            found = parent;
         }
         _derivedIdType = (Class<I>) found;
         return _derivedIdType;

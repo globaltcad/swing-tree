@@ -13,6 +13,8 @@ import utility.LogSpy
 import utility.SwingTreeTestConfigurator
 
 import javax.swing.JTree
+import javax.swing.ToolTipManager
+import java.awt.event.MouseEvent
 
 import static swingtree.TreeSpecFileSystem.dir
 import static swingtree.TreeSpecFileSystem.doc
@@ -255,6 +257,11 @@ class Tree_Binding_Spec extends Specification
 
             Declaring it per node type is what lets a folder and a document look different
             without a single `if` in a renderer.
+
+            A tool tip needs one thing beyond the renderer to actually appear: a `JTree`
+            shows the tips of its renderer only if it is registered with Swing's
+            `ToolTipManager`, which it is not by default. A bound tree registers itself, so
+            a declared `toolTip(..)` is a tip the user really sees.
         """
         given : 'Two icon declarations, one per node type.'
             IconDeclaration folderIcon = { "img/two_16th_notes.svg" }
@@ -282,6 +289,16 @@ class Tree_Binding_Spec extends Specification
             view.getIcon() != null
         and : '...and so did the tool tip, which reads off the node it belongs to.'
             view.getToolTipText() == "A folder holding 1 entries"
+        and : 'The tree registered itself with the tool tip manager, without which nothing would show.'
+            tree.getMouseListeners().any({ it instanceof ToolTipManager })
+        and : 'So the tree answers a pointer resting over the root row with that very text.'
+            UI.runAndGet({
+                tree.setSize(200, 100)
+                tree.doLayout()
+                var bounds = tree.getRowBounds(0)
+                tree.getToolTipText(new MouseEvent(tree, MouseEvent.MOUSE_MOVED, 0, 0,
+                                        (int)(bounds.x + 2), (int)(bounds.y + 2), 0, false))
+            }) == "A folder holding 1 entries"
     }
 
     def 'The most specific rule wins, so a general rule can be refined for one type.'()

@@ -546,6 +546,41 @@ class Tree_Selection_And_Editing_Spec extends Specification
             visibleRows(tree) == ["workspace", "    notes.txt"]
     }
 
+    def 'An editor is offered for the node the edit is aimed at, not for the selected one.'()
+    {
+        reportInfo """
+            Whether a node may be renamed is a question about *that* node, so it is asked of
+            the node an edit is aimed at rather than of whatever happens to be selected at the
+            time. A plain `JTree` lets `startEditingAtPath(..)` open an editor on a tree with
+            no selection at all, and a bound tree does too.
+        """
+        given : 'A tree in which directories can be renamed.'
+            var fileSystem = Var.of(FsNode, dir("r", "root", doc("a", "notes.txt")))
+            var tree =
+                    UI.tree(FsNode, fileSystem, { conf -> conf
+                        .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })
+                                          .text({ Dir d -> d.name() }, { Dir d, String t -> d.withName(t) }) })
+                        .nodesOf(Doc, { it.text({ Doc d -> d.name() }, { Doc d, String t -> d.withName(t) }) })
+                    })
+                    .get(JTree)
+
+        when : 'An edit is started on a row while nothing at all is selected.'
+            var editing = UI.runAndGet({
+                tree.setSize(220, 120)
+                tree.doLayout()
+                tree.expandRow(0)
+                tree.clearSelection()
+                tree.startEditingAtPath(tree.getPathForRow(1))
+                return [ tree.isEditing(), tree.getEditingPath() == tree.getPathForRow(1) ]
+            })
+
+        then : 'The editor opened, and on that very row.'
+            editing == [true, true]
+
+        cleanup :
+            UI.runNow({ tree.stopEditing() })
+    }
+
     def 'A tree bound to a read only property refuses edits outright.'()
     {
         reportInfo """
