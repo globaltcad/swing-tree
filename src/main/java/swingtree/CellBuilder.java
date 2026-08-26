@@ -76,6 +76,9 @@ public final class CellBuilder<C extends JComponent, E> {
     static <E> CellBuilder<JTable,E> forTable(Class<E> elementType) {
         return (CellBuilder) new CellBuilder<>(JTable.class, elementType);
     }
+    static <E> CellBuilder<JTree,E> forTree(Class<E> elementType) {
+        return (CellBuilder) new CellBuilder<>(JTree.class, elementType);
+    }
 
     private CellBuilder(Class<C> componentType, Class<E> elementType) {
         _state = new BuiltCells<>(componentType, elementType);

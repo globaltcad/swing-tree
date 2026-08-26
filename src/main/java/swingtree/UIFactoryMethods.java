@@ -5676,6 +5676,251 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     public static <E> UIForList<E, JList<E>> listOf( java.util.List<E> entries ) { return list( entries ); }
 
     /**
+     *  Allows you to wrap the provided {@link JTree} type in a declarative UI builder.
+     *  A tree wrapped like this keeps whatever {@link javax.swing.tree.TreeModel} it
+     *  already has; use {@link #tree(Var, Configurator)} to bind one to a property instead.
+     *
+     * @param tree The tree which should be wrapped by the builder.
+     * @param <T> The {@link JTree} type.
+     * @return A builder instance for the provided {@link JTree}.
+     */
+    public static <T extends JTree> UIForTree<Object, Object, T> of( T tree ) {
+        NullUtil.nullArgCheck(tree, "tree", JTree.class);
+        return new UIForTree<>(new BuilderState<>(tree), null);
+    }
+
+    /**
+     *  Creates a declarative builder for a {@link JTree} bound to a single property holding
+     *  a deeply immutable, nested data structure, together with a {@link TreeConf} saying
+     *  which parts of that structure the tree should zoom into.
+     *  <p>
+     *  This is the recommended way to build a tree in SwingTree. The bound value is the
+     *  whole tree, the {@link Configurator} declares one rule block per node type, and both
+     *  the structure and the labels become editable the moment a rule is given a wither
+     *  alongside its getter:
+     *  <pre>{@code
+     *  public sealed interface FsNode extends HasId<String> { String name(); }
+     *  public record Dir( String id, String name, Tuple<FsNode> entries ) implements FsNode {}
+     *  public record Doc( String id, String name, String body )           implements FsNode {}
+     *
+     *  Var<FsNode> fileSystem = Var.of(FsNode.class, loadFileSystem());
+     *
+     *  UI.tree(fileSystem, conf -> conf
+     *      .nodesOf(Dir.class, dir -> dir
+     *          .children(Dir::entries, Dir::withEntries)
+     *          .text(Dir::name, Dir::withName)
+     *      )
+     *      .nodesOf(Doc.class, doc -> doc.text(Doc::name))
+     *  );
+     *  }</pre>
+     *  Because the bound value is deeply immutable, the tree is thread safe by construction:
+     *  the property value <i>is</i> the UI thread's snapshot, nothing is copied, and an edit
+     *  made in the tree travels back into the property on the application thread.
+     *  <p>
+     *  The identity type {@code I} is taken from the node type's {@link HasId} bound, which
+     *  is what selection paths are made of. Use
+     *  {@link #tree(Class, Class, Var, Configurator)} for node types which cannot implement
+     *  {@link HasId}, and declare their identity with {@link TreeConf#idOf(java.util.function.Function)}.
+     *
+     * @param root A mutable property holding the root of the tree.
+     * @param conf Declares which parts of the structure are the tree's children, and how nodes are shown.
+     * @param <I> The identity type of the nodes, which selection paths are made of.
+     * @param <N> The common node type of the tree.
+     * @return A builder instance for a new {@link JTree}.
+     */
+    public static <I, N extends HasId<I>> UIForTree<I, N, UI.Tree> tree(
+        Var<N> root, Configurator<TreeConf<I, N>> conf
+    ) {
+        NullUtil.nullArgCheck(root, "root", Var.class);
+        NullUtil.nullArgCheck(conf, "conf", Configurator.class);
+        return _tree(root.type(), null, root, conf, true);
+    }
+
+    /**
+     *  Creates a declarative builder for a {@link JTree} bound to a read only property,
+     *  which gives a tree the user may browse and select in, but not edit.
+     *  <p>
+     *  Note that the overload you pick is what expresses your intent: a read only
+     *  {@link Val} always yields a read only tree, even where the reference happens to point
+     *  at a {@link Var} at runtime, which is what a view model exposing its {@code Var} as a
+     *  {@code Val} does.
+     *
+     * @param root A read only property holding the root of the tree.
+     * @param conf Declares which parts of the structure are the tree's children, and how nodes are shown.
+     * @param <I> The identity type of the nodes, which selection paths are made of.
+     * @param <N> The common node type of the tree.
+     * @return A builder instance for a new {@link JTree}.
+     */
+    public static <I, N extends HasId<I>> UIForTree<I, N, UI.Tree> tree(
+        Val<N> root, Configurator<TreeConf<I, N>> conf
+    ) {
+        NullUtil.nullArgCheck(root, "root", Val.class);
+        NullUtil.nullArgCheck(conf, "conf", Configurator.class);
+        return _tree(root.type(), null, root, conf, false);
+    }
+
+    /**
+     *  Creates a declarative builder for a {@link JTree} bound to a property, with the
+     *  common node type named explicitly. Reach for this when the property's own type is
+     *  narrower than the tree's nodes are, which happens whenever the root is one concrete
+     *  case of a wider node type.
+     *
+     * @param nodeType The common supertype of every node in the tree.
+     * @param root A mutable property holding the root of the tree.
+     * @param conf Declares which parts of the structure are the tree's children, and how nodes are shown.
+     * @param <I> The identity type of the nodes, which selection paths are made of.
+     * @param <N> The common node type of the tree.
+     * @return A builder instance for a new {@link JTree}.
+     */
+    public static <I, N extends HasId<I>> UIForTree<I, N, UI.Tree> tree(
+        Class<N> nodeType, Var<N> root, Configurator<TreeConf<I, N>> conf
+    ) {
+        NullUtil.nullArgCheck(nodeType, "nodeType", Class.class);
+        NullUtil.nullArgCheck(root, "root", Var.class);
+        NullUtil.nullArgCheck(conf, "conf", Configurator.class);
+        return _tree(nodeType, null, root, conf, true);
+    }
+
+    /**
+     *  Creates a declarative builder for a {@link JTree} bound to a read only property, with
+     *  the common node type named explicitly. See {@link #tree(Val, Configurator)} for what
+     *  binding read only means.
+     *
+     * @param nodeType The common supertype of every node in the tree.
+     * @param root A read only property holding the root of the tree.
+     * @param conf Declares which parts of the structure are the tree's children, and how nodes are shown.
+     * @param <I> The identity type of the nodes, which selection paths are made of.
+     * @param <N> The common node type of the tree.
+     * @return A builder instance for a new {@link JTree}.
+     */
+    public static <I, N extends HasId<I>> UIForTree<I, N, UI.Tree> tree(
+        Class<N> nodeType, Val<N> root, Configurator<TreeConf<I, N>> conf
+    ) {
+        NullUtil.nullArgCheck(nodeType, "nodeType", Class.class);
+        NullUtil.nullArgCheck(root, "root", Val.class);
+        NullUtil.nullArgCheck(conf, "conf", Configurator.class);
+        return _tree(nodeType, null, root, conf, false);
+    }
+
+    /**
+     *  Creates a declarative builder for a {@link JTree} whose node types cannot implement
+     *  {@link HasId}, by naming both the common node type and the identity type explicitly.
+     *  Their identity is then declared with {@link TreeConf#idOf(java.util.function.Function)}.
+     *  <p>
+     *  This is what a tree whose levels are unrelated types needs, because there the type of
+     *  the root says nothing about the type of the nodes below it, and nothing in the chain
+     *  is yours to add an interface to:
+     *  <pre>{@code
+     *  UI.tree(Object.class, String.class, company, conf -> conf
+     *      .idOf( node -> node instanceof Department d ? d.code() : "company" )
+     *      .nodesOf(Company.class,    c -> c.children(Company::departments).text(Company::name))
+     *      .nodesOf(Department.class, d -> d.children(Department::staff).text(Department::name))
+     *      .nodesOf(Employee.class,   e -> e.text(Employee::name))
+     *  );
+     *  }</pre>
+     *
+     * @param nodeType The common supertype of every node in the tree.
+     * @param idType The type of the node identities, which selection paths are made of.
+     * @param root A mutable property holding the root of the tree.
+     * @param conf Declares which parts of the structure are the tree's children, and how nodes are shown.
+     * @param <I> The identity type of the nodes.
+     * @param <N> The common node type of the tree.
+     * @return A builder instance for a new {@link JTree}.
+     */
+    public static <I, N> UIForTree<I, N, UI.Tree> tree(
+        Class<N> nodeType, Class<I> idType, Var<N> root, Configurator<TreeConf<I, N>> conf
+    ) {
+        NullUtil.nullArgCheck(nodeType, "nodeType", Class.class);
+        NullUtil.nullArgCheck(idType, "idType", Class.class);
+        NullUtil.nullArgCheck(root, "root", Var.class);
+        NullUtil.nullArgCheck(conf, "conf", Configurator.class);
+        return _tree(nodeType, idType, root, conf, true);
+    }
+
+    /**
+     *  Creates a declarative builder for a read only {@link JTree} whose node types cannot
+     *  implement {@link HasId}. See {@link #tree(Class, Class, Var, Configurator)}.
+     *
+     * @param nodeType The common supertype of every node in the tree.
+     * @param idType The type of the node identities, which selection paths are made of.
+     * @param root A read only property holding the root of the tree.
+     * @param conf Declares which parts of the structure are the tree's children, and how nodes are shown.
+     * @param <I> The identity type of the nodes.
+     * @param <N> The common node type of the tree.
+     * @return A builder instance for a new {@link JTree}.
+     */
+    public static <I, N> UIForTree<I, N, UI.Tree> tree(
+        Class<N> nodeType, Class<I> idType, Val<N> root, Configurator<TreeConf<I, N>> conf
+    ) {
+        NullUtil.nullArgCheck(nodeType, "nodeType", Class.class);
+        NullUtil.nullArgCheck(idType, "idType", Class.class);
+        NullUtil.nullArgCheck(root, "root", Val.class);
+        NullUtil.nullArgCheck(conf, "conf", Configurator.class);
+        return _tree(nodeType, idType, root, conf, false);
+    }
+
+    /**
+     *  Creates a declarative builder for a {@link JTree} from a {@link TreeConf} you already
+     *  have, which is what you want when the same shape is both bound to a tree and asked
+     *  questions elsewhere:
+     *  <pre>{@code
+     *  TreeConf<String, Packed> shape = TreeConf.of(Packed.class)
+     *          .nodesOf(Box.class,  it -> it.children(Box::contents).text(Box::label))
+     *          .nodesOf(Item.class, it -> it.text(Item::label));
+     *
+     *  UI.tree(move, shape);
+     *  Val<Packed> selectedNode = Viewable.of(move, selectedPath,
+     *                                  (root, path) -> shape.nodeAt(root, path).orElse(null));
+     *  }</pre>
+     *
+     * @param root A mutable property holding the root of the tree.
+     * @param conf The shape of the tree.
+     * @param <I> The identity type of the nodes, which selection paths are made of.
+     * @param <N> The common node type of the tree.
+     * @return A builder instance for a new {@link JTree}.
+     */
+    public static <I, N> UIForTree<I, N, UI.Tree> tree( Var<N> root, TreeConf<I, N> conf ) {
+        NullUtil.nullArgCheck(root, "root", Var.class);
+        NullUtil.nullArgCheck(conf, "conf", TreeConf.class);
+        return UIForTree._bind(new BuilderState<>(UI.Tree.class, UI.Tree::new), root, conf, true);
+    }
+
+    /**
+     *  Creates a declarative builder for a read only {@link JTree} from a {@link TreeConf}
+     *  you already have. See {@link #tree(Var, TreeConf)}.
+     *
+     * @param root A read only property holding the root of the tree.
+     * @param conf The shape of the tree.
+     * @param <I> The identity type of the nodes, which selection paths are made of.
+     * @param <N> The common node type of the tree.
+     * @return A builder instance for a new {@link JTree}.
+     */
+    public static <I, N> UIForTree<I, N, UI.Tree> tree( Val<N> root, TreeConf<I, N> conf ) {
+        NullUtil.nullArgCheck(root, "root", Val.class);
+        NullUtil.nullArgCheck(conf, "conf", TreeConf.class);
+        return UIForTree._bind(new BuilderState<>(UI.Tree.class, UI.Tree::new), root, conf, false);
+    }
+
+    private static <I, N> UIForTree<I, N, UI.Tree> _tree(
+        Class<N> nodeType, @Nullable Class<I> idType, Val<N> root,
+        Configurator<TreeConf<I, N>> conf, boolean writable
+    ) {
+        TreeConf<I, N> treeConf = TreeConf._of(nodeType, idType);
+        try {
+            treeConf = conf.configure(treeConf);
+        } catch (Exception e) {
+            log.error(SwingTree.get().logMarker(), "Error while configuring a tree.", e);
+        }
+        Objects.requireNonNull(treeConf);
+        if ( !treeConf.hasRules() )
+            log.warn(SwingTree.get().logMarker(),
+                "A tree was bound to property '{}' without a single node rule, so every node " +
+                "will be a leaf. Declare at least one 'nodesOf(SomeType.class, it -> it.children(..))'.",
+                root);
+        return UIForTree._bind(new BuilderState<>(UI.Tree.class, UI.Tree::new), root, treeConf, writable);
+    }
+
+    /**
      *  Allows you to wrap the provided {@link JTable} type in a declarative UI builder.
      *  This is useful when you want to use a custom {@link JTable} implementation
      *  in the SwingTree framework.
