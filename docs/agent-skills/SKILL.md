@@ -106,7 +106,7 @@ Rules of `.add(..)`:
 | `textField(text)`, `textArea(text)`, `passwordField()`, `numericTextField(var)` | text inputs |
 | `comboBox(...)`, `slider(Align, min, max)`, `spinner(...)`, `progressBar(...)` | value pickers |
 | `separator()`, `scrollPane()`, `scrollPanels()`, `splitPane(Align)`, `tabbedPane()` | structure |
-| `table(Var<TableData>)`, `table()`, `tree(Var<N>, conf)`, `list(...)`, `menu(...)`, `menuItem(...)`, `splitButton(text)` | data / menus (bind a `TableData` value — see §10; a tree binds one nested value — see §10) |
+| `table(Var<TableData>)`, `table()`, `tree(Var<N>, conf)`, `trees(Var<Tuple<N>>, conf)`, `list(...)`, `menu(...)`, `menuItem(...)`, `splitButton(text)` | data / menus (bind a `TableData` value — see §10; a tree binds one nested value, a *forest* a tuple of them — see §10) |
 | `icon(path)`, `icon(w,h,path)` | `JIcon` (supports SVG, see §10) |
 
 `box(...)` vs `panel(...)`: a `JBox` is non-opaque with zero default insets — use it
@@ -1242,7 +1242,7 @@ Full prose: [Writing-Tables.md](https://github.com/globaltcad/swing-tree/blob/ma
 Executable catalogue of the whole `TableData` API:
 [Table_Data_Spec.groovy](https://github.com/globaltcad/swing-tree/blob/main/src/test/groovy/swingtree/Table_Data_Spec.groovy).
 
-### Trees — bind the nested value you already have (`UI.tree(..)`)
+### Trees — bind the nested value you already have (`UI.tree(..)` / `UI.trees(..)`)
 
 A `JTree` binds to **one property holding a deeply immutable, nested value** plus a
 `TreeConf` saying which parts of it to zoom into. There is no `TreeModel`, no
@@ -1269,11 +1269,29 @@ UI.tree(fileSystem, conf -> conf                       // Var<FsNode>
 **The one rule to remember: a getter alone is read only, a getter *plus a wither* is a
 lens and therefore two-way.** Same rule as `Var.zoomTo(..)`, applied per node type.
 
+**Forests — `UI.trees(Var<Tuple<N>>, conf)`.** Where the data has no single root but several
+top-level nodes (open projects, top-level blocks, shelves), bind the tuple directly. Same
+`TreeConf`, same rules, same builder — the *very same* conf value binds either form. What
+differs: nothing is drawn above the top level (`withRootVisible(true)` is ignored + logged),
+selection paths are **one element shorter** (`["myapp","src","App.java"]`, no synthetic first
+id), and the node type is read off `Tuple.type()` — which a tuple reports even while empty —
+so no `Class<N>` argument is needed unless the tuple's element type is *narrower* than the
+tree's nodes. **Do not invent a wrapper node type to squeeze a tuple into `tree(..)`:** it
+becomes a permitted case every `switch` over your sum type must handle, and its invented id
+ends up inside every selection path you persist.
+
+```java
+UI.trees(projects, conf -> conf                        // Var<Tuple<FsNode>>
+    .nodesOf(Dir.class, it -> it.children(Dir::entries, Dir::withEntries).text(Dir::name))
+    .nodesOf(Doc.class, it -> it.text(Doc::name))
+).withSelection(selectedPath).withInitialExpansionDepth(1);
+```
+
 | | |
 |---|---|
 | `TreeConf` | `nodesOf(Class, conf)`, `nodesOf(conf)` (catch-all), `idOf(Function)`, `leafWhenEmpty(boolean)` |
 | `TreeNodeConf` | `children(getter[, wither])` / `children(Lens)`, `text(getter[, wither])`, `icon(..)`, `toolTip(..)`, `isLeaf(boolean)` |
-| `TreeConf` (paths) | `nodeAt(root, Tuple<I>)` → `Optional<N>`, `nodesAlong(root, Tuple<I>)` → `Tuple<N>` (breadcrumbs). Build one standalone with `TreeConf.of(N.class)` and bind it with `UI.tree(root, conf)`. |
+| `TreeConf` (paths) | `nodeAt(root, Tuple<I>)` → `Optional<N>`, `nodesAlong(root, Tuple<I>)` → `Tuple<N>` (breadcrumbs); same pair overloaded on `Tuple<N> roots` for a forest. Build one standalone with `TreeConf.of(N.class)` and bind it with `UI.tree(root, conf)` **or** `UI.trees(roots, conf)`. |
 | `UIForTree` | `withSelection(Var\|Val<Tuple<I>>)`, `withSelectionPaths(Var<Tuple<Tuple<I>>>)`, `onSelection(..)`, `withRootVisible`, `isRootVisibleIf`, `withRootHandlesVisible`, `withRowHeight`, `withInitialExpansionDepth`, `withCells`/`withCell`/`withCellRenderer`/`withCellEditor`, `withModel(TreeModel)` |
 
 **Non-obvious things that will bite you:**
@@ -1284,7 +1302,8 @@ lens and therefore two-way.** Same rule as `Var.zoomTo(..)`, applied per node ty
   by *content*, so without ids a single deep edit invalidates every path and the tree
   collapses. Ids only need to be unique **among siblings**.
 - **A selection is a PATH, not a node** — `Var<Tuple<I>>`, the ids from the root down
-  (root's own id first; empty tuple = nothing selected; `["root"]` = the root). A node value
+  (root's own id first; empty tuple = nothing selected; `["root"]` = the root; in a forest the
+  first id is a **top-level node**, and nothing names the forest). A node value
   cannot name a *position*: the same value may sit in several places, since ids are only
   sibling-unique. Resolve a path back to its node with `conf.nodeAt(root, path)` /
   `conf.nodesAlong(root, path)`, e.g.
@@ -1317,11 +1336,14 @@ lens and therefore two-way.** Same rule as `Var.zoomTo(..)`, applied per node ty
 - Updates cost what is **on screen**, not what exists: the sync walk stops at any subtree
   reference-identical to before (structural sharing) and never looks below a collapsed
   branch.
+- **`withInitialExpansionDepth(n)` counts *visible* levels**, so a hidden root (and a forest's
+  absent one) does not count. Call it *after* `withRootVisible(false)`, which is what tells it.
 - Not yet built: `expanded(getter, wither)` (expansion as model state) and `view(..)`
   (a bound component per node).
 
 Full prose: [Growing-Trees.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Growing-Trees.md).
-Executable catalogue: `Tree_Binding_Spec`, `Tree_Update_Spec`, `Tree_Selection_And_Editing_Spec`.
+Executable catalogue: `Tree_Binding_Spec`, `Tree_Update_Spec`, `Tree_Selection_And_Editing_Spec`,
+`Tree_Forest_Spec`.
 
 ### Icons & SVG (first-class, HiDPI-crisp)
 
@@ -1632,6 +1654,9 @@ UI.tree(root, conf -> conf                                // Var<N>; N MUST have
 .withRootVisible(false).withInitialExpansionDepth(2);     // withSelectionPaths(Var<Tuple<Tuple<I>>>) for many
 conf.nodeAt(root, path) / conf.nodesAlong(root, path)     // path -> the node / the breadcrumb chain
 UI.tree(Object.class, String.class, root, conf -> ..);    // heterogeneous: name the supertype AND the id type
+UI.trees(roots, conf -> ..);   // Var<Tuple<N>>: no root at all; paths start at a top-level node
+// same conf binds both; node type read off Tuple.type(); withRootVisible(true) ignored + logged
+// depth counts VISIBLE levels, so call withInitialExpansionDepth AFTER withRootVisible(false)
 
 // events
 .onClick / .onMouseEnter / .onMouseClick / .onKeyPress / .onResize (it -> ...)

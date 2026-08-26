@@ -427,15 +427,102 @@ UI.tree(move, conf -> ..)
 .withStyle( it -> it.borderRadius(8).padding(6) );
 ```
 
-`withRootVisible(false)` deserves a word. A property holds exactly one value, so a
-bound tree always has exactly one root — and that root is very often a container
-nobody needs to see. Hiding it turns your single rooted value into what looks like a
-forest of its children, and turns the top-level handles on so they can still be
-opened.
+`withRootVisible(false)` deserves a word. A tree grown from `tree(..)` has exactly one
+root, and that root is sometimes a container which is simply not a thing to look at — "The
+move" itself. Hiding it drops that row and turns the top-level handles on, so what is now
+the first visible level can still be opened. `withInitialExpansionDepth(n)` then counts from
+that first visible level, so `n` means the same thing whether the root is drawn or not: the
+number of levels a user would count looking at the screen.
+
+Do not invent a root in order to hide it, though. Where your data genuinely has several
+things at the top, say so — which is the next section.
 
 A property may also hold *nothing*, which a `Var.ofNullable(Packed.class, null)` does while
 the move is still being loaded. That is an empty tree: no root, no rows, and no placeholder
 row reading `null`. It fills in the moment the property does.
+
+---
+
+## Several boxes on the van floor ##
+
+Look at the move again. Everything in it was inside *one* box marked "The move", which is
+convenient for an example and is not how a van gets loaded. Boxes stand side by side on the
+floor, and **the floor is not a box**.
+
+That shape — several top-level things with nothing above them — is at least as common as
+the single-rooted one. A workspace holds several open projects, a document holds several
+top-level blocks, a scene holds several graphs. In a view model it is a tuple:
+
+```java
+Var<Tuple<Packed>> onTheVan;
+```
+
+You *can* squeeze that into `UI.tree(..)` by inventing a box to put it all in, and it is
+worth seeing what that costs before reaching for it:
+
+```java
+record Van( Tuple<Packed> boxes ) implements Packed {   // ← a case your domain does not have
+    public String id() { return "van"; }                // ← an id nobody chose
+}
+```
+
+`Van` is now a permitted case of `Packed`, so every `switch` over `Packed` anywhere in the
+application has to handle it or stop compiling — which is precisely the property you chose a
+sealed interface for, spent to satisfy a view. And since a selection is a path of ids,
+`"van"` is now the first element of every path you persist:
+
+```
+[ "van", "kitchen", "appliances", "kettle" ]
+```
+
+The fiction did not stay at the binding site. It got into the data.
+
+So say what is true instead — there are several, and nothing contains them:
+
+```java
+UI.trees(onTheVan, conf -> conf
+    .nodesOf(Box.class,  it -> it.children(Box::contents, Box::withContents).text(Box::label))
+    .nodesOf(Item.class, it -> it.text(Item::label))
+)
+.withSelection(opened);   // [ "kitchen", "appliances", "kettle" ]
+```
+
+**`trees(..)` is `tree(..)` with the plural spelled out**, and that is the whole of the
+difference: the same `TreeConf`, the same rules, the same wither turning a rule two-way, the
+same sync walk, the same everything below the top level. The very same configuration value
+binds either form, in fact, because a `TreeConf` describes node types and says nothing at all
+about how many things are at the top.
+
+Three consequences are worth writing down:
+
+- **Nothing is drawn above the top level, and nothing can be.** There is no root row, no
+  `withRootVisible(true)` which will produce one — asking for it is ignored and logged — and
+  no path which names the forest. `[]` still means "nothing is selected", and it is now the
+  only special case left.
+- **Selection paths are one element shorter.** `[ "kitchen", "appliances", "kettle" ]`, not
+  `[ "van", ... ]`. Migrating off the wrapper above therefore means dropping the first element
+  of every path you have stored.
+- **An empty tuple is an empty tree.** No rows, no placeholder, filling in when the property
+  does — the same thing a `tree(..)` bound to a property holding nothing already does.
+
+You do not have to name the node type. A `Tuple` carries the type of its elements, and carries
+it while empty, so `UI.trees(onTheVan, ..)` reads it off the value — which matters, because a
+workspace with nothing open yet is the ordinary state on first launch. Name it —
+`UI.trees(Packed.class, onTheVan, ..)` — only when the tuple was built with a *narrower*
+element type than the tree's nodes, which `Tuple.of(Box.class, ..)` assigned to a
+`Var<Tuple<Packed>>` does.
+
+Underneath, this is still exactly one `JTree`. `javax.swing.tree.TreeModel` declares
+
+```java
+public abstract java.lang.Object getRoot();
+```
+
+— one `Object`, and Swing has never had room for more. So the container still exists. It is
+simply SwingTree's, held inside the model, drawn nowhere and named by nothing you can see,
+which is where a container of that kind belongs. A panel of several `JTree`s would have been
+worse: selection, keyboard navigation and drag are all per-component, so arrow-keying off the
+bottom of one would not enter the next.
 
 ---
 
@@ -448,10 +535,11 @@ Three pieces, if you ever go looking:
   in equality. This is the trick from the identity section, made concrete — and it is
   also why a bound selection is exact in both directions: the path the user clicked *is*
   the value written into your property, with nothing reconstructed by searching.
-- **`TreePathLens`** turns a change into a new root value: walk down by ids, then
-  rebuild upwards through each level's children wither. It never touches the UI, so it
-  is safe to evaluate on any thread — which matters, because under
-  `EventProcessor.DECOUPLED` it runs on your application thread.
+- **`TreePathLens`** turns a change into a new bound value: walk down by ids from the top
+  level, then rebuild upwards through each level's children wither. It never touches the UI,
+  so it is safe to evaluate on any thread — which matters, because under
+  `EventProcessor.DECOUPLED` it runs on your application thread. The last step up is the only
+  thing a forest does differently: it writes into the tuple rather than replacing the root.
 - **The sync walk** is the two-line performance story above, plus a fallback. When a
   change is structural — something packed, something unpacked, a node that became a
   different case of the sum type — it captures which branches are open by their ids,
@@ -485,8 +573,8 @@ looking:
 ## Where to next? ##
 
 - The executable catalogue of everything on this page lives in the living
-  documentation: **Growing a Tree from a Property**, **Keeping a Bound Tree in Sync**
-  and **Selecting and Editing in a Bound Tree**.
+  documentation: **Growing a Tree from a Property**, **Keeping a Bound Tree in Sync**,
+  **Selecting and Editing in a Bound Tree** and **Growing a Forest from a Property**.
 - A tree in a real application: the materials tree in
   [**AtelierView**](../../src/test/java/examples/laf/app/AtelierView.java), derived from
   the shelves of its view model, so a shelf that runs down while cloth ships relabels

@@ -5901,9 +5901,222 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         return UIForTree._bind(new BuilderState<>(UI.Tree.class, UI.Tree::new), root, conf, false);
     }
 
+    /**
+     *  Creates a declarative builder for a {@link JTree} bound to a single property holding a
+     *  <b>tuple of top level nodes</b>, which is the shape of a workspace holding several open
+     *  projects, a document holding several top level blocks, or a store room holding several
+     *  shelves.
+     *  <p>
+     *  This is the plural of {@link #tree(Var, Configurator)} and works the same way in every
+     *  other respect: one {@link TreeConf} describing the node types, a {@code children(..)}
+     *  rule making a type a branch, and a wither alongside a getter turning a rule into a two
+     *  way lens. What differs is that there is no root above the top level, so no row is drawn
+     *  for one and no selection path names one:
+     *  <pre>{@code
+     *  Var<Tuple<FsNode>> projects = vm.zoomTo(Workspace::projects, Workspace::withProjects);
+     *
+     *  UI.trees(projects, conf -> conf
+     *      .nodesOf(Dir.class, dir -> dir.children(Dir::entries, Dir::withEntries).text(Dir::name))
+     *      .nodesOf(Doc.class, doc -> doc.text(Doc::name))
+     *  )
+     *  .withSelection(selectedPath);   //  [ "myapp", "src", "App.java" ]
+     *  }</pre>
+     *  Reach for this rather than wrapping the tuple in a container type invented for the view.
+     *  Such a wrapper is a case every {@code switch} over your sum type has to carry forever,
+     *  and its id ends up inside every selection path your application persists.
+     *  <p>
+     *  The common node type is taken from the bound tuple, which carries it even while the
+     *  tuple is empty. Where the tuple was built with a <i>narrower</i> element type than the
+     *  tree's nodes — a {@code Tuple.of(Dir.class, ..)} held by a {@code Var<Tuple<FsNode>>} —
+     *  name the node type explicitly with {@link #trees(Class, Var, Configurator)}.
+     *
+     * @param roots A mutable property holding the top level nodes of the forest.
+     * @param conf Declares which parts of the structure are the tree's children, and how nodes are shown.
+     * @param <I> The identity type of the nodes, which selection paths are made of.
+     * @param <N> The common node type of the tree.
+     * @return A builder instance for a new {@link JTree}.
+     */
+    public static <I, N extends HasId<I>> UIForTree<I, N, UI.Tree> trees(
+        Var<Tuple<N>> roots, Configurator<TreeConf<I, N>> conf
+    ) {
+        NullUtil.nullArgCheck(roots, "roots", Var.class);
+        NullUtil.nullArgCheck(conf, "conf", Configurator.class);
+        return _trees(_nodeTypeOf(roots), null, roots, conf, true);
+    }
+
+    /**
+     *  Creates a declarative builder for a {@link JTree} bound to a read only property holding
+     *  a tuple of top level nodes, which gives a forest the user may browse and select in, but
+     *  not edit. See {@link #trees(Var, Configurator)} for what a forest is.
+     *
+     * @param roots A read only property holding the top level nodes of the forest.
+     * @param conf Declares which parts of the structure are the tree's children, and how nodes are shown.
+     * @param <I> The identity type of the nodes, which selection paths are made of.
+     * @param <N> The common node type of the tree.
+     * @return A builder instance for a new {@link JTree}.
+     */
+    public static <I, N extends HasId<I>> UIForTree<I, N, UI.Tree> trees(
+        Val<Tuple<N>> roots, Configurator<TreeConf<I, N>> conf
+    ) {
+        NullUtil.nullArgCheck(roots, "roots", Val.class);
+        NullUtil.nullArgCheck(conf, "conf", Configurator.class);
+        return _trees(_nodeTypeOf(roots), null, roots, conf, false);
+    }
+
+    /**
+     *  Creates a declarative builder for a {@link JTree} bound to a tuple of top level nodes,
+     *  with the common node type named explicitly. Reach for this where the bound tuple's own
+     *  element type is narrower than the tree's nodes are, which is what
+     *  {@code Tuple.of(Dir.class, ..)} held by a {@code Var<Tuple<FsNode>>} does, and what a
+     *  forest which may be empty while its property holds nothing at all does.
+     *
+     * @param nodeType The common supertype of every node in the tree.
+     * @param roots A mutable property holding the top level nodes of the forest.
+     * @param conf Declares which parts of the structure are the tree's children, and how nodes are shown.
+     * @param <I> The identity type of the nodes, which selection paths are made of.
+     * @param <N> The common node type of the tree.
+     * @return A builder instance for a new {@link JTree}.
+     */
+    public static <I, N extends HasId<I>> UIForTree<I, N, UI.Tree> trees(
+        Class<N> nodeType, Var<Tuple<N>> roots, Configurator<TreeConf<I, N>> conf
+    ) {
+        NullUtil.nullArgCheck(nodeType, "nodeType", Class.class);
+        NullUtil.nullArgCheck(roots, "roots", Var.class);
+        NullUtil.nullArgCheck(conf, "conf", Configurator.class);
+        return _trees(nodeType, null, roots, conf, true);
+    }
+
+    /**
+     *  Creates a declarative builder for a {@link JTree} bound to a read only tuple of top
+     *  level nodes, with the common node type named explicitly.
+     *  See {@link #trees(Class, Var, Configurator)}.
+     *
+     * @param nodeType The common supertype of every node in the tree.
+     * @param roots A read only property holding the top level nodes of the forest.
+     * @param conf Declares which parts of the structure are the tree's children, and how nodes are shown.
+     * @param <I> The identity type of the nodes, which selection paths are made of.
+     * @param <N> The common node type of the tree.
+     * @return A builder instance for a new {@link JTree}.
+     */
+    public static <I, N extends HasId<I>> UIForTree<I, N, UI.Tree> trees(
+        Class<N> nodeType, Val<Tuple<N>> roots, Configurator<TreeConf<I, N>> conf
+    ) {
+        NullUtil.nullArgCheck(nodeType, "nodeType", Class.class);
+        NullUtil.nullArgCheck(roots, "roots", Val.class);
+        NullUtil.nullArgCheck(conf, "conf", Configurator.class);
+        return _trees(nodeType, null, roots, conf, false);
+    }
+
+    /**
+     *  Creates a declarative builder for a {@link JTree} bound to a tuple of top level nodes
+     *  whose types cannot implement {@link HasId}, by naming both the common node type and the
+     *  identity type explicitly. Their identity is then declared with
+     *  {@link TreeConf#idOf(java.util.function.Function)}, exactly as in
+     *  {@link #tree(Class, Class, Var, Configurator)}.
+     *
+     * @param nodeType The common supertype of every node in the tree.
+     * @param idType The type of the node identities, which selection paths are made of.
+     * @param roots A mutable property holding the top level nodes of the forest.
+     * @param conf Declares which parts of the structure are the tree's children, and how nodes are shown.
+     * @param <I> The identity type of the nodes.
+     * @param <N> The common node type of the tree.
+     * @return A builder instance for a new {@link JTree}.
+     */
+    public static <I, N> UIForTree<I, N, UI.Tree> trees(
+        Class<N> nodeType, Class<I> idType, Var<Tuple<N>> roots, Configurator<TreeConf<I, N>> conf
+    ) {
+        NullUtil.nullArgCheck(nodeType, "nodeType", Class.class);
+        NullUtil.nullArgCheck(idType, "idType", Class.class);
+        NullUtil.nullArgCheck(roots, "roots", Var.class);
+        NullUtil.nullArgCheck(conf, "conf", Configurator.class);
+        return _trees(nodeType, idType, roots, conf, true);
+    }
+
+    /**
+     *  Creates a declarative builder for a read only {@link JTree} bound to a tuple of top
+     *  level nodes whose types cannot implement {@link HasId}.
+     *  See {@link #trees(Class, Class, Var, Configurator)}.
+     *
+     * @param nodeType The common supertype of every node in the tree.
+     * @param idType The type of the node identities, which selection paths are made of.
+     * @param roots A read only property holding the top level nodes of the forest.
+     * @param conf Declares which parts of the structure are the tree's children, and how nodes are shown.
+     * @param <I> The identity type of the nodes.
+     * @param <N> The common node type of the tree.
+     * @return A builder instance for a new {@link JTree}.
+     */
+    public static <I, N> UIForTree<I, N, UI.Tree> trees(
+        Class<N> nodeType, Class<I> idType, Val<Tuple<N>> roots, Configurator<TreeConf<I, N>> conf
+    ) {
+        NullUtil.nullArgCheck(nodeType, "nodeType", Class.class);
+        NullUtil.nullArgCheck(idType, "idType", Class.class);
+        NullUtil.nullArgCheck(roots, "roots", Val.class);
+        NullUtil.nullArgCheck(conf, "conf", Configurator.class);
+        return _trees(nodeType, idType, roots, conf, false);
+    }
+
+    /**
+     *  Creates a declarative builder for a {@link JTree} bound to a tuple of top level nodes,
+     *  from a {@link TreeConf} you already have. A configuration describes node types rather
+     *  than the shape of the top level, so the very same value binds a forest here and a
+     *  single rooted tree through {@link #tree(Var, TreeConf)}:
+     *  <pre>{@code
+     *  TreeConf<String, FsNode> shape = TreeConf.of(FsNode.class)
+     *          .nodesOf(Dir.class, it -> it.children(Dir::entries).text(Dir::name))
+     *          .nodesOf(Doc.class, it -> it.text(Doc::name));
+     *
+     *  UI.trees(projects, shape);
+     *  Val<FsNode> selectedNode = Viewable.of(projects, selectedPath,
+     *                                  (roots, path) -> shape.nodeAt(roots, path).orElse(null));
+     *  }</pre>
+     *
+     * @param roots A mutable property holding the top level nodes of the forest.
+     * @param conf The shape of the tree.
+     * @param <I> The identity type of the nodes, which selection paths are made of.
+     * @param <N> The common node type of the tree.
+     * @return A builder instance for a new {@link JTree}.
+     */
+    public static <I, N> UIForTree<I, N, UI.Tree> trees( Var<Tuple<N>> roots, TreeConf<I, N> conf ) {
+        NullUtil.nullArgCheck(roots, "roots", Var.class);
+        NullUtil.nullArgCheck(conf, "conf", TreeConf.class);
+        return UIForTree._bindForest(new BuilderState<>(UI.Tree.class, UI.Tree::new), roots, conf, true);
+    }
+
+    /**
+     *  Creates a declarative builder for a read only {@link JTree} bound to a tuple of top
+     *  level nodes, from a {@link TreeConf} you already have. See {@link #trees(Var, TreeConf)}.
+     *
+     * @param roots A read only property holding the top level nodes of the forest.
+     * @param conf The shape of the tree.
+     * @param <I> The identity type of the nodes, which selection paths are made of.
+     * @param <N> The common node type of the tree.
+     * @return A builder instance for a new {@link JTree}.
+     */
+    public static <I, N> UIForTree<I, N, UI.Tree> trees( Val<Tuple<N>> roots, TreeConf<I, N> conf ) {
+        NullUtil.nullArgCheck(roots, "roots", Val.class);
+        NullUtil.nullArgCheck(conf, "conf", TreeConf.class);
+        return UIForTree._bindForest(new BuilderState<>(UI.Tree.class, UI.Tree::new), roots, conf, false);
+    }
+
     private static <I, N> UIForTree<I, N, UI.Tree> _tree(
         Class<N> nodeType, @Nullable Class<I> idType, Val<N> root,
         Configurator<TreeConf<I, N>> conf, boolean writable
+    ) {
+        TreeConf<I, N> treeConf = _treeConfOf(nodeType, idType, conf, root);
+        return UIForTree._bind(new BuilderState<>(UI.Tree.class, UI.Tree::new), root, treeConf, writable);
+    }
+
+    private static <I, N> UIForTree<I, N, UI.Tree> _trees(
+        Class<N> nodeType, @Nullable Class<I> idType, Val<Tuple<N>> roots,
+        Configurator<TreeConf<I, N>> conf, boolean writable
+    ) {
+        TreeConf<I, N> treeConf = _treeConfOf(nodeType, idType, conf, roots);
+        return UIForTree._bindForest(new BuilderState<>(UI.Tree.class, UI.Tree::new), roots, treeConf, writable);
+    }
+
+    private static <I, N> TreeConf<I, N> _treeConfOf(
+        Class<N> nodeType, @Nullable Class<I> idType,
+        Configurator<TreeConf<I, N>> conf, Val<?> bound
     ) {
         TreeConf<I, N> treeConf = TreeConf._of(nodeType, idType);
         try {
@@ -5916,8 +6129,26 @@ public abstract class UIFactoryMethods extends UILayoutConstants
             log.warn(SwingTree.get().logMarker(),
                 "A tree was bound to property '{}' without a single node rule, so every node " +
                 "will be a leaf. Declare at least one 'nodesOf(SomeType.class, it -> it.children(..))'.",
-                root);
-        return UIForTree._bind(new BuilderState<>(UI.Tree.class, UI.Tree::new), root, treeConf, writable);
+                bound);
+        return treeConf;
+    }
+
+    /**
+     *  A {@link Tuple} carries the type of its elements even while it holds none, so a forest
+     *  can be told what its nodes are by the value it is bound to. Only a property holding no
+     *  tuple at all leaves the question unanswered.
+     */
+    @SuppressWarnings("unchecked")
+    private static <N> Class<N> _nodeTypeOf( Val<Tuple<N>> roots ) {
+        Tuple<N> current = roots.orElseNull();
+        if ( current != null )
+            return current.type();
+        log.warn(SwingTree.get().logMarker(),
+            "Cannot tell what the nodes of the tree bound to property '{}' are, because the " +
+            "property holds no tuple to take their type from. Name it explicitly through " +
+            "'UI.trees(NodeType.class, roots, conf -> ..)'.",
+            roots);
+        return (Class<N>) (Class<?>) Object.class;
     }
 
     /**

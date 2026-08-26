@@ -33,13 +33,17 @@ import java.util.Objects;
  *  owned snapshot: nothing is copied to hand it across, and the Event Dispatch Thread never
  *  reads application thread owned mutable state.
  *  <p>
+ *  That property holds either one root node or, for a forest, a {@link Tuple} of top level
+ *  nodes. {@link TreeRoots} is the only place that difference is expressed; everything below
+ *  the top level is the same in both forms.
+ *  <p>
  *  Two design decisions are worth knowing about:
  *  <ul>
  *      <li><b>The nodes this model hands to the {@link JTree} are {@link TreeNodeRef} handles,
  *      not the user's own values</b>, which is what keeps expanded paths and the selection
  *      alive across an edit (see {@link TreeNodeRef}). Everything wanting the real value asks
  *      {@link #valueOf(Object)}.</li>
- *      <li><b>An update costs what is on screen, not what exists.</b> {@link #applyNewRoot}
+ *      <li><b>An update costs what is on screen, not what exists.</b> {@link #applyNewValue}
  *      walks only the expanded region and stops at every subtree reference identical to the
  *      one it had before, which structural sharing makes true for everything the change did
  *      not touch. A change it cannot express as node events falls back to a structure change
@@ -49,8 +53,9 @@ import java.util.Objects;
  *
  * @param <I> The identity type of the nodes, which selection paths are made of.
  * @param <N> The common node type of the tree.
+ * @param <R> The type of the value the tree is bound to: one node, or a tuple of them.
  */
-final class PropertyTreeModel<I, N> implements TreeModel
+final class PropertyTreeModel<I, N, R> implements TreeModel
 {
     private static final Logger log = LoggerFactory.getLogger(PropertyTreeModel.class);
 
@@ -61,8 +66,9 @@ final class PropertyTreeModel<I, N> implements TreeModel
      */
     private static final int MAX_CANONICAL_REFS = 100_000;
 
-    private final Val<N>                        _root;
-    private final @Nullable Var<N>              _writableRoot;
+    private final Val<R>                        _bound;
+    private final @Nullable Var<R>              _writable;
+    private final TreeRoots<N, R>               _roots;
     private final TreeConf<I, N>                _conf;
     private final EventProcessor                _eventProcessor;
     private final EventListenerList             _listeners = new EventListenerList();
@@ -72,17 +78,24 @@ final class PropertyTreeModel<I, N> implements TreeModel
     private @Nullable WeakReference<JTree> _tree;
     private @Nullable Class<I>             _derivedIdType;
     private @Nullable TreeNodeRef          _rootRef;
-    private @Nullable N                    _snapshot;
+    private @Nullable R                    _snapshot;
     private boolean                        _restructuring          = false;
     private boolean                        _warnedAboutDuplicates  = false;
     private boolean                        _warnedAboutIdType      = false;
 
-    PropertyTreeModel( Val<N> root, TreeConf<I, N> conf, boolean writable, EventProcessor eventProcessor ) {
-        _root           = Objects.requireNonNull(root);
+    PropertyTreeModel(
+        Val<R>          bound,
+        TreeRoots<N, R> roots,
+        TreeConf<I, N>  conf,
+        boolean         writable,
+        EventProcessor  eventProcessor
+    ) {
+        _bound          = Objects.requireNonNull(bound);
+        _roots          = Objects.requireNonNull(roots);
         _conf           = Objects.requireNonNull(conf);
         _eventProcessor = Objects.requireNonNull(eventProcessor);
-        _writableRoot   = ( writable && root instanceof Var && root.isMutable() ) ? (Var<N>) root : null;
-        _snapshot       = root.orElseNull();
+        _writable       = ( writable && bound instanceof Var && bound.isMutable() ) ? (Var<R>) bound : null;
+        _snapshot       = bound.orElseNull();
         _rootRef        = _newRootRef();
     }
 
@@ -99,7 +112,24 @@ final class PropertyTreeModel<I, N> implements TreeModel
      *  be handed over through a mutable overload and still refuse writes.
      */
     boolean isWritable() {
-        return _writableRoot != null;
+        return _writable != null;
+    }
+
+    /**
+     *  A forest has no root of its own: the {@link JTree} is given a synthetic handle above
+     *  the top level nodes, which is never drawn and which no path of ids names.
+     */
+    boolean isForest() {
+        return _roots.isForest();
+    }
+
+    /** The top level nodes of the tree: one for a single rooted tree, any number for a forest. */
+    private Tuple<N> _rootNodes() {
+        return _roots.of(_snapshot);
+    }
+
+    private static boolean _isForestHandle( @Nullable Object node ) {
+        return node instanceof TreeNodeRef && ((TreeNodeRef) node).idPath().length == 0;
     }
 
     /**
@@ -125,17 +155,19 @@ final class PropertyTreeModel<I, N> implements TreeModel
      *  the property from the application thread.
      */
     @Nullable Var<N> propertyFor( Object[] idPath, @Nullable N value ) {
-        Var<N> writable = _writableRoot;
-        if ( writable == null )
-            return null;
-        return writable.zoomTo(new TreePathLens<>(_conf, idPath, value));
+        Var<R> writable = _writable;
+        if ( writable == null || idPath.length == 0 )
+            return null; // An empty path names the forest itself, which is no node of the user's.
+        return writable.zoomTo(new TreePathLens<>(_conf, _roots, idPath, value));
     }
 
     // ---------------------------------------------------------------- TreeModel
 
     /**
-     *  Null when the property holds nothing, which a {@link JTree} draws as no rows at all.
-     *  Wrapping the absent value in a handle instead would put a row reading "null" on screen.
+     *  Null when a single rooted tree's property holds nothing, which a {@link JTree} draws as
+     *  no rows at all. Wrapping the absent value in a handle instead would put a row reading
+     *  "null" on screen. A forest always has its handle, and an empty forest simply has no
+     *  children below it.
      */
     @Override
     public @Nullable Object getRoot() {
@@ -149,7 +181,7 @@ final class PropertyTreeModel<I, N> implements TreeModel
 
     @Override
     public Object getChild( Object parent, int index ) {
-        Tuple<Object> children = _childrenOf(parent);
+        Tuple<?> children = _childrenOf(parent);
         if ( index < 0 || index >= children.size() )
             throw new IndexOutOfBoundsException(
                 "There is no child at index " + index + " below '" + parent + "'."
@@ -166,7 +198,7 @@ final class PropertyTreeModel<I, N> implements TreeModel
         if ( childIds.length != parentIds.length + 1 )
             return -1;
         Object wantedId = childIds[childIds.length - 1];
-        Tuple<Object> children = _childrenOf(parent);
+        Tuple<?> children = _childrenOf(parent);
         for ( int i = 0; i < children.size(); i++ )
             if ( Objects.equals(_conf.idOf(children.get(i)), wantedId) )
                 return i;
@@ -175,6 +207,8 @@ final class PropertyTreeModel<I, N> implements TreeModel
 
     @Override
     public boolean isLeaf( Object node ) {
+        if ( _isForestHandle(node) )
+            return false; // Nothing would be drawn at all if the forest were a leaf.
         Object value = valueOf(node);
         TreeNodeConf<N, ?> rule = _conf.ruleFor(value);
         if ( rule == null )
@@ -195,7 +229,7 @@ final class PropertyTreeModel<I, N> implements TreeModel
             return;
         Object value = valueOf(last);
         TreeNodeConf<N, ?> rule = _conf.ruleFor(value);
-        Var<N> writable = _writableRoot;
+        Var<R> writable = _writable;
         if ( value == null || rule == null )
             return;
         if ( !rule.isRenamable() ) {
@@ -219,11 +253,11 @@ final class PropertyTreeModel<I, N> implements TreeModel
             return;
         }
         N renamedNode = _conf.nodeType().cast(renamed);
-        TreePathLens<I, N> lens = new TreePathLens<>(
-            _conf, ((TreeNodeRef) last).idPath(), _conf.nodeType().cast(value)
+        TreePathLens<I, N, R> lens = new TreePathLens<>(
+            _conf, _roots, ((TreeNodeRef) last).idPath(), _conf.nodeType().cast(value)
         );
         _eventProcessor.registerAppEvent(
-            () -> writable.update(From.VIEW, root -> lens.wither(root, renamedNode))
+            () -> writable.update(From.VIEW, bound -> lens.wither(bound, renamedNode))
         );
     }
 
@@ -240,21 +274,17 @@ final class PropertyTreeModel<I, N> implements TreeModel
     // ------------------------------------------------------------ Model updates
 
     /**
-     *  Adopts a new root value and tells the {@link JTree} about it in the most targeted way
+     *  Adopts a new bound value and tells the {@link JTree} about it in the most targeted way
      *  the change permits. Runs on the UI thread.
      */
-    void applyNewRoot( @Nullable N newRoot ) {
-        @Nullable N previous = _snapshot;
-        _snapshot = newRoot;
-        if ( previous == newRoot )
+    void applyNewValue( @Nullable R newValue ) {
+        @Nullable R previous = _snapshot;
+        _snapshot = newValue;
+        if ( previous == newValue )
             return; // Reference identical: nothing anywhere in the tree changed.
         TreeNodeRef rootRef = _rootRef;
-        if ( rootRef == null || previous == null || newRoot == null ) {
+        if ( rootRef == null ) {
             _rebuildEverything();
-            return;
-        }
-        if ( !Objects.equals(_conf.idOf(previous), _conf.idOf(newRoot)) ) {
-            _rebuildEverything(); // A different root entirely, so no path carries over.
             return;
         }
         /*
@@ -265,7 +295,7 @@ final class PropertyTreeModel<I, N> implements TreeModel
         List<TreeNodeRef> changed = new ArrayList<>();
         boolean synced;
         try {
-            synced = _sync(rootRef, previous, newRoot, changed);
+            synced = _syncTopLevel(rootRef, previous, newValue, changed);
         } catch (Exception e) {
             log.debug(SwingTree.get().logMarker(), "Failed to incrementally sync a bound tree.", e);
             synced = false;
@@ -278,11 +308,28 @@ final class PropertyTreeModel<I, N> implements TreeModel
     }
 
     /**
+     *  A forest handle is the parent of the top level nodes, so a change of the bound value is
+     *  a change of its children. A single root has no such parent and is compared as a node —
+     *  and a root whose id changed is a different tree, which no path carries over into.
+     */
+    private boolean _syncTopLevel(
+        TreeNodeRef ref, @Nullable R previous, @Nullable R current, List<TreeNodeRef> changed
+    ) {
+        if ( _roots.isForest() )
+            return _syncChildren(ref, _roots.of(previous), _roots.of(current), changed);
+        if ( previous == null || current == null )
+            return false;
+        if ( !Objects.equals(_conf.idOf(previous), _conf.idOf(current)) )
+            return false;
+        return _syncNode(ref, previous, current, changed);
+    }
+
+    /**
      *  Collects every node whose content differs, and returns false as soon as it meets a
      *  change no node event can express — a node which changed type, or a branch whose
      *  children were inserted, removed or reordered — which the caller answers with a rebuild.
      */
-    private boolean _sync( TreeNodeRef ref, Object oldValue, Object newValue, List<TreeNodeRef> changed ) {
+    private boolean _syncNode( TreeNodeRef ref, Object oldValue, Object newValue, List<TreeNodeRef> changed ) {
         if ( oldValue == newValue )
             return true; // Structural sharing: this whole subtree is untouched.
         if ( oldValue.getClass() != newValue.getClass() )
@@ -298,8 +345,12 @@ final class PropertyTreeModel<I, N> implements TreeModel
         if ( rule == null || !rule.hasChildrenRule() )
             return true;
 
-        Tuple<Object> oldChildren = rule.childrenOf(oldValue);
-        Tuple<Object> newChildren = rule.childrenOf(newValue);
+        return _syncChildren(ref, rule.childrenOf(oldValue), rule.childrenOf(newValue), changed);
+    }
+
+    private boolean _syncChildren(
+        TreeNodeRef parent, Tuple<?> oldChildren, Tuple<?> newChildren, List<TreeNodeRef> changed
+    ) {
         if ( oldChildren == newChildren )
             return true;
         if ( oldChildren.size() != newChildren.size() )
@@ -312,7 +363,7 @@ final class PropertyTreeModel<I, N> implements TreeModel
                 continue;
             if ( !Objects.equals(_conf.idOf(oldChild), _conf.idOf(newChild)) )
                 return false; // The children were reordered or exchanged.
-            if ( !_sync(_canonicalChild(ref, newChild, i), oldChild, newChild, changed) )
+            if ( !_syncNode(_canonicalChild(parent, newChild, i), oldChild, newChild, changed) )
                 return false;
         }
         return true;
@@ -398,15 +449,23 @@ final class PropertyTreeModel<I, N> implements TreeModel
     // ------------------------------------------------------------------ Helpers
 
     private @Nullable TreeNodeRef _newRootRef() {
-        @Nullable N snapshot = _snapshot;
-        if ( snapshot == null )
-            return null;
-        TreeNodeRef rootRef = TreeNodeRef.ofRoot(snapshot, _conf.idOf(snapshot));
+        TreeNodeRef rootRef;
+        if ( _roots.isForest() )
+            rootRef = TreeNodeRef.ofForest(); // Always there, even where the forest is empty.
+        else {
+            Tuple<N> roots = _rootNodes();
+            if ( roots.isEmpty() )
+                return null;
+            N root = roots.first();
+            rootRef = TreeNodeRef.ofRoot(root, _conf.idOf(root));
+        }
         _canonical.put(rootRef, rootRef);
         return rootRef;
     }
 
-    private Tuple<Object> _childrenOf( @Nullable Object node ) {
+    private Tuple<?> _childrenOf( @Nullable Object node ) {
+        if ( _isForestHandle(node) )
+            return _rootNodes(); // The forest has no rule to consult: its children are what is bound.
         Object value = valueOf(node);
         if ( value == null )
             return Tuple.of(Object.class);
@@ -529,10 +588,17 @@ final class PropertyTreeModel<I, N> implements TreeModel
     /** How expansion, selection and any other id addressed state finds its way back. */
     @Nullable TreePath pathForIds( Object[] idPath ) {
         TreeNodeRef current = _rootRef;
-        if ( current == null || idPath.length == 0 || !Objects.equals(current.idPath()[0], idPath[0]) )
+        if ( current == null )
             return null;
-        for ( int level = 1; level < idPath.length; level++ ) {
-            Tuple<Object> children = _childrenOf(current);
+        // A single root contributes its own id to every path below it; a forest handle none:
+        Object[] rootIds = current.idPath();
+        if ( idPath.length < rootIds.length )
+            return null;
+        for ( int level = 0; level < rootIds.length; level++ )
+            if ( !Objects.equals(rootIds[level], idPath[level]) )
+                return null;
+        for ( int level = rootIds.length; level < idPath.length; level++ ) {
+            Tuple<?> children = _childrenOf(current);
             int found = -1;
             for ( int i = 0; i < children.size(); i++ )
                 if ( Objects.equals(_conf.idOf(children.get(i)), idPath[level]) ) {
@@ -603,8 +669,8 @@ final class PropertyTreeModel<I, N> implements TreeModel
 
     /**
      *  The element type selection path tuples are built with. A declared id type wins,
-     *  otherwise it is derived from an id this model actually resolves — walking up out of
-     *  an anonymous class, so an enum constant with a body reports its enum rather than the
+     *  otherwise it is derived from the id of a top level node — walking up out of an
+     *  anonymous class, so an enum constant with a body reports its enum rather than the
      *  synthetic subclass Java gave it.
      */
     @SuppressWarnings("unchecked")
@@ -615,10 +681,10 @@ final class PropertyTreeModel<I, N> implements TreeModel
         Class<I> derived = _derivedIdType;
         if ( derived != null )
             return derived;
-        @Nullable N snapshot = _snapshot;
-        if ( snapshot == null )
+        Tuple<N> roots = _rootNodes();
+        if ( roots.isEmpty() )
             return (Class<I>) (Class<?>) Object.class;
-        Class<?> found = _conf.idOf(snapshot).getClass();
+        Class<?> found = _conf.idOf(roots.first()).getClass();
         while ( found.isAnonymousClass() || found.isSynthetic() ) {
             Class<?> parent = found.getSuperclass();
             if ( parent == null )
@@ -655,9 +721,10 @@ final class PropertyTreeModel<I, N> implements TreeModel
     @Override
     public String toString() {
         return this.getClass().getSimpleName() + "[" +
-                    "root="     + _root + ", " +
+                    "bound="    + _bound + ", " +
+                    "roots="    + _roots + ", " +
                     "conf="     + _conf + ", " +
-                    "writable=" + ( _writableRoot != null ) +
+                    "writable=" + ( _writable != null ) +
                 "]";
     }
 }

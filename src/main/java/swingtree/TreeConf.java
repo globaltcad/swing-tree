@@ -10,6 +10,7 @@ import sprouts.Tuple;
 import swingtree.api.Configurator;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -46,6 +47,10 @@ import java.util.function.Function;
  *  identifies a node by its <i>path of ids</i>. Nodes implementing {@link HasId} supply that
  *  id for free; for types you do not own, declare one with {@link #idOf(Function)}. Ids only
  *  need to be unique <i>among siblings</i>, because the path disambiguates the rest.
+ *  <p>
+ *  A configuration describes node types, not the shape of the top level, so the very same
+ *  value binds a single rooted tree through {@link UI#tree(sprouts.Var, TreeConf)} and a
+ *  forest of them through {@link UI#trees(sprouts.Var, TreeConf)}.
  *  <p>
  *  Instances of this class are immutable values, so every method returns a new
  *  instance instead of modifying the receiver.
@@ -246,6 +251,25 @@ public final class TreeConf<I, N>
     }
 
     /**
+     *  Resolves a selection path of a <b>forest</b> back to the node it names, which is the
+     *  same question {@link #nodeAt(Object, Tuple)} answers for a single rooted tree:
+     *  <pre>{@code
+     *  Val<FsNode> selectedNode = Viewable.of(projects, selectedPath,
+     *                                  (roots, path) -> conf.nodeAt(roots, path).orElse(null));
+     *  }</pre>
+     *  A forest has no root, so the first id of the path names one of the top level nodes
+     *  rather than a container above them.
+     *
+     * @param roots The top level nodes of the forest, which is what the path is relative to.
+     * @param path The ids leading from a top level node down to the node, its own id first.
+     * @return The node at that path, or an empty optional if the path names nothing.
+     */
+    public Optional<N> nodeAt( Tuple<N> roots, Tuple<I> path ) {
+        Tuple<N> along = nodesAlong(roots, path);
+        return ( along.isEmpty() ? Optional.empty() : Optional.of(along.last()) );
+    }
+
+    /**
      *  Resolves a selection path to every node along it, the root first and the named node
      *  last, which is what a breadcrumb trail is made of:
      *  <pre>{@code
@@ -262,13 +286,33 @@ public final class TreeConf<I, N>
      * @return Every node from the root down to the named one, or an empty tuple.
      */
     public Tuple<N> nodesAlong( @Nullable N root, Tuple<I> path ) {
+        Objects.requireNonNull(path, "path");
+        if ( root == null )
+            return Tuple.of(_nodeType);
+        return nodesAlong(Tuple.of(_nodeType, Collections.singletonList(root)), path);
+    }
+
+    /**
+     *  Resolves a selection path of a <b>forest</b> to every node along it, the top level
+     *  node first and the named node last, which is what a breadcrumb trail is made of.
+     *  It is the same as {@link #nodesAlong(Object, Tuple)} in every respect but where the
+     *  path starts: a forest has no root, so its trails begin one level lower.
+     *
+     * @param roots The top level nodes of the forest, which is what the path is relative to.
+     * @param path The ids leading from a top level node down to the node, its own id first.
+     * @return Every node from the top level down to the named one, or an empty tuple.
+     */
+    public Tuple<N> nodesAlong( Tuple<N> roots, Tuple<I> path ) {
+        Objects.requireNonNull(roots, "roots");
+        Objects.requireNonNull(path, "path");
         Tuple<N> empty = Tuple.of(_nodeType);
-        if ( path.isEmpty() || root == null )
+        if ( path.isEmpty() )
             return empty;
-        if ( !Objects.equals(idOf(root), path.get(0)) )
+        int found = _indexOfId(roots, path.get(0));
+        if ( found < 0 )
             return empty;
         List<N> along = new ArrayList<>(path.size());
-        Object current = root;
+        Object current = roots.get(found);
         along.add(_nodeType.cast(current));
         for ( int level = 1; level < path.size(); level++ ) {
             TreeNodeConf<N, ?> rule = ruleFor(current);
@@ -281,18 +325,20 @@ public final class TreeConf<I, N>
                 log.debug(SwingTree.get().logMarker(), "Failed to walk a tree path.", e);
                 return empty;
             }
-            int found = -1;
-            for ( int i = 0; i < children.size(); i++ )
-                if ( Objects.equals(idOf(children.get(i)), path.get(level)) ) {
-                    found = i;
-                    break;
-                }
+            found = _indexOfId(children, path.get(level));
             if ( found < 0 )
                 return empty;
             current = children.get(found);
             along.add(_nodeType.cast(current));
         }
         return Tuple.of(_nodeType, along);
+    }
+
+    private int _indexOfId( Tuple<?> nodes, I id ) {
+        for ( int i = 0; i < nodes.size(); i++ )
+            if ( Objects.equals(idOf(nodes.get(i)), id) )
+                return i;
+        return -1;
     }
 
     Class<N> nodeType() {

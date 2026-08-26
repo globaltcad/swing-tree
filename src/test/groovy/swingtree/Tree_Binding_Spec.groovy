@@ -51,9 +51,11 @@ import static swingtree.TreeSpecFileSystem.visibleRows
     makes a node a branch or a leaf, where its label and icon come from, what identifies it,
     and how a tree of unrelated types is described.
 
-    Two companion documents carry on from here: `Tree_Update_Spec` is about what happens
-    when the bound value changes, and `Tree_Selection_And_Editing_Spec` is about selecting
-    and editing in a bound tree.
+    Three companion documents carry on from here: `Tree_Update_Spec` is about what happens
+    when the bound value changes, `Tree_Selection_And_Editing_Spec` is about selecting and
+    editing in a bound tree, and `Tree_Forest_Spec` is about `UI.trees(..)`, which binds a
+    `Var<Tuple<N>>` for data whose natural shape is several top level nodes rather than one
+    root.
 
 """)
 @Subject([UIForTree, TreeConf, TreeNodeConf])
@@ -440,31 +442,46 @@ class Tree_Binding_Spec extends Specification
             ]
     }
 
-    def 'Hiding the root turns a single rooted value into what looks like a forest.'()
+    def 'A root nobody needs to see can be hidden, and then it counts for nothing.'()
     {
         reportInfo """
-            A property always holds exactly one value, so a bound tree always has exactly one
-            root. That is usually not what should be on screen: a file browser shows the
-            *contents* of a folder, not the folder itself.
+            Sometimes the data really does have a root which is simply not a thing to look at:
+            a folder whose *contents* are the point, the document node of an outline.
+            `withRootVisible(false)` drops that row and turns on the handles of the level
+            below, so what is now the first visible level can still be opened.
 
-            `withRootVisible(false)` drops that row, and turns the handles on for the top
-            level so the user can still open what is now the first visible level.
+            A row nobody can see is not a level either, so the depth
+            `withInitialExpansionDepth(n)` counts begins below it. That makes `n` mean the same
+            thing whether or not the root is drawn: the number of levels a user would count
+            looking at the screen.
+
+            Where the data has no root at all — several open projects, several top level
+            blocks — do not invent one in order to hide it. `UI.trees(..)` binds a
+            `Var<Tuple<N>>` of top level nodes directly, and then no invented id ends up inside
+            the selection paths your application persists. See *Growing a Forest from a
+            Property*.
         """
         given : 'A file system with a root nobody needs to see.'
             var fileSystem = Var.of(FsNode, dir("r", "<workspace>",
-                                        dir("a", "src"),
+                                        dir("a", "src", doc("a1", "App.java")),
                                         dir("b", "docs")
                                     ))
-        when : 'We hide the root.'
+        when : 'We hide the root, and open a single level.'
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })
+                        .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })
                     })
                     .withRootVisible(false)
+                    .withInitialExpansionDepth(1)
                     .get(JTree)
 
-        then : 'Its children become the top level rows.'
-            visibleRows(tree).collect { it.trim() } == ["src", "docs"]
+        then : 'Its children became the top level rows, and that one visible level is open.'
+            visibleRows(tree) == [
+                "src",
+                "    App.java",
+                "docs",
+            ]
         and : 'And the tree draws handles next to them, so they can still be opened.'
             tree.getShowsRootHandles()
     }

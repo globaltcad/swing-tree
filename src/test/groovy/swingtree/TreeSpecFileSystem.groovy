@@ -39,17 +39,24 @@ final class TreeSpecFileSystem {
         return new Doc(id, name, body)
     }
 
+    /** Builds the top level of a forest: several nodes with nothing above them. */
+    static Tuple<FsNode> forest( FsNode... roots ) {
+        return Tuple.of(FsNode, roots)
+    }
+
     /**
-     *  Every row the tree currently shows, indented by depth and labelled exactly the way
-     *  its cell renderer labels it. This is deliberately not a peek at the model: it asks
-     *  the same questions the painting code asks, so a scenario asserting on it is
-     *  asserting on what a user sees.
+     *  Every row the tree currently shows, indented by its depth below the topmost visible
+     *  level and labelled exactly the way its cell renderer labels it. This is deliberately
+     *  not a peek at the model: it asks the same questions the painting code asks, so a
+     *  scenario asserting on it is asserting on what a user sees.
      */
     static List<String> visibleRows( JTree tree ) {
         return UI.runAndGet({
+            // A root the tree does not draw is no level of its own, so it does not indent:
+            var offset = ( tree.isRootVisible() ? 1 : 2 )
             (0..<tree.getRowCount()).collect { int row ->
                 var path = tree.getPathForRow(row)
-                return ("    " * (path.getPathCount() - 1)) + _labelOf(tree, path, row)
+                return ("    " * (path.getPathCount() - offset)) + _labelOf(tree, path, row)
             }
         })
     }

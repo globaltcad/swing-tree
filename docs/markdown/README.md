@@ -61,7 +61,7 @@ fans out from there.
 |---|---|
 | [Simple Dialogs](./Simple-Dialogs.md) | `UI.confirmation(..)` / `UI.message(..)` — the SwingTree wrappers around `JOptionPane`. |
 | [Writing Tables](./Writing-Tables.md) | Modelling a `JTable` as data with `TableData` — a bindable, thread safe, incrementally updated value. Plus editable cells and custom cell renderers. |
-| [Growing Trees](./Growing-Trees.md) | Binding a `JTree` to one property holding a deeply immutable, sum-type tree — a rule per node type, lenses that carry an edit back up, and why your open branches survive it. |
+| [Growing Trees](./Growing-Trees.md) | Binding a `JTree` to one property holding a deeply immutable, sum-type tree — a rule per node type, lenses that carry an edit back up, and why your open branches survive it. Plus `UI.trees(..)`, for data whose natural shape is several top-level nodes rather than one root. |
 | [SVG Icons and Images](./SVG-Icons-And-Images.md) | First-class SVG support — view-model-friendly `IconDeclaration`s, the cached `UI.findIcon(..)` loaders, the `SvgIcon` fit/placement policies, and SVG in the style API's image layers. |
 
 ## 🔍 Under the hood ##
