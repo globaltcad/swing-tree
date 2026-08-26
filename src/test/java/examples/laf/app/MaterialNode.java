@@ -33,6 +33,7 @@ import sprouts.Tuple;
  *  structure. An id only has to be unique among siblings, so a fibre's own name is
  *  plenty.
  */
+@SuppressWarnings("SameNameButDifferent") // <- TODO: remove this! (needed for Java 8 to compile)
 public interface MaterialNode extends HasId<String>
 {
     /** How this node is named in the tree. */
