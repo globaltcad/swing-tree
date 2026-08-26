@@ -16,8 +16,6 @@ import javax.swing.JTree
 import javax.swing.ToolTipManager
 import java.awt.event.MouseEvent
 
-import static swingtree.TreeSpecFileSystem.dir
-import static swingtree.TreeSpecFileSystem.doc
 import static swingtree.TreeSpecFileSystem.expandedRows
 import static swingtree.TreeSpecFileSystem.visibleRows
 
@@ -84,10 +82,10 @@ class Tree_Binding_Spec extends Specification
             *is* the tree.
         """
         given : 'A little file system, held in a single property.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("a", "assets", doc("a1", "logo.svg")),
-                                        doc("b", "README.md")
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("a", "assets", Tuple.of(FsNode, new Doc("a1", "logo.svg"))),
+                                        new Doc("b", "README.md")
+                                    )))
         when : 'We describe it as a tree, one rule block per node type.'
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
@@ -119,10 +117,10 @@ class Tree_Binding_Spec extends Specification
             leaves. The shape of your data already said so.
         """
         given : 'A tree whose configuration gives directories children, but documents none.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("empty", "empty-folder"),
-                                        doc("d", "notes.txt")
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("empty", "empty-folder", Tuple.of(FsNode)),
+                                        new Doc("d", "notes.txt")
+                                    )))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })
@@ -153,7 +151,7 @@ class Tree_Binding_Spec extends Specification
             rare model where an empty branch really is nothing.
         """
         given : 'A file system whose only entry is an empty directory.'
-            var fileSystem = Var.of(FsNode, dir("r", "root", dir("e", "empty-folder")))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode, new Dir("e", "empty-folder", Tuple.of(FsNode)))))
         and : 'Two trees over it, differing only in how they treat childless branches.'
             var defaultTree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
@@ -185,7 +183,7 @@ class Tree_Binding_Spec extends Specification
             the user expects.
         """
         given : 'A file system in which one directory has not been read from disk yet.'
-            var fileSystem = Var.of(FsNode, dir("r", "root", dir("lazy", "not-loaded-yet")))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode, new Dir("lazy", "not-loaded-yet", Tuple.of(FsNode)))))
         and : 'A tree which declares the empty directory a branch regardless.'
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
@@ -210,9 +208,9 @@ class Tree_Binding_Spec extends Specification
             the whole point of declaring the rule per type rather than once for the tree.
         """
         given : 'A tree labelling directories by their name and documents by name and size.'
-            var fileSystem = Var.of(FsNode, dir("r", "Projects",
-                                        doc("a", "notes.txt", "0123456789")
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "Projects", Tuple.of(FsNode,
+                                        new Doc("a", "notes.txt", "0123456789")
+                                    )))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })
@@ -235,7 +233,7 @@ class Tree_Binding_Spec extends Specification
             prints all of its fields, which is rarely a good label.
         """
         given : 'A tree which declares where the children are, but not how to label anything.'
-            var fileSystem = Var.of(FsNode, dir("r", "root", doc("a", "notes.txt")))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode, new Doc("a", "notes.txt"))))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }) })
@@ -269,7 +267,7 @@ class Tree_Binding_Spec extends Specification
             IconDeclaration folderIcon = { "img/two_16th_notes.svg" }
             IconDeclaration pageIcon   = { "img/trees.png" }
         and : 'A tree declaring an icon and a tool tip for each type.'
-            var fileSystem = Var.of(FsNode, dir("r", "root", doc("a", "notes.txt")))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode, new Doc("a", "notes.txt"))))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() })
@@ -316,7 +314,7 @@ class Tree_Binding_Spec extends Specification
             The scenario after next is about exactly that.
         """
         given : 'A tree with a rule for the shared interface and a more specific one for directories.'
-            var fileSystem = Var.of(FsNode, dir("r", "root", doc("a", "notes.txt")))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode, new Doc("a", "notes.txt"))))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf({ it.text({ FsNode n -> n.name().toUpperCase() }) })
@@ -385,7 +383,7 @@ class Tree_Binding_Spec extends Specification
             missing case is almost always an oversight rather than an intent.
         """
         given : 'A tree which forgets to declare anything about documents.'
-            var fileSystem = Var.of(FsNode, dir("r", "root", doc("a", "notes.txt")))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode, new Doc("a", "notes.txt"))))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })
@@ -414,10 +412,10 @@ class Tree_Binding_Spec extends Specification
             deliberately share an id, and the folders above them keep them apart.
         """
         given : 'A structure in which the same id is deliberately reused in two different folders.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("a", "first",  doc("notes", "notes.txt")),
-                                        dir("b", "second", doc("notes", "notes.txt"))
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("a", "first", Tuple.of(FsNode,  new Doc("notes", "notes.txt"))),
+                                        new Dir("b", "second", Tuple.of(FsNode, new Doc("notes", "notes.txt")))
+                                    )))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })
@@ -462,10 +460,10 @@ class Tree_Binding_Spec extends Specification
             Property*.
         """
         given : 'A file system with a root nobody needs to see.'
-            var fileSystem = Var.of(FsNode, dir("r", "<workspace>",
-                                        dir("a", "src", doc("a1", "App.java")),
-                                        dir("b", "docs")
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "<workspace>", Tuple.of(FsNode,
+                                        new Dir("a", "src", Tuple.of(FsNode, new Doc("a1", "App.java"))),
+                                        new Dir("b", "docs", Tuple.of(FsNode))
+                                    )))
         when : 'We hide the root, and open a single level.'
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
@@ -498,10 +496,10 @@ class Tree_Binding_Spec extends Specification
             untouched by it.
         """
         given : 'A file system three levels deep.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("a", "src", dir("a1", "main", doc("a11", "App.java"))),
-                                        dir("b", "docs")
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("a", "src", Tuple.of(FsNode, new Dir("a1", "main", Tuple.of(FsNode, new Doc("a11", "App.java"))))),
+                                        new Dir("b", "docs", Tuple.of(FsNode))
+                                    )))
             var conf = { conf -> conf
                             .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })
                             .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })
@@ -538,7 +536,7 @@ class Tree_Binding_Spec extends Specification
             So `when(Doc.class)` matches a document, and `cell.entry()` hands you a `Doc`.
         """
         given : 'A tree whose cells are declared through the shared cell builder API.'
-            var fileSystem = Var.of(FsNode, dir("r", "root", doc("a", "notes.txt")))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode, new Doc("a", "notes.txt"))))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }) })
@@ -567,10 +565,10 @@ class Tree_Binding_Spec extends Specification
             the types you actually name here are taken over.
         """
         given : 'A tree whose types are labelled by their rules, and one type given a cell view.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("a", "assets", doc("a1", "logo.svg")),
-                                        doc("b", "README.md")
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("a", "assets", Tuple.of(FsNode, new Doc("a1", "logo.svg"))),
+                                        new Doc("b", "README.md")
+                                    )))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })
@@ -604,7 +602,7 @@ class Tree_Binding_Spec extends Specification
             label and its own children, it says both.
         """
         given : 'A catch-all rule labelling everything, and a directory rule declaring only children.'
-            var fileSystem = Var.of(FsNode, dir("r", "root", doc("a", "notes.txt")))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode, new Doc("a", "notes.txt"))))
             var forgetful =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf({ it.text({ FsNode n -> n.name() }) })
@@ -646,7 +644,7 @@ class Tree_Binding_Spec extends Specification
         """
         given : 'A folder holding two documents which were given the same id.'
             var log = LogSpy.attach()
-            var fileSystem = Var.of(FsNode, dir("r", "root", doc("dup", "first.txt"), doc("dup", "second.txt")))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode, new Doc("dup", "first.txt"), new Doc("dup", "second.txt"))))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })
@@ -681,7 +679,7 @@ class Tree_Binding_Spec extends Specification
             that happens to be editable because of what the reference points at.
         """
         given : 'The same structure and the same renaming rules for both trees.'
-            FsNode structure = dir("r", "root", doc("a", "notes.txt"))
+            FsNode structure = new Dir("r", "root", Tuple.of(FsNode, new Doc("a", "notes.txt")))
             var conf = { conf -> conf
                             .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }, { Dir d, String t -> d.withName(t) }) })
                             .nodesOf(Doc, { it.text({ Doc d -> d.name() }, { Doc d, String t -> d.withName(t) }) })
@@ -707,7 +705,7 @@ class Tree_Binding_Spec extends Specification
             SwingTree does not offer the user an editor it could not honour.
         """
         given : 'A mutable property, but rules which only read.'
-            var fileSystem = Var.of(FsNode, dir("r", "root", doc("a", "notes.txt")))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode, new Doc("a", "notes.txt"))))
         when : 'We bind it with read only text rules.'
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf

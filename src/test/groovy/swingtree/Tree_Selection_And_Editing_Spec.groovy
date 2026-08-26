@@ -14,8 +14,6 @@ import utility.SwingTreeTestConfigurator
 import javax.swing.JTree
 import javax.swing.tree.TreePath
 
-import static swingtree.TreeSpecFileSystem.dir
-import static swingtree.TreeSpecFileSystem.doc
 import static swingtree.TreeSpecFileSystem.selectedRows
 import static swingtree.TreeSpecFileSystem.visibleRows
 
@@ -80,10 +78,10 @@ class Tree_Selection_And_Editing_Spec extends Specification
             several places at once, which the next scenario makes concrete.
         """
         given : 'A file system, and a property for wherever the selection is.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        doc("a", "notes.txt"),
-                                        doc("b", "todo.md")
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Doc("a", "notes.txt"),
+                                        new Doc("b", "todo.md")
+                                    )))
             var selected = Var.of(Tuple.of(String))
         and : 'A tree binding the two together.'
             var tree =
@@ -119,10 +117,10 @@ class Tree_Selection_And_Editing_Spec extends Specification
             can resolve to the wrong one.
         """
         given : 'A structure in which the same id is deliberately reused in two folders.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("first",  "first",  doc("notes", "notes.txt")),
-                                        dir("second", "second", doc("notes", "notes.txt"))
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("first",  "first", Tuple.of(FsNode,  new Doc("notes", "notes.txt"))),
+                                        new Dir("second", "second", Tuple.of(FsNode, new Doc("notes", "notes.txt")))
+                                    )))
             var selected = Var.of(Tuple.of(String))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
@@ -165,10 +163,10 @@ class Tree_Selection_And_Editing_Spec extends Specification
             the property having to be rewritten and without the tree having to guess.
         """
         given : 'A tree with a bound selection.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("a", "src", doc("a1", "App.java")),
-                                        doc("b", "README.md")
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("a", "src", Tuple.of(FsNode, new Doc("a1", "App.java"))),
+                                        new Doc("b", "README.md")
+                                    )))
             var selected = Var.of(Tuple.of(String))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
@@ -206,7 +204,7 @@ class Tree_Selection_And_Editing_Spec extends Specification
             that is a path of exactly one id.
         """
         given : 'A tree with something selected in it.'
-            var fileSystem = Var.of(FsNode, dir("r", "root", doc("a", "notes.txt")))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode, new Doc("a", "notes.txt"))))
             var selected = Var.of(Tuple.of(String))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
@@ -242,11 +240,11 @@ class Tree_Selection_And_Editing_Spec extends Specification
             property.
         """
         given : 'A tree binding every selected position to one property.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        doc("a", "one.txt"),
-                                        doc("b", "two.txt"),
-                                        doc("c", "three.txt")
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Doc("a", "one.txt"),
+                                        new Doc("b", "two.txt"),
+                                        new Doc("c", "three.txt")
+                                    )))
             var selected = Var.of(Tuple.of(Tuple.classTyped(String)))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
@@ -281,9 +279,9 @@ class Tree_Selection_And_Editing_Spec extends Specification
             never produces a half-resolved trail.
         """
         given : 'The configuration a tree is built from, kept so it can answer questions later.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("a", "src", doc("a1", "App.java"))
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("a", "src", Tuple.of(FsNode, new Doc("a1", "App.java")))
+                                    )))
             var conf = TreeConf.of(FsNode, String)
                             .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })
                             .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })
@@ -318,9 +316,9 @@ class Tree_Selection_And_Editing_Spec extends Specification
             return one of your nodes. The delegate exists so you never need it.
         """
         given : 'A tree recording what each selection change told it.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("a", "src", doc("a1", "App.java"))
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("a", "src", Tuple.of(FsNode, new Doc("a1", "App.java")))
+                                    )))
             var seen = []
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
@@ -361,9 +359,9 @@ class Tree_Selection_And_Editing_Spec extends Specification
             only, because there would then be nothing to write into.
         """
         given : 'A tree whose selection action renames whatever document gets picked.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("a", "src", doc("a1", "App.java"))
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("a", "src", Tuple.of(FsNode, new Doc("a1", "App.java")))
+                                    )))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })
@@ -400,10 +398,10 @@ class Tree_Selection_And_Editing_Spec extends Specification
             edit lands in.
         """
         given : 'A tree three levels deep, bound to a mutable property.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("a", "src", doc("a1", "App.java")),
-                                        dir("b", "docs")
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("a", "src", Tuple.of(FsNode, new Doc("a1", "App.java"))),
+                                        new Dir("b", "docs", Tuple.of(FsNode))
+                                    )))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })
@@ -439,10 +437,10 @@ class Tree_Selection_And_Editing_Spec extends Specification
             side.
         """
         given : 'A tree with two sibling folders, one of which we are about to edit.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("a", "edited",    doc("a1", "one.txt")),
-                                        dir("b", "untouched", doc("b1", "two.txt"))
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("a", "edited", Tuple.of(FsNode,    new Doc("a1", "one.txt"))),
+                                        new Dir("b", "untouched", Tuple.of(FsNode, new Doc("b1", "two.txt")))
+                                    )))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })
@@ -479,9 +477,9 @@ class Tree_Selection_And_Editing_Spec extends Specification
         """
         given : 'A tree in which directories expose their entries read only.'
             var log = LogSpy.attach()
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("a", "src", doc("a1", "App.java"))
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("a", "src", Tuple.of(FsNode, new Doc("a1", "App.java")))
+                                    )))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() })                                // getter only
@@ -524,7 +522,7 @@ class Tree_Selection_And_Editing_Spec extends Specification
             predicate anywhere.
         """
         given : 'A tree where only directories declare a text wither.'
-            var fileSystem = Var.of(FsNode, dir("r", "root", doc("a", "notes.txt")))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode, new Doc("a", "notes.txt"))))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })
@@ -555,7 +553,7 @@ class Tree_Selection_And_Editing_Spec extends Specification
             no selection at all, and a bound tree does too.
         """
         given : 'A tree in which directories can be renamed.'
-            var fileSystem = Var.of(FsNode, dir("r", "root", doc("a", "notes.txt")))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode, new Doc("a", "notes.txt"))))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })
@@ -589,7 +587,7 @@ class Tree_Selection_And_Editing_Spec extends Specification
             quietly discarding the edit.
         """
         given : 'The same rules as an editable tree, but bound through the read only overload.'
-            FsNode structure = dir("r", "root", doc("a", "notes.txt"))
+            FsNode structure = new Dir("r", "root", Tuple.of(FsNode, new Doc("a", "notes.txt")))
             var tree =
                     UI.tree(FsNode, Val.of(structure), { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })

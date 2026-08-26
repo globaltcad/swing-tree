@@ -14,9 +14,6 @@ import utility.SwingTreeTestConfigurator
 
 import javax.swing.JTree
 
-import static swingtree.TreeSpecFileSystem.dir
-import static swingtree.TreeSpecFileSystem.doc
-import static swingtree.TreeSpecFileSystem.forest
 import static swingtree.TreeSpecFileSystem.expandedRows
 import static swingtree.TreeSpecFileSystem.selectedRows
 import static swingtree.TreeSpecFileSystem.visibleRows
@@ -91,9 +88,9 @@ class Tree_Forest_Spec extends Specification
             reads it straight out of the property.
         """
         given : 'Two projects, held side by side in a single property.'
-            var projects = Var.of(forest(
-                                dir("app", "myapp", dir("src", "src", doc("main", "App.java"))),
-                                dir("doc", "notes", doc("readme", "README.md"))
+            var projects = Var.of(Tuple.of(FsNode,
+                                new Dir("app", "myapp", Tuple.of(FsNode, new Dir("src", "src", Tuple.of(FsNode, new Doc("main", "App.java"))))),
+                                new Dir("doc", "notes", Tuple.of(FsNode, new Doc("readme", "README.md")))
                            ))
 
         when : 'We grow a forest from it.'
@@ -120,7 +117,7 @@ class Tree_Forest_Spec extends Specification
             `UI.trees(FsNode.class, projects, ..)`.
         """
         given : 'An empty workspace: a property holding a tuple with nothing in it.'
-            var projects = Var.of(forest())
+            var projects = Var.of(Tuple.of(FsNode))
 
         expect : 'The tuple still knows what its elements are.'
             projects.get().type() == FsNode
@@ -132,7 +129,7 @@ class Tree_Forest_Spec extends Specification
             visibleRows(tree) == []
 
         when : 'The workspace fills in.'
-            UI.runNow({ projects.set(forest(dir("app", "myapp", doc("main", "App.java")))) })
+            UI.runNow({ projects.set(Tuple.of(FsNode, new Dir("app", "myapp", Tuple.of(FsNode, new Doc("main", "App.java"))))) })
 
         then : 'So does the tree.'
             visibleRows(tree) == ["myapp"]
@@ -150,9 +147,9 @@ class Tree_Forest_Spec extends Specification
             path holds exactly the ids the application chose, and nothing else.
         """
         given : 'A forest and a property to mirror its selection into.'
-            var projects = Var.of(forest(
-                                dir("app", "myapp", dir("src", "src", doc("main", "App.java"))),
-                                dir("doc", "notes", doc("readme", "README.md"))
+            var projects = Var.of(Tuple.of(FsNode,
+                                new Dir("app", "myapp", Tuple.of(FsNode, new Dir("src", "src", Tuple.of(FsNode, new Doc("main", "App.java"))))),
+                                new Dir("doc", "notes", Tuple.of(FsNode, new Doc("readme", "README.md")))
                            ))
             var selected = Var.of(Tuple.of(String))
             var tree = UI.trees(projects, shape()).withSelection(selected).get(JTree)
@@ -191,9 +188,9 @@ class Tree_Forest_Spec extends Specification
             everything else did not change.
         """
         given : 'A forest with both of its projects open.'
-            var projects = Var.of(forest(
-                                dir("app", "myapp", dir("src", "src", doc("main", "App.java"))),
-                                dir("doc", "notes", doc("readme", "README.md"))
+            var projects = Var.of(Tuple.of(FsNode,
+                                new Dir("app", "myapp", Tuple.of(FsNode, new Dir("src", "src", Tuple.of(FsNode, new Doc("main", "App.java"))))),
+                                new Dir("doc", "notes", Tuple.of(FsNode, new Doc("readme", "README.md")))
                            ))
             var tree = UI.trees(projects, shape()).withInitialExpansionDepth(1).get(JTree)
 
@@ -201,7 +198,7 @@ class Tree_Forest_Spec extends Specification
             expandedRows(tree) == ["myapp", "notes"]
 
         when : 'A third project is opened, at the end.'
-            UI.runNow({ projects.update({ it.add(dir("new", "scratch", doc("todo", "todo.txt"))) }) })
+            UI.runNow({ projects.update({ it.add(new Dir("new", "scratch", Tuple.of(FsNode, new Doc("todo", "todo.txt")))) }) })
 
         then : 'It appears, and the two that were open are still open.'
             visibleRows(tree) == [
@@ -238,9 +235,9 @@ class Tree_Forest_Spec extends Specification
         given : 'A counter recording which project gets walked into.'
             var reads = [:].withDefault { 0 }
         and : 'A forest whose two projects are both open.'
-            var projects = Var.of(forest(
-                                dir("app", "edited",    doc("one", "one.txt")),
-                                dir("doc", "untouched", doc("two", "two.txt"))
+            var projects = Var.of(Tuple.of(FsNode,
+                                new Dir("app", "edited", Tuple.of(FsNode,    new Doc("one", "one.txt"))),
+                                new Dir("doc", "untouched", Tuple.of(FsNode, new Doc("two", "two.txt")))
                            ))
             var tree =
                     UI.trees(projects, { conf -> conf
@@ -288,9 +285,9 @@ class Tree_Forest_Spec extends Specification
             new project and one new tuple — with every other project shared rather than copied.
         """
         given : 'A forest, with an editable rule for every node type.'
-            var projects = Var.of(forest(
-                                dir("app", "myapp", dir("src", "src", doc("main", "App.java"))),
-                                dir("doc", "notes", doc("readme", "README.md"))
+            var projects = Var.of(Tuple.of(FsNode,
+                                new Dir("app", "myapp", Tuple.of(FsNode, new Dir("src", "src", Tuple.of(FsNode, new Doc("main", "App.java"))))),
+                                new Dir("doc", "notes", Tuple.of(FsNode, new Doc("readme", "README.md")))
                            ))
             var untouchedBefore = projects.get().get(1)
             var tree = UI.trees(projects, shape()).withInitialExpansionDepth(3).get(JTree)
@@ -318,9 +315,9 @@ class Tree_Forest_Spec extends Specification
             of its top level nodes for exactly the same reason.
         """
         given : 'A forest of two projects.'
-            var projects = Var.of(forest(
-                                dir("app", "myapp", doc("main", "App.java")),
-                                dir("doc", "notes", doc("readme", "README.md"))
+            var projects = Var.of(Tuple.of(FsNode,
+                                new Dir("app", "myapp", Tuple.of(FsNode, new Doc("main", "App.java"))),
+                                new Dir("doc", "notes", Tuple.of(FsNode, new Doc("readme", "README.md")))
                            ))
             var tree = UI.trees(projects, shape()).get(JTree)
 
@@ -344,9 +341,9 @@ class Tree_Forest_Spec extends Specification
             the user would count looking at the screen.
         """
         given : 'A forest three levels deep.'
-            var projects = Var.of(forest(
-                                dir("app", "myapp", dir("src", "src", doc("main", "App.java"))),
-                                dir("doc", "notes", doc("readme", "README.md"))
+            var projects = Var.of(Tuple.of(FsNode,
+                                new Dir("app", "myapp", Tuple.of(FsNode, new Dir("src", "src", Tuple.of(FsNode, new Doc("main", "App.java"))))),
+                                new Dir("doc", "notes", Tuple.of(FsNode, new Doc("readme", "README.md")))
                            ))
 
         when : 'We build one forest closed and one opened a single level.'
@@ -376,7 +373,7 @@ class Tree_Forest_Spec extends Specification
         """
         given : 'A forest, and a spy on the log.'
             var log = LogSpy.attach()
-            var projects = Var.of(forest(dir("app", "myapp", doc("main", "App.java"))))
+            var projects = Var.of(Tuple.of(FsNode, new Dir("app", "myapp", Tuple.of(FsNode, new Doc("main", "App.java")))))
 
         when : 'We ask for a root row anyway.'
             var tree = UI.trees(projects, shape()).withRootVisible(true).get(JTree)
@@ -406,9 +403,9 @@ class Tree_Forest_Spec extends Specification
             var shape = TreeConf.of(FsNode)
                             .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })
                             .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })
-            var projects = Var.of(forest(
-                                dir("app", "myapp", dir("src", "src", doc("main", "App.java"))),
-                                dir("doc", "notes")
+            var projects = Var.of(Tuple.of(FsNode,
+                                new Dir("app", "myapp", Tuple.of(FsNode, new Dir("src", "src", Tuple.of(FsNode, new Doc("main", "App.java"))))),
+                                new Dir("doc", "notes", Tuple.of(FsNode))
                            ))
             var selected = Var.of(Tuple.of(String))
 
@@ -441,9 +438,9 @@ class Tree_Forest_Spec extends Specification
             have made harder to express rather than easier.
         """
         given : 'A forest and a property holding one path per selected node.'
-            var projects = Var.of(forest(
-                                dir("app", "myapp", doc("main", "App.java")),
-                                dir("doc", "notes", doc("readme", "README.md"))
+            var projects = Var.of(Tuple.of(FsNode,
+                                new Dir("app", "myapp", Tuple.of(FsNode, new Doc("main", "App.java"))),
+                                new Dir("doc", "notes", Tuple.of(FsNode, new Doc("readme", "README.md")))
                            ))
             var selected = Var.of(Tuple.of(Tuple.classTyped(String)))
             var tree = UI.trees(projects, shape()).withSelectionPaths(selected).withInitialExpansionDepth(2).get(JTree)
@@ -475,9 +472,9 @@ class Tree_Forest_Spec extends Specification
             SwingTree's, not yours, and nothing in your own types could describe it.
         """
         given : 'A forest, and somewhere to record what the action was told.'
-            var projects = Var.of(forest(
-                                dir("app", "myapp", dir("src", "src", doc("main", "App.java"))),
-                                dir("doc", "notes")
+            var projects = Var.of(Tuple.of(FsNode,
+                                new Dir("app", "myapp", Tuple.of(FsNode, new Dir("src", "src", Tuple.of(FsNode, new Doc("main", "App.java"))))),
+                                new Dir("doc", "notes", Tuple.of(FsNode))
                            ))
             var trail = []
             var leadPath = null
@@ -505,7 +502,7 @@ class Tree_Forest_Spec extends Specification
             only forest.
         """
         given : 'The same two projects and the same renaming rules for both forests.'
-            var roots = forest(dir("app", "myapp", doc("main", "App.java")))
+            var roots = Tuple.of(FsNode, new Dir("app", "myapp", Tuple.of(FsNode, new Doc("main", "App.java"))))
 
         when : 'We bind one forest to a mutable property and one to a read only one.'
             var editable = UI.trees(Var.of(roots), shape()).get(JTree)
@@ -531,9 +528,9 @@ class Tree_Forest_Spec extends Specification
         """
         given : 'Two projects which were given the same id.'
             var log = LogSpy.attach()
-            var projects = Var.of(forest(
-                                dir("same", "first",  doc("a", "one.txt")),
-                                dir("same", "second", doc("b", "two.txt"))
+            var projects = Var.of(Tuple.of(FsNode,
+                                new Dir("same", "first", Tuple.of(FsNode,  new Doc("a", "one.txt"))),
+                                new Dir("same", "second", Tuple.of(FsNode, new Doc("b", "two.txt")))
                            ))
 
         when : 'We build a forest out of them and ask what it shows.'
