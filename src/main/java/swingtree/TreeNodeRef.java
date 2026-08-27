@@ -91,6 +91,8 @@ final class TreeNodeRef
         Object[] chain = new Object[_depth + 1];
         TreeNodeRef current = this;
         for ( int i = _depth; i >= 0; i-- ) {
+            if ( current == null )
+                throw new IllegalStateException();
             chain[i] = current;
             current = current._parent;
         }
