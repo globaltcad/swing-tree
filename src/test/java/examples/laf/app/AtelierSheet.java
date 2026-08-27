@@ -1,7 +1,8 @@
 package examples.laf.app;
 
-import examples.laf.LinenPalette;
 import swingtree.style.StyleSheet;
+
+import static examples.laf.SwingTreeLookAndFeel.palette;
 
 /**
  *  The atelier's own styling, layered on top of the Linen look-and-feel.
@@ -16,10 +17,10 @@ import swingtree.style.StyleSheet;
  *        background, a scroll pane's border — <b>wins</b> against a sheet rule
  *        for the same property. Asking for it here would silently do nothing.
  *        That is why the atelier asks Linen for the surface and the button role
- *        it wants, through {@code .group(LinenSurface.CARD)} and
- *        {@code .group(LinenVariant.PRIMARY)}, instead of painting them itself.</li>
+ *        it wants, through {@code .group(Surface.CARD)} and
+ *        {@code .group(Variant.PRIMARY)}, instead of painting them itself.</li>
  *    <li>Everything the LAF leaves alone is the sheet's. Linen is careful about
- *        this: {@code LinenLabelUI} sets only a foreground colour, so typography
+ *        this: the label delegate sets only a foreground colour, so typography
  *        — family, size, weight, tracking, and the colour carried <i>by the
  *        font</i> — is entirely ours. Which is what this sheet is: a type scale
  *        for the whole application, in one place, so that no fragment of the
@@ -38,39 +39,39 @@ public final class AtelierSheet extends StyleSheet
     @Override
     protected void configure() {
         add(group(Skin.APP_TITLE), it -> it
-            .componentFont(f -> f.family(SERIF).size(23).weight(2f).color(LinenPalette.TEXT))
+            .componentFont(f -> f.family(SERIF).size(23).weight(2f).color(palette().text()))
         );
         add(group(Skin.APP_SUBTITLE), it -> it
-            .componentFont(f -> f.family(SANS).size(12).color(LinenPalette.TEXT_MUTED))
+            .componentFont(f -> f.family(SANS).size(12).color(palette().textMuted()))
         );
         add(group(Skin.CARD_TITLE), it -> it
-            .componentFont(f -> f.family(SERIF).size(16).weight(2f).color(LinenPalette.TEXT))
+            .componentFont(f -> f.family(SERIF).size(16).weight(2f).color(palette().text()))
         );
         add(group(Skin.CARD_SUB), it -> it
-            .componentFont(f -> f.family(SANS).size(11).color(LinenPalette.TEXT_MUTED))
+            .componentFont(f -> f.family(SANS).size(11).color(palette().textMuted()))
         );
         // Small caps by way of tracking: the letters are pushed apart far enough
         // that an all-upper-case heading stops shouting.
         add(group(Skin.SECTION), it -> it
-            .componentFont(f -> f.family(SANS).size(10).weight(2f).spacing(0.18f).color(LinenPalette.TEXT_MUTED))
+            .componentFont(f -> f.family(SANS).size(10).weight(2f).spacing(0.18f).color(palette().textMuted()))
         );
         add(group(Skin.FIELD_LABEL), it -> it
-            .componentFont(f -> f.family(SANS).size(12).color(LinenPalette.TEXT_MUTED))
+            .componentFont(f -> f.family(SANS).size(12).color(palette().textMuted()))
         );
         add(group(Skin.META), it -> it
-            .componentFont(f -> f.family(SANS).size(11).color(LinenPalette.TEXT_MUTED))
+            .componentFont(f -> f.family(SANS).size(11).color(palette().textMuted()))
         );
         add(group(Skin.EMPTY), it -> it
-            .componentFont(f -> f.family(SERIF).size(14).posture(0.14f).color(LinenPalette.TEXT_MUTED))
+            .componentFont(f -> f.family(SERIF).size(14).posture(0.14f).color(palette().textMuted()))
         );
         add(group(Skin.STATUS), it -> it
-            .componentFont(f -> f.family(SANS).size(11).color(LinenPalette.TEXT_MUTED))
+            .componentFont(f -> f.family(SANS).size(11).color(palette().textMuted()))
         );
         add(group(Skin.FIGURE), it -> it
-            .componentFont(f -> f.family(SERIF).size(19).weight(2f).color(LinenPalette.TEXT))
+            .componentFont(f -> f.family(SERIF).size(19).weight(2f).color(palette().text()))
         );
         add(group(Skin.DOCUMENT), it -> it
-            .componentFont(f -> f.family(SERIF).size(13).color(LinenPalette.TEXT))
+            .componentFont(f -> f.family(SERIF).size(13).color(palette().text()))
         );
     }
 }
