@@ -42,9 +42,11 @@ import java.util.Objects;
  *      )
  *      .nodesOf(Doc.class, doc -> doc.text(Doc::name))
  *  )
- *  .withSelection(selectedNode)
- *  .withRootVisible(false);
+ *  .withSelection(selectedNode);
  *  }</pre>
+ *  Where the data has no single root but several top level nodes,
+ *  {@link UI#trees(Var, Configurator)} binds a {@code Var<Tuple<N>>} of them instead. The
+ *  builder returned is this same one, and everything below configures both forms alike.
  * 	<p>
  * 	<b>Please take a look at the <a href="https://globaltcad.github.io/swing-tree/">living swing-tree documentation</a>
  * 	where you can browse a large collection of examples demonstrating how to use the API of this class.</b>
@@ -57,10 +59,10 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
 {
     private static final Logger log = LoggerFactory.getLogger(UIForTree.class);
 
-    private final BuilderState<T>                 _state;
-    private final @Nullable PropertyTreeModel<I, N>  _model;
+    private final BuilderState<T>                    _state;
+    private final @Nullable PropertyTreeModel<I, N, ?> _model;
 
-    UIForTree( BuilderState<T> state, @Nullable PropertyTreeModel<I, N> model ) {
+    UIForTree( BuilderState<T> state, @Nullable PropertyTreeModel<I, N, ?> model ) {
         _state = Objects.requireNonNull(state);
         _model = model;
     }
@@ -91,7 +93,7 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
      */
     public final UIForTree<I, N, T> withModel( TreeModel model ) {
         Objects.requireNonNull(model, "model");
-        PropertyTreeModel<I, N> bound = _model;
+        PropertyTreeModel<I, N, ?> bound = _model;
         return _with( thisComponent -> {
                     if ( bound != null ) {
                         log.warn(SwingTree.get().logMarker(),
@@ -130,6 +132,10 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
      *  the node a path names — for a detail view, say — ask the configuration:
      *  {@link TreeConf#nodeAt(Object, Tuple)} and {@link TreeConf#nodesAlong(Object, Tuple)}.
      *  <p>
+     *  On a tree bound through {@link UI#trees(Var, Configurator)} the first id names a top
+     *  level node rather than a root, so its paths are one element shorter and no path at all
+     *  names the forest. Resolve them with {@link TreeConf#nodeAt(Tuple, Tuple)}.
+     *  <p>
      *  Binding a single path this way also puts the tree into single selection mode. Use
      *  {@link #withSelectionPaths(Var)} for a tree the user may select several nodes in.
      *
@@ -138,7 +144,7 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
      */
     public final UIForTree<I, N, T> withSelection( Var<Tuple<I>> selection ) {
         Objects.requireNonNull(selection, "selection");
-        PropertyTreeModel<I, N> model = _requireBoundModel("withSelection(Var)");
+        PropertyTreeModel<I, N, ?> model = _requireBoundModel("withSelection(Var)");
         if ( model == null )
             return _this();
         return _with( thisComponent -> {
@@ -178,7 +184,7 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
      */
     public final UIForTree<I, N, T> withSelection( Val<Tuple<I>> selection ) {
         Objects.requireNonNull(selection, "selection");
-        PropertyTreeModel<I, N> model = _requireBoundModel("withSelection(Val)");
+        PropertyTreeModel<I, N, ?> model = _requireBoundModel("withSelection(Val)");
         if ( model == null )
             return _this();
         return _with( thisComponent -> {
@@ -206,7 +212,7 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
      */
     public final UIForTree<I, N, T> withSelectionPaths( Var<Tuple<Tuple<I>>> selection ) {
         Objects.requireNonNull(selection, "selection");
-        PropertyTreeModel<I, N> model = _requireBoundModel("withSelectionPaths(Var)");
+        PropertyTreeModel<I, N, ?> model = _requireBoundModel("withSelectionPaths(Var)");
         if ( model == null )
             return _this();
         return _with( thisComponent -> {
@@ -255,7 +261,7 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
      */
     public final UIForTree<I, N, T> onSelection( Action<TreeSelectionDelegate<I, N>> action ) {
         Objects.requireNonNull(action, "action");
-        PropertyTreeModel<I, N> model = _requireBoundModel("onSelection(..)");
+        PropertyTreeModel<I, N, ?> model = _requireBoundModel("onSelection(..)");
         if ( model == null )
             return _this();
         return _with( thisComponent -> {
@@ -287,15 +293,19 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
 
     /**
      *  Decides whether the root node of the bound structure is drawn as a row of its own.
-     *  Hiding it is what turns a single rooted value into what looks like a forest of its
-     *  children, which is usually what a file browser or an outline wants.
+     *  Hiding it also turns on the handles of the level below, so that what is now the first
+     *  visible level can still be opened.
+     *  <p>
+     *  A tree bound through {@link UI#trees(Var, Configurator)} has no root node, so there is
+     *  nothing here to show: showing it is ignored and reported in the log, and hiding it was
+     *  already the case.
      *
      * @param rootVisible True to show the root node.
      * @return This builder node, to allow for method chaining.
      */
     public final UIForTree<I, N, T> withRootVisible( boolean rootVisible ) {
         return _with( thisComponent -> {
-                    thisComponent.setRootVisible(rootVisible);
+                    _applyRootVisible(thisComponent, rootVisible, "withRootVisible(boolean)");
                     if ( !rootVisible )
                         thisComponent.setShowsRootHandles(true);
                 })
@@ -304,7 +314,9 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
 
     /**
      *  Binds the visibility of the root node to a property, so that the tree can fold its
-     *  root away and back in response to application state.
+     *  root away and back in response to application state. A tree bound through
+     *  {@link UI#trees(Var, Configurator)} has no root node, so see
+     *  {@link #withRootVisible(boolean)} for what happens there.
      *
      * @param rootVisible A property telling whether the root node should be shown.
      * @return This builder node, to allow for method chaining.
@@ -312,17 +324,33 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
     public final UIForTree<I, N, T> isRootVisibleIf( Val<Boolean> rootVisible ) {
         Objects.requireNonNull(rootVisible, "rootVisible");
         return _withOnShow( rootVisible, (thisComponent, visible) -> {
-                    thisComponent.setRootVisible(Boolean.TRUE.equals(visible));
+                    _applyRootVisible(thisComponent, Boolean.TRUE.equals(visible), "isRootVisibleIf(Val)");
                 })
                 ._with( thisComponent -> {
-                    thisComponent.setRootVisible(Boolean.TRUE.equals(rootVisible.orElseNull()));
+                    _applyRootVisible(
+                        thisComponent, Boolean.TRUE.equals(rootVisible.orElseNull()), "isRootVisibleIf(Val)"
+                    );
                 })
                 ._this();
     }
 
+    private void _applyRootVisible( JTree tree, boolean rootVisible, String method ) {
+        PropertyTreeModel<I, N, ?> model = _model;
+        if ( rootVisible && model != null && model.isForest() ) {
+            log.warn(SwingTree.get().logMarker(),
+                "Ignoring '{}' on a tree bound to a tuple of top level nodes, which has no root " +
+                "node to show. Bind it through 'UI.tree(rootProperty, ..)' if it should have one.",
+                method);
+            return;
+        }
+        tree.setRootVisible(rootVisible);
+    }
+
     /**
      *  Decides whether the handles which expand and collapse a branch are drawn next to the
-     *  top level nodes as well.
+     *  top level nodes as well. Hiding the root turns these on, because they are then the only
+     *  handles there are — and turning them off again on a tree with no visible root leaves
+     *  the user nothing to click, so only do that where expansion is driven from code.
      *
      * @param showsRootHandles True to draw handles next to the top level nodes.
      * @return This builder node, to allow for method chaining.
@@ -351,12 +379,16 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
 
     /**
      *  Expands every branch down to the given depth, once, at the point this builder method
-     *  runs, where a depth of {@code 1} opens the root's own children, {@code 2} their
-     *  children as well, and so on. This is a convenience for the initial view only:
+     *  runs, where a depth of {@code 1} opens the topmost visible level, {@code 2} the level
+     *  below that as well, and so on. This is a convenience for the initial view only:
      *  expansion the user performs afterwards is untouched by it, and so is everything the
      *  bound property grows later.
+     *  <p>
+     *  Depth is counted from what is on screen, so a root hidden with
+     *  {@link #withRootVisible(boolean)} — and the absent root of a forest — does not count
+     *  as a level. Call this <i>after</i> hiding the root, so that it knows.
      *
-     * @param depth How many levels below the root to expand.
+     * @param depth How many visible levels to expand.
      * @return This builder node, to allow for method chaining.
      */
     public final UIForTree<I, N, T> withInitialExpansionDepth( int depth ) {
@@ -401,7 +433,7 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
             return _this();
         }
         Objects.requireNonNull(builder);
-        PropertyTreeModel<I, N> model = _model;
+        PropertyTreeModel<I, N, ?> model = _model;
         /*
             The tree's own renderer goes in as the fallback, so a node type no 'when(..)'
             clause covers keeps the rules declared for it instead of falling to 'toString()'.
@@ -443,7 +475,7 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
      */
     public final UIForTree<I, N, T> withCellRenderer( TreeCellRenderer renderer ) {
         Objects.requireNonNull(renderer, "renderer");
-        PropertyTreeModel<I, N> model = _model;
+        PropertyTreeModel<I, N, ?> model = _model;
         return _with( thisComponent -> {
                     thisComponent.setCellRenderer(
                         model == null ? renderer : new UnwrappingRenderer(model, renderer)
@@ -473,8 +505,20 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
     static <I, N, T extends JTree> UIForTree<I, N, T> _bind(
         BuilderState<T> state, Val<N> root, TreeConf<I, N> conf, boolean writable
     ) {
-        PropertyTreeModel<I, N> model = new PropertyTreeModel<>(
-            root, conf, writable, state.eventProcessor()
+        return _bindTo(state, root, TreeRoots.single(conf.nodeType()), conf, writable);
+    }
+
+    static <I, N, T extends JTree> UIForTree<I, N, T> _bindForest(
+        BuilderState<T> state, Val<Tuple<N>> roots, TreeConf<I, N> conf, boolean writable
+    ) {
+        return _bindTo(state, roots, TreeRoots.forest(conf.nodeType()), conf, writable);
+    }
+
+    private static <I, N, R, T extends JTree> UIForTree<I, N, T> _bindTo(
+        BuilderState<T> state, Val<R> bound, TreeRoots<N, R> roots, TreeConf<I, N> conf, boolean writable
+    ) {
+        PropertyTreeModel<I, N, R> model = new PropertyTreeModel<>(
+            bound, roots, conf, writable, state.eventProcessor()
         );
         UIForTree<I, N, T> builder = new UIForTree<>(state, model);
         return builder
@@ -483,6 +527,11 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
                     thisComponent.setModel(model);
                     thisComponent.setCellRenderer(new DefaultBoundRenderer<>(model));
                     ToolTipManager.sharedInstance().registerComponent(thisComponent);
+                    if ( model.isForest() ) {
+                        // Nothing sits above the top level, and its handles are the only ones there are:
+                        thisComponent.setRootVisible(false);
+                        thisComponent.setShowsRootHandles(true);
+                    }
                     if ( model.isWritable() && conf.hasRenamableRule() ) {
                         thisComponent.setEditable(true);
                         thisComponent.setCellEditor(new BoundCellEditor<>(
@@ -490,14 +539,14 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
                         ));
                     }
                 })
-                ._withOnShow( root, (thisComponent, newRoot) -> {
-                    model.applyNewRoot(newRoot);
+                ._withOnShow( bound, (thisComponent, newValue) -> {
+                    model.applyNewValue(newValue);
                 })
                 ._this();
     }
 
-    private @Nullable PropertyTreeModel<I, N> _requireBoundModel( String method ) {
-        PropertyTreeModel<I, N> model = _model;
+    private @Nullable PropertyTreeModel<I, N, ?> _requireBoundModel( String method ) {
+        PropertyTreeModel<I, N, ?> model = _model;
         if ( model == null )
             log.warn(SwingTree.get().logMarker(),
                 "Ignoring '{}' on a tree which is not bound to a property. Create the tree through " +
@@ -510,12 +559,12 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
      *  element type as part of its equality: a tuple of the wrong type would never compare
      *  equal to what the property holds, so every write would echo back forever.
      */
-    private Class<I> _idTypeOf( Val<Tuple<I>> selection, PropertyTreeModel<I, N> model ) {
+    private Class<I> _idTypeOf( Val<Tuple<I>> selection, PropertyTreeModel<I, N, ?> model ) {
         Tuple<I> current = selection.orElseNull();
         return ( current == null ? model.idType() : current.type() );
     }
 
-    private Class<I> _idTypeOfNested( Val<Tuple<Tuple<I>>> selection, PropertyTreeModel<I, N> model ) {
+    private Class<I> _idTypeOfNested( Val<Tuple<Tuple<I>>> selection, PropertyTreeModel<I, N, ?> model ) {
         Tuple<Tuple<I>> current = selection.orElseNull();
         if ( current != null && !current.isEmpty() )
             return current.get(0).type();
@@ -544,7 +593,7 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
      *  A path which no longer names anything simply takes no part in the selection,
      *  rather than clearing it.
      */
-    private void _selectPaths( JTree tree, PropertyTreeModel<I, N> model, List<Tuple<I>> idPaths ) {
+    private void _selectPaths( JTree tree, PropertyTreeModel<I, N, ?> model, List<Tuple<I>> idPaths ) {
         if ( idPaths.isEmpty() ) {
             tree.clearSelection();
             return;
@@ -568,10 +617,12 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
     private static void _expandToDepth( JTree tree, int depth ) {
         if ( depth <= 0 )
             return;
+        // A root nobody can see is no level of its own, so it does not count towards the depth:
+        int invisibleLevels = ( tree.isRootVisible() ? 0 : 1 );
         // Expanding a row adds rows below it, so the count is re-read on every step:
         for ( int row = 0; row < tree.getRowCount(); row++ ) {
             TreePath path = tree.getPathForRow(row);
-            if ( path != null && path.getPathCount() <= depth )
+            if ( path != null && path.getPathCount() - invisibleLevels <= depth )
                 tree.expandRow(row);
         }
     }
@@ -579,9 +630,9 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
     /** Unwraps the node handle and renders the node by the rules declared for its type. */
     private static final class DefaultBoundRenderer<I, N> extends DefaultTreeCellRenderer
     {
-        private final PropertyTreeModel<I, N> _model;
+        private final PropertyTreeModel<I, N, ?> _model;
 
-        DefaultBoundRenderer( PropertyTreeModel<I, N> model ) {
+        DefaultBoundRenderer( PropertyTreeModel<I, N, ?> model ) {
             _model = model;
         }
 
@@ -625,10 +676,10 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
     /** Keeps a user supplied renderer from ever seeing the internal node handles. */
     private static final class UnwrappingRenderer implements TreeCellRenderer
     {
-        private final PropertyTreeModel<?, ?> _model;
-        private final TreeCellRenderer     _delegate;
+        private final PropertyTreeModel<?, ?, ?> _model;
+        private final TreeCellRenderer       _delegate;
 
-        UnwrappingRenderer( PropertyTreeModel<?, ?> model, TreeCellRenderer delegate ) {
+        UnwrappingRenderer( PropertyTreeModel<?, ?, ?> model, TreeCellRenderer delegate ) {
             _model    = model;
             _delegate = delegate;
         }
@@ -651,9 +702,9 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
      */
     private static final class BoundCellEditor<I, N> extends DefaultTreeCellEditor
     {
-        private final PropertyTreeModel<I, N> _model;
+        private final PropertyTreeModel<I, N, ?> _model;
 
-        BoundCellEditor( JTree tree, DefaultTreeCellRenderer renderer, PropertyTreeModel<I, N> model ) {
+        BoundCellEditor( JTree tree, DefaultTreeCellRenderer renderer, PropertyTreeModel<I, N, ?> model ) {
             super(tree, renderer);
             _model = model;
         }

@@ -14,8 +14,6 @@ import javax.swing.JTree
 import javax.swing.event.TreeModelEvent
 import javax.swing.event.TreeModelListener
 
-import static swingtree.TreeSpecFileSystem.dir
-import static swingtree.TreeSpecFileSystem.doc
 import static swingtree.TreeSpecFileSystem.expandedRows
 import static swingtree.TreeSpecFileSystem.selectedRows
 import static swingtree.TreeSpecFileSystem.visibleRows
@@ -78,7 +76,7 @@ class Tree_Update_Spec extends Specification
             for reading the value, transforming it, and setting the result.
         """
         given : 'A small file system in a property, and a tree bound to it.'
-            var fileSystem = Var.of(FsNode, dir("r", "root", doc("a", "notes.txt")))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode, new Doc("a", "notes.txt"))))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })
@@ -90,7 +88,7 @@ class Tree_Update_Spec extends Specification
             visibleRows(tree) == ["root", "    notes.txt"]
 
         when : 'We put a second document into the root.'
-            UI.runNow({ fileSystem.update({ Dir d -> d.withEntries(d.entries().add(doc("b", "todo.md"))) }) })
+            UI.runNow({ fileSystem.update({ Dir d -> d.withEntries(d.entries().add(new Doc("b", "todo.md"))) }) })
 
         then : 'The tree shows it, without anything else being said.'
             visibleRows(tree) == ["root", "    notes.txt", "    todo.md"]
@@ -110,11 +108,11 @@ class Tree_Update_Spec extends Specification
             exactly the thing an edit leaves alone.
         """
         given : 'A file system three levels deep, bound to a tree.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("a", "src",
-                                            dir("a1", "main", doc("a11", "App.java"))),
-                                        dir("b", "docs", doc("b1", "guide.md"))
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("a", "src", Tuple.of(FsNode,
+                                            new Dir("a1", "main", Tuple.of(FsNode, new Doc("a11", "App.java"))))),
+                                        new Dir("b", "docs", Tuple.of(FsNode, new Doc("b1", "guide.md")))
+                                    )))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })
@@ -174,10 +172,10 @@ class Tree_Update_Spec extends Specification
             structure change at all.
         """
         given : 'A tree with one folder opened by the user.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("a", "src", doc("a1", "App.java")),
-                                        dir("b", "docs")
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("a", "src", Tuple.of(FsNode, new Doc("a1", "App.java"))),
+                                        new Dir("b", "docs", Tuple.of(FsNode))
+                                    )))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })
@@ -222,10 +220,10 @@ class Tree_Update_Spec extends Specification
         given : 'A counter recording which folders get asked for their children.'
             var reads = [:].withDefault { 0 }
         and : 'A tree in which two sibling folders are both open.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("a", "edited",    doc("a1", "one.txt")),
-                                        dir("b", "untouched", doc("b1", "two.txt"))
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("a", "edited", Tuple.of(FsNode,    new Doc("a1", "one.txt"))),
+                                        new Dir("b", "untouched", Tuple.of(FsNode, new Doc("b1", "two.txt")))
+                                    )))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> reads[d.name()] = reads[d.name()] + 1; d.entries() },
@@ -273,9 +271,9 @@ class Tree_Update_Spec extends Specification
         """
         given : 'A counter, and a tree whose one folder the user has not opened.'
             var reads = [:].withDefault { 0 }
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("a", "closed", doc("a1", "deep.txt"))
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("a", "closed", Tuple.of(FsNode, new Doc("a1", "deep.txt")))
+                                    )))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> reads[d.name()] = reads[d.name()] + 1; d.entries() })
@@ -317,10 +315,10 @@ class Tree_Update_Spec extends Specification
             the paths being restored are made of ids, which the insertion did not disturb.
         """
         given : 'A tree with two folders.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("a", "src",  doc("a1", "App.java")),
-                                        dir("b", "docs", doc("b1", "guide.md"))
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("a", "src", Tuple.of(FsNode,  new Doc("a1", "App.java"))),
+                                        new Dir("b", "docs", Tuple.of(FsNode, new Doc("b1", "guide.md")))
+                                    )))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })
@@ -337,7 +335,7 @@ class Tree_Update_Spec extends Specification
         when : 'A new document is added to the first folder.'
             UI.runNow({ fileSystem.update({ Dir root ->
                 var src = (Dir) root.entries().get(0)
-                root.withEntries(root.entries().setAt(0, src.withEntries(src.entries().add(doc("a2", "Util.java")))))
+                root.withEntries(root.entries().setAt(0, src.withEntries(src.entries().add(new Doc("a2", "Util.java")))))
             }) })
 
         then : 'It appears where it belongs.'
@@ -364,11 +362,11 @@ class Tree_Update_Spec extends Specification
             the removal left it sitting.
         """
         given : 'Three folders, of which the user has opened only the last.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("a", "first",  doc("a1", "a.txt")),
-                                        dir("b", "second", doc("b1", "b.txt")),
-                                        dir("c", "third",  doc("c1", "c.txt"))
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("a", "first", Tuple.of(FsNode,  new Doc("a1", "a.txt"))),
+                                        new Dir("b", "second", Tuple.of(FsNode, new Doc("b1", "b.txt"))),
+                                        new Dir("c", "third", Tuple.of(FsNode,  new Doc("c1", "c.txt")))
+                                    )))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })
@@ -415,10 +413,10 @@ class Tree_Update_Spec extends Specification
             node picks up its new type's rules.
         """
         given : 'A tree in which the first entry is currently a document.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        doc("x", "mystery"),
-                                        dir("b", "docs", doc("b1", "guide.md"))
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Doc("x", "mystery"),
+                                        new Dir("b", "docs", Tuple.of(FsNode, new Doc("b1", "guide.md")))
+                                    )))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })
@@ -434,7 +432,7 @@ class Tree_Update_Spec extends Specification
 
         when : 'That same entry, keeping its id, becomes a directory.'
             UI.runNow({ fileSystem.update({ Dir root ->
-                root.withEntries(root.entries().setAt(0, dir("x", "mystery", doc("x1", "revealed.txt"))))
+                root.withEntries(root.entries().setAt(0, new Dir("x", "mystery", Tuple.of(FsNode, new Doc("x1", "revealed.txt")))))
             }) })
 
         then : 'It is a branch now, and it can be opened.'
@@ -467,7 +465,7 @@ class Tree_Update_Spec extends Specification
             this is not something you have to declare.
         """
         given : 'A tree over one file system, with a folder opened.'
-            var fileSystem = Var.of(FsNode, dir("old", "old-root", dir("a", "src", doc("a1", "App.java"))))
+            var fileSystem = Var.of(FsNode, new Dir("old", "old-root", Tuple.of(FsNode, new Dir("a", "src", Tuple.of(FsNode, new Doc("a1", "App.java"))))))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })
@@ -480,7 +478,7 @@ class Tree_Update_Spec extends Specification
             visibleRows(tree) == ["old-root", "    src", "        App.java"]
 
         when : 'A completely different file system is assigned.'
-            UI.runNow({ fileSystem.set(dir("new", "new-root", doc("z", "readme.txt"))) })
+            UI.runNow({ fileSystem.set(new Dir("new", "new-root", Tuple.of(FsNode, new Doc("z", "readme.txt")))) })
 
         then : 'The tree shows the new one, from the top.'
             visibleRows(tree) == ["new-root", "    readme.txt"]
@@ -497,7 +495,7 @@ class Tree_Update_Spec extends Specification
             liberally: the view does not pay for a change that did not happen.
         """
         given : 'A tree, and a listener counting everything its model announces.'
-            var fileSystem = Var.of(FsNode, dir("r", "root", doc("a", "notes.txt")))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode, new Doc("a", "notes.txt"))))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
                         .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })
@@ -541,10 +539,10 @@ class Tree_Update_Spec extends Specification
             is true after the tree has finished moving, and only when it is news.
         """
         given : 'A file system with a document selected somewhere inside it.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("a", "assets", doc("a1", "logo.svg")),
-                                        doc("b", "README.md")
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("a", "assets", Tuple.of(FsNode, new Doc("a1", "logo.svg"))),
+                                        new Doc("b", "README.md")
+                                    )))
             var selection = Var.of(Tuple.of(String))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
@@ -567,7 +565,7 @@ class Tree_Update_Spec extends Specification
 
         when : 'A new file appears somewhere else entirely, which is a structural change.'
             seen.clear()
-            UI.runNow({ fileSystem.update({ Dir root -> root.withEntries(root.entries().add(doc("c", "CHANGELOG.md"))) }) })
+            UI.runNow({ fileSystem.update({ Dir root -> root.withEntries(root.entries().add(new Doc("c", "CHANGELOG.md"))) }) })
 
         then : 'It is on screen...'
             visibleRows(tree).contains("    CHANGELOG.md")
@@ -587,9 +585,9 @@ class Tree_Update_Spec extends Specification
             was removed, there is nothing to restore, and the property has to hear about it.
         """
         given : 'A file system with a document selected, which we are about to delete.'
-            var fileSystem = Var.of(FsNode, dir("r", "root",
-                                        dir("a", "assets", doc("a1", "logo.svg"), doc("a2", "icon.svg"))
-                                    ))
+            var fileSystem = Var.of(FsNode, new Dir("r", "root", Tuple.of(FsNode,
+                                        new Dir("a", "assets", Tuple.of(FsNode, new Doc("a1", "logo.svg"), new Doc("a2", "icon.svg")))
+                                    )))
             var selection = Var.of(Tuple.of(String, "r", "a", "a1"))
             var tree =
                     UI.tree(FsNode, fileSystem, { conf -> conf
@@ -640,7 +638,7 @@ class Tree_Update_Spec extends Specification
             visibleRows(tree) == []
 
         when : 'The file system arrives.'
-            UI.runNow({ fileSystem.set(dir("r", "root", doc("a", "notes.txt"))) })
+            UI.runNow({ fileSystem.set(new Dir("r", "root", Tuple.of(FsNode, new Doc("a", "notes.txt")))) })
         then : 'It is on screen, root opened, exactly as if it had been there all along.'
             visibleRows(tree) == ["root", "    notes.txt"]
 

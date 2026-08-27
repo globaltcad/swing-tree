@@ -35,20 +35,20 @@ public final class TreeSelectionDelegate<I, N>
         thread, so reading them from here later would be a race under DECOUPLED. Values,
         ids and id paths are all immutable, so a snapshot of them needs no copy.
     */
-    private final JTree                   _tree;
-    private final PropertyTreeModel<I, N> _model;
-    private final @Nullable N             _lead;
-    private final @Nullable Object[]      _leadIdPath;
-    private final Tuple<N>                _selection;
-    private final Tuple<N>                _pathToLead;
-    private final Tuple<I>                _leadPath;
-    private final Tuple<Tuple<I>>         _selectionPaths;
+    private final JTree                      _tree;
+    private final PropertyTreeModel<I, N, ?> _model;
+    private final @Nullable N                _lead;
+    private final @Nullable Object[]         _leadIdPath;
+    private final Tuple<N>                   _selection;
+    private final Tuple<N>                   _pathToLead;
+    private final Tuple<I>                   _leadPath;
+    private final Tuple<Tuple<I>>            _selectionPaths;
 
     TreeSelectionDelegate(
-        JTree                 tree,
-        PropertyTreeModel<I, N> model,
-        @Nullable TreePath    leadPath,
-        @Nullable TreePath[]  selectedPaths
+        JTree                      tree,
+        PropertyTreeModel<I, N, ?> model,
+        @Nullable TreePath         leadPath,
+        @Nullable TreePath[]       selectedPaths
     ) {
         _tree           = Objects.requireNonNull(tree);
         _model          = Objects.requireNonNull(model);
@@ -88,7 +88,7 @@ public final class TreeSelectionDelegate<I, N>
         return ( last instanceof TreeNodeRef ? ((TreeNodeRef) last).idPath() : null );
     }
 
-    private static <I, N> @Nullable N _nodeOf( PropertyTreeModel<I, N> model, @Nullable TreePath path ) {
+    private static <I, N> @Nullable N _nodeOf( PropertyTreeModel<I, N, ?> model, @Nullable TreePath path ) {
         if ( path == null )
             return null;
         Object value = model.valueOf(path.getLastPathComponent());
@@ -122,20 +122,22 @@ public final class TreeSelectionDelegate<I, N>
     }
 
     /**
-     *  The chain of nodes from the root of the tree down to (and including) the
+     *  The chain of nodes from the top of the tree down to (and including) the
      *  {@link #lead()} node, which is how you learn where in the structure the selection
-     *  landed. It is empty when the selection was cleared.
-     *  @return The nodes leading from the root to the selected node.
+     *  landed. It is empty when the selection was cleared. A forest has no root, so its
+     *  trails begin at the top level node the selection sits under.
+     *  @return The nodes leading from the top of the tree to the selected node.
      */
     public Tuple<N> pathToLead() {
         return _pathToLead;
     }
 
     /**
-     *  The identity of the selected position: the ids leading from the root down to the
-     *  {@link #lead()} node, the root's own id first. This is the same value a property
-     *  bound with {@link UIForTree#withSelection(sprouts.Var)} receives, and it is empty
-     *  when the selection was cleared rather than moved.
+     *  The identity of the selected position: the ids leading from the top of the tree down
+     *  to the {@link #lead()} node, the root's own id first — or, in a forest, the id of the
+     *  top level node it sits under. This is the same value a property bound with
+     *  {@link UIForTree#withSelection(sprouts.Var)} receives, and it is empty when the
+     *  selection was cleared rather than moved.
      *  <p>
      *  Where {@link #pathToLead()} answers "what is selected", this answers "which position
      *  is selected" — the question a node value cannot answer on its own, because the same
@@ -159,8 +161,8 @@ public final class TreeSelectionDelegate<I, N>
 
     /**
      *  A writable property focused on the selected node, so that an action reacting to a
-     *  selection can go straight on to edit what was selected, and the edit lands in the
-     *  single root property the tree is bound to.
+     *  selection can go straight on to edit what was selected, and the edit lands in the one
+     *  property the tree is bound to.
      *  <p>
      *  It is empty when nothing is selected, or when the tree was bound to a read only
      *  {@link sprouts.Val}, in which case there is nothing to write into.

@@ -1,9 +1,13 @@
 # Growing Forests #
 
-> **Status: design sketch.** Nothing described here is built. This is the plan for a
-> follow-up iteration on top of the `UI.tree(..)` binding that landed in
-> [Growing Trees](../markdown/Growing-Trees.md), written so that someone who did not
-> take part in the discussion can execute it.
+> **Status: implemented.** This started life as a design sketch and is kept as the record of
+> why the API looks the way it does. What shipped follows it closely; the places it departs
+> from the sketch are listed under *Decisions taken* at the end, and the
+> `withInitialExpansionDepth(..)` measurements there are the ones the fix was written against.
+>
+> The user-facing prose lives in
+> [Growing Trees § *Several boxes on the van floor*](../markdown/Growing-Trees.md), and the
+> executable catalogue in `Tree_Forest_Spec` ("Growing a Forest from a Property").
 
 ---
 
@@ -24,8 +28,8 @@ shelves, a scene holds several graphs. Their natural shape is a property holding
 Var<Tuple<FsNode>> projects;
 ```
 
-Today that has to be squeezed into the single-root form by inventing a node type which
-is not part of the domain:
+Before this work, that had to be squeezed into the single-root form by inventing a node
+type which is not part of the domain:
 
 ```java
 public sealed interface FsNode extends HasId<String> { .. }
@@ -93,7 +97,7 @@ tree" without reintroducing exactly the container it was trying to avoid.
 
 ---
 
-## The proposed API ##
+## The API ##
 
 A parallel family of factory methods named `trees(..)`, plural, because what is bound is
 several top-level nodes and because the name then says at a glance which of the two
@@ -104,14 +108,21 @@ forms a call site is using.
 static <I, N extends HasId<I>> UIForTree<I,N,UI.Tree> trees( Var<Tuple<N>> roots, Configurator<TreeConf<I,N>> conf );
 static <I, N extends HasId<I>> UIForTree<I,N,UI.Tree> trees( Val<Tuple<N>> roots, Configurator<TreeConf<I,N>> conf );
 
-// node types which cannot implement HasId: name the identity type, declare conf.idOf(..)
-static <I, N> UIForTree<I,N,UI.Tree> trees( Class<I> idType, Var<Tuple<N>> roots, Configurator<TreeConf<I,N>> conf );
-static <I, N> UIForTree<I,N,UI.Tree> trees( Class<I> idType, Val<Tuple<N>> roots, Configurator<TreeConf<I,N>> conf );
+// the tuple's element type is narrower than the tree's nodes: name the node type
+static <I, N extends HasId<I>> UIForTree<I,N,UI.Tree> trees( Class<N> nodeType, Var<Tuple<N>> roots, Configurator<TreeConf<I,N>> conf );
+static <I, N extends HasId<I>> UIForTree<I,N,UI.Tree> trees( Class<N> nodeType, Val<Tuple<N>> roots, Configurator<TreeConf<I,N>> conf );
+
+// node types which cannot implement HasId: name both types, declare conf.idOf(..)
+static <I, N> UIForTree<I,N,UI.Tree> trees( Class<N> nodeType, Class<I> idType, Var<Tuple<N>> roots, Configurator<TreeConf<I,N>> conf );
+static <I, N> UIForTree<I,N,UI.Tree> trees( Class<N> nodeType, Class<I> idType, Val<Tuple<N>> roots, Configurator<TreeConf<I,N>> conf );
 
 // a TreeConf you already hold
 static <I, N> UIForTree<I,N,UI.Tree> trees( Var<Tuple<N>> roots, TreeConf<I,N> conf );
 static <I, N> UIForTree<I,N,UI.Tree> trees( Val<Tuple<N>> roots, TreeConf<I,N> conf );
 ```
+
+Eight overloads, positionally identical to the eight `tree(..)` has. (The sketch originally
+proposed a three-argument form naming the *identity* type instead; see *Decisions taken*.)
 
 Note what is missing compared with `tree(..)`: there is no `Class<N> nodeType`
 parameter in the common case. A `Tuple` carries its element type at runtime
@@ -120,13 +131,8 @@ what its nodes are instead of being told.
 
 That inference has one failure mode which needs an escape hatch: a tuple built as
 `Tuple.of(Dir.class, ..)` and assigned to a `Var<Tuple<FsNode>>` reports `Dir` as its
-element type, which would make the configuration reject `Doc` nodes below it. So keep
-one explicit overload for the case where the tuple's element type is narrower than the
-tree's node type:
-
-```java
-static <I, N> UIForTree<I,N,UI.Tree> trees( Class<N> nodeType, Class<I> idType, Var<Tuple<N>> roots, Configurator<TreeConf<I,N>> conf );
-```
+element type, which would make the configuration reject `Doc` nodes below it. That is what
+the three-argument overload above is for.
 
 **A `TreeConf` describes node types, not root shape**, so the very same configuration
 value binds through `tree(..)` and through `trees(..)`. That is worth preserving: it is
@@ -184,8 +190,8 @@ which is precisely the forest handle's situation.
 ## What changes, site by site ##
 
 The risk in this work is **not** the path arithmetic. It is that a forest handle wraps
-no node value, and several places currently assume that a handle always does. Each of
-these needs a decision, and the middle column is what the code does today.
+no node value, and several places assumed that a handle always does. Each of these needed
+a decision; the middle column is what the code did before this landed.
 
 ### `PropertyTreeModel`
 
@@ -274,11 +280,11 @@ already has.
 
 ---
 
-## Open decisions ##
+## Decisions taken ##
 
-**1. `withInitialExpansionDepth(..)` counts the invisible root.** It compares
+**1. `withInitialExpansionDepth(..)` counted the invisible root.** It compared
 `TreePath.getPathCount()`, which includes the root whether or not the root is drawn.
-Measured against the current implementation:
+Measured against the implementation as it then stood:
 
 ```
 visible root, depth 1:  root / src / README.md          <- the root opened
@@ -286,27 +292,59 @@ hidden  root, depth 1:  src / README.md                 <- nothing opened
 hidden  root, depth 2:  src / deep / README.md          <- the top level opened
 ```
 
-So the argument means one thing for a visible root and one less for a hidden one. Today
-that is a wart on an uncommon configuration. Under `trees(..)` a hidden root is the only
-configuration, so it becomes the default experience.
+So the argument meant one thing for a visible root and one less for a hidden one. Under
+`trees(..)` a hidden root is the *only* configuration, which would have made that the default
+experience.
 
-Recommendation: count depth from the first **visible** level, so `depth(1)` opens the
-top-level nodes in both forms. This changes the existing hidden-root behaviour of
-`tree(..)`, which is a small break, but the current behaviour is hard to defend as
-intentional. The alternative — fixing it only for `trees(..)` — leaves two rules for one
-method and should be rejected.
+**Taken: depth counts from the first visible level in both forms**, so `depth(1)` opens the
+top level whether the root is drawn, hidden, or absent. This is a behaviour change for
+`tree(..).withRootVisible(false).withInitialExpansionDepth(n)`; the alternative, fixing it
+only for `trees(..)`, would have left two rules for one method. Three scenarios pin it, and
+they do fail if the offset is removed. It has one ordering consequence, now documented on the
+method: it reads `isRootVisible()`, so it has to be called *after* `withRootVisible(false)`.
 
-**2. Node type inference from `Tuple.type()`.** Recommended as the default, with the
-explicit four-argument overload as the escape hatch. Worth confirming that
-`Tuple.type()` on an *empty* tuple reports the declared element type in every
-construction path sprouts offers, since a forest that starts empty is the ordinary case.
+**2. Node type inference from `Tuple.type()`.** Confirmed by measurement, which was the open
+question: an empty tuple reports its declared element type through every construction path
+sprouts offers — `Tuple.of(Class)`, `Tuple.of(Class, Iterable)`, and a tuple emptied by
+`removeAll` — so a forest which starts empty, the ordinary state on first launch, still knows
+what it is a forest of. `Var.of(tuple).type()` is *not* usable for this: it reports the
+concrete implementation class rather than `Tuple`, and carries no element type at all. The
+inference therefore reads `roots.orElseNull().type()`, and only a property holding no tuple
+at all leaves the question unanswered, which is logged naming the overload to reach for.
 
-**3. Whether `trees(..)` should also accept `Vals<N>`** (a sprouts property *list*)
-rather than only `Var<Tuple<N>>`. Probably not — the tuple form is the one the rest of
-the immutable-value API is built on — but it should be a decision rather than an
-omission.
+**3. `Vals<N>` was rejected.** The tuple form is the one the rest of the immutable-value API
+is built on, and a second binding shape would have doubled the surface for nothing.
 
----
+**4. The overload family mirrors `tree(..)` positionally.** The sketch proposed
+`trees(Class<I> idType, Var<Tuple<N>>, conf)` as the three-argument form, on the grounds that
+the node type is inferred and the id type is therefore the only one left to name. Rejected:
+`tree(SomeClass.class, root, conf)` names the *node* type, and a `trees(..)` next to it in the
+same file naming the *id* type instead is a trap no javadoc undoes. Argument one now means the
+same thing in both, and the escape hatch for inference is that three-argument form rather than
+a signature of its own.
+
+**5. `TreeRoots` — option 2 of the two the sketch offered.** A package-private pair of
+operations, "read the top level nodes out of the bound value" and "write them back", with two
+implementations: `single` wraps and unwraps one root, `forest` is the identity on the tuple.
+`TreePathLens<I,N,R> implements Lens<R,N>` and `PropertyTreeModel<I,N,R>` are then written once
+for both forms, and the descent is uniform from the first id downwards, because the top level
+is a tuple of siblings either way. `UIForTree<I,N,T>` is untouched: it holds the model as
+`PropertyTreeModel<I,N,?>`, and every method it calls on it is independent of `R`.
+
+The hazard the sketch named is respected — the update walk never goes through `TreeRoots`. A
+single rooted tree's `applyNewValue` compares the two `R` values directly and hands them to
+`_syncNode`, so nothing is allocated and reference identity still short-circuits everything the
+change did not touch. Only the forest branch calls `TreeRoots.of(..)`, where it is the identity
+on a tuple the property already holds.
+
+**6. One change the sketch did not foresee: `TreeNodeRef.path()`.** It sized the `TreePath`
+from the length of the id path, which is exact for a single rooted tree — a node's id path and
+its chain of handles are the same length — and one short for every node under a forest handle,
+which contributes a component to the path without contributing an id. A top level node would
+have produced a `TreePath` of `[node]` rather than `[forest, node]`, which is not a path a
+`JTree` can resolve. The handle now carries its depth explicitly and walks its parent chain.
+The empty case matters too: `new TreePath(new Object[0])` throws, so the forest handle's own
+path is `[forest]` — one component, exactly as a root handle's is.
 
 ## What this does not change ##
 
@@ -316,18 +354,16 @@ still begin with the root's own id.
 
 ---
 
-## Documentation to update when this lands ##
+## Documentation, as it landed ##
 
-- [`Growing-Trees.md`](../markdown/Growing-Trees.md) — the section beginning
-  *"`withRootVisible(false)` deserves a word"* currently presents the wrapper idiom as
-  the design ("a bound tree always has exactly one root — and that root is very often a
-  container nobody needs to see"). Once forests are first-class, that paragraph is
-  describing a workaround as though it were intent.
+- [`Growing-Trees.md`](../markdown/Growing-Trees.md) — a new section, *Several boxes on the
+  van floor*, and a rewrite of the paragraph beginning *"`withRootVisible(false)` deserves a
+  word"*, which used to present the wrapper idiom as the design.
 - [`agent-skills/SKILL.md`](../agent-skills/SKILL.md) — the component table, the tree
-  section's method list, and the cheat sheet all name `tree(..)` only.
-- [`markdown/README.md`](../markdown/README.md) — no change needed unless this sketch
-  grows into a wiki page of its own.
-- New scenarios in `Tree_Binding_Spec`, `Tree_Update_Spec` and
-  `Tree_Selection_And_Editing_Spec`, mirroring the single-root ones: a forest is bound,
-  a top-level node is added and removed, a selection path has no synthetic first
-  element, and an edit nine levels down still produces one new tuple value.
+  section and the cheat sheet.
+- [`markdown/README.md`](../markdown/README.md) — one line, on the *Growing Trees* row.
+- `Tree_Forest_Spec` — a living document of its own, *Growing a Forest from a Property*,
+  rather than an appendix on each of the three single-root ones. The binding, the update walk,
+  selection, editing and the cost story all read as one story for a forest, and splitting them
+  across three documents would have left each with a lopsided tail. `Tree_Binding_Spec` keeps
+  one scenario of its own for the expansion-depth change, since that is `tree(..)` behaviour.

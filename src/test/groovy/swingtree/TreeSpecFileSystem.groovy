@@ -23,33 +23,28 @@ import javax.swing.tree.TreePath
  *  final fields, wither methods, value based equality, and an {@code id()} which
  *  {@link HasId} exposes to the binding.
  *
+ *  <p>A forest built with {@code UI.trees(..)} is made of these very same node types; the
+ *  only difference is that its top level is a {@code Tuple<FsNode>} rather than one {@code Dir}.
+ *
  *  <p>The three observers below all answer in the labels a user would read off the screen,
  *  rather than in the node handles a bound tree keeps inside its paths. They ask their
  *  questions on the UI thread, which is where a tree may be asked anything at all.
  */
 final class TreeSpecFileSystem {
 
-    /** Builds a directory holding the given entries. */
-    static Dir dir( String id, String name, FsNode... entries ) {
-        return new Dir(id, name, Tuple.of(FsNode, entries))
-    }
-
-    /** Builds a document, which is a leaf because no rule ever gives it children. */
-    static Doc doc( String id, String name, String body = "" ) {
-        return new Doc(id, name, body)
-    }
-
     /**
-     *  Every row the tree currently shows, indented by depth and labelled exactly the way
-     *  its cell renderer labels it. This is deliberately not a peek at the model: it asks
-     *  the same questions the painting code asks, so a scenario asserting on it is
-     *  asserting on what a user sees.
+     *  Every row the tree currently shows, indented by its depth below the topmost visible
+     *  level and labelled exactly the way its cell renderer labels it. This is deliberately
+     *  not a peek at the model: it asks the same questions the painting code asks, so a
+     *  scenario asserting on it is asserting on what a user sees.
      */
     static List<String> visibleRows( JTree tree ) {
         return UI.runAndGet({
+            // A root the tree does not draw is no level of its own, so it does not indent:
+            var offset = ( tree.isRootVisible() ? 1 : 2 )
             (0..<tree.getRowCount()).collect { int row ->
                 var path = tree.getPathForRow(row)
-                return ("    " * (path.getPathCount() - 1)) + _labelOf(tree, path, row)
+                return ("    " * (path.getPathCount() - offset)) + _labelOf(tree, path, row)
             }
         })
     }
@@ -115,7 +110,7 @@ final class Doc implements FsNode {
     private final String _name
     private final String _body
 
-    Doc( String id, String name, String body ) {
+    Doc( String id, String name, String body = "" ) {
         _id = id; _name = name; _body = body
     }
     @Override String id()   { return _id }
