@@ -141,6 +141,12 @@ class Html_Editor_Font_Styling_Spec extends Specification
             We verify that: (a) CSS is injected at scale > 1, (b) heading
             sizes scale proportionally with `UI.scale()`, and (c) settled
             output doesn't grow unboundedly.
+
+            NB: the heading sizes are derived from the Look & Feel's default
+            base font (which varies per platform — e.g. 15pt on this test
+            setup's Ubuntu, 12pt on Windows' Segoe UI). We therefore assert on
+            the exact pt value *derived from the live font size* rather than on
+            a hard-coded digit, so the check holds on every platform.
         """
         given :
             var editor = UI.runAndGet({
@@ -178,12 +184,23 @@ class Html_Editor_Font_Styling_Spec extends Specification
             UI.sync() // Await one EDT cycle just to make sure...
             String textBackTo1 = UI.runAndGet(()->editor.getText())
 
+            // Capture the platform/L&F default base font size at each scale. The
+            // injected h1..h6 values are computed as fixed multiples of this base
+            // (see LabelStyleInstallerUtility._buildHtmlScalingDefaultsCss), so we
+            // derive the *expected* pt value from the live font size rather than
+            // hard-coding a platform-dependent digit run.
+            int baseAt2 = UI.runAndGet(()-> { SwingTree.get().setUiScaleFactor(2f); editor.getFont().getSize() })
+            int baseAt3 = UI.runAndGet(()-> { SwingTree.get().setUiScaleFactor(3f); editor.getFont().getSize() })
+            SwingTree.get().setUiScaleFactor(1f)
+
         then : 'Heading CSS appears at scale > 1 (body + h1..h6 ≥ 7 rules):'
             (textAt2 =~ /font-size:/).count >= 7
             (textAt3 =~ /font-size:/).count >= 7
-        and : 'Scale 2+ contain heading overrides (h2 present):'
-            textAt3.contains('font-size: 6')
-            textAt2.contains('font-size: 4')
+        and : 'Scale 2+ contain the expected scaled heading overrides (h2 present at the derived size):'
+            // h2 = round(base * 1.50). Asserting the exact derived substring (e.g. "font-size: 45pt")
+            // pins the scaling contract without depending on the platform default font size.
+            textAt3.contains('h2 { font-size: ' + Math.round(baseAt3 * 1.50f) + 'pt }')
+            textAt2.contains('h2 { font-size: ' + Math.round(baseAt2 * 1.50f) + 'pt }')
         and : 'After returning to scale 1 the stale injected CSS is stripped again (like a JLabel):'
             !textBackTo1.contains('font-size')
     }
