@@ -17,6 +17,7 @@ import swingtree.layout.Bounds;
 
 import javax.swing.*;
 import javax.swing.border.Border;
+import javax.swing.plaf.basic.BasicHTML;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.Objects;
@@ -146,17 +147,23 @@ final class StyleInstaller<C extends JComponent>
         final StyleConf   newStyle
     ) {
         /*
-            Note that HTML-label style correction must always run for every installation
-            pipeline — including the two short-circuits when the component is not styled
-            or the style did not change:
-            (oldStyle.equals(newStyle) and !isStyled). Both fire for a plain
-            `UI.html("...")` with no styler attached, because its `StyleConf`
-            is `StyleConf.none()` and never changes. Without this anchor the
-            inline `font-size:NNpx|pt` declarations would not track
-            `UI.scale()` for those labels.
+            HTML scaling / FontConf injection must run every paint cycle.
+            JLabel uses the standard settle-check (works because BasicHTML
+            does NOT re-normalise the document model on round-trip).
+            JEditorPane uses a settle-guard that extracts our injected CSS
+            block rather than comparing whole strings — HTMLEditorKit
+            normalises whitespace/comments/structure so string equality
+            perpetually fails and would cause an infinite setText loop.
         */
-        if ( owner instanceof JLabel )
-            LabelStyleInstallerUtility._applyHtmlScalingAndStyle((JLabel) owner, newStyle.font());
+        if ( owner instanceof JLabel ) {
+            LabelStyleInstallerUtility._applyHtmlScalingAndStyle(
+                (JLabel) owner, newStyle.font()
+            );
+        } else if ( owner instanceof JEditorPane ) {
+            LabelStyleInstallerUtility.htmlSettles(
+                (JEditorPane) owner, newStyle.font()
+            );
+        }
 
         StyleConf adjustedStyle = newStyle;
         if ( StyleUtil.isUndefinedColor(owner.getBackground()) ) {

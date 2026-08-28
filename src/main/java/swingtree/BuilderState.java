@@ -156,7 +156,11 @@ final class BuilderState<C extends java.awt.Component>
             ComponentUI componentUI = LibraryInternalCrossPackageStyleUtil._findComponentUIOf((JComponent) component);
             if ( componentUI instanceof SwingTreeStyledComponentUI<?> ) {
                 ComponentExtension.from(jComponent).gatherApplyAndInstallStyle(false);
-            } else if ( jComponent instanceof JLabel && BasicHTML.isHTMLString(((JLabel)jComponent).getText()) ) {
+            } else if ( jComponent instanceof JLabel
+                    && BasicHTML.isHTMLString( ((JLabel)jComponent).getText() ) ) {
+                ComponentExtension.from(jComponent).gatherApplyAndInstallStyle(false);
+            } else if ( jComponent instanceof JEditorPane
+                    && BasicHTML.isHTMLString( ((JEditorPane)jComponent).getText() ) ) {
                 ComponentExtension.from(jComponent).gatherApplyAndInstallStyle(false);
             }
         }
