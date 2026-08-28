@@ -196,6 +196,8 @@ class Html_Editor_Font_Styling_Spec extends Specification
         then : 'Heading CSS appears at scale > 1 (body + h1..h6 ≥ 7 rules):'
             (textAt2 =~ /font-size:/).count >= 7
             (textAt3 =~ /font-size:/).count >= 7
+        and : 'At the initial scale 1 no scaling CSS has been injected yet (injection only fires when UI.scale() != 1):'
+            !textAt1.contains('font-size')
         and : 'Scale 2+ contain the expected scaled heading overrides (h2 present at the derived size):'
             // h2 = round(base * 1.50). Asserting the exact derived substring (e.g. "font-size: 45pt")
             // pins the scaling contract without depending on the platform default font size.
@@ -204,7 +206,6 @@ class Html_Editor_Font_Styling_Spec extends Specification
         and : 'After returning to scale 1 the stale injected CSS is stripped again (like a JLabel):'
             !textBackTo1.contains('font-size')
     }
-
 
 
     def 'At scale 2, a bare-heading JEditorPane renders headings at the scaled size.'()
@@ -233,6 +234,8 @@ class Html_Editor_Font_Styling_Spec extends Specification
 
         then : 'Injected CSS contains heading rules with scaled pt values:'
             (textAt2 =~ /font-size:/).count >= 7
+        and : 'At the scale-1 baseline no injected CSS is present — scaling only kicks in when UI.scale() != 1:'
+            !textAt1.contains('font-size')
     }
 
 
@@ -278,6 +281,8 @@ class Html_Editor_Font_Styling_Spec extends Specification
 
         then : 'Injected CSS appears when scale > 1 (headings are scaled):'
             textAt2.contains('font-size')
+        and : 'At scale 1 the inline `14px` size passes through un-scaled (only the injected heading CSS is what grows with UI.scale()):'
+            textAt1.contains('14px')
 
         when :
             // After settling, repeated cycles at same scale should produce stable output.
