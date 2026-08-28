@@ -154,24 +154,28 @@ class Html_Editor_Font_Styling_Spec extends Specification
                 SwingTree.get().setUiScaleFactor(1f)
                 ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)
             })
+            UI.sync() // Await one EDT cycle just to make sure...
             String textAt1 = UI.runAndGet(()->editor.getText())
 
             UI.runNow({
                 SwingTree.get().setUiScaleFactor(2f)
                 ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)
             })
+            UI.sync() // Await one EDT cycle just to make sure...
             String textAt2 = UI.runAndGet(()->editor.getText())
 
             UI.runNow({
                 SwingTree.get().setUiScaleFactor(3f)
                 ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)
             })
+            UI.sync() // Await one EDT cycle just to make sure...
             String textAt3 = UI.runAndGet(()->editor.getText())
 
             UI.runNow({
                 SwingTree.get().setUiScaleFactor(1f)
                 ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)
             })
+            UI.sync() // Await one EDT cycle just to make sure...
             String textBackTo1 = UI.runAndGet(()->editor.getText())
 
         then : 'Heading CSS appears at scale > 1 (body + h1..h6 ≥ 7 rules):'
