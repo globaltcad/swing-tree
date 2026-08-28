@@ -177,8 +177,9 @@ class Parent_Filter_Spec extends Specification
         String description, boolean secondFilters, boolean thirdFilters, boolean fourthFilters
     ) {
         reportInfo """
-            The previous scenario asks whether one neighbour can reach a pane. This one asks
-            whether the reach adds up.
+            A pane shows a stable picture of its parent, and a sibling which also looks at that
+            parent cannot change it. Once that is true for a single neighbour, the question is
+            whether it holds as the neighbours *add up*.
 
             Four panes sit in a row over the same noisy parent. The first of them always blurs
             it, and the other three are switched between filtering and not, one row of the
@@ -191,7 +192,7 @@ class Parent_Filter_Spec extends Specification
             blurred as many times over as it has neighbours.
         """
         given : """
-            The same fine-grained noise as before, this time under four equally sized panes.
+            A parent painted in fine-grained noise, this time under four equally sized panes.
             The first pane is the one under test and always filters; the other three filter or
             not according to the row of the table below.
         """
@@ -222,7 +223,7 @@ class Parent_Filter_Spec extends Specification
                 parent.doLayout()
                 return Utility.renderSingleComponent(parent)
             }
-        and : 'The same pixel count as before, over the first of the four panes.'
+        and : 'A count of pixels differing between two renderings, over just the first of the four panes.'
             var pixelsDifferingInTheFirstPane = { BufferedImage a, BufferedImage b ->
                 int count = 0
                 for ( int y = 0; y < a.height; y++ )
@@ -269,6 +270,8 @@ class Parent_Filter_Spec extends Specification
             filter which only ever looks at the freshly repainted strip is looking at a parent
             with a hole around it, and paints the hole.
 
+            The requirement is that a pane renders identically whatever rectangle Swing asks
+            for: a partial repaint is an optimisation, not a licence to change the picture.
             The rows below repaint through three different rectangles: one lying wholly inside
             the pane, one straddling its edge, and - as a control which must pass either way -
             one covering the whole component, which is simply the full repaint again.
@@ -308,7 +311,7 @@ class Parent_Filter_Spec extends Specification
                     return image
                 })
             }
-        and : 'The same pixel count as before, over a rectangle of our choosing.'
+        and : 'A count of pixels differing between two renderings, over a rectangle of our choosing.'
             var pixelsDifferingInside = { BufferedImage a, BufferedImage b,
                                           int x, int y, int width, int height ->
                 int count = 0
@@ -345,10 +348,9 @@ class Parent_Filter_Spec extends Specification
         String description, int clipX, int clipY, int clipWidth, int clipHeight
     ) {
         reportInfo """
-            This is the previous scenario as a user meets it. A window is already on screen, and
-            something small happens on it - the pointer arrives on a button, a caret blinks, a
-            progress bar ticks. Swing does not redraw the window; it redraws that rectangle,
-            over what is already there.
+            A window is already on screen, and something small happens on it - the pointer
+            arrives on a button, a caret blinks, a progress bar ticks. Swing does not redraw the
+            window; it redraws that rectangle, over what is already there.
 
             Nothing about the window has changed here, so redrawing any rectangle of it has to
             leave it exactly as it was. That makes every pixel of the window an assertion,
@@ -432,16 +434,17 @@ class Parent_Filter_Spec extends Specification
         String description, Closure<FilterConf> filter
     ) {
         reportInfo """
-            The scenarios above put one filter through its paces. This one puts every kind of
-            filter through the first of them.
+            A pane shows a picture of its parent, and no sibling can change it. A blur is only
+            the most familiar way to configure that picture; the rest of the filtering API has
+            to be trusted in the same way.
 
-            A blur is only the most familiar way to configure `parentFilter(..)`. The parent can
-            also be slid with `offset(..)`, magnified with `scale(..)`, run through a convolution
-            matrix of one's own with `kernel(..)`, and confined to one area of the component with
-            `area(..)` - and any of those may be combined with a blur. Each is a different route
-            through the filtering code, so the guarantee the previous scenarios establish for a
-            blur has to be established for each of them separately: what a pane shows is a
-            picture of its parent, and a sibling looking at the same parent cannot change it.
+            `parentFilter(..)` can also slide the parent with `offset(..)`, magnify it with
+            `scale(..)`, run it through a convolution matrix of one's own with `kernel(..)`, and
+            confine the result to one area of the component with `area(..)` - and any of those
+            may be combined with a blur. Each is a different route through the filtering code,
+            so the guarantee has to be established for each of them separately: what a pane
+            shows is a picture of its parent, and a sibling looking at the same parent cannot
+            change it.
 
             The blur radii in the table are chosen to land on either side of the point at which
             a wide blur stops being convolved pixel by pixel. Beyond a certain radius the parent
@@ -451,7 +454,7 @@ class Parent_Filter_Spec extends Specification
             of the threshold is what keeps both of them covered.
         """
         given : """
-            Two panes side by side over a noisy parent, as in the first scenario, except that
+            Two panes side by side over a noisy parent, except that
             what the panes are asked to do is now whatever the row of the table says.
         """
             var twoPanesWhere = { boolean leftFilters, boolean rightFilters ->
@@ -478,7 +481,7 @@ class Parent_Filter_Spec extends Specification
                 parent.doLayout()
                 return Utility.renderSingleComponent(parent)
             }
-        and : 'The same pixel count as in the first scenario, over a half of the rendering.'
+        and : 'A count of pixels differing between two renderings, over a half of the rendering.'
             var pixelsDifferingBetween = { BufferedImage a, BufferedImage b, int fromX, int toX ->
                 int count = 0
                 for ( int y = 0; y < a.height; y++ )
@@ -529,16 +532,23 @@ class Parent_Filter_Spec extends Specification
         String description, Closure<FilterConf> filter
     ) {
         reportInfo """
-            This is the partial repaint scenario above, asked of every kind of filter rather
-            than of a blur alone.
+            Swing repaints as little as it can: when only part of a window is touched, only that
+            rectangle is redrawn, as a clip on the graphics. A pane using `parentFilter(..)`
+            has to show the same picture there as it would in a full repaint - and that has to
+            hold for every way the filter is configured, not just for a blur.
 
-            It is the sharper of the two questions for a wide blur, because of *how* a wide blur
-            is computed. The parent is shrunk before it is convolved, and the region which is
-            shrunk is the part of the parent the pane needs - which is smaller when Swing asks
-            for a smaller rectangle to be redrawn. So the pixels a filter samples the parent at
-            are decided by something which changes from one repaint to the next, and a filter
-            which let that reach its output would give a pane which shifts, very slightly, every
-            time the pointer passes over it.
+            It is a sharper question for a wide blur than for a narrow one, because of *how* a
+            wide blur is computed. The parent is shrunk before it is convolved, and the region
+            which is shrunk is the part of the parent the pane needs - which is smaller when
+            Swing asks for a smaller rectangle to be redrawn. So the pixels a filter samples
+            the parent at are decided by something which changes from one repaint to the next,
+            and a filter which let that reach its output would give a pane which shifts, very
+            slightly, every time the pointer passes over it.
+
+            The requirement is plain: whatever rectangle Swing asks for, and however the
+            filter is configured, the picture in that rectangle has to match what a full
+            repaint puts there. Every row below is a different route through the filtering
+            code, and a defect hiding in any one of those routes is a defect this catches.
         """
         given : """
             A parent painted in fine-grained noise, inset by 40 pixels all round, with a single
@@ -558,7 +568,7 @@ class Parent_Filter_Spec extends Specification
                     .get(JPanel)
             parent.setSize(240, 160)
             parent.doLayout()
-        and : 'The same way of painting it through a clip of our choosing as in the scenario above.'
+        and : 'A way of painting the parent through a clip of our choosing.'
             var paintedThroughClip = { int x, int y, int width, int height ->
                 return UI.runAndGet(() -> {
                     var image = Utility.createDeterministicImage(240, 160)
@@ -614,13 +624,16 @@ class Parent_Filter_Spec extends Specification
         String description, int blurRadius
     ) {
         reportInfo """
-            The scenarios above are about *repeatability*: a pane shows a stable picture of its
-            parent. This one is about *effect*. A blur which is computed on a shrunk raster and
-            stretched back out still has to read as a blur - the wider the radius, the more of
-            the fine detail it has to remove. The rows land on the points where the shrinking
-            grows: crossing into it (8), a step deep (16), at the cap (64) and beyond it (100).
-            A blur which silently stopped blurring at any of them would pass every repeatability
-            scenario above while showing a sharp parent.
+            A blur has to actually blur: the wider the radius a pane is asked for, the more
+            fine detail it has to remove. That is the requirement this scenario is here to
+            guard, and the reason it has to be guarded at all is a shortcut. Beyond a small
+            radius the parent is shrunk before it is convolved and stretched back out
+            afterwards, and the danger is that this performance optimisation quietly decides
+            the blur is no longer needed and stops. The rows land on the points where that
+            shrinking grows: crossing into it (8), a step deep (16), at the cap (64) and
+            beyond it (100). A blur which dropped out at any of them would leave the pane
+            looking sharp while the API still promises a blur - a promise the library quietly
+            broke, which is exactly the defect this scenario is here to catch.
         """
         given : """
             A single pane spanning an entire noisy parent, filtering with this row's radius. The
@@ -687,7 +700,7 @@ class Parent_Filter_Spec extends Specification
             is only acceptable if it does not *sharpen* the parent: a pane told to blur more has
             to look more blurred, or the control reads the wrong way. Between radii where the
             blur is still visually meaningful this has to hold strictly. A defect which made the
-            shrinking re-introduce detail would pass the repeatability scenarios above.
+            shrinking re-introduce detail would pass a stability check while being wrong.
         """
         given : 'A pane over a full noisy parent, rendered at each of the two radii.'
             var parentWith = { int radius ->
@@ -707,7 +720,7 @@ class Parent_Filter_Spec extends Specification
                 parent.doLayout()
                 return Utility.renderSingleComponent(parent)
             }
-        and : 'The same fine-detail measure as above.'
+        and : 'A measure of fine detail: the mean difference between horizontally adjacent pixels.'
             var fineDetailOf = { BufferedImage img, int x, int y, int w, int h ->
                 double total = 0
                 long   n     = 0
@@ -734,11 +747,11 @@ class Parent_Filter_Spec extends Specification
 
     def 'A wide blur works on a pane flush against the far edge of its parent.'() {
         reportInfo """
-            A region is blured read well beyond the pixels it is drawn into. For a pane that
-            lies flush against the far edge of its parent that padding reaches past the parent,
-            where there are no pixels to read - the shrinking grows the window onto a grid,
-            and the grown cells past the far edge simply have nothing to contribute. This has
-            to be handled without an exception and without the pane changing what it shows
+            A blur gathers its colour from far beyond the pixels it is drawn into. For a pane
+            that lies flush against the far edge of its parent that padding reaches past the
+            parent, where there are no pixels to read - the shrinking grows the window onto a
+            grid, and the grown cells past the far edge simply have nothing to contribute. This
+            has to be handled without an exception and without the pane changing what it shows
             when only part of it is repainted.
         """
         given : """
@@ -762,7 +775,7 @@ class Parent_Filter_Spec extends Specification
                     .get(JPanel)
             parent.setSize(480, 320)
             parent.doLayout()
-        and : 'The same way of painting it through a clip of our choosing as above.'
+        and : 'A way of painting the parent through a clip of our choosing.'
             var paintedThroughClip = { int x, int y, int width, int height ->
                 return UI.runAndGet(() -> {
                     var image = Utility.createDeterministicImage(480, 320)
