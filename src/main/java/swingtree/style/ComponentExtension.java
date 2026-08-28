@@ -895,7 +895,16 @@ public final class ComponentExtension<C extends JComponent>
         int height = _owner.getHeight();
         if ( existing != null && existing.getWidth() == width && existing.getHeight() == height )
             return existing;
-        return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage buffer = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        /*
+            Java2D keeps a server side copy of an image it sees drawn repeatedly, which is a good
+            bet for an image that never changes and a bad one here: this buffer is repainted every
+            single frame, so the copy is thrown away before it is ever read a second time, and
+            maintaining it doubles what is uploaded. Telling Java2D not to bother leaves one
+            upload per frame instead of two.
+        */
+        buffer.setAccelerationPriority(0);
+        return buffer;
     }
 
     private void _renderInto(
@@ -919,7 +928,23 @@ public final class ComponentExtension<C extends JComponent>
         } finally {
             bufferGraphics.dispose();
         }
-        graphics.drawImage(buffer, 0, 0, null);
+        /*
+            Only the part Swing asked to have repainted is handed over. The buffer lives in
+            ordinary heap memory while the destination is a server side surface, so every pixel
+            of this call is uploaded across that boundary - and a scrolled component's buffer is
+            as tall as its whole content, of which a single viewport's worth is on screen.
+        */
+        Rectangle visible = new Rectangle(0, 0, buffer.getWidth(), buffer.getHeight());
+        Rectangle requested = graphics.getClipBounds();
+        if ( requested != null )
+            visible = visible.intersection(requested);
+        if ( !visible.isEmpty() )
+            graphics.drawImage(
+                    buffer,
+                    visible.x, visible.y, visible.x + visible.width, visible.y + visible.height,
+                    visible.x, visible.y, visible.x + visible.width, visible.y + visible.height,
+                    null
+                );
     }
 
     private boolean _hasChildWithParentFilter() {

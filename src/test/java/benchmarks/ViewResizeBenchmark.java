@@ -147,6 +147,9 @@ public final class ViewResizeBenchmark
             return new BevelUIView();
         }),
         LINEN("linen", frame -> LinenShowcaseView.createView()),
+        GLASSMORPHIC("glassmorphic", frame ->
+            LinenShowcaseView.createView(examples.laf.SwingTreeLookAndFeel.StylePreset.GLASSMORPHIC)
+        ),
         STUDIO("studio", frame -> {
             FlatLightLaf.setup();
             return new StyleStudioView(Var.of(StyleStudioViewModel.initial()), new LookSheet());

@@ -50,9 +50,24 @@ public final class LinenShowcaseView
      *  @return the atelier, styled the way the application shows it
      */
     public static JPanel createView() {
+        return createView(SwingTreeLookAndFeel.StylePreset.LINEN);
+    }
+
+    /**
+     *  Installs the look and feel under the given style preset and builds the atelier under its
+     *  {@link AtelierSheet}. Exists so that callers outside this package - the resize benchmark
+     *  among them - can build the atelier under a preset other than the one
+     *  {@link #main(String...)} shows.
+     *
+     *  @param preset the style preset to install the look and feel under; its
+     *                {@linkplain SwingTreeLookAndFeel.StylePreset#preferredSymbols() preferred symbols}
+     *                are installed with it
+     *  @return the atelier, styled by the given preset
+     */
+    public static JPanel createView( SwingTreeLookAndFeel.StylePreset preset ) {
         SwingTreeLookAndFeel.initializeUsing( it -> it
-            .stylePreset(SwingTreeLookAndFeel.StylePreset.LINEN)
-            .symbolPreset(SwingTreeLookAndFeel.SymbolPreset.LINEN)
+            .stylePreset(preset)
+            .symbolPreset(preset.preferredSymbols())
         );
         AtelierSheet sheet = new AtelierSheet();
         return UI.use(sheet, () -> new AtelierView(Var.of(AtelierViewModel.initial()), sheet));
