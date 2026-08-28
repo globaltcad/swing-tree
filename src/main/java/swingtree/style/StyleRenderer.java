@@ -1910,15 +1910,38 @@ final class StyleRenderer
 
         final @Nullable Kernel awtKernel = kernel.equals(KernelConf.none()) ? null : kernel.toAwtKernel();
         final int              blurReach = (int) Math.ceil(Math.max(0, blur));
+        /*
+            A gaussian blur is a low pass filter: it throws away exactly the detail that a
+            smaller raster cannot hold. So a large radius does not have to be convolved at full
+            resolution - the source is shrunk first, blurred with a proportionally smaller kernel
+            and stretched back out while it is drawn. The cost of the convolution falls with the
+            square of the shrink factor AND with the kernel width, and the result is
+            indistinguishable, because the frequencies the shrink loses are the ones the blur was
+            about to remove anyway. A kernel of the caller's own is never shrunk: its matrix says
+            what to do with neighbouring pixels, and at a coarser raster those are other pixels.
+        */
+        final int downscale = ( awtKernel == null ) ? _shrinkFactorFor(blur) : 1;
 
         /*
             For optimal performance: We only onvolve the part of the parent which is covered by this component,
             narrowed to whatever Swing asked to have repainted + some padding for the convolution blur reach!
         */
         Rectangle window = new Rectangle(0, 0, filtered.getWidth(), filtered.getHeight());
+        int smallWidth  = 0;
+        int smallHeight = 0;
         if ( awtKernel != null || blurReach > 0 ) {
             int reachX = blurReach + ( awtKernel == null ? 0 : awtKernel.getWidth()  / 2 );
             int reachY = blurReach + ( awtKernel == null ? 0 : awtKernel.getHeight() / 2 );
+            if ( downscale > 1 ) {
+                /*
+                    A convolution leaves a band as wide as its own radius untouched at the edge
+                    of the raster it runs over, and the stretch which follows reconstructs each
+                    of its pixels from a pair of neighbouring samples, so it reaches one sample
+                    further still. Measuring the discarded rim in whole grid cells - two more
+                    than the shrunk radius - keeps all of that outside what ends up drawn.
+                */
+                reachX = reachY = ( (int) Math.ceil(blur / downscale) + BLUR_SHRINK_RIM_CELLS ) * downscale;
+            }
             Rectangle drawn = new Rectangle(0, 0, (int) Math.ceil(width), (int) Math.ceil(height));
             Shape requested = g2d.getClip();
             if ( requested != null )
@@ -1932,7 +1955,14 @@ final class StyleRenderer
                         ));
             if ( window.isEmpty() )
                 return;
-            filtered = _regionOf(filtered, window);
+            if ( downscale > 1 ) {
+                window      = _snappedToShrinkGrid(window, downscale);
+                smallWidth  = window.width  / downscale;
+                smallHeight = window.height / downscale;
+                filtered = _shrunkRegionOf(filtered, window, smallWidth, smallHeight);
+            } else {
+                filtered = _regionOf(filtered, window);
+            }
         }
 
         if ( awtKernel != null ) {
@@ -1941,23 +1971,118 @@ final class StyleRenderer
         }
 
         if ( blurReach > 0 ) {
-            ConvolveOp blurOp = new ConvolveOp(_makeKernel(blur, false), ConvolveOp.EDGE_NO_OP, null);
+            final float effectiveBlur = blur / downscale;
+            ConvolveOp blurOp = new ConvolveOp(_makeKernel(effectiveBlur, false), ConvolveOp.EDGE_NO_OP, null);
             BufferedImage blurred = blurOp.filter(filtered, null);
-            blurOp = new ConvolveOp(_makeKernel(blur, true), ConvolveOp.EDGE_NO_OP, null);
+            blurOp = new ConvolveOp(_makeKernel(effectiveBlur, true), ConvolveOp.EDGE_NO_OP, null);
             filtered = blurOp.filter(blurred, filtered);
         }
 
         Shape oldClip = g2d.getClip();
+        Object oldInterpolation = g2d.getRenderingHint(RenderingHints.KEY_INTERPOLATION);
         try {
             ComponentAreas areas = ComponentAreas.of(boxModelConf);
             Shape newClip = areas.get(filterConf.area());
             g2d.clip(newClip);
-            g2d.drawImage(filtered, window.x - offsetX, window.y - offsetY, null);
+            final int dstX = window.x - offsetX;
+            final int dstY = window.y - offsetY;
+            if ( downscale > 1 ) {
+                g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+                g2d.drawImage(
+                        filtered,
+                        dstX, dstY, dstX + window.width, dstY + window.height,
+                        0, 0, smallWidth, smallHeight,
+                        null
+                    );
+            } else
+                g2d.drawImage(filtered, dstX, dstY, null);
         } catch (Exception e) {
             log.error(SwingTree.get().logMarker(), "Failed to successfully render filtered parent buffer!", e);
         } finally {
             g2d.setClip(oldClip);
+            if ( oldInterpolation != null )
+                g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, oldInterpolation);
         }
+    }
+
+    /** The smallest blur radius, in samples of the shrunk raster, a shrunk convolution may use. */
+    private static final int MIN_BLUR_TAPS_RADIUS = 4;
+    /** The largest factor a region may be shrunk by before it is blurred. */
+    private static final int MAX_BLUR_SHRINK = 8;
+    /** How many grid cells wider than the shrunk blur radius the discarded rim is made. */
+    private static final int BLUR_SHRINK_RIM_CELLS = 2;
+
+    /**
+     *  Picks the integer factor by which the parent region is shrunk before it is blurred,
+     *  which is {@code 1} for a radius small enough that shrinking would be visible.
+     *  <p>
+     *  The factor is chosen so the kernel still spans at least {@value #MIN_BLUR_TAPS_RADIUS}
+     *  samples of the shrunk raster: below that a gaussian degenerates into a box and the
+     *  shrinking starts to show. It is a power of two so the resampler works on whole source
+     *  pixels, and it depends on the radius alone - see {@link #_snappedToShrinkGrid(Rectangle, int)}
+     *  for why nothing about the region being drawn may enter into it.
+     */
+    private static int _shrinkFactorFor( final float blur ) {
+        int factor = 1;
+        while ( factor < MAX_BLUR_SHRINK && blur / (factor * 2) >= MIN_BLUR_TAPS_RADIUS )
+            factor *= 2;
+        return factor;
+    }
+
+    /**
+     *  Grows a region outwards until both its origin and its size are whole multiples of the
+     *  shrink factor, which pins the shrunk raster to one grid over the parent.
+     *  <p>
+     *  Without this the filter would sample the parent at different places depending on how much
+     *  of the window Swing asked to have repainted: the region is the component narrowed by the
+     *  repainted rectangle, so a smaller rectangle shrinks a smaller region, and shrinking a
+     *  smaller region lands its samples somewhere else. What the user would see is a pane
+     *  which shifts by a fraction of a pixel every time the pointer passes over it. Snapped to
+     *  the grid, every repaint of the same parent samples the very same pixels and stretches
+     *  them back to the very same place, whatever it was asked to redraw.
+     *  <p>
+     *  The grown region may reach past the far edge of the parent by up to one grid cell.
+     *  Those pixels are simply not there to be read, exactly like the transparent pixels beyond
+     *  a parent which does not fill its own bounds, and they land in the border band the
+     *  convolution leaves untouched anyway.
+     */
+    private static Rectangle _snappedToShrinkGrid( final Rectangle region, final int factor ) {
+        int x = region.x - Math.floorMod(region.x, factor);
+        int y = region.y - Math.floorMod(region.y, factor);
+        int width  = region.x + region.width  - x;
+        int height = region.y + region.height - y;
+        return new Rectangle(
+                    x, y,
+                    ( (width  + factor - 1) / factor ) * factor,
+                    ( (height + factor - 1) / factor ) * factor
+                );
+    }
+
+    /**
+     *  Copies one rectangle out of an image and shrinks it to the given size in the same pass,
+     *  so that the convolutions run over the smaller raster and write into a buffer of this
+     *  method's making.
+     */
+    private static BufferedImage _shrunkRegionOf(
+        final BufferedImage source, final Rectangle window, final int width, final int height
+    ) {
+        BufferedImage region = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D regionGraphics = region.createGraphics();
+        try {
+            regionGraphics.setComposite(AlphaComposite.Src);
+            regionGraphics.setRenderingHint(
+                    RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR
+                );
+            regionGraphics.drawImage(
+                    source,
+                    0, 0, width, height,
+                    window.x, window.y, window.x + window.width, window.y + window.height,
+                    null
+                );
+        } finally {
+            regionGraphics.dispose();
+        }
+        return region;
     }
 
     /**
