@@ -5,6 +5,7 @@ import swingtree.UI;
 
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicHTML;
+import javax.swing.text.html.HTMLEditorKit;
 import java.awt.*;
 import java.util.Locale;
 import java.util.Objects;
@@ -88,8 +89,10 @@ import java.util.regex.Pattern;
 final class LabelStyleInstallerUtility {
 
     private static final String _HTML_INJECTION_OPEN  = "<head><style data-swingtree=\"injected\">";
-    private static final String _HTML_INJECTION_CLOSE = "</style></head>";
+    private static final String _HTML_STYLE_BANNER   = "<!--swingtree-style-->";
+    private static final String _HTML_INJECTION_CLOSE = "</style>" + _HTML_STYLE_BANNER + "</head>";
     private static final String _HTML_TEXT_LISTENER_KEY  = "swingtree.style.htmlTextListenerInstalled";
+    private static final String _HTML_APPLYING_KEY       = "swingtree.style.htmlApplying";
     private static final String _HTML_LAST_INSTALLED_KEY = "swingtree.style.htmlLastInstalled";
     private static final String _HTML_ORIGINAL_KEY       = "swingtree.style.htmlOriginal";
     private static final int    _HTML_OPEN_TAG_LEN = 6; // "<html>" — guaranteed by BasicHTML.isHTMLString
@@ -103,50 +106,92 @@ final class LabelStyleInstallerUtility {
         "(font-size\\s*:\\s*)(\\d+(?:\\.\\d+)?)\\s*(px|pt)",
         Pattern.CASE_INSENSITIVE
     );
+    /*
+        Regex pattern that extracts the inner CSS content from our injected
+        style tag after HTMLEditorKit normalises it.
+
+        HTMLEditorKit transforms:<br/>
+          &lt;style data-swingtree="injected">body{...}</style><br/>
+        Into:<br/>
+          &lt;style type="text/css"&gt;&lt;!-- body{...} --&gt;&lt;/style&gt;<br/>
+
+        We extract everything between <!-- and --> regardless of surrounding
+        whitespace or newlines.
+     */
+    private static final Pattern SETTLE_MARKER_PATTERN = Pattern.compile(
+            "<!--(.*?)-->",
+            Pattern.DOTALL
+    );
 
     private LabelStyleInstallerUtility() {}
 
 
     /*
-        When the JLabel's text is changed externally — by a sprouts.Val binding,
-        a manual setText elsewhere in the codebase, or any other mechanism — the
-        renderer is rebuilt by BasicLabelUI from the new (un-styled) text and
-        our injection is gone. To make the styling survive these out-of-band
-        changes we install (once per label) a property change listener that
-        triggers a fresh style cycle whenever the text changes to something
-        that differs from what we last installed. Comparing against the
-        last-installed snapshot is what lets us tell our own setText apart
-        from external ones — without it, every setText we do would trigger
-        another cycle and we would loop.
-    */
-    static void _ensureHtmlTextListenerInstalled(JLabel label) {
+        Ensures a (single) change listener is installed that reacts to externally
+        supplied HTML content by forcing a fresh style pass.
 
-        if ( label.getClientProperty(_HTML_TEXT_LISTENER_KEY) != null )
+        The lifecycle differs between component types:
+          * JLabel fires a "text" PropertyChangeEvent whenever its text is set.
+          * JEditorPane / JTextComponent does NOT fire "text". It fires a
+            "document" PropertyChangeEvent when the whole document is replaced
+            (e.g. via setDocument); setText goes through the kit's reader and
+            fires no property event at all.
+
+        Listening on "text" for an editor is therefore a silent no-op — externally
+        replaced editor content would silently miss its re-style. We thus branch:
+        labels keep the "text" listener (their own setText is recognised via the
+        last-installed snapshot), editors listen on "document" (their own internal
+        setText does not fire that event, so it cannot react to itself).
+    */
+    static void _ensureHtmlTextListenerInstalled(
+        JComponent component
+    ) {
+        if ( component.getClientProperty(_HTML_TEXT_LISTENER_KEY) != null )
             return;
 
-        label.putClientProperty(_HTML_TEXT_LISTENER_KEY, Boolean.TRUE);
+        component.putClientProperty(_HTML_TEXT_LISTENER_KEY, Boolean.TRUE);
 
-        // Installing the text listener (once):
-        label.addPropertyChangeListener("text", evt -> {
+        if ( component instanceof JEditorPane ) {
+            JEditorPane editor = (JEditorPane) component;
+            // JEditorPane content is delivered as a document model, not a text
+            // bean property — a whole-document replacement surfaces as a
+            // "document" PropertyChangeEvent.
+            component.addPropertyChangeListener("document", evt -> {
+                // Skip our own writes (bracketed by the re-entrancy marker in
+                // _setStyledText) — otherwise setText would refire a styling
+                // cycle from inside itself and read a half-swapped document.
+                if ( Boolean.TRUE.equals(component.getClientProperty(_HTML_APPLYING_KEY)) )
+                    return;
+                if ( !BasicHTML.isHTMLString(editor.getText()) )
+                    return;
+                _forceRestyleOf(component);
+            });
+            return;
+        }
 
+        // JLabel (and any other simple "text"-property component):
+        component.addPropertyChangeListener("text", evt -> {
             Object newValue = evt.getNewValue();
             if ( !(newValue instanceof String) )
                 return;
             String newText = (String) newValue;
             if ( !BasicHTML.isHTMLString(newText) )
                 return;
-            Object lastInstalled = label.getClientProperty(_HTML_LAST_INSTALLED_KEY);
+            Object lastInstalled = component.getClientProperty(_HTML_LAST_INSTALLED_KEY);
             if ( Objects.equals(newText, lastInstalled) )
                 return; // this was our own setText
-            /*
-                Force the cycle (force=true): the engine's stored StyleConf may
-                still match the current styler output, but the label's actual
-                text was just reset externally — so the conf-equality short
-                circuit would skip the re-injection we need.
-            */
-            ComponentExtension.from(label).gatherApplyAndInstallStyle(true);
-
+            _forceRestyleOf(component);
         });
+    }
+
+    private static void _forceRestyleOf( JComponent component ) {
+        /*
+            Force the cycle (force=true): the engine's stored StyleConf may
+            still match the current styler output, but the component's
+            actual text was just reset externally — so the conf-equality
+            short-circuit would skip the re-injection we need.
+        */
+        ComponentExtension.from(component).gatherApplyAndInstallStyle(true);
     }
 
     /**
@@ -163,23 +208,49 @@ final class LabelStyleInstallerUtility {
      *  externally.
      */
     static void _applyHtmlScalingAndStyle(JLabel label, FontConf fontConf) {
-        String currentText = label.getText();
+        _applyHtmlScalingAndStyle(label, label.getText(), label::setText, fontConf);
+    }
+
+    /**
+     *  Generalized variant that applies HTML scaling and styling to any component
+     *  whose HTML content lives in a plain string — both {@link JLabel} and
+     *  {@link JEditorPane} fall into this category when the editor kit is an
+     *  {@code HTMLEditorKit} (the default for MIME type {@code text/html}).
+     *
+     *  <p>The caller provides the HTML string currently displayed (already read via
+     *  the component's own accessor) and a setter that installs the modified string
+     *  back into the component. SwingTree stores its tracking state
+     *  ({@link #_HTML_LAST_INSTALLED_KEY}, {@link #_HTML_ORIGINAL_KEY}) on the
+     *  component itself, so the same internal pipeline handles both types identically.
+     *
+     *  @param component the component being styled (used for the default font size)
+     *  @param currentText the unmodified HTML string currently displayed
+     *  @param setter  a function that installs a new HTML string back into the
+     *                 component (for {@code JLabel}: {@code setText})
+     *  @param fontConf  the font configuration derived from the style pipeline
+     */
+    static void _applyHtmlScalingAndStyle(
+        JComponent       component,
+        String           currentText,
+        java.util.function.Consumer<String>   setter,
+        FontConf         fontConf
+    ) {
         if ( !BasicHTML.isHTMLString(currentText) ) {
             // Text became non-HTML: clear tracking state so a future HTML
             // value is treated as a fresh original (and not as something
             // we already installed).
-            if ( label.getClientProperty(_HTML_LAST_INSTALLED_KEY) != null )
-                label.putClientProperty(_HTML_LAST_INSTALLED_KEY, null);
-            if ( label.getClientProperty(_HTML_ORIGINAL_KEY) != null )
-                label.putClientProperty(_HTML_ORIGINAL_KEY, null);
+            if ( component.getClientProperty(_HTML_LAST_INSTALLED_KEY) != null )
+                component.putClientProperty(_HTML_LAST_INSTALLED_KEY, null);
+            if ( component.getClientProperty(_HTML_ORIGINAL_KEY) != null )
+                component.putClientProperty(_HTML_ORIGINAL_KEY, null);
             return;
         }
 
         float  scale    = UI.scale();
-        String original = _recoverOriginalHtml(label, currentText);
+        String original = _recoverOriginalHtml(component, currentText);
         String scaled   = _scaleInlineFontSizes(original, scale);
         String css      = _buildHtmlBodyCss(fontConf)
-                        + _buildHtmlScalingDefaultsCss(label, scale, fontConf);
+                        + _buildHtmlScalingDefaultsCss(component, scale, fontConf);
 
         @Nullable String desired;
         if ( css.isEmpty() ) {
@@ -190,37 +261,24 @@ final class LabelStyleInstallerUtility {
                 desired = scaled;
         }
 
-        label.putClientProperty(_HTML_ORIGINAL_KEY, original);
+        component.putClientProperty(_HTML_ORIGINAL_KEY, original);
 
         if ( Objects.equals(desired, currentText) ) {
-            label.putClientProperty(_HTML_LAST_INSTALLED_KEY, currentText);
+            component.putClientProperty(_HTML_LAST_INSTALLED_KEY, currentText);
         } else {
-            // IMPORTANT: write the snapshot BEFORE setText so the listener
-            // installed below can recognise this as our own change.
-            label.putClientProperty(_HTML_LAST_INSTALLED_KEY, desired);
-            label.setText(desired);
+            // IMPORTANT: write the snapshot BEFORE setting the text so the
+            // listener can recognise this as our own change.
+            component.putClientProperty(_HTML_LAST_INSTALLED_KEY, desired);
+            setter.accept(desired);
         }
 
-        _ensureHtmlTextListenerInstalled(label);
+        _ensureHtmlTextListenerInstalled(component);
     }
 
-    /*
-       Recover the un-scaled, un-injected HTML.
-
-       The label's current text is one of three things:
-        1. The text we installed on the previous cycle (matches lastInstalled).
-           In that case the stored original is authoritative.
-        2. Text set by external code (Var binding, setText elsewhere). The
-           stored original is now stale; we strip our injection (defensively,
-           in case it is still in there) and treat the result as a new
-           original.
-        3. The first time we see this label — neither client property is set
-           yet. Same as (2).
-    */
-    private static String _recoverOriginalHtml(JLabel label, String currentText) {
-        Object lastInstalled = label.getClientProperty(_HTML_LAST_INSTALLED_KEY);
+    private static String _recoverOriginalHtml(JComponent component, String currentText) {
+        Object lastInstalled = component.getClientProperty(_HTML_LAST_INSTALLED_KEY);
         if ( Objects.equals(currentText, lastInstalled) ) {
-            Object stored = label.getClientProperty(_HTML_ORIGINAL_KEY);
+            Object stored = component.getClientProperty(_HTML_ORIGINAL_KEY);
             if ( stored instanceof String )
                 return (String) stored;
         }
@@ -317,7 +375,7 @@ final class LabelStyleInstallerUtility {
         kit's own defaults are the right answer and we want unstyled labels
         to remain text-untouched.
     */
-    static String _buildHtmlScalingDefaultsCss(JLabel label, float scale, FontConf fontConf) {
+    static String _buildHtmlScalingDefaultsCss(JComponent component, float scale, FontConf fontConf) {
         if ( scale == 1f )
             return "";
 
@@ -327,7 +385,7 @@ final class LabelStyleInstallerUtility {
             baseSize   = fontConf.size(); // FontConf is already scaled upstream
             injectBody = false;           // _buildHtmlBodyCss already emitted body{font-size:...}
         } else {
-            Font f = label.getFont();
+            Font f = component.getFont();
             baseSize   = ( f != null && f.getSize() > 0 ) ? f.getSize() : 12; // We already expect SwingTree or the Look and Feel (like FlatLaF) to have the font size scaled!
             injectBody = true;
         }
@@ -401,6 +459,140 @@ final class LabelStyleInstallerUtility {
             return "";
 
         return "body{" + body + "}";
+    }
+
+    // ══════════════════════════════════════════════════════════════════
+    // Settle-aware pipeline for JEditorPane (HTMLEditorKit normalises)
+    // ══════════════════════════════════════════════════════════════════
+
+    static void htmlSettles( JEditorPane ep, FontConf fontConf ) {
+        String currentText = ep.getText();
+        if ( currentText == null || !BasicHTML.isHTMLString(currentText) ) {
+            ep.putClientProperty(_HTML_LAST_INSTALLED_KEY, null);
+            ep.putClientProperty(_HTML_ORIGINAL_KEY, null);
+            return;
+        }
+
+        float scale = UI.scale();
+        String cssOutput = _buildHtmlBodyCss(fontConf)
+                         +  _buildHtmlScalingDefaultsCss(ep, scale, fontConf);
+
+        /*
+            PHASE 1 SETTLE CHECK:
+            Does current text already have our injected CSS that matches what
+            we'd produce right now?  If yes, we're settled — just update the
+            snapshot with the normalized form so future compares work.
+        */
+        Matcher settleM = SETTLE_MARKER_PATTERN.matcher(currentText);
+        if ( settleM.find() ) {
+            // Strip our sentinel banner (which sits at the start of the injected
+            // CSS inside the <style> comment) so the comparison only sees real CSS.
+            String existingCss = settleM.group(1)
+                .replace(_HTML_STYLE_BANNER, "")
+                .replaceAll("\\s+", "").replace(";","").trim();
+            String expectedCss = cssOutput.replaceAll("\\s+", "").replace(";","");
+            if ( existingCss.equals(expectedCss) ) {
+                // Already settled — just update snapshot with current (normalized) form so
+                // future recovery can recognise this write and hand back the original.
+                ep.putClientProperty(_HTML_LAST_INSTALLED_KEY, ep.getText());
+                return;
+            }
+            /* CSS differs → e.g. scale changed or external edit. Fall through to Phase 2. */
+        }
+
+        /*
+            PHASE 2 INJECT / MAINTAIN:
+            Recompute the desired text from the recovered original. Store the
+            *normalized* round-tripped text as our write-snapshot, because a
+            JEditorPane re-serialises getText() into a canonical form we cannot
+            predict ahead of time.
+        */
+        String original = _recoverOriginalHtml(ep, currentText);
+        String scaled   = _scaleInlineFontSizes(original, scale);
+        // True when the current document still carries our (possibly outdated)
+        // injection. Detected via the sentinel HTML comment, which survives
+        // HTMLEditorKit normalisation.
+        boolean currentlyStyledByUs = isHtmlStyledBySwingTree(currentText);
+
+        ep.putClientProperty(_HTML_ORIGINAL_KEY, original);
+
+        if ( cssOutput.isEmpty() ) {
+            // No CSS required anymore (scale back to 1 / FontConf cleared). If we
+            // previously injected a now-stale block, strip it so the user's editable
+            // document is clean again; otherwise the document is already what we
+            // want — leave it (and the caret) untouched.
+            if ( currentlyStyledByUs )
+                _stripStaleStyle(ep, scaled);
+            else
+                ep.putClientProperty(_HTML_LAST_INSTALLED_KEY, currentText);
+            _ensureHtmlTextListenerInstalled(ep);
+            return;
+        }
+
+        String desired = _injectStyleTag(scaled, cssOutput);
+        if ( desired == null )
+            desired = scaled;
+
+        /*
+            Only touch the document when the content actually changes. Writing
+            setText() on every cycle would re-parse the document and reset the
+            caret + selection to the start on a component whose whole purpose is
+            editing. The write-snapshot stores the normalized form so the
+            PropertyChange listener and future recovery can recognise it as ours.
+        */
+        if ( Objects.equals(desired, currentText) )
+            ep.putClientProperty(_HTML_LAST_INSTALLED_KEY, currentText);
+        else
+            _setStyledText(ep, desired);
+
+        _ensureHtmlTextListenerInstalled(ep);
+    }
+
+    /*
+        Strip a stale SwingTree-injected <style> block from a JEditorPane. A plain
+        setText() cannot do this: once an HTMLEditorKit document has seen a style
+        block, it re-serialises and CARRIES THE OLD STYLE forward across subsequent
+        setText() calls, so a clean setText() still yields styled getText(). The
+        only reliable way to drop the stale CSS is to replace the underlying HTML
+        document with a fresh one and then write the clean original on top of it.
+    */
+    private static void _stripStaleStyle( JEditorPane ep, String cleanHtml ) {
+        ep.putClientProperty(_HTML_APPLYING_KEY, Boolean.TRUE);
+        try {
+            HTMLEditorKit kit = (HTMLEditorKit) ep.getEditorKit();
+            ep.setDocument( kit.createDefaultDocument() );
+            ep.setText(cleanHtml);
+            ep.putClientProperty(_HTML_LAST_INSTALLED_KEY, ep.getText()); // normalized
+        } finally {
+            ep.putClientProperty(_HTML_APPLYING_KEY, Boolean.FALSE);
+        }
+    }
+
+    /*
+        Write a SwingTree-computed HTML document into a JEditorPane. Every write is
+        bracketed by our re-entrancy marker so the "document" PropertyChange listener
+        (see _ensureHtmlTextListenerInstalled) can tell our own writes apart from an
+        external edit — otherwise the listener would refire a styling cycle from
+        inside setText, reading a half-swapped document and cascading the stale style
+        block back into the text. HTMLEditorKit normalises the serialised form, so the
+        write snapshot only records what getText() reports after the swap.
+    */
+    private static void _setStyledText( JEditorPane ep, String text ) {
+        ep.putClientProperty(_HTML_APPLYING_KEY, Boolean.TRUE);
+        try {
+            ep.setText(text);
+            ep.putClientProperty(_HTML_LAST_INSTALLED_KEY, ep.getText()); // normalized
+        } finally {
+            ep.putClientProperty(_HTML_APPLYING_KEY, Boolean.FALSE);
+        }
+    }
+
+    /*
+        True when the given (possibly HTMLEditorKit-normalized) HTML still contains a
+        SwingTree-injected style block, detected through our sentinel banner.
+    */
+    static boolean isHtmlStyledBySwingTree( String html ) {
+        return html != null && html.indexOf(_HTML_STYLE_BANNER) >= 0;
     }
 
     private static String _cssEscape(String value) {

@@ -8,16 +8,13 @@ import swingtree.style.FontConf
 import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
 
-import javax.swing.JLabel
-import javax.swing.UIManager
+import javax.swing.*
 import javax.swing.plaf.basic.BasicHTML
 import javax.swing.text.View
-import java.awt.Color
-import java.awt.Graphics2D
-import java.awt.Rectangle
+import java.awt.*
 import java.awt.image.BufferedImage
 
-@Title("Styling HTML Labels through FontConf")
+@Title("Styling HTML content in JLabel through FontConf")
 @Narrative('''
 
     SwingTree's styling API treats every `JComponent` uniformly: when you write
@@ -764,7 +761,7 @@ class Html_Label_Font_Styling_Spec extends Specification
             and recomputes from it each cycle, instead of operating on the
             already-scaled output. Without that, two re-style cycles at scale
             1.5 would produce 20 → 30 → 45 px. We confirm here that *N*
-            forced cycles produce the same result as one.
+            forced cycles produce the same reswipult as one.
         """
         given : 'HTML with a known-size inline declaration:'
             var html = '<html><span style="font-size:20px;">Hi</span></html>'
