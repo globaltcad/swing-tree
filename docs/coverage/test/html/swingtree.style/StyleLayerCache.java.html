@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StyleLayerCache.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">StyleLayerCache.java</span></div><h1>StyleLayerCache.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import org.jspecify.annotations.Nullable;
+import sprouts.Tuple;
+import swingtree.UI;
+import swingtree.layout.Size;
+
+import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.BiConsumer;
+
+/**
+ *  Caches and paints one {@link UI.Layer} of a component's style, by composing the
+ *  {@link LayerRenderConfPartition}s that layer is made of. &lt;br&gt;
+ *  &lt;br&gt;
+ *  Ordinarily a layer is a single {@link LayerRenderConfPartition#WHOLE} part, and this is then nothing
+ *  more than a wrapper around the one {@link LayerPartitionCache} holding it. The reason it exists is
+ *  that a layer mixing style which caches in incompatible ways cannot be one rasterization, and
+ *  then it is painted as several parts in order - see {@link LayerRenderConfPartition} for what those parts
+ *  are and why source-over compositing makes painting them one after another identical to
+ *  painting the layer whole.
+ */
+final class StyleLayerCache
+{
+    private static final int PAINTS_UNTIL_REJOINED = 4;
+
+    // Sum type based states of what this cache was last brought in line with
+    private interface Validation {
+<span class="fc" id="L32">        final class None implements Validation { static final None INSTANCE = new None(); }</span>
+        final class Done implements Validation {
+            final ComponentConf _conf;
+            final boolean       _whileResizing;
+            final boolean       _withTiling;
+<span class="fc" id="L37">            Done( ComponentConf conf, boolean whileResizing, boolean withTiling ) {</span>
+<span class="fc" id="L38">                _conf          = conf;</span>
+<span class="fc" id="L39">                _whileResizing = whileResizing;</span>
+<span class="fc" id="L40">                _withTiling    = withTiling;</span>
+<span class="fc" id="L41">            }</span>
+        }
+    }
+
+    private final UI.Layer         _layer;
+    private final BiConsumer&lt;LayerRenderConf, Graphics2D&gt; _renderer;
+    private LayerPartitionCache[]  _parts;
+    private PartitioningPolicy     _partitioningPolicy;
+    private LayerRenderConf        _uncachedPartition;
+    private Size                   _lastSize;
+    private int                    _paintsAtThisSize;
+    private Validation             _validation;
+
+<span class="fc" id="L54">    private int _paintCacheHitCount  = 0;</span>
+<span class="fc" id="L55">    private int _paintCacheMissCount = 0;</span>
+
+
+<span class="fc" id="L58">    StyleLayerCache( UI.Layer layer ) {</span>
+<span class="fc" id="L59">        _layer               = Objects.requireNonNull(layer);</span>
+<span class="fc" id="L60">        _renderer            = ( conf, graphics ) -&gt; StyleRenderer.renderStyleOn(_layer, conf, graphics);</span>
+<span class="fc" id="L61">        _partitioningPolicy  = PartitioningPolicy.NONE;</span>
+<span class="fc" id="L62">        _parts               = PartitioningPolicy.NONE.newPartsFor(layer);</span>
+<span class="fc" id="L63">        _uncachedPartition   = LayerRenderConf.none();</span>
+<span class="fc" id="L64">        _lastSize            = Size.unknown();</span>
+<span class="fc" id="L65">        _paintsAtThisSize    = PAINTS_UNTIL_REJOINED;</span>
+<span class="fc" id="L66">        _validation          = Validation.None.INSTANCE;</span>
+<span class="fc" id="L67">    }</span>
+
+<span class="fc" id="L69">    int paintCacheHitCount() { return _paintCacheHitCount; }</span>
+
+<span class="fc" id="L71">    int paintCacheMissCount() { return _paintCacheMissCount; }</span>
+
+    void validate( ComponentConf newConf ) {
+<span class="fc" id="L74">        _recordSize(newConf.currentBounds().size());</span>
+<span class="fc" id="L75">        final boolean isResizing   = _isResizing();</span>
+<span class="fc" id="L76">        final boolean tilingIsOn   = CacheBudget.tilingEnabled();</span>
+<span class="fc bfc" id="L77" title="All 2 branches covered.">        if ( _isSettledAndSameAsLastValidation(newConf, isResizing, tilingIsOn) )</span>
+<span class="fc" id="L78">            return; // We avoid validation work if nothing changed!</span>
+
+<span class="fc" id="L80">        final LayerRenderConf full = newConf.renderConfFor(_layer);</span>
+<span class="fc" id="L81">        final PartitioningPolicy policy = _partitioningPolicyFor(full, isResizing);</span>
+<span class="fc bfc" id="L82" title="All 2 branches covered.">        if ( policy != _partitioningPolicy ) {</span>
+<span class="fc" id="L83">            _partitioningPolicy = policy;</span>
+<span class="fc" id="L84">            _parts              = policy.newPartsFor(_layer);</span>
+        }
+<span class="fc bfc" id="L86" title="All 2 branches covered.">        for ( LayerPartitionCache part : _parts )</span>
+<span class="fc" id="L87">            part.validate(newConf, isResizing);</span>
+
+<span class="fc" id="L89">        _uncachedPartition = policy.uncachedPartitionOf(full);</span>
+<span class="fc" id="L90">        _validation        = new Validation.Done(newConf, isResizing, tilingIsOn);</span>
+<span class="fc" id="L91">    }</span>
+
+    @SuppressWarnings(&quot;ReferenceEquality&quot;) // Identity means the configuration is literally the one validated against.
+    private boolean _isSettledAndSameAsLastValidation(ComponentConf conf, boolean isResizing, boolean tilingIsOn ) {
+<span class="fc bfc" id="L95" title="All 2 branches covered.">        if ( !(_validation instanceof Validation.Done) )</span>
+<span class="fc" id="L96">            return false;</span>
+<span class="fc" id="L97">        final Validation.Done done = (Validation.Done) _validation;</span>
+<span class="fc bfc" id="L98" title="All 6 branches covered.">        if ( done._conf != conf || done._whileResizing != isResizing || done._withTiling != tilingIsOn )</span>
+<span class="fc" id="L99">            return false;</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">        for ( LayerPartitionCache part : _parts )</span>
+<span class="fc bfc" id="L101" title="All 2 branches covered.">            if ( part.admissionDecisionLeftOpen() )</span>
+<span class="fc" id="L102">                return false; // The cache is NOT settled because at least one part has a rejected cache attempt!</span>
+<span class="fc" id="L103">        return true;</span>
+    }
+
+    private PartitioningPolicy _partitioningPolicyFor( LayerRenderConf full, boolean isResizing ) {
+<span class="fc bfc" id="L107" title="All 2 branches covered.">        if ( _canBeSplitAroundPainters(full) )</span>
+<span class="fc" id="L108">            return PartitioningPolicy.AROUND_PAINTERS;</span>
+<span class="fc bfc" id="L109" title="All 4 branches covered.">        if ( isResizing &amp;&amp; _canBeSplitAroundNoises(full) )</span>
+<span class="fc" id="L110">            return PartitioningPolicy.AROUND_NOISES;</span>
+<span class="fc" id="L111">        return PartitioningPolicy.NONE;</span>
+    }
+
+    private boolean _canBeSplitAroundPainters( LayerRenderConf conf ) {
+<span class="fc bfc" id="L115" title="All 2 branches covered.">        if ( !conf.layer().hasPaintersWhichCannotBeCached() )</span>
+<span class="fc" id="L116">            return false; // Nothing to cut around, or nothing that stops the layer being cached whole.</span>
+<span class="fc" id="L117">        final LayerRenderConf underPainters = LayerRenderConfPartition.UNDER_PAINTERS.restrict(conf);</span>
+<span class="fc bfc" id="L118" title="All 2 branches covered.">        if ( underPainters.rendersNothing() )</span>
+<span class="fc" id="L119">            return false; // The painters are all there is, so a cut would only add bookkeeping.</span>
+<span class="fc" id="L120">        return LayerPartitionCache.wouldBeAdmitted(_layer, underPainters);</span>
+    }
+
+    private void _recordSize( Size size ) {
+<span class="fc bfc" id="L124" title="All 2 branches covered.">        if ( size.equals(_lastSize) )</span>
+<span class="fc" id="L125">            return;</span>
+<span class="fc bfc" id="L126" title="All 4 branches covered.">        final boolean grewFromNothing = !_lastSize.hasPositiveWidth() || !_lastSize.hasPositiveHeight();</span>
+<span class="fc" id="L127">        _lastSize         = size;</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">        _paintsAtThisSize = grewFromNothing ? PAINTS_UNTIL_REJOINED : 0;</span>
+<span class="fc" id="L129">    }</span>
+
+    private boolean _isResizing() {
+<span class="fc bfc" id="L132" title="All 2 branches covered.">        return _paintsAtThisSize &lt; PAINTS_UNTIL_REJOINED;</span>
+    }
+
+    private static boolean _canBeSplitAroundNoises( LayerRenderConf conf ) {
+<span class="fc bfc" id="L136" title="All 2 branches covered.">        if ( !conf.layer().hasRenderableNoises() )</span>
+<span class="fc" id="L137">            return false; // Nothing to cut around.</span>
+
+<span class="fc bfc" id="L139" title="All 2 branches covered.">        if ( !CacheBudget.tilingEnabled() )</span>
+<span class="fc" id="L140">            return false;</span>
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        if ( !StyleRenderer.allNoisesAreCheapToRepaint(conf) )</span>
+<span class="fc" id="L142">            return false; // Repainting this noise every paint would cost more than it saves.</span>
+<span class="fc bfc" id="L143" title="All 2 branches covered.">        return _isWorthCuttingOut(LayerRenderConfPartition.UNDER_NOISE.restrict(conf))</span>
+<span class="pc bpc" id="L144" title="1 of 2 branches missed.">            &amp;&amp; _isWorthCuttingOut(LayerRenderConfPartition.OVER_NOISE.restrict(conf));</span>
+    }
+
+    private static boolean _isWorthCuttingOut( LayerRenderConf part ) {
+<span class="fc bfc" id="L148" title="All 4 branches covered.">        return part.rendersNothing() || LayerPartitionCache.cachesSizeIndependently(part);</span>
+    }
+
+    void paint( Graphics2D g2d ) {
+<span class="fc" id="L152">        boolean anythingRendered          = false;</span>
+<span class="fc" id="L153">        boolean anythingRenderedFromStyle = false;</span>
+<span class="fc" id="L154">        boolean anythingRenderedFromCache = false;</span>
+<span class="fc bfc" id="L155" title="All 2 branches covered.">        for ( int i = 0; i &lt; _parts.length; i++ ) {</span>
+<span class="fc" id="L156">            LayerPartitionCache.PaintOutcome outcome = _parts[i].paint(g2d, _renderer);</span>
+<span class="fc bfc" id="L157" title="All 2 branches covered.">            anythingRendered          |= ( outcome != LayerPartitionCache.PaintOutcome.NOTHING_RENDERED   );</span>
+<span class="fc bfc" id="L158" title="All 2 branches covered.">            anythingRenderedFromStyle |= ( outcome == LayerPartitionCache.PaintOutcome.RENDERED_FROM_STYLE);</span>
+<span class="fc bfc" id="L159" title="All 2 branches covered.">            anythingRenderedFromCache |= ( outcome == LayerPartitionCache.PaintOutcome.RENDERED_FROM_CACHE);</span>
+            // The lifted out piece always sits directly after the first cached part: between
+            // the two parts of a noise cut, and on top of the single part of a painter cut.
+<span class="fc bfc" id="L162" title="All 2 branches covered.">            if ( i == 0 ) {</span>
+<span class="fc" id="L163">                final Size size = _uncachedPartition.boxModel().size();</span>
+<span class="pc bpc" id="L164" title="1 of 4 branches missed.">                if ( size.hasPositiveWidth() &amp;&amp; size.hasPositiveHeight() ) {</span>
+<span class="fc" id="L165">                    StyleRenderer.renderStyleOn(_layer, _uncachedPartition, g2d);</span>
+<span class="fc" id="L166">                    anythingRendered = true;</span>
+                }
+            }
+        }
+
+<span class="fc bfc" id="L171" title="All 2 branches covered.">        if ( _paintsAtThisSize &lt; PAINTS_UNTIL_REJOINED )</span>
+<span class="fc" id="L172">            _paintsAtThisSize++;</span>
+
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        if ( !anythingRendered )</span>
+<span class="fc" id="L175">            return; // Nothing reached the destination, so this was not a paint of this layer.</span>
+
+<span class="fc bfc" id="L177" title="All 4 branches covered.">        if ( anythingRenderedFromStyle || !anythingRenderedFromCache )</span>
+<span class="fc" id="L178">            _paintCacheMissCount++;</span>
+        else
+<span class="fc" id="L180">            _paintCacheHitCount++;</span>
+<span class="fc" id="L181">    }</span>
+
+    Tuple&lt;BufferedImage&gt; renderedImages() {
+<span class="fc" id="L184">        List&lt;BufferedImage&gt; images = new ArrayList&lt;&gt;(_parts.length);</span>
+<span class="fc bfc" id="L185" title="All 2 branches covered.">        for ( LayerPartitionCache part : _parts ) {</span>
+<span class="fc" id="L186">            BufferedImage rendered = part.renderedImage();</span>
+<span class="fc bfc" id="L187" title="All 2 branches covered.">            if ( rendered != null )</span>
+<span class="fc" id="L188">                images.add(rendered);</span>
+        }
+<span class="fc" id="L190">        return Tuple.of(BufferedImage.class, images);</span>
+    }
+
+
+    /**
+     *  The shapes a layer is cached in. Each one names the cached parts it consists of and the
+     *  uncached piece (if any), which is instead rendered straight onto the destination after
+     *  the first of them - see {@link LayerRenderConfPartition} for why a layer is ever cut.
+     */
+<span class="fc" id="L199">    private enum PartitioningPolicy</span>
+    {
+        /** One cached rendering of everything. */
+<span class="fc" id="L202">        NONE( Tuple.of(LayerRenderConfPartition.WHOLE), null ),</span>
+        /** Cut around the noises, so that everything else keeps a size independent cache
+         *  entry across a resize. Temporary: only while the component is resizing. */
+<span class="fc" id="L205">        AROUND_NOISES(</span>
+<span class="fc" id="L206">            Tuple.of(LayerRenderConfPartition.UNDER_NOISE, LayerRenderConfPartition.OVER_NOISE),</span>
+            LayerRenderConfPartition.NOISES
+        ),
+        /** Cut around the user painters, so that a layer which carries one is cacheable at
+         *  all rather than being re-rendered whole on every paint. */
+<span class="fc" id="L211">        AROUND_PAINTERS(</span>
+<span class="fc" id="L212">            Tuple.of(LayerRenderConfPartition.UNDER_PAINTERS),</span>
+            LayerRenderConfPartition.PAINTERS
+        );
+
+        private final Tuple&lt;LayerRenderConfPartition&gt;    _cachedParts;
+        private final @Nullable LayerRenderConfPartition _uncachedPart;
+
+<span class="fc" id="L219">        PartitioningPolicy( Tuple&lt;LayerRenderConfPartition&gt; cachedParts, @Nullable LayerRenderConfPartition uncachedPart ) {</span>
+<span class="fc" id="L220">            _cachedParts  = cachedParts;</span>
+<span class="fc" id="L221">            _uncachedPart = uncachedPart;</span>
+<span class="fc" id="L222">        }</span>
+
+        LayerPartitionCache[] newPartsFor( UI.Layer layer ) {
+<span class="fc" id="L225">            LayerPartitionCache[] parts = new LayerPartitionCache[_cachedParts.size()];</span>
+<span class="fc bfc" id="L226" title="All 2 branches covered.">            for ( int i = 0; i &lt; parts.length; i++ )</span>
+<span class="fc" id="L227">                parts[i] = new LayerPartitionCache(layer, _cachedParts.get(i));</span>
+<span class="fc" id="L228">            return parts;</span>
+        }
+
+        LayerRenderConf uncachedPartitionOf( LayerRenderConf full ) {
+<span class="fc bfc" id="L232" title="All 2 branches covered.">            return ( _uncachedPart == null ? LayerRenderConf.none() : _uncachedPart.restrict(full) );</span>
+        }
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

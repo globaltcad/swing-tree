@@ -1,0 +1,241 @@
+{
+  "className":"swingtree.Flow_Layout_Measurement_Spec",
+  "title":"Flow Layout Measurement",
+  "narrative":"A wrapping layout is asked how big it would like to be far more often than it is\n    actually laid out. A scroll pane alone asks several times per pass while it works\n    out whether it needs scroll bars, and a responsive grid nested inside another one\n    is asked once more for every measurement of its parent. Answering is expensive:\n    it walks every child, runs the cell configurator for each of them and descends\n    into any nested grid. So the same question being asked five times is five times\n    the work.\n\n    The `ResponsiveGridFlowLayout` therefore remembers the answer it last gave. The\n    rule for handing it out again is the one Swing itself applies to the size cached\n    by `Container.getPreferredSize()`: **a remembered measurement is only ever reused\n    while the container is `valid`**, and it is thrown away as soon as Swing reports\n    a change through `LayoutManager2.invalidateLayout`.\n\n    Every scenario below is about that answer never going stale, and about it really\n    being reused when it may be. Note that a container has to be *realised* -- placed\n    in a window which was packed -- before any of this is observable at all. A\n    detached panel is never `valid`, so it is measured afresh every single time.",
+  "subjects":["swingtree.layout.ResponsiveGridFlowLayout"],
+  "statistics":{
+    "runs":"7",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A remembered measurement is only ever handed back for the width it was taken at.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The whole purpose of `preferredLayoutSizeAtWidth` is that the answer depends\n            on the width it is given: a grid which wraps needs more height when it is\n            narrow. An answer therefore belongs to exactly one width and to no other.\n\n            This scenario walks a grid through two different widths and then back to the\n            first one, which is what a scroll pane does when it discovers halfway through\n            a layout pass that it needs a vertical scroll bar after all. Every one of the\n            three questions has to be answered on its own terms -- a grid which mixed them\n            up would size its content for a width it does not have.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Three boxes, each of which claims half a row from the `MEDIUM` category upwards, and a whole row below it.","code":["var grid =","        UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)","        .add(UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(6).large(6).veryLarge(6).oversize(6) }),","            UI.box().withPrefSize(40, 20)","        )","        .add(UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(6).large(6).veryLarge(6).oversize(6) }),","            UI.box().withPrefSize(40, 20)","        )","        .add(UI.AUTO_SPAN({ it.verySmall(12).small(12).medium(6).large(6).veryLarge(6).oversize(6) }),","            UI.box().withPrefSize(40, 20)","        )","        .get(JPanel)"]},
+
+        {"kind":"and","text":"We declare that this grid considers itself full at a width of 60, which is what its size categories are measured against.","code":["grid.setPreferredSize(new Dimension(60, 0))"]},
+
+        {"kind":"and","text":"We put it into a window and pack it, because only a realised container is ever `valid`.","code":["var frame = new JFrame(\"A remembered measurement belongs to one width\")","frame.getContentPane().add(grid)","UI.runNow({ frame.pack() })"]},
+
+        {"kind":"expect","text":"The grid really is valid, which is the state in which a measurement may be reused at all.","code":["grid.isValid()"]},
+
+        {"kind":"when","text":"We ask how tall it would be at a width of 40, two thirds of its reference width and so the `LARGE` category,","code":["var wide = UI.runAndGet({ grid.getLayout().preferredLayoutSizeAtWidth(grid, 40) })"]},
+
+        {"kind":"then","text":"the boxes pair up and we get two rows: two boxes of 20 and three gaps of 5.","code":["wide.height == 55"]},
+
+        {"kind":"when","text":"We ask the very same grid about a width of 20 instead, a third of its reference width and thus `SMALL`,","code":["var narrow = UI.runAndGet({ grid.getLayout().preferredLayoutSizeAtWidth(grid, 20) })"]},
+
+        {"kind":"then","text":"every box claims a whole row, so three boxes of 20 and four gaps of 5 are needed.","code":["narrow.height == 80"]},
+
+        {"kind":"when","text":"We come back to the width we started with,","code":["var wideAgain = UI.runAndGet({ grid.getLayout().preferredLayoutSizeAtWidth(grid, 40) })"]},
+
+        {"kind":"then","text":"we are told what we were told the first time, and not what belongs to the narrow width.","code":["wideAgain == wide"]},
+
+        {"kind":"cleanup","text":"We close the window again.","code":["UI.runNow({ frame.dispose() })"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid measures its children again after one of them changed.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A component which changes size announces it by calling `revalidate()`, and\n            Swing turns that into an `invalidate()` travelling up the parent chain. When\n            it passes the grid, the grid is told through `invalidateLayout` that what it\n            knows about itself is now out of date.\n\n            This is the ordinary, everyday case: a label gets a longer text, a panel gets\n            another child, a component is given a new preferred size. The grid has to\n            forget what it measured, or the window would reserve yesterday's room for\n            today's content and clip whatever no longer fits.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Three boxes in a grid, side by side.","code":["var grid =","        UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)","        .add(UI.box().withPrefSize(40, 20))","        .add(UI.box().withPrefSize(40, 20))","        .add(UI.box().withPrefSize(40, 20))","        .get(JPanel)"]},
+
+        {"kind":"and","text":"A window holding it, packed, so that the grid is valid and its measurements may be reused.","code":["var frame = new JFrame(\"A changed child forces a new measurement\")","frame.getContentPane().add(grid)","UI.runNow({ frame.pack() })"]},
+
+        {"kind":"when","text":"We ask how big the grid would like to be at a width of 200, which is room enough for all three boxes,","code":["var before = UI.runAndGet({ grid.getLayout().preferredLayoutSizeAtWidth(grid, 200) })"]},
+
+        {"kind":"then","text":"it asks for a single row: a box of 20 and two gaps of 5.","code":["before.height == 30"]},
+
+        {"kind":"when","text":"The first box now becomes four and a half times as tall and says so,","code":["UI.runNow({","    ((JComponent) grid.getComponent(0)).setPreferredSize(new Dimension(40, 90))","    ((JComponent) grid.getComponent(0)).revalidate()","})"]},
+
+        {"kind":"and","text":"we ask the grid the very same question once more,","code":["var after = UI.runAndGet({ grid.getLayout().preferredLayoutSizeAtWidth(grid, 200) })"]},
+
+        {"kind":"then","text":"the taller row is accounted for: a box of 90 and two gaps of 5.","code":["after.height == 100"]},
+
+        {"kind":"cleanup","text":"We close the window again.","code":["UI.runNow({ frame.dispose() })"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid measures its children again while it is invalid, even though nothing told it a second time.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Swing propagates `invalidate()` upwards only until it reaches a component\n            which is already invalid, because there is nothing left to tell such a\n            component. A grid which is invalidated once and then has three of its children\n            change therefore hears about it exactly once, not four times.\n\n            That is the reason a remembered measurement may only be handed out while the\n            container is *valid*, and it is not a subtle corner case: being invalid is the\n            state a container spends every single layout pass in. An invalid grid has to\n            measure afresh every time, precisely because it is no longer being told when\n            something moves underneath it. The delegation box which a configured scroll\n            pane places around its content follows the same reasoning.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Three boxes in a grid, side by side.","code":["var grid =","        UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)","        .add(UI.box().withPrefSize(40, 20))","        .add(UI.box().withPrefSize(40, 20))","        .add(UI.box().withPrefSize(40, 20))","        .get(JPanel)"]},
+
+        {"kind":"and","text":"A window holding it, packed, which leaves the grid valid to begin with.","code":["var frame = new JFrame(\"An invalid grid may not reuse a measurement\")","frame.getContentPane().add(grid)","UI.runNow({ frame.pack() })"]},
+
+        {"kind":"when","text":"We invalidate the grid, putting it in the state it is in throughout every layout pass,","code":["UI.runNow({ grid.invalidate() })"]},
+
+        {"kind":"then","text":"it is indeed no longer valid.","code":["!grid.isValid()"]},
+
+        {"kind":"when","text":"We measure it in that state, just like a layout pass would,","code":["var before = UI.runAndGet({ grid.getLayout().preferredLayoutSizeAtWidth(grid, 200) })"]},
+
+        {"kind":"then","text":"we are told about the single row the three boxes occupy.","code":["before.height == 30"]},
+
+        {"kind":"when","text":"The first box now grows and announces it to its ancestors,","code":["UI.runNow({","    ((JComponent) grid.getComponent(0)).setPreferredSize(new Dimension(40, 90))","    ((JComponent) grid.getComponent(0)).revalidate()","})"]},
+
+        {"kind":"then","text":"\n            the grid is none the wiser, because it was already invalid and Swing does not\n            invalidate what is invalid already. Whatever it remembers, it cannot have been\n            told to forget it.\n        ","code":["!grid.isValid()"]},
+
+        {"kind":"when","text":"We measure it once more,","code":["var after = UI.runAndGet({ grid.getLayout().preferredLayoutSizeAtWidth(grid, 200) })"]},
+
+        {"kind":"then","text":"it answers with the size it needs now rather than the one it needed a moment ago.","code":["after.height == 100"]},
+
+        {"kind":"cleanup","text":"We close the window again.","code":["UI.runNow({ frame.dispose() })"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Changing a gap on the layout manager is reflected in the very next measurement. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The gaps, the alignment and the baseline flag belong to the layout manager\n            rather than to the container. Changing one of them does not touch the\n            container at all, so Swing has nothing to report and `invalidateLayout` is\n            never called. A layout which remembers measurements has to notice such a\n            change entirely by itself.\n\n            This scenario deliberately changes a gap **without** revalidating anything, and\n            then asks the same question as before. A layout which trusted Swing to tell it\n            everything would answer with the measurement it took before the change, and the\n            gaps would appear to have no effect until something else happened to invalidate\n            the container.\n\n            The two gap sizes are the ones shown here because their effect on the measured\n            size can be pointed at directly with boxes of a fixed size. `setAlignment` and\n            `setAlignOnBaseline` forget the remembered measurement through the very same\n            path, but neither makes for a good scenario: the first has no effect on the\n            measured size at all, since it only decides where within a row the children end\n            up, and the second needs children carrying a real text baseline, whose measured\n            size depends on the fonts of whichever machine runs the test.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Three boxes in a grid, side by side, with gaps of 5.","code":["var grid =","        UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)","        .add(UI.box().withPrefSize(40, 20))","        .add(UI.box().withPrefSize(40, 20))","        .add(UI.box().withPrefSize(40, 20))","        .get(JPanel)"]},
+
+        {"kind":"and","text":"A window holding it, packed, so the grid is valid and may reuse what it measures.","code":["var frame = new JFrame(\"A changed layout manager forces a new measurement\")","frame.getContentPane().add(grid)","UI.runNow({ frame.pack() })"]},
+
+        {"kind":"when","text":"We measure it at a width of 200, an answer the grid is now free to remember,","code":["var before = UI.runAndGet({ grid.getLayout().preferredLayoutSizeAtWidth(grid, 200) })"]},
+
+        {"kind":"then","text":"we get a single row of three boxes: 140 wide including all four gaps, and 30 tall.","code":["before == new Dimension(140, 30)"]},
+
+        {"kind":"when","text":"","code":["when : \"We change $property on the layout manager itself, and revalidate nothing at all,\"","UI.runNow({ change((ResponsiveGridFlowLayout) grid.getLayout()) })"]},
+
+        {"kind":"then","text":"the container knows nothing of it and stays perfectly valid.","code":["grid.isValid()"]},
+
+        {"kind":"when","text":"We nevertheless ask the very same question again,","code":["var after = UI.runAndGet({ grid.getLayout().preferredLayoutSizeAtWidth(grid, 200) })"]},
+
+        {"kind":"then","text":"the new gap is honoured instead of the measurement taken before the change.","code":["after == new Dimension(expectedWidth, expectedHeight)"]},
+
+        {"kind":"cleanup","text":"We close the window again.","code":["UI.runNow({ frame.dispose() })"]},
+
+        {"kind":"where","text":"","code":{"property":["'the vertical gap'","'the horizontal gap'"],"expectedWidth":["140","280"],"expectedHeight":["100","55"],"change":["{ ResponsiveGridFlowLayout it -> it.setVerticalGapSize(40) }","{ ResponsiveGridFlowLayout it -> it.setHorizontalGapSize(40) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Changing a gap on the layout manager is reflected in the very next measurement. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The gaps, the alignment and the baseline flag belong to the layout manager\n            rather than to the container. Changing one of them does not touch the\n            container at all, so Swing has nothing to report and `invalidateLayout` is\n            never called. A layout which remembers measurements has to notice such a\n            change entirely by itself.\n\n            This scenario deliberately changes a gap **without** revalidating anything, and\n            then asks the same question as before. A layout which trusted Swing to tell it\n            everything would answer with the measurement it took before the change, and the\n            gaps would appear to have no effect until something else happened to invalidate\n            the container.\n\n            The two gap sizes are the ones shown here because their effect on the measured\n            size can be pointed at directly with boxes of a fixed size. `setAlignment` and\n            `setAlignOnBaseline` forget the remembered measurement through the very same\n            path, but neither makes for a good scenario: the first has no effect on the\n            measured size at all, since it only decides where within a row the children end\n            up, and the second needs children carrying a real text baseline, whose measured\n            size depends on the fonts of whichever machine runs the test.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Three boxes in a grid, side by side, with gaps of 5.","code":["var grid =","        UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)","        .add(UI.box().withPrefSize(40, 20))","        .add(UI.box().withPrefSize(40, 20))","        .add(UI.box().withPrefSize(40, 20))","        .get(JPanel)"]},
+
+        {"kind":"and","text":"A window holding it, packed, so the grid is valid and may reuse what it measures.","code":["var frame = new JFrame(\"A changed layout manager forces a new measurement\")","frame.getContentPane().add(grid)","UI.runNow({ frame.pack() })"]},
+
+        {"kind":"when","text":"We measure it at a width of 200, an answer the grid is now free to remember,","code":["var before = UI.runAndGet({ grid.getLayout().preferredLayoutSizeAtWidth(grid, 200) })"]},
+
+        {"kind":"then","text":"we get a single row of three boxes: 140 wide including all four gaps, and 30 tall.","code":["before == new Dimension(140, 30)"]},
+
+        {"kind":"when","text":"","code":["when : \"We change $property on the layout manager itself, and revalidate nothing at all,\"","UI.runNow({ change((ResponsiveGridFlowLayout) grid.getLayout()) })"]},
+
+        {"kind":"then","text":"the container knows nothing of it and stays perfectly valid.","code":["grid.isValid()"]},
+
+        {"kind":"when","text":"We nevertheless ask the very same question again,","code":["var after = UI.runAndGet({ grid.getLayout().preferredLayoutSizeAtWidth(grid, 200) })"]},
+
+        {"kind":"then","text":"the new gap is honoured instead of the measurement taken before the change.","code":["after == new Dimension(expectedWidth, expectedHeight)"]},
+
+        {"kind":"cleanup","text":"We close the window again.","code":["UI.runNow({ frame.dispose() })"]},
+
+        {"kind":"where","text":"","code":{"property":["'the vertical gap'","'the horizontal gap'"],"expectedWidth":["140","280"],"expectedHeight":["100","55"],"change":["{ ResponsiveGridFlowLayout it -> it.setVerticalGapSize(40) }","{ ResponsiveGridFlowLayout it -> it.setHorizontalGapSize(40) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A layout manager shared by two containers answers for each of them separately.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Nothing stops a single layout manager instance from being installed on more\n            than one container -- `java.awt.FlowLayout` is routinely shared that way, and\n            the responsive grid keeps no per-container state that would forbid it.\n\n            A layout which remembers its last measurement therefore has to remember *which*\n            container that measurement was of. Handing the size of one container to a\n            different one would be the worst kind of bug: it only shows up when a layout\n            manager happens to be shared, and it makes two unrelated parts of a window\n            silently agree on the wrong size.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"One single layout manager instance.","code":["var shared = new ResponsiveGridFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)"]},
+
+        {"kind":"and","text":"A small container which uses it, holding one small box.","code":["var small = UI.panel().withLayout(shared).add(UI.box().withPrefSize(40, 20)).get(JPanel)"]},
+
+        {"kind":"and","text":"A large container which uses the very same instance, holding one much bigger box.","code":["var large = UI.panel().withLayout(shared).add(UI.box().withPrefSize(90, 60)).get(JPanel)"]},
+
+        {"kind":"and","text":"Both of them realised in windows of their own, so both are valid.","code":["var smallFrame = new JFrame(\"The small one\")","var largeFrame = new JFrame(\"The large one\")","smallFrame.getContentPane().add(small)","largeFrame.getContentPane().add(large)","UI.runNow({ smallFrame.pack(); largeFrame.pack() })"]},
+
+        {"kind":"expect","text":"They really do share the one layout manager.","code":["small.getLayout().is(shared)","large.getLayout().is(shared)"]},
+
+        {"kind":"when","text":"We measure the small one,","code":["var firstSmall = UI.runAndGet({ shared.preferredLayoutSizeAtWidth(small, 300) })"]},
+
+        {"kind":"then","text":"we are told about its one small box and the gaps around it.","code":["firstSmall == new Dimension(50, 30)"]},
+
+        {"kind":"when","text":"We then measure the large one through the same instance,","code":["var firstLarge = UI.runAndGet({ shared.preferredLayoutSizeAtWidth(large, 300) })"]},
+
+        {"kind":"then","text":"we are told about its one large box, and not about the container measured just before.","code":["firstLarge == new Dimension(100, 70)"]},
+
+        {"kind":"when","text":"And when we come back to the small one,","code":["var secondSmall = UI.runAndGet({ shared.preferredLayoutSizeAtWidth(small, 300) })"]},
+
+        {"kind":"then","text":"it is still measured as itself.","code":["secondSmall == firstSmall"]},
+
+        {"kind":"cleanup","text":"We close both windows again.","code":["UI.runNow({ smallFrame.dispose(); largeFrame.dispose() })"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grid which has not changed does not walk its children again.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the reason the answer is remembered in the first place, so it is worth\n            pinning down directly rather than trusting it to stay true.\n\n            Walking the children is what makes measuring expensive: every child is asked\n            for its preferred size, which for a text component means shaping its text, and\n            for a nested grid means measuring that entire grid in turn. A grid asked the\n            same question five times over must pay for that walk once. The moment it is\n            invalidated it has to pay again, because then it can no longer know that the\n            answer still holds.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Three boxes which keep count of how often they are asked for their preferred size.","code":["var boxes = [new CountingBox(40, 20), new CountingBox(40, 20), new CountingBox(40, 20)]"]},
+
+        {"kind":"and","text":"A grid holding them.","code":["var grid =","        UI.panel().withFlowLayout(UI.HorizontalAlignment.LEFT, 5, 5)","        .add(UI.of(boxes[0]))","        .add(UI.of(boxes[1]))","        .add(UI.of(boxes[2]))","        .get(JPanel)"]},
+
+        {"kind":"and","text":"A window holding the grid, packed, so the grid is valid.","code":["var frame = new JFrame(\"An unchanged grid walks its children once\")","frame.getContentPane().add(grid)","UI.runNow({ frame.pack() })"]},
+
+        {"kind":"when","text":"We measure the grid once and note how much walking that took,","code":["UI.runNow({ grid.getLayout().preferredLayoutSizeAtWidth(grid, 200) })","var afterOneMeasurement = boxes[0].measurements + boxes[1].measurements + boxes[2].measurements"]},
+
+        {"kind":"then","text":"the children were in fact walked.","code":["afterOneMeasurement > 0"]},
+
+        {"kind":"when","text":"We ask the very same question four more times,","code":["4.times { UI.runNow({ grid.getLayout().preferredLayoutSizeAtWidth(grid, 200) }) }"]},
+
+        {"kind":"then","text":"not a single child was asked again -- all four answers came from the first walk.","code":["boxes[0].measurements + boxes[1].measurements + boxes[2].measurements == afterOneMeasurement"]},
+
+        {"kind":"when","text":"We invalidate the grid, which is Swing telling it that it knows nothing anymore,","code":["UI.runNow({ grid.invalidate() })"]},
+
+        {"kind":"and","text":"we ask once more,","code":["UI.runNow({ grid.getLayout().preferredLayoutSizeAtWidth(grid, 200) })"]},
+
+        {"kind":"then","text":"it walks its children all over again.","code":["boxes[0].measurements + boxes[1].measurements + boxes[2].measurements > afterOneMeasurement"]},
+
+        {"kind":"cleanup","text":"We close the window again.","code":["UI.runNow({ frame.dispose() })"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

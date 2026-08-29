@@ -1,0 +1,747 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForTree.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForTree.java</span></div><h1>UIForTree.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sprouts.Action;
+import sprouts.From;
+import sprouts.Tuple;
+import sprouts.Val;
+import sprouts.Var;
+import swingtree.api.Configurator;
+import swingtree.api.IconDeclaration;
+
+import javax.swing.Icon;
+import javax.swing.JTree;
+import javax.swing.ToolTipManager;
+import javax.swing.tree.DefaultTreeCellEditor;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.TreeCellEditor;
+import javax.swing.tree.TreeCellRenderer;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
+import java.awt.Component;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.EventObject;
+import java.util.List;
+import java.util.Objects;
+
+/**
+ *  A SwingTree builder node designed for configuring {@link JTree} instances.
+ *  &lt;p&gt;
+ *  The recommended way to get one is {@link UI#tree(Var, Configurator)}, which binds the
+ *  tree to a single property holding a deeply immutable, nested data structure and a
+ *  {@link TreeConf} saying which parts of it to zoom into:
+ *  &lt;pre&gt;{@code
+ *  UI.tree(fileSystem, conf -&gt; conf
+ *      .nodesOf(Dir.class, dir -&gt; dir
+ *          .children(Dir::entries, Dir::withEntries)
+ *          .text(Dir::name, Dir::withName)
+ *      )
+ *      .nodesOf(Doc.class, doc -&gt; doc.text(Doc::name))
+ *  )
+ *  .withSelection(selectedNode);
+ *  }&lt;/pre&gt;
+ *  Where the data has no single root but several top level nodes,
+ *  {@link UI#trees(Var, Configurator)} binds a {@code Var&lt;Tuple&lt;N&gt;&gt;} of them instead. The
+ *  builder returned is this same one, and everything below configures both forms alike.
+ * 	&lt;p&gt;
+ * 	&lt;b&gt;Please take a look at the &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
+ * 	where you can browse a large collection of examples demonstrating how to use the API of this class.&lt;/b&gt;
+ *
+ * @param &lt;I&gt; The identity type of the nodes, which selection paths are made of.
+ * @param &lt;N&gt; The common type of the nodes of the tree managed by this builder.
+ * @param &lt;T&gt; The type of the {@link JTree} instance which will be managed by this builder.
+ */
+public final class UIForTree&lt;I, N, T extends JTree&gt; extends UIForAnySwing&lt;UIForTree&lt;I, N, T&gt;, T&gt;
+{
+<span class="fc" id="L60">    private static final Logger log = LoggerFactory.getLogger(UIForTree.class);</span>
+
+    private final BuilderState&lt;T&gt;                    _state;
+    private final @Nullable PropertyTreeModel&lt;I, N, ?&gt; _model;
+
+<span class="fc" id="L65">    UIForTree( BuilderState&lt;T&gt; state, @Nullable PropertyTreeModel&lt;I, N, ?&gt; model ) {</span>
+<span class="fc" id="L66">        _state = Objects.requireNonNull(state);</span>
+<span class="fc" id="L67">        _model = model;</span>
+<span class="fc" id="L68">    }</span>
+
+    @Override
+    protected BuilderState&lt;T&gt; _state() {
+<span class="fc" id="L72">        return _state;</span>
+    }
+
+    @Override
+    protected UIForTree&lt;I, N, T&gt; _newBuilderWithState( BuilderState&lt;T&gt; newState ) {
+<span class="fc" id="L77">        return new UIForTree&lt;&gt;(newState, _model);</span>
+    }
+
+    /**
+     *  Installs a plain Swing {@link TreeModel}, which is the escape hatch for a tree whose
+     *  contents genuinely do not live in a property, or which already has a model you want
+     *  to keep. A tree installed like this takes no part in any of the property binding this
+     *  builder otherwise offers.
+     *  &lt;p&gt;
+     *  Installing one on a tree built by {@code UI.tree(rootProperty, ..)} replaces the bound
+     *  model, which leaves the binding with nothing to drive; SwingTree says so in the log
+     *  rather than leaving you to work out why the tree stopped following the property. Build
+     *  the tree with {@link UI#of(JTree)} instead when the contents are not a property.
+     *
+     * @param model The {@link TreeModel} to install.
+     * @return This builder node, to allow for method chaining.
+     */
+    public final UIForTree&lt;I, N, T&gt; withModel( TreeModel model ) {
+<span class="nc" id="L95">        Objects.requireNonNull(model, &quot;model&quot;);</span>
+<span class="nc" id="L96">        PropertyTreeModel&lt;I, N, ?&gt; bound = _model;</span>
+<span class="nc" id="L97">        return _with( thisComponent -&gt; {</span>
+<span class="nc bnc" id="L98" title="All 2 branches missed.">                    if ( bound != null ) {</span>
+<span class="nc" id="L99">                        log.warn(SwingTree.get().logMarker(),</span>
+                            &quot;Replacing the bound model of a tree with a plain '{}'. The tree will no &quot; +
+                            &quot;longer follow the property it was built from. Use 'UI.of(someTree)' if &quot; +
+                            &quot;the contents of this tree are not supposed to live in a property.&quot;,
+<span class="nc" id="L103">                            model.getClass().getSimpleName());</span>
+<span class="nc" id="L104">                        thisComponent.setCellRenderer(new DefaultTreeCellRenderer());</span>
+<span class="nc" id="L105">                        thisComponent.setEditable(false);</span>
+                    }
+<span class="nc" id="L107">                    thisComponent.setModel(model);</span>
+<span class="nc" id="L108">                })</span>
+<span class="nc" id="L109">                ._this();</span>
+    }
+
+    /**
+     *  Binds the selected position of the tree to a mutable property holding a
+     *  &lt;b&gt;path of ids&lt;/b&gt;, which keeps the two in sync in both directions: selecting a node
+     *  writes the path leading to it into the property, and assigning a path selects the
+     *  node it names, opening every branch above it and scrolling it into view.
+     *  &lt;pre&gt;{@code
+     *  Var&lt;Tuple&lt;String&gt;&gt; selectedPath = vm.zoomTo(Move::selectedPath, Move::withSelectedPath);
+     *
+     *  UI.tree(move, conf -&gt; ..).withSelection(selectedPath);
+     *  //  nothing selected   -&gt;  Tuple.of(String.class)
+     *  //  the root           -&gt;  [&quot;move&quot;]
+     *  //  the kettle         -&gt;  [&quot;move&quot;, &quot;kitchen&quot;, &quot;appliances&quot;, &quot;kettle&quot;]
+     *  }&lt;/pre&gt;
+     *  &lt;b&gt;A selection is a position, and only a path names a position.&lt;/b&gt; A node value
+     *  cannot: the same value may sit in several places at once, and a tree only requires
+     *  its ids to be unique &lt;i&gt;among siblings&lt;/i&gt;, so two folders may each hold a
+     *  {@code notes.txt}. A path of ids has nothing to be ambiguous about, needs no search
+     *  to resolve, and carries no data which could contradict the tree.
+     *  &lt;p&gt;
+     *  The empty tuple means nothing is selected, so there is no null to handle. To get at
+     *  the node a path names — for a detail view, say — ask the configuration:
+     *  {@link TreeConf#nodeAt(Object, Tuple)} and {@link TreeConf#nodesAlong(Object, Tuple)}.
+     *  &lt;p&gt;
+     *  On a tree bound through {@link UI#trees(Var, Configurator)} the first id names a top
+     *  level node rather than a root, so its paths are one element shorter and no path at all
+     *  names the forest. Resolve them with {@link TreeConf#nodeAt(Tuple, Tuple)}.
+     *  &lt;p&gt;
+     *  Binding a single path this way also puts the tree into single selection mode. Use
+     *  {@link #withSelectionPaths(Var)} for a tree the user may select several nodes in.
+     *
+     * @param selection A property holding the ids leading to the selected node.
+     * @return This builder node, to allow for method chaining.
+     */
+    public final UIForTree&lt;I, N, T&gt; withSelection( Var&lt;Tuple&lt;I&gt;&gt; selection ) {
+<span class="fc" id="L146">        Objects.requireNonNull(selection, &quot;selection&quot;);</span>
+<span class="fc" id="L147">        PropertyTreeModel&lt;I, N, ?&gt; model = _requireBoundModel(&quot;withSelection(Var)&quot;);</span>
+<span class="pc bpc" id="L148" title="1 of 2 branches missed.">        if ( model == null )</span>
+<span class="nc" id="L149">            return _this();</span>
+<span class="fc" id="L150">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L151">                    thisComponent.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);</span>
+<span class="fc" id="L152">                    Runnable writeBack = () -&gt; {</span>
+<span class="fc" id="L153">                        Tuple&lt;I&gt; path = model.idTupleOf(</span>
+<span class="fc" id="L154">                                            thisComponent.getSelectionPath(),</span>
+<span class="fc" id="L155">                                            _idTypeOf(selection, model)</span>
+                                        );
+<span class="fc" id="L157">                        _runInApp(() -&gt; selection.set(From.VIEW, path));</span>
+<span class="fc" id="L158">                    };</span>
+<span class="fc" id="L159">                    thisComponent.addTreeSelectionListener( event -&gt; {</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">                        if ( model.isRestructuring() )</span>
+<span class="fc" id="L161">                            return; // The tree is mid rebuild, so its selection means nothing yet.</span>
+<span class="fc" id="L162">                        writeBack.run();</span>
+<span class="fc" id="L163">                    });</span>
+<span class="fc" id="L164">                    model.onAfterRestructure(writeBack);</span>
+<span class="fc" id="L165">                })</span>
+<span class="fc" id="L166">                ._withOnShow( selection, (thisComponent, path) -&gt; {</span>
+<span class="fc" id="L167">                    _selectPaths(thisComponent, model, _asPaths(path));</span>
+<span class="fc" id="L168">                })</span>
+<span class="fc" id="L169">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L170">                    Tuple&lt;I&gt; initial = selection.orElseNull();</span>
+<span class="pc bpc" id="L171" title="1 of 4 branches missed.">                    if ( initial != null &amp;&amp; !initial.isEmpty() )</span>
+<span class="fc" id="L172">                        _selectPaths(thisComponent, model, _asPaths(initial));</span>
+<span class="fc" id="L173">                })</span>
+<span class="fc" id="L174">                ._this();</span>
+    }
+
+    /**
+     *  Binds the selected position of the tree to a read only property holding a path of
+     *  ids, so that the tree follows the property but a selection made by the user is not
+     *  written back. See {@link #withSelection(Var)} for why a selection is a path.
+     *
+     * @param selection A read only property holding the ids leading to the selected node.
+     * @return This builder node, to allow for method chaining.
+     */
+    public final UIForTree&lt;I, N, T&gt; withSelection( Val&lt;Tuple&lt;I&gt;&gt; selection ) {
+<span class="nc" id="L186">        Objects.requireNonNull(selection, &quot;selection&quot;);</span>
+<span class="nc" id="L187">        PropertyTreeModel&lt;I, N, ?&gt; model = _requireBoundModel(&quot;withSelection(Val)&quot;);</span>
+<span class="nc bnc" id="L188" title="All 2 branches missed.">        if ( model == null )</span>
+<span class="nc" id="L189">            return _this();</span>
+<span class="nc" id="L190">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L191">                    thisComponent.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);</span>
+<span class="nc" id="L192">                })</span>
+<span class="nc" id="L193">                ._withOnShow( selection, (thisComponent, path) -&gt; {</span>
+<span class="nc" id="L194">                    _selectPaths(thisComponent, model, _asPaths(path));</span>
+<span class="nc" id="L195">                })</span>
+<span class="nc" id="L196">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L197">                    Tuple&lt;I&gt; initial = selection.orElseNull();</span>
+<span class="nc bnc" id="L198" title="All 4 branches missed.">                    if ( initial != null &amp;&amp; !initial.isEmpty() )</span>
+<span class="nc" id="L199">                        _selectPaths(thisComponent, model, _asPaths(initial));</span>
+<span class="nc" id="L200">                })</span>
+<span class="nc" id="L201">                ._this();</span>
+    }
+
+    /**
+     *  Binds every selected position of the tree to a mutable property holding one path of
+     *  ids per selected node, which also puts the tree into a mode where the user may
+     *  select any number of nodes. The two stay in sync in both directions, just like
+     *  {@link #withSelection(Var)}.
+     *
+     * @param selection A property holding one path of ids per selected node.
+     * @return This builder node, to allow for method chaining.
+     */
+    public final UIForTree&lt;I, N, T&gt; withSelectionPaths( Var&lt;Tuple&lt;Tuple&lt;I&gt;&gt;&gt; selection ) {
+<span class="fc" id="L214">        Objects.requireNonNull(selection, &quot;selection&quot;);</span>
+<span class="fc" id="L215">        PropertyTreeModel&lt;I, N, ?&gt; model = _requireBoundModel(&quot;withSelectionPaths(Var)&quot;);</span>
+<span class="pc bpc" id="L216" title="1 of 2 branches missed.">        if ( model == null )</span>
+<span class="nc" id="L217">            return _this();</span>
+<span class="fc" id="L218">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L219">                    thisComponent.getSelectionModel().setSelectionMode(TreeSelectionModel.DISCONTIGUOUS_TREE_SELECTION);</span>
+<span class="fc" id="L220">                    Runnable writeBack = () -&gt; {</span>
+<span class="fc" id="L221">                        Class&lt;I&gt; idType = _idTypeOfNested(selection, model);</span>
+<span class="fc" id="L222">                        TreePath[] paths = thisComponent.getSelectionPaths();</span>
+<span class="fc" id="L223">                        List&lt;Tuple&lt;I&gt;&gt; asIds = new ArrayList&lt;&gt;();</span>
+<span class="pc bpc" id="L224" title="1 of 2 branches missed.">                        if ( paths != null )</span>
+<span class="fc bfc" id="L225" title="All 2 branches covered.">                            for ( TreePath path : paths )</span>
+<span class="fc" id="L226">                                asIds.add(model.idTupleOf(path, idType));</span>
+<span class="fc" id="L227">                        Tuple&lt;Tuple&lt;I&gt;&gt; selected = Tuple.of(Tuple.classTyped(idType), asIds);</span>
+<span class="fc" id="L228">                        _runInApp(() -&gt; selection.set(From.VIEW, selected));</span>
+<span class="fc" id="L229">                    };</span>
+<span class="fc" id="L230">                    thisComponent.addTreeSelectionListener( event -&gt; {</span>
+<span class="pc bpc" id="L231" title="1 of 2 branches missed.">                        if ( model.isRestructuring() )</span>
+<span class="nc" id="L232">                            return; // The tree is mid rebuild, so its selection means nothing yet.</span>
+<span class="fc" id="L233">                        writeBack.run();</span>
+<span class="fc" id="L234">                    });</span>
+<span class="fc" id="L235">                    model.onAfterRestructure(writeBack);</span>
+<span class="fc" id="L236">                })</span>
+<span class="fc" id="L237">                ._withOnShow( selection, (thisComponent, paths) -&gt; {</span>
+<span class="fc" id="L238">                    _selectPaths(thisComponent, model, _asPathList(paths));</span>
+<span class="fc" id="L239">                })</span>
+<span class="fc" id="L240">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L241">                    Tuple&lt;Tuple&lt;I&gt;&gt; initial = selection.orElseNull();</span>
+<span class="pc bpc" id="L242" title="2 of 4 branches missed.">                    if ( initial != null &amp;&amp; !initial.isEmpty() )</span>
+<span class="nc" id="L243">                        _selectPaths(thisComponent, model, _asPathList(initial));</span>
+<span class="fc" id="L244">                })</span>
+<span class="fc" id="L245">                ._this();</span>
+    }
+
+    /**
+     *  Registers an action which is invoked whenever the selection of the tree changes.
+     *  The action receives a {@link TreeSelectionDelegate} speaking in your own node values,
+     *  so there is never a reason to reach into the tree's own path objects.
+     *  &lt;pre&gt;{@code
+     *  UI.tree(fileSystem, conf -&gt; ..)
+     *  .onSelection( it -&gt; it.lead().ifPresent(node -&gt; open(node)) );
+     *  }&lt;/pre&gt;
+     *  For the common case of mirroring the selection into a view model, prefer
+     *  {@link #withSelection(Var)}, which needs no action at all.
+     *
+     * @param action The action to invoke when the selection changes.
+     * @return This builder node, to allow for method chaining.
+     */
+    public final UIForTree&lt;I, N, T&gt; onSelection( Action&lt;TreeSelectionDelegate&lt;I, N&gt;&gt; action ) {
+<span class="fc" id="L263">        Objects.requireNonNull(action, &quot;action&quot;);</span>
+<span class="fc" id="L264">        PropertyTreeModel&lt;I, N, ?&gt; model = _requireBoundModel(&quot;onSelection(..)&quot;);</span>
+<span class="pc bpc" id="L265" title="1 of 2 branches missed.">        if ( model == null )</span>
+<span class="nc" id="L266">            return _this();</span>
+<span class="fc" id="L267">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L268">                    Runnable notify = () -&gt; {</span>
+                        // Captured on the UI thread, delivered on the application thread:
+<span class="fc" id="L270">                        TreeSelectionDelegate&lt;I, N&gt; delegate = new TreeSelectionDelegate&lt;&gt;(</span>
+                            thisComponent, model,
+<span class="fc" id="L272">                            thisComponent.getSelectionPath(),</span>
+<span class="fc" id="L273">                            thisComponent.getSelectionPaths()</span>
+                        );
+<span class="fc" id="L275">                        _runInApp(() -&gt; {</span>
+                            try {
+<span class="fc" id="L277">                                action.accept(delegate);</span>
+<span class="nc" id="L278">                            } catch (Exception e) {</span>
+<span class="nc" id="L279">                                log.error(SwingTree.get().logMarker(),</span>
+                                        &quot;Error occurred while processing a tree selection event.&quot;, e);
+<span class="fc" id="L281">                            }</span>
+<span class="fc" id="L282">                        });</span>
+<span class="fc" id="L283">                    };</span>
+<span class="fc" id="L284">                    thisComponent.addTreeSelectionListener( event -&gt; {</span>
+<span class="pc bpc" id="L285" title="1 of 2 branches missed.">                        if ( model.isRestructuring() )</span>
+<span class="nc" id="L286">                            return; // The tree is mid rebuild, so its selection means nothing yet.</span>
+<span class="fc" id="L287">                        notify.run();</span>
+<span class="fc" id="L288">                    });</span>
+<span class="fc" id="L289">                    model.onAfterRestructure(notify);</span>
+<span class="fc" id="L290">                })</span>
+<span class="fc" id="L291">                ._this();</span>
+    }
+
+    /**
+     *  Decides whether the root node of the bound structure is drawn as a row of its own.
+     *  Hiding it also turns on the handles of the level below, so that what is now the first
+     *  visible level can still be opened.
+     *  &lt;p&gt;
+     *  A tree bound through {@link UI#trees(Var, Configurator)} has no root node, so there is
+     *  nothing here to show: showing it is ignored and reported in the log, and hiding it was
+     *  already the case.
+     *
+     * @param rootVisible True to show the root node.
+     * @return This builder node, to allow for method chaining.
+     */
+    public final UIForTree&lt;I, N, T&gt; withRootVisible( boolean rootVisible ) {
+<span class="fc" id="L307">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L308">                    _applyRootVisible(thisComponent, rootVisible, &quot;withRootVisible(boolean)&quot;);</span>
+<span class="fc bfc" id="L309" title="All 2 branches covered.">                    if ( !rootVisible )</span>
+<span class="fc" id="L310">                        thisComponent.setShowsRootHandles(true);</span>
+<span class="fc" id="L311">                })</span>
+<span class="fc" id="L312">                ._this();</span>
+    }
+
+    /**
+     *  Binds the visibility of the root node to a property, so that the tree can fold its
+     *  root away and back in response to application state. A tree bound through
+     *  {@link UI#trees(Var, Configurator)} has no root node, so see
+     *  {@link #withRootVisible(boolean)} for what happens there.
+     *
+     * @param rootVisible A property telling whether the root node should be shown.
+     * @return This builder node, to allow for method chaining.
+     */
+    public final UIForTree&lt;I, N, T&gt; isRootVisibleIf( Val&lt;Boolean&gt; rootVisible ) {
+<span class="nc" id="L325">        Objects.requireNonNull(rootVisible, &quot;rootVisible&quot;);</span>
+<span class="nc" id="L326">        return _withOnShow( rootVisible, (thisComponent, visible) -&gt; {</span>
+<span class="nc" id="L327">                    _applyRootVisible(thisComponent, Boolean.TRUE.equals(visible), &quot;isRootVisibleIf(Val)&quot;);</span>
+<span class="nc" id="L328">                })</span>
+<span class="nc" id="L329">                ._with( thisComponent -&gt; {</span>
+<span class="nc" id="L330">                    _applyRootVisible(</span>
+<span class="nc" id="L331">                        thisComponent, Boolean.TRUE.equals(rootVisible.orElseNull()), &quot;isRootVisibleIf(Val)&quot;</span>
+                    );
+<span class="nc" id="L333">                })</span>
+<span class="nc" id="L334">                ._this();</span>
+    }
+
+    private void _applyRootVisible( JTree tree, boolean rootVisible, String method ) {
+<span class="fc" id="L338">        PropertyTreeModel&lt;I, N, ?&gt; model = _model;</span>
+<span class="pc bpc" id="L339" title="2 of 6 branches missed.">        if ( rootVisible &amp;&amp; model != null &amp;&amp; model.isForest() ) {</span>
+<span class="fc" id="L340">            log.warn(SwingTree.get().logMarker(),</span>
+                &quot;Ignoring '{}' on a tree bound to a tuple of top level nodes, which has no root &quot; +
+                &quot;node to show. Bind it through 'UI.tree(rootProperty, ..)' if it should have one.&quot;,
+                method);
+<span class="fc" id="L344">            return;</span>
+        }
+<span class="fc" id="L346">        tree.setRootVisible(rootVisible);</span>
+<span class="fc" id="L347">    }</span>
+
+    /**
+     *  Decides whether the handles which expand and collapse a branch are drawn next to the
+     *  top level nodes as well. Hiding the root turns these on, because they are then the only
+     *  handles there are — and turning them off again on a tree with no visible root leaves
+     *  the user nothing to click, so only do that where expansion is driven from code.
+     *
+     * @param showsRootHandles True to draw handles next to the top level nodes.
+     * @return This builder node, to allow for method chaining.
+     */
+    public final UIForTree&lt;I, N, T&gt; withRootHandlesVisible( boolean showsRootHandles ) {
+<span class="nc" id="L359">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L360">                    thisComponent.setShowsRootHandles(showsRootHandles);</span>
+<span class="nc" id="L361">                })</span>
+<span class="nc" id="L362">                ._this();</span>
+    }
+
+    /**
+     *  Sets the height of every row of the tree, in the same scale independent developer
+     *  pixels the rest of SwingTree speaks in. Pass {@code 0} to let each row take the
+     *  height its own cell view asks for.
+     *
+     * @param rowHeight The height of a row.
+     * @return This builder node, to allow for method chaining.
+     */
+    public final UIForTree&lt;I, N, T&gt; withRowHeight( int rowHeight ) {
+<span class="nc" id="L374">        return _with( thisComponent -&gt; {</span>
+<span class="nc bnc" id="L375" title="All 2 branches missed.">                    thisComponent.setRowHeight(rowHeight &lt;= 0 ? rowHeight : UI.scale(rowHeight));</span>
+<span class="nc" id="L376">                })</span>
+<span class="nc" id="L377">                ._this();</span>
+    }
+
+    /**
+     *  Expands every branch down to the given depth, once, at the point this builder method
+     *  runs, where a depth of {@code 1} opens the topmost visible level, {@code 2} the level
+     *  below that as well, and so on. This is a convenience for the initial view only:
+     *  expansion the user performs afterwards is untouched by it, and so is everything the
+     *  bound property grows later.
+     *  &lt;p&gt;
+     *  Depth is counted from what is on screen, so a root hidden with
+     *  {@link #withRootVisible(boolean)} — and the absent root of a forest — does not count
+     *  as a level. Call this &lt;i&gt;after&lt;/i&gt; hiding the root, so that it knows.
+     *
+     * @param depth How many visible levels to expand.
+     * @return This builder node, to allow for method chaining.
+     */
+    public final UIForTree&lt;I, N, T&gt; withInitialExpansionDepth( int depth ) {
+<span class="fc" id="L395">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L396">                    _expandToDepth(thisComponent, depth);</span>
+<span class="fc" id="L397">                })</span>
+<span class="fc" id="L398">                ._this();</span>
+    }
+
+    /**
+     *  Use this to build a cell renderer covering several node types at once, through the
+     *  same fluent API the list, combo box and table components expose:
+     *  &lt;pre&gt;{@code
+     *  UI.tree(fileSystem, conf -&gt; ..)
+     *  .withCells( it -&gt; it
+     *      .when(Dir.class).asText( cell -&gt; cell.entry().map(Dir::name).orElse(&quot;&quot;) )
+     *      .when(Doc.class).asComponent( cell -&gt; myFancyRow(cell) )
+     *  );
+     *  }&lt;/pre&gt;
+     *  Note that for a label and an icon there is no need to come here at all: declare them
+     *  as part of the node's own rule with {@link TreeNodeConf#text(java.util.function.Function)}
+     *  and {@link TreeNodeConf#icon(java.util.function.Function)}. Reach for this method when
+     *  a node needs a view a label cannot give it.
+     *  &lt;p&gt;
+     *  The two mix freely: a node type this builder says nothing about keeps the label, icon
+     *  and tool tip declared in its own rule, so covering one type here does not oblige you
+     *  to cover the rest.
+     *
+     * @param renderBuilder Configures the cell renderer.
+     * @param &lt;V&gt; The type of the node values being rendered.
+     * @return This builder node, to allow for method chaining.
+     */
+    public final &lt;V extends N&gt; UIForTree&lt;I, N, T&gt; withCells(
+        Configurator&lt;CellBuilder&lt;T, V&gt;&gt; renderBuilder
+    ) {
+<span class="fc" id="L427">        Objects.requireNonNull(renderBuilder, &quot;renderBuilder&quot;);</span>
+<span class="fc" id="L428">        CellBuilder builder = CellBuilder.forTree(Object.class);</span>
+        try {
+<span class="fc" id="L430">            builder = renderBuilder.configure(builder);</span>
+<span class="nc" id="L431">        } catch (Exception e) {</span>
+<span class="nc" id="L432">            log.error(SwingTree.get().logMarker(), &quot;Error while building the cells of a tree.&quot;, e);</span>
+<span class="nc" id="L433">            return _this();</span>
+<span class="fc" id="L434">        }</span>
+<span class="fc" id="L435">        Objects.requireNonNull(builder);</span>
+<span class="fc" id="L436">        PropertyTreeModel&lt;I, N, ?&gt; model = _model;</span>
+        /*
+            The tree's own renderer goes in as the fallback, so a node type no 'when(..)'
+            clause covers keeps the rules declared for it instead of falling to 'toString()'.
+        */
+<span class="fc" id="L441">        TreeCellRenderer renderer = builder.getForTree(</span>
+<span class="pc bpc" id="L442" title="1 of 2 branches missed.">                                        model == null ? null : new DefaultBoundRenderer&lt;&gt;(model)</span>
+                                    );
+<span class="fc" id="L444">        return withCellRenderer(renderer);</span>
+    }
+
+    /**
+     *  Configures a single cell view used for every node of the tree, which is the shorter
+     *  form of {@link #withCells(Configurator)} when there is no need to distinguish between
+     *  node types.
+     *
+     * @param cellConfigurator Configures the cell view.
+     * @param &lt;V&gt; The type of the node values being rendered.
+     * @return This builder node, to allow for method chaining.
+     */
+    public final &lt;V extends N&gt; UIForTree&lt;I, N, T&gt; withCell(
+        Configurator&lt;CellConf&lt;T, V&gt;&gt; cellConfigurator
+    ) {
+<span class="nc" id="L459">        Objects.requireNonNull(cellConfigurator, &quot;cellConfigurator&quot;);</span>
+<span class="nc" id="L460">        return withCells( it -&gt; it.when((Class) Object.class).as(cellConfigurator) );</span>
+    }
+
+    /**
+     *  Installs a plain Swing {@link TreeCellRenderer}. A bound tree keeps internal handles
+     *  inside its paths, so the renderer is wrapped in one which unwraps them first: what
+     *  reaches your renderer is always your own node value.
+     *  &lt;p&gt;
+     *  A renderer installed this way answers for &lt;i&gt;every&lt;/i&gt; node, so the {@code text(..)},
+     *  {@code icon(..)} and {@code toolTip(..)} rules declared per node type no longer apply.
+     *  Use {@link #withCells(Configurator)} to cover only some node types and leave the rest
+     *  to their own rules.
+     *
+     * @param renderer The renderer to paint the nodes with.
+     * @return This builder node, to allow for method chaining.
+     */
+    public final UIForTree&lt;I, N, T&gt; withCellRenderer( TreeCellRenderer renderer ) {
+<span class="fc" id="L477">        Objects.requireNonNull(renderer, &quot;renderer&quot;);</span>
+<span class="fc" id="L478">        PropertyTreeModel&lt;I, N, ?&gt; model = _model;</span>
+<span class="fc" id="L479">        return _with( thisComponent -&gt; {</span>
+<span class="fc" id="L480">                    thisComponent.setCellRenderer(</span>
+<span class="pc bpc" id="L481" title="1 of 2 branches missed.">                        model == null ? renderer : new UnwrappingRenderer(model, renderer)</span>
+                    );
+<span class="fc" id="L483">                })</span>
+<span class="fc" id="L484">                ._this();</span>
+    }
+
+    /**
+     *  Installs a plain Swing {@link TreeCellEditor}, replacing the in place rename the
+     *  {@link TreeNodeConf#text(java.util.function.Function, java.util.function.BiFunction)}
+     *  rule installs by itself.
+     *
+     * @param editor The editor to edit the nodes with.
+     * @return This builder node, to allow for method chaining.
+     */
+    public final UIForTree&lt;I, N, T&gt; withCellEditor( TreeCellEditor editor ) {
+<span class="nc" id="L496">        Objects.requireNonNull(editor, &quot;editor&quot;);</span>
+<span class="nc" id="L497">        return _with( thisComponent -&gt; {</span>
+<span class="nc" id="L498">                    thisComponent.setCellEditor(editor);</span>
+<span class="nc" id="L499">                })</span>
+<span class="nc" id="L500">                ._this();</span>
+    }
+
+    // -------------------------------------------------------------- Internals
+
+    static &lt;I, N, T extends JTree&gt; UIForTree&lt;I, N, T&gt; _bind(
+        BuilderState&lt;T&gt; state, Val&lt;N&gt; root, TreeConf&lt;I, N&gt; conf, boolean writable
+    ) {
+<span class="fc" id="L508">        return _bindTo(state, root, TreeRoots.single(conf.nodeType()), conf, writable);</span>
+    }
+
+    static &lt;I, N, T extends JTree&gt; UIForTree&lt;I, N, T&gt; _bindForest(
+        BuilderState&lt;T&gt; state, Val&lt;Tuple&lt;N&gt;&gt; roots, TreeConf&lt;I, N&gt; conf, boolean writable
+    ) {
+<span class="fc" id="L514">        return _bindTo(state, roots, TreeRoots.forest(conf.nodeType()), conf, writable);</span>
+    }
+
+    private static &lt;I, N, R, T extends JTree&gt; UIForTree&lt;I, N, T&gt; _bindTo(
+        BuilderState&lt;T&gt; state, Val&lt;R&gt; bound, TreeRoots&lt;N, R&gt; roots, TreeConf&lt;I, N&gt; conf, boolean writable
+    ) {
+<span class="fc" id="L520">        PropertyTreeModel&lt;I, N, R&gt; model = new PropertyTreeModel&lt;&gt;(</span>
+<span class="fc" id="L521">            bound, roots, conf, writable, state.eventProcessor()</span>
+        );
+<span class="fc" id="L523">        UIForTree&lt;I, N, T&gt; builder = new UIForTree&lt;&gt;(state, model);</span>
+<span class="fc" id="L524">        return builder</span>
+<span class="fc" id="L525">                ._with( thisComponent -&gt; {</span>
+<span class="fc" id="L526">                    model.attachTo(thisComponent);</span>
+<span class="fc" id="L527">                    thisComponent.setModel(model);</span>
+<span class="fc" id="L528">                    thisComponent.setCellRenderer(new DefaultBoundRenderer&lt;&gt;(model));</span>
+<span class="fc" id="L529">                    ToolTipManager.sharedInstance().registerComponent(thisComponent);</span>
+<span class="fc bfc" id="L530" title="All 2 branches covered.">                    if ( model.isForest() ) {</span>
+                        // Nothing sits above the top level, and its handles are the only ones there are:
+<span class="fc" id="L532">                        thisComponent.setRootVisible(false);</span>
+<span class="fc" id="L533">                        thisComponent.setShowsRootHandles(true);</span>
+                    }
+<span class="fc bfc" id="L535" title="All 4 branches covered.">                    if ( model.isWritable() &amp;&amp; conf.hasRenamableRule() ) {</span>
+<span class="fc" id="L536">                        thisComponent.setEditable(true);</span>
+<span class="fc" id="L537">                        thisComponent.setCellEditor(new BoundCellEditor&lt;&gt;(</span>
+<span class="fc" id="L538">                            thisComponent, (DefaultTreeCellRenderer) thisComponent.getCellRenderer(), model</span>
+                        ));
+                    }
+<span class="fc" id="L541">                })</span>
+<span class="fc" id="L542">                ._withOnShow( bound, (thisComponent, newValue) -&gt; {</span>
+<span class="fc" id="L543">                    model.applyNewValue(newValue);</span>
+<span class="fc" id="L544">                })</span>
+<span class="fc" id="L545">                ._this();</span>
+    }
+
+    private @Nullable PropertyTreeModel&lt;I, N, ?&gt; _requireBoundModel( String method ) {
+<span class="fc" id="L549">        PropertyTreeModel&lt;I, N, ?&gt; model = _model;</span>
+<span class="pc bpc" id="L550" title="1 of 2 branches missed.">        if ( model == null )</span>
+<span class="nc" id="L551">            log.warn(SwingTree.get().logMarker(),</span>
+                &quot;Ignoring '{}' on a tree which is not bound to a property. Create the tree through &quot; +
+                &quot;'UI.tree(rootProperty, conf -&gt; ..)' to be able to use it.&quot;, method);
+<span class="fc" id="L554">        return model;</span>
+    }
+
+    /**
+     *  Taken from the value the property already holds, because a {@link Tuple} compares its
+     *  element type as part of its equality: a tuple of the wrong type would never compare
+     *  equal to what the property holds, so every write would echo back forever.
+     */
+    private Class&lt;I&gt; _idTypeOf( Val&lt;Tuple&lt;I&gt;&gt; selection, PropertyTreeModel&lt;I, N, ?&gt; model ) {
+<span class="fc" id="L563">        Tuple&lt;I&gt; current = selection.orElseNull();</span>
+<span class="pc bpc" id="L564" title="1 of 2 branches missed.">        return ( current == null ? model.idType() : current.type() );</span>
+    }
+
+    private Class&lt;I&gt; _idTypeOfNested( Val&lt;Tuple&lt;Tuple&lt;I&gt;&gt;&gt; selection, PropertyTreeModel&lt;I, N, ?&gt; model ) {
+<span class="fc" id="L568">        Tuple&lt;Tuple&lt;I&gt;&gt; current = selection.orElseNull();</span>
+<span class="pc bpc" id="L569" title="1 of 4 branches missed.">        if ( current != null &amp;&amp; !current.isEmpty() )</span>
+<span class="fc" id="L570">            return current.get(0).type();</span>
+<span class="fc" id="L571">        return model.idType();</span>
+    }
+
+    private List&lt;Tuple&lt;I&gt;&gt; _asPaths( @Nullable Tuple&lt;I&gt; path ) {
+<span class="fc" id="L575">        List&lt;Tuple&lt;I&gt;&gt; paths = new ArrayList&lt;&gt;(1);</span>
+<span class="pc bpc" id="L576" title="1 of 4 branches missed.">        if ( path != null &amp;&amp; !path.isEmpty() )</span>
+<span class="fc" id="L577">            paths.add(path);</span>
+<span class="fc" id="L578">        return paths;</span>
+    }
+
+    private List&lt;Tuple&lt;I&gt;&gt; _asPathList( @Nullable Tuple&lt;Tuple&lt;I&gt;&gt; paths ) {
+<span class="fc" id="L582">        List&lt;Tuple&lt;I&gt;&gt; result = new ArrayList&lt;&gt;();</span>
+<span class="pc bpc" id="L583" title="1 of 2 branches missed.">        if ( paths != null )</span>
+<span class="fc bfc" id="L584" title="All 2 branches covered.">            for ( int i = 0; i &lt; paths.size(); i++ ) {</span>
+<span class="fc" id="L585">                Tuple&lt;I&gt; path = paths.get(i);</span>
+<span class="pc bpc" id="L586" title="2 of 4 branches missed.">                if ( path != null &amp;&amp; !path.isEmpty() )</span>
+<span class="fc" id="L587">                    result.add(path);</span>
+            }
+<span class="fc" id="L589">        return result;</span>
+    }
+
+    /**
+     *  A path which no longer names anything simply takes no part in the selection,
+     *  rather than clearing it.
+     */
+    private void _selectPaths( JTree tree, PropertyTreeModel&lt;I, N, ?&gt; model, List&lt;Tuple&lt;I&gt;&gt; idPaths ) {
+<span class="fc bfc" id="L597" title="All 2 branches covered.">        if ( idPaths.isEmpty() ) {</span>
+<span class="fc" id="L598">            tree.clearSelection();</span>
+<span class="fc" id="L599">            return;</span>
+        }
+<span class="fc" id="L601">        List&lt;TreePath&gt; resolved = new ArrayList&lt;&gt;(idPaths.size());</span>
+<span class="fc bfc" id="L602" title="All 2 branches covered.">        for ( Tuple&lt;I&gt; idPath : idPaths ) {</span>
+<span class="fc" id="L603">            TreePath path = model.pathForIdTuple(idPath);</span>
+<span class="pc bpc" id="L604" title="1 of 2 branches missed.">            if ( path != null )</span>
+<span class="fc" id="L605">                resolved.add(path);</span>
+<span class="fc" id="L606">        }</span>
+<span class="pc bpc" id="L607" title="1 of 2 branches missed.">        if ( resolved.isEmpty() ) {</span>
+<span class="nc" id="L608">            tree.clearSelection();</span>
+<span class="nc" id="L609">            return;</span>
+        }
+<span class="fc bfc" id="L611" title="All 2 branches covered.">        for ( TreePath path : resolved )</span>
+<span class="fc" id="L612">            tree.makeVisible(path);</span>
+<span class="fc" id="L613">        tree.setSelectionPaths(resolved.toArray(new TreePath[0]));</span>
+<span class="fc" id="L614">        tree.scrollPathToVisible(resolved.get(0));</span>
+<span class="fc" id="L615">    }</span>
+
+    private static void _expandToDepth( JTree tree, int depth ) {
+<span class="pc bpc" id="L618" title="1 of 2 branches missed.">        if ( depth &lt;= 0 )</span>
+<span class="nc" id="L619">            return;</span>
+        // A root nobody can see is no level of its own, so it does not count towards the depth:
+<span class="fc bfc" id="L621" title="All 2 branches covered.">        int invisibleLevels = ( tree.isRootVisible() ? 0 : 1 );</span>
+        // Expanding a row adds rows below it, so the count is re-read on every step:
+<span class="fc bfc" id="L623" title="All 2 branches covered.">        for ( int row = 0; row &lt; tree.getRowCount(); row++ ) {</span>
+<span class="fc" id="L624">            TreePath path = tree.getPathForRow(row);</span>
+<span class="pc bpc" id="L625" title="1 of 4 branches missed.">            if ( path != null &amp;&amp; path.getPathCount() - invisibleLevels &lt;= depth )</span>
+<span class="fc" id="L626">                tree.expandRow(row);</span>
+        }
+<span class="fc" id="L628">    }</span>
+
+    /** Unwraps the node handle and renders the node by the rules declared for its type. */
+    private static final class DefaultBoundRenderer&lt;I, N&gt; extends DefaultTreeCellRenderer
+    {
+        private final PropertyTreeModel&lt;I, N, ?&gt; _model;
+
+<span class="fc" id="L635">        DefaultBoundRenderer( PropertyTreeModel&lt;I, N, ?&gt; model ) {</span>
+<span class="fc" id="L636">            _model = model;</span>
+<span class="fc" id="L637">        }</span>
+
+        @Override
+        public Component getTreeCellRendererComponent(
+            JTree tree, Object value, boolean selected,
+            boolean expanded, boolean leaf, int row, boolean hasFocus
+        ) {
+<span class="fc" id="L644">            Object node = _model.valueOf(value);</span>
+<span class="fc" id="L645">            TreeNodeConf&lt;N, ?&gt; rule = _model.ruleOf(value);</span>
+<span class="fc" id="L646">            String text = null;</span>
+<span class="fc" id="L647">            IconDeclaration iconDeclaration = null;</span>
+<span class="fc" id="L648">            String toolTip = null;</span>
+<span class="pc bpc" id="L649" title="1 of 4 branches missed.">            if ( rule != null &amp;&amp; node != null ) {</span>
+                try {
+<span class="fc" id="L651">                    text            = rule.textOf(node);</span>
+<span class="fc" id="L652">                    iconDeclaration = rule.iconOf(node);</span>
+<span class="fc" id="L653">                    toolTip         = rule.toolTipOf(node);</span>
+<span class="nc" id="L654">                } catch (Exception e) {</span>
+<span class="nc" id="L655">                    log.error(SwingTree.get().logMarker(),</span>
+                            &quot;Failed to render a tree node of type '{}'.&quot;,
+<span class="nc" id="L657">                            node.getClass().getSimpleName(), e);</span>
+<span class="fc" id="L658">                }</span>
+            }
+<span class="fc bfc" id="L660" title="All 2 branches covered.">            if ( text == null )</span>
+<span class="fc" id="L661">                text = String.valueOf(node);</span>
+<span class="fc" id="L662">            Component view = super.getTreeCellRendererComponent(</span>
+                tree, text, selected, expanded, leaf, row, hasFocus
+            );
+            // After the super call, which picks a leaf/open/closed icon of its own every time:
+<span class="fc bfc" id="L666" title="All 2 branches covered.">            if ( iconDeclaration != null ) {</span>
+<span class="fc" id="L667">                Icon icon = iconDeclaration.find().orElse(null);</span>
+<span class="fc bfc" id="L668" title="All 2 branches covered.">                if ( icon != null )</span>
+<span class="fc" id="L669">                    setIcon(icon);</span>
+            }
+<span class="fc" id="L671">            setToolTipText(toolTip);</span>
+<span class="fc" id="L672">            return view;</span>
+        }
+    }
+
+    /** Keeps a user supplied renderer from ever seeing the internal node handles. */
+    private static final class UnwrappingRenderer implements TreeCellRenderer
+    {
+        private final PropertyTreeModel&lt;?, ?, ?&gt; _model;
+        private final TreeCellRenderer       _delegate;
+
+<span class="fc" id="L682">        UnwrappingRenderer( PropertyTreeModel&lt;?, ?, ?&gt; model, TreeCellRenderer delegate ) {</span>
+<span class="fc" id="L683">            _model    = model;</span>
+<span class="fc" id="L684">            _delegate = delegate;</span>
+<span class="fc" id="L685">        }</span>
+
+        @Override
+        public Component getTreeCellRendererComponent(
+            JTree tree, Object value, boolean selected,
+            boolean expanded, boolean leaf, int row, boolean hasFocus
+        ) {
+<span class="fc" id="L692">            return _delegate.getTreeCellRendererComponent(</span>
+<span class="fc" id="L693">                tree, _model.valueOf(value), selected, expanded, leaf, row, hasFocus</span>
+            );
+        }
+    }
+
+    /**
+     *  Differs from the plain Swing editor in two places: it opens showing what the node's
+     *  {@code text(..)} rule produces rather than its {@code toString()}, and it refuses to
+     *  open on a node the user pointed at whose type declared no wither.
+     */
+    private static final class BoundCellEditor&lt;I, N&gt; extends DefaultTreeCellEditor
+    {
+        private final PropertyTreeModel&lt;I, N, ?&gt; _model;
+
+        BoundCellEditor( JTree tree, DefaultTreeCellRenderer renderer, PropertyTreeModel&lt;I, N, ?&gt; model ) {
+<span class="fc" id="L708">            super(tree, renderer);</span>
+<span class="fc" id="L709">            _model = model;</span>
+<span class="fc" id="L710">        }</span>
+
+        @Override
+        public Component getTreeCellEditorComponent(
+            JTree tree, Object value, boolean isSelected, boolean expanded, boolean leaf, int row
+        ) {
+<span class="fc" id="L716">            Object node = _model.valueOf(value);</span>
+<span class="fc" id="L717">            TreeNodeConf&lt;N, ?&gt; rule = _model.ruleOf(value);</span>
+<span class="pc bpc" id="L718" title="2 of 4 branches missed.">            String text = ( rule == null || node == null ? null : rule.textOf(node) );</span>
+<span class="fc" id="L719">            return super.getTreeCellEditorComponent(</span>
+<span class="pc bpc" id="L720" title="1 of 2 branches missed.">                tree, text == null ? String.valueOf(node) : text, isSelected, expanded, leaf, row</span>
+            );
+        }
+
+        @Override
+        public boolean isCellEditable( EventObject event ) {
+<span class="pc bpc" id="L726" title="1 of 2 branches missed.">            if ( !super.isCellEditable(event) )</span>
+<span class="nc" id="L727">                return false;</span>
+<span class="fc" id="L728">            TreePath path = _pathTargetedBy(event);</span>
+<span class="pc bpc" id="L729" title="1 of 2 branches missed.">            if ( path == null )</span>
+<span class="fc" id="L730">                return true;</span>
+<span class="nc" id="L731">            TreeNodeConf&lt;N, ?&gt; rule = _model.ruleOf(path.getLastPathComponent());</span>
+<span class="nc bnc" id="L732" title="All 4 branches missed.">            return rule != null &amp;&amp; rule.isRenamable();</span>
+        }
+
+        private @Nullable TreePath _pathTargetedBy( @Nullable EventObject event ) {
+<span class="pc bpc" id="L736" title="3 of 4 branches missed.">            if ( event instanceof MouseEvent &amp;&amp; event.getSource() instanceof JTree ) {</span>
+<span class="nc" id="L737">                MouseEvent click = (MouseEvent) event;</span>
+<span class="nc" id="L738">                TreePath clicked = ((JTree) event.getSource())</span>
+<span class="nc" id="L739">                                        .getPathForLocation(click.getX(), click.getY());</span>
+<span class="nc bnc" id="L740" title="All 2 branches missed.">                if ( clicked != null )</span>
+<span class="nc" id="L741">                    return clicked;</span>
+            }
+<span class="fc" id="L743">            return lastPath;</span>
+        }
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

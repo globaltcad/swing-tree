@@ -1,0 +1,176 @@
+{
+  "className":"swingtree.Html_Editor_Font_Styling_Spec",
+  "title":"Styling HTML content JEditorPane through FontConf",
+  "narrative":"SwingTree's styling API treats every `JComponent` uniformly: when you write\n    `withStyle(it -> it.fontColor(\"orange\").fontFamily(\"Serif\"))` you expect\n    the result to look the same regardless of whether the component displays a\n    plain string or a fragment of HTML.  In practice that is harder than it\n    sounds, because Swing renders HTML through a completely different pipeline\n    than its plain-text label/editor pane rendering.\n\n    A plain `JEditorPane` paints text using the component's `Font` and `Foreground`\n    properties.  Setting font attributes through `FontConf` translates directly\n    to a derived `Font` and (where applicable) a foreground color, and the\n    result is what the user sees.\n\n    An HTML based `JEditorPane` (one whose text starts with `<html>`) is different:\n    Swing builds an `HTMLDocument` and a `View` tree from the text and renders\n    everything through CSS.  The label's own `Font` and `Foreground` only feed\n    the *base* `body { ... }` rule that Swing seeds at parse time — they have\n    no effect on already-resolved element attributes.  Bolting `FontConf`\n    styling onto that pipeline therefore requires a different approach than\n    plain text.\n\n    SwingTree handles the difference internally by injecting a small\n    `<head><style data-swingtree=\"injected\">...</style></head>` block into\n    the HTML text, *before* Swing parses it.  The injection is wrapped in a\n    distinctive marker so SwingTree can recognise — and strip — its own\n    previous injection on the next style cycle, leaving the user's HTML\n    intact and recoverable.\n\n    This specification is the user-facing contract: that styling HTML editor panes\n    \"just works\", that nothing the user can put inside an HTML editor breaks\n    the styling pipeline, and that SwingTree's own injection is a self-cleaning\n    affair, not a one-way transformation.\n\n    The JEditorPane HTML-scaling feature introduced alongside JLabel's has three\n    lifecycle concerns that are covered here as well:\n    - whether an *editable* editor's caret survives a style cycle,\n    - whether an externally supplied document still triggers a fresh style pass,\n    - and whether a style that is no longer required (scale back to 1, colour removed)\n      actually cleans up the injected CSS. These specs pin those behaviours down first as repros,\n      and later as regression guards.",
+  "subjects":["swingtree.UI"],
+  "statistics":{
+    "runs":"8",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"JEditorPane HTML styling must settle after the first injection — no infinite setText loop.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When SwingTree injects scaled CSS into a JEditorPane's HTML via\n            `setText()`, HTMLEditorKit parses and normalises the document:\n            it adds indentation, strips comments, restructures tags.  As a\n            consequence the round-tripped `getText()` is never equal to the\n            string we wrote.\n\n            If the settle logic naively compares desired == currentText with\n            the pre-normalisation string, the check perpetually fails →\n            another injection → another normalization → … this is an\n            *infinite repaint loop* that hogs the EDT and freezes the window.\n\n            The fix: because HTMLEditorKit normalisation is deterministic,\n            writing the same text twice yields identical output. After the\n            first cycle writes the injected HTML and reads back the normalized\n            form, subsequent cycles keep writing the same thing — stabilising\n            at a constant text length.\n\n            We verify settle by asserting that the document text doesn't\n            grow without bound across repeated style cycles.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["SwingTree.get().setUiScaleFactor(2f)","            var editor = UI.runAndGet({","                var editor = UI.editorPane().get(JEditorPane)","","                editor.setContentType(\"text/html\")","                editor.setText(\"<html><h2>Hello</h2></html>\")","","                ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)","","                return editor","            })","int firstLength = editor.getText().length()"]},
+
+        {"kind":"when","text":"We force three more full style cycles:","code":["3.times {","    UI.runNow({","        ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)","    })","}","var text = UI.runAndGet(()->editor.getText())"]},
+
+        {"kind":"then","text":"Text length has stabilised (no unbounded growth from looping injections):","code":["text.length() <= firstLength + 50   // small tolerance for normalisation variance"]},
+
+        {"kind":"and","text":"The injected CSS still appears in the document:","code":["text.contains('font-size')"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"HTML headings inside a JEditorPane scale with UI.scale() just like in a JLabel.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `JEditorPane` renders HTML through exactly the same Swing mechanism\n            as an HTML `JLabel`: it builds an `HTMLDocument`, parses the text\n            through `HTMLEditorKit`, and stores a `View` tree behind\n            `BasicHTML.propertyKey`.  Swing's default stylesheet pins bare\n            heading tags (`<h1>`…`<h6>`) to absolute keyword sizes that do *not*\n            react to `UI.scale()`.\n\n            For JLabel, SwingTree fixes this by injecting scaled `h1..h6` CSS\n            overrides into the HTML text whenever `UI.scale() != 1`.  The same\n            treatment must apply to `JEditorPane` — which is what delivers the\n            “Delivery note #…” headline in the Linen showcase correctly at\n            every DPI.\n\n            We verify that: (a) CSS is injected at scale > 1, (b) heading\n            sizes scale proportionally with `UI.scale()`, and (c) settled\n            output doesn't grow unboundedly.\n\n            NB: the heading sizes are derived from the Look & Feel's default\n            base font (which varies per platform — e.g. 15pt on this test\n            setup's Ubuntu, 12pt on Windows' Segoe UI). We therefore assert on\n            the exact pt value *derived from the live font size* rather than on\n            a hard-coded digit, so the check holds on every platform.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var editor = UI.runAndGet({","    var editor = UI.editorPane().get(JEditorPane)","    editor.setContentType(\"text/html\")","    editor.setText(\"<html><h2>Delivery note</h2></html>\")","    return editor","})"]},
+
+        {"kind":"when","text":"Inject at scale 1 (default font ~15pt):","code":["UI.runNow({","    SwingTree.get().setUiScaleFactor(1f)","    ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)","})","UI.sync() // Await one EDT cycle just to make sure...","String textAt1 = UI.runAndGet(()->editor.getText())","UI.runNow({","    SwingTree.get().setUiScaleFactor(2f)","    ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)","})","UI.sync() // Await one EDT cycle just to make sure...","String textAt2 = UI.runAndGet(()->editor.getText())","UI.runNow({","    SwingTree.get().setUiScaleFactor(3f)","    ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)","})","UI.sync() // Await one EDT cycle just to make sure...","String textAt3 = UI.runAndGet(()->editor.getText())","UI.runNow({","    SwingTree.get().setUiScaleFactor(1f)","    ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)","})","UI.sync() // Await one EDT cycle just to make sure...","String textBackTo1 = UI.runAndGet(()->editor.getText())","int baseAt2 = UI.runAndGet(()-> { SwingTree.get().setUiScaleFactor(2f); editor.getFont().getSize() })","int baseAt3 = UI.runAndGet(()-> { SwingTree.get().setUiScaleFactor(3f); editor.getFont().getSize() })","SwingTree.get().setUiScaleFactor(1f)"]},
+
+        {"kind":"then","text":"Heading CSS appears at scale > 1 (body + h1..h6 ≥ 7 rules):","code":["(textAt2 =~ /font-size:/).count >= 7","(textAt3 =~ /font-size:/).count >= 7"]},
+
+        {"kind":"and","text":"At the initial scale 1 no scaling CSS has been injected yet (injection only fires when UI.scale() != 1):","code":["!textAt1.contains('font-size')"]},
+
+        {"kind":"and","text":"Scale 2+ contain the expected scaled heading overrides (h2 present at the derived size):","code":["textAt3.contains('h2 { font-size: ' + Math.round(baseAt3 * 1.50f) + 'pt }')","textAt2.contains('h2 { font-size: ' + Math.round(baseAt2 * 1.50f) + 'pt }')"]},
+
+        {"kind":"and","text":"After returning to scale 1 the stale injected CSS is stripped again (like a JLabel):","code":["!textBackTo1.contains('font-size')"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"At scale 2, a bare-heading JEditorPane renders headings at the scaled size.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            SwingTree injects scaled `h1..h6` + `body` overrides when UI.scale != 1.\n            We verify that heading sizes are present in the injected CSS and\n            that settling works correctly across scale changes.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var editor = UI.runAndGet({","    var editor = UI.editorPane().get(JEditorPane)","    editor.setContentType(\"text/html\")","    editor.setText(\"<html><h2>Progress</h2></html>\")","    ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)","    return editor","})","String textAt1 = UI.runAndGet(()->editor.getText())"]},
+
+        {"kind":"when","text":"Change scale to 2 and re-inject:","code":["UI.runNow({","    SwingTree.get().setUiScaleFactor(2f)","    ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)","})","String textAt2 = UI.runAndGet(()->editor.getText())"]},
+
+        {"kind":"then","text":"Injected CSS contains heading rules with scaled pt values:","code":["(textAt2 =~ /font-size:/).count >= 7"]},
+
+        {"kind":"and","text":"At the scale-1 baseline no injected CSS is present — scaling only kicks in when UI.scale() != 1:","code":["!textAt1.contains('font-size')"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An inline `font-size:NNpx` declaration inside a JEditorPane settles without looping.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Inline pixel sizes written by the author should grow with the active\n            UI scale — the same rule that applies to JLabel.  Note that\n            HTMLEditorKit may transform <span style='font-size:14px'> into\n            <font size=\"14px\"> which our _scaleInlineFontSizes pattern\n            targets separately from its css-style rewrite.\n\n            What matters most: after repeated scale-change cycles the document\n            settles and doesn't grow unboundedly.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"","code":["var editor = UI.editorPane().get(JEditorPane)","editor.setContentType(\"text/html\")","editor.setText(\"<html><span style='font-size:14px;color:#000'>X</span></html>\")"]},
+
+        {"kind":"when","text":"Run a full injection cycle at scale 1:","code":["UI.runNow({","    SwingTree.get().setUiScaleFactor(1f)","    ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)","})","String textAt1 = UI.runAndGet(()->editor.getText())","SwingTree.get().setUiScaleFactor(2f)","3.times {","    ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)","    UI.sync()","}","Thread.sleep(100)","String textAt2 = UI.runAndGet(()->editor.getText())","SwingTree.get().setUiScaleFactor(1f)","3.times {","    ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)","    UI.sync()","}","Thread.sleep(100)","String textBackTo1 = UI.runAndGet(()->editor.getText())"]},
+
+        {"kind":"then","text":"Injected CSS appears when scale > 1 (headings are scaled):","code":["textAt2.contains('font-size')"]},
+
+        {"kind":"and","text":"At scale 1 the inline `14px` size passes through un-scaled (only the injected heading CSS is what grows with UI.scale()):","code":["textAt1.contains('14px')"]},
+
+        {"kind":"when","text":"","code":["String settled = UI.runAndGet(()->editor.getText())","UI.runNow({and","    ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)","})","String again = UI.runAndGet(()->editor.getText())"]},
+
+        {"kind":"then","text":"Document does not grow unboundedly (settled at scale 2):","code":["Math.abs(settled.length() - again.length()) <= 20"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"FontConf styling applied to a JEditorPane changes the rendered text color.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Beyond scaling, FontConf properties such as `fontColor` must also be\n            respected by JEditorPane.  This means injecting a `body{color:#...}`\n            rule alongside whatever heading overrides exist.\n\n            We verify through pixel counting — blue-styled text produces many\n            blue-tinted pixels; unstyled text does not.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"An unstyled JEditorPane with some paragraph text:","code":["var plain = UI.editorPane().get(JEditorPane)","plain.setContentType(\"text/html\")","plain.setText(\"<html><p>Hello world</p></html>\")","plain.setSize(400, 100)"]},
+
+        {"kind":"and","text":"A styled version with blue text:","code":["var styled = UI.editorPane()","                .withStyle({ it.fontColor(\"blue\") })","                .get(JEditorPane)","styled.setContentType(\"text/html\")","styled.setText(\"<html><p>Hello world</p></html>\")","ComponentExtension.from(styled).gatherApplyAndInstallStyle(false)","styled.setSize(400, 100)"]},
+
+        {"kind":"when","text":"Both panes are rendered:","code":["int plainBlue  = countBluePixels(renderHtmlEditor(plain,   400, 100, 1f))","int styledBlue = countBluePixels(renderHtmlEditor(styled,  400, 100, 1f))"]},
+
+        {"kind":"then","text":"The plain pane contains virtually no blue text pixels:","code":["plainBlue < 50"]},
+
+        {"kind":"and","text":"The styled pane contains substantial blue pixels:","code":["styledBlue > 100"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An editable JEditorPane keeps its caret where the user put it across a style cycle",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            JEditorPane is an *editing* component. As the user types they move the\n            caret (and possibly select a range). SwingTree's JEditorPane styling path\n            (`htmlSettles`) runs on every style cycle and currently calls `setText()`\n            unconditionally on its phase-2 path even when the text did not need\n            changing (e.g. plain HTML at scale 1 → empty CSS). `JTextComponent.setText`\n            re-parses the document and resets the caret to the start.\n\n            For a component whose whole job is editing, that would throw the user's\n            text-caret (and any text selection) back to the beginning on every repaint.\n            The JLabel path avoids this by only calling setText when the desired text\n            actually differs from the current one (`Objects.equals` guard). The editor\n            path must be equally conservative.\n\n            This spec asserts that a caret placed mid-document survives a complete\n            style pass untouched.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"An editable HTML editor with a caret planted in the middle of the text:","code":["var editor = UI.editorPane().get(JEditorPane)","editor.setContentType(\"text/html\")","editor.setText(\"<html><p>hello world</p></html>\")","editor.setEditable(true)","int caret = UI.runAndGet({","    editor.getCaret().setDot(6)","    editor.getCaret().getDot()","})"]},
+
+        {"kind":"when","text":"A full style cycle runs at scale 1 (no CSS to inject):","code":["SwingTree.get().setUiScaleFactor(1f)","UI.runNow({ ComponentExtension.from(editor).gatherApplyAndInstallStyle(true) })"]},
+
+        {"kind":"then","text":"The caret has not moved:","code":["UI.runAndGet({ editor.getCaret().getDot() }) == caret"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A styled JEditorPane re-applies its style after its HTML is replaced externally",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When a JLabel's text is set from outside SwingTree (a sprouts `Val`\n            binding, a manual `setText`, a copy/paste round-trip), SwingTree\n            detects the change via a PropertyChangeListener and triggers a fresh\n            style pass so the new text is styled/scaled too.\n\n            `JLabel` fires a `\"text\"` property change. `JEditorPane`/`JTextComponent`\n            fires a `\"document\"` property change instead — so listening on `\"text\"`\n            for an editor is a no-op. The intended contract is: if the user replaces\n            the HTML content of a styled editor, it must come out styled just like\n            the original did.\n\n            This spec asserts that after an external `setText`, the injected style is\n            present again (proving a re-style pass ran).\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A JEditorPane styled to a blue font, already carrying injected CSS:","code":["var editor = UI.editorPane().withStyle({ it.fontColor(\"blue\") }).get(JEditorPane)","editor.setContentType(\"text/html\")","editor.setText(\"<html><p>hello world</p></html>\")","UI.runNow({ ComponentExtension.from(editor).gatherApplyAndInstallStyle(true) })","boolean styledBefore = UI.runAndGet({ editor.getText().contains('#0000ff') })","assert styledBefore"]},
+
+        {"kind":"when","text":"The user replaces the HTML with new, plain, unstyled content (external setText):","code":["UI.runNow({","    // Replace the entire content as an application would:","    var doc = editor.getEditorKit().createDefaultDocument()","    doc.insertString(0, \"<html><p>brand new content</p></html>\", null)","    editor.setDocument(doc)","})"]},
+
+        {"kind":"then","text":"The newly supplied HTML is styled again (blue font injected):","code":["UI.runAndGet({ editor.getText().contains('#0000ff') })"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Stale injected CSS disappears from the document once UI scale returns to 1",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The injected `<style>` block (heading/body font-size overrides) exists\n            only because UI scale != 1. When the scale returns to 1 those overrides\n            are no longer wanted — otherwise the document keeps a permanent copy of\n            framework-generated CSS that (a) no longer reflects the real scale and\n            still scales the rendered text, and (b) leaks raw framework markup into\n            the user's editable document text.\n\n            The JLabel path strips the injection when no CSS is needed (it reinstalls\n            the pristine, stripped original). The JEditorPane path currently keeps the\n            previously-stabilised CSS. This spec asserts the editor behaves like the\n            label: after scale returns to 1, the document contains no injected\n            `font-size` CSS.\n\n            Furthermore, an editor that can't settle (stale CSS never matches the\n            empty `expectedCss`) would call setText every cycle — asserted as a\n            secondary regression guard on caret stability.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"An unstyled HTML editor whose document gets injected CSS at scale 2:","code":["SwingTree.get().setUiScaleFactor(2f)","var editor = UI.editorPane().get(JEditorPane)","editor.setContentType(\"text/html\")","editor.setText(\"<html><h2>Delivery note</h2></html>\")","editor.setEditable(true)","UI.runNow({ ComponentExtension.from(editor).gatherApplyAndInstallStyle(true) })","String atScale2 = UI.runAndGet({ editor.getText() })","assert atScale2.contains('font-size')"]},
+
+        {"kind":"when","text":"The scale returns to 1 and a full style cycle runs:","code":["SwingTree.get().setUiScaleFactor(1f)","UI.runNow({ ComponentExtension.from(editor).gatherApplyAndInstallStyle(true) })"]},
+
+        {"kind":"then","text":"The injected font-size CSS has been removed from the document:","code":["UI.runAndGet({ editor.getText().contains('font-size') }) == false"]},
+
+        {"kind":"and","text":"A second cycle is a no-op (document is stable, caret undisturbed):","code":["int caret = UI.runAndGet({ editor.getCaret().setDot(8); editor.getCaret().getDot() })","UI.runNow({ ComponentExtension.from(editor).gatherApplyAndInstallStyle(true) })","UI.runAndGet({ editor.getCaret().getDot() }) == caret"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

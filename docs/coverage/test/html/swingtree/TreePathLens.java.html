@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TreePathLens.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">TreePathLens.java</span></div><h1>TreePathLens.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sprouts.Lens;
+import sprouts.Tuple;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
+
+/**
+ *  A {@link Lens} focusing on a single node inside a deeply nested, immutable tree,
+ *  identified by the path of ids leading down to it. Reading walks down the path by id;
+ *  writing walks down and rebuilds the chain bottom up, so a change nine levels deep
+ *  produces one new bound value with everything off the path shared rather than copied.
+ *  &lt;p&gt;
+ *  The descent begins at the top level nodes, which {@link TreeRoots} reads out of the one
+ *  value the tree is bound to: one root node for a tree, a whole tuple of them for a forest.
+ *  The first id of the path therefore names a top level node in both forms.
+ *  &lt;p&gt;
+ *  Two properties of this lens matter a great deal:
+ *  &lt;ul&gt;
+ *      &lt;li&gt;&lt;b&gt;It never touches the UI, nor anything the UI thread owns.&lt;/b&gt; It needs only
+ *      the bound &lt;i&gt;value&lt;/i&gt; and the {@link TreeConf}, whose rule lookup is concurrent, so
+ *      it may be evaluated on any thread. That is essential, because it runs whenever the
+ *      bound property changes, which under a decoupled UI is the application thread.&lt;/li&gt;
+ *      &lt;li&gt;&lt;b&gt;It fails softly.&lt;/b&gt; A node which has vanished from the tree yields the last
+ *      value this lens did resolve, and a write into it is dropped. A lens whose node is
+ *      gone may still be bound to a view on its way out, and disturbing that view is worse
+ *      than doing nothing. The tuple item lens follows the same policy.&lt;/li&gt;
+ *  &lt;/ul&gt;
+ *
+ * @param &lt;I&gt; The identity type of the nodes, which the path is made of.
+ * @param &lt;N&gt; The common node type of the tree.
+ * @param &lt;R&gt; The type of the value the tree is bound to: one node, or a tuple of them.
+ */
+final class TreePathLens&lt;I, N, R&gt; implements Lens&lt;R, N&gt;
+{
+<span class="fc" id="L42">    private static final Logger log = LoggerFactory.getLogger(TreePathLens.class);</span>
+
+    private final TreeConf&lt;I, N&gt;               _conf;
+    private final TreeRoots&lt;N, R&gt;              _roots;
+    private final Object[]                     _idPath;
+    private final AtomicReference&lt;@Nullable N&gt; _lastResolved;
+
+<span class="fc" id="L49">    TreePathLens( TreeConf&lt;I, N&gt; conf, TreeRoots&lt;N, R&gt; roots, Object[] idPath, @Nullable N initial ) {</span>
+<span class="fc" id="L50">        _conf         = Objects.requireNonNull(conf);</span>
+<span class="fc" id="L51">        _roots        = Objects.requireNonNull(roots);</span>
+<span class="fc" id="L52">        _idPath       = Objects.requireNonNull(idPath);</span>
+<span class="fc" id="L53">        _lastResolved = new AtomicReference&lt;&gt;(initial);</span>
+<span class="fc" id="L54">    }</span>
+
+    @Override
+    public N getter( R boundValue ) {
+        try {
+<span class="fc" id="L59">            @Nullable N found = _resolve(boundValue);</span>
+<span class="pc bpc" id="L60" title="1 of 2 branches missed.">            if ( found != null )</span>
+<span class="fc" id="L61">                _lastResolved.set(found);</span>
+            else
+<span class="nc" id="L63">                found = _lastResolved.get();</span>
+<span class="fc" id="L64">            return NullUtil.fakeNonNull(found);</span>
+<span class="nc" id="L65">        } catch (Exception e) {</span>
+<span class="nc" id="L66">            log.debug(SwingTree.get().logMarker(), &quot;Failed to resolve a tree node lens.&quot;, e);</span>
+<span class="nc" id="L67">            return NullUtil.fakeNonNull(_lastResolved.get());</span>
+        }
+    }
+
+    @Override
+    public R wither( R boundValue, N newNode ) {
+<span class="pc bpc" id="L73" title="1 of 2 branches missed.">        if ( _idPath.length == 0 )</span>
+<span class="nc" id="L74">            return boundValue; // Nothing is focused, so there is nothing to write into.</span>
+        try {
+<span class="fc" id="L76">            Tuple&lt;N&gt; roots = _roots.of(boundValue);</span>
+<span class="fc" id="L77">            int rootIndex = _indexOfIdIn(roots, _idPath[0]);</span>
+<span class="pc bpc" id="L78" title="1 of 2 branches missed.">            if ( rootIndex &lt; 0 )</span>
+<span class="nc" id="L79">                return boundValue;</span>
+<span class="fc" id="L80">            List&lt;Step&gt; steps = _walk(roots.get(rootIndex));</span>
+<span class="pc bpc" id="L81" title="1 of 2 branches missed.">            if ( steps == null )</span>
+<span class="nc" id="L82">                return boundValue; // The node is gone, so the write no longer applies.</span>
+
+<span class="fc" id="L84">            Object rebuilt = newNode;</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">            for ( int i = steps.size() - 1; i &gt;= 0; i-- ) {</span>
+<span class="fc" id="L86">                Step step = steps.get(i);</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">                if ( !step.rule.isStructurallyWritable() ) {</span>
+<span class="fc" id="L88">                    _warnAboutReadOnlyBranch(step);</span>
+<span class="fc" id="L89">                    return boundValue;</span>
+                }
+<span class="fc" id="L91">                Tuple&lt;Object&gt; updatedChildren = step.children.setAt(step.index, rebuilt);</span>
+<span class="fc" id="L92">                rebuilt = step.rule.withChildren(step.parent, updatedChildren);</span>
+            }
+<span class="fc" id="L94">            _lastResolved.set(newNode);</span>
+<span class="fc" id="L95">            return _roots.with(boundValue, roots.setAt(rootIndex, _conf.nodeType().cast(rebuilt)));</span>
+<span class="nc" id="L96">        } catch (Exception e) {</span>
+<span class="nc" id="L97">            log.debug(SwingTree.get().logMarker(), &quot;Failed to write through a tree node lens.&quot;, e);</span>
+<span class="nc" id="L98">            return boundValue;</span>
+        }
+    }
+
+    private @Nullable N _resolve( @Nullable R boundValue ) {
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        if ( _idPath.length == 0 )</span>
+<span class="nc" id="L104">            return null;</span>
+<span class="fc" id="L105">        Tuple&lt;N&gt; roots = _roots.of(boundValue);</span>
+<span class="fc" id="L106">        int rootIndex = _indexOfIdIn(roots, _idPath[0]);</span>
+<span class="pc bpc" id="L107" title="1 of 2 branches missed.">        if ( rootIndex &lt; 0 )</span>
+<span class="nc" id="L108">            return null; // Not a top level node of this value, so this path means nothing in it.</span>
+<span class="fc" id="L109">        Object current = roots.get(rootIndex);</span>
+<span class="fc bfc" id="L110" title="All 2 branches covered.">        for ( int level = 1; level &lt; _idPath.length; level++ ) {</span>
+<span class="fc" id="L111">            TreeNodeConf&lt;N, ?&gt; rule = _conf.ruleFor(current);</span>
+<span class="pc bpc" id="L112" title="2 of 4 branches missed.">            if ( rule == null || !rule.hasChildrenRule() )</span>
+<span class="nc" id="L113">                return null;</span>
+<span class="fc" id="L114">            Tuple&lt;Object&gt; children = rule.childrenOf(current);</span>
+<span class="fc" id="L115">            int index = _indexOfIdIn(children, _idPath[level]);</span>
+<span class="pc bpc" id="L116" title="1 of 2 branches missed.">            if ( index &lt; 0 )</span>
+<span class="nc" id="L117">                return null;</span>
+<span class="fc" id="L118">            current = children.get(index);</span>
+        }
+<span class="fc" id="L120">        return _conf.nodeType().cast(current);</span>
+    }
+
+    private @Nullable List&lt;Step&gt; _walk( Object topLevelNode ) {
+<span class="fc" id="L124">        List&lt;Step&gt; steps = new ArrayList&lt;&gt;(_idPath.length - 1);</span>
+<span class="fc" id="L125">        Object current = topLevelNode;</span>
+<span class="fc bfc" id="L126" title="All 2 branches covered.">        for ( int level = 1; level &lt; _idPath.length; level++ ) {</span>
+<span class="fc" id="L127">            TreeNodeConf&lt;N, ?&gt; rule = _conf.ruleFor(current);</span>
+<span class="pc bpc" id="L128" title="2 of 4 branches missed.">            if ( rule == null || !rule.hasChildrenRule() )</span>
+<span class="nc" id="L129">                return null;</span>
+<span class="fc" id="L130">            Tuple&lt;Object&gt; children = rule.childrenOf(current);</span>
+<span class="fc" id="L131">            int index = _indexOfIdIn(children, _idPath[level]);</span>
+<span class="pc bpc" id="L132" title="1 of 2 branches missed.">            if ( index &lt; 0 )</span>
+<span class="nc" id="L133">                return null;</span>
+<span class="fc" id="L134">            steps.add(new Step(rule, current, children, index));</span>
+<span class="fc" id="L135">            current = children.get(index);</span>
+        }
+<span class="fc" id="L137">        return steps;</span>
+    }
+
+    private int _indexOfIdIn( Tuple&lt;?&gt; children, Object id ) {
+<span class="pc bpc" id="L141" title="1 of 2 branches missed.">        for ( int i = 0; i &lt; children.size(); i++ )</span>
+<span class="fc bfc" id="L142" title="All 2 branches covered.">            if ( Objects.equals(_conf.idOf(children.get(i)), id) )</span>
+<span class="fc" id="L143">                return i;</span>
+<span class="nc" id="L144">        return -1;</span>
+    }
+
+    /**
+     *  The dedup lives on the configuration rather than on this lens, because a lens is
+     *  built afresh for every single edit, so a per lens flag would repeat the same
+     *  complaint on every keystroke that ends one.
+     */
+    private void _warnAboutReadOnlyBranch( Step step ) {
+<span class="fc" id="L153">        Class&lt;?&gt; branchType = step.parent.getClass();</span>
+<span class="fc bfc" id="L154" title="All 2 branches covered.">        if ( !_conf.shouldWarnAbout(branchType) )</span>
+<span class="fc" id="L155">            return;</span>
+<span class="fc" id="L156">        log.warn(SwingTree.get().logMarker(),</span>
+            &quot;Dropping a write to a tree node, because the branch of type '{}' above it was declared &quot; +
+            &quot;with a read only 'children(getter)' rule. Declare it as 'children(getter, wither)' to &quot; +
+            &quot;let edits below it travel back up into the bound property.&quot;,
+<span class="fc" id="L160">            branchType.getSimpleName()</span>
+        );
+<span class="fc" id="L162">    }</span>
+
+    /** One level of the descent from a top level node down to the focused node. */
+    private static final class Step {
+        final TreeNodeConf&lt;?, ?&gt; rule;
+        final Object             parent;
+        final Tuple&lt;Object&gt;      children;
+        final int                index;
+<span class="fc" id="L170">        Step( TreeNodeConf&lt;?, ?&gt; rule, Object parent, Tuple&lt;Object&gt; children, int index ) {</span>
+<span class="fc" id="L171">            this.rule     = rule;</span>
+<span class="fc" id="L172">            this.parent   = parent;</span>
+<span class="fc" id="L173">            this.children = children;</span>
+<span class="fc" id="L174">            this.index    = index;</span>
+<span class="fc" id="L175">        }</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
