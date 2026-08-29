@@ -4,6 +4,7 @@ import org.slf4j.MarkerFactory
 import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
+import spock.lang.Timeout
 import spock.lang.Title
 import sprouts.From
 import sprouts.Viewable
@@ -13,6 +14,7 @@ import swingtree.threading.EventProcessor
 import javax.swing.UIManager
 import javax.swing.plaf.FontUIResource
 import javax.swing.plaf.basic.BasicLookAndFeel
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 
 
@@ -37,6 +39,7 @@ import java.util.concurrent.atomic.AtomicReference
     ```
 ''')
 @Subject([SwingTree, SwingTreeInitConfig])
+@Timeout(value = 60, unit = TimeUnit.SECONDS)
 class SwingTree_Library_Context_Spec extends Specification {
 
     def setup() {

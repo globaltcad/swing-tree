@@ -1,0 +1,322 @@
+{
+  "className":"swingtree.Tree_Selection_And_Editing_Spec",
+  "title":"Selecting and Editing in a Bound Tree",
+  "narrative":"The two things a user does to a tree, beyond opening and closing branches, are selecting\n    a node and changing one. Both are handled the same way everything else in SwingTree is:\n    by binding a property, not by registering a listener and copying values around by hand.\n\n    **Selection** is a property holding a **path of ids** — the ids leading from the root\n    down to the selected node — kept in sync in both directions. A selection is a *position*\n    in the tree, and a node value cannot name a position: the same value may sit in several\n    places at once, and a tree only asks its ids to be unique among siblings. A path has\n    nothing to be ambiguous about, needs no search to resolve, and carries no node data which\n    could contradict the tree. The empty path means nothing is selected.\n\n    **Editing** is where the lens at the heart of this API becomes visible. Renaming a node\n    nine levels down cannot mutate anything: it has to produce a brand new root value with\n    every ancestor along the path rebuilt and everything off the path shared. That is exactly\n    what a `children(getter, wither)` rule declares, and the chain of those rules from the\n    root down to the edited node is what carries the edit home.\n\n    The rule to remember throughout: **a getter alone is read only, a getter together with a\n    wither is a lens and therefore two way.** These scenarios are mostly about what follows\n    from that one sentence.\n\n    The file system they build on is a sealed interface with two cases, which in Java 21\n    would read:\n\n    ```java\n    public sealed interface FsNode extends HasId<String> { String name(); }\n    public record Dir( String id, String name, Tuple<FsNode> entries ) implements FsNode {}\n    public record Doc( String id, String name, String body )           implements FsNode {}\n    ```",
+  "subjects":["swingtree.UIForTree","swingtree.TreeNodeConf","swingtree.TreeSelectionDelegate"],
+  "statistics":{
+    "runs":"14",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"The selected position is a property holding a path of ids.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            One binding replaces the whole dance a plain `JTree` demands: a selection\n            listener writing into the model, and a second piece of code walking the rows to\n            put a selection back when the model changes elsewhere.\n\n            Note what the property holds. **A selection is a position, and only a path names\n            a position** — the ids leading from the root down to the selected node, the\n            root's own id first. A node value could not do it: the same value may sit in\n            several places at once, which the next scenario makes concrete.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A file system, and a property for wherever the selection is.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Doc(\"a\", \"notes.txt\"),","                            new Doc(\"b\", \"todo.md\")","                        )))","var selected = Var.of(Tuple.of(String))"]},
+
+        {"kind":"and","text":"A tree binding the two together.","code":["var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .withSelection(selected)","        .get(JTree)"]},
+
+        {"kind":"when","text":"The user clicks the second document.","code":["UI.runNow({ tree.setSelectionRow(2) })"]},
+
+        {"kind":"then","text":"The property holds the path leading to it.","code":["selected.get().toList() == [\"r\", \"b\"]"]},
+
+        {"kind":"when","text":"The application selects the other document by naming its path.","code":["UI.runNow({ selected.set(Tuple.of(String, [\"r\", \"a\"])) })"]},
+
+        {"kind":"then","text":"The tree moved its selection there.","code":["selectedRows(tree) == [\"notes.txt\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The same node value in two places is two different selections.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the scenario a node-valued selection could not express, and the reason\n            the property holds a path.\n\n            A tree only requires its ids to be unique **among siblings**, so two folders may\n            each hold a `notes.txt` with the very same id. Those are two different rows, and\n            the two paths leading to them say so exactly. Nothing is searched for, so nothing\n            can resolve to the wrong one.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A structure in which the same id is deliberately reused in two folders.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"first\",  \"first\", Tuple.of(FsNode,  new Doc(\"notes\", \"notes.txt\"))),","                            new Dir(\"second\", \"second\", Tuple.of(FsNode, new Doc(\"notes\", \"notes.txt\")))","                        )))","var selected = Var.of(Tuple.of(String))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .withSelection(selected)","        .withInitialExpansionDepth(3)","        .get(JTree)"]},
+
+        {"kind":"expect","text":"Both documents are on screen, and they look identical.","code":["visibleRows(tree) == [","    \"root\",","    \"    first\",","    \"        notes.txt\",","    \"    second\",","    \"        notes.txt\",","]"]},
+
+        {"kind":"when","text":"The application asks for the one inside the SECOND folder.","code":["UI.runNow({ selected.set(Tuple.of(String, [\"r\", \"second\", \"notes\"])) })"]},
+
+        {"kind":"then","text":"That is the row which got selected, and not its identical twin.","code":["UI.runAndGet({ tree.getSelectionRows() as List }) == [4]"]},
+
+        {"kind":"when","text":"The user clicks the one inside the FIRST folder instead.","code":["UI.runNow({ tree.setSelectionRow(2) })"]},
+
+        {"kind":"then","text":"The selection stays where they clicked...","code":["UI.runAndGet({ tree.getSelectionRows() as List }) == [2]"]},
+
+        {"kind":"and","text":"...and the property says which of the two it is.","code":["selected.get().toList() == [\"r\", \"first\", \"notes\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A path outlives an edit to the node it names.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A path is made of ids, and an id is exactly the thing an edit leaves alone. So a\n            selection made before a rename is still the same selection afterwards, without\n            the property having to be rewritten and without the tree having to guess.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree with a bound selection.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"a\", \"src\", Tuple.of(FsNode, new Doc(\"a1\", \"App.java\"))),","                            new Doc(\"b\", \"README.md\")","                        )))","var selected = Var.of(Tuple.of(String))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })","                              .text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .withSelection(selected)","        .get(JTree)"]},
+
+        {"kind":"when","text":"We select the folder by its path.","code":["UI.runNow({ selected.set(Tuple.of(String, [\"r\", \"a\"])) })"]},
+
+        {"kind":"then","text":"It is selected.","code":["selectedRows(tree) == [\"src\"]"]},
+
+        {"kind":"when","text":"That very folder is then renamed, which replaces it with a different value.","code":["UI.runNow({ fileSystem.update({ Dir root ->","    root.withEntries(root.entries().setAt(0, ((Dir) root.entries().get(0)).withName(\"sources\")))","}) })"]},
+
+        {"kind":"then","text":"It is still the selected row, because renaming it did not move it.","code":["visibleRows(tree) == [\"root\", \"    sources\", \"    README.md\"]","selectedRows(tree) == [\"sources\"]"]},
+
+        {"kind":"and","text":"And the path in the property never had to change.","code":["selected.get().toList() == [\"r\", \"a\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The empty path means nothing is selected.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            \"Nothing is selected\" is an ordinary value of the property rather than a null to\n            handle: a path of no ids leads nowhere, which is precisely what an empty\n            selection is. This is also why the root being selected is representable at all —\n            that is a path of exactly one id.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree with something selected in it.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode, new Doc(\"a\", \"notes.txt\"))))","var selected = Var.of(Tuple.of(String))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .withSelection(selected)","        .get(JTree)","UI.runNow({ tree.setSelectionRow(1) })"]},
+
+        {"kind":"expect","text":"The document is selected.","code":["selectedRows(tree) == [\"notes.txt\"]"]},
+
+        {"kind":"when","text":"The application empties the path.","code":["UI.runNow({ selected.set(Tuple.of(String)) })"]},
+
+        {"kind":"then","text":"The tree has no selection any more.","code":["selectedRows(tree) == []"]},
+
+        {"kind":"when","text":"The application names the root itself, which is a path of one id.","code":["UI.runNow({ selected.set(Tuple.of(String, [\"r\"])) })"]},
+
+        {"kind":"then","text":"The root is selected, which an empty path could never have expressed.","code":["selectedRows(tree) == [\"root\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Several selected positions bind to a property holding a tuple of paths.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Which overload you call is what says whether the user may select one node or\n            several: there is no separate selection mode to set. Binding a tuple of paths\n            puts the tree into multiple selection mode and keeps the whole selection in the\n            property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree binding every selected position to one property.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Doc(\"a\", \"one.txt\"),","                            new Doc(\"b\", \"two.txt\"),","                            new Doc(\"c\", \"three.txt\")","                        )))","var selected = Var.of(Tuple.of(Tuple.classTyped(String)))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .withSelectionPaths(selected)","        .get(JTree)"]},
+
+        {"kind":"when","text":"The user picks the first and the last document.","code":["UI.runNow({ tree.setSelectionRows([1, 3] as int[]) })"]},
+
+        {"kind":"then","text":"Both paths are in the property, in the order the tree reports them.","code":["selected.get().toList().collect({ Tuple<String> p -> p.toList() }) == [[\"r\", \"a\"], [\"r\", \"c\"]]"]},
+
+        {"kind":"when","text":"The application replaces the selection with the middle document alone.","code":["UI.runNow({ selected.set(Tuple.of(Tuple.classTyped(String), [Tuple.of(String, [\"r\", \"b\"])])) })"]},
+
+        {"kind":"then","text":"That is what is selected in the tree.","code":["selectedRows(tree) == [\"two.txt\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A path is resolved back to its node through the configuration.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A path says *where*, not *what*. When a view needs the node itself — for a detail\n            pane, or a breadcrumb trail — it asks the tree's own configuration, which is the\n            thing that knows where children live.\n\n            `nodesAlong(..)` walks the whole chain and `nodeAt(..)` takes its last step. Both\n            answer emptily for a path which no longer leads anywhere, so a stale selection\n            never produces a half-resolved trail.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The configuration a tree is built from, kept so it can answer questions later.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"a\", \"src\", Tuple.of(FsNode, new Doc(\"a1\", \"App.java\")))","                        )))","var conf = TreeConf.of(FsNode, String)","                .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","                .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })"]},
+
+        {"kind":"when","text":"We ask what sits at a path.","code":["var node = conf.nodeAt(fileSystem.get(), Tuple.of(String, [\"r\", \"a\", \"a1\"]))"]},
+
+        {"kind":"then","text":"It is the node that path names.","code":["node.get().name() == \"App.java\""]},
+
+        {"kind":"when","text":"We ask for the whole chain leading to it.","code":["var trail = conf.nodesAlong(fileSystem.get(), Tuple.of(String, [\"r\", \"a\", \"a1\"]))"]},
+
+        {"kind":"then","text":"It reads as a breadcrumb.","code":["trail.toList().collect({ FsNode n -> n.name() }) == [\"root\", \"src\", \"App.java\"]"]},
+
+        {"kind":"when","text":"We ask for a path which names nothing.","code":["var missing = conf.nodesAlong(fileSystem.get(), Tuple.of(String, [\"r\", \"a\", \"gone\"]))"]},
+
+        {"kind":"then","text":"Nothing comes back, rather than a partial trail.","code":["missing.isEmpty()","!conf.nodeAt(fileSystem.get(), Tuple.of(String, [\"r\", \"a\", \"gone\"])).isPresent()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A selection action speaks in your own node values, and in paths.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `onSelection(..)` is for the cases a bound property does not cover, such as\n            opening a document when it is picked. The delegate it receives answers both\n            questions a selection raises: *what* is selected, in your own node types, and\n            *which position* is selected, as a path of ids.\n\n            Reaching into the tree's own path objects would not help you here anyway: a bound\n            tree keeps internal handles in them, so `getLastSelectedPathComponent()` does not\n            return one of your nodes. The delegate exists so you never need it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree recording what each selection change told it.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"a\", \"src\", Tuple.of(FsNode, new Doc(\"a1\", \"App.java\")))","                        )))","var seen = []","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .onSelection({ it ->","            seen << [ lead : it.lead().map({ FsNode n -> n.name() }).orElse(\"nothing\"),","                      names: it.pathToLead().toList().collect({ FsNode n -> n.name() }),","                      path : it.leadPath().toList(),","                      count: it.selection().size() ]","        })","        .get(JTree)","UI.runNow({ tree.expandRow(1) })"]},
+
+        {"kind":"when","text":"The user selects the document two levels down.","code":["UI.runNow({ tree.setSelectionRow(2) })"]},
+
+        {"kind":"then","text":"The action was told what was selected...","code":["seen.size() == 1","seen[0].lead  == \"App.java\"","seen[0].names == [\"root\", \"src\", \"App.java\"]","seen[0].count == 1"]},
+
+        {"kind":"and","text":"...and exactly which position it was.","code":["seen[0].path == [\"r\", \"a\", \"a1\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A selection action can go straight on to edit what was selected.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The delegate also hands over a **lens onto the selected node**: a `Var` focused on\n            that one node, reaching all the way up into the single property the tree is bound\n            to. Writing through it produces a new root value, exactly as an edit made in the\n            tree itself would.\n\n            This is the same mechanism the whole API rests on, surfaced where an action can\n            reach it. It is empty when nothing is selected, or when the tree was bound read\n            only, because there would then be nothing to write into.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree whose selection action renames whatever document gets picked.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"a\", \"src\", Tuple.of(FsNode, new Doc(\"a1\", \"App.java\")))","                        )))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })","                              .text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .onSelection({ it ->","            it.property().ifPresent({ Var<FsNode> node ->","                node.update({ FsNode n -> n instanceof Doc ? ((Doc) n).withName(\"Selected.java\") : n })","            })","        })","        .get(JTree)","UI.runNow({ tree.expandRow(1) })"]},
+
+        {"kind":"when","text":"The user selects the document two levels down.","code":["UI.runNow({ tree.setSelectionRow(2) })"]},
+
+        {"kind":"then","text":"The write went through the lens into the one bound property.","code":["visibleRows(tree) == [\"root\", \"    src\", \"        Selected.java\"]"]},
+
+        {"kind":"and","text":"And what came out is a new root value carrying the change.","code":["((Doc) ((Dir) fileSystem.get().entries().get(0)).entries().get(0)).name() == \"Selected.java\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Renaming a node writes one new root value back into the bound property.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An in place rename is what a tree offers when a node type declares a text rule\n            *with a wither*. The edited text is handed to that wither, and the resulting node\n            travels back up through every `children(getter, wither)` rule above it until it\n            arrives as a new value of the single bound property.\n\n            The tree drives this through the standard Swing editing path, which is why the\n            scenario below calls `valueForPathChanged(..)`: that is the method a finished\n            edit lands in.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree three levels deep, bound to a mutable property.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"a\", \"src\", Tuple.of(FsNode, new Doc(\"a1\", \"App.java\"))),","                            new Dir(\"b\", \"docs\", Tuple.of(FsNode))","                        )))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })","                              .text({ Dir d -> d.name() }, { Dir d, String t -> d.withName(t) }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }, { Doc d, String t -> d.withName(t) }) })","        })","        .get(JTree)","UI.runNow({ tree.expandRow(1) })"]},
+
+        {"kind":"and","text":"We hold on to the root value as it is before the edit.","code":["var before = fileSystem.get()"]},
+
+        {"kind":"when","text":"The user finishes renaming the deepest document.","code":["UI.runNow({ tree.getModel().valueForPathChanged(tree.getPathForRow(2), \"Application.java\") })"]},
+
+        {"kind":"then","text":"The rename is in the property...","code":["((Doc) ((Dir) fileSystem.get().entries().get(0)).entries().get(0)).name() == \"Application.java\""]},
+
+        {"kind":"and","text":"...and on screen.","code":["visibleRows(tree) == [\"root\", \"    src\", \"        Application.java\", \"    docs\"]"]},
+
+        {"kind":"and","text":"The value that was there before was not mutated, because it could not be.","code":["((Doc) ((Dir) before.entries().get(0)).entries().get(0)).name() == \"App.java\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Everything off the edited path is shared, not copied.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is why an edit in a large tree is cheap. Rebuilding the path from the root\n            down to the edited node is unavoidable: those nodes really did change, because\n            each of them now holds a different child. Everything else does not change, and a\n            persistent collection therefore hands back the very same objects.\n\n            The assertions below are deliberately about **reference** identity. It is the same\n            property the update walk exploits to skip untouched subtrees, seen from the other\n            side.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree with two sibling folders, one of which we are about to edit.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"a\", \"edited\", Tuple.of(FsNode,    new Doc(\"a1\", \"one.txt\"))),","                            new Dir(\"b\", \"untouched\", Tuple.of(FsNode, new Doc(\"b1\", \"two.txt\")))","                        )))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })","                              .text({ Dir d -> d.name() }, { Dir d, String t -> d.withName(t) }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }, { Doc d, String t -> d.withName(t) }) })","        })","        .get(JTree)","UI.runNow({ tree.expandRow(1) })"]},
+
+        {"kind":"and","text":"We remember both folders as they are now.","code":["var editedBefore    = fileSystem.get().entries().get(0)","var untouchedBefore = fileSystem.get().entries().get(1)"]},
+
+        {"kind":"when","text":"A document inside the first folder is renamed.","code":["UI.runNow({ tree.getModel().valueForPathChanged(tree.getPathForRow(2), \"ONE.txt\") })"]},
+
+        {"kind":"then","text":"The folder holding it is a new value, because it now holds a different document.","code":["!fileSystem.get().entries().get(0).is(editedBefore)"]},
+
+        {"kind":"and","text":"The other folder is not a copy of what it was, it is the exact same object.","code":["fileSystem.get().entries().get(1).is(untouchedBefore)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A read only branch rule drops edits coming from below it.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An edit travels home through the chain of `children(getter, wither)` rules above\n            it. A branch declared with only a getter has no wither, so there is no way to put\n            a changed child back into it, and the write stops there.\n\n            That is a deliberate outcome rather than an error: declaring a read only rule is\n            how you say a part of the structure is not the user's to rearrange. SwingTree logs\n            the dropped write once, naming the type of the branch which refused it — once for\n            the whole tree, not once per keystroke, because a user who holds a key down in a\n            branch that will not take the result should not fill the log with it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree in which directories expose their entries read only.","code":["var log = LogSpy.attach()","var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"a\", \"src\", Tuple.of(FsNode, new Doc(\"a1\", \"App.java\")))","                        )))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() })                                // getter only","                              .text({ Dir d -> d.name() }, { Dir d, String t -> d.withName(t) }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }, { Doc d, String t -> d.withName(t) }) })","        })","        .get(JTree)","UI.runNow({ tree.expandRow(1) })"]},
+
+        {"kind":"when","text":"The user tries to rename a document below that branch, three times over.","code":["UI.runNow({","    tree.getModel().valueForPathChanged(tree.getPathForRow(2), \"Application.java\")","    tree.getModel().valueForPathChanged(tree.getPathForRow(2), \"Program.java\")","    tree.getModel().valueForPathChanged(tree.getPathForRow(2), \"Main.java\")","})"]},
+
+        {"kind":"then","text":"Nothing changed, because there was no way back up through the read only branch.","code":["((Doc) ((Dir) fileSystem.get().entries().get(0)).entries().get(0)).name() == \"App.java\"","visibleRows(tree) == [\"root\", \"    src\", \"        App.java\"]"]},
+
+        {"kind":"and","text":"And it was said exactly once, naming the branch type which refused the write.","code":["log.warnings().findAll { it.contains(\"read only 'children(getter)'\") }.size() == 1","log.warnings().any { it.contains(\"'Dir'\") }"]},
+
+        {"kind":"when","text":"The root itself is renamed, which needs no branch wither at all.","code":["UI.runNow({ tree.getModel().valueForPathChanged(tree.getPathForRow(0), \"workspace\") })"]},
+
+        {"kind":"then","text":"That edit does land, because nothing stood between it and the property.","code":["fileSystem.get().name() == \"workspace\""]},
+
+        {"kind":"cleanup","text":"","code":["log.detach()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A node type without a text wither cannot be renamed, even in an editable tree.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Editability is decided per node type, by whether that type declared how edited\n            text gets back into it. A tree may therefore let the user rename its folders while\n            leaving its documents alone, which is a common thing to want and needs no\n            predicate anywhere.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree where only directories declare a text wither.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode, new Doc(\"a\", \"notes.txt\"))))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })","                              .text({ Dir d -> d.name() }, { Dir d, String t -> d.withName(t) }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })                                    // getter only","        })","        .get(JTree)"]},
+
+        {"kind":"when","text":"An edit is attempted on the document.","code":["UI.runNow({ tree.getModel().valueForPathChanged(tree.getPathForRow(1), \"renamed.txt\") })"]},
+
+        {"kind":"then","text":"It is ignored, because the document never said how to take it.","code":["visibleRows(tree) == [\"root\", \"    notes.txt\"]"]},
+
+        {"kind":"when","text":"The same edit is attempted on the directory.","code":["UI.runNow({ tree.getModel().valueForPathChanged(tree.getPathForRow(0), \"workspace\") })"]},
+
+        {"kind":"then","text":"It lands, because the directory did.","code":["visibleRows(tree) == [\"workspace\", \"    notes.txt\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"An editor is offered for the node the edit is aimed at, not for the selected one.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Whether a node may be renamed is a question about *that* node, so it is asked of\n            the node an edit is aimed at rather than of whatever happens to be selected at the\n            time. A plain `JTree` lets `startEditingAtPath(..)` open an editor on a tree with\n            no selection at all, and a bound tree does too.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree in which directories can be renamed.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode, new Doc(\"a\", \"notes.txt\"))))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })","                              .text({ Dir d -> d.name() }, { Dir d, String t -> d.withName(t) }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }, { Doc d, String t -> d.withName(t) }) })","        })","        .get(JTree)"]},
+
+        {"kind":"when","text":"An edit is started on a row while nothing at all is selected.","code":["var editing = UI.runAndGet({","    tree.setSize(220, 120)","    tree.doLayout()","    tree.expandRow(0)","    tree.clearSelection()","    tree.startEditingAtPath(tree.getPathForRow(1))","    return [ tree.isEditing(), tree.getEditingPath() == tree.getPathForRow(1) ]","})"]},
+
+        {"kind":"then","text":"The editor opened, and on that very row.","code":["editing == [true, true]"]},
+
+        {"kind":"cleanup","text":"","code":["UI.runNow({ tree.stopEditing() })"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A tree bound to a read only property refuses edits outright.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The last of the conditions. Even with a full set of withers, there is nothing to\n            write into when the bound property is read only, and SwingTree says so rather than\n            quietly discarding the edit.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The same rules as an editable tree, but bound through the read only overload.","code":["FsNode structure = new Dir(\"r\", \"root\", Tuple.of(FsNode, new Doc(\"a\", \"notes.txt\")))","var tree =","        UI.tree(FsNode, Val.of(structure), { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })","                              .text({ Dir d -> d.name() }, { Dir d, String t -> d.withName(t) }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }, { Doc d, String t -> d.withName(t) }) })","        })","        .get(JTree)"]},
+
+        {"kind":"when","text":"An edit is attempted anyway.","code":["UI.runNow({ tree.getModel().valueForPathChanged(new TreePath(tree.getModel().getRoot()), \"workspace\") })"]},
+
+        {"kind":"then","text":"Nothing changed, and the tree never offered an editor in the first place.","code":["visibleRows(tree) == [\"root\", \"    notes.txt\"]","!tree.isEditable()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

@@ -1874,7 +1874,7 @@ public final class UI extends UIFactoryMethods
 <span class="nc" id="L1874">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {@inheritDoc} */
-<span class="nc" id="L1877">    public static class Tree extends JTree implements StylableComponent {</span>
+<span class="fc" id="L1877">    public static class Tree extends JTree implements StylableComponent {</span>
 <span class="nc" id="L1878">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
 <span class="nc" id="L1879">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
 <span class="nc" id="L1880">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
@@ -1912,8 +1912,8 @@ public final class UI extends UIFactoryMethods
     }
     /** {@inheritDoc} */
 <span class="fc" id="L1914">    public static class EditorPane extends JEditorPane implements StylableComponent {</span>
-<span class="nc" id="L1915">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
-<span class="nc" id="L1916">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
+<span class="fc" id="L1915">        @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }</span>
+<span class="fc" id="L1916">        @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }</span>
 <span class="nc" id="L1917">        @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }</span>
     }
     /** {@inheritDoc} */

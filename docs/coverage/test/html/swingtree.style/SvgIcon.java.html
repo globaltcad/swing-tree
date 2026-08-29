@@ -1470,8 +1470,8 @@ public final class SvgIcon extends ImageIcon
 
     @Override
     public boolean equals( Object obj ) {
-<span class="fc bfc" id="L1473" title="All 2 branches covered.">        if ( obj == null ) return false;</span>
-<span class="pc bpc" id="L1474" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
+<span class="pc bpc" id="L1473" title="1 of 2 branches missed.">        if ( obj == null ) return false;</span>
+<span class="fc bfc" id="L1474" title="All 2 branches covered.">        if ( obj == this ) return true;</span>
 <span class="fc bfc" id="L1475" title="All 2 branches covered.">        if ( obj.getClass() != getClass() ) return false;</span>
 <span class="fc" id="L1476">        SvgIcon rhs = (SvgIcon) obj;</span>
 <span class="pc bpc" id="L1477" title="1 of 2 branches missed.">        return Objects.equals(_size,               rhs._size)        &amp;&amp;</span>

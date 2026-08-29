@@ -80,8 +80,8 @@ public final class FilterConf
 <span class="fc" id="L80">        blur = Math.max(0, blur);</span>
 <span class="fc" id="L81">        if (</span>
 <span class="fc bfc" id="L82" title="All 2 branches covered.">            _NONE._kernel.equals(kernel) &amp;&amp;</span>
-<span class="pc bpc" id="L83" title="1 of 2 branches missed.">            _NONE._area.equals(area)     &amp;&amp;</span>
-<span class="pc bpc" id="L84" title="1 of 2 branches missed.">            _NONE._offset.equals(offset) &amp;&amp;</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">            _NONE._area.equals(area)     &amp;&amp;</span>
+<span class="fc bfc" id="L84" title="All 2 branches covered.">            _NONE._offset.equals(offset) &amp;&amp;</span>
 <span class="fc bfc" id="L85" title="All 4 branches covered.">            _NONE._scale.equals(scale)   &amp;&amp;</span>
             _NONE._blur == blur
         ) {
@@ -174,7 +174,7 @@ public final class FilterConf
      * @return An updated filter configuration having the desired translation.
      */
     public FilterConf offset( double x, double y ) {
-<span class="nc" id="L177">        return of(_kernel, _area, Offset.of(x, y), _scale, _blur);</span>
+<span class="fc" id="L177">        return of(_kernel, _area, Offset.of(x, y), _scale, _blur);</span>
     }
 
     /**
@@ -218,7 +218,7 @@ public final class FilterConf
         if (
 <span class="fc bfc" id="L219" title="All 2 branches covered.">            KernelConf.none().equals(kernel) &amp;&amp;</span>
 <span class="fc bfc" id="L220" title="All 2 branches covered.">            _scale.equals(Scale.none()) &amp;&amp;</span>
-<span class="pc bpc" id="L221" title="1 of 4 branches missed.">            _offset.equals(Offset.none()) &amp;&amp;</span>
+<span class="fc bfc" id="L221" title="All 4 branches covered.">            _offset.equals(Offset.none()) &amp;&amp;</span>
             _blur &lt;= 0
         ) {
 <span class="fc" id="L224">            return _NONE;</span>
@@ -237,8 +237,8 @@ public final class FilterConf
 <span class="fc" id="L237">        FilterConf other = (FilterConf) obj;</span>
 <span class="fc" id="L238">        return</span>
 <span class="fc bfc" id="L239" title="All 2 branches covered.">            _kernel.equals(other._kernel) &amp;&amp;</span>
-<span class="pc bpc" id="L240" title="1 of 2 branches missed.">            _area.equals(other._area)     &amp;&amp;</span>
-<span class="pc bpc" id="L241" title="1 of 2 branches missed.">            _offset.equals(other._offset) &amp;&amp;</span>
+<span class="fc bfc" id="L240" title="All 2 branches covered.">            _area.equals(other._area)     &amp;&amp;</span>
+<span class="fc bfc" id="L241" title="All 2 branches covered.">            _offset.equals(other._offset) &amp;&amp;</span>
 <span class="fc bfc" id="L242" title="All 4 branches covered.">            _scale.equals(other._scale)   &amp;&amp;</span>
             _blur == other._blur;
     }

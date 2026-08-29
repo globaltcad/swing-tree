@@ -1,0 +1,301 @@
+{
+  "className":"swingtree.Tree_Update_Spec",
+  "title":"Keeping a Bound Tree in Sync",
+  "narrative":"A bound tree follows one property. When that property receives a new value, the tree has\n    to change with it, and it has to do so without throwing away what the user has done:\n    which branches they opened, and what they had selected.\n\n    That is harder for a tree than for a list, because of how value objects work. A `JTree`\n    keys its expanded branches and its selection on `TreePath`, whose equality bottoms out\n    in the equality of the nodes it holds. Records compare by content, so renaming one leaf\n    produces a new leaf, a new parent, a new grandparent and a new root: **every path in the\n    whole tree goes stale at once**, and the tree collapses.\n\n    SwingTree therefore identifies a node by the *path of ids* leading to it, which does not\n    change when the node's content does. That is the same idea `HasId` brings to\n    `addAll(Var<Tuple<M>>, ..)`, carried from one index up to a whole path.\n\n    The second thing these scenarios are about is cost. \"Potentially large\" is a real\n    requirement for a tree: two hundred thousand nodes of which forty are on screen. So an\n    update walks only what is expanded, and stops dead at every subtree whose value is\n    reference identical to the one before, which persistent, structurally shared data makes\n    true for everything a change did not touch.\n\n    The file system these scenarios build on is a sealed interface with two cases, which in\n    Java 21 would read:\n\n    ```java\n    public sealed interface FsNode extends HasId<String> { String name(); }\n    public record Dir( String id, String name, Tuple<FsNode> entries ) implements FsNode {}\n    public record Doc( String id, String name, String body )           implements FsNode {}\n    ```",
+  "subjects":["swingtree.UIForTree","swingtree.TreeConf"],
+  "statistics":{
+    "runs":"13",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"Assigning a new value to the property changes the tree.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            There is no `updateTreeOn(..)`, no event to fire and no model to notify. The tree\n            listens to the property it was bound to, and a new value is all it takes.\n\n            Note that the update is written as a pure function of the old value, which is how\n            a change to an immutable structure is always expressed: `update(..)` is shorthand\n            for reading the value, transforming it, and setting the result.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A small file system in a property, and a tree bound to it.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode, new Doc(\"a\", \"notes.txt\"))))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .get(JTree)"]},
+
+        {"kind":"expect","text":"It shows what the property holds.","code":["visibleRows(tree) == [\"root\", \"    notes.txt\"]"]},
+
+        {"kind":"when","text":"We put a second document into the root.","code":["UI.runNow({ fileSystem.update({ Dir d -> d.withEntries(d.entries().add(new Doc(\"b\", \"todo.md\"))) }) })"]},
+
+        {"kind":"then","text":"The tree shows it, without anything else being said.","code":["visibleRows(tree) == [\"root\", \"    notes.txt\", \"    todo.md\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Expansion survives an edit anywhere in the tree.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is the scenario the whole identity design exists for.\n\n            The user opens two folders deep down. Then something they are looking at is\n            renamed, which in an immutable world means a brand new root value with brand new\n            nodes all the way down the edited path. If the tree identified its nodes by their\n            content, everything the user had opened would snap shut.\n\n            It does not, because a node is identified by the ids leading to it, and an id is\n            exactly the thing an edit leaves alone.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A file system three levels deep, bound to a tree.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"a\", \"src\", Tuple.of(FsNode,","                                new Dir(\"a1\", \"main\", Tuple.of(FsNode, new Doc(\"a11\", \"App.java\"))))),","                            new Dir(\"b\", \"docs\", Tuple.of(FsNode, new Doc(\"b1\", \"guide.md\")))","                        )))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })","                              .text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .get(JTree)"]},
+
+        {"kind":"when","text":"The user opens the two folders leading down to the deepest document.","code":["UI.runNow({","    tree.expandRow(1)   // src","    tree.expandRow(2)   // main, which only has a row once src is open","})"]},
+
+        {"kind":"then","text":"Both are open, and the deep document is on screen.","code":["expandedRows(tree) == [\"root\", \"src\", \"main\"]","visibleRows(tree) == [","    \"root\",","    \"    src\",","    \"        main\",","    \"            App.java\",","    \"    docs\",","]"]},
+
+        {"kind":"when","text":"The deepest document is renamed, which rebuilds every node above it.","code":["UI.runNow({ fileSystem.update({ Dir root ->","    var src  = (Dir) root.entries().get(0)","    var main = (Dir) src.entries().get(0)","    var app  = (Doc) main.entries().get(0)","    root.withEntries(root.entries().setAt(0,","        src.withEntries(src.entries().setAt(0,","            main.withEntries(main.entries().setAt(0, app.withName(\"Application.java\")))))))","}) })"]},
+
+        {"kind":"then","text":"The rename is on screen...","code":["visibleRows(tree) == [","    \"root\",","    \"    src\",","    \"        main\",","    \"            Application.java\",","    \"    docs\",","]"]},
+
+        {"kind":"and","text":"...and both folders the user opened are still open.","code":["expandedRows(tree) == [\"root\", \"src\", \"main\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A content edit is announced as a node change, never as a structure change.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The distinction matters to a `JTree`. A node change repaints the affected rows; a\n            structure change makes it throw away everything it knows about the branch and ask\n            again.\n\n            So an edit which leaves the shape of the tree alone must not be announced as a\n            structural one. Here we listen to the model directly and watch it say the right\n            thing: three node changes, one for each node on the path the edit rebuilt, and no\n            structure change at all.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree with one folder opened by the user.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"a\", \"src\", Tuple.of(FsNode, new Doc(\"a1\", \"App.java\"))),","                            new Dir(\"b\", \"docs\", Tuple.of(FsNode))","                        )))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .get(JTree)","UI.runNow({ tree.expandRow(1) })"]},
+
+        {"kind":"and","text":"A listener recording everything the tree model announces.","code":["var announced = []","tree.getModel().addTreeModelListener(new TreeModelListener() {","    @Override void treeNodesChanged    ( TreeModelEvent e ) { announced << \"changed\"   }","    @Override void treeNodesInserted   ( TreeModelEvent e ) { announced << \"inserted\"  }","    @Override void treeNodesRemoved    ( TreeModelEvent e ) { announced << \"removed\"   }","    @Override void treeStructureChanged( TreeModelEvent e ) { announced << \"structure\" }","})"]},
+
+        {"kind":"when","text":"A document two levels down is renamed.","code":["UI.runNow({ fileSystem.update({ Dir root ->","    var src = (Dir) root.entries().get(0)","    root.withEntries(root.entries().setAt(0,","        src.withEntries(src.entries().setAt(0, ((Doc) src.entries().get(0)).withName(\"Main.java\")))))","}) })"]},
+
+        {"kind":"then","text":"Exactly the three nodes the edit rebuilt were announced as changed.","code":["announced == [\"changed\", \"changed\", \"changed\"]"]},
+
+        {"kind":"and","text":"The tree was never told to rebuild anything.","code":["!announced.contains(\"structure\")"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A subtree the change did not touch is not even looked at.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is where immutability pays for itself. A persistent collection shares\n            everything a change did not touch, so after an edit inside one folder, the *other*\n            folder is not merely equal to what it was, it is the very same object.\n\n            The update walk compares by reference and stops there. Below, the children getter\n            counts how often each folder is asked for its entries, and the untouched one is\n            never asked at all, even though it is expanded and on screen. That is what makes\n            the cost of an edit independent of the size of the tree.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A counter recording which folders get asked for their children.","code":["var reads = [:].withDefault { 0 }"]},
+
+        {"kind":"and","text":"A tree in which two sibling folders are both open.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"a\", \"edited\", Tuple.of(FsNode,    new Doc(\"a1\", \"one.txt\"))),","                            new Dir(\"b\", \"untouched\", Tuple.of(FsNode, new Doc(\"b1\", \"two.txt\")))","                        )))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> reads[d.name()] = reads[d.name()] + 1; d.entries() },","                                        { Dir d, Tuple<FsNode> e -> d.withEntries(e) })","                              .text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .withInitialExpansionDepth(3)","        .get(JTree)"]},
+
+        {"kind":"expect","text":"Both folders are on screen and open.","code":["expandedRows(tree) == [\"root\", \"edited\", \"untouched\"]","visibleRows(tree) == [","    \"root\",","    \"    edited\",","    \"        one.txt\",","    \"    untouched\",","    \"        two.txt\",","]"]},
+
+        {"kind":"when","text":"We forget every read so far and then rename a document in the first folder.","code":["reads.clear()","UI.runNow({ fileSystem.update({ Dir root ->","    var edited = (Dir) root.entries().get(0)","    root.withEntries(root.entries().setAt(0,","        edited.withEntries(edited.entries().setAt(0, ((Doc) edited.entries().get(0)).withName(\"ONE.txt\")))))","}) })"]},
+
+        {"kind":"then","text":"The rename is on screen.","code":["visibleRows(tree).contains(\"        ONE.txt\")"]},
+
+        {"kind":"and","text":"The edited folder was walked into...","code":["reads[\"edited\"] > 0"]},
+
+        {"kind":"and","text":"...and the untouched one was never asked for anything, because it is the same object as before.","code":["reads[\"untouched\"] == 0"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A change below a collapsed branch costs nothing to apply.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The second half of the cost story. Nothing below a collapsed branch is on screen,\n            so nothing below it needs an event, and the walk stops at the branch.\n\n            This is what keeps a tree over a genuinely large structure responsive: the work an\n            update does is bounded by what the user has actually opened, not by what exists.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A counter, and a tree whose one folder the user has not opened.","code":["var reads = [:].withDefault { 0 }","var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"a\", \"closed\", Tuple.of(FsNode, new Doc(\"a1\", \"deep.txt\")))","                        )))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> reads[d.name()] = reads[d.name()] + 1; d.entries() })","                              .text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .get(JTree)"]},
+
+        {"kind":"expect","text":"Only the root and the closed folder are on screen.","code":["visibleRows(tree) == [\"root\", \"    closed\"]"]},
+
+        {"kind":"when","text":"We forget every read and then change something inside the closed folder.","code":["reads.clear()","UI.runNow({ fileSystem.update({ Dir root ->","    var closed = (Dir) root.entries().get(0)","    root.withEntries(root.entries().setAt(0,","        closed.withEntries(closed.entries().setAt(0, ((Doc) closed.entries().get(0)).withName(\"changed.txt\")))))","}) })"]},
+
+        {"kind":"then","text":"The closed folder was never asked for its children, because they are not on screen.","code":["reads[\"closed\"] == 0"]},
+
+        {"kind":"when","text":"The user opens it.","code":["UI.runNow({ tree.expandRow(1) })"]},
+
+        {"kind":"then","text":"The change was there all along, and shows the moment it becomes visible.","code":["visibleRows(tree) == [\"root\", \"    closed\", \"        changed.txt\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Adding a node makes it appear, and leaves every open branch open.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An insertion changes the shape of a branch, which is a different kind of change\n            from an edit: the tree cannot be told \"this row now reads differently\", it has to\n            be told the branch itself is different.\n\n            SwingTree answers that by announcing a structure change and then putting the\n            user's expanded branches and selection back. The user notices nothing, because\n            the paths being restored are made of ids, which the insertion did not disturb.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree with two folders.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"a\", \"src\", Tuple.of(FsNode,  new Doc(\"a1\", \"App.java\"))),","                            new Dir(\"b\", \"docs\", Tuple.of(FsNode, new Doc(\"b1\", \"guide.md\")))","                        )))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })","                              .text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .get(JTree)"]},
+
+        {"kind":"and","text":"Which the user opens both of.","code":["UI.runNow({","    tree.expandRow(1)   // src","    tree.expandRow(3)   // docs, one row further down now that src is open","})"]},
+
+        {"kind":"when","text":"A new document is added to the first folder.","code":["UI.runNow({ fileSystem.update({ Dir root ->","    var src = (Dir) root.entries().get(0)","    root.withEntries(root.entries().setAt(0, src.withEntries(src.entries().add(new Doc(\"a2\", \"Util.java\")))))","}) })"]},
+
+        {"kind":"then","text":"It appears where it belongs.","code":["visibleRows(tree) == [","    \"root\",","    \"    src\",","    \"        App.java\",","    \"        Util.java\",","    \"    docs\",","    \"        guide.md\",","]"]},
+
+        {"kind":"and","text":"And both folders the user opened are still open.","code":["expandedRows(tree) == [\"root\", \"src\", \"docs\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Removing a node makes it disappear, and its siblings keep their state.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The mirror image of an insertion, and the harder direction: removing an entry\n            shifts every entry after it up by one. A tree identifying its rows by position\n            would now have the wrong branch expanded.\n\n            Identifying them by id means the surviving folder keeps its own state, wherever\n            the removal left it sitting.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Three folders, of which the user has opened only the last.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"a\", \"first\", Tuple.of(FsNode,  new Doc(\"a1\", \"a.txt\"))),","                            new Dir(\"b\", \"second\", Tuple.of(FsNode, new Doc(\"b1\", \"b.txt\"))),","                            new Dir(\"c\", \"third\", Tuple.of(FsNode,  new Doc(\"c1\", \"c.txt\")))","                        )))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })","                              .text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .get(JTree)","UI.runNow({ tree.expandRow(3) })"]},
+
+        {"kind":"expect","text":"Only the third folder shows its contents.","code":["visibleRows(tree) == [","    \"root\",","    \"    first\",","    \"    second\",","    \"    third\",","    \"        c.txt\",","]","expandedRows(tree) == [\"root\", \"third\"]"]},
+
+        {"kind":"when","text":"The first folder is removed, shifting the other two up.","code":["UI.runNow({ fileSystem.update({ Dir root -> root.withEntries(root.entries().removeAt(0)) }) })"]},
+
+        {"kind":"then","text":"It is gone...","code":["visibleRows(tree) == [","    \"root\",","    \"    second\",","    \"    third\",","    \"        c.txt\",","]"]},
+
+        {"kind":"and","text":"...and the folder the user had opened is still the one that is open, despite having moved.","code":["expandedRows(tree) == [\"root\", \"third\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A node changing to a different variant of the sum type is handled.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A sum type makes it possible for a node to become something else entirely: a\n            document turning into a directory, or a `Pending` branch turning into a `Loaded`\n            one once its contents arrive.\n\n            That is not a content change, it is a different node in the same place, and it may\n            well change whether the node is a branch at all. SwingTree answers it the same way\n            it answers an insertion, so the rest of the tree keeps its state while the changed\n            node picks up its new type's rules.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree in which the first entry is currently a document.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Doc(\"x\", \"mystery\"),","                            new Dir(\"b\", \"docs\", Tuple.of(FsNode, new Doc(\"b1\", \"guide.md\")))","                        )))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })","                              .text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .get(JTree)","UI.runNow({ tree.expandRow(2) })"]},
+
+        {"kind":"expect","text":"The document is a leaf, and the folder below it is open.","code":["expandedRows(tree) == [\"root\", \"docs\"]","UI.runAndGet({ tree.getModel().isLeaf(tree.getPathForRow(1).getLastPathComponent()) })"]},
+
+        {"kind":"when","text":"That same entry, keeping its id, becomes a directory.","code":["UI.runNow({ fileSystem.update({ Dir root ->","    root.withEntries(root.entries().setAt(0, new Dir(\"x\", \"mystery\", Tuple.of(FsNode, new Doc(\"x1\", \"revealed.txt\")))))","}) })"]},
+
+        {"kind":"then","text":"It is a branch now, and it can be opened.","code":["!UI.runAndGet({ tree.getModel().isLeaf(tree.getPathForRow(1).getLastPathComponent()) })"]},
+
+        {"kind":"and","text":"The folder the user had opened elsewhere is untouched by any of it.","code":["expandedRows(tree) == [\"root\", \"docs\"]"]},
+
+        {"kind":"when","text":"The user opens the node that changed its nature.","code":["UI.runNow({ tree.expandRow(1) })"]},
+
+        {"kind":"then","text":"Its new contents are there.","code":["visibleRows(tree) == [","    \"root\",","    \"    mystery\",","    \"        revealed.txt\",","    \"    docs\",","    \"        guide.md\",","]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Replacing the whole root rebuilds the tree.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Every scenario so far changed something *inside* the bound value. Assigning an\n            entirely different root is a different matter: no path from the old tree means\n            anything in the new one, so there is nothing to preserve and the tree starts\n            over.\n\n            SwingTree tells the two cases apart by the identity of the root, which is why\n            this is not something you have to declare.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree over one file system, with a folder opened.","code":["var fileSystem = Var.of(FsNode, new Dir(\"old\", \"old-root\", Tuple.of(FsNode, new Dir(\"a\", \"src\", Tuple.of(FsNode, new Doc(\"a1\", \"App.java\"))))))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .get(JTree)","UI.runNow({ tree.expandRow(1) })"]},
+
+        {"kind":"expect","text":"","code":["visibleRows(tree) == [\"old-root\", \"    src\", \"        App.java\"]"]},
+
+        {"kind":"when","text":"A completely different file system is assigned.","code":["UI.runNow({ fileSystem.set(new Dir(\"new\", \"new-root\", Tuple.of(FsNode, new Doc(\"z\", \"readme.txt\")))) })"]},
+
+        {"kind":"then","text":"The tree shows the new one, from the top.","code":["visibleRows(tree) == [\"new-root\", \"    readme.txt\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Setting the property to a value that is not actually different does nothing.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Sprouts properties do not fire when the value they receive equals the one they\n            hold, so an update that computes the same structure back is not an update at all\n            and the tree is never disturbed.\n\n            This is worth knowing because it is what makes it safe to recompute state\n            liberally: the view does not pay for a change that did not happen.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tree, and a listener counting everything its model announces.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode, new Doc(\"a\", \"notes.txt\"))))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })","                              .text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .get(JTree)","var announcements = 0","tree.getModel().addTreeModelListener(new TreeModelListener() {","    @Override void treeNodesChanged    ( TreeModelEvent e ) { announcements++ }","    @Override void treeNodesInserted   ( TreeModelEvent e ) { announcements++ }","    @Override void treeNodesRemoved    ( TreeModelEvent e ) { announcements++ }","    @Override void treeStructureChanged( TreeModelEvent e ) { announcements++ }","})"]},
+
+        {"kind":"when","text":"We rename a document to the name it already has.","code":["UI.runNow({ fileSystem.update({ Dir root ->","    root.withEntries(root.entries().setAt(0, ((Doc) root.entries().get(0)).withName(\"notes.txt\")))","}) })"]},
+
+        {"kind":"then","text":"Nothing was announced, because nothing changed.","code":["announcements == 0","visibleRows(tree) == [\"root\", \"    notes.txt\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A structural change leaves a bound selection exactly where it was.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Restoring the user's selection after a structural change is only half the job. The\n            other half is not *lying* about it on the way there.\n\n            A structure change makes the `JTree` drop every selected path before the restore\n            can put it back, and it announces that as an ordinary selection event. A binding\n            which passed that on would tell the application \"nothing is selected any more\" on\n            every single insertion, and a detail pane listening to it would blink empty and\n            fill again each time somebody added a file in a folder nobody was looking at.\n\n            So the write back is muted for the length of the rebuild, and the settled selection\n            is compared with the one the rebuild started from: it is announced once at the end\n            if it really moved, and not at all if it did not. What reaches the property is what\n            is true after the tree has finished moving, and only when it is news.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A file system with a document selected somewhere inside it.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"a\", \"assets\", Tuple.of(FsNode, new Doc(\"a1\", \"logo.svg\"))),","                            new Doc(\"b\", \"README.md\")","                        )))","var selection = Var.of(Tuple.of(String))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })","                              .text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .withSelection(selection)","        .withInitialExpansionDepth(3)","        .get(JTree)"]},
+
+        {"kind":"and","text":"A record of every value the selection property ever receives.","code":["var seen = []","selection.onChange(From.ALL, { seen.add(it.currentValue().orElseThrow().toList()) })"]},
+
+        {"kind":"when","text":"The logo is selected.","code":["UI.runNow({ selection.set(Tuple.of(String, [\"r\", \"a\", \"a1\"])) })"]},
+
+        {"kind":"then","text":"The property and the tree agree, and that was one change.","code":["selectedRows(tree) == [\"logo.svg\"]","seen == [[\"r\", \"a\", \"a1\"]]"]},
+
+        {"kind":"when","text":"A new file appears somewhere else entirely, which is a structural change.","code":["seen.clear()","UI.runNow({ fileSystem.update({ Dir root -> root.withEntries(root.entries().add(new Doc(\"c\", \"CHANGELOG.md\"))) }) })"]},
+
+        {"kind":"then","text":"It is on screen...","code":["visibleRows(tree).contains(\"    CHANGELOG.md\")"]},
+
+        {"kind":"and","text":"...the logo is still selected...","code":["selectedRows(tree) == [\"logo.svg\"]"]},
+
+        {"kind":"and","text":"...and the property was never told anything else. No empty selection in between.","code":["seen.every { it == [\"r\", \"a\", \"a1\"] }","!seen.contains([])","selection.get().toList() == [\"r\", \"a\", \"a1\"]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Deleting the selected node empties the selection, and says so once.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The counterpart to the scenario above: muting the write back during a rebuild must\n            not swallow a change that really happened. When the selected node is the one that\n            was removed, there is nothing to restore, and the property has to hear about it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A file system with a document selected, which we are about to delete.","code":["var fileSystem = Var.of(FsNode, new Dir(\"r\", \"root\", Tuple.of(FsNode,","                            new Dir(\"a\", \"assets\", Tuple.of(FsNode, new Doc(\"a1\", \"logo.svg\"), new Doc(\"a2\", \"icon.svg\")))","                        )))","var selection = Var.of(Tuple.of(String, \"r\", \"a\", \"a1\"))","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }, { Dir d, Tuple<FsNode> e -> d.withEntries(e) })","                              .text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .withSelection(selection)","        .withInitialExpansionDepth(3)","        .get(JTree)"]},
+
+        {"kind":"expect","text":"The logo starts out selected.","code":["selectedRows(tree) == [\"logo.svg\"]"]},
+
+        {"kind":"when","text":"The selected document is removed from its folder.","code":["UI.runNow({ fileSystem.update({ Dir root ->","    var assets = (Dir) root.entries().get(0)","    root.withEntries(root.entries().setAt(0, assets.withEntries(assets.entries().removeFirst(1))))","}) })"]},
+
+        {"kind":"then","text":"It is gone from the screen, and the property says nothing is selected.","code":["visibleRows(tree) == [\"root\", \"    assets\", \"        icon.svg\"]","selectedRows(tree) == []","selection.get().isEmpty()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A property holding nothing is an empty tree, not a tree holding nothing.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A property may legitimately hold no value at all: a structure which has not\n            finished loading, a document nobody has opened yet. A `TreeModel` says \"there is\n            no tree\" by having no root, and a `JTree` draws no rows for one, which is what\n            an empty property should look like.\n\n            What it must *not* look like is a single row reading `null`, which is what\n            wrapping the absent value in a node would produce.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property which holds no file system yet.","code":["var fileSystem = Var.ofNullable(FsNode, null)","var tree =","        UI.tree(FsNode, fileSystem, { conf -> conf","            .nodesOf(Dir, { it.children({ Dir d -> d.entries() }).text({ Dir d -> d.name() }) })","            .nodesOf(Doc, { it.text({ Doc d -> d.name() }) })","        })","        .get(JTree)"]},
+
+        {"kind":"expect","text":"The tree has no root and shows nothing.","code":["UI.runAndGet({ tree.getModel().getRoot() }) == null","visibleRows(tree) == []"]},
+
+        {"kind":"when","text":"The file system arrives.","code":["UI.runNow({ fileSystem.set(new Dir(\"r\", \"root\", Tuple.of(FsNode, new Doc(\"a\", \"notes.txt\")))) })"]},
+
+        {"kind":"then","text":"It is on screen, root opened, exactly as if it had been there all along.","code":["visibleRows(tree) == [\"root\", \"    notes.txt\"]"]},
+
+        {"kind":"when","text":"And it is taken away again.","code":["UI.runNow({ fileSystem.set(null) })"]},
+
+        {"kind":"then","text":"The tree goes empty rather than showing a node standing in for nothing.","code":["UI.runAndGet({ tree.getModel().getRoot() }) == null","visibleRows(tree) == []"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

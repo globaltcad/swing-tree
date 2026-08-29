@@ -109,7 +109,7 @@ final class LayerPartitionCache
     // Sum type based states
     private interface CacheState {
 <span class="fc" id="L111">        final class Nothing  implements CacheState { static final Nothing  INSTANCE = new Nothing();  }</span>
-<span class="fc" id="L112">        final class Uncached implements CacheState { static final Uncached INSTANCE = new Uncached(); }</span>
+<span class="fc" id="L112">        final class Rejected implements CacheState { static final Rejected INSTANCE = new Rejected(); }</span>
         final class Cached   implements CacheState {
             final Pooled&lt;LayerRenderConf&gt; _key;
             final CachedImage             _image;
@@ -133,67 +133,75 @@ final class LayerPartitionCache
 <span class="fc" id="L133">        _state       = CacheState.Nothing.INSTANCE;</span>
 <span class="fc" id="L134">    }</span>
 
+    /** A part has no admission decisions left open if it is either cached, or there
+     *  is nothing to cache. But a part that was refused admission may be admitted later, because
+     *  that decision also depends on how full the global cache is, so it has to be re-validated
+     *  and offered again on the next paint. */
+    boolean admissionDecisionLeftOpen() {
+<span class="fc" id="L141">        return _state instanceof CacheState.Rejected;</span>
+    }
+
     public @Nullable BufferedImage renderedImage() {
-<span class="fc bfc" id="L137" title="All 2 branches covered.">        if ( !(_state instanceof CacheState.Cached) )</span>
-<span class="fc" id="L138">            return null;</span>
-<span class="fc" id="L139">        final CachedImage image = ((CacheState.Cached) _state)._image;</span>
-<span class="fc bfc" id="L140" title="All 2 branches covered.">        return image.isRendered() ? image.getImage() : null;</span>
+<span class="fc bfc" id="L145" title="All 2 branches covered.">        if ( !(_state instanceof CacheState.Cached) )</span>
+<span class="fc" id="L146">            return null;</span>
+<span class="fc" id="L147">        final CachedImage image = ((CacheState.Cached) _state)._image;</span>
+<span class="fc bfc" id="L148" title="All 2 branches covered.">        return image.isRendered() ? image.getImage() : null;</span>
     }
 
     public void validate( ComponentConf newConf, boolean isResizing )
     {
-<span class="fc bfc" id="L145" title="All 4 branches covered.">        if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) ) {</span>
-<span class="fc" id="L146">            _renderInput = LayerRenderConf.none();</span>
-<span class="fc" id="L147">            _state       = CacheState.Nothing.INSTANCE;</span>
-<span class="fc" id="L148">            return;</span>
+<span class="fc bfc" id="L153" title="All 4 branches covered.">        if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) ) {</span>
+<span class="fc" id="L154">            _renderInput = LayerRenderConf.none();</span>
+<span class="fc" id="L155">            _state       = CacheState.Nothing.INSTANCE;</span>
+<span class="fc" id="L156">            return;</span>
         }
 
-<span class="fc" id="L151">        _renderInput = _part.restrict(newConf.renderConfFor(_layer));</span>
-<span class="fc bfc" id="L152" title="All 2 branches covered.">        if ( _renderInput.rendersNothing() ) {</span>
-<span class="fc" id="L153">            _state = CacheState.Nothing.INSTANCE;</span>
-<span class="fc" id="L154">            return;</span>
-        }
-
-<span class="fc bfc" id="L157" title="All 2 branches covered.">        final LayerRenderConf keyConf = CacheBudget.tilingEnabled()</span>
-<span class="fc" id="L158">                                            ? _canonicalize(_renderInput)</span>
-<span class="fc" id="L159">                                            : _renderInput;</span>
-
-<span class="fc bfc" id="L161" title="All 4 branches covered.">        if ( _state instanceof CacheState.Cached &amp;&amp; ((CacheState.Cached) _state)._key.get().equals(keyConf) )</span>
+<span class="fc" id="L159">        _renderInput = _part.restrict(newConf.renderConfFor(_layer));</span>
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        if ( _renderInput.rendersNothing() ) {</span>
+<span class="fc" id="L161">            _state = CacheState.Nothing.INSTANCE;</span>
 <span class="fc" id="L162">            return;</span>
-
-<span class="fc" id="L164">        final int hitsUntilAllocation = _hitsUntilAllocationFor(keyConf, _renderInput, isResizing);</span>
-<span class="fc bfc" id="L165" title="All 2 branches covered.">        if ( hitsUntilAllocation &lt; 0 ) {</span>
-<span class="fc" id="L166">            _state = CacheState.Uncached.INSTANCE;</span>
-        } else {
-<span class="fc" id="L168">            final Pooled&lt;LayerRenderConf&gt; key = new Pooled&lt;&gt;(keyConf).intern();</span>
-
-<span class="fc" id="L170">            CachedImage image = _CACHE.get(key);</span>
-<span class="fc bfc" id="L171" title="All 2 branches covered.">            if (image == null) {</span>
-<span class="fc" id="L172">                image = new CachedImage(keyConf.boxModel().size(), hitsUntilAllocation);</span>
-<span class="fc" id="L173">                _CACHE.put(key, image);</span>
-            }
-<span class="fc" id="L175">            _state = new CacheState.Cached(key, image);</span>
         }
-<span class="fc" id="L177">    }</span>
+
+<span class="fc bfc" id="L165" title="All 2 branches covered.">        final LayerRenderConf keyConf = CacheBudget.tilingEnabled()</span>
+<span class="fc" id="L166">                                            ? _canonicalize(_renderInput)</span>
+<span class="fc" id="L167">                                            : _renderInput;</span>
+
+<span class="fc bfc" id="L169" title="All 4 branches covered.">        if ( _state instanceof CacheState.Cached &amp;&amp; ((CacheState.Cached) _state)._key.get().equals(keyConf) )</span>
+<span class="fc" id="L170">            return;</span>
+
+<span class="fc" id="L172">        final int hitsUntilAllocation = _hitsUntilAllocationFor(keyConf, _renderInput, isResizing);</span>
+<span class="fc bfc" id="L173" title="All 2 branches covered.">        if ( hitsUntilAllocation &lt; 0 ) {</span>
+<span class="fc" id="L174">            _state = CacheState.Rejected.INSTANCE; // The cache refused admission!</span>
+        } else {
+<span class="fc" id="L176">            final Pooled&lt;LayerRenderConf&gt; key = new Pooled&lt;&gt;(keyConf).intern();</span>
+
+<span class="fc" id="L178">            CachedImage image = _CACHE.get(key);</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">            if (image == null) {</span>
+<span class="fc" id="L180">                image = new CachedImage(keyConf.boxModel().size(), hitsUntilAllocation);</span>
+<span class="fc" id="L181">                _CACHE.put(key, image);</span>
+            }
+<span class="fc" id="L183">            _state = new CacheState.Cached(key, image);</span>
+        }
+<span class="fc" id="L185">    }</span>
 
     PaintOutcome paint( Graphics2D g, BiConsumer&lt;LayerRenderConf, Graphics2D&gt; renderer )
     {
-<span class="fc" id="L181">        final Size size = _renderInput.boxModel().size();</span>
+<span class="fc" id="L189">        final Size size = _renderInput.boxModel().size();</span>
 
-<span class="fc bfc" id="L183" title="All 2 branches covered.">        if ( _state instanceof CacheState.Nothing )</span>
-<span class="fc" id="L184">            return PaintOutcome.NOTHING_RENDERED;</span>
+<span class="fc bfc" id="L191" title="All 2 branches covered.">        if ( _state instanceof CacheState.Nothing )</span>
+<span class="fc" id="L192">            return PaintOutcome.NOTHING_RENDERED;</span>
 
-<span class="pc bpc" id="L186" title="2 of 4 branches missed.">        if ( size.widthOrElse(0f) == 0f || size.heightOrElse(0f) == 0f )</span>
-<span class="nc" id="L187">            return PaintOutcome.NOTHING_RENDERED;</span>
+<span class="pc bpc" id="L194" title="2 of 4 branches missed.">        if ( size.widthOrElse(0f) == 0f || size.heightOrElse(0f) == 0f )</span>
+<span class="nc" id="L195">            return PaintOutcome.NOTHING_RENDERED;</span>
 
-<span class="fc bfc" id="L189" title="All 2 branches covered.">        if ( !(_state instanceof CacheState.Cached) ) {</span>
-<span class="fc" id="L190">            renderer.accept(_renderInput, g);</span>
-<span class="fc" id="L191">            return PaintOutcome.RENDERED_FROM_STYLE;</span>
+<span class="fc bfc" id="L197" title="All 2 branches covered.">        if ( !(_state instanceof CacheState.Cached) ) {</span>
+<span class="fc" id="L198">            renderer.accept(_renderInput, g);</span>
+<span class="fc" id="L199">            return PaintOutcome.RENDERED_FROM_STYLE;</span>
         }
 
-<span class="fc" id="L194">        final CacheState.Cached cached = (CacheState.Cached) _state;</span>
-<span class="fc" id="L195">        final CachedImage image        = cached._image;</span>
-<span class="fc" id="L196">        final LayerRenderConf cacheKey = cached._key.get();</span>
+<span class="fc" id="L202">        final CacheState.Cached cached = (CacheState.Cached) _state;</span>
+<span class="fc" id="L203">        final CachedImage image        = cached._image;</span>
+<span class="fc" id="L204">        final LayerRenderConf cacheKey = cached._key.get();</span>
         /*
             A cache key size differing from the actual size means the entry is the small
             exemplar rendering, and painting means reconstructing the actual size from it
@@ -201,29 +209,29 @@ final class LayerPartitionCache
             under anything more exotic (rotation, shear, flips) we render directly
             instead of using the cache for this paint.
         */
-<span class="fc bfc" id="L204" title="All 2 branches covered.">        final boolean isTiled = !cacheKey.boxModel().size().equals(size);</span>
-<span class="fc bfc" id="L205" title="All 4 branches covered.">        if ( isTiled &amp;&amp; !_isBlitCompatible(g.getTransform()) ) {</span>
-<span class="fc" id="L206">            renderer.accept(_renderInput, g);</span>
-<span class="fc" id="L207">            return PaintOutcome.RENDERED_FROM_STYLE;</span>
+<span class="fc bfc" id="L212" title="All 2 branches covered.">        final boolean isTiled = !cacheKey.boxModel().size().equals(size);</span>
+<span class="fc bfc" id="L213" title="All 4 branches covered.">        if ( isTiled &amp;&amp; !_isBlitCompatible(g.getTransform()) ) {</span>
+<span class="fc" id="L214">            renderer.accept(_renderInput, g);</span>
+<span class="fc" id="L215">            return PaintOutcome.RENDERED_FROM_STYLE;</span>
         }
 
         final PaintOutcome outcome;
-<span class="fc bfc" id="L211" title="All 2 branches covered.">        if ( !image.isRendered() ) {</span>
-<span class="fc" id="L212">            Graphics2D g2 = image.createGraphics(g.getDeviceConfiguration());</span>
-<span class="fc bfc" id="L213" title="All 2 branches covered.">            if ( g2 == null ) {</span>
+<span class="fc bfc" id="L219" title="All 2 branches covered.">        if ( !image.isRendered() ) {</span>
+<span class="fc" id="L220">            Graphics2D g2 = image.createGraphics(g.getDeviceConfiguration());</span>
+<span class="fc bfc" id="L221" title="All 2 branches covered.">            if ( g2 == null ) {</span>
                 /*
                     The cache is not yet ready to render into!
                     It will need a few more hits to be ready...
                     So we just do normal rendering instead:
                 */
-<span class="fc" id="L219">                renderer.accept(_renderInput, g);</span>
-<span class="fc" id="L220">                return PaintOutcome.RENDERED_FROM_STYLE;</span>
+<span class="fc" id="L227">                renderer.accept(_renderInput, g);</span>
+<span class="fc" id="L228">                return PaintOutcome.RENDERED_FROM_STYLE;</span>
             }
             try {
-<span class="fc" id="L223">                StyleUtil.transferConfigurations(g, g2);</span>
+<span class="fc" id="L231">                StyleUtil.transferConfigurations(g, g2);</span>
             }
-<span class="nc" id="L225">            catch ( Exception ignored ) {</span>
-<span class="nc" id="L226">                log.debug(SwingTree.get().logMarker(), &quot;Error while transferring configurations to the cached image graphics context.&quot;);</span>
+<span class="nc" id="L233">            catch ( Exception ignored ) {</span>
+<span class="nc" id="L234">                log.debug(SwingTree.get().logMarker(), &quot;Error while transferring configurations to the cached image graphics context.&quot;);</span>
             }
             finally {
                 /*
@@ -231,56 +239,56 @@ final class LayerPartitionCache
                     the *cache key* configuration (possibly the small exemplar), whereas
                     the direct-render fallbacks above render the full sized render input.
                 */
-<span class="fc" id="L234">                renderer.accept(cacheKey, g2);</span>
-<span class="fc" id="L235">                g2.dispose();</span>
+<span class="fc" id="L242">                renderer.accept(cacheKey, g2);</span>
+<span class="fc" id="L243">                g2.dispose();</span>
             }
-<span class="fc" id="L237">            outcome = PaintOutcome.RENDERED_FROM_STYLE;</span>
-<span class="fc" id="L238">        } else {</span>
-<span class="fc" id="L239">            outcome = PaintOutcome.RENDERED_FROM_CACHE;</span>
+<span class="fc" id="L245">            outcome = PaintOutcome.RENDERED_FROM_STYLE;</span>
+<span class="fc" id="L246">        } else {</span>
+<span class="fc" id="L247">            outcome = PaintOutcome.RENDERED_FROM_CACHE;</span>
         }
 
-<span class="fc" id="L242">        final BufferedImage cachedImage = image.getImage();</span>
-<span class="pc bpc" id="L243" title="1 of 2 branches missed.">        if ( cachedImage == null )</span>
-<span class="nc" id="L244">            return outcome; // Cannot happen (the count-down path returned above), but let's be defensive.</span>
+<span class="fc" id="L250">        final BufferedImage cachedImage = image.getImage();</span>
+<span class="pc bpc" id="L251" title="1 of 2 branches missed.">        if ( cachedImage == null )</span>
+<span class="nc" id="L252">            return outcome; // Cannot happen (the count-down path returned above), but let's be defensive.</span>
 
-<span class="fc bfc" id="L246" title="All 2 branches covered.">        if ( isTiled )</span>
-<span class="fc" id="L247">            image.paintStretched(g, cacheKey, size);</span>
+<span class="fc bfc" id="L254" title="All 2 branches covered.">        if ( isTiled )</span>
+<span class="fc" id="L255">            image.paintStretched(g, cacheKey, size);</span>
         else
-<span class="fc" id="L249">            g.drawImage(cachedImage, 0, 0, null);</span>
+<span class="fc" id="L257">            g.drawImage(cachedImage, 0, 0, null);</span>
 
-<span class="fc" id="L251">        return outcome;</span>
+<span class="fc" id="L259">        return outcome;</span>
     }
 
     private int _hitsUntilAllocationFor(
         LayerRenderConf cacheKey, LayerRenderConf renderInput, boolean isResizing
     ) {
-<span class="fc bfc" id="L257" title="All 2 branches covered.">        if ( !_isKeyedOnAChangingSize(cacheKey, renderInput, isResizing) )</span>
-<span class="fc" id="L258">            return _cachingMakesSenseFor(_layer, cacheKey);</span>
+<span class="fc bfc" id="L265" title="All 2 branches covered.">        if ( !_isKeyedOnAChangingSize(cacheKey, renderInput, isResizing) )</span>
+<span class="fc" id="L266">            return _cachingMakesSenseFor(_layer, cacheKey);</span>
 
-<span class="fc bfc" id="L260" title="All 2 branches covered.">        if ( _isTooLargeToMintWhileResizing(cacheKey) )</span>
-<span class="fc" id="L261">            return _hitsForReusingAFinishedRendering(cacheKey);</span>
+<span class="fc bfc" id="L268" title="All 2 branches covered.">        if ( _isTooLargeToMintWhileResizing(cacheKey) )</span>
+<span class="fc" id="L269">            return _hitsForReusingAFinishedRendering(cacheKey);</span>
 
-<span class="fc" id="L263">        final int hits = _cachingMakesSenseFor(_layer, cacheKey);</span>
-<span class="fc bfc" id="L264" title="All 4 branches covered.">        if ( hits &lt; 0 || _isTrivialToMintWhileResizing(cacheKey) )</span>
-<span class="fc" id="L265">            return hits;</span>
-<span class="fc" id="L266">        return Math.max(HITS_UNTIL_ALLOCATION_WHILE_RESIZING, hits);</span>
+<span class="fc" id="L271">        final int hits = _cachingMakesSenseFor(_layer, cacheKey);</span>
+<span class="fc bfc" id="L272" title="All 4 branches covered.">        if ( hits &lt; 0 || _isTrivialToMintWhileResizing(cacheKey) )</span>
+<span class="fc" id="L273">            return hits;</span>
+<span class="fc" id="L274">        return Math.max(HITS_UNTIL_ALLOCATION_WHILE_RESIZING, hits);</span>
     }
 
     private static boolean _isKeyedOnAChangingSize(
         LayerRenderConf cacheKey, LayerRenderConf renderInput, boolean isResizing
     ) {
-<span class="fc bfc" id="L272" title="All 4 branches covered.">        return isResizing &amp;&amp; cacheKey.boxModel().size().equals(renderInput.boxModel().size());</span>
+<span class="fc bfc" id="L280" title="All 4 branches covered.">        return isResizing &amp;&amp; cacheKey.boxModel().size().equals(renderInput.boxModel().size());</span>
     }
 
     private static boolean _isTooLargeToMintWhileResizing( LayerRenderConf cacheKey ) {
-<span class="fc" id="L276">        final Size size = cacheKey.boxModel().size();</span>
-<span class="fc bfc" id="L277" title="All 2 branches covered.">        return size.widthOrElse(0f) * size.heightOrElse(0f) &gt; _eagerAllocationLimit();</span>
+<span class="fc" id="L284">        final Size size = cacheKey.boxModel().size();</span>
+<span class="fc bfc" id="L285" title="All 2 branches covered.">        return size.widthOrElse(0f) * size.heightOrElse(0f) &gt; _eagerAllocationLimit();</span>
     }
 
     private static boolean _isTrivialToMintWhileResizing( LayerRenderConf cacheKey ) {
-<span class="fc" id="L281">        final Size size = cacheKey.boxModel().size();</span>
-<span class="fc" id="L282">        final int trivialAllocationLimit = (int) ( _eagerAllocationLimit() * EAGER_ALLOCATION_FRIENDLINESS );</span>
-<span class="fc bfc" id="L283" title="All 2 branches covered.">        return size.widthOrElse(0f) * size.heightOrElse(0f) &lt;= trivialAllocationLimit;</span>
+<span class="fc" id="L289">        final Size size = cacheKey.boxModel().size();</span>
+<span class="fc" id="L290">        final int trivialAllocationLimit = (int) ( _eagerAllocationLimit() * EAGER_ALLOCATION_FRIENDLINESS );</span>
+<span class="fc bfc" id="L291" title="All 2 branches covered.">        return size.widthOrElse(0f) * size.heightOrElse(0f) &lt;= trivialAllocationLimit;</span>
     }
 
     private static int _hitsForReusingAFinishedRendering( LayerRenderConf cacheKey ) {
@@ -288,96 +296,96 @@ final class LayerPartitionCache
             Deliberately not interned: `Pooled` compares by value, so a plain probe finds the
             entry without putting anything into the object pool for a key we may not use.
         */
-<span class="fc" id="L291">        final @Nullable CachedImage existing = _CACHE.get(new Pooled&lt;&gt;(cacheKey));</span>
-<span class="pc bpc" id="L292" title="1 of 4 branches missed.">        return ( existing != null &amp;&amp; existing.isRendered() ? 0 : -1 );</span>
+<span class="fc" id="L299">        final @Nullable CachedImage existing = _CACHE.get(new Pooled&lt;&gt;(cacheKey));</span>
+<span class="pc bpc" id="L300" title="1 of 4 branches missed.">        return ( existing != null &amp;&amp; existing.isRendered() ? 0 : -1 );</span>
     }
 
     /** The image area up to which an entry is worth allocating right away rather than after a
      *  warm-up of cache hits; also the line above which minting one mid-resize is a loss. */
     private static int _eagerAllocationLimit() {
-<span class="fc" id="L298">        return (int) ( _maxCacheableImageArea() * EAGER_ALLOCATION_FRIENDLINESS );</span>
+<span class="fc" id="L306">        return (int) ( _maxCacheableImageArea() * EAGER_ALLOCATION_FRIENDLINESS );</span>
     }
 
     static boolean wouldBeAdmitted( UI.Layer layer, LayerRenderConf conf ) {
-<span class="fc bfc" id="L302" title="All 2 branches covered.">        return _cachingMakesSenseFor(layer, conf) &gt;= 0;</span>
+<span class="fc bfc" id="L310" title="All 2 branches covered.">        return _cachingMakesSenseFor(layer, conf) &gt;= 0;</span>
     }
 
     private static int _cachingMakesSenseFor( UI.Layer layer, LayerRenderConf conf )
     {
-<span class="fc" id="L307">        final int maxEntries = _maxCacheEntries();</span>
-<span class="pc bpc" id="L308" title="1 of 4 branches missed.">        if ( maxEntries &lt;= 0 || _CACHE.size() &gt;= maxEntries )</span>
-<span class="fc" id="L309">            return -1; // Caching disabled or cache already too full, don't admit more entries.</span>
+<span class="fc" id="L315">        final int maxEntries = _maxCacheEntries();</span>
+<span class="pc bpc" id="L316" title="1 of 4 branches missed.">        if ( maxEntries &lt;= 0 || _CACHE.size() &gt;= maxEntries )</span>
+<span class="fc" id="L317">            return -1; // Caching disabled or cache already too full, don't admit more entries.</span>
 
-<span class="fc" id="L311">        final Size size = conf.boxModel().size();</span>
+<span class="fc" id="L319">        final Size size = conf.boxModel().size();</span>
 
-<span class="pc bpc" id="L313" title="1 of 4 branches missed.">        if ( !size.hasPositiveWidth() || !size.hasPositiveHeight() )</span>
-<span class="fc" id="L314">            return -1; // The component does not have a size that can be displayed.</span>
+<span class="pc bpc" id="L321" title="1 of 4 branches missed.">        if ( !size.hasPositiveWidth() || !size.hasPositiveHeight() )</span>
+<span class="fc" id="L322">            return -1; // The component does not have a size that can be displayed.</span>
 
-<span class="fc bfc" id="L316" title="All 2 branches covered.">        if ( conf.layer().hasPaintersWhichCannotBeCached() )</span>
-<span class="fc" id="L317">            return -1; // We don't know what the painters will do, so we don't cache their painting!</span>
+<span class="fc bfc" id="L324" title="All 2 branches covered.">        if ( conf.layer().hasPaintersWhichCannotBeCached() )</span>
+<span class="fc" id="L325">            return -1; // We don't know what the painters will do, so we don't cache their painting!</span>
 
-<span class="fc" id="L319">        int heavyStyleCount = 0;</span>
+<span class="fc" id="L327">        int heavyStyleCount = 0;</span>
 
-<span class="fc bfc" id="L321" title="All 2 branches covered.">        for ( ImageConf imageConf : conf.layer().images().sortedByNames() )</span>
-<span class="fc bfc" id="L322" title="All 4 branches covered.">            if ( !imageConf.equals(ImageConf.none()) &amp;&amp; imageConf.image().isPresent() ) {</span>
-<span class="fc" id="L323">                ImageIcon icon = imageConf.image().get();</span>
-<span class="fc bfc" id="L324" title="All 4 branches covered.">                boolean isSpecialIcon = ( icon.getClass() != ImageIcon.class &amp;&amp; icon.getClass() != ScalableImageIcon.class );</span>
-<span class="pc bpc" id="L325" title="1 of 4 branches missed.">                boolean hasSize = ( icon.getIconHeight() &gt; 0 || icon.getIconWidth() &gt; 0 );</span>
-<span class="pc bpc" id="L326" title="1 of 4 branches missed.">                if ( isSpecialIcon || hasSize )</span>
-<span class="fc" id="L327">                    heavyStyleCount++;</span>
+<span class="fc bfc" id="L329" title="All 2 branches covered.">        for ( ImageConf imageConf : conf.layer().images().sortedByNames() )</span>
+<span class="fc bfc" id="L330" title="All 4 branches covered.">            if ( !imageConf.equals(ImageConf.none()) &amp;&amp; imageConf.image().isPresent() ) {</span>
+<span class="fc" id="L331">                ImageIcon icon = imageConf.image().get();</span>
+<span class="fc bfc" id="L332" title="All 4 branches covered.">                boolean isSpecialIcon = ( icon.getClass() != ImageIcon.class &amp;&amp; icon.getClass() != ScalableImageIcon.class );</span>
+<span class="pc bpc" id="L333" title="1 of 4 branches missed.">                boolean hasSize = ( icon.getIconHeight() &gt; 0 || icon.getIconWidth() &gt; 0 );</span>
+<span class="pc bpc" id="L334" title="1 of 4 branches missed.">                if ( isSpecialIcon || hasSize )</span>
+<span class="fc" id="L335">                    heavyStyleCount++;</span>
             }
-<span class="fc bfc" id="L329" title="All 2 branches covered.">        for ( GradientConf gradient : conf.layer().gradients().sortedByNames() )</span>
-<span class="pc bpc" id="L330" title="1 of 4 branches missed.">            if ( !gradient.equals(GradientConf.none()) &amp;&amp; gradient.colors().length &gt; 0 )</span>
-<span class="fc" id="L331">                heavyStyleCount++;</span>
-<span class="fc bfc" id="L332" title="All 2 branches covered.">        for ( Pooled&lt;NoiseConf&gt; noise : conf.layer().noises().sortedByNames() )</span>
-<span class="pc bpc" id="L333" title="1 of 4 branches missed.">            if ( !noise.get().equals(NoiseConf.none()) &amp;&amp; noise.get().colors().length &gt; 0 )</span>
-<span class="fc" id="L334">                heavyStyleCount += 2;</span>
-<span class="fc bfc" id="L335" title="All 2 branches covered.">        for ( TextConf text : conf.layer().texts().sortedByNames() )</span>
-<span class="pc bpc" id="L336" title="1 of 4 branches missed.">            if ( !text.equals(TextConf.none()) &amp;&amp; !text.content().isEmpty() )</span>
-<span class="fc" id="L337">                heavyStyleCount++;</span>
-<span class="fc bfc" id="L338" title="All 2 branches covered.">        for ( ShadowConf shadow : conf.layer().shadows().sortedByNames() )</span>
-<span class="pc bpc" id="L339" title="1 of 4 branches missed.">            if ( !shadow.equals(ShadowConf.none()) &amp;&amp; shadow.color().isPresent() )</span>
-<span class="fc" id="L340">                heavyStyleCount++;</span>
-<span class="fc bfc" id="L341" title="All 2 branches covered.">        for ( PainterConf painter : conf.layer().painters().sortedByNames() )</span>
-<span class="pc bpc" id="L342" title="1 of 4 branches missed.">            if ( !painter.equals(PainterConf.none()) &amp;&amp; painter.painter().canBeCached() )</span>
-<span class="fc" id="L343">                heavyStyleCount++;</span>
+<span class="fc bfc" id="L337" title="All 2 branches covered.">        for ( GradientConf gradient : conf.layer().gradients().sortedByNames() )</span>
+<span class="pc bpc" id="L338" title="1 of 4 branches missed.">            if ( !gradient.equals(GradientConf.none()) &amp;&amp; gradient.colors().length &gt; 0 )</span>
+<span class="fc" id="L339">                heavyStyleCount++;</span>
+<span class="fc bfc" id="L340" title="All 2 branches covered.">        for ( Pooled&lt;NoiseConf&gt; noise : conf.layer().noises().sortedByNames() )</span>
+<span class="pc bpc" id="L341" title="1 of 4 branches missed.">            if ( !noise.get().equals(NoiseConf.none()) &amp;&amp; noise.get().colors().length &gt; 0 )</span>
+<span class="fc" id="L342">                heavyStyleCount += 2;</span>
+<span class="fc bfc" id="L343" title="All 2 branches covered.">        for ( TextConf text : conf.layer().texts().sortedByNames() )</span>
+<span class="pc bpc" id="L344" title="1 of 4 branches missed.">            if ( !text.equals(TextConf.none()) &amp;&amp; !text.content().isEmpty() )</span>
+<span class="fc" id="L345">                heavyStyleCount++;</span>
+<span class="fc bfc" id="L346" title="All 2 branches covered.">        for ( ShadowConf shadow : conf.layer().shadows().sortedByNames() )</span>
+<span class="pc bpc" id="L347" title="1 of 4 branches missed.">            if ( !shadow.equals(ShadowConf.none()) &amp;&amp; shadow.color().isPresent() )</span>
+<span class="fc" id="L348">                heavyStyleCount++;</span>
+<span class="fc bfc" id="L349" title="All 2 branches covered.">        for ( PainterConf painter : conf.layer().painters().sortedByNames() )</span>
+<span class="pc bpc" id="L350" title="1 of 4 branches missed.">            if ( !painter.equals(PainterConf.none()) &amp;&amp; painter.painter().canBeCached() )</span>
+<span class="fc" id="L351">                heavyStyleCount++;</span>
 
-<span class="fc" id="L345">        final BaseColorConf baseColors = conf.baseColors();</span>
-<span class="fc" id="L346">        final BoxModelConf  boxModel   = conf.boxModel();</span>
-<span class="fc" id="L347">        final boolean       isRounded  = boxModel.hasAnyNonZeroArcs();</span>
+<span class="fc" id="L353">        final BaseColorConf baseColors = conf.baseColors();</span>
+<span class="fc" id="L354">        final BoxModelConf  boxModel   = conf.boxModel();</span>
+<span class="fc" id="L355">        final boolean       isRounded  = boxModel.hasAnyNonZeroArcs();</span>
 
-<span class="fc bfc" id="L349" title="All 2 branches covered.">        if ( layer == UI.Layer.BORDER ) {</span>
-<span class="fc bfc" id="L350" title="All 2 branches covered.">            boolean hasWidth = !Outline.none().equals(boxModel.widths());</span>
-<span class="fc bfc" id="L351" title="All 2 branches covered.">            boolean hasColoring = !baseColors.borderColor().equals(BorderColorsConf.none());</span>
-<span class="pc bpc" id="L352" title="1 of 4 branches missed.">            if ( hasWidth &amp;&amp; hasColoring )</span>
-<span class="fc" id="L353">                heavyStyleCount++;</span>
+<span class="fc bfc" id="L357" title="All 2 branches covered.">        if ( layer == UI.Layer.BORDER ) {</span>
+<span class="fc bfc" id="L358" title="All 2 branches covered.">            boolean hasWidth = !Outline.none().equals(boxModel.widths());</span>
+<span class="fc bfc" id="L359" title="All 2 branches covered.">            boolean hasColoring = !baseColors.borderColor().equals(BorderColorsConf.none());</span>
+<span class="pc bpc" id="L360" title="1 of 4 branches missed.">            if ( hasWidth &amp;&amp; hasColoring )</span>
+<span class="fc" id="L361">                heavyStyleCount++;</span>
         }
-<span class="fc bfc" id="L355" title="All 2 branches covered.">        if ( layer == UI.Layer.BACKGROUND ) {</span>
-<span class="fc bfc" id="L356" title="All 4 branches covered.">            boolean roundedOrHasMargin = isRounded || !boxModel.margin().equals(Outline.none());</span>
-<span class="fc bfc" id="L357" title="All 2 branches covered.">            if ( roundedOrHasMargin ) {</span>
-<span class="fc bfc" id="L358" title="All 4 branches covered.">                if ( baseColors.backgroundColor().filter( c -&gt; c.getAlpha() &gt; 0 ).isPresent() )</span>
-<span class="fc" id="L359">                    heavyStyleCount++;</span>
-<span class="fc bfc" id="L360" title="All 4 branches covered.">                if ( baseColors.foundationColor().filter( c -&gt; c.getAlpha() &gt; 0 ).isPresent() )</span>
-<span class="fc" id="L361">                    heavyStyleCount++;</span>
+<span class="fc bfc" id="L363" title="All 2 branches covered.">        if ( layer == UI.Layer.BACKGROUND ) {</span>
+<span class="fc bfc" id="L364" title="All 4 branches covered.">            boolean roundedOrHasMargin = isRounded || !boxModel.margin().equals(Outline.none());</span>
+<span class="fc bfc" id="L365" title="All 2 branches covered.">            if ( roundedOrHasMargin ) {</span>
+<span class="fc bfc" id="L366" title="All 4 branches covered.">                if ( baseColors.backgroundColor().filter( c -&gt; c.getAlpha() &gt; 0 ).isPresent() )</span>
+<span class="fc" id="L367">                    heavyStyleCount++;</span>
+<span class="fc bfc" id="L368" title="All 4 branches covered.">                if ( baseColors.foundationColor().filter( c -&gt; c.getAlpha() &gt; 0 ).isPresent() )</span>
+<span class="fc" id="L369">                    heavyStyleCount++;</span>
             }
         }
 
-<span class="fc bfc" id="L365" title="All 2 branches covered.">        if ( heavyStyleCount &lt; 1 )</span>
-<span class="fc" id="L366">            return -1;</span>
+<span class="fc bfc" id="L373" title="All 2 branches covered.">        if ( heavyStyleCount &lt; 1 )</span>
+<span class="fc" id="L374">            return -1;</span>
 
-<span class="fc" id="L368">        final int maxSizeLimit         = _maxCacheableImageArea();</span>
-<span class="fc" id="L369">        final int eagerAllocationLimit = _eagerAllocationLimit();</span>
-<span class="fc" id="L370">        final int cacheHitCountLimit   = (int) (maxSizeLimit * (1 - EAGER_ALLOCATION_FRIENDLINESS));</span>
+<span class="fc" id="L376">        final int maxSizeLimit         = _maxCacheableImageArea();</span>
+<span class="fc" id="L377">        final int eagerAllocationLimit = _eagerAllocationLimit();</span>
+<span class="fc" id="L378">        final int cacheHitCountLimit   = (int) (maxSizeLimit * (1 - EAGER_ALLOCATION_FRIENDLINESS));</span>
 
-<span class="fc" id="L372">        final int pixelCount = (int) (size.widthOrElse(0f) * size.heightOrElse(0f));</span>
-<span class="fc" id="L373">        final int score      = pixelCount / Math.min(heavyStyleCount, 5); // Heavier styles get cached more easily!</span>
+<span class="fc" id="L380">        final int pixelCount = (int) (size.widthOrElse(0f) * size.heightOrElse(0f));</span>
+<span class="fc" id="L381">        final int score      = pixelCount / Math.min(heavyStyleCount, 5); // Heavier styles get cached more easily!</span>
 
-<span class="fc bfc" id="L375" title="All 2 branches covered.">        if ( score &gt; maxSizeLimit )</span>
-<span class="fc" id="L376">            return -1; // We are not going to cache such a large image!</span>
-<span class="fc bfc" id="L377" title="All 2 branches covered.">        else if ( score &lt;= eagerAllocationLimit )</span>
-<span class="fc" id="L378">            return 0; // Nice and small, definitely worth allocating and caching right away!</span>
+<span class="fc bfc" id="L383" title="All 2 branches covered.">        if ( score &gt; maxSizeLimit )</span>
+<span class="fc" id="L384">            return -1; // We are not going to cache such a large image!</span>
+<span class="fc bfc" id="L385" title="All 2 branches covered.">        else if ( score &lt;= eagerAllocationLimit )</span>
+<span class="fc" id="L386">            return 0; // Nice and small, definitely worth allocating and caching right away!</span>
         else
-<span class="fc" id="L380">            return 1 + (score - eagerAllocationLimit) / Math.max(1, cacheHitCountLimit / MAX_CACHE_HIT_COUNT);</span>
+<span class="fc" id="L388">            return 1 + (score - eagerAllocationLimit) / Math.max(1, cacheHitCountLimit / MAX_CACHE_HIT_COUNT);</span>
             // Here we return the number of cache hits until allocation and rendering should happen.
     }
 
@@ -393,57 +401,57 @@ final class LayerPartitionCache
      *  which already has the exemplar size maps onto itself.
      */
     private static LayerRenderConf _canonicalize( LayerRenderConf conf ) {
-<span class="fc bfc" id="L396" title="All 2 branches covered.">        if ( !_isStretchTileable(conf) )</span>
-<span class="fc" id="L397">            return conf;</span>
+<span class="fc bfc" id="L404" title="All 2 branches covered.">        if ( !_isStretchTileable(conf) )</span>
+<span class="fc" id="L405">            return conf;</span>
 
-<span class="fc" id="L399">        final Outline sliceInsets = _sliceInsets(conf);</span>
-<span class="fc" id="L400">        final Size    canonical   = _canonicalSize(sliceInsets);</span>
+<span class="fc" id="L407">        final Outline sliceInsets = _sliceInsets(conf);</span>
+<span class="fc" id="L408">        final Size    canonical   = _canonicalSize(sliceInsets);</span>
 
-<span class="fc bfc" id="L402" title="All 2 branches covered.">        if ( !_borderEdgeSeamsAreSizeIndependent(conf, sliceInsets, canonical) )</span>
-<span class="fc" id="L403">            return conf;</span>
-
-<span class="fc" id="L405">        final Size    actual      = conf.boxModel().size();</span>
-
-<span class="fc" id="L407">        final boolean strictlyLarger =</span>
-<span class="fc bfc" id="L408" title="All 2 branches covered.">                        actual.widthOrElse(0f)  &gt; canonical.widthOrElse(0f) &amp;&amp;</span>
-<span class="fc bfc" id="L409" title="All 2 branches covered.">                        actual.heightOrElse(0f) &gt; canonical.heightOrElse(0f);</span>
-<span class="fc bfc" id="L410" title="All 2 branches covered.">        if ( !strictlyLarger )</span>
+<span class="fc bfc" id="L410" title="All 2 branches covered.">        if ( !_borderEdgeSeamsAreSizeIndependent(conf, sliceInsets, canonical) )</span>
 <span class="fc" id="L411">            return conf;</span>
 
-<span class="fc" id="L413">        return conf.withBoxModel(conf.boxModel().withSize(canonical));</span>
+<span class="fc" id="L413">        final Size    actual      = conf.boxModel().size();</span>
+
+<span class="fc" id="L415">        final boolean strictlyLarger =</span>
+<span class="fc bfc" id="L416" title="All 2 branches covered.">                        actual.widthOrElse(0f)  &gt; canonical.widthOrElse(0f) &amp;&amp;</span>
+<span class="fc bfc" id="L417" title="All 2 branches covered.">                        actual.heightOrElse(0f) &gt; canonical.heightOrElse(0f);</span>
+<span class="fc bfc" id="L418" title="All 2 branches covered.">        if ( !strictlyLarger )</span>
+<span class="fc" id="L419">            return conf;</span>
+
+<span class="fc" id="L421">        return conf.withBoxModel(conf.boxModel().withSize(canonical));</span>
     }
 
     static boolean cachesSizeIndependently( LayerRenderConf conf ) {
-<span class="pc bpc" id="L417" title="1 of 2 branches missed.">        if ( !CacheBudget.tilingEnabled() )</span>
-<span class="nc" id="L418">            return false;</span>
-<span class="fc bfc" id="L419" title="All 2 branches covered.">        return !_canonicalize(conf).boxModel().size().equals(conf.boxModel().size());</span>
+<span class="pc bpc" id="L425" title="1 of 2 branches missed.">        if ( !CacheBudget.tilingEnabled() )</span>
+<span class="nc" id="L426">            return false;</span>
+<span class="fc bfc" id="L427" title="All 2 branches covered.">        return !_canonicalize(conf).boxModel().size().equals(conf.boxModel().size());</span>
     }
 
     /** Whether the layer content satisfies the tiling invariant (see class javadoc). */
     private static boolean _isStretchTileable( LayerRenderConf conf ) {
-<span class="fc" id="L424">        final StyleConfLayer layer = conf.layer();</span>
+<span class="fc" id="L432">        final StyleConfLayer layer = conf.layer();</span>
 
-<span class="fc bfc" id="L426" title="All 2 branches covered.">        for ( GradientConf gradient : layer.gradients().sortedByNames() )</span>
-<span class="fc bfc" id="L427" title="All 2 branches covered.">            if ( !gradient.equals(GradientConf.none()) )</span>
-<span class="fc" id="L428">                return false; // Gradient geometry spans the component bounds.</span>
+<span class="fc bfc" id="L434" title="All 2 branches covered.">        for ( GradientConf gradient : layer.gradients().sortedByNames() )</span>
+<span class="fc bfc" id="L435" title="All 2 branches covered.">            if ( !gradient.equals(GradientConf.none()) )</span>
+<span class="fc" id="L436">                return false; // Gradient geometry spans the component bounds.</span>
 
-<span class="fc bfc" id="L430" title="All 2 branches covered.">        for ( Pooled&lt;NoiseConf&gt; noise : layer.noises().sortedByNames() )</span>
-<span class="fc bfc" id="L431" title="All 2 branches covered.">            if ( !noise.get().equals(NoiseConf.none()) )</span>
-<span class="fc" id="L432">                return false; // Noise varies per pixel position.</span>
+<span class="fc bfc" id="L438" title="All 2 branches covered.">        for ( Pooled&lt;NoiseConf&gt; noise : layer.noises().sortedByNames() )</span>
+<span class="fc bfc" id="L439" title="All 2 branches covered.">            if ( !noise.get().equals(NoiseConf.none()) )</span>
+<span class="fc" id="L440">                return false; // Noise varies per pixel position.</span>
 
-<span class="fc bfc" id="L434" title="All 2 branches covered.">        for ( ImageConf image : layer.images().sortedByNames() )</span>
-<span class="fc bfc" id="L435" title="All 2 branches covered.">            if ( !image.equals(ImageConf.none()) )</span>
-<span class="fc" id="L436">                return false; // Image placement/fit depends on the component bounds.</span>
+<span class="fc bfc" id="L442" title="All 2 branches covered.">        for ( ImageConf image : layer.images().sortedByNames() )</span>
+<span class="fc bfc" id="L443" title="All 2 branches covered.">            if ( !image.equals(ImageConf.none()) )</span>
+<span class="fc" id="L444">                return false; // Image placement/fit depends on the component bounds.</span>
 
-<span class="fc bfc" id="L438" title="All 2 branches covered.">        for ( TextConf text : layer.texts().sortedByNames() )</span>
-<span class="fc bfc" id="L439" title="All 2 branches covered.">            if ( !text.equals(TextConf.none()) )</span>
-<span class="fc" id="L440">                return false; // Text layout depends on the component bounds.</span>
+<span class="fc bfc" id="L446" title="All 2 branches covered.">        for ( TextConf text : layer.texts().sortedByNames() )</span>
+<span class="fc bfc" id="L447" title="All 2 branches covered.">            if ( !text.equals(TextConf.none()) )</span>
+<span class="fc" id="L448">                return false; // Text layout depends on the component bounds.</span>
 
-<span class="fc bfc" id="L442" title="All 2 branches covered.">        for ( PainterConf painter : layer.painters().sortedByNames() )</span>
-<span class="fc bfc" id="L443" title="All 2 branches covered.">            if ( !painter.equals(PainterConf.none()) )</span>
-<span class="fc" id="L444">                return false; // We cannot know what a custom painter does.</span>
+<span class="fc bfc" id="L450" title="All 2 branches covered.">        for ( PainterConf painter : layer.painters().sortedByNames() )</span>
+<span class="fc bfc" id="L451" title="All 2 branches covered.">            if ( !painter.equals(PainterConf.none()) )</span>
+<span class="fc" id="L452">                return false; // We cannot know what a custom painter does.</span>
 
-<span class="fc" id="L446">        return true;</span>
+<span class="fc" id="L454">        return true;</span>
     }
 
     /**
@@ -461,35 +469,35 @@ final class LayerPartitionCache
         Outline         sliceInsets,
         Size            exemplar
     ) {
-<span class="fc" id="L464">        final BorderColorsConf borderColors = conf.baseColors().borderColor();</span>
-<span class="fc bfc" id="L465" title="All 4 branches covered.">        if ( borderColors.equals(BorderColorsConf.none()) || borderColors.isHomogeneous() )</span>
-<span class="fc" id="L466">            return true;</span>
-<span class="fc bfc" id="L467" title="All 2 branches covered.">        if ( !conf.boxModel().hasAnyNonZeroArcs() )</span>
-<span class="fc" id="L468">            return true;</span>
+<span class="fc" id="L472">        final BorderColorsConf borderColors = conf.baseColors().borderColor();</span>
+<span class="fc bfc" id="L473" title="All 4 branches covered.">        if ( borderColors.equals(BorderColorsConf.none()) || borderColors.isHomogeneous() )</span>
+<span class="fc" id="L474">            return true;</span>
+<span class="fc bfc" id="L475" title="All 2 branches covered.">        if ( !conf.boxModel().hasAnyNonZeroArcs() )</span>
+<span class="fc" id="L476">            return true;</span>
 
-<span class="fc" id="L470">        final Outline widths = conf.boxModel().widths();</span>
-<span class="fc" id="L471">        final float   top    = _positive(widths.top());</span>
-<span class="fc" id="L472">        final float   right  = _positive(widths.right());</span>
-<span class="fc" id="L473">        final float   bottom = _positive(widths.bottom());</span>
-<span class="fc" id="L474">        final float   left   = _positive(widths.left());</span>
-<span class="pc bpc" id="L475" title="4 of 8 branches missed.">        if ( top &lt;= 0 || right &lt;= 0 || bottom &lt;= 0 || left &lt;= 0 )</span>
-<span class="nc" id="L476">            return false;</span>
+<span class="fc" id="L478">        final Outline widths = conf.boxModel().widths();</span>
+<span class="fc" id="L479">        final float   top    = _positive(widths.top());</span>
+<span class="fc" id="L480">        final float   right  = _positive(widths.right());</span>
+<span class="fc" id="L481">        final float   bottom = _positive(widths.bottom());</span>
+<span class="fc" id="L482">        final float   left   = _positive(widths.left());</span>
+<span class="pc bpc" id="L483" title="4 of 8 branches missed.">        if ( top &lt;= 0 || right &lt;= 0 || bottom &lt;= 0 || left &lt;= 0 )</span>
+<span class="nc" id="L484">            return false;</span>
 
-<span class="fc" id="L478">        final Outline margin       = conf.boxModel().margin();</span>
-<span class="fc" id="L479">        final float   marginTop    = _positive(margin.top());</span>
-<span class="fc" id="L480">        final float   marginRight  = _positive(margin.right());</span>
-<span class="fc" id="L481">        final float   marginBottom = _positive(margin.bottom());</span>
-<span class="fc" id="L482">        final float   marginLeft   = _positive(margin.left());</span>
+<span class="fc" id="L486">        final Outline margin       = conf.boxModel().margin();</span>
+<span class="fc" id="L487">        final float   marginTop    = _positive(margin.top());</span>
+<span class="fc" id="L488">        final float   marginRight  = _positive(margin.right());</span>
+<span class="fc" id="L489">        final float   marginBottom = _positive(margin.bottom());</span>
+<span class="fc" id="L490">        final float   marginLeft   = _positive(margin.left());</span>
 
-<span class="fc" id="L484">        final float boxWidth  = exemplar.widthOrElse(0f)  - marginLeft - marginRight;</span>
-<span class="fc" id="L485">        final float boxHeight = exemplar.heightOrElse(0f) - marginTop  - marginBottom;</span>
-<span class="pc bpc" id="L486" title="2 of 4 branches missed.">        if ( boxWidth &lt;= 0 || boxHeight &lt;= 0 )</span>
-<span class="nc" id="L487">            return false;</span>
+<span class="fc" id="L492">        final float boxWidth  = exemplar.widthOrElse(0f)  - marginLeft - marginRight;</span>
+<span class="fc" id="L493">        final float boxHeight = exemplar.heightOrElse(0f) - marginTop  - marginBottom;</span>
+<span class="pc bpc" id="L494" title="2 of 4 branches missed.">        if ( boxWidth &lt;= 0 || boxHeight &lt;= 0 )</span>
+<span class="nc" id="L495">            return false;</span>
 
-<span class="fc bfc" id="L489" title="All 2 branches covered.">        return boxHeight * top    &gt; ( _positive(sliceInsets.top())    - marginTop    ) * ( top  + bottom )</span>
-<span class="pc bpc" id="L490" title="1 of 2 branches missed.">            &amp;&amp; boxHeight * bottom &gt; ( _positive(sliceInsets.bottom()) - marginBottom ) * ( top  + bottom )</span>
-<span class="pc bpc" id="L491" title="1 of 2 branches missed.">            &amp;&amp; boxWidth  * left   &gt; ( _positive(sliceInsets.left())   - marginLeft   ) * ( left + right  )</span>
-<span class="pc bpc" id="L492" title="1 of 2 branches missed.">            &amp;&amp; boxWidth  * right  &gt; ( _positive(sliceInsets.right())  - marginRight  ) * ( left + right  );</span>
+<span class="fc bfc" id="L497" title="All 2 branches covered.">        return boxHeight * top    &gt; ( _positive(sliceInsets.top())    - marginTop    ) * ( top  + bottom )</span>
+<span class="pc bpc" id="L498" title="1 of 2 branches missed.">            &amp;&amp; boxHeight * bottom &gt; ( _positive(sliceInsets.bottom()) - marginBottom ) * ( top  + bottom )</span>
+<span class="pc bpc" id="L499" title="1 of 2 branches missed.">            &amp;&amp; boxWidth  * left   &gt; ( _positive(sliceInsets.left())   - marginLeft   ) * ( left + right  )</span>
+<span class="pc bpc" id="L500" title="1 of 2 branches missed.">            &amp;&amp; boxWidth  * right  &gt; ( _positive(sliceInsets.right())  - marginRight  ) * ( left + right  );</span>
     }
 
     /**
@@ -501,28 +509,28 @@ final class LayerPartitionCache
      *  recomputed at blit time and always agrees with the canonicalization.
      */
     private static Outline _sliceInsets( LayerRenderConf conf ) {
-<span class="fc" id="L504">        final BoxModelConf box = conf.boxModel();</span>
+<span class="fc" id="L512">        final BoxModelConf box = conf.boxModel();</span>
 
-<span class="fc" id="L506">        final float marginTop    = _positive(box.margin().top());</span>
-<span class="fc" id="L507">        final float marginRight  = _positive(box.margin().right());</span>
-<span class="fc" id="L508">        final float marginBottom = _positive(box.margin().bottom());</span>
-<span class="fc" id="L509">        final float marginLeft   = _positive(box.margin().left());</span>
+<span class="fc" id="L514">        final float marginTop    = _positive(box.margin().top());</span>
+<span class="fc" id="L515">        final float marginRight  = _positive(box.margin().right());</span>
+<span class="fc" id="L516">        final float marginBottom = _positive(box.margin().bottom());</span>
+<span class="fc" id="L517">        final float marginLeft   = _positive(box.margin().left());</span>
 
-<span class="fc" id="L511">        final float baseTop    = _positive(box.baseOutline().top());</span>
-<span class="fc" id="L512">        final float baseRight  = _positive(box.baseOutline().right());</span>
-<span class="fc" id="L513">        final float baseBottom = _positive(box.baseOutline().bottom());</span>
-<span class="fc" id="L514">        final float baseLeft   = _positive(box.baseOutline().left());</span>
+<span class="fc" id="L519">        final float baseTop    = _positive(box.baseOutline().top());</span>
+<span class="fc" id="L520">        final float baseRight  = _positive(box.baseOutline().right());</span>
+<span class="fc" id="L521">        final float baseBottom = _positive(box.baseOutline().bottom());</span>
+<span class="fc" id="L522">        final float baseLeft   = _positive(box.baseOutline().left());</span>
 
-<span class="fc" id="L516">        final float widthTop    = _positive(box.widths().top());</span>
-<span class="fc" id="L517">        final float widthRight  = _positive(box.widths().right());</span>
-<span class="fc" id="L518">        final float widthBottom = _positive(box.widths().bottom());</span>
-<span class="fc" id="L519">        final float widthLeft   = _positive(box.widths().left());</span>
+<span class="fc" id="L524">        final float widthTop    = _positive(box.widths().top());</span>
+<span class="fc" id="L525">        final float widthRight  = _positive(box.widths().right());</span>
+<span class="fc" id="L526">        final float widthBottom = _positive(box.widths().bottom());</span>
+<span class="fc" id="L527">        final float widthLeft   = _positive(box.widths().left());</span>
 
         // Per side, the larger of the two adjacent corner arc extents:
-<span class="fc" id="L522">        final float arcTop    = Math.max(_arcHeight(box.topLeftArc()),    _arcHeight(box.topRightArc())   );</span>
-<span class="fc" id="L523">        final float arcRight  = Math.max(_arcWidth(box.topRightArc()),    _arcWidth(box.bottomRightArc()) );</span>
-<span class="fc" id="L524">        final float arcBottom = Math.max(_arcHeight(box.bottomLeftArc()), _arcHeight(box.bottomRightArc()));</span>
-<span class="fc" id="L525">        final float arcLeft   = Math.max(_arcWidth(box.topLeftArc()),     _arcWidth(box.bottomLeftArc())  );</span>
+<span class="fc" id="L530">        final float arcTop    = Math.max(_arcHeight(box.topLeftArc()),    _arcHeight(box.topRightArc())   );</span>
+<span class="fc" id="L531">        final float arcRight  = Math.max(_arcWidth(box.topRightArc()),    _arcWidth(box.bottomRightArc()) );</span>
+<span class="fc" id="L532">        final float arcBottom = Math.max(_arcHeight(box.bottomLeftArc()), _arcHeight(box.bottomRightArc()));</span>
+<span class="fc" id="L533">        final float arcLeft   = Math.max(_arcWidth(box.topLeftArc()),     _arcWidth(box.bottomLeftArc())  );</span>
 
         /*
             A shadow's 2D-varying pixels extend beyond its geometric box: its gradients
@@ -530,28 +538,28 @@ final class LayerPartitionCache
             displaced by the shadow offset. We conservatively use the same reach for all
             four sides (overestimation only costs a few exemplar pixels).
         */
-<span class="fc" id="L533">        float shadowReachH = 0;</span>
-<span class="fc" id="L534">        float shadowReachV = 0;</span>
-<span class="fc bfc" id="L535" title="All 2 branches covered.">        for ( ShadowConf shadow : conf.layer().shadows().sortedByNames() ) {</span>
-<span class="pc bpc" id="L536" title="1 of 4 branches missed.">            if ( shadow.equals(ShadowConf.none()) || !shadow.color().isPresent() )</span>
-<span class="nc" id="L537">                continue;</span>
-<span class="fc" id="L538">            final float blur   = Math.max(0, shadow.blurRadius());</span>
-<span class="fc" id="L539">            final float spread = Math.abs(shadow.spreadRadius());</span>
-<span class="fc" id="L540">            final float fade   = StyleRenderer.shadowGradientStartOffset(box, shadow);</span>
-<span class="fc" id="L541">            shadowReachH = Math.max(shadowReachH, blur + spread + fade + Math.abs(shadow.horizontalOffset()));</span>
-<span class="fc" id="L542">            shadowReachV = Math.max(shadowReachV, blur + spread + fade + Math.abs(shadow.verticalOffset()));</span>
-<span class="fc" id="L543">        }</span>
+<span class="fc" id="L541">        float shadowReachH = 0;</span>
+<span class="fc" id="L542">        float shadowReachV = 0;</span>
+<span class="fc bfc" id="L543" title="All 2 branches covered.">        for ( ShadowConf shadow : conf.layer().shadows().sortedByNames() ) {</span>
+<span class="pc bpc" id="L544" title="1 of 4 branches missed.">            if ( shadow.equals(ShadowConf.none()) || !shadow.color().isPresent() )</span>
+<span class="nc" id="L545">                continue;</span>
+<span class="fc" id="L546">            final float blur   = Math.max(0, shadow.blurRadius());</span>
+<span class="fc" id="L547">            final float spread = Math.abs(shadow.spreadRadius());</span>
+<span class="fc" id="L548">            final float fade   = StyleRenderer.shadowGradientStartOffset(box, shadow);</span>
+<span class="fc" id="L549">            shadowReachH = Math.max(shadowReachH, blur + spread + fade + Math.abs(shadow.horizontalOffset()));</span>
+<span class="fc" id="L550">            shadowReachV = Math.max(shadowReachV, blur + spread + fade + Math.abs(shadow.verticalOffset()));</span>
+<span class="fc" id="L551">        }</span>
 
-<span class="fc" id="L545">        final float top    = marginTop    + baseTop    + widthTop    + arcTop    + shadowReachV + SAFETY_MARGIN;</span>
-<span class="fc" id="L546">        final float right  = marginRight  + baseRight  + widthRight  + arcRight  + shadowReachH + SAFETY_MARGIN;</span>
-<span class="fc" id="L547">        final float bottom = marginBottom + baseBottom + widthBottom + arcBottom + shadowReachV + SAFETY_MARGIN;</span>
-<span class="fc" id="L548">        final float left   = marginLeft   + baseLeft   + widthLeft   + arcLeft   + shadowReachH + SAFETY_MARGIN;</span>
+<span class="fc" id="L553">        final float top    = marginTop    + baseTop    + widthTop    + arcTop    + shadowReachV + SAFETY_MARGIN;</span>
+<span class="fc" id="L554">        final float right  = marginRight  + baseRight  + widthRight  + arcRight  + shadowReachH + SAFETY_MARGIN;</span>
+<span class="fc" id="L555">        final float bottom = marginBottom + baseBottom + widthBottom + arcBottom + shadowReachV + SAFETY_MARGIN;</span>
+<span class="fc" id="L556">        final float left   = marginLeft   + baseLeft   + widthLeft   + arcLeft   + shadowReachH + SAFETY_MARGIN;</span>
 
-<span class="fc" id="L550">        return Outline.of(</span>
-<span class="fc" id="L551">                    (float) Math.ceil(top),</span>
-<span class="fc" id="L552">                    (float) Math.ceil(right),</span>
-<span class="fc" id="L553">                    (float) Math.ceil(bottom),</span>
-<span class="fc" id="L554">                    (float) Math.ceil(left)</span>
+<span class="fc" id="L558">        return Outline.of(</span>
+<span class="fc" id="L559">                    (float) Math.ceil(top),</span>
+<span class="fc" id="L560">                    (float) Math.ceil(right),</span>
+<span class="fc" id="L561">                    (float) Math.ceil(bottom),</span>
+<span class="fc" id="L562">                    (float) Math.ceil(left)</span>
                 );
     }
 
@@ -564,9 +572,9 @@ final class LayerPartitionCache
      *  any larger size.
      */
     private static Size _canonicalSize( Outline sliceInsets ) {
-<span class="fc" id="L567">        final float maxHorizontal = Math.max(sliceInsets.left().orElse(0f), sliceInsets.right().orElse(0f));</span>
-<span class="fc" id="L568">        final float maxVertical   = Math.max(sliceInsets.top().orElse(0f),  sliceInsets.bottom().orElse(0f));</span>
-<span class="fc" id="L569">        return Size.of(</span>
+<span class="fc" id="L575">        final float maxHorizontal = Math.max(sliceInsets.left().orElse(0f), sliceInsets.right().orElse(0f));</span>
+<span class="fc" id="L576">        final float maxVertical   = Math.max(sliceInsets.top().orElse(0f),  sliceInsets.bottom().orElse(0f));</span>
+<span class="fc" id="L577">        return Size.of(</span>
                     2 * maxHorizontal + STRETCH_BAND,
                     2 * maxVertical   + STRETCH_BAND
                 );
@@ -574,22 +582,22 @@ final class LayerPartitionCache
 
     /** Tile blits support positive scaling and translation; rotation, shear and flips do not. */
     private static boolean _isBlitCompatible( AffineTransform transform ) {
-<span class="fc bfc" id="L577" title="All 2 branches covered.">        return transform.getShearX() == 0 &amp;&amp;</span>
-<span class="pc bpc" id="L578" title="1 of 2 branches missed.">               transform.getShearY() == 0 &amp;&amp;</span>
-<span class="pc bpc" id="L579" title="1 of 2 branches missed.">               transform.getScaleX() &gt;  0 &amp;&amp;</span>
-<span class="fc bfc" id="L580" title="All 2 branches covered.">               transform.getScaleY() &gt;  0;</span>
+<span class="fc bfc" id="L585" title="All 2 branches covered.">        return transform.getShearX() == 0 &amp;&amp;</span>
+<span class="pc bpc" id="L586" title="1 of 2 branches missed.">               transform.getShearY() == 0 &amp;&amp;</span>
+<span class="pc bpc" id="L587" title="1 of 2 branches missed.">               transform.getScaleX() &gt;  0 &amp;&amp;</span>
+<span class="fc bfc" id="L588" title="All 2 branches covered.">               transform.getScaleY() &gt;  0;</span>
     }
 
     private static float _positive( Optional&lt;Float&gt; value ) {
-<span class="fc" id="L584">        return Math.max(0f, value.orElse(0f));</span>
+<span class="fc" id="L592">        return Math.max(0f, value.orElse(0f));</span>
     }
 
     private static float _arcWidth( Optional&lt;Arc&gt; arc ) {
-<span class="fc" id="L588">        return arc.map( a -&gt; Math.max(0f, a.width()) ).orElse(0f);</span>
+<span class="fc" id="L596">        return arc.map( a -&gt; Math.max(0f, a.width()) ).orElse(0f);</span>
     }
 
     private static float _arcHeight( Optional&lt;Arc&gt; arc ) {
-<span class="fc" id="L592">        return arc.map( a -&gt; Math.max(0f, a.height()) ).orElse(0f);</span>
+<span class="fc" id="L600">        return arc.map( a -&gt; Math.max(0f, a.height()) ).orElse(0f);</span>
     }
 
     /**
@@ -614,16 +622,16 @@ final class LayerPartitionCache
         /** Indices into the {@link #_stretchTiles} array. */
         private static final int TOP = 0, LEFT = 1, CENTER = 2, RIGHT = 3, BOTTOM = 4;
         private interface StretchTile {
-<span class="fc" id="L617">            final class Nothing implements StretchTile {</span>
-<span class="fc" id="L618">                static final Nothing INSTANCE = new Nothing();</span>
+<span class="fc" id="L625">            final class Nothing implements StretchTile {</span>
+<span class="fc" id="L626">                static final Nothing INSTANCE = new Nothing();</span>
             }
             final class FillColor implements StretchTile {
                 final Color _color;
-<span class="fc" id="L622">                FillColor( Color color ) { _color = color; }</span>
+<span class="fc" id="L630">                FillColor( Color color ) { _color = color; }</span>
             }
             final class Image implements StretchTile {
                 final BufferedImage _image;
-<span class="fc" id="L626">                Image( BufferedImage image ) { _image = image; }</span>
+<span class="fc" id="L634">                Image( BufferedImage image ) { _image = image; }</span>
             }
         }
 
@@ -635,39 +643,39 @@ final class LayerPartitionCache
         private int                            _numberOfHitsUntilAllocation;
 
 
-<span class="fc" id="L638">        CachedImage( Size size, int numberOfHitsUntilAllocation ) {</span>
-<span class="fc" id="L639">            _isRendered                  = false;</span>
-<span class="fc" id="L640">            _width                       = Math.max(1, size.width().map(Number::intValue).orElse(1));</span>
-<span class="fc" id="L641">            _height                      = Math.max(1, size.height().map(Number::intValue).orElse(1));</span>
-<span class="fc" id="L642">            _image                       = null;</span>
-<span class="fc" id="L643">            _numberOfHitsUntilAllocation = numberOfHitsUntilAllocation;</span>
-<span class="fc" id="L644">        }</span>
+<span class="fc" id="L646">        CachedImage( Size size, int numberOfHitsUntilAllocation ) {</span>
+<span class="fc" id="L647">            _isRendered                  = false;</span>
+<span class="fc" id="L648">            _width                       = Math.max(1, size.width().map(Number::intValue).orElse(1));</span>
+<span class="fc" id="L649">            _height                      = Math.max(1, size.height().map(Number::intValue).orElse(1));</span>
+<span class="fc" id="L650">            _image                       = null;</span>
+<span class="fc" id="L651">            _numberOfHitsUntilAllocation = numberOfHitsUntilAllocation;</span>
+<span class="fc" id="L652">        }</span>
 
         /** The memory this entry has claimed: its image - counted from the moment the entry
          *  exists, not from the moment the buffer is actually allocated.  */
         long reservedBytes() {
-<span class="fc" id="L649">            long total = (long) _width * _height * BYTES_PER_PIXEL;</span>
-<span class="fc bfc" id="L650" title="All 2 branches covered.">            if ( _stretchTiles != null )</span>
-<span class="fc bfc" id="L651" title="All 2 branches covered.">                for ( StretchTile tile : _stretchTiles )</span>
-<span class="fc bfc" id="L652" title="All 2 branches covered.">                    if ( tile instanceof StretchTile.Image )</span>
-<span class="fc" id="L653">                        total += _bytesOf(((StretchTile.Image) tile)._image);</span>
-<span class="fc" id="L654">            return total;</span>
+<span class="fc" id="L657">            long total = (long) _width * _height * BYTES_PER_PIXEL;</span>
+<span class="fc bfc" id="L658" title="All 2 branches covered.">            if ( _stretchTiles != null )</span>
+<span class="fc bfc" id="L659" title="All 2 branches covered.">                for ( StretchTile tile : _stretchTiles )</span>
+<span class="fc bfc" id="L660" title="All 2 branches covered.">                    if ( tile instanceof StretchTile.Image )</span>
+<span class="fc" id="L661">                        total += _bytesOf(((StretchTile.Image) tile)._image);</span>
+<span class="fc" id="L662">            return total;</span>
         }
 
         private static long _bytesOf( BufferedImage image ) {
-<span class="fc" id="L658">            return (long) image.getWidth() * image.getHeight() * BYTES_PER_PIXEL;</span>
+<span class="fc" id="L666">            return (long) image.getWidth() * image.getHeight() * BYTES_PER_PIXEL;</span>
         }
 
         private static BufferedImage _allocate( @Nullable GraphicsConfiguration gc, int width, int height ) {
-<span class="pc bpc" id="L662" title="1 of 2 branches missed.">            BufferedImage img = ( gc != null )</span>
-<span class="fc" id="L663">                    ? gc.createCompatibleImage(width, height, Transparency.TRANSLUCENT) // potentially accelerated</span>
-<span class="pc" id="L664">                    : new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB); // probably headless</span>
-<span class="fc" id="L665">            img.setAccelerationPriority(1.0f);</span>
-<span class="fc" id="L666">            return img;</span>
+<span class="pc bpc" id="L670" title="1 of 2 branches missed.">            BufferedImage img = ( gc != null )</span>
+<span class="fc" id="L671">                    ? gc.createCompatibleImage(width, height, Transparency.TRANSLUCENT) // potentially accelerated</span>
+<span class="pc" id="L672">                    : new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB); // probably headless</span>
+<span class="fc" id="L673">            img.setAccelerationPriority(1.0f);</span>
+<span class="fc" id="L674">            return img;</span>
         }
 
         public @Nullable BufferedImage getImage() {
-<span class="fc" id="L670">            return _image;</span>
+<span class="fc" id="L678">            return _image;</span>
         }
 
         /**
@@ -676,20 +684,20 @@ final class LayerPartitionCache
          *  has not reached zero yet. The image is allocated on the first call after that.
          */
         public @Nullable Graphics2D createGraphics( @Nullable GraphicsConfiguration gc ) {
-<span class="pc bpc" id="L679" title="1 of 2 branches missed.">            if ( _isRendered )</span>
-<span class="nc" id="L680">                throw new IllegalStateException(&quot;This image has already been rendered into!&quot;);</span>
-<span class="fc bfc" id="L681" title="All 2 branches covered.">            if ( _numberOfHitsUntilAllocation &gt; 0 ) {</span>
-<span class="fc" id="L682">                _numberOfHitsUntilAllocation--;</span>
-<span class="fc" id="L683">                return null;</span>
+<span class="pc bpc" id="L687" title="1 of 2 branches missed.">            if ( _isRendered )</span>
+<span class="nc" id="L688">                throw new IllegalStateException(&quot;This image has already been rendered into!&quot;);</span>
+<span class="fc bfc" id="L689" title="All 2 branches covered.">            if ( _numberOfHitsUntilAllocation &gt; 0 ) {</span>
+<span class="fc" id="L690">                _numberOfHitsUntilAllocation--;</span>
+<span class="fc" id="L691">                return null;</span>
             }
-<span class="pc bpc" id="L685" title="1 of 2 branches missed.">            if ( _image == null )</span>
-<span class="fc" id="L686">                _image = _allocate(gc, _width, _height);</span>
-<span class="fc" id="L687">            _isRendered = true;</span>
-<span class="fc" id="L688">            return _image.createGraphics();</span>
+<span class="pc bpc" id="L693" title="1 of 2 branches missed.">            if ( _image == null )</span>
+<span class="fc" id="L694">                _image = _allocate(gc, _width, _height);</span>
+<span class="fc" id="L695">            _isRendered = true;</span>
+<span class="fc" id="L696">            return _image.createGraphics();</span>
         }
 
         public boolean isRendered() {
-<span class="fc" id="L692">            return _isRendered;</span>
+<span class="fc" id="L700">            return _isRendered;</span>
         }
 
         /**
@@ -713,69 +721,69 @@ final class LayerPartitionCache
          */
         public void paintStretched( Graphics2D g, LayerRenderConf canonicalConf, Size actualSize )
         {
-<span class="fc" id="L716">            final BufferedImage image = _image;</span>
-<span class="pc bpc" id="L717" title="1 of 2 branches missed.">            if ( image == null )</span>
-<span class="nc" id="L718">                return; // Cannot happen (callers check `isRendered()` first), but let's be defensive.</span>
+<span class="fc" id="L724">            final BufferedImage image = _image;</span>
+<span class="pc bpc" id="L725" title="1 of 2 branches missed.">            if ( image == null )</span>
+<span class="nc" id="L726">                return; // Cannot happen (callers check `isRendered()` first), but let's be defensive.</span>
 
-<span class="fc" id="L720">            final Outline insets = _sliceInsets(canonicalConf);</span>
-<span class="fc" id="L721">            final int insetTop    = (int) _positive(insets.top());</span>
-<span class="fc" id="L722">            final int insetRight  = (int) _positive(insets.right());</span>
-<span class="fc" id="L723">            final int insetBottom = (int) _positive(insets.bottom());</span>
-<span class="fc" id="L724">            final int insetLeft   = (int) _positive(insets.left());</span>
+<span class="fc" id="L728">            final Outline insets = _sliceInsets(canonicalConf);</span>
+<span class="fc" id="L729">            final int insetTop    = (int) _positive(insets.top());</span>
+<span class="fc" id="L730">            final int insetRight  = (int) _positive(insets.right());</span>
+<span class="fc" id="L731">            final int insetBottom = (int) _positive(insets.bottom());</span>
+<span class="fc" id="L732">            final int insetLeft   = (int) _positive(insets.left());</span>
 
-<span class="fc" id="L726">            StretchTile[] tiles = _stretchTiles;</span>
-<span class="fc bfc" id="L727" title="All 2 branches covered.">            if ( tiles == null ) {</span>
-<span class="fc" id="L728">                tiles = _extractStretchTiles(g.getDeviceConfiguration(), image, insetTop, insetRight, insetBottom, insetLeft);</span>
-<span class="fc" id="L729">                _stretchTiles = tiles;</span>
+<span class="fc" id="L734">            StretchTile[] tiles = _stretchTiles;</span>
+<span class="fc bfc" id="L735" title="All 2 branches covered.">            if ( tiles == null ) {</span>
+<span class="fc" id="L736">                tiles = _extractStretchTiles(g.getDeviceConfiguration(), image, insetTop, insetRight, insetBottom, insetLeft);</span>
+<span class="fc" id="L737">                _stretchTiles = tiles;</span>
             }
 
-<span class="fc" id="L732">            final float actualWidth  = actualSize.widthOrElse(0f);</span>
-<span class="fc" id="L733">            final float actualHeight = actualSize.heightOrElse(0f);</span>
+<span class="fc" id="L740">            final float actualWidth  = actualSize.widthOrElse(0f);</span>
+<span class="fc" id="L741">            final float actualHeight = actualSize.heightOrElse(0f);</span>
 
-<span class="fc" id="L735">            final AffineTransform transform = g.getTransform();</span>
-<span class="fc" id="L736">            final double scaleX     = transform.getScaleX();</span>
-<span class="fc" id="L737">            final double scaleY     = transform.getScaleY();</span>
-<span class="fc" id="L738">            final double translateX = transform.getTranslateX();</span>
-<span class="fc" id="L739">            final double translateY = transform.getTranslateY();</span>
+<span class="fc" id="L743">            final AffineTransform transform = g.getTransform();</span>
+<span class="fc" id="L744">            final double scaleX     = transform.getScaleX();</span>
+<span class="fc" id="L745">            final double scaleY     = transform.getScaleY();</span>
+<span class="fc" id="L746">            final double translateX = transform.getTranslateX();</span>
+<span class="fc" id="L747">            final double translateY = transform.getTranslateY();</span>
 
             // The horizontal and vertical cut lines in integer device space,
             // shared between adjacent tiles (no seams, no overlaps):
-<span class="fc" id="L743">            final int[] dx = {</span>
-<span class="fc" id="L744">                            (int) Math.round(translateX),</span>
-<span class="fc" id="L745">                            (int) Math.round(translateX + insetLeft * scaleX),</span>
-<span class="fc" id="L746">                            (int) Math.round(translateX + (actualWidth - insetRight) * scaleX),</span>
-<span class="fc" id="L747">                            (int) Math.round(translateX + actualWidth * scaleX)</span>
+<span class="fc" id="L751">            final int[] dx = {</span>
+<span class="fc" id="L752">                            (int) Math.round(translateX),</span>
+<span class="fc" id="L753">                            (int) Math.round(translateX + insetLeft * scaleX),</span>
+<span class="fc" id="L754">                            (int) Math.round(translateX + (actualWidth - insetRight) * scaleX),</span>
+<span class="fc" id="L755">                            (int) Math.round(translateX + actualWidth * scaleX)</span>
                         };
-<span class="fc" id="L749">            final int[] dy = {</span>
-<span class="fc" id="L750">                            (int) Math.round(translateY),</span>
-<span class="fc" id="L751">                            (int) Math.round(translateY + insetTop * scaleY),</span>
-<span class="fc" id="L752">                            (int) Math.round(translateY + (actualHeight - insetBottom) * scaleY),</span>
-<span class="fc" id="L753">                            (int) Math.round(translateY + actualHeight * scaleY)</span>
+<span class="fc" id="L757">            final int[] dy = {</span>
+<span class="fc" id="L758">                            (int) Math.round(translateY),</span>
+<span class="fc" id="L759">                            (int) Math.round(translateY + insetTop * scaleY),</span>
+<span class="fc" id="L760">                            (int) Math.round(translateY + (actualHeight - insetBottom) * scaleY),</span>
+<span class="fc" id="L761">                            (int) Math.round(translateY + actualHeight * scaleY)</span>
                         };
             // The corresponding cut lines in the exemplar source image:
-<span class="fc" id="L756">            final int[] sx = { 0, insetLeft, _width  - insetRight,  _width  };</span>
-<span class="fc" id="L757">            final int[] sy = { 0, insetTop,  _height - insetBottom, _height };</span>
+<span class="fc" id="L764">            final int[] sx = { 0, insetLeft, _width  - insetRight,  _width  };</span>
+<span class="fc" id="L765">            final int[] sy = { 0, insetTop,  _height - insetBottom, _height };</span>
 
-<span class="fc" id="L759">            final Graphics2D g2 = (Graphics2D) g.create();</span>
+<span class="fc" id="L767">            final Graphics2D g2 = (Graphics2D) g.create();</span>
             try {
-<span class="fc" id="L761">                g2.setTransform(new AffineTransform()); // We draw in device space.</span>
-<span class="fc" id="L762">                g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);</span>
-<span class="fc" id="L763">                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);</span>
+<span class="fc" id="L769">                g2.setTransform(new AffineTransform()); // We draw in device space.</span>
+<span class="fc" id="L770">                g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);</span>
+<span class="fc" id="L771">                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);</span>
                 // The four corners, 1:1 sub-rectangle copies from the exemplar image:
-<span class="fc" id="L765">                _drawRegion(g2, image, dx[0], dy[0], dx[1], dy[1], sx[0], sy[0], sx[1], sy[1]); // top-left</span>
-<span class="fc" id="L766">                _drawRegion(g2, image, dx[2], dy[0], dx[3], dy[1], sx[2], sy[0], sx[3], sy[1]); // top-right</span>
-<span class="fc" id="L767">                _drawRegion(g2, image, dx[0], dy[2], dx[1], dy[3], sx[0], sy[2], sx[1], sy[3]); // bottom-left</span>
-<span class="fc" id="L768">                _drawRegion(g2, image, dx[2], dy[2], dx[3], dy[3], sx[2], sy[2], sx[3], sy[3]); // bottom-right</span>
+<span class="fc" id="L773">                _drawRegion(g2, image, dx[0], dy[0], dx[1], dy[1], sx[0], sy[0], sx[1], sy[1]); // top-left</span>
+<span class="fc" id="L774">                _drawRegion(g2, image, dx[2], dy[0], dx[3], dy[1], sx[2], sy[0], sx[3], sy[1]); // top-right</span>
+<span class="fc" id="L775">                _drawRegion(g2, image, dx[0], dy[2], dx[1], dy[3], sx[0], sy[2], sx[1], sy[3]); // bottom-left</span>
+<span class="fc" id="L776">                _drawRegion(g2, image, dx[2], dy[2], dx[3], dy[3], sx[2], sy[2], sx[3], sy[3]); // bottom-right</span>
                 // The stretched bands and center, each a whole dedicated image:
-<span class="fc" id="L770">                _drawStretched(g2, tiles[TOP],    dx[1], dy[0], dx[2], dy[1]);</span>
-<span class="fc" id="L771">                _drawStretched(g2, tiles[LEFT],   dx[0], dy[1], dx[1], dy[2]);</span>
-<span class="fc" id="L772">                _drawStretched(g2, tiles[CENTER], dx[1], dy[1], dx[2], dy[2]);</span>
-<span class="fc" id="L773">                _drawStretched(g2, tiles[RIGHT],  dx[2], dy[1], dx[3], dy[2]);</span>
-<span class="fc" id="L774">                _drawStretched(g2, tiles[BOTTOM], dx[1], dy[2], dx[2], dy[3]);</span>
+<span class="fc" id="L778">                _drawStretched(g2, tiles[TOP],    dx[1], dy[0], dx[2], dy[1]);</span>
+<span class="fc" id="L779">                _drawStretched(g2, tiles[LEFT],   dx[0], dy[1], dx[1], dy[2]);</span>
+<span class="fc" id="L780">                _drawStretched(g2, tiles[CENTER], dx[1], dy[1], dx[2], dy[2]);</span>
+<span class="fc" id="L781">                _drawStretched(g2, tiles[RIGHT],  dx[2], dy[1], dx[3], dy[2]);</span>
+<span class="fc" id="L782">                _drawStretched(g2, tiles[BOTTOM], dx[1], dy[2], dx[2], dy[3]);</span>
             } finally {
-<span class="fc" id="L776">                g2.dispose();</span>
+<span class="fc" id="L784">                g2.dispose();</span>
             }
-<span class="fc" id="L778">        }</span>
+<span class="fc" id="L786">        }</span>
 
         /**
          *  Copies the five stretchable regions (four edge bands + center) into dedicated,
@@ -801,15 +809,15 @@ final class LayerPartitionCache
             final BufferedImage image,
             final int insetTop, final int insetRight, final int insetBottom, final int insetLeft
         ) {
-<span class="fc" id="L804">            final int width  = image.getWidth();</span>
-<span class="fc" id="L805">            final int height = image.getHeight();</span>
-<span class="fc" id="L806">            final StretchTile[] tiles = new StretchTile[5];</span>
-<span class="fc" id="L807">            tiles[TOP]    = _extractTile(gc, image, insetLeft,          0,                    width - insetRight, insetTop           );</span>
-<span class="fc" id="L808">            tiles[LEFT]   = _extractTile(gc, image, 0,                  insetTop,             insetLeft,          height - insetBottom);</span>
-<span class="fc" id="L809">            tiles[CENTER] = _extractTile(gc, image, insetLeft,          insetTop,             width - insetRight, height - insetBottom);</span>
-<span class="fc" id="L810">            tiles[RIGHT]  = _extractTile(gc, image, width - insetRight, insetTop,             width,              height - insetBottom);</span>
-<span class="fc" id="L811">            tiles[BOTTOM] = _extractTile(gc, image, insetLeft,          height - insetBottom, width - insetRight, height             );</span>
-<span class="fc" id="L812">            return tiles;</span>
+<span class="fc" id="L812">            final int width  = image.getWidth();</span>
+<span class="fc" id="L813">            final int height = image.getHeight();</span>
+<span class="fc" id="L814">            final StretchTile[] tiles = new StretchTile[5];</span>
+<span class="fc" id="L815">            tiles[TOP]    = _extractTile(gc, image, insetLeft,          0,                    width - insetRight, insetTop           );</span>
+<span class="fc" id="L816">            tiles[LEFT]   = _extractTile(gc, image, 0,                  insetTop,             insetLeft,          height - insetBottom);</span>
+<span class="fc" id="L817">            tiles[CENTER] = _extractTile(gc, image, insetLeft,          insetTop,             width - insetRight, height - insetBottom);</span>
+<span class="fc" id="L818">            tiles[RIGHT]  = _extractTile(gc, image, width - insetRight, insetTop,             width,              height - insetBottom);</span>
+<span class="fc" id="L819">            tiles[BOTTOM] = _extractTile(gc, image, insetLeft,          height - insetBottom, width - insetRight, height             );</span>
+<span class="fc" id="L820">            return tiles;</span>
         }
 
         private static StretchTile _extractTile(
@@ -817,64 +825,64 @@ final class LayerPartitionCache
             final BufferedImage source,
             final int x1, final int y1, final int x2, final int y2
         ) {
-<span class="fc" id="L820">            final @Nullable StretchTile bufferless = _scanForBufferlessTile(source, x1, y1, x2, y2);</span>
-<span class="fc bfc" id="L821" title="All 2 branches covered.">            if ( bufferless != null )</span>
-<span class="fc" id="L822">                return bufferless;</span>
-<span class="fc" id="L823">            final int width  = Math.max(1, x2 - x1);</span>
-<span class="fc" id="L824">            final int height = Math.max(1, y2 - y1);</span>
-<span class="fc" id="L825">            final BufferedImage region = _allocate(gc, width, height);</span>
-<span class="fc" id="L826">            final Graphics2D g = region.createGraphics();</span>
+<span class="fc" id="L828">            final @Nullable StretchTile bufferless = _scanForBufferlessTile(source, x1, y1, x2, y2);</span>
+<span class="fc bfc" id="L829" title="All 2 branches covered.">            if ( bufferless != null )</span>
+<span class="fc" id="L830">                return bufferless;</span>
+<span class="fc" id="L831">            final int width  = Math.max(1, x2 - x1);</span>
+<span class="fc" id="L832">            final int height = Math.max(1, y2 - y1);</span>
+<span class="fc" id="L833">            final BufferedImage region = _allocate(gc, width, height);</span>
+<span class="fc" id="L834">            final Graphics2D g = region.createGraphics();</span>
             try {
-<span class="fc" id="L828">                g.setComposite(AlphaComposite.Src); // exact pixel copy, including alpha</span>
-<span class="fc" id="L829">                g.drawImage(source, 0, 0, width, height, x1, y1, x2, y2, null);</span>
+<span class="fc" id="L836">                g.setComposite(AlphaComposite.Src); // exact pixel copy, including alpha</span>
+<span class="fc" id="L837">                g.drawImage(source, 0, 0, width, height, x1, y1, x2, y2, null);</span>
             } finally {
-<span class="fc" id="L831">                g.dispose();</span>
+<span class="fc" id="L839">                g.dispose();</span>
             }
-<span class="fc" id="L833">            return new StretchTile.Image(region);</span>
+<span class="fc" id="L841">            return new StretchTile.Image(region);</span>
         }
 
         private static @Nullable StretchTile _scanForBufferlessTile(
             final BufferedImage image,
             final int x1, final int y1, final int x2, final int y2
         ) {
-<span class="fc" id="L840">            final ColorModel colorModel = image.getColorModel();</span>
-<span class="pc bpc" id="L841" title="2 of 4 branches missed.">            if ( !(colorModel instanceof DirectColorModel) || !colorModel.hasAlpha() )</span>
-<span class="nc" id="L842">                return null;</span>
-<span class="fc" id="L843">            final Raster raster = image.getRaster();</span>
-<span class="pc bpc" id="L844" title="2 of 4 branches missed.">            if ( raster.getTransferType() != DataBuffer.TYPE_INT || raster.getNumDataElements() != 1 )</span>
-<span class="nc" id="L845">                return null;</span>
-<span class="fc" id="L846">            final int alphaMask = ((DirectColorModel) colorModel).getAlphaMask();</span>
-<span class="fc" id="L847">            final int startX = Math.max(0, x1);</span>
-<span class="fc" id="L848">            final int startY = Math.max(0, y1);</span>
-<span class="fc" id="L849">            final int width  = Math.min(image.getWidth(),  x2) - startX;</span>
-<span class="fc" id="L850">            final int endY   = Math.min(image.getHeight(), y2);</span>
-<span class="pc bpc" id="L851" title="2 of 4 branches missed.">            if ( width &lt;= 0 || endY &lt;= startY )</span>
-<span class="nc" id="L852">                return StretchTile.Nothing.INSTANCE;</span>
+<span class="fc" id="L848">            final ColorModel colorModel = image.getColorModel();</span>
+<span class="pc bpc" id="L849" title="2 of 4 branches missed.">            if ( !(colorModel instanceof DirectColorModel) || !colorModel.hasAlpha() )</span>
+<span class="nc" id="L850">                return null;</span>
+<span class="fc" id="L851">            final Raster raster = image.getRaster();</span>
+<span class="pc bpc" id="L852" title="2 of 4 branches missed.">            if ( raster.getTransferType() != DataBuffer.TYPE_INT || raster.getNumDataElements() != 1 )</span>
+<span class="nc" id="L853">                return null;</span>
+<span class="fc" id="L854">            final int alphaMask = ((DirectColorModel) colorModel).getAlphaMask();</span>
+<span class="fc" id="L855">            final int startX = Math.max(0, x1);</span>
+<span class="fc" id="L856">            final int startY = Math.max(0, y1);</span>
+<span class="fc" id="L857">            final int width  = Math.min(image.getWidth(),  x2) - startX;</span>
+<span class="fc" id="L858">            final int endY   = Math.min(image.getHeight(), y2);</span>
+<span class="pc bpc" id="L859" title="2 of 4 branches missed.">            if ( width &lt;= 0 || endY &lt;= startY )</span>
+<span class="nc" id="L860">                return StretchTile.Nothing.INSTANCE;</span>
 
-<span class="fc" id="L854">            final int[] row = new int[width];</span>
-<span class="fc" id="L855">            int     alphaBits = 0;</span>
-<span class="fc" id="L856">            int     firstPixel = 0;</span>
-<span class="fc" id="L857">            boolean isUniform  = true;</span>
-<span class="fc bfc" id="L858" title="All 2 branches covered.">            for ( int y = startY; y &lt; endY; y++ ) {</span>
-<span class="fc" id="L859">                raster.getDataElements(startX, y, width, 1, row);</span>
-<span class="fc bfc" id="L860" title="All 2 branches covered.">                if ( y == startY )</span>
-<span class="fc" id="L861">                    firstPixel = row[0];</span>
-<span class="fc bfc" id="L862" title="All 2 branches covered.">                for ( int i = 0; i &lt; width; i++ ) {</span>
-<span class="fc" id="L863">                    final int pixel = row[i];</span>
-<span class="fc" id="L864">                    alphaBits |= pixel;</span>
-<span class="fc bfc" id="L865" title="All 2 branches covered.">                    isUniform &amp;= ( pixel == firstPixel );</span>
+<span class="fc" id="L862">            final int[] row = new int[width];</span>
+<span class="fc" id="L863">            int     alphaBits = 0;</span>
+<span class="fc" id="L864">            int     firstPixel = 0;</span>
+<span class="fc" id="L865">            boolean isUniform  = true;</span>
+<span class="fc bfc" id="L866" title="All 2 branches covered.">            for ( int y = startY; y &lt; endY; y++ ) {</span>
+<span class="fc" id="L867">                raster.getDataElements(startX, y, width, 1, row);</span>
+<span class="fc bfc" id="L868" title="All 2 branches covered.">                if ( y == startY )</span>
+<span class="fc" id="L869">                    firstPixel = row[0];</span>
+<span class="fc bfc" id="L870" title="All 2 branches covered.">                for ( int i = 0; i &lt; width; i++ ) {</span>
+<span class="fc" id="L871">                    final int pixel = row[i];</span>
+<span class="fc" id="L872">                    alphaBits |= pixel;</span>
+<span class="fc bfc" id="L873" title="All 2 branches covered.">                    isUniform &amp;= ( pixel == firstPixel );</span>
                 }
-<span class="pc bpc" id="L867" title="1 of 4 branches missed.">                if ( !isUniform &amp;&amp; (alphaBits &amp; alphaMask) != 0 )</span>
-<span class="fc" id="L868">                    return null; // Neither empty nor uniform, so an image it is.</span>
+<span class="pc bpc" id="L875" title="1 of 4 branches missed.">                if ( !isUniform &amp;&amp; (alphaBits &amp; alphaMask) != 0 )</span>
+<span class="fc" id="L876">                    return null; // Neither empty nor uniform, so an image it is.</span>
             }
-<span class="fc bfc" id="L870" title="All 2 branches covered.">            if ( (alphaBits &amp; alphaMask) == 0 )</span>
-<span class="fc" id="L871">                return StretchTile.Nothing.INSTANCE;</span>
-<span class="pc bpc" id="L872" title="1 of 2 branches missed.">            if ( !isUniform )</span>
-<span class="nc" id="L873">                return null;</span>
-<span class="fc" id="L874">            final int argb = colorModel.getRGB(firstPixel);</span>
-<span class="fc bfc" id="L875" title="All 2 branches covered.">            if ( (argb &gt;&gt;&gt; 24) != 0xFF )</span>
-<span class="fc" id="L876">                return null;</span>
-<span class="fc" id="L877">            return new StretchTile.FillColor(new Color(argb, true));</span>
+<span class="fc bfc" id="L878" title="All 2 branches covered.">            if ( (alphaBits &amp; alphaMask) == 0 )</span>
+<span class="fc" id="L879">                return StretchTile.Nothing.INSTANCE;</span>
+<span class="pc bpc" id="L880" title="1 of 2 branches missed.">            if ( !isUniform )</span>
+<span class="nc" id="L881">                return null;</span>
+<span class="fc" id="L882">            final int argb = colorModel.getRGB(firstPixel);</span>
+<span class="fc bfc" id="L883" title="All 2 branches covered.">            if ( (argb &gt;&gt;&gt; 24) != 0xFF )</span>
+<span class="fc" id="L884">                return null;</span>
+<span class="fc" id="L885">            return new StretchTile.FillColor(new Color(argb, true));</span>
         }
 
         private static void _drawRegion(
@@ -882,27 +890,27 @@ final class LayerPartitionCache
             final int dx1, final int dy1, final int dx2, final int dy2,
             final int sx1, final int sy1, final int sx2, final int sy2
         ) {
-<span class="pc bpc" id="L885" title="2 of 4 branches missed.">            if ( dx2 &lt;= dx1 || dy2 &lt;= dy1 )</span>
-<span class="nc" id="L886">                return; // Degenerate tile, nothing to draw (a negative span would mirror the image!).</span>
-<span class="fc" id="L887">            g2.drawImage(source, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);</span>
-<span class="fc" id="L888">        }</span>
+<span class="pc bpc" id="L893" title="2 of 4 branches missed.">            if ( dx2 &lt;= dx1 || dy2 &lt;= dy1 )</span>
+<span class="nc" id="L894">                return; // Degenerate tile, nothing to draw (a negative span would mirror the image!).</span>
+<span class="fc" id="L895">            g2.drawImage(source, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);</span>
+<span class="fc" id="L896">        }</span>
 
         private static void _drawStretched(
             final Graphics2D g2, final StretchTile tile,
             final int dx1, final int dy1, final int dx2, final int dy2
         ) {
-<span class="fc bfc" id="L894" title="All 2 branches covered.">            if ( tile instanceof StretchTile.Nothing )</span>
-<span class="fc" id="L895">                return;</span>
-<span class="pc bpc" id="L896" title="2 of 4 branches missed.">            if ( dx2 &lt;= dx1 || dy2 &lt;= dy1 )</span>
-<span class="nc" id="L897">                return; // Degenerate tile, nothing to draw.</span>
-<span class="fc bfc" id="L898" title="All 2 branches covered.">            if ( tile instanceof StretchTile.FillColor ) {</span>
-<span class="fc" id="L899">                g2.setColor(((StretchTile.FillColor) tile)._color);</span>
-<span class="fc" id="L900">                g2.fillRect(dx1, dy1, dx2 - dx1, dy2 - dy1);</span>
-<span class="fc" id="L901">                return;</span>
+<span class="fc bfc" id="L902" title="All 2 branches covered.">            if ( tile instanceof StretchTile.Nothing )</span>
+<span class="fc" id="L903">                return;</span>
+<span class="pc bpc" id="L904" title="2 of 4 branches missed.">            if ( dx2 &lt;= dx1 || dy2 &lt;= dy1 )</span>
+<span class="nc" id="L905">                return; // Degenerate tile, nothing to draw.</span>
+<span class="fc bfc" id="L906" title="All 2 branches covered.">            if ( tile instanceof StretchTile.FillColor ) {</span>
+<span class="fc" id="L907">                g2.setColor(((StretchTile.FillColor) tile)._color);</span>
+<span class="fc" id="L908">                g2.fillRect(dx1, dy1, dx2 - dx1, dy2 - dy1);</span>
+<span class="fc" id="L909">                return;</span>
             }
-<span class="fc" id="L903">            final BufferedImage image = ((StretchTile.Image) tile)._image;</span>
-<span class="fc" id="L904">            g2.drawImage(image, dx1, dy1, dx2, dy2, 0, 0, image.getWidth(), image.getHeight(), null);</span>
-<span class="fc" id="L905">        }</span>
+<span class="fc" id="L911">            final BufferedImage image = ((StretchTile.Image) tile)._image;</span>
+<span class="fc" id="L912">            g2.drawImage(image, dx1, dy1, dx2, dy2, 0, 0, image.getWidth(), image.getHeight(), null);</span>
+<span class="fc" id="L913">        }</span>
     }
 
 }

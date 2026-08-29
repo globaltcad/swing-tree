@@ -1419,7 +1419,7 @@ final class StyleRenderer
 <span class="fc bfc" id="L1419" title="All 2 branches covered.">            if ( oldClip != null )</span>
 <span class="fc" id="L1420">                newClip = StyleUtil.intersect( newClip, oldClip );</span>
 
-<span class="fc" id="L1422">            g2d.setClip(newClip);</span>
+<span class="fc" id="L1422">            g2d.clip(newClip);</span>
 
 <span class="fc bfc" id="L1424" title="All 2 branches covered.">            if ( imageIcon instanceof SvgIcon ) {</span>
 <span class="fc" id="L1425">                SvgIcon svgIcon = (SvgIcon) imageIcon;</span>
@@ -1587,7 +1587,7 @@ final class StyleRenderer
             // We merge the new clip with the old one:
 <span class="fc bfc" id="L1588" title="All 2 branches covered.">            if ( oldClip != null )</span>
 <span class="fc" id="L1589">                newClip = StyleUtil.intersect( newClip, oldClip );</span>
-<span class="fc" id="L1590">            g2d.setClip(newClip);</span>
+<span class="fc" id="L1590">            g2d.clip(newClip);</span>
 <span class="fc" id="L1591">            _renderTextInternal(g2d, font, textBounds, placement, lines, totalHeight);</span>
 <span class="nc" id="L1592">        } catch (Exception e) {</span>
 <span class="nc" id="L1593">            log.error(SwingTree.get().logMarker(), &quot;Unexpected error while rendering text: '{}'\n&quot;, textToRender, e);</span>
@@ -1892,10 +1892,10 @@ final class StyleRenderer
 
 <span class="fc" id="L1893">        BufferedImage filtered = parentRendering;</span>
 
-<span class="pc bpc" id="L1895" title="2 of 4 branches missed.">        if ( !center.equals(Offset.none()) || !scale.equals(Scale.none()) ) {</span>
-<span class="pc bpc" id="L1896" title="1 of 2 branches missed.">            if ( scale.equals(Scale.none()) ) {</span>
-<span class="nc" id="L1897">                offsetX += (int) center.x();</span>
-<span class="nc" id="L1898">                offsetY += (int) center.y();</span>
+<span class="fc bfc" id="L1895" title="All 4 branches covered.">        if ( !center.equals(Offset.none()) || !scale.equals(Scale.none()) ) {</span>
+<span class="fc bfc" id="L1896" title="All 2 branches covered.">            if ( scale.equals(Scale.none()) ) {</span>
+<span class="fc" id="L1897">                offsetX += (int) center.x();</span>
+<span class="fc" id="L1898">                offsetY += (int) center.y();</span>
             } else {
 <span class="fc" id="L1900">                AffineTransform at = new AffineTransform();</span>
 <span class="fc" id="L1901">                float vx = center.x() + offsetX + width / 2f;</span>
@@ -1908,60 +1908,225 @@ final class StyleRenderer
             }
         }
 
-<span class="pc bpc" id="L1911" title="1 of 2 branches missed.">        if ( !kernel.equals(KernelConf.none()) ) {</span>
-<span class="nc" id="L1912">            Kernel awtKernel = kernel.toAwtKernel();</span>
-<span class="nc" id="L1913">            ConvolveOp convolve = new ConvolveOp(awtKernel, ConvolveOp.EDGE_NO_OP, null);</span>
-<span class="nc" id="L1914">            filtered = convolve.filter(filtered, null);</span>
+<span class="fc bfc" id="L1911" title="All 2 branches covered.">        final @Nullable Kernel awtKernel = kernel.equals(KernelConf.none()) ? null : kernel.toAwtKernel();</span>
+<span class="fc" id="L1912">        final int              blurReach = (int) Math.ceil(Math.max(0, blur));</span>
+        /*
+            A gaussian blur is a low pass filter: it throws away exactly the detail that a
+            smaller raster cannot hold. So a large radius does not have to be convolved at full
+            resolution - the source is shrunk first, blurred with a proportionally smaller kernel
+            and stretched back out while it is drawn. The cost of the convolution falls with the
+            square of the shrink factor AND with the kernel width, and the result is
+            indistinguishable, because the frequencies the shrink loses are the ones the blur was
+            about to remove anyway. A kernel of the caller's own is never shrunk: its matrix says
+            what to do with neighbouring pixels, and at a coarser raster those are other pixels.
+        */
+<span class="fc bfc" id="L1923" title="All 2 branches covered.">        final int downscale = ( awtKernel == null ) ? _shrinkFactorFor(blur) : 1;</span>
+
+        /*
+            For optimal performance: We only onvolve the part of the parent which is covered by this component,
+            narrowed to whatever Swing asked to have repainted + some padding for the convolution blur reach!
+        */
+<span class="fc" id="L1929">        Rectangle window = new Rectangle(0, 0, filtered.getWidth(), filtered.getHeight());</span>
+<span class="fc" id="L1930">        int smallWidth  = 0;</span>
+<span class="fc" id="L1931">        int smallHeight = 0;</span>
+<span class="fc bfc" id="L1932" title="All 4 branches covered.">        if ( awtKernel != null || blurReach &gt; 0 ) {</span>
+<span class="fc bfc" id="L1933" title="All 2 branches covered.">            int reachX = blurReach + ( awtKernel == null ? 0 : awtKernel.getWidth()  / 2 );</span>
+<span class="fc bfc" id="L1934" title="All 2 branches covered.">            int reachY = blurReach + ( awtKernel == null ? 0 : awtKernel.getHeight() / 2 );</span>
+<span class="fc bfc" id="L1935" title="All 2 branches covered.">            if ( downscale &gt; 1 ) {</span>
+                /*
+                    A convolution leaves a band as wide as its own radius untouched at the edge
+                    of the raster it runs over, and the stretch which follows reconstructs each
+                    of its pixels from a pair of neighbouring samples, so it reaches one sample
+                    further still. Measuring the discarded rim in whole grid cells - two more
+                    than the shrunk radius - keeps all of that outside what ends up drawn.
+                */
+<span class="fc" id="L1943">                reachX = reachY = ( (int) Math.ceil(blur / downscale) + BLUR_SHRINK_RIM_CELLS ) * downscale;</span>
+            }
+<span class="fc" id="L1945">            Rectangle drawn = new Rectangle(0, 0, (int) Math.ceil(width), (int) Math.ceil(height));</span>
+<span class="fc" id="L1946">            Shape requested = g2d.getClip();</span>
+<span class="pc bpc" id="L1947" title="1 of 2 branches missed.">            if ( requested != null )</span>
+<span class="fc" id="L1948">                drawn = drawn.intersection(requested.getBounds());</span>
+<span class="fc" id="L1949">            drawn.translate(offsetX, offsetY);</span>
+<span class="fc" id="L1950">            window = window.intersection(new Rectangle(</span>
+                            drawn.x - reachX,
+                            drawn.y - reachY,
+                            drawn.width  + 2 * reachX,
+                            drawn.height + 2 * reachY
+                        ));
+<span class="pc bpc" id="L1956" title="1 of 2 branches missed.">            if ( window.isEmpty() )</span>
+<span class="nc" id="L1957">                return;</span>
+<span class="fc bfc" id="L1958" title="All 2 branches covered.">            if ( downscale &gt; 1 ) {</span>
+<span class="fc" id="L1959">                window      = _snappedToShrinkGrid(window, downscale);</span>
+<span class="fc" id="L1960">                smallWidth  = window.width  / downscale;</span>
+<span class="fc" id="L1961">                smallHeight = window.height / downscale;</span>
+<span class="fc" id="L1962">                filtered = _shrunkRegionOf(filtered, window, smallWidth, smallHeight);</span>
+            } else {
+<span class="fc" id="L1964">                filtered = _regionOf(filtered, window);</span>
+            }
         }
 
-<span class="pc bpc" id="L1917" title="1 of 2 branches missed.">        if ( blur &gt; 0 ) {</span>
-<span class="nc" id="L1918">            Kernel blurKernelHorizontal = _makeKernel(blur, false);</span>
-<span class="nc" id="L1919">            ConvolveOp blurOp = new ConvolveOp(blurKernelHorizontal, ConvolveOp.EDGE_NO_OP, null);</span>
-<span class="nc" id="L1920">            BufferedImage blurred = blurOp.filter(filtered, null);</span>
-<span class="nc" id="L1921">            Kernel blurKernelVertical = _makeKernel(blur, true);</span>
-<span class="nc" id="L1922">            blurOp = new ConvolveOp(blurKernelVertical, ConvolveOp.EDGE_NO_OP, null);</span>
-<span class="nc" id="L1923">            filtered = blurOp.filter(blurred, filtered);</span>
+<span class="fc bfc" id="L1968" title="All 2 branches covered.">        if ( awtKernel != null ) {</span>
+<span class="fc" id="L1969">            ConvolveOp convolve = new ConvolveOp(awtKernel, ConvolveOp.EDGE_NO_OP, null);</span>
+<span class="fc" id="L1970">            filtered = convolve.filter(filtered, null);</span>
         }
 
-<span class="fc" id="L1926">        Shape oldClip = g2d.getClip();</span>
+<span class="fc bfc" id="L1973" title="All 2 branches covered.">        if ( blurReach &gt; 0 ) {</span>
+<span class="fc" id="L1974">            final float effectiveBlur = blur / downscale;</span>
+<span class="fc" id="L1975">            ConvolveOp blurOp = new ConvolveOp(_makeKernel(effectiveBlur, false), ConvolveOp.EDGE_NO_OP, null);</span>
+<span class="fc" id="L1976">            BufferedImage blurred = blurOp.filter(filtered, null);</span>
+<span class="fc" id="L1977">            blurOp = new ConvolveOp(_makeKernel(effectiveBlur, true), ConvolveOp.EDGE_NO_OP, null);</span>
+<span class="fc" id="L1978">            filtered = blurOp.filter(blurred, filtered);</span>
+        }
+
+<span class="fc" id="L1981">        Shape oldClip = g2d.getClip();</span>
+<span class="fc" id="L1982">        Object oldInterpolation = g2d.getRenderingHint(RenderingHints.KEY_INTERPOLATION);</span>
         try {
-<span class="fc" id="L1928">            ComponentAreas areas = ComponentAreas.of(boxModelConf);</span>
-<span class="fc" id="L1929">            Shape newClip = areas.get(filterConf.area());</span>
-<span class="fc" id="L1930">            g2d.setClip(newClip);</span>
-<span class="fc" id="L1931">            g2d.drawImage(filtered, -offsetX, -offsetY, null);</span>
-<span class="nc" id="L1932">        } catch (Exception e) {</span>
-<span class="nc" id="L1933">            log.error(SwingTree.get().logMarker(), &quot;Failed to successfully render filtered parent buffer!&quot;, e);</span>
+<span class="fc" id="L1984">            ComponentAreas areas = ComponentAreas.of(boxModelConf);</span>
+<span class="fc" id="L1985">            Shape newClip = areas.get(filterConf.area());</span>
+<span class="fc" id="L1986">            g2d.clip(newClip);</span>
+<span class="fc" id="L1987">            final int dstX = window.x - offsetX;</span>
+<span class="fc" id="L1988">            final int dstY = window.y - offsetY;</span>
+<span class="fc bfc" id="L1989" title="All 2 branches covered.">            if ( downscale &gt; 1 ) {</span>
+<span class="fc" id="L1990">                g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);</span>
+<span class="fc" id="L1991">                g2d.drawImage(</span>
+                        filtered,
+                        dstX, dstY, dstX + window.width, dstY + window.height,
+                        0, 0, smallWidth, smallHeight,
+                        null
+                    );
+            } else
+<span class="fc" id="L1998">                g2d.drawImage(filtered, dstX, dstY, null);</span>
+<span class="nc" id="L1999">        } catch (Exception e) {</span>
+<span class="nc" id="L2000">            log.error(SwingTree.get().logMarker(), &quot;Failed to successfully render filtered parent buffer!&quot;, e);</span>
         } finally {
-<span class="fc" id="L1935">            g2d.setClip(oldClip);</span>
+<span class="fc" id="L2002">            g2d.setClip(oldClip);</span>
+<span class="pc bpc" id="L2003" title="1 of 2 branches missed.">            if ( oldInterpolation != null )</span>
+<span class="fc" id="L2004">                g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, oldInterpolation);</span>
         }
-<span class="fc" id="L1937">    }</span>
+<span class="fc" id="L2006">    }</span>
+
+    /** The smallest blur radius, in samples of the shrunk raster, a shrunk convolution may use. */
+    private static final int MIN_BLUR_TAPS_RADIUS = 4;
+    /** The largest factor a region may be shrunk by before it is blurred. */
+    private static final int MAX_BLUR_SHRINK = 8;
+    /** How many grid cells wider than the shrunk blur radius the discarded rim is made. */
+    private static final int BLUR_SHRINK_RIM_CELLS = 2;
+
+    /**
+     *  Picks the integer factor by which the parent region is shrunk before it is blurred,
+     *  which is {@code 1} for a radius small enough that shrinking would be visible.
+     *  &lt;p&gt;
+     *  The factor is chosen so the kernel still spans at least {@value #MIN_BLUR_TAPS_RADIUS}
+     *  samples of the shrunk raster: below that a gaussian degenerates into a box and the
+     *  shrinking starts to show. It is a power of two so the resampler works on whole source
+     *  pixels, and it depends on the radius alone - see {@link #_snappedToShrinkGrid(Rectangle, int)}
+     *  for why nothing about the region being drawn may enter into it.
+     */
+    private static int _shrinkFactorFor( final float blur ) {
+<span class="fc" id="L2026">        int factor = 1;</span>
+<span class="fc bfc" id="L2027" title="All 4 branches covered.">        while ( factor &lt; MAX_BLUR_SHRINK &amp;&amp; blur / (factor * 2) &gt;= MIN_BLUR_TAPS_RADIUS )</span>
+<span class="fc" id="L2028">            factor *= 2;</span>
+<span class="fc" id="L2029">        return factor;</span>
+    }
+
+    /**
+     *  Grows a region outwards until both its origin and its size are whole multiples of the
+     *  shrink factor, which pins the shrunk raster to one grid over the parent.
+     *  &lt;p&gt;
+     *  Without this the filter would sample the parent at different places depending on how much
+     *  of the window Swing asked to have repainted: the region is the component narrowed by the
+     *  repainted rectangle, so a smaller rectangle shrinks a smaller region, and shrinking a
+     *  smaller region lands its samples somewhere else. What the user would see is a pane
+     *  which shifts by a fraction of a pixel every time the pointer passes over it. Snapped to
+     *  the grid, every repaint of the same parent samples the very same pixels and stretches
+     *  them back to the very same place, whatever it was asked to redraw.
+     *  &lt;p&gt;
+     *  The grown region may reach past the far edge of the parent by up to one grid cell.
+     *  Those pixels are simply not there to be read, exactly like the transparent pixels beyond
+     *  a parent which does not fill its own bounds, and they land in the border band the
+     *  convolution leaves untouched anyway.
+     */
+    private static Rectangle _snappedToShrinkGrid( final Rectangle region, final int factor ) {
+<span class="fc" id="L2050">        int x = region.x - Math.floorMod(region.x, factor);</span>
+<span class="fc" id="L2051">        int y = region.y - Math.floorMod(region.y, factor);</span>
+<span class="fc" id="L2052">        int width  = region.x + region.width  - x;</span>
+<span class="fc" id="L2053">        int height = region.y + region.height - y;</span>
+<span class="fc" id="L2054">        return new Rectangle(</span>
+                    x, y,
+                    ( (width  + factor - 1) / factor ) * factor,
+                    ( (height + factor - 1) / factor ) * factor
+                );
+    }
+
+    /**
+     *  Copies one rectangle out of an image and shrinks it to the given size in the same pass,
+     *  so that the convolutions run over the smaller raster and write into a buffer of this
+     *  method's making.
+     */
+    private static BufferedImage _shrunkRegionOf(
+        final BufferedImage source, final Rectangle window, final int width, final int height
+    ) {
+<span class="fc" id="L2069">        BufferedImage region = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);</span>
+<span class="fc" id="L2070">        Graphics2D regionGraphics = region.createGraphics();</span>
+        try {
+<span class="fc" id="L2072">            regionGraphics.setComposite(AlphaComposite.Src);</span>
+<span class="fc" id="L2073">            regionGraphics.setRenderingHint(</span>
+                    RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR
+                );
+<span class="fc" id="L2076">            regionGraphics.drawImage(</span>
+                    source,
+                    0, 0, width, height,
+                    window.x, window.y, window.x + window.width, window.y + window.height,
+                    null
+                );
+        } finally {
+<span class="fc" id="L2083">            regionGraphics.dispose();</span>
+        }
+<span class="fc" id="L2085">        return region;</span>
+    }
+
+    /**
+     *  Copies one rectangle out of an image, so that the convolutions run over that rectangle
+     *  alone and write into a buffer of this method's making.
+     */
+    private static BufferedImage _regionOf( final BufferedImage source, final Rectangle window ) {
+<span class="fc" id="L2093">        BufferedImage region = new BufferedImage(window.width, window.height, BufferedImage.TYPE_INT_ARGB);</span>
+<span class="fc" id="L2094">        Graphics2D regionGraphics = region.createGraphics();</span>
+        try {
+<span class="fc" id="L2096">            regionGraphics.setComposite(AlphaComposite.Src);</span>
+<span class="fc" id="L2097">            regionGraphics.drawImage(source, -window.x, -window.y, null);</span>
+        } finally {
+<span class="fc" id="L2099">            regionGraphics.dispose();</span>
+        }
+<span class="fc" id="L2101">        return region;</span>
+    }
 
     private static Kernel _makeKernel( final float radius, final boolean transpose ) {
-<span class="nc" id="L1940">        final int maxRadius = (int)Math.ceil(radius);</span>
-<span class="nc" id="L1941">        final int rows = maxRadius * 2 + 1;</span>
-<span class="nc" id="L1942">        final float[] matrix = new float[rows];</span>
-<span class="nc" id="L1943">        final float sigma = radius / 3;</span>
-<span class="nc" id="L1944">        final float sigma22 = 2*sigma*sigma;</span>
-<span class="nc" id="L1945">        final float sigmaPi2 = (float) ( 2 * Math.PI * sigma );</span>
-<span class="nc" id="L1946">        final float sqrtSigmaPi2 = (float)Math.sqrt(sigmaPi2);</span>
-<span class="nc" id="L1947">        final float radius2 = radius*radius;</span>
+<span class="fc" id="L2105">        final int maxRadius = (int)Math.ceil(radius);</span>
+<span class="fc" id="L2106">        final int rows = maxRadius * 2 + 1;</span>
+<span class="fc" id="L2107">        final float[] matrix = new float[rows];</span>
+<span class="fc" id="L2108">        final float sigma = radius / 3;</span>
+<span class="fc" id="L2109">        final float sigma22 = 2*sigma*sigma;</span>
+<span class="fc" id="L2110">        final float sigmaPi2 = (float) ( 2 * Math.PI * sigma );</span>
+<span class="fc" id="L2111">        final float sqrtSigmaPi2 = (float)Math.sqrt(sigmaPi2);</span>
+<span class="fc" id="L2112">        final float radius2 = radius*radius;</span>
 
-<span class="nc" id="L1949">        float total = 0;</span>
-<span class="nc" id="L1950">        int   index = 0;</span>
+<span class="fc" id="L2114">        float total = 0;</span>
+<span class="fc" id="L2115">        int   index = 0;</span>
 
-<span class="nc bnc" id="L1952" title="All 2 branches missed.">        for (int row = -maxRadius; row &lt;= maxRadius; row++) {</span>
-<span class="nc" id="L1953">            float distance = row*row;</span>
-<span class="nc bnc" id="L1954" title="All 2 branches missed.">            if (distance &gt; radius2)</span>
-<span class="nc" id="L1955">                matrix[index] = 0;</span>
+<span class="fc bfc" id="L2117" title="All 2 branches covered.">        for (int row = -maxRadius; row &lt;= maxRadius; row++) {</span>
+<span class="fc" id="L2118">            float distance = row*row;</span>
+<span class="fc bfc" id="L2119" title="All 2 branches covered.">            if (distance &gt; radius2)</span>
+<span class="fc" id="L2120">                matrix[index] = 0;</span>
             else
-<span class="nc" id="L1957">                matrix[index] = (float)Math.exp(-distance/sigma22) / sqrtSigmaPi2;</span>
-<span class="nc" id="L1958">            total += matrix[index];</span>
-<span class="nc" id="L1959">            index++;</span>
+<span class="fc" id="L2122">                matrix[index] = (float)Math.exp(-distance/sigma22) / sqrtSigmaPi2;</span>
+<span class="fc" id="L2123">            total += matrix[index];</span>
+<span class="fc" id="L2124">            index++;</span>
         }
-<span class="nc bnc" id="L1961" title="All 2 branches missed.">        for ( int i = 0; i &lt; rows; i++ )</span>
-<span class="nc" id="L1962">            matrix[i] /= total;</span>
+<span class="fc bfc" id="L2126" title="All 2 branches covered.">        for ( int i = 0; i &lt; rows; i++ )</span>
+<span class="fc" id="L2127">            matrix[i] /= total;</span>
 
-<span class="nc bnc" id="L1964" title="All 4 branches missed.">        return new Kernel( transpose ? 1 : rows, transpose ? rows : 1, matrix );</span>
+<span class="fc bfc" id="L2129" title="All 4 branches covered.">        return new Kernel( transpose ? 1 : rows, transpose ? rows : 1, matrix );</span>
     }
 
     /**
@@ -1986,7 +2151,7 @@ final class StyleRenderer
      *  &lt;i&gt;which&lt;/i&gt; tiles are visible and &lt;i&gt;where&lt;/i&gt; they are drawn - already rendered tiles
      *  stay valid, which keeps a dynamically resized UI responsive.
      */
-<span class="fc" id="L1989">    static class NoisePaintCache {</span>
+<span class="fc" id="L2154">    static class NoisePaintCache {</span>
 
         /** Side length of the pre-rendered large tiles, in (unscaled) device pixels. */
         private static final int LARGE_TILE_SIZE = 256;
@@ -1996,7 +2161,7 @@ final class StyleRenderer
          *  the shared {@link CacheBudget} byte budget. {@code 0} disables tile caching.
          *  Read live (not snapshotted) so a runtime cache-mode change takes effect at once. */
         private static int _maxCachedTiles() {
-<span class="fc" id="L1999">            return CacheBudget.maxEntriesFor(CacheBudget.Kind.NOISE_TILE);</span>
+<span class="fc" id="L2164">            return CacheBudget.maxEntriesFor(CacheBudget.Kind.NOISE_TILE);</span>
         }
 
         /** Absolute ceiling on retained per-{@code center} {@link NoiseGradientPaint}s. A static
@@ -2009,19 +2174,19 @@ final class StyleRenderer
          *  offset would grow this map without bound. This path is also the fallback used when tile
          *  caching is off (incl. the {@code DISABLED} cache mode), so it must stay functional
          *  regardless of the byte budget — hence a fixed LRU cap rather than a budget-derived one. */
-<span class="fc" id="L2012">        private final Map&lt;Point2D,NoiseGradientPaint&gt; paintCache =</span>
-<span class="fc" id="L2013">                new LinkedHashMap&lt;Point2D,NoiseGradientPaint&gt;(16, 0.75f, true) {</span>
+<span class="fc" id="L2177">        private final Map&lt;Point2D,NoiseGradientPaint&gt; paintCache =</span>
+<span class="fc" id="L2178">                new LinkedHashMap&lt;Point2D,NoiseGradientPaint&gt;(16, 0.75f, true) {</span>
                     @Override
                     protected boolean removeEldestEntry( Map.Entry&lt;Point2D,NoiseGradientPaint&gt; eldest ) {
-<span class="pc bpc" id="L2016" title="1 of 2 branches missed.">                        return size() &gt; MAX_CACHED_PAINTS;</span>
+<span class="pc bpc" id="L2181" title="1 of 2 branches missed.">                        return size() &gt; MAX_CACHED_PAINTS;</span>
                     }
                 };
         /** Large pre-rendered tiles, keyed by noise-space tile index, evicted least-recently-used first. */
-<span class="fc" id="L2020">        private final Map&lt;Long,BufferedImage&gt; largeTileCache =</span>
-<span class="fc" id="L2021">                new LinkedHashMap&lt;Long,BufferedImage&gt;(16, 0.75f, true) {</span>
+<span class="fc" id="L2185">        private final Map&lt;Long,BufferedImage&gt; largeTileCache =</span>
+<span class="fc" id="L2186">                new LinkedHashMap&lt;Long,BufferedImage&gt;(16, 0.75f, true) {</span>
                     @Override
                     protected boolean removeEldestEntry( Map.Entry&lt;Long,BufferedImage&gt; eldest ) {
-<span class="pc bpc" id="L2024" title="1 of 2 branches missed.">                        return size() &gt; _maxCachedTiles();</span>
+<span class="pc bpc" id="L2189" title="1 of 2 branches missed.">                        return size() &gt; _maxCachedTiles();</span>
                     }
                 };
 
@@ -2032,28 +2197,28 @@ final class StyleRenderer
             final Shape             areaToFill,
             final Graphics2D        g2d
         ) {
-<span class="fc" id="L2035">            final Color[] colors = noise.get().colors();</span>
-<span class="fc bfc" id="L2036" title="All 2 branches covered.">            if ( colors.length == 1 ) {</span>
-<span class="fc" id="L2037">                g2d.setPaint(colors[0]);</span>
-<span class="fc" id="L2038">                _fillShapeFast(g2d, areaToFill);</span>
-<span class="fc" id="L2039">                return;</span>
+<span class="fc" id="L2200">            final Color[] colors = noise.get().colors();</span>
+<span class="fc bfc" id="L2201" title="All 2 branches covered.">            if ( colors.length == 1 ) {</span>
+<span class="fc" id="L2202">                g2d.setPaint(colors[0]);</span>
+<span class="fc" id="L2203">                _fillShapeFast(g2d, areaToFill);</span>
+<span class="fc" id="L2204">                return;</span>
             }
 
-<span class="fc" id="L2042">            final Outline insets = boxModel.insetsFor(noise.get().boundary());</span>
-<span class="fc" id="L2043">            final Point2D.Float center = new Point2D.Float(</span>
-<span class="fc" id="L2044">                    insets.left().orElse(0f) + noise.get().offset().x(),</span>
-<span class="fc" id="L2045">                    insets.top().orElse(0f) + noise.get().offset().y()</span>
+<span class="fc" id="L2207">            final Outline insets = boxModel.insetsFor(noise.get().boundary());</span>
+<span class="fc" id="L2208">            final Point2D.Float center = new Point2D.Float(</span>
+<span class="fc" id="L2209">                    insets.left().orElse(0f) + noise.get().offset().x(),</span>
+<span class="fc" id="L2210">                    insets.top().orElse(0f) + noise.get().offset().y()</span>
             );
 
-<span class="fc" id="L2048">            final Rectangle bounds = areaToFill.getBounds();</span>
+<span class="fc" id="L2213">            final Rectangle bounds = areaToFill.getBounds();</span>
 
-<span class="fc bfc" id="L2050" title="All 2 branches covered.">            if ( usesLargeTiles(bounds) )</span>
-<span class="fc" id="L2051">                _renderWithLargeTiles(center, noise, areaToFill, bounds, g2d);</span>
+<span class="fc bfc" id="L2215" title="All 2 branches covered.">            if ( usesLargeTiles(bounds) )</span>
+<span class="fc" id="L2216">                _renderWithLargeTiles(center, noise, areaToFill, bounds, g2d);</span>
             else {
-<span class="fc" id="L2053">                g2d.setPaint(_getCachedNoisePaint(center, noise));</span>
-<span class="fc" id="L2054">                _fillShapeFast(g2d, areaToFill);</span>
+<span class="fc" id="L2218">                g2d.setPaint(_getCachedNoisePaint(center, noise));</span>
+<span class="fc" id="L2219">                _fillShapeFast(g2d, areaToFill);</span>
             }
-<span class="fc" id="L2056">        }</span>
+<span class="fc" id="L2221">        }</span>
 
         /**
          *  Which of the two strategies {@link #renderNoise} uses for an area of these bounds:
@@ -2065,8 +2230,8 @@ final class StyleRenderer
          *  so a caller reasoning about repaint cost has to account for that case itself.
          */
         static boolean usesLargeTiles( Rectangle bounds ) {
-<span class="fc" id="L2068">            final long area = (long) bounds.width * bounds.height;</span>
-<span class="pc bpc" id="L2069" title="1 of 4 branches missed.">            return area &gt; LARGE_AREA_THRESHOLD &amp;&amp; _maxCachedTiles() &gt; 0;</span>
+<span class="fc" id="L2233">            final long area = (long) bounds.width * bounds.height;</span>
+<span class="pc bpc" id="L2234" title="1 of 4 branches missed.">            return area &gt; LARGE_AREA_THRESHOLD &amp;&amp; _maxCachedTiles() &gt; 0;</span>
         }
 
         /**
@@ -2081,41 +2246,41 @@ final class StyleRenderer
             final Rectangle         bounds,
             final Graphics2D        g2d
         ) {
-<span class="fc" id="L2084">            final int size = LARGE_TILE_SIZE;</span>
+<span class="fc" id="L2249">            final int size = LARGE_TILE_SIZE;</span>
 
             // Bounds expressed in noise space (device space translated by 'center'):
-<span class="fc" id="L2087">            final double uMin = bounds.getMinX() - center.x;</span>
-<span class="fc" id="L2088">            final double uMax = bounds.getMaxX() - center.x;</span>
-<span class="fc" id="L2089">            final double vMin = bounds.getMinY() - center.y;</span>
-<span class="fc" id="L2090">            final double vMax = bounds.getMaxY() - center.y;</span>
+<span class="fc" id="L2252">            final double uMin = bounds.getMinX() - center.x;</span>
+<span class="fc" id="L2253">            final double uMax = bounds.getMaxX() - center.x;</span>
+<span class="fc" id="L2254">            final double vMin = bounds.getMinY() - center.y;</span>
+<span class="fc" id="L2255">            final double vMax = bounds.getMaxY() - center.y;</span>
 
-<span class="fc" id="L2092">            final int tileXMin = Math.floorDiv( (int) Math.floor(uMin), size );</span>
-<span class="fc" id="L2093">            final int tileXMax = Math.floorDiv( (int) Math.ceil(uMax) - 1, size );</span>
-<span class="fc" id="L2094">            final int tileYMin = Math.floorDiv( (int) Math.floor(vMin), size );</span>
-<span class="fc" id="L2095">            final int tileYMax = Math.floorDiv( (int) Math.ceil(vMax) - 1, size );</span>
+<span class="fc" id="L2257">            final int tileXMin = Math.floorDiv( (int) Math.floor(uMin), size );</span>
+<span class="fc" id="L2258">            final int tileXMax = Math.floorDiv( (int) Math.ceil(uMax) - 1, size );</span>
+<span class="fc" id="L2259">            final int tileYMin = Math.floorDiv( (int) Math.floor(vMin), size );</span>
+<span class="fc" id="L2260">            final int tileYMax = Math.floorDiv( (int) Math.ceil(vMax) - 1, size );</span>
 
-<span class="fc" id="L2097">            final Shape oldClip = g2d.getClip();</span>
+<span class="fc" id="L2262">            final Shape oldClip = g2d.getClip();</span>
             try {
-<span class="fc" id="L2099">                g2d.clip(areaToFill); // Restricts the tile blits to the requested shape.</span>
-<span class="fc bfc" id="L2100" title="All 2 branches covered.">                for ( int tileY = tileYMin; tileY &lt;= tileYMax; tileY++ ) {</span>
-<span class="fc bfc" id="L2101" title="All 2 branches covered.">                    for ( int tileX = tileXMin; tileX &lt;= tileXMax; tileX++ ) {</span>
-<span class="fc" id="L2102">                        final long key = ((long) tileX &lt;&lt; 32) | (tileY &amp; 0xFFFFFFFFL);</span>
-<span class="fc" id="L2103">                        BufferedImage tile = largeTileCache.get(key);</span>
-<span class="fc bfc" id="L2104" title="All 2 branches covered.">                        if ( tile == null ) {</span>
-<span class="fc" id="L2105">                            tile = _renderLargeTile(tileX, tileY, noise, g2d.getDeviceConfiguration());</span>
-<span class="fc" id="L2106">                            largeTileCache.put(key, tile);</span>
+<span class="fc" id="L2264">                g2d.clip(areaToFill); // Restricts the tile blits to the requested shape.</span>
+<span class="fc bfc" id="L2265" title="All 2 branches covered.">                for ( int tileY = tileYMin; tileY &lt;= tileYMax; tileY++ ) {</span>
+<span class="fc bfc" id="L2266" title="All 2 branches covered.">                    for ( int tileX = tileXMin; tileX &lt;= tileXMax; tileX++ ) {</span>
+<span class="fc" id="L2267">                        final long key = ((long) tileX &lt;&lt; 32) | (tileY &amp; 0xFFFFFFFFL);</span>
+<span class="fc" id="L2268">                        BufferedImage tile = largeTileCache.get(key);</span>
+<span class="fc bfc" id="L2269" title="All 2 branches covered.">                        if ( tile == null ) {</span>
+<span class="fc" id="L2270">                            tile = _renderLargeTile(tileX, tileY, noise, g2d.getDeviceConfiguration());</span>
+<span class="fc" id="L2271">                            largeTileCache.put(key, tile);</span>
                         }
-<span class="fc" id="L2108">                        final int drawX = Math.round( tileX * (float) size + center.x );</span>
-<span class="fc" id="L2109">                        final int drawY = Math.round( tileY * (float) size + center.y );</span>
-<span class="fc" id="L2110">                        g2d.drawImage(tile, drawX, drawY, null);</span>
+<span class="fc" id="L2273">                        final int drawX = Math.round( tileX * (float) size + center.x );</span>
+<span class="fc" id="L2274">                        final int drawY = Math.round( tileY * (float) size + center.y );</span>
+<span class="fc" id="L2275">                        g2d.drawImage(tile, drawX, drawY, null);</span>
                     }
                 }
-<span class="nc" id="L2113">            } catch ( Exception e ) {</span>
-<span class="nc" id="L2114">                log.error(SwingTree.get().logMarker(), &quot;Failed to render noise using large tiles!&quot;, e);</span>
+<span class="nc" id="L2278">            } catch ( Exception e ) {</span>
+<span class="nc" id="L2279">                log.error(SwingTree.get().logMarker(), &quot;Failed to render noise using large tiles!&quot;, e);</span>
             } finally {
-<span class="fc" id="L2116">                g2d.setClip(oldClip);</span>
+<span class="fc" id="L2281">                g2d.setClip(oldClip);</span>
             }
-<span class="fc" id="L2118">        }</span>
+<span class="fc" id="L2283">        }</span>
 
         /**
          *  Renders a single large tile of the noise into a fresh {@link BufferedImage}.
@@ -2130,70 +2295,70 @@ final class StyleRenderer
             final Pooled&lt;NoiseConf&gt;               noise,
             final @Nullable GraphicsConfiguration gc
         ) {
-<span class="fc" id="L2133">            final int size = LARGE_TILE_SIZE;</span>
-<span class="fc" id="L2134">            final NoiseGradientPaint paint = _createNoiseGradientPaint(</span>
+<span class="fc" id="L2298">            final int size = LARGE_TILE_SIZE;</span>
+<span class="fc" id="L2299">            final NoiseGradientPaint paint = _createNoiseGradientPaint(</span>
                     new Point2D.Float( -tileX * (float) size, -tileY * (float) size ),
                     noise
             );
-<span class="fc bfc" id="L2138" title="All 2 branches covered.">            final boolean isOpaque = ( paint.getTransparency() == Transparency.OPAQUE );</span>
-<span class="pc bpc" id="L2139" title="1 of 2 branches missed.">            final BufferedImage tile = ( gc != null )</span>
-<span class="fc bfc" id="L2140" title="All 2 branches covered.">                    ? gc.createCompatibleImage(size, size, isOpaque ? Transparency.OPAQUE : Transparency.TRANSLUCENT)</span>
-<span class="pc bnc" id="L2141" title="All 2 branches missed.">                    : new BufferedImage(size, size, isOpaque ? BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB);</span>
-<span class="fc" id="L2142">            tile.setAccelerationPriority(1.0f);</span>
-<span class="fc" id="L2143">            final Graphics2D ig = tile.createGraphics();</span>
+<span class="fc bfc" id="L2303" title="All 2 branches covered.">            final boolean isOpaque = ( paint.getTransparency() == Transparency.OPAQUE );</span>
+<span class="pc bpc" id="L2304" title="1 of 2 branches missed.">            final BufferedImage tile = ( gc != null )</span>
+<span class="fc bfc" id="L2305" title="All 2 branches covered.">                    ? gc.createCompatibleImage(size, size, isOpaque ? Transparency.OPAQUE : Transparency.TRANSLUCENT)</span>
+<span class="pc bnc" id="L2306" title="All 2 branches missed.">                    : new BufferedImage(size, size, isOpaque ? BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB);</span>
+<span class="fc" id="L2307">            tile.setAccelerationPriority(1.0f);</span>
+<span class="fc" id="L2308">            final Graphics2D ig = tile.createGraphics();</span>
             try {
-<span class="fc" id="L2145">                ig.setPaint(paint);</span>
-<span class="fc" id="L2146">                ig.fillRect(0, 0, size, size);</span>
+<span class="fc" id="L2310">                ig.setPaint(paint);</span>
+<span class="fc" id="L2311">                ig.fillRect(0, 0, size, size);</span>
             } finally {
-<span class="fc" id="L2148">                ig.dispose();</span>
+<span class="fc" id="L2313">                ig.dispose();</span>
             }
-<span class="fc" id="L2150">            return tile;</span>
+<span class="fc" id="L2315">            return tile;</span>
         }
 
         Paint getNoisePaint(
             final BoxModelConf      boxModel,
             final Pooled&lt;NoiseConf&gt; noise
         ) {
-<span class="fc" id="L2157">            final Color[] colors = noise.get().colors();</span>
-<span class="pc bpc" id="L2158" title="1 of 2 branches missed.">            if ( colors.length == 1 ) {</span>
-<span class="nc" id="L2159">                return colors[0];</span>
+<span class="fc" id="L2322">            final Color[] colors = noise.get().colors();</span>
+<span class="pc bpc" id="L2323" title="1 of 2 branches missed.">            if ( colors.length == 1 ) {</span>
+<span class="nc" id="L2324">                return colors[0];</span>
             }
-<span class="fc" id="L2161">            final Outline insets = boxModel.insetsFor(noise.get().boundary());</span>
-<span class="fc" id="L2162">            final Point2D.Float center = new Point2D.Float(</span>
-<span class="fc" id="L2163">                    insets.left().orElse(0f) + noise.get().offset().x(),</span>
-<span class="fc" id="L2164">                    insets.top().orElse(0f) + noise.get().offset().y()</span>
+<span class="fc" id="L2326">            final Outline insets = boxModel.insetsFor(noise.get().boundary());</span>
+<span class="fc" id="L2327">            final Point2D.Float center = new Point2D.Float(</span>
+<span class="fc" id="L2328">                    insets.left().orElse(0f) + noise.get().offset().x(),</span>
+<span class="fc" id="L2329">                    insets.top().orElse(0f) + noise.get().offset().y()</span>
             );
-<span class="fc" id="L2166">            return _getCachedNoisePaint(center, noise);</span>
+<span class="fc" id="L2331">            return _getCachedNoisePaint(center, noise);</span>
         }
 
         private NoiseGradientPaint _getCachedNoisePaint(
             final Point2D.Float     center,
             final Pooled&lt;NoiseConf&gt; noise
         ) {
-<span class="fc" id="L2173">            NoiseGradientPaint paint = paintCache.get(center);</span>
-<span class="fc bfc" id="L2174" title="All 2 branches covered.">            if ( paint != null ) {</span>
-<span class="fc" id="L2175">                return paint;</span>
+<span class="fc" id="L2338">            NoiseGradientPaint paint = paintCache.get(center);</span>
+<span class="fc bfc" id="L2339" title="All 2 branches covered.">            if ( paint != null ) {</span>
+<span class="fc" id="L2340">                return paint;</span>
             }
-<span class="fc" id="L2177">            paint = _createNoiseGradientPaint(center, noise);</span>
-<span class="fc" id="L2178">            paintCache.put(center, paint);</span>
-<span class="fc" id="L2179">            return paint;</span>
+<span class="fc" id="L2342">            paint = _createNoiseGradientPaint(center, noise);</span>
+<span class="fc" id="L2343">            paintCache.put(center, paint);</span>
+<span class="fc" id="L2344">            return paint;</span>
         }
 
         private static NoiseGradientPaint _createNoiseGradientPaint(
             final Point2D           center,
             final Pooled&lt;NoiseConf&gt; noise
         ) {
-<span class="fc" id="L2186">            final Color[] colors    = noise.get().colors();</span>
-<span class="fc" id="L2187">            final float[] fractions = _fractionsFrom(colors, noise.get().fractions());</span>
-<span class="fc" id="L2188">            final Scale   scale     = noise.get().scale();</span>
-<span class="fc" id="L2189">            return new NoiseGradientPaint(</span>
+<span class="fc" id="L2351">            final Color[] colors    = noise.get().colors();</span>
+<span class="fc" id="L2352">            final float[] fractions = _fractionsFrom(colors, noise.get().fractions());</span>
+<span class="fc" id="L2353">            final Scale   scale     = noise.get().scale();</span>
+<span class="fc" id="L2354">            return new NoiseGradientPaint(</span>
                     center,
-<span class="fc" id="L2191">                    scale.x(),</span>
-<span class="fc" id="L2192">                    scale.y(),</span>
-<span class="fc" id="L2193">                    noise.get().rotation(),</span>
+<span class="fc" id="L2356">                    scale.x(),</span>
+<span class="fc" id="L2357">                    scale.y(),</span>
+<span class="fc" id="L2358">                    noise.get().rotation(),</span>
                     fractions,
                     colors,
-<span class="fc" id="L2196">                    noise.get().function()</span>
+<span class="fc" id="L2361">                    noise.get().function()</span>
             );
         }
 

@@ -91,9 +91,9 @@ public final class ScalableImageIcon extends ImageIcon
 <span class="fc" id="L91">            Image originalImage = original.getImage();</span>
 <span class="fc bfc" id="L92" title="All 4 branches covered.">            if ( width == original.getIconWidth() &amp;&amp; height == original.getIconHeight() )</span>
 <span class="fc" id="L93">                return original;</span>
-<span class="pc bpc" id="L94" title="2 of 4 branches missed.">            if ( width &lt;= 0 || height &lt;= 0 ) {</span>
+<span class="pc bpc" id="L94" title="1 of 4 branches missed.">            if ( width &lt;= 0 || height &lt;= 0 ) {</span>
                 // We create the smallest possible image to avoid exceptions.
-<span class="nc" id="L96">                return new ImageIcon(new ImageIcon(new byte[0]).getImage());</span>
+<span class="fc" id="L96">                return new ImageIcon(new ImageIcon(new byte[0]).getImage());</span>
             }
 <span class="fc" id="L98">            return new ImageIcon(originalImage.getScaledInstance(width, height, java.awt.Image.SCALE_SMOOTH));</span>
 <span class="nc" id="L99">        } catch ( Exception e ) {</span>
@@ -223,7 +223,7 @@ public final class ScalableImageIcon extends ImageIcon
     public boolean equals( Object obj ) {
 <span class="pc bpc" id="L224" title="1 of 2 branches missed.">        if ( obj == this )</span>
 <span class="nc" id="L225">            return true;</span>
-<span class="fc bfc" id="L226" title="All 4 branches covered.">        if ( obj == null || obj.getClass() != this.getClass() )</span>
+<span class="pc bpc" id="L226" title="1 of 4 branches missed.">        if ( obj == null || obj.getClass() != this.getClass() )</span>
 <span class="fc" id="L227">            return false;</span>
 <span class="fc" id="L228">        ScalableImageIcon other = (ScalableImageIcon) obj;</span>
 <span class="pc bpc" id="L229" title="1 of 2 branches missed.">        return _sourceIcon.equals(other._sourceIcon) &amp;&amp;</span>
@@ -233,7 +233,7 @@ public final class ScalableImageIcon extends ImageIcon
 
     @Override
     public int hashCode() {
-<span class="fc" id="L236">        return Objects.hash(_sourceIcon, _relativeScale, _baseSize);</span>
+<span class="nc" id="L236">        return Objects.hash(_sourceIcon, _relativeScale, _baseSize);</span>
     }
 
 }

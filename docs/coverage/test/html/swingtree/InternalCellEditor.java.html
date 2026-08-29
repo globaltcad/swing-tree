@@ -55,11 +55,11 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
 <span class="fc" id="L55">    }</span>
 
     public void ini(JComponent host, int row, int col) {
-<span class="pc bpc" id="L58" title="1 of 2 branches missed.">        if ( !isInitialized ) {</span>
+<span class="fc bfc" id="L58" title="All 2 branches covered.">        if ( !isInitialized ) {</span>
 <span class="fc" id="L59">            isInitialized = true;</span>
 <span class="fc" id="L60">            Border defaultBorder = null;</span>
 <span class="fc" id="L61">            JComponent defaultEditorComponent = null;</span>
-<span class="pc bpc" id="L62" title="1 of 2 branches missed.">            if ( host instanceof JTable ) {</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">            if ( host instanceof JTable ) {</span>
 <span class="fc" id="L63">                JTable table = (JTable) host;</span>
 <span class="fc" id="L64">                Class&lt;?&gt; columnDataType = table.getColumnClass(col);</span>
 <span class="pc bpc" id="L65" title="1 of 2 branches missed.">                if ( Boolean.class.isAssignableFrom(columnDataType) )</span>
@@ -68,17 +68,17 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
 <span class="pc bpc" id="L68" title="1 of 2 branches missed.">            if ( defaultEditorComponent == null )</span>
 <span class="fc" id="L69">                defaultEditorComponent = new JTextField();</span>
 
-<span class="pc bpc" id="L71" title="1 of 2 branches missed.">            if (JTable.class.isAssignableFrom(hostType)) {</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">            if (JTable.class.isAssignableFrom(hostType)) {</span>
 <span class="fc" id="L72">                defaultBorder = UIManager.getBorder(&quot;Table.editorBorder&quot;);</span>
 <span class="fc" id="L73">                defaultEditorComponent.setName(&quot;Table.editor&quot;);</span>
-<span class="nc bnc" id="L74" title="All 2 branches missed.">            } else if (JTree.class.isAssignableFrom(hostType)) {</span>
-<span class="nc" id="L75">                defaultBorder = UIManager.getBorder(&quot;Tree.editorBorder&quot;);</span>
+<span class="pc bpc" id="L74" title="1 of 2 branches missed.">            } else if (JTree.class.isAssignableFrom(hostType)) {</span>
+<span class="fc" id="L75">                defaultBorder = UIManager.getBorder(&quot;Tree.editorBorder&quot;);</span>
 <span class="nc bnc" id="L76" title="All 2 branches missed.">            } else if (JList.class.isAssignableFrom(hostType)) {</span>
 <span class="nc" id="L77">                defaultBorder = UIManager.getBorder(&quot;List.editorBorder&quot;);</span>
 <span class="nc bnc" id="L78" title="All 2 branches missed.">            } else if (JComboBox.class.isAssignableFrom(hostType)) {</span>
 <span class="nc" id="L79">                defaultBorder = UIManager.getBorder(&quot;ComboBox.editorBorder&quot;);</span>
             }
-<span class="pc bpc" id="L81" title="1 of 2 branches missed.">            if (defaultBorder == null)</span>
+<span class="fc bfc" id="L81" title="All 2 branches covered.">            if (defaultBorder == null)</span>
 <span class="fc" id="L82">                defaultBorder = new LineBorder(Color.BLACK);</span>
 
 <span class="fc" id="L84">            defaultEditorComponent.setBorder(defaultBorder);</span>
@@ -94,10 +94,10 @@ final class InternalCellEditor extends AbstractCellEditor implements TableCellEd
     private void _setUIManagerInfo(JComponent editor) {
 <span class="fc" id="L95">        String name = &quot;&quot;;</span>
 <span class="fc" id="L96">        String info = &quot;&quot;;</span>
-<span class="pc bpc" id="L97" title="1 of 2 branches missed.">        if ( JTable.class.isAssignableFrom(hostType) )</span>
+<span class="fc bfc" id="L97" title="All 2 branches covered.">        if ( JTable.class.isAssignableFrom(hostType) )</span>
 <span class="fc" id="L98">            info = &quot;isTableCellEditor&quot;;</span>
-<span class="nc bnc" id="L99" title="All 2 branches missed.">        else if ( JTree.class.isAssignableFrom(hostType) )</span>
-<span class="nc" id="L100">            info = &quot;isTreeCellEditor&quot;;</span>
+<span class="pc bpc" id="L99" title="1 of 2 branches missed.">        else if ( JTree.class.isAssignableFrom(hostType) )</span>
+<span class="fc" id="L100">            info = &quot;isTreeCellEditor&quot;;</span>
 <span class="nc bnc" id="L101" title="All 2 branches missed.">        else if ( JList.class.isAssignableFrom(hostType) )</span>
 <span class="nc" id="L102">            info = &quot;isListCellEditor&quot;;</span>
 <span class="nc bnc" id="L103" title="All 2 branches missed.">        else if ( JComboBox.class.isAssignableFrom(hostType) )</span>

@@ -4,7 +4,7 @@
   "narrative":"Every one of SwingTree's internal rendering caches – style layer images,\n    noise tiles, shadow gradients and text layouts – draws its\n    memory budget from a single, unified source: the `CacheMode` configured on\n    the `SwingTree` library context, combined with the amount of system RAM.\n\n    A higher mode keeps more rendered results in memory so subsequent repaints\n    can blit them instead of re-rendering (faster, but more memory); the\n    `DISABLED` mode turns caching off entirely. The mode can be selected at\n    startup or changed at runtime, in which case the caches drop their now-excess\n    memory immediately and repopulate under the new budget.\n\n    These scenarios pin the contract down through the *public* API\n    (`SwingTree.get().getCacheMode()` / `setCacheMode(..)` and the\n    `ComponentExtension` cache observers) so they survive internal refactors; the\n    one non-public touch-point is the `CacheBudget.UNITS_OVERRIDE` test hook, used\n    purely to make the otherwise RAM-dependent budget deterministic regardless of\n    the runner's physical memory.",
   "subjects":["swingtree.SwingTree","swingtree.SwingTreeInitConfig","swingtree.style.ComponentExtension"],
   "statistics":{
-    "runs":"6",
+    "runs":"7",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -120,6 +120,29 @@
         {"kind":"then","text":"The layer is one whole image at the component size, noise and all.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1","ext.cachedRendering(UI.Layer.BACKGROUND).first().width  == 700","ext.cachedRendering(UI.Layer.BACKGROUND).first().height == 380"]},
 
         {"kind":"cleanup","text":"","code":["SwingTree.get().setCacheTilingEnabled(true)","CacheBudget.UNITS_OVERRIDE = -1","ComponentExtension.updateAllCachesFromLibraryConfig()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Flipping the stretch tiling hatch reaches a component that is not changing at all.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The tiling switch is a debugging hatch: someone who suspects a\n            reconstructed rendering of being wrong flips it and looks at the very\n            same component again. That component is typically sitting still - the\n            window is not being dragged and nothing in its style is animating - so\n            the switch has to reach a component whose configuration has not changed\n            since its last paint, not merely one that is about to be resized.\n\n            Which of the two cache keyings is in force is visible in the rendering\n            the component holds on to: a stretch tiled layer caches one small\n            exemplar that every size is reconstructed from, whereas the classic\n            keying the hatch restores caches the component's own size.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A deterministic budget and a large, flatly coloured, stretch tileable button.","code":["CacheBudget.UNITS_OVERRIDE = 10","ComponentExtension.updateAllCachesFromLibraryConfig()","var button =","    UI.button(\"Hold still\")","      .withStyle( it -> it","            .borderRadius(20)","            .backgroundColor(new Color(60, 130, 90))","            .foundationColor(new Color(240, 240, 235))","      )","      .get(JButton)","button.setSize(300, 120)","var ext = ComponentExtension.from(button)"]},
+
+        {"kind":"when","text":"It is painted a number of times, without ever changing in any way.","code":["6.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"then","text":"What it holds is the small exemplar that every size is reconstructed from.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1","ext.cachedRendering(UI.Layer.BACKGROUND).first().width < 300"]},
+
+        {"kind":"when","text":"The hatch is closed, and it is painted again - still without changing anything.","code":["SwingTree.get().setCacheTilingEnabled(false)","6.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"then","text":"It now holds a rendering of its own size, which is the classic keying.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1","ext.cachedRendering(UI.Layer.BACKGROUND).first().width  == 300","ext.cachedRendering(UI.Layer.BACKGROUND).first().height == 120"]},
+
+        {"kind":"cleanup","text":"We open the hatch again and hand the library back its own budget.","code":["SwingTree.get().setCacheTilingEnabled(true)","CacheBudget.UNITS_OVERRIDE = -1","ComponentExtension.updateAllCachesFromLibraryConfig()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

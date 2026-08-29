@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TreeSelectionDelegate.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">TreeSelectionDelegate.java</span></div><h1>TreeSelectionDelegate.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.jspecify.annotations.Nullable;
+import sprouts.Tuple;
+import sprouts.Var;
+
+import javax.swing.JTree;
+import javax.swing.tree.TreePath;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+
+/**
+ *  Everything a selection change in a bound {@link JTree} has to say, handed to the
+ *  {@link sprouts.Action} registered through
+ *  {@link UIForTree#onSelection(sprouts.Action)}.
+ *  &lt;p&gt;
+ *  It speaks entirely in the user's own node values. The handles a bound tree keeps inside
+ *  its {@link TreePath}s are an internal matter and never surface here, which is also why
+ *  {@link JTree#getLastSelectedPathComponent()} is not a useful thing to call on a bound tree.
+ *  &lt;p&gt;
+ *  Note that for the common case of mirroring the selection into a view model there is no
+ *  need for this delegate at all: bind a property with
+ *  {@link UIForTree#withSelection(Var)} instead and the two stay in sync by themselves.
+ *
+ * @param &lt;I&gt; The identity type of the nodes, which selection paths are made of.
+ * @param &lt;N&gt; The common node type of the tree.
+ */
+public final class TreeSelectionDelegate&lt;I, N&gt;
+{
+    /*
+        Read once, on the UI thread, in the constructor. An action is delivered on the
+        application thread, and the node handles a bound tree keeps are owned by the UI
+        thread, so reading them from here later would be a race under DECOUPLED. Values,
+        ids and id paths are all immutable, so a snapshot of them needs no copy.
+    */
+    private final JTree                      _tree;
+    private final PropertyTreeModel&lt;I, N, ?&gt; _model;
+    private final @Nullable N                _lead;
+    private final @Nullable Object[]         _leadIdPath;
+    private final Tuple&lt;N&gt;                   _selection;
+    private final Tuple&lt;N&gt;                   _pathToLead;
+    private final Tuple&lt;I&gt;                   _leadPath;
+    private final Tuple&lt;Tuple&lt;I&gt;&gt;            _selectionPaths;
+
+    TreeSelectionDelegate(
+        JTree                      tree,
+        PropertyTreeModel&lt;I, N, ?&gt; model,
+        @Nullable TreePath         leadPath,
+        @Nullable TreePath[]       selectedPaths
+<span class="fc" id="L52">    ) {</span>
+<span class="fc" id="L53">        _tree           = Objects.requireNonNull(tree);</span>
+<span class="fc" id="L54">        _model          = Objects.requireNonNull(model);</span>
+<span class="pc bpc" id="L55" title="1 of 2 branches missed.">        TreePath[] paths = ( selectedPaths == null ? new TreePath[0] : selectedPaths );</span>
+<span class="fc" id="L56">        Class&lt;N&gt; nodeType = model.conf().nodeType();</span>
+<span class="fc" id="L57">        Class&lt;I&gt; idType   = model.idType();</span>
+
+<span class="fc" id="L59">        _lead       = _nodeOf(model, leadPath);</span>
+<span class="fc" id="L60">        _leadIdPath = _idPathOf(leadPath);</span>
+<span class="fc" id="L61">        _leadPath   = model.idTupleOf(leadPath, idType);</span>
+
+<span class="fc" id="L63">        List&lt;N&gt; selected = new ArrayList&lt;&gt;(paths.length);</span>
+<span class="fc" id="L64">        List&lt;Tuple&lt;I&gt;&gt; selectedIds = new ArrayList&lt;&gt;(paths.length);</span>
+<span class="fc bfc" id="L65" title="All 2 branches covered.">        for ( TreePath path : paths ) {</span>
+<span class="fc" id="L66">            N node = _nodeOf(model, path);</span>
+<span class="pc bpc" id="L67" title="1 of 2 branches missed.">            if ( node != null )</span>
+<span class="fc" id="L68">                selected.add(node);</span>
+<span class="fc" id="L69">            selectedIds.add(model.idTupleOf(path, idType));</span>
+        }
+<span class="fc" id="L71">        _selection      = Tuple.of(nodeType, selected);</span>
+<span class="fc" id="L72">        _selectionPaths = Tuple.of(Tuple.classTyped(idType), selectedIds);</span>
+
+<span class="fc" id="L74">        List&lt;N&gt; trail = new ArrayList&lt;&gt;();</span>
+<span class="pc bpc" id="L75" title="1 of 2 branches missed.">        if ( leadPath != null )</span>
+<span class="fc bfc" id="L76" title="All 2 branches covered.">            for ( Object component : leadPath.getPath() ) {</span>
+<span class="fc" id="L77">                Object value = model.valueOf(component);</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">                if ( value != null )</span>
+<span class="fc" id="L79">                    trail.add(nodeType.cast(value));</span>
+            }
+<span class="fc" id="L81">        _pathToLead = Tuple.of(nodeType, trail);</span>
+<span class="fc" id="L82">    }</span>
+
+    private static @Nullable Object[] _idPathOf( @Nullable TreePath path ) {
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">        if ( path == null )</span>
+<span class="nc" id="L86">            return null;</span>
+<span class="fc" id="L87">        Object last = path.getLastPathComponent();</span>
+<span class="pc bpc" id="L88" title="1 of 2 branches missed.">        return ( last instanceof TreeNodeRef ? ((TreeNodeRef) last).idPath() : null );</span>
+    }
+
+    private static &lt;I, N&gt; @Nullable N _nodeOf( PropertyTreeModel&lt;I, N, ?&gt; model, @Nullable TreePath path ) {
+<span class="pc bpc" id="L92" title="1 of 2 branches missed.">        if ( path == null )</span>
+<span class="nc" id="L93">            return null;</span>
+<span class="fc" id="L94">        Object value = model.valueOf(path.getLastPathComponent());</span>
+<span class="pc bpc" id="L95" title="1 of 2 branches missed.">        return ( value == null ? null : model.conf().nodeType().cast(value) );</span>
+    }
+
+    /**
+     *  The tree whose selection changed, in case you need to reach past this delegate.
+     *  @return The {@link JTree} this selection belongs to.
+     */
+    public JTree tree() {
+<span class="nc" id="L103">        return _tree;</span>
+    }
+
+    /**
+     *  The node the user just moved the selection onto, which is empty when the selection
+     *  was cleared rather than moved.
+     *  @return The node the selection now leads with.
+     */
+    public Optional&lt;N&gt; lead() {
+<span class="fc" id="L112">        return Optional.ofNullable(_lead);</span>
+    }
+
+    /**
+     *  Every currently selected node, in the order the tree reports them. For a single
+     *  selection tree this holds at most one node, and it is empty when nothing is selected.
+     *  @return All selected nodes.
+     */
+    public Tuple&lt;N&gt; selection() {
+<span class="fc" id="L121">        return _selection;</span>
+    }
+
+    /**
+     *  The chain of nodes from the top of the tree down to (and including) the
+     *  {@link #lead()} node, which is how you learn where in the structure the selection
+     *  landed. It is empty when the selection was cleared. A forest has no root, so its
+     *  trails begin at the top level node the selection sits under.
+     *  @return The nodes leading from the top of the tree to the selected node.
+     */
+    public Tuple&lt;N&gt; pathToLead() {
+<span class="fc" id="L132">        return _pathToLead;</span>
+    }
+
+    /**
+     *  The identity of the selected position: the ids leading from the top of the tree down
+     *  to the {@link #lead()} node, the root's own id first — or, in a forest, the id of the
+     *  top level node it sits under. This is the same value a property bound with
+     *  {@link UIForTree#withSelection(sprouts.Var)} receives, and it is empty when the
+     *  selection was cleared rather than moved.
+     *  &lt;p&gt;
+     *  Where {@link #pathToLead()} answers &quot;what is selected&quot;, this answers &quot;which position
+     *  is selected&quot; — the question a node value cannot answer on its own, because the same
+     *  value may sit in several places at once.
+     *
+     *  @return The ids leading to the selected node.
+     */
+    public Tuple&lt;I&gt; leadPath() {
+<span class="fc" id="L149">        return _leadPath;</span>
+    }
+
+    /**
+     *  The identity of every selected position, in the order the tree reports them. This is
+     *  what a property bound with {@link UIForTree#withSelectionPaths(sprouts.Var)} receives.
+     *
+     *  @return One path of ids per selected node.
+     */
+    public Tuple&lt;Tuple&lt;I&gt;&gt; selectionPaths() {
+<span class="nc" id="L159">        return _selectionPaths;</span>
+    }
+
+    /**
+     *  A writable property focused on the selected node, so that an action reacting to a
+     *  selection can go straight on to edit what was selected, and the edit lands in the one
+     *  property the tree is bound to.
+     *  &lt;p&gt;
+     *  It is empty when nothing is selected, or when the tree was bound to a read only
+     *  {@link sprouts.Val}, in which case there is nothing to write into.
+     *
+     *  @return A lens property onto the selected node.
+     */
+    public Optional&lt;Var&lt;N&gt;&gt; property() {
+<span class="fc" id="L173">        Object[] idPath = _leadIdPath;</span>
+<span class="pc bpc" id="L174" title="1 of 2 branches missed.">        if ( idPath == null )</span>
+<span class="nc" id="L175">            return Optional.empty();</span>
+<span class="fc" id="L176">        return Optional.ofNullable(_model.propertyFor(idPath, _lead));</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L181">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="nc bnc" id="L182" title="All 2 branches missed.">                    &quot;lead=&quot;      + ( _lead == null ? &quot;none&quot; : String.valueOf(_lead) ) + &quot;, &quot; +</span>
+<span class="nc" id="L183">                    &quot;selection=&quot; + _selection.size() + &quot; node(s)&quot; +</span>
+                &quot;]&quot;;
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

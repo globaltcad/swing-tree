@@ -1,6 +1,6 @@
 {
   "className":"swingtree.Html_Label_Font_Styling_Spec",
-  "title":"Styling HTML Labels through FontConf",
+  "title":"Styling HTML content in JLabel through FontConf",
   "narrative":"SwingTree's styling API treats every `JComponent` uniformly: when you write\n    `withStyle(it -> it.fontColor(\"orange\").fontFamily(\"Serif\"))` you expect\n    the result to look the same regardless of whether the label happens to\n    display a plain string or a fragment of HTML.  In practice that is harder\n    than it sounds, because Swing renders HTML through a completely different\n    pipeline than its plain-text label rendering.\n\n    A plain `JLabel` paints text using the component's `Font` and `Foreground`\n    properties.  Setting font attributes through `FontConf` translates directly\n    to a derived `Font` and (where applicable) a foreground color, and the\n    result is what the user sees.\n\n    An HTML `JLabel` (one whose text starts with `<html>`) is different:\n    Swing builds an `HTMLDocument` and a `View` tree from the text and renders\n    everything through CSS.  The label's own `Font` and `Foreground` only feed\n    the *base* `body { ... }` rule that Swing seeds at parse time — they have\n    no effect on already-resolved element attributes.  Bolting `FontConf`\n    styling onto that pipeline therefore requires a different approach than\n    plain text.\n\n    SwingTree handles the difference internally by injecting a small\n    `<head><style data-swingtree=\"injected\">...</style></head>` block into\n    the HTML text, *before* Swing parses it.  The injection is wrapped in a\n    distinctive marker so SwingTree can recognise — and strip — its own\n    previous injection on the next style cycle, leaving the user's HTML\n    intact and recoverable.\n\n    This specification is the user-facing contract: that styling HTML labels\n    \"just works\", that nothing the user can put inside an HTML label breaks\n    the styling pipeline, and that SwingTree's own injection is a self-cleaning\n    affair, not a one-way transformation.",
   "subjects":["swingtree.style.FontConf"],
   "statistics":{
@@ -631,7 +631,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The scaling rewrite stores the un-scaled HTML on a client property\n            and recomputes from it each cycle, instead of operating on the\n            already-scaled output. Without that, two re-style cycles at scale\n            1.5 would produce 20 → 30 → 45 px. We confirm here that *N*\n            forced cycles produce the same result as one.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The scaling rewrite stores the un-scaled HTML on a client property\n            and recomputes from it each cycle, instead of operating on the\n            already-scaled output. Without that, two re-style cycles at scale\n            1.5 would produce 20 → 30 → 45 px. We confirm here that *N*\n            forced cycles produce the same reswipult as one.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"HTML with a known-size inline declaration:","code":["var html = '<html><span style=\"font-size:20px;\">Hi</span></html>'"]},
