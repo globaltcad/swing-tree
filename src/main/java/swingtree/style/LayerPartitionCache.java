@@ -10,11 +10,7 @@ import swingtree.layout.Size;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.awt.image.ColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DirectColorModel;
-import java.awt.image.Raster;
+import java.awt.image.*;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -50,8 +46,8 @@ import java.util.function.BiConsumer;
  *  background/foundation fills, borders and shadows satisfy it. Gradients, noises, images, texts
  *  and custom painters do not, their pixels depending on the full component bounds. A border
  *  with a different color per edge satisfies it as long as its miter joints land in the same
- *  place at every size, which {@link #_borderEdgeSeamsAreSizeIndependent} decides. The
- *  eligibility check must stay conservative, because an over-eager rule produces subtly wrong
+ *  place at every size.
+ *  The eligibility check must stay conservative, because an over-eager rule produces subtly wrong
  *  pixels, not a crash.
  *  Ineligible or too small configurations keep the classic exact-size key and behave exactly as
  *  they did before stretch tiling existed. <br>
@@ -84,8 +80,6 @@ final class LayerPartitionCache
     private static final double EAGER_ALLOCATION_FRIENDLINESS     = 0.1; // Has to be between 0 and 1!
     private static final int    MAX_CACHE_HIT_COUNT               = 12;
     private static final int    HITS_UNTIL_ALLOCATION_WHILE_RESIZING = 1;
-    private static final int    STRETCH_BAND                      = 2; // Freely stretchable band between the slice insets; one pixel suffices mathematically, two give slack.
-    private static final int    SAFETY_MARGIN                     = 2; // Added to every slice inset to absorb antialiasing bleed and artifact adjustments in the renderer.
     private static final int    BYTES_PER_PIXEL                   = 4; // Every cached rendering is 32 bit ARGB, see CachedImage._allocate.
 
     private static int  _maxCacheableImageArea() { return (int) (CacheBudget.units() * PIXELS_PER_UNIT_OF_AGGRESSIVENESS); }
@@ -163,7 +157,7 @@ final class LayerPartitionCache
         }
 
         final LayerRenderConf keyConf = CacheBudget.tilingEnabled()
-                                            ? _canonicalize(_renderInput)
+                                            ? _renderInput.canonicalRepresentation()
                                             : _renderInput;
 
         if ( _state instanceof CacheState.Cached && ((CacheState.Cached) _state)._key.get().equals(keyConf) )
@@ -394,190 +388,10 @@ final class LayerPartitionCache
         and the slice cut lines from a render configuration (see class javadoc).
         ------------------------------------------------------------------------------------ */
 
-    /**
-     *  Maps eligible configurations of any size onto the size independent exemplar key,
-     *  and returns ineligible ones (as well as those not strictly larger than the exemplar
-     *  in both dimensions) unchanged - which also makes this idempotent, so a configuration
-     *  which already has the exemplar size maps onto itself.
-     */
-    private static LayerRenderConf _canonicalize( LayerRenderConf conf ) {
-        if ( !_isStretchTileable(conf) )
-            return conf;
-
-        final Outline sliceInsets = _sliceInsets(conf);
-        final Size    canonical   = _canonicalSize(sliceInsets);
-
-        if ( !_borderEdgeSeamsAreSizeIndependent(conf, sliceInsets, canonical) )
-            return conf;
-
-        final Size    actual      = conf.boxModel().size();
-
-        final boolean strictlyLarger =
-                        actual.widthOrElse(0f)  > canonical.widthOrElse(0f) &&
-                        actual.heightOrElse(0f) > canonical.heightOrElse(0f);
-        if ( !strictlyLarger )
-            return conf;
-
-        return conf.withBoxModel(conf.boxModel().withSize(canonical));
-    }
-
     static boolean cachesSizeIndependently( LayerRenderConf conf ) {
         if ( !CacheBudget.tilingEnabled() )
             return false;
-        return !_canonicalize(conf).boxModel().size().equals(conf.boxModel().size());
-    }
-
-    /** Whether the layer content satisfies the tiling invariant (see class javadoc). */
-    private static boolean _isStretchTileable( LayerRenderConf conf ) {
-        final StyleConfLayer layer = conf.layer();
-
-        for ( GradientConf gradient : layer.gradients().sortedByNames() )
-            if ( !gradient.equals(GradientConf.none()) )
-                return false; // Gradient geometry spans the component bounds.
-
-        for ( Pooled<NoiseConf> noise : layer.noises().sortedByNames() )
-            if ( !noise.get().equals(NoiseConf.none()) )
-                return false; // Noise varies per pixel position.
-
-        for ( ImageConf image : layer.images().sortedByNames() )
-            if ( !image.equals(ImageConf.none()) )
-                return false; // Image placement/fit depends on the component bounds.
-
-        for ( TextConf text : layer.texts().sortedByNames() )
-            if ( !text.equals(TextConf.none()) )
-                return false; // Text layout depends on the component bounds.
-
-        for ( PainterConf painter : layer.painters().sortedByNames() )
-            if ( !painter.equals(PainterConf.none()) )
-                return false; // We cannot know what a custom painter does.
-
-        return true;
-    }
-
-    /**
-     *  Whether the seams of a border with a different color per edge fall in the same place in
-     *  the exemplar as they do at any larger size, which is what lets such a border be
-     *  reconstructed from an exemplar rather than re-rendered per size. <br>
-     *  <br>
-     *  Note that the border edges divide the <i>margin box</i> rather than the component: the
-     *  seams are placed within, and the slice insets measured from, two different origins, so the
-     *  margins have to be taken out of both before they can be compared.
-     * @see ComponentAreas#getEdgeAreas() For more context related code...
-     */
-    private static boolean _borderEdgeSeamsAreSizeIndependent(
-        LayerRenderConf conf,
-        Outline         sliceInsets,
-        Size            exemplar
-    ) {
-        final BorderColorsConf borderColors = conf.baseColors().borderColor();
-        if ( borderColors.equals(BorderColorsConf.none()) || borderColors.isHomogeneous() )
-            return true;
-        if ( !conf.boxModel().hasAnyNonZeroArcs() )
-            return true;
-
-        final Outline widths = conf.boxModel().widths();
-        final float   top    = _positive(widths.top());
-        final float   right  = _positive(widths.right());
-        final float   bottom = _positive(widths.bottom());
-        final float   left   = _positive(widths.left());
-        if ( top <= 0 || right <= 0 || bottom <= 0 || left <= 0 )
-            return false;
-
-        final Outline margin       = conf.boxModel().margin();
-        final float   marginTop    = _positive(margin.top());
-        final float   marginRight  = _positive(margin.right());
-        final float   marginBottom = _positive(margin.bottom());
-        final float   marginLeft   = _positive(margin.left());
-
-        final float boxWidth  = exemplar.widthOrElse(0f)  - marginLeft - marginRight;
-        final float boxHeight = exemplar.heightOrElse(0f) - marginTop  - marginBottom;
-        if ( boxWidth <= 0 || boxHeight <= 0 )
-            return false;
-
-        return boxHeight * top    > ( _positive(sliceInsets.top())    - marginTop    ) * ( top  + bottom )
-            && boxHeight * bottom > ( _positive(sliceInsets.bottom()) - marginBottom ) * ( top  + bottom )
-            && boxWidth  * left   > ( _positive(sliceInsets.left())   - marginLeft   ) * ( left + right  )
-            && boxWidth  * right  > ( _positive(sliceInsets.right())  - marginRight  ) * ( left + right  );
-    }
-
-    /**
-     *  How far the size dependent pixels reach into the component from each side:
-     *  margin + base outline + border width + the adjacent corner arc extents + the
-     *  shadow reach, plus a safety margin, ceiled to whole numbers. Everything between
-     *  opposite insets repeats along the respective axis and may be stretched freely. <br>
-     *  A pure function of the size independent parts of the configuration, so it can be
-     *  recomputed at blit time and always agrees with the canonicalization.
-     */
-    private static Outline _sliceInsets( LayerRenderConf conf ) {
-        final BoxModelConf box = conf.boxModel();
-
-        final float marginTop    = _positive(box.margin().top());
-        final float marginRight  = _positive(box.margin().right());
-        final float marginBottom = _positive(box.margin().bottom());
-        final float marginLeft   = _positive(box.margin().left());
-
-        final float baseTop    = _positive(box.baseOutline().top());
-        final float baseRight  = _positive(box.baseOutline().right());
-        final float baseBottom = _positive(box.baseOutline().bottom());
-        final float baseLeft   = _positive(box.baseOutline().left());
-
-        final float widthTop    = _positive(box.widths().top());
-        final float widthRight  = _positive(box.widths().right());
-        final float widthBottom = _positive(box.widths().bottom());
-        final float widthLeft   = _positive(box.widths().left());
-
-        // Per side, the larger of the two adjacent corner arc extents:
-        final float arcTop    = Math.max(_arcHeight(box.topLeftArc()),    _arcHeight(box.topRightArc())   );
-        final float arcRight  = Math.max(_arcWidth(box.topRightArc()),    _arcWidth(box.bottomRightArc()) );
-        final float arcBottom = Math.max(_arcHeight(box.bottomLeftArc()), _arcHeight(box.bottomRightArc()));
-        final float arcLeft   = Math.max(_arcWidth(box.topLeftArc()),     _arcWidth(box.bottomLeftArc())  );
-
-        /*
-            A shadow's 2D-varying pixels extend beyond its geometric box: its gradients
-            fade over blur + spread + gradient start offset, and the whole shadow box is
-            displaced by the shadow offset. We conservatively use the same reach for all
-            four sides (overestimation only costs a few exemplar pixels).
-        */
-        float shadowReachH = 0;
-        float shadowReachV = 0;
-        for ( ShadowConf shadow : conf.layer().shadows().sortedByNames() ) {
-            if ( shadow.equals(ShadowConf.none()) || !shadow.color().isPresent() )
-                continue;
-            final float blur   = Math.max(0, shadow.blurRadius());
-            final float spread = Math.abs(shadow.spreadRadius());
-            final float fade   = StyleRenderer.shadowGradientStartOffset(box, shadow);
-            shadowReachH = Math.max(shadowReachH, blur + spread + fade + Math.abs(shadow.horizontalOffset()));
-            shadowReachV = Math.max(shadowReachV, blur + spread + fade + Math.abs(shadow.verticalOffset()));
-        }
-
-        final float top    = marginTop    + baseTop    + widthTop    + arcTop    + shadowReachV + SAFETY_MARGIN;
-        final float right  = marginRight  + baseRight  + widthRight  + arcRight  + shadowReachH + SAFETY_MARGIN;
-        final float bottom = marginBottom + baseBottom + widthBottom + arcBottom + shadowReachV + SAFETY_MARGIN;
-        final float left   = marginLeft   + baseLeft   + widthLeft   + arcLeft   + shadowReachH + SAFETY_MARGIN;
-
-        return Outline.of(
-                    (float) Math.ceil(top),
-                    (float) Math.ceil(right),
-                    (float) Math.ceil(bottom),
-                    (float) Math.ceil(left)
-                );
-    }
-
-    /**
-     *  The exemplar size for the supplied slice insets: {@code 2 * max(insetA, insetB) + band}
-     *  per axis. Symmetric, because some rendering internals split their work at the component
-     *  <i>center</i> - corner shadow clip boxes meet there, and so do the seams between two
-     *  opposite border edges. The symmetric size guarantees the exemplar's center line falls
-     *  into the repeating band, keeping those artifacts pixel-identical to a real rendering of
-     *  any larger size.
-     */
-    private static Size _canonicalSize( Outline sliceInsets ) {
-        final float maxHorizontal = Math.max(sliceInsets.left().orElse(0f), sliceInsets.right().orElse(0f));
-        final float maxVertical   = Math.max(sliceInsets.top().orElse(0f),  sliceInsets.bottom().orElse(0f));
-        return Size.of(
-                    2 * maxHorizontal + STRETCH_BAND,
-                    2 * maxVertical   + STRETCH_BAND
-                );
+        return !conf.canonicalRepresentation().boxModel().size().equals(conf.boxModel().size());
     }
 
     /** Tile blits support positive scaling and translation; rotation, shear and flips do not. */
@@ -586,18 +400,6 @@ final class LayerPartitionCache
                transform.getShearY() == 0 &&
                transform.getScaleX() >  0 &&
                transform.getScaleY() >  0;
-    }
-
-    private static float _positive( Optional<Float> value ) {
-        return Math.max(0f, value.orElse(0f));
-    }
-
-    private static float _arcWidth( Optional<Arc> arc ) {
-        return arc.map( a -> Math.max(0f, a.width()) ).orElse(0f);
-    }
-
-    private static float _arcHeight( Optional<Arc> arc ) {
-        return arc.map( a -> Math.max(0f, a.height()) ).orElse(0f);
     }
 
     /**
@@ -725,11 +527,11 @@ final class LayerPartitionCache
             if ( image == null )
                 return; // Cannot happen (callers check `isRendered()` first), but let's be defensive.
 
-            final Outline insets = _sliceInsets(canonicalConf);
-            final int insetTop    = (int) _positive(insets.top());
-            final int insetRight  = (int) _positive(insets.right());
-            final int insetBottom = (int) _positive(insets.bottom());
-            final int insetLeft   = (int) _positive(insets.left());
+            final Outline insets = canonicalConf.canonicalSliceInsets();
+            final int insetTop    = (int) LayerRenderConf._positive(insets.top());
+            final int insetRight  = (int) LayerRenderConf._positive(insets.right());
+            final int insetBottom = (int) LayerRenderConf._positive(insets.bottom());
+            final int insetLeft   = (int) LayerRenderConf._positive(insets.left());
 
             StretchTile[] tiles = _stretchTiles;
             if ( tiles == null ) {
