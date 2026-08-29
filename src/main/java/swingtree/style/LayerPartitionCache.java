@@ -46,10 +46,21 @@ import java.util.function.BiConsumer;
  *  <br>
  *  The reconstruction is exact, not an approximation, but it rests on an invariant: <b>the body
  *  must be homogeneous, and each edge must be homogeneous along its own axis</b>. Flat
- *  background/foundation fills, borders and shadows satisfy it. Gradients, noises, images, texts
- *  and custom painters do not, their pixels depending on the full component bounds. A border
- *  with a different color per edge satisfies it as long as its miter joints land in the same
- *  place at every size.
+ *  background/foundation fills, borders and shadows satisfy it. Noises, images, texts and custom
+ *  painters do not, their pixels depending on the full component bounds. A border with a
+ *  different color per edge satisfies it as long as its miter joints land in the same place at
+ *  every size. <br>
+ *  <br>
+ *  The invariant is judged per axis, so the exemplar does not always collapse both. A gradient
+ *  running top to bottom paints every column the same, so its width may be collapsed while its
+ *  height stays in the key. Such a key holds still through a horizontal resize and changes on a
+ *  vertical one. A key is therefore one of three things - exact, collapsed along one axis, or
+ *  collapsed along both - and the two questions this class asks about that are deliberately
+ *  different. {@link #_isSizeInvariantKey} demands both axes, because a key still
+ *  carrying one changes on every frame of a drag along it and must not be allocated mid-drag.
+ *  {@link #cachesIndependentlyOfSomeAxis} settles for one, because a layer cut which buys cache
+ *  hits in a single direction already earns its bookkeeping. Which axes a configuration leaves
+ *  repeating is decided by {@code LayerRenderConf._repeatingAxes}.
  *  The eligibility check must stay conservative, because an over-eager rule produces subtly wrong
  *  pixels, not a crash.
  *  Ineligible or too small configurations keep the classic exact-size key and behave exactly as
@@ -272,13 +283,31 @@ final class LayerPartitionCache
     }
 
     /**
-     *  Whether this key's image may be allocated on the spot, rather than only
-     *  after a certain number of cache entry hits...
+     *  Whether this key's image may be allocated on the spot, rather than only once a second
+     *  user has asked for it. The entry itself is created either way; only the pixel buffer
+     *  waits. It may be allocated whenever the component is not resizing at all, and while it is
+     *  resizing only for a key no resize can change - any other key is invalidated by the very
+     *  next frame, so its image would be allocated, blitted once and thrown away.
      */
     private static boolean _isWorthAllocatingRightAway(
         LayerRenderConf cacheKey, LayerRenderConf renderInput, boolean isResizing
     ) {
-        return !isResizing || !cacheKey.boxModel().size().equals(renderInput.boxModel().size());
+        return !isResizing || _isSizeInvariantKey(cacheKey, renderInput);
+    }
+
+    /**
+     *  Whether the cache key drops <i>both</i> of the actual dimensions, which is what makes it
+     *  survive a resize along any axis. A key which collapsed only one of them - a gradient
+     *  running down the component keeps its height, see the class javadoc - still changes on
+     *  every frame of a drag along the other, and must be treated as the exact-size keys are.
+     */
+    private static boolean _isSizeInvariantKey(
+        LayerRenderConf cacheKey, LayerRenderConf renderInput
+    ) {
+        final Size key    = cacheKey.boxModel().size();
+        final Size actual = renderInput.boxModel().size();
+        return key.widthOrElse(0f)  != actual.widthOrElse(0f)
+            && key.heightOrElse(0f) != actual.heightOrElse(0f);
     }
 
     private static boolean _isTooLargeToAllocateWhileResizing( LayerRenderConf cacheKey ) {
@@ -395,7 +424,12 @@ final class LayerPartitionCache
         and the slice cut lines from a render configuration (see class javadoc).
         ------------------------------------------------------------------------------------ */
 
-    static boolean cachesSizeIndependently( LayerRenderConf conf ) {
+    /**
+     *  Whether the cache key collapses <i>at least one</i> axis, so that a drag along that axis
+     *  is served from the cache. Deliberately weaker than {@link #_isSizeInvariantKey};
+     *  see the class javadoc for why the two questions differ.
+     */
+    static boolean cachesIndependentlyOfSomeAxis( LayerRenderConf conf ) {
         if ( !CacheBudget.tilingEnabled() )
             return false;
         return !conf.canonicalRepresentation().boxModel().size().equals(conf.boxModel().size());

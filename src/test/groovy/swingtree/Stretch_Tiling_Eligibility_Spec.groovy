@@ -386,6 +386,56 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             ext.cachedRendering(UI.Layer.BACKGROUND).size() == 2
     }
 
+    def 'A noise is lifted out even when the layer under it is only free along one axis.'()
+    {
+        reportInfo """
+            The cut above is worth making whenever the piece under the noise can be cached
+            across a drag - and "across a drag" is allowed to mean one direction rather than
+            both. A layer whose background is a gradient running straight down it collapses
+            its width into an exemplar and carries its height, so widening it is free while
+            heightening it is not.
+
+            Cutting such a layer therefore buys real cache hits half the time and costs only a
+            second cache entry the other half, which is a trade worth taking. Requiring the
+            piece to hold still along *both* axes before cutting would be the tidier looking
+            rule and would quietly turn every frame of the drag below back into a re-render.
+        """
+        given : 'A button whose background layer is a gradient down the component, a noise and a shadow.'
+            var button =
+                UI.button("Tile me")
+                  .withStyle( it -> it
+                        .borderRadius(16)
+                        .gradient(UI.Layer.BACKGROUND, "gloss", g -> g.span(UI.Span.TOP_TO_BOTTOM).colors("#1e5a8a", "#8a5a1e"))
+                        .noise(UI.Layer.BACKGROUND, "grain", n -> n.colors("#202020", "#dedede"))
+                        .shadow(UI.Layer.BACKGROUND, "glow", s -> s.color("#0a0a14").blurRadius(6))
+                  )
+                  .get(JButton)
+            button.setSize(500, 300)
+            var ext = ComponentExtension.from(button)
+        and : 'A drag is started along the axis the gradient does not vary along.'
+            2.times { Utility.renderSingleComponent(button) }
+            button.setSize(640, 300)
+            2.times { Utility.renderSingleComponent(button) }
+
+        expect : 'The layer was cut, and the piece under the noise is a compressed exemplar.'
+            button.width == 640 && button.height == 300
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            ext.cachedRendering(UI.Layer.BACKGROUND).all( image -> image.width < 640 )
+
+        when : 'The drag continues through a series of fresh widths.'
+            int missesWhenWarm = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            int hitsWhenWarm   = ext.cacheHitCount(UI.Layer.BACKGROUND)
+            [700, 780, 900, 1010].each { width ->
+                button.setSize(width, 300)
+                Utility.renderSingleComponent(button)
+                assert button.width == width
+            }
+
+        then : 'Not one of those paints re-rendered the style, despite the noise on the layer.'
+            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesWhenWarm
+            ext.cacheHitCount(UI.Layer.BACKGROUND)  == hitsWhenWarm + 4
+    }
+
     def 'Once the size settles again, the noise goes back into a single cached image.'()
     {
         reportInfo """

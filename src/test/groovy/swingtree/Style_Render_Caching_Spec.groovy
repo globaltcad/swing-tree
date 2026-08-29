@@ -683,6 +683,106 @@ class Style_Render_Caching_Spec extends Specification
             ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
     }
 
+    def 'A style cached size independently along one axis only is not allocated while the other axis is dragged.'()
+    {
+        reportInfo """
+            The scenario above holds back renderings whose key contains a size that is
+            currently changing. Deciding whether a key contains one used to be a yes or no
+            question, because a style was either cached at its exact size or at a size
+            independent exemplar. A gradient running straight down a component is neither: its
+            width collapses into the exemplar while its height is carried in the key.
+
+            Dragging such a component sideways is free, and the scenario after this one is
+            about that. Dragging it *downwards* changes the key on every frame, exactly like an
+            exact-size key, and it has to be held back for exactly the same reason - otherwise
+            each frame allocates an image, blits it once and throws it away.
+
+            The trap here is that "the key differs from the component size" is true for this
+            style even while the height is being dragged, so a check phrased that way concludes
+            the key is stable and allocates on every frame. What has to be asked instead is whether
+            *both* dimensions were dropped, because either one still carried is a dimension this
+            drag may be moving.
+        """
+        given : 'A button with a gradient running straight down it, at a settled size.'
+            var button =
+                UI.button("Taller")
+                  .withStyle( it -> it
+                        .borderRadius(10)
+                        .gradient( g -> g.span(UI.Span.TOP_TO_BOTTOM).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
+                  )
+                  .get(JButton)
+            var ext = ComponentExtension.from(button)
+        and : """
+            Tall enough that its exemplar is above the size up to which an image is allocated
+            eagerly - the small entry exception of the scenario above applies here too, and a
+            short component would be allocated on every frame quite legitimately.
+        """
+            button.setSize(300, 500)
+            4.times { Utility.renderSingleComponent(button) }
+        expect : 'It really is cached, and at a width far below its own.'
+            button.width == 300 && button.height == 500
+            ext.cachedRendering(UI.Layer.BACKGROUND).every( image -> image.width < 100 )
+
+        when : 'The component is dragged through four heights it has never had before.'
+            var renderingsPerFrame = []
+            [520, 540, 560, 580].each { height ->
+                button.setSize(300, height)
+                Utility.renderSingleComponent(button)
+                renderingsPerFrame << ext.cachedRendering(UI.Layer.BACKGROUND).size()
+            }
+        then : 'The component really did arrive at the last of those heights.'
+            button.height == 580
+        and  : 'Not one of those frames left a finished rendering behind.'
+            renderingsPerFrame == [0, 0, 0, 0]
+
+        when : 'The drag ends and the component keeps being painted at its final height.'
+            2.times { Utility.renderSingleComponent(button) }
+        then : 'Caching resumes, just as it does for a key of any other shape.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+    }
+
+    def 'The axis a one axis gradient does not vary along is still dragged for free.'()
+    {
+        reportInfo """
+            The other side of the scenario above, and the reason it may not simply treat a one
+            axis key as an exact-size key everywhere. Holding a rendering back is only right
+            while the key is actually moving. Dragged along the axis its gradient does not vary
+            along, this very same style keeps one and the same key from frame to frame, and
+            every one of those frames is served from the cache without re-rendering anything.
+
+            Both halves have to be pinned together: a fix for the scenario above which
+            suppressed this one would have cured the churn by giving up the feature.
+        """
+        given : 'The same style, settled at a size where it is cached.'
+            var button =
+                UI.button("Wider")
+                  .withStyle( it -> it
+                        .borderRadius(10)
+                        .gradient( g -> g.span(UI.Span.TOP_TO_BOTTOM).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
+                  )
+                  .get(JButton)
+            var ext = ComponentExtension.from(button)
+            button.setSize(300, 500)
+            4.times { Utility.renderSingleComponent(button) }
+        expect : 'A rendering exists to be dragged against.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+
+        when : 'The component is dragged through four widths it has never had before.'
+            int missesBefore = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            int hitsBefore   = ext.cacheHitCount(UI.Layer.BACKGROUND)
+            [340, 380, 420, 460].each { width ->
+                button.setSize(width, 500)
+                Utility.renderSingleComponent(button)
+            }
+        then : 'The component really did arrive at the last of those widths.'
+            button.width == 460 && button.height == 500
+        and  : 'Not one of those frames re-rendered the style - all four were cache hits.'
+            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBefore
+            ext.cacheHitCount(UI.Layer.BACKGROUND)  == hitsBefore + 4
+        and  : 'And they were all served from the one exemplar, which never changed.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).every( image -> image.width < 100 )
+    }
+
     def 'Equally styled components resizing together still end up sharing one rendering.'()
     {
         reportInfo """
@@ -700,7 +800,7 @@ class Style_Render_Caching_Spec extends Specification
             waiting on its next repaint too, without having asked for it again.
         """
         given : 'Two buttons carrying the exact same style.'
-            // Radial on purpose - see 'A large exact-size rendering is not minted while the
+            // Radial on purpose - see 'A large exact-size rendering is not allocated while the
             // component is being resized.' for why a gradient down the component would not do.
             def styler = { conf -> conf
                 .borderRadius(10)

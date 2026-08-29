@@ -24,7 +24,7 @@ import java.util.Optional;
  *  reconstructs any actual size from the resulting rendering. A newly added field whose value
  *  (or whose rendering) depends on the component size would silently break that reconstruction,
  *  producing subtly wrong pixels rather than a failure. Should such a field become necessary,
- *  it must also be rejected by {@code LayerPartitionCache._isStretchTileable}.
+ *  it must also be rejected by {@link #_repeatingAxes(LayerRenderConf)}.
  */
 @Immutable
 @SuppressWarnings("Immutable")
@@ -175,36 +175,85 @@ final class LayerRenderConf
     // Canonical (size independent) representation for 9 patch caching:
 
     /**
-     *  Maps eligible configurations of any size onto the size independent exemplar key,
-     *  and returns ineligible ones (as well as those not strictly larger than the exemplar
-     *  in both dimensions) unchanged - which also makes this idempotent, so a configuration
-     *  which already has the exemplar size maps onto itself.
+     *  Maps eligible configurations of any size onto the exemplar key, collapsing only the
+     *  axes the layer actually repeats along (see the {@link LayerPartitionCache} class
+     *  documentation). Ineligible configurations, and those not strictly larger than the
+     *  exemplar in both dimensions, are returned unchanged - which also makes this idempotent,
+     *  so a configuration already at the exemplar size maps onto itself.
      */
     private static LayerRenderConf _canonicalize( LayerRenderConf conf ) {
-        if ( !_isStretchTileable(conf) )
+        final RepeatingAxes axes = _repeatingAxes(conf);
+        if ( axes == RepeatingAxes.NEITHER )
             return conf;
 
         final Outline sliceInsets = conf.nineTileSliceInsets();
-        final Size    canonical    = _exemplarSize(sliceInsets);
+        final Size    exemplar    = _exemplarSize(sliceInsets);
 
-        if ( !_borderEdgeSeamsAreSizeIndependent(conf, sliceInsets, canonical) )
+        if ( !_borderEdgeSeamsAreSizeIndependent(conf, sliceInsets, exemplar) )
             return conf;
 
         final Size actual = conf.boxModel().size();
 
+        /*
+            Deliberately still measured against the exemplar in *both* dimensions, even when
+            only one of them is collapsed: the stretch blit cuts the component along all four
+            slice insets whichever axis it stretches, so a component shorter than its own top
+            and bottom insets would have the two cut lines cross over regardless.
+        */
         final boolean strictlyLarger =
-                        actual.widthOrElse(0f)  > canonical.widthOrElse(0f) &&
-                        actual.heightOrElse(0f) > canonical.heightOrElse(0f);
+                        actual.widthOrElse(0f)  > exemplar.widthOrElse(0f) &&
+                        actual.heightOrElse(0f) > exemplar.heightOrElse(0f);
         if ( !strictlyLarger )
             return conf;
+
+        final Size canonical = Size.of(
+                                    axes.repeatsHorizontally() ? exemplar.widthOrElse(0f)  : actual.widthOrElse(0f),
+                                    axes.repeatsVertically()   ? exemplar.heightOrElse(0f) : actual.heightOrElse(0f)
+                                );
 
         return conf.withBoxModel(conf.boxModel().withSize(canonical));
     }
 
     /**
-     *  How far the size dependent pixels reach into the component from each side.
-     *  These insets are used to essentially cut an "exemplar" rendering of a componenet
-     *  into a size independent cache of 9 tiles.
+     *  The axes along which a layer's rendering repeats, and which may therefore be collapsed
+     *  into the exemplar. {@link #HORIZONTALLY} means every column is identical, so the
+     *  <i>width</i> is what collapses.
+     */
+    private enum RepeatingAxes
+    {
+        NEITHER(false, false), HORIZONTALLY(true, false), VERTICALLY(false, true), BOTH(true, true);
+
+        private final boolean _horizontally;
+        private final boolean _vertically;
+
+        RepeatingAxes( boolean horizontally, boolean vertically ) {
+            _horizontally = horizontally;
+            _vertically   = vertically;
+        }
+
+        boolean repeatsHorizontally() { return _horizontally; }
+        boolean repeatsVertically()   { return _vertically;   }
+
+        /** The axes both leave repeating: what a layer with more than one gradient is left with. */
+        RepeatingAxes and( RepeatingAxes other ) {
+            return of(_horizontally && other._horizontally, _vertically && other._vertically);
+        }
+
+        private static RepeatingAxes of( boolean horizontally, boolean vertically ) {
+            if ( horizontally )
+                return vertically ? BOTH : HORIZONTALLY;
+            else
+                return vertically ? VERTICALLY : NEITHER;
+        }
+    }
+
+    /**
+     *  How far the size dependent pixels reach into the component from each side:
+     *  margin + base outline + border width + the adjacent corner arc extents + the
+     *  shadow reach, plus a safety margin, ceiled to whole numbers. Everything between
+     *  opposite insets repeats along the respective axis and may be stretched freely. <br>
+     *  A pure function of the size independent parts of the configuration, so it can be
+     *  recomputed at blit time and always agrees with the canonicalization.
      */
     private static Outline _compute9PatchSliceInsets(LayerRenderConf conf ) {
         final BoxModelConf box = conf.boxModel();
@@ -261,31 +310,73 @@ final class LayerRenderConf
                 );
     }
 
-    /** Whether the layer content satisfies the tiling invariant (see class javadoc). */
-    private static boolean _isStretchTileable( LayerRenderConf conf ) {
+    /**
+     *  Which axes the layer content leaves repeating (see the class javadoc for the invariant). <br>
+     *  Noise, images, text and custom painters are refused outright: they vary in two dimensions,
+     *  or - for a painter - cannot be reasoned about at all. A gradient is the one kind that may
+     *  still leave an axis intact, and only ever the axis across its own direction.
+     */
+    private static RepeatingAxes _repeatingAxes( LayerRenderConf conf ) {
         final StyleConfLayer layer = conf.layer();
-
-        for ( GradientConf gradient : layer.gradients().sortedByNames() )
-            if ( !gradient.equals(GradientConf.none()) )
-                return false; // Gradient geometry spans the component bounds.
 
         for ( Pooled<NoiseConf> noise : layer.noises().sortedByNames() )
             if ( !noise.get().equals(NoiseConf.none()) )
-                return false; // Noise varies per pixel position.
+                return RepeatingAxes.NEITHER; // Noise varies per pixel position.
 
         for ( ImageConf image : layer.images().sortedByNames() )
             if ( !image.equals(ImageConf.none()) )
-                return false; // Image placement/fit depends on the component bounds.
+                return RepeatingAxes.NEITHER; // Image placement/fit depends on the component bounds.
 
         for ( TextConf text : layer.texts().sortedByNames() )
             if ( !text.equals(TextConf.none()) )
-                return false; // Text layout depends on the component bounds.
+                return RepeatingAxes.NEITHER; // Text layout depends on the component bounds.
 
         for ( PainterConf painter : layer.painters().sortedByNames() )
             if ( !painter.equals(PainterConf.none()) )
-                return false; // We cannot know what a custom painter does.
+                return RepeatingAxes.NEITHER; // We cannot know what a custom painter does.
 
-        return true;
+        RepeatingAxes axes = RepeatingAxes.BOTH;
+        for ( GradientConf gradient : layer.gradients().sortedByNames() ) {
+            if ( gradient.equals(GradientConf.none()) )
+                continue;
+            axes = axes.and(_axesRepeatedBy(gradient));
+            if ( axes == RepeatingAxes.NEITHER )
+                return axes;
+        }
+        return axes;
+    }
+
+    /**
+     *  The axes a single gradient leaves repeating. <br>
+     *  <br>
+     *  A linear gradient straight down the component is built by
+     *  {@link StyleRenderer#createGradientPaint(BoxModelConf, GradientConf)} from two points
+     *  sharing an x coordinate, and the component width never enters that calculation - so
+     *  every column of it is the same and the width may be collapsed. Left to right is the
+     *  same argument transposed. <br>
+     *  <br>
+     *  Everything else is refused: a radial or conic gradient varies in two dimensions by
+     *  definition, a diagonal span varies along both axes, a rotation turns an axis aligned
+     *  span into a diagonal one, and {@link UI.ComponentBoundary#CENTER_TO_CONTENT} derives its
+     *  insets from the component size itself.
+     */
+    private static RepeatingAxes _axesRepeatedBy( GradientConf gradient ) {
+        if ( gradient.type() != UI.GradientType.LINEAR )
+            return RepeatingAxes.NEITHER;
+        if ( gradient.rotation() % 360f != 0f )
+            return RepeatingAxes.NEITHER;
+        if ( gradient.boundary() == UI.ComponentBoundary.CENTER_TO_CONTENT )
+            return RepeatingAxes.NEITHER;
+        switch ( gradient.span() ) {
+            case TOP_TO_BOTTOM:
+            case BOTTOM_TO_TOP:
+                return RepeatingAxes.HORIZONTALLY;
+            case LEFT_TO_RIGHT:
+            case RIGHT_TO_LEFT:
+                return RepeatingAxes.VERTICALLY;
+            default:
+                return RepeatingAxes.NEITHER;
+        }
     }
 
     /**
