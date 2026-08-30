@@ -16,8 +16,15 @@ from __future__ import annotations
 import json
 
 #  The example UIs in the order the benchmark measures them, so the report does not
-#  re-order them alphabetically and make two runs harder to compare side by side.
-VIEW_ORDER = ["chat", "sequencer", "trains", "team", "scribe", "almanack", "garden"]
+#  re-order them alphabetically and make two runs harder to compare side by side. The seven
+#  look and feel presets in the middle are one and the same view, which is why they are kept
+#  adjacent: read side by side they say what the styling costs, with everything else equal.
+VIEW_ORDER = [
+    "chat", "sequencer", "trains", "team", "scribe", "almanack", "garden",
+    "glass", "soft", "bevel",
+    "linen", "glassmorphic", "skeuomorphic", "softui", "aero", "material", "flat",
+    "studio", "budget", "breathing",
+]
 
 #  Which measures are drawn, and in which colour. The mapping is by *what is measured*
 #  rather than by position, so 'repaint after a size change' is the same colour in the
@@ -46,6 +53,26 @@ FACET_TITLES = {
     "gradient/uncached": "Rounded gradient, cache off",
 }
 
+#  The look and feel showcase is measured under seven presets. Each note says what that
+#  preset actually puts on a style layer, because that - not the picture - is what decides
+#  which of the renderer's paths the view exercises.
+SHOWCASE_NOTES = {
+    "linen":        "The look and feel showcase under the Linen preset: flat cream surfaces, "
+                    "taupe borders, and a woven noise grain on the window background.",
+    "glassmorphic": "The showcase under Glassmorphism: nothing opaque, every surface a "
+                    "translucent wash over a blurred parent, with a wide soft shadow.",
+    "skeuomorphic": "The showcase under Skeuomorphism: a grain, a vertical gradient and a bevel "
+                    "on every raised control, which is the most layered of the presets.",
+    "softui":       "The showcase under Soft UI: no borders and no gradients, only generous "
+                    "radii and a paired highlight and shadow - shadow-dominated.",
+    "aero":         "The showcase under Frutiger Aero: saturated fills under a hard gloss "
+                    "gradient, sky gradients behind everything, outlines and drop shadows.",
+    "material":     "The showcase under Material: flat fills, a small 4px radius, and depth "
+                    "said entirely with elevation shadows - no gradient anywhere.",
+    "flat":         "The showcase under Flat design: no shadow, no gradient, no bevel and no "
+                    "rounded corner - the cheapest thing the style engine can be asked to draw.",
+}
+
 FACET_NOTES = {
     "noise/opaque": "A large FABRIC noise over the whole component, 1100..1600 x 1000.",
     "noise/translucent": "The same noise with a translucent colour, which denies it the opaque blit.",
@@ -54,6 +81,7 @@ FACET_NOTES = {
     "gradient/uncached": "The same panel with the render cache switched off, i.e. the cost the "
                          "cache exists to avoid.",
 }
+FACET_NOTES.update({f"resize/{view}": note for view, note in SHOWCASE_NOTES.items()})
 
 
 def facet_key(metric: dict) -> str:
