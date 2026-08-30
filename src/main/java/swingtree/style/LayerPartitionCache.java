@@ -259,30 +259,34 @@ final class LayerPartitionCache
     private int _hitsUntilAllocationFor(
         LayerRenderConf cacheKey, LayerRenderConf renderInput, boolean isResizing
     ) {
-        if ( !_isKeyedOnAChangingSize(cacheKey, renderInput, isResizing) )
+        if ( _isWorthAllocatingRightAway(cacheKey, renderInput, isResizing) )
             return _cachingMakesSenseFor(_layer, cacheKey);
 
-        if ( _isTooLargeToMintWhileResizing(cacheKey) )
+        if ( _isTooLargeToAllocateWhileResizing(cacheKey) )
             return _hitsForReusingAFinishedRendering(cacheKey);
 
         final int hits = _cachingMakesSenseFor(_layer, cacheKey);
-        if ( hits < 0 || _isTrivialToMintWhileResizing(cacheKey) )
+        if ( hits < 0 || _isTrivialToAllocateWhileResizing(cacheKey) )
             return hits;
         return Math.max(HITS_UNTIL_ALLOCATION_WHILE_RESIZING, hits);
     }
 
-    private static boolean _isKeyedOnAChangingSize(
+    /**
+     *  Whether this key's image may be allocated on the spot, rather than only
+     *  after a certain number of cache entry hits...
+     */
+    private static boolean _isWorthAllocatingRightAway(
         LayerRenderConf cacheKey, LayerRenderConf renderInput, boolean isResizing
     ) {
-        return isResizing && cacheKey.boxModel().size().equals(renderInput.boxModel().size());
+        return !isResizing || !cacheKey.boxModel().size().equals(renderInput.boxModel().size());
     }
 
-    private static boolean _isTooLargeToMintWhileResizing( LayerRenderConf cacheKey ) {
+    private static boolean _isTooLargeToAllocateWhileResizing( LayerRenderConf cacheKey ) {
         final Size size = cacheKey.boxModel().size();
         return size.widthOrElse(0f) * size.heightOrElse(0f) > _eagerAllocationLimit();
     }
 
-    private static boolean _isTrivialToMintWhileResizing( LayerRenderConf cacheKey ) {
+    private static boolean _isTrivialToAllocateWhileResizing( LayerRenderConf cacheKey ) {
         final Size size = cacheKey.boxModel().size();
         final int trivialAllocationLimit = (int) ( _eagerAllocationLimit() * EAGER_ALLOCATION_FRIENDLINESS );
         return size.widthOrElse(0f) * size.heightOrElse(0f) <= trivialAllocationLimit;
@@ -298,7 +302,7 @@ final class LayerPartitionCache
     }
 
     /** The image area up to which an entry is worth allocating right away rather than after a
-     *  warm-up of cache hits; also the line above which minting one mid-resize is a loss. */
+     *  warm-up of cache hits; also the line above which allocating one mid-resize is a loss. */
     private static int _eagerAllocationLimit() {
         return (int) ( _maxCacheableImageArea() * EAGER_ALLOCATION_FRIENDLINESS );
     }
