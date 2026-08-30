@@ -29,6 +29,12 @@ import java.util.concurrent.TimeUnit
     copying the four corners and stretching the edge bands and the center
     (a "nine slice", like Android 9-patch images or CSS border-image).
 
+    Some styles are reconstructable along one axis only. A gradient
+    running straight down a component varies from top to bottom, but every
+    one of its columns is identical, so it can be stretched sideways while
+    its real height is kept. Those are cached size independently along the
+    free axis alone, and have to survive the same comparison.
+
     That optimization is only acceptable if it is invisible. Painting a
     component with stretch tiling enabled must produce (practically) the
     same pixels as painting it the classic way, where every size is
@@ -166,6 +172,56 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
                                                                                                      .borderRadiusAt(UI.Corner.BOTTOM_RIGHT, 16, 17) }
             "strongly asymmetric margin"                | UI.Layer.BACKGROUND | 400   | 160    | { it.backgroundColor("#4a8fd1").foundationColor("#20242a").margin(0, 0, 0, 20).borderRadius(8) }
             "big margin, huge radius"                   | UI.Layer.BACKGROUND | 500   | 300    | { it.backgroundColor("#c19a3f").borderRadius(32).margin(10) }
+    }
+
+    def 'A gradient reconstructed along its free axis paints what a full rendering paints. (#description)'(
+        String description, int width, int height, int siblingWidth, int siblingHeight, Closure styler
+    ) {
+        reportInfo """
+            A gradient running down a component is stretched sideways from an
+            exemplar which is only a few pixels wide but as tall as the component
+            itself. That is a far more violent stretch than a flat fill ever
+            asks for - a handful of columns blown up to the full width - so it is
+            worth pinning that the result is still the same picture.
+
+            The sibling below grows along the *free* axis only, because that is
+            the whole claim: a gradient down the component may be widened for
+            free, and may not be heightened for free. A sibling differing in the
+            other direction would simply miss the cache and prove nothing.
+        """
+        given : 'The component painted the classic way, with stretch tiling disabled:'
+            var classic = renderedClassically(width, height, styler)
+        and : 'An identically styled box painted with stretch tiling enabled and warmed into the shared cache:'
+            var tiledBox = tiledAndWarmed(width, height, styler)
+        and : """
+            Proof that the comparison is not vacuous: a sibling differing only
+            along the axis the gradient does not vary along finds the shared
+            entry already populated and is served from it on its first paint.
+        """
+            var sibling = boxWith(siblingWidth, siblingHeight, styler)
+            Utility.renderSingleComponent(sibling)
+            assert ComponentExtension.from(sibling).cacheMissCount(UI.Layer.BACKGROUND) == 0
+            assert ComponentExtension.from(sibling).cacheHitCount(UI.Layer.BACKGROUND)  >= 1
+
+        expect : 'Both switch positions produced practically identical pixels:'
+            var tiled = Utility.renderSingleComponent(tiledBox)
+            Utility.similarityBetween(classic, tiled) >= 99.9
+
+        where :
+            description                              | width | height | siblingWidth | siblingHeight | styler
+            "down the component, widened"            | 400   | 160    | 560          | 160           | { it.borderRadius(14).gradient(g -> g.span(UI.Span.TOP_TO_BOTTOM).colors("#d14a4a", "#1a3d6d")) }
+            "up the component, widened"              | 400   | 160    | 560          | 160           | { it.borderRadius(14).gradient(g -> g.span(UI.Span.BOTTOM_TO_TOP).colors("#d14a4a", "#1a3d6d")) }
+            "across the component, heightened"       | 200   | 340    | 200          | 470           | { it.borderRadius(14).gradient(g -> g.span(UI.Span.LEFT_TO_RIGHT).colors("#d14a4a", "#1a3d6d")) }
+            "across right to left, heightened"       | 200   | 340    | 200          | 470           | { it.borderRadius(14).gradient(g -> g.span(UI.Span.RIGHT_TO_LEFT).colors("#d14a4a", "#1a3d6d")) }
+            "a gloss over a flat fill, widened"      | 420   | 150    | 610          | 150           | { it.borderRadius(14).backgroundColor("#123048")
+                                                                                                          .gradient(g -> g.colors(new Color(255, 255, 255, 90), new Color(255, 255, 255, 0))) }
+            "three colour stops, widened"            | 380   | 200    | 505          | 200           | { it.borderRadius(18).margin(6).gradient(g -> g.colors("#c81e46", "#1e46c8", "#46c81e")) }
+            "a gradient under a shadow, widened"     | 400   | 180    | 545          | 180           | { it.borderRadius(16)
+                                                                                                          .shadow("halo", s -> s.color("#0a0a12").blurRadius(7).spreadRadius(2))
+                                                                                                          .gradient(g -> g.colors("#d14a4a", "#1a3d6d")) }
+            "a gradient inside a rounded border"     | 440   | 190    | 600          | 190           | { it.borderRadius(20).border(4, "#20242e").margin(5)
+                                                                                                          .gradient(g -> g.colors("#d14a4a", "#1a3d6d")) }
+            "an extreme stretch, very wide"          | 260   | 150    | 1400         | 150           | { it.borderRadius(12).gradient(g -> g.colors("#d14a4a", "#1a3d6d")) }
     }
 
     def 'A layer cut around its noise paints what the whole layer paints. (#description)'(

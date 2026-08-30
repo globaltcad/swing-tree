@@ -594,12 +594,15 @@ class Style_Render_Caching_Spec extends Specification
             is not affected, and small images are always allocated - see the scenario after this
             one for why that second exception is essential.
         """
-        given : 'A gradient styled button - heavy enough to cache, too gradient-y to stretch tile.'
+        given : 'A radial gradient styled button - heavy enough to cache, too two dimensional to stretch tile.'
+            // Radial on purpose: a gradient running straight down the component varies along one
+            // axis only and is keyed size independently across the other, which would put it in
+            // the very group this scenario needs a counterexample to.
             var button =
                 UI.button("Wide")
                   .withStyle( it -> it
                         .borderRadius(10)
-                        .gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
+                        .gradient( g -> g.type(UI.GradientType.RADIAL).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
                   )
                   .get(JButton)
             var ext = ComponentExtension.from(button)
@@ -646,12 +649,13 @@ class Style_Render_Caching_Spec extends Specification
             it has never had, and none of those frames leaves a rendering behind. As soon as
             the size stops changing, caching returns of its own accord.
         """
-        given : 'A gradient styled button, heavy enough to be cached, but not stretch tileable.'
+        given : 'A radial gradient styled button, heavy enough to be cached, but not stretch tileable.'
+            // Radial on purpose - see the scenario above.
             var button =
                 UI.button("Drag me")
                   .withStyle( it -> it
                         .borderRadius(10)
-                        .gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
+                        .gradient( g -> g.type(UI.GradientType.RADIAL).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
                   )
                   .get(JButton)
             var ext = ComponentExtension.from(button)
@@ -696,9 +700,11 @@ class Style_Render_Caching_Spec extends Specification
             waiting on its next repaint too, without having asked for it again.
         """
         given : 'Two buttons carrying the exact same style.'
+            // Radial on purpose - see 'A large exact-size rendering is not minted while the
+            // component is being resized.' for why a gradient down the component would not do.
             def styler = { conf -> conf
                 .borderRadius(10)
-                .gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
+                .gradient( g -> g.type(UI.GradientType.RADIAL).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
             }
             var first  = UI.button("A").withStyle(styler as swingtree.api.Styler).get(JButton)
             var second = UI.button("B").withStyle(styler as swingtree.api.Styler).get(JButton)
