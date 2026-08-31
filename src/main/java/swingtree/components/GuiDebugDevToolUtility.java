@@ -631,8 +631,11 @@ final class GuiDebugDevToolUtility {
                             "CSS <code>border-image</code>). Resizing such a component then costs nothing to re-render, and all<br>" +
                             "its differently sized siblings share the one small image.<br>" +
                             "<br>" +
-                            "Styles whose pixels depend on the full bounds (gradients, noises, images, text, custom painters,<br>" +
-                            "and per-edge border colors on rounded corners) are never tiled and keep their exact-size cache.<br>" +
+                            "A gradient from top to bottom paints every column alike, so it is rendered at the component's<br>" +
+                            "real height but only a fraction of its width: widening such a component is free, making it<br>" +
+                            "taller renders it again. Styles whose pixels depend on the full bounds (two dimensional<br>" +
+                            "gradients, noises, images, text, custom painters, and per-edge border colors on rounded<br>" +
+                            "corners) are never tiled and keep their exact-size cache.<br>" +
                             "<br>" +
                             "Unchecking this is a <b>safety hatch</b>: it makes every style fall back to exact-size caching,<br>" +
                             "so a resize re-renders. Use it to confirm whether a suspicious rendering artifact comes from the<br>" +

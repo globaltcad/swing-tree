@@ -145,7 +145,7 @@ final class StyleLayerCache
     }
 
     private static boolean _isWorthCuttingOut( LayerRenderConf part ) {
-        return part.rendersNothing() || LayerPartitionCache.cachesIndependentlyOfSomeAxis(part);
+        return part.rendersNothing() || LayerPartitionCache.cachesIndependentlyOfAtLeastOneDimension(part);
     }
 
     void paint( Graphics2D g2d ) {

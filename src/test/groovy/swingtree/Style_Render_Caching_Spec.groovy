@@ -783,6 +783,57 @@ class Style_Render_Caching_Spec extends Specification
             ext.cachedRendering(UI.Layer.BACKGROUND).every( image -> image.width < 100 )
     }
 
+    def 'A drag which stops changing the exact dimension of a key starts caching again mid-drag.'()
+    {
+        reportInfo """
+            A key which is compact in one dimension and exact in the other is invalidated when
+            the component changes size in the exact dimension, and by nothing else. A window
+            drag stops changing both dimensions quickly: grab a corner, pull it down and then
+            mostly sideways, and from the moment the height stops changing, the key of a button
+            with a vertical gradient survives the rest of the drag untouched. Withholding its
+            image buffer until the drag ends renders every one of those frames from scratch
+            instead.
+
+            The button below has to be genuinely tall for the scenario to reach that decision at
+            all. Its exemplar is 26 pixels wide, so a short button's exemplar is small enough to
+            be allocated during a resize regardless and the question never comes up. A tall
+            one's exemplar is above that size, and the entry is then refused admission on every
+            frame the component counts as resizing.
+        """
+        given : 'A tall button whose background is a gradient running straight down it.'
+            var button =
+                UI.button("Tall")
+                  .withStyle( it -> it
+                        .borderRadius(10)
+                        .gradient( g -> g.span(UI.Span.TOP_TO_BOTTOM).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
+                  )
+                  .get(JButton)
+            var ext = ComponentExtension.from(button)
+            button.setSize(300, 2800)
+            4.times { Utility.renderSingleComponent(button) }
+        expect : 'It is cached at this settled size, in an image far narrower than the component.'
+            ext.cachedRendering(UI.Layer.BACKGROUND).every( image -> image.width < 100 )
+
+        when : 'The drag starts by pulling the height, which invalidates that key.'
+            button.setSize(300, 2900)
+            Utility.renderSingleComponent(button)
+        then : 'Nothing is cached for the new height yet, as for any key whose exact dimension just changed.'
+            button.height == 2900
+            ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
+
+        when : 'The drag continues sideways alone, so the component stops changing size in the exact dimension.'
+            int hitsBefore = ext.cacheHitCount(UI.Layer.BACKGROUND)
+            [340, 380, 420, 460].each { width ->
+                button.setSize(width, 2900)
+                Utility.renderSingleComponent(button)
+                assert button.width == width
+            }
+        then : 'The rendering was allocated during the drag rather than after it...'
+            ext.cachedRendering(UI.Layer.BACKGROUND).every( image -> image.width < 100 )
+        and : '...and the later frames of that same drag were served from it.'
+            ext.cacheHitCount(UI.Layer.BACKGROUND) > hitsBefore
+    }
+
     def 'Equally styled components resizing together still end up sharing one rendering.'()
     {
         reportInfo """

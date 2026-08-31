@@ -51,16 +51,16 @@ import java.util.function.BiConsumer;
  *  different color per edge satisfies it as long as its miter joints land in the same place at
  *  every size. <br>
  *  <br>
- *  The invariant is judged per axis, so the exemplar does not always collapse both. A gradient
- *  running top to bottom paints every column the same, so its width may be collapsed while its
- *  height stays in the key. Such a key holds still through a horizontal resize and changes on a
- *  vertical one. A key is therefore one of three things - exact, collapsed along one axis, or
- *  collapsed along both - and the two questions this class asks about that are deliberately
- *  different. {@link #_isSizeInvariantKey} demands both axes, because a key still
- *  carrying one changes on every frame of a drag along it and must not be allocated mid-drag.
- *  {@link #cachesIndependentlyOfSomeAxis} settles for one, because a layer cut which buys cache
- *  hits in a single direction already earns its bookkeeping. Which axes a configuration leaves
- *  repeating is decided by {@code LayerRenderConf._repeatingAxes}.
+ *  That invariant is really two - one about the columns and one about the rows - so an exemplar
+ *  is not always compact in both dimensions. A gradient running top to bottom paints every
+ *  column the same, so its width can be compacted while its height stays exactly the
+ *  component's. A key is therefore one of the four shapes {@link LayerRenderConf.Compaction}
+ *  names, and it is invalidated when the component changes size in a dimension it holds
+ *  exactly, never in one it holds compacted. The two decisions taken here read that
+ *  differently: allocating an image buffer during a resize asks whether <i>this</i> resize can
+ *  invalidate the key, while the layer cut of {@link #cachesIndependentlyOfAtLeastOneDimension} asks
+ *  only whether either dimension is compact at all, because cache hits in a single direction
+ *  already earn its bookkeeping.
  *  The eligibility check must stay conservative, because an over-eager rule produces subtly wrong
  *  pixels, not a crash.
  *  Ineligible or too small configurations keep the classic exact-size key and behave exactly as
@@ -164,6 +164,7 @@ final class LayerPartitionCache
             return;
         }
 
+        final LayerRenderConf previousInput = _renderInput;
         _renderInput = _part.restrict(newConf.renderConfFor(_layer));
         if ( _renderInput.rendersNothing() ) {
             _state = CacheState.Nothing.INSTANCE;
@@ -177,7 +178,7 @@ final class LayerPartitionCache
         if ( _state instanceof CacheState.Cached && ((CacheState.Cached) _state)._key.get().equals(keyConf) )
             return;
 
-        final int hitsUntilAllocation = _hitsUntilAllocationFor(keyConf, _renderInput, isResizing);
+        final int hitsUntilAllocation = _hitsUntilAllocationFor(keyConf, _renderInput, previousInput, isResizing);
         if ( hitsUntilAllocation < 0 ) {
             _state = CacheState.Rejected.INSTANCE; // The cache refused admission!
         } else {
@@ -268,9 +269,9 @@ final class LayerPartitionCache
     }
 
     private int _hitsUntilAllocationFor(
-        LayerRenderConf cacheKey, LayerRenderConf renderInput, boolean isResizing
+        LayerRenderConf cacheKey, LayerRenderConf renderInput, LayerRenderConf previousInput, boolean isResizing
     ) {
-        if ( _isWorthAllocatingRightAway(cacheKey, renderInput, isResizing) )
+        if ( _isWorthAllocatingRightAway(cacheKey, renderInput, previousInput, isResizing) )
             return _cachingMakesSenseFor(_layer, cacheKey);
 
         if ( _isTooLargeToAllocateWhileResizing(cacheKey) )
@@ -283,31 +284,30 @@ final class LayerPartitionCache
     }
 
     /**
-     *  Whether this key's image may be allocated on the spot, rather than only once a second
-     *  user has asked for it. The entry itself is created either way; only the pixel buffer
-     *  waits. It may be allocated whenever the component is not resizing at all, and while it is
-     *  resizing only for a key no resize can change - any other key is invalidated by the very
-     *  next frame, so its image would be allocated, blitted once and thrown away.
+     *  Whether this key's image buffer may be allocated on the spot, rather than only once a
+     *  second user has asked for it. The entry itself is created either way; only the buffer
+     *  waits. A buffer allocated for a key which the next frame invalidates is drawn, blitted
+     *  once and thrown away, so during a resize a buffer is only worth allocating for a key
+     *  that this resize cannot invalidate. A key is invalidated when the component changes
+     *  size in a dimension the key holds exactly, so the test is whether the component changed
+     *  size only in dimensions this key holds compacted.
      */
     private static boolean _isWorthAllocatingRightAway(
-        LayerRenderConf cacheKey, LayerRenderConf renderInput, boolean isResizing
+        LayerRenderConf cacheKey, LayerRenderConf renderInput, LayerRenderConf previousInput, boolean isResizing
     ) {
-        return !isResizing || _isSizeInvariantKey(cacheKey, renderInput);
-    }
+        if ( !isResizing )
+            return true;
 
-    /**
-     *  Whether the cache key drops <i>both</i> of the actual dimensions, which is what makes it
-     *  survive a resize along any axis. A key which collapsed only one of them - a gradient
-     *  running down the component keeps its height, see the class javadoc - still changes on
-     *  every frame of a drag along the other, and must be treated as the exact-size keys are.
-     */
-    private static boolean _isSizeInvariantKey(
-        LayerRenderConf cacheKey, LayerRenderConf renderInput
-    ) {
-        final Size key    = cacheKey.boxModel().size();
         final Size actual = renderInput.boxModel().size();
-        return key.widthOrElse(0f)  != actual.widthOrElse(0f)
-            && key.heightOrElse(0f) != actual.heightOrElse(0f);
+        final LayerRenderConf.Compaction compacted =
+                    LayerRenderConf.Compaction.between(cacheKey.boxModel().size(), actual);
+
+        if ( compacted == LayerRenderConf.Compaction.NONE )
+            return false; // An exact-size key is invalidated by any frame of any drag.
+
+        final Size previous = previousInput.boxModel().size();
+        return ( compacted.includesWidth()  || previous.widthOrElse(0f)  == actual.widthOrElse(0f)  )
+            && ( compacted.includesHeight() || previous.heightOrElse(0f) == actual.heightOrElse(0f) );
     }
 
     private static boolean _isTooLargeToAllocateWhileResizing( LayerRenderConf cacheKey ) {
@@ -425,14 +425,16 @@ final class LayerPartitionCache
         ------------------------------------------------------------------------------------ */
 
     /**
-     *  Whether the cache key collapses <i>at least one</i> axis, so that a drag along that axis
-     *  is served from the cache. Deliberately weaker than {@link #_isSizeInvariantKey};
-     *  see the class javadoc for why the two questions differ.
+     *  Whether the cache key is compact in <i>at least one</i> dimension, so that a resize
+     *  changing only that dimension is served from the cache. Deliberately weaker than what
+     *  allocating a buffer asks above.
      */
-    static boolean cachesIndependentlyOfSomeAxis( LayerRenderConf conf ) {
+    static boolean cachesIndependentlyOfAtLeastOneDimension(LayerRenderConf conf ) {
         if ( !CacheBudget.tilingEnabled() )
             return false;
-        return !conf.canonicalRepresentation().boxModel().size().equals(conf.boxModel().size());
+        final Size key    = conf.canonicalRepresentation().boxModel().size();
+        final Size actual = conf.boxModel().size();
+        return LayerRenderConf.Compaction.between(key, actual) != LayerRenderConf.Compaction.NONE;
     }
 
     /** Tile blits support positive scaling and translation; rotation, shear and flips do not. */

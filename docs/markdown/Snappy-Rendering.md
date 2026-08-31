@@ -291,7 +291,7 @@ caution:
 
 | Not reconstructed | Why |
 |---|---|
-| gradients | the gradient's geometry spans the whole component |
+| gradients whose colour depends on both coordinates: radial, conic, diagonal, rotated, or measured from the centre | there is no direction along which the picture repeats |
 | procedural noise | noise varies with every pixel position |
 | background images | placement and fit are relative to the component bounds |
 | styled text | text is laid out within the component bounds |
@@ -300,7 +300,7 @@ caution:
 | a border colour per edge, with rounded corners and unequal opposite widths | refused conservatively; the pixels would usually survive it |
 
 Anything on that list falls back to an exact-size key: still cached, but re-rendered when
-the size changes. Eligibility is decided **per layer**, so a panel with a gradient
+the size changes. Eligibility is decided **per layer**, so a panel with a radial gradient
 background and a shadow can reconstruct its shadow while caching its background at full
 size.
 
@@ -309,6 +309,41 @@ eligibility decision here. An over-eager rule wouldn't crash; it would draw subt
 pixels, quietly, forever. A timid one costs a cache miss. So the rules are timid, and
 pinned by pixel-equivalence tests that render a style both ways and compare channel by
 channel, alpha included.
+
+### Stretching in one dimension only ###
+
+"Homogeneous along its own axis" is two questions rather than one — do all the columns look
+alike, and do all the rows? — and a style can answer yes to one and no to the other. The case
+worth knowing is a linear gradient running straight down a component. Its colour stops sit on
+two points that share an x coordinate, so how far *down* a pixel sits decides its colour and
+how far across it sits decides nothing: every column is identical to every other column, while
+no two rows are alike.
+
+The exemplar for such a style is therefore cut down in width alone — a few pixels wide, but as
+tall as the component really is — and the cache key carries that real height. Widen the
+component and the wider rendering is rebuilt from that exemplar by stretching the edge bands,
+for nothing. Make it taller and there is nothing to stretch, so the style engine renders it
+again.
+
+What falls out of that is the whole feature, and worth stating as a rule:
+
+> A component keeps hitting its cache entry for as long as it only resizes **across** the
+> direction its gradient transitions over.
+
+Note which of the two dimensions that frees, because it is the opposite one to the first
+guess: a gradient running *vertically* is what lets the **width** go. Counting the shapes a
+key can have, a 300 × 500 component whose exemplar would be 30 × 30 is stored as one of
+these four:
+
+| key | reused by | style |
+|---|---|---|
+| 30 × 30 | every size | flat fills, borders, shadows |
+| 30 × 500 | every width, at that height | a gradient down the component |
+| 300 × 30 | every height, at that width | a gradient across the component |
+| 300 × 500 | that exact size alone | everything in the table above |
+
+The reuse the middle two buy is conditional, unlike the first: twenty buttons at twenty
+widths share one entry only if they also share a height.
 
 ### Where real pixels get in the way ###
 
@@ -684,9 +719,11 @@ int hits   = ext.cacheHitCount(UI.Layer.BACKGROUND);
 int misses = ext.cacheMissCount(UI.Layer.BACKGROUND);
 ```
 
-The image dimensions are informative in themselves: one much smaller than the component is
-a size-independent exemplar, one matching the component's size is an exact-size entry, and
-more than one image means the layer's description was partitioned. The returned images are
+The image dimensions are informative in themselves: a dimension much smaller than the
+component's is one the key compacted, a dimension matching it is one the key still carries
+(so an image smaller in both is a fully size-independent exemplar, and one matching in both
+is an exact-size entry), and more than one image means the layer's description was
+partitioned. The returned images are
 defensive copies, so you can inspect or even modify them freely.
 
 ### Styling for speed ###
@@ -695,8 +732,11 @@ If you want a resize to be free, keep the style's *edges* size-independent:
 
 - ✅ flat background and foundation colours, borders, shadows — reconstructable, including
   a border with its own colour on each edge
-- ⚠️ gradients, noises, background images, styled text — cached, but at an exact size, so a
-  resize re-renders them
+- ✅ a linear gradient running straight up, down or across — free in one direction only: a
+  panel with a vertical gloss resizes sideways for nothing, and re-renders when it grows
+  taller
+- ⚠️ radial, conic, diagonal and rotated gradients, noises, background images, styled text —
+  cached, but at an exact size, so a resize re-renders them
 - ⚠️ rounded corners plus a colour per border edge, with two **opposite** edges of unequal
   thickness — the one non-obvious disqualifier, and a deliberately strict one: 4 px against
   5 px already drops the layer back to exact-size caching. Give opposite edges the same

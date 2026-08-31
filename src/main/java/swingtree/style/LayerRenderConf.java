@@ -24,7 +24,7 @@ import java.util.Optional;
  *  reconstructs any actual size from the resulting rendering. A newly added field whose value
  *  (or whose rendering) depends on the component size would silently break that reconstruction,
  *  producing subtly wrong pixels rather than a failure. Should such a field become necessary,
- *  it must also be rejected by {@link #_repeatingAxes(LayerRenderConf)}.
+ *  it must also be rejected by {@link #_compactionFor(LayerRenderConf)}.
  */
 @Immutable
 @SuppressWarnings("Immutable")
@@ -175,85 +175,90 @@ final class LayerRenderConf
     // Canonical (size independent) representation for 9 patch caching:
 
     /**
-     *  Maps eligible configurations of any size onto the exemplar key, collapsing only the
-     *  axes the layer actually repeats along (see the {@link LayerPartitionCache} class
-     *  documentation). Ineligible configurations, and those not strictly larger than the
-     *  exemplar in both dimensions, are returned unchanged - which also makes this idempotent,
-     *  so a configuration already at the exemplar size maps onto itself.
+     *  Maps eligible configurations of any size onto the exemplar key, compacting only the
+     *  dimensions the layer may be stretched along (see the {@link LayerPartitionCache} class
+     *  documentation). Ineligible configurations, and those with no room to stretch, are
+     *  returned unchanged - which also makes this idempotent, so a configuration which already
+     *  has the exemplar size maps onto itself.
      */
     private static LayerRenderConf _canonicalize( LayerRenderConf conf ) {
-        final RepeatingAxes axes = _repeatingAxes(conf);
-        if ( axes == RepeatingAxes.NEITHER )
+        final Compaction compaction = _compactionFor(conf);
+        if ( compaction == Compaction.NONE )
             return conf;
 
         final Outline sliceInsets = conf.nineTileSliceInsets();
         final Size    exemplar    = _exemplarSize(sliceInsets);
+        final Size    actual      = conf.boxModel().size();
 
         if ( !_borderEdgeSeamsAreSizeIndependent(conf, sliceInsets, exemplar) )
             return conf;
 
-        final Size actual = conf.boxModel().size();
-
-        /*
-            Deliberately still measured against the exemplar in *both* dimensions, even when
-            only one of them is collapsed: the stretch blit cuts the component along all four
-            slice insets whichever axis it stretches, so a component shorter than its own top
-            and bottom insets would have the two cut lines cross over regardless.
-        */
-        final boolean strictlyLarger =
-                        actual.widthOrElse(0f)  > exemplar.widthOrElse(0f) &&
-                        actual.heightOrElse(0f) > exemplar.heightOrElse(0f);
-        if ( !strictlyLarger )
+        if ( !_hasRoomToStretch(actual, exemplar) )
             return conf;
 
         final Size canonical = Size.of(
-                                    axes.repeatsHorizontally() ? exemplar.widthOrElse(0f)  : actual.widthOrElse(0f),
-                                    axes.repeatsVertically()   ? exemplar.heightOrElse(0f) : actual.heightOrElse(0f)
+                                    compaction.includesWidth()  ? exemplar.widthOrElse(0f)  : actual.widthOrElse(0f),
+                                    compaction.includesHeight() ? exemplar.heightOrElse(0f) : actual.heightOrElse(0f)
                                 );
 
         return conf.withBoxModel(conf.boxModel().withSize(canonical));
     }
 
     /**
-     *  The axes along which a layer's rendering repeats, and which may therefore be collapsed
-     *  into the exemplar. {@link #HORIZONTALLY} means every column is identical, so the
-     *  <i>width</i> is what collapses.
+     *  The nine tile blit cuts along all four slice insets whichever dimension it stretches, so
+     *  both have to clear the exemplar even when only one of them is compacted.
      */
-    private enum RepeatingAxes
+    private static boolean _hasRoomToStretch( Size actual, Size exemplar ) {
+        return actual.widthOrElse(0f)  > exemplar.widthOrElse(0f)
+            && actual.heightOrElse(0f) > exemplar.heightOrElse(0f);
+    }
+
+    /**
+     *  Which of an exemplar's two dimensions are held at their minimal size instead of the
+     *  component's, and stretched back on paint. The component may change size in a compacted
+     *  dimension without invalidating the key; in the other, which is exactly the component's,
+     *  it may not.
+     */
+    enum Compaction
     {
-        NEITHER(false, false), HORIZONTALLY(true, false), VERTICALLY(false, true), BOTH(true, true);
+        NONE(false, false), WIDTH(true, false), HEIGHT(false, true), BOTH(true, true);
 
-        private final boolean _horizontally;
-        private final boolean _vertically;
-
-        RepeatingAxes( boolean horizontally, boolean vertically ) {
-            _horizontally = horizontally;
-            _vertically   = vertically;
+        static Compaction between( Size key, Size actual ) {
+            return _of(
+                    key.widthOrElse(0f)  != actual.widthOrElse(0f),
+                    key.heightOrElse(0f) != actual.heightOrElse(0f)
+                );
         }
 
-        boolean repeatsHorizontally() { return _horizontally; }
-        boolean repeatsVertically()   { return _vertically;   }
+        private final boolean _width;
+        private final boolean _height;
 
-        /** The axes both leave repeating: what a layer with more than one gradient is left with. */
-        RepeatingAxes and( RepeatingAxes other ) {
-            return of(_horizontally && other._horizontally, _vertically && other._vertically);
+        Compaction( boolean width, boolean height ) {
+            _width  = width;
+            _height = height;
         }
 
-        private static RepeatingAxes of( boolean horizontally, boolean vertically ) {
-            if ( horizontally )
-                return vertically ? BOTH : HORIZONTALLY;
+        boolean includesWidth()  { return _width;  }
+        boolean includesHeight() { return _height; }
+
+        /** What two constraints on the same layer leave over. */
+        Compaction and( Compaction other ) {
+            return _of(_width && other._width, _height && other._height);
+        }
+
+        private static Compaction _of( boolean width, boolean height ) {
+            if ( width )
+                return height ? BOTH : WIDTH;
             else
-                return vertically ? VERTICALLY : NEITHER;
+                return height ? HEIGHT : NONE;
         }
     }
 
     /**
-     *  How far the size dependent pixels reach into the component from each side:
-     *  margin + base outline + border width + the adjacent corner arc extents + the
-     *  shadow reach, plus a safety margin, ceiled to whole numbers. Everything between
-     *  opposite insets repeats along the respective axis and may be stretched freely. <br>
-     *  A pure function of the size independent parts of the configuration, so it can be
-     *  recomputed at blit time and always agrees with the canonicalization.
+     *  How far the size dependent pixels reach into the component from each side; everything
+     *  between opposite insets repeats and may be stretched freely. A pure function of the size
+     *  independent parts of the configuration, so the blit can recompute it and is guaranteed
+     *  to agree with the canonicalization.
      */
     private static Outline _compute9PatchSliceInsets(LayerRenderConf conf ) {
         final BoxModelConf box = conf.boxModel();
@@ -310,72 +315,62 @@ final class LayerRenderConf
                 );
     }
 
-    /**
-     *  Which axes the layer content leaves repeating (see the class javadoc for the invariant). <br>
-     *  Noise, images, text and custom painters are refused outright: they vary in two dimensions,
-     *  or - for a painter - cannot be reasoned about at all. A gradient is the one kind that may
-     *  still leave an axis intact, and only ever the axis across its own direction.
-     */
-    private static RepeatingAxes _repeatingAxes( LayerRenderConf conf ) {
+    /** Which dimensions the layer content permits compacting: the width when every column of
+     *  the layer is identical, the height when every row is. */
+    private static Compaction _compactionFor( LayerRenderConf conf ) {
         final StyleConfLayer layer = conf.layer();
 
         for ( Pooled<NoiseConf> noise : layer.noises().sortedByNames() )
             if ( !noise.get().equals(NoiseConf.none()) )
-                return RepeatingAxes.NEITHER; // Noise varies per pixel position.
+                return Compaction.NONE; // Noise varies per pixel position.
 
         for ( ImageConf image : layer.images().sortedByNames() )
             if ( !image.equals(ImageConf.none()) )
-                return RepeatingAxes.NEITHER; // Image placement/fit depends on the component bounds.
+                return Compaction.NONE; // Image placement/fit depends on the component bounds.
 
         for ( TextConf text : layer.texts().sortedByNames() )
             if ( !text.equals(TextConf.none()) )
-                return RepeatingAxes.NEITHER; // Text layout depends on the component bounds.
+                return Compaction.NONE; // Text layout depends on the component bounds.
 
         for ( PainterConf painter : layer.painters().sortedByNames() )
             if ( !painter.equals(PainterConf.none()) )
-                return RepeatingAxes.NEITHER; // We cannot know what a custom painter does.
+                return Compaction.NONE; // We cannot know what a custom painter does.
 
-        RepeatingAxes axes = RepeatingAxes.BOTH;
+        Compaction compaction = Compaction.BOTH;
         for ( GradientConf gradient : layer.gradients().sortedByNames() ) {
             if ( gradient.equals(GradientConf.none()) )
                 continue;
-            axes = axes.and(_axesRepeatedBy(gradient));
-            if ( axes == RepeatingAxes.NEITHER )
-                return axes;
+            compaction = compaction.and(_compactionAllowedBy(gradient));
+            if ( compaction == Compaction.NONE )
+                return compaction;
         }
-        return axes;
+        return compaction;
     }
 
     /**
-     *  The axes a single gradient leaves repeating. <br>
-     *  <br>
-     *  A linear gradient straight down the component is built by
+     *  A linear gradient straight down a component is built by
      *  {@link StyleRenderer#createGradientPaint(BoxModelConf, GradientConf)} from two points
-     *  sharing an x coordinate, and the component width never enters that calculation - so
-     *  every column of it is the same and the width may be collapsed. Left to right is the
-     *  same argument transposed. <br>
-     *  <br>
-     *  Everything else is refused: a radial or conic gradient varies in two dimensions by
-     *  definition, a diagonal span varies along both axes, a rotation turns an axis aligned
-     *  span into a diagonal one, and {@link UI.ComponentBoundary#CENTER_TO_CONTENT} derives its
-     *  insets from the component size itself.
+     *  sharing an x coordinate, so the component width never enters its rendering and the
+     *  exemplar can hold it at its minimum. Everything else varies with both coordinates at once -
+     *  {@link UI.ComponentBoundary#CENTER_TO_CONTENT} by deriving its insets from the
+     *  component size itself.
      */
-    private static RepeatingAxes _axesRepeatedBy( GradientConf gradient ) {
+    private static Compaction _compactionAllowedBy( GradientConf gradient ) {
         if ( gradient.type() != UI.GradientType.LINEAR )
-            return RepeatingAxes.NEITHER;
+            return Compaction.NONE;
         if ( gradient.rotation() % 360f != 0f )
-            return RepeatingAxes.NEITHER;
+            return Compaction.NONE;
         if ( gradient.boundary() == UI.ComponentBoundary.CENTER_TO_CONTENT )
-            return RepeatingAxes.NEITHER;
+            return Compaction.NONE;
         switch ( gradient.span() ) {
             case TOP_TO_BOTTOM:
             case BOTTOM_TO_TOP:
-                return RepeatingAxes.HORIZONTALLY;
+                return Compaction.WIDTH;
             case LEFT_TO_RIGHT:
             case RIGHT_TO_LEFT:
-                return RepeatingAxes.VERTICALLY;
+                return Compaction.HEIGHT;
             default:
-                return RepeatingAxes.NEITHER;
+                return Compaction.NONE;
         }
     }
 
