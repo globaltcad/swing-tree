@@ -687,21 +687,22 @@ class Style_Render_Caching_Spec extends Specification
     {
         reportInfo """
             The scenario above holds back renderings whose key contains a size that is
-            currently changing. Deciding whether a key contains one used to be a yes or no
-            question, because a style was either cached at its exact size or at a size
-            independent exemplar. A gradient running straight down a component is neither: its
-            width collapses into the exemplar while its height is carried in the key.
+            currently changing. A key can contain one of the component's dimensions without the
+            other. For a gradient running straight down a component we compact the width and
+            take the height from the component itself.
 
             Dragging such a component sideways is free, and the scenario after this one is
             about that. Dragging it *downwards* changes the key on every frame, exactly like an
             exact-size key, and it has to be held back for exactly the same reason - otherwise
             each frame allocates an image, blits it once and throws it away.
 
-            The trap here is that "the key differs from the component size" is true for this
-            style even while the height is being dragged, so a check phrased that way concludes
-            the key is stable and allocates on every frame. What has to be asked instead is whether
-            *both* dimensions were dropped, because either one still carried is a dimension this
-            drag may be moving.
+            Two comparisons are possible here and only one of them works. The key's size and
+            the component's size always differ for a gradient running down a component,
+            including on every frame of a vertical drag, so allocating whenever they differ
+            allocates a buffer on every frame and throws each one away. Comparing the
+            component's uncompacted dimensions against the values they had at the previous paint
+            is the one that works: during a vertical drag the height has moved, so we allocate
+            nothing.
         """
         given : 'A button with a gradient running straight down it, at a settled size.'
             var button =

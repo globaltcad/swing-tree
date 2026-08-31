@@ -285,13 +285,12 @@ without any of this ever coming up.
 
 ## Where reconstruction stops ##
 
-Stretching is only truthful for a style whose body is homogeneous and whose edges are
-homogeneous along their own axis. Plenty of styles aren't, and one more is refused out of
-caution:
+Stretching only gives back the same pixels when the strips we duplicate are all identical.
+Plenty of styles fail that, and we turn one more down out of caution:
 
 | Not reconstructed | Why |
 |---|---|
-| gradients whose colour depends on both coordinates: radial, conic, diagonal, rotated, or measured from the centre | there is no direction along which the picture repeats |
+| gradients whose colour depends on both x and y: radial, conic, diagonal, rotated, or measured from the centre | no strip repeats in either direction |
 | procedural noise | noise varies with every pixel position |
 | background images | placement and fit are relative to the component bounds |
 | styled text | text is laid out within the component bounds |
@@ -312,38 +311,38 @@ channel, alpha included.
 
 ### Stretching in one dimension only ###
 
-"Homogeneous along its own axis" is two questions rather than one — do all the columns look
-alike, and do all the rows? — and a style can answer yes to one and no to the other. The case
-worth knowing is a linear gradient running straight down a component. Its colour stops sit on
-two points that share an x coordinate, so how far *down* a pixel sits decides its colour and
-how far across it sits decides nothing: every column is identical to every other column, while
-no two rows are alike.
+Stretching sideways and stretching downwards need different things. We can stretch a style
+sideways when every pixel strip along its y axis is identical, and downwards when every pixel
+strip along its x axis is identical. Those two conditions are independent. A style can paint
+identical strips along the y axis while every strip along the x axis differs. The case
+worth knowing is a linear gradient running straight down a component. We build it from two
+points that share an x coordinate, so only a pixel's y position affects its colour. Every pixel
+strip along the y axis is therefore identical, and no two strips along the x axis are.
 
-The exemplar for such a style is therefore cut down in width alone — a few pixels wide, but as
-tall as the component really is — and the cache key carries that real height. Widen the
-component and the wider rendering is rebuilt from that exemplar by stretching the edge bands,
-for nothing. Make it taller and there is nothing to stretch, so the style engine renders it
-again.
+So we compact the exemplar for such a style in width alone: a few pixels wide, but as tall as
+the component really is. The cache key carries that real height. Widen the
+component and we rebuild the wider rendering from that exemplar by stretching the edge bands,
+which costs nothing. Make it taller and the key changes, so we render the style again.
 
-What falls out of that is the whole feature, and worth stating as a rule:
+Which gives the rule:
 
-> A component keeps hitting its cache entry for as long as it only resizes **across** the
-> direction its gradient transitions over.
+> A component keeps hitting its cache entry as long as it only resizes in the direction its
+> gradient does **not** run in.
 
-Note which of the two dimensions that frees, because it is the opposite one to the first
-guess: a gradient running *vertically* is what lets the **width** go. Counting the shapes a
-key can have, a 300 × 500 component whose exemplar would be 30 × 30 is stored as one of
-these four:
+Note that a *vertical* gradient is what frees the **width**, not the height: identical strips
+along the y axis are exactly what lets us throw strips away. A 300 × 500 component whose
+exemplar would be 30 × 30 is therefore stored in one of four ways:
 
-| key | reused by | style |
+| key | shared by components of | style |
 |---|---|---|
-| 30 × 30 | every size | flat fills, borders, shadows |
-| 30 × 500 | every width, at that height | a gradient down the component |
-| 300 × 30 | every height, at that width | a gradient across the component |
-| 300 × 500 | that exact size alone | everything in the table above |
+| 30 × 30 | any size | flat fills, borders, shadows |
+| 30 × 500 | any width, if they are 500 tall | a gradient down the component |
+| 300 × 30 | any height, if they are 300 wide | a gradient across the component |
+| 300 × 500 | this size only | radial gradients, noise, images, text, painters |
 
-The reuse the middle two buy is conditional, unlike the first: twenty buttons at twenty
-widths share one entry only if they also share a height.
+Note the catch in the two middle rows: twenty buttons at twenty widths share a single entry
+only if they are all the same height. In the first row they would share one whatever their
+sizes.
 
 ### Where real pixels get in the way ###
 
@@ -719,11 +718,10 @@ int hits   = ext.cacheHitCount(UI.Layer.BACKGROUND);
 int misses = ext.cacheMissCount(UI.Layer.BACKGROUND);
 ```
 
-The image dimensions are informative in themselves: a dimension much smaller than the
-component's is one the key compacted, a dimension matching it is one the key still carries
-(so an image smaller in both is a fully size-independent exemplar, and one matching in both
-is an exact-size entry), and more than one image means the layer's description was
-partitioned. The returned images are
+The image dimensions tell you how the style was cached. A dimension much smaller than the
+component's is one we compacted, a dimension matching the component's is one we did not, so an
+image smaller in both is a fully compacted exemplar and one matching in both is an exact-size
+entry. More than one image means we split the layer's description. The returned images are
 defensive copies, so you can inspect or even modify them freely.
 
 ### Styling for speed ###
@@ -733,8 +731,8 @@ If you want a resize to be free, keep the style's *edges* size-independent:
 - ✅ flat background and foundation colours, borders, shadows — reconstructable, including
   a border with its own colour on each edge
 - ✅ a linear gradient running straight up, down or across — free in one direction only: a
-  panel with a vertical gloss resizes sideways for nothing, and re-renders when it grows
-  taller
+  panel with a vertical gloss resizes sideways for nothing, and re-renders when its height
+  changes
 - ⚠️ radial, conic, diagonal and rotated gradients, noises, background images, styled text —
   cached, but at an exact size, so a resize re-renders them
 - ⚠️ rounded corners plus a colour per border edge, with two **opposite** edges of unequal

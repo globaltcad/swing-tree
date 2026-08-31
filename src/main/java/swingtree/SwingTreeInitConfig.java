@@ -624,8 +624,8 @@ public final class SwingTreeInitConfig
      *  canonical size and any component size is reconstructed by copying the corner
      *  tiles and stretching the edge bands. This makes live-resizing styled components
      *  dramatically cheaper, because no re-rendering happens at all. A linear gradient running
-     *  straight up, down or across qualifies in one dimension only: a gradient from top to
-     *  bottom paints every column of the component alike, so it is rendered once at the
+     *  straight up, down or across qualifies in one dimension only. A gradient from top to
+     *  bottom paints every pixel strip along the y axis alike, so we render it once at the
      *  component's real height but only a fraction of its width. Widening such a component is
      *  then free, while making it taller renders it again.
      *  <p>

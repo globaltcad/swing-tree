@@ -32,12 +32,12 @@ import java.util.concurrent.TimeUnit
     be reconstructed that way and falls back to the classic exact-size
     caching, where every resize re-renders.
 
-    A gradient sits between those two. One running straight down a
-    component varies from top to bottom, but every one of its columns is
-    identical, so it can be stretched sideways even though it cannot be
-    stretched downwards. Such a style is cached at a size which is
-    independent along one axis and exact along the other: widening the
-    component is free, heightening it re-renders. A gradient running
+    A gradient sits in between. One running straight down a component
+    varies from top to bottom, but every pixel strip along its y axis is
+    identical, so we can stretch it sideways even though we cannot
+    stretch it downwards. We cache such a style with one dimension
+    compacted and the other taken from the component, so widening it is
+    free and changing its height re-renders. A gradient running
     diagonally, radially or conically varies in both directions at once
     and stays on the classic exact-size cache.
 
@@ -192,9 +192,9 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         reportInfo """
             A gradient running straight down a component is built from two points
             which share an x coordinate, so its colour depends on how far down a
-            pixel is and on nothing else. Every column of it is therefore the
-            same column, and widening the component simply needs more of them -
-            which is exactly what stretching an edge band does.
+            pixel is and on nothing else. Every pixel strip along its y axis is
+            therefore identical, and widening the component simply needs more of
+            them - which is exactly what stretching an edge band does.
 
             So such a style is cached at a size which is *independent along one
             axis and exact along the other*, and widening it is served from that

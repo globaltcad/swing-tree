@@ -29,11 +29,13 @@ import java.util.concurrent.TimeUnit
     copying the four corners and stretching the edge bands and the center
     (a "nine slice", like Android 9-patch images or CSS border-image).
 
-    Some styles are reconstructable along one axis only. A gradient
-    running straight down a component varies from top to bottom, but every
-    one of its columns is identical, so it can be stretched sideways while
-    its real height is kept. Those are cached size independently along the
-    free axis alone, and have to survive the same comparison.
+    Some style renderings are reconstructible along one axis only: a
+    gradient running straight down a component varies from top to bottom,
+    but every pixel strip along its y axis is identical, so we can stretch
+    it sideways while its height comes from the component itself. Those
+    are compacted along one axis only. The requirement stated below
+    applies to them exactly as it does to a style compacted in both
+    dimensions.
 
     That optimization is only acceptable if it is invisible. Painting a
     component with stretch tiling enabled must produce (practically) the
@@ -180,9 +182,10 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
         reportInfo """
             A gradient running down a component is stretched sideways from an
             exemplar which is only a few pixels wide but as tall as the component
-            itself. That is a far more violent stretch than a flat fill ever
-            asks for - a handful of columns blown up to the full width - so it is
-            worth pinning that the result is still the same picture.
+            itself. The source is a handful of pixels and the destination is the
+            component's full width, so the scale factor here is far larger than
+            any other scenario in this file reaches, which is why the pixels are
+            worth checking.
 
             The sibling below grows along the *free* axis only, because that is
             the whole claim: a gradient down the component may be widened for

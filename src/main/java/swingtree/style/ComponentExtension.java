@@ -505,9 +505,9 @@ public final class ComponentExtension<C extends JComponent>
      *  shadows) is stored as a small, size independent exemplar rendering which may be much
      *  smaller than the component itself (it is stretch tiled back to any actual size on paint,
      *  see {@link swingtree.SwingTree#setCacheTilingEnabled(boolean)}). A linear gradient
-     *  running straight up, down or across is stored that way in one dimension only: a gradient
-     *  from top to bottom paints every column of the component alike, so it is rendered at the
-     *  component's real height but only a fraction of its width. Everything else is cached at
+     *  running straight up, down or across is stored that way in one dimension only. A gradient
+     *  from top to bottom paints every pixel strip along the y axis alike, so we render it at
+     *  the component's real height but only a fraction of its width. Everything else is cached at
      *  exactly the component size.
      *  <p>
      *  The returned images are defensive copies: a cached rendering is shared by all components
