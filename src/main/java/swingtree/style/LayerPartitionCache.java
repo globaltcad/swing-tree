@@ -10,10 +10,13 @@ import swingtree.layout.Size;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DirectColorModel;
+import java.awt.image.Raster;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.WeakHashMap;
 import java.util.function.BiConsumer;
 
@@ -527,11 +530,11 @@ final class LayerPartitionCache
             if ( image == null )
                 return; // Cannot happen (callers check `isRendered()` first), but let's be defensive.
 
-            final Outline insets = canonicalConf.canonicalSliceInsets();
-            final int insetTop    = (int) LayerRenderConf._positive(insets.top());
-            final int insetRight  = (int) LayerRenderConf._positive(insets.right());
-            final int insetBottom = (int) LayerRenderConf._positive(insets.bottom());
-            final int insetLeft   = (int) LayerRenderConf._positive(insets.left());
+            final Outline insets = canonicalConf.nineTileSliceInsets();
+            final int insetTop    = insets.top().orElse(0f).intValue();
+            final int insetRight  = insets.right().orElse(0f).intValue();
+            final int insetBottom = insets.bottom().orElse(0f).intValue();
+            final int insetLeft   = insets.left().orElse(0f).intValue();
 
             StretchTile[] tiles = _stretchTiles;
             if ( tiles == null ) {

@@ -4,7 +4,7 @@ import com.google.errorprone.annotations.Immutable;
 import swingtree.UI;
 import swingtree.layout.Size;
 
-import java.awt.*;
+import java.awt.Graphics2D;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -44,8 +44,7 @@ final class LayerRenderConf
     private final BaseColorConf _baseColor;
     private final StyleConfLayer _layer;
     private final LazyRef<LayerRenderConf> _canonicalRepresentation;
-    private final LazyRef<CanonicalSizeAndInsets> _canonicalSizeAndInsets;
-
+    private final LazyRef<Outline> _nineTileSliceInsets;
 
     private LayerRenderConf(
         BoxModelConf   boxModelConf,
@@ -56,11 +55,7 @@ final class LayerRenderConf
         _baseColor    = Objects.requireNonNull(base);
         _layer        = Objects.requireNonNull(layers);
         _canonicalRepresentation = new LazyRef<>(this, LayerRenderConf::_canonicalize);
-        _canonicalSizeAndInsets = new LazyRef<>(this, it -> {
-            final Outline sliceInsets = _sliceInsets(it);
-            final Size canonical   = _canonicalSize(sliceInsets);
-            return new CanonicalSizeAndInsets(sliceInsets, canonical);
-        });
+        _nineTileSliceInsets = new LazyRef<>(this, LayerRenderConf::_compute9PatchSliceInsets);
     }
 
     static LayerRenderConf of( UI.Layer layer, ComponentConf fullConf ) {
@@ -147,8 +142,8 @@ final class LayerRenderConf
         return _canonicalRepresentation.get();
     }
 
-    Outline canonicalSliceInsets() {
-        return _canonicalSizeAndInsets.get().sliceInsets;
+    Outline nineTileSliceInsets() {
+        return _nineTileSliceInsets.get();
     }
 
     @Override
@@ -189,9 +184,8 @@ final class LayerRenderConf
         if ( !_isStretchTileable(conf) )
             return conf;
 
-        final CanonicalSizeAndInsets sizeAndInsets = conf._canonicalSizeAndInsets.get();
-        final Outline sliceInsets = sizeAndInsets.sliceInsets;
-        final Size canonical = sizeAndInsets.canonicalSize;
+        final Outline sliceInsets = conf.nineTileSliceInsets();
+        final Size    canonical    = _exemplarSize(sliceInsets);
 
         if ( !_borderEdgeSeamsAreSizeIndependent(conf, sliceInsets, canonical) )
             return conf;
@@ -208,14 +202,11 @@ final class LayerRenderConf
     }
 
     /**
-     *  How far the size dependent pixels reach into the component from each side:
-     *  margin + base outline + border width + the adjacent corner arc extents + the
-     *  shadow reach, plus a safety margin, ceiled to whole numbers. Everything between
-     *  opposite insets repeats along the respective axis and may be stretched freely. <br>
-     *  A pure function of the size independent parts of the configuration, so it can be
-     *  recomputed at blit time and always agrees with the canonicalization.
+     *  How far the size dependent pixels reach into the component from each side.
+     *  These insets are used to essentially cut an "exemplar" rendering of a componenet
+     *  into a size independent cache of 9 tiles.
      */
-    private static Outline _sliceInsets( LayerRenderConf conf ) {
+    private static Outline _compute9PatchSliceInsets(LayerRenderConf conf ) {
         final BoxModelConf box = conf.boxModel();
 
         final float marginTop    = _positive(box.margin().top());
@@ -351,7 +342,7 @@ final class LayerRenderConf
      *  into the repeating band, keeping those artifacts pixel-identical to a real rendering of
      *  any larger size.
      */
-    private static Size _canonicalSize( Outline sliceInsets ) {
+    private static Size _exemplarSize( Outline sliceInsets ) {
         final float maxHorizontal = Math.max(sliceInsets.left().orElse(0f), sliceInsets.right().orElse(0f));
         final float maxVertical   = Math.max(sliceInsets.top().orElse(0f),  sliceInsets.bottom().orElse(0f));
         return Size.of(
@@ -360,25 +351,15 @@ final class LayerRenderConf
                 );
     }
 
-    static float _positive(Optional<Float> value) {
+    private static float _positive( Optional<Float> value ) {
         return Math.max(0f, value.orElse(0f));
     }
 
-    private static float _arcWidth(Optional<Arc> arc) {
+    private static float _arcWidth( Optional<Arc> arc ) {
         return arc.map( a -> Math.max(0f, a.width()) ).orElse(0f);
     }
 
-    private static float _arcHeight(Optional<Arc> arc) {
+    private static float _arcHeight( Optional<Arc> arc ) {
         return arc.map( a -> Math.max(0f, a.height()) ).orElse(0f);
-    }
-
-    private static class CanonicalSizeAndInsets {
-        final Outline sliceInsets;
-        final Size canonicalSize;
-
-        private CanonicalSizeAndInsets(Outline sliceInsets, Size canonicalSize) {
-            this.sliceInsets = sliceInsets;
-            this.canonicalSize = canonicalSize;
-        }
     }
 }
