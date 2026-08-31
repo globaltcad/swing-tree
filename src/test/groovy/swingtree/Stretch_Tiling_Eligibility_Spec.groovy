@@ -241,7 +241,8 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         String description, Closure styler, int grownWidth, int grownHeight
     ) {
         reportInfo """
-            The other half of the promise above, and the reason it is safe. A
+            The counterpart to growing along the free direction, and the reason
+            that direction is safe. A
             gradient running down a component genuinely has different pixels at
             every height: its colours are spread over the whole distance, so
             making the component taller does not add more of the same rows, it
@@ -249,8 +250,8 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             reconstruct, and the cache does not pretend otherwise - the exact
             height is part of the key, so growing along it re-renders.
 
-            Without this half, a resize would silently smear a gradient rather
-            than redraw it.
+            Without this, a resize would smear a gradient across the new height
+            instead of redrawing it.
         """
         given : 'A button styled with the gradient, warmed up with two paints at its initial size.'
             var button = buttonWith(styler)
@@ -282,9 +283,9 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         String description, Closure styler
     ) {
         reportInfo """
-            The guard on the rule above. Only a gradient whose colour depends on
-            a single coordinate may have the other axis collapsed, and this pins
-            every way of failing that test: a radial or conic gradient varies with
+            We only compact an axis when the gradient's colour depends on the
+            other coordinate alone. This pins every way of failing that
+            condition: a radial or conic gradient varies with
             the distance or the angle from a point and so depends on both
             coordinates; a diagonal span varies along both by construction; a
             rotation turns an axis aligned span into a diagonal one; and
@@ -292,10 +293,10 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             from the component size itself.
 
             Every one of these keeps the classic exact-size cache, so even
-            growing along a single axis - the cheap direction for a well behaved
-            gradient - re-renders. An eligibility rule which let any of them
-            through would not fail loudly; it would quietly paint a smeared
-            picture, which is why they are all listed here by name.
+            growing along a single axis re-renders, although that is the cheap
+            direction for a gradient which varies along one axis only. Letting
+            any of them through would not raise an error; it would paint a
+            smeared picture, which is why they are all listed here by name.
         """
         given : 'A button styled with the gradient, warmed up with two paints.'
             var button = buttonWith(styler)
@@ -389,16 +390,16 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
     def 'A noise is lifted out even when the layer under it is only free along one axis.'()
     {
         reportInfo """
-            The cut above is worth making whenever the piece under the noise can be cached
-            across a drag - and "across a drag" is allowed to mean one direction rather than
-            both. A layer whose background is a gradient running straight down it collapses
-            its width into an exemplar and carries its height, so widening it is free while
-            heightening it is not.
+            Cutting a layer around its noise is worth doing whenever the piece under the
+            noise stays cached through a drag, and that piece does not have to stay cached in
+            both directions. A layer whose background is a gradient running straight down it
+            has its width compacted and its height taken from the component, so widening it is
+            served from the cache while changing its height is not.
 
-            Cutting such a layer therefore buys real cache hits half the time and costs only a
-            second cache entry the other half, which is a trade worth taking. Requiring the
-            piece to hold still along *both* axes before cutting would be the tidier looking
-            rule and would quietly turn every frame of the drag below back into a re-render.
+            Cutting such a layer buys cache hits whenever the drag is sideways, and costs a
+            second cache entry when it is not. Requiring the piece to stay cached along *both*
+            axes before cutting would be the tidier looking rule, and would turn every frame of
+            the drag below back into a re-render.
         """
         given : 'A button whose background layer is a gradient down the component, a noise and a shadow.'
             var button =
@@ -885,7 +886,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             var firstImage  = ComponentExtension.from(first).cachedRendering(layer).first()
             var secondImage = ComponentExtension.from(second).cachedRendering(layer).first()
 
-        expect : 'The table really names one of the four shapes a cached rendering can have:'
+        expect : 'The table really names one of the four ways a rendering can be cached:'
             cachedAs in ["compact atlas", "compact width", "compact height", "full size"]
         and : 'Every compacted dimension is size independent, every uncompacted one tracks its component:'
             var compactWidth  = cachedAs in ["compact atlas", "compact width"]

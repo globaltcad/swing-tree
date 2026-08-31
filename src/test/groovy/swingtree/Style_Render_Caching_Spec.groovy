@@ -594,10 +594,10 @@ class Style_Render_Caching_Spec extends Specification
             is not affected, and small images are always allocated - see the scenario after this
             one for why that second exception is essential.
         """
-        given : 'A radial gradient styled button - heavy enough to cache, too two dimensional to stretch tile.'
-            // Radial on purpose: a gradient running straight down the component varies along one
-            // axis only and is keyed size independently across the other, which would put it in
-            // the very group this scenario needs a counterexample to.
+        given : 'A radial gradient styled button - heavy enough to cache, and not stretch tileable in either direction.'
+            // Radial on purpose: a gradient running straight down the component has its width
+            // compacted, which would put it in the very group this scenario needs a
+            // counterexample to.
             var button =
                 UI.button("Wide")
                   .withStyle( it -> it
@@ -650,7 +650,8 @@ class Style_Render_Caching_Spec extends Specification
             the size stops changing, caching returns of its own accord.
         """
         given : 'A radial gradient styled button, heavy enough to be cached, but not stretch tileable.'
-            // Radial on purpose - see the scenario above.
+            // Radial on purpose: a gradient running straight down the component has its
+            // width compacted, so it would not be a counterexample here.
             var button =
                 UI.button("Drag me")
                   .withStyle( it -> it
@@ -686,8 +687,8 @@ class Style_Render_Caching_Spec extends Specification
     def 'A style cached size independently along one axis only is not allocated while the other axis is dragged.'()
     {
         reportInfo """
-            The scenario above holds back renderings whose key contains a size that is
-            currently changing. A key can contain one of the component's dimensions without the
+            We hold back renderings whose key contains a size that is currently changing.
+            A key can contain one of the component's dimensions without the
             other. For a gradient running straight down a component we compact the width and
             take the height from the component itself.
 
@@ -715,8 +716,8 @@ class Style_Render_Caching_Spec extends Specification
             var ext = ComponentExtension.from(button)
         and : """
             Tall enough that its exemplar is above the size up to which an image is allocated
-            eagerly - the small entry exception of the scenario above applies here too, and a
-            short component would be allocated on every frame quite legitimately.
+            eagerly. Images below that size are always allocated, so a short component would be
+            allocated on every frame quite legitimately and the question would never come up.
         """
             button.setSize(300, 500)
             4.times { Utility.renderSingleComponent(button) }
@@ -738,21 +739,22 @@ class Style_Render_Caching_Spec extends Specification
 
         when : 'The drag ends and the component keeps being painted at its final height.'
             2.times { Utility.renderSingleComponent(button) }
-        then : 'Caching resumes, just as it does for a key of any other shape.'
+        then : 'Caching resumes, just as it does for a fully compacted or an exact-size key.'
             ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
     }
 
     def 'The axis a one axis gradient does not vary along is still dragged for free.'()
     {
         reportInfo """
-            The other side of the scenario above, and the reason it may not simply treat a one
-            axis key as an exact-size key everywhere. Holding a rendering back is only right
+            The other side of holding a rendering back, and the reason a key with one
+            compacted dimension may not simply be treated as an exact-size key everywhere. Holding a rendering back is only right
             while the key is actually moving. Dragged along the axis its gradient does not vary
             along, this very same style keeps one and the same key from frame to frame, and
             every one of those frames is served from the cache without re-rendering anything.
 
-            Both halves have to be pinned together: a fix for the scenario above which
-            suppressed this one would have cured the churn by giving up the feature.
+            Both halves have to be pinned together: a fix which stopped the churn by never
+            allocating for a key with one compacted dimension would have cured it by giving up
+            the feature.
         """
         given : 'The same style, settled at a size where it is cached.'
             var button =

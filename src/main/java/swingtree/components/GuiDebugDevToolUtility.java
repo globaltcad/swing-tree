@@ -634,8 +634,9 @@ final class GuiDebugDevToolUtility {
                             "A gradient from top to bottom paints every pixel strip along the y axis alike, so we render<br>" +
                             "it at the component's real height but only a fraction of its width. Widening such a component<br>" +
                             "is then free, making it taller renders it again. Styles whose pixels depend on the full<br>" +
-                            "bounds (two dimensional gradients, noises, images, text, custom painters, and per-edge<br>" +
-                            "border colors on rounded corners) are never tiled and keep their exact-size cache.<br>" +
+                            "bounds (gradients whose color depends on both x and y, noises, images, text, custom<br>" +
+                            "painters, and per-edge border colors on rounded corners) are never tiled and keep<br>" +
+                            "their exact-size cache.<br>" +
                             "<br>" +
                             "Unchecking this is a <b>safety hatch</b>: it makes every style fall back to exact-size caching,<br>" +
                             "so a resize re-renders. Use it to confirm whether a suspicious rendering artifact comes from the<br>" +

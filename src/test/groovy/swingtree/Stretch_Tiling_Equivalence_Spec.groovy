@@ -176,7 +176,7 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             "big margin, huge radius"                   | UI.Layer.BACKGROUND | 500   | 300    | { it.backgroundColor("#c19a3f").borderRadius(32).margin(10) }
     }
 
-    def 'A gradient reconstructed along its free axis paints what a full rendering paints. (#description)'(
+    def 'A gradient reconstructed along its compacted axis paints what a full rendering paints. (#description)'(
         String description, int width, int height, int siblingWidth, int siblingHeight, Closure styler
     ) {
         reportInfo """
@@ -187,10 +187,11 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             any other scenario in this file reaches, which is why the pixels are
             worth checking.
 
-            The sibling below grows along the *free* axis only, because that is
-            the whole claim: a gradient down the component may be widened for
-            free, and may not be heightened for free. A sibling differing in the
-            other direction would simply miss the cache and prove nothing.
+            The sibling below differs only in the compacted dimension, because that
+            is the whole claim: a gradient down the component may be widened
+            without re-rendering, and may not be made taller without re-rendering.
+            A sibling differing in the other dimension would miss the cache and
+            prove nothing.
         """
         given : 'The component painted the classic way, with stretch tiling disabled:'
             var classic = renderedClassically(width, height, styler)
@@ -214,8 +215,8 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             description                              | width | height | siblingWidth | siblingHeight | styler
             "down the component, widened"            | 400   | 160    | 560          | 160           | { it.borderRadius(14).gradient(g -> g.span(UI.Span.TOP_TO_BOTTOM).colors("#d14a4a", "#1a3d6d")) }
             "up the component, widened"              | 400   | 160    | 560          | 160           | { it.borderRadius(14).gradient(g -> g.span(UI.Span.BOTTOM_TO_TOP).colors("#d14a4a", "#1a3d6d")) }
-            "across the component, heightened"       | 200   | 340    | 200          | 470           | { it.borderRadius(14).gradient(g -> g.span(UI.Span.LEFT_TO_RIGHT).colors("#d14a4a", "#1a3d6d")) }
-            "across right to left, heightened"       | 200   | 340    | 200          | 470           | { it.borderRadius(14).gradient(g -> g.span(UI.Span.RIGHT_TO_LEFT).colors("#d14a4a", "#1a3d6d")) }
+            "across the component, made taller"      | 200   | 340    | 200          | 470           | { it.borderRadius(14).gradient(g -> g.span(UI.Span.LEFT_TO_RIGHT).colors("#d14a4a", "#1a3d6d")) }
+            "across right to left, made taller"      | 200   | 340    | 200          | 470           | { it.borderRadius(14).gradient(g -> g.span(UI.Span.RIGHT_TO_LEFT).colors("#d14a4a", "#1a3d6d")) }
             "a gloss over a flat fill, widened"      | 420   | 150    | 610          | 150           | { it.borderRadius(14).backgroundColor("#123048")
                                                                                                           .gradient(g -> g.colors(new Color(255, 255, 255, 90), new Color(255, 255, 255, 0))) }
             "three colour stops, widened"            | 380   | 200    | 505          | 200           | { it.borderRadius(18).margin(6).gradient(g -> g.colors("#c81e46", "#1e46c8", "#46c81e")) }
