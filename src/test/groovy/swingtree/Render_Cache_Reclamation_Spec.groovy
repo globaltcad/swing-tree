@@ -197,7 +197,7 @@ class Render_Cache_Reclamation_Spec extends Specification
             box = null // Causing the component + style conf garbage collection
             8.times { Utility.renderSingleComponent(survivor) }
 
-        expect : 'They shared a single entry rather than minting one each.'
+        expect : 'They shared a single rendering rather than allocating one each.'
             ComponentExtension.from(survivor).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
             ComponentExtension.from(survivor).cacheHitCount(UI.Layer.BACKGROUND) >= 1
 

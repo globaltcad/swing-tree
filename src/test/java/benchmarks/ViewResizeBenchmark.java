@@ -11,6 +11,7 @@ import examples.budget.mvi.BudgetViewModel;
 import examples.chat.mvi.ChatView;
 import examples.chat.mvi.ChatViewModel;
 import examples.laf.LinenShowcaseView;
+import examples.laf.SwingTreeLookAndFeel.StylePreset;
 import examples.scribe.CelestialScribe;
 import examples.scribe.CosmosViewModel;
 import examples.sequencer.SequencerView;
@@ -73,11 +74,20 @@ import java.util.Map;
  *  <p>
  *  Which UI is measured is chosen with {@code -Dbenchmark.view=<name>}, where the name is one
  *  of {@code chat}, {@code sequencer}, {@code trains}, {@code team}, {@code scribe},
- *  {@code almanack}, {@code garden}, {@code glass}, {@code soft}, {@code linen},
- *  {@code studio}, {@code budget}, {@code breathing} - or {@code all}, or a comma separated list, which
- *  measures several of them back to back and prints one comparison table at the end. That is
- *  the interesting mode when profiling, because a bottleneck that only one styling idiom
- *  triggers is indistinguishable from a universal one until a second UI disagrees.
+ *  {@code almanack}, {@code garden}, {@code glass}, {@code soft}, {@code bevel},
+ *  {@code studio}, {@code budget}, {@code breathing}, or one of the look and feel showcase
+ *  names below - or {@code all}, or a comma separated list, which measures several of them
+ *  back to back and prints one comparison table at the end. That is the interesting mode when
+ *  profiling, because a bottleneck that only one styling idiom triggers is indistinguishable
+ *  from a universal one until a second UI disagrees.
+ *  <p>
+ *  {@code linen}, {@code glassmorphic}, {@code skeuomorphic}, {@code softui}, {@code aero},
+ *  {@code material} and {@code flat} are all the same view - the look and feel showcase - built
+ *  under a different {@link StylePreset}. One view under seven presets is what isolates the
+ *  <i>styling</i> from the widget tree: any difference between them is the style engine alone,
+ *  because the components, the layout and the geometry are identical. Note that {@code softui}
+ *  is that showcase under {@link StylePreset#SOFT_UI}, whereas {@code soft} is the separate
+ *  {@code SoftUIView} example, and likewise {@code glass} is not {@code glassmorphic}.
  *  <p>
  *  {@code -Dbenchmark.phase=layout|resize|static|clip} narrows a run down to one of the four
  *  sweeps, which is how a profile of one regime is kept free of the other three. Two further
@@ -147,9 +157,12 @@ public final class ViewResizeBenchmark
             return new BevelUIView();
         }),
         LINEN("linen", frame -> LinenShowcaseView.createView()),
-        GLASSMORPHIC("glassmorphic", frame ->
-            LinenShowcaseView.createView(examples.laf.SwingTreeLookAndFeel.StylePreset.GLASSMORPHIC)
-        ),
+        GLASSMORPHIC("glassmorphic", frame -> LinenShowcaseView.createView(StylePreset.GLASSMORPHIC)),
+        SKEUOMORPHIC("skeuomorphic", frame -> LinenShowcaseView.createView(StylePreset.SKEUOMORPHIC)),
+        SOFT_UI("softui", frame -> LinenShowcaseView.createView(StylePreset.SOFT_UI)),
+        FRUTIGER_AERO("aero", frame -> LinenShowcaseView.createView(StylePreset.FRUTIGER_AERO)),
+        MATERIAL("material", frame -> LinenShowcaseView.createView(StylePreset.MATERIAL)),
+        FLAT("flat", frame -> LinenShowcaseView.createView(StylePreset.FLAT)),
         STUDIO("studio", frame -> {
             FlatLightLaf.setup();
             return new StyleStudioView(Var.of(StyleStudioViewModel.initial()), new LookSheet());
@@ -567,11 +580,11 @@ public final class ViewResizeBenchmark
         System.out.println("  View resize benchmark, UI scale " + UI_SCALE);
         System.out.println("  median of " + TIMED_SWEEPS + " sweeps after " + WARMUP_SWEEPS + " warmup sweeps, in milliseconds");
         System.out.println("  ---------------------------------------------------------------------------------------------");
-        System.out.printf ("  %-10s %11s %9s %9s %9s %9s %9s%n",
+        System.out.printf ("  %-13s %11s %9s %9s %9s %9s %9s%n",
                            "view", "size", "layout", "paint±", "paint=", "clip" + CLIP_HEIGHT, "drag");
         for ( Map.Entry<Example, Result> entry : results.entrySet() ) {
             Result r = entry.getValue();
-            System.out.printf("  %-10s %11s %9s %9s %9s %9s %9s%n",
+            System.out.printf("  %-13s %11s %9s %9s %9s %9s %9s%n",
                               entry.getKey().name, r.geometry.width + "x" + r.geometry.height,
                               millis(r.layout), millis(r.paintAfterResize), millis(r.paintAtUnchangedSize),
                               millis(r.paintOfNarrowClip), millis(r.dragFrame()));

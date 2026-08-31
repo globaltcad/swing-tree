@@ -578,7 +578,7 @@ class Style_Render_Caching_Spec extends Specification
             ext.cacheHitCount(UI.Layer.BACKGROUND)  == hitsBeforeResize
     }
 
-    def 'A large exact-size rendering is not minted while the component is being resized.'()
+    def 'A large exact-size rendering is not allocated while the component is being resized.'()
     {
         reportInfo """
             A cached rendering earns its keep by being blitted more than once. An entry keyed
@@ -589,9 +589,9 @@ class Style_Render_Caching_Spec extends Specification
             allocation per frame, and a software blit rather than an accelerated one, because
             Java2D only promotes an image to a server side pixmap after several uses.
 
-            So while the size is in flux, a *large* exact-size entry is not minted at all.
+            So while the size is in flux, a *large* exact-size image is not allocated at all.
             Note the two qualifiers: a stretch tileable style is keyed size independently and
-            is not affected, and small entries are always minted - see the scenario after this
+            is not affected, and small images are always allocated - see the scenario after this
             one for why that second exception is essential.
         """
         given : 'A gradient styled button - heavy enough to cache, too gradient-y to stretch tile.'
@@ -614,7 +614,7 @@ class Style_Render_Caching_Spec extends Specification
         when : 'The component is then resized and painted again.'
             button.setSize(620, 400)
             Utility.renderSingleComponent(button)
-        then : 'No image was minted for the new size.'
+        then : 'No image was allocated for the new size.'
             ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
 
         when : 'The size settles and the component keeps being painted.'
@@ -735,7 +735,7 @@ class Style_Render_Caching_Spec extends Specification
     def 'A resizing component still uses a large rendering that already exists.'()
     {
         reportInfo """
-            What the rule above suppresses is *minting*, and only that. If a finished rendering
+            What the rule above suppresses is *allocation*, and only that. If a finished rendering
             for exactly this style and size happens to be there already, using it costs no
             allocation and no rendering at all - it is a blit, which is strictly cheaper than
             the fresh render that refusing it would force. There is nothing to save by saying
@@ -920,7 +920,7 @@ class Style_Render_Caching_Spec extends Specification
             style is addressed while it is being configured, not something the user expects to
             change what is drawn - so two components whose only difference is that one calls its
             painter "mark" and the other calls it "logo" have to share the one cached image.
-            Were they not to, each would mint an entry of its own, and since the number of
+            Were they not to, each would allocate an image of its own, and since the number of
             entries is capped, that debris would lock other components out of the cache too.
         """
         given : 'Two boxes with the same background, each with an uncacheable painter of its own name.'
@@ -999,7 +999,7 @@ class Style_Render_Caching_Spec extends Specification
 
         when : 'The second one is painted for the very first time.'
             Utility.renderSingleComponent(second)
-        then : 'It found that very image, rather than minting one of its own.'
+        then : 'It found that very image, rather than allocating one of its own.'
             ComponentExtension.from(second).cacheHitCount(UI.Layer.BACKGROUND)  == 1
             ComponentExtension.from(second).cacheMissCount(UI.Layer.BACKGROUND) == 0
     }
