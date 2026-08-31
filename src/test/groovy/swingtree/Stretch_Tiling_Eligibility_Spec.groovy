@@ -619,33 +619,31 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
     {
         reportInfo """
             Lifting a noise out of its layer only earns anything if what is left
-            behind then really does fit the small size independent exemplar,
+            behind then really does fit a smaller, size independent exemplar,
             because that exemplar is the entire yield of the operation. Merely
             *being the kind of style* that can be stretched is not enough.
 
-            A component only ever gets mapped onto an exemplar when it is
-            strictly larger than that exemplar in both directions, and how large
-            the exemplar is depends on the style: every corner arc, border
-            width, margin and shadow reach has to fit inside it, because those
-            are the pixels that cannot be stretched. So a chunky corner radius
-            and a wide shadow on a component that is wide but not tall produce
-            an exemplar taller than the component itself, and that style is
-            cached at the exact component size no matter what.
+            A dimension is compacted only when two things hold at once: the style
+            repeats along that dimension, and the component is larger than the
+            exemplar in it. The two can name different dimensions, and then
+            nothing is compacted at all. The button below carries a gradient
+            running from left to right, which paints every pixel strip along the
+            x axis the same, so the dimension it lets us compact is the height -
+            and the height is exactly where a button 440 pixels wide and 64 tall
+            has no room.
 
             Cutting such a layer would be the worst of both worlds: two exact
             size images instead of one, both re-rendered at every new size, plus
             the noise replayed on top on every single paint. So it is not cut,
             even mid-drag.
         """
-        given : """
-            A wide but short button whose 30 pixel corner radius and 14 pixel shadow blur
-            need an exemplar around 92 pixels tall - taller than the button.
-        """
+        given : 'A wide but short button whose gradient runs across it, over a noise and a shadow.'
             var button =
                 UI.button("Grain me")
                   .withStyle( it -> it
                         .borderRadius(30)
                         .backgroundColor("#1e5a8a")
+                        .gradient(UI.Layer.BACKGROUND, "sheen", g -> g.span(UI.Span.LEFT_TO_RIGHT).colors("#b02050", "#2050b0"))
                         .noise(UI.Layer.BACKGROUND, "grain", n -> n.colors("#202020", "#dedede"))
                         .shadow(UI.Layer.BACKGROUND, "glow", s -> s.color("#0a0a14").blurRadius(14))
                   )
@@ -671,26 +669,28 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             ext.cachedRendering(UI.Layer.BACKGROUND).first().height == 64
 
         when : """
-            The very same style is dragged on a component tall enough for the exemplar to fit,
-            which is the case the cut exists for.
+            The very same style is dragged on a button turned on its side, where the room and
+            the gradient name the same dimension, which is the case the cut exists for.
         """
-            var tall =
+            var upright =
                 UI.button("Grain me")
                   .withStyle( it -> it
                         .borderRadius(30)
                         .backgroundColor("#1e5a8a")
+                        .gradient(UI.Layer.BACKGROUND, "sheen", g -> g.span(UI.Span.LEFT_TO_RIGHT).colors("#b02050", "#2050b0"))
                         .noise(UI.Layer.BACKGROUND, "grain", n -> n.colors("#202020", "#dedede"))
                         .shadow(UI.Layer.BACKGROUND, "glow", s -> s.color("#0a0a14").blurRadius(14))
                   )
                   .get(JButton)
-            [[400, 300], [420, 320], [440, 340]].each { w, h ->
-                tall.setSize(w, h)
-                Utility.renderSingleComponent(tall)
+            [[60, 400], [62, 420], [64, 440]].each { w, h ->
+                upright.setSize(w, h)
+                Utility.renderSingleComponent(upright)
             }
 
-        then : 'That one *is* cut, into exemplars far smaller than the component.'
-            ComponentExtension.from(tall).cachedRendering(UI.Layer.BACKGROUND)
-                              .all( image -> image.width < 440 && image.height < 340 )
+        then : 'That one *is* cut, into two images whose heights no longer follow the component.'
+            ComponentExtension.from(upright).cachedRendering(UI.Layer.BACKGROUND).size() == 2
+            ComponentExtension.from(upright).cachedRendering(UI.Layer.BACKGROUND)
+                              .all( image -> image.height < 440 && image.width == 64 )
     }
 
     def 'A layer which is nothing but a noise is not cached while it resizes.'()
@@ -781,11 +781,15 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             Reconstructing a component from corner tiles and stretched bands
             needs room: the component must be strictly larger than the
             style's minimal exemplar (all four corner regions plus a band to
-            stretch), otherwise the corners would overlap. Below that
-            style-dependent minimal size, components keep the classic
-            behavior — every size is its own cache entry and resizing
-            re-renders. Once the component grows past the minimal size,
-            resizing becomes free.
+            stretch), otherwise the corners would overlap. The component
+            below is smaller than its exemplar in both dimensions, so it
+            keeps the classic behavior — every size is its own cache entry
+            and resizing re-renders. Once it grows past the minimal size in
+            both, resizing becomes free.
+
+            A component with room in one dimension and none in the other is
+            compacted in the one it has room in; the scenario after this one
+            covers that.
         """
         given : 'A tiny button with a comparatively heavy style, warmed up.'
             var button = buttonWith({ it.borderRadius(16).margin(6).backgroundColor("#5a8a1e").foundationColor("#f4f0e8") })
@@ -814,6 +818,61 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         then : 'Now resizing no longer re-renders: the style crossed into size independent caching.'
             button.width == 260 && button.height == 180
             ext.cacheMissCount(UI.Layer.BACKGROUND) == missesWhileLarge
+    }
+
+    def 'A component with room to stretch in one dimension only is compacted in that one. (#description)'(
+        String description, int width, int height, int siblingWidth, int siblingHeight, String cachedAs, Closure styler
+    ) {
+        reportInfo """
+            Reconstruction needs the component to be larger than the style's minimal
+            exemplar, because a dimension the exemplar already fills has nothing left
+            to stretch. That is measured per dimension, not for the component as a
+            whole: a bar 400 pixels wide and 20 pixels tall has plenty of room across
+            and none at all downwards, so its width is compacted down to the exemplar's
+            and its height is carried at the component's own 20.
+
+            Two conditions have to hold in a dimension for it to be compacted: the style
+            has to repeat along it *and* the component has to be larger than the exemplar
+            in it. The two can name different dimensions and then neither is compacted —
+            a gradient running across a wide short bar repeats downwards, which is the
+            one dimension that bar has no room in, so it is cached at its full size.
+        """
+        given : 'A styled component of the given size, painted until its cache is warm.'
+            var component = buttonWith(styler)
+            component.setSize(width, height)
+            3.times { Utility.renderSingleComponent(component) }
+            var image = ComponentExtension.from(component).cachedRendering(UI.Layer.BACKGROUND).first()
+
+        expect : 'The table really names one of the three ways a rendering can be cached:'
+            cachedAs in ["compact width", "compact height", "full size"]
+        and : 'The compacted dimension came out smaller than the component, the other one is exactly it:'
+            if ( cachedAs == "compact width" ) {
+                assert image.width < width && image.height == height
+            } else if ( cachedAs == "compact height" ) {
+                assert image.height < height && image.width == width
+            } else {
+                assert image.width == width && image.height == height
+            }
+
+        when : 'A sibling of the same style is painted once, at a size differing in one dimension:'
+            var sibling = buttonWith(styler)
+            sibling.setSize(siblingWidth, siblingHeight)
+            Utility.renderSingleComponent(sibling)
+        then : 'A compacted style shares what the first component cached; a full size one cannot:'
+            if ( cachedAs == "full size" ) {
+                assert ComponentExtension.from(sibling).cacheMissCount(UI.Layer.BACKGROUND) >= 1
+            } else {
+                assert ComponentExtension.from(sibling).cacheMissCount(UI.Layer.BACKGROUND) == 0
+                assert ComponentExtension.from(sibling).cacheHitCount(UI.Layer.BACKGROUND) >= 1
+            }
+
+        where :
+            description                          | width | height | siblingWidth | siblingHeight | cachedAs         | styler
+            "a flat bar, wide and short"         | 400   | 20     | 560          | 20            | "compact width"  | { it.borderRadius(10).backgroundColor("#175d38") }
+            "a flat bar, tall and narrow"        | 20    | 400    | 20           | 560           | "compact height" | { it.borderRadius(10).backgroundColor("#175d38") }
+            "a gradient down a wide short bar"   | 400   | 20     | 560          | 20            | "compact width"  | { it.borderRadius(10).gradient(g -> g.span(UI.Span.TOP_TO_BOTTOM).colors("#b02050", "#2050b0")) }
+            "a gradient across a wide short bar" | 400   | 20     | 560          | 20            | "full size"      | { it.borderRadius(10).gradient(g -> g.span(UI.Span.LEFT_TO_RIGHT).colors("#b02050", "#2050b0")) }
+            "a bar too small in both dimensions" | 20    | 20     | 24           | 20            | "full size"      | { it.borderRadius(10).backgroundColor("#175d38") }
     }
 
     def 'A warm style survives any sequence of resizes without ever re-rendering.'()

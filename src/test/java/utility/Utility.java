@@ -517,6 +517,37 @@ public class Utility
         return similarity;
     }
 
+    /**
+     *  The largest deviation of any single colour channel of any single pixel between two
+     *  images of the same size, alpha included. Where {@link #similarityBetween(BufferedImage,
+     *  BufferedImage)} averages over the whole image and drops alpha entirely - so that a
+     *  handful of wholly wrong pixels, or a completely wrong transparency, still scores above
+     *  99% - this reports the worst pixel there is. Use it wherever two rendering paths are
+     *  required to agree exactly rather than merely to look alike.
+     *
+     * @param image0 The first of the two images to compare.
+     * @param image1 The second image, which must have the dimensions of the first.
+     * @return The worst channel deviation found, from 0 (identical) to 255.
+     */
+    public static int worstChannelDelta(BufferedImage image0, BufferedImage image1) {
+        if ( image0.getWidth() != image1.getWidth() || image0.getHeight() != image1.getHeight() )
+            throw new IllegalArgumentException(
+                    "Cannot compare a " + image0.getWidth() + "x" + image0.getHeight() +
+                    " image to a " + image1.getWidth() + "x" + image1.getHeight() + " one."
+                );
+        int worst = 0;
+        for ( int y = 0; y < image0.getHeight(); y++ )
+            for ( int x = 0; x < image0.getWidth(); x++ ) {
+                int pixel0 = image0.getRGB(x, y);
+                int pixel1 = image1.getRGB(x, y);
+                for ( int shift : new int[]{0, 8, 16, 24} ) { // blue, green, red and alpha
+                    int delta = Math.abs(((pixel0 >> shift) & 0xff) - ((pixel1 >> shift) & 0xff));
+                    worst = Math.max(worst, delta);
+                }
+            }
+        return worst;
+    }
+
     private static double pixelDiff(int rgb1, int rgb2) {
         int r1 = (rgb1 >> 16) & 0xff;
         int g1 = (rgb1 >>  8) & 0xff;
