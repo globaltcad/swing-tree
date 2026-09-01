@@ -623,7 +623,11 @@ public final class SwingTreeInitConfig
      *  (also known as "nine slice" rendering): the style is rendered once at a small
      *  canonical size and any component size is reconstructed by copying the corner
      *  tiles and stretching the edge bands. This makes live-resizing styled components
-     *  dramatically cheaper, because no re-rendering happens at all.
+     *  dramatically cheaper, because no re-rendering happens at all. A linear gradient running
+     *  straight up, down or across qualifies in one dimension only. A gradient from top to
+     *  bottom paints every pixel strip along the y axis alike, so we render it once at the
+     *  component's real height but only a fraction of its width. Widening such a component is
+     *  then free, while making it taller renders it again.
      *  <p>
      *  This flag exists as a safety hatch: disabling it makes every style fall back to
      *  the classic exact-size cache keying. It can also be set through the system

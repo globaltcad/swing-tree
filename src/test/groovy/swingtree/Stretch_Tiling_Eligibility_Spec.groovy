@@ -28,9 +28,18 @@ import java.util.concurrent.TimeUnit
     Stretching is only truthful for styles which look the same along their
     edges no matter the component size: flat background and foundation
     colors, borders and shadows. Content whose pixels genuinely depend on
-    the full component bounds — gradients, background images, styled
-    text — cannot be reconstructed that way and falls back to the
-    classic exact-size caching, where every resize re-renders.
+    the full component bounds — background images, styled text — cannot
+    be reconstructed that way and falls back to the classic exact-size
+    caching, where every resize re-renders.
+
+    A gradient sits in between. One running straight down a component
+    varies from top to bottom, but every pixel strip along its y axis is
+    identical, so we can stretch it sideways even though we cannot
+    stretch it downwards. We cache such a style with one dimension
+    compacted and the other taken from the component, so widening it is
+    free and changing its height re-renders. A gradient running
+    diagonally, radially or conically varies in both directions at once
+    and stays on the classic exact-size cache.
 
     Noise is the interesting exception. Its pixels vary with every pixel
     position, so it can never be stretched — but it is also the one kind
@@ -135,14 +144,18 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         String description, UI.Layer layer, Closure styler
     ) {
         reportInfo """
-            A gradient spans the whole component, a background image is placed
-            and fitted relative to the component bounds, and styled text is laid
-            out within them. Their
-            pixels at one size are genuinely different from their pixels at
-            another size, so no amount of corner copying and edge stretching
-            can reconstruct them. Such styles keep the classic exact-size
-            cache key: resizing them re-renders, exactly as it did before
-            stretch tiling existed.
+            A radial gradient spans the whole component in both directions, a
+            background image is placed and fitted relative to the component
+            bounds, and styled text is laid out within them. Their pixels at one
+            size are genuinely different from their pixels at another size, so no
+            amount of corner copying and edge stretching can reconstruct them.
+            Such styles keep the classic exact-size cache key: resizing them
+            re-renders, exactly as it did before stretch tiling existed.
+
+            Note that the resize below changes *both* dimensions, which is what
+            makes it a fair question for a gradient of any kind: one running
+            along a single axis is free to stretch across that axis, but never
+            along it, so growing both always costs it a re-render too.
         """
         given : 'A styled button, warmed up with two paints at its initial size.'
             var button = buttonWith(styler)
@@ -165,10 +178,153 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             ext.cacheHitCount(layer)  == hitsBeforeResize
 
         where :
-            description          | layer               | styler
-            "a gradient"         | UI.Layer.BACKGROUND | { it.borderRadius(10).gradient(g -> g.colors("#c81e46", "#1e46c8")) }
-            "a background image" | UI.Layer.BACKGROUND | { it.borderRadius(10).image(img -> img.image(ICON)) }
-            "styled text"        | UI.Layer.CONTENT    | { it.text(t -> t.content("Ninety-nine slices")) }
+            description            | layer               | styler
+            "a vertical gradient"  | UI.Layer.BACKGROUND | { it.borderRadius(10).gradient(g -> g.colors("#c81e46", "#1e46c8")) }
+            "a radial gradient"    | UI.Layer.BACKGROUND | { it.borderRadius(10).gradient(g -> g.type(UI.GradientType.RADIAL).colors("#c81e46", "#1e46c8")) }
+            "a diagonal gradient"  | UI.Layer.BACKGROUND | { it.borderRadius(10).gradient(g -> g.span(UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT).colors("#c81e46", "#1e46c8")) }
+            "a background image"   | UI.Layer.BACKGROUND | { it.borderRadius(10).image(img -> img.image(ICON)) }
+            "styled text"          | UI.Layer.CONTENT    | { it.text(t -> t.content("Ninety-nine slices")) }
+    }
+
+    def 'A gradient along one axis lets the component grow for free across that axis. (#description)'(
+        String description, Closure styler, int grownWidth, int grownHeight
+    ) {
+        reportInfo """
+            A gradient running straight down a component is built from two points
+            which share an x coordinate, so its colour depends on how far down a
+            pixel is and on nothing else. Every pixel strip along its y axis is
+            therefore identical, and widening the component simply needs more of
+            them - which is exactly what stretching an edge band does.
+
+            So such a style is cached at a size which is *independent along one
+            axis and exact along the other*, and widening it is served from that
+            cache without re-rendering. The same argument transposed applies to a
+            gradient running left to right, which is free to grow taller.
+
+            This is what makes a horizontal window drag cheap for the many themes
+            whose panels and buttons are a vertical gradient - the whole
+            Frutiger Aero and skeuomorphic idiom of "a gloss down every raised
+            thing" resizes sideways for nothing.
+        """
+        given : 'A button styled with the gradient, warmed up with two paints at its initial size.'
+            var button = buttonWith(styler)
+            button.setSize(220, 160)
+            var ext = ComponentExtension.from(button)
+            2.times { Utility.renderSingleComponent(button) }
+        expect : 'The size stuck and the cache is warm.'
+            button.width == 220 && button.height == 160
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
+
+        when : 'The component grows along the axis the gradient does not vary along.'
+            int missesBefore = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            int hitsBefore   = ext.cacheHitCount(UI.Layer.BACKGROUND)
+            button.setSize(grownWidth, grownHeight)
+            Utility.renderSingleComponent(button)
+        then : 'The resize took effect...'
+            button.width == grownWidth && button.height == grownHeight
+        and : '...and the paint at the new size was still served from the cache.'
+            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBefore
+            ext.cacheHitCount(UI.Layer.BACKGROUND)  >  hitsBefore
+
+        where :
+            description                        | styler                                                                                                              | grownWidth | grownHeight
+            "top to bottom, grown wider"       | { it.borderRadius(12).gradient(g -> g.span(UI.Span.TOP_TO_BOTTOM).colors("#c81e46", "#1e46c8")) }                  | 460        | 160
+            "bottom to top, grown wider"       | { it.borderRadius(12).gradient(g -> g.span(UI.Span.BOTTOM_TO_TOP).colors("#c81e46", "#1e46c8")) }                  | 460        | 160
+            "left to right, grown taller"      | { it.borderRadius(12).gradient(g -> g.span(UI.Span.LEFT_TO_RIGHT).colors("#c81e46", "#1e46c8")) }                  | 220        | 340
+            "right to left, grown taller"      | { it.borderRadius(12).gradient(g -> g.span(UI.Span.RIGHT_TO_LEFT).colors("#c81e46", "#1e46c8")) }                  | 220        | 340
+            "a gloss over a flat fill, wider"  | { it.borderRadius(12).backgroundColor("#123048").gradient(g -> g.colors(new Color(255,255,255,90), new Color(255,255,255,0))) } | 460 | 160
+            "a gradient under a shadow, wider" | { it.borderRadius(12).shadowColor("#0a0a12").shadowBlurRadius(6).gradient(g -> g.colors("#c81e46", "#1e46c8")) }    | 460        | 160
+    }
+
+    def 'A gradient along one axis still re-renders when the component grows along that same axis. (#description)'(
+        String description, Closure styler, int grownWidth, int grownHeight
+    ) {
+        reportInfo """
+            The counterpart to growing along the free direction, and the reason
+            that direction is safe. A
+            gradient running down a component genuinely has different pixels at
+            every height: its colours are spread over the whole distance, so
+            making the component taller does not add more of the same rows, it
+            changes every row. That is not something a stretched edge band can
+            reconstruct, and the cache does not pretend otherwise - the exact
+            height is part of the key, so growing along it re-renders.
+
+            Without this, a resize would smear a gradient across the new height
+            instead of redrawing it.
+        """
+        given : 'A button styled with the gradient, warmed up with two paints at its initial size.'
+            var button = buttonWith(styler)
+            button.setSize(220, 160)
+            var ext = ComponentExtension.from(button)
+            2.times { Utility.renderSingleComponent(button) }
+        expect : 'The cache is warm and serving hits at this settled size.'
+            ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
+
+        when : 'The component grows along the very axis the gradient varies along.'
+            int missesBefore = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            int hitsBefore   = ext.cacheHitCount(UI.Layer.BACKGROUND)
+            button.setSize(grownWidth, grownHeight)
+            Utility.renderSingleComponent(button)
+        then : 'The new size required a fresh rendering, not a cache hit.'
+            button.width == grownWidth && button.height == grownHeight
+            ext.cacheMissCount(UI.Layer.BACKGROUND) >  missesBefore
+            ext.cacheHitCount(UI.Layer.BACKGROUND)  == hitsBefore
+
+        where :
+            description                    | styler                                                                                             | grownWidth | grownHeight
+            "top to bottom, grown taller"  | { it.borderRadius(12).gradient(g -> g.span(UI.Span.TOP_TO_BOTTOM).colors("#c81e46", "#1e46c8")) } | 220        | 340
+            "bottom to top, grown taller"  | { it.borderRadius(12).gradient(g -> g.span(UI.Span.BOTTOM_TO_TOP).colors("#c81e46", "#1e46c8")) } | 220        | 340
+            "left to right, grown wider"   | { it.borderRadius(12).gradient(g -> g.span(UI.Span.LEFT_TO_RIGHT).colors("#c81e46", "#1e46c8")) } | 460        | 160
+            "right to left, grown wider"   | { it.borderRadius(12).gradient(g -> g.span(UI.Span.RIGHT_TO_LEFT).colors("#c81e46", "#1e46c8")) } | 460        | 160
+    }
+
+    def 'A gradient which varies in two directions at once is never reconstructed. (#description)'(
+        String description, Closure styler
+    ) {
+        reportInfo """
+            We only compact an axis when the gradient's colour depends on the
+            other coordinate alone. This pins every way of failing that
+            condition: a radial or conic gradient varies with
+            the distance or the angle from a point and so depends on both
+            coordinates; a diagonal span varies along both by construction; a
+            rotation turns an axis aligned span into a diagonal one; and
+            measuring the gradient from the component centre derives its extent
+            from the component size itself.
+
+            Every one of these keeps the classic exact-size cache, so even
+            growing along a single axis re-renders, although that is the cheap
+            direction for a gradient which varies along one axis only. Letting
+            any of them through would not raise an error; it would paint a
+            smeared picture, which is why they are all listed here by name.
+        """
+        given : 'A button styled with the gradient, warmed up with two paints.'
+            var button = buttonWith(styler)
+            button.setSize(220, 160)
+            var ext = ComponentExtension.from(button)
+            2.times { Utility.renderSingleComponent(button) }
+        expect : 'The cache is warm at this settled size.'
+            ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
+
+        when : 'The component grows in width alone, the direction a vertical gradient would get for free.'
+            int missesBefore = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            button.setSize(460, 160)
+            Utility.renderSingleComponent(button)
+        then : 'It still had to be rendered again.'
+            button.width == 460 && button.height == 160
+            ext.cacheMissCount(UI.Layer.BACKGROUND) > missesBefore
+
+        where :
+            description                          | styler
+            "radial"                             | { it.borderRadius(12).gradient(g -> g.type(UI.GradientType.RADIAL).colors("#c81e46", "#1e46c8")) }
+            "conic"                              | { it.borderRadius(12).gradient(g -> g.type(UI.GradientType.CONIC).colors("#c81e46", "#1e46c8")) }
+            "diagonal, top left to bottom right" | { it.borderRadius(12).gradient(g -> g.span(UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT).colors("#c81e46", "#1e46c8")) }
+            "diagonal, bottom left to top right" | { it.borderRadius(12).gradient(g -> g.span(UI.Span.BOTTOM_LEFT_TO_TOP_RIGHT).colors("#c81e46", "#1e46c8")) }
+            "vertical but rotated"               | { it.borderRadius(12).gradient(g -> g.span(UI.Span.TOP_TO_BOTTOM).rotation(37f).colors("#c81e46", "#1e46c8", "#46c81e")) }
+            "vertical but measured from centre"  | { it.borderRadius(12).padding(12).gradient(g -> g.span(UI.Span.TOP_TO_BOTTOM).boundary(UI.ComponentBoundary.CENTER_TO_CONTENT).colors("#c81e46", "#1e46c8")) }
+            "one down, one across the component" | { it.borderRadius(12)
+                                                        .gradient("a", g -> g.span(UI.Span.TOP_TO_BOTTOM).colors(new Color(200,30,70,160), new Color(30,70,200,160)))
+                                                        .gradient("b", g -> g.span(UI.Span.LEFT_TO_RIGHT).colors(new Color(30,200,70,120), new Color(200,200,30,120))) }
     }
 
     def 'While a component resizes, a noise is lifted out so the rest of its layer resizes for free.'()
@@ -229,6 +385,56 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             ext.cacheMissCount(UI.Layer.BACKGROUND) == missesWhenWarm
         and : 'And the two exemplars are still the ones being painted from.'
             ext.cachedRendering(UI.Layer.BACKGROUND).size() == 2
+    }
+
+    def 'A noise is lifted out even when the layer under it is only free along one axis.'()
+    {
+        reportInfo """
+            Cutting a layer around its noise is worth doing whenever the piece under the
+            noise stays cached through a drag, and that piece does not have to stay cached in
+            both directions. A layer whose background is a gradient running straight down it
+            has its width compacted and its height taken from the component, so widening it is
+            served from the cache while changing its height is not.
+
+            Cutting such a layer buys cache hits whenever the drag is sideways, and costs a
+            second cache entry when it is not. Requiring the piece to stay cached along *both*
+            axes before cutting would be the tidier looking rule, and would turn every frame of
+            the drag below back into a re-render.
+        """
+        given : 'A button whose background layer is a gradient down the component, a noise and a shadow.'
+            var button =
+                UI.button("Tile me")
+                  .withStyle( it -> it
+                        .borderRadius(16)
+                        .gradient(UI.Layer.BACKGROUND, "gloss", g -> g.span(UI.Span.TOP_TO_BOTTOM).colors("#1e5a8a", "#8a5a1e"))
+                        .noise(UI.Layer.BACKGROUND, "grain", n -> n.colors("#202020", "#dedede"))
+                        .shadow(UI.Layer.BACKGROUND, "glow", s -> s.color("#0a0a14").blurRadius(6))
+                  )
+                  .get(JButton)
+            button.setSize(500, 300)
+            var ext = ComponentExtension.from(button)
+        and : 'A drag is started along the axis the gradient does not vary along.'
+            2.times { Utility.renderSingleComponent(button) }
+            button.setSize(640, 300)
+            2.times { Utility.renderSingleComponent(button) }
+
+        expect : 'The layer was cut, and the piece under the noise is a compact exemplar.'
+            button.width == 640 && button.height == 300
+            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            ext.cachedRendering(UI.Layer.BACKGROUND).all( image -> image.width < 640 )
+
+        when : 'The drag continues through a series of fresh widths.'
+            int missesWhenWarm = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            int hitsWhenWarm   = ext.cacheHitCount(UI.Layer.BACKGROUND)
+            [700, 780, 900, 1010].each { width ->
+                button.setSize(width, 300)
+                Utility.renderSingleComponent(button)
+                assert button.width == width
+            }
+
+        then : 'Not one of those paints re-rendered the style, despite the noise on the layer.'
+            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesWhenWarm
+            ext.cacheHitCount(UI.Layer.BACKGROUND)  == hitsWhenWarm + 4
     }
 
     def 'Once the size settles again, the noise goes back into a single cached image.'()
@@ -413,33 +619,30 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
     {
         reportInfo """
             Lifting a noise out of its layer only earns anything if what is left
-            behind then really does fit the small size independent exemplar,
+            behind then really does fit a smaller, size independent exemplar,
             because that exemplar is the entire yield of the operation. Merely
             *being the kind of style* that can be stretched is not enough.
 
-            A component only ever gets mapped onto an exemplar when it is
-            strictly larger than that exemplar in both directions, and how large
-            the exemplar is depends on the style: every corner arc, border
-            width, margin and shadow reach has to fit inside it, because those
-            are the pixels that cannot be stretched. So a chunky corner radius
-            and a wide shadow on a component that is wide but not tall produce
-            an exemplar taller than the component itself, and that style is
-            cached at the exact component size no matter what.
+            A dimension is compacted only when two things hold at once: the style
+            repeats along that dimension, and the component is larger than the
+            exemplar in it. The button below carries a gradient running from left
+            to right, which paints every pixel strip along the x axis the same, so
+            the dimension it lets us compact is the height - and the height is
+            exactly where a button 440 pixels wide and 64 tall has no room, which
+            leaves nothing compacted at all.
 
             Cutting such a layer would be the worst of both worlds: two exact
             size images instead of one, both re-rendered at every new size, plus
             the noise replayed on top on every single paint. So it is not cut,
             even mid-drag.
         """
-        given : """
-            A wide but short button whose 30 pixel corner radius and 14 pixel shadow blur
-            need an exemplar around 92 pixels tall - taller than the button.
-        """
+        given : 'A wide but short button whose gradient runs across it, over a noise and a shadow.'
             var button =
                 UI.button("Grain me")
                   .withStyle( it -> it
                         .borderRadius(30)
                         .backgroundColor("#1e5a8a")
+                        .gradient(UI.Layer.BACKGROUND, "sheen", g -> g.span(UI.Span.LEFT_TO_RIGHT).colors("#b02050", "#2050b0"))
                         .noise(UI.Layer.BACKGROUND, "grain", n -> n.colors("#202020", "#dedede"))
                         .shadow(UI.Layer.BACKGROUND, "glow", s -> s.color("#0a0a14").blurRadius(14))
                   )
@@ -465,26 +668,28 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             ext.cachedRendering(UI.Layer.BACKGROUND).first().height == 64
 
         when : """
-            The very same style is dragged on a component tall enough for the exemplar to fit,
-            which is the case the cut exists for.
+            The very same style is dragged on a button turned on its side, where the room and
+            the gradient name the same dimension, which is the case the cut exists for.
         """
-            var tall =
+            var upright =
                 UI.button("Grain me")
                   .withStyle( it -> it
                         .borderRadius(30)
                         .backgroundColor("#1e5a8a")
+                        .gradient(UI.Layer.BACKGROUND, "sheen", g -> g.span(UI.Span.LEFT_TO_RIGHT).colors("#b02050", "#2050b0"))
                         .noise(UI.Layer.BACKGROUND, "grain", n -> n.colors("#202020", "#dedede"))
                         .shadow(UI.Layer.BACKGROUND, "glow", s -> s.color("#0a0a14").blurRadius(14))
                   )
                   .get(JButton)
-            [[400, 300], [420, 320], [440, 340]].each { w, h ->
-                tall.setSize(w, h)
-                Utility.renderSingleComponent(tall)
+            [[60, 400], [62, 420], [64, 440]].each { w, h ->
+                upright.setSize(w, h)
+                Utility.renderSingleComponent(upright)
             }
 
-        then : 'That one *is* cut, into exemplars far smaller than the component.'
-            ComponentExtension.from(tall).cachedRendering(UI.Layer.BACKGROUND)
-                              .all( image -> image.width < 440 && image.height < 340 )
+        then : 'That one *is* cut, into two images whose heights no longer follow the component.'
+            ComponentExtension.from(upright).cachedRendering(UI.Layer.BACKGROUND).size() == 2
+            ComponentExtension.from(upright).cachedRendering(UI.Layer.BACKGROUND)
+                              .all( image -> image.height < 440 && image.width == 64 )
     }
 
     def 'A layer which is nothing but a noise is not cached while it resizes.'()
@@ -575,11 +780,15 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             Reconstructing a component from corner tiles and stretched bands
             needs room: the component must be strictly larger than the
             style's minimal exemplar (all four corner regions plus a band to
-            stretch), otherwise the corners would overlap. Below that
-            style-dependent minimal size, components keep the classic
-            behavior — every size is its own cache entry and resizing
-            re-renders. Once the component grows past the minimal size,
-            resizing becomes free.
+            stretch), otherwise the corners would overlap. The component
+            below is smaller than its exemplar in both dimensions, so it
+            keeps the classic behavior — every size is its own cache entry
+            and resizing re-renders. Once it grows past the minimal size in
+            both, resizing becomes free.
+
+            A component with room in one dimension and none in the other is
+            compacted in the one it has room in; the scenario after this one
+            covers that.
         """
         given : 'A tiny button with a comparatively heavy style, warmed up.'
             var button = buttonWith({ it.borderRadius(16).margin(6).backgroundColor("#5a8a1e").foundationColor("#f4f0e8") })
@@ -608,6 +817,61 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         then : 'Now resizing no longer re-renders: the style crossed into size independent caching.'
             button.width == 260 && button.height == 180
             ext.cacheMissCount(UI.Layer.BACKGROUND) == missesWhileLarge
+    }
+
+    def 'A component with room to stretch in one dimension only is compacted in that one. (#description)'(
+        String description, int width, int height, int siblingWidth, int siblingHeight, String cachedAs, Closure styler
+    ) {
+        reportInfo """
+            Reconstruction stretches a dimension only where the component is larger
+            than the style's minimal exemplar in that dimension, because a dimension
+            the exemplar already fills has nothing left to stretch. Width and height
+            are judged separately: a bar 400 pixels wide and 20 pixels tall has plenty
+            of room across and none at all downwards, so its width is compacted down to
+            the exemplar's and its height is carried at the component's own 20.
+
+            Two conditions have to hold in a dimension for it to be compacted: the style
+            has to repeat along it *and* the component has to be larger than the exemplar
+            in it. A gradient running across a wide short bar repeats downwards, which is
+            the one dimension that bar has no room in, so neither dimension is compacted
+            and the bar is cached at its full size.
+        """
+        given : 'A styled component of the given size, painted until its cache is warm.'
+            var component = buttonWith(styler)
+            component.setSize(width, height)
+            3.times { Utility.renderSingleComponent(component) }
+            var image = ComponentExtension.from(component).cachedRendering(UI.Layer.BACKGROUND).first()
+
+        expect : 'The table really names one of the three ways a rendering can be cached:'
+            cachedAs in ["compact width", "compact height", "full size"]
+        and : "A compacted dimension came out smaller than the component; an uncompacted one is exactly the component's:"
+            if ( cachedAs == "compact width" ) {
+                assert image.width < width && image.height == height
+            } else if ( cachedAs == "compact height" ) {
+                assert image.height < height && image.width == width
+            } else {
+                assert image.width == width && image.height == height
+            }
+
+        when : 'A sibling of the same style is painted once, at a size differing in one dimension:'
+            var sibling = buttonWith(styler)
+            sibling.setSize(siblingWidth, siblingHeight)
+            Utility.renderSingleComponent(sibling)
+        then : 'A compacted style shares what the first component cached; a full size one cannot:'
+            if ( cachedAs == "full size" ) {
+                assert ComponentExtension.from(sibling).cacheMissCount(UI.Layer.BACKGROUND) >= 1
+            } else {
+                assert ComponentExtension.from(sibling).cacheMissCount(UI.Layer.BACKGROUND) == 0
+                assert ComponentExtension.from(sibling).cacheHitCount(UI.Layer.BACKGROUND) >= 1
+            }
+
+        where :
+            description                          | width | height | siblingWidth | siblingHeight | cachedAs         | styler
+            "a flat bar, wide and short"         | 400   | 20     | 560          | 20            | "compact width"  | { it.borderRadius(10).backgroundColor("#175d38") }
+            "a flat bar, tall and narrow"        | 20    | 400    | 20           | 560           | "compact height" | { it.borderRadius(10).backgroundColor("#175d38") }
+            "a gradient down a wide short bar"   | 400   | 20     | 560          | 20            | "compact width"  | { it.borderRadius(10).gradient(g -> g.span(UI.Span.TOP_TO_BOTTOM).colors("#b02050", "#2050b0")) }
+            "a gradient across a wide short bar" | 400   | 20     | 560          | 20            | "full size"      | { it.borderRadius(10).gradient(g -> g.span(UI.Span.LEFT_TO_RIGHT).colors("#b02050", "#2050b0")) }
+            "a bar too small in both dimensions" | 20    | 20     | 24           | 20            | "full size"      | { it.borderRadius(10).backgroundColor("#175d38") }
     }
 
     def 'A warm style survives any sequence of resizes without ever re-rendering.'()
@@ -642,20 +906,26 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
     }
 
-    def 'The dimensions of the cached rendering reveal how a style is cached: compressed atlas or full size. (#description)'(
+    def 'The dimensions of the cached rendering reveal how a style is cached. (#description)'(
         String description, UI.Layer layer, String cachedAs, Closure styler
     ) {
         reportInfo """
             `cachedRendering(layer)` hands out a copy of the actual cached
             image, and its dimensions tell the whole caching story from the
-            outside: a stretch tileable style is stored as a small exemplar
-            rendering - a compressed texture atlas whose size depends only on
-            the style - while every other style is cached at exactly the
-            component size. We pin both aspects by painting the same style on
-            two differently sized components and comparing the two cached
-            images: atlases must be identical in size (and much smaller than
-            either component), full size renderings must each track their
-            own component.
+            outside. There are three stories it can tell:
+
+            A fully tileable style is stored as a small exemplar rendering - a
+            compact texture atlas whose size depends only on the style, never
+            on the component. A style which repeats along one axis only, such as
+            a gradient running straight down the component, is compacted along
+            that axis and carries the component's real measurement on the other.
+            Everything else is cached at exactly the component size.
+
+            We pin all three by painting the same style on two differently sized
+            components and comparing the two cached images: a compacted
+            dimension must be identical for both (and much smaller than either
+            component), while a dimension that was not compacted must track each
+            component's own size.
 
             Note that a noise sits in the full size group here even though it is
             the one style that gets lifted out of its layer's cached image: that
@@ -674,71 +944,98 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             var firstImage  = ComponentExtension.from(first).cachedRendering(layer).first()
             var secondImage = ComponentExtension.from(second).cachedRendering(layer).first()
 
-        expect : 'Atlases are size independent and compressed, full size renderings track their component:'
-            if ( cachedAs == "compressed atlas" ) {
-                assert firstImage.width == secondImage.width && firstImage.height == secondImage.height
-                assert firstImage.width < 400 && firstImage.height < 300
+        expect : 'The table really names one of the four ways a rendering can be cached:'
+            cachedAs in ["compact atlas", "compact width", "compact height", "full size"]
+        and : 'Every compacted dimension is size independent, every uncompacted one tracks its component:'
+            var compactWidth  = cachedAs in ["compact atlas", "compact width"]
+            var compactHeight = cachedAs in ["compact atlas", "compact height"]
+            if ( compactWidth ) {
+                assert firstImage.width == secondImage.width : "a compact width must not depend on the component"
+                assert firstImage.width < 400
             } else {
-                assert firstImage.width  == 400 && firstImage.height  == 300
-                assert secondImage.width == 500 && secondImage.height == 350
+                assert firstImage.width == 400 && secondImage.width == 500
+            }
+            if ( compactHeight ) {
+                assert firstImage.height == secondImage.height : "a compact height must not depend on the component"
+                assert firstImage.height < 300
+            } else {
+                assert firstImage.height == 300 && secondImage.height == 350
             }
 
         where :
             description                                    | layer               | cachedAs           | styler
-            "flat rounded background"                      | UI.Layer.BACKGROUND | "compressed atlas" | { it.borderRadius(16).backgroundColor("#175d38") }
-            "background, foundation and margin"            | UI.Layer.BACKGROUND | "compressed atlas" | { it.borderRadius(20).margin(8).backgroundColor("#5d1738").foundationColor("#f0ead6") }
-            "arcless flat colors with a margin"            | UI.Layer.BACKGROUND | "compressed atlas" | { it.margin(6).backgroundColor("#38175d").foundationColor("#e6f0d6") }
-            "a different arc for every corner"             | UI.Layer.BACKGROUND | "compressed atlas" | { it.backgroundColor("#5d3817")
+            "flat rounded background"                      | UI.Layer.BACKGROUND | "compact atlas" | { it.borderRadius(16).backgroundColor("#175d38") }
+            "background, foundation and margin"            | UI.Layer.BACKGROUND | "compact atlas" | { it.borderRadius(20).margin(8).backgroundColor("#5d1738").foundationColor("#f0ead6") }
+            "arcless flat colors with a margin"            | UI.Layer.BACKGROUND | "compact atlas" | { it.margin(6).backgroundColor("#38175d").foundationColor("#e6f0d6") }
+            "a different arc for every corner"             | UI.Layer.BACKGROUND | "compact atlas" | { it.backgroundColor("#5d3817")
                                                                                                             .borderRadiusAt(UI.Corner.TOP_LEFT, 0, 0)
                                                                                                             .borderRadiusAt(UI.Corner.TOP_RIGHT, 8, 8)
                                                                                                             .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 16, 16)
                                                                                                             .borderRadiusAt(UI.Corner.BOTTOM_RIGHT, 24, 24) }
-            "uniformly colored rounded border"             | UI.Layer.BORDER     | "compressed atlas" | { it.border(3, "#17385d").borderRadius(14) }
-            "per-edge border widths, one color, rounded"   | UI.Layer.BORDER     | "compressed atlas" | { it.borderWidths(1, 2, 3, 4).borderColor("#0f2f4f").borderRadius(12) }
-            "per-edge border colors, square corners"       | UI.Layer.BORDER     | "compressed atlas" | { it.borderWidths(2, 2, 2, 2).borderColors("#7a2020", "#207a20", "#20207a", "#7a7a20") }
-            "per-edge border colors, rounded, even widths" | UI.Layer.BORDER     | "compressed atlas" | { it.borderWidths(3, 3, 3, 3).borderColors("#7a2020", "#207a20", "#20207a", "#7a7a20").borderRadius(16) }
-            "per-edge border colors, rounded, margined"    | UI.Layer.BORDER     | "compressed atlas" | { it.margin(10).borderWidths(12, 4, 10, 4).borderColors("#7a2020", "#207a20", "#20207a", "#7a7a20").borderRadius(8) }
-            "an outset drop shadow"                        | UI.Layer.CONTENT    | "compressed atlas" | { it.shadowColor("#0a0a14").shadowBlurRadius(6).shadowSpreadRadius(2).borderRadius(12) }
-            "an inset shadow"                              | UI.Layer.CONTENT    | "compressed atlas" | { it.shadowColor("#141414").shadowBlurRadius(5).shadowIsInset(true).borderRadius(10) }
-            "an offset shadow"                             | UI.Layer.CONTENT    | "compressed atlas" | { it.shadowColor("#101018").shadowBlurRadius(4).shadowOffset(3, 5).borderRadius(8) }
-            "two named shadows, one in, one out"           | UI.Layer.CONTENT    | "compressed atlas" | { it.borderRadius(14)
+            "uniformly colored rounded border"             | UI.Layer.BORDER     | "compact atlas" | { it.border(3, "#17385d").borderRadius(14) }
+            "per-edge border widths, one color, rounded"   | UI.Layer.BORDER     | "compact atlas" | { it.borderWidths(1, 2, 3, 4).borderColor("#0f2f4f").borderRadius(12) }
+            "per-edge border colors, square corners"       | UI.Layer.BORDER     | "compact atlas" | { it.borderWidths(2, 2, 2, 2).borderColors("#7a2020", "#207a20", "#20207a", "#7a7a20") }
+            "per-edge border colors, rounded, even widths" | UI.Layer.BORDER     | "compact atlas" | { it.borderWidths(3, 3, 3, 3).borderColors("#7a2020", "#207a20", "#20207a", "#7a7a20").borderRadius(16) }
+            "per-edge border colors, rounded, margined"    | UI.Layer.BORDER     | "compact atlas" | { it.margin(10).borderWidths(12, 4, 10, 4).borderColors("#7a2020", "#207a20", "#20207a", "#7a7a20").borderRadius(8) }
+            "an outset drop shadow"                        | UI.Layer.CONTENT    | "compact atlas" | { it.shadowColor("#0a0a14").shadowBlurRadius(6).shadowSpreadRadius(2).borderRadius(12) }
+            "an inset shadow"                              | UI.Layer.CONTENT    | "compact atlas" | { it.shadowColor("#141414").shadowBlurRadius(5).shadowIsInset(true).borderRadius(10) }
+            "an offset shadow"                             | UI.Layer.CONTENT    | "compact atlas" | { it.shadowColor("#101018").shadowBlurRadius(4).shadowOffset(3, 5).borderRadius(8) }
+            "two named shadows, one in, one out"           | UI.Layer.CONTENT    | "compact atlas" | { it.borderRadius(14)
                                                                                                             .shadow("out", s -> s.color("#26264a").blurRadius(7).isOutset(true))
                                                                                                             .shadow("in",  s -> s.color("#0e0e16").blurRadius(4).isInset(true)) }
-            "soft-UI penumbra shadows"                     | UI.Layer.CONTENT    | "compressed atlas" | { it.borderRadius(28).margin(10)
+            "soft-UI penumbra shadows"                     | UI.Layer.CONTENT    | "compact atlas" | { it.borderRadius(28).margin(10)
                                                                                                             .shadow("bright", s -> s.color(new Color(255, 255, 255, 40)).offset(-8, -8).type(UI.ShadowType.PENUMBRA))
                                                                                                             .shadow("dark",   s -> s.color(new Color(0, 0, 0, 110)).offset(4, 4).type(UI.ShadowType.PENUMBRA))
                                                                                                             .shadowBlurRadius(17).shadowSpreadRadius(-5).shadowIsInset(true) }
-            "asymmetric margins, widths and arcs"          | UI.Layer.BACKGROUND | "compressed atlas" | { it.backgroundColor("#4f2f0f").margin(1, 2, 3, 4)
+            "asymmetric margins, widths and arcs"          | UI.Layer.BACKGROUND | "compact atlas" | { it.backgroundColor("#4f2f0f").margin(1, 2, 3, 4)
                                                                                                             .borderWidths(5, 6, 7, 8).borderColor("#2f4f0f")
                                                                                                             .borderRadiusAt(UI.Corner.TOP_LEFT, 10, 11)
                                                                                                             .borderRadiusAt(UI.Corner.TOP_RIGHT, 12, 13)
                                                                                                             .borderRadiusAt(UI.Corner.BOTTOM_LEFT, 14, 15)
                                                                                                             .borderRadiusAt(UI.Corner.BOTTOM_RIGHT, 16, 17) }
-            "a gradient"                                   | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(10).gradient(g -> g.colors("#b02050", "#2050b0")) }
+            "a gradient down the component"                | UI.Layer.BACKGROUND | "compact width" | { it.borderRadius(10).gradient(g -> g.colors("#b02050", "#2050b0")) }
+            "a gradient up the component"                  | UI.Layer.BACKGROUND | "compact width" | { it.borderRadius(10).gradient(g -> g.span(UI.Span.BOTTOM_TO_TOP).colors("#b02050", "#2050b0")) }
+            "a gradient across the component"              | UI.Layer.BACKGROUND | "compact height"| { it.borderRadius(10).gradient(g -> g.span(UI.Span.LEFT_TO_RIGHT).colors("#b02050", "#2050b0")) }
+            "a gradient across, right to left"             | UI.Layer.BACKGROUND | "compact height"| { it.borderRadius(10).gradient(g -> g.span(UI.Span.RIGHT_TO_LEFT).colors("#b02050", "#2050b0")) }
+            "two gradients, both down the component"       | UI.Layer.BACKGROUND | "compact width" | { it.borderRadius(10)
+                                                                                                            .gradient("a", g -> g.span(UI.Span.TOP_TO_BOTTOM).colors(new Color(176, 32, 80, 160), new Color(32, 80, 176, 160)))
+                                                                                                            .gradient("b", g -> g.span(UI.Span.BOTTOM_TO_TOP).colors(new Color(32, 176, 80, 120), new Color(176, 176, 32, 120))) }
+            "two gradients along different axes"           | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(10)
+                                                                                                            .gradient("a", g -> g.span(UI.Span.TOP_TO_BOTTOM).colors(new Color(176, 32, 80, 160), new Color(32, 80, 176, 160)))
+                                                                                                            .gradient("b", g -> g.span(UI.Span.LEFT_TO_RIGHT).colors(new Color(32, 176, 80, 120), new Color(176, 176, 32, 120))) }
+            "a radial gradient"                            | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(10).gradient(g -> g.type(UI.GradientType.RADIAL).colors("#b02050", "#2050b0")) }
+            "a conic gradient"                             | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(10).gradient(g -> g.type(UI.GradientType.CONIC).colors("#b02050", "#2050b0")) }
+            "a diagonal gradient"                          | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(10).gradient(g -> g.span(UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT).colors("#b02050", "#2050b0")) }
+            "a rotated vertical gradient"                  | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(10).gradient(g -> g.span(UI.Span.TOP_TO_BOTTOM).rotation(37f).colors("#b02050", "#2050b0", "#20b050")) }
+            "a vertical gradient measured from the center" | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(10).padding(12).gradient(g -> g.span(UI.Span.TOP_TO_BOTTOM).boundary(UI.ComponentBoundary.CENTER_TO_CONTENT).colors("#b02050", "#2050b0")) }
             "a noise texture at a settled size"            | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(10).noise(n -> n.colors("#202020", "#dedede")) }
             "a background image"                           | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(10).image(img -> img.image(ICON)) }
             "styled text"                                  | UI.Layer.CONTENT    | "full size"        | { it.text(t -> t.content("Full size")) }
             "per-edge colors, rounded, lopsided widths"    | UI.Layer.BORDER     | "full size"        | { it.borderWidths(2, 3, 4, 5).borderColors("#6a1010", "#106a10", "#10106a", "#6a6a10").borderRadius(16) }
-            "a rounded background poisoned by a gradient"  | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(16).backgroundColor("#0f4f2f").gradient(g -> g.colors("#903060", "#309060")) }
+            "a rounded background under a radial gradient" | UI.Layer.BACKGROUND | "full size"        | { it.borderRadius(16).backgroundColor("#0f4f2f").gradient(g -> g.type(UI.GradientType.RADIAL).colors("#903060", "#309060")) }
+            "a rounded background under a down gradient"   | UI.Layer.BACKGROUND | "compact width" | { it.borderRadius(16).backgroundColor("#0f4f2f").gradient(g -> g.colors("#903060", "#309060")) }
     }
 
-    def 'Enormous components are cached eagerly when their style fits a compressed atlas.'()
+    def 'Enormous components are cached eagerly when their style fits a compact atlas.'()
     {
         reportInfo """
             The memory gates of the render cache - the maximum image area worth
             caching and the lazy allocation warm-up which shields short-lived
             styles from paying for an image - are applied to what will actually
-            be *allocated*. The compressed atlas turns this on its head: for a
+            be *allocated*. The compact atlas turns this on its head: for a
             stretch tileable style the allocation is the small exemplar no
             matter how large the component, so a component far beyond the
             classic size limit is cached immediately, on its very first paint.
             Before stretch tiling, such a component could never be cached at
-            all, and its equally sized gradient sibling still cannot: a
-            full size rendering of it would blow the memory budget.
+            all, and its equally sized radial gradient sibling still cannot: a
+            full size rendering of it would blow the memory budget. The foil has
+            to be a *radial* gradient, because one running straight down the
+            component compacts along its width and would comfortably fit the
+            budget - which the scenario after this one is about.
         """
-        given : 'Two gigantic buttons: one with a tileable style, one with a gradient.'
+        given : 'Two gigantic buttons: one with a tileable style, one with a radial gradient.'
             var tileable = buttonWith({ it.borderRadius(24).margin(8).backgroundColor("#0b3d2e").foundationColor("#efe8d8") })
-            var gradient = buttonWith({ it.borderRadius(24).gradient(g -> g.colors("#803060", "#306080")) })
+            var gradient = buttonWith({ it.borderRadius(24).gradient(g -> g.type(UI.GradientType.RADIAL).colors("#803060", "#306080")) })
             tileable.setSize(3000, 1500)
             gradient.setSize(3000, 1500)
 
@@ -763,16 +1060,16 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
     {
         reportInfo """
             A style is not tileable or non-tileable as a whole - each *layer* is
-            judged on its own content. A panel with a gradient background and a
-            drop shadow is the everyday case: the gradient spans the component
-            and cannot be reconstructed, but the shadow lives on its own layer
-            and can. So the very same component gets a full size cached rendering
-            for its background and a compressed atlas for its shadow, and a
-            resize re-renders only the former.
+            judged on its own content. A panel with a radial gradient background
+            and a drop shadow is the everyday case: the gradient spans the
+            component in both directions and cannot be reconstructed, but the
+            shadow lives on its own layer and can. So the very same component
+            gets a full size cached rendering for its background and a compact
+            atlas for its shadow, and a resize re-renders only the former.
         """
-        given : 'One button carrying a gradient background *and* a shadow, warmed up.'
+        given : 'One button carrying a radial gradient background *and* a shadow, warmed up.'
             var button = buttonWith({ it.borderRadius(18)
-                                        .gradient(g -> g.colors("#a02050", "#2050a0"))
+                                        .gradient(g -> g.type(UI.GradientType.RADIAL).colors("#a02050", "#2050a0"))
                                         .shadowColor("#0a0a12").shadowBlurRadius(7).shadowSpreadRadius(2) })
             button.setSize(300, 200)
             var ext = ComponentExtension.from(button)
@@ -848,7 +1145,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             ComponentExtension.from(stable).cacheHitCount(UI.Layer.BACKGROUND) >= 1
     }
 
-    def 'The compressed atlas is a faithful miniature of the style.'()
+    def 'The compact atlas is a faithful miniature of the style.'()
     {
         reportInfo """
             The exemplar rendering is not some encoded artifact - it is a plain
@@ -862,9 +1159,9 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             var button = buttonWith({ it.borderRadius(10).margin(6).backgroundColor("#204080").foundationColor("#d0c8b8") })
             button.setSize(400, 300)
             2.times { Utility.renderSingleComponent(button) }
-        and : 'Its compressed atlas.'
+        and : 'Its compact atlas.'
             var atlas = ComponentExtension.from(button).cachedRendering(UI.Layer.BACKGROUND).first()
-        expect : 'The atlas really is the compressed rendering, not the component sized one.'
+        expect : 'The atlas really is the compact rendering, not the component sized one.'
             atlas.width < 60 && atlas.height < 60
         and : 'Its center pixel carries the background color.'
             new Color(atlas.getRGB((int)(atlas.width/2), (int)(atlas.height/2))) == new Color(0x20, 0x40, 0x80)

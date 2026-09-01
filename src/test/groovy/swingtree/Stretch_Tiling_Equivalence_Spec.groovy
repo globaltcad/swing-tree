@@ -29,6 +29,14 @@ import java.util.concurrent.TimeUnit
     copying the four corners and stretching the edge bands and the center
     (a "nine slice", like Android 9-patch images or CSS border-image).
 
+    Some style renderings are reconstructible along one axis only: a
+    gradient running straight down a component varies from top to bottom,
+    but every pixel strip along its y axis is identical, so we can stretch
+    it sideways while its height comes from the component itself. Those
+    are compacted along one axis only. The requirement stated below
+    applies to them exactly as it does to a style compacted in both
+    dimensions.
+
     That optimization is only acceptable if it is invisible. Painting a
     component with stretch tiling enabled must produce (practically) the
     same pixels as painting it the classic way, where every size is
@@ -168,6 +176,78 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             "big margin, huge radius"                   | UI.Layer.BACKGROUND | 500   | 300    | { it.backgroundColor("#c19a3f").borderRadius(32).margin(10) }
     }
 
+    def 'A style compacted along one dimension only paints what a full rendering paints. (#description)'(
+        String description, UI.Layer layer, int width, int height, int siblingWidth, int siblingHeight, Closure styler
+    ) {
+        reportInfo """
+            A style is compacted along one dimension and carried at the component's
+            own measurement along the other for two different reasons, and this
+            table holds rows for both.
+
+            The first reason is the style. A gradient running down a component
+            varies from top to bottom but paints every pixel strip along the y axis
+            the same, so it may be stretched sideways and not downwards. Its
+            exemplar is a handful of pixels wide and as tall as the component, which
+            makes the sideways scale factor larger than anywhere else in this file.
+
+            The second reason is the component. A bar 400 pixels wide and 20 tall is
+            larger than its exemplar across and smaller than it downwards, so even a
+            flat rounded fill, which repeats in both dimensions, has room to be
+            stretched sideways only. The reconstruction then cuts the width alone and
+            copies the height one to one.
+
+            The sibling in each row differs only in the compacted dimension, because
+            that is the whole claim: such a style may be resized along that one
+            dimension without re-rendering, and may not be resized along the other
+            without re-rendering. A sibling differing in the other dimension would
+            miss the cache and prove nothing.
+
+            What is compared is the worst single colour channel of any single pixel,
+            alpha included, rather than an average over the image. An average absorbs
+            a seam where two tiles meet and ignores transparency altogether, and a
+            miscut is exactly what would produce those.
+        """
+        given : 'The component painted the classic way, with stretch tiling disabled:'
+            var classic = renderedClassically(width, height, styler)
+        and : 'An identically styled box painted with stretch tiling enabled and warmed into the shared cache:'
+            var tiledBox = tiledAndWarmed(width, height, styler)
+        and : """
+            Proof that the comparison is not vacuous: a sibling differing only along
+            the compacted dimension finds the shared entry already populated and is
+            served from it on its first paint.
+        """
+            var sibling = boxWith(siblingWidth, siblingHeight, styler)
+            Utility.renderSingleComponent(sibling)
+            assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0
+            assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1
+
+        expect : 'Not one channel of one pixel deviates between the two switch positions, alpha included:'
+            var tiled = Utility.renderSingleComponent(tiledBox)
+            Utility.worstChannelDelta(classic, tiled) <= 2
+
+        where :
+            description                              | layer               | width | height | siblingWidth | siblingHeight | styler
+            "down the component, widened"            | UI.Layer.BACKGROUND | 400   | 160    | 560          | 160           | { it.borderRadius(14).gradient(g -> g.span(UI.Span.TOP_TO_BOTTOM).colors("#d14a4a", "#1a3d6d")) }
+            "up the component, widened"              | UI.Layer.BACKGROUND | 400   | 160    | 560          | 160           | { it.borderRadius(14).gradient(g -> g.span(UI.Span.BOTTOM_TO_TOP).colors("#d14a4a", "#1a3d6d")) }
+            "across the component, made taller"      | UI.Layer.BACKGROUND | 200   | 340    | 200          | 470           | { it.borderRadius(14).gradient(g -> g.span(UI.Span.LEFT_TO_RIGHT).colors("#d14a4a", "#1a3d6d")) }
+            "across right to left, made taller"      | UI.Layer.BACKGROUND | 200   | 340    | 200          | 470           | { it.borderRadius(14).gradient(g -> g.span(UI.Span.RIGHT_TO_LEFT).colors("#d14a4a", "#1a3d6d")) }
+            "a gloss over a flat fill, widened"      | UI.Layer.BACKGROUND | 420   | 150    | 610          | 150           | { it.borderRadius(14).backgroundColor("#123048")
+                                                                                                                                .gradient(g -> g.colors(new Color(255, 255, 255, 90), new Color(255, 255, 255, 0))) }
+            "three colour stops, widened"            | UI.Layer.BACKGROUND | 380   | 200    | 505          | 200           | { it.borderRadius(18).margin(6).gradient(g -> g.colors("#c81e46", "#1e46c8", "#46c81e")) }
+            "a gradient under a shadow, widened"     | UI.Layer.BACKGROUND | 400   | 180    | 545          | 180           | { it.borderRadius(16)
+                                                                                                                                .shadow("halo", s -> s.color("#0a0a12").blurRadius(7).spreadRadius(2))
+                                                                                                                                .gradient(g -> g.colors("#d14a4a", "#1a3d6d")) }
+            "a gradient inside a rounded border"     | UI.Layer.BACKGROUND | 440   | 190    | 600          | 190           | { it.borderRadius(20).border(4, "#20242e").margin(5)
+                                                                                                                                .gradient(g -> g.colors("#d14a4a", "#1a3d6d")) }
+            "an extreme stretch, very wide"          | UI.Layer.BACKGROUND | 260   | 150    | 1400         | 150           | { it.borderRadius(12).gradient(g -> g.colors("#d14a4a", "#1a3d6d")) }
+            "a flat bar, wide and short"             | UI.Layer.BACKGROUND | 400   | 20     | 560          | 20            | { it.borderRadius(10).backgroundColor("#123048") }
+            "a flat bar, tall and narrow"            | UI.Layer.BACKGROUND | 20    | 400    | 20           | 560           | { it.borderRadius(10).backgroundColor("#123048") }
+            "background, foundation and margin, short"| UI.Layer.BACKGROUND| 400   | 24     | 545          | 24            | { it.borderRadius(14).margin(4).backgroundColor("#5d1738").foundationColor("#f0ead6") }
+            "a rounded border on a short bar"        | UI.Layer.BORDER     | 400   | 20     | 560          | 20            | { it.border(3, "#20242e").borderRadius(10) }
+            "a shadow on a short bar"                | UI.Layer.CONTENT    | 400   | 24     | 560          | 24            | { it.shadowColor("#101010").shadowBlurRadius(6).shadowSpreadRadius(2).borderRadius(12) }
+            "a gradient down a short bar"            | UI.Layer.BACKGROUND | 400   | 20     | 560          | 20            | { it.borderRadius(10).gradient(g -> g.span(UI.Span.TOP_TO_BOTTOM).colors("#d14a4a", "#1a3d6d")) }
+    }
+
     def 'A layer cut around its noise paints what the whole layer paints. (#description)'(
         String description, int width, int height, Closure styler
     ) {
@@ -176,7 +256,10 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             layer: while the component resizes, the noise is lifted out and
             replayed straight onto the destination, and only what sits under and
             over it is cached — as two size independent exemplars rather than
-            one exact-size image.
+            one exact-size image. Those exemplars are compacted in whichever
+            dimensions the rest of the layer allows, so the rows carrying a
+            gradient under the noise are compacted in width alone and keep the
+            component's own height.
 
             That is three drawing operations where there used to be one, so it
             is worth demanding that they add up to the same picture. They do,
@@ -219,19 +302,9 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
 
         when : 'We look for the single worst deviating colour channel of the whole image:'
             var tiled = Utility.renderSingleComponent(tiledBox)
-            int worstChannelDelta = 0
-            for ( int y = 0; y < height; y++ )
-                for ( int x = 0; x < width; x++ )
-                    for ( int shift : [0, 8, 16, 24] ) { // blue, green, red and alpha
-                        int delta = Math.abs(
-                                        ((classic.getRGB(x, y) >> shift) & 0xff) -
-                                        ((tiled.getRGB(x, y)   >> shift) & 0xff)
-                                    )
-                        worstChannelDelta = Math.max(worstChannelDelta, delta)
-                    }
 
         then : 'Not one channel of one pixel deviates, alpha included:'
-            worstChannelDelta <= 1
+            Utility.worstChannelDelta(classic, tiled) <= 1
 
         where :
             description                                 | width | height | styler
@@ -240,6 +313,13 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             "a noise between a background and a shadow" | 360   | 240    | { it.backgroundColor("#6f4f2f").borderRadius(18)
                                                                               .noise(UI.Layer.BACKGROUND, "grain", n -> n.function(UI.NoiseType.FABRIC).colors("#201000", "#f0e0d0"))
                                                                               .shadow(UI.Layer.BACKGROUND, "glow", s -> s.color("#0a0a14").blurRadius(7).spreadRadius(1)) }
+            "a noise over a gradient down the layer"    | 400   | 150    | { it.backgroundColor("#2f4f6f").borderRadius(14)
+                                                                              .gradient(UI.Layer.BACKGROUND, "sheen", g -> g.span(UI.Span.TOP_TO_BOTTOM).colors("#1a3d6d", "#6f4f2f"))
+                                                                              .noise(UI.Layer.BACKGROUND, "grain", n -> n.colors("#101010", "#e0e0e0")) }
+            "a noise over a gradient, under a shadow"   | 360   | 140    | { it.backgroundColor("#4f2f6f").borderRadius(12)
+                                                                              .gradient(UI.Layer.BACKGROUND, "sheen", g -> g.span(UI.Span.BOTTOM_TO_TOP).colors("#2f1a4d", "#6f4f2f"))
+                                                                              .noise(UI.Layer.BACKGROUND, "grain", n -> n.function(UI.NoiseType.FABRIC).colors("#201000", "#f0e0d0"))
+                                                                              .shadow(UI.Layer.BACKGROUND, "glow", s -> s.color("#0a0a14").blurRadius(6).spreadRadius(1)) }
     }
 
     def 'A layer cut around its painters paints what the whole layer paints. (#description)'(
@@ -297,19 +377,9 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
 
         when : 'We look for the single worst deviating colour channel of the whole image:'
             var cut = Utility.renderSingleComponent(cutBox)
-            int worstChannelDelta = 0
-            for ( int y = 0; y < height; y++ )
-                for ( int x = 0; x < width; x++ )
-                    for ( int shift : [0, 8, 16, 24] ) { // blue, green, red and alpha
-                        int delta = Math.abs(
-                                        ((whole.getRGB(x, y) >> shift) & 0xff) -
-                                        ((cut.getRGB(x, y)   >> shift) & 0xff)
-                                    )
-                        worstChannelDelta = Math.max(worstChannelDelta, delta)
-                    }
 
         then : 'Not one channel of one pixel deviates, alpha included:'
-            worstChannelDelta <= 1
+            Utility.worstChannelDelta(whole, cut) <= 1
 
         cleanup : 'The budget goes back to what the rest of this specification expects.'
             // Restored here rather than only in the `given` block above, so that a failure
@@ -376,22 +446,25 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
     def 'The two switch positions agree at every size across the range where tiling begins to apply.'()
     {
         reportInfo """
-            Size independent caching only applies to components strictly larger
-            than the style's minimal exemplar; below that, painting falls back
-            to the classic behavior. The exact threshold is an internal detail,
-            so instead of referring to it we bracket it from the outside: we
-            walk a range of small sizes that safely straddles it for this style
-            and demand pixel equivalence at every step. This covers the
-            trickiest sizes of all — the ones where the stretched bands are
-            just a single pixel wide.
+            A dimension is stretched only where the component is larger than the
+            style's minimal exemplar in it; where it is not, that dimension is
+            painted at the component's own measurement. The exact threshold is an
+            internal detail, so instead of referring to it we bracket it from the
+            outside: we walk a range of small sizes that safely straddles it for
+            this style and demand pixel equivalence at every step. The square
+            sizes cross the threshold in both dimensions at once, and the lopsided
+            ones cross it in one dimension only. This covers the trickiest sizes
+            of all — the ones where the stretched bands are just a single pixel
+            wide.
         """
         given :
             var styler = { it.backgroundColor("#7a4ab1").foundationColor("#efe6d8").borderRadius(16).margin(6) }
         expect : 'Classic and stretch tiled painting agree at every size in the bracket:'
-            for ( var size : [[44, 44], [48, 48], [52, 52], [56, 56], [60, 60], [64, 64], [96, 52], [52, 96]] ) {
+            for ( var size : [[44, 44], [48, 48], [52, 52], [56, 56], [60, 60], [64, 64],
+                              [96, 52], [52, 96], [96, 44], [44, 96], [96, 48], [48, 96]] ) {
                 var classic = renderedClassically(size[0], size[1], styler)
                 var tiled   = renderedTiled(size[0], size[1], styler)
-                assert Utility.similarityBetween(classic, tiled) >= 99.9
+                assert Utility.worstChannelDelta(classic, tiled) <= 1 : "at ${size[0]}x${size[1]}"
             }
     }
 

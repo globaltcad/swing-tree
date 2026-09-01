@@ -24,7 +24,8 @@ import java.util.Optional;
  *  reconstructs any actual size from the resulting rendering. A newly added field whose value
  *  (or whose rendering) depends on the component size would silently break that reconstruction,
  *  producing subtly wrong pixels rather than a failure. Should such a field become necessary,
- *  it must also be rejected by {@code LayerPartitionCache._isStretchTileable}.
+ *  {@link #_compactionFor(LayerRenderConf)} must return {@link Compaction#NONE} whenever it is
+ *  set.
  */
 @Immutable
 @SuppressWarnings("Immutable")
@@ -175,36 +176,87 @@ final class LayerRenderConf
     // Canonical (size independent) representation for 9 patch caching:
 
     /**
-     *  Maps eligible configurations of any size onto the size independent exemplar key,
-     *  and returns ineligible ones (as well as those not strictly larger than the exemplar
-     *  in both dimensions) unchanged - which also makes this idempotent, so a configuration
-     *  which already has the exemplar size maps onto itself.
+     *  Maps a configuration of any size onto its exemplar key. A dimension is compacted only if
+     *  the layer repeats along it (see the {@link LayerPartitionCache} class documentation) and
+     *  the component is larger than the exemplar in it, because a dimension the exemplar already
+     *  fills has nothing left for the blit to stretch. A layer can repeat along the width while
+     *  only the height is larger than the exemplar, and then neither dimension is compacted and
+     *  the configuration comes back unchanged. Compacting a dimension also takes away its room
+     *  to stretch, which is what makes this idempotent: a configuration already at the exemplar
+     *  size maps onto itself.
      */
     private static LayerRenderConf _canonicalize( LayerRenderConf conf ) {
-        if ( !_isStretchTileable(conf) )
+        Compaction compaction = _compactionFor(conf);
+        if ( compaction == Compaction.NONE )
             return conf;
 
         final Outline sliceInsets = conf.nineTileSliceInsets();
-        final Size    canonical    = _exemplarSize(sliceInsets);
+        final Size    exemplar    = _exemplarSize(sliceInsets);
+        final Size    actual      = conf.boxModel().size();
 
-        if ( !_borderEdgeSeamsAreSizeIndependent(conf, sliceInsets, canonical) )
+        if ( !_borderEdgeSeamsAreSizeIndependent(conf, sliceInsets, exemplar) )
             return conf;
 
-        final Size actual = conf.boxModel().size();
-
-        final boolean strictlyLarger =
-                        actual.widthOrElse(0f)  > canonical.widthOrElse(0f) &&
-                        actual.heightOrElse(0f) > canonical.heightOrElse(0f);
-        if ( !strictlyLarger )
+        compaction = compaction.and(Compaction._of(
+                            actual.widthOrElse(0f)  > exemplar.widthOrElse(0f),
+                            actual.heightOrElse(0f) > exemplar.heightOrElse(0f)
+                        ));
+        if ( compaction == Compaction.NONE )
             return conf;
+
+        final Size canonical = Size.of(
+                                    compaction.includesWidth()  ? exemplar.widthOrElse(0f)  : actual.widthOrElse(0f),
+                                    compaction.includesHeight() ? exemplar.heightOrElse(0f) : actual.heightOrElse(0f)
+                                );
 
         return conf.withBoxModel(conf.boxModel().withSize(canonical));
     }
 
     /**
-     *  How far the size dependent pixels reach into the component from each side.
-     *  These insets are used to essentially cut an "exemplar" rendering of a componenet
-     *  into a size independent cache of 9 tiles.
+     *  Which of an exemplar's two dimensions we compacted to their minimum instead of taking
+     *  them from the component, and stretch back on paint. A resize in a compacted dimension
+     *  keeps the key; a resize in an uncompacted dimension gives a new one.
+     */
+    enum Compaction
+    {
+        NONE(false, false), WIDTH(true, false), HEIGHT(false, true), BOTH(true, true);
+
+        static Compaction between( Size key, Size actual ) {
+            return _of(
+                    key.widthOrElse(0f)  != actual.widthOrElse(0f),
+                    key.heightOrElse(0f) != actual.heightOrElse(0f)
+                );
+        }
+
+        private final boolean _width;
+        private final boolean _height;
+
+        Compaction( boolean width, boolean height ) {
+            _width  = width;
+            _height = height;
+        }
+
+        boolean includesWidth()  { return _width;  }
+        boolean includesHeight() { return _height; }
+
+        /** The dimensions both of them allow, for a layer that has to satisfy two of these at once. */
+        Compaction and( Compaction other ) {
+            return _of(_width && other._width, _height && other._height);
+        }
+
+        private static Compaction _of( boolean width, boolean height ) {
+            if ( width )
+                return height ? BOTH : WIDTH;
+            else
+                return height ? HEIGHT : NONE;
+        }
+    }
+
+    /**
+     *  How far the size dependent pixels reach into the component from each side; everything
+     *  between opposite insets repeats and may be stretched freely. A pure function of the size
+     *  independent parts of the configuration, so the blit can recompute it and is guaranteed
+     *  to agree with the canonicalization.
      */
     private static Outline _compute9PatchSliceInsets(LayerRenderConf conf ) {
         final BoxModelConf box = conf.boxModel();
@@ -261,31 +313,64 @@ final class LayerRenderConf
                 );
     }
 
-    /** Whether the layer content satisfies the tiling invariant (see class javadoc). */
-    private static boolean _isStretchTileable( LayerRenderConf conf ) {
+    /** Which dimensions we may compact: we can shrink the width when every pixel strip along
+     *  the y axis is identical, and the height when every pixel strip along the x axis is. */
+    private static Compaction _compactionFor( LayerRenderConf conf ) {
         final StyleConfLayer layer = conf.layer();
-
-        for ( GradientConf gradient : layer.gradients().sortedByNames() )
-            if ( !gradient.equals(GradientConf.none()) )
-                return false; // Gradient geometry spans the component bounds.
 
         for ( Pooled<NoiseConf> noise : layer.noises().sortedByNames() )
             if ( !noise.get().equals(NoiseConf.none()) )
-                return false; // Noise varies per pixel position.
+                return Compaction.NONE; // Noise varies per pixel position.
 
         for ( ImageConf image : layer.images().sortedByNames() )
             if ( !image.equals(ImageConf.none()) )
-                return false; // Image placement/fit depends on the component bounds.
+                return Compaction.NONE; // Image placement/fit depends on the component bounds.
 
         for ( TextConf text : layer.texts().sortedByNames() )
             if ( !text.equals(TextConf.none()) )
-                return false; // Text layout depends on the component bounds.
+                return Compaction.NONE; // Text layout depends on the component bounds.
 
         for ( PainterConf painter : layer.painters().sortedByNames() )
             if ( !painter.equals(PainterConf.none()) )
-                return false; // We cannot know what a custom painter does.
+                return Compaction.NONE; // We cannot know what a custom painter does.
 
-        return true;
+        Compaction compaction = Compaction.BOTH;
+        for ( GradientConf gradient : layer.gradients().sortedByNames() ) {
+            if ( gradient.equals(GradientConf.none()) )
+                continue;
+            compaction = compaction.and(_compactionAllowedBy(gradient));
+            if ( compaction == Compaction.NONE )
+                return compaction;
+        }
+        return compaction;
+    }
+
+    /**
+     *  A linear gradient straight down a component is built by
+     *  {@link StyleRenderer#createGradientPaint(BoxModelConf, GradientConf)} from two points
+     *  sharing an x coordinate, so the component width never enters its rendering and we can
+     *  compact the width; a gradient straight across is the same with the axes swapped. We turn
+     *  down every other kind, because they vary with x and y at once -
+     *  {@link UI.ComponentBoundary#CENTER_TO_CONTENT} because it derives its insets from the
+     *  component size itself.
+     */
+    private static Compaction _compactionAllowedBy( GradientConf gradient ) {
+        if ( gradient.type() != UI.GradientType.LINEAR )
+            return Compaction.NONE;
+        if ( gradient.rotation() % 360f != 0f )
+            return Compaction.NONE;
+        if ( gradient.boundary() == UI.ComponentBoundary.CENTER_TO_CONTENT )
+            return Compaction.NONE;
+        switch ( gradient.span() ) {
+            case TOP_TO_BOTTOM:
+            case BOTTOM_TO_TOP:
+                return Compaction.WIDTH;
+            case LEFT_TO_RIGHT:
+            case RIGHT_TO_LEFT:
+                return Compaction.HEIGHT;
+            default:
+                return Compaction.NONE;
+        }
     }
 
     /**

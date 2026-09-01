@@ -285,22 +285,21 @@ without any of this ever coming up.
 
 ## Where reconstruction stops ##
 
-Stretching is only truthful for a style whose body is homogeneous and whose edges are
-homogeneous along their own axis. Plenty of styles aren't, and one more is refused out of
-caution:
+Stretching only gives back the same pixels when the strips we duplicate are all identical.
+Plenty of styles fail that, and we turn one more down out of caution:
 
 | Not reconstructed | Why |
 |---|---|
-| gradients | the gradient's geometry spans the whole component |
+| gradients whose colour depends on both x and y: radial, conic, diagonal, rotated, or measured from the centre | no strip repeats in either direction |
 | procedural noise | noise varies with every pixel position |
 | background images | placement and fit are relative to the component bounds |
 | styled text | text is laid out within the component bounds |
 | custom painters | the engine cannot know what your painter does |
-| components smaller than their own exemplar | no room to stretch |
+| components no larger than their own exemplar in either dimension | nothing left to stretch |
 | a border colour per edge, with rounded corners and unequal opposite widths | refused conservatively; the pixels would usually survive it |
 
 Anything on that list falls back to an exact-size key: still cached, but re-rendered when
-the size changes. Eligibility is decided **per layer**, so a panel with a gradient
+the size changes. Eligibility is decided **per layer**, so a panel with a radial gradient
 background and a shadow can reconstruct its shadow while caching its background at full
 size.
 
@@ -309,6 +308,52 @@ eligibility decision here. An over-eager rule wouldn't crash; it would draw subt
 pixels, quietly, forever. A timid one costs a cache miss. So the rules are timid, and
 pinned by pixel-equivalence tests that render a style both ways and compare channel by
 channel, alpha included.
+
+### Stretching in one dimension only ###
+
+Stretching sideways and stretching downwards need different things. We can stretch a style
+sideways when every pixel strip along its y axis is identical, and downwards when every pixel
+strip along its x axis is identical. Those two conditions are independent. A style can paint
+identical strips along the y axis while every strip along the x axis differs. The case
+worth knowing is a linear gradient running straight down a component. We build it from two
+points that share an x coordinate, so only a pixel's y position affects its colour. Every pixel
+strip along the y axis is therefore identical, and no two strips along the x axis are.
+
+So we compact the exemplar for such a style in width alone: a few pixels wide, but as tall as
+the component really is. The cache key carries that real height. Widen the
+component and we rebuild the wider rendering from that exemplar by stretching the edge bands,
+which costs nothing. Make it taller and the key changes, so we render the style again.
+
+Which gives the rule:
+
+> A component keeps hitting its cache entry as long as it only resizes in the direction its
+> gradient does **not** run in.
+
+Note that a *vertical* gradient is what frees the **width**, not the height: identical strips
+along the y axis are exactly what lets us throw strips away. A 300 × 500 component whose
+exemplar would be 30 × 30 is therefore stored in one of four ways:
+
+| key | shared by components of | style |
+|---|---|---|
+| 30 × 30 | any size | flat fills, borders, shadows |
+| 30 × 500 | any width, if they are 500 tall | a gradient down the component |
+| 300 × 30 | any height, if they are 300 wide | a gradient across the component |
+| 300 × 500 | this size only | radial gradients, noise, images, text, painters |
+
+Note the catch in the two middle rows: twenty buttons at twenty widths share a single entry
+only if they are all the same height. In the first row they would share one whatever their
+sizes.
+
+Width and height are judged separately for the component too, not only for the style.
+Stretching a dimension needs the component to be larger than the exemplar in it, because a
+dimension the exemplar already fills has nothing left to stretch. A bar 400 pixels wide and
+20 tall carrying a flat rounded fill repeats in both directions, but only its width has room,
+so it is stored under a 26 × 20 key: the exemplar's width, the component's own height.
+Toolbars, table rows, progress bars and headers all live in that shape.
+
+A dimension is compacted only if the style repeats along it **and** the component has room in
+it. A gradient running across that same 400 × 20 bar repeats downwards, which is the one
+direction the bar has no room in, so nothing is compacted and the bar keeps an exact-size key.
 
 ### Where real pixels get in the way ###
 
@@ -684,9 +729,10 @@ int hits   = ext.cacheHitCount(UI.Layer.BACKGROUND);
 int misses = ext.cacheMissCount(UI.Layer.BACKGROUND);
 ```
 
-The image dimensions are informative in themselves: one much smaller than the component is
-a size-independent exemplar, one matching the component's size is an exact-size entry, and
-more than one image means the layer's description was partitioned. The returned images are
+The image dimensions tell you how the style was cached. A dimension much smaller than the
+component's is one we compacted, a dimension matching the component's is one we did not, so an
+image smaller in both is a fully compacted exemplar and one matching in both is an exact-size
+entry. More than one image means we split the layer's description. The returned images are
 defensive copies, so you can inspect or even modify them freely.
 
 ### Styling for speed ###
@@ -695,8 +741,11 @@ If you want a resize to be free, keep the style's *edges* size-independent:
 
 - ✅ flat background and foundation colours, borders, shadows — reconstructable, including
   a border with its own colour on each edge
-- ⚠️ gradients, noises, background images, styled text — cached, but at an exact size, so a
-  resize re-renders them
+- ✅ a linear gradient running straight up, down or across — free in one direction only: a
+  panel with a vertical gloss resizes sideways for nothing, and re-renders when its height
+  changes
+- ⚠️ radial, conic, diagonal and rotated gradients, noises, background images, styled text —
+  cached, but at an exact size, so a resize re-renders them
 - ⚠️ rounded corners plus a colour per border edge, with two **opposite** edges of unequal
   thickness — the one non-obvious disqualifier, and a deliberately strict one: 4 px against
   5 px already drops the layer back to exact-size caching. Give opposite edges the same

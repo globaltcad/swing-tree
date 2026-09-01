@@ -500,12 +500,15 @@ public final class ComponentExtension<C extends JComponent>
      *  is cached separately, as exemplars that survive the resize. Either of those two may also
      *  be absent, when that side of the noise holds no style (or none worth caching), which is
      *  why such a layer can report two images, one, or none at all.
-     *  The dimensions of each image reveal <em>how</em> that part is cached: style whose pixels
-     *  are constant along the component edges (flat colours, borders, shadows) is stored as a
-     *  small, size independent exemplar rendering which may be much smaller than the component
-     *  itself (it is stretch tiled back to any actual size on paint, see
-     *  {@link swingtree.SwingTree#setCacheTilingEnabled(boolean)}), while everything else is
-     *  cached at exactly the component size.
+     *  The dimensions of each image reveal <em>how</em> that part is cached, one dimension at a
+     *  time: style whose pixels are constant along the component edges (flat colours, borders,
+     *  shadows) is stored as a small, size independent exemplar rendering which may be much
+     *  smaller than the component itself (it is stretch tiled back to any actual size on paint,
+     *  see {@link swingtree.SwingTree#setCacheTilingEnabled(boolean)}). A linear gradient
+     *  running straight up, down or across is stored that way in one dimension only. A gradient
+     *  from top to bottom paints every pixel strip along the y axis alike, so we render it at
+     *  the component's real height but only a fraction of its width. Everything else is cached at
+     *  exactly the component size.
      *  <p>
      *  The returned images are defensive copies: a cached rendering is shared by all components
      *  with an equal style, so callers may examine (or even modify) the copies freely without

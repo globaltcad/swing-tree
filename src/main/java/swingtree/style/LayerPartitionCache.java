@@ -21,14 +21,14 @@ import java.util.WeakHashMap;
 import java.util.function.BiConsumer;
 
 /**
- *  A {@link BufferedImage} based cache for the rendering of one {@link LayerRenderConfPartition} of a
- *  particular layer of a component's style - which is ordinarily {@link LayerRenderConfPartition#WHOLE},
- *  the entire layer. <br>
- *  Caching is keyed by the deeply immutable {@link LayerRenderConf} of that part: as long as it
- *  stays equal across paint calls, the cached image is blitted instead of re-rendered, and when
- *  it changes, the entry is invalidated. An instance of this exists per component, layer and
- *  part (inside the style engine), while the rendered images live in a global, weakly keyed pool
- *  shared by all components with an equal configuration. <br>
+ *  This class manages the cached rendering of one piece of a component's style: usually a whole
+ *  layer ({@link LayerRenderConfPartition#WHOLE}), and otherwise one part of a layer that could
+ *  not be drawn into a single image. <br>
+ *  The cache key is the deeply immutable {@link LayerRenderConf} describing that piece, so a
+ *  paint whose description is unchanged blits the image we already have, and a paint whose
+ *  description changed drops the entry and draws again. There is one instance of this per
+ *  component, layer and part, but the images themselves live in a global pool keyed weakly by
+ *  the description, so every component with an equal style shares one image. <br>
  *  <br>
  *  <b>Size independent caching through stretch tiling ("nine slice"):</b><br>
  *  The render configuration includes the exact component {@link Size}, so naively every frame of
@@ -37,26 +37,44 @@ import java.util.function.BiConsumer;
  *  on a <b>minimal exemplar</b> of the style instead: the same configuration with its size
  *  replaced by the smallest size at which every size dependent pixel still exists. Because
  *  {@link Size} is the <i>only</i> size dependent property in the whole configuration, the
- *  exemplar is both a size independent cache key (all sizes of a style collapse onto one value)
- *  and an honest render recipe (the {@link StyleRenderer} receives exactly what a real component
- *  of that small size would send - it never learns that tiling exists). The exemplar rendering
- *  then acts like a small texture atlas from which any actual size is reconstructed with nine
- *  tile blits: the four corners copied 1:1, the four edge bands and the center stretched - the
- *  technique behind Android 9-patch drawables and CSS {@code border-image}. <br>
+ *  exemplar works as a size independent cache key, mapping all sizes of a style onto one value,
+ *  and at the same time as a valid render instruction: {@link StyleRenderer} receives exactly
+ *  what a real component of that small size would send, so it needs no special case for tiling.
+ *  The exemplar rendering then acts like a small texture atlas from which the actual rendering
+ *  is reconstructed on the fly using nine tile blits: the four corners copied 1:1, the four edge
+ *  bands and the center stretched - the technique behind Android 9-patch drawables and CSS
+ *  {@code border-image}. <br>
  *  <br>
- *  The reconstruction is exact, not an approximation, but it rests on an invariant: <b>the body
- *  must be homogeneous, and each edge must be homogeneous along its own axis</b>. Flat
- *  background/foundation fills, borders and shadows satisfy it. Gradients, noises, images, texts
- *  and custom painters do not, their pixels depending on the full component bounds. A border
- *  with a different color per edge satisfies it as long as its miter joints land in the same
- *  place at every size.
+ *  This gives back exactly the same pixels, but only for styles that meet one condition: <b>the
+ *  parts we stretch have to look the same all the way along the direction we stretch them</b>. Flat
+ *  background/foundation fills, borders and shadows satisfy it. Noises, images, texts and custom
+ *  painters do not, their pixels depending on the full component bounds. A border with a
+ *  different color per edge satisfies it as long as its miter joints land in the same place at
+ *  every size. <br>
+ *  <br>
+ *  There are two directions we can stretch, so that is two separate conditions, and a style can
+ *  pass one and fail the other. A gradient running top to bottom paints every
+ *  pixel strip along the y axis the same, so its width can be compacted while its height stays
+ *  exactly the component's. {@link LayerRenderConf.Compaction} says which of the two dimensions we
+ *  compacted. Resizing the component in an uncompacted dimension gives a new key; resizing it
+ *  in a compacted dimension does not. <br>
+ *  <br>
+ *  Two places in this class use that. The first decides whether to allocate an image buffer
+ *  while a component resizes: we do that only for a key with a compacted dimension, and only
+ *  when its uncompacted dimensions still hold last paint's values, because a buffer drawn for a
+ *  key that the next paint replaces is blitted once and then never asked for again. The second
+ *  is {@link #wouldCompactADimension}, which {@link StyleLayerCache} calls to decide whether
+ *  cutting a layer around its noise is worth a second cache entry; one compacted dimension
+ *  already pays for one, so it asks for no more than that.
  *  The eligibility check must stay conservative, because an over-eager rule produces subtly wrong
  *  pixels, not a crash.
- *  Ineligible or too small configurations keep the classic exact-size key and behave exactly as
- *  they did before stretch tiling existed. <br>
+ *  A style we turn down is keyed on its real size and blitted one to one, with no stretching
+ *  involved. A component the exemplar already fills in one dimension is keyed on its own
+ *  measurement in that dimension, and the other dimension can still be compacted, which is what
+ *  lets a wide, short bar be cached at all. <br>
  *  <br>
- *  Two related configurations are therefore managed here, and telling them apart is essential
- *  for understanding this class:
+ *  So two configurations are in play at once, and most of the code below only makes sense if
+ *  you keep them apart:
  *  <ul>
  *      <li><b>the render input</b> ({@code _renderInput}) - always the actual configuration
  *          at the real component size. All direct-render fallbacks receive it, and it determines
@@ -153,6 +171,7 @@ final class LayerPartitionCache
             return;
         }
 
+        final LayerRenderConf previousInput = _renderInput;
         _renderInput = _part.restrict(newConf.renderConfFor(_layer));
         if ( _renderInput.rendersNothing() ) {
             _state = CacheState.Nothing.INSTANCE;
@@ -166,7 +185,7 @@ final class LayerPartitionCache
         if ( _state instanceof CacheState.Cached && ((CacheState.Cached) _state)._key.get().equals(keyConf) )
             return;
 
-        final int hitsUntilAllocation = _hitsUntilAllocationFor(keyConf, _renderInput, isResizing);
+        final int hitsUntilAllocation = _hitsUntilAllocationFor(keyConf, _renderInput, previousInput, isResizing);
         if ( hitsUntilAllocation < 0 ) {
             _state = CacheState.Rejected.INSTANCE; // The cache refused admission!
         } else {
@@ -257,9 +276,9 @@ final class LayerPartitionCache
     }
 
     private int _hitsUntilAllocationFor(
-        LayerRenderConf cacheKey, LayerRenderConf renderInput, boolean isResizing
+        LayerRenderConf cacheKey, LayerRenderConf renderInput, LayerRenderConf previousInput, boolean isResizing
     ) {
-        if ( _isWorthAllocatingRightAway(cacheKey, renderInput, isResizing) )
+        if ( _isWorthAllocatingRightAway(cacheKey, renderInput, previousInput, isResizing) )
             return _cachingMakesSenseFor(_layer, cacheKey);
 
         if ( _isTooLargeToAllocateWhileResizing(cacheKey) )
@@ -272,13 +291,31 @@ final class LayerPartitionCache
     }
 
     /**
-     *  Whether this key's image may be allocated on the spot, rather than only
-     *  after a certain number of cache entry hits...
+     *  Whether this key's image buffer may be allocated on the spot, rather than only once a
+     *  second user has asked for it. The entry itself is created either way; only the buffer
+     *  waits. Naively, we would allocate a buffer as soon as a key appears. While a component
+     *  is resizing, however, it changes size between paints, so the buffer we just filled is
+     *  blitted once and then never asked for again. To avoid that, we only allocate when the
+     *  resize cannot replace the key: the key is replaced only if the component changed size in
+     *  an uncompacted dimension, so we compare the component's size at this paint against its
+     *  size at the previous paint, in exactly those dimensions.
      */
     private static boolean _isWorthAllocatingRightAway(
-        LayerRenderConf cacheKey, LayerRenderConf renderInput, boolean isResizing
+        LayerRenderConf cacheKey, LayerRenderConf renderInput, LayerRenderConf previousInput, boolean isResizing
     ) {
-        return !isResizing || !cacheKey.boxModel().size().equals(renderInput.boxModel().size());
+        if ( !isResizing )
+            return true;
+
+        final Size actual = renderInput.boxModel().size();
+        final LayerRenderConf.Compaction compacted =
+                    LayerRenderConf.Compaction.between(cacheKey.boxModel().size(), actual);
+
+        if ( compacted == LayerRenderConf.Compaction.NONE )
+            return false; // An exact-size key is invalidated by any frame of any drag.
+
+        final Size previous = previousInput.boxModel().size();
+        return ( compacted.includesWidth()  || previous.widthOrElse(0f)  == actual.widthOrElse(0f)  )
+            && ( compacted.includesHeight() || previous.heightOrElse(0f) == actual.heightOrElse(0f) );
     }
 
     private static boolean _isTooLargeToAllocateWhileResizing( LayerRenderConf cacheKey ) {
@@ -395,10 +432,18 @@ final class LayerPartitionCache
         and the slice cut lines from a render configuration (see class javadoc).
         ------------------------------------------------------------------------------------ */
 
-    static boolean cachesSizeIndependently( LayerRenderConf conf ) {
+    /**
+     *  Whether the cache would compact a dimension of this configuration, so that a resize
+     *  changing only that dimension is served from the entry rather than rendered again.
+     *  Deliberately weaker than {@link #_isWorthAllocatingRightAway}, which also asks that the
+     *  component's uncompacted dimensions still hold last paint's values.
+     */
+    static boolean wouldCompactADimension( LayerRenderConf conf ) {
         if ( !CacheBudget.tilingEnabled() )
             return false;
-        return !conf.canonicalRepresentation().boxModel().size().equals(conf.boxModel().size());
+        final Size key    = conf.canonicalRepresentation().boxModel().size();
+        final Size actual = conf.boxModel().size();
+        return LayerRenderConf.Compaction.between(key, actual) != LayerRenderConf.Compaction.NONE;
     }
 
     /** Tile blits support positive scaling and translation; rotation, shear and flips do not. */
@@ -515,6 +560,10 @@ final class LayerPartitionCache
          *  image, the four edge bands stretched along their edge and the center stretched
          *  in both directions - the latter five from their dedicated tile images. <br>
          *  <br>
+         *  Cutting a dimension is what makes it stretchable, so a dimension this image already
+         *  carries at the component's own measurement is not cut: an image compacted in one
+         *  dimension only is drawn as three tiles rather than nine. <br>
+         *  <br>
          *  The tiles are drawn in <b>integer device space</b>: the cut lines are transformed
          *  to device pixels once and shared between adjacent tiles, so that under fractional
          *  HiDPI scales the independent rounding of nine user space rectangles can never
@@ -535,10 +584,12 @@ final class LayerPartitionCache
                 return; // Cannot happen (callers check `isRendered()` first), but let's be defensive.
 
             final Outline insets = canonicalConf.nineTileSliceInsets();
-            final int insetTop    = insets.top().orElse(0f).intValue();
-            final int insetRight  = insets.right().orElse(0f).intValue();
-            final int insetBottom = insets.bottom().orElse(0f).intValue();
-            final int insetLeft   = insets.left().orElse(0f).intValue();
+            final LayerRenderConf.Compaction compaction =
+                        LayerRenderConf.Compaction.between(canonicalConf.boxModel().size(), actualSize);
+            final int insetTop    = compaction.includesHeight() ? insets.top().orElse(0f).intValue()    : 0;
+            final int insetRight  = compaction.includesWidth()  ? insets.right().orElse(0f).intValue()  : 0;
+            final int insetBottom = compaction.includesHeight() ? insets.bottom().orElse(0f).intValue() : 0;
+            final int insetLeft   = compaction.includesWidth()  ? insets.left().orElse(0f).intValue()   : 0;
 
             StretchTile[] tiles = _stretchTiles;
             if ( tiles == null ) {
