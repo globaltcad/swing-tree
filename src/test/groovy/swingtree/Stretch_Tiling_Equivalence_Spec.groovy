@@ -446,22 +446,25 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
     def 'The two switch positions agree at every size across the range where tiling begins to apply.'()
     {
         reportInfo """
-            Size independent caching only applies to components strictly larger
-            than the style's minimal exemplar; below that, painting falls back
-            to the classic behavior. The exact threshold is an internal detail,
-            so instead of referring to it we bracket it from the outside: we
-            walk a range of small sizes that safely straddles it for this style
-            and demand pixel equivalence at every step. This covers the
-            trickiest sizes of all — the ones where the stretched bands are
-            just a single pixel wide.
+            A dimension is stretched only where the component is larger than the
+            style's minimal exemplar in it; where it is not, that dimension is
+            painted at the component's own measurement. The exact threshold is an
+            internal detail, so instead of referring to it we bracket it from the
+            outside: we walk a range of small sizes that safely straddles it for
+            this style and demand pixel equivalence at every step. The square
+            sizes cross the threshold in both dimensions at once, and the lopsided
+            ones cross it in one dimension only. This covers the trickiest sizes
+            of all — the ones where the stretched bands are just a single pixel
+            wide.
         """
         given :
             var styler = { it.backgroundColor("#7a4ab1").foundationColor("#efe6d8").borderRadius(16).margin(6) }
         expect : 'Classic and stretch tiled painting agree at every size in the bracket:'
-            for ( var size : [[44, 44], [48, 48], [52, 52], [56, 56], [60, 60], [64, 64], [96, 52], [52, 96]] ) {
+            for ( var size : [[44, 44], [48, 48], [52, 52], [56, 56], [60, 60], [64, 64],
+                              [96, 52], [52, 96], [96, 44], [44, 96], [96, 48], [48, 96]] ) {
                 var classic = renderedClassically(size[0], size[1], styler)
                 var tiled   = renderedTiled(size[0], size[1], styler)
-                assert Utility.similarityBetween(classic, tiled) >= 99.9
+                assert Utility.worstChannelDelta(classic, tiled) <= 1 : "at ${size[0]}x${size[1]}"
             }
     }
 

@@ -176,14 +176,17 @@ final class LayerRenderConf
     // Canonical (size independent) representation for 9 patch caching:
 
     /**
-     *  Maps a configuration of any size onto its exemplar key, compacting only the dimensions
-     *  this layer may be stretched along (see the {@link LayerPartitionCache} class
-     *  documentation). A configuration we cannot compact, or one with no room to stretch, comes
-     *  back unchanged. That also makes this idempotent: a configuration already at the exemplar
+     *  Maps a configuration of any size onto its exemplar key. A dimension is compacted only if
+     *  the layer repeats along it (see the {@link LayerPartitionCache} class documentation) and
+     *  the component is larger than the exemplar in it, because a dimension the exemplar already
+     *  fills has nothing left for the blit to stretch. A layer can repeat along the width while
+     *  only the height is larger than the exemplar, and then neither dimension is compacted and
+     *  the configuration comes back unchanged. Compacting a dimension also takes away its room
+     *  to stretch, which is what makes this idempotent: a configuration already at the exemplar
      *  size maps onto itself.
      */
     private static LayerRenderConf _canonicalize( LayerRenderConf conf ) {
-        final Compaction compaction = _compactionFor(conf);
+        Compaction compaction = _compactionFor(conf);
         if ( compaction == Compaction.NONE )
             return conf;
 
@@ -194,7 +197,11 @@ final class LayerRenderConf
         if ( !_borderEdgeSeamsAreSizeIndependent(conf, sliceInsets, exemplar) )
             return conf;
 
-        if ( !_hasRoomToStretch(actual, exemplar) )
+        compaction = compaction.and(Compaction._of(
+                            actual.widthOrElse(0f)  > exemplar.widthOrElse(0f),
+                            actual.heightOrElse(0f) > exemplar.heightOrElse(0f)
+                        ));
+        if ( compaction == Compaction.NONE )
             return conf;
 
         final Size canonical = Size.of(
@@ -203,16 +210,6 @@ final class LayerRenderConf
                                 );
 
         return conf.withBoxModel(conf.boxModel().withSize(canonical));
-    }
-
-    /**
-     *  Whichever dimension we stretch, the blit still cuts nine tiles and so still cuts along all
-     *  four slice insets. That means both dimensions must exceed the exemplar's, even when only
-     *  one of them is compacted.
-     */
-    private static boolean _hasRoomToStretch( Size actual, Size exemplar ) {
-        return actual.widthOrElse(0f)  > exemplar.widthOrElse(0f)
-            && actual.heightOrElse(0f) > exemplar.heightOrElse(0f);
     }
 
     /**

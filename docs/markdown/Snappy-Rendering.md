@@ -295,7 +295,7 @@ Plenty of styles fail that, and we turn one more down out of caution:
 | background images | placement and fit are relative to the component bounds |
 | styled text | text is laid out within the component bounds |
 | custom painters | the engine cannot know what your painter does |
-| components smaller than their own exemplar | no room to stretch |
+| components no larger than their own exemplar in either dimension | nothing left to stretch |
 | a border colour per edge, with rounded corners and unequal opposite widths | refused conservatively; the pixels would usually survive it |
 
 Anything on that list falls back to an exact-size key: still cached, but re-rendered when
@@ -343,6 +343,17 @@ exemplar would be 30 × 30 is therefore stored in one of four ways:
 Note the catch in the two middle rows: twenty buttons at twenty widths share a single entry
 only if they are all the same height. In the first row they would share one whatever their
 sizes.
+
+Width and height are judged separately for the component too, not only for the style.
+Stretching a dimension needs the component to be larger than the exemplar in it, because a
+dimension the exemplar already fills has nothing left to stretch. A bar 400 pixels wide and
+20 tall carrying a flat rounded fill repeats in both directions, but only its width has room,
+so it is stored under a 26 × 20 key: the exemplar's width, the component's own height.
+Toolbars, table rows, progress bars and headers all live in that shape.
+
+A dimension is compacted only if the style repeats along it **and** the component has room in
+it. A gradient running across that same 400 × 20 bar repeats downwards, which is the one
+direction the bar has no room in, so nothing is compacted and the bar keeps an exact-size key.
 
 ### Where real pixels get in the way ###
 

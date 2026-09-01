@@ -63,13 +63,15 @@ import java.util.function.BiConsumer;
  *  while a component resizes: we do that only for a key with a compacted dimension, and only
  *  when its uncompacted dimensions still hold last paint's values, because a buffer drawn for a
  *  key that the next paint replaces is blitted once and then never asked for again. The second
- *  is {@link #cachesIndependentlyOfAtLeastOneDimension}, which {@link StyleLayerCache} calls to
- *  decide whether cutting a layer around its noise is worth a second cache entry; one
- *  compacted dimension already pays for one, so it asks for no more than that.
+ *  is {@link #wouldCompactADimension}, which {@link StyleLayerCache} calls to decide whether
+ *  cutting a layer around its noise is worth a second cache entry; one compacted dimension
+ *  already pays for one, so it asks for no more than that.
  *  The eligibility check must stay conservative, because an over-eager rule produces subtly wrong
  *  pixels, not a crash.
- *  A style we turn down, or a component too small to have anything left to stretch, is keyed on
- *  its real size and blitted one to one, with no stretching involved. <br>
+ *  A style we turn down is keyed on its real size and blitted one to one, with no stretching
+ *  involved. A component the exemplar already fills in one dimension is keyed on its own
+ *  measurement in that dimension, and the other dimension can still be compacted, which is what
+ *  lets a wide, short bar be cached at all. <br>
  *  <br>
  *  So two configurations are in play at once, and most of the code below only makes sense if
  *  you keep them apart:
@@ -431,11 +433,12 @@ final class LayerPartitionCache
         ------------------------------------------------------------------------------------ */
 
     /**
-     *  Whether the cache key is compact in <i>at least one</i> dimension, so that a resize
-     *  changing only that dimension is served from the cache. Deliberately weaker than what
-     *  allocating a buffer asks above.
+     *  Whether the cache would compact a dimension of this configuration, so that a resize
+     *  changing only that dimension is served from the entry rather than rendered again.
+     *  Deliberately weaker than {@link #_isWorthAllocatingRightAway}, which also asks that the
+     *  component's uncompacted dimensions still hold last paint's values.
      */
-    static boolean cachesIndependentlyOfAtLeastOneDimension(LayerRenderConf conf ) {
+    static boolean wouldCompactADimension( LayerRenderConf conf ) {
         if ( !CacheBudget.tilingEnabled() )
             return false;
         final Size key    = conf.canonicalRepresentation().boxModel().size();
@@ -557,6 +560,10 @@ final class LayerPartitionCache
          *  image, the four edge bands stretched along their edge and the center stretched
          *  in both directions - the latter five from their dedicated tile images. <br>
          *  <br>
+         *  Cutting a dimension is what makes it stretchable, so a dimension this image already
+         *  carries at the component's own measurement is not cut: an image compacted in one
+         *  dimension only is drawn as three tiles rather than nine. <br>
+         *  <br>
          *  The tiles are drawn in <b>integer device space</b>: the cut lines are transformed
          *  to device pixels once and shared between adjacent tiles, so that under fractional
          *  HiDPI scales the independent rounding of nine user space rectangles can never
@@ -577,10 +584,12 @@ final class LayerPartitionCache
                 return; // Cannot happen (callers check `isRendered()` first), but let's be defensive.
 
             final Outline insets = canonicalConf.nineTileSliceInsets();
-            final int insetTop    = insets.top().orElse(0f).intValue();
-            final int insetRight  = insets.right().orElse(0f).intValue();
-            final int insetBottom = insets.bottom().orElse(0f).intValue();
-            final int insetLeft   = insets.left().orElse(0f).intValue();
+            final LayerRenderConf.Compaction compaction =
+                        LayerRenderConf.Compaction.between(canonicalConf.boxModel().size(), actualSize);
+            final int insetTop    = compaction.includesHeight() ? insets.top().orElse(0f).intValue()    : 0;
+            final int insetRight  = compaction.includesWidth()  ? insets.right().orElse(0f).intValue()  : 0;
+            final int insetBottom = compaction.includesHeight() ? insets.bottom().orElse(0f).intValue() : 0;
+            final int insetLeft   = compaction.includesWidth()  ? insets.left().orElse(0f).intValue()   : 0;
 
             StretchTile[] tiles = _stretchTiles;
             if ( tiles == null ) {

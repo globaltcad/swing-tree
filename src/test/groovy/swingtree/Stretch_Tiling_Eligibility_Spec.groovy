@@ -625,12 +625,11 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
 
             A dimension is compacted only when two things hold at once: the style
             repeats along that dimension, and the component is larger than the
-            exemplar in it. The two can name different dimensions, and then
-            nothing is compacted at all. The button below carries a gradient
-            running from left to right, which paints every pixel strip along the
-            x axis the same, so the dimension it lets us compact is the height -
-            and the height is exactly where a button 440 pixels wide and 64 tall
-            has no room.
+            exemplar in it. The button below carries a gradient running from left
+            to right, which paints every pixel strip along the x axis the same, so
+            the dimension it lets us compact is the height - and the height is
+            exactly where a button 440 pixels wide and 64 tall has no room, which
+            leaves nothing compacted at all.
 
             Cutting such a layer would be the worst of both worlds: two exact
             size images instead of one, both re-rendered at every new size, plus
@@ -824,18 +823,18 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         String description, int width, int height, int siblingWidth, int siblingHeight, String cachedAs, Closure styler
     ) {
         reportInfo """
-            Reconstruction needs the component to be larger than the style's minimal
-            exemplar, because a dimension the exemplar already fills has nothing left
-            to stretch. That is measured per dimension, not for the component as a
-            whole: a bar 400 pixels wide and 20 pixels tall has plenty of room across
-            and none at all downwards, so its width is compacted down to the exemplar's
-            and its height is carried at the component's own 20.
+            Reconstruction stretches a dimension only where the component is larger
+            than the style's minimal exemplar in that dimension, because a dimension
+            the exemplar already fills has nothing left to stretch. Width and height
+            are judged separately: a bar 400 pixels wide and 20 pixels tall has plenty
+            of room across and none at all downwards, so its width is compacted down to
+            the exemplar's and its height is carried at the component's own 20.
 
             Two conditions have to hold in a dimension for it to be compacted: the style
             has to repeat along it *and* the component has to be larger than the exemplar
-            in it. The two can name different dimensions and then neither is compacted —
-            a gradient running across a wide short bar repeats downwards, which is the
-            one dimension that bar has no room in, so it is cached at its full size.
+            in it. A gradient running across a wide short bar repeats downwards, which is
+            the one dimension that bar has no room in, so neither dimension is compacted
+            and the bar is cached at its full size.
         """
         given : 'A styled component of the given size, painted until its cache is warm.'
             var component = buttonWith(styler)
@@ -845,7 +844,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
 
         expect : 'The table really names one of the three ways a rendering can be cached:'
             cachedAs in ["compact width", "compact height", "full size"]
-        and : 'The compacted dimension came out smaller than the component, the other one is exactly it:'
+        and : "A compacted dimension came out smaller than the component; an uncompacted one is exactly the component's:"
             if ( cachedAs == "compact width" ) {
                 assert image.width < width && image.height == height
             } else if ( cachedAs == "compact height" ) {
