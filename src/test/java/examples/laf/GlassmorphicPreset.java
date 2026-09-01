@@ -71,6 +71,8 @@ final class GlassmorphicPreset
     private static final int RIM   = 90;
     /** The radius every pane is cut to. */
     private static final int RADIUS = 16;
+    /** How opaque a pane is when nothing behind it can be frosted, out of 255. */
+    private static final int UNFROSTED_PANE = 232;
 
     private static final String DROP  = "drop";
     private static final String SHEEN = "sheen";
@@ -348,24 +350,62 @@ final class GlassmorphicPreset
                 .borderWidth(0), PANE / 2, 3);
     }
 
+    @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
     private static ComponentStyleDelegate<JPopupMenu> popupMenu( ComponentStyleDelegate<JPopupMenu> it ) {
         Palette p = SwingTreeLookAndFeel.palette();
-        return pane(it
+        return groundIfUnfrosted(pane(it
                 .foregroundColor(p.text())
                 .margin(7)
                 .padding(5, 0, 5, 0)
                 .borderRadius(RADIUS)
-                .borderWidth(1), PANE + 30, 7);
+                .borderWidth(1), PANE + 30, 7), it.component(), PANE + 30);
     }
 
+    @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
     private static ComponentStyleDelegate<JToolTip> toolTip( ComponentStyleDelegate<JToolTip> it ) {
         Palette p = SwingTreeLookAndFeel.palette();
-        return pane(it
+        return groundIfUnfrosted(pane(it
                 .foregroundColor(p.text())
                 .margin(5)
                 .padding(5, 10, 5, 10)
                 .borderRadius(RADIUS - 6)
-                .borderWidth(1), PANE + 40, 5);
+                .borderWidth(1), PANE + 40, 5), it.component(), PANE + 40);
+    }
+
+    /**
+     *  Repaints a popup's pane in a colour that does not need the frost, when the popup is in a
+     *  per-pixel translucent window of its own.
+     *  <p>
+     *  Every other pane in this preset is frosted: {@code parentFilter} blurs the component behind
+     *  it, and that blur is what separates the pane's text from whatever it covers. A popup which
+     *  Swing had to put in a window of its own has no component behind it - the blur reads the
+     *  parent's rendering, and the parent is that window's own empty content pane - so the frost
+     *  is absent exactly where the pane is most transparent, and the menu text would stand on the
+     *  bare desktop. The two opaque {@link SwingTreeLookAndFeel.PopupWindowMode}s need no repaint,
+     *  because {@link SwingTreePopupFactory} fills their window with the palette ground.
+     *  <p>
+     *  Raising the wash alone would make this worse rather than better: the wash tints towards
+     *  {@link SwingTreeLookAndFeel.Palette#surface()}, and on a palette whose text is lighter than
+     *  its surface a thicker wash moves the pane towards the colour of its own letters. So the
+     *  pane is mixed down onto {@link SwingTreeLookAndFeel.Palette#background()} first - which is
+     *  the colour it would have been composited against inside the application window - and only
+     *  then made nearly opaque. What the window's alpha still buys is the margin ring: the rounded
+     *  corners stay antialiased and the drop shadow still falls on the desktop.
+     *
+     * @param it    the pane as {@link #pane} left it
+     * @param popup the popup menu or tool tip being styled
+     * @param wash  the wash {@link #pane} was given, out of 255
+     * @param <C> the component type
+     * @return the delegate, repainted only for a popup which cannot be frosted
+     */
+    private static <C extends JComponent> ComponentStyleDelegate<C> groundIfUnfrosted(
+        ComponentStyleDelegate<C> it, C popup, int wash
+    ) {
+        if ( SwingTreeLookAndFeel.popupWindowModeOf(popup) != SwingTreeLookAndFeel.PopupWindowMode.TRANSLUCENT )
+            return it;
+        Palette p = SwingTreeLookAndFeel.palette();
+        Color grounded = LafUtilities.shadeTowards(p.background(), p.surface(), wash / 255.0);
+        return it.backgroundColor(LafUtilities.withOpacity(grounded, UNFROSTED_PANE));
     }
 
     /** The delegate draws the hairline itself, so the rule leaves the rest of the strip alone. */

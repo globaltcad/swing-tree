@@ -16,6 +16,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JToolTip;
 import javax.swing.JViewport;
+import javax.swing.PopupFactory;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
@@ -26,11 +27,14 @@ import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.BasicLookAndFeel;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Window;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
@@ -173,11 +177,15 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
      *  authoritative default-font property, so that runtime changes — a display-DPI event, an
      *  explicit {@link SwingTree#setUiScaleFactor(float)} call, the OS pushing a new system
      *  font — reach every open window without a restart.
+     *  <p>
+     *  This is also where {@link SwingTreePopupFactory} is installed, which is what lets a popup
+     *  too large for the application window keep the corners and the shadow the style rules paint.
      */
     @Override
     public void initialize() {
         _active = this;
         super.initialize();
+        _installPopupFactory();
         _fontView = SwingTree.get().getScaledDefaultFontView();
         _fontView.onChange(From.ALL, it -> SwingUtilities.invokeLater(() ->
                 it.currentValue().ifPresent(SwingTreeLookAndFeel::_propagateFont)
@@ -186,12 +194,28 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
 
     @Override
     public void uninitialize() {
+        _uninstallPopupFactory();
         // Drop the strong reference so the subscription becomes eligible for collection
         // alongside the look and feel instance itself.
         _fontView = null;
         if ( _active == this )
             _active = null;
         super.uninitialize();
+    }
+
+    /** Puts the popup factory in front of whichever one is installed, unless it is already there:
+     *  switching presets re-installs the look and feel, and a factory stacked on itself would
+     *  dress every popup once per switch. */
+    private static void _installPopupFactory() {
+        PopupFactory current = PopupFactory.getSharedInstance();
+        if ( !(current instanceof SwingTreePopupFactory) )
+            PopupFactory.setSharedInstance(new SwingTreePopupFactory(current));
+    }
+
+    private static void _uninstallPopupFactory() {
+        PopupFactory current = PopupFactory.getSharedInstance();
+        if ( current instanceof SwingTreePopupFactory )
+            PopupFactory.setSharedInstance(((SwingTreePopupFactory) current).replaced());
     }
 
     @Override
@@ -216,6 +240,73 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
      * @return the palette of the installed look and feel, or the default one if none is installed
      */
     public static Palette palette() { return conf().palette(); }
+
+    /**
+     *  How {@link SwingTreePopupFactory} dresses the window of a popup which does not fit inside
+     *  the application window, with {@link PopupWindowMode#AUTO} already resolved against what the
+     *  platform supports.
+     *
+     * @return the mode a popup needing a window of its own is given; never {@link PopupWindowMode#AUTO}
+     *         and never {@link PopupWindowMode#IN_FRAME}
+     */
+    public static PopupWindowMode popupWindowMode() {
+        PopupWindowMode configured = conf().popupWindowMode();
+        return configured == PopupWindowMode.AUTO ? _detectedPopupWindowMode() : configured;
+    }
+
+    /**
+     *  What a popup that is being styled right now is painting into. A style rule asks when the
+     *  difference changes what it should paint - {@link GlassmorphicPreset} asks because its frost
+     *  blurs the component behind the popup, and outside the application window there is no such
+     *  component.
+     *
+     * @param popup the popup menu, tool tip or other component a popup was made of
+     * @return the mode {@link SwingTreePopupFactory} resolved for it, or
+     *         {@link PopupWindowMode#IN_FRAME} for a component which has never been shown as a popup
+     */
+    public static PopupWindowMode popupWindowModeOf( JComponent popup ) {
+        Object recorded = popup.getClientProperty(SwingTreePopupFactory.MODE_KEY);
+        return recorded instanceof PopupWindowMode ? (PopupWindowMode) recorded : PopupWindowMode.IN_FRAME;
+    }
+
+    /** Memoised because the screen device is asked once per popup otherwise, and a display's
+     *  translucency support does not change while the application runs. The race between two
+     *  threads arriving first is harmless: both compute the same answer. */
+    private static volatile PopupWindowMode _detectedPopupWindowMode = null;
+
+    /**
+     *  Which dressing the platform can actually carry.
+     *  <p>
+     *  {@link GraphicsDevice#isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency)}
+     *  cannot be trusted on its own for
+     *  {@link GraphicsDevice.WindowTranslucency#PERPIXEL_TRANSLUCENT}: on X11 it reports
+     *  {@code true} whenever the server offers an ARGB visual, while the alpha is only honoured if
+     *  a compositing window manager is running, and a bare window manager such as i3 without picom
+     *  paints a translucent window as an opaque white rectangle. Java cannot ask whether a
+     *  compositor owns the {@code _NET_WM_CM_S0} selection, so per-pixel translucency is only
+     *  chosen on the two platforms which always composite, and X11 gets the shaped window that
+     *  {@link GraphicsDevice.WindowTranslucency#PERPIXEL_TRANSPARENT} delivers through the X shape
+     *  extension whether or not anything composites. An application which knows better says so
+     *  with {@link Conf#popupWindowMode(PopupWindowMode)}.
+     */
+    private static PopupWindowMode _detectedPopupWindowMode() {
+        PopupWindowMode detected = _detectedPopupWindowMode;
+        if ( detected != null )
+            return detected;
+        if ( GraphicsEnvironment.isHeadless() )
+            return PopupWindowMode.OPAQUE;
+        GraphicsDevice screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
+        String os = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
+        boolean alwaysComposites = os.contains("mac") || os.contains("darwin") || os.contains("windows");
+        if ( alwaysComposites && screen.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSLUCENT) )
+            detected = PopupWindowMode.TRANSLUCENT;
+        else if ( screen.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSPARENT) )
+            detected = PopupWindowMode.SHAPED;
+        else
+            detected = PopupWindowMode.OPAQUE;
+        _detectedPopupWindowMode = detected;
+        return detected;
+    }
 
     /** @return the symbol set of the installed look and feel. */
     static Symbols symbols() { return conf().symbols(); }
@@ -607,7 +698,8 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
     {
         static final Conf DEFAULT = new Conf(
                 StylePreset.LINEN, null, null, null,
-                Tuple.of(StyleRule.class), Tuple.of(StyleRule.class)
+                Tuple.of(StyleRule.class), Tuple.of(StyleRule.class),
+                PopupWindowMode.AUTO
         );
 
         private final StylePreset      _stylePreset;
@@ -616,6 +708,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         private final Palette          _palette;        // null means "whatever the palette preset brings"
         private final Tuple<StyleRule> _overrides;
         private final Tuple<StyleRule> _additions;
+        private final PopupWindowMode  _popupWindowMode;
 
         /** Memoises the fold of preset, overrides and additions per component class, so that a
          *  style gathered on every paint costs a single map lookup. */
@@ -632,7 +725,8 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             PalettePreset    palettePreset,
             Palette          palette,
             Tuple<StyleRule> overrides,
-            Tuple<StyleRule> additions
+            Tuple<StyleRule> additions,
+            PopupWindowMode  popupWindowMode
         ) {
             _stylePreset   = stylePreset;
             _symbolPreset  = symbolPreset;
@@ -640,6 +734,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             _palette       = palette;
             _overrides     = overrides;
             _additions     = additions;
+            _popupWindowMode = popupWindowMode;
             SymbolPreset symbols = symbolPreset != null ? symbolPreset : stylePreset.preferredSymbols();
             _symbols       = new CachedSymbols(symbols.symbols(), palette());
         }
@@ -655,7 +750,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          */
         public Conf stylePreset( StylePreset preset ) {
             Objects.requireNonNull(preset);
-            return new Conf(preset, _symbolPreset, _palettePreset, _palette, _overrides, _additions);
+            return new Conf(preset, _symbolPreset, _palettePreset, _palette, _overrides, _additions, _popupWindowMode);
         }
 
         /**
@@ -667,7 +762,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          */
         public Conf symbolPreset( SymbolPreset preset ) {
             Objects.requireNonNull(preset);
-            return new Conf(_stylePreset, preset, _palettePreset, _palette, _overrides, _additions);
+            return new Conf(_stylePreset, preset, _palettePreset, _palette, _overrides, _additions, _popupWindowMode);
         }
 
         /**
@@ -683,7 +778,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          */
         public Conf palettePreset( PalettePreset preset ) {
             Objects.requireNonNull(preset);
-            return new Conf(_stylePreset, _symbolPreset, preset, null, _overrides, _additions);
+            return new Conf(_stylePreset, _symbolPreset, preset, null, _overrides, _additions, _popupWindowMode);
         }
 
         /**
@@ -701,7 +796,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             } catch ( Exception e ) {
                 throw new IllegalArgumentException("Failed to configure the look and feel palette.", e);
             }
-            return new Conf(_stylePreset, _symbolPreset, _palettePreset, configured, _overrides, _additions);
+            return new Conf(_stylePreset, _symbolPreset, _palettePreset, configured, _overrides, _additions, _popupWindowMode);
         }
 
         /**
@@ -716,7 +811,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          */
         public <C extends JComponent> Conf overrideStyle( Class<C> type, Styler<C> styler ) {
             return new Conf(_stylePreset, _symbolPreset, _palettePreset, _palette,
-                            _overrides.add(new StyleRule(type, styler)), _additions);
+                            _overrides.add(new StyleRule(type, styler)), _additions, _popupWindowMode);
         }
 
         /**
@@ -731,10 +826,33 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          */
         public <C extends JComponent> Conf addStyle( Class<C> type, Styler<C> styler ) {
             return new Conf(_stylePreset, _symbolPreset, _palettePreset, _palette,
-                            _overrides, _additions.add(new StyleRule(type, styler)));
+                            _overrides, _additions.add(new StyleRule(type, styler)), _popupWindowMode);
+        }
+
+        /**
+         *  Chooses how a popup which does not fit inside the application window is dressed. The
+         *  default, {@link PopupWindowMode#AUTO}, picks per-pixel translucency on the platforms
+         *  which always composite and a shaped window elsewhere; name a mode here when the
+         *  application knows something that detection cannot, such as an X11 desktop which does
+         *  run a compositor and can therefore carry {@link PopupWindowMode#TRANSLUCENT}.
+         *
+         * @param mode the dressing to give a popup's own window
+         * @return a new configuration using {@code mode}
+         */
+        public Conf popupWindowMode( PopupWindowMode mode ) {
+            Objects.requireNonNull(mode);
+            if ( mode == PopupWindowMode.IN_FRAME )
+                throw new IllegalArgumentException(
+                    "PopupWindowMode.IN_FRAME describes a popup which needs no window of its own, "
+                    + "so it cannot be chosen as the dressing for one that does."
+                );
+            return new Conf(_stylePreset, _symbolPreset, _palettePreset, _palette,
+                            _overrides, _additions, mode);
         }
 
         // ── read back by the look and feel and its delegates ──────────────
+
+        PopupWindowMode popupWindowMode() { return _popupWindowMode; }
 
         Palette palette() {
             if ( _palette != null )
@@ -1358,5 +1476,42 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
                 && ( component.getComponent(0) instanceof JPopupMenu
                   || component.getComponent(0) instanceof JToolTip );
         }
+    }
+
+    /**
+     *  What the window behind a popup can do, which decides how much of the popup's rectangle a
+     *  style rule may leave unpainted.
+     *  <p>
+     *  A popup that fits inside the application window is added to that window's layered pane, so
+     *  its {@code margin} ring, its rounded corners and its drop shadow all fall on the
+     *  application. A popup that does not fit is given a window of its own, and that window's
+     *  background covers the ring unless {@link SwingTreePopupFactory} dresses it - which it can
+     *  only do as far as the platform allows.
+     *  <p>
+     *  Two of the constants belong to one direction only. {@link #AUTO} is an answer an
+     *  application gives to {@link Conf#popupWindowMode(PopupWindowMode)} and is resolved before
+     *  anything reads it back, and {@link #IN_FRAME} is an answer
+     *  {@link SwingTreeLookAndFeel#popupWindowModeOf(JComponent)} gives about a popup which never
+     *  needed a window at all.
+     */
+    public enum PopupWindowMode
+    {
+        /** Resolve from the platform: {@link #TRANSLUCENT} where the desktop always composites,
+         *  {@link #SHAPED} where it may not, {@link #OPAQUE} with no screen at all. */
+        AUTO,
+        /** The popup is inside the application window and needs no dressing. Everything a style
+         *  rule paints outside the sheet falls on the application underneath it. */
+        IN_FRAME,
+        /** The popup's window is per-pixel translucent, so the margin ring shows the desktop and
+         *  the drop shadow falls on it. Nothing behind the window is blurred, though: a frosted
+         *  fill has only the desktop's own colours to sit on. */
+        TRANSLUCENT,
+        /** The popup's window is clipped to the sheet, so the corners are cut out of the window
+         *  itself. Nothing can be painted outside that clip, which costs the drop shadow. */
+        SHAPED,
+        /** The popup's window keeps its rectangle and is filled with
+         *  {@link Palette#background()}, so that the margin ring is the colour the popup would
+         *  have stood on in-frame. The corners are square. */
+        OPAQUE
     }
 }
