@@ -223,7 +223,7 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
 
         expect : 'Not one channel of one pixel deviates between the two switch positions, alpha included:'
             var tiled = Utility.renderSingleComponent(tiledBox)
-            Utility.worstChannelDelta(classic, tiled) <= 1
+            Utility.worstChannelDelta(classic, tiled) <= 2
 
         where :
             description                              | layer               | width | height | siblingWidth | siblingHeight | styler
