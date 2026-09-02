@@ -36,6 +36,9 @@ import java.util.function.Supplier;
 public final class ComponentExtension<C extends JComponent>
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(ComponentExtension.class);
+    /** Answered once per component class, since a class cannot start overriding a method later. */
+    private static final Map<Class<?>, Boolean> _LEAVES_BORDER_PAINTING_TO_JCOMPONENT = new ConcurrentHashMap<>();
+
 
     private static long _anonymousPainterCounter = 0;
 
@@ -880,9 +883,9 @@ public final class ComponentExtension<C extends JComponent>
         try {
             if ( isNewPaintCycle && step == PaintStep.BACKGROUND && _hasChildWithParentFilter() ) {
                 _bufferedImage = _bufferTheSizeOfThisComponent(_bufferedImage);
-                _renderInto(_bufferedImage, step, graphics, superPaint, true, !_aBorderStepWillFollow());
+                _renderInto(_bufferedImage, step, graphics, superPaint, true, _aBorderPaintStepIsGuaranteed());
             } else if ( _bufferedImage != null && step == PaintStep.BORDER ) {
-                _renderInto(_bufferedImage, step, graphics, superPaint, false, true);
+                _renderInto(_bufferedImage, step, graphics, superPaint, false, false);
             } else {
                 superPaint.accept((Graphics2D) graphics);
             }
@@ -925,15 +928,12 @@ public final class ComponentExtension<C extends JComponent>
      *  theirs is off. Those keep the hand-over in the background step, because a background
      *  which is never handed over is a hole in the window.
      */
-    private boolean _aBorderStepWillFollow() {
+    private boolean _aBorderPaintStepIsGuaranteed() {
         return _owner.getBorder() instanceof StyleAndAnimationBorder
             && _LEAVES_BORDER_PAINTING_TO_JCOMPONENT.computeIfAbsent(
                     _owner.getClass(), ComponentExtension::_leavesBorderPaintingToJComponent
                );
     }
-
-    /** Answered once per component class, since a class cannot start overriding a method later. */
-    private static final Map<Class<?>, Boolean> _LEAVES_BORDER_PAINTING_TO_JCOMPONENT = new ConcurrentHashMap<>();
 
     private static boolean _leavesBorderPaintingToJComponent( Class<?> componentType ) {
         for ( Class<?> type = componentType; type != null && type != JComponent.class; type = type.getSuperclass() )
@@ -949,13 +949,13 @@ public final class ComponentExtension<C extends JComponent>
      *  Paints one step of this component into the buffer its filtering children read, and hands
      *  the buffer to the destination when this step is the last one to write into it.
      *
-     * @param handOver whether to draw the buffer onto {@code graphics} afterwards; a background
+     * @param skipRenderingIntoSuppliedGraphics whether to not draw the buffer onto {@code graphics} afterwards; a background
      *                 step which knows a border step is coming leaves that to it, so that the
      *                 buffer crosses into the destination surface once per frame instead of twice
      */
     private void _renderInto(
         BufferedImage buffer, PaintStep step, Graphics graphics,
-        Consumer<Graphics2D> superPaint, boolean startsANewFrame, boolean handOver
+        Consumer<Graphics2D> superPaint, boolean startsANewFrame, boolean skipRenderingIntoSuppliedGraphics
     ) {
         Graphics2D bufferGraphics = buffer.createGraphics();
         StyleUtil.transferConfigurations((Graphics2D) graphics, bufferGraphics);
@@ -980,7 +980,7 @@ public final class ComponentExtension<C extends JComponent>
             of this call is uploaded across that boundary - and a scrolled component's buffer is
             as tall as its whole content, of which a single viewport's worth is on screen.
         */
-        if ( !handOver )
+        if ( skipRenderingIntoSuppliedGraphics )
             return;
 
         Rectangle visible = new Rectangle(0, 0, buffer.getWidth(), buffer.getHeight());
