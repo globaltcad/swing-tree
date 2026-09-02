@@ -1311,62 +1311,62 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *  {@code Basic*UI} would do, so the check marks, arrows, thumbs and grips are Swing's own.
          */
         BLANK {
-            @Override Symbols symbols() { return BlankSymbols.INSTANCE; }
+            @Override Symbols symbols() { return Symbols.Blank.INSTANCE; }
             @Override String  displayName() { return "Blank"; }
         },
         /** Thin strokes, round caps, round dots and no fills to speak of: drawn the way a pen
          *  draws, so the geometry reads at a glance and stays crisp at any scale factor. */
         LINEN {
-            @Override Symbols symbols() { return LinenSymbols.INSTANCE; }
+            @Override Symbols symbols() { return Symbols.Linen.INSTANCE; }
             @Override String  displayName() { return "Linen"; }
         },
         /** Extruded: every glyph is the surface colour, lit from the top left and shadowed at the
          *  bottom right, so it reads as pressed out of the panel rather than drawn onto it. */
         SOFT {
-            @Override Symbols symbols() { return SoftSymbols.INSTANCE; }
+            @Override Symbols symbols() { return Symbols.Soft.INSTANCE; }
             @Override String  displayName() { return "Soft"; }
         },
         /** Glass: saturated fills under a hard gloss that breaks across the middle, with a crisp
          *  outline and a highlight along the top edge. */
         GLOSSY {
-            @Override Symbols symbols() { return GlossySymbols.INSTANCE; }
+            @Override Symbols symbols() { return Symbols.Glossy.INSTANCE; }
             @Override String  displayName() { return "Glossy"; }
         },
         /** Bold and geometric: filled shapes rather than outlined ones, solid triangles for arrows,
          *  and thick strokes that stay legible at a glance. */
         MATERIAL {
-            @Override Symbols symbols() { return MaterialSymbols.INSTANCE; }
+            @Override Symbols symbols() { return Symbols.Material.INSTANCE; }
             @Override String  displayName() { return "Material"; }
         },
         /** Rectangles and solid triangles: no radius, no rim, no halo and no shade, so a control
          *  that is on is the same shape as one that is off, filled. */
         FLAT {
-            @Override Symbols symbols() { return FlatSymbols.INSTANCE; }
+            @Override Symbols symbols() { return Symbols.Flat.INSTANCE; }
             @Override String  displayName() { return "Flat"; }
         },
         /** Cut into the surface or screwed onto it: every mark is drawn twice, dark on the line
          *  and light one pixel below it, where the far wall of the groove catches the light. */
         CARVED {
-            @Override Symbols symbols() { return CarvedSymbols.INSTANCE; }
+            @Override Symbols symbols() { return Symbols.Carved.INSTANCE; }
             @Override String  displayName() { return "Carved"; }
         },
         /** Cut from the same glass as everything else: a shape that is off is a wash you can see
          *  the ground through, one that is on is the accent behind a brighter rim. */
         GLASS {
-            @Override Symbols symbols() { return GlassSymbols.INSTANCE; }
+            @Override Symbols symbols() { return Symbols.Glass.INSTANCE; }
             @Override String  displayName() { return "Glass"; }
         },
         /** Moulded from the same plastic as the surfaces around them: a small rounded square, a
          *  small circle, a round knob and a pill, each lit by the one overhead light the Nimbus
          *  style preset uses, inside the outline a button of the same state wears. */
         NIMBUS {
-            @Override Symbols symbols() { return NimbusSymbols.INSTANCE; }
+            @Override Symbols symbols() { return Symbols.Nimbus.INSTANCE; }
             @Override String  displayName() { return "Nimbus"; }
         },
         /** Not a set of its own but a choice between three of the others, remade from the palette
          *  in force on every call. */
         ADAPTIVE {
-            @Override Symbols symbols() { return AdaptiveSymbols.INSTANCE; }
+            @Override Symbols symbols() { return Symbols.Adaptive.INSTANCE; }
             @Override String  displayName() { return "Adaptive"; }
         };
 

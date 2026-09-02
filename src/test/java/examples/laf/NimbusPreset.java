@@ -149,7 +149,7 @@ final class NimbusPreset
     }
 
     /**
-     *  The unlit colour of an ordinary control, which {@link NimbusSymbols} needs too: a check box
+     *  The unlit colour of an ordinary control, which {@link Symbols.Nimbus} needs too: a check box
      *  has the same four states a button has and has to be made of the same material, so both read
      *  it from here rather than each keeping its own idea of what "pressed" looks like.
      *

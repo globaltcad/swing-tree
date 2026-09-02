@@ -11,7 +11,7 @@ import java.awt.geom.Point2D;
 
 /**
  *  The light {@link NimbusPreset} is built out of, in the one place both the style rules and the
- *  {@link NimbusSymbols} read it from.
+ *  {@link Symbols.Nimbus} read it from.
  *  <p>
  *  A relief is a set of gradient stops measured against the surface's own colour rather than
  *  written down: a stop says "this far down, this much brighter and this much less saturated than
