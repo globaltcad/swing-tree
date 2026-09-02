@@ -900,13 +900,10 @@ public void setCacheMode( SwingTreeInitConfig.CacheMode cacheMode ) {
         {
             this.config = config;
             try {
-                // add user scale factor to allow layout managers (e.g. MigLayout) to use it
-                UIManager.put( "laf.scaleFactor", (UIDefaults.ActiveValue) t -> {
-                    return this.scaleFactor.get();
-                });
+                _publishScaleFactor(this.scaleFactor.get());
 
                 if ( config.scalingStrategy() == SwingTreeInitConfig.Scaling.NONE ) {
-                    this.scaleFactor.set(1f);
+                    _publishScaleFactor(1f);
                     this.initialized = true;
                     return;
                 }
@@ -1415,7 +1412,24 @@ public void setCacheMode( SwingTreeInitConfig.CacheMode cacheMode ) {
         private void _setUserScaleFactor(float scaleFactor) {
             // minimum scale factor
             scaleFactor = Math.max( scaleFactor, 0.1f );
+            _publishScaleFactor(scaleFactor);
+        }
+
+        /**
+         *  Records the user scale factor and republishes it under {@code "laf.scaleFactor"}, which
+         *  is where a layout manager looks for it - MigLayout reads that key through
+         *  {@link UIManager#get(Object)} for every component it measures.
+         *  <p>
+         *  The value stored there is the number itself rather than a {@link UIDefaults.ActiveValue}
+         *  which reads this field. A look up of an active value takes the defaults table's own
+         *  monitor and runs the supplier, on every one of those measurements; a plain number is
+         *  returned from the table. What that costs the reader is why the writer republishes here
+         *  instead: the factor changes when a display or a font does, and a measurement happens
+         *  hundreds of times per laid out frame.
+         */
+        private void _publishScaleFactor( float scaleFactor ) {
             this.scaleFactor.set(scaleFactor);
+            UIManager.put( "laf.scaleFactor", scaleFactor );
         }
 
         /**
