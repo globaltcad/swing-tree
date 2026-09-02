@@ -81,6 +81,88 @@ final class LafUtilities
         );
     }
 
+    /**
+     *  The same colour with its saturation and brightness moved by fixed amounts, both measured
+     *  on the 0-to-1 scale {@link Color#RGBtoHSB} reports and both clamped at the ends.
+     *  <p>
+     *  This is how a theme built on one base colour stays one theme when that colour is replaced.
+     *  Mixing towards white and black - {@link #shadeTowardsWhite} - washes the hue out as it
+     *  goes, so a stack of mixed shades drifts towards grey and a saturated base loses what made
+     *  it worth choosing. Moving the brightness leaves the hue untouched, so a red base yields
+     *  light reds and a blue base light blues, and one set of offsets describes the same relief on
+     *  either. That is also what makes the offsets transferable: they can be read off one colour
+     *  scheme by measurement and replayed on another.
+     *  <p>
+     *  Clamping is the reason a bright base does not simply produce a brighter theme: a stop
+     *  already near white cannot move, so the relief flattens where the colour runs out, which is
+     *  what a light material does under a light.
+     *
+     * @param base the colour to move
+     * @param saturationOffset how much saturation to add, negative to remove it
+     * @param brightnessOffset how much brightness to add, negative to remove it
+     * @return the moved colour, at {@code base}'s hue and opacity
+     */
+    static Color shiftHsb( Color base, double saturationOffset, double brightnessOffset ) {
+        float[] hsb = Color.RGBtoHSB(base.getRed(), base.getGreen(), base.getBlue(), null);
+        Color shifted = Color.getHSBColor(
+                            hsb[0],
+                            (float) clamp01(hsb[1] + saturationOffset),
+                            (float) clamp01(hsb[2] + brightnessOffset)
+                        );
+        return base.getAlpha() == 255 ? shifted : withOpacity(shifted, base.getAlpha());
+    }
+
+    /**
+     *  Washes a colour out towards the ground it is going to be seen against: the hue is kept, the
+     *  saturation is scaled down, and the brightness is moved part of the way to the ground's.
+     *  <p>
+     *  This is what {@link #shiftHsb} cannot do. A fixed brightness offset says "lighter", which is
+     *  right on a light theme and wrong on a dark one - the same {@code +0.26} that turns a deep
+     *  blue into a pale blue-grey on a paper background turns an already-bright blue into white on
+     *  a near-black one, and the label on top of it stops being readable. Moving a <em>fraction of
+     *  the way to the ground</em> says "less itself, more of the room it is in", which is the same
+     *  instruction on both.
+     *
+     * @param colour the colour to wash out
+     * @param ground the colour it will be seen against, which it is moved towards
+     * @param saturationKept how much of the colour's own saturation survives, 0 to 1
+     * @param towardsGround how far to move its brightness towards the ground's, 0 to 1; may be
+     *                      slightly negative to move a shade the other way
+     * @return the washed colour, at {@code colour}'s hue and opacity
+     */
+    static Color wash( Color colour, Color ground, double saturationKept, double towardsGround ) {
+        float[] from = Color.RGBtoHSB(colour.getRed(), colour.getGreen(), colour.getBlue(), null);
+        float[] to   = Color.RGBtoHSB(ground.getRed(), ground.getGreen(), ground.getBlue(), null);
+        Color washed = Color.getHSBColor(
+                            from[0],
+                            (float) clamp01(from[1] * saturationKept),
+                            (float) clamp01(from[2] + ( to[2] - from[2] ) * towardsGround)
+                       );
+        return colour.getAlpha() == 255 ? washed : withOpacity(washed, colour.getAlpha());
+    }
+
+    /**
+     *  Picks whichever of two inks can actually be read on a given ground, by comparing relative
+     *  luminance. A theme that derives its colours cannot know in advance whether a surface will
+     *  come out light or dark - that is the palette's business - so anywhere the answer decides
+     *  legibility it has to be measured rather than assumed.
+     *
+     * @param ground the colour the text will be drawn on
+     * @param first the ink to use unless the second one is easier to read
+     * @param second the alternative ink
+     * @return whichever of the two is further from {@code ground} in luminance
+     */
+    static Color readableOn( Color ground, Color first, Color second ) {
+        double g = luminance(ground);
+        return Math.abs(luminance(first) - g) >= Math.abs(luminance(second) - g) ? first : second;
+    }
+
+    private static double luminance( Color c ) {
+        return ( 0.2126 * c.getRed() + 0.7152 * c.getGreen() + 0.0722 * c.getBlue() ) / 255.0;
+    }
+
+    private static double clamp01( double value ) { return Math.max(0, Math.min(1, value)); }
+
     /** The same colour at a different opacity, from 0 to 255. */
     static Color withOpacity( Color base, int alpha ) {
         return new Color(base.getRed(), base.getGreen(), base.getBlue(), Math.max(0, Math.min(255, alpha)));
@@ -113,10 +195,16 @@ final class LafUtilities
     static void paintStyled( Graphics g, JComponent c, Painter inheritedPainting ) {
         boolean wasOpaque = c.isOpaque();
         ComponentExtension.from(c).paintBackground(g, g2 -> {
-            antialiasShapesAndText(g2);
+            Object formerShapeAntialiasing = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+            applyDesktopTextHints(g2);
             g2.setColor(c.getForeground());
             g2.setFont(c.getFont());
-            inheritedPainting.paint(g2);
+            try {
+                inheritedPainting.paint(g2);
+            } finally {
+                if ( formerShapeAntialiasing != null )
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, formerShapeAntialiasing);
+            }
         });
         Container parent = c.getParent();
         if ( wasOpaque && !c.isOpaque() && parent != null )
@@ -129,31 +217,68 @@ final class LafUtilities
     }
 
     /**
-     *  Turns on shape antialiasing and the desktop's own text antialiasing.
+     *  Puts the desktop's own text antialiasing settings on a context which is about to draw a
+     *  component's text.
      *  <p>
      *  Swing's {@code SwingUtilities2.drawString}, which every {@code BasicXxxUI} draws through,
      *  reads its text antialiasing from a client property {@code javax.swing} does not export,
      *  falling back to the rendering hints already on the context. Merging the toolkit's desktop
      *  hints in here is the only handle a third-party look and feel has on that, and it is also
      *  what makes the text match the rest of the desktop.
+     *  <p>
+     *  Shape antialiasing is deliberately <em>not</em> turned on alongside it. The inherited
+     *  painting this precedes draws whole pixels - rules, grid lines, focus rectangles, a tabbed
+     *  pane's content edge - and antialiasing a rectangle whose corners already sit on pixel
+     *  boundaries runs a coverage rasterization to arrive at the pixels a plain fill would have
+     *  written directly. What does have a curve or a diagonal in it is a {@link Symbols} glyph,
+     *  and every symbol set turns antialiasing on for itself, as does the style engine for the
+     *  surfaces it paints. Not setting the hint here measured at a fifth off a repaint of the
+     *  Linen preset and four fifths off one of {@link SwingTreeLookAndFeel.StylePreset#BLANK},
+     *  without changing a pixel of any preset.
      */
-    private static void antialiasShapesAndText( Graphics2D g ) {
-        Map<?, ?> desktopHints = desktopFontHints();
-        if ( desktopHints != null && !desktopHints.isEmpty() )
-            g.addRenderingHints(desktopHints);
-        else {
-            g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-            g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+    private static void applyDesktopTextHints( Graphics2D g ) {
+        RenderingHints hints = textHints;
+        if ( hints == null ) {
+            hints = readDesktopTextHints();
+            textHints = hints;
         }
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.addRenderingHints(hints);
     }
 
-    private static Map<?, ?> desktopFontHints() {
+    /**
+     *  The hints last read from the desktop, or nothing until they are read again.
+     *  <p>
+     *  Reading them is a look up in the {@code UIManager} defaults followed, when that misses, by
+     *  one in the toolkit's desktop properties - and this runs once per component per repaint,
+     *  which on the showcase was 1.3% of the event thread. Both sources announce their own changes
+     *  and the listeners below drop the field when they do, so nothing here can go stale.
+     */
+    private static volatile RenderingHints textHints = null;
+
+    static {
+        Toolkit.getDefaultToolkit()
+               .addPropertyChangeListener("awt.font.desktophints", event -> textHints = null);
+        UIManager.addPropertyChangeListener(event -> {
+            if ( "lookAndFeel".equals(event.getPropertyName()) )
+                textHints = null;
+        });
+    }
+
+    private static RenderingHints readDesktopTextHints() {
         Object fromManager = UIManager.get("AwtFontDesktopHints");
-        if ( fromManager instanceof Map<?, ?> )
-            return (Map<?, ?>) fromManager;
-        Object fromToolkit = Toolkit.getDefaultToolkit().getDesktopProperty("awt.font.desktophints");
-        return ( fromToolkit instanceof Map<?, ?> ) ? (Map<?, ?>) fromToolkit : null;
+        Map<?, ?> desktopHints = ( fromManager instanceof Map<?, ?> ) ? (Map<?, ?>) fromManager : null;
+        if ( desktopHints == null ) {
+            Object fromToolkit = Toolkit.getDefaultToolkit().getDesktopProperty("awt.font.desktophints");
+            desktopHints = ( fromToolkit instanceof Map<?, ?> ) ? (Map<?, ?>) fromToolkit : null;
+        }
+        RenderingHints hints = new RenderingHints(null);
+        if ( desktopHints != null && !desktopHints.isEmpty() )
+            hints.add(new RenderingHints((Map<RenderingHints.Key, ?>) desktopHints));
+        else {
+            hints.put(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            hints.put(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        }
+        return hints;
     }
 
     /** A top-to-bottom two-stop paint, falling back to {@code top} for a shape with no height. */

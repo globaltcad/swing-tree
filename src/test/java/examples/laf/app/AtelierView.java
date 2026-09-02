@@ -222,7 +222,6 @@ public final class AtelierView extends JPanel
     private final Val<Boolean>     isFiltered;
     private final Val<Boolean>     millConnected;
     private final Val<Double>      workload;
-    private final Val<Integer>     bookHeight;
 
     /*
      *  The one raw Swing handle this view keeps. A JTable's row selection is the
@@ -288,7 +287,6 @@ public final class AtelierView extends JPanel
         isFiltered    = vm.viewAs(Boolean.class, AtelierViewModel::isFiltered);
         millConnected = vm.viewAs(Boolean.class, AtelierViewModel::millConnected);
         workload      = vm.viewAsDouble(AtelierViewModel::workload);
-        bookHeight    = vm.viewAsInt(AtelierViewModel::bookHeight);
         bookCount     = book.viewAsString(table -> table.getRowCount() == 1 ? "1 commission"
                                                  : table.getRowCount() + " commissions");
         bookIsEmpty   = book.viewAs(Boolean.class, table -> table.getRowCount() == 0);
@@ -321,11 +319,6 @@ public final class AtelierView extends JPanel
             .withLayout("fill, wrap 1, ins 0, gap 0, hidemode 3")
             .withPrefSize(1300, 880)
             .withMinSize(0, 0)
-            // The single place the shape of the window enters the model, and it
-            // hands the numbers straight over rather than deciding what they
-            // mean: a flow grid never stretches a row, so the order book has to
-            // be told how tall to want to be.
-            .onResize( it -> vm.update(From.VIEW, m -> m.withViewSize(it.getWidth(), it.getHeight())) )
             .add(GROW_X, menuBar())
             .add(GROW_X.and("wmin 0"), header())
             .add(GROW_X.and("wmin 0"), toolStrip())
@@ -615,7 +608,6 @@ public final class AtelierView extends JPanel
         return
             panel().group(Surface.CARD)
             .withLayout("fill, wrap 1, ins 14 16 16 16, gap 8, hidemode 3")
-            .withStyle(bookHeight, (tall, it) -> it.prefSize(540, tall))
             .add(GROW_X.and("wmin 0"),
                 box(FILL).withLayout("fill, ins 0, gap 8", "[grow][]")
                 .add(LEFT.and("wmin 0"),
@@ -717,7 +709,6 @@ public final class AtelierView extends JPanel
         return
             panel().group(Surface.CARD)
             .withLayout("fill, wrap 1, ins 14 16 16 16, gap 8, hidemode 3")
-            .withStyle(bookHeight, (tall, it) -> it.prefSize(400, tall))
             .add(GROW_X.and("wmin 0"), label(orderTitle).group(Skin.CARD_TITLE))
             .add(GROW_X.and("wmin 0"), label(clothLine).group(Skin.CARD_SUB))
             .add(GROW.and(PUSH).and("wmin 0"),

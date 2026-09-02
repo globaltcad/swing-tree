@@ -7,6 +7,7 @@ import sprouts.Tuple;
 import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.Painter;
+import swingtree.api.laf.OptimizedShapeRendering;
 import swingtree.layout.Bounds;
 import swingtree.layout.Size;
 
@@ -29,11 +30,6 @@ import java.util.List;
  */
 final class StyleRenderer
 {
-    /**
-     *  The smallest area, in device pixels, for which splitting a rounded fill into parts pays.
-     */
-    private static final int SMALLEST_AREA_WORTH_SPLITTING = 32768; // device pixels
-
     /**
      *  A shadow's gradient transition happens across the normalized region
      *  {@code [gradientStart, 1]}. When that region is narrower than this, it cannot hold the
@@ -115,147 +111,6 @@ final class StyleRenderer
         // And that's it! We have rendered a style layer!
     }
 
-    /**
-     *  Fills a shape as fast as possible, by switching antialiasing off over every part of it that
-     *  provably has no non-axis aligned outline (over a rounded corner, for example, we cannot
-     *  turn antialiasing off).
-     *  <p>
-     *  So two kinds of shape get a faster treatment here:
-     *  <ul>
-     *      <li>A {@link Rectangle} is integer valued by its very type and so has no soft edge
-     *          anywhere. Only the transform could still put one between two pixels, which is
-     *          why that is checked before filling it in one go, without antialiasing.</li>
-     *      <li>A {@link RoundRectangle2D} curves only inside its four corner boxes, so it is
-     *          filled as antialiasing-free bands plus antialiased corners.
-     *          See {@link #_fillRoundRectangleInPartsFast}.</li>
-     *  </ul>
-     *  Anything else, like a fractional {@link Rectangle2D} or a rotated transform, keeps
-     *  antialiasing and is filled in one go.
-     */
-    private static void _fillShapeFast( final Graphics2D g2d, final Shape shape ) {
-        if ( !RenderingHints.VALUE_ANTIALIAS_ON.equals(g2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING)) ) {
-            g2d.fill(shape); // Nothing to gain, antialiasing is already off.
-            return;
-        }
-        final AffineTransform transform = g2d.getTransform();
-
-        if ( shape instanceof Rectangle && _mapsOntoWholeDevicePixels(transform, (Rectangle) shape) ) {
-            _fillWithoutAntialiasing(g2d, shape);
-            return;
-        }
-        if ( shape instanceof RoundRectangle2D && _fillRoundRectangleInPartsFast(g2d, (RoundRectangle2D) shape, transform) )
-            return;
-
-        g2d.fill(shape);
-    }
-
-    /**
-     *  Fills the given shapes with antialiasing switched off and then switches it back on.
-     */
-    private static void _fillWithoutAntialiasing( final Graphics2D g2d, final Shape... shapes ) {
-        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);
-        try {
-            for ( Shape shape : shapes )
-                g2d.fill(shape);
-        } finally {
-            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        }
-    }
-
-    /**
-     *  Tries to fill a rounded rectangle as three antialiasing-free bands plus four antialiased
-     *  corners, and reports whether it succeeded or not.
-     *
-     * @return {@code true} when the shape was filled, {@code false} when the caller must fill it.
-     */
-    private static boolean _fillRoundRectangleInPartsFast(
-        final Graphics2D       g2d,
-        final RoundRectangle2D round,
-        final AffineTransform  transform
-    ) {
-        if ( transform.getShearX() != 0 || transform.getShearY() != 0 )
-            return false; // The bands would not be axis aligned in device space.
-
-        final double x = round.getX(),     y = round.getY();
-        final double w = round.getWidth(), h = round.getHeight();
-        if ( w <= 0 || h <= 0 )
-            return false;
-
-        final double scaleX = transform.getScaleX(), translateX = transform.getTranslateX();
-        final double scaleY = transform.getScaleY(), translateY = transform.getTranslateY();
-
-        final double deviceArea = Math.abs(w * scaleX * h * scaleY);
-        if ( deviceArea < SMALLEST_AREA_WORTH_SPLITTING )
-            return false; // The split would not pay for its six extra fills.
-
-        // How far the curvature reaches in from each side, which is half of the arc:
-        final double arcW = Math.min(Math.abs(round.getArcWidth()),  w) / 2d;
-        final double arcH = Math.min(Math.abs(round.getArcHeight()), h) / 2d;
-        if ( arcW <= 0 || arcH <= 0 )
-            return false; // Not actually rounded; an undivided fill of it is already optimal.
-
-        final double[] cutX = { x, x + arcW, x + w - arcW, x + w };
-        final double[] cutY = { y, y + arcH, y + h - arcH, y + h };
-        if ( !_allCutsAreWholeDevicePixels(cutX, scaleX, translateX) )
-            return false;
-        if ( !_allCutsAreWholeDevicePixels(cutY, scaleY, translateY) )
-            return false;
-
-        // The bands, which hold nearly all of the area and none of the curvature.
-        // A band is empty when the arc spans the full width or height, which fills nothing.
-        _fillWithoutAntialiasing(g2d,
-            new Rectangle2D.Double(cutX[0], cutY[1], w,                 cutY[2] - cutY[1]), // Between the corners.
-            new Rectangle2D.Double(cutX[1], cutY[0], cutX[2] - cutX[1], arcH),              // Above them,
-            new Rectangle2D.Double(cutX[1], cutY[2], cutX[2] - cutX[1], arcH)               // and below them.
-        );
-        // And then the four corner boxes, each filled with the whole shape clipped to it, so
-        // that the curve is rasterized by exactly the code which would have drawn it anyway.
-        for ( int corner = 0; corner < 4; corner++ ) {
-            final double cornerX = ( corner == 1 || corner == 3 ) ? cutX[2] : cutX[0];
-            final double cornerY = ( corner >= 2 )                ? cutY[2] : cutY[0];
-            final Graphics2D cornerG2d = (Graphics2D) g2d.create();
-            try {
-                cornerG2d.clip(new Rectangle2D.Double(cornerX, cornerY, arcW, arcH));
-                cornerG2d.fill(round);
-            } finally {
-                cornerG2d.dispose();
-            }
-        }
-        return true;
-    }
-
-    /**
-     *  Whether every cut line lands on a whole device pixel. A cut between two pixels would
-     *  make the band and the corner clip meeting there disagree about which pixel they own,
-     *  leaving a seam that is either blended twice or not covered at all.
-     */
-    private static boolean _allCutsAreWholeDevicePixels(
-        final double[] cuts, final double scale, final double translate
-    ) {
-        for ( double cut : cuts )
-            if ( !_isWhole(cut * scale + translate) )
-                return false;
-        return true;
-    }
-
-    /**
-     *  Whether the given transform turns the corners of the given integer rectangle
-     *  into whole device pixels, which requires it to be free of rotation and shear
-     *  and to scale the corners onto integers.
-     */
-    private static boolean _mapsOntoWholeDevicePixels( final AffineTransform transform, final Rectangle rectangle ) {
-        if ( transform.getShearX() != 0 || transform.getShearY() != 0 )
-            return false;
-        return _isWhole(transform.getScaleX() * rectangle.x                    + transform.getTranslateX())
-            && _isWhole(transform.getScaleY() * rectangle.y                    + transform.getTranslateY())
-            && _isWhole(transform.getScaleX() * (rectangle.x + rectangle.width ) + transform.getTranslateX())
-            && _isWhole(transform.getScaleY() * (rectangle.y + rectangle.height) + transform.getTranslateY());
-    }
-
-    private static boolean _isWhole( final double value ) {
-        return Math.abs(value - Math.rint(value)) < 1e-6;
-    }
-
     private static void _drawBackgroundFill(
         final LayerRenderConf conf,
         final Graphics2D g2d
@@ -269,18 +124,18 @@ final class StyleRenderer
             Shape bodyArea = conf.areas().get(UI.ComponentArea.BODY);
             if ( !StyleUtil.shapesAreEqual(fullArea, bodyArea) ) {
                 g2d.setColor(foundationColor);
-                _fillShapeFast(g2d, fullArea); // Filling everything is a bit cheaper than UI.ComponentArea.EXTERIOR!
+                OptimizedShapeRendering.fill(g2d, fullArea); // Filling everything is a bit cheaper than UI.ComponentArea.EXTERIOR!
             }
             g2d.setColor(backgroundColor);
-            _fillShapeFast(g2d, bodyArea);
+            OptimizedShapeRendering.fill(g2d, bodyArea);
         } else {
             if ( foundationColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
                 g2d.setColor(foundationColor);
-                _fillShapeFast(g2d, conf.areas().get(UI.ComponentArea.EXTERIOR));
+                OptimizedShapeRendering.fill(g2d, conf.areas().get(UI.ComponentArea.EXTERIOR));
             }
             if ( backgroundColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
                 g2d.setColor(backgroundColor);
-                _fillShapeFast(g2d, conf.areas().get(UI.ComponentArea.BODY));
+                OptimizedShapeRendering.fill(g2d, conf.areas().get(UI.ComponentArea.BODY));
             }
         }
     }
@@ -299,7 +154,7 @@ final class StyleRenderer
                 Objects.requireNonNull(borderArea);
                 if ( colors.isHomogeneous() ) {
                     g2d.setColor(colors.bottom().orElse(UI.Color.BLACK));
-                    _fillShapeFast(g2d, borderArea);
+                    OptimizedShapeRendering.fill(g2d, borderArea);
                 } else {
                     // The border area clipped to each edge region. These intersections are a pure
                     // function of the (immutable) box model, so they are computed once and cached in
@@ -910,14 +765,14 @@ final class StyleRenderer
     ) {
         if ( gradient.colors().length == 1 ) {
             g2d.setColor(gradient.colors()[0]);
-            _fillShapeFast(g2d, conf.areas().get(gradient.area()));
+            OptimizedShapeRendering.fill(g2d, conf.areas().get(gradient.area()));
         }
         else {
             final Paint paint = createGradientPaint(conf.boxModel(), gradient);
             if ( paint != null ) {
                 Shape areaToFill = conf.areas().get(gradient.area());
                 g2d.setPaint(paint);
-                _fillShapeFast(g2d, areaToFill);
+                OptimizedShapeRendering.fill(g2d, areaToFill);
             }
         }
     }
@@ -1396,7 +1251,7 @@ final class StyleRenderer
     ) {
         if ( style.primer().isPresent() ) {
             g2d.setColor(style.primer().get());
-            _fillShapeFast(g2d, conf.areas().get(style.clipArea()));
+            OptimizedShapeRendering.fill(g2d, conf.areas().get(style.clipArea()));
         }
 
         style.image().ifPresent( imageIcon -> {
@@ -1535,7 +1390,7 @@ final class StyleRenderer
                         Paint oldPaint = g2d.getPaint();
                         try {
                             g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));
-                            _fillShapeFast(g2d, conf.areas().get(UI.ComponentArea.BODY));
+                            OptimizedShapeRendering.fill(g2d, conf.areas().get(UI.ComponentArea.BODY));
                         } finally {
                             g2d.setPaint(oldPaint);
                         }
@@ -2200,7 +2055,7 @@ final class StyleRenderer
             final Color[] colors = noise.get().colors();
             if ( colors.length == 1 ) {
                 g2d.setPaint(colors[0]);
-                _fillShapeFast(g2d, areaToFill);
+                OptimizedShapeRendering.fill(g2d, areaToFill);
                 return;
             }
 
@@ -2216,7 +2071,7 @@ final class StyleRenderer
                 _renderWithLargeTiles(center, noise, areaToFill, bounds, g2d);
             else {
                 g2d.setPaint(_getCachedNoisePaint(center, noise));
-                _fillShapeFast(g2d, areaToFill);
+                OptimizedShapeRendering.fill(g2d, areaToFill);
             }
         }
 

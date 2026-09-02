@@ -68,7 +68,6 @@ public final class AtelierViewModel
     private final String        millSecret;
     private final boolean       millConnected;
     private final boolean       loomsRunning;
-    private final int           bookHeight;     // derived from the window, see withViewSize
 
     /** The workshop as it stands when the doors open in the morning. */
     public static AtelierViewModel initial() {
@@ -101,8 +100,7 @@ public final class AtelierViewModel
             "2214", "", "", false,
             0, false, "",
             "Seven commissions on the books. Two looms threaded.",
-            "atelier@flaxen", "", false, false,
-            460
+            "atelier@flaxen", "", false, false
         );
     }
 
@@ -505,22 +503,6 @@ public final class AtelierViewModel
             updated = kept.toString();
         }
         return withJournal(updated).withStatus(line);
-    }
-
-    /**
-     *  The only place the shape of the window reaches the model. Just the height
-     *  matters, and only in bands of forty pixels: a flow grid gives a row the
-     *  height its tallest child <em>prefers</em> and never stretches it, so the
-     *  order book has to be told how tall to want to be — but it must not be
-     *  told sixty times a second while somebody drags the window edge.
-     *
-     *  @param width  the view's width, which the responsive grid handles by itself
-     *  @param height the view's height
-     *  @return a view model with a new book height, or {@code this} within the band
-     */
-    public AtelierViewModel withViewSize( int width, int height ) {
-        int band = Math.max(320, Math.min(760, ( height - 300 ) / 40 * 40));
-        return band == bookHeight ? this : withBookHeight(band);
     }
 
     // ── Small shared helpers ──────────────────────────────────────────────

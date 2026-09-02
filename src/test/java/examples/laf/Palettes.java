@@ -261,6 +261,13 @@ final class Palettes
             .dangerPressed  (rgb(0xE05468))
             .onFilled       (rgb(0xFFFFFF));
 
+    /**
+     *  The colours Nimbus ships with, fed through {@link Palette#nimbus} - five colours chosen,
+     *  the other seventeen derived from them.
+     */
+    static final Palette NIMBUS =
+            Palette.nimbus(rgb(0x33628C), rgb(0xA9B0BE), rgb(0xBF6204), rgb(0xA92E22), rgb(0xF2F2BD));
+
     private static Color rgb( int packed ) {
         return new Color((packed >> 16) & 0xFF, (packed >> 8) & 0xFF, packed & 0xFF);
     }
