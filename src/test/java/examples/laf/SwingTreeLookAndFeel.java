@@ -1050,6 +1050,81 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         /** @return the text laid over a filled control, and over a tooltip */
         public Color onFilled()        { return _get(Slot.ON_FILLED); }
 
+        /**
+         *  Builds a palette the way Nimbus builds a colour scheme: from a handful of chosen
+         *  colours, with everything else derived from them by a shift in saturation and
+         *  brightness.
+         *  <p>
+         *  This is the part of Nimbus worth keeping, and the reason it could be re-tinted at all.
+         *  Its colour schemes are not repaints - nobody lists the colour of a pressed scroll-bar
+         *  thumb - they are a few colours changed, and the hundred shades of chrome follow because
+         *  each one is stated as a distance from one of them rather than as a value. The offsets
+         *  used here were measured off the colours Nimbus itself paints, so passing
+         *  {@code #33628C} and {@code #A9B0BE} reproduces its own scheme to within a rounding
+         *  step - that is {@link PalettePreset#NIMBUS} - and passing anything else moves the whole
+         *  theme together:
+         *  <pre>{@code
+         *    SwingTreeLookAndFeel.initializeUsing( it -> it
+         *        .stylePreset(SwingTreeLookAndFeel.StylePreset.NIMBUS)
+         *        .palette( p -> SwingTreeLookAndFeel.Palette.nimbus(
+         *                            new Color(0x2E6B3F), new Color(0xB4B7A8),
+         *                            new Color(0xB07A12), new Color(0xA8352A),
+         *                            new Color(0xF4F0C8)
+         *                       ) )
+         *    );
+         *  }</pre>
+         *  A caller wanting a shade that is not derived from these five can name it afterwards
+         *  with the {@code with}-style methods on the returned palette, which is also how the
+         *  configurator above lets one colour be corrected without giving up the derivation.
+         *  <p>
+         *  Nothing about this is tied to {@link StylePreset#NIMBUS}: the result is an ordinary
+         *  palette, and any preset can be paired with it.
+         *
+         * @param base     the one saturated colour: focus rings, selections, the default button, a
+         *                 slider's filled track, the selected tab. Nimbus calls it
+         *                 {@code nimbusBase}
+         * @param chrome   the neutral every unlit surface is derived from - the window, a button
+         *                 at rest, a table header, a scroll bar. Nimbus calls it
+         *                 {@code nimbusBlueGrey}; it is a good deal darker than anything painted
+         *                 with it, because most of the theme is this colour lifted towards the
+         *                 light
+         * @param positive the colour of something going well: a progress bar's fill, and with it
+         *                 the affirmative {@link Variant#PRIMARY} control
+         * @param negative the colour of something going wrong, worn by {@link Variant#DANGER}
+         * @param notice   the ground a tool tip is written on. It is chosen rather than derived
+         *                 for the same reason Nimbus keeps its own {@code info} colour outside the
+         *                 derivation: a notice is meant to be the one thing on screen that is not
+         *                 a shade of the theme. It is carried in the two grain slots, which a
+         *                 theme with no grain has spare
+         * @return a palette with all twenty-two slots filled from those five
+         */
+        public static Palette nimbus( Color base, Color chrome, Color positive, Color negative, Color notice ) {
+            Color ground = LafUtilities.shiftHsb(chrome, -0.070, +0.129);
+            return neutral()
+                    .background     (ground)
+                    .surface        (ground)
+                    .surfaceHover   (LafUtilities.shiftHsb(chrome, -0.073, +0.204))
+                    .surfacePressed (LafUtilities.shiftHsb(chrome, -0.002, -0.024))
+                    .surfaceDisabled(LafUtilities.shiftHsb(chrome, -0.090, +0.204))
+                    .surfaceField   (LafUtilities.shiftHsb(chrome, -0.111, +0.255))
+                    .border         (LafUtilities.shiftHsb(chrome, -0.017, -0.114))
+                    .borderSoft     (LafUtilities.shiftHsb(chrome, -0.034, +0.071))
+                    .text           (LafUtilities.shiftHsb(chrome, -0.111, -0.745))
+                    .textMuted      (LafUtilities.shiftHsb(chrome, +0.029, -0.408))
+                    .textDisabled   (LafUtilities.shiftHsb(chrome, -0.090, -0.177))
+                    .accent         (base)
+                    .accentSoft     (LafUtilities.shiftHsb(base,   -0.483, +0.377))
+                    .textureLight   (notice)
+                    .textureDark    (LafUtilities.shiftHsb(notice, +0.180, -0.245))
+                    .primary        (positive)
+                    .primaryHover   (LafUtilities.shiftHsb(positive, -0.060, +0.078))
+                    .primaryPressed (LafUtilities.shiftHsb(positive, +0.040, -0.086))
+                    .danger         (negative)
+                    .dangerHover    (LafUtilities.shiftHsb(negative, -0.060, +0.078))
+                    .dangerPressed  (LafUtilities.shiftHsb(negative, +0.040, -0.086))
+                    .onFilled       (LafUtilities.shiftHsb(chrome, -0.111, +0.255));
+        }
+
         /** @param alpha how opaque the returned accent should be, 0 to 255
          *  @return the accent colour at the given opacity */
         public Color accentAt( int alpha ) {
@@ -1166,6 +1241,24 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             @Override String               displayName()      { return "Glassmorphic"; }
         },
         /**
+         *  Nimbus, the look and feel Sun shipped with Java 6 update 10, rebuilt on the style
+         *  engine. Every raised thing is the same piece of moulded plastic under one overhead
+         *  light - bright along the top edge, dimming through the middle, catching the light again
+         *  on the bottom lip - and a button, a tab, a table heading and a check box differ only in
+         *  which colour that one curve is laid over. Anything you can type into is cut into the
+         *  panel instead of standing on it, and focus is a pale ring outside the outline rather
+         *  than a change to the control.
+         *  <p>
+         *  It is here as a test of whether this look-and-feel layer can carry a theme it was not
+         *  designed around, so it reproduces the original rather than reinterpreting it.
+         */
+        NIMBUS {
+            @Override Tuple<StyleRule>     rules()            { return NimbusPreset.rules(); }
+            @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.NIMBUS; }
+            @Override public PalettePreset preferredPalette() { return PalettePreset.NIMBUS; }
+            @Override String               displayName()      { return "Nimbus"; }
+        },
+        /**
          *  Polymorphism: a theme with no fixed appearance, only rules for arriving at one. It
          *  reads what the palette leaves it to work with, how tall each control is and how deeply
          *  each surface is nested, and derives everything from those three. Switching the palette
@@ -1263,6 +1356,13 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             @Override Symbols symbols() { return GlassSymbols.INSTANCE; }
             @Override String  displayName() { return "Glass"; }
         },
+        /** Moulded from the same plastic as the surfaces around them: a small rounded square, a
+         *  small circle, a round knob and a pill, each lit by the one overhead light the Nimbus
+         *  style preset uses, inside the outline a button of the same state wears. */
+        NIMBUS {
+            @Override Symbols symbols() { return NimbusSymbols.INSTANCE; }
+            @Override String  displayName() { return "Nimbus"; }
+        },
         /** Not a set of its own but a choice between three of the others, remade from the palette
          *  in force on every call. */
         ADAPTIVE {
@@ -1332,6 +1432,13 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         WORKSHOP {
             @Override Palette palette() { return Palettes.WORKSHOP; }
             @Override String  displayName() { return "Workshop"; }
+        },
+        /** The blue-grey Sun chose for Nimbus, and the seventeen shades derived from it: one
+         *  neutral for every unlit surface, one saturated blue for everything active, an orange
+         *  for progress and a red for danger. See {@link Palette#nimbus} to re-tint it. */
+        NIMBUS {
+            @Override Palette palette() { return Palettes.NIMBUS; }
+            @Override String  displayName() { return "Nimbus"; }
         },
         /** Night sky through a frosted pane: a deep indigo ground with a violet and a magenta
          *  bloom in it, and white for everything the glass is made of. */
