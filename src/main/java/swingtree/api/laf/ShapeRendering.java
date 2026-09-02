@@ -34,8 +34,22 @@ public final class ShapeRendering
 {
     /**
      *  The smallest area, in device pixels, for which splitting a rounded fill into parts pays.
+     *  <p>
+     *  The split costs four antialiased corner fills and three plain bands, and that is a fixed
+     *  price - measured at 22 microseconds on an accelerated surface and 5.5 on a heap image, the
+     *  same for a scroll bar thumb as for a whole card, because a corner is eight pixels square
+     *  whatever it is a corner of. An undivided antialiased fill instead costs about 17
+     *  nanoseconds per device pixel, so the two meet somewhere between one and two and a half
+     *  thousand pixels, depending on how much of a shape is edge.
+     *  <p>
+     *  This bound is deliberately well above that. Between the two, one style preset's progress
+     *  bar renders 12 pixels differently out of four and a half million - at the antialiased edge
+     *  of its rounded cap, and only inside the whole application: the same shape, paint and clip
+     *  replayed on their own come out identical, as do four thousand randomly generated ones. So
+     *  the last stretch is left on the table until that is explained rather than taken on the
+     *  grounds that nobody would see it.
      */
-    private static final int SMALLEST_AREA_WORTH_SPLITTING = 32768;
+    private static final int SMALLEST_AREA_WORTH_SPLITTING = 16384;
 
     private ShapeRendering() {}
 
