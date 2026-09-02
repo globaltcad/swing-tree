@@ -17,8 +17,10 @@ import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -878,9 +880,9 @@ public final class ComponentExtension<C extends JComponent>
         try {
             if ( isNewPaintCycle && step == PaintStep.BACKGROUND && _hasChildWithParentFilter() ) {
                 _bufferedImage = _bufferTheSizeOfThisComponent(_bufferedImage);
-                _renderInto(_bufferedImage, step, graphics, superPaint, true);
+                _renderInto(_bufferedImage, step, graphics, superPaint, true, !_aBorderStepWillFollow());
             } else if ( _bufferedImage != null && step == PaintStep.BORDER ) {
-                _renderInto(_bufferedImage, step, graphics, superPaint, false);
+                _renderInto(_bufferedImage, step, graphics, superPaint, false, true);
             } else {
                 superPaint.accept((Graphics2D) graphics);
             }
@@ -910,9 +912,50 @@ public final class ComponentExtension<C extends JComponent>
         return buffer;
     }
 
+    /**
+     *  Whether the border step of this paint cycle is going to render into the buffer as well,
+     *  which is what lets the background step leave the hand-over to it and the buffer reach the
+     *  destination once per frame instead of twice.
+     *  <p>
+     *  {@link javax.swing.JComponent#paint(Graphics)} calls {@code paintComponent} and
+     *  {@code paintBorder} together, under one condition and in that order, and a
+     *  {@link StyleAndAnimationBorder} is what turns the second of those into this component's
+     *  border step. So the two run in the same cycle unless the component overrides
+     *  {@code paintBorder} - which several Swing classes do, to skip it while a property of
+     *  theirs is off. Those keep the hand-over in the background step, because a background
+     *  which is never handed over is a hole in the window.
+     */
+    private boolean _aBorderStepWillFollow() {
+        return _owner.getBorder() instanceof StyleAndAnimationBorder
+            && _LEAVES_BORDER_PAINTING_TO_JCOMPONENT.computeIfAbsent(
+                    _owner.getClass(), ComponentExtension::_leavesBorderPaintingToJComponent
+               );
+    }
+
+    /** Answered once per component class, since a class cannot start overriding a method later. */
+    private static final Map<Class<?>, Boolean> _LEAVES_BORDER_PAINTING_TO_JCOMPONENT = new ConcurrentHashMap<>();
+
+    private static boolean _leavesBorderPaintingToJComponent( Class<?> componentType ) {
+        for ( Class<?> type = componentType; type != null && type != JComponent.class; type = type.getSuperclass() )
+            for ( Method method : type.getDeclaredMethods() )
+                if ( method.getName().equals("paintBorder")
+                     && method.getParameterCount() == 1
+                     && method.getParameterTypes()[0] == Graphics.class )
+                    return false;
+        return true;
+    }
+
+    /**
+     *  Paints one step of this component into the buffer its filtering children read, and hands
+     *  the buffer to the destination when this step is the last one to write into it.
+     *
+     * @param handOver whether to draw the buffer onto {@code graphics} afterwards; a background
+     *                 step which knows a border step is coming leaves that to it, so that the
+     *                 buffer crosses into the destination surface once per frame instead of twice
+     */
     private void _renderInto(
         BufferedImage buffer, PaintStep step, Graphics graphics,
-        Consumer<Graphics2D> superPaint, boolean startsANewFrame
+        Consumer<Graphics2D> superPaint, boolean startsANewFrame, boolean handOver
     ) {
         Graphics2D bufferGraphics = buffer.createGraphics();
         StyleUtil.transferConfigurations((Graphics2D) graphics, bufferGraphics);
@@ -937,6 +980,9 @@ public final class ComponentExtension<C extends JComponent>
             of this call is uploaded across that boundary - and a scrolled component's buffer is
             as tall as its whole content, of which a single viewport's worth is on screen.
         */
+        if ( !handOver )
+            return;
+
         Rectangle visible = new Rectangle(0, 0, buffer.getWidth(), buffer.getHeight());
         Rectangle requested = graphics.getClipBounds();
         if ( requested != null )

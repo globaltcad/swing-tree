@@ -809,4 +809,83 @@ class Parent_Filter_Spec extends Specification
         then : 'Painting at all did not throw, and the pane shows the same thing under a partial repaint.'
             pixelsDifferingInside(fullRepaint, patched, 380, 220, 60, 50) == 0
     }
+
+    def 'Reading a parent through a filter does not change how the parent itself is drawn.'()
+    {
+        reportInfo """
+            Everything a `parentFilter(..)` shows is a picture of the component behind it, so
+            before a pane can be filtered by a child, that component behind it has to be captured. 
+            Therefore it stops painting straight onto the window: 
+            Instead its painting is collected into an off-screen image first, then when it is captured
+            the pane reads that image, and the image goes to the window so a user can see it.
+
+            Capturing something is supposed to leave it as it is, which is what we verify here. 
+            Previously we had a bug: The capture happens in as many steps as the component is painted in 
+            - a background, then a border - and the image was sent to the window at the end of **each** of them, 
+            so everything painted in the first step arrived on the window twice.
+
+            In case of an opaque parent, it renders without any visual issues, because an opaque colour laid
+            down twice is the same colour. That is why this bug went unnoticed for a long time. 
+            A half transparent however is in trouble: half transparent white laid on nothing 
+            half white painted on top of half white **again** is three quarters white. 
+            That is the edge case which matters, because a filter is nearly always asked for by 
+            something translucent: a pane of frosted glass for example is a wash of white you are meant to see through. 
+
+            This scenario exists to keep that bug from returning, and to state the rule it broke,
+            which is broader than the defect: **what a child does with its parent's picture is
+            the child's business, and the parent looks the same either way.** Anything which
+            changes how the parent's painting reaches the window has to keep that true, and
+            this is where it is checked.
+        """
+        given : """
+            A half transparent parent with two panes on it, each taking half the width. Only the
+            left one filters, and whether it does is the single difference between the two
+            arrangements below - nothing moves, nothing is resized, no colour changes. So the
+            right half of the parent, which no pane filters, has to come out identical.
+
+            The parent is given a rounded edge, and that is important:
+            a parent with only a background is painted in one step and reaches the window once,
+            which is too few times to arrive twice. It takes a border for there to be a second
+            step, and a rounded corner is the least a border can be.
+        """
+            var halfTransparentWhite = new java.awt.Color(255, 255, 255, 128)
+            var parentWhereTheLeftPaneFilters = { boolean filters ->
+                var leftPane = filters
+                        ? UI.panel().withStyle( it -> it
+                                .backgroundColor(UI.Color.TRANSPARENT)
+                                .parentFilter( f -> f.blur(6) ) )
+                        : UI.panel().withStyle( it -> it
+                                .backgroundColor(UI.Color.TRANSPARENT) )
+                var parent =
+                        UI.panel("fill, ins 0, gap 0")
+                        .withStyle( it -> it
+                            .backgroundColor(halfTransparentWhite)
+                            .borderRadius(12) )
+                        .add("grow, width 50%", leftPane)
+                        .add("grow, width 50%", UI.panel().withStyle( it -> it
+                                .backgroundColor(UI.Color.TRANSPARENT) ))
+                        .get(JPanel)
+                parent.setSize(240, 160)
+                parent.doLayout()
+                return Utility.renderSingleComponent(parent)
+            }
+        and : """
+            A reading of one pixel from the middle of the right half, where the only thing which
+            has ever been painted is the parent's own background. Rendering starts from an empty
+            image, so how opaque that pixel came out says how many times the background reached
+            it: once gives back the colour the style asked for, and a second time moves it
+            towards white and can never move it back.
+        """
+            var opacityOnTheRight = { BufferedImage image -> ( image.getRGB(200, 80) >> 24 ) & 0xff }
+        when : 'The same parent is rendered with the left pane filtering it, and without.'
+            var whileTheLeftPaneFilters = parentWhereTheLeftPaneFilters(true)
+            var whileItDoesNot         = parentWhereTheLeftPaneFilters(false)
+        then : 'A pane reading the parent left the half of it that no pane reads exactly as it was.'
+            opacityOnTheRight(whileTheLeftPaneFilters) == opacityOnTheRight(whileItDoesNot)
+        and : """
+            And what both of them show is the opacity the style asked for, so the two cannot
+            have agreed on a wrong answer - which is what a comparison alone would have allowed.
+        """
+            opacityOnTheRight(whileTheLeftPaneFilters) == halfTransparentWhite.getAlpha()
+    }
 }
