@@ -2,6 +2,7 @@ package examples.laf;
 
 import examples.laf.SwingTreeLookAndFeel.Palette;
 import swingtree.UI;
+import swingtree.api.laf.ShapeRendering;
 
 import javax.swing.SwingConstants;
 import java.awt.BasicStroke;
@@ -136,7 +137,7 @@ final class GlossySymbols implements Symbols
         if ( horizontal ) {
             int y = track.y + (track.height - t) / 2;
             g.setPaint(LafUtilities.verticalGradient(y, t, LafUtilities.shadeTowardsBlack(empty, 0.16), LafUtilities.shadeTowardsWhite(empty, 0.30)));
-            g.fill(new RoundRectangle2D.Float(track.x, y, track.width, t, arc, arc));
+            ShapeRendering.fill(g, new RoundRectangle2D.Float(track.x, y, track.width, t, arc, arc));
             g.setColor(p.border());
             g.setStroke(new BasicStroke(Math.max(1f, UI.scale(1f))));
             g.draw(new RoundRectangle2D.Float(track.x, y, track.width - 1, t - 1, arc, arc));
@@ -144,12 +145,12 @@ final class GlossySymbols implements Symbols
                                   : Math.max(0, thumbCentre - track.x);
             if ( filled > 0 ) {
                 g.setPaint(LafUtilities.glossGradient(y, t, fill));
-                g.fill(new RoundRectangle2D.Float(inverted ? thumbCentre : track.x, y, filled, t, arc, arc));
+                ShapeRendering.fill(g, new RoundRectangle2D.Float(inverted ? thumbCentre : track.x, y, filled, t, arc, arc));
             }
         } else {
             int x = track.x + (track.width - t) / 2;
             g.setColor(LafUtilities.shadeTowardsBlack(empty, 0.08));
-            g.fill(new RoundRectangle2D.Float(x, track.y, t, track.height, arc, arc));
+            ShapeRendering.fill(g, new RoundRectangle2D.Float(x, track.y, t, track.height, arc, arc));
             g.setColor(p.border());
             g.setStroke(new BasicStroke(Math.max(1f, UI.scale(1f))));
             g.draw(new RoundRectangle2D.Float(x, track.y, t - 1, track.height - 1, arc, arc));
@@ -158,7 +159,7 @@ final class GlossySymbols implements Symbols
             if ( filled > 0 ) {
                 int top = inverted ? track.y : thumbCentre;
                 g.setPaint(LafUtilities.glossGradient(top, filled, fill));
-                g.fill(new RoundRectangle2D.Float(x, top, t, filled, arc, arc));
+                ShapeRendering.fill(g, new RoundRectangle2D.Float(x, top, t, filled, arc, arc));
             }
         }
     }
@@ -230,12 +231,12 @@ final class GlossySymbols implements Symbols
             int inner = h - 2 * pad;
             int fillW = Math.max(inner, (int) Math.round((w - 2 * pad) * ratio));
             g.setPaint(LafUtilities.glossGradient(pad, inner, base));
-            g.fill(new RoundRectangle2D.Float(pad, pad, fillW, inner, inner, inner));
+            ShapeRendering.fill(g, new RoundRectangle2D.Float(pad, pad, fillW, inner, inner, inner));
         } else {
             int inner = w - 2 * pad;
             int fillH = Math.max(inner, (int) Math.round((h - 2 * pad) * ratio));
             g.setPaint(LafUtilities.glossGradient(h - pad - fillH, fillH, base));
-            g.fill(new RoundRectangle2D.Float(pad, h - pad - fillH, inner, fillH, inner, inner));
+            ShapeRendering.fill(g, new RoundRectangle2D.Float(pad, h - pad - fillH, inner, fillH, inner, inner));
         }
     }
 
@@ -269,14 +270,14 @@ final class GlossySymbols implements Symbols
                            : p.textDisabled());
         switch ( tabPlacement ) {
             case SwingConstants.BOTTOM:
-                g.fill(new RoundRectangle2D.Float(x, y, w, stripe, arc, arc)); break;
+                ShapeRendering.fill(g, new RoundRectangle2D.Float(x, y, w, stripe, arc, arc)); break;
             case SwingConstants.LEFT:
-                g.fill(new RoundRectangle2D.Float(x + w - stripe, y, stripe, h, arc, arc)); break;
+                ShapeRendering.fill(g, new RoundRectangle2D.Float(x + w - stripe, y, stripe, h, arc, arc)); break;
             case SwingConstants.RIGHT:
-                g.fill(new RoundRectangle2D.Float(x, y, stripe, h, arc, arc)); break;
+                ShapeRendering.fill(g, new RoundRectangle2D.Float(x, y, stripe, h, arc, arc)); break;
             case SwingConstants.TOP:
             default:
-                g.fill(new RoundRectangle2D.Float(x, y + h - stripe, w, stripe, arc, arc)); break;
+                ShapeRendering.fill(g, new RoundRectangle2D.Float(x, y + h - stripe, w, stripe, arc, arc)); break;
         }
     }
 
@@ -300,7 +301,7 @@ final class GlossySymbols implements Symbols
         if ( w <= 0 || h <= 0 )
             return;
         g.setColor(new Color(255, 255, 255, 120));
-        g.fill(new RoundRectangle2D.Float(x, y, w, h, arc, arc));
+        ShapeRendering.fill(g, new RoundRectangle2D.Float(x, y, w, h, arc, arc));
     }
 
     private static void droppedArrow(

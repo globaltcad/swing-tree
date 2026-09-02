@@ -2,6 +2,7 @@ package examples.laf;
 
 import examples.laf.SwingTreeLookAndFeel.Palette;
 import swingtree.UI;
+import swingtree.api.laf.ShapeRendering;
 
 import javax.swing.SwingConstants;
 import java.awt.BasicStroke;
@@ -138,23 +139,23 @@ final class GlassSymbols implements Symbols
         if ( horizontal ) {
             int y = track.y + (track.height - t) / 2;
             g.setColor(empty);
-            g.fill(new RoundRectangle2D.Float(track.x, y, track.width, t, arc, arc));
+            ShapeRendering.fill(g, new RoundRectangle2D.Float(track.x, y, track.width, t, arc, arc));
             int filled = inverted ? Math.max(0, track.x + track.width - thumbCentre)
                                   : Math.max(0, thumbCentre - track.x);
             if ( filled <= 0 )
                 return;
             g.setColor(fill);
-            g.fill(new RoundRectangle2D.Float(inverted ? thumbCentre : track.x, y, filled, t, arc, arc));
+            ShapeRendering.fill(g, new RoundRectangle2D.Float(inverted ? thumbCentre : track.x, y, filled, t, arc, arc));
         } else {
             int x = track.x + (track.width - t) / 2;
             g.setColor(empty);
-            g.fill(new RoundRectangle2D.Float(x, track.y, t, track.height, arc, arc));
+            ShapeRendering.fill(g, new RoundRectangle2D.Float(x, track.y, t, track.height, arc, arc));
             int filled = inverted ? Math.max(0, thumbCentre - track.y)
                                   : Math.max(0, track.y + track.height - thumbCentre);
             if ( filled <= 0 )
                 return;
             g.setColor(fill);
-            g.fill(new RoundRectangle2D.Float(x, inverted ? track.y : thumbCentre, t, filled, arc, arc));
+            ShapeRendering.fill(g, new RoundRectangle2D.Float(x, inverted ? track.y : thumbCentre, t, filled, arc, arc));
         }
     }
 
@@ -175,7 +176,7 @@ final class GlassSymbols implements Symbols
         int pad = UI.scale(3);
         int arc = Math.min(r.width, r.height) - 2 * pad;
         g.setColor(LafUtilities.withOpacity(active ? p.accent() : p.surface(), active ? LIT : 96));
-        g.fill(new RoundRectangle2D.Float(r.x + pad, r.y + pad, r.width - 2 * pad, r.height - 2 * pad, arc, arc));
+        ShapeRendering.fill(g, new RoundRectangle2D.Float(r.x + pad, r.y + pad, r.width - 2 * pad, r.height - 2 * pad, arc, arc));
     }
 
     @Override
@@ -205,10 +206,10 @@ final class GlassSymbols implements Symbols
         g.setColor(LafUtilities.withOpacity(enabled ? p.accent() : p.textDisabled(), LIT));
         if ( horizontal ) {
             int fillW = Math.max(h, (int) Math.round(w * ratio));
-            g.fill(new RoundRectangle2D.Float(0, 0, fillW, h, h, h));
+            ShapeRendering.fill(g, new RoundRectangle2D.Float(0, 0, fillW, h, h, h));
         } else {
             int fillH = Math.max(w, (int) Math.round(h * ratio));
-            g.fill(new RoundRectangle2D.Float(0, h - fillH, w, fillH, w, w));
+            ShapeRendering.fill(g, new RoundRectangle2D.Float(0, h - fillH, w, fillH, w, w));
         }
     }
 
@@ -221,7 +222,7 @@ final class GlassSymbols implements Symbols
         LafUtilities.antialiasShapes(g);
         int arc = UI.scale(10);
         g.setColor(LafUtilities.withOpacity(p.surface(), selected ? 58 : 28));
-        g.fill(new RoundRectangle2D.Float(x, y, w, h, arc, arc));
+        ShapeRendering.fill(g, new RoundRectangle2D.Float(x, y, w, h, arc, arc));
     }
 
     @Override
