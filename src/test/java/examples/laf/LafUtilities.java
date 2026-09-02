@@ -237,21 +237,48 @@ final class LafUtilities
      *  without changing a pixel of any preset.
      */
     private static void applyDesktopTextHints( Graphics2D g ) {
-        Map<?, ?> desktopHints = desktopFontHints();
-        if ( desktopHints != null && !desktopHints.isEmpty() )
-            g.addRenderingHints(desktopHints);
-        else {
-            g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-            g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        RenderingHints hints = textHints;
+        if ( hints == null ) {
+            hints = readDesktopTextHints();
+            textHints = hints;
         }
+        g.addRenderingHints(hints);
     }
 
-    private static Map<?, ?> desktopFontHints() {
+    /**
+     *  The hints last read from the desktop, or nothing until they are read again.
+     *  <p>
+     *  Reading them is a look up in the {@code UIManager} defaults followed, when that misses, by
+     *  one in the toolkit's desktop properties - and this runs once per component per repaint,
+     *  which on the showcase was 1.3% of the event thread. Both sources announce their own changes
+     *  and the listeners below drop the field when they do, so nothing here can go stale.
+     */
+    private static volatile RenderingHints textHints = null;
+
+    static {
+        Toolkit.getDefaultToolkit()
+               .addPropertyChangeListener("awt.font.desktophints", event -> textHints = null);
+        UIManager.addPropertyChangeListener(event -> {
+            if ( "lookAndFeel".equals(event.getPropertyName()) )
+                textHints = null;
+        });
+    }
+
+    private static RenderingHints readDesktopTextHints() {
         Object fromManager = UIManager.get("AwtFontDesktopHints");
-        if ( fromManager instanceof Map<?, ?> )
-            return (Map<?, ?>) fromManager;
-        Object fromToolkit = Toolkit.getDefaultToolkit().getDesktopProperty("awt.font.desktophints");
-        return ( fromToolkit instanceof Map<?, ?> ) ? (Map<?, ?>) fromToolkit : null;
+        Map<?, ?> desktopHints = ( fromManager instanceof Map<?, ?> ) ? (Map<?, ?>) fromManager : null;
+        if ( desktopHints == null ) {
+            Object fromToolkit = Toolkit.getDefaultToolkit().getDesktopProperty("awt.font.desktophints");
+            desktopHints = ( fromToolkit instanceof Map<?, ?> ) ? (Map<?, ?>) fromToolkit : null;
+        }
+        RenderingHints hints = new RenderingHints(null);
+        if ( desktopHints != null && !desktopHints.isEmpty() )
+            hints.add(new RenderingHints((Map<RenderingHints.Key, ?>) desktopHints));
+        else {
+            hints.put(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+            hints.put(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
+        }
+        return hints;
     }
 
     /** A top-to-bottom two-stop paint, falling back to {@code top} for a shape with no height. */
