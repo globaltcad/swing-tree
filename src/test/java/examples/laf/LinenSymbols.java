@@ -2,7 +2,7 @@ package examples.laf;
 
 import examples.laf.SwingTreeLookAndFeel.Palette;
 import swingtree.UI;
-import swingtree.api.laf.ShapeRendering;
+import swingtree.api.laf.OptimizedShapeRendering;
 
 import javax.swing.SwingConstants;
 import java.awt.BasicStroke;
@@ -56,7 +56,7 @@ final class LinenSymbols implements Symbols
         int   arc = UI.scale(4);
         float pad = UI.scale(0.5f);
         g.setColor(glyphSurface(p, enabled, pressed, rollover, selected));
-        ShapeRendering.fill(g, new RoundRectangle2D.Float(x, y, w - 1, h - 1, arc, arc));
+        OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x, y, w - 1, h - 1, arc, arc));
         g.setStroke(new BasicStroke(Math.max(1f, UI.scale(1f))));
         g.setColor(glyphBorder(p, enabled, focused));
         g.draw(new RoundRectangle2D.Float(x + pad, y + pad, w - 1 - pad, h - 1 - pad, arc, arc));
@@ -158,37 +158,37 @@ final class LinenSymbols implements Symbols
         if ( horizontal ) {
             int y = track.y + (track.height - t) / 2;
             g.setColor(p.borderSoft());
-            ShapeRendering.fill(g, new RoundRectangle2D.Float(track.x, y, track.width, t, arc, arc));
+            OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(track.x, y, track.width, t, arc, arc));
             if ( !inverted ) {
                 int filled = Math.max(0, thumbCentre - track.x);
                 if ( filled > 0 ) {
                     g.setColor(fill);
-                    ShapeRendering.fill(g, new RoundRectangle2D.Float(track.x, y, filled, t, arc, arc));
+                    OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(track.x, y, filled, t, arc, arc));
                 }
             } else {
                 int filled = Math.max(0, track.x + track.width - thumbCentre);
                 if ( filled > 0 ) {
                     g.setColor(fill);
-                    ShapeRendering.fill(g, new RoundRectangle2D.Float(thumbCentre, y, filled, t, arc, arc));
+                    OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(thumbCentre, y, filled, t, arc, arc));
                 }
             }
         } else {
             int x = track.x + (track.width - t) / 2;
             g.setColor(p.borderSoft());
-            ShapeRendering.fill(g, new RoundRectangle2D.Float(x, track.y, t, track.height, arc, arc));
+            OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x, track.y, t, track.height, arc, arc));
             // A vertical slider defaults to "max at top", so the un-inverted fill covers the
             // area below the handle, down to the bottom of the track.
             if ( !inverted ) {
                 int filled = Math.max(0, track.y + track.height - thumbCentre);
                 if ( filled > 0 ) {
                     g.setColor(fill);
-                    ShapeRendering.fill(g, new RoundRectangle2D.Float(x, thumbCentre, t, filled, arc, arc));
+                    OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x, thumbCentre, t, filled, arc, arc));
                 }
             } else {
                 int filled = Math.max(0, thumbCentre - track.y);
                 if ( filled > 0 ) {
                     g.setColor(fill);
-                    ShapeRendering.fill(g, new RoundRectangle2D.Float(x, track.y, t, filled, arc, arc));
+                    OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x, track.y, t, filled, arc, arc));
                 }
             }
         }
@@ -220,7 +220,7 @@ final class LinenSymbols implements Symbols
         int pad = UI.scale(2);
         int arc = UI.scale(8);
         g.setColor(active ? p.accent() : p.border());
-        ShapeRendering.fill(g, new RoundRectangle2D.Float(r.x + pad, r.y + pad,
+        OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(r.x + pad, r.y + pad,
                                           r.width - 2 * pad, r.height - 2 * pad, arc, arc));
     }
 
@@ -281,10 +281,10 @@ final class LinenSymbols implements Symbols
         g.setColor(enabled ? p.accent() : p.textDisabled());
         if ( horizontal ) {
             int fillW = Math.max(arc, (int) Math.round((w - 2 * pad) * ratio));
-            ShapeRendering.fill(g, new RoundRectangle2D.Float(pad, pad, fillW, h - 2 * pad, arc, arc));
+            OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(pad, pad, fillW, h - 2 * pad, arc, arc));
         } else {
             int fillH = Math.max(arc, (int) Math.round((h - 2 * pad) * ratio));
-            ShapeRendering.fill(g, new RoundRectangle2D.Float(pad, h - pad - fillH, w - 2 * pad, fillH, arc, arc));
+            OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(pad, h - pad - fillH, w - 2 * pad, fillH, arc, arc));
         }
     }
 
@@ -298,7 +298,7 @@ final class LinenSymbols implements Symbols
         antialias(g);
         g.setColor(fill);
         int arc = UI.scale(8);
-        ShapeRendering.fill(g, new RoundRectangle2D.Float(x, y, w, h, arc, arc));
+        OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x, y, w, h, arc, arc));
     }
 
     @Override
@@ -311,17 +311,17 @@ final class LinenSymbols implements Symbols
         g.setColor(enabled ? p.accent() : p.textDisabled());
         switch ( tabPlacement ) {
             case SwingConstants.BOTTOM:
-                ShapeRendering.fill(g, new RoundRectangle2D.Float(x, y, w, stripe, arc, arc));
+                OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x, y, w, stripe, arc, arc));
                 break;
             case SwingConstants.LEFT:
-                ShapeRendering.fill(g, new RoundRectangle2D.Float(x + w - stripe, y, stripe, h, arc, arc));
+                OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x + w - stripe, y, stripe, h, arc, arc));
                 break;
             case SwingConstants.RIGHT:
-                ShapeRendering.fill(g, new RoundRectangle2D.Float(x, y, stripe, h, arc, arc));
+                OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x, y, stripe, h, arc, arc));
                 break;
             case SwingConstants.TOP:
             default:
-                ShapeRendering.fill(g, new RoundRectangle2D.Float(x, y + h - stripe, w, stripe, arc, arc));
+                OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x, y + h - stripe, w, stripe, arc, arc));
                 break;
         }
     }

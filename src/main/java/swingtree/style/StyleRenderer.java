@@ -7,7 +7,7 @@ import sprouts.Tuple;
 import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.Painter;
-import swingtree.api.laf.ShapeRendering;
+import swingtree.api.laf.OptimizedShapeRendering;
 import swingtree.layout.Bounds;
 import swingtree.layout.Size;
 
@@ -124,18 +124,18 @@ final class StyleRenderer
             Shape bodyArea = conf.areas().get(UI.ComponentArea.BODY);
             if ( !StyleUtil.shapesAreEqual(fullArea, bodyArea) ) {
                 g2d.setColor(foundationColor);
-                ShapeRendering.fill(g2d, fullArea); // Filling everything is a bit cheaper than UI.ComponentArea.EXTERIOR!
+                OptimizedShapeRendering.fill(g2d, fullArea); // Filling everything is a bit cheaper than UI.ComponentArea.EXTERIOR!
             }
             g2d.setColor(backgroundColor);
-            ShapeRendering.fill(g2d, bodyArea);
+            OptimizedShapeRendering.fill(g2d, bodyArea);
         } else {
             if ( foundationColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
                 g2d.setColor(foundationColor);
-                ShapeRendering.fill(g2d, conf.areas().get(UI.ComponentArea.EXTERIOR));
+                OptimizedShapeRendering.fill(g2d, conf.areas().get(UI.ComponentArea.EXTERIOR));
             }
             if ( backgroundColor.getAlpha() > 0 ) { // Avoid rendering a fully transparent color!
                 g2d.setColor(backgroundColor);
-                ShapeRendering.fill(g2d, conf.areas().get(UI.ComponentArea.BODY));
+                OptimizedShapeRendering.fill(g2d, conf.areas().get(UI.ComponentArea.BODY));
             }
         }
     }
@@ -154,7 +154,7 @@ final class StyleRenderer
                 Objects.requireNonNull(borderArea);
                 if ( colors.isHomogeneous() ) {
                     g2d.setColor(colors.bottom().orElse(UI.Color.BLACK));
-                    ShapeRendering.fill(g2d, borderArea);
+                    OptimizedShapeRendering.fill(g2d, borderArea);
                 } else {
                     // The border area clipped to each edge region. These intersections are a pure
                     // function of the (immutable) box model, so they are computed once and cached in
@@ -765,14 +765,14 @@ final class StyleRenderer
     ) {
         if ( gradient.colors().length == 1 ) {
             g2d.setColor(gradient.colors()[0]);
-            ShapeRendering.fill(g2d, conf.areas().get(gradient.area()));
+            OptimizedShapeRendering.fill(g2d, conf.areas().get(gradient.area()));
         }
         else {
             final Paint paint = createGradientPaint(conf.boxModel(), gradient);
             if ( paint != null ) {
                 Shape areaToFill = conf.areas().get(gradient.area());
                 g2d.setPaint(paint);
-                ShapeRendering.fill(g2d, areaToFill);
+                OptimizedShapeRendering.fill(g2d, areaToFill);
             }
         }
     }
@@ -1251,7 +1251,7 @@ final class StyleRenderer
     ) {
         if ( style.primer().isPresent() ) {
             g2d.setColor(style.primer().get());
-            ShapeRendering.fill(g2d, conf.areas().get(style.clipArea()));
+            OptimizedShapeRendering.fill(g2d, conf.areas().get(style.clipArea()));
         }
 
         style.image().ifPresent( imageIcon -> {
@@ -1390,7 +1390,7 @@ final class StyleRenderer
                         Paint oldPaint = g2d.getPaint();
                         try {
                             g2d.setPaint(new TexturePaint((BufferedImage) image, new Rectangle(x, y, imgWidth, imgHeight)));
-                            ShapeRendering.fill(g2d, conf.areas().get(UI.ComponentArea.BODY));
+                            OptimizedShapeRendering.fill(g2d, conf.areas().get(UI.ComponentArea.BODY));
                         } finally {
                             g2d.setPaint(oldPaint);
                         }
@@ -2055,7 +2055,7 @@ final class StyleRenderer
             final Color[] colors = noise.get().colors();
             if ( colors.length == 1 ) {
                 g2d.setPaint(colors[0]);
-                ShapeRendering.fill(g2d, areaToFill);
+                OptimizedShapeRendering.fill(g2d, areaToFill);
                 return;
             }
 
@@ -2071,7 +2071,7 @@ final class StyleRenderer
                 _renderWithLargeTiles(center, noise, areaToFill, bounds, g2d);
             else {
                 g2d.setPaint(_getCachedNoisePaint(center, noise));
-                ShapeRendering.fill(g2d, areaToFill);
+                OptimizedShapeRendering.fill(g2d, areaToFill);
             }
         }
 

@@ -5,7 +5,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Timeout
 import spock.lang.Title
-import swingtree.api.laf.ShapeRendering
+import swingtree.api.laf.OptimizedShapeRendering
 
 import java.awt.Color
 import java.awt.Graphics2D
@@ -43,13 +43,13 @@ import java.util.concurrent.TimeUnit
     way into a pixel, or for a shape which is neither of the two kinds it knows.
 
 ''')
-@Subject([ShapeRendering])
+@Subject([OptimizedShapeRendering])
 @Timeout(value = 90, unit = TimeUnit.SECONDS)
 class Shape_Rendering_Spec extends Specification
 {
     /**
      *  Fills the given shape twice into two images of the same size, once through
-     *  {@link Graphics2D#fill(Shape)} and once through {@link ShapeRendering#fill}, and
+     *  {@link Graphics2D#fill(Shape)} and once through {@link OptimizedShapeRendering#fill}, and
      *  reports how many pixels of the two differ.
      */
     private static int differingPixels(
@@ -66,7 +66,7 @@ class Shape_Rendering_Spec extends Specification
             g.scale(scale, scale)
             if ( shear ) g.shear(0.2d, 0d)
             g.setColor(new Color(20, 90, 200))
-            if ( variant == 0 ) g.fill(shape) else ShapeRendering.fill(g, shape)
+            if ( variant == 0 ) g.fill(shape) else OptimizedShapeRendering.fill(g, shape)
             g.dispose()
             return image
         }
@@ -136,7 +136,7 @@ class Shape_Rendering_Spec extends Specification
             var g = image.createGraphics()
             g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF)
         when :
-            ShapeRendering.fill(g, new RoundRectangle2D.Float(3, 4, 53, 90, 8, 8))
+            OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(3, 4, 53, 90, 8, 8))
         then :
             g.getRenderingHint(RenderingHints.KEY_ANTIALIASING) == RenderingHints.VALUE_ANTIALIAS_OFF
         and : 'The pixels are the ones Java2D writes for the same shape without antialiasing.'

@@ -2,7 +2,7 @@ package examples.laf;
 
 import examples.laf.SwingTreeLookAndFeel.Palette;
 import swingtree.UI;
-import swingtree.api.laf.ShapeRendering;
+import swingtree.api.laf.OptimizedShapeRendering;
 
 import javax.swing.SwingConstants;
 import java.awt.BasicStroke;
@@ -144,23 +144,23 @@ final class SoftSymbols implements Symbols
         if ( horizontal ) {
             int y = track.y + (track.height - t) / 2;
             g.setPaint(LafUtilities.verticalGradient(y, t, LafUtilities.shadeBySteps(p.background(), GROOVE_DARK), LafUtilities.shadeBySteps(p.background(), GROOVE_LIGHT)));
-            ShapeRendering.fill(g, new RoundRectangle2D.Float(track.x, y, track.width, t, arc, arc));
+            OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(track.x, y, track.width, t, arc, arc));
             int filled = inverted ? Math.max(0, track.x + track.width - thumbCentre)
                                   : Math.max(0, thumbCentre - track.x);
             if ( filled > 0 ) {
                 g.setColor(fill);
-                ShapeRendering.fill(g, new RoundRectangle2D.Float(inverted ? thumbCentre : track.x, y, filled, t, arc, arc));
+                OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(inverted ? thumbCentre : track.x, y, filled, t, arc, arc));
             }
         } else {
             int x = track.x + (track.width - t) / 2;
             g.setPaint(LafUtilities.verticalGradient(track.y, track.height,
                                    LafUtilities.shadeBySteps(p.background(), GROOVE_DARK), LafUtilities.shadeBySteps(p.background(), GROOVE_LIGHT)));
-            ShapeRendering.fill(g, new RoundRectangle2D.Float(x, track.y, t, track.height, arc, arc));
+            OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x, track.y, t, track.height, arc, arc));
             int filled = inverted ? Math.max(0, thumbCentre - track.y)
                                   : Math.max(0, track.y + track.height - thumbCentre);
             if ( filled > 0 ) {
                 g.setColor(fill);
-                ShapeRendering.fill(g, new RoundRectangle2D.Float(x, inverted ? track.y : thumbCentre, t, filled, arc, arc));
+                OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x, inverted ? track.y : thumbCentre, t, filled, arc, arc));
             }
         }
     }
@@ -228,12 +228,12 @@ final class SoftSymbols implements Symbols
             int inner = h - 2 * pad;
             int fillW = Math.max(inner, (int) Math.round((w - 2 * pad) * ratio));
             g.setPaint(LafUtilities.verticalGradient(pad, inner, LafUtilities.shadeTowardsWhite(base, 0.22), LafUtilities.shadeTowardsBlack(base, 0.10)));
-            ShapeRendering.fill(g, new RoundRectangle2D.Float(pad, pad, fillW, inner, inner, inner));
+            OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(pad, pad, fillW, inner, inner, inner));
         } else {
             int inner = w - 2 * pad;
             int fillH = Math.max(inner, (int) Math.round((h - 2 * pad) * ratio));
             g.setPaint(LafUtilities.verticalGradient(h - pad - fillH, fillH, LafUtilities.shadeTowardsWhite(base, 0.22), LafUtilities.shadeTowardsBlack(base, 0.10)));
-            ShapeRendering.fill(g, new RoundRectangle2D.Float(pad, h - pad - fillH, inner, fillH, inner, inner));
+            OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(pad, h - pad - fillH, inner, fillH, inner, inner));
         }
     }
 
@@ -262,14 +262,14 @@ final class SoftSymbols implements Symbols
         g.setColor(enabled ? p.accent() : p.textDisabled());
         switch ( tabPlacement ) {
             case SwingConstants.BOTTOM:
-                ShapeRendering.fill(g, new RoundRectangle2D.Float(x + w * 0.25f, y, w * 0.5f, stripe, arc, arc)); break;
+                OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x + w * 0.25f, y, w * 0.5f, stripe, arc, arc)); break;
             case SwingConstants.LEFT:
-                ShapeRendering.fill(g, new RoundRectangle2D.Float(x + w - stripe, y + h * 0.25f, stripe, h * 0.5f, arc, arc)); break;
+                OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x + w - stripe, y + h * 0.25f, stripe, h * 0.5f, arc, arc)); break;
             case SwingConstants.RIGHT:
-                ShapeRendering.fill(g, new RoundRectangle2D.Float(x, y + h * 0.25f, stripe, h * 0.5f, arc, arc)); break;
+                OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x, y + h * 0.25f, stripe, h * 0.5f, arc, arc)); break;
             case SwingConstants.TOP:
             default:
-                ShapeRendering.fill(g, new RoundRectangle2D.Float(x + w * 0.25f, y + h - stripe, w * 0.5f, stripe, arc, arc)); break;
+                OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x + w * 0.25f, y + h - stripe, w * 0.5f, stripe, arc, arc)); break;
         }
     }
 

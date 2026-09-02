@@ -2,7 +2,7 @@ package examples.laf;
 
 import examples.laf.SwingTreeLookAndFeel.Palette;
 import swingtree.UI;
-import swingtree.api.laf.ShapeRendering;
+import swingtree.api.laf.OptimizedShapeRendering;
 
 import javax.swing.SwingConstants;
 import java.awt.BasicStroke;
@@ -64,7 +64,7 @@ final class MaterialSymbols implements Symbols
         halo(g, p, x, y, w, h, enabled, focused, rollover, pressed);
         if ( selected ) {
             g.setColor(mark);
-            ShapeRendering.fill(g, new RoundRectangle2D.Float(x, y, w - 1, h - 1, arc, arc));
+            OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x, y, w - 1, h - 1, arc, arc));
             g.setColor(p.onFilled());
             g.setStroke(new BasicStroke(stroke, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
             g.draw(LafUtilities.tickShape(x, y, w, h));
@@ -141,22 +141,22 @@ final class MaterialSymbols implements Symbols
         if ( horizontal ) {
             int y = track.y + (track.height - t) / 2;
             g.setColor(empty);
-            ShapeRendering.fill(g, new RoundRectangle2D.Float(track.x, y, track.width, t, arc, arc));
+            OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(track.x, y, track.width, t, arc, arc));
             int filled = inverted ? Math.max(0, track.x + track.width - thumbCentre)
                                   : Math.max(0, thumbCentre - track.x);
             if ( filled > 0 ) {
                 g.setColor(fill);
-                ShapeRendering.fill(g, new RoundRectangle2D.Float(inverted ? thumbCentre : track.x, y, filled, t, arc, arc));
+                OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(inverted ? thumbCentre : track.x, y, filled, t, arc, arc));
             }
         } else {
             int x = track.x + (track.width - t) / 2;
             g.setColor(empty);
-            ShapeRendering.fill(g, new RoundRectangle2D.Float(x, track.y, t, track.height, arc, arc));
+            OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x, track.y, t, track.height, arc, arc));
             int filled = inverted ? Math.max(0, thumbCentre - track.y)
                                   : Math.max(0, track.y + track.height - thumbCentre);
             if ( filled > 0 ) {
                 g.setColor(fill);
-                ShapeRendering.fill(g, new RoundRectangle2D.Float(x, inverted ? track.y : thumbCentre, t, filled, arc, arc));
+                OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x, inverted ? track.y : thumbCentre, t, filled, arc, arc));
             }
         }
     }
@@ -180,7 +180,7 @@ final class MaterialSymbols implements Symbols
         int pad = UI.scale(3);
         int arc = Math.min(r.width, r.height) - 2 * pad;
         g.setColor(active ? p.accent() : LafUtilities.withOpacity(p.text(), 70));
-        ShapeRendering.fill(g, new RoundRectangle2D.Float(r.x + pad, r.y + pad, r.width - 2 * pad, r.height - 2 * pad, arc, arc));
+        OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(r.x + pad, r.y + pad, r.width - 2 * pad, r.height - 2 * pad, arc, arc));
     }
 
     @Override
@@ -225,10 +225,10 @@ final class MaterialSymbols implements Symbols
         g.setColor(enabled ? p.accent() : p.textDisabled());
         if ( horizontal ) {
             int fillW = Math.max(h, (int) Math.round(w * ratio));
-            ShapeRendering.fill(g, new RoundRectangle2D.Float(0, 0, fillW, h, h, h));
+            OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(0, 0, fillW, h, h, h));
         } else {
             int fillH = Math.max(w, (int) Math.round(h * ratio));
-            ShapeRendering.fill(g, new RoundRectangle2D.Float(0, h - fillH, w, fillH, w, w));
+            OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(0, h - fillH, w, fillH, w, w));
         }
     }
 

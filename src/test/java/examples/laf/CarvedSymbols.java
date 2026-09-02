@@ -2,7 +2,7 @@ package examples.laf;
 
 import examples.laf.SwingTreeLookAndFeel.Palette;
 import swingtree.UI;
-import swingtree.api.laf.ShapeRendering;
+import swingtree.api.laf.OptimizedShapeRendering;
 
 import javax.swing.SwingConstants;
 import java.awt.BasicStroke;
@@ -67,7 +67,7 @@ final class CarvedSymbols implements Symbols
 
         // The lip of light under the whole recess, drawn first so the recess sits on top of it.
         g.setColor(LafUtilities.withOpacity(Color.WHITE, LIP));
-        ShapeRendering.fill(g, new RoundRectangle2D.Float(x, y + 1, w - 1, h - 1, arc, arc));
+        OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x, y + 1, w - 1, h - 1, arc, arc));
 
         g.setPaint(LafUtilities.verticalGradient(y, h, LafUtilities.shadeBySteps(face, -14), face));
         g.fill(box);
@@ -155,7 +155,7 @@ final class CarvedSymbols implements Symbols
             if ( filled <= 0 )
                 return;
             g.setPaint(LafUtilities.glossGradient(y, t, fill));
-            ShapeRendering.fill(g, new RoundRectangle2D.Float(inverted ? thumbCentre : track.x, y, filled, t, arc, arc));
+            OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(inverted ? thumbCentre : track.x, y, filled, t, arc, arc));
         } else {
             int x = track.x + (track.width - t) / 2;
             groove(g, x, track.y, t, track.height, arc, p);
@@ -164,7 +164,7 @@ final class CarvedSymbols implements Symbols
             if ( filled <= 0 )
                 return;
             g.setColor(fill);
-            ShapeRendering.fill(g, new RoundRectangle2D.Float(x, inverted ? track.y : thumbCentre, t, filled, arc, arc));
+            OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x, inverted ? track.y : thumbCentre, t, filled, arc, arc));
         }
     }
 
@@ -182,9 +182,9 @@ final class CarvedSymbols implements Symbols
         int arc = Math.min(body.width, body.height);
         Color base = active ? p.accent() : p.surface();
         g.setColor(LafUtilities.withOpacity(Color.BLACK, 60));
-        ShapeRendering.fill(g, new RoundRectangle2D.Float(body.x, body.y + 1, body.width, body.height, arc, arc));
+        OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(body.x, body.y + 1, body.width, body.height, arc, arc));
         g.setPaint(LafUtilities.glossGradient(body.y, body.height, base));
-        ShapeRendering.fill(g, new RoundRectangle2D.Float(body.x, body.y, body.width, body.height, arc, arc));
+        OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(body.x, body.y, body.width, body.height, arc, arc));
         g.setColor(p.border());
         g.setStroke(new BasicStroke(1f));
         g.draw(new RoundRectangle2D.Float(body.x, body.y, body.width - 1, body.height - 1, arc, arc));
@@ -223,11 +223,11 @@ final class CarvedSymbols implements Symbols
         if ( horizontal ) {
             int fillW = Math.max(h, (int) Math.round(w * ratio));
             g.setPaint(LafUtilities.glossGradient(0, h, base));
-            ShapeRendering.fill(g, new RoundRectangle2D.Float(0, 0, fillW, h, h, h));
+            OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(0, 0, fillW, h, h, h));
         } else {
             int fillH = Math.max(w, (int) Math.round(h * ratio));
             g.setColor(base);
-            ShapeRendering.fill(g, new RoundRectangle2D.Float(0, h - fillH, w, fillH, w, w));
+            OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(0, h - fillH, w, fillH, w, w));
         }
     }
 
@@ -241,9 +241,9 @@ final class CarvedSymbols implements Symbols
         Color base = selected ? p.surface() : p.surfaceHover();
         int   arc  = UI.scale(5);
         g.setColor(LafUtilities.withOpacity(Color.BLACK, selected ? 60 : 30));
-        ShapeRendering.fill(g, new RoundRectangle2D.Float(x, y + 1, w, h, arc, arc));
+        OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x, y + 1, w, h, arc, arc));
         g.setPaint(LafUtilities.verticalGradient(y, h, LafUtilities.shadeBySteps(base, 16), base));
-        ShapeRendering.fill(g, new RoundRectangle2D.Float(x, y, w, h, arc, arc));
+        OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x, y, w, h, arc, arc));
     }
 
     @Override
@@ -266,10 +266,10 @@ final class CarvedSymbols implements Symbols
     /** A hole with a dark wall along the top and the light spilling over the far lip. */
     private static void groove( Graphics2D g, int x, int y, int w, int h, int arc, Palette p ) {
         g.setColor(LafUtilities.withOpacity(Color.WHITE, LIP));
-        ShapeRendering.fill(g, new RoundRectangle2D.Float(x, y + 1, w, h, arc, arc));
+        OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x, y + 1, w, h, arc, arc));
         g.setPaint(LafUtilities.verticalGradient(y, h,
                         LafUtilities.withOpacity(Color.BLACK, GROOVE), p.surfaceDisabled()));
-        ShapeRendering.fill(g, new RoundRectangle2D.Float(x, y, w, h, arc, arc));
+        OptimizedShapeRendering.fill(g, new RoundRectangle2D.Float(x, y, w, h, arc, arc));
     }
 
     /** A milled knob: a gloss down its face, a dark rim, and its own shadow underneath. */

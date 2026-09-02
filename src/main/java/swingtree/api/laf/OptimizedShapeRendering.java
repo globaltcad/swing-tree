@@ -11,26 +11,27 @@ import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 
 /**
- *  Fills shapes the way the SwingTree style engine fills its own surfaces: antialiasing stays on
- *  wherever the outline actually curves, and is switched off everywhere else.
+ *  A utility class for optimized shape filling, the way the SwingTree style engine does it for its own surfaces:
+ *  antialiasing stays on wherever the outline actually curves, and is switched off everywhere else.<br>
+ *  <b>
+ *      It optimizes shape filling specifically by turning antialiasing off strategically for parts
+ *      which do not need it because the result looks identical.
+ *  </b>
  *  <p>
- *  A rasterizer asked to antialias computes a coverage value for every pixel of a shape, including
+ *  Filling anti-aliased shapes can be extremely slow. This is because a {@link Graphics2D} rasterizer asked
+ *  to antialias computes a computest multiple pixels internal for every visual pixel of a shape, including
  *  the great majority which lie well inside it and come out fully covered. Over a rounded
  *  rectangle the size of a scroll bar's thumb or a progress bar's fill, that is a few hundred
  *  pixels of genuine curve and tens of thousands of pixels of arithmetic arriving at "opaque". A
- *  fill without antialiasing writes those directly.
+ *  fill without antialiasing on the other hand writes those directly: So much, much faster!
  *  <p>
- *  This is worth having in a look and feel because a {@link javax.swing.plaf.ComponentUI} draws
- *  the same rounded chrome on every repaint, and Swing offers no cache for it. The one condition
- *  under which the shortcut is taken is that every cut between an antialiased part and a
- *  plain one lands on a whole device pixel, which is what makes the result identical to
- *  {@link Graphics2D#fill(Shape)} rather than merely similar - a cut falling between two pixels
- *  would leave a seam blended twice or not at all. Anything else, a fractional rectangle or a
- *  sheared transform among them, is filled in one antialiased go.
+ *  Support for such optimized routines is worth having in a custom look and feel because a
+ *  {@link javax.swing.plaf.ComponentUI} still needs to draw most of the visible primitives like
+ *  scroll bars itself (which SwingTree will not do for you).
  *
  *  @see SwingTreeStyledComponentUI
  */
-public final class ShapeRendering
+public final class OptimizedShapeRendering
 {
     /**
      *  The smallest area, in device pixels, for which splitting a rounded fill into parts pays.
@@ -51,7 +52,7 @@ public final class ShapeRendering
      */
     private static final int SMALLEST_AREA_WORTH_SPLITTING = 16384;
 
-    private ShapeRendering() {}
+    private OptimizedShapeRendering() {}
 
     /**
      *  Fills a shape with the graphics context's current paint, in as few antialiased pixels as
