@@ -163,6 +163,9 @@ public final class ViewResizeBenchmark
         FRUTIGER_AERO("aero", frame -> LinenShowcaseView.createView(StylePreset.FRUTIGER_AERO)),
         MATERIAL("material", frame -> LinenShowcaseView.createView(StylePreset.MATERIAL)),
         FLAT("flat", frame -> LinenShowcaseView.createView(StylePreset.FLAT)),
+        NIMBUS("nimbus", frame -> LinenShowcaseView.createView(StylePreset.NIMBUS)),
+        POLYMORPHIC("polymorphic", frame -> LinenShowcaseView.createView(StylePreset.POLYMORPHIC)),
+        BLANK("blank", frame -> LinenShowcaseView.createView(StylePreset.BLANK)),
         STUDIO("studio", frame -> {
             FlatLightLaf.setup();
             return new StyleStudioView(Var.of(StyleStudioViewModel.initial()), new LookSheet());
