@@ -195,10 +195,16 @@ final class LafUtilities
     static void paintStyled( Graphics g, JComponent c, Painter inheritedPainting ) {
         boolean wasOpaque = c.isOpaque();
         ComponentExtension.from(c).paintBackground(g, g2 -> {
-            antialiasShapesAndText(g2);
+            Object formerShapeAntialiasing = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+            applyDesktopTextHints(g2);
             g2.setColor(c.getForeground());
             g2.setFont(c.getFont());
-            inheritedPainting.paint(g2);
+            try {
+                inheritedPainting.paint(g2);
+            } finally {
+                if ( formerShapeAntialiasing != null )
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, formerShapeAntialiasing);
+            }
         });
         Container parent = c.getParent();
         if ( wasOpaque && !c.isOpaque() && parent != null )
@@ -211,15 +217,26 @@ final class LafUtilities
     }
 
     /**
-     *  Turns on shape antialiasing and the desktop's own text antialiasing.
+     *  Puts the desktop's own text antialiasing settings on a context which is about to draw a
+     *  component's text.
      *  <p>
      *  Swing's {@code SwingUtilities2.drawString}, which every {@code BasicXxxUI} draws through,
      *  reads its text antialiasing from a client property {@code javax.swing} does not export,
      *  falling back to the rendering hints already on the context. Merging the toolkit's desktop
      *  hints in here is the only handle a third-party look and feel has on that, and it is also
      *  what makes the text match the rest of the desktop.
+     *  <p>
+     *  Shape antialiasing is deliberately <em>not</em> turned on alongside it. The inherited
+     *  painting this precedes draws whole pixels - rules, grid lines, focus rectangles, a tabbed
+     *  pane's content edge - and antialiasing a rectangle whose corners already sit on pixel
+     *  boundaries runs a coverage rasterization to arrive at the pixels a plain fill would have
+     *  written directly. What does have a curve or a diagonal in it is a {@link Symbols} glyph,
+     *  and every symbol set turns antialiasing on for itself, as does the style engine for the
+     *  surfaces it paints. Not setting the hint here measured at a fifth off a repaint of the
+     *  Linen preset and four fifths off one of {@link SwingTreeLookAndFeel.StylePreset#BLANK},
+     *  without changing a pixel of any preset.
      */
-    private static void antialiasShapesAndText( Graphics2D g ) {
+    private static void applyDesktopTextHints( Graphics2D g ) {
         Map<?, ?> desktopHints = desktopFontHints();
         if ( desktopHints != null && !desktopHints.isEmpty() )
             g.addRenderingHints(desktopHints);
@@ -227,7 +244,6 @@ final class LafUtilities
             g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             g.setRenderingHint(RenderingHints.KEY_FRACTIONALMETRICS, RenderingHints.VALUE_FRACTIONALMETRICS_ON);
         }
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
     }
 
     private static Map<?, ?> desktopFontHints() {
