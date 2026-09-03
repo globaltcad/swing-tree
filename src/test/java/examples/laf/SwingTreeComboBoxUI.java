@@ -17,26 +17,22 @@ import java.awt.Insets;
 import java.awt.Rectangle;
 
 /**
- *  The {@link JComboBox} UI delegate. The outer surface mirrors a text field; the drop-down
- *  button is a flat, transparent button whose arrow the configured symbol set draws.
- *  <p>
- *  The popup window is rendered separately by Swing and inherits the popup-menu and list
- *  defaults; an application wanting more control over it can override the {@code ComboBox.list*}
- *  keys.
+ *  The {@link JComboBox} UI delegate. The drop-down list is a popup of Swing's own making and
+ *  takes the popup menu and list defaults; the {@code ComboBox.list*} keys are what an
+ *  application overrides to change it.
  */
 public final class SwingTreeComboBoxUI
         extends    BasicComboBoxUI
         implements SwingTreeStyledComponentUI<JComboBox<?>>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeComboBoxUI(); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
         SwingTreeLookAndFeel.installStyleOn(c);
-        // A non-editable combo owns focus itself and the inherited delegate repaints it, but an
-        // editable combo's focus lives on its editor, so bridge that to a repaint of the whole.
+        // Focus on an editable combo box lands on its editor, and BasicComboBoxUI repaints the
+        // combo box only for focus that lands on the combo box itself.
         JComboBox<?> combo = (JComboBox<?>) c;
         if ( combo.getEditor() != null )
             LafUtilities.repaintOnFocusChange(combo, combo.getEditor().getEditorComponent());
@@ -62,11 +58,10 @@ public final class SwingTreeComboBoxUI
     public boolean canForwardPaintingToSwingTree() { return true; }
 
     /**
-     *  Swing fills the strip a combo box shows its value in from the {@code ComboBox.background}
-     *  default rather than from the component, which lays a hard rectangle of one fixed colour
-     *  over whatever the style rule has just painted - over its rounded corners, and over its
-     *  translucency if it had any. The rule has already filled the surface, so nothing is drawn
-     *  here unless nothing styles combo boxes at all.
+     *  Swing fills the strip showing the current value from the {@code ComboBox.background}
+     *  default rather than from the component, which puts a square opaque rectangle over the
+     *  rounded, possibly translucent surface a style rule has just painted. So it is only filled
+     *  when no rule paints that surface.
      */
     @Override
     public void paintCurrentValueBackground( Graphics g, Rectangle bounds, boolean hasFocus ) {
@@ -85,9 +80,9 @@ public final class SwingTreeComboBoxUI
     }
 
     /**
-     *  A flat, transparent button carrying nothing but the symbol set's drop-down arrow. It
-     *  paints itself rather than going through the style engine: the surrounding combo box is
-     *  already one styled surface, and a second one inside it would draw a box around the arrow.
+     *  A flat transparent button carrying the symbol set's drop-down arrow. It paints itself
+     *  instead of going through the style engine, because the combo box around it is already a
+     *  styled surface and a second one would draw a box around the arrow.
      */
     private static final class ArrowButton extends JButton
     {

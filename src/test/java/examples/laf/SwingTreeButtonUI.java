@@ -10,25 +10,20 @@ import javax.swing.plaf.basic.BasicButtonUI;
 import java.awt.Graphics;
 
 /**
- *  The {@link AbstractButton} UI delegate, used for both {@link javax.swing.JButton} and
- *  {@link javax.swing.JToggleButton} since they share the same model. Which colours its
- *  states resolve to is decided by the {@link SwingTreeLookAndFeel.Variant} the button was
- *  tagged with.
+ *  The {@link AbstractButton} UI delegate, shared by {@link javax.swing.JButton} and
+ *  {@link javax.swing.JToggleButton}.
  */
 public final class SwingTreeButtonUI
         extends    BasicButtonUI
         implements SwingTreeStyledComponentUI<AbstractButton>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeButtonUI(); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        // Suppressing Swing's own fill is right when a rule is going to paint one in its place -
-        // it would otherwise double-paint underneath rounded corners and a noise overlay - and
-        // wrong when nothing is, which is what a blank style preset means. The style engine is
-        // installed either way: an application may still add a rule of its own.
+        // Swing's own fill has to go only when a style rule paints one in its place, or it would
+        // show through the rounded corners and the grain of that rule. A blank preset paints none.
         if ( SwingTreeLookAndFeel.styles(c.getClass()) ) {
             AbstractButton b = (AbstractButton) c;
             b.setContentAreaFilled(false);

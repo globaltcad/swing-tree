@@ -9,15 +9,11 @@ import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicPopupMenuUI;
 import java.awt.Graphics;
 
-/**
- *  The {@link JPopupMenu} UI delegate: the rounded, softly shadowed sheet the menu entries sit
- *  on, so that it visibly lifts off whatever lives underneath.
- */
+/** The {@link JPopupMenu} UI delegate. */
 public final class SwingTreePopupMenuUI
         extends    BasicPopupMenuUI
         implements SwingTreeStyledComponentUI<JPopupMenu>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreePopupMenuUI(); }
 
     @Override

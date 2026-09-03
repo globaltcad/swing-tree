@@ -11,18 +11,13 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 /**
- *  The {@link Icon} instances the look and feel installs into {@link javax.swing.UIManager} for
- *  the glyphs Swing draws through an icon rather than through a UI delegate: the check-box and
- *  radio marks, the tree's disclosure handles and the submenu arrow.
+ *  The {@link Icon} instances installed into {@link javax.swing.UIManager} for the glyphs Swing
+ *  draws through an icon instead of through a UI delegate: the check and radio marks, the tree's
+ *  disclosure handles and the submenu arrow.
  *  <p>
- *  Each one is a thin adapter: it reports the size the installed
- *  {@linkplain Symbols symbol set} asks for, reads the button model behind the component it is
- *  drawn on, and hands both to that symbol set. Nothing is captured at construction time, so an
- *  icon installed under one preset keeps working after the look and feel is re-initialised with
- *  another one.
- *  <p>
- *  All of them implement {@link UIResource} so Swing recognises them as look-and-feel defaults
- *  and replaces them cleanly when another look and feel is installed.
+ *  Each icon reads the symbol set and the palette when it paints and captures neither, so the
+ *  icons installed under one preset go on working after the look and feel is re-initialised under
+ *  another. Each is a {@link UIResource} so that the next look and feel replaces it.
  */
 final class GlyphIcons
 {

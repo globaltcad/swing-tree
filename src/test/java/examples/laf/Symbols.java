@@ -11,76 +11,64 @@ import java.awt.geom.Path2D;
 import java.awt.geom.RoundRectangle2D;
 
 /**
- *  How a look and feel draws the small pieces of geometry that no style rule can express - a
- *  check mark, a radio dot, a drop-down arrow, a slider handle, a scroll bar thumb, the grip on a
- *  split-pane divider - and how much room they need. The two are one decision: a 16-pixel round
- *  slider handle wants a slider at least 20 pixels tall, so splitting them apart would let a
- *  symbol set be swapped into a layout it does not fit. Every metric is in <b>developer pixels</b>
- *  and is scaled by the caller through {@link swingtree.UI#scale(int)}.
+ *  How a look and feel draws the small pieces of geometry no style rule can express - a check mark,
+ *  a radio dot, a drop-down arrow, a slider handle, a scroll bar thumb, the grip on a split-pane
+ *  divider - and how much room they need. The shapes and the metrics are one decision, because a
+ *  16-pixel round slider handle wants a slider at least 20 pixels tall. Every metric is in
+ *  <b>developer pixels</b> and the caller scales it through {@link swingtree.UI#scale(int)}.
  *  <p>
  *  Every painting method is handed a scratch {@link Graphics2D} it may configure freely, the
- *  {@link Palette} to take its colours from, the geometry in <b>component</b> pixels (already
- *  scaled), and the component state as plain flags. Nothing here reads a Swing component, so a
- *  symbol set is a pure function of its arguments and can be exercised without a GUI.
+ *  {@link Palette} to take its colours from, the geometry in <b>component</b> pixels, and the
+ *  component's state as flags. Nothing here reads a Swing component, so a symbol set is a pure
+ *  function of its arguments, can be exercised without a GUI, and can be memoised by
+ *  {@link CachedSymbols}.
  *
  *  @see SwingTreeLookAndFeel.SymbolPreset
  */
 interface Symbols
 {
     /**
-     *  Whether this set draws and sizes the chrome itself. Answering {@code false} - the blank set
-     *  does - makes every delegate fall through to its inherited {@code Basic*UI}, so nothing else
-     *  here is asked. The two exceptions are {@link #paintCheckGlyph} and {@link #paintRadioGlyph}:
-     *  the basic look and feel's own versions of those are empty stubs, and a control nobody can
-     *  read is not what "no chrome" is supposed to mean.
+     *  Whether this set draws and sizes the chrome itself. An answer of {@code false}, which only
+     *  {@link Blank} gives, makes every delegate fall through to the {@code Basic*UI} it extends and
+     *  nothing else here is ever asked. {@link #paintCheckGlyph} and {@link #paintRadioGlyph} are the
+     *  two exceptions, because {@code BasicIconFactory}'s versions of those are empty stubs.
      */
     boolean drawsItsOwnChrome();
 
     // ── Metrics, in developer pixels ─────────────────────────────────────
+    // A thickness is measured across the control's short axis, and a size is the side length of a
+    // square. The two glyph sizes cover more than their names say: the check size is the radio's
+    // too, and the arrow size is a tree disclosure handle's as well as a submenu arrow's.
 
-    /** @return the side length of the check-box and radio glyphs. */
     int checkGlyphSize();
 
-    /** @return the side length of a tree disclosure handle and a submenu arrow. */
     int arrowGlyphSize();
 
-    /** @return the side length of a combo box's drop-down button. */
     int comboArrowButtonSize();
 
-    /** @return the width of one of a spinner's two stepper buttons. */
     int spinnerButtonWidth();
 
-    /** @return the height of one of a spinner's two stepper buttons. */
     int spinnerButtonHeight();
 
-    /** @return the diameter of a slider's handle. */
     int sliderThumbDiameter();
 
-    /** @return the thickness of a slider's track groove. */
     int sliderTrackThickness();
 
-    /** @return the thickness of a scroll bar across its short axis. */
     int scrollBarThickness();
 
-    /** @return the thickness of a split pane's divider. */
     int splitDividerThickness();
 
-    /** @return the smallest thickness a progress bar is laid out at across its short axis. */
+    /** @return the smallest thickness a progress bar may be laid out at. */
     int progressBarThickness();
 
-    /** @return the thickness of the hairline a separator draws. */
     int separatorThickness();
 
-    /** @return the height of one table row. */
     int tableRowHeight();
 
-    /** @return the height of one tree row. */
     int treeRowHeight();
 
-    /** @return the padding above and below a tab's label. */
     int tabPaddingVertical();
 
-    /** @return the padding left and right of a tab's label. */
     int tabPaddingHorizontal();
 
     /** @return the gap between the edge of a tabbed pane and its strip of tabs. */
@@ -123,20 +111,18 @@ interface Symbols
 
     // ── Chrome ───────────────────────────────────────────────────────────
 
-    /** Draws a slider's groove and the part of it that lies on the filled side of the handle. */
+    /** Draws a slider's groove and the part of it lying on the filled side of the handle. */
     void paintSliderTrack(
         Graphics2D g, Palette p, Rectangle track, int thumbCentre,
         boolean horizontal, boolean inverted, boolean enabled
     );
 
-    /** Draws a slider's handle. */
     void paintSliderThumb( Graphics2D g, Palette p, Rectangle thumb, boolean enabled, boolean focused );
 
     /**
-     *  Draws a scroll bar's thumb. The groove it slides along is not a symbol: a flat fill with a
-     *  radius is something a style rule already says, and the scroll bar's own styled background
-     *  covers the whole bar, so a symbol set drawing it again would rasterize the same colour
-     *  twice - see {@link SwingTreeScrollBarUI#paintTrack}.
+     *  Draws a scroll bar's thumb. The groove it slides along is a style rule rather than a symbol,
+     *  because the scroll bar's own styled background already covers the whole bar and a symbol
+     *  drawing it again would rasterize the same colour twice.
      */
     void paintScrollThumb( Graphics2D g, Palette p, Rectangle thumb, boolean active );
 
@@ -170,22 +156,16 @@ interface Symbols
     // IMPLEMENTATIONS:
 
     /**
-     *  The symbol set with no opinions: it answers {@link #drawsItsOwnChrome()} with {@code false} and
-     *  is never asked anything else.
+     *  The symbol set with no opinions: it answers {@link #drawsItsOwnChrome()} with {@code false},
+     *  every call site checks that answer first, and the look and feel installs none of the glyph
+     *  icons. So a check box gets Swing's own check box, a scroll bar its own arrows and thumb, a
+     *  tabbed pane its own tabs. With {@link SwingTreeLookAndFeel.StylePreset#BLANK} the result is
+     *  plain Swing with the style engine wired into every component and nothing painted on top.
      *  <p>
-     *  Every call site checks that answer first and falls through to the painting and the sizing its
-     *  inherited {@code Basic*UI} would do, and the look and feel installs none of the glyph icons. So
-     *  a check box gets Swing's own check box, a scroll bar its own arrows and thumb, a tabbed pane its
-     *  own tabs. Paired with {@link SwingTreeLookAndFeel.StylePreset#BLANK} the result is plain Swing
-     *  with the SwingTree style engine wired into every component and nothing painted on top - the
-     *  starting point for an application that wants to build its whole appearance itself.
-     *  <p>
-     *  Two glyphs are drawn anyway. A check box and a radio button are drawn through an icon rather
-     *  than by their delegate, and {@code BasicIconFactory}'s versions of both are <b>empty stubs</b>,
-     *  so falling through would leave a control that cannot be read - which is not what "no styling"
-     *  means: a browser showing a page with no stylesheet still draws a real check box. Everything else
-     *  here is unreachable, and returns nothing rather than throwing, so a lost guard leaves a control
-     *  undecorated instead of taking the window down.
+     *  The check and the radio glyph are drawn anyway, because they reach Swing through an icon and
+     *  {@code BasicIconFactory}'s versions of both are empty stubs. Every other method here is
+     *  unreachable, and draws nothing rather than throwing, so a guard someone forgets leaves a
+     *  control undecorated instead of taking the window down.
      */
     final class Blank implements Symbols
     {
@@ -195,7 +175,8 @@ interface Symbols
 
         @Override public boolean drawsItsOwnChrome() { return false; }
 
-        /** The one metric a blank set still has to answer: the two glyphs below are drawn. */
+        /** The one metric a blank set still answers, because it does draw the check and the radio
+         *  glyph. */
         @Override public int checkGlyphSize()        { return 13; }
         @Override public int arrowGlyphSize()        { return 0; }
         @Override public int comboArrowButtonSize()  { return 0; }
@@ -289,12 +270,9 @@ interface Symbols
     }
 
     /**
-     *  Symbols drawn with thin strokes, round caps, no bevels and no gradients: the geometry reads
-     *  at a glance and stays crisp at any scale factor, because every stroke and radius is derived
-     *  from {@link UI#scale(float)} rather than from a fixed bitmap.
-     *  <p>
-     *  This is the set behind {@link SwingTreeLookAndFeel.SymbolPreset#LINEN}. It is
-     *  stateless, so a single instance serves the whole application.
+     *  Symbols for {@link SwingTreeLookAndFeel.SymbolPreset#LINEN}: thin strokes, round caps, no
+     *  bevels and no gradients. Every stroke and radius comes from {@link UI#scale(float)} rather
+     *  than from a bitmap, so the geometry stays crisp at any scale factor.
      */
     final class Linen implements Symbols
     {
@@ -649,14 +627,11 @@ interface Symbols
     }
 
     /**
-     *  Symbols for {@link SwingTreeLookAndFeel.StylePreset#SOFT_UI}: every glyph is the surface colour,
-     *  and is told apart from the panel behind it only by its rim, which runs from a near-white
-     *  highlight at the top to a soft shadow at the bottom. Selecting something turns that rim around,
-     *  so a ticked box reads as pressed into the clay rather than standing on it.
-     *  <p>
-     *  Arrows are embossed the same way: drawn once in the highlight colour a pixel down and right,
-     *  then again in their own colour on top, which is the oldest trick there is for making a mark
-     *  look carved rather than printed.
+     *  Symbols for {@link SwingTreeLookAndFeel.StylePreset#SOFT_UI}: every glyph is the surface
+     *  colour, told apart from the panel behind it only by a rim running from a near-white highlight
+     *  at the top to a soft shadow at the bottom. Selecting something turns that rim around, so a
+     *  ticked box reads as pressed into the clay. Arrows are embossed the same way, drawn once in the
+     *  highlight colour a pixel down and right and again in their own colour on top.
      */
     final class Soft implements Symbols
     {
@@ -665,10 +640,9 @@ interface Symbols
         private Soft() {}
 
         /**
-         *  How far the light and the shadow move from the surface they fall on, in channel steps.
-         *  Fixed steps rather than fractions, for the reason {@link Styles.SoftUi} spells out: a
-         *  fraction of the way to white lifts a dark palette five times as far as a light one, which
-         *  is what turns every thumb and rim into a glowing bar on Midnight.
+         *  How far the light and the shadow move from the surface they fall on, in channel steps
+         *  rather than as a fraction of the way to white. A fraction lifts a dark palette several
+         *  times as far as a light one, which turns every thumb and rim into a glowing bar.
          */
         private static final int RIM_LIGHT    =  18;
         private static final int RIM_DARK     = -34;
@@ -950,13 +924,10 @@ interface Symbols
     }
 
     /**
-     *  Symbols for {@link SwingTreeLookAndFeel.StylePreset#FRUTIGER_AERO}: everything is a piece of wet
-     *  glass. A glyph is a saturated fill under a highlight that breaks on a hard line just above the
-     *  middle, wrapped in a crisp outline a few shades darker than the fill, with a white sheen along
-     *  the top edge.
-     *  <p>
-     *  Arrows are solid rather than stroked, and carry a pale copy of themselves one pixel below - the
-     *  drop shadow every toolbar icon of the period had.
+     *  Symbols for {@link SwingTreeLookAndFeel.StylePreset#FRUTIGER_AERO}: a glyph is a saturated fill
+     *  under a highlight that breaks on a hard line just above the middle, wrapped in a crisp outline
+     *  a few shades darker, with a white sheen along the top edge. Arrows are solid rather than
+     *  stroked and carry a pale copy of themselves one pixel below.
      */
     final class Glossy implements Symbols
     {
@@ -1261,12 +1232,9 @@ interface Symbols
 
     /**
      *  Symbols for {@link SwingTreeLookAndFeel.StylePreset#MATERIAL}: bold, flat and geometric.
-     *  <p>
-     *  Nothing is shaded or outlined-and-filled at the same time. A control is either an outline in the
-     *  muted text colour, meaning "off", or a solid shape in the accent colour, meaning "on" - the tick
-     *  and the dot are then punched out of it in white. Arrows are solid triangles rather than strokes,
-     *  and thumbs are plain accent shapes with no rim at all, which is what lets a slider read at a
-     *  glance from across a room.
+     *  Nothing is both outlined and filled. A control is either an outline in the muted text colour,
+     *  meaning off, or a solid accent shape with the tick or the dot punched out of it in white,
+     *  meaning on. Arrows are solid triangles and thumbs are plain accent shapes with no rim.
      *  <p>
      *  The metrics are the idiom's larger touch targets: taller rows, a fatter slider handle, and a
      *  scroll bar wide enough to grab.
@@ -1531,13 +1499,10 @@ interface Symbols
     }
 
     /**
-     *  Symbols for {@link SwingTreeLookAndFeel.StylePreset#FLAT}: rectangles, solid triangles and
-     *  nothing else.
-     *  <p>
-     *  There is no radius, no rim, no halo and no shade anywhere. A control that is off is a
-     *  two-pixel outline in the border colour; a control that is on is the same shape filled solid
-     *  with the accent and its mark punched out in white. The one shape left round is the radio
-     *  button, because a radio that is not round has stopped being a radio.
+     *  Symbols for {@link SwingTreeLookAndFeel.StylePreset#FLAT}: rectangles and solid triangles,
+     *  with no radius, no rim, no halo and no shade anywhere. A control that is off is a two-pixel
+     *  outline in the border colour, and one that is on is the same shape filled with the accent and
+     *  its mark punched out in white. Only the radio button is left round.
      *
      *  @see SwingTreeLookAndFeel.SymbolPreset#FLAT
      */
@@ -1783,13 +1748,11 @@ interface Symbols
     }
 
     /**
-     *  Symbols for {@link SwingTreeLookAndFeel.StylePreset#SKEUOMORPHIC}: everything is either
-     *  cut into the surface or screwed onto it.
-     *  <p>
-     *  A mark cut into a surface is drawn twice - once dark on the line itself, once light one pixel
-     *  below it, where the far wall of the groove catches the light. A mark standing on the surface is
-     *  the same two copies the other way round. That one trick, and a vertical gradient on anything
-     *  wide enough to show one, is what every glyph here is made of.
+     *  Symbols for {@link SwingTreeLookAndFeel.StylePreset#SKEUOMORPHIC}: everything is either cut
+     *  into the surface or screwed onto it. A mark cut in is drawn twice, dark on the line itself and
+     *  light one pixel below it where the far wall of the groove catches the light; a mark standing
+     *  on the surface is the same two copies the other way round. That, and a vertical gradient on
+     *  anything wide enough to show one, is what every glyph here is made of.
      *
      *  @see SwingTreeLookAndFeel.SymbolPreset#CARVED
      */
@@ -2084,12 +2047,10 @@ interface Symbols
 
     /**
      *  Symbols for {@link SwingTreeLookAndFeel.StylePreset#GLASSMORPHIC}: small pieces of the same
-     *  glass everything else is cut from.
-     *  <p>
-     *  Nothing is drawn in a solid colour. A shape that is off is a wash of white you can see the
-     *  ground through; a shape that is on is the accent at about three quarters, with a rim one shade
-     *  brighter along its edge. Marks - the tick, the dot, the arrows - are the one thing painted at
-     *  full strength, because a mark you cannot read is not a mark.
+     *  glass everything else is cut from. A shape that is off is a wash of white you can see the
+     *  ground through, and one that is on is the accent at about three quarters with a brighter rim
+     *  along its edge. The marks themselves - the tick, the dot, the arrows - are the one thing
+     *  painted at full strength.
      *
      *  @see SwingTreeLookAndFeel.SymbolPreset#GLASS
      */
@@ -2350,19 +2311,16 @@ interface Symbols
 
     /**
      *  Symbols for {@link SwingTreeLookAndFeel.StylePreset#NIMBUS}: the same moulded plastic the style
-     *  rules paint, cut into the shapes no style rule can express.
+     *  rules paint, cut into the shapes no style rule can express. A check box is a small rounded
+     *  square, a radio a small circle, a slider handle a round knob and a scroll thumb a pill, and
+     *  every one is the surface colour under {@link NimbusRelief#LIT} inside the outline a button
+     *  wears, so all of them follow the palette without being told about it. The arrows are solid
+     *  triangles in the text colour, which is what the original draws.
      *  <p>
-     *  Nothing here has an appearance of its own. A check box is a small rounded square, a radio a
-     *  small circle, a slider handle a round knob and a scroll thumb a pill, and every one of them is
-     *  the surface colour under {@link NimbusRelief#LIT} inside the same outline a button wears - so
-     *  they follow the palette and the theme's state colours without being told about either. The
-     *  arrows are solid triangles in the text colour, which is what the original draws and what keeps
-     *  them legible at any scale.
-     *  <p>
-     *  Two things here deliberately do not do what the other symbol sets do. A slider's track is not
-     *  filled up to the handle, because the original does not fill it and a filled track would say the
-     *  value twice. And a progress bar's fill is the one place a different relief is used -
-     *  {@link NimbusRelief#GLOSS} - because that bar is the one wet thing in a dry theme.
+     *  Two things here differ from every other symbol set. A slider's track is not filled up to the
+     *  handle, because the original leaves it unfilled and a filled track would say the value twice.
+     *  And a progress bar's fill is the one place {@link NimbusRelief#GLOSS} is used, because that
+     *  bar is the one wet thing in a dry theme.
      *
      *  @see SwingTreeLookAndFeel.SymbolPreset#NIMBUS
      */
@@ -2461,10 +2419,10 @@ interface Symbols
         }
 
         /**
-         *  The small button a drop-down arrow or a stepper arrow stands on. It is drawn here rather
-         *  than by a style rule because the rule governs the whole combo box or spinner: a second
-         *  styled surface inside the first would draw a box around the arrow instead of beside it.
-         *  The divider down its left edge is what separates the button from the value.
+         *  The small button a drop-down arrow or a stepper arrow stands on, with a divider down its
+         *  left edge separating it from the value. It is drawn here rather than by a style rule
+         *  because the rule governs the whole combo box or spinner, and a second styled surface
+         *  inside the first would draw a box around the arrow.
          */
         private static void stepper(
             Graphics2D g, Palette p, int w, int h, boolean enabled, boolean rollover, boolean pressed
@@ -2478,11 +2436,9 @@ interface Symbols
 
         // ── Chrome ───────────────────────────────────────────────────────────
 
-        /**
-         *  A groove cut across the slider, the same colour the whole way along. The original leaves it
-         *  unfilled: the handle already says where the value is, and a coloured run behind it would
-         *  make a slider look like a progress bar.
-         */
+        /** A groove cut across the slider, one colour the whole way along. The handle already says
+         *  where the value is, and a coloured run behind it would make a slider look like a progress
+         *  bar. */
         @Override
         public void paintSliderTrack(
             Graphics2D g, Palette p, Rectangle track, int thumbCentre,
@@ -2546,11 +2502,8 @@ interface Symbols
             }
         }
 
-        /**
-         *  The one wet thing in the theme: a saturated bar under a hard sheen, closed top and bottom by
-         *  a line of its own colour darkened, so the bar reads as a filled tube rather than as a
-         *  painted rectangle.
-         */
+        /** The one wet thing in the theme: a saturated bar under a hard sheen, closed top and bottom
+         *  by a darkened line of its own colour, so it reads as a filled tube. */
         @Override
         public void paintProgressFill(
             Graphics2D g, Palette p, int w, int h, double ratio, boolean horizontal, boolean enabled
@@ -2608,9 +2561,9 @@ interface Symbols
         // ── Internals ────────────────────────────────────────────────────────
 
         /**
-         *  Fills a shape the way the style rules fill a button - the relief over the state's own
-         *  colour, inside the state's own outline - so that a check box and the button beside it are
-         *  visibly the same material.
+         *  Fills a shape the way the style rules fill a button, the relief over the state's own colour
+         *  inside the state's own outline, so that a check box and the button beside it are visibly
+         *  the same material.
          *
          * @param on whether the control is ticked, filled or otherwise affirmative, which is what
          *           moves it onto the accented material
@@ -2665,13 +2618,10 @@ interface Symbols
     }
 
     /**
-     *  Symbols for {@link SwingTreeLookAndFeel.StylePreset#POLYMORPHIC}: not a set of its own, but a
-     *  choice between three of the others, remade on every call from the palette in force.
-     *  <p>
-     *  The preset it belongs to reads its whole idiom off the palette (see {@link Mood}), and the
-     *  small geometry has to follow, or a theme that separates its surfaces with light would end up
-     *  with flat glyphs drawn onto them. So the same question is asked here, and answered with
-     *  whichever existing set was designed for that answer.
+     *  Symbols for {@link SwingTreeLookAndFeel.StylePreset#POLYMORPHIC}: not a set of its own but a
+     *  choice between three of the others, made afresh from the installed palette on every call. That
+     *  preset reads its whole idiom off the palette through {@link Mood}, and the small geometry has
+     *  to follow it, or a theme separating its surfaces with light would carry flat glyphs on them.
      *
      *  @see SwingTreeLookAndFeel.SymbolPreset#ADAPTIVE
      */

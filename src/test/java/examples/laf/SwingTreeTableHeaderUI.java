@@ -19,37 +19,29 @@ import java.awt.Component;
 import java.awt.Graphics;
 
 /**
- *  The {@link JTableHeader} UI delegate. A header cell renderer is installed as the header's
- *  default so that the heading row reads as a quiet caption regardless of the table's model.
+ *  The {@link JTableHeader} UI delegate. It installs a default cell renderer, so that a heading is
+ *  a padded label in the palette's muted text colour whatever the table's model says.
  */
 public final class SwingTreeTableHeaderUI
         extends    BasicTableHeaderUI
         implements SwingTreeStyledComponentUI<JTableHeader>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeTableHeaderUI(); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
         JTableHeader header = (JTableHeader) c;
-        // Follow Swing's UIResource contract: only replace the header's default renderer when it
-        // is a look-and-feel default (absent or a UIResource); a renderer the application
-        // installed directly is a NON-UIResource and must survive look-and-feel swaps. Per-column
-        // header renderers are deliberately left alone: a column with a null header renderer
-        // already falls back to this default, and installing ours per column would make it stick
-        // after switching away, because other look and feels replace the header's default
-        // renderer but do not clear per-column ones.
+        // A per-column header renderer is left alone. A column with none of its own already falls
+        // back to the header default, and one installed per column would outlive this look and
+        // feel: other look and feels replace the header default but never clear per-column ones.
         if ( SwingTreeLookAndFeel.drawsOwnChrome() && isReplaceableLafDefault(header.getDefaultRenderer()) )
             header.setDefaultRenderer(new HeaderRenderer());
         SwingTreeLookAndFeel.installStyleOn(c);
     }
 
-    /**
-     * @param current the renderer the header carries right now
-     * @return {@code true} if it is either absent or a {@link UIResource}, i.e. a look-and-feel
-     *         default the next look and feel is allowed to overwrite
-     */
+    /** @return {@code true} for a renderer the next look and feel is allowed to overwrite, which
+     *          means one that is absent or marked as a {@link UIResource}. */
     private static boolean isReplaceableLafDefault( TableCellRenderer current ) {
         return current == null || current instanceof UIResource;
     }
@@ -71,11 +63,8 @@ public final class SwingTreeTableHeaderUI
     }
 
     /**
-     *  The default header cell renderer: a padded label in the palette's muted text colour.
-     *  <p>
-     *  Implements {@link UIResource} so Swing recognises it as a look-and-feel default and lets
-     *  the next look and feel replace it cleanly. Without the marker, an application that
-     *  switches away would still see this renderer on every header.
+     *  The default header cell renderer: a padded label in the palette's muted text colour. It is
+     *  a {@link UIResource} so that the next look and feel replaces it instead of keeping it.
      */
     private static final class HeaderRenderer extends DefaultTableCellRenderer implements UIResource
     {

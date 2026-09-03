@@ -14,16 +14,13 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 /**
- *  The {@link JTable} UI delegate. Gridlines are off by default for a cleaner look - re-enable
- *  them per instance with {@link JTable#setShowGrid(boolean)} - and the band behind a selected
- *  row is filled here rather than by the cell renderer, for the reason spelled out in
- *  {@link SwingTreeListUI}.
+ *  The {@link JTable} UI delegate. Grid lines are off unless the table asks for them back with
+ *  {@link JTable#setShowGrid(boolean)}.
  */
 public final class SwingTreeTableUI
         extends    BasicTableUI
         implements SwingTreeStyledComponentUI<JTable>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeTableUI(); }
 
     @Override
@@ -35,10 +32,8 @@ public final class SwingTreeTableUI
             table.setIntercellSpacing(new Dimension(0, 0));
             table.setRowHeight(UI.scale(SwingTreeLookAndFeel.symbols().tableRowHeight()));
         } else {
-            // Swing's own row height is a fixed 16 pixels set by the table's constructor, which on
-            // a scaled display is shorter than the text in it. A symbol set with no chrome still
-            // leaves this look and feel owning the font, and a row the font does not fit in is
-            // unreadable rather than merely plain.
+            // The table's constructor sets a fixed 16 pixels, which is shorter than the font
+            // this look and feel installs once the UI scale factor is above one.
             table.setRowHeight(rowHeightFor(table));
         }
         SwingTreeLookAndFeel.installStyleOn(c);
@@ -59,8 +54,8 @@ public final class SwingTreeTableUI
         return Math.round(size * 1.9f);
     }
 
-    /** Fills a band behind each selected row; see {@link SwingTreeListUI} for why the table
-     *  paints it rather than the cell renderer. */
+    /** Fills a band behind each selected row, for the reason {@link SwingTreeListUI} paints its
+     *  own: one renderer instance cannot carry a colour that differs from row to row. */
     private static void paintSelectionBands( Graphics2D g, JTable table ) {
         if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
             return; // Swing's own renderer is carrying the selection colour

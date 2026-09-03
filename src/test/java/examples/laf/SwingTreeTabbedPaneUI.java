@@ -23,18 +23,15 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 
 /**
- *  The {@link JTabbedPane} UI delegate. The tab surfaces and the accent that marks the selected
- *  one are drawn by the configured symbol set; this delegate decides the spacing, the label
- *  colours, the single hairline that separates the strip of tabs from the page below it, and
- *  the height a tab strip that has wrapped into several runs asks its parent for.
- *  The four-sided box the inherited delegate draws by default is deliberately suppressed - it
- *  clashes with a rounded selected tab.
+ *  The {@link JTabbedPane} UI delegate. The symbol set draws the tab surfaces and the accent on
+ *  the selected one; this delegate decides the spacing and the label colours, replaces the box
+ *  {@link BasicTabbedPaneUI} draws around the page with a single hairline, and asks the parent
+ *  for the height of a tab strip that has wrapped into several runs.
  */
 public final class SwingTreeTabbedPaneUI
         extends    BasicTabbedPaneUI
         implements SwingTreeStyledComponentUI<JTabbedPane>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeTabbedPaneUI(); }
 
     @Override
@@ -107,10 +104,10 @@ public final class SwingTreeTabbedPaneUI
     /**
      *  Adds the height of the extra tab runs a narrow pane needs to the size the pane asks for.
      *  <p>
-     *  The inherited layout measures the tab strip at the width the pane would <i>like</i> to
-     *  have, so a pane that is given less than that wraps its tabs into further runs without
-     *  ever asking for the height they occupy. The runs are laid over the page instead, and the
-     *  bottom of whichever tab is showing is pushed out of view.
+     *  {@link TabbedPaneLayout} measures the tab strip at the width the pane would like to have,
+     *  so a pane given less than that wraps its tabs into further runs and never asks for the
+     *  height those runs occupy. They are laid over the page instead, and the bottom of the page
+     *  is pushed out of sight.
      */
     private final class StackAwareLayout extends TabbedPaneLayout
     {

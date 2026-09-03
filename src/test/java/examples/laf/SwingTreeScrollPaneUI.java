@@ -10,16 +10,13 @@ import javax.swing.plaf.basic.BasicScrollPaneUI;
 import java.awt.Graphics;
 
 /**
- *  The {@link JScrollPane} UI delegate: the frame around a scrollable region. What that frame
- *  looks like - a field, a card, a rail or nothing at all - follows the
- *  {@link SwingTreeLookAndFeel.Surface} the scroll pane was tagged with. All of the scrolling
- *  visuals live on {@link SwingTreeScrollBarUI}.
+ *  The {@link JScrollPane} UI delegate. The scroll bars are painted by
+ *  {@link SwingTreeScrollBarUI}.
  */
 public final class SwingTreeScrollPaneUI
         extends    BasicScrollPaneUI
         implements SwingTreeStyledComponentUI<JScrollPane>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeScrollPaneUI(); }
 
     @Override

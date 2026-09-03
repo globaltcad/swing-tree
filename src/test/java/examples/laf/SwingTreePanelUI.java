@@ -9,16 +9,11 @@ import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicPanelUI;
 import java.awt.Graphics;
 
-/**
- *  The {@link JPanel} UI delegate: the ground an application stands on, or one of the
- *  cards standing on it, depending on the {@link SwingTreeLookAndFeel.Surface} the panel
- *  was tagged with.
- */
+/** The {@link JPanel} UI delegate. */
 public final class SwingTreePanelUI
         extends    BasicPanelUI
         implements SwingTreeStyledComponentUI<JPanel>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreePanelUI(); }
 
     @Override

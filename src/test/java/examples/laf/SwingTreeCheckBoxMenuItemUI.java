@@ -9,15 +9,11 @@ import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicCheckBoxMenuItemUI;
 import java.awt.Graphics;
 
-/**
- *  The {@link JCheckBoxMenuItem} UI delegate: the same row as {@link SwingTreeMenuItemUI},
- *  augmented by the symbol set's check glyph on the left.
- */
+/** The {@link JCheckBoxMenuItem} UI delegate. */
 public final class SwingTreeCheckBoxMenuItemUI
         extends    BasicCheckBoxMenuItemUI
         implements SwingTreeStyledComponentUI<JCheckBoxMenuItem>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeCheckBoxMenuItemUI(); }
 
     @Override

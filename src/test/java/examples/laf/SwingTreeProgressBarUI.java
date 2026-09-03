@@ -17,15 +17,14 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 
 /**
- *  The {@link JProgressBar} UI delegate. The trough is a style rule; the filled part is drawn on
- *  top by the configured symbol set. An indeterminate bar falls through to the inherited
- *  delegate's animated bouncing block.
+ *  The {@link JProgressBar} UI delegate. The trough is a style rule and the symbol set draws the
+ *  filled part on top of it. An indeterminate bar keeps {@link BasicProgressBarUI}'s bouncing
+ *  block.
  */
 public final class SwingTreeProgressBarUI
         extends    BasicProgressBarUI
         implements SwingTreeStyledComponentUI<JProgressBar>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeProgressBarUI(); }
 
     @Override

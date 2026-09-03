@@ -5,15 +5,8 @@ import examples.laf.SwingTreeLookAndFeel.Palette;
 import java.awt.Color;
 
 /**
- *  The colour sets behind {@link SwingTreeLookAndFeel.PalettePreset}.
- *  <p>
- *  A palette is the one thing every style preset and every symbol set reads through, and it is
- *  named semantically rather than literally: a rule asks for "the surface a raised control is
- *  filled with", never for a colour. That is what lets any of these be paired with any preset, and
- *  it is why a theme is re-tinted by swapping one of these rather than by editing the rules.
- *  <p>
- *  Each palette starts from {@link Palette#neutral()} and names every slot, so a colour is never
- *  inherited by accident from whatever the neutral placeholder happened to be.
+ *  The colour sets behind {@link SwingTreeLookAndFeel.PalettePreset}. Each one starts from
+ *  {@link Palette#neutral()} and names every slot, so no colour is left as the neutral grey.
  */
 final class Palettes
 {

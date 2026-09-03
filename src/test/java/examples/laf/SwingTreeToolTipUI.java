@@ -9,15 +9,11 @@ import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicToolTipUI;
 import java.awt.Graphics;
 
-/**
- *  The {@link JToolTip} UI delegate: a small rounded callout, distinct enough from the
- *  application's panels to read as a floating popover.
- */
+/** The {@link JToolTip} UI delegate. */
 public final class SwingTreeToolTipUI
         extends    BasicToolTipUI
         implements SwingTreeStyledComponentUI<JToolTip>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeToolTipUI(); }
 
     @Override

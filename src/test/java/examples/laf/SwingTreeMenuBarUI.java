@@ -9,15 +9,11 @@ import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicMenuBarUI;
 import java.awt.Graphics;
 
-/**
- *  The {@link JMenuBar} UI delegate: a flat horizontal strip separated from the window
- *  below it by a hairline. Its top-level entries are painted by {@link SwingTreeMenuUI}.
- */
+/** The {@link JMenuBar} UI delegate. */
 public final class SwingTreeMenuBarUI
         extends    BasicMenuBarUI
         implements SwingTreeStyledComponentUI<JMenuBar>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeMenuBarUI(); }
 
     @Override

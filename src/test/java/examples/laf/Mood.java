@@ -5,12 +5,9 @@ import examples.laf.SwingTreeLookAndFeel.Palette;
 import java.awt.Color;
 
 /**
- *  What a palette leaves a theme to work with, which is what
- *  {@link SwingTreeLookAndFeel.StylePreset#POLYMORPHIC} chooses its whole idiom from.
- *  <p>
- *  A rule cannot separate a card from the ground it lies on unless something is available to
- *  separate it <em>with</em>. Which of the three things is available is a property of the palette,
- *  not of the rule, so it is read off the palette once here and every rule then asks for it.
+ *  What a palette leaves a theme to tell a surface from the ground it lies on with, which is what
+ *  {@link SwingTreeLookAndFeel.StylePreset#POLYMORPHIC} builds its whole appearance out of. It is
+ *  a property of the palette, so it is worked out once here and every rule then asks for it.
  */
 enum Mood
 {
@@ -24,12 +21,10 @@ enum Mood
      *  and anything more would be decoration. */
     SHEET;
 
-    /** How far apart, summed over the three channels, two colours have to be before a flat fill
-     *  alone can be seen against the other. Below this the light has to do the work instead. */
+    /** How far apart two colours have to be, summed over the three channels, before a flat fill in
+     *  one can be seen against the other. Below this the light has to do the work instead. */
     private static final int SEPARABLE = 12;
 
-    /** @param p the palette a theme has been paired with
-     *  @return what that palette leaves the theme to tell a surface from its ground with */
     static Mood of( Palette p ) {
         if ( distance(p.background(), p.surface()) < SEPARABLE )
             return RELIEF;

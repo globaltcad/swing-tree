@@ -10,16 +10,13 @@ import javax.swing.plaf.basic.BasicMenuUI;
 import java.awt.Graphics;
 
 /**
- *  The {@link JMenu} UI delegate. A menu appears in two contexts - as a top-level entry on
- *  a {@link javax.swing.JMenuBar}, and as a submenu entry inside another popup - and is
- *  painted the same way in both, with the standard arrow icon on the right hinting that
- *  children expand from it.
+ *  The {@link JMenu} UI delegate, for a top level entry of a {@link javax.swing.JMenuBar}
+ *  as well as for a submenu entry inside another popup.
  */
 public final class SwingTreeMenuUI
         extends    BasicMenuUI
         implements SwingTreeStyledComponentUI<JMenu>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeMenuUI(); }
 
     @Override
