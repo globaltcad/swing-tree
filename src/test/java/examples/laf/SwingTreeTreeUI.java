@@ -6,6 +6,7 @@ import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.JComponent;
 import javax.swing.JTree;
+import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicTreeUI;
 import java.awt.Graphics;
@@ -27,17 +28,36 @@ public final class SwingTreeTreeUI
         super.installUI(c);
         JTree tree = (JTree) c;
         if ( SwingTreeLookAndFeel.drawsOwnChrome() ) {
-            tree.setRowHeight(UI.scale(SwingTreeLookAndFeel.symbols().treeRowHeight()));
             tree.setShowsRootHandles(true);
             setExpandedIcon(GlyphIcons.treeExpanded());
             setCollapsedIcon(GlyphIcons.treeCollapsed());
-        } else {
+        }
+        LafUtilities.rescaleOnUiScaleChange(tree, () -> applyScaledMetrics(tree));
+        SwingTreeLookAndFeel.installStyleOn(c);
+    }
+
+    @Override
+    public void uninstallUI( JComponent c ) {
+        LafUtilities.uninstallUiScaleRescale(c);
+        super.uninstallUI(c);
+    }
+
+    /**
+     *  The two lengths a tree keeps rather than re-derives: how tall a row is, and how far a
+     *  child is inset from its parent. Both are written again after every scale change, because
+     *  a tree whose rows stay 22 pixels tall while its text doubles clips every label it has.
+     */
+    private void applyScaledMetrics( JTree tree ) {
+        if ( SwingTreeLookAndFeel.drawsOwnChrome() )
+            tree.setRowHeight(UI.scale(SwingTreeLookAndFeel.symbols().treeRowHeight()));
+        else {
             // See SwingTreeTableUI: a row shorter than the font in it is unreadable, not plain.
             java.awt.Font font = tree.getFont();
             int size = font == null ? UI.scale(13) : Math.round(font.getSize2D());
             tree.setRowHeight(Math.round(size * 1.75f));
         }
-        SwingTreeLookAndFeel.installStyleOn(c);
+        setLeftChildIndent(UI.scale(UIManager.getInt("Tree.leftChildIndent")));
+        setRightChildIndent(UI.scale(UIManager.getInt("Tree.rightChildIndent")));
     }
 
     @Override

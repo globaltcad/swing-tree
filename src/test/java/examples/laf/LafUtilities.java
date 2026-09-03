@@ -1,5 +1,10 @@
 package examples.laf;
 
+import sprouts.Action;
+import sprouts.From;
+import sprouts.Subscriber;
+import sprouts.ValDelegate;
+import swingtree.UI;
 import swingtree.api.Painter;
 import swingtree.style.ComponentExtension;
 
@@ -477,7 +482,42 @@ final class LafUtilities
         target.putClientProperty(SELECTION_LISTENER, null);
     }
 
+    /**
+     *  Writes {@code scaledMetrics} onto {@code target} now, and again after every change of
+     *  SwingTree's UI scale factor.
+     *  <p>
+     *  A length a delegate computes while painting reads {@link UI#scale(int)} afresh every time
+     *  and so follows the factor by itself. A length the delegate <i>stores</i> on its component -
+     *  a tree's row height, a split pane's divider thickness - is read from the component
+     *  afterwards, and keeps whatever the factor was during {@code installUI} until somebody
+     *  writes it again. This is that somebody.
+     *  <p>
+     *  The write is deferred to the end of the event that changed the factor, because a row height
+     *  may be a multiple of the component's font size and SwingTree re-scales component fonts in
+     *  that same event.
+     *
+     * @param target        the component the lengths are stored on
+     * @param scaledMetrics writes those lengths, reading the scale factor as it is at that moment
+     */
+    static void rescaleOnUiScaleChange( JComponent target, Runnable scaledMetrics ) {
+        scaledMetrics.run();
+        if ( target.getClientProperty(UI_SCALE_ACTION) != null )
+            return;
+        Action<ValDelegate<Float>> action = ignored -> UI.runLater(scaledMetrics);
+        ComponentExtension.from(target).localUiScaleFactor().onChange(From.ALL, action);
+        target.putClientProperty(UI_SCALE_ACTION, action);
+    }
+
+    /** Undoes {@link #rescaleOnUiScaleChange}. */
+    static void uninstallUiScaleRescale( JComponent target ) {
+        Object stored = target.getClientProperty(UI_SCALE_ACTION);
+        if ( stored instanceof Subscriber )
+            ComponentExtension.from(target).localUiScaleFactor().unsubscribe((Subscriber) stored);
+        target.putClientProperty(UI_SCALE_ACTION, null);
+    }
+
     /** Guards against a second {@code installUI(..)} stacking listeners, and is the handle to remove them. */
     private static final String FOCUS_LISTENER     = "swingtree.laf.focusRepaint.listener";
     private static final String SELECTION_LISTENER = "swingtree.laf.selectionRepaint.listener";
+    private static final String UI_SCALE_ACTION    = "swingtree.laf.uiScaleRescale.action";
 }

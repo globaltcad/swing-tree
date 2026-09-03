@@ -10,7 +10,10 @@ import sprouts.Var
 import swingtree.layout.Size
 import swingtree.threading.EventProcessor
 
+import swingtree.style.ComponentExtension
+
 import javax.swing.*
+import javax.swing.tree.DefaultTreeCellRenderer
 import java.awt.*
 import java.lang.ref.WeakReference
 
@@ -1250,6 +1253,12 @@ class UI_Scaling_Spec extends Specification
             
             This ensures that applications using specialized typography maintain visual
             consistency and readability across different display DPI settings.
+
+            Note which number every step is computed from: the size the application wrote,
+            multiplied by the factor now in force. A second change must not multiply the size
+            the component is currently wearing by the *step* between the two factors, because
+            that compounds every rounding and drifts away from the authored size - after
+            1.0 to 1.25 to 1.75 a 14 point font would then read 20 points rather than 25.
         """
         given : 'We start with a scale factor of 1.0'
             SwingTree.get().setUiScaleFactor(1.0f)
@@ -1297,15 +1306,15 @@ class UI_Scaling_Spec extends Specification
             SwingTree.get().setUiScaleFactor(1.75f)
             UI.sync()
 
-        then : 'Custom font sizes scale to the new factor'
+        then : 'Every size is the authored size times the new factor, not the size it happened to have times the step'
             button.font.style == Font.BOLD
-            button.font.size == 20
+            button.font.size == 25  // 14 * 1.75 = 24.5 -> rounded to 25
 
             label.font.style == Font.ITALIC
-            label.font.size == 22
+            label.font.size == 28   // 16 * 1.75
 
             textField.font.style == Font.PLAIN
-            textField.font.size == 25
+            textField.font.size == 32 // 18 * 1.75 = 31.5 -> rounded to 32
     }
 
     def 'Bound custom fonts update reactively with both property and scale changes'() {
@@ -1418,6 +1427,151 @@ class UI_Scaling_Spec extends Specification
             label.font.size == 30   // 20 * 1.5
             textField.font.size == 27  // 18 * 1.5
             textArea.font.size == 18   // unchanged static size at scale
+    }
+
+    def 'A font written onto a component by hand becomes the font every later scaling starts from.'()
+    {
+        reportInfo """
+            To achieve robust component font scaling SwingTree has to know:
+            1. Which font to scale, and the answer is: whatever the user application **last** specified (`setFont`). 
+            2. What was the scaling factor when it was last set. 
+            
+            So a SwingTree managed component watches its own `"font"` property
+            and treats every write it did not make itself as a new starting point,
+            by capturing the 1. and 2...
+
+            Without that, an application handing a component a font halfway through a session
+            would find the next factor change discarding it and scaling the font the component
+            happened to wear at start-up instead. The step from two to three below is where the
+            two readings part company: 30 points written at a factor of two is 45 points at a
+            factor of three, whereas the 20 points of the start would have given 30.
+        """
+        given : 'A factor of one, and a label wearing a font the application chose.'
+            SwingTree.get().setUiScaleFactor(1f)
+            var label = UI.label("Hi").get(JLabel)
+            UI.runNow({ label.setFont(new Font("Ubuntu", Font.PLAIN, 20)) })
+
+        expect : 'The label wears what it was given, because the factor has not moved.'
+            label.font.size == 20
+
+        when : 'The factor doubles.'
+            SwingTree.get().setUiScaleFactor(2f)
+            UI.sync()
+
+        then : 'The font the application wrote is the one that was doubled.'
+            label.font.size == 40
+
+        when : 'The application writes a second font of its own, with the factor still at two.'
+            UI.runNow({ label.setFont(new Font("Ubuntu", Font.PLAIN, 30)) })
+
+        then : 'It is left exactly as written: a write is not a factor change, and nothing scales it.'
+            label.font.size == 30
+
+        when : 'The factor then goes from two to three.'
+            SwingTree.get().setUiScaleFactor(3f)
+            UI.sync()
+
+        then : 'The second font is what grew, by half again, rather than the first font growing threefold.'
+            label.font.size == 45
+
+        when : 'The factor returns to two.'
+            SwingTree.get().setUiScaleFactor(2f)
+            UI.sync()
+
+        then : 'The label is wearing exactly the font the application handed it.'
+            label.font.size == 30
+    }
+
+    def 'A component with no font of its own is left to inherit one rather than scaled a second time.'()
+    {
+        reportInfo """
+            `Component.getFont()` forwards the parent's font when the component was never
+            given one of its own, and a cell renderer is where that matters most:
+            `DefaultTreeCellRenderer.getFont()` reports the font of the tree it last painted for,
+            and its `setFont(..)` throws away a look-and-feel font so that the tree keeps
+            showing through.
+
+            Scaling what `getFont()` returns would therefore scale the tree's font a second
+            time - the tree's own scaling is what produced that font a moment earlier - and
+            would pin the doubled result onto the renderer, where it can never follow the tree
+            again. A component that inherits its font is left alone instead: scaling the parent
+            has already scaled it.
+        """
+        given : 'A factor of one, and a tree.'
+            SwingTree.get().setUiScaleFactor(1f)
+            var tree = UI.of(new JTree()).get(JTree)
+        and : 'Its renderer, given the style extension a SwingTree look and feel gives every component it paints.'
+            var renderer = tree.cellRenderer as DefaultTreeCellRenderer
+            ComponentExtension.from(renderer)
+        and : 'One rendered node, which is what hands the renderer the tree it reads its font from.'
+            UI.runNow({ renderer.getTreeCellRendererComponent(tree, "leaf", false, false, true, 0, false) })
+
+        expect : 'The renderer starts out reporting the font of its tree, because it has none of its own.'
+            !renderer.isFontSet()
+            renderer.font.size == tree.font.size
+
+        when : 'The factor doubles.'
+            var sizeAtFactorOne = tree.font.size
+            SwingTree.get().setUiScaleFactor(2f)
+            UI.sync()
+
+        then : 'The tree grew.'
+            tree.font.size > sizeAtFactorOne
+        and : 'And the renderer is still reporting exactly the tree font, rather than twice it.'
+            renderer.font.size == tree.font.size
+
+        when : 'The factor goes back to 1.'
+            SwingTree.get().setUiScaleFactor(1f)
+            UI.sync()
+        then : 'The font size shrank.'
+            tree.font.size == sizeAtFactorOne
+    }
+
+    def 'The text field inside a spinner grows with the factor exactly once.'()
+    {
+        reportInfo """
+            `BasicSpinnerUI` watches its spinner for a font change and copies the new font onto
+            the editor's text field, as long as that field is still wearing a look-and-feel font.
+            So the moment SwingTree scales the spinner, Swing hands the *already scaled* font to
+            the text field - and a text field that then scales whatever it is currently wearing
+            would show a number twice the size of every other piece of text in the window.
+
+            Which of the two is scaled first is not something a spec should have to know, so this
+            scenario states the outcome that has to hold either way: after the change the editor
+            and the spinner around it wear the same size.
+        """
+        given : 'A factor of one, and a spinner.'
+            SwingTree.get().setUiScaleFactor(1f)
+            var spinner = UI.spinner(new SpinnerNumberModel(1, 1, 999, 1)).get(JSpinner)
+            var textField = (spinner.editor as JSpinner.DefaultEditor).textField
+        and : '''
+            The style extension a SwingTree look and feel gives every component it paints. The
+            editor gets it first because that is the order a look and feel reaches the two in:
+            a spinner builds its editor inside its own constructor, before Swing installs the
+            delegate that would style the spinner.
+        '''
+            ComponentExtension.from(textField)
+            ComponentExtension.from(spinner)
+
+        expect : 'The spinner and the text field in it start out at the same size.'
+            textField.font.size == spinner.font.size
+
+        when : 'The factor doubles.'
+            var sizeAtFactorOne = spinner.font.size
+            SwingTree.get().setUiScaleFactor(2f)
+            UI.sync()
+
+        then : 'The spinner grew.'
+            spinner.font.size > sizeAtFactorOne
+        and : 'And the text field grew with it, by the same amount rather than by twice as much.'
+            textField.font.size == spinner.font.size
+
+        when : 'The factor goes back to 1.'
+            SwingTree.get().setUiScaleFactor(1f)
+            UI.sync()
+        then : 'The font size shrank.'
+            textField.font.size == sizeAtFactorOne
+            spinner.font.size == sizeAtFactorOne
     }
 
     def 'The scaling factor is published to the UIManager under "laf.scaleFactor".'()
