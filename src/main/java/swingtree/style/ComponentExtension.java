@@ -91,7 +91,6 @@ public final class ComponentExtension<C extends JComponent>
 
     private @Nullable Font _fontToScaleFrom = null;
     private float          _scaleTheFontWasWrittenFor = 1f;
-    private boolean        _fontHasTheDefaultSize = false;
     private boolean        _isRescalingFont = false;
 
     private StyleEngine     _styleEngine = StyleEngine.create();
@@ -120,13 +119,8 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     private void _rememberFontToScaleFrom() {
-        @Nullable Font ownFont = _owner.isFontSet() ? _owner.getFont() : null;
-        @Nullable Font defaultFont = UIManager.getDefaults().getFont("defaultFont");
-        _fontToScaleFrom = ownFont;
+        _fontToScaleFrom = _owner.isFontSet() ? _owner.getFont() : null;
         _scaleTheFontWasWrittenFor = SwingTree.get().getUiScaleFactor();
-        _fontHasTheDefaultSize = ownFont != null
-                              && defaultFont != null
-                              && defaultFont.getSize() == ownFont.getSize();
     }
 
     private void _rescaleFont() {
@@ -145,8 +139,6 @@ public final class ComponentExtension<C extends JComponent>
     private Font _rescaledTo( Font fontToScaleFrom, float currentScale ) {
         if ( currentScale == _scaleTheFontWasWrittenFor )
             return fontToScaleFrom;
-        if ( _fontHasTheDefaultSize )
-            return SwingTree.get().applyScaleAsFontSize(fontToScaleFrom);
         return _resized(fontToScaleFrom, currentScale / _scaleTheFontWasWrittenFor);
     }
 

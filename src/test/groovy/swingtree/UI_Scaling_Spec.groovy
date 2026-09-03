@@ -1607,6 +1607,14 @@ class UI_Scaling_Spec extends Specification
             current font is a `UIResource`, that is, a font the look and feel installed
             rather than one the application chose.
 
+            Java 8 hands the font over differently. There the same listener runs
+            `textField.setFont(spinner.getFont())`, passing the spinner's font object
+            itself, without wrapping it in a `FontUIResource`. A font that SwingTree
+            writes is a plain `Font`, so from the first change of the factor onward the
+            text field holds a plain font, and Swing never copies the spinner's font onto
+            it again. From then on the size of the text field comes from SwingTree's
+            arithmetic alone, and nothing corrects it.
+
             So the moment SwingTree writes the spinner's new font, Swing hands that same,
             already scaled font to the text field. Suppose SwingTree then worked out the
             text field's new size from the font the text field is holding at that instant.
@@ -1620,8 +1628,28 @@ class UI_Scaling_Spec extends Specification
             size belongs to, and never from the size a component happens to hold at the
             instant it is asked. This scenario checks the outcome that rule guarantees:
             the text field and the spinner have one and the same font size.
+
+            The arithmetic behind that rule has to be a proportion and nothing else: the
+            remembered size, times the current factor, divided by the remembered factor.
+            SwingTree once treated a font of the look and feel's default size differently
+            and replaced its size with the platform's base size times the factor. On
+            Windows a 13 point font became 24 at a factor of two, not 26, and 12 at a
+            factor of one, not 13. The spinner never showed that, because a component
+            that returns to the factor its font was remembered at gets that font back
+            unchanged. The text field on Java 8 did show it. It had remembered the 24 it
+            was handed at a factor of two as a font of its own, and half of 24 is 12, in
+            a spinner that went back to 13.
         """
-        given : 'A scale factor of one, and a spinner.'
+        given : '''
+            A default font of 14 points, installed on every component type in the
+            `UIManager`. SwingTree assumes a base font size per platform: 11 or 12 on
+            Windows, 13 on macOS and KDE, 15 on other Linux desktops. A default font of
+            14 points matches none of them, so on no platform can a formula built on the
+            base size agree with a proportion by coincidence.
+        '''
+            SwingTree.initializeUsing(it -> it.defaultFont(new Font("Ubuntu", Font.PLAIN, 14), SwingTreeInitConfig.FontInstallation.HARD))
+            SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
+        and : 'A scale factor of one, and a spinner.'
             SwingTree.get().setUiScaleFactor(1f)
             var spinner = UI.spinner(new SpinnerNumberModel(1, 1, 999, 1)).get(JSpinner)
             var textField = (spinner.editor as JSpinner.DefaultEditor).textField
@@ -1672,8 +1700,9 @@ class UI_Scaling_Spec extends Specification
             factors happened to be set before it.
 
             What makes this hard is a second Swing listener, next to the one on the spinner
-            that the previous scenario describes. `JSpinner.DefaultEditor` listens to the
-            `"font"` property of its text field. Whenever a `UIResource` font arrives there
+            that the previous scenario describes. Java 8 does not have it, Java 11 and every
+            later version do: `JSpinner.DefaultEditor` listens to the `"font"` property of
+            its text field. Whenever a `UIResource` font arrives there
             that differs from the font of the spinner, the editor at once overwrites the
             text field with `new FontUIResource(spinner.getFont())`. It does so from inside
             the `setFont(..)` call that delivered the differing font, before that call has
