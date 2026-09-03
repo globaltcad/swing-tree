@@ -1420,6 +1420,39 @@ class UI_Scaling_Spec extends Specification
             textArea.font.size == 18   // unchanged static size at scale
     }
 
+    def 'The scaling factor is published to the UIManager under "laf.scaleFactor".'()
+    {
+        reportInfo """
+            SwingTree scales what it paints itself, but a layout manager decides how much room
+            a component gets, and that has to be scaled by the same number or a scaled component
+            ends up in an unscaled hole. MigLayout, which SwingTree lays out with, asks for that
+            number under the `UIManager` key `"laf.scaleFactor"` - it reads the key once for every
+            logical pixel value it turns into pixels, and a logical pixel is the unit it gives an
+            unqualified number in a constraint, as well as the unit of every gap and inset it
+            defaults to.
+
+            So the key is not decoration: it is how the layout of every window in the application
+            learns the scaling factor. This scenario states that it holds the same number
+            `getUiScaleFactor()` reports, and keeps holding it after the factor is changed again.
+            The second half is the part worth pinning, because the key is written when the factor
+            is set rather than read back from it when asked: a new way of setting the factor which
+            forgets to write the key would leave the two disagreeing, and every layout in the
+            application would then scale by a number nothing else uses.
+        """
+        when : 'We set the scaling factor to one and a half.'
+            SwingTree.get().setUiScaleFactor(1.5f)
+        then : 'The key holds a number, and it is the factor SwingTree reports.'
+            UIManager.get("laf.scaleFactor") instanceof Number
+            ((Number)UIManager.get("laf.scaleFactor")).floatValue() == SwingTree.get().getUiScaleFactor()
+            ((Number)UIManager.get("laf.scaleFactor")).floatValue() == 1.5f
+
+        when : 'We change the scaling factor a second time.'
+            SwingTree.get().setUiScaleFactor(2f)
+        then : 'The key followed the change instead of keeping the number it was given first.'
+            ((Number)UIManager.get("laf.scaleFactor")).floatValue() == SwingTree.get().getUiScaleFactor()
+            ((Number)UIManager.get("laf.scaleFactor")).floatValue() == 2f
+    }
+
     /**
      * This method guarantees that garbage collection is
      * done unlike <code>{@link System#gc()}</code>

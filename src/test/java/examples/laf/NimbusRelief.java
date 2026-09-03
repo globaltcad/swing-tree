@@ -10,7 +10,7 @@ import java.awt.Paint;
 import java.awt.geom.Point2D;
 
 /**
- *  The light {@link NimbusPreset} is built out of, in the one place both the style rules and the
+ *  The light {@link Styles.Nimbus} is built out of, in the one place both the style rules and the
  *  {@link Symbols.Nimbus} read it from.
  *  <p>
  *  A relief is a set of gradient stops measured against the surface's own colour rather than

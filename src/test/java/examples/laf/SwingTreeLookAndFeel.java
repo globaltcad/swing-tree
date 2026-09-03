@@ -256,7 +256,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
 
     /**
      *  What a popup that is being styled right now is painting into. A style rule asks when the
-     *  difference changes what it should paint - {@link GlassmorphicPreset} asks because its frost
+     *  difference changes what it should paint - {@link Styles.Glassmorphic} asks because its frost
      *  blurs the component behind the popup, and outside the application window there is no such
      *  component.
      *
@@ -1162,7 +1162,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *  and selection, and a barely perceptible woven grain on the window background.
          */
         LINEN {
-            @Override Tuple<StyleRule>     rules()            { return LinenPreset.rules(); }
+            @Override Tuple<StyleRule>     rules()            { return Styles.Linen.rules(); }
             @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.LINEN; }
             @Override public PalettePreset preferredPalette() { return PalettePreset.LINEN; }
             @Override String               displayName()      { return "Linen"; }
@@ -1174,7 +1174,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *  in. Generous radii, no borders anywhere, and text a shade softer than black.
          */
         SOFT_UI {
-            @Override Tuple<StyleRule>     rules()            { return SoftUiPreset.rules(); }
+            @Override Tuple<StyleRule>     rules()            { return Styles.SoftUi.rules(); }
             @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.SOFT; }
             @Override public PalettePreset preferredPalette() { return PalettePreset.CLAY; }
             @Override String               displayName()      { return "Soft UI"; }
@@ -1185,7 +1185,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *  outlines and a drop shadow on every raised thing.
          */
         FRUTIGER_AERO {
-            @Override Tuple<StyleRule>     rules()            { return FrutigerAeroPreset.rules(); }
+            @Override Tuple<StyleRule>     rules()            { return Styles.FrutigerAero.rules(); }
             @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.GLOSSY; }
             @Override public PalettePreset preferredPalette() { return PalettePreset.AERO; }
             @Override String               displayName()      { return "Frutiger Aero"; }
@@ -1197,7 +1197,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *  when the field takes focus.
          */
         MATERIAL {
-            @Override Tuple<StyleRule>     rules()            { return MaterialPreset.rules(); }
+            @Override Tuple<StyleRule>     rules()            { return Styles.Material.rules(); }
             @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.MATERIAL; }
             @Override public PalettePreset preferredPalette() { return PalettePreset.MATERIAL; }
             @Override String               displayName()      { return "Material"; }
@@ -1209,7 +1209,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *  rule around an input is what is left to say that it can be typed into.
          */
         FLAT {
-            @Override Tuple<StyleRule>     rules()            { return FlatDesignPreset.rules(); }
+            @Override Tuple<StyleRule>     rules()            { return Styles.FlatDesign.rules(); }
             @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.FLAT; }
             @Override public PalettePreset preferredPalette() { return PalettePreset.VIVID; }
             @Override String               displayName()      { return "Flat"; }
@@ -1222,7 +1222,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *  into exactly that hole.
          */
         SKEUOMORPHIC {
-            @Override Tuple<StyleRule>     rules()            { return SkeuomorphicPreset.rules(); }
+            @Override Tuple<StyleRule>     rules()            { return Styles.Skeuomorphic.rules(); }
             @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.CARVED; }
             @Override public PalettePreset preferredPalette() { return PalettePreset.WORKSHOP; }
             @Override String               displayName()      { return "Skeuomorphic"; }
@@ -1235,7 +1235,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *  just a pale rectangle.
          */
         GLASSMORPHIC {
-            @Override Tuple<StyleRule>     rules()            { return GlassmorphicPreset.rules(); }
+            @Override Tuple<StyleRule>     rules()            { return Styles.Glassmorphic.rules(); }
             @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.GLASS; }
             @Override public PalettePreset preferredPalette() { return PalettePreset.AURORA; }
             @Override String               displayName()      { return "Glassmorphic"; }
@@ -1253,7 +1253,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *  designed around, so it reproduces the original rather than reinterpreting it.
          */
         NIMBUS {
-            @Override Tuple<StyleRule>     rules()            { return NimbusPreset.rules(); }
+            @Override Tuple<StyleRule>     rules()            { return Styles.Nimbus.rules(); }
             @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.NIMBUS; }
             @Override public PalettePreset preferredPalette() { return PalettePreset.NIMBUS; }
             @Override String               displayName()      { return "Nimbus"; }
@@ -1266,7 +1266,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *  least two palettes to be seen at all.
          */
         POLYMORPHIC {
-            @Override Tuple<StyleRule>     rules()            { return PolymorphicPreset.rules(); }
+            @Override Tuple<StyleRule>     rules()            { return Styles.Polymorphic.rules(); }
             @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.ADAPTIVE; }
             @Override public PalettePreset preferredPalette() { return PalettePreset.MATERIAL; }
             @Override String               displayName()      { return "Polymorphic"; }
