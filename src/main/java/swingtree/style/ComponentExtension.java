@@ -92,7 +92,7 @@ public final class ComponentExtension<C extends JComponent>
     private @Nullable Font _fontToScaleFrom = null;
     private float          _scaleTheFontWasWrittenFor = 1f;
     private boolean        _fontHasTheDefaultSize = false;
-    private @Nullable Font _fontLastWrittenByRescaling = null;
+    private boolean        _isRescalingFont = false;
 
     private StyleEngine     _styleEngine = StyleEngine.create();
     private StyleSource<C>  _styleSource  = StyleSource.create();
@@ -106,7 +106,7 @@ public final class ComponentExtension<C extends JComponent>
         _owner = Objects.requireNonNull(owner);
         _rememberFontToScaleFrom();
         owner.addPropertyChangeListener("font", event -> {
-            if ( !Objects.equals(event.getNewValue(), _fontLastWrittenByRescaling) )
+            if ( !_isRescalingFont )
                 _rememberFontToScaleFrom();
         });
         _localUiScaleFactor = SwingTree.get().getUiScaleView().onChange(From.ALL, it -> {
@@ -134,9 +134,12 @@ public final class ComponentExtension<C extends JComponent>
         if ( fontToScaleFrom == null )
             return;
         float currentScale = SwingTree.get().getUiScaleFactor();
-        Font rescaled = _rescaledTo(fontToScaleFrom, currentScale);
-        _fontLastWrittenByRescaling = rescaled;
-        _owner.setFont(rescaled);
+        _isRescalingFont = true;
+        try {
+            _owner.setFont(_rescaledTo(fontToScaleFrom, currentScale));
+        } finally {
+            _isRescalingFont = false;
+        }
     }
 
     private Font _rescaledTo( Font fontToScaleFrom, float currentScale ) {

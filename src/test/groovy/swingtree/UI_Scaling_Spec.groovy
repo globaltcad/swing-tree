@@ -1670,6 +1670,29 @@ class UI_Scaling_Spec extends Specification
             The second time it is two, the spinner has to look exactly the way it looked the
             first time. A scale factor means one thing only, and it cannot depend on which
             factors happened to be set before it.
+
+            What makes this hard is a second Swing listener, next to the one on the spinner
+            that the previous scenario describes. `JSpinner.DefaultEditor` listens to the
+            `"font"` property of its text field. Whenever a `UIResource` font arrives there
+            that differs from the font of the spinner, the editor at once overwrites the
+            text field with `new FontUIResource(spinner.getFont())`. It does so from inside
+            the `setFont(..)` call that delivered the differing font, before that call has
+            returned.
+
+            When the factor goes back to one, SwingTree hands the text field its remembered
+            factor-one font while the spinner still holds the doubled one, because the
+            spinner is rescaled a moment later. So the editor writes the doubled font back
+            onto the text field, from inside SwingTree's own call. Once the spinner is
+            rescaled too, `BasicSpinnerUI` copies its factor-one font onto the text field,
+            and the two agree again.
+
+            Had SwingTree told its own writes apart from foreign ones by comparing the font
+            that arrived with the font it had just written, the doubled font would count as
+            foreign and be remembered as the size at a factor of one, and the corrective
+            font that follows would compare equal to the one SwingTree wrote and be ignored.
+            The next doubling would then start from a size that is already doubled. This is
+            why a font counts as foreign only when it arrives while SwingTree is not
+            applying a scale factor, whatever its value.
         """
         given : 'A spinner, at a scale factor of one, wearing whatever font the look and feel gave it.'
             SwingTree.get().setUiScaleFactor(1f)
