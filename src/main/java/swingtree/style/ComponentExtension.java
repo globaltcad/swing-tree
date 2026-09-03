@@ -36,7 +36,7 @@ import java.util.function.Supplier;
 public final class ComponentExtension<C extends JComponent>
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(ComponentExtension.class);
-    /** Whether a class leaves border painting to {@link JComponent}, answered once per class, since a class cannot start overriding a method later. */
+    /** Remembers per component class whether its border is painted by {@link JComponent#paintBorder(Graphics)} rather than by an override of that method. A class cannot start overriding a method after it was loaded, so this answer is found once and then kept. */
     private static final Map<Class<?>, Boolean> _LEAVES_BORDER_PAINTING_TO_JCOMPONENT = new ConcurrentHashMap<>();
 
     private static long _anonymousPainterCounter = 0;
@@ -917,22 +917,27 @@ public final class ComponentExtension<C extends JComponent>
     /**
      *  This method scans the {@link JComponent} of this {@link ComponentExtension} to check if the
      *  "border paint step" is going to run. This is important, because when we render the component into a buffer,
-     *  we need to know what the last paint step isgoing to be before bliting the buffer onto the application window...
+     *  we need to know what the last paint step is going to be before blitting the buffer onto the application window...
      *  <p>
-     *  <b>Background:</b> {@link javax.swing.JComponent#paint(Graphics)} calls {@code paintComponent} first and
-     *  {@code paintBorder} straight after, and drops the two together when the component's
-     *  rectangle is fully obscured, so the second never goes missing on its own. A
-     *  {@link StyleAndAnimationBorder} is what turns that second call into this component's
-     *  border step.
+     *  <b>Why the caller wants to know:</b> the background paint step and the border paint step draw
+     *  into the same {@link BufferedImage}, and that image has to be blitted onto the window exactly
+     *  once, by whichever of those two steps wrote into the image last. So when this method returns
+     *  {@code true}, the background paint step only fills the image and leaves the blitting to the
+     *  border paint step, which blits once the border has been drawn into the image as well. When
+     *  this method returns {@code false}, the background paint step has to blit the image itself,
+     *  because no later step is going to, and an image which is never blitted leaves the component
+     *  missing from the window.
      *  <p>
-     *  A class which overrides {@code paintBorder} can drop it on its own after all:
-     *  {@link javax.swing.AbstractButton}, {@link javax.swing.JToolBar},
-     *  {@link javax.swing.JMenuBar}, {@link javax.swing.JPopupMenu} and
-     *  {@link javax.swing.JProgressBar} each override it to return without painting while
-     *  their {@code borderPainted} flag is off, and they are the only classes in
-     *  {@code javax.swing} which override it at all. Such a component keeps the hand-over in
-     *  the background step, because a background which is never handed over is a hole in the
-     *  window.
+     *  <b>How this is checked:</b> {@link JComponent#paint(Graphics)} calls
+     *  {@code paintComponent(Graphics)} and {@code paintBorder(Graphics)} inside one and the same
+     *  {@code if} block, so the border paint step is guaranteed to follow the background paint step
+     *  as long as two things hold: the component's border is a {@link StyleAndAnimationBorder}, and
+     *  {@code paintBorder(Graphics)} is unaltered, meaning it is still {@link JComponent}'s own
+     *  implementation. Reflection tells us the second one. An override may return without calling
+     *  {@code super.paintBorder(g)} and so never reach the border at all, which is what
+     *  {@link javax.swing.AbstractButton}, {@link javax.swing.JToolBar}, {@link javax.swing.JMenuBar},
+     *  {@link javax.swing.JPopupMenu} and {@link javax.swing.JProgressBar} do while their
+     *  {@code borderPainted} property is {@code false}.
      */
     private boolean _aBorderPaintStepIsGuaranteed() {
         return _owner.getBorder() instanceof StyleAndAnimationBorder &&
@@ -977,10 +982,11 @@ public final class ComponentExtension<C extends JComponent>
             return;
 
         /*
-            Only the part Swing asked to have repainted is handed over. The buffer lives in
-            ordinary heap memory while the destination is a server side surface, so every pixel
-            of this call is uploaded across that boundary - and a scrolled component's buffer is
-            as tall as its whole content, of which a single viewport's worth is on screen.
+            Only the part of the buffer which Swing asked to have repainted is drawn onto the
+            supplied graphics. The buffer lives in ordinary heap memory while the surface behind
+            those graphics lives in the graphics server, so every pixel of this draw call is
+            uploaded across that boundary - and the buffer of a scrolled component is as tall as
+            its whole content, of which only a single viewport's worth is ever on screen.
         */
         Rectangle visible = new Rectangle(0, 0, buffer.getWidth(), buffer.getHeight());
         Rectangle requested = graphics.getClipBounds();

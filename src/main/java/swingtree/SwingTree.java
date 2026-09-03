@@ -1416,19 +1416,30 @@ public void setCacheMode( SwingTreeInitConfig.CacheMode cacheMode ) {
         }
 
         /**
-         *  Records the user scale factor and republishes it under {@code "laf.scaleFactor"}, which
-         *  is where a layout manager looks for it. MigLayout reads that key through
-         *  {@link UIManager#get(Object)} once for every logical pixel value it turns into pixels,
-         *  and a logical pixel is the unit it gives an unqualified number in a constraint, as well
-         *  as the unit of every gap and inset it defaults to. So a laid out frame asks for it
+         *  Stores the given user scale factor in the {@link #scaleFactor} property of this
+         *  {@code UiScale} and additionally writes it into the {@link UIManager} defaults
+         *  under the key {@code "laf.scaleFactor"}, which is where MigLayout reads the scale factor from.
+         *  <p>
+         *  <b>Who reads that key:</b> the method
+         *  {@code net.miginfocom.swing.SwingComponentWrapper.getPixelUnitFactor(boolean)} calls
+         *  {@link UIManager#get(Object)} with {@code "laf.scaleFactor"} and multiplies MigLayout's
+         *  own scale factor with whatever number comes back. MigLayout calls that method every
+         *  time it converts a length written in <i>logical pixels</i> into device pixels, and
+         *  logical pixels are MigLayout's default unit: a bare number in a layout constraint is a
+         *  logical pixel, and so is every gap and every inset MigLayout falls back to when a
+         *  constraint does not specify one. Laying out a single window therefore reads this key
          *  hundreds of times.
          *  <p>
-         *  The value stored there is the number itself rather than a {@link UIDefaults.ActiveValue}
-         *  reading this field. {@link UIDefaults#get(Object)} hands a plain value back from its
-         *  first look up, while an active value costs a second look up under the table's own
-         *  monitor and a call into the supplier before there is an answer. Sparing the reader
-         *  that is why the writer republishes here instead: the factor only changes when a
-         *  display or a font does.
+         *  <b>Why a plain number is written and not a supplier:</b> the alternative is to write a
+         *  {@link UIDefaults.ActiveValue} which reads the {@link #scaleFactor} property every time the
+         *  defaults table is asked for the key. {@link UIDefaults#get(Object)} returns a plain stored
+         *  number immediately, whereas for a {@link UIDefaults.ActiveValue} that same method has to
+         *  look the key up a second time inside a block synchronized on the defaults table and then
+         *  call
+         *  {@link UIDefaults.ActiveValue#createValue(UIDefaults)} to obtain the number. MigLayout
+         *  would pay for that on every single one of the hundreds of reads described above.
+         *  Writing the number instead moves the work into this method, which is affordable because
+         *  the user scale factor only changes when the look and feel or the default font changes.
          */
         private void _publishScaleFactor( float scaleFactor ) {
             this.scaleFactor.set(scaleFactor);
