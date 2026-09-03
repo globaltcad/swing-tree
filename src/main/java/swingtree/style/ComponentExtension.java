@@ -20,7 +20,6 @@ import java.awt.image.BufferedImage;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -36,8 +35,22 @@ import java.util.function.Supplier;
 public final class ComponentExtension<C extends JComponent>
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(ComponentExtension.class);
-    /** Remembers per component class whether its border is painted by {@link JComponent#paintBorder(Graphics)} rather than by an override of that method. A class cannot start overriding a method after it was loaded, so this answer is found once and then kept. */
-    private static final Map<Class<?>, Boolean> _LEAVES_BORDER_PAINTING_TO_JCOMPONENT = new ConcurrentHashMap<>();
+    /**
+     *  Remembers per component class whether its border is painted by
+     *  {@code JComponent.paintBorder(Graphics)} rather than by an override of that method.
+     *  See {@link #_aBorderPaintStepIsGuaranteed} to understand why we keep track of that!
+     */
+    private static final ClassValue<Boolean> _LEAVES_BORDER_PAINTING_TO_JCOMPONENT = new ClassValue<Boolean>() {
+        @Override protected Boolean computeValue( Class<?> componentType ) {
+            for ( Class<?> type = componentType; type != null && type != JComponent.class; type = type.getSuperclass() )
+                for ( Method method : type.getDeclaredMethods() )
+                    if ( method.getName().equals("paintBorder")
+                            && method.getParameterCount() == 1
+                            && method.getParameterTypes()[0] == Graphics.class )
+                        return false; // We do not know its control flow! So no guarantees.
+            return true; // The standard control flow is guaranteed!
+        }
+    };
 
     private static long _anonymousPainterCounter = 0;
 
@@ -940,16 +953,8 @@ public final class ComponentExtension<C extends JComponent>
      *  {@code borderPainted} property is {@code false}.
      */
     private boolean _aBorderPaintStepIsGuaranteed() {
-        return _owner.getBorder() instanceof StyleAndAnimationBorder &&
-                _LEAVES_BORDER_PAINTING_TO_JCOMPONENT.computeIfAbsent(_owner.getClass(), ( Class<?> componentType ) -> {
-                    for ( Class<?> type = componentType; type != null && type != JComponent.class; type = type.getSuperclass() )
-                        for ( Method method : type.getDeclaredMethods() )
-                            if ( method.getName().equals("paintBorder")
-                                    && method.getParameterCount() == 1
-                                    && method.getParameterTypes()[0] == Graphics.class )
-                                return false; // We do not know about this control flow! So no guarantees.
-                    return true; // The standard control flow is guaranteed!
-                });
+        return _owner.getBorder() instanceof StyleAndAnimationBorder
+            && _LEAVES_BORDER_PAINTING_TO_JCOMPONENT.get(_owner.getClass());
     }
 
     /**
