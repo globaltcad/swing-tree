@@ -46,7 +46,7 @@ import java.util.Objects;
  *          popup would have been standing on in-frame rather than an unrelated white.</li>
  *  </ul>
  *  The window is filled with the palette's ground colour in the two opaque modes for a second
- *  reason: a preset which paints the popup in a translucent colour - {@link GlassmorphicPreset}
+ *  reason: a preset which paints the popup in a translucent colour - {@link Styles.Glassmorphic}
  *  does - composites it against whatever the window background is, and against the default white
  *  every such sheet washes out.
  */

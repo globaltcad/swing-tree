@@ -666,7 +666,7 @@ interface Symbols
 
         /**
          *  How far the light and the shadow move from the surface they fall on, in channel steps.
-         *  Fixed steps rather than fractions, for the reason {@link SoftUiPreset} spells out: a
+         *  Fixed steps rather than fractions, for the reason {@link Styles.SoftUi} spells out: a
          *  fraction of the way to white lifts a dark palette five times as far as a light one, which
          *  is what turns every thumb and rim into a glowing bar on Midnight.
          */
@@ -2469,10 +2469,10 @@ interface Symbols
         private static void stepper(
             Graphics2D g, Palette p, int w, int h, boolean enabled, boolean rollover, boolean pressed
         ) {
-            Color tone = enabled ? NimbusPreset.accentedTone(p, pressed, rollover) : p.surfaceDisabled();
-            g.setPaint(NimbusPreset.relief(enabled, true).paint(0, h, tone));
+            Color tone = enabled ? Styles.Nimbus.accentedTone(p, pressed, rollover) : p.surfaceDisabled();
+            g.setPaint(Styles.Nimbus.relief(enabled, true).paint(0, h, tone));
             g.fillRect(0, 0, w, h);
-            g.setColor(enabled ? NimbusPreset.accentedEdge(p) : NimbusPreset.surfaceEdge(p, false, false, false));
+            g.setColor(enabled ? Styles.Nimbus.accentedEdge(p) : Styles.Nimbus.surfaceEdge(p, false, false, false));
             g.fillRect(0, 0, 1, h);
         }
 
@@ -2515,10 +2515,10 @@ interface Symbols
                                 r.x + pad + 0.5f, r.y + pad + 0.5f,
                                 r.width - 2 * pad - 1, r.height - 2 * pad - 1, arc, arc
                             );
-            Color tone = NimbusPreset.accentedTone(p, active, false);
+            Color tone = Styles.Nimbus.accentedTone(p, active, false);
             g.setPaint(NimbusRelief.LIT_ACCENTED.paint(r.y + pad, r.height - 2f * pad, tone));
             g.fill(pill);
-            g.setColor(NimbusPreset.accentedEdge(p));
+            g.setColor(Styles.Nimbus.accentedEdge(p));
             g.setStroke(new BasicStroke(1f));
             g.draw(pill);
         }
@@ -2579,13 +2579,13 @@ interface Symbols
             // Rounded at the top only: the bottom edge has to meet the page squarely, or the tab and
             // the page it belongs to read as two separate things.
             Shape tab = new RoundRectangle2D.Float(x + 0.5f, y + 0.5f, w - 1, h - 1 + arc, arc, arc);
-            Color tone = selected ? NimbusPreset.accentedTone(p, false, false)
+            Color tone = selected ? Styles.Nimbus.accentedTone(p, false, false)
                                   : rollover ? p.surfaceHover() : p.surface();
             // A tab that is not the one you are on has no bottom lip to catch the light: it runs under
             // the page rather than standing beside it.
             g.setPaint(( selected ? NimbusRelief.LIT_ACCENTED : NimbusRelief.STRIP ).paint(y, h, tone));
             g.fill(tab);
-            g.setColor(selected ? NimbusPreset.accentedEdge(p) : p.border());
+            g.setColor(selected ? Styles.Nimbus.accentedEdge(p) : p.border());
             g.setStroke(new BasicStroke(1f));
             g.draw(tab);
         }
@@ -2624,12 +2624,12 @@ interface Symbols
         ) {
             LafUtilities.antialiasShapes(g);
             boolean accented = enabled && on;
-            Color   tone     = accented ? NimbusPreset.accentedTone(p, pressed, rollover)
-                                        : NimbusPreset.surfaceTone(p, enabled, pressed, rollover);
-            g.setPaint(NimbusPreset.relief(enabled, accented).paint(y, h, tone));
+            Color   tone     = accented ? Styles.Nimbus.accentedTone(p, pressed, rollover)
+                                        : Styles.Nimbus.surfaceTone(p, enabled, pressed, rollover);
+            g.setPaint(Styles.Nimbus.relief(enabled, accented).paint(y, h, tone));
             g.fill(shape);
-            Color edge = accented ? NimbusPreset.accentedEdge(p)
-                                  : NimbusPreset.surfaceEdge(p, enabled, pressed, rollover);
+            Color edge = accented ? Styles.Nimbus.accentedEdge(p)
+                                  : Styles.Nimbus.surfaceEdge(p, enabled, pressed, rollover);
             g.setStroke(new BasicStroke(1f));
             g.setColor(edge);
             g.draw(shape);
@@ -2640,7 +2640,7 @@ interface Symbols
             Rectangle bounds = shape.getBounds();
             Shape     clip   = g.getClip();
             g.clipRect(bounds.x, y + h - Math.max(1, h / 3), bounds.width + 1, h);
-            g.setColor(NimbusPreset.contactEdge(edge));
+            g.setColor(Styles.Nimbus.contactEdge(edge));
             g.draw(shape);
             g.setClip(clip);
         }
