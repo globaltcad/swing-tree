@@ -1702,11 +1702,10 @@ class UI_Scaling_Spec extends Specification
             What makes this hard is a second Swing listener, next to the one on the spinner
             that the previous scenario describes. Java 8 does not have it, Java 11 and every
             later version do: `JSpinner.DefaultEditor` listens to the `"font"` property of
-            its text field. Whenever a `UIResource` font arrives there
-            that differs from the font of the spinner, the editor at once overwrites the
-            text field with `new FontUIResource(spinner.getFont())`. It does so from inside
-            the `setFont(..)` call that delivered the differing font, before that call has
-            returned.
+            its text field. Whenever a `UIResource` font arrives there that differs from the
+            font of the spinner, the editor at once overwrites the text field with
+            `new FontUIResource(spinner.getFont())`. It does so from inside the `setFont(..)`
+            call that delivered the differing font, before that call has returned.
 
             When the factor goes back to one, SwingTree hands the text field its remembered
             factor-one font while the spinner still holds the doubled one, because the
