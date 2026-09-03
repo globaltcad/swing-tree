@@ -50,13 +50,18 @@ import java.util.concurrent.TimeUnit
     pane occupies the same rectangle in both renderings and the two can be compared pixel for
     pixel.
 
-    The last scenario is about a different way the same picture can go wrong. Swing repaints as
-    little as it can get away with: move the pointer onto a button and the only thing redrawn
-    is that button's rectangle, expressed as a clip on the graphics everything is painted
-    through. A filter still has to read the whole of the parent underneath its pane, because a
-    blur gathers colour from further away than the pixel it is computing. So what a pane shows
-    inside the repainted rectangle has to be the same whether that rectangle was the whole
-    window or a corner of one button.
+    A second way the same picture can go wrong is the clip. Swing repaints as little as it can
+    get away with: move the pointer onto a button and the only thing redrawn is that button's
+    rectangle, expressed as a clip on the graphics everything is painted through. A filter still
+    has to read the whole of the parent underneath its pane, because a blur gathers colour from
+    further away than the pixel it is computing. So what a pane shows inside the repainted
+    rectangle has to be the same whether that rectangle was the whole window or a corner of one
+    button.
+
+    A third thing which can go wrong is not in the picture but in the parent it was taken from.
+    Being read through a filter is supposed to leave a component exactly as it was, so the half
+    of a parent which nobody filters has to come out the same whether or not somebody filters
+    the other half.
 
 ''')
 @Subject([UI])

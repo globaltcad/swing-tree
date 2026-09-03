@@ -36,9 +36,8 @@ import java.util.function.Supplier;
 public final class ComponentExtension<C extends JComponent>
 {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(ComponentExtension.class);
-    /** Answered once per component class, since a class cannot start overriding a method later. */
+    /** Whether a class leaves border painting to {@link JComponent}, answered once per class, since a class cannot start overriding a method later. */
     private static final Map<Class<?>, Boolean> _LEAVES_BORDER_PAINTING_TO_JCOMPONENT = new ConcurrentHashMap<>();
-
 
     private static long _anonymousPainterCounter = 0;
 
@@ -916,52 +915,52 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
-     *  Whether the border step of this paint cycle is going to render into the buffer as well,
-     *  which is what lets the background step leave the hand-over to it and the buffer reach the
-     *  destination once per frame instead of twice.
+     *  This method scans the {@link JComponent} of this {@link ComponentExtension} to check if the
+     *  "border paint step" is going to run. This is important, because when we render the component into a buffer,
+     *  we need to know what the last paint step isgoing to be before bliting the buffer onto the application window...
      *  <p>
-     *  {@link javax.swing.JComponent#paint(Graphics)} calls {@code paintComponent} and
-     *  {@code paintBorder} together, under one condition and in that order, and a
-     *  {@link StyleAndAnimationBorder} is what turns the second of those into this component's
-     *  border step. So the two run in the same cycle unless the component overrides
-     *  {@code paintBorder} - which several Swing classes do, to skip it while a property of
-     *  theirs is off. Those keep the hand-over in the background step, because a background
-     *  which is never handed over is a hole in the window.
+     *  <b>Background:</b> {@link javax.swing.JComponent#paint(Graphics)} calls {@code paintComponent} first and
+     *  {@code paintBorder} straight after, and drops the two together when the component's
+     *  rectangle is fully obscured, so the second never goes missing on its own. A
+     *  {@link StyleAndAnimationBorder} is what turns that second call into this component's
+     *  border step.
+     *  <p>
+     *  A class which overrides {@code paintBorder} can drop it on its own after all:
+     *  {@link javax.swing.AbstractButton}, {@link javax.swing.JToolBar},
+     *  {@link javax.swing.JMenuBar}, {@link javax.swing.JPopupMenu} and
+     *  {@link javax.swing.JProgressBar} each override it to return without painting while
+     *  their {@code borderPainted} flag is off, and they are the only classes in
+     *  {@code javax.swing} which override it at all. Such a component keeps the hand-over in
+     *  the background step, because a background which is never handed over is a hole in the
+     *  window.
      */
     private boolean _aBorderPaintStepIsGuaranteed() {
-        return _owner.getBorder() instanceof StyleAndAnimationBorder
-            && _LEAVES_BORDER_PAINTING_TO_JCOMPONENT.computeIfAbsent(
-                    _owner.getClass(), ComponentExtension::_leavesBorderPaintingToJComponent
-               );
-    }
-
-    private static boolean _leavesBorderPaintingToJComponent( Class<?> componentType ) {
-        for ( Class<?> type = componentType; type != null && type != JComponent.class; type = type.getSuperclass() )
-            for ( Method method : type.getDeclaredMethods() )
-                if ( method.getName().equals("paintBorder")
-                     && method.getParameterCount() == 1
-                     && method.getParameterTypes()[0] == Graphics.class )
-                    return false;
-        return true;
+        return _owner.getBorder() instanceof StyleAndAnimationBorder &&
+                _LEAVES_BORDER_PAINTING_TO_JCOMPONENT.computeIfAbsent(_owner.getClass(), ( Class<?> componentType ) -> {
+                    for ( Class<?> type = componentType; type != null && type != JComponent.class; type = type.getSuperclass() )
+                        for ( Method method : type.getDeclaredMethods() )
+                            if ( method.getName().equals("paintBorder")
+                                    && method.getParameterCount() == 1
+                                    && method.getParameterTypes()[0] == Graphics.class )
+                                return false; // We do not know about this control flow! So no guarantees.
+                    return true; // The standard control flow is guaranteed!
+                });
     }
 
     /**
-     *  Paints one step of this component into the buffer its filtering children read, and hands
-     *  the buffer to the destination when this step is the last one to write into it.
-     *
-     * @param skipRenderingIntoSuppliedGraphics whether to not draw the buffer onto {@code graphics} afterwards; a background
-     *                 step which knows a border step is coming leaves that to it, so that the
-     *                 buffer crosses into the destination surface once per frame instead of twice
+     *  Paints one step of this component into the supplied buffer its filtering children read from, and
+     *  if {@code skipRenderingIntoSuppliedGraphics} is {@code false} it also renders the buffer into the
+     *  supplied {@link Graphics2D} pipeline...
      */
     private void _renderInto(
-        BufferedImage buffer, PaintStep step, Graphics graphics,
-        Consumer<Graphics2D> superPaint, boolean startsANewFrame, boolean skipRenderingIntoSuppliedGraphics
+        BufferedImage buffer, PaintStep step, Graphics graphics, Consumer<Graphics2D> superPaint,
+        boolean startANewFrameByWipingBuffer, boolean skipRenderingIntoSuppliedGraphics
     ) {
         Graphics2D bufferGraphics = buffer.createGraphics();
         StyleUtil.transferConfigurations((Graphics2D) graphics, bufferGraphics);
         bufferGraphics.setClip(graphics.getClip());
         try {
-            if ( startsANewFrame ) {
+            if ( startANewFrameByWipingBuffer ) {
                 // We re-use the parent buffer if possible, so we need to wipe it (mostly if the parent is non-opaque).
                 Composite formerComposite = bufferGraphics.getComposite();
                 bufferGraphics.setComposite(AlphaComposite.Clear);
@@ -974,15 +973,15 @@ public final class ComponentExtension<C extends JComponent>
         } finally {
             bufferGraphics.dispose();
         }
+        if ( skipRenderingIntoSuppliedGraphics )
+            return;
+
         /*
             Only the part Swing asked to have repainted is handed over. The buffer lives in
             ordinary heap memory while the destination is a server side surface, so every pixel
             of this call is uploaded across that boundary - and a scrolled component's buffer is
             as tall as its whole content, of which a single viewport's worth is on screen.
         */
-        if ( skipRenderingIntoSuppliedGraphics )
-            return;
-
         Rectangle visible = new Rectangle(0, 0, buffer.getWidth(), buffer.getHeight());
         Rectangle requested = graphics.getClipBounds();
         if ( requested != null )

@@ -1417,15 +1417,18 @@ public void setCacheMode( SwingTreeInitConfig.CacheMode cacheMode ) {
 
         /**
          *  Records the user scale factor and republishes it under {@code "laf.scaleFactor"}, which
-         *  is where a layout manager looks for it - MigLayout reads that key through
-         *  {@link UIManager#get(Object)} for every component it measures.
+         *  is where a layout manager looks for it. MigLayout reads that key through
+         *  {@link UIManager#get(Object)} once for every logical pixel value it turns into pixels,
+         *  and a logical pixel is the unit it gives an unqualified number in a constraint, as well
+         *  as the unit of every gap and inset it defaults to. So a laid out frame asks for it
+         *  hundreds of times.
          *  <p>
          *  The value stored there is the number itself rather than a {@link UIDefaults.ActiveValue}
-         *  which reads this field. A look up of an active value takes the defaults table's own
-         *  monitor and runs the supplier, on every one of those measurements; a plain number is
-         *  returned from the table. What that costs the reader is why the writer republishes here
-         *  instead: the factor changes when a display or a font does, and a measurement happens
-         *  hundreds of times per laid out frame.
+         *  reading this field. {@link UIDefaults#get(Object)} hands a plain value back from its
+         *  first look up, while an active value costs a second look up under the table's own
+         *  monitor and a call into the supplier before there is an answer. Sparing the reader
+         *  that is why the writer republishes here instead: the factor only changes when a
+         *  display or a font does.
          */
         private void _publishScaleFactor( float scaleFactor ) {
             this.scaleFactor.set(scaleFactor);
