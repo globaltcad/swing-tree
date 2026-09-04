@@ -119,7 +119,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
 
     private static <M> M _entryFetcher(int i, Vals<M> vals) {
         M v = _modelFetcher(i, vals);
-        return ( v != null ? (M) v : (M)_entryModel() );
+        return ( v != null ? v : (M)_entryModel() );
     }
 
     @Override
@@ -166,7 +166,7 @@ public class UIForScrollPanels<P extends JScrollPanels> extends UIForAnyScrollPa
 
     private static <M> M _entryFetcher(int i, Tuple<M> tuple) {
         M v = _modelFetcher(i, tuple);
-        return ( v != null ? (M) v : (M)_entryModel() );
+        return ( v != null ? v : (M)_entryModel() );
     }
 
     private <M> void _addAllEntriesAt(

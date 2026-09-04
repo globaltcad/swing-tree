@@ -1675,62 +1675,100 @@ public final class UI extends UIFactoryMethods
             without requiring the user to override the paint methods.
     */
 
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JComponent} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class Component extends JComponent implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JPanel} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class Panel extends JPanel implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JLabel} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class Label extends JLabel implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JTextField} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class TextField extends JTextField implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JTextArea} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class TextArea extends JTextArea implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JCheckBox} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class CheckBox extends JCheckBox implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JButton} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class Button extends JButton implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JToggleButton} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class ToggleButton extends JToggleButton implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JRadioButton} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class RadioButton extends JRadioButton implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /**
-     *  {@inheritDoc}
+     *  A {@link JComboBox} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
      *  @param <E> The type of items in the combo box.
      */
     public static class ComboBox<E> extends JComboBox<E> implements StylableComponent {
@@ -1739,7 +1777,9 @@ public final class UI extends UIFactoryMethods
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
     /**
-     *  {@inheritDoc}
+     *  A {@link JList} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
      *  @param <E> The type of items in the list view.
      */
     public static class ListView<E> extends JList<E> implements StylableComponent {
@@ -1747,13 +1787,21 @@ public final class UI extends UIFactoryMethods
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JTable} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class Table extends JTable implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JTableHeader} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class TableHeader extends JTableHeader implements StylableComponent {
         private @Nullable Function<Integer, String> _toolTipTextSupplier;
         public TableHeader() { super(); }
@@ -1796,55 +1844,91 @@ public final class UI extends UIFactoryMethods
             return  ( retStr.isEmpty() ? super.getToolTipText(e) : retStr );
         }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JSlider} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class Slider extends JSlider implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JSeparator} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class Separator extends JSeparator implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JPopupMenu} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class PopupMenu extends JPopupMenu implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JMenuItem} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class MenuItem extends JMenuItem implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JRadioButtonMenuItem} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class RadioButtonMenuItem extends JRadioButtonMenuItem implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JCheckBoxMenuItem} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
      public static class CheckBoxMenuItem extends JCheckBoxMenuItem implements StylableComponent {
          @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
          @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
      }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JMenu} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class Menu extends JMenu implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JMenuBar} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class MenuBar extends JMenuBar implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JScrollPane} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class ScrollPane extends JScrollPane implements StylableComponent {
         public ScrollPane() { this(null); }
         public ScrollPane(java.awt.@Nullable Component view) {
@@ -1855,77 +1939,129 @@ public final class UI extends UIFactoryMethods
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JTabbedPane} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class TabbedPane extends JTabbedPane implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JToolBar} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class ToolBar extends JToolBar implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JToolTip} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class ToolTip extends JToolTip implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JTree} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class Tree extends JTree implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JTextPane} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class TextPane extends JTextPane implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JSpinner} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class Spinner extends JSpinner implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JSplitPane} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class SplitPane extends JSplitPane implements StylableComponent {
         SplitPane( Align align ) { super(align.forSplitPane()); }
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JPasswordField} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class PasswordField extends JPasswordField implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JProgressBar} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class ProgressBar extends JProgressBar implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JEditorPane} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class EditorPane extends JEditorPane implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
+    /**
+     *  A {@link JFormattedTextField} which implements {@link StylableComponent}, so that SwingTree
+     *  can paint the {@link Layer#BACKGROUND} and {@link Layer#FOREGROUND} style layers on
+     *  it directly instead of having to install a custom {@code ComponentUI} delegate.
+     */
     public static class FormattedTextField extends JFormattedTextField implements StylableComponent {
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g){ paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }
     }
-    /** {@inheritDoc} */
-    public static class Box extends JBox {/* Already implemented */}
-    /** {@inheritDoc} */
-    public static class SplitButton extends JSplitButton {/* Already implemented */}
+    /**
+     *  A {@link JBox} under the {@code UI} namespace, so that the other component classes
+     *  nested here can be reached without a second import. {@link JBox} already implements
+     *  {@link StylableComponent}, which is why this subclass adds nothing.
+     */
+    public static class Box extends JBox {}
+    /**
+     *  A {@link JSplitButton} under the {@code UI} namespace, so that the other component
+     *  classes nested here can be reached without a second import. {@link JSplitButton}
+     *  already implements {@link StylableComponent}, which is why this subclass adds nothing.
+     */
+    public static class SplitButton extends JSplitButton {}
 
     /**
      * This {@code Color} class is a refined and more complete/modernized

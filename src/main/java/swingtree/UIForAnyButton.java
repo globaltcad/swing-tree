@@ -1640,8 +1640,8 @@ public abstract class UIForAnyButton<I, B extends AbstractButton> extends UIForA
         Insets insets = thisComponent.getInsets();
         float fittedWidth = Math.max(thisComponent.getWidth(),  thisComponent.getMinimumSize().width);
         float fittedHeight = Math.max(thisComponent.getHeight(), thisComponent.getMinimumSize().height);
-        fittedWidth  = Math.max(0, UI.unscale((float) fittedWidth - insets.left - insets.right)); // We unscale because the icon will be scaled internally
-        fittedHeight = Math.max(0, UI.unscale((float) fittedHeight - insets.top  - insets.bottom));
+        fittedWidth  = Math.max(0, UI.unscale(fittedWidth - insets.left - insets.right)); // We unscale because the icon will be scaled internally
+        fittedHeight = Math.max(0, UI.unscale(fittedHeight - insets.top  - insets.bottom));
         int iconWidth  = icon.getIconWidth();
         int iconHeight = icon.getIconHeight();
         // We need to determine and return a base size to be scaled later on...

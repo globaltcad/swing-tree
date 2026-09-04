@@ -627,7 +627,11 @@ public final class UIForTree<I, N, T extends JTree> extends UIForAnySwing<UIForT
         }
     }
 
-    /** Unwraps the node handle and renders the node by the rules declared for its type. */
+    /**
+     *  Unwraps the node handle and renders the node by the rules declared for its type.
+     *  @param <I> The identity type of the nodes, which selection paths are made of.
+     *  @param <N> The common node type of the tree.
+     */
     private static final class DefaultBoundRenderer<I, N> extends DefaultTreeCellRenderer
     {
         private final PropertyTreeModel<I, N, ?> _model;

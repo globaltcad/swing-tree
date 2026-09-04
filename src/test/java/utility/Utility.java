@@ -71,6 +71,7 @@ public class Utility
         return log.toString();
     }
 
+    @SuppressWarnings("fallthrough") // FLAT_BRIGHT sets FlatLaf up and then takes the generic path.
     public static void setLaF(LaF lookAndFeel) {
         switch ( lookAndFeel ) {
             case DEFAULT: break;

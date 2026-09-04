@@ -1475,7 +1475,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         private static boolean _carriesAPopup( JComponent component ) {
             Container parent = component.getParent();
             if ( parent instanceof JLayeredPane
-              && ((JLayeredPane) parent).getLayer(component) >= JLayeredPane.POPUP_LAYER )
+              && JLayeredPane.getLayer(component) >= JLayeredPane.POPUP_LAYER )
                 return true;
             return component.getComponentCount() == 1
                 && ( component.getComponent(0) instanceof JPopupMenu

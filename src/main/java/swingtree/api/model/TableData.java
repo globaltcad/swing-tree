@@ -260,12 +260,18 @@ public final class TableData
         return _editability.isEditable();
     }
 
-    /** Returns the number of rows in this table. @return The row count. */
+    /**
+     *  Returns the number of rows in this table.
+     *  @return The row count.
+     */
     public int getRowCount() {
         return _rowCount;
     }
 
-    /** Returns the number of columns in this table. @return The column count. */
+    /**
+     *  Returns the number of columns in this table.
+     *  @return The column count.
+     */
     public int getColumnCount() {
         return _columnCount;
     }
