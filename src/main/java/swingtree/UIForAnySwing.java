@@ -3061,6 +3061,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                ._this();
     }
 
+    @SuppressWarnings("DoNotCall")
     protected final void _setMinWidth( C component, int width ) {
         int currentHeight = component.getMinimumSize().height;
         if ( !component.isMinimumSizeSet() && LibraryInternalCrossPackageStyleUtil._currentLookAndFeelHasBadScaling() )
@@ -3109,6 +3110,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._this();
     }
 
+    @SuppressWarnings("DoNotCall")
     protected final void _setMinHeight( C component, int height ) {
         int currentWidth = component.getMinimumSize().width;
         if ( !component.isMinimumSizeSet() && LibraryInternalCrossPackageStyleUtil._currentLookAndFeelHasBadScaling() )
@@ -3238,6 +3240,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._this();
     }
 
+    @SuppressWarnings("DoNotCall")
     private void _setMaxWidth( C component, int width ) {
         int currentHeight = component.getMaximumSize().height;
         if ( !component.isMaximumSizeSet() && LibraryInternalCrossPackageStyleUtil._currentLookAndFeelHasBadScaling() )
@@ -3285,6 +3288,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._this();
     }
 
+    @SuppressWarnings("DoNotCall")
     private void _setMaxHeight( C component, int height ) {
         int currentWidth = component.getMaximumSize().width;
         if ( !component.isMaximumSizeSet() && LibraryInternalCrossPackageStyleUtil._currentLookAndFeelHasBadScaling() )
@@ -3423,6 +3427,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._this();
     }
 
+    @SuppressWarnings("DoNotCall")
     protected final void _setPrefWidth( C component, int width ) {
         int currentHeight = component.getPreferredSize().height;
         if ( !component.isPreferredSizeSet() && LibraryInternalCrossPackageStyleUtil._currentLookAndFeelHasBadScaling() )
@@ -3472,6 +3477,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._this();
     }
 
+    @SuppressWarnings("DoNotCall")
     private void _setPrefHeight( C component, int height ) {
         int currentWidth = component.getPreferredSize().width;
         if ( !component.isPreferredSizeSet() && LibraryInternalCrossPackageStyleUtil._currentLookAndFeelHasBadScaling() )
