@@ -44,13 +44,13 @@ public final class Member implements HasId<UUID> {
         String trimmed = name.trim();
         if ( trimmed.isEmpty() )
             return "?";
-        String[] parts = trimmed.split("\\s+");
+        String[] parts = trimmed.split("\\s+", -1);
         if ( parts.length == 1 )
             return parts[0].substring(0, 1).toUpperCase(Locale.ROOT);
         return (parts[0].substring(0, 1) + parts[parts.length - 1].substring(0, 1)).toUpperCase(Locale.ROOT);
     }
 
     public String firstName() {
-        return name.split("\\s+")[0];
+        return name.split("\\s+", -1)[0];
     }
 }

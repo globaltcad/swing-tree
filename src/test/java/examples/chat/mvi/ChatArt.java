@@ -46,7 +46,7 @@ public final class ChatArt {
     public static String roomSigil( Room room, Theme.Palette p ) {
         String tint  = hex(p.hue(room.hue()));
         String wash  = hex(p.hueWash(room.hue()));
-        String glyph = glyphFor(Math.abs(room.name().hashCode()) % 4, tint);
+        String glyph = glyphFor(Math.floorMod(room.name().hashCode(), 4), tint);
         return "<svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'>"
              +   "<rect x='0' y='0' width='24' height='24' rx='8' fill='" + wash + "'/>"
              +   glyph

@@ -56,8 +56,8 @@ public final class ChatBot {
         String[] bank = bankFor(room);
         String   text = yourMessage.trim().toLowerCase(Locale.ROOT);
         if ( text.endsWith("?") )
-            return "Good question. " + bank[Math.abs(text.hashCode()) % bank.length];
-        int index = Math.abs(text.hashCode() + room.messages().size()) % (bank.length + SMALL_TALK.length);
+            return "Good question. " + bank[Math.floorMod(text.hashCode(), bank.length)];
+        int index = Math.floorMod(text.hashCode() + room.messages().size(), bank.length + SMALL_TALK.length);
         return index < bank.length ? bank[index] : SMALL_TALK[index - bank.length];
     }
 

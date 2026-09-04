@@ -2441,7 +2441,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @see #withStyle(Val, ItemStyler) For styling based on the item of a property, in a thread safe fashion.
      * @see #withStyle(Val, LifeTime, AnimatedItemStyler) For a property driven style which animates towards each new item.
      * @see #withTransitionalStyle(Val, LifeTime, AnimatedStyler) For a style transitioning back and forth as a boolean property flips.
-     * @see #withTransitoryStyle(Observable, LifeTime, AnimatedStyler) For a temporary style animation triggered by an {@link Observable}.
+     * @see #withTransitoryStyle(Observable, LifeTime, AnimatedStyler) For a temporary style animation triggered by an {@code Observable}.
      */
     public final I withStyle( Styler<C> styler ) {
         NullUtil.nullArgCheck(styler, "styler", Styler.class);
@@ -2530,7 +2530,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @see #withStyle(Styler) For styles which do not depend on property state.
      * @see #withStyle(Val, LifeTime, AnimatedItemStyler) For styles which animate towards the new item.
      * @see #withTransitionalStyle(Val, LifeTime, AnimatedStyler) For a style transitioning back and forth as a boolean property flips.
-     * @see #withTransitoryStyle(Observable, LifeTime, AnimatedStyler) For a temporary style animation triggered by an {@link Observable}.
+     * @see #withTransitoryStyle(Observable, LifeTime, AnimatedStyler) For a temporary style animation triggered by an {@code Observable}.
      * @see sprouts.Viewable#of(Object, java.util.function.Function) The composite view builder used to merge many properties into one styler (Sprouts 2.7.0+).
      */
     public final <T> I withStyle( Val<T> item, ItemStyler<T, C> styler ) {
@@ -2616,7 +2616,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @see #withStyle(Styler) For styles which do not depend on property state.
      * @see #withStyle(Val, ItemStyler) For property driven styles without a transition animation.
      * @see #withTransitionalStyle(Val, LifeTime, AnimatedStyler) For bidirectional transitions driven by a boolean property.
-     * @see #withTransitoryStyle(Observable, LifeTime, AnimatedStyler) For a temporary style animation triggered by an {@link Observable}.
+     * @see #withTransitoryStyle(Observable, LifeTime, AnimatedStyler) For a temporary style animation triggered by an {@code Observable}.
      * @see sprouts.Viewable#of(Object, java.util.function.Function) The composite view builder used to merge many properties into one styler (Sprouts 2.7.0+).
      */
     public final <T> I withStyle( Val<T> item, LifeTime transitionLifeTime, AnimatedItemStyler<T, C> styler ) {
@@ -2660,7 +2660,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *               transition between the 2 states.
      *
      * @return This builder instance, which enables fluent method chaining.
-     * @see #withTransitoryStyle(Observable, LifeTime, AnimatedStyler) For a temporary style animation triggered by an {@link Observable} (e.g. an {@link Event}).
+     * @see #withTransitoryStyle(Observable, LifeTime, AnimatedStyler) For a temporary style animation triggered by an {@code Observable} (e.g. an {@code Event}).
      * @see #withStyle(Styler) For a plain style which does not depend on property state.
      * @see #withStyle(Val, ItemStyler) For a style following the item of a property.
      * @see #withStyle(Val, LifeTime, AnimatedItemStyler) For a style which animates towards the item of a property.

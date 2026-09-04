@@ -616,10 +616,10 @@ public final class ChatView extends JPanel {
     ) {
         return
             box(FILL).withLayout("fill, ins 3 0 0 0, gap 4, hidemode 3", "[][][][][grow][][]")
-            .add(reactionChip(entry, id, Message.REACTIONS[0]))
-            .add(reactionChip(entry, id, Message.REACTIONS[1]))
-            .add(reactionChip(entry, id, Message.REACTIONS[2]))
-            .add(reactionChip(entry, id, Message.REACTIONS[3]))
+            .add(reactionChip(entry, id, Message.REACTIONS.get(0)))
+            .add(reactionChip(entry, id, Message.REACTIONS.get(1)))
+            .add(reactionChip(entry, id, Message.REACTIONS.get(2)))
+            .add(reactionChip(entry, id, Message.REACTIONS.get(3)))
             .add(GROW_X, box())
             .add(toggleButton("✎", isEditing).group(Skin.ICON_BUTTON)
                  .isVisibleIf(revealed).withTooltip("Edit this message in place"))

@@ -124,7 +124,7 @@ public final class UIForPopup<P extends JPopupMenu> extends UIForAnySwing<UIForP
                     _onPopupClose(thisComponent,
                         e -> _runInApp(()->{
                             try {
-                                action.accept(new ComponentDelegate<>((P) thisComponent, e));
+                                action.accept(new ComponentDelegate<>(thisComponent, e));
                             } catch (Exception ex) {
                                 log.error(SwingTree.get().logMarker(), "Error while executing action on popup close!", ex);
                             }

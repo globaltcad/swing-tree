@@ -7,6 +7,7 @@ package examples.laf.app;
  *  {@link #completion()} turns it into the fraction that feeds the workload bar
  *  in the status line.
  */
+@SuppressWarnings("EnumOrdinal") // The declaration order of the stations *is* the order of the workshop.
 public enum Stage
 {
     DRAFTED(   "Drafted"),
