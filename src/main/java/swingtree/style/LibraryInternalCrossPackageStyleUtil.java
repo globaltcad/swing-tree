@@ -49,7 +49,7 @@ public final class LibraryInternalCrossPackageStyleUtil {
     }
 
     private static boolean _needsNimbusBorderInsetsCorrection(Component c) {
-        if ( UI.currentLookAndFeel() == UI.LookAndFeel.NIMBUS ) {
+        if ( UI.LookAndFeel.current() == UI.LookAndFeel.NIMBUS ) {
             return c instanceof JButton || c instanceof JToggleButton;
         }
         return false;
