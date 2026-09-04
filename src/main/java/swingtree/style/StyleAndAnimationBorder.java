@@ -178,7 +178,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         else
         {
             if (
-                UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.NIMBUS) &&
+                UI.LookAndFeel.current().isOneOf(UI.LookAndFeel.NIMBUS) &&
                 _compExt.getOwner() instanceof JTextComponent
             ) {
                 Insets formerInsets = _formerBorder.getBorderInsets(_compExt.getOwner());
