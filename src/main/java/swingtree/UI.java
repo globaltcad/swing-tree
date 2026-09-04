@@ -59,9 +59,6 @@ import java.util.function.Supplier;
  */
 public final class UI extends UIFactoryMethods
 {
-    private static final Logger log = LoggerFactory.getLogger(UI.class);
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     /**
      *  An enum set of all the available swing cursors which
      *  map to the cursor type id.
