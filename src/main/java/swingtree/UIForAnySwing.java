@@ -3063,7 +3063,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     protected final void _setMinWidth( C component, int width ) {
         int currentHeight = component.getMinimumSize().height;
-        if ( !component.isMinimumSizeSet() && UI.LookAndFeel.current().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+        if ( !component.isMinimumSizeSet() && LibraryInternalCrossPackageStyleUtil._currentLookAndFeelHasBadScaling() )
             currentHeight = UI.scale(currentHeight);
         component.setMinimumSize(new Dimension(UI.scale(width), currentHeight));
     }
@@ -3111,7 +3111,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     protected final void _setMinHeight( C component, int height ) {
         int currentWidth = component.getMinimumSize().width;
-        if ( !component.isMinimumSizeSet() && UI.LookAndFeel.current().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+        if ( !component.isMinimumSizeSet() && LibraryInternalCrossPackageStyleUtil._currentLookAndFeelHasBadScaling() )
             currentWidth = UI.scale(currentWidth);
         component.setMinimumSize(new Dimension(currentWidth, UI.scale(height)));
     }
@@ -3240,7 +3240,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     private void _setMaxWidth( C component, int width ) {
         int currentHeight = component.getMaximumSize().height;
-        if ( !component.isMaximumSizeSet() && UI.LookAndFeel.current().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+        if ( !component.isMaximumSizeSet() && LibraryInternalCrossPackageStyleUtil._currentLookAndFeelHasBadScaling() )
             currentHeight = UI.scale(currentHeight);
         component.setMaximumSize(new Dimension(UI.scale(width), currentHeight));
     }
@@ -3287,7 +3287,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     private void _setMaxHeight( C component, int height ) {
         int currentWidth = component.getMaximumSize().width;
-        if ( !component.isMaximumSizeSet() && UI.LookAndFeel.current().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+        if ( !component.isMaximumSizeSet() && LibraryInternalCrossPackageStyleUtil._currentLookAndFeelHasBadScaling() )
             currentWidth = UI.scale(currentWidth);
         component.setMaximumSize(new Dimension(currentWidth, UI.scale(height)));
     }
@@ -3425,7 +3425,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     protected final void _setPrefWidth( C component, int width ) {
         int currentHeight = component.getPreferredSize().height;
-        if ( !component.isPreferredSizeSet() && UI.LookAndFeel.current().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+        if ( !component.isPreferredSizeSet() && LibraryInternalCrossPackageStyleUtil._currentLookAndFeelHasBadScaling() )
             currentHeight = UI.scale(currentHeight);
         component.setPreferredSize(new Dimension(UI.scale(width), currentHeight));
     }
@@ -3474,7 +3474,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
 
     private void _setPrefHeight( C component, int height ) {
         int currentWidth = component.getPreferredSize().width;
-        if ( !component.isPreferredSizeSet() && UI.LookAndFeel.current().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+        if ( !component.isPreferredSizeSet() && LibraryInternalCrossPackageStyleUtil._currentLookAndFeelHasBadScaling() )
             currentWidth = UI.scale(currentWidth);
         component.setPreferredSize(new Dimension(currentWidth, UI.scale(height)));
     }

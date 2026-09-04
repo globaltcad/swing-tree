@@ -26,6 +26,11 @@ public final class LibraryInternalCrossPackageStyleUtil {
     private static final Insets ZERO_INSETS = new Insets(0,0,0,0);
 
     @DoNotCall @Deprecated
+    public static boolean _currentLookAndFeelHasBadScaling() {
+        return LookAndFeelType.current().isOneOf(LookAndFeelType.METAL, LookAndFeelType.NIMBUS);
+    }
+
+    @DoNotCall @Deprecated
     public static Result<Insets> _onlyBorderInsetsOf(@Nullable Border b, java.awt.Component c) {
         return Result.ofTry(Insets.class, ()->{
             if ( b == null )
@@ -49,7 +54,7 @@ public final class LibraryInternalCrossPackageStyleUtil {
     }
 
     private static boolean _needsNimbusBorderInsetsCorrection(Component c) {
-        if ( UI.LookAndFeel.current() == UI.LookAndFeel.NIMBUS ) {
+        if ( LookAndFeelType.current() == LookAndFeelType.NIMBUS ) {
             return c instanceof JButton || c instanceof JToggleButton;
         }
         return false;

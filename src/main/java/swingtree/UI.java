@@ -1102,47 +1102,6 @@ public final class UI extends UIFactoryMethods
         }
     }
 
-    /**
-     *  Set of enum instances defining common types of Swing look and feels.
-     *  Use {@link LookAndFeel#current()} to check which look and feel is currently active.
-     */
-    @Immutable
-    public enum LookAndFeel implements UIEnum<LookAndFeel> {
-        OTHER,
-        METAL,
-        FLAT_LAF,
-        NIMBUS;
-
-        /**
-         *  SwingTree tries to be compatible with different look and feels, which is
-         *  why it maintains a set of constants for the most common look and feels through
-         *  the {@link LookAndFeel} enum.
-         *  This method returns the current look and feel of the application
-         *  or {@link LookAndFeel#OTHER} if the look and feel is not recognized.
-         * @return One of
-         *            <ul>
-         *                <li>{@link LookAndFeel#FLAT_LAF}</li>
-         *                <li>{@link LookAndFeel#NIMBUS}</li>
-         *                <li>{@link LookAndFeel#METAL}</li>
-         *            </ul>
-         *            or {@link LookAndFeel#OTHER} if none of the above
-         *            was recognized.
-         */
-        public static LookAndFeel current() {
-            try {
-                String laf = UIManager.getLookAndFeel().getClass().getName();
-                if ( laf.contains("FlatLaf") ) return FLAT_LAF;
-                if ( laf.contains("Nimbus")  ) return NIMBUS;
-                if ( laf.contains("Metal")   ) return METAL;
-            }
-            catch (Exception e) {
-                log.warn(SwingTree.get().logMarker(), "Failed to determine current look and feel.", e);
-            }
-
-            return OTHER;
-        }
-    }
-
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     /**
