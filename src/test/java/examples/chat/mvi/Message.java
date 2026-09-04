@@ -6,6 +6,7 @@ import lombok.With;
 import lombok.experimental.Accessors;
 import sprouts.Association;
 import sprouts.HasId;
+import sprouts.Tuple;
 import sprouts.ValueSet;
 
 import java.time.LocalDateTime;
@@ -45,7 +46,7 @@ public final class Message implements HasId<UUID> {
      *  emoji falls back to a colour font the JDK cannot always reach, and shows
      *  up as an empty box on a lot of Linux desktops.
      */
-    public static final String[] REACTIONS = { "★", "♥", "☺", "✿" };
+    public static final Tuple<String> REACTIONS = Tuple.of(String.class, "★", "♥", "☺", "✿");
 
     private final UUID                       id;
     private final UUID                       authorId;

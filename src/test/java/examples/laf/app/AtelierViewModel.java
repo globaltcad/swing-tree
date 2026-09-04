@@ -9,6 +9,7 @@ import swingtree.UI;
 import swingtree.api.model.TableData;
 
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
@@ -493,7 +494,7 @@ public final class AtelierViewModel
      *  @return a view model that has recorded it
      */
     public AtelierViewModel note( String line ) {
-        String stamped = CLOCK.format(LocalTime.now()) + "  " + line;
+        String stamped = CLOCK.format(LocalTime.now(ZoneId.systemDefault())) + "  " + line;
         String updated = journal.isEmpty() ? stamped : journal + "\n" + stamped;
         String[] lines = updated.split("\n", -1);
         if ( lines.length > JOURNAL_LINES ) {

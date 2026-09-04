@@ -213,6 +213,7 @@ final class StyleLayerCache
             LayerRenderConfPartition.PAINTERS
         );
 
+        @SuppressWarnings("ImmutableEnumChecker") // A Tuple is immutable, it is simply not annotated as such.
         private final Tuple<LayerRenderConfPartition>    _cachedParts;
         private final @Nullable LayerRenderConfPartition _uncachedPart;
 
