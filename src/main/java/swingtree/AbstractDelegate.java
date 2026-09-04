@@ -1200,7 +1200,7 @@ public class AbstractDelegate<C extends JComponent>
     public final AbstractDelegate<C> setCursor( UI.Cursor cursor ) {
         Objects.requireNonNull(cursor);
         UI.run(()->{
-            _component().setCursor(Cursor.getPredefinedCursor(cursor.type));
+            _component().setCursor(cursor.toAWTCursor());
         });
         return this;
     }

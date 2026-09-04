@@ -81,7 +81,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
 
     private static final ShadowConf _NONE = new ShadowConf(
                                                     Offset.none(),0, 0,
-                                                    null, true, UI.ShadowType.BLUR
+                                                    null, true, UI.ShadowFalloff.BLUR
                                                 );
 
     public static ShadowConf none() { return _NONE; }
@@ -92,7 +92,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
         float               shadowSpreadRadius,
         @Nullable Color     shadowColor,
         boolean             isOutset,
-        UI.ShadowType       type
+        UI.ShadowFalloff       falloff
     ) {
         if (
             offset == _NONE._offset &&
@@ -100,11 +100,11 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
             shadowSpreadRadius == _NONE._spreadRadius &&
             shadowColor == _NONE._color &&
             isOutset == _NONE._isOutset &&
-            type == _NONE._type
+            falloff == _NONE._falloff
         )
             return _NONE;
         else
-            return new ShadowConf(offset, shadowBlurRadius, shadowSpreadRadius, shadowColor, isOutset, type);
+            return new ShadowConf(offset, shadowBlurRadius, shadowSpreadRadius, shadowColor, isOutset, falloff);
     }
 
     private final Offset              _offset;
@@ -112,7 +112,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
     private final float               _spreadRadius;
     private final @Nullable Color     _color;
     private final boolean             _isOutset;
-    private final UI.ShadowType       _type;
+    private final UI.ShadowFalloff       _falloff;
     private final LazyRef<Pooled<ShadowConf>> _renderCacheKey = new LazyRef<>(this, s ->
         /*
             The blended color stops of a shadow gradient (see StyleRenderer) depend solely on
@@ -122,7 +122,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
             (e.g. an animated shadow) of an otherwise equal shadow to share one self-cleaning,
             weakly referenced render cache entry. This mirrors NoiseConf#withoutOffsetForRenderCacheAccess.
         */
-        new Pooled<>(ShadowConf.of(Offset.none(), 0f, 0f, s._color, s._isOutset, s._type)).intern()
+        new Pooled<>(ShadowConf.of(Offset.none(), 0f, 0f, s._color, s._isOutset, s._falloff)).intern()
     );
 
 
@@ -132,14 +132,14 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
         float               shadowSpreadRadius,
         @Nullable Color     shadowColor,
         boolean             isOutset,
-        UI.ShadowType       type
+        UI.ShadowFalloff       falloff
     ) {
         _offset           = Objects.requireNonNull(offset);
         _blurRadius       = shadowBlurRadius;
         _spreadRadius     = shadowSpreadRadius;
         _color            = shadowColor;
         _isOutset         = isOutset;
-        _type             = Objects.requireNonNull(type);
+        _falloff          = Objects.requireNonNull(falloff);
     }
 
     float horizontalOffset() { return _offset.x(); }
@@ -156,7 +156,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
 
     boolean isInset() { return !_isOutset; }
 
-    UI.ShadowType type() { return _type; }
+    UI.ShadowFalloff falloff() { return _falloff; }
 
     /**
      *  Returns the interned, geometry-independent key under which this shadow's
@@ -175,7 +175,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      * @return A new {@link ShadowConf} with the specified horizontal shadow offset.
      */
     public ShadowConf horizontalOffset( double horizontalShadowOffset ) {
-        return ShadowConf.of(_offset.withX((float) horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset, _type);
+        return ShadowConf.of(_offset.withX((float) horizontalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset, _falloff);
     }
 
     /**
@@ -187,7 +187,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      * @return A new {@link ShadowConf} with the specified vertical shadow offset.
      */
     public ShadowConf verticalOffset( double verticalShadowOffset ) {
-        return ShadowConf.of(_offset.withY((float) verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset, _type);
+        return ShadowConf.of(_offset.withY((float) verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset, _falloff);
     }
 
     /**
@@ -203,7 +203,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      * @return A new {@link ShadowConf} with the specified horizontal and vertical shadow offsets.
      */
     public ShadowConf offset( double horizontalShadowOffset, double verticalShadowOffset ) {
-        return ShadowConf.of(Offset.of(horizontalShadowOffset, verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset, _type);
+        return ShadowConf.of(Offset.of(horizontalShadowOffset, verticalShadowOffset), _blurRadius, _spreadRadius, _color, _isOutset, _falloff);
     }
 
     /**
@@ -216,7 +216,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      * @return A new {@link ShadowConf} with the specified horizontal and vertical shadow offsets.
      */
     public ShadowConf offset( double shadowOffset ) {
-        return ShadowConf.of(Offset.of(shadowOffset, shadowOffset), _blurRadius, _spreadRadius, _color, _isOutset, _type);
+        return ShadowConf.of(Offset.of(shadowOffset, shadowOffset), _blurRadius, _spreadRadius, _color, _isOutset, _falloff);
     }
 
     /**
@@ -230,7 +230,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      * @return A new {@link ShadowConf} with the specified blur radius.
      */
     public ShadowConf blurRadius( double shadowBlurRadius ) {
-        return ShadowConf.of(_offset, (float) shadowBlurRadius, _spreadRadius, _color, _isOutset, _type);
+        return ShadowConf.of(_offset, (float) shadowBlurRadius, _spreadRadius, _color, _isOutset, _falloff);
     }
 
     /**
@@ -246,7 +246,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      * @return A new {@link ShadowConf} with the specified spread radius.
      */
     public ShadowConf spreadRadius( double shadowSpreadRadius ) {
-        return ShadowConf.of(_offset, _blurRadius, (float) shadowSpreadRadius, _color, _isOutset, _type);
+        return ShadowConf.of(_offset, _blurRadius, (float) shadowSpreadRadius, _color, _isOutset, _falloff);
     }
 
     /**
@@ -260,7 +260,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
             shadowColor = null;
         if ( Objects.equals(shadowColor, _color) )
             return this;
-        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, shadowColor, _isOutset, _type);
+        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, shadowColor, _isOutset, _falloff);
     }
 
     /**
@@ -290,7 +290,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
             log.error(SwingTree.get().logMarker(), "Failed to parse color string: '{}'", shadowColor, e);
             return this; // We want to avoid side effects other than a wrong color
         }
-        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, newColor, _isOutset, _type);
+        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, newColor, _isOutset, _falloff);
     }
 
     /**
@@ -341,7 +341,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      * @return A new {@link ShadowConf} with the specified inset/outset state.
      */
     public ShadowConf isInset(boolean shadowInset ) {
-        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, !shadowInset, _type);
+        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, !shadowInset, _falloff);
     }
 
     /**
@@ -360,29 +360,29 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
      * @return A new {@link ShadowConf} with the specified outset/inset state.
      */
     public ShadowConf isOutset( boolean shadowOutset ) {
-        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, shadowOutset, _type);
+        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, shadowOutset, _falloff);
     }
 
     /**
      *  Defines the shape of the shadow's "falloff curve", that is to say, the way in
      *  which the shadow color fades from its full strength into full transparency across
-     *  the blur region. The default is {@link UI.ShadowType#BLUR}, which mimics the
+     *  the blur region. The default is {@link UI.ShadowFalloff#BLUR}, which mimics the
      *  natural soft edge of a Gaussian-blurred shadow, whereas the other types model
-     *  different real world shadow phenomena (an area-light {@link UI.ShadowType#PENUMBRA},
-     *  a {@link UI.ShadowType#CONTACT} shadow, a diffuse {@link UI.ShadowType#GLOW})
-     *  or, in the case of {@link UI.ShadowType#FLAT}, fade at a plain constant rate.
-     *  (see {@link UI.ShadowType} for a description, real world analogue and exact math
-     *  of each available type)
+     *  different real world shadow phenomena (an area-light {@link UI.ShadowFalloff#PENUMBRA},
+     *  a {@link UI.ShadowFalloff#CONTACT} shadow, a diffuse {@link UI.ShadowFalloff#GLOW})
+     *  or, in the case of {@link UI.ShadowFalloff#FLAT}, fade at a plain constant rate.
+     *  (see {@link UI.ShadowFalloff} for a description, real world analogue and exact math
+     *  of each available falloff)
      *
-     * @param type The {@link UI.ShadowType} defining how the shadow color fades
-     *             from full strength into transparency across the blur region.
-     * @return A new {@link ShadowConf} with the specified shadow type.
+     * @param falloff The {@link UI.ShadowFalloff} defining how the shadow color fades
+     *                from full strength into transparency across the blur region.
+     * @return A new {@link ShadowConf} with the specified falloff curve.
      */
-    public ShadowConf type( UI.ShadowType type ) {
-        Objects.requireNonNull(type);
-        if ( type == _type )
+    public ShadowConf falloff( UI.ShadowFalloff falloff ) {
+        Objects.requireNonNull(falloff);
+        if ( falloff == _falloff )
             return this;
-        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, _isOutset, type);
+        return ShadowConf.of(_offset, _blurRadius, _spreadRadius, _color, _isOutset, falloff);
     }
 
     ShadowConf _scale( double scaleFactor ) {
@@ -392,7 +392,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
                             (float) (_spreadRadius * scaleFactor),
                             _color,
                             _isOutset,
-                            _type
+                            _falloff
                         );
     }
 
@@ -404,7 +404,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
         hash = 31 * hash + Float.hashCode(_spreadRadius);
         hash = 31 * hash + Objects.hashCode(_color);
         hash = 31 * hash + (_isOutset ? 1 : 0);
-        hash = 31 * hash + _type.hashCode();
+        hash = 31 * hash + _falloff.hashCode();
         return hash;
     }
 
@@ -419,7 +419,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
                _spreadRadius     == rhs._spreadRadius     &&
                Objects.equals(_color, rhs._color)         &&
                _isOutset         == rhs._isOutset         &&
-               _type       == rhs._type;
+               _falloff       == rhs._falloff;
     }
 
     @Override
@@ -433,7 +433,7 @@ public final class ShadowConf implements Simplifiable<ShadowConf>
                     "spreadRadius="     + _toString(_spreadRadius) + ", " +
                     "color="            + StyleUtil.toString(_color) + ", " +
                     "isInset="          + !_isOutset + ", " +
-                    "type="             + _type +
+                    "falloff="          + _falloff +
                 "]";
     }
 

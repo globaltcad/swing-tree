@@ -3,7 +3,6 @@ package swingtree.style;
 import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import swingtree.SwingTree;
-import swingtree.UI;
 import swingtree.api.Styler;
 
 import javax.swing.AbstractButton;
@@ -178,7 +177,7 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         else
         {
             if (
-                UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.NIMBUS) &&
+                LookAndFeelType.current().isOneOf(LookAndFeelType.NIMBUS) &&
                 _compExt.getOwner() instanceof JTextComponent
             ) {
                 Insets formerInsets = _formerBorder.getBorderInsets(_compExt.getOwner());

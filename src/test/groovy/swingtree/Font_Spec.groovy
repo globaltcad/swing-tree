@@ -205,7 +205,7 @@ class Font_Spec extends Specification
                           .verticalAlignment(UI.VerticalAlignment.CENTER)
             })
             var font2 = UI.Font.of("Ubuntu", UI.FontStyle.ITALIC, 13).with((Configurator<FontConf>){ FontConf it ->
-                return it.alignment(UI.Alignment.TOP_CENTER)
+                return it.alignment(UI.Placement.TOP)
             })
             var font3 = UI.Font.of("Dialog", UI.FontStyle.PLAIN, 17).with((Configurator<FontConf>){ FontConf it ->
                 return it.horizontalAlignment(UI.HorizontalAlignment.RIGHT)
@@ -290,7 +290,7 @@ class Font_Spec extends Specification
         """
         given : 'We create various fonts with custom alignments:'
             var font1 = UI.Font.of("Buggie", UI.FontStyle.BOLD_ITALIC, 7).with((Configurator<FontConf>){ FontConf it ->
-                return it.alignment(UI.Alignment.CENTER_LEFT)
+                return it.alignment(UI.Placement.LEFT)
             })
             var font2 = UI.Font.of("Ubuntu", UI.FontStyle.ITALIC, 13).with((Configurator<FontConf>){ FontConf it ->
                 return it.horizontalAlignment(UI.HorizontalAlignment.CENTER)
@@ -335,7 +335,7 @@ class Font_Spec extends Specification
                           .verticalAlignment(UI.VerticalAlignment.CENTER)
             })
             var font2 = UI.Font.of("Ubuntu", UI.FontStyle.ITALIC, 13).with((Configurator<FontConf>){ FontConf it ->
-                return it.alignment(UI.Alignment.TOP_CENTER)
+                return it.alignment(UI.Placement.TOP)
             })
             var font3 = UI.Font.of("Dialog", UI.FontStyle.PLAIN, 17).with((Configurator<FontConf>){ FontConf it ->
                 return it.horizontalAlignment(UI.HorizontalAlignment.RIGHT)
@@ -464,7 +464,7 @@ class Font_Spec extends Specification
                             .verticalAlignment(UI.VerticalAlignment.TOP)
             })
             var font3 = UI.Font.of("Dialog", UI.FontStyle.PLAIN, 17).with((Configurator<FontConf>){ FontConf it ->
-                return it.alignment(UI.Alignment.BOTTOM_RIGHT)
+                return it.alignment(UI.Placement.BOTTOM_RIGHT)
             })
             var fontProp1 = Var.of(font1)
             var fontProp2 = Var.of(font2)

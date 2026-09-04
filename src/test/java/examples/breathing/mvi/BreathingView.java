@@ -210,7 +210,7 @@ public final class BreathingView extends Panel {
                 )
             )
             .add("center, growx, width 160::360, wmin 0, gaptop 8",
-                progressBar(Align.HORIZONTAL, phaseProgress)
+                progressBar(Axis.HORIZONTAL, phaseProgress)
             )
             .add("center, growx, width 160::360, wmin 0, gaptop 2",
                 label(sessionDone.viewAsString( d -> "Session " + Math.round(d * 100) + "% complete" ))
@@ -407,7 +407,7 @@ public final class BreathingView extends Panel {
                 )
             )
             .add("growx, pushx, wmin 0",
-                slider(Align.HORIZONTAL, min, max, value)
+                slider(Axis.HORIZONTAL, min, max, value)
             )
             .add("width 42!",
                 label(value.viewAsString( d -> formatSeconds(name, d) ))

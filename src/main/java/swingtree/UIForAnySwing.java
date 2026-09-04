@@ -1597,7 +1597,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I withCursor( UI.Cursor type ) {
         NullUtil.nullArgCheck( type, "type", UI.Cursor.class );
-        return _with( c -> c.setCursor( new java.awt.Cursor( type.type ) ) )._this();
+        return _with( c -> c.setCursor( type.toAWTCursor() ) )._this();
     }
 
     /**
@@ -1612,10 +1612,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck( type, "type", Val.class );
         NullUtil.nullPropertyCheck(type, "type", "Null is not allowed to model a cursor type.");
         return _withOnShow( type, (c,t) -> {
-                    c.setCursor( new java.awt.Cursor( t.type ) );
+                    c.setCursor( t.toAWTCursor() );
                 })
                 ._with( c -> {
-                    c.setCursor( new java.awt.Cursor( type.orElseThrowUnchecked().type ) );
+                    c.setCursor( type.orElseThrowUnchecked().toAWTCursor() );
                 })
                 ._this();
     }
@@ -1635,10 +1635,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck( type, "type", UI.Cursor.class );
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the cursor selection state.");
         return _withOnShow( condition, (c,v) -> {
-                    c.setCursor( new java.awt.Cursor( v ? type.type : UI.Cursor.DEFAULT.type ) );
+                    c.setCursor( ( v ? type : UI.Cursor.DEFAULT ).toAWTCursor() );
                 })
                 ._with( c -> {
-                    c.setCursor( new java.awt.Cursor( condition.orElseThrowUnchecked() ? type.type : UI.Cursor.DEFAULT.type ) );
+                    c.setCursor( ( condition.orElseThrowUnchecked() ? type : UI.Cursor.DEFAULT ).toAWTCursor() );
                 })
                 ._this();
     }
@@ -1663,11 +1663,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     _onShow( condition, thisComponent, (c,v) -> type.fireChange(From.VIEW_MODEL) );
                     _onShow( type, thisComponent, (c,v) -> {
                         if ( baseCursor[0] == null ) baseCursor[0] = c.getCursor();
-                        c.setCursor( new java.awt.Cursor( condition.orElseThrowUnchecked() ? v.type : baseCursor[0].getType() ) );
+                        c.setCursor( condition.orElseThrowUnchecked() ? v.toAWTCursor() : baseCursor[0] );
                     });
                 })
                 ._with( c -> {
-                    c.setCursor( new java.awt.Cursor( condition.orElseThrowUnchecked() ? type.orElseThrowUnchecked().type : UI.Cursor.DEFAULT.type ) );
+                    c.setCursor( ( condition.orElseThrowUnchecked() ? type.orElseThrowUnchecked() : UI.Cursor.DEFAULT ).toAWTCursor() );
                 })
                 ._this();
     }
@@ -3061,9 +3061,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                ._this();
     }
 
+    @SuppressWarnings("DoNotCall")
     protected final void _setMinWidth( C component, int width ) {
         int currentHeight = component.getMinimumSize().height;
-        if ( !component.isMinimumSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+        if ( !component.isMinimumSizeSet() && LibraryInternalCrossPackageStyleUtil._currentLookAndFeelHasBadScaling() )
             currentHeight = UI.scale(currentHeight);
         component.setMinimumSize(new Dimension(UI.scale(width), currentHeight));
     }
@@ -3109,9 +3110,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._this();
     }
 
+    @SuppressWarnings("DoNotCall")
     protected final void _setMinHeight( C component, int height ) {
         int currentWidth = component.getMinimumSize().width;
-        if ( !component.isMinimumSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+        if ( !component.isMinimumSizeSet() && LibraryInternalCrossPackageStyleUtil._currentLookAndFeelHasBadScaling() )
             currentWidth = UI.scale(currentWidth);
         component.setMinimumSize(new Dimension(currentWidth, UI.scale(height)));
     }
@@ -3238,9 +3240,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._this();
     }
 
+    @SuppressWarnings("DoNotCall")
     private void _setMaxWidth( C component, int width ) {
         int currentHeight = component.getMaximumSize().height;
-        if ( !component.isMaximumSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+        if ( !component.isMaximumSizeSet() && LibraryInternalCrossPackageStyleUtil._currentLookAndFeelHasBadScaling() )
             currentHeight = UI.scale(currentHeight);
         component.setMaximumSize(new Dimension(UI.scale(width), currentHeight));
     }
@@ -3285,9 +3288,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._this();
     }
 
+    @SuppressWarnings("DoNotCall")
     private void _setMaxHeight( C component, int height ) {
         int currentWidth = component.getMaximumSize().width;
-        if ( !component.isMaximumSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+        if ( !component.isMaximumSizeSet() && LibraryInternalCrossPackageStyleUtil._currentLookAndFeelHasBadScaling() )
             currentWidth = UI.scale(currentWidth);
         component.setMaximumSize(new Dimension(currentWidth, UI.scale(height)));
     }
@@ -3423,9 +3427,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._this();
     }
 
+    @SuppressWarnings("DoNotCall")
     protected final void _setPrefWidth( C component, int width ) {
         int currentHeight = component.getPreferredSize().height;
-        if ( !component.isPreferredSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+        if ( !component.isPreferredSizeSet() && LibraryInternalCrossPackageStyleUtil._currentLookAndFeelHasBadScaling() )
             currentHeight = UI.scale(currentHeight);
         component.setPreferredSize(new Dimension(UI.scale(width), currentHeight));
     }
@@ -3472,9 +3477,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._this();
     }
 
+    @SuppressWarnings("DoNotCall")
     private void _setPrefHeight( C component, int height ) {
         int currentWidth = component.getPreferredSize().width;
-        if ( !component.isPreferredSizeSet() && UI.currentLookAndFeel().isOneOf(UI.LookAndFeel.METAL, UI.LookAndFeel.NIMBUS) )
+        if ( !component.isPreferredSizeSet() && LibraryInternalCrossPackageStyleUtil._currentLookAndFeelHasBadScaling() )
             currentWidth = UI.scale(currentWidth);
         component.setPreferredSize(new Dimension(currentWidth, UI.scale(height)));
     }

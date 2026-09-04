@@ -72,7 +72,7 @@ public class NamedFieldsView extends JPanel {
                     UI.icon(funnel).withMinSize(19, 19)
                 )
                 .add("span, growx, pushx",
-                    UI.separator(UI.Align.HORIZONTAL)
+                    UI.separator(UI.Axis.HORIZONTAL)
                 )
                 .add("shrinkx", UI.label("Min dim sizing:"))
                 .add("growx, pushx",
@@ -92,7 +92,7 @@ public class NamedFieldsView extends JPanel {
                 )
             )
             .add("span, growx, pushx",
-                UI.separator(UI.Align.HORIZONTAL).withMinHeight(18)
+                UI.separator(UI.Axis.HORIZONTAL).withMinHeight(18)
             )
             .add(
                 UI.box("fill")

@@ -99,7 +99,7 @@ class Styled_Component_Border_Inset_Spec extends Specification
             SwingTree.get().setUiScaleFactor(uiScale)
         and : 'Now we create a slider UI with a custom styler lambda:'
             var ui =
-                    UI.slider(UI.Align.HORIZONTAL, 0, 100, 50)
+                    UI.slider(UI.Axis.HORIZONTAL, 0, 100, 50)
                     .withStyle( it -> it
                         .size(280, 38)
                         .prefSize(280, 38)

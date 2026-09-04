@@ -245,7 +245,7 @@ public final class ParentFilterView extends Panel
                 UI.label(value.viewAsString( v -> name + "   " + v + unit ))
                 .withStyle( it -> it.fontSize(12).fontColor(FAINT_INK) )
             )
-            .add("growx, wmin 0", UI.slider(UI.Align.HORIZONTAL, min, max, value));
+            .add("growx, wmin 0", UI.slider(UI.Axis.HORIZONTAL, min, max, value));
     }
 
     // ── One specimen ──────────────────────────────────────────────────────────

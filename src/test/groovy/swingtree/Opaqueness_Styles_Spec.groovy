@@ -252,7 +252,7 @@ class Opaqueness_Styles_Spec extends Specification
         """
         given : 'We create a slider UI declaration with a transparent background color:'
             var ui =
-                    UI.slider(UI.Align.HORIZONTAL)
+                    UI.slider(UI.Axis.HORIZONTAL)
                     .withStyle(it -> it
                         .backgroundColor(new java.awt.Color(40, 210, 220, 100))
                     )
@@ -802,7 +802,7 @@ class Opaqueness_Styles_Spec extends Specification
             var isOn = Var.of(false)
         and : 'Then we create the slider based UI declaration, which is styled to temporarily have an opaque background color:'
             var ui =
-                    UI.slider(UI.Align.HORIZONTAL)
+                    UI.slider(UI.Axis.HORIZONTAL)
                     .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it
                         .backgroundColor(new java.awt.Color(40, 210, 220, (int)(255 * state.progress())))
                     )
@@ -860,7 +860,7 @@ class Opaqueness_Styles_Spec extends Specification
             var isOn = Var.of(false)
         and : 'Then we create the slider based UI declaration, which is styled to either have an undefined or transparent background color:'
             var ui =
-                    UI.slider(UI.Align.HORIZONTAL)
+                    UI.slider(UI.Axis.HORIZONTAL)
                     .withTransitionalStyle(isOn, LifeTime.of(1, TimeUnit.MILLISECONDS), (state, it) -> it
                         .backgroundColor(
                             state.progress() == 0

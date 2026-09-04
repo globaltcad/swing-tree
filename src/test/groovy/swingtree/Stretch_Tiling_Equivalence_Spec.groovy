@@ -624,8 +624,8 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
         given : 'The soft-UI style recipe which first revealed the problem, on a very long panel:'
             int W = 3000, H = 900
             var styler = { it.borderRadius(28).margin(10)
-                             .shadow("bright", s -> s.color(new Color(255, 255, 255, 40)).offset(-8, -8).type(UI.ShadowType.PENUMBRA))
-                             .shadow("dark",   s -> s.color(new Color(0, 0, 0, 110)).offset(4, 4).type(UI.ShadowType.PENUMBRA))
+                             .shadow("bright", s -> s.color(new Color(255, 255, 255, 40)).offset(-8, -8).falloff(UI.ShadowFalloff.PENUMBRA))
+                             .shadow("dark",   s -> s.color(new Color(0, 0, 0, 110)).offset(4, 4).falloff(UI.ShadowFalloff.PENUMBRA))
                              .shadowBlurRadius(17).shadowSpreadRadius(-5).shadowIsInset(true) }
         and : 'The classic software rendering as the reference:'
             var classic = renderedClassically(W, H, styler)

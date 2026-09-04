@@ -66,7 +66,7 @@ public class TextObstacleViewer extends Panel
                 .add("pushx, growx", checkBox("Wrap lines", wrapLines))
             )
             .add("push, grow",
-                splitPane(Align.HORIZONTAL)
+                splitPane(Axis.HORIZONTAL)
                 .add(
                     panel("fill").withMinSize(80, 20)
                     .withBackground(Color.LIGHTSTEELBLUE.brighter())

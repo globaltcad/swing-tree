@@ -118,7 +118,7 @@ public class AnimatedFoldingPanelsExample {
             frame.setPreferredSize(new Dimension(400, 600));
             return
                 UI.panel("fill, wrap", "", "[][grow]")
-                .add("growx", UI.slider(UI.Align.HORIZONTAL, 10, 300, height))
+                .add("growx", UI.slider(UI.Axis.HORIZONTAL, 10, 300, height))
                 .add(UI.GROW,
                     UI.tabbedPane().add(
                         UI.tab("Tab 1").add(
@@ -155,7 +155,7 @@ public class AnimatedFoldingPanelsExample {
         JPanel panel = new JPanel();
 
         UI.of(panel).withLayout("fill", "", "[][grow]")
-            .add("wrap, growx, span 2", UI.slider(UI.Align.HORIZONTAL, 10, 300, height))
+            .add("wrap, growx, span 2", UI.slider(UI.Axis.HORIZONTAL, 10, 300, height))
             .add(UI.GROW,
                 UI.panel().withBackground(new Color(0xF4A0A0))
                 .add(UI.panel().withBackground(Color.lightGray)

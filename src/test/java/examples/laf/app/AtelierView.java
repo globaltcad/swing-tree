@@ -448,7 +448,7 @@ public final class AtelierView extends JPanel
                 .add(button("▸  Advance").isEnabledIf(hasSelection)
                      .withTooltip("Move the selected commission to the next station")
                      .onClick( it -> vm.update(AtelierViewModel::advanceSelected) ))
-                .add(separator(Align.VERTICAL))
+                .add(separator(Axis.VERTICAL))
                 .add(button("✕  Strike out").group(Variant.DANGER).isEnabledIf(hasSelection)
                      .withTooltip("Take the selected commission out of the book")
                      .onClick( it -> confirmAndStrike() ))
@@ -619,7 +619,7 @@ public final class AtelierView extends JPanel
             )
             .add(GROW_X.and("wmin 0"), filterRow())
             .add(GROW.and(PUSH).and("wmin 0"),
-                splitPane(Align.VERTICAL).withDivisionOf(bookSplit).withDividerSize(9)
+                splitPane(Axis.VERTICAL).withDivisionOf(bookSplit).withDividerSize(9)
                 .add(bookTable())
                 .add(loomFloor())
             );
@@ -700,7 +700,7 @@ public final class AtelierView extends JPanel
                 .withTooltip("Show the commission this loom is weaving")
                 .onClick( it -> vm.update( m -> m.select(entry.get().orderRef()) ) )
             )
-            .add("cell 0 1 3 1, growx, wmin 0", progressBar(Align.HORIZONTAL, made));
+            .add("cell 0 1 3 1, growx, wmin 0", progressBar(Axis.HORIZONTAL, made));
     }
 
     // ── Right: the editor ─────────────────────────────────────────────────
@@ -779,13 +779,13 @@ public final class AtelierView extends JPanel
             .add(fieldLabel("Sett"))
             .add(GROW_X.and("wmin 0"),
                 box(FILL).withLayout("fill, ins 0, gap 8", "[grow][40!]")
-                .add(GROW_X.and("wmin 0"), slider(Align.HORIZONTAL, 8, 40, sett).isEnabledIf(hasSelection))
+                .add(GROW_X.and("wmin 0"), slider(Axis.HORIZONTAL, 8, 40, sett).isEnabledIf(hasSelection))
                 .add(label(sett.viewAsString( s -> s + "/cm" )).group(Skin.META))
             )
             .add(fieldLabel("Width"))
             .add(GROW_X.and("wmin 0"),
                 box(FILL).withLayout("fill, ins 0, gap 8", "[grow][40!]")
-                .add(GROW_X.and("wmin 0"), slider(Align.HORIZONTAL, 40, 180, widthCm).isEnabledIf(hasSelection))
+                .add(GROW_X.and("wmin 0"), slider(Axis.HORIZONTAL, 40, 180, widthCm).isEnabledIf(hasSelection))
                 .add(label(widthCm.viewAsString( w -> w + " cm" )).group(Skin.META))
             )
             .add("span, growx, gaptop 4", separator())
@@ -842,7 +842,7 @@ public final class AtelierView extends JPanel
             .withLayout("fill, ins 6 20 6 20, gap 14, hidemode 3", "[grow][120!][]")
             .withStyle( it -> it.borderAt(UI.Edge.TOP, 1, palette().borderSoft()) )
             .add(GROW_X.and("wmin 0"), label(status).group(Skin.STATUS))
-            .add(GROW_X, progressBar(Align.HORIZONTAL, workload)
+            .add(GROW_X, progressBar(Axis.HORIZONTAL, workload)
                  .withTooltip("How far the whole book has come, weighted by metres"))
             .add(RIGHT, label(vm.viewAsString(AtelierViewModel::bookValue)).group(Skin.STATUS));
     }

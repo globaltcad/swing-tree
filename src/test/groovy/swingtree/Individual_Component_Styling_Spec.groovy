@@ -119,12 +119,12 @@ class Individual_Component_Styling_Spec extends Specification
                         .shadow("bright", s -> s
                             .color(0.5, 1, 1, state.progress())
                             .offset(-6)
-                            .type(UI.ShadowType.FLAT)
+                            .falloff(UI.ShadowFalloff.FLAT)
                         )
                         .shadow("dark", s -> s
                             .color(0, 0, 0, state.progress()/4)
                             .offset(+6)
-                            .type(UI.ShadowType.FLAT)
+                            .falloff(UI.ShadowFalloff.FLAT)
                         )
                         .shadowBlurRadius(10 * state.progress())
                         .shadowSpreadRadius(-5 * state.progress())
@@ -228,7 +228,7 @@ class Individual_Component_Styling_Spec extends Specification
                          .shadowSpreadRadius(10)
                          .shadowOffset(10)
                          .font("Papyrus", 42)
-                         .shadowType(UI.ShadowType.FLAT)
+                         .shadowFalloff(UI.ShadowFalloff.FLAT)
                      )
         and : 'We build the panel:'
             var panel = ui.get(JPanel)
@@ -316,7 +316,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .shadowSpreadRadius(10)
                             .shadowOffset(10)
                             .font("Papyrus", 42)
-                            .shadowType(UI.ShadowType.FLAT)
+                            .shadowFalloff(UI.ShadowFalloff.FLAT)
                         )
         and : 'We build the panel:'
             var panel = ui.get(JPanel)
@@ -415,7 +415,7 @@ class Individual_Component_Styling_Spec extends Specification
                             .shadowSpreadRadius(-1)
                             .borderRadius(8)
                             .margin(13)
-                            .shadowType(UI.ShadowType.FLAT)
+                            .shadowFalloff(UI.ShadowFalloff.FLAT)
                         )
                         .add("center, push, grow",
                             UI.icon("img/two-16th-notes.svg").withSizeExactly(58,58)
@@ -426,7 +426,7 @@ class Individual_Component_Styling_Spec extends Specification
                                 .borderRadius(8)
                                 .margin(13)
                                 .padding(4)
-                                .shadowType(UI.ShadowType.FLAT)
+                                .shadowFalloff(UI.ShadowFalloff.FLAT)
                             )
                         )
                     )
@@ -773,7 +773,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .shadowSpreadRadius(1)
                         .shadowBlurRadius(2)
                         .font(new Font("Arial", Font.BOLD, 20))
-                        .shadowType(UI.ShadowType.FLAT)
+                        .shadowFalloff(UI.ShadowFalloff.FLAT)
                     )
 
         when : 'We render the label into a BufferedImage.'
@@ -816,7 +816,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .shadowColor(new Color(0,0,0,100))
                         .shadowSpreadRadius(1)
                         .shadowBlurRadius(2)
-                        .shadowType(UI.ShadowType.FLAT) // pin the pre-BLUR-default look so the snapshot stays valid
+                        .shadowFalloff(UI.ShadowFalloff.FLAT) // pin the pre-BLUR-default look so the snapshot stays valid
                         .font(new Font("Arial", Font.BOLD, 20))
                     )
 
@@ -937,7 +937,7 @@ class Individual_Component_Styling_Spec extends Specification
                         .shadowBlurRadius(4)
                         .shadowIsInset(true)
                         .font(new Font("Dancing Script", Font.PLAIN, 20))
-                        .shadowType(UI.ShadowType.FLAT)
+                        .shadowFalloff(UI.ShadowFalloff.FLAT)
                     )
 
         when : 'We render the text area into a BufferedImage.'
@@ -965,7 +965,7 @@ class Individual_Component_Styling_Spec extends Specification
             FlatLightLaf.setup()
         and : 'Now a slider UI with a custom styler lambda.'
             var ui =
-                    UI.slider(UI.Align.HORIZONTAL, 0, 100, 50)
+                    UI.slider(UI.Axis.HORIZONTAL, 0, 100, 50)
                     .withStyle( it -> it
                         .size(280, 38)
                         .prefSize(280, 38)
@@ -975,17 +975,17 @@ class Individual_Component_Styling_Spec extends Specification
                         .shadow(UI.Layer.BACKGROUND,"bright", s -> s
                             .color(new Color(0.7f, 0.95f, 1f, 0.35f))
                             .offset(-11)
-                            .type(UI.ShadowType.FLAT)
+                            .falloff(UI.ShadowFalloff.FLAT)
                         )
                         .shadow(UI.Layer.BACKGROUND,"dark", s -> s
                             .color(new Color(0, 0.1f, 0.2f, 0.20f))
                             .offset(+4)
-                            .type(UI.ShadowType.FLAT)
+                            .falloff(UI.ShadowFalloff.FLAT)
                         )
                         .shadowBlurRadius(4)
                         .shadowSpreadRadius(-2)
                         .shadowIsInset(true)
-                        .shadowType(UI.ShadowType.FLAT) // pin the pre-BLUR-default look so the snapshot stays valid
+                        .shadowFalloff(UI.ShadowFalloff.FLAT) // pin the pre-BLUR-default look so the snapshot stays valid
                         .padding(6)
                         .margin(10)
                     )
@@ -1015,7 +1015,7 @@ class Individual_Component_Styling_Spec extends Specification
             FlatLightLaf.setup()
         and : 'Now a progress bar UI with a custom styler lambda.'
             var ui =
-                    UI.progressBar(UI.Align.HORIZONTAL, 0, 100, 38)
+                    UI.progressBar(UI.Axis.HORIZONTAL, 0, 100, 38)
                     .peek(it->{it.setString("%"); it.setStringPainted(true);})
                     .withStyle( it -> it
                         .borderRadius(13)
@@ -1024,17 +1024,17 @@ class Individual_Component_Styling_Spec extends Specification
                         .shadow("bright", s -> s
                             .color(new Color(1f, 1f, 1f, 0.3f))
                             .offset(-11)
-                            .type(UI.ShadowType.FLAT)
+                            .falloff(UI.ShadowFalloff.FLAT)
                         )
                         .shadow("dark", s -> s
                             .color(new Color(0, 0f, 0f, 0.15f))
                             .offset(+6)
-                            .type(UI.ShadowType.FLAT)
+                            .falloff(UI.ShadowFalloff.FLAT)
                         )
                         .shadowBlurRadius(13)
                         .shadowSpreadRadius(-5)
                         .shadowIsInset(false)
-                        .shadowType(UI.ShadowType.FLAT) // pin the pre-BLUR-default look so the snapshot stays valid
+                        .shadowFalloff(UI.ShadowFalloff.FLAT) // pin the pre-BLUR-default look so the snapshot stays valid
                         .padding(0)
                         .margin(10)
                         .size(230, 30)
@@ -1254,9 +1254,9 @@ class Individual_Component_Styling_Spec extends Specification
             new JButton()    | UI.Cursor.HAND
             new JTextArea()  | UI.Cursor.CROSS
             new JTextField() | UI.Cursor.DEFAULT
-            new JBox()       | UI.Cursor.RESIZE_EAST
-            new JSlider()    | UI.Cursor.RESIZE_NORTH
-            new JSpinner()   | UI.Cursor.RESIZE_NORTH_EAST
+            new JBox()       | UI.Cursor.RESIZE_RIGHT
+            new JSlider()    | UI.Cursor.RESIZE_TOP
+            new JSpinner()   | UI.Cursor.RESIZE_TOP_RIGHT
     }
 
     def 'The background color of any component can be configured through the style API.'(

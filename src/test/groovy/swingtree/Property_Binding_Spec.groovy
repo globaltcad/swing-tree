@@ -370,7 +370,7 @@ class Property_Binding_Spec extends Specification
                         .add(UI.label("Below me is a spinner!"))
                         .add(UI.spinner().isVisibleIf(property))
                         .add(UI.textArea("I am here for decoration..."))
-                        .add(UI.slider(UI.Align.VERTICAL).isVisibleIfNot(property))
+                        .add(UI.slider(UI.Axis.VERTICAL).isVisibleIfNot(property))
         and : 'We build the component:'
             var panel = ui.get(JPanel)
         expect : 'The spinner will be visible.'
@@ -510,7 +510,7 @@ class Property_Binding_Spec extends Specification
                         .add(UI.label("Below me is a spinner!"))
                         .add(UI.spinner().isFocusableIf(property))
                         .add(UI.textArea("I am here for decoration..."))
-                        .add(UI.slider(UI.Align.VERTICAL).isFocusableIfNot(property))
+                        .add(UI.slider(UI.Axis.VERTICAL).isFocusableIfNot(property))
         and : 'We build the component:'
             var panel = ui.get(JPanel)
         expect : 'The spinner will be focusable.'

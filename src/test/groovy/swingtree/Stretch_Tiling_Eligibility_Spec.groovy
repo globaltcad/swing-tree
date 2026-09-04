@@ -984,8 +984,8 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
                                                                                                             .shadow("out", s -> s.color("#26264a").blurRadius(7).isOutset(true))
                                                                                                             .shadow("in",  s -> s.color("#0e0e16").blurRadius(4).isInset(true)) }
             "soft-UI penumbra shadows"                     | UI.Layer.CONTENT    | "compact atlas" | { it.borderRadius(28).margin(10)
-                                                                                                            .shadow("bright", s -> s.color(new Color(255, 255, 255, 40)).offset(-8, -8).type(UI.ShadowType.PENUMBRA))
-                                                                                                            .shadow("dark",   s -> s.color(new Color(0, 0, 0, 110)).offset(4, 4).type(UI.ShadowType.PENUMBRA))
+                                                                                                            .shadow("bright", s -> s.color(new Color(255, 255, 255, 40)).offset(-8, -8).falloff(UI.ShadowFalloff.PENUMBRA))
+                                                                                                            .shadow("dark",   s -> s.color(new Color(0, 0, 0, 110)).offset(4, 4).falloff(UI.ShadowFalloff.PENUMBRA))
                                                                                                             .shadowBlurRadius(17).shadowSpreadRadius(-5).shadowIsInset(true) }
             "asymmetric margins, widths and arcs"          | UI.Layer.BACKGROUND | "compact atlas" | { it.backgroundColor("#4f2f0f").margin(1, 2, 3, 4)
                                                                                                             .borderWidths(5, 6, 7, 8).borderColor("#2f4f0f")

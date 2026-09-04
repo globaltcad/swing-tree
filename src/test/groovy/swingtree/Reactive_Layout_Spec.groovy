@@ -972,13 +972,13 @@ class Reactive_Layout_Spec extends Specification
             ((GridLayout) panel.getLayout()).getColumns() == 2
 
         when: 'We switch to a horizontal BoxLayout:'
-            layout.set(Layout.box(UI.Axis.X))
+            layout.set(Layout.box(UI.Axis.HORIZONTAL))
         then: 'A BoxLayout is installed along the X axis:'
             panel.getLayout() instanceof BoxLayout
             ((BoxLayout) panel.getLayout()).getAxis() == BoxLayout.X_AXIS
 
         when: 'We switch to a vertical BoxLayout — a new instance is created since the axis changed:'
-            layout.set(Layout.box(UI.Axis.Y))
+            layout.set(Layout.box(UI.Axis.VERTICAL))
         then: 'A BoxLayout is installed along the Y axis:'
             panel.getLayout() instanceof BoxLayout
             ((BoxLayout) panel.getLayout()).getAxis() == BoxLayout.Y_AXIS

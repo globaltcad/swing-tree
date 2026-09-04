@@ -645,7 +645,7 @@ class Examples_Spec extends Specification
                     .add("grow, span", UI.label("Column Major"))
                     .add("grow, span", UI.table(UI.CellOrder.COLUMN_MAJOR, ()->[["A", "B", "C"], ["a", "b", "c"]]).id("CM"))
                 )
-                .add("grow", UI.separator(UI.Align.VERTICAL))
+                .add("grow", UI.separator(UI.Axis.VERTICAL))
                 .add("grow",
                     UI.panel("fill")
                     .add("grow, span", UI.label("Row Major 2"))
