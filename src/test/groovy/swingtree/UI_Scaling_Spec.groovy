@@ -10,7 +10,10 @@ import sprouts.Var
 import swingtree.layout.Size
 import swingtree.threading.EventProcessor
 
+import swingtree.style.ComponentExtension
+
 import javax.swing.*
+import javax.swing.tree.DefaultTreeCellRenderer
 import java.awt.*
 import java.lang.ref.WeakReference
 
@@ -1250,6 +1253,23 @@ class UI_Scaling_Spec extends Specification
             
             This ensures that applications using specialized typography maintain visual
             consistency and readability across different display DPI settings.
+
+            One thing is worth spelling out, because it is easy to get wrong: which two
+            numbers each new size is worked out from.
+
+            The first number is the size the application asked for, and it never changes.
+            The button in this scenario asks for 14 points, and 14 points is what it is
+            still asking for after a dozen changes of the factor. The second number is the
+            scale factor that is set right now. At a factor of 1.75 the button's size is
+            therefore 14 * 1.75 = 24.5, which rounds to 25.
+
+            There is a second way to work it out, and it is wrong. Instead of the current
+            factor you could use the step from the old factor to the new one. The factor
+            moves from 1.25 to 1.75, so that step is 1.4, and 14 * 1.4 = 19.6, which rounds
+            to 20. Look closely at what 20 is: it is the size 14 points would have at a
+            factor of 1.4. But the factor is 1.75, not 1.4. Every further change would
+            multiply that mistake again, and after a few of them the text on screen would
+            have nothing left to do with the 14 points the application asked for.
         """
         given : 'We start with a scale factor of 1.0'
             SwingTree.get().setUiScaleFactor(1.0f)
@@ -1297,15 +1317,15 @@ class UI_Scaling_Spec extends Specification
             SwingTree.get().setUiScaleFactor(1.75f)
             UI.sync()
 
-        then : 'Custom font sizes scale to the new factor'
+        then : 'Every size is the authored size times the new factor, not the size it happened to have times the step'
             button.font.style == Font.BOLD
-            button.font.size == 20
+            button.font.size == 25  // 14 * 1.75 = 24.5 -> rounded to 25
 
             label.font.style == Font.ITALIC
-            label.font.size == 22
+            label.font.size == 28   // 16 * 1.75
 
             textField.font.style == Font.PLAIN
-            textField.font.size == 25
+            textField.font.size == 32 // 18 * 1.75 = 31.5 -> rounded to 32
     }
 
     def 'Bound custom fonts update reactively with both property and scale changes'() {
@@ -1418,6 +1438,324 @@ class UI_Scaling_Spec extends Specification
             label.font.size == 30   // 20 * 1.5
             textField.font.size == 27  // 18 * 1.5
             textArea.font.size == 18   // unchanged static size at scale
+    }
+
+    def 'A font the user application sets itself becomes the size every later rescaling starts from.'()
+    {
+        reportInfo """
+            Whenever the UI scale factor changes, SwingTree works out a new font size for
+            every component it manages. To do that it has to remember two things about each
+            component:
+
+            1. A starting size. That is the size of the font the application last handed to
+               `setFont(..)`. If the application never called it, the starting size is the
+               one the look and feel installed.
+            2. The scale factor that was set at the moment that new font arrived.
+
+            For a font the application chose itself, the new size is then the starting size,
+            times the current factor, divided by the remembered factor.
+
+            Both remembered values must be replaced every time somebody other than SwingTree
+            calls `setFont(..)` on the component. The remembered factor is why: a font handed
+            over while the factor is two is already a size meant for a factor of two, and
+            reading it as a size meant for a factor of one would double it a second time.
+
+            SwingTree notices those calls by registering a `PropertyChangeListener` on the
+            component's own `"font"` property. The listener fires on every `setFont(..)`, and
+            every font that arrives while SwingTree is not itself applying a new scale factor
+            becomes the new starting size, paired with the factor of that moment.
+
+            Here is what would happen without that listener. Suppose a component remembered
+            only the font it was built with, and nothing later. The label in this scenario is
+            built at a factor of one and given 20 points. Later, with the factor at two, the
+            application gives it 30 points. Now the factor moves to three. The remembered
+            starting point is still "20 points, at a factor of one", so the label would jump
+            to 20 * 3 = 60 points. The 30 points the application asked for would be gone, and
+            no later change of the factor would ever bring them back. With the listener the
+            starting point is "30 points, at a factor of two", and the label goes to
+            30 * 3 / 2 = 45 points, which is what this scenario checks.
+        """
+        given : 'A scale factor of one, and a label the application gives a font of 20 points.'
+            SwingTree.get().setUiScaleFactor(1f)
+            var label = UI.label("Hi").get(JLabel)
+            UI.runNow({ label.setFont(new Font("Ubuntu", Font.PLAIN, 20)) })
+
+        expect : 'The label has the 20 points it was given, because the factor has not changed since.'
+            label.font.size == 20
+
+        when : 'The factor doubles.'
+            SwingTree.get().setUiScaleFactor(2f)
+            UI.sync()
+
+        then : 'The 20 points the application asked for are what got doubled.'
+            label.font.size == 40
+
+        when : 'The application hands the label a second font of 30 points, with the factor still at two.'
+            UI.runNow({ label.setFont(new Font("Ubuntu", Font.PLAIN, 30)) })
+
+        then : 'The label keeps those 30 points exactly. Calling `setFont(..)` is not a change of the scale factor, so nothing is rescaled.'
+            label.font.size == 30
+
+        when : 'The factor then goes from two to three.'
+            SwingTree.get().setUiScaleFactor(3f)
+            UI.sync()
+
+        then : 'The 30 points grew by half, because the factor grew by half. The 20 points of the beginning play no part any more.'
+            label.font.size == 45
+
+        when : 'The factor returns to two.'
+            SwingTree.get().setUiScaleFactor(2f)
+            UI.sync()
+
+        then : 'The label has exactly the 30 points the application handed it, down to the point.'
+            label.font.size == 30
+    }
+
+    def 'A component with no font of its own inherits a size instead of having one scaled onto it.'()
+    {
+        reportInfo """
+            SwingTree changes the font size of a component only when that component has a
+            font of its own. `JComponent.isFontSet()` answers that question: it is true when
+            the component holds a font, and false when its font is empty. A component with
+            no font of its own returns its parent's font from `Component.getFont()`, so its
+            text already grows and shrinks with the parent. Scaling it as well would scale
+            the same font size twice.
+
+            A tree cell renderer is the plainest example, and the one that goes worst when a
+            component without a font of its own is scaled anyway. A `JTree` paints all of its
+            rows with a single `DefaultTreeCellRenderer`, which is a `JLabel`. That renderer
+            is meant to have no font of its own, and the JDK takes trouble to keep it that
+            way: `DefaultTreeCellRenderer.setFont(..)` throws away any `FontUIResource`
+            handed to it and stores null instead, and `DefaultTreeCellRenderer.getFont()`
+            then answers with `tree.getFont()`. The renderer is supposed to paint in the
+            tree's font.
+
+            Now imagine SwingTree scaled that renderer anyway. The factor goes from one to
+            two. The tree and the renderer are reached one after the other, so say the tree
+            comes first: its font size is doubled. Then SwingTree reaches the renderer and
+            asks it for its font. Back comes the tree's brand new, already doubled size,
+            because that is the font `getFont()` forwards. Doubling that a second time gives
+            the renderer a font twice the size of the tree's.
+
+            The damage does not stop there. To store the new size SwingTree would call
+            `renderer.setFont(..)` with a plain `java.awt.Font`. A plain font is not a
+            `FontUIResource`, so `DefaultTreeCellRenderer` keeps it instead of throwing it
+            away. From that moment on the renderer has a font of its own, `getFont()` stops
+            answering with the tree's font, and no later change of the factor can bring the
+            two back together. What the user sees is row labels drawn at twice the size of
+            the rest of the window, inside rows measured for the tree's own font.
+        """
+        given : 'A scale factor of one, and a tree.'
+            SwingTree.get().setUiScaleFactor(1f)
+            var tree = UI.of(new JTree()).get(JTree)
+        and : '''
+            Its renderer, holding the `ComponentExtension` that a SwingTree look and feel
+            attaches to every component it paints. The extension is the thing that rescales
+            a font size, so the renderer has to have one for the mistake to be possible at
+            all.
+        '''
+            var renderer = tree.cellRenderer as DefaultTreeCellRenderer
+            ComponentExtension.from(renderer)
+        and : '''
+            One painted row. `getTreeCellRendererComponent(..)` is where the renderer stores
+            the tree it was called for, and `DefaultTreeCellRenderer.getFont()` reads the
+            font off that stored tree. Until the renderer has painted once, it has no tree
+            to read from.
+        '''
+            UI.runNow({ renderer.getTreeCellRendererComponent(tree, "leaf", false, false, true, 0, false) })
+
+        expect : 'The renderer answers with the font size of its tree, because it holds no font of its own.'
+            !renderer.isFontSet()
+            renderer.font.size == tree.font.size
+
+        when : 'The factor doubles.'
+            var sizeAtFactorOne = tree.font.size
+            SwingTree.get().setUiScaleFactor(2f)
+            UI.sync()
+
+        then : 'The font size of the tree grew.'
+            tree.font.size > sizeAtFactorOne
+        and : 'The renderer still answers with the tree font size exactly, not with twice it.'
+            renderer.font.size == tree.font.size
+
+        when : 'The factor goes back to 1.'
+            SwingTree.get().setUiScaleFactor(1f)
+            UI.sync()
+        then : 'The tree is back at the exact font size it started with.'
+            tree.font.size == sizeAtFactorOne
+    }
+
+    def 'The font size of the text field inside a spinner is scaled exactly once.'()
+    {
+        reportInfo """
+            After a change of the UI scale factor, a `JSpinner` and the text field inside it
+            must have the same font size. The number the user reads is drawn by that text
+            field. The spinner is the box and the two little arrows around it. If the two
+            sizes drift apart, the number is drawn at the wrong size inside a box that is
+            the right size.
+
+            Holding them together takes some care, because a spinner is not one component.
+            `JSpinner` builds a `JSpinner.NumberEditor`, and that editor holds a
+            `JFormattedTextField`. SwingTree manages the spinner and that text field
+            separately, so each of them works out a new font size of its own.
+
+            Swing then adds a third party. `BasicSpinnerUI.installListeners()` registers a
+            `PropertyChangeListener` on the spinner. Whenever the spinner's `"font"`
+            property changes, that listener runs
+            `textField.setFont(new FontUIResource(spinner.getFont()))`, copying the
+            spinner's new font onto the text field. It does so only while the text field's
+            current font is a `UIResource`, that is, a font the look and feel installed
+            rather than one the application chose.
+
+            Java 8 hands the font over differently. There the same listener runs
+            `textField.setFont(spinner.getFont())`, passing the spinner's font object
+            itself, without wrapping it in a `FontUIResource`. A font that SwingTree
+            writes is a plain `Font`, so from the first change of the factor onward the
+            text field holds a plain font, and Swing never copies the spinner's font onto
+            it again. From then on the size of the text field comes from SwingTree's
+            arithmetic alone, and nothing corrects it.
+
+            So the moment SwingTree writes the spinner's new font, Swing hands that same,
+            already scaled font to the text field. Suppose SwingTree then worked out the
+            text field's new size from the font the text field is holding at that instant.
+            It would be scaling a size that was scaled a moment earlier. At a factor of two
+            the number inside the spinner would come out at four times its original size,
+            in a box only twice as large.
+
+            Which of the two SwingTree reaches first is not fixed, and no scenario should
+            depend on it. What makes the order stop mattering is the rule that every new
+            size is worked out from the size the application asked for and the factor that
+            size belongs to, and never from the size a component happens to hold at the
+            instant it is asked. This scenario checks the outcome that rule guarantees:
+            the text field and the spinner have one and the same font size.
+
+            The arithmetic behind that rule has to be a proportion and nothing else: the
+            remembered size, times the current factor, divided by the remembered factor.
+            SwingTree once treated a font of the look and feel's default size differently
+            and replaced its size with the platform's base size times the factor. On
+            Windows a 13 point font became 24 at a factor of two, not 26, and 12 at a
+            factor of one, not 13. The spinner never showed that, because a component
+            that returns to the factor its font was remembered at gets that font back
+            unchanged. The text field on Java 8 did show it. It had remembered the 24 it
+            was handed at a factor of two as a font of its own, and half of 24 is 12, in
+            a spinner that went back to 13.
+        """
+        given : '''
+            A default font of 14 points, installed on every component type in the
+            `UIManager`. SwingTree assumes a base font size per platform: 11 or 12 on
+            Windows, 13 on macOS and KDE, 15 on other Linux desktops. A default font of
+            14 points matches none of them, so on no platform can a formula built on the
+            base size agree with a proportion by coincidence.
+        '''
+            SwingTree.initializeUsing(it -> it.defaultFont(new Font("Ubuntu", Font.PLAIN, 14), SwingTreeInitConfig.FontInstallation.HARD))
+            SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
+        and : 'A scale factor of one, and a spinner.'
+            SwingTree.get().setUiScaleFactor(1f)
+            var spinner = UI.spinner(new SpinnerNumberModel(1, 1, 999, 1)).get(JSpinner)
+            var textField = (spinner.editor as JSpinner.DefaultEditor).textField
+        and : '''
+            The `ComponentExtension` that a SwingTree look and feel attaches to every
+            component it paints. The extension is the thing that rescales a font size, so the
+            spinner and its text field each need one. The text field is given its extension
+            first here, because that is the order a look and feel reaches the two in: a
+            `JSpinner` builds its editor inside its own constructor, before Swing installs
+            the delegate that would style the spinner.
+        '''
+            ComponentExtension.from(textField)
+            ComponentExtension.from(spinner)
+
+        expect : 'The spinner and the text field inside it start out at the same font size.'
+            textField.font.size == spinner.font.size
+
+        when : 'The factor doubles.'
+            var sizeAtFactorOne = spinner.font.size
+            SwingTree.get().setUiScaleFactor(2f)
+            UI.sync()
+
+        then : 'The font size of the spinner grew.'
+            spinner.font.size > sizeAtFactorOne
+        and : 'The text field grew by the same amount, not by twice as much.'
+            textField.font.size == spinner.font.size
+
+        when : 'The factor goes back to 1.'
+            SwingTree.get().setUiScaleFactor(1f)
+            UI.sync()
+        then : 'Both are back at the exact font size they started with.'
+            textField.font.size == sizeAtFactorOne
+            spinner.font.size == sizeAtFactorOne
+    }
+
+    def 'A spinner looks the same at a scale factor no matter which factors came before it.'()
+    {
+        reportInfo """
+            The number a spinner shows and the box drawn around it are two fonts on two
+            components: `JSpinner` is the box and the two little arrows, and the
+            `JFormattedTextField` inside its editor draws the number. Whatever the scale
+            factor is, those two sizes have to agree, or the number is drawn at the wrong
+            size inside a box that is the right size.
+
+            Below, the factor is set to two, then back to one, then to two a second time.
+            The second time it is two, the spinner has to look exactly the way it looked the
+            first time. A scale factor means one thing only, and it cannot depend on which
+            factors happened to be set before it.
+
+            What makes this hard is a second Swing listener, next to the one on the spinner
+            that the previous scenario describes. Java 8 does not have it, Java 11 and every
+            later version do: `JSpinner.DefaultEditor` listens to the `"font"` property of
+            its text field. Whenever a `UIResource` font arrives there that differs from the
+            font of the spinner, the editor at once overwrites the text field with
+            `new FontUIResource(spinner.getFont())`. It does so from inside the `setFont(..)`
+            call that delivered the differing font, before that call has returned.
+
+            When the factor goes back to one, SwingTree hands the text field its remembered
+            factor-one font while the spinner still holds the doubled one, because the
+            spinner is rescaled a moment later. So the editor writes the doubled font back
+            onto the text field, from inside SwingTree's own call. Once the spinner is
+            rescaled too, `BasicSpinnerUI` copies its factor-one font onto the text field,
+            and the two agree again.
+
+            Had SwingTree told its own writes apart from foreign ones by comparing the font
+            that arrived with the font it had just written, the doubled font would count as
+            foreign and be remembered as the size at a factor of one, and the corrective
+            font that follows would compare equal to the one SwingTree wrote and be ignored.
+            The next doubling would then start from a size that is already doubled. This is
+            why a font counts as foreign only when it arrives while SwingTree is not
+            applying a scale factor, whatever its value.
+        """
+        given : 'A spinner, at a scale factor of one, wearing whatever font the look and feel gave it.'
+            SwingTree.get().setUiScaleFactor(1f)
+            var spinner = new JSpinner(new SpinnerNumberModel(1, 1, 999, 1))
+            var textField = (spinner.editor as JSpinner.DefaultEditor).textField
+        and : '''
+            The `ComponentExtension` that a SwingTree look and feel attaches to every
+            component it paints. The extension is the thing that rescales a font, so the
+            spinner and its text field each need one. The text field is given its extension
+            first, which is the order a look and feel reaches the two in: a `JSpinner` builds
+            its editor, and Swing gives that editor its delegate, inside the `JSpinner`
+            constructor, before the spinner is given a delegate of its own.
+        '''
+            ComponentExtension.from(textField)
+            ComponentExtension.from(spinner)
+
+        expect : 'The number and the box around it start out at the same size.'
+            textField.font.size == spinner.font.size
+
+        when : 'The scale factor doubles.'
+            SwingTree.get().setUiScaleFactor(2f)
+            UI.sync()
+            var sizeAtFactorTwo = spinner.font.size
+        then : 'The number is still the size of its box.'
+            textField.font.size == sizeAtFactorTwo
+
+        when : 'The factor goes back to one, and then doubles a second time.'
+            SwingTree.get().setUiScaleFactor(1f)
+            UI.sync()
+            SwingTree.get().setUiScaleFactor(2f)
+            UI.sync()
+        then : 'The box is exactly where it was the first time the factor was two.'
+            spinner.font.size == sizeAtFactorTwo
+        and : 'And the number is still the size of that box, rather than twice it.'
+            textField.font.size == sizeAtFactorTwo
     }
 
     def 'The scaling factor is published to the UIManager under "laf.scaleFactor".'()

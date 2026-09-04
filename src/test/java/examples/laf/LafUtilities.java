@@ -1,5 +1,10 @@
 package examples.laf;
 
+import sprouts.Action;
+import sprouts.From;
+import sprouts.Subscriber;
+import sprouts.ValDelegate;
+import swingtree.UI;
 import swingtree.api.Painter;
 import swingtree.style.ComponentExtension;
 
@@ -49,11 +54,7 @@ final class LafUtilities
     /** Moves {@code base} the given fraction of the way towards black. */
     static Color shadeTowardsBlack( Color base, double amount ) { return shadeTowards(base, Color.BLACK, amount); }
 
-    /**
-     *  Mixes two colours, opacity included. Presets that model light rather than pigment need
-     *  shades a palette has no name for - "this surface, lit" - and computing them keeps a preset
-     *  usable with any {@link SwingTreeLookAndFeel.PalettePreset}.
-     */
+    /** Mixes two colours, opacity included. */
     static Color shadeTowards( Color from, Color to, double amount ) {
         double t = Math.max(0, Math.min(1, amount));
         return new Color(
@@ -66,11 +67,9 @@ final class LafUtilities
 
     /**
      *  The same colour a fixed number of channel steps lighter (positive) or darker (negative).
-     *  <p>
-     *  A <i>fraction</i> of the way to white moves a dark colour ten times as far as a light one -
-     *  the same 0.4 that lifts a pale grey by thirteen steps lifts near-black by ninety - so a
-     *  relief built out of fractions glares on a dark palette and disappears on a light one. A
-     *  fixed step behaves the way one light source falling on one material does.
+     *  A <i>fraction</i> of the way to white moves a dark colour much further than a light one -
+     *  the 0.4 that lifts a pale grey by thirteen steps lifts near-black by ninety - so a relief
+     *  built out of fractions glares on a dark palette and vanishes on a light one.
      */
     static Color shadeBySteps( Color base, int steps ) {
         return new Color(
@@ -82,20 +81,13 @@ final class LafUtilities
     }
 
     /**
-     *  The same colour with its saturation and brightness moved by fixed amounts, both measured
-     *  on the 0-to-1 scale {@link Color#RGBtoHSB} reports and both clamped at the ends.
+     *  The same colour with its saturation and brightness moved by fixed amounts, both on the
+     *  0-to-1 scale {@link Color#RGBtoHSB} reports and both clamped at the ends.
      *  <p>
-     *  This is how a theme built on one base colour stays one theme when that colour is replaced.
-     *  Mixing towards white and black - {@link #shadeTowardsWhite} - washes the hue out as it
-     *  goes, so a stack of mixed shades drifts towards grey and a saturated base loses what made
-     *  it worth choosing. Moving the brightness leaves the hue untouched, so a red base yields
-     *  light reds and a blue base light blues, and one set of offsets describes the same relief on
-     *  either. That is also what makes the offsets transferable: they can be read off one colour
-     *  scheme by measurement and replayed on another.
-     *  <p>
-     *  Clamping is the reason a bright base does not simply produce a brighter theme: a stop
-     *  already near white cannot move, so the relief flattens where the colour runs out, which is
-     *  what a light material does under a light.
+     *  This is how {@link NimbusRelief} keeps its light the same light in every palette.
+     *  {@link #shadeTowardsWhite} washes the hue out as it goes, so a stack of mixed shades drifts
+     *  towards grey. Moving the brightness leaves the hue alone, so a red base yields light reds
+     *  and a blue base light blues, and one set of offsets describes the same relief on either.
      *
      * @param base the colour to move
      * @param saturationOffset how much saturation to add, negative to remove it
@@ -113,15 +105,14 @@ final class LafUtilities
     }
 
     /**
-     *  Washes a colour out towards the ground it is going to be seen against: the hue is kept, the
+     *  Washes a colour out towards the ground it will be seen against: the hue is kept, the
      *  saturation is scaled down, and the brightness is moved part of the way to the ground's.
      *  <p>
-     *  This is what {@link #shiftHsb} cannot do. A fixed brightness offset says "lighter", which is
-     *  right on a light theme and wrong on a dark one - the same {@code +0.26} that turns a deep
-     *  blue into a pale blue-grey on a paper background turns an already-bright blue into white on
-     *  a near-black one, and the label on top of it stops being readable. Moving a <em>fraction of
-     *  the way to the ground</em> says "less itself, more of the room it is in", which is the same
-     *  instruction on both.
+     *  {@link #shiftHsb} cannot do this. A fixed brightness offset means "lighter", which is right
+     *  on a light theme and wrong on a dark one: the {@code +0.26} that turns a deep blue into a
+     *  pale blue-grey on paper turns an already bright blue into white on near-black, and the label
+     *  on top of it stops being readable. A fraction of the way to the ground means "less itself,
+     *  more of the room it is in", which is the same instruction on both.
      *
      * @param colour the colour to wash out
      * @param ground the colour it will be seen against, which it is moved towards
@@ -142,15 +133,11 @@ final class LafUtilities
     }
 
     /**
-     *  Picks whichever of two inks can actually be read on a given ground, by comparing relative
-     *  luminance. A theme that derives its colours cannot know in advance whether a surface will
-     *  come out light or dark - that is the palette's business - so anywhere the answer decides
-     *  legibility it has to be measured rather than assumed.
+     *  Picks whichever of two inks can be read on a given ground, by comparing luminance. A theme
+     *  that derives its colours cannot know in advance whether a surface comes out light or dark,
+     *  because that is the palette's business.
      *
-     * @param ground the colour the text will be drawn on
-     * @param first the ink to use unless the second one is easier to read
-     * @param second the alternative ink
-     * @return whichever of the two is further from {@code ground} in luminance
+     * @return whichever of {@code first} and {@code second} is further from {@code ground}
      */
     static Color readableOn( Color ground, Color first, Color second ) {
         double g = luminance(ground);
@@ -177,20 +164,20 @@ final class LafUtilities
 
     /**
      *  Runs a UI delegate's inherited painting inside the SwingTree style engine, which fills the
-     *  surface first and hands back a graphics context for the chrome and text on top. It also
-     *  restores the two things about that context the engine has no reason to know matter.
+     *  surface first and hands back a graphics context to draw the chrome and the text on. Two
+     *  things about that context have to be put right, and neither is the engine's business.
      *  <p>
-     *  <b>The colour and the font.</b> Swing guarantees that a component's own colour and font are
-     *  already on the graphics reaching {@code paintComponent}, and inherited painting relies on
-     *  that instead of setting a colour of its own: {@code BasicMenuItemUI.paintText} sets one only
-     *  for a disabled or an armed row, and draws everything else in whatever colour it is handed.
-     *  A context that came from somewhere else therefore renders menu labels invisible.
+     *  <b>The colour and the font.</b> Swing promises that a component's own colour and font are
+     *  already on the graphics that reaches {@code paintComponent}, and the inherited painting
+     *  relies on that: {@code BasicMenuItemUI.paintText} sets a colour only for a disabled or an
+     *  armed row and draws every other row in whatever colour it was handed. A context from
+     *  anywhere else therefore paints menu labels in the wrong colour, or in none at all.
      *  <p>
-     *  <b>The opacity.</b> The engine decides, while it paints, whether the component is opaque -
-     *  one repaint too late for the frame in which a component stops being opaque. Swing has by
-     *  then already skipped repainting what is behind it, and nothing covers the pixels it used to
-     *  fill, which is how a menu row that is only filled while armed leaves its highlight behind.
-     *  Repainting the vacated bounds in the parent costs one extra repaint, on that frame only.
+     *  <b>The opacity.</b> The engine works out whether the component is opaque while it paints,
+     *  which is one repaint too late for the frame in which a component stops being opaque: Swing
+     *  has already skipped repainting what is behind it, and nothing covers the pixels it used to
+     *  fill. That is how a menu row filled only while armed leaves its highlight behind. Repainting
+     *  the bounds it vacated costs one extra repaint on that one frame.
      */
     static void paintStyled( Graphics g, JComponent c, Painter inheritedPainting ) {
         boolean wasOpaque = c.isOpaque();
@@ -217,24 +204,20 @@ final class LafUtilities
     }
 
     /**
-     *  Puts the desktop's own text antialiasing settings on a context which is about to draw a
-     *  component's text.
+     *  Puts the desktop's own text antialiasing settings on a context that is about to draw a
+     *  component's text. {@code SwingUtilities2.drawString}, which every {@code BasicXxxUI} draws
+     *  through, reads that setting from a client property {@code javax.swing} does not export and
+     *  otherwise falls back to the hints on the context, which is the only handle a look and feel
+     *  outside the JDK has on it.
      *  <p>
-     *  Swing's {@code SwingUtilities2.drawString}, which every {@code BasicXxxUI} draws through,
-     *  reads its text antialiasing from a client property {@code javax.swing} does not export,
-     *  falling back to the rendering hints already on the context. Merging the toolkit's desktop
-     *  hints in here is the only handle a third-party look and feel has on that, and it is also
-     *  what makes the text match the rest of the desktop.
-     *  <p>
-     *  Shape antialiasing is deliberately <em>not</em> turned on alongside it. The inherited
-     *  painting this precedes draws whole pixels - rules, grid lines, focus rectangles, a tabbed
-     *  pane's content edge - and antialiasing a rectangle whose corners already sit on pixel
-     *  boundaries runs a coverage rasterization to arrive at the pixels a plain fill would have
-     *  written directly. What does have a curve or a diagonal in it is a {@link Symbols} glyph,
-     *  and every symbol set turns antialiasing on for itself, as does the style engine for the
-     *  surfaces it paints. Not setting the hint here measured at a fifth off a repaint of the
-     *  Linen preset and four fifths off one of {@link SwingTreeLookAndFeel.StylePreset#BLANK},
-     *  without changing a pixel of any preset.
+     *  Shape antialiasing is deliberately left alone. The painting that follows draws whole pixels
+     *  - rules, grid lines, focus rectangles, a tabbed pane's content edge - and antialiasing a
+     *  rectangle already sitting on pixel boundaries runs a coverage rasterization to arrive at
+     *  the pixels a plain fill writes directly. Every curve and diagonal belongs to a
+     *  {@link Symbols} glyph or to a surface the style engine paints, and both turn the hint on
+     *  for themselves. Leaving it off here took a fifth off a repaint of the Linen preset and four
+     *  fifths off one of {@link SwingTreeLookAndFeel.StylePreset#BLANK}, changing no pixel of
+     *  either.
      */
     private static void applyDesktopTextHints( Graphics2D g ) {
         RenderingHints hints = textHints;
@@ -246,12 +229,11 @@ final class LafUtilities
     }
 
     /**
-     *  The hints last read from the desktop, or nothing until they are read again.
-     *  <p>
-     *  Reading them is a look up in the {@code UIManager} defaults followed, when that misses, by
-     *  one in the toolkit's desktop properties - and this runs once per component per repaint,
-     *  which on the showcase was 1.3% of the event thread. Both sources announce their own changes
-     *  and the listeners below drop the field when they do, so nothing here can go stale.
+     *  The hints last read from the desktop, or null until they are read again. Reading them is a
+     *  lookup in the {@code UIManager} defaults and, when that misses, one in the toolkit's desktop
+     *  properties, once per component per repaint: 1.3% of the event thread on the showcase. Both
+     *  sources announce their own changes, and the static block that follows clears this field on
+     *  either announcement.
      */
     private static volatile RenderingHints textHints = null;
 
@@ -348,36 +330,26 @@ final class LafUtilities
     // ── Focus ────────────────────────────────────────────────────────────
 
     /**
-     *  Whether a combo box should be drawn as focused. An editable one hands the focus to its
-     *  editor, so asking the combo box itself returns {@code false} forever.
-     */
-    /**
-     *  Whether a text component is the inside of a control that already carries a surface of its
-     *  own - the page inside a scroll pane, or the editor inside a spinner - so that a rule
-     *  giving it a box of its own would draw one box inside another.
-     *
-     * @param text the text component being styled
-     * @return {@code true} if something around it has already been given a surface
+     *  Whether a text component is the inside of something that already carries a surface - the page
+     *  inside a scroll pane, or the editor inside a spinner or a combo box - so that a rule giving
+     *  it a box of its own would draw one box inside another.
      */
     static boolean isInsideAnotherControl( JTextComponent text ) {
         return text.getParent() instanceof JViewport || isControlInternal(text);
     }
 
     /**
-     *  Whether Swing put this component inside a control which already carries a surface of its
-     *  own. A spinner's editor is a {@link JPanel} the application never declared, holding a text
-     *  field it never declared either, and an editable combo box has an editor of the same kind;
-     *  all of them sit inside a box the control around them has already been given, so a rule
-     *  filling one of them paints over that control.
-     *
-     * @param inner the component being styled
-     * @return {@code true} if it is a piece of a control's own machinery
+     *  Whether Swing put this component inside a control that already carries a surface. A spinner's
+     *  editor is a {@link JPanel} the application never declared, holding a text field it never
+     *  declared either, and an editable combo box has an editor of the same kind.
      */
     static boolean isControlInternal( JComponent inner ) {
         return SwingUtilities.getAncestorOfClass(JSpinner.class, inner) != null
             || SwingUtilities.getAncestorOfClass(JComboBox.class, inner) != null;
     }
 
+    /** Whether a combo box should be drawn as focused. An editable one hands the focus to its
+     *  editor, so the combo box itself never owns it. */
     static boolean hasFocus( JComboBox<?> combo ) {
         if ( combo.isFocusOwner() )
             return true;
@@ -388,10 +360,8 @@ final class LafUtilities
         return false;
     }
 
-    /**
-     *  Whether a spinner should be drawn as focused. Its editor is a wrapper around the text
-     *  field that actually takes the focus, so this walks one level in.
-     */
+    /** Whether a spinner should be drawn as focused. Its editor is a wrapper around the text field
+     *  that takes the focus, so this walks one level in. */
     static boolean hasFocus( JSpinner spinner ) {
         Component editor = spinner.getEditor();
         if ( editor instanceof JSpinner.DefaultEditor )
@@ -400,17 +370,14 @@ final class LafUtilities
     }
 
     /**
-     *  Repaints {@code target} whenever {@code focusSource} gains or loses focus, so a
-     *  focus-dependent style is re-gathered right away rather than on the next unrelated repaint.
+     *  Repaints {@code target} whenever {@code focusSource} gains or loses focus, so that a style
+     *  depending on focus is re-gathered at once instead of at the next unrelated repaint. A style
+     *  is only re-gathered while its component paints, and Swing does not repaint a text component
+     *  on a focus change: only the caret repaints, and only its own narrow rectangle. Buttons and
+     *  sliders need none of this, because their listeners repaint already.
      *  <p>
-     *  A style is only re-gathered while its component paints, and Swing does not repaint a text
-     *  component on a focus change - only the caret repaints its own narrow rectangle. Buttons
-     *  and sliders need none of this; their listeners already repaint. For a composite control
-     *  the focus does not even live on the styled component, which is why the source and the
-     *  target differ.
-     *
-     * @param target      the styled component to repaint
-     * @param focusSource the component that owns the focus, often the target itself
+     *  The two parameters differ for a composite control, where the focus lands on a child of the
+     *  component being styled.
      */
     static void repaintOnFocusChange( JComponent target, Component focusSource ) {
         if ( focusSource == null || target.getClientProperty(FOCUS_LISTENER) != null )
@@ -444,12 +411,11 @@ final class LafUtilities
     }
 
     /**
-     *  Repaints {@code target} in full whenever its selection changes.
-     *  <p>
-     *  {@code BasicTextUI.damageRange} repaints only the changed offsets, measured against the
-     *  insets the style engine installs as part of the component's own paint - too narrow to be
-     *  relied on for a new selection to appear. Bare caret moves, which is what typing produces,
-     *  keep Swing's cheap behaviour.
+     *  Repaints {@code target} in full whenever its selection changes. {@code
+     *  BasicTextUI.damageRange} repaints only the changed offsets, measured against insets the
+     *  style engine installs while the component paints, which is too narrow for a new selection to
+     *  appear inside. A caret that moves without selecting anything, which is what typing produces,
+     *  keeps Swing's cheaper behaviour.
      */
     static void repaintOnSelectionChange( JTextComponent target ) {
         if ( target.getClientProperty(SELECTION_LISTENER) != null )
@@ -477,7 +443,41 @@ final class LafUtilities
         target.putClientProperty(SELECTION_LISTENER, null);
     }
 
-    /** Guards against a second {@code installUI(..)} stacking listeners, and is the handle to remove them. */
+    /**
+     *  Runs {@code scaledMetrics} now, and again after every change of SwingTree's UI scale factor.
+     *  <p>
+     *  A length a delegate computes while it paints calls {@link UI#scale(int)} afresh each time
+     *  and follows the factor by itself. A length the delegate stores on its component instead - a
+     *  tree's row height, a split pane's divider thickness - is read back from the component, and
+     *  keeps whatever the factor was during {@code installUI} until something writes it again.
+     *  <p>
+     *  The rewrite is deferred to the end of the event that changed the factor, because a row
+     *  height may be a multiple of the component's font size and SwingTree rescales component fonts
+     *  during that same event.
+     *
+     * @param target        the component the lengths are stored on
+     * @param scaledMetrics writes those lengths, reading the scale factor as it is when it runs
+     */
+    static void rescaleOnUiScaleChange( JComponent target, Runnable scaledMetrics ) {
+        scaledMetrics.run();
+        if ( target.getClientProperty(UI_SCALE_ACTION) != null )
+            return;
+        Action<ValDelegate<Float>> action = ignored -> UI.runLater(scaledMetrics);
+        ComponentExtension.from(target).localUiScaleFactor().onChange(From.ALL, action);
+        target.putClientProperty(UI_SCALE_ACTION, action);
+    }
+
+    /** Undoes {@link #rescaleOnUiScaleChange}. */
+    static void uninstallUiScaleRescale( JComponent target ) {
+        Object stored = target.getClientProperty(UI_SCALE_ACTION);
+        if ( stored instanceof Subscriber )
+            ComponentExtension.from(target).localUiScaleFactor().unsubscribe((Subscriber) stored);
+        target.putClientProperty(UI_SCALE_ACTION, null);
+    }
+
+    // Each key guards against a second installUI(..) stacking listeners, and is the handle the
+    // matching uninstall method removes them by.
     private static final String FOCUS_LISTENER     = "swingtree.laf.focusRepaint.listener";
     private static final String SELECTION_LISTENER = "swingtree.laf.selectionRepaint.listener";
+    private static final String UI_SCALE_ACTION    = "swingtree.laf.uiScaleRescale.action";
 }

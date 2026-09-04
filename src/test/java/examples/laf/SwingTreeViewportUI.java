@@ -10,15 +10,13 @@ import javax.swing.plaf.basic.BasicViewportUI;
 import java.awt.Graphics;
 
 /**
- *  The {@link JViewport} UI delegate. A viewport is a near-invisible window onto a scroll
- *  pane's child; it exists mostly to clip and translate. It is filled so that the area
- *  behind it - visible when the child does not fill it - matches the scroll pane's framing.
+ *  The {@link JViewport} UI delegate. A viewport carries no style group of its own, so
+ *  {@link SwingTreeLookAndFeel.Surface#of(JComponent)} reads the one on the scroll pane around it.
  */
 public final class SwingTreeViewportUI
         extends    BasicViewportUI
         implements SwingTreeStyledComponentUI<JViewport>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeViewportUI(); }
 
     @Override

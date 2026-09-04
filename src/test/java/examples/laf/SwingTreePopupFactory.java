@@ -17,38 +17,33 @@ import java.awt.geom.AffineTransform;
 import java.util.Objects;
 
 /**
- *  The {@link PopupFactory} which {@link SwingTreeLookAndFeel} installs, so that a popup Swing has
- *  to put in a window of its own looks like the popups which fit inside the application window.
- *
- *  <h2>What goes wrong without it</h2>
- *  A popup that fits inside its owner's window is added to that window's
- *  {@link javax.swing.JLayeredPane}, and everything a style rule paints - the {@code margin} ring,
- *  the rounded corners, the drop shadow - falls on the application underneath. A popup that does
- *  not fit is given a {@code javax.swing.Popup$HeavyWeightWindow} instead: an undecorated
- *  {@link javax.swing.JWindow} packed around the popup, whose background is opaque and covers the
- *  whole rectangle. The margin ring is then painted over in that background colour, which turns
- *  the rounded shadowed sheet into a square one sitting on a light slab. No style rule can correct
- *  this, because the window is one level above the component a rule is handed.
- *
- *  <h2>What this factory does instead</h2>
- *  It dresses that window, in whichever of the three ways
- *  {@link SwingTreeLookAndFeel#popupWindowMode()} reports the platform supports. Every mode leaves
- *  the style rules alone: the popup keeps the margin, the radius and the shadow it is painted with
+ *  The {@link PopupFactory} which {@link SwingTreeLookAndFeel} installs, so that a popup Swing puts
+ *  in a window of its own looks like one that fits inside the application window.
+ *  <p>
+ *  A popup that fits is added to the application window's {@link javax.swing.JLayeredPane}, and
+ *  everything a style rule paints outside the sheet - the {@code margin} ring, the rounded corners,
+ *  the drop shadow - falls on the application underneath. A popup that does not fit is packed into
+ *  an undecorated {@code javax.swing.Popup$HeavyWeightWindow} whose opaque background covers that
+ *  whole ring, which turns a rounded shadowed sheet into a square one on a light slab. A style rule
+ *  cannot correct it, because the window is one level above the component a rule is handed.
+ *  <p>
+ *  So this factory dresses the window instead, in whichever way
+ *  {@link SwingTreeLookAndFeel#popupWindowMode()} says the platform supports. The style rules are
+ *  untouched under every mode: the sheet keeps the margin, the radius and the shadow it has
  *  in-frame, and only the window behind it changes.
  *  <ul>
- *      <li>{@link PopupWindowMode#TRANSLUCENT} - the window background is set to a fully
- *          transparent colour, so the margin ring shows the desktop and the shadow falls on it.</li>
- *      <li>{@link PopupWindowMode#SHAPED} - the window is clipped to the popup's own
- *          {@link UI.ComponentArea#BODY}, so the corners are cut out of the window itself. The
- *          shadow is painted into the ring outside that shape and is therefore clipped away.</li>
- *      <li>{@link PopupWindowMode#OPAQUE} - the window keeps its rectangle, and is filled with
- *          {@link SwingTreeLookAndFeel.Palette#background()} so that the ring is the colour the
- *          popup would have been standing on in-frame rather than an unrelated white.</li>
+ *      <li>{@link PopupWindowMode#TRANSLUCENT} - the window background is a fully transparent
+ *          colour, so the ring shows the desktop and the shadow falls on it.</li>
+ *      <li>{@link PopupWindowMode#SHAPED} - the window is clipped to the sheet's own
+ *          {@link UI.ComponentArea#BODY}, so the corners are cut out of the window. The shadow is
+ *          painted outside that shape and is clipped away with it.</li>
+ *      <li>{@link PopupWindowMode#OPAQUE} - the window keeps its rectangle, filled with
+ *          {@link SwingTreeLookAndFeel.Palette#background()} so the ring is the colour the sheet
+ *          would have stood on in-frame.</li>
  *  </ul>
- *  The window is filled with the palette's ground colour in the two opaque modes for a second
- *  reason: a preset which paints the popup in a translucent colour - {@link Styles.Glassmorphic}
- *  does - composites it against whatever the window background is, and against the default white
- *  every such sheet washes out.
+ *  The last two both fill the window with the palette's ground colour for a second reason: a preset
+ *  that paints the sheet in a translucent colour, as {@link Styles.Glassmorphic} does, composites
+ *  it against the window background, and against the default white every such sheet washes out.
  */
 final class SwingTreePopupFactory extends PopupFactory
 {
@@ -85,13 +80,13 @@ final class SwingTreePopupFactory extends PopupFactory
     }
 
     /**
-     *  Gives the popup's own window the background the resolved mode calls for, and reports the
-     *  mode that was actually achieved. A platform which advertises per-pixel translucency and
-     *  then refuses it leaves {@link Window#setBackground(Color)} throwing, and the popup is
-     *  dressed as a {@link PopupWindowMode#SHAPED} one instead.
+     *  Gives the popup's window the background its mode calls for and returns the mode that was
+     *  achieved: a platform which advertises per-pixel translucency and then refuses it makes
+     *  {@link Window#setBackground(Color)} throw, and the popup falls back to
+     *  {@link PopupWindowMode#SHAPED}.
      *  <p>
-     *  Only the background is set here. The shape cannot be, because a shape has to match the
-     *  popup and the popup has no size until {@link Popup#show()} has packed the window around it.
+     *  The shape cannot be set here, because it has to match the sheet and the sheet has no size
+     *  until the {@code pack()} inside {@link Popup#show()} has run.
      */
     private static PopupWindowMode _dress( Window host ) {
         PopupWindowMode mode = SwingTreeLookAndFeel.popupWindowMode();
@@ -132,15 +127,11 @@ final class SwingTreePopupFactory extends PopupFactory
     }
 
     /**
-     *  Cuts the corners out of a heavyweight popup's window once the window exists at its final
-     *  size.
+     *  Cuts the corners out of the popup's window once that window has its final size, which is
+     *  after {@link Popup#show()} rather than when the popup was handed out.
      *  <p>
-     *  The shape has to be the popup's own {@link UI.ComponentArea#BODY}, so that the window edge
-     *  and the painted edge are the same curve; reading it off the style engine is also what keeps
-     *  the corner radius correct across presets which each choose their own. That area is only
-     *  calculated once the popup has a size, and the popup is sized by the {@code pack()} inside
-     *  {@link Popup#show()} - hence the work happens after the delegate has been shown rather than
-     *  when the popup was handed out.
+     *  The shape is the sheet's own {@link UI.ComponentArea#BODY}, so that the window edge and the
+     *  painted edge are one curve at whatever corner radius the installed preset chose.
      */
     private static final class ShapedPopup extends Popup
     {

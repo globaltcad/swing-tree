@@ -16,24 +16,19 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 
-/**
- *  The {@link JSpinner} UI delegate. The spinner's surface is styled like a small text field;
- *  its two stepper buttons are flat and carry nothing but the symbol set's arrows. The editor
- *  inside receives its own delegate, so it picks up the same focus treatment.
- */
+/** The {@link JSpinner} UI delegate. Its two stepper buttons carry the symbol set's arrows. */
 public final class SwingTreeSpinnerUI
         extends    BasicSpinnerUI
         implements SwingTreeStyledComponentUI<JSpinner>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeSpinnerUI(); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
         SwingTreeLookAndFeel.installStyleOn(c);
-        // The spinner's outer border tracks its inner editor's focus, but focus never lands on
-        // the spinner itself, so bridge the editor's focus to a repaint of the whole spinner.
+        // Focus lands on the text field inside the spinner, never on the spinner itself, and the
+        // spinner's own border is what has to change when it does.
         JSpinner  spinner = (JSpinner) c;
         Component editor  = spinner.getEditor();
         if ( editor instanceof JSpinner.DefaultEditor )
@@ -83,9 +78,9 @@ public final class SwingTreeSpinnerUI
         return SwingTreeLookAndFeel.applyStyle(it);
     }
 
-    /** One of the two stepper buttons. It paints itself rather than going through the style
-     *  engine, for the same reason a combo box's drop-down button does: the spinner around it is
-     *  already one styled surface, and a second one inside it would draw a box around the arrow. */
+    /** One of the two stepper buttons. It paints itself instead of going through the style
+     *  engine, because the spinner around it is already a styled surface and a second one would
+     *  draw a box around the arrow. */
     private static final class StepperButton extends JButton
     {
         private final boolean _up;

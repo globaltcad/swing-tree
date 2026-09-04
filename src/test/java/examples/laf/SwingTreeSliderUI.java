@@ -14,19 +14,17 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 /**
- *  The {@link JSlider} UI delegate. The groove, the filled part of it and the handle are all
- *  drawn by the configured symbol set; this delegate only decides where they go and makes sure
- *  the slider is laid out with enough room for the handle on both axes.
+ *  The {@link JSlider} UI delegate. The symbol set draws the groove, the filled part of it and
+ *  the handle; this delegate places them and keeps room for the handle on both axes.
  */
 public final class SwingTreeSliderUI
         extends    BasicSliderUI
         implements SwingTreeStyledComponentUI<JSlider>
 {
-    /** Creates the delegate. {@link BasicSliderUI} wants a slider up front; it is installed
-     *  through {@link #installUI(JComponent)} instead, exactly as the basic look and feel does. */
+    /** {@link BasicSliderUI} asks for a slider up front; {@link #installUI(JComponent)} supplies
+     *  it instead, which is what the basic look and feel does too. */
     public SwingTreeSliderUI() { super(null); }
 
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeSliderUI(); }
 
     @Override
@@ -61,10 +59,10 @@ public final class SwingTreeSliderUI
     }
 
     /**
-     *  {@link BasicSliderUI#getPreferredSize(JComponent)} recomputes the dimension perpendicular
-     *  to the slider from {@code trackRect + tickRect + labelRect}, ignoring the floor set in
-     *  {@link #getPreferredHorizontalSize()} and {@link #getPreferredVerticalSize()}. The floor
-     *  is re-applied here so the slider always has room for the scaled handle on both axes.
+     *  {@link BasicSliderUI#getPreferredSize(JComponent)} recomputes the extent across the slider
+     *  from {@code trackRect + tickRect + labelRect} and drops the floor that
+     *  {@link #getPreferredHorizontalSize()} and {@link #getPreferredVerticalSize()} put there,
+     *  so the floor is applied a second time here.
      */
     @Override
     public Dimension getPreferredSize( JComponent c ) {
@@ -85,8 +83,8 @@ public final class SwingTreeSliderUI
         return new Dimension(side, side);
     }
 
-    /** The handle itself indicates focus, so no separate focus rectangle is drawn - unless the
-     *  symbol set has no handle of its own, in which case Swing's own indicator is the one there is. */
+    /** The handle shows focus by itself, so no focus rectangle is drawn around the slider -
+     *  unless the symbol set draws no handle, and Swing's rectangle is the only sign there is. */
     @Override
     public void paintFocus( Graphics g ) {
         if ( !SwingTreeLookAndFeel.drawsOwnChrome() )

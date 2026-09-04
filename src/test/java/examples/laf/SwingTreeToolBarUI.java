@@ -10,16 +10,13 @@ import javax.swing.plaf.basic.BasicToolBarUI;
 import java.awt.Graphics;
 
 /**
- *  The {@link JToolBar} UI delegate: a flat strip carrying a row of commands. Floating mode -
- *  when the user undocks the bar - keeps the same painting; the floating window's own frame is
- *  drawn by whatever look and feel owns the dialog. The handle the bar is dragged by is painted
- *  by the configured symbol set, on the tool bar's content layer.
+ *  The {@link JToolBar} UI delegate. An undocked tool bar is painted no differently, and the frame
+ *  of the window it floats in belongs to whichever look and feel owns dialogs.
  */
 public final class SwingTreeToolBarUI
         extends    BasicToolBarUI
         implements SwingTreeStyledComponentUI<JToolBar>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeToolBarUI(); }
 
     @Override

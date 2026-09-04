@@ -15,20 +15,17 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
 /**
- *  The {@link JScrollBar} UI delegate: a slim bar with no increment or decrement buttons. The
- *  thumb is drawn by the configured symbol set; the groove it slides along is the bar's own
- *  styled background - see {@link #paintTrack}.
+ *  The {@link JScrollBar} UI delegate: a slim bar with no increment or decrement buttons, and a
+ *  thumb the symbol set draws.
  *  <p>
- *  The bar's thickness is deliberately <em>not</em> taken from the {@code ScrollBar.width}
- *  default: Swing's convention is that the value is in raw component pixels, which would be
- *  wrong on a HiDPI display. It is computed here instead, from the symbol set's developer-pixel
- *  constant, at every layout pass.
+ *  Its thickness is computed in {@link #getPreferredSize(JComponent)} rather than read from the
+ *  {@code ScrollBar.width} default, because Swing reads that default as raw screen pixels and it
+ *  would therefore stay the same width as the UI scale factor grows.
  */
 public final class SwingTreeScrollBarUI
         extends    BasicScrollBarUI
         implements SwingTreeStyledComponentUI<JScrollBar>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeScrollBarUI(); }
 
     @Override
@@ -69,12 +66,10 @@ public final class SwingTreeScrollBarUI
     }
 
     /**
-     *  The groove is the scroll bar's own styled background, which the style engine has already
-     *  filled across the whole bar by the time the inherited delegate asks for a track. Filling it
-     *  a second time here would push an antialiased round rectangle the height of the window
-     *  through the rasterizer to arrive at exactly the colour that is already there - measured at
-     *  2.5% of the event thread on the Linen showcase. A style rule is the place to say what the
-     *  groove looks like.
+     *  The groove is the scroll bar's own background, which a style rule has already filled across
+     *  the whole bar by the time this is called. Filling it again would run an antialiased round
+     *  rectangle the height of the window through the rasterizer to arrive at the colour already
+     *  there: 2.5% of the event thread on the Linen showcase.
      */
     @Override
     protected void paintTrack( Graphics g, JComponent c, Rectangle r ) {

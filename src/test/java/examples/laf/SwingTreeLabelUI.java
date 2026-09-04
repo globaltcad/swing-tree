@@ -14,29 +14,22 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 
 /**
- *  The {@link JLabel} UI delegate, which also remembers where it last put a label's text - see
- *  {@link #layoutCL}.
- *  <p>
- *  It paints no background, not even for the cell renderer of a selected table or list row: one
- *  renderer instance stands in for every cell while the style engine keys a style on the
- *  <i>component</i>, so a per-cell decision here would land on whichever cell is painted next.
- *  Selection is filled by the owner instead - see {@link SwingTreeTableUI} and
- *  {@link SwingTreeListUI}.
+ *  The {@link JLabel} UI delegate. It paints no background, not even behind a selected table or
+ *  list cell: {@link SwingTreeTableUI} and {@link SwingTreeListUI} fill those bands themselves,
+ *  because one renderer instance cannot carry a colour that differs from cell to cell.
  */
 public final class SwingTreeLabelUI
         extends    BasicLabelUI
         implements SwingTreeStyledComponentUI<JLabel>
 {
     /**
-     *  Swing asks {@link #layoutCL} the same question from three directions - where the text
-     *  sits, how large the label wants to be, and where its baseline is - each with a different
-     *  viewing rectangle, so fewer than three slots make them evict each other: measured 33% hits
-     *  with one slot, 50% with two, 99.7% with three. A fourth buys nothing, because a label
-     *  needing more is one whose content genuinely varies.
+     *  Swing asks {@link #layoutCL} three questions - where the text sits, how large the label
+     *  wants to be, where its baseline is - each with a viewing rectangle of its own, so three
+     *  slots are what it takes to stop them evicting each other: 33% hits with one, 50% with two,
+     *  99.7% with three, and no further gain from a fourth.
      */
     private static final int REMEMBERED_PLACEMENTS = 3;
 
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeLabelUI(); }
 
     private final Placement[] _placements = new Placement[REMEMBERED_PLACEMENTS];
@@ -60,18 +53,18 @@ public final class SwingTreeLabelUI
      *  Places the label's text and icon inside {@code viewR} and returns the text as it should be
      *  drawn, shortened with an ellipsis when it does not fit.
      *  <p>
-     *  Measuring text is expensive - a string with a character the font cannot advance from a
-     *  lookup table costs a hundred times what plain ASCII does - and Swing asks this again on
-     *  every paint, although a label's inputs almost never change between two of them. Every one
-     *  of those inputs is compared here, so a label that changes any of them simply finds no
-     *  match and is laid out afresh; nothing else needs invalidating.
+     *  Measuring text is expensive - a string holding a character the font cannot advance from a
+     *  lookup table costs a hundred times what plain ASCII does - and Swing asks again on every
+     *  paint although the answer almost never changes. So the last few answers are remembered.
+     *  Every input the answer depends on is compared, which means a label that changes one of them
+     *  finds no match and is laid out afresh, and nothing has to be invalidated by hand.
      *  <p>
-     *  Markup is never remembered: Swing lays it out through a document view that keeps its own
-     *  measurements and discards them on its own - when an image inside it loads, say - so a
-     *  remembered placement would shadow an invalidation this delegate cannot see.
-     *  {@link BasicHTML#isHTMLString(String)} is exactly the condition under which Swing builds
-     *  that view, and is cheaper and safer to ask than the client property, which also misses a
-     *  label whose markup is switched off through {@code html.disable}.
+     *  Markup is never remembered. Swing lays markup out through a document view which keeps
+     *  measurements of its own and throws them away by itself, when an image inside it finishes
+     *  loading for instance, and this delegate cannot see that happen.
+     *  {@link BasicHTML#isHTMLString(String)} is the same test Swing uses to decide to build that
+     *  view. The client property is the wrong test: it misses a label whose markup was switched
+     *  off through {@code html.disable}.
      */
     @Override
     protected String layoutCL(
@@ -105,9 +98,9 @@ public final class SwingTreeLabelUI
     }
 
     /**
-     *  One remembered answer of {@link #layoutCL}. Of an icon only its size is held: that is all
-     *  the placement is worked out from, and an icon that loads or animates reports a new size
-     *  without becoming a new icon.
+     *  One remembered answer of {@link #layoutCL}. Only an icon's size is held, because the size
+     *  is all the placement is worked out from, and an icon that finishes loading or animates
+     *  reports a new size without becoming a different icon.
      */
     private static final class Placement
     {

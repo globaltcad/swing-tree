@@ -13,16 +13,11 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 
-/**
- *  The {@link JSeparator} UI delegate: one hairline across the full length of the separator,
- *  horizontal or vertical depending on its orientation. The line is as thick as the configured
- *  symbol set asks for, scaled through {@link UI#scale(int)} so it stays crisp on HiDPI displays.
- */
+/** The {@link JSeparator} UI delegate: one hairline as thick as the symbol set asks for. */
 public final class SwingTreeSeparatorUI
         extends    BasicSeparatorUI
         implements SwingTreeStyledComponentUI<JSeparator>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeSeparatorUI(); }
 
     @Override

@@ -9,16 +9,11 @@ import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicRadioButtonMenuItemUI;
 import java.awt.Graphics;
 
-/**
- *  The {@link JRadioButtonMenuItem} UI delegate: the same row as
- *  {@link SwingTreeMenuItemUI}, with the symbol set's radio glyph on the left to indicate
- *  membership in an exclusive group.
- */
+/** The {@link JRadioButtonMenuItem} UI delegate. */
 public final class SwingTreeRadioButtonMenuItemUI
         extends    BasicRadioButtonMenuItemUI
         implements SwingTreeStyledComponentUI<JRadioButtonMenuItem>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeRadioButtonMenuItemUI(); }
 
     @Override

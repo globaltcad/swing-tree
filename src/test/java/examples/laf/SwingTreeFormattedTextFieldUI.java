@@ -10,27 +10,19 @@ import javax.swing.plaf.basic.BasicFormattedTextFieldUI;
 import javax.swing.text.JTextComponent;
 import java.awt.Graphics;
 
-/**
- *  The {@link JFormattedTextField} UI delegate. Visually identical to
- *  {@link SwingTreeTextFieldUI}, but the inherited delegate routes input through the
- *  field's formatter so values can be validated and committed or reverted.
- *  <p>
- *  Painting takes the document read lock the way {@link SwingTreeTextFieldUI} describes.
- */
+/** The {@link JFormattedTextField} UI delegate. */
 public final class SwingTreeFormattedTextFieldUI
         extends    BasicFormattedTextFieldUI
         implements SwingTreeStyledComponentUI<JFormattedTextField>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeFormattedTextFieldUI(); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
         SwingTreeLookAndFeel.installStyleOn(c);
-        // A text component does not repaint itself when it gains or loses focus, and repaints
-        // only a narrow damage rectangle when its selection changes - neither is enough for a
-        // style that is re-gathered as part of the component's own paint cycle.
+        // Swing repaints neither on a focus change nor across a whole new selection, and the
+        // style is re-gathered while the component paints, so both need a repaint of their own.
         LafUtilities.repaintOnFocusChange(c, c);
         LafUtilities.repaintOnSelectionChange((JTextComponent) c);
     }
@@ -44,6 +36,7 @@ public final class SwingTreeFormattedTextFieldUI
 
     @Override
     public void update( Graphics g, JComponent c ) {
+        // BasicTextUI.paint(..) takes the document read lock, paintSafely(..) does not.
         LafUtilities.paintStyled(g, c, g2 -> super.paint(g2, c));
     }
 

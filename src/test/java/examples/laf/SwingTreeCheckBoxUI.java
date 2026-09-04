@@ -10,24 +10,20 @@ import javax.swing.plaf.basic.BasicCheckBoxUI;
 import java.awt.Graphics;
 
 /**
- *  The {@link javax.swing.JCheckBox} UI delegate. Unlike a button, a check box reserves
- *  all of its visual identity for the glyph next to its label, which the configured
- *  symbol set draws through the {@code CheckBox.icon} default.
+ *  The {@link javax.swing.JCheckBox} UI delegate. The box itself is not painted here: it is the
+ *  symbol set's glyph, installed as the {@code CheckBox.icon} default.
  */
 public final class SwingTreeCheckBoxUI
         extends    BasicCheckBoxUI
         implements SwingTreeStyledComponentUI<AbstractButton>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeCheckBoxUI(); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        // Suppressing Swing's own fill is right when a rule is going to paint one in its place -
-        // it would otherwise double-paint underneath rounded corners and a noise overlay - and
-        // wrong when nothing is, which is what a blank style preset means. The style engine is
-        // installed either way: an application may still add a rule of its own.
+        // Swing's own fill has to go only when a style rule paints one in its place, or it would
+        // show through the rounded corners and the grain of that rule. A blank preset paints none.
         if ( SwingTreeLookAndFeel.styles(c.getClass()) ) {
             AbstractButton b = (AbstractButton) c;
             b.setContentAreaFilled(false);
@@ -38,8 +34,7 @@ public final class SwingTreeCheckBoxUI
     }
 
     @Override
-    // Swing UI delegates only ever paint on the Event Dispatch Thread, so the inherited
-    // synchronization is not needed here.
+    // A UI delegate only ever paints on the event dispatch thread.
     @SuppressWarnings("UnsynchronizedOverridesSynchronized")
     public void paint( Graphics g, JComponent c ) {
         LafUtilities.paintStyled(g, c, g2 -> super.paint(g2, c));

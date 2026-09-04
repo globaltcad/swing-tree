@@ -10,27 +10,19 @@ import javax.swing.plaf.basic.BasicTextPaneUI;
 import javax.swing.text.JTextComponent;
 import java.awt.Graphics;
 
-/**
- *  The {@link JTextPane} UI delegate. A text pane is the styled-document cousin of a text
- *  area and is painted identically, letting the styled document control the colour and font
- *  of individual runs of text.
- *  <p>
- *  Painting takes the document read lock the way {@link SwingTreeTextFieldUI} describes.
- */
+/** The {@link JTextPane} UI delegate. */
 public final class SwingTreeTextPaneUI
         extends    BasicTextPaneUI
         implements SwingTreeStyledComponentUI<JTextPane>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeTextPaneUI(); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
         SwingTreeLookAndFeel.installStyleOn(c);
-        // A text component does not repaint itself when it gains or loses focus, and repaints
-        // only a narrow damage rectangle when its selection changes - neither is enough for a
-        // style that is re-gathered as part of the component's own paint cycle.
+        // Swing repaints neither on a focus change nor across a whole new selection, and the
+        // style is re-gathered while the component paints, so both need a repaint of their own.
         LafUtilities.repaintOnFocusChange(c, c);
         LafUtilities.repaintOnSelectionChange((JTextComponent) c);
     }
@@ -44,6 +36,7 @@ public final class SwingTreeTextPaneUI
 
     @Override
     public void update( Graphics g, JComponent c ) {
+        // BasicTextUI.paint(..) takes the document read lock, paintSafely(..) does not.
         LafUtilities.paintStyled(g, c, g2 -> super.paint(g2, c));
     }
 

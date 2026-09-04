@@ -11,29 +11,26 @@ import javax.swing.text.JTextComponent;
 import java.awt.Graphics;
 
 /**
- *  The {@link JTextField} UI delegate: a rounded field whose border grows into the accent
- *  colour on focus, under a faint accent-tinted glow.
+ *  The {@link JTextField} UI delegate.
  *  <p>
- *  Painting goes through the {@code final}
- *  {@link javax.swing.plaf.basic.BasicTextUI#paint(Graphics, JComponent)} and not through
- *  {@code paintSafely(..)}, because only the former takes the document's read lock. Without it a
- *  document mutated mid-render makes the view ask for text that is no longer there: measured 192
- *  {@code StateInvariantError: Can't render: p0,p1} in 400 paints, none with the lock.
+ *  Every text delegate here paints through the {@code final}
+ *  {@link javax.swing.plaf.basic.BasicTextUI#paint(Graphics, JComponent)} rather than through
+ *  {@code paintSafely(..)}, because only {@code paint(..)} takes the document's read lock. Without
+ *  that lock a document edited while the view renders makes the view ask for text that is no
+ *  longer there: 192 {@code StateInvariantError: Can't render: p0,p1} in 400 paints, none with it.
  */
 public final class SwingTreeTextFieldUI
         extends    BasicTextFieldUI
         implements SwingTreeStyledComponentUI<JTextField>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeTextFieldUI(); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
         SwingTreeLookAndFeel.installStyleOn(c);
-        // A text component does not repaint itself when it gains or loses focus, and repaints
-        // only a narrow damage rectangle when its selection changes - neither is enough for a
-        // style that is re-gathered as part of the component's own paint cycle.
+        // Swing repaints neither on a focus change nor across a whole new selection, and the
+        // style is re-gathered while the component paints, so both need a repaint of their own.
         LafUtilities.repaintOnFocusChange(c, c);
         LafUtilities.repaintOnSelectionChange((JTextComponent) c);
     }

@@ -20,7 +20,6 @@ import java.awt.image.BufferedImage;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -90,6 +89,10 @@ public final class ComponentExtension<C extends JComponent>
     private final List<String>      _styleGroups = new ArrayList<>(0);
     private final StyleInstaller<C> _styleInstaller = new StyleInstaller<>();
 
+    private @Nullable Font _fontToScaleFrom = null;
+    private float          _scaleTheFontWasWrittenFor = 1f;
+    private boolean        _isRescalingFont = false;
+
     private StyleEngine     _styleEngine = StyleEngine.create();
     private StyleSource<C>  _styleSource  = StyleSource.create();
     private @Nullable Shape _outerBaseClip = null;
@@ -100,25 +103,13 @@ public final class ComponentExtension<C extends JComponent>
 
     private ComponentExtension( C owner ) {
         _owner = Objects.requireNonNull(owner);
-        @Nullable Font defaultFont = UIManager.getDefaults().getFont("defaultFont");
-        @Nullable Integer defaultFontSize = (defaultFont != null ? defaultFont.getSize() : null);
-        AtomicReference<@Nullable Font> referenceFont = new AtomicReference<>();
-        AtomicReference<@Nullable Boolean> hasDefaultSize = new AtomicReference<>(false);
+        _rememberFontToScaleFrom();
+        owner.addPropertyChangeListener("font", event -> {
+            if ( !_isRescalingFont )
+                _rememberFontToScaleFrom();
+        });
         _localUiScaleFactor = SwingTree.get().getUiScaleView().onChange(From.ALL, it -> {
-            Font currentFont = referenceFont.get();
-            if ( currentFont == null ) {
-                currentFont = owner.getFont();
-                referenceFont.set(currentFont);
-                if ( defaultFontSize != null && currentFont != null && defaultFontSize == currentFont.getSize() ) {
-                    hasDefaultSize.set(true);
-                }
-            }
-            if ( currentFont != null ) {
-                if ( Optional.ofNullable(hasDefaultSize.get()).orElse(false) )
-                    owner.setFont(SwingTree.get().applyScaleAsFontSize(currentFont));
-                else
-                    owner.setFont(scale(currentFont, it.oldValue().orElseThrowUnchecked()));
-            }
+            _rescaleFont();
             gatherApplyAndInstallStyle(false);
             UI.runLater(owner::revalidate);
         });
@@ -127,18 +118,38 @@ public final class ComponentExtension<C extends JComponent>
         }
     }
 
-    private Font scale(Font font, float previousScale) {
-        if( !SwingTree.get().isUiScaleFactorEnabled() )
+    private void _rememberFontToScaleFrom() {
+        _fontToScaleFrom = _owner.isFontSet() ? _owner.getFont() : null;
+        _scaleTheFontWasWrittenFor = SwingTree.get().getUiScaleFactor();
+    }
+
+    private void _rescaleFont() {
+        @Nullable Font fontToScaleFrom = _fontToScaleFrom;
+        if ( fontToScaleFrom == null )
+            return;
+        float currentScale = SwingTree.get().getUiScaleFactor();
+        _isRescalingFont = true;
+        try {
+            _owner.setFont(_rescaledTo(fontToScaleFrom, currentScale));
+        } finally {
+            _isRescalingFont = false;
+        }
+    }
+
+    private Font _rescaledTo( Font fontToScaleFrom, float currentScale ) {
+        if ( currentScale == _scaleTheFontWasWrittenFor )
+            return fontToScaleFrom;
+        return _resized(fontToScaleFrom, currentScale / _scaleTheFontWasWrittenFor);
+    }
+
+    private static Font _resized( Font font, float factor ) {
+        if ( !SwingTree.get().isUiScaleFactorEnabled() )
             return font;
 
-        if( previousScale <= 0 )
+        if ( factor <= 0 || factor == 1 )
             return font;
 
-        float scaleFactor = SwingTree.get().getUiScaleFactor() / previousScale;
-        if( scaleFactor <= 0 || scaleFactor == 1 )
-            return font;
-
-        int newFontSize = Math.max( Math.round( font.getSize() * scaleFactor ), 1 );
+        int newFontSize = Math.max( Math.round( font.getSize() * factor ), 1 );
         return new Font( font.deriveFont( (float) newFontSize ).getAttributes() );
     }
 

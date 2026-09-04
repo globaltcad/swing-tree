@@ -11,15 +11,11 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 
-/**
- *  The {@link JList} UI delegate. Entries are rendered by whatever cell renderer the list
- *  carries; the band behind a selected entry is filled here.
- */
+/** The {@link JList} UI delegate. */
 public final class SwingTreeListUI
         extends    BasicListUI
         implements SwingTreeStyledComponentUI<JList<?>>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeListUI(); }
 
     @Override
@@ -39,13 +35,11 @@ public final class SwingTreeListUI
     /**
      *  Fills a band behind each selected entry.
      *  <p>
-     *  Swing's own mechanism - a cell renderer that arrives wearing the list's selection colour -
-     *  cannot work under a look and feel backed by the style engine: one renderer instance stands
-     *  in for every row, while the engine keys a component's gathered style and its rendered
-     *  layers on the component, so a per-row colour decided in the renderer's delegate lands on
-     *  whichever row happens to be painted next. The list, on the other hand, knows exactly which
-     *  rows are selected and is painted once, so the band belongs here. The renderers on top are
-     *  not opaque, so the band shows through them.
+     *  Swing has a cell renderer arrive wearing the list's selection colour, which the style
+     *  engine cannot reproduce: one renderer instance stands in for every entry, and the engine
+     *  keys a gathered style on the component, so a colour chosen for one entry lands on whichever
+     *  entry is painted next. The list knows which entries are selected and is painted once, so
+     *  the band is filled here and the renderers, which are not opaque, are painted over it.
      */
     private static void paintSelectionBands( Graphics2D g, JList<?> list ) {
         if ( !SwingTreeLookAndFeel.drawsOwnChrome() )

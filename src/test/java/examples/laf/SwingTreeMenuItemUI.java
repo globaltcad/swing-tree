@@ -9,15 +9,11 @@ import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicMenuItemUI;
 import java.awt.Graphics;
 
-/**
- *  The {@link JMenuItem} UI delegate: a transparent row that picks up the popup's fill,
- *  highlighted once the pointer is over it or the keyboard is holding it open.
- */
+/** The {@link JMenuItem} UI delegate. */
 public final class SwingTreeMenuItemUI
         extends    BasicMenuItemUI
         implements SwingTreeStyledComponentUI<JMenuItem>
 {
-    /** Called by Swing reflectively to make the delegate. */
     public static ComponentUI createUI( JComponent c ) { return new SwingTreeMenuItemUI(); }
 
     @Override

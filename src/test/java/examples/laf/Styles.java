@@ -13,20 +13,23 @@ import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.util.Objects;
 
+/**
+ *  The tables of style rules behind {@link SwingTreeLookAndFeel.StylePreset}, one nested class per
+ *  preset and one rule per component family.
+ *  <p>
+ *  No rule anywhere here names a colour. Every one reads {@link SwingTreeLookAndFeel#palette()}
+ *  while it runs, which is on every paint, so pairing a preset with a palette it was not designed
+ *  against re-tints the whole preset instead of half of it.
+ */
 final class Styles
 {
-    private Styles() {} // Just a namespace for the style functions!
+    private Styles() {}
 
 
     /**
-     *  <b>Linen</b>: a calm, paper-like theme. Cream surfaces, taupe borders, a deep olive accent for
-     *  focus and selection, and a barely perceptible noise grain on the window background that suggests
-     *  woven fabric. A control that takes focus grows its border and gives the same amount back from
+     *  <b>Linen</b>: a calm, paper-like theme of cream surfaces, taupe borders and a woven grain on
+     *  the window. A control that takes focus grows its border and gives the same amount back from
      *  its margin, so tabbing through a form never shifts the layout around it.
-     *  <p>
-     *  No rule names a colour: every one reads {@link SwingTreeLookAndFeel#palette()} at paint time, so
-     *  pairing Linen with a palette other than {@link Palettes#LINEN} gives a re-tinted Linen rather
-     *  than a half-changed one.
      *
      *  @see SwingTreeLookAndFeel.StylePreset#LINEN
      */
@@ -34,19 +37,16 @@ final class Styles
     {
         private Linen() {}
 
-        /** The shadow a pressed control sinks into. Hoisted because a style rule runs on every
-         *  paint, and a colour that never changes has no business being allocated there. */
-        private static final Color PRESSED_SHADOW  = new Color(0, 0, 0, 55);
-        /** The shadow a resting raised control casts. */
+        // The four shadows the theme casts, deepening in that order. They are constants because a
+        // style rule runs on every paint, and a colour that never changes should not be allocated
+        // there. A floating surface is a popup or a tool tip.
         private static final Color RESTING_SHADOW  = new Color(0, 0, 0, 25);
-        /** The deeper shadow the same control casts once the pointer is over it. */
         private static final Color HOVERED_SHADOW  = new Color(0, 0, 0, 55);
-        /** The shadow a floating surface - a popup, a tooltip - casts onto the window. */
+        private static final Color PRESSED_SHADOW  = new Color(0, 0, 0, 55);
         private static final Color FLOATING_SHADOW = new Color(0, 0, 0, 70);
 
         private static final Tuple<StyleRule> RULES = buildRules();
 
-        /** @return the theme's style rules, one per component family. */
         static Tuple<StyleRule> rules() { return RULES; }
 
         private static Tuple<StyleRule> buildRules() {
@@ -486,7 +486,6 @@ final class Styles
 
         // ── Variant colours ──────────────────────────────────────────────────
 
-        /** The fill of one combination of button states. */
         private static Color surfaceOf(SwingTreeLookAndFeel.Variant variant, SwingTreeLookAndFeel.Palette p, boolean enabled, boolean sunken, boolean rollover ) {
             if ( !enabled )
                 return variant == SwingTreeLookAndFeel.Variant.QUIET ? SwingTreeLookAndFeel.Palette.TRANSPARENT : p.surfaceDisabled();
@@ -530,12 +529,11 @@ final class Styles
         }
 
         /**
-         *  Draws the handle a floatable tool bar is dragged by, on the tool bar's content layer.
-         *  <p>
-         *  A named painter rather than a lambda: a style rule is re-evaluated on every paint, and a
-         *  capturing lambda is a fresh object each time, which would make the style engine conclude
-         *  that the tool bar's style had changed when nothing had. Two of these compare equal
-         *  whenever they would draw the same thing.
+         *  Draws the handle a floatable tool bar is dragged by, on the tool bar's content layer. It
+         *  is a named painter rather than a lambda because a style rule runs on every paint, and a
+         *  capturing lambda is a new object each time, which would tell the style engine the tool
+         *  bar's style had changed. Two of these compare equal whenever they would draw the same
+         *  thing.
          */
         private static final class DragHandlePainter implements Painter
         {
@@ -588,25 +586,20 @@ final class Styles
     }
 
     /**
-     *  <b>Soft UI</b>, or neumorphism: a theme in which nothing has a colour of its own.
+     *  <b>Soft UI</b>, or neumorphism: every surface is the colour of the window it sits on, and only
+     *  the light tells them apart. A highlight up and to the left, a shadow down and to the right,
+     *  and a wash across the face along the same diagonal, so a control reads as moulded rather than
+     *  as a rectangle with a halo. Pressing one turns all three around.
      *  <p>
-     *  Every surface is the same colour as the window it sits on. What tells a button from the panel
-     *  behind it is not a fill or a border but the <em>light</em>: a pale highlight up and to the left,
-     *  a soft shadow down and to the right, and across the face between them a wash along the same
-     *  diagonal, so the thing reads as moulded rather than as a rectangle with a halo. Press it and all
-     *  three turn around and it sinks back in. Text inputs are sunken from the start, because a hole is
-     *  what you type into.
+     *  Three rules keep the light believable across palettes: every shade is a fixed number of
+     *  channel steps from the palette colour ({@link #LIGHT_STEP}), each fade follows the falloff
+     *  curve of the thing it stands for rather than a straight ramp ({@link #raised},
+     *  {@link #sunken}), and a shadow always reaches further than the highlight facing it
+     *  ({@link #SHEEN_REACH}).
      *  <p>
-     *  Every one of those shades is computed from the palette by a fixed number of channel steps
-     *  ({@link #LIGHT_STEP}), never named and never a fraction, which is what lets the same theme be
-     *  lit on {@link Palettes#CLAY} and on a midnight blue without glaring on one of them. Each fade
-     *  also follows the falloff curve of the thing it stands for rather than a straight ramp - see
-     *  {@link #raised} and {@link #sunken} - and a shadow always reaches further than the highlight
-     *  facing it ({@link #SHEEN_REACH}), because in a real room it does.
-     *  <p>
-     *  Borders are given up almost entirely, since an outline would do the job the light is there to
-     *  do. The exception is focus, which cannot be said with a shadow a resting control already has -
-     *  so a focused control grows an accent ring and gives the same amount back from its margin.
+     *  There are almost no borders, because an outline would do the work the light is there to do.
+     *  Focus is the exception: a resting control already casts a shadow, so a focused one grows an
+     *  accent ring and gives the same amount back from its margin.
      *
      *  @see SwingTreeLookAndFeel.StylePreset#SOFT_UI
      */
@@ -616,39 +609,28 @@ final class Styles
 
         /**
          *  How far the two sides of an extrusion move, in channel steps rather than as a fraction of
-         *  the way to white or black.
-         *  <p>
-         *  A fraction is the wrong unit for light. The same 0.4 that lifts a pale clay grey by
-         *  thirteen steps lifts a midnight blue by ninety, so a relief built out of fractions glares
-         *  on a dark palette and washes out on a light one. A fixed step is what one lamp falling on
-         *  one material actually does, and it is why this preset survives being paired with any
-         *  {@link SwingTreeLookAndFeel.PalettePreset}.
+         *  the way to white or black. A fraction is the wrong unit for light: the 0.4 that lifts a
+         *  pale clay grey by thirteen steps lifts a midnight blue by ninety.
          */
         private static final int LIGHT_STEP = 18;
-        /** Slightly deeper than the highlight, so the effect reads as a room lit from one corner
-         *  rather than as an outline drawn twice. */
+        /** Deeper than the highlight, so the pair reads as a room lit from one corner rather than
+         *  as an outline drawn twice in two colours. */
         private static final int SHADE_STEP = 22;
-        /**
-         *  An inset groove is packed into the few pixels along an edge, where the same step that
-         *  reads as a soft halo around a raised thing reads as a hard dark line pressed into a sunken
-         *  one. Inset light is therefore dimmer than the light outside.
-         */
+        /** How much dimmer the light inside a groove is. A groove is only a few pixels wide, and a
+         *  step that reads as a soft halo outside reads as a hard line inside. */
         private static final double INSET_DIMMING = 0.55;
         /** How far the two ends of a surface's own diagonal wash sit from its fill. */
         private static final int CURVE_STEP = 5;
         /**
-         *  How far a highlight reaches compared with the shadow opposite it.
-         *  <p>
-         *  In a real room the two are never the same size. A shadow is an umbra widened by the whole
-         *  angular width of the light, so it spreads; a highlight is only the band where the surface
-         *  has turned far enough to face the lamp, so it stays near the edge. Giving both the same
-         *  reach is what makes a relief read as an outline drawn twice in two colours.
+         *  How far a highlight reaches compared with the shadow opposite it. A shadow is an umbra
+         *  widened by the angular width of the lamp, so it spreads; a highlight is only the band
+         *  where the surface has turned far enough to face the lamp, so it stays near the edge.
          */
         private static final double SHEEN_REACH = 0.75;
 
-        /** The corner the light comes from, said once so every extrusion agrees. */
+        // The names of the two shadow layers every extrusion is built from: the corner the light
+        // comes from, and the corner opposite it.
         private static final String LIT    = "lit";
-        /** The opposite corner. */
         private static final String SHADED = "shaded";
 
         private static final Tuple<StyleRule> RULES = Tuple.of(
@@ -681,32 +663,29 @@ final class Styles
             StyleRule.of(JSplitPane.class,   SoftUi::splitPane)
         );
 
-        /** @return the theme's style rules, one per component family. */
         static Tuple<StyleRule> rules() { return RULES; }
 
         // ── The light ────────────────────────────────────────────────────────
 
-        /** @return the surface as it looks where the light falls on it. */
         private static Color lit( SwingTreeLookAndFeel.Palette p ) { return LafUtilities.shadeBySteps(p.background(), LIGHT_STEP); }
 
-        /** @return the surface as it looks in its own shadow. */
         private static Color shade( SwingTreeLookAndFeel.Palette p ) { return LafUtilities.shadeBySteps(p.background(), -SHADE_STEP); }
 
-        /** @return {@link #lit} as it reads inside a groove. */
+        /** @return {@link #lit}, dimmed to what it reads as inside a groove. */
         private static Color litInside( SwingTreeLookAndFeel.Palette p ) {
             return LafUtilities.shadeBySteps(p.background(), (int) Math.round(LIGHT_STEP * INSET_DIMMING));
         }
 
-        /** @return {@link #shade} as it reads inside a groove. */
+        /** @return {@link #shade}, dimmed to what it reads as inside a groove. */
         private static Color shadeInside( SwingTreeLookAndFeel.Palette p ) {
             return LafUtilities.shadeBySteps(p.background(), -(int) Math.round(SHADE_STEP * INSET_DIMMING));
         }
 
         /**
-         *  Curves a flat fill. One light source falling on a rounded thing does not leave it one
-         *  colour: the shoulder facing the lamp is brighter than the face, and the far edge is already
-         *  turning away. A gentle wash along that diagonal is the whole difference between a control
-         *  that looks moulded and one that looks like a coloured rectangle with a halo around it.
+         *  Curves a flat fill. One lamp falling on a rounded thing does not leave it one colour: the
+         *  shoulder facing the lamp is brighter than the face, and the far edge is already turning
+         *  away. That wash along the diagonal is the difference between a control that looks moulded
+         *  and one that looks like a coloured rectangle with a halo around it.
          *
          * @param it     the delegate to style
          * @param fill   the colour the surface is nominally painted in
@@ -719,10 +698,10 @@ final class Styles
             ComponentStyleDelegate<C> it, Color fill, boolean inward
         ) {
             int step = inward ? -CURVE_STEP : CURVE_STEP;
-            // Most of a rounded rectangle's face points straight at the viewer and is therefore one
-            // even colour; only near the two shoulders does it turn far enough to catch or lose the
-            // light. So the wash is a plateau with a roll-off at each end, not a constant slope,
-            // which is the difference between a curved face and a flat one held at an angle.
+            // Most of a rounded rectangle's face points straight at the viewer and is one even
+            // colour; only the two shoulders turn far enough to catch or lose the light. So the wash
+            // is a plateau with a roll-off at each end rather than a constant slope, which is what a
+            // curved face does and a flat one held at an angle does not.
             return it.gradient( g -> g
                     .span(UI.Span.TOP_LEFT_TO_BOTTOM_RIGHT)
                     .fractions(0, 0.38, 0.62, 1)
@@ -739,16 +718,16 @@ final class Styles
          *  Extrudes a surface out of the panel behind it: light from the top left, shadow to the
          *  bottom right, both outside the shape.
          *  <p>
-         *  Each of the two fades along the curve that matches what it is. The shadow uses
-         *  {@link UI.ShadowType#BLUR}, the profile a hard edge takes on when it is convolved with a
-         *  blur, so it leaves the shape at full strength and arrives at nothing with no slope at
-         *  either end - which is what stops the surface looking as though it steps up out of the
-         *  panel rather than swelling out of it. The highlight uses {@link UI.ShadowType#GLOW}, a
-         *  bell, because a sheen is light bleeding off a shoulder and not an edge being cast.
+         *  Each of the two fades along the curve that matches what it stands for. The shadow uses
+         *  {@link UI.ShadowType#BLUR}, the profile a hard edge takes when it is convolved with a
+         *  blur, so it leaves the shape at full strength and reaches nothing with no slope at either
+         *  end; the surface then swells out of the panel instead of stepping up out of it. The
+         *  highlight uses the bell of {@link UI.ShadowType#GLOW}, because a sheen is light bleeding
+         *  off a shoulder rather than an edge being cast.
          *  <p>
-         *  An outer shadow is drawn in the component's own margin and is cut off at the component
-         *  bounds, so {@code reach} - the offset and the blur together - must never exceed the margin
-         *  the caller set, or the soft glow ends in a hard rectangular edge.
+         *  An outer shadow is drawn in the component's own margin and cut off at the component
+         *  bounds, so {@code reach} - the offset and the blur together - must not exceed the margin
+         *  the caller set, or the glow ends in a hard rectangular edge.
          */
         private static <C extends JComponent> ComponentStyleDelegate<C> raised(
                 ComponentStyleDelegate<C> it, SwingTreeLookAndFeel.Palette p, int reach
@@ -1104,18 +1083,14 @@ final class Styles
     }
 
     /**
-     *  <b>Frutiger Aero</b>: the wet, glassy optimism of software from about 2004 to 2012.
-     *  <p>
-     *  Everything looks like it was moulded out of coloured glass and then rained on. The defining
-     *  move is the <em>gloss</em>: a fill noticeably lighter across its top half, breaking on a hard
-     *  line at the middle and continuing darker below, so the surface reads as curved rather than
-     *  flat. Around it go a crisp one-pixel outline a few shades darker than the fill, a generous
-     *  radius, and a small drop shadow. The page itself is a sky - a soft vertical gradient. Pressing
+     *  <b>Frutiger Aero</b>: the wet, glassy optimism of software from about 2004 to 2012. The move
+     *  the whole idiom rests on is the gloss - a fill lighter across its top half, breaking on a
+     *  hard line at the middle and darker below, so a surface reads as curved. Around it go a crisp
+     *  one-pixel outline, a generous radius and a small drop shadow, and behind it a sky. Pressing
      *  something turns the gloss upside down and sinks the shadow inward.
      *  <p>
-     *  The idiom needs a colour it can put a highlight on, which is what {@link Palettes#AERO}
-     *  supplies. A flatter palette still works, it is simply quieter: all four stops of every gradient
-     *  are derived from the palette, never named.
+     *  All four stops of every gradient are derived from the palette, so a flatter palette than
+     *  {@link Palettes#AERO} gives a quieter version rather than a broken one.
      *
      *  @see SwingTreeLookAndFeel.StylePreset#FRUTIGER_AERO
      */
@@ -1123,11 +1098,11 @@ final class Styles
     {
         private FrutigerAero() {}
 
-        /** Where the gloss breaks, as a fraction of the height. Just above the middle, which is what
-         *  makes the highlight read as a reflection rather than as a two-tone paint job. */
+        /** Where the gloss breaks, as a fraction of the height. Above the middle rather than on it,
+         *  which is what makes the highlight read as a reflection and not as a two-tone paint job. */
         private static final double BREAK = 0.48;
-        /** The far side of that break. A gradient's stops have to be strictly increasing, so the hard
-         *  line the idiom is built on is the smallest step there is rather than no step at all. */
+        /** The far side of that break. A gradient's stops have to increase, so the hard line is the
+         *  smallest step there is rather than no step at all. */
         private static final double BREAK_END = 0.482;
 
         private static final Tuple<StyleRule> RULES = Tuple.of(
@@ -1160,7 +1135,6 @@ final class Styles
             StyleRule.of(JSplitPane.class,     FrutigerAero::splitPane)
         );
 
-        /** @return the theme's style rules, one per component family. */
         static Tuple<StyleRule> rules() { return RULES; }
 
         // ── The gloss ────────────────────────────────────────────────────────
@@ -1547,18 +1521,14 @@ final class Styles
     }
 
     /**
-     *  <b>Material</b>: flat surfaces at different heights above the page.
+     *  <b>Material</b>: flat surfaces at different heights above the page. Nothing is shaded,
+     *  bevelled or glossy, and the only thing saying one surface is above another is the shadow it
+     *  casts, so the shadows come in named steps ({@link #elevation}) instead of being tuned per
+     *  component. A card sits one step up, a menu three, a pressed button one more than it was.
      *  <p>
-     *  Nothing is shaded, bevelled or glossy. Every surface is one flat colour with a small four-pixel
-     *  radius, and the only thing that says one is above another is the shadow it casts - which is why
-     *  the shadows here come in named steps ({@link #elevation}) rather than being tuned per component.
-     *  A card sits one step up, a menu three, a button that has just been pressed one more than it was.
-     *  <p>
-     *  Buttons follow the idiom's three kinds rather than being one kind in three colours: an ordinary
-     *  one is <i>outlined</i>, the single affirmative or destructive one is <i>contained</i> - filled,
-     *  and the only thing on the page casting a shadow at rest - and an in-place one is a <i>text</i>
-     *  button with no box at all until you reach for it. Text fields are filled boxes, rounded only at
-     *  the top, standing on a rule that thickens into the accent colour when the field takes focus.
+     *  Buttons come in the idiom's three kinds rather than in three colours: an ordinary one is
+     *  outlined, the one affirmative or destructive one is filled and is the only thing casting a
+     *  shadow at rest, and an in-place one has no box at all until the pointer arrives.
      *
      *  @see SwingTreeLookAndFeel.StylePreset#MATERIAL
      */
@@ -1599,7 +1569,6 @@ final class Styles
             StyleRule.of(JSplitPane.class,     Material::splitPane)
         );
 
-        /** @return the theme's style rules, one per component family. */
         static Tuple<StyleRule> rules() { return RULES; }
 
         /**
@@ -1914,17 +1883,14 @@ final class Styles
     }
 
     /**
-     *  <b>Flat design</b>: no shadow, no gradient, no bevel and no rounded corner anywhere.
+     *  <b>Flat design</b>: no shadow, no gradient, no bevel and no rounded corner anywhere. With
+     *  depth given up, colour carries everything and is never mixed: a control at rest is a plain
+     *  grey rectangle, pale accent under the pointer, and full accent with an inverted label when
+     *  pressed. Every control climbs that same three-step ladder.
      *  <p>
-     *  Once depth is given up, colour is the only thing left to say anything with, so it is spent
-     *  freely and never mixed: a control at rest is a plain grey rectangle, under the pointer it goes
-     *  pale accent, and pressed it goes the full accent with its label inverted to white. That
-     *  three-step ladder is the whole vocabulary, and every control climbs the same one.
-     *  <p>
-     *  The idiom has one well known cost - with no relief left, a thing that can be pressed looks
-     *  exactly like a thing that cannot - and it pays for it with edges instead: every input carries a
-     *  hard rule around it, and focus doubles that rule rather than adding a glow, so the ring can be
-     *  seen on a projector.
+     *  With no relief left, a thing that can be pressed looks like a thing that cannot, so the idiom
+     *  pays for it with edges: every input carries a hard rule around it, and focus doubles that rule
+     *  rather than adding a glow.
      *
      *  @see SwingTreeLookAndFeel.StylePreset#FLAT
      */
@@ -1962,7 +1928,6 @@ final class Styles
             StyleRule.of(JSplitPane.class,     FlatDesign::bare)
         );
 
-        /** @return the theme's style rules, one per component family. */
         static Tuple<StyleRule> rules() { return RULES; }
 
         // ── Surfaces ─────────────────────────────────────────────────────────
@@ -2232,18 +2197,15 @@ final class Styles
     }
 
     /**
-     *  <b>Skeuomorphism</b>: every control pretends to be made of something.
+     *  <b>Skeuomorphism</b>: the window is a leather bench, cards are sheets of paper lying on it,
+     *  and anything you can press is a milled metal plate screwed down onto the paper. A plate needs
+     *  all three of a grain, so the surface has a material; a vertical gradient, because a flat thing
+     *  under a ceiling lamp is brightest at the top; and a bevel of one light pixel along the top
+     *  edge and one dark pixel along the bottom, which is its own thickness seen edge on.
      *  <p>
-     *  The window is a leather bench, cards are sheets of paper lying on it, and anything you can
-     *  press is a milled metal plate screwed down onto the paper. Three things say so together, and
-     *  none of them works without the other two: a grain, so the surface has a material; a vertical
-     *  gradient, because a flat thing under a ceiling lamp is brightest at the top and darkest where
-     *  it curves away at the bottom; and a bevel of one light pixel along the top edge and one dark
-     *  one along the bottom, which is the plate's own thickness seen edge on.
-     *  <p>
-     *  Anything you type into is the opposite of a plate: a hole milled into the surface, dark along
-     *  its top wall where the light cannot reach and bright along the bottom where it can. Pressing a
-     *  plate turns it into exactly that hole, which is the whole trick the idiom is built on.
+     *  Anything you type into is the opposite: a hole milled into the surface, dark along the top
+     *  wall the light cannot reach and bright along the bottom it can. Pressing a plate turns it into
+     *  that same hole.
      *
      *  @see SwingTreeLookAndFeel.StylePreset#SKEUOMORPHIC
      */
@@ -2293,7 +2255,6 @@ final class Styles
             StyleRule.of(JSplitPane.class,     Skeuomorphic::bare)
         );
 
-        /** @return the theme's style rules, one per component family. */
         static Tuple<StyleRule> rules() { return RULES; }
 
         // ── Materials ────────────────────────────────────────────────────────
@@ -2488,11 +2449,11 @@ final class Styles
         }
 
         /**
-         *  A picker is milled like a hole rather than like a plate, and the stepper or drop-down
-         *  button screwed into its right-hand end is what you actually press. It has to be a hole:
-         *  Swing fills the strip a picker shows its value in with the {@code ComboBox.background}
-         *  default rather than with the component's own colour, so a picker made of anything else
-         *  would carry a rectangle of paper colour across its middle.
+         *  A combo box or a spinner is milled like a hole rather than like a plate, and the button
+         *  screwed into its right-hand end is what you press. It has to be a hole, because Swing
+         *  fills the strip showing the current value from the {@code ComboBox.background} default
+         *  rather than from the component, and anything else would carry a rectangle of paper colour
+         *  across its middle.
          */
         private static <C extends JComponent> ComponentStyleDelegate<C> machined(
                 ComponentStyleDelegate<C> it, SwingTreeLookAndFeel.Palette p, boolean enabled, boolean focused,
@@ -2677,19 +2638,15 @@ final class Styles
     }
 
     /**
-     *  <b>Glassmorphism</b>: frosted panes floating over something vivid.
+     *  <b>Glassmorphism</b>: frosted panes floating over something vivid. Nothing is opaque. A
+     *  surface is a wash of white at about a tenth of full strength, and what makes it read as glass
+     *  rather than as a pale rectangle is that the window behind it is really blurred where it shows
+     *  through: {@link ComponentStyleDelegate#parentFilter} convolves the parent's rendering rather
+     *  than imitating it. A hairline of brighter white along the edge is the bevel catching the
+     *  light, and a wide soft shadow underneath says the pane is floating.
      *  <p>
-     *  Nothing here is opaque. A surface is a wash of white at about a tenth of full strength, and what
-     *  makes it read as glass rather than as a pale rectangle is that the window behind it is
-     *  <em>blurred</em> where it shows through - which the style engine does with
-     *  {@link ComponentStyleDelegate#parentFilter}, an actual convolution of the parent's rendering
-     *  rather than a painted imitation of one. A hairline of brighter white along the edge is the pane
-     *  catching the light on its bevel, and a wide soft shadow underneath is what says it is floating
-     *  rather than lying flat.
-     *  <p>
-     *  The idiom only works if there is something worth blurring, so the window is not a colour but a
-     *  gradient: an indigo ground with a violet and a magenta bloom washed diagonally across it. Pair
-     *  the preset with a flat palette and the glass still behaves, it simply has nothing to show.
+     *  Glass needs something worth blurring, so the window is a gradient and not a colour. Under a
+     *  flat palette the panes still behave, they simply have nothing to show.
      *
      *  @see SwingTreeLookAndFeel.StylePreset#GLASSMORPHIC
      */
@@ -2744,7 +2701,6 @@ final class Styles
             StyleRule.of(JSplitPane.class,     Glassmorphic::bare)
         );
 
-        /** @return the theme's style rules, one per component family. */
         static Tuple<StyleRule> rules() { return RULES; }
 
         // ── Glass ────────────────────────────────────────────────────────────
@@ -2798,11 +2754,9 @@ final class Styles
         }
 
         /**
-         *  The vivid ground the whole idiom depends on there being.
-         *  <p>
-         *  Only the outermost panel paints it. A gradient is laid out across the bounds of whatever
-         *  draws it, so an untagged panel inside another untagged panel would start the whole sweep
-         *  again inside its own corner of it.
+         *  The vivid ground the whole idiom needs there to be. Only the outermost panel paints it,
+         *  because a gradient is laid out across the bounds of whatever draws it and an untagged
+         *  panel inside another untagged panel would start the sweep again inside its own corner.
          */
         private static <C extends JComponent> ComponentStyleDelegate<C> aurora( ComponentStyleDelegate<C> it, SwingTreeLookAndFeel.Palette p ) {
             return it
@@ -3009,24 +2963,24 @@ final class Styles
         }
 
         /**
-         *  Repaints a popup's pane in a colour that does not need the frost, when the popup is in a
+         *  Repaints a popup's pane in a colour that does not need the frost, for a popup in a
          *  per-pixel translucent window of its own.
          *  <p>
-         *  Every other pane in this preset is frosted: {@code parentFilter} blurs the component behind
-         *  it, and that blur is what separates the pane's text from whatever it covers. A popup which
-         *  Swing had to put in a window of its own has no component behind it - the blur reads the
-         *  parent's rendering, and the parent is that window's own empty content pane - so the frost
-         *  is absent exactly where the pane is most transparent, and the menu text would stand on the
-         *  bare desktop. The two opaque {@link SwingTreeLookAndFeel.PopupWindowMode}s need no repaint,
-         *  because {@link SwingTreePopupFactory} fills their window with the palette ground.
+         *  Every other pane here is frosted, and that blur of what lies behind is what separates the
+         *  pane's text from it. A popup Swing had to put in a window of its own has nothing behind
+         *  it: {@code parentFilter} reads the parent's rendering, and the parent is that window's
+         *  empty content pane, so the frost is missing exactly where the pane is most transparent and
+         *  the menu text would stand on the bare desktop. The two opaque
+         *  {@link SwingTreeLookAndFeel.PopupWindowMode}s need no repaint, because
+         *  {@link SwingTreePopupFactory} fills their window with the palette ground.
          *  <p>
-         *  Raising the wash alone would make this worse rather than better: the wash tints towards
-         *  {@link SwingTreeLookAndFeel.Palette#surface()}, and on a palette whose text is lighter than
-         *  its surface a thicker wash moves the pane towards the colour of its own letters. So the
-         *  pane is mixed down onto {@link SwingTreeLookAndFeel.Palette#background()} first - which is
-         *  the colour it would have been composited against inside the application window - and only
-         *  then made nearly opaque. What the window's alpha still buys is the margin ring: the rounded
-         *  corners stay antialiased and the drop shadow still falls on the desktop.
+         *  Raising the wash alone would make it worse. The wash tints towards
+         *  {@link SwingTreeLookAndFeel.Palette#surface()}, so on a palette whose text is lighter than
+         *  its surface a thicker wash moves the pane towards the colour of its own letters. The pane
+         *  is therefore mixed down onto {@link SwingTreeLookAndFeel.Palette#background()} first,
+         *  which is the colour it would have been composited against in-frame, and only then made
+         *  nearly opaque. The window's alpha still buys the margin ring: the corners stay antialiased
+         *  and the drop shadow still falls on the desktop.
          *
          * @param it    the pane as {@link #pane} left it
          * @param popup the popup menu or tool tip being styled
@@ -3107,45 +3061,34 @@ final class Styles
     }
 
     /**
-     *  <b>Nimbus</b>: the look and feel Sun shipped with Java 6 update 10, rebuilt on the style engine.
-     *
-     *  <h2>What the idiom actually is</h2>
-     *  Every raised thing is the same piece of moulded plastic seen under one overhead light: bright
-     *  along the top edge, dimming to about two thirds of the way down, then catching the light again
-     *  on the bottom lip, and closed off underneath by a line much darker than the rest of its outline.
-     *  A button, a combo box, a table heading, a tab, a check box and a scroll-bar thumb differ only in
-     *  which colour that curve is laid over and how they are outlined, so the curve is written once, in
-     *  {@link NimbusRelief}, and this file is mostly a list of which tone each control is cast in.
+     *  <b>Nimbus</b>: the look and feel Sun shipped with Java 6 update 10, rebuilt on the style
+     *  engine. Every raised thing is one piece of moulded plastic under one overhead light: bright
+     *  along the top edge, dimming about two thirds of the way down, catching the light again on the
+     *  bottom lip, and closed off underneath by a line much darker than the rest of its outline. A
+     *  button, a combo box, a table heading, a tab, a check box and a scroll-bar thumb differ only in
+     *  the colour that curve is laid over and in how they are outlined, so the curve is written once
+     *  in {@link NimbusRelief} and most of the rules here only say which tone a control is cast in.
      *  <p>
-     *  Two things follow from that which are easy to get wrong. Pressing something does not turn the
-     *  light around: it moves the colour down and leaves the light where it was, which is why a pressed
-     *  Nimbus button looks pushed into the panel rather than lit from below. And disabling something
-     *  flattens the curve rather than greying it, because a control that cannot be used is one nothing
-     *  is shining on.
-     *
-     *  <h2>Why no colour here is written down</h2>
-     *  Nimbus's colour schemes are not repaints. Its whole appearance hangs off a handful of chosen
-     *  colours, and every shade of chrome is stated as a distance from one of them, so replacing a
-     *  chosen colour moves all of them together. This preset keeps that property: it asks the palette
-     *  for a named colour and then moves it, with {@link LafUtilities#shiftHsb} where the distance is
-     *  fixed and with {@link LafUtilities#wash} where it has to be read relative to the ground.
+     *  Two of its habits are easy to get wrong. Pressing something moves the colour down and leaves
+     *  the light where it was, so a pressed button looks pushed into the panel rather than lit from
+     *  below. Disabling something flattens the curve instead of greying it, because a control that
+     *  cannot be used is one nothing is shining on.
      *  <p>
-     *  The distinction is what lets the theme survive a palette it was not designed for. A fixed
-     *  brightness offset reproduces the original exactly and then turns
-     *  {@link SwingTreeLookAndFeel.PalettePreset#MIDNIGHT}'s already-bright accent white, taking every
-     *  label on top of it with it. Washing a colour <em>towards the surface it will be seen against</em>
-     *  is the same instruction on a light palette and a dark one. The numbers used were measured off
-     *  the colours Nimbus itself paints, so
-     *  {@link SwingTreeLookAndFeel.PalettePreset#NIMBUS} reproduces it and
-     *  {@link SwingTreeLookAndFeel.Palette#nimbus} re-tints it.
-     *
-     *  <h2>The one thing that did not fit</h2>
-     *  Nimbus writes a tool tip on a pale yellow it calls {@code info}, deliberately not a shade of
-     *  anything else in the theme and therefore not derivable from the palette either. There is no
-     *  palette slot for a notice colour, so it is carried in the two grain slots, which a theme with no
-     *  grain has spare - the same accommodation {@link Palettes#AURORA} makes for its blooms. Because
-     *  it is chosen rather than derived, nothing here knows whether it came out light or dark, and the
-     *  ink on it has to be picked by {@link LafUtilities#readableOn} rather than named.
+     *  No colour here is written down. Each one is a named palette colour that has been moved:
+     *  {@link LafUtilities#shiftHsb} where the distance is fixed, and {@link LafUtilities#wash} where
+     *  it has to be measured against the ground the colour will be seen on. The difference decides
+     *  whether the theme survives a palette it was not designed for. A fixed brightness offset
+     *  reproduces the original exactly and then turns
+     *  {@link SwingTreeLookAndFeel.PalettePreset#MIDNIGHT}'s already bright accent white, taking every
+     *  label on top of it. Washing a colour towards the surface it will be seen against is the same
+     *  instruction on a light palette and on a dark one.
+     *  <p>
+     *  One colour would not fit. Nimbus writes a tool tip on a pale yellow it calls {@code info},
+     *  deliberately not a shade of anything else and therefore not derivable from the palette either.
+     *  There is no palette slot for a notice colour, so it is carried in the two grain slots, which a
+     *  theme with no grain has spare - the same room {@link Palettes#AURORA} borrows for its blooms.
+     *  Nothing here knows whether that colour came out light or dark, so the ink on it is picked by
+     *  {@link LafUtilities#readableOn} rather than named.
      *
      *  @see SwingTreeLookAndFeel.StylePreset#NIMBUS
      */
@@ -3189,7 +3132,6 @@ final class Styles
             StyleRule.of(JSplitPane.class,     Nimbus::splitPane)
         );
 
-        /** @return the theme's style rules, one per component family. */
         static Tuple<StyleRule> rules() { return RULES; }
 
         // ── The light ────────────────────────────────────────────────────────
@@ -3215,9 +3157,9 @@ final class Styles
         }
 
         /**
-         *  The unlit colour of an ordinary control, which {@link Symbols.Nimbus} needs too: a check box
-         *  has the same four states a button has and has to be made of the same material, so both read
-         *  it from here rather than each keeping its own idea of what "pressed" looks like.
+         *  The unlit colour of an ordinary control, which {@link Symbols.Nimbus} reads as well: a
+         *  check box has the same four states a button has and is made of the same material, so
+         *  neither keeps an idea of its own about what a pressed control looks like.
          *
          * @param p the palette in force
          * @param enabled whether the control can be used
@@ -3246,13 +3188,12 @@ final class Styles
 
         /**
          *  The material anything that is <i>on</i> is made of: the default button, a ticked check box,
-         *  a filled radio, a selected tab, and the little actuator a combo box or a spinner is worked
-         *  by. Nimbus gives all five the same washed-out accent rather than a colour each, which is
-         *  what makes them read as one family of "this one, then".
+         *  a filled radio, a selected tab, and the actuator a combo box or a spinner is worked by.
+         *  Nimbus gives all five the same washed out accent rather than a colour each.
          *  <p>
-         *  It is washed towards the palette's own surface rather than simply lightened, so that on a
-         *  dark palette it comes out dark. Lightening it there would leave the label on top of it
-         *  unreadable, and the label is not this method's to choose.
+         *  It is washed towards the palette's own surface instead of simply lightened, so that it
+         *  comes out dark on a dark palette. Lightening it there would leave the label on top of it
+         *  unreadable, and this method does not choose the label.
          *
          * @param p the palette in force
          * @param sunken whether the control is held down or selected
@@ -3265,17 +3206,9 @@ final class Styles
         }
 
         /**
-         *  The outline that material wears: the accent again, lightened just enough to read as an edge
-         *  rather than as a shadow.
-         *
-         * @param p the palette in force
-         * @return the colour to outline an accented control with
-         */
-        /**
-         *  The bottom of an outline, which Nimbus draws a good deal darker than the rest of it: the
-         *  line where a raised thing meets what it is standing on is in its own shadow. It is the most
-         *  consistent single difference between a control that looks moulded and one that looks
-         *  printed, and it costs one edge.
+         *  The bottom of an outline, which Nimbus draws much darker than the rest of it: the line
+         *  where a raised thing meets what it stands on is in its own shadow. One edge, and the most
+         *  reliable single difference between a control that looks moulded and one that looks printed.
          *
          * @param edge the colour the rest of the outline is drawn in
          * @return the colour for its bottom edge
@@ -3284,6 +3217,13 @@ final class Styles
             return LafUtilities.shiftHsb(edge, +0.050, -0.262);
         }
 
+        /**
+         *  The outline the accented material wears: the accent again, lightened just enough to read
+         *  as an edge rather than as a shadow.
+         *
+         * @param p the palette in force
+         * @return the colour to outline an accented control with
+         */
         static Color accentedEdge( SwingTreeLookAndFeel.Palette p ) {
             return LafUtilities.wash(p.accent(), p.surface(), 0.456, -0.025);
         }
@@ -3664,26 +3604,21 @@ final class Styles
     }
 
     /**
-     *  <b>Polymorphism</b>: a theme that has no fixed appearance, only rules for arriving at one.
-     *  <p>
-     *  Every other preset here decides what it looks like and then asks the palette for the colours to
-     *  do it in. This one asks the other way round. It reads three things about the context it has been
-     *  dropped into and derives the whole appearance from them:
+     *  <b>Polymorphism</b>: a theme with no fixed appearance, only rules for arriving at one. Every
+     *  other preset here decides how it looks and then asks the palette for the colours; this one
+     *  asks the other way round, and derives its whole appearance from three readings:
      *  <ul>
-     *      <li><b>What the palette leaves it to work with</b> ({@link Mood}). Given a palette whose
-     *          ground and surfaces are the same colour it separates them with light; given a dark one
-     *          it rims them; given a light one with contrast to spend it uses a flat fill and a
-     *          shadow. Switching the palette therefore does not re-tint this theme, it
-     *          <em>rewrites</em> it.</li>
+     *      <li><b>What the palette leaves it to work with</b> ({@link Mood}). A palette whose ground
+     *          and surfaces are one colour has them separated by light, a dark one has them rimmed,
+     *          and a light one with contrast to spend gets a flat fill and a shadow.</li>
      *      <li><b>How big the control is.</b> The radius is half the control's own height up to a
-     *          limit, so a one-line control comes out as a pill and a tall one as a soft rectangle,
-     *          without either being told which it is.</li>
-     *      <li><b>How deeply it is nested.</b> A card lying on another card is lifted further than one
-     *          lying on the window, because that is the only way the two are still told apart.</li>
+     *          limit, so a one-line control comes out a pill and a tall one a soft rectangle.</li>
+     *      <li><b>How deeply it is nested.</b> A card lying on another card is lifted further than
+     *          one lying on the window, which is the only thing still telling the two apart.</li>
      *  </ul>
-     *  Two consequences worth knowing. The theme has no look of its own to show in a screenshot - it
-     *  has to be seen in at least two palettes to be seen at all. And every rule reads the component,
-     *  so nothing here can be decided ahead of time and cached.
+     *  So switching the palette rewrites this theme rather than re-tinting it, and it has to be seen
+     *  in two palettes to be seen at all. Every rule reads its component, so none of it can be
+     *  decided ahead of time.
      *
      *  @see SwingTreeLookAndFeel.StylePreset#POLYMORPHIC
      */
@@ -3735,7 +3670,6 @@ final class Styles
             StyleRule.of(JSplitPane.class,     Polymorphic::bare)
         );
 
-        /** @return the theme's style rules, one per component family. */
         static Tuple<StyleRule> rules() { return RULES; }
 
         // ── What the context says ────────────────────────────────────────────
