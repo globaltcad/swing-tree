@@ -156,7 +156,7 @@ public final class ThemeGardenView extends Panel {
 
                                 // Progress slider
                                 .add("bottom, growx, gaptop 12",
-                                    slider(Align.HORIZONTAL, 0, 100, progress).group(Skin.PROGRESS)
+                                    slider(Axis.HORIZONTAL, 0, 100, progress).group(Skin.PROGRESS)
                                 )
 
                             )
@@ -165,7 +165,7 @@ public final class ThemeGardenView extends Panel {
                                 box("wrap 1, insets 0, gap 8", "[shrink]")
                                 .add(label("vol").group(Skin.SECTION_LABEL))
                                 .add("growy",
-                                    slider(Align.VERTICAL, 0, 100, volume).group(Skin.VOLUME)
+                                    slider(Axis.VERTICAL, 0, 100, volume).group(Skin.VOLUME)
                                 )
                             )
                         )
@@ -184,7 +184,7 @@ public final class ThemeGardenView extends Panel {
                                         p.add("",
                                             box("fill, wrap 1, insets 0").withPrefWidth(38)
                                             .add("center, h 90!",
-                                                slider(Align.VERTICAL, 0, 100)
+                                                slider(Axis.VERTICAL, 0, 100)
                                                     .withValue(v)
                                                     .group(Skin.EQ_BAR)
                                             )

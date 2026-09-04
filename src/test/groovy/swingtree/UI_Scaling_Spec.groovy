@@ -71,7 +71,7 @@ class UI_Scaling_Spec extends Specification
                     .withSize(Size.of(121, 44))
                 )
                 .add(
-                    UI.slider(UI.Align.HORIZONTAL)
+                    UI.slider(UI.Axis.HORIZONTAL)
                     .withPrefSize(Val.of(Size.of(60, 20)))
                     .withMinSize(Val.of(Size.of(70, 80)))
                     .withMaxSize(Val.of(Size.of(80, 42)))

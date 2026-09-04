@@ -38,7 +38,7 @@ class Auto_Cleaning_Spec extends Specification
                 .add( "grow", UI.passwordField(vm.surname))
                 .add( UI.label( "Favourite Number:" ) )
                 .add( "grow",
-                    UI.slider(UI.Align.HORIZONTAL, 0, 100)
+                    UI.slider(UI.Axis.HORIZONTAL, 0, 100)
                     .withValue(vm.favouriteNumber)
                 )
         and : 'We set the view to null and wait a bit... let the GC do its thing...'

@@ -72,7 +72,7 @@ public final class CelestialScribe extends Panel {
             topBar(vm, mood)
         )
         .add("grow, push",
-            splitPane(Align.HORIZONTAL).withDividerAt(760)
+            splitPane(Axis.HORIZONTAL).withDividerAt(760)
             .add(
                 parchment(vm, stars)
             )
@@ -261,17 +261,17 @@ public final class CelestialScribe extends Panel {
                 .add("growx, gaptop 10",
                     panel("fill, wrap 1, insets 0")
                     .add("growx", label("Hue"))
-                    .add("growx", slider(Align.HORIZONTAL, 0.0, 1.0, hue))
+                    .add("growx", slider(Axis.HORIZONTAL, 0.0, 1.0, hue))
                 )
                 .add("growx, gaptop 10",
                     panel("fill, wrap 1, insets 0")
                     .add("growx", label("Brightness"))
-                    .add("growx", slider(Align.HORIZONTAL, 0.0, 1.0, brightness))
+                    .add("growx", slider(Axis.HORIZONTAL, 0.0, 1.0, brightness))
                 )
                 .add("growx, gaptop 10",
                     panel("fill, wrap 1, insets 0")
                     .add("growx", label("Size"))
-                    .add("growx", slider(Align.HORIZONTAL, 30.0, 160.0, size))
+                    .add("growx", slider(Axis.HORIZONTAL, 30.0, 160.0, size))
                 )
             )
             .add("growx, gaptop 18",

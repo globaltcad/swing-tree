@@ -55,40 +55,40 @@ class Separator_Spec extends Specification
             separator.orientation == SwingConstants.HORIZONTAL
     }
 
-    def 'Pass an `UI.Align` constant to the `separator(UI.Align)` factory method to choose the orientation.'()
+    def 'Pass an `UI.Axis` constant to the `separator(UI.Axis)` factory method to choose the orientation.'()
     {
         reportInfo """
             Instead of the integer constants that raw Swing expects
             in `JSeparator.setOrientation(int)`, SwingTree uses the
-            type safe `UI.Align` enum to declare whether the separation
+            type safe `UI.Axis` enum to declare whether the separation
             line runs horizontally or vertically.
         """
         given : 'A vertical and a horizontal separator.'
-            var vertical   = UI.separator(UI.Align.VERTICAL).get(JSeparator)
-            var horizontal = UI.separator(UI.Align.HORIZONTAL).get(JSeparator)
+            var vertical   = UI.separator(UI.Axis.VERTICAL).get(JSeparator)
+            var horizontal = UI.separator(UI.Axis.HORIZONTAL).get(JSeparator)
 
         expect : 'The orientation of each component matches its declaration.'
             vertical.orientation   == SwingConstants.VERTICAL
             horizontal.orientation == SwingConstants.HORIZONTAL
     }
 
-    def 'The `withOrientation(UI.Align)` method configures the orientation as part of a builder chain.'()
+    def 'The `withOrientation(UI.Axis)` method configures the orientation as part of a builder chain.'()
     {
         given : 'We declare a separator and set its orientation in the middle of the builder chain.'
             var separator =
                     UI.separator()
-                    .withOrientation(UI.Align.VERTICAL)
+                    .withOrientation(UI.Axis.VERTICAL)
                     .get(JSeparator)
 
         expect :
             separator.orientation == SwingConstants.VERTICAL
     }
 
-    def 'Bind an `UI.Align` property to a separator to control its orientation dynamically.'()
+    def 'Bind an `UI.Axis` property to a separator to control its orientation dynamically.'()
     {
         reportInfo """
-            The `separator(Val<UI.Align>)` factory method, and equally the
-            `withOrientation(Val<UI.Align>)` builder method, bind an alignment
+            The `separator(Val<UI.Axis>)` factory method, and equally the
+            `withOrientation(Val<UI.Axis>)` builder method, bind an alignment
             property to the orientation of the separator.
             Whenever the property changes in your view model, the separator
             reorients itself automatically.
@@ -97,7 +97,7 @@ class Separator_Spec extends Specification
             from a wide to a narrow shape.
         """
         given : 'An alignment property, as it would exist in a view model.'
-            var alignment = Var.of(UI.Align.HORIZONTAL)
+            var alignment = Var.of(UI.Axis.HORIZONTAL)
         and : 'A separator bound to the property.'
             var separator = UI.separator(alignment).get(JSeparator)
 
@@ -105,7 +105,7 @@ class Separator_Spec extends Specification
             separator.orientation == SwingConstants.HORIZONTAL
 
         when : 'The view model changes the alignment.'
-            UI.runNow({ alignment.set(UI.Align.VERTICAL) })
+            UI.runNow({ alignment.set(UI.Axis.VERTICAL) })
         then : 'The separator followed along.'
             separator.orientation == SwingConstants.VERTICAL
     }
@@ -128,11 +128,11 @@ class Separator_Spec extends Specification
         """
         given : 'A horizontal and a vertical separator, both with a length of 42.'
             var horizontal =
-                    UI.separator(UI.Align.HORIZONTAL)
+                    UI.separator(UI.Axis.HORIZONTAL)
                     .withLength(42)
                     .get(JSeparator)
             var vertical =
-                    UI.separator(UI.Align.VERTICAL)
+                    UI.separator(UI.Axis.VERTICAL)
                     .withLength(42)
                     .get(JSeparator)
 
@@ -155,7 +155,7 @@ class Separator_Spec extends Specification
             var length = Var.of(50)
         and : 'A horizontal separator bound to it.'
             var separator =
-                    UI.separator(UI.Align.HORIZONTAL)
+                    UI.separator(UI.Axis.HORIZONTAL)
                     .withLength(length)
                     .get(JSeparator)
 
@@ -168,21 +168,21 @@ class Separator_Spec extends Specification
             separator.preferredSize.width == UI.scale(200)
     }
 
-    def 'Null is not a valid alignment for a separator.'()
+    def 'Null is not a valid axis for a separator.'()
     {
         reportInfo """
             The separator factory and builder methods reject null
-            arguments, as well as nullable alignment properties, eagerly
+            arguments, as well as nullable axis properties, eagerly
             with an exception, so that programming errors surface
             right where the UI is declared.
         """
-        when : 'We try to declare a separator with a null alignment...'
-            UI.separator((UI.Align) null)
+        when : 'We try to declare a separator with a null axis...'
+            UI.separator((UI.Axis) null)
         then : '...the declaration fails immediately.'
             thrown(IllegalArgumentException)
 
         when : 'The same happens for a property which permits null in it:'
-            UI.separator().withOrientation(Var.ofNullable(UI.Align, null))
+            UI.separator().withOrientation(Var.ofNullable(UI.Axis, null))
         then :
             thrown(IllegalArgumentException)
     }

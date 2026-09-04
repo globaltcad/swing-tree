@@ -46,16 +46,16 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
      * If you want to control this property dynamically through a bound property,
      * then consider using the {@link #withLayoutOrientation(Val)} method.<br>
      * You can also directly construct a split pane with the desired layout through the
-     * {@link UI#splitPane(UI.Align)} and {@link UI#splitPane(Val)} factory methods.
+     * {@link UI#splitPane(UI.Axis)} and {@link UI#splitPane(Val)} factory methods.
      *
-     * @param align The alignment of the components in the split pane, which determines the layout of the split pane.
+     * @param axis The axis of the components in the split pane, which determines the layout of the split pane.
      * @return This very instance, which enables builder-style method chaining.
-     * @throws IllegalArgumentException if the provided alignment is null.
+     * @throws IllegalArgumentException if the provided axis is null.
      */
-    public final UIForSplitPane<P> withLayoutOrientation( UI.Align align ) {
-        NullUtil.nullArgCheck( align, "align", UI.Align.class );
+    public final UIForSplitPane<P> withLayoutOrientation( UI.Axis axis ) {
+        NullUtil.nullArgCheck( axis, "axis", UI.Axis.class );
         return _with( thisComponent -> {
-                    thisComponent.setOrientation( align.forSplitPane() );
+                    thisComponent.setOrientation( axis.forSplitPane() );
                 })
                 ._this();
     }
@@ -64,23 +64,23 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
      * Dynamically sets the layout of the two components in the split pane to either be
      * placed left to right (horizontal split) or on top of each other (vertical split).
      * This method binds the supplied layout property to the split pane, which means that when
-     * the property changes its {@link swingtree.UI.Align}, then the layout of the split pane will be updated accordingly.
-     * If you want to set a fixed layout that does not change dynamically, then consider using the {@link #withLayoutOrientation(UI.Align)} method.<br>
+     * the property changes its {@link swingtree.UI.Axis}, then the layout of the split pane will be updated accordingly.
+     * If you want to set a fixed layout that does not change dynamically, then consider using the {@link #withLayoutOrientation(UI.Axis)} method.<br>
      * You can also directly construct a split pane with the desired layout through the
-     * {@link UI#splitPane(UI.Align)} and {@link UI#splitPane(Val)} factory methods.
+     * {@link UI#splitPane(UI.Axis)} and {@link UI#splitPane(Val)} factory methods.
      *
-     * @param align A property dynamically determining the alignment of the components in the split pane, which determines the layout of the split pane.
+     * @param axis A property dynamically determining the axis of the components in the split pane, which determines the layout of the split pane.
      * @return This very instance, which enables builder-style method chaining.
-     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     * @throws IllegalArgumentException if {@code axis} is {@code null}.
      */
-    public final UIForSplitPane<P> withLayoutOrientation( Val<UI.Align> align ) {
-        NullUtil.nullArgCheck( align, "align", Val.class );
-        NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment." );
-        return _withOnShow( align, (thisComponent,it) -> {
+    public final UIForSplitPane<P> withLayoutOrientation( Val<UI.Axis> axis ) {
+        NullUtil.nullArgCheck( axis, "axis", Val.class );
+        NullUtil.nullPropertyCheck( axis, "axis", "Null is not a valid axis." );
+        return _withOnShow( axis, (thisComponent,it) -> {
                     thisComponent.setOrientation( it.forSplitPane() );
                 })
                 ._with( thisComponent -> {
-                    thisComponent.setOrientation( align.orElseThrowUnchecked().forSplitPane() );
+                    thisComponent.setOrientation( axis.orElseThrowUnchecked().forSplitPane() );
                 })
                 ._this();
     }

@@ -203,35 +203,35 @@ class Progress_Bar_Spec extends Specification
             progressBar.value == 150
     }
 
-    def 'Choose between a horizontal and a vertical progress bar using the `UI.Align` enum.'()
+    def 'Choose between a horizontal and a vertical progress bar using the `UI.Axis` enum.'()
     {
         reportInfo """
-            The `withOrientation(UI.Align)` method, as well as various
+            The `withOrientation(UI.Axis)` method, as well as various
             alignment accepting factory methods, allow you to choose between
             a horizontal and a vertical progress bar.
-            The `UI.Align` enum is SwingTree's type safe alternative to the
+            The `UI.Axis` enum is SwingTree's type safe alternative to the
             integer constants used by `JProgressBar.setOrientation(int)`.
         """
         given : 'A vertical and a horizontal progress bar.'
-            var vertical   = UI.progressBar(UI.Align.VERTICAL, 0, 10).get(JProgressBar)
-            var horizontal = UI.progressBar().withOrientation(UI.Align.HORIZONTAL).get(JProgressBar)
+            var vertical   = UI.progressBar(UI.Axis.VERTICAL, 0, 10).get(JProgressBar)
+            var horizontal = UI.progressBar().withOrientation(UI.Axis.HORIZONTAL).get(JProgressBar)
 
         expect : 'The orientations of the underlying Swing components match the declarations.'
             vertical.orientation   == SwingConstants.VERTICAL
             horizontal.orientation == SwingConstants.HORIZONTAL
     }
 
-    def 'The `progressBar(Align, double)` factory gives you a percentage based bar with a default range.'()
+    def 'The `progressBar(Axis, double)` factory gives you a percentage based bar with a default range.'()
     {
         reportInfo """
             For the common case of a simple percentage based progress bar,
-            the `progressBar(UI.Align, double)` factory method configures
+            the `progressBar(UI.Axis, double)` factory method configures
             a default range of 0 to 100 for you, so the resulting integer
             value of the bar conveniently corresponds to the progress
             in percent.
         """
         given :
-            var progressBar = UI.progressBar(UI.Align.HORIZONTAL, 0.5).get(JProgressBar)
+            var progressBar = UI.progressBar(UI.Axis.HORIZONTAL, 0.5).get(JProgressBar)
 
         expect : 'The default range is 0 to 100, and 50% progress maps to a value of 50.'
             progressBar.minimum == 0
@@ -242,13 +242,13 @@ class Progress_Bar_Spec extends Specification
     def 'Bind both the orientation and the progress of a progress bar to properties.'()
     {
         reportInfo """
-            The `progressBar(Val<UI.Align>, Val<Double>)` factory method
+            The `progressBar(Val<UI.Axis>, Val<Double>)` factory method
             creates a fully view model driven progress bar whose orientation
             and percentage based progress are both bound to properties.
             When either property changes, the component updates accordingly.
         """
         given : 'Two properties, one for the alignment and one for the progress.'
-            var alignment = Var.of(UI.Align.HORIZONTAL)
+            var alignment = Var.of(UI.Axis.HORIZONTAL)
             var progress  = Var.of(0.1d)
         and : 'A progress bar bound to both of them.'
             var progressBar = UI.progressBar(alignment, progress).get(JProgressBar)
@@ -259,7 +259,7 @@ class Progress_Bar_Spec extends Specification
 
         when : 'We flip the alignment and advance the progress in the view model.'
             UI.runNow({
-                alignment.set(UI.Align.VERTICAL)
+                alignment.set(UI.Axis.VERTICAL)
                 progress.set(0.9d)
             })
         then : 'The progress bar reflects the new state.'

@@ -719,10 +719,10 @@ final class Styles
          *  bottom right, both outside the shape.
          *  <p>
          *  Each of the two fades along the curve that matches what it stands for. The shadow uses
-         *  {@link UI.ShadowType#BLUR}, the profile a hard edge takes when it is convolved with a
+         *  {@link UI.ShadowFalloff#BLUR}, the profile a hard edge takes when it is convolved with a
          *  blur, so it leaves the shape at full strength and reaches nothing with no slope at either
          *  end; the surface then swells out of the panel instead of stepping up out of it. The
-         *  highlight uses the bell of {@link UI.ShadowType#GLOW}, because a sheen is light bleeding
+         *  highlight uses the bell of {@link UI.ShadowFalloff#GLOW}, because a sheen is light bleeding
          *  off a shoulder rather than an edge being cast.
          *  <p>
          *  An outer shadow is drawn in the component's own margin and cut off at the component
@@ -736,10 +736,10 @@ final class Styles
             return it
                     .shadow(LIT,    s -> s.color(lit(p))
                                           .offset(-offsetOf(sheen), -offsetOf(sheen)).blurRadius(blurOf(sheen))
-                                          .type(UI.ShadowType.GLOW).isInset(false))
+                                          .falloff(UI.ShadowFalloff.GLOW).isInset(false))
                     .shadow(SHADED, s -> s.color(shade(p))
                                           .offset(offsetOf(reach), offsetOf(reach)).blurRadius(blurOf(reach))
-                                          .type(UI.ShadowType.BLUR).isInset(false));
+                                          .falloff(UI.ShadowFalloff.BLUR).isInset(false));
         }
 
         /** How far a shadow of the given reach is displaced from the shape casting it. */
@@ -754,7 +754,7 @@ final class Styles
          *  <p>
          *  Nothing is cast inside a groove: both sides of it are the same wall, turning towards the
          *  light on one edge and away from it on the other. So both fades take the same symmetric
-         *  {@link UI.ShadowType#PENUMBRA} S-curve, and the wall rounds off into the floor instead of
+         *  {@link UI.ShadowFalloff#PENUMBRA} S-curve, and the wall rounds off into the floor instead of
          *  meeting it at a line.
          */
         private static <C extends JComponent> ComponentStyleDelegate<C> sunken(
@@ -763,10 +763,10 @@ final class Styles
             return it
                     .shadow(SHADED, s -> s.color(shadeInside(p))
                                           .offset(depth, depth).blurRadius(depth * 2)
-                                          .type(UI.ShadowType.PENUMBRA).isInset(true))
+                                          .falloff(UI.ShadowFalloff.PENUMBRA).isInset(true))
                     .shadow(LIT,    s -> s.color(litInside(p))
                                           .offset(-depth, -depth).blurRadius(depth * 2)
-                                          .type(UI.ShadowType.PENUMBRA).isInset(true));
+                                          .falloff(UI.ShadowFalloff.PENUMBRA).isInset(true));
         }
 
         // ── Surfaces ─────────────────────────────────────────────────────────
@@ -2298,10 +2298,10 @@ final class Styles
             if ( pressed )
                 return it.shadow(WALL, s -> s.color(LafUtilities.withOpacity(Color.BLACK, 90))
                                              .offset(0, 2).blurRadius(3)
-                                             .type(UI.ShadowType.PENUMBRA).isInset(true));
+                                             .falloff(UI.ShadowFalloff.PENUMBRA).isInset(true));
             return it.shadow(DROP, s -> s.color(LafUtilities.withOpacity(Color.BLACK, 60))
                                          .offset(0, 2).blurRadius(3)
-                                         .type(UI.ShadowType.BLUR).isInset(false));
+                                         .falloff(UI.ShadowFalloff.BLUR).isInset(false));
         }
 
         /**
@@ -2314,10 +2314,10 @@ final class Styles
             return it
                     .shadow(WALL,  s -> s.color(LafUtilities.withOpacity(Color.BLACK, 105))
                                          .offset(0, depth).blurRadius(depth * 2)
-                                         .type(UI.ShadowType.PENUMBRA).isInset(true))
+                                         .falloff(UI.ShadowFalloff.PENUMBRA).isInset(true))
                     .shadow(FLOOR, s -> s.color(LafUtilities.withOpacity(Color.WHITE, 120))
                                          .offset(0, -depth).blurRadius(depth * 2)
-                                         .type(UI.ShadowType.GLOW).isInset(true));
+                                         .falloff(UI.ShadowFalloff.GLOW).isInset(true));
         }
 
         // ── Surfaces ─────────────────────────────────────────────────────────
@@ -2375,7 +2375,7 @@ final class Styles
                             .clipTo(UI.ComponentArea.BODY))
                     .shadow(DROP, s -> s.color(LafUtilities.withOpacity(Color.BLACK, 70))
                                         .offset(0, 3).blurRadius(6).spreadRadius(-1)
-                                        .type(UI.ShadowType.BLUR).isInset(false));
+                                        .falloff(UI.ShadowFalloff.BLUR).isInset(false));
         }
 
         /** The bench everything else lies on. */
@@ -2417,7 +2417,7 @@ final class Styles
             if ( focused )
                 it = it.shadow("focus", s -> s.color(LafUtilities.withOpacity(p.accent(), 150))
                                               .blurRadius(4).spreadRadius(1)
-                                              .type(UI.ShadowType.GLOW).isInset(false));
+                                              .falloff(UI.ShadowFalloff.GLOW).isInset(false));
             if ( !enabled )
                 return it.borderColor(p.border());
             if ( variant == SwingTreeLookAndFeel.Variant.QUIET && !sunken && !rollover )
@@ -2733,7 +2733,7 @@ final class Styles
                             .clipTo(UI.ComponentArea.BODY))
                     .shadow(DROP, s -> s.color(LafUtilities.withOpacity(Color.BLACK, 90))
                                         .offset(0, lift).blurRadius(lift * 2)
-                                        .type(UI.ShadowType.BLUR).isInset(false));
+                                        .falloff(UI.ShadowFalloff.BLUR).isInset(false));
         }
 
         // ── Surfaces ─────────────────────────────────────────────────────────
@@ -3469,7 +3469,7 @@ final class Styles
                     .foregroundColor(enabled ? p.text() : p.textDisabled())
                     .shadow("cut", s -> s.color(LafUtilities.withOpacity(p.border(), enabled ? 150 : 60))
                                          .offset(0, 1).blurRadius(2)
-                                         .type(UI.ShadowType.PENUMBRA).isInset(true)), p, focused);
+                                         .falloff(UI.ShadowFalloff.PENUMBRA).isInset(true)), p, focused);
         }
 
         // ── Menus ────────────────────────────────────────────────────────────
@@ -3717,23 +3717,23 @@ final class Styles
                             .borderWidth(0)
                             .shadow(LIT,  s -> s.color(LafUtilities.shadeBySteps(p.background(), LIGHT_STEP))
                                                 .offset(-off, -off).blurRadius(lift)
-                                                .type(UI.ShadowType.GLOW).isInset(false))
+                                                .falloff(UI.ShadowFalloff.GLOW).isInset(false))
                             .shadow(DROP, s -> s.color(LafUtilities.shadeBySteps(p.background(), -SHADE_STEP))
                                                 .offset(off, off).blurRadius(lift)
-                                                .type(UI.ShadowType.BLUR).isInset(false));
+                                                .falloff(UI.ShadowFalloff.BLUR).isInset(false));
                 case LUMINOUS:
                     return it
                             .border(1, LafUtilities.shadeBySteps(fill, 26))
                             .shadow(DROP, s -> s.color(LafUtilities.withOpacity(Color.BLACK, 120))
                                                 .offset(0, off).blurRadius(lift)
-                                                .type(UI.ShadowType.BLUR).isInset(false));
+                                                .falloff(UI.ShadowFalloff.BLUR).isInset(false));
                 case SHEET:
                 default:
                     return it
                             .borderWidth(0)
                             .shadow(DROP, s -> s.color(LafUtilities.withOpacity(p.text(), 46))
                                                 .offset(0, off).blurRadius(lift + 1).spreadRadius(-1)
-                                                .type(UI.ShadowType.BLUR).isInset(false));
+                                                .falloff(UI.ShadowFalloff.BLUR).isInset(false));
             }
         }
 
@@ -3749,10 +3749,10 @@ final class Styles
                         .borderColor(focused ? p.accent() : SwingTreeLookAndFeel.Palette.TRANSPARENT)
                         .shadow(DROP, s -> s.color(LafUtilities.shadeBySteps(p.background(), -SHADE_STEP / 2))
                                             .offset(3, 3).blurRadius(6)
-                                            .type(UI.ShadowType.PENUMBRA).isInset(true))
+                                            .falloff(UI.ShadowFalloff.PENUMBRA).isInset(true))
                         .shadow(LIT,  s -> s.color(LafUtilities.shadeBySteps(p.background(), LIGHT_STEP / 2))
                                             .offset(-3, -3).blurRadius(6)
-                                            .type(UI.ShadowType.PENUMBRA).isInset(true));
+                                            .falloff(UI.ShadowFalloff.PENUMBRA).isInset(true));
             return it.border(focused ? 2 : 1, focused ? p.accent() : p.border());
         }
 

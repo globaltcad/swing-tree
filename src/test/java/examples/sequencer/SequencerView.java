@@ -404,8 +404,8 @@ public final class SequencerView extends Panel {
                 .colors(SHEEN_HI, SHEEN_LO)
                 .clipTo(ComponentArea.BODY)
             )
-            .shadow("bright", s -> s.color(HI).offset(-brightOffset, -brightOffset).type(UI.ShadowType.PENUMBRA))
-            .shadow("dark",   s -> s.color(LO).offset(darkOffset, darkOffset).type(UI.ShadowType.PENUMBRA))
+            .shadow("bright", s -> s.color(HI).offset(-brightOffset, -brightOffset).falloff(UI.ShadowFalloff.PENUMBRA))
+            .shadow("dark",   s -> s.color(LO).offset(darkOffset, darkOffset).falloff(UI.ShadowFalloff.PENUMBRA))
             .shadowBlurRadius(blur)
             .shadowSpreadRadius(spread)
             .shadowIsInset(inset);

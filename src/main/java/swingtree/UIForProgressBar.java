@@ -34,15 +34,15 @@ public final class UIForProgressBar<P extends JProgressBar> extends UIForAnySwin
     }
 
     /**
-     *  Sets a fixed orientation for the slider using the {@link UI.Align} enum.
+     *  Sets a fixed orientation for the slider using the {@link UI.Axis} enum.
      *
-     *  @param align The orientation constant of the slider.
+     *  @param axis The orientation constant of the slider.
      *  @return This builder node.
      */
-    public final UIForProgressBar<P> withOrientation( UI.Align align ) {
-        NullUtil.nullArgCheck( align, "align", UI.Align.class );
+    public final UIForProgressBar<P> withOrientation( UI.Axis axis ) {
+        NullUtil.nullArgCheck( axis, "axis", UI.Axis.class );
         return _with( thisComponent -> {
-                    thisComponent.setOrientation(align.forProgressBar());
+                    thisComponent.setOrientation(axis.forProgressBar());
                 })
                 ._this();
     }
@@ -52,17 +52,17 @@ public final class UIForProgressBar<P extends JProgressBar> extends UIForAnySwin
      *  which allows for dynamic updates to the orientation of the slider.
      *  So when the value of the property changes, the orientation of the slider will be updated accordingly.
      *
-     *  @param align The orientation of the slider.
+     *  @param axis The orientation of the slider.
      *  @return This builder node.
      */
-    public final UIForProgressBar<P> withOrientation( Val<UI.Align> align ) {
-        NullUtil.nullArgCheck( align, "align", Val.class );
-        NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment" );
-        return _withOnShow( align, (thisComponent,v) -> {
+    public final UIForProgressBar<P> withOrientation( Val<UI.Axis> axis ) {
+        NullUtil.nullArgCheck( axis, "axis", Val.class );
+        NullUtil.nullPropertyCheck( axis, "axis", "Null is not a valid axis" );
+        return _withOnShow( axis, (thisComponent,v) -> {
                    thisComponent.setOrientation(v.forProgressBar());
                })
                ._with( thisComponent -> {
-                   thisComponent.setOrientation(align.orElseThrowUnchecked().forProgressBar());
+                   thisComponent.setOrientation(axis.orElseThrowUnchecked().forProgressBar());
                })
                ._this();
     }

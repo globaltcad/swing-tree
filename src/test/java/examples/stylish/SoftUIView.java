@@ -45,7 +45,7 @@ public class SoftUIView extends Panel
                 .add( SHRINK.and(SPAN).and(ALIGN_CENTER),
                     box().group(Soft.SINK_ROOMY)
                     .add(
-                        slider(Align.VERTICAL, 0, 255).group(Soft.SLIM)
+                        slider(Axis.VERTICAL, 0, 255).group(Soft.SLIM)
                     )
                     .add(WRAP,
                         box(FILL.and(WRAP(2)))
@@ -83,7 +83,7 @@ public class SoftUIView extends Panel
                             )
                         )
                         .add(SPAN.and(GROW_X),
-                             progressBar(Align.HORIZONTAL, 0, 100).withValue(68)
+                             progressBar(Axis.HORIZONTAL, 0, 100).withValue(68)
                              .peek(it->{it.setString("%"); it.setStringPainted(true);})
                              .withBackground(Color.WHITE)
                         )
@@ -120,7 +120,7 @@ public class SoftUIView extends Panel
                                     )
                                 )
                                 .add(
-                                    slider(Align.HORIZONTAL, 0, 100).group(Soft.SLIM)
+                                    slider(Axis.HORIZONTAL, 0, 100).group(Soft.SLIM)
                                     .withValue(25+(int) Math.abs(Math.pow(91,i+7)%51))
                                 )
                                 .add(

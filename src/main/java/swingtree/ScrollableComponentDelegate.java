@@ -102,11 +102,11 @@ public final class ScrollableComponentDelegate
             fitWidth  = Lazy.from(scrollable::getScrollableTracksViewportWidth);
             fitHeight = Lazy.from(scrollable::getScrollableTracksViewportHeight);
             unitIncrementSupplier = (a,b,c) -> {
-                int orientation = b == UI.Align.HORIZONTAL ? SwingConstants.HORIZONTAL : SwingConstants.VERTICAL;
+                int orientation = b.isHorizontal() ? SwingConstants.HORIZONTAL : SwingConstants.VERTICAL;
                 return scrollable.getScrollableUnitIncrement(a.toRectangle(),orientation,c);
             };
             blockIncrementSupplier = (a,b,c) -> {
-                int orientation = b == UI.Align.HORIZONTAL ? SwingConstants.HORIZONTAL : SwingConstants.VERTICAL;
+                int orientation = b.isHorizontal() ? SwingConstants.HORIZONTAL : SwingConstants.VERTICAL;
                 return scrollable.getScrollableBlockIncrement(a.toRectangle(),orientation,c);
             };
         } else {
@@ -459,13 +459,13 @@ public final class ScrollableComponentDelegate
      * {@link Scrollable#getScrollableUnitIncrement(java.awt.Rectangle, int, int)}.
      *
      * @param viewRectangle The view area visible within the viewport.
-     * @param orientation Either {@link UI.Align#VERTICAL} or {@link UI.Align#HORIZONTAL}.
+     * @param orientation Either {@link UI.Axis#VERTICAL} or {@link UI.Axis#HORIZONTAL}.
      * @param direction Less than zero to scroll up/left, greater than zero for down/right.
      * @return The configured unit increment for the given context.
      */
     public int unitIncrement(
         Bounds   viewRectangle,
-        UI.Align orientation,
+        UI.Axis orientation,
         int      direction
     ) {
         return _unitIncrement.get(viewRectangle, orientation, direction);
@@ -476,13 +476,13 @@ public final class ScrollableComponentDelegate
      * {@link Scrollable#getScrollableBlockIncrement(java.awt.Rectangle, int, int)}.
      *
      * @param viewRectangle The view area visible within the viewport.
-     * @param orientation Either {@link UI.Align#VERTICAL} or {@link UI.Align#HORIZONTAL}.
+     * @param orientation Either {@link UI.Axis#VERTICAL} or {@link UI.Axis#HORIZONTAL}.
      * @param direction Less than zero to scroll up/left, greater than zero for down/right.
      * @return The configured block increment for the given context.
      */
     public int blockIncrement(
         Bounds   viewRectangle,
-        UI.Align orientation,
+        UI.Axis orientation,
         int      direction
     ) {
         return _blockIncrement.get(viewRectangle, orientation, direction);

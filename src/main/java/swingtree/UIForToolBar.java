@@ -35,14 +35,14 @@ public final class UIForToolBar<T extends JToolBar> extends UIForAnySwing<UIForT
      *  which is a layout mode that is either horizontal or vertical.
      *  It translates to a call to {@link JToolBar#setOrientation(int)}.
      *
-     * @param alignment The {@link UI.Align} value mapping to the {@link JToolBar}'s orientation.
+     * @param axis The {@link UI.Axis} value mapping to the {@link JToolBar}'s orientation.
      *                  See {@link JToolBar#setOrientation(int)}.
      * @return This builder node.
      */
-    public final UIForToolBar<T> withOrientation( UI.Align alignment ) {
-        NullUtil.nullArgCheck(alignment, "alignment", UI.Align.class);
+    public final UIForToolBar<T> withOrientation( UI.Axis axis ) {
+        NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
         return _with( thisComponent -> {
-                    thisComponent.setOrientation(alignment.forToolBar());
+                    thisComponent.setOrientation(axis.forToolBar());
                 })
                 ._this();
     }
@@ -53,18 +53,18 @@ public final class UIForToolBar<T extends JToolBar> extends UIForAnySwing<UIForT
      *  This translates to a call to {@link JToolBar#setOrientation(int)}.
      *  The orientation must have either the value HORIZONTAL or VERTICAL.
      *
-     * @param alignment The {@link UI.Align} property mapping to the {@link JToolBar}'s orientation.
+     * @param axis The {@link UI.Axis} property mapping to the {@link JToolBar}'s orientation.
      *                  See {@link JToolBar#setOrientation(int)}.
      * @return This builder node.
      */
-    public final UIForToolBar<T> withOrientation( Val<UI.Align> alignment ) {
-        NullUtil.nullArgCheck(alignment, "alignment", Val.class);
-        NullUtil.nullPropertyCheck(alignment, "alignment", "Null is not a valid alignment.");
-        return _withOnShow( alignment, (c,v) -> {
+    public final UIForToolBar<T> withOrientation( Val<UI.Axis> axis ) {
+        NullUtil.nullArgCheck(axis, "axis", Val.class);
+        NullUtil.nullPropertyCheck(axis, "axis", "Null is not a valid axis.");
+        return _withOnShow( axis, (c,v) -> {
                     c.setOrientation(v.forToolBar());
                 })
                 ._with( thisComponent -> {
-                    thisComponent.setOrientation(alignment.orElseThrowUnchecked().forToolBar());
+                    thisComponent.setOrientation(axis.orElseThrowUnchecked().forToolBar());
                 })
                 ._this();
     }

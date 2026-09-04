@@ -39,7 +39,7 @@ import java.util.stream.IntStream;
  *  whose entries are not able to receive user events like for example mouse events, button clicks etc...
  *  <br>
  *  A {@link JScrollPanels} instance can arrange its entries in a vertical or horizontal manner
- *  based on the {@link UI.Align} parameter.
+ *  based on the {@link UI.Axis} parameter.
  *  <br><br>
  *  The recommended way to populate this component is the tuple based binding,
  *  where the entries live in a {@link sprouts.Var} property holding an immutable
@@ -72,12 +72,12 @@ public class JScrollPanels extends UI.ScrollPane
     /**
      * Constructs a new {@link JScrollPanels} instance with the provided alignment and size.
      * @param align The alignment of the entries inside this {@link JScrollPanels} instance.
-     *              The alignment can be either {@link UI.Align#HORIZONTAL} or {@link UI.Align#VERTICAL}.
+     *              The alignment can be either {@link UI.Axis#HORIZONTAL} or {@link UI.Axis#VERTICAL}.
      * @param size The size of the entries in this {@link JScrollPanels} instance.
      * @return A new {@link JScrollPanels} instance.
      */
     public static JScrollPanels of(
-        UI.Align align, @Nullable Dimension size
+        UI.Axis align, @Nullable Dimension size
     ) {
         Objects.requireNonNull(align);
         return _construct(align, size, null, Collections.emptyList(), null, m -> UI.panel());
@@ -92,7 +92,7 @@ public class JScrollPanels extends UI.ScrollPane
      * and does not force its width or height to match the viewport.
      *
      * @param align        The alignment of the entries inside this {@link JScrollPanels} instance.
-     *                     The alignment can be either {@link UI.Align#HORIZONTAL} or {@link UI.Align#VERTICAL}.
+     *                     The alignment can be either {@link UI.Axis#HORIZONTAL} or {@link UI.Axis#VERTICAL}.
      * @param size         The size of the entries in this {@link JScrollPanels} instance.
      * @param configurator A {@link Configurator} which configures the {@link Scrollable} behavior
      *                     of the entry container of this scroll panels component.
@@ -100,7 +100,7 @@ public class JScrollPanels extends UI.ScrollPane
      * @return A new {@link JScrollPanels} instance.
      */
     public static JScrollPanels of(
-        UI.Align align,
+        UI.Axis align,
         @Nullable Dimension size,
         @Nullable Configurator<ScrollableComponentDelegate> configurator
     ) {
@@ -109,14 +109,14 @@ public class JScrollPanels extends UI.ScrollPane
     }
 
     private static JScrollPanels _construct(
-        UI.Align align,
+        UI.Axis align,
         @Nullable Dimension shape,
         @Nullable Configurator<ScrollableComponentDelegate> configurator,
         List<EntryViewModel> models,
         @Nullable AddConstraint constraints,
         ViewSupplier<EntryViewModel> viewSupplier
     ) {
-        UI.Align type = align;
+        UI.Axis type = align;
         @Nullable InternalPanel[] forwardReference = {null};
         List<EntryPanel> entries =
                 IntStream.range(0,models.size())
@@ -137,7 +137,7 @@ public class JScrollPanels extends UI.ScrollPane
         internalWrapperPanel._setScrollPane(newJScrollPanels);
         forwardReference[0] = internalWrapperPanel;
 
-        if ( type == UI.Align.HORIZONTAL )
+        if ( type.isHorizontal() )
             newJScrollPanels.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
         else
             newJScrollPanels.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
@@ -553,7 +553,7 @@ public class JScrollPanels extends UI.ScrollPane
     private static class InternalPanel extends JBox implements Scrollable
     {
         private final int _W, _H, _horizontalGap, _verticalGap;
-        private final UI.Align _type;
+        private final UI.Axis _type;
         private final Dimension _size;
         private final @Nullable Configurator<ScrollableComponentDelegate> _configurator;
         private @Nullable JScrollPane _scrollPane;
@@ -562,7 +562,7 @@ public class JScrollPanels extends UI.ScrollPane
         private InternalPanel(
             List<EntryPanel> entryPanels,
             @Nullable Dimension shape,
-            UI.Align type,
+            UI.Axis type,
             @Nullable Configurator<ScrollableComponentDelegate> configurator
         ) {
             shape = ( shape == null ? new Dimension(120, 100) : shape );
@@ -572,7 +572,7 @@ public class JScrollPanels extends UI.ScrollPane
             _type = type;
             _configurator = configurator;
             LayoutManager layout;
-            if ( type == UI.Align.HORIZONTAL ) {
+            if ( type.isHorizontal() ) {
                 ResponsiveGridFlowLayout flow = new ResponsiveGridFlowLayout();
                 _horizontalGap = flow.horizontalGapSize();
                 _verticalGap = flow.verticalGapSize();
@@ -586,7 +586,7 @@ public class JScrollPanels extends UI.ScrollPane
             setLayout(layout);
             for ( EntryPanel c : entryPanels ) this.add(c);
 
-            if ( type == UI.Align.HORIZONTAL )
+            if ( type.isHorizontal() )
                 _size = new Dimension(n * _W + (n + 1) * _horizontalGap, _H + 2 * _verticalGap);
             else
                 _size = new Dimension(_W + 2 * _horizontalGap, n * _H + (n + 1) * _verticalGap);
@@ -627,7 +627,7 @@ public class JScrollPanels extends UI.ScrollPane
 
         @Override
         public Dimension getPreferredSize() {
-            if ( _type == UI.Align.VERTICAL )
+            if ( !_type.isHorizontal() )
                 return new Dimension(
                             Math.max(_W, getParent().getWidth()),
                             (int) super.getPreferredSize().getHeight()
@@ -650,7 +650,7 @@ public class JScrollPanels extends UI.ScrollPane
                 return _incrementFrom(orientation);
             try {
                 Bounds bounds = ( visibleRect == null ? Bounds.none() : Bounds.of(visibleRect) );
-                UI.Align align = ( orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL );
+                UI.Axis align = ( orientation == SwingConstants.VERTICAL ? UI.Axis.VERTICAL : UI.Axis.HORIZONTAL );
                 return delegate.unitIncrement(bounds, align, direction);
             } catch ( Exception e ) {
                 log.error(SwingTree.get().logMarker(), "Error while calculating unit increment for scroll panels.", e);
@@ -669,7 +669,7 @@ public class JScrollPanels extends UI.ScrollPane
                 return _incrementFrom(orientation) / 2;
             try {
                 Bounds bounds = ( visibleRect == null ? Bounds.none() : Bounds.of(visibleRect) );
-                UI.Align align = ( orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL );
+                UI.Axis align = ( orientation == SwingConstants.VERTICAL ? UI.Axis.VERTICAL : UI.Axis.HORIZONTAL );
                 return delegate.blockIncrement(bounds, align, direction);
             } catch ( Exception e ) {
                 log.error(SwingTree.get().logMarker(), "Error while calculating block increment for scroll panels.", e);
@@ -713,9 +713,9 @@ public class JScrollPanels extends UI.ScrollPane
             if ( _configurator == null || _scrollPane == null )
                 return null;
             ScrollIncrementSupplier unitSupplier  = (rect, align, direction) ->
-                    _incrementFrom(align == UI.Align.HORIZONTAL ? JScrollBar.HORIZONTAL : JScrollBar.VERTICAL);
+                    _incrementFrom(align.isHorizontal() ? JScrollBar.HORIZONTAL : JScrollBar.VERTICAL);
             ScrollIncrementSupplier blockSupplier = (rect, align, direction) ->
-                    _incrementFrom(align == UI.Align.HORIZONTAL ? JScrollBar.HORIZONTAL : JScrollBar.VERTICAL) / 2;
+                    _incrementFrom(align.isHorizontal() ? JScrollBar.HORIZONTAL : JScrollBar.VERTICAL) / 2;
             ScrollableComponentDelegate delegate = ScrollableComponentDelegate.of(
                     _scrollPane, this, Size.of(_size),
                     unitSupplier, blockSupplier,

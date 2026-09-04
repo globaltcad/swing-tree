@@ -1597,7 +1597,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final I withCursor( UI.Cursor type ) {
         NullUtil.nullArgCheck( type, "type", UI.Cursor.class );
-        return _with( c -> c.setCursor( new java.awt.Cursor( type.type ) ) )._this();
+        return _with( c -> c.setCursor( type.toAWTCursor() ) )._this();
     }
 
     /**
@@ -1612,10 +1612,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck( type, "type", Val.class );
         NullUtil.nullPropertyCheck(type, "type", "Null is not allowed to model a cursor type.");
         return _withOnShow( type, (c,t) -> {
-                    c.setCursor( new java.awt.Cursor( t.type ) );
+                    c.setCursor( t.toAWTCursor() );
                 })
                 ._with( c -> {
-                    c.setCursor( new java.awt.Cursor( type.orElseThrowUnchecked().type ) );
+                    c.setCursor( type.orElseThrowUnchecked().toAWTCursor() );
                 })
                 ._this();
     }
@@ -1635,10 +1635,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck( type, "type", UI.Cursor.class );
         NullUtil.nullPropertyCheck(condition, "condition", "Null is not allowed to model the cursor selection state.");
         return _withOnShow( condition, (c,v) -> {
-                    c.setCursor( new java.awt.Cursor( v ? type.type : UI.Cursor.DEFAULT.type ) );
+                    c.setCursor( ( v ? type : UI.Cursor.DEFAULT ).toAWTCursor() );
                 })
                 ._with( c -> {
-                    c.setCursor( new java.awt.Cursor( condition.orElseThrowUnchecked() ? type.type : UI.Cursor.DEFAULT.type ) );
+                    c.setCursor( ( condition.orElseThrowUnchecked() ? type : UI.Cursor.DEFAULT ).toAWTCursor() );
                 })
                 ._this();
     }
@@ -1663,11 +1663,11 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     _onShow( condition, thisComponent, (c,v) -> type.fireChange(From.VIEW_MODEL) );
                     _onShow( type, thisComponent, (c,v) -> {
                         if ( baseCursor[0] == null ) baseCursor[0] = c.getCursor();
-                        c.setCursor( new java.awt.Cursor( condition.orElseThrowUnchecked() ? v.type : baseCursor[0].getType() ) );
+                        c.setCursor( condition.orElseThrowUnchecked() ? v.toAWTCursor() : baseCursor[0] );
                     });
                 })
                 ._with( c -> {
-                    c.setCursor( new java.awt.Cursor( condition.orElseThrowUnchecked() ? type.orElseThrowUnchecked().type : UI.Cursor.DEFAULT.type ) );
+                    c.setCursor( ( condition.orElseThrowUnchecked() ? type.orElseThrowUnchecked() : UI.Cursor.DEFAULT ).toAWTCursor() );
                 })
                 ._this();
     }

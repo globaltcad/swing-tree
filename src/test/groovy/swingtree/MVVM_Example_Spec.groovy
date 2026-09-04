@@ -429,7 +429,7 @@ class MVVM_Example_Spec extends Specification
                     case "Dummy View Model 2":
                             return UI.panel().id("sub-2")
                                     .add(UI.label("Population:"))
-                                    .add(UI.slider(UI.Align.HORIZONTAL).withValue(population))
+                                    .add(UI.slider(UI.Axis.HORIZONTAL).withValue(population))
                                     .add(UI.button("Update").onClick { population.set(5) })
                 }
             }
@@ -494,7 +494,7 @@ class MVVM_Example_Spec extends Specification
                     case "Dummy View Model 3":
                             return UI.panel().id("sub-3")
                                     .add(UI.label("Price:"))
-                                    .add(UI.slider(UI.Align.HORIZONTAL).withValue(price))
+                                    .add(UI.slider(UI.Axis.HORIZONTAL).withValue(price))
                                     .add(UI.button("Update").onClick { price.set(2000000.0) })
                     case "Dummy View Model 4":
                                 return UI.panel().id("sub-4")
@@ -595,7 +595,7 @@ class MVVM_Example_Spec extends Specification
                     case "Dummy View Model 3":
                             return UI.panel().id("sub-3")
                                     .add(UI.label("Price:"))
-                                    .add(UI.slider(UI.Align.HORIZONTAL).withValue(price))
+                                    .add(UI.slider(UI.Axis.HORIZONTAL).withValue(price))
                                     .add(UI.button("Update").onClick { price.set(2000000.0) })
                     case "Dummy View Model 4":
                                 return UI.panel().id("sub-4")

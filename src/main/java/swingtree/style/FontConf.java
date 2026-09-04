@@ -990,7 +990,7 @@ public final class FontConf
      * </ul>
      * This property will have no effect on components that don't support text alignment,
      * except for when you use this property to render text through the SwingTree style API.
-     * (see {@link ComponentStyleDelegate#fontAlignment(UI.Alignment)})
+     * (see {@link ComponentStyleDelegate#fontAlignment(UI.Placement)})
      *
      * <p><b>Recommended Usage:</b><br>
      * For effective alignment specification, use either:
@@ -998,7 +998,7 @@ public final class FontConf
      *   <li>{@link ComponentStyleDelegate#fontAlignment(UI.VerticalAlignment)} for individual alignment</li>
      *   <li>{@link FontConf} within a {@link UI.Font} passed to:
      *     <ul>
-     *       <li>see {@link ComponentStyleDelegate#fontAlignment(UI.Alignment)}</li>
+     *       <li>see {@link ComponentStyleDelegate#fontAlignment(UI.Placement)}</li>
      *       <li>{@link swingtree.UIForAnySwing#withFont(UI.Font)}</li>
      *       <li>{@link swingtree.UIForAnySwing#withFont(Val)}</li>
      *     </ul>
@@ -1016,14 +1016,14 @@ public final class FontConf
      *
      * @see #horizontalAlignment(UI.HorizontalAlignment)
      * @see #verticalAlignment(UI.VerticalAlignment)
-     * @see UI.Alignment
+     * @see UI.Placement
      * @see UI.HorizontalAlignment
      * @see UI.VerticalAlignment
      * @throws NullPointerException if the supplied enum constant is null.
      */
-    public FontConf alignment( UI.Alignment alignment ) {
+    public FontConf alignment( UI.Placement alignment ) {
         Objects.requireNonNull(alignment);
-        return verticalAlignment(alignment.getVertical()).horizontalAlignment(alignment.getHorizontal());
+        return verticalAlignment(alignment.vertical()).horizontalAlignment(alignment.horizontal());
     }
 
     /**

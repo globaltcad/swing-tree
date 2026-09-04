@@ -203,7 +203,7 @@ class Basic_UI_Builder_Examples_Spec extends Specification
             button.cursor.type == Cursor.DEFAULT_CURSOR
 
         when : 'We set the cursor of the button to be something else...'
-            ui = ui.withCursor(UI.Cursor.RESIZE_SOUTH_EAST)
+            ui = ui.withCursor(UI.Cursor.RESIZE_BOTTOM_RIGHT)
         and : 'We re-build the component.'
             button = ui.get(JButton)
         then : 'This will lead to the correct cursor being chosen.'
