@@ -29,10 +29,10 @@ import javax.swing.JSlider
 @CompileDynamic
 class Slider_Spec extends Specification
 {
-    def 'Use the `slider(Align)` factory method to build a `JSlider`.'()
+    def 'Use the `slider(Axis)` factory method to build a `JSlider`.'()
     {
         reportInfo """
-            The `slider(Align)` factory method returns a builder instance
+            The `slider(Axis)` factory method returns a builder instance
             which can be used to configure the JSlider instance
             using method chaining.
             Use the "show()" method at the end of your chain to
@@ -42,7 +42,7 @@ class Slider_Spec extends Specification
             var record = []
         and : 'Then we create UI declaration for the `JSlider` component.'
             var slider =
-                    UI.slider(UI.Align.HORIZONTAL)
+                    UI.slider(UI.Axis.HORIZONTAL)
                     .withMin(0)
                     .withMax(100)
                     .withValue(50)
@@ -64,7 +64,7 @@ class Slider_Spec extends Specification
     def 'Bind the current slider state to a double property through one of its factory methods.'()
     {
         reportInfo """
-            You can use the `slider(Align, N, N, Var<N>)` factory method
+            You can use the `slider(Axis, N, N, Var<N>)` factory method
             to bind a number based property to the slider's current value.
             This includes floating point numbers, like `double` or `float`.
             
@@ -79,7 +79,7 @@ class Slider_Spec extends Specification
             currentState.onChange(From.ALL, it -> trace << "property=${it.currentValue().orElseThrowUnchecked()}" )
         and : 'Then we build a declarative JSlider.'
             var slider =
-                    UI.slider(UI.Align.HORIZONTAL, -2d, 2d, currentState)
+                    UI.slider(UI.Axis.HORIZONTAL, -2d, 2d, currentState)
                     .onChange( it -> trace << "slider=${it.get().value}" )
                     .get(JSlider)
         and : 'We calculate the internal scale based on the min-max range'
@@ -105,7 +105,7 @@ class Slider_Spec extends Specification
     def 'Bind the full slider state to a double property through one of its factory methods.'()
     {
         reportInfo """
-            You can use the `slider(Align, Val<N>, Val<N>, Var<N>)` factory method
+            You can use the `slider(Axis, Val<N>, Val<N>, Var<N>)` factory method
             to bind min, max and value properties to the slider's current state.
             This works for any `Number` based property, including `double` or `float`.
             
@@ -127,7 +127,7 @@ class Slider_Spec extends Specification
             max.onChange(From.ALL, it -> trace << "max=${it.currentValue().orElseThrowUnchecked()}" )
         and : 'Then we build a declarative JSlider.'
             var slider =
-                    UI.slider(UI.Align.VERTICAL, min, max, currentState)
+                    UI.slider(UI.Axis.VERTICAL, min, max, currentState)
                     .onChange( it -> trace << "slider=${it.get().value}" )
                     .get(JSlider)
         and : 'We calculate the internal scale based on the min-max range'
@@ -182,7 +182,7 @@ class Slider_Spec extends Specification
             var max = Var.of(10d)
             var value = Var.of(7.5d)
             var slider =
-                    UI.slider(UI.Align.HORIZONTAL, min, max, value)
+                    UI.slider(UI.Axis.HORIZONTAL, min, max, value)
                       .get(JSlider)
         and : 'We compute the slider integer range after dropping the max.'
             var newMax = 6d

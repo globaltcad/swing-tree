@@ -193,7 +193,7 @@ SwingTree replaces the old manager with the new one automatically.
 | `Layout.flow()` | `ResponsiveGridFlowLayout` (see below) |
 | `Layout.border()` | `java.awt.BorderLayout` |
 | `Layout.grid(rows, cols)` | `java.awt.GridLayout` |
-| `Layout.box(UI.Axis.X)` | `javax.swing.BoxLayout` along X axis |
+| `Layout.box(UI.Axis.HORIZONTAL)` | `javax.swing.BoxLayout` along X axis |
 | `Layout.unspecific()` | No-op — current manager is untouched |
 | `Layout.none()` | Removes the manager (`setLayout(null)`) |
 
@@ -212,7 +212,7 @@ public static void main(String[] args) {
             panel("fillx, insets 6")
             .add(button("MigLayout 2-col" ).onClick(e -> layout.set(Layout.mig("fill, wrap 2"))))
             .add(button("Responsive flow" ).onClick(e -> layout.set(Layout.flow())))
-            .add(button("Horizontal box"  ).onClick(e -> layout.set(Layout.box(UI.Axis.X))))
+            .add(button("Horizontal box"  ).onClick(e -> layout.set(Layout.box(UI.Axis.HORIZONTAL))))
             .add(button("Canvas (no mgr)" ).onClick(e -> layout.set(Layout.none())))
         )
         .add("grow",

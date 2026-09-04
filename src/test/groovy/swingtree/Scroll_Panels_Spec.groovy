@@ -554,18 +554,18 @@ class Scroll_Panels_Spec extends Specification
             inner.getScrollableTracksViewportHeight() == false
     }
 
-    def 'The `UI.scrollPanels(UI.Align, Configurator)` factory accepts a custom alignment alongside the configurator.'()
+    def 'The `UI.scrollPanels(UI.Axis, Configurator)` factory accepts a custom alignment alongside the configurator.'()
     {
         reportInfo """
             Sometimes you want the scroll panels widget to lay its entries out
             horizontally instead of vertically. The
-            `UI.scrollPanels(UI.Align, Configurator)` factory lets you do that
+            `UI.scrollPanels(UI.Axis, Configurator)` factory lets you do that
             while still letting you tweak the `Scrollable` behavior
             through a declarative lambda.
         """
         given : 'A horizontally aligned scroll panels widget with a custom scrollable config.'
             var ui =
-                    UI.scrollPanels(UI.Align.HORIZONTAL, conf -> conf
+                    UI.scrollPanels(UI.Axis.HORIZONTAL, conf -> conf
                         .unitIncrement(7)
                         .blockIncrement(21)
                         .fitHeight(true)
@@ -598,8 +598,8 @@ class Scroll_Panels_Spec extends Specification
         given : 'A scroll panels widget which uses a custom `ScrollIncrementSupplier`.'
             var ui =
                     UI.scrollPanels( conf -> conf
-                        .unitIncrement((rect, align, dir) -> align == UI.Align.VERTICAL ? 11 : 33)
-                        .blockIncrement((rect, align, dir) -> align == UI.Align.VERTICAL ? 22 : 66)
+                        .unitIncrement((rect, align, dir) -> align == UI.Axis.VERTICAL ? 11 : 33)
+                        .blockIncrement((rect, align, dir) -> align == UI.Axis.VERTICAL ? 22 : 66)
                     )
                     .add(UI.label("Alpha"))
                     .add(UI.label("Beta"))
@@ -614,7 +614,7 @@ class Scroll_Panels_Spec extends Specification
             inner.getScrollableBlockIncrement(null, javax.swing.SwingConstants.HORIZONTAL, 1) == 66
     }
 
-    def 'The `UI.scrollPanels(UI.Align, Dimension, Configurator)` factory accepts an entry shape together with the configurator.'()
+    def 'The `UI.scrollPanels(UI.Axis, Dimension, Configurator)` factory accepts an entry shape together with the configurator.'()
     {
         reportInfo """
             The most expressive overload of the `UI.scrollPanels` factory family
@@ -625,7 +625,7 @@ class Scroll_Panels_Spec extends Specification
         """
         given : 'A scroll panels widget with a fixed entry shape and a custom configurator.'
             var ui =
-                    UI.scrollPanels(UI.Align.VERTICAL, new Dimension(200, 40), conf -> conf
+                    UI.scrollPanels(UI.Axis.VERTICAL, new Dimension(200, 40), conf -> conf
                         .prefSize(200, 240)
                         .fitWidth(true)
                     )

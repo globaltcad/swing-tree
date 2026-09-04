@@ -400,9 +400,9 @@ class Style_Sheet_Spec extends Specification
                          }
                      }
         when : 'We create a few UI components:'
-            var slider1 = UI.slider(UI.Align.HORIZONTAL).group("A", "B").get(JSlider)
-            var slider2 = UI.slider(UI.Align.HORIZONTAL).group("A").get(JSlider)
-            var slider3 = UI.slider(UI.Align.HORIZONTAL).group("B").get(JSlider)
+            var slider1 = UI.slider(UI.Axis.HORIZONTAL).group("A", "B").get(JSlider)
+            var slider2 = UI.slider(UI.Axis.HORIZONTAL).group("A").get(JSlider)
+            var slider3 = UI.slider(UI.Axis.HORIZONTAL).group("B").get(JSlider)
             var label1 = UI.label(":)").group("A").get(JLabel)
             var label2 = UI.label(":D").group("B").get(JLabel)
         and : 'We run them through the style sheet...'

@@ -11,7 +11,7 @@ class AdvancedUI {
         UIManager.setLookAndFeel(new FlatMaterialDesignDarkIJTheme())
         UI.panel("fill, ins 5")
         .add("grow",
-            UI.splitPane(UI.Align.HORIZONTAL).withDividerAt(565)
+            UI.splitPane(UI.Axis.HORIZONTAL).withDividerAt(565)
             .add(
                 UI.panel("fill, ins 0")
                 .add("push, grow, span, wrap",
@@ -45,7 +45,7 @@ class AdvancedUI {
                                .add(UI.editorPane().withForeground(Color.DARK_GRAY).withText((Data.explain.trim().replace("\n", " "))).isEditableIf(false)))
                         )
                         .add("width 480!, shrink, aligny bottom",
-                            UI.slider(UI.Align.HORIZONTAL).peek({
+                            UI.slider(UI.Axis.HORIZONTAL).peek({
                                 Hashtable labelTable = new Hashtable();
                                 9.times {level -> labelTable.put( level*12, new JLabel(String.valueOf(level)) )}
                                 it.setLabelTable( labelTable );
@@ -114,7 +114,7 @@ class AdvancedUI {
                             .add(UI.splitRadioItem("S-192.153.122.80"))
                         )
                         .add("alignx right, shrinkx, growy, pushy",
-                            UI.slider(UI.Align.VERTICAL).peek({
+                            UI.slider(UI.Axis.VERTICAL).peek({
                                 it.setPaintLabels(true);it.setPaintTicks(true);
                                 it.setMajorTickSpacing(10);
                                 it.setMinorTickSpacing(1);
@@ -122,7 +122,7 @@ class AdvancedUI {
                             .doUpdates(1250, it -> it.component.setValue(it.component.value + (new Random().nextInt()%5)-((it.component.value-40)/25) as int))
                         )
                         .add("alignx right, shrinkx, growy, pushy, wrap",
-                            UI.progressBar(UI.Align.VERTICAL, 0, 100)
+                            UI.progressBar(UI.Axis.VERTICAL, 0, 100)
                             .peek({it.setValue(68); it.setString("%"); it.setStringPainted(true)})
                             .doUpdates(25000, it -> it.component.setValue(it.component.value - 1))
                         )

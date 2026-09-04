@@ -74,7 +74,7 @@ public final class TransitionalAnimation extends Panel
                 toggleButton("toggle me").onClick( it -> isOn.set(it.get().isSelected()) )
             )
         )
-        .add(GROW_X, progressBar(Align.HORIZONTAL, this.progress));
+        .add(GROW_X, progressBar(Axis.HORIZONTAL, this.progress));
     }
     public static void main(String[] args) {
         UI.show( f -> new TransitionalAnimation() );

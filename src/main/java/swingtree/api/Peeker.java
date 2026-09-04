@@ -12,7 +12,7 @@ import swingtree.UIForAnySwing;
  * 	<pre>{@code
  *        UI.panel("fill")
  *        .add("span, grow, wrap",
- *             progressBar(UI.Align.HORIZONTAL, 0, 100)
+ *             progressBar(UI.Axis.HORIZONTAL, 0, 100)
  *             .withValue(68)
  *             .peek( it -> {
  *                 it.setString("%");

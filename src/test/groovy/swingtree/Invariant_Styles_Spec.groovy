@@ -453,13 +453,13 @@ class Invariant_Styles_Spec extends Specification
             true     | UI.toggleButton("◌")                               | UI.toggleButton("◌")
             false    | UI.toggleButton("◌")                               | UI.toggleButton("⬤")
 
-            true     | UI.slider(UI.Align.HORIZONTAL, 0, 0, 0)            | UI.slider(UI.Align.HORIZONTAL, 0, 0, 0)
-            false    | UI.slider(UI.Align.HORIZONTAL, 0, 0, 0)            | UI.slider(UI.Align.VERTICAL,   0, 0, 0)
-            false    | UI.slider(UI.Align.HORIZONTAL, 0, 0, 0)            | UI.slider(UI.Align.HORIZONTAL, -10, 0, 0)
-            false    | UI.slider(UI.Align.HORIZONTAL, 0, 0, 0)            | UI.slider(UI.Align.HORIZONTAL, -10, 0, 10)
+            true     | UI.slider(UI.Axis.HORIZONTAL, 0, 0, 0)            | UI.slider(UI.Axis.HORIZONTAL, 0, 0, 0)
+            false    | UI.slider(UI.Axis.HORIZONTAL, 0, 0, 0)            | UI.slider(UI.Axis.VERTICAL,   0, 0, 0)
+            false    | UI.slider(UI.Axis.HORIZONTAL, 0, 0, 0)            | UI.slider(UI.Axis.HORIZONTAL, -10, 0, 0)
+            false    | UI.slider(UI.Axis.HORIZONTAL, 0, 0, 0)            | UI.slider(UI.Axis.HORIZONTAL, -10, 0, 10)
 
-            true     | UI.slider(UI.Align.HORIZONTAL, 0, 20, 2)           | UI.slider(UI.Align.HORIZONTAL, 0, 20, 2)
-            false    | UI.slider(UI.Align.HORIZONTAL, 0, 20, 2)           | UI.slider(UI.Align.HORIZONTAL, 0, 20, 3)
+            true     | UI.slider(UI.Axis.HORIZONTAL, 0, 20, 2)           | UI.slider(UI.Axis.HORIZONTAL, 0, 20, 2)
+            false    | UI.slider(UI.Axis.HORIZONTAL, 0, 20, 2)           | UI.slider(UI.Axis.HORIZONTAL, 0, 20, 3)
 
             true     | UI.panel().withBackground(UI.Color.RED)            | UI.panel().withBackgroundColor("red")
             false    | UI.panel().withBackground(UI.Color.RED)            | UI.panel().withBackground(UI.Color.BLUE)

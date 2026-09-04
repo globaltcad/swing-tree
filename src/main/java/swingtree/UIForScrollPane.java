@@ -161,7 +161,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
                 Bounds bounds = Bounds.none();
                 if ( visibleRect != null )
                     bounds = Bounds.of(visibleRect);
-                UI.Align align = (orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL);
+                UI.Axis align = (orientation == SwingConstants.VERTICAL ? UI.Axis.VERTICAL : UI.Axis.HORIZONTAL);
                 return delegate.unitIncrement(bounds, align, direction);
             } catch ( Exception e ) {
                 log.error(SwingTree.get().logMarker(), "Error while calculating unit increment for scrollable component.", e);
@@ -176,7 +176,7 @@ public final class UIForScrollPane<P extends JScrollPane> extends UIForAnyScroll
                 Bounds bounds = Bounds.none();
                 if ( visibleRect != null )
                     bounds = Bounds.of(visibleRect);
-                UI.Align align = (orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL);
+                UI.Axis align = (orientation == SwingConstants.VERTICAL ? UI.Axis.VERTICAL : UI.Axis.HORIZONTAL);
                 return delegate.blockIncrement(bounds, align, direction);
             } catch ( Exception e ) {
                 log.error(SwingTree.get().logMarker(), "Error while calculating block increment for scrollable component.", e);

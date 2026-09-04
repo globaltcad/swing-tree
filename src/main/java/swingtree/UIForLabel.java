@@ -412,11 +412,11 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code alignment} is {@code null}.
      */
-    public UIForLabel<L> withAlignment( UI.Alignment alignment ) {
-        NullUtil.nullArgCheck( alignment, "alignment", UI.Alignment.class );
+    public UIForLabel<L> withAlignment( UI.Placement alignment ) {
+        NullUtil.nullArgCheck( alignment, "alignment", UI.Placement.class );
         return _with( thisComponent -> {
-                    alignment.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);
-                    alignment.getVertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);
+                    alignment.horizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);
+                    alignment.vertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);
                 })
                 ._this();
     }
@@ -430,17 +430,17 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code alignment} is {@code null}.
      */
-    public UIForLabel<L> withAlignment( Val<UI.Alignment> alignment ) {
+    public UIForLabel<L> withAlignment( Val<UI.Placement> alignment ) {
         NullUtil.nullArgCheck( alignment, "alignment", Val.class );
         NullUtil.nullPropertyCheck( alignment, "alignment", "Null is not a valid alignment." );
         return _withOnShow( alignment, (thisComponent,v) -> {
-                    v.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);
-                    v.getVertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);
+                    v.horizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);
+                    v.vertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);
                 })
                 ._with( thisComponent -> {
-                    UI.Alignment a = alignment.orElseThrowUnchecked();
-                    a.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);
-                    a.getVertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);
+                    UI.Placement a = alignment.orElseThrowUnchecked();
+                    a.horizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);
+                    a.vertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);
                 })
                 ._this();
     }
@@ -540,11 +540,11 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code alignment} is {@code null}.
      */
-    public UIForLabel<L> withTextPosition( UI.Alignment alignment ) {
-        NullUtil.nullArgCheck( alignment, "alignment", UI.Alignment.class );
+    public UIForLabel<L> withTextPosition( UI.Placement alignment ) {
+        NullUtil.nullArgCheck( alignment, "alignment", UI.Placement.class );
         return _with( thisComponent -> {
-                    alignment.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalTextPosition);
-                    alignment.getVertical().forSwing().ifPresent(thisComponent::setVerticalTextPosition);
+                    alignment.horizontal().forSwing().ifPresent(thisComponent::setHorizontalTextPosition);
+                    alignment.vertical().forSwing().ifPresent(thisComponent::setVerticalTextPosition);
                 })
                 ._this();
     }

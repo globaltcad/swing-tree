@@ -496,7 +496,7 @@ final class GuiDebugDevToolUtility {
                 setTitle(titleFromFocus(focusedDebugComponent));
             });
             this.add(
-                    UI.splitPane(UI.Align.VERTICAL)
+                    UI.splitPane(UI.Axis.VERTICAL)
                     .withDivisionOf(0.0)
                     .add(
                         UI.scrollPane()
@@ -504,7 +504,7 @@ final class GuiDebugDevToolUtility {
                         .withMinSize(0, 0) // let the divider collapse fully to the top
                     )
                     .add(
-                        UI.splitPane(UI.Align.HORIZONTAL)
+                        UI.splitPane(UI.Axis.HORIZONTAL)
                         .add(
                             buildInfoDisplay(debugState, FOCUS_COLOR,
                                 "<html>" +
