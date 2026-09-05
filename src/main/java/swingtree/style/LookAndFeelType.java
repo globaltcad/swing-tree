@@ -11,7 +11,9 @@ import javax.swing.*;
 /**
  * Set of enum instances defining common types of Swing look and feels.
  * Use {@link LookAndFeelType#current()} to check which look and feel is currently active.<br>
- * <b>Note: This class is deliberately package private and should not be public!</b>
+ * <b>Note: This enum is deliberately package private and should stay that way.</b>
+ * SwingTree consults it to work around look and feel quirks, which is an implementation
+ * detail rather than something client code should branch on.
  */
 @Immutable
 enum LookAndFeelType implements UIEnum<LookAndFeelType> {
@@ -33,9 +35,9 @@ enum LookAndFeelType implements UIEnum<LookAndFeelType> {
      *     <li>{@link LookAndFeelType#FLAT_LAF}</li>
      *     <li>{@link LookAndFeelType#NIMBUS}</li>
      *     <li>{@link LookAndFeelType#METAL}</li>
+     *     <li>{@link LookAndFeelType#OTHER}, if none of the above was recognized,
+     *         or if the current look and feel could not be read at all.</li>
      * </ul>
-     * or {@link LookAndFeelType#OTHER} if none of the above
-     * was recognized.
      */
     public static LookAndFeelType current() {
         try {

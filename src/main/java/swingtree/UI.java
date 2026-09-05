@@ -85,9 +85,9 @@ public final class UI extends UIFactoryMethods
         MOVE(java.awt.Cursor.MOVE_CURSOR);
 
         /**
-         *  Returns the cursor which tells the user that dragging will resize the
-         *  given side of a component, so that a drag handler already holding a
-         *  {@link Side} does not have to name the matching cursor a second time.
+         *  Returns the cursor which tells the user that dragging will move the given
+         *  side of a component, so that code which already holds a {@link Side} can
+         *  ask for the matching cursor instead of naming it a second time.
          *
          * @param side The side of the component whose size a drag would change.
          * @return One of {@link #RESIZE_TOP}, {@link #RESIZE_LEFT},
@@ -104,9 +104,9 @@ public final class UI extends UIFactoryMethods
         }
 
         /**
-         *  Returns the cursor which tells the user that dragging will resize the
-         *  given corner of a component, so that a drag handler already holding a
-         *  {@link Corner} does not have to name the matching cursor a second time.
+         *  Returns the cursor which tells the user that dragging will move the given
+         *  corner of a component, so that code which already holds a {@link Corner} can
+         *  ask for the matching cursor instead of naming it a second time.
          *
          * @param corner The corner of the component whose size a drag would change.
          * @return One of {@link #RESIZE_TOP_LEFT}, {@link #RESIZE_TOP_RIGHT},
@@ -147,11 +147,10 @@ public final class UI extends UIFactoryMethods
         NEVER, AS_NEEDED, ALWAYS;
 
         /**
-         *  Applies this policy to a situation which either calls for the thing or does not,
-         *  which is the decision every consumer of this enum has to make.
-         *  A scroll pane passes whether the content is larger than the viewport, a badge
-         *  passes whether there is anything to report, and both get their answer here
-         *  instead of writing the three way switch themselves.
+         *  Answers whether the thing this policy governs should be present, given whether
+         *  the current situation calls for it. This is the three way decision the enum exists
+         *  to express: {@link #NEVER} and {@link #ALWAYS} ignore the situation, and only
+         *  {@link #AS_NEEDED} consults it.
          *
          * @param needed Whether the current situation calls for the thing being decided about.
          * @return {@code false} for {@link #NEVER}, {@code true} for {@link #ALWAYS},
@@ -204,8 +203,9 @@ public final class UI extends UIFactoryMethods
         }
 
         /**
-         *  Returns the point at the middle of this side, so that a caller holding a side
-         *  can reach the styling API, which places things by {@link Placement}.
+         *  Returns the point at the middle of this side, which is how a side is handed
+         *  to the parts of the API that place things by {@link Placement}, such as
+         *  {@link ImageConf#placement(Placement)}.
          *  @return {@link Placement#TOP}, {@link Placement#LEFT},
          *          {@link Placement#BOTTOM} or {@link Placement#RIGHT}.
          */
@@ -597,8 +597,8 @@ public final class UI extends UIFactoryMethods
         public Placement to() { return to; }
 
         /**
-         *  Returns the span running the other way, which turns a gradient around
-         *  without the caller having to name the reversed constant.
+         *  Returns the span running the other way, so that a gradient can be turned around
+         *  without naming the reversed constant.
          *  @return The span whose {@link #from()} is this span's {@link #to()}.
          */
         public Span reversed() {
@@ -842,8 +842,9 @@ public final class UI extends UIFactoryMethods
         }
 
         /**
-         *  Returns the point at this corner, so that a caller holding a corner can reach
-         *  the styling API, which places things by {@link Placement}.
+         *  Returns the point at this corner, which is how a corner is handed to the
+         *  parts of the API that place things by {@link Placement}, such as
+         *  {@link ImageConf#placement(Placement)}.
          *  @return The matching corner of {@link Placement}, and {@link Placement#UNDEFINED}
          *          for {@link #EVERY}, which names no single corner.
          */
@@ -867,6 +868,14 @@ public final class UI extends UIFactoryMethods
      *  <p>
      *  {@link #UNDEFINED} means that no point was chosen here, which leaves another policy
      *  or a default free to choose one.
+     *  <p>
+     *  A point is already placed, so this enum names no reading direction: there is no
+     *  leading or trailing constant here. {@link #of(VerticalAlignment, HorizontalAlignment,
+     *  ComponentOrientation)} accepts {@link HorizontalAlignment#LEADING} and
+     *  {@link HorizontalAlignment#TRAILING} and resolves them against an orientation, but
+     *  {@link #horizontal()} never answers with either of them. To align a component along
+     *  the reading direction rather than at a fixed side, pass those two constants to
+     *  {@link UIForLabel#withHorizontalAlignment(UI.HorizontalAlignment)} instead.
      *
      * @see ImageConf#placement(Placement)
      * @see TextConf#placement(Placement)
@@ -891,7 +900,7 @@ public final class UI extends UIFactoryMethods
          * @param vertical Which of the top, the middle or the bottom of the component to use.
          * @param horizontal Which of the left, the middle or the right of the component to use.
          * @param orientation The reading direction that turns {@link HorizontalAlignment#LEADING}
-         *                    into a left or a right; {@link ComponentOrientation#UNKNOWN} reads
+         *                    into a left or a right; {@link UI.ComponentOrientation#UNKNOWN} reads
          *                    left to right, matching {@link java.awt.ComponentOrientation#UNKNOWN}.
          * @return The point named by both alignments, or {@link #UNDEFINED} if neither names one.
          */
@@ -981,8 +990,9 @@ public final class UI extends UIFactoryMethods
         }
 
         /**
-         *  Returns the point reached by reflecting this one through the center of the component,
-         *  which is what a caller placing a shadow, an arrow or a tooltip on the far side needs.
+         *  Returns the point reached by reflecting this one through the center of the
+         *  component, which is the point to place something at when it should sit on
+         *  the far side of whatever this point marks.
          *  @return The opposite point, with {@link #CENTER} and {@link #UNDEFINED} returning themselves.
          */
         public Placement opposite() {
@@ -1117,7 +1127,12 @@ public final class UI extends UIFactoryMethods
         /**
          *  Returns the boundary line this area starts at, measured from the outside in.
          *  {@link #ALL} and {@link #EXTERIOR} both start at the outer edge of the component,
-         *  and {@link #BORDER} and {@link #BODY} both start where the margin ends.
+         *  {@link #BORDER} and {@link #BODY} both start where the margin ends, and
+         *  {@link #INTERIOR} starts where the border ends.
+         *  <p>
+         *  Two areas can share a boundary, so this is not the inverse of
+         *  {@link ComponentBoundary#wrappedArea()}: that method answers {@link #ALL} for
+         *  {@link ComponentBoundary#OUTER_TO_EXTERIOR} and never {@link #EXTERIOR}.
          *
          * @return The {@link ComponentBoundary} that tightly wraps this area.
          */
@@ -1361,9 +1376,10 @@ public final class UI extends UIFactoryMethods
         public boolean isHorizontal() { return resolve() == HORIZONTAL; }
 
         /**
-         *  Returns the axis at a right angle to this one, so that a caller laying out a
-         *  divider, a scroll bar or a label across a component does not have to spell
-         *  out the other axis.
+         *  Returns the axis at a right angle to this one, so that code holding one axis
+         *  can name the other without spelling out both constants. A {@link JSplitPane}
+         *  laid out along {@link #HORIZONTAL}, for instance, carries a divider that runs
+         *  along {@link #VERTICAL}.
          *  @return {@link #VERTICAL} for a horizontal axis and {@link #HORIZONTAL} for a vertical one.
          */
         public Axis perpendicular() { return isHorizontal() ? VERTICAL : HORIZONTAL; }
