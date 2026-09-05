@@ -193,7 +193,7 @@ SwingTree replaces the old manager with the new one automatically.
 | `Layout.flow()` | `ResponsiveGridFlowLayout` (see below) |
 | `Layout.border()` | `java.awt.BorderLayout` |
 | `Layout.grid(rows, cols)` | `java.awt.GridLayout` |
-| `Layout.box(UI.Axis.HORIZONTAL)` | `javax.swing.BoxLayout` along X axis |
+| `Layout.box(UI.Axis.HORIZONTAL)` | `javax.swing.BoxLayout` along the horizontal axis |
 | `Layout.unspecific()` | No-op — current manager is untouched |
 | `Layout.none()` | Removes the manager (`setLayout(null)`) |
 
