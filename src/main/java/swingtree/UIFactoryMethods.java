@@ -997,7 +997,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to create a swing tree builder node for the {@link JSeparator} whose
-     *  alignment is dynamically determined based on a provided property.
+     *  axis is dynamically determined based on a provided property.
      *
      * @param axis The property holding the axis the separator runs along.
      * @return A {@link UIForSeparator} UI builder instance which wraps the {@link JSeparator} and exposes helpful methods.
@@ -2645,7 +2645,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Allows you to create a declarative builder for the {@link JScrollPanels} component type,
-     *  with a custom alignment and a configurator which defines how the internal entry container
+     *  with a custom axis and a configurator which defines how the internal entry container
      *  of the scroll panels should behave in the scroll pane viewport. <br>
      *  The configurator receives a {@link ScrollableComponentDelegate} on which you can define
      *  properties like the preferred viewport size, unit increment, block increment, and whether
@@ -2678,7 +2678,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Allows you to create a declarative builder for the {@link JScrollPanels} component type,
-     *  with a custom alignment, a fixed entry shape and a configurator which defines how the
+     *  with a custom axis, a fixed entry shape and a configurator which defines how the
      *  internal entry container of the scroll panels should behave in the scroll pane viewport. <br>
      *  The configurator receives a {@link ScrollableComponentDelegate} on which you can define
      *  properties like the preferred viewport size, unit increment, block increment, and whether
@@ -2759,7 +2759,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  and the vertical axis respectively, as {@link swingtree.UI.Axis#resolve()} describes.<br>
      *  You can create a simple split pane based UI like so: <br>
      *  <pre>{@code
-     *    UI.splitPane(viewModel.getAlignment())
+     *    UI.splitPane(viewModel.getSplitAxis())
      *    .withDividerAt(50)
      *    .add(UI.panel().add(...)) // left or top
      *    .add(UI.scrollPane().add(...)) // right or bottom
@@ -2768,7 +2768,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  The split pane will be updated whenever the provided property changes.
      *  This allows you to dynamically change the layout of the split pane at runtime by changing
      *  the value of the supplied property. For example, you could have a simple toggle button that switches
-     *  the value of the property between the two alignments.
+     *  the value of the property between the two axes.
      *  <br>
      *  <b>Note:</b> The supplied property must not be {@code null} and it must never contain any {@code null} values!
      *  Otherwise, an {@link IllegalArgumentException} will be thrown.
@@ -2845,8 +2845,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to create a builder for a new {@link JSlider} instance
-     *  based on tbe provided alignment type determining if
-     *  the slider will be aligned vertically or horizontally.
+     *  which runs along the provided {@link UI.Axis}, so either from left to
+     *  right or from bottom to top.
      *
      * @param axis The axis the {@link JSlider} runs along.
      * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
@@ -2861,9 +2861,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
-     *  Use this to create a builder for a new {@link JSlider} instance
-     *  based on the provided alignment property which dynamically
-     *  determines if the property is aligned vertically or horizontally.
+     *  Use this to create a builder for a new {@link JSlider} instance whose
+     *  {@link UI.Axis} is read from the supplied property, so that the slider
+     *  turns from horizontal to vertical whenever your view model says so.
      *
      * @param axis The property holding the axis the {@link JSlider} runs along.
      * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
@@ -2878,8 +2878,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
-     *  Use this to create a builder for a new {@link JSlider} instance
-     *  based on tbe provided alignment type, min slider value and max slider value.
+     *  Use this to create a builder for a new {@link JSlider} instance running
+     *  along the provided {@link UI.Axis}, with the provided minimum and maximum values.
      *
      * @param axis The axis the {@link JSlider} runs along.
      * @param min The minimum possible value of the slider.
@@ -2902,8 +2902,8 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
-     * Creates a slider with the specified alignment and the
-     * specified minimum, maximum, and initial values.
+     * Creates a slider running along the specified {@link UI.Axis}, with the
+     * specified minimum, maximum and initial values.
      *
      * @param axis The axis the {@link JSlider} runs along.
      * @param min The minimum possible value of the slider.
@@ -2928,7 +2928,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
-     * Creates a slider with the specified alignment and the
+     * Creates a slider running along the specified {@link UI.Axis}, with the
      * specified minimum, maximum, and dynamic value. <br>
      * The slider will be updated whenever the provided property changes.
      * But note that the property is of the read only {@link Val} type,
@@ -2962,7 +2962,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
-     * Creates a slider with the specified alignment and the
+     * Creates a slider running along the specified {@link UI.Axis}, with the
      * specified minimum, maximum, and dynamic value property.
      * The property will be updated whenever the user
      * moves the slider and the slider will be updated whenever
@@ -2994,7 +2994,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
-     * Creates a slider with the specified alignment and the
+     * Creates a slider running along the specified {@link UI.Axis}, with the
      * specified minimum, maximum, and value property views.
      * The min, max and value may be updated dynamically
      * when the properties change their values.
@@ -3032,7 +3032,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
-     * Creates a slider with the specified alignment and the
+     * Creates a slider running along the specified {@link UI.Axis}, with the
      * specified minimum, maximum, and value property views.
      * The min, max and value may be updated dynamically
      * when the properties change their values in your code.
@@ -3952,10 +3952,16 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
-     *  Use this to create a builder for the {@link JLabel} UI component.
+     *  Use this to create a builder for the {@link JLabel} UI component,
+     *  with the text placed at one named point of the label.
+     *  <p>
+     *  A {@link UI.Placement} sets both axes at once, so the four side constants
+     *  centre the other axis: {@link UI.Placement#TOP} puts the text at the middle
+     *  of the top edge, not merely at the top. Name a corner, such as
+     *  {@link UI.Placement#TOP_LEFT}, to pin both axes.
      *
      * @param text The text which should be displayed on the label.
-     * @param alignment The vertical and horizontal alignment of the text.
+     * @param alignment The point of the label the text sits at.
      * @return A builder instance for the label, which enables fluent method chaining.
      */
     public static UIForLabel<JLabel> label( String text, UI.Placement alignment ) {
@@ -5353,9 +5359,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to create a builder for a new {@link JProgressBar} instance with
-     *  the provided alignment, minimum and maximum values.
-     *  The alignment is a {@link UI.Axis} value, which may be either {@link UI.Axis#HORIZONTAL}
-     *  or {@link UI.Axis#VERTICAL}.
+     *  the provided axis, minimum and maximum values.
+     *  The axis is one of {@link UI.Axis#HORIZONTAL}, {@link UI.Axis#VERTICAL},
+     *  {@link UI.Axis#LINE} or {@link UI.Axis#PAGE}, where the latter two select the
+     *  horizontal and the vertical axis respectively, as {@link UI.Axis#resolve()} describes.
      *
      * @param axis The axis the progress bar runs along.
      * @param min The minimum value of the progress bar.
@@ -5369,9 +5376,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to create a builder for a new {@link JProgressBar} instance with
-     *  the provided alignment, minimum, maximum and current value.
-     *  The alignment is a {@link UI.Axis} value, which may be either {@link UI.Axis#HORIZONTAL}
-     *  or {@link UI.Axis#VERTICAL}.
+     *  the provided axis, minimum, maximum and current value.
+     *  The axis is one of {@link UI.Axis#HORIZONTAL}, {@link UI.Axis#VERTICAL},
+     *  {@link UI.Axis#LINE} or {@link UI.Axis#PAGE}, where the latter two select the
+     *  horizontal and the vertical axis respectively, as {@link UI.Axis#resolve()} describes.
      *
      * @param axis The axis the progress bar runs along.
      * @param min The minimum value of the progress bar.
@@ -5386,9 +5394,10 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to create a builder for a new {@link JProgressBar} instance with
-     *  the provided alignment, minimum, maximum and current value property dynamically bound to the progress bar.
-     *  The alignment is a {@link UI.Axis} value, which may be either {@link UI.Axis#HORIZONTAL}
-     *  or {@link UI.Axis#VERTICAL}.
+     *  the provided axis, minimum, maximum and a current value property dynamically bound to the progress bar.
+     *  The axis is one of {@link UI.Axis#HORIZONTAL}, {@link UI.Axis#VERTICAL},
+     *  {@link UI.Axis#LINE} or {@link UI.Axis#PAGE}, where the latter two select the
+     *  horizontal and the vertical axis respectively, as {@link UI.Axis#resolve()} describes.
      *
      * @param axis The axis the progress bar runs along.
      * @param min The minimum value of the progress bar.
@@ -5405,10 +5414,11 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to create a builder for a new {@link JProgressBar} instance with a default minimum and maximum value
-     *  of 0 and 100 and the provided alignment and double based progress property (a property wrapping a double value between 0 and 1)
+     *  of 0 and 100 and the provided axis and double based progress property (a property wrapping a double value between 0 and 1)
      *  dynamically bound to the progress bar.
-     *  The alignment is a {@link UI.Axis} value, which may be either {@link UI.Axis#HORIZONTAL}
-     *  or {@link UI.Axis#VERTICAL}.
+     *  The axis is one of {@link UI.Axis#HORIZONTAL}, {@link UI.Axis#VERTICAL},
+     *  {@link UI.Axis#LINE} or {@link UI.Axis#PAGE}, where the latter two select the
+     *  horizontal and the vertical axis respectively, as {@link UI.Axis#resolve()} describes.
      *
      * @param axis The axis the progress bar runs along.
      * @param progress The current progress property of the progress bar, a property wrapping a double value between 0 and 1.
@@ -5423,10 +5433,11 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to create a builder for a new {@link JProgressBar} instance with a default minimum and maximum value
-     *  of 0 and 100 and the provided alignment and double based progress property (a property wrapping a double value between 0 and 1)
+     *  of 0 and 100 and the provided axis and double based progress property (a property wrapping a double value between 0 and 1)
      *  dynamically bound to the progress bar.
-     *  The alignment is a {@link UI.Axis} value, which may be either {@link UI.Axis#HORIZONTAL}
-     *  or {@link UI.Axis#VERTICAL}.
+     *  The axis is one of {@link UI.Axis#HORIZONTAL}, {@link UI.Axis#VERTICAL},
+     *  {@link UI.Axis#LINE} or {@link UI.Axis#PAGE}, where the latter two select the
+     *  horizontal and the vertical axis respectively, as {@link UI.Axis#resolve()} describes.
      *
      * @param axis The axis the progress bar runs along.
      * @param progress The current progress property of the progress bar, a property wrapping a double value between 0 and 1.
@@ -5439,11 +5450,12 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to create a builder for a new {@link JProgressBar} instance with a default minimum and maximum value
-     *  of 0 and 100 and the provided alignment property and double based progress
+     *  of 0 and 100 and the provided axis property and double based progress
      *  property (a property wrapping a double value between 0 and 1)
      *  dynamically bound to the progress bar.
-     *  The alignment property wraps a {@link UI.Axis} value, which may be either {@link UI.Axis#HORIZONTAL}
-     *  or {@link UI.Axis#VERTICAL}.
+     *  The axis is one of {@link UI.Axis#HORIZONTAL}, {@link UI.Axis#VERTICAL},
+     *  {@link UI.Axis#LINE} or {@link UI.Axis#PAGE}, where the latter two select the
+     *  horizontal and the vertical axis respectively, as {@link UI.Axis#resolve()} describes.
      *  When any of the two properties change in your view model, the progress bar will be updated accordingly.
      *
      * @param axis The axis the progress bar runs along.

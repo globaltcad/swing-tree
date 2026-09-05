@@ -407,8 +407,18 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
      *     UI.label("Something")
      *     .peek( label -> label.setHorizontalAlignment(...); label.setVerticalAlignment(...) );
      *  }</pre>
+     *  <p>
+     *  A {@link UI.Placement} names a single point, so it sets both axes at once and
+     *  the four side constants centre the other axis: {@link UI.Placement#TOP} is the
+     *  middle of the top edge, not merely the top. Name a corner, such as
+     *  {@link UI.Placement#TOP_LEFT}, to pin both axes, or call
+     *  {@link #withHorizontalAlignment(UI.HorizontalAlignment)} and
+     *  {@link #withVerticalAlignment(UI.VerticalAlignment)} to set one axis and leave
+     *  the other alone. Those two also accept {@link UI.HorizontalAlignment#LEADING}
+     *  and {@link UI.HorizontalAlignment#TRAILING}, which {@link UI.Placement} does not
+     *  name, because it names points rather than reading directions.
      *
-     * @param alignment The alignment which should be applied to the underlying component.
+     * @param alignment The point of the label its content is aligned with.
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code alignment} is {@code null}.
      */
@@ -535,8 +545,12 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
      *     UI.label("Something")
      *         .peek( label -> label.setHorizontalTextPosition(...); label.setVerticalTextPosition(...) );
      *  }</pre>
+     *  <p>
+     *  A {@link UI.Placement} names a single point, so it sets both axes at once and the
+     *  four side constants centre the other axis: {@link UI.Placement#TOP} puts the text
+     *  above the image and horizontally centred on it, not merely above it.
      *
-     * @param alignment The alignment which should be applied to the text of the underlying component.
+     * @param alignment The point of the image the text sits at.
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code alignment} is {@code null}.
      */
