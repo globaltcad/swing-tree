@@ -88,7 +88,7 @@ class Separator_Spec extends Specification
     {
         reportInfo """
             The `separator(Val<UI.Axis>)` factory method, and equally the
-            `withOrientation(Val<UI.Axis>)` builder method, bind an alignment
+            `withOrientation(Val<UI.Axis>)` builder method, bind an axis
             property to the orientation of the separator.
             Whenever the property changes in your view model, the separator
             reorients itself automatically.
@@ -96,16 +96,16 @@ class Separator_Spec extends Specification
             dynamically, for example when the user resizes a window
             from a wide to a narrow shape.
         """
-        given : 'An alignment property, as it would exist in a view model.'
-            var alignment = Var.of(UI.Axis.HORIZONTAL)
+        given : 'An axis property, as it would exist in a view model.'
+            var axis = Var.of(UI.Axis.HORIZONTAL)
         and : 'A separator bound to the property.'
-            var separator = UI.separator(alignment).get(JSeparator)
+            var separator = UI.separator(axis).get(JSeparator)
 
         expect : 'The separator starts out with the initial orientation of the property.'
             separator.orientation == SwingConstants.HORIZONTAL
 
-        when : 'The view model changes the alignment.'
-            UI.runNow({ alignment.set(UI.Axis.VERTICAL) })
+        when : 'The view model changes the axis.'
+            UI.runNow({ axis.set(UI.Axis.VERTICAL) })
         then : 'The separator followed along.'
             separator.orientation == SwingConstants.VERTICAL
     }

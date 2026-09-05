@@ -206,8 +206,8 @@ class Progress_Bar_Spec extends Specification
     def 'Choose between a horizontal and a vertical progress bar using the `UI.Axis` enum.'()
     {
         reportInfo """
-            The `withOrientation(UI.Axis)` method, as well as various
-            alignment accepting factory methods, allow you to choose between
+            The `withOrientation(UI.Axis)` method, as well as the various
+            axis accepting factory methods, allow you to choose between
             a horizontal and a vertical progress bar.
             The `UI.Axis` enum is SwingTree's type safe alternative to the
             integer constants used by `JProgressBar.setOrientation(int)`.
@@ -247,19 +247,19 @@ class Progress_Bar_Spec extends Specification
             and percentage based progress are both bound to properties.
             When either property changes, the component updates accordingly.
         """
-        given : 'Two properties, one for the alignment and one for the progress.'
-            var alignment = Var.of(UI.Axis.HORIZONTAL)
+        given : 'Two properties, one for the axis and one for the progress.'
+            var axis = Var.of(UI.Axis.HORIZONTAL)
             var progress  = Var.of(0.1d)
         and : 'A progress bar bound to both of them.'
-            var progressBar = UI.progressBar(alignment, progress).get(JProgressBar)
+            var progressBar = UI.progressBar(axis, progress).get(JProgressBar)
 
         expect : 'Initially, the component reflects both property values.'
             progressBar.orientation == SwingConstants.HORIZONTAL
             progressBar.value       == 10
 
-        when : 'We flip the alignment and advance the progress in the view model.'
+        when : 'We flip the axis and advance the progress in the view model.'
             UI.runNow({
-                alignment.set(UI.Axis.VERTICAL)
+                axis.set(UI.Axis.VERTICAL)
                 progress.set(0.9d)
             })
         then : 'The progress bar reflects the new state.'

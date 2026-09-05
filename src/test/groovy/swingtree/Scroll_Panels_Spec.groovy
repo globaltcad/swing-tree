@@ -554,7 +554,7 @@ class Scroll_Panels_Spec extends Specification
             inner.getScrollableTracksViewportHeight() == false
     }
 
-    def 'The `UI.scrollPanels(UI.Axis, Configurator)` factory accepts a custom alignment alongside the configurator.'()
+    def 'The `UI.scrollPanels(UI.Axis, Configurator)` factory accepts a custom axis alongside the configurator.'()
     {
         reportInfo """
             Sometimes you want the scroll panels widget to lay its entries out
@@ -563,7 +563,7 @@ class Scroll_Panels_Spec extends Specification
             while still letting you tweak the `Scrollable` behavior
             through a declarative lambda.
         """
-        given : 'A horizontally aligned scroll panels widget with a custom scrollable config.'
+        given : 'A scroll panels widget stacking its entries along the horizontal axis, with a custom scrollable config.'
             var ui =
                     UI.scrollPanels(UI.Axis.HORIZONTAL, conf -> conf
                         .unitIncrement(7)
@@ -598,8 +598,8 @@ class Scroll_Panels_Spec extends Specification
         given : 'A scroll panels widget which uses a custom `ScrollIncrementSupplier`.'
             var ui =
                     UI.scrollPanels( conf -> conf
-                        .unitIncrement((rect, align, dir) -> align == UI.Axis.VERTICAL ? 11 : 33)
-                        .blockIncrement((rect, align, dir) -> align == UI.Axis.VERTICAL ? 22 : 66)
+                        .unitIncrement((rect, axis, dir) -> axis.isHorizontal() ? 33 : 11)
+                        .blockIncrement((rect, axis, dir) -> axis.isHorizontal() ? 66 : 22)
                     )
                     .add(UI.label("Alpha"))
                     .add(UI.label("Beta"))
@@ -618,7 +618,7 @@ class Scroll_Panels_Spec extends Specification
     {
         reportInfo """
             The most expressive overload of the `UI.scrollPanels` factory family
-            takes the alignment, a `Dimension` describing the shape of the
+            takes the axis, a `Dimension` describing the shape of the
             entry slots and a `Configurator` lambda for the `Scrollable`
             behavior. This is useful when you want to set a fixed entry
             shape and a custom scroll behavior at once.

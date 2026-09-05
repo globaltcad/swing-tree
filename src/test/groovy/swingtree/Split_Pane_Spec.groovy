@@ -14,7 +14,7 @@ import javax.swing.JSplitPane
 
    In this specification you can not only see how to use the Swing-Tree API to 
    create and configure split panes but also how to bind them to your view model model.
-   The layout alignment of a split pane for example can be bound to a property in your view model.
+   The axis a split pane is laid out along, for example, can be bound to a property in your view model.
 
 ''')
 @Subject([UIForSplitPane])
@@ -29,75 +29,75 @@ class Split_Pane_Spec extends Specification
         SwingTree.clear()
     }
 
-    def 'A horizontally aligned split pane can be created through the "splitPane" factory method.'()
+    def 'A split pane laid out along the horizontal axis can be created through the "splitPane" factory method.'()
     {
-        given : 'We create a horizontally aligned split pane UI node.'
+        given : 'We create a split pane UI node laid out along the horizontal axis.'
             var ui = UI.splitPane(UI.Axis.HORIZONTAL)
         and : 'We actually build the component:'
             var splitPane = ui.get(JSplitPane)
         expect : 'The split pane is a JSplitPane.'
             (splitPane instanceof JSplitPane)
-        and : 'The split pane is horizontally aligned.'
+        and : 'The split pane places its two components left and right of each other.'
             splitPane.orientation == JSplitPane.HORIZONTAL_SPLIT
     }
 
-    def 'A vertically aligned split pane can be created through the "splitPane" factory method.'()
+    def 'A split pane laid out along the vertical axis can be created through the "splitPane" factory method.'()
     {
-        given : 'We create a vertically aligned split pane UI node.'
+        given : 'We create a split pane UI node laid out along the vertical axis.'
             var ui = UI.splitPane(UI.Axis.VERTICAL)
         and : 'We actually build the component:'
             var splitPane = ui.get(JSplitPane)
         expect : 'The split pane is a JSplitPane.'
             (splitPane instanceof JSplitPane)
-        and : 'The split pane is vertically aligned.'
+        and : 'The split pane places its two components above one another.'
             splitPane.orientation == JSplitPane.VERTICAL_SPLIT
     }
 
-    def 'An alignment property can be used to dynamically model the alignment of your split pane.'()
+    def 'An `UI.Axis` property can be used to dynamically model the layout of your split pane.'()
     {
         reportInfo """
             Note that the property shown in this example would be part of your view model.
             So you can simply modify it as part of your business logic and the split pane
-            will automatically update its alignment.
+            will automatically update the axis it is laid out along.
         """
-        given : 'We create a simple view model property holding the alignment of our split pane.'
-            var alignment = Var.of(UI.Axis.HORIZONTAL)
+        given : 'We create a simple view model property holding the axis of our split pane.'
+            var axis = Var.of(UI.Axis.HORIZONTAL)
         and : 'We create a split pane UI node bound to the property.'
-            var ui = UI.splitPane(alignment)
+            var ui = UI.splitPane(axis)
         and : 'We actually build the component:'
             var splitPane = ui.get(JSplitPane)
         expect : 'The split pane is a JSplitPane.'
             (splitPane instanceof JSplitPane)
-        and : 'The split pane is horizontally aligned, meaning components are placed left to right.'
+        and : 'The split pane is laid out along the horizontal axis, meaning components are placed left to right.'
             splitPane.orientation == JSplitPane.HORIZONTAL_SPLIT
-        when : 'We change the alignment property to "VERTICAL".'
-            alignment.set(UI.Axis.VERTICAL)
+        when : 'We change the axis property to "VERTICAL".'
+            axis.set(UI.Axis.VERTICAL)
             UI.sync()
-        then : 'The split pane is vertically aligned, meaning components are placed top to bottom.'
+        then : 'The split pane is laid out along the vertical axis, meaning components are placed top to bottom.'
             splitPane.orientation == JSplitPane.VERTICAL_SPLIT
     }
 
-    def 'An alignment property can be used to dynamically model the alignment of your split pane using `withLayoutOrientation(..)`.'()
+    def 'An `UI.Axis` property can be used to dynamically model the layout of your split pane using `withLayoutOrientation(..)`.'()
     {
         reportInfo """
             Note that the property shown in this example would be part of your view model.
             So you can simply modify it as part of your business logic and the split pane
-            will automatically update its alignment.
+            will automatically update the axis it is laid out along.
         """
-        given : 'We create a simple view model property holding the alignment of our split pane.'
-            var alignment = Var.of(UI.Axis.HORIZONTAL)
+        given : 'We create a simple view model property holding the axis of our split pane.'
+            var axis = Var.of(UI.Axis.HORIZONTAL)
         and : 'We create a split pane UI node bound to the property.'
-            var ui = UI.splitPane(UI.Axis.HORIZONTAL).withLayoutOrientation(alignment)
+            var ui = UI.splitPane(UI.Axis.HORIZONTAL).withLayoutOrientation(axis)
         and : 'We actually build the component:'
             var splitPane = ui.get(JSplitPane)
         expect : 'The split pane is a JSplitPane.'
             (splitPane instanceof JSplitPane)
-        and : 'The split pane is horizontally aligned, meaning components are placed left to right.'
+        and : 'The split pane is laid out along the horizontal axis, meaning components are placed left to right.'
             splitPane.orientation == JSplitPane.HORIZONTAL_SPLIT
-        when : 'We change the alignment property to "VERTICAL".'
-            alignment.set(UI.Axis.VERTICAL)
+        when : 'We change the axis property to "VERTICAL".'
+            axis.set(UI.Axis.VERTICAL)
             UI.sync()
-        then : 'The split pane is vertically aligned, meaning components are placed top to bottom.'
+        then : 'The split pane is laid out along the vertical axis, meaning components are placed top to bottom.'
             splitPane.orientation == JSplitPane.VERTICAL_SPLIT
     }
 
@@ -119,7 +119,7 @@ class Split_Pane_Spec extends Specification
             var splitPane = ui.get(JSplitPane)
         expect : 'The split pane is a JSplitPane.'
             (splitPane instanceof JSplitPane)
-        and : 'The split pane is horizontally aligned.'
+        and : 'The split pane places its two components left and right of each other.'
             splitPane.orientation == JSplitPane.HORIZONTAL_SPLIT
         and : 'The divider size is 10.'
             splitPane.dividerSize == (int) ( 10 * uiScale )
@@ -135,7 +135,7 @@ class Split_Pane_Spec extends Specification
             var splitPane = ui.get(JSplitPane)
         expect : 'The split pane is a JSplitPane.'
             (splitPane instanceof JSplitPane)
-        and : 'The split pane is horizontally aligned, meaning its components are placed left to right.'
+        and : 'The split pane is laid out along the horizontal axis, meaning its components are placed left to right.'
             splitPane.orientation == JSplitPane.HORIZONTAL_SPLIT
         and : 'The divider location is 10.'
             splitPane.dividerLocation == 10
@@ -156,7 +156,7 @@ class Split_Pane_Spec extends Specification
                      .withDividerAt(dividerLocation)
         and : 'We actually build the component:'
             var splitPane = ui.get(JSplitPane)
-        expect : 'The split pane exists and it is indeed horizontally aligned.'
+        expect : 'The split pane exists and is indeed laid out along the horizontal axis.'
             splitPane instanceof JSplitPane
             splitPane.orientation == JSplitPane.HORIZONTAL_SPLIT
         and : 'The divider location is 10.'
@@ -168,7 +168,7 @@ class Split_Pane_Spec extends Specification
             splitPane.dividerLocation == 20
     }
 
-    def 'A vertically aligned split pane can be configured with a divider location as a percentage.'( float uiScale )
+    def 'A split pane along the vertical axis can be configured with a divider location as a percentage.'( float uiScale )
     {
         given : """
             We first set a scaling factor to simulate a platform with higher DPI.
@@ -189,7 +189,7 @@ class Split_Pane_Spec extends Specification
             var splitPane = ui.get(JSplitPane)
         expect : 'The split pane is a JSplitPane.'
             (splitPane instanceof JSplitPane)
-        and : 'The split pane is vertically aligned:'
+        and : 'The split pane is laid out along the vertical axis:'
             splitPane.orientation == JSplitPane.VERTICAL_SPLIT
         and : 'The divider location is 50 * uiScale.'
             splitPane.dividerLocation == (int) ( 50 * uiScale )
@@ -197,7 +197,7 @@ class Split_Pane_Spec extends Specification
             uiScale << [ 1.0f, 1.5f, 2.0f ]
     }
 
-    def 'A horizontally aligned split pane can be configured with a divider location as a percentage.'( float uiScale )
+    def 'A split pane along the horizontal axis can be configured with a divider location as a percentage.'( float uiScale )
     {
         given : """
             We first set a scaling factor to simulate a platform with higher DPI.
@@ -218,7 +218,7 @@ class Split_Pane_Spec extends Specification
             var splitPane = ui.get(JSplitPane)
         expect : 'The split pane is a JSplitPane.'
             (splitPane instanceof JSplitPane)
-        and : 'The split pane is horizontally aligned:'
+        and : 'The split pane is laid out along the horizontal axis:'
             splitPane.orientation == JSplitPane.HORIZONTAL_SPLIT
         and : 'The divider location is 50 * uiScale.'
             splitPane.dividerLocation == (int) ( 50 * uiScale )
@@ -250,7 +250,7 @@ class Split_Pane_Spec extends Specification
 
         and : 'We actually build the component:'
             var splitPane = ui.get(JSplitPane)
-        expect : 'The split pane exists and it is indeed a vertically aligned split pane.'
+        expect : 'The split pane exists and is indeed laid out along the vertical axis.'
             splitPane instanceof JSplitPane
             splitPane.orientation == JSplitPane.VERTICAL_SPLIT
             splitPane.dividerLocation == (int)(50 * uiScale)
@@ -291,11 +291,11 @@ class Split_Pane_Spec extends Specification
             SwingTree.get().setUiScaleFactor(uiScale)
         and : 'We create a simple view model property holding the divider size of our split pane.'
             var dividerSize = Var.of(10)
-        and : 'We create a vertically aligned split pane UI node bound to the property.'
+        and : 'We create a split pane UI node along the vertical axis, bound to the property.'
             var ui = UI.splitPane(UI.Axis.VERTICAL).withDividerSize(dividerSize)
         and : 'We actually build the component:'
             var splitPane = ui.get(JSplitPane)
-        expect : 'The split pane exists and it is indeed a vertically aligned split pane.'
+        expect : 'The split pane exists and is indeed laid out along the vertical axis.'
             splitPane instanceof JSplitPane
             splitPane.orientation == JSplitPane.VERTICAL_SPLIT
         and : 'The divider size is 10.'
