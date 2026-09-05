@@ -100,7 +100,7 @@ public final class UI extends UIFactoryMethods
                 case BOTTOM: return RESIZE_BOTTOM;
                 case RIGHT:  return RESIZE_RIGHT;
             }
-            return DEFAULT;
+            throw new RuntimeException();
         }
 
         /**
@@ -121,7 +121,7 @@ public final class UI extends UIFactoryMethods
                 case BOTTOM_RIGHT: return RESIZE_BOTTOM_RIGHT;
                 case EVERY:        return DEFAULT;
             }
-            return DEFAULT;
+            throw new RuntimeException();
         }
 
         private final int type;
@@ -159,10 +159,11 @@ public final class UI extends UIFactoryMethods
          */
         public boolean decide( boolean needed ) {
             switch ( this ) {
-                case NEVER:  return false;
-                case ALWAYS: return true;
-                default:     return needed;
+                case NEVER:     return false;
+                case ALWAYS:    return true;
+                case AS_NEEDED: return needed;
             }
+            throw new RuntimeException();
         }
     }
 
@@ -187,8 +188,9 @@ public final class UI extends UIFactoryMethods
                 case TOP:    return BOTTOM;
                 case BOTTOM: return TOP;
                 case LEFT:   return RIGHT;
-                default:     return LEFT;
+                case RIGHT:  return LEFT;
             }
+            throw new RuntimeException();
         }
 
         /**
@@ -212,8 +214,9 @@ public final class UI extends UIFactoryMethods
                 case TOP:    return Placement.TOP;
                 case LEFT:   return Placement.LEFT;
                 case BOTTOM: return Placement.BOTTOM;
-                default:     return Placement.RIGHT;
+                case RIGHT:  return Placement.RIGHT;
             }
+            throw new RuntimeException();
         }
 
         int forTabbedPane() {
@@ -607,8 +610,9 @@ public final class UI extends UIFactoryMethods
                 case TOP_TO_BOTTOM:            return BOTTOM_TO_TOP;
                 case BOTTOM_TO_TOP:            return TOP_TO_BOTTOM;
                 case LEFT_TO_RIGHT:            return RIGHT_TO_LEFT;
-                default:                       return LEFT_TO_RIGHT;
+                case RIGHT_TO_LEFT:            return LEFT_TO_RIGHT;
             }
+            throw new RuntimeException();
         }
 
         /**
@@ -832,8 +836,9 @@ public final class UI extends UIFactoryMethods
                 case BOTTOM_RIGHT: return TOP_LEFT;
                 case TOP_RIGHT:    return BOTTOM_LEFT;
                 case BOTTOM_LEFT:  return TOP_RIGHT;
-                default:           return EVERY;
+                case EVERY:        return EVERY;
             }
+            throw new RuntimeException();
         }
 
         /**
@@ -848,8 +853,9 @@ public final class UI extends UIFactoryMethods
                 case TOP_RIGHT:    return Placement.TOP_RIGHT;
                 case BOTTOM_LEFT:  return Placement.BOTTOM_LEFT;
                 case BOTTOM_RIGHT: return Placement.BOTTOM_RIGHT;
-                default:           return Placement.UNDEFINED;
+                case EVERY:        return Placement.UNDEFINED;
             }
+            throw new RuntimeException();
         }
     }
 
@@ -897,42 +903,29 @@ public final class UI extends UIFactoryMethods
             Objects.requireNonNull(vertical);
             Objects.requireNonNull(horizontal);
             Objects.requireNonNull(orientation);
-            boolean leftToRight = orientation != ComponentOrientation.RIGHT_TO_LEFT;
+            HorizontalAlignment side = _sideOf(horizontal, orientation);
+            boolean left  = ( side == HorizontalAlignment.LEFT  );
+            boolean right = ( side == HorizontalAlignment.RIGHT );
             switch ( vertical ) {
-                case TOP:
-                    switch ( horizontal ) {
-                        case LEFT:     return TOP_LEFT;
-                        case RIGHT:    return TOP_RIGHT;
-                        case LEADING:  return leftToRight ? TOP_LEFT  : TOP_RIGHT;
-                        case TRAILING: return leftToRight ? TOP_RIGHT : TOP_LEFT;
-                        default:       return TOP;
-                    }
-                case BOTTOM:
-                    switch ( horizontal ) {
-                        case LEFT:     return BOTTOM_LEFT;
-                        case RIGHT:    return BOTTOM_RIGHT;
-                        case LEADING:  return leftToRight ? BOTTOM_LEFT  : BOTTOM_RIGHT;
-                        case TRAILING: return leftToRight ? BOTTOM_RIGHT : BOTTOM_LEFT;
-                        default:       return BOTTOM;
-                    }
-                case CENTER:
-                    switch ( horizontal ) {
-                        case LEFT:     return LEFT;
-                        case RIGHT:    return RIGHT;
-                        case LEADING:  return leftToRight ? LEFT  : RIGHT;
-                        case TRAILING: return leftToRight ? RIGHT : LEFT;
-                        default:       return CENTER;
-                    }
-                default:
-                    switch ( horizontal ) {
-                        case LEFT:     return LEFT;
-                        case RIGHT:    return RIGHT;
-                        case CENTER:   return CENTER;
-                        case LEADING:  return leftToRight ? LEFT  : RIGHT;
-                        case TRAILING: return leftToRight ? RIGHT : LEFT;
-                        default:       return UNDEFINED;
-                    }
+                case TOP:       return left ? TOP_LEFT    : right ? TOP_RIGHT    : TOP;
+                case BOTTOM:    return left ? BOTTOM_LEFT : right ? BOTTOM_RIGHT : BOTTOM;
+                case CENTER:    return left ? LEFT        : right ? RIGHT        : CENTER;
+                case UNDEFINED: return left ? LEFT        : right ? RIGHT
+                                            : side == HorizontalAlignment.CENTER ? CENTER : UNDEFINED;
             }
+            throw new RuntimeException();
+        }
+
+        private static HorizontalAlignment _sideOf(
+            HorizontalAlignment  horizontal,
+            ComponentOrientation orientation
+        ) {
+            switch ( horizontal ) {
+                case LEADING:  return orientation.isLeftToRight() ? HorizontalAlignment.LEFT  : HorizontalAlignment.RIGHT;
+                case TRAILING: return orientation.isLeftToRight() ? HorizontalAlignment.RIGHT : HorizontalAlignment.LEFT;
+                case LEFT: case RIGHT: case CENTER: case UNDEFINED: return horizontal;
+            }
+            throw new RuntimeException();
         }
 
         /**
@@ -961,9 +954,10 @@ public final class UI extends UIFactoryMethods
                     return VerticalAlignment.BOTTOM;
                 case LEFT: case RIGHT: case CENTER:
                     return VerticalAlignment.CENTER;
-                default:
+                case UNDEFINED:
                     return VerticalAlignment.UNDEFINED;
             }
+            throw new RuntimeException();
         }
 
         /**
@@ -980,9 +974,10 @@ public final class UI extends UIFactoryMethods
                     return HorizontalAlignment.RIGHT;
                 case TOP: case BOTTOM: case CENTER:
                     return HorizontalAlignment.CENTER;
-                default:
+                case UNDEFINED:
                     return HorizontalAlignment.UNDEFINED;
             }
+            throw new RuntimeException();
         }
 
         /**
@@ -1000,8 +995,9 @@ public final class UI extends UIFactoryMethods
                 case BOTTOM_RIGHT: return TOP_LEFT;
                 case TOP_RIGHT:    return BOTTOM_LEFT;
                 case BOTTOM_LEFT:  return TOP_RIGHT;
-                default:           return this;
+                case CENTER: case UNDEFINED: return this;
             }
+            throw new RuntimeException();
         }
 
         /**
@@ -1010,7 +1006,8 @@ public final class UI extends UIFactoryMethods
          *          {@link #BOTTOM_LEFT} and {@link #BOTTOM_RIGHT}.
          */
         public boolean isCorner() {
-            return isOneOf(TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT);
+            return this == TOP_LEFT  || this == TOP_RIGHT
+                || this == BOTTOM_LEFT || this == BOTTOM_RIGHT;
         }
     }
 
@@ -1126,10 +1123,11 @@ public final class UI extends UIFactoryMethods
          */
         public ComponentBoundary outerBoundary() {
             switch ( this ) {
-                case INTERIOR: return ComponentBoundary.BORDER_TO_INTERIOR;
-                case BORDER: case BODY: return ComponentBoundary.EXTERIOR_TO_BORDER;
-                default: return ComponentBoundary.OUTER_TO_EXTERIOR;
+                case INTERIOR:            return ComponentBoundary.BORDER_TO_INTERIOR;
+                case BORDER: case BODY:   return ComponentBoundary.EXTERIOR_TO_BORDER;
+                case ALL: case EXTERIOR:  return ComponentBoundary.OUTER_TO_EXTERIOR;
             }
+            throw new RuntimeException();
         }
 
         /**
@@ -1145,9 +1143,10 @@ public final class UI extends UIFactoryMethods
             Objects.requireNonNull(other);
             switch ( this ) {
                 case ALL:  return true;
-                case BODY: return other.isOneOf(BODY, BORDER, INTERIOR);
-                default:   return this == other;
+                case BODY: return other == BODY || other == BORDER || other == INTERIOR;
+                case EXTERIOR: case BORDER: case INTERIOR: return this == other;
             }
+            throw new RuntimeException();
         }
     }
 
@@ -1228,8 +1227,9 @@ public final class UI extends UIFactoryMethods
                 case OUTER_TO_EXTERIOR:  return Optional.of(ComponentArea.ALL);
                 case EXTERIOR_TO_BORDER: return Optional.of(ComponentArea.BODY);
                 case BORDER_TO_INTERIOR: return Optional.of(ComponentArea.INTERIOR);
-                default:                 return Optional.empty();
+                case INTERIOR_TO_CONTENT: case CENTER_TO_CONTENT: return Optional.empty();
             }
+            throw new RuntimeException();
         }
     }
 
@@ -1243,7 +1243,18 @@ public final class UI extends UIFactoryMethods
     @Immutable
     public enum ComponentOrientation implements UIEnum<ComponentOrientation>
     {
-        UNKNOWN, LEFT_TO_RIGHT, RIGHT_TO_LEFT
+        UNKNOWN, LEFT_TO_RIGHT, RIGHT_TO_LEFT;
+
+        /**
+         *  Tells whether text and components laid out under this orientation run from
+         *  left to right, which is the question every consumer of this enum asks it.
+         *  {@link #UNKNOWN} answers {@code true}, matching
+         *  {@link java.awt.ComponentOrientation#UNKNOWN}, whose
+         *  {@link java.awt.ComponentOrientation#isLeftToRight()} also answers {@code true}.
+         *
+         * @return True for {@link #LEFT_TO_RIGHT} and {@link #UNKNOWN}.
+         */
+        public boolean isLeftToRight() { return this != RIGHT_TO_LEFT; }
     }
 
     /**
@@ -1338,8 +1349,9 @@ public final class UI extends UIFactoryMethods
             switch ( this ) {
                 case LINE: return HORIZONTAL;
                 case PAGE: return VERTICAL;
-                default:   return this;
+                case HORIZONTAL: case VERTICAL: return this;
             }
+            throw new RuntimeException();
         }
 
         /**
@@ -1369,8 +1381,9 @@ public final class UI extends UIFactoryMethods
                 case HORIZONTAL: return BoxLayout.X_AXIS;
                 case VERTICAL:   return BoxLayout.Y_AXIS;
                 case LINE:       return BoxLayout.LINE_AXIS;
-                default:         return BoxLayout.PAGE_AXIS;
+                case PAGE:       return BoxLayout.PAGE_AXIS;
             }
+            throw new RuntimeException();
         }
 
         int forSlider()      { return isHorizontal() ? JSlider.HORIZONTAL      : JSlider.VERTICAL;      }
