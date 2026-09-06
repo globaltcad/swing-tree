@@ -128,20 +128,36 @@ final class ComponentAreas
         return clipped;
     }
 
+    /**
+     *  Tells whether the box model carves the given area out of the plain component bounds.
+     *  A {@link UI.ComponentArea#BORDER} exists when a border width is positive, an
+     *  {@link UI.ComponentArea#EXTERIOR} when a margin, a base outline or a corner arc pushes
+     *  the body inward, and an {@link UI.ComponentArea#INTERIOR} or {@link UI.ComponentArea#BODY}
+     *  when either of the two does. The answer depends on the box model alone,
+     *  never on which shapes have been built so far.
+     *
+     * @param area The area to ask about.
+     * @return {@code true} when the box model gives the given area a shape of its own.
+     */
     public boolean areaExists(UI.ComponentArea area) {
         switch ( area ) {
             case BODY:
-                return _bodyArea.exists();
-            case INTERIOR:
-                return _interiorArea.exists();
-            case BORDER:
-                return _borderArea.exists();
             case EXTERIOR:
-                return _exteriorArea.exists();
+                return _bodyIsInsetFromBounds();
+            case INTERIOR:
+                return _bodyIsInsetFromBounds() || _boxModel.widths().isPositive();
+            case BORDER:
+                return _boxModel.widths().isPositive();
             case ALL:
             default:
                 return true;
         }
+    }
+
+    private boolean _bodyIsInsetFromBounds() {
+        return _boxModel.margin().isPositive()
+            || _boxModel.baseOutline().isPositive()
+            || _boxModel.hasAnyNonZeroArcs();
     }
 
     static Shape calculateComponentBodyArea(BoxModelConf state, float insTop, float insLeft, float insBottom, float insRight ) {

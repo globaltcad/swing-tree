@@ -56,16 +56,10 @@ final class StyleEngine
 
     BoxModelConf getBoxModelConf() { return _boxModelConf.get(); }
 
-    Optional<Shape> componentAreaIfCalculated( UI.ComponentArea area ) {
-        ComponentAreas _areas = ComponentAreas.of(_boxModelConf);
-        if ( _areas.areaExists(area) )
-            return Optional.ofNullable(_areas.get(area));
-        if ( area == UI.ComponentArea.BODY ) {
-            if ( _componentConf.get().style().margin().isPositive() )
-                return Optional.ofNullable(_areas.get(area));
-            if ( _componentConf.get().style().border().hasAnyNonZeroArcs() )
-                return Optional.ofNullable(_areas.get(area));
-        }
+    Optional<Shape> componentArea( UI.ComponentArea area ) {
+        ComponentAreas areas = ComponentAreas.of(_boxModelConf);
+        if ( areas.areaExists(area) )
+            return Optional.ofNullable(areas.get(area));
         return Optional.empty();
     }
 

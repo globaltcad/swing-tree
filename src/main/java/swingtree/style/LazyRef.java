@@ -27,10 +27,6 @@ final class LazyRef<T>
         return _value;
     }
 
-    final boolean exists() {
-        return _value != null;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

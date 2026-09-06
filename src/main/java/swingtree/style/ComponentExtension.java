@@ -743,13 +743,13 @@ public final class ComponentExtension<C extends JComponent>
      *  </ul>
      * @param area The area of the component to retrieve.
      * @return An optional {@link Shape} which represents the given area of the component or an empty optional.
-     *         If the area is not available, then this means that the style of the component
-     *         did not lead to the calculation of the given area. This may happen for the {@code EXTERIOR}
-     *         in case of there being no margin or corner radius, and the {@code BORDER} in case of there being
-     *         no border width.
+     *         Whether an area is available is decided by the style of the component alone,
+     *         independently of whether or how the component has been painted.
+     *         The {@code BORDER} is absent when no border width is defined, and the {@code EXTERIOR}
+     *         is absent when neither a margin nor a corner radius is defined.
      */
     public Optional<Shape> getComponentArea( UI.ComponentArea area ) {
-        Optional<Shape> areaShape = _styleEngine.componentAreaIfCalculated(area);
+        Optional<Shape> areaShape = _styleEngine.componentArea(area);
         if ( !areaShape.isPresent() ) {
             if ( area.isOneOf( UI.ComponentArea.BODY, UI.ComponentArea.ALL, UI.ComponentArea.INTERIOR) ) {
                 return Optional.of(_owner.getBounds());
@@ -1113,7 +1113,7 @@ public final class ComponentExtension<C extends JComponent>
             _styleEngine.renderBackgroundStyle(internalGraphics, parentRendering, _owner.getX(), _owner.getY());
 
             if ( lookAndFeelPainting != null ) {
-                Shape contentClip = _styleEngine.componentAreaIfCalculated(UI.ComponentArea.BODY).orElse(null);
+                Shape contentClip = _styleEngine.componentArea(UI.ComponentArea.BODY).orElse(null);
 
                 contentClip = StyleUtil.intersect( contentClip, _outerBaseClip );
 
@@ -1201,7 +1201,7 @@ public final class ComponentExtension<C extends JComponent>
                     children to be clipped by the round border (and the viewport).
                     So we use the inner component area as the clip for the children.
                 */
-                Shape localClip = StyleUtil.intersect( _styleEngine.componentAreaIfCalculated(UI.ComponentArea.BODY).orElse(formerClip), formerClip );
+                Shape localClip = StyleUtil.intersect( _styleEngine.componentArea(UI.ComponentArea.BODY).orElse(formerClip), formerClip );
                 paintWithClip(internalGraphics, localClip, ()-> superPaint.accept(internalGraphics));
             }
             else
