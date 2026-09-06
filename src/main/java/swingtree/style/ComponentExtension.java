@@ -108,11 +108,11 @@ public final class ComponentExtension<C extends JComponent>
             if ( !_isRescalingFont )
                 _rememberFontToScaleFrom();
         });
-        _localUiScaleFactor = SwingTree.get().getUiScaleView().onChange(From.ALL, it -> {
+        _localUiScaleFactor = SwingTree.get().getUiScaleView().onChange(From.ALL, it -> UI.run(() -> {
             _rescaleFont();
             gatherApplyAndInstallStyle(false);
             UI.runLater(owner::revalidate);
-        });
+        }));
         if ( _styleSource.styleSheet() != StyleSheet.none() ) {
             storeBoundObservable(_styleSource.styleSheet().observable().subscribe(this::gatherApplyAndInstallStyleConfig));
         }

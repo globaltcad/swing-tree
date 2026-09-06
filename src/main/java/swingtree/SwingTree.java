@@ -72,31 +72,47 @@ public final class SwingTree
      */
     public static void clear() {
         UI.runNow(()->{
-            if ( _INSTANCE != null && _INSTANCE.hasValue()) {
-                SwingTree swingTree = _INSTANCE.get();
-                swingTree._iconCache.clear();
-                swingTree._globalAwtBinding.values().forEach( pair ->{
-                    Toolkit.getDefaultToolkit().removeAWTEventListener(pair.first());
-                });
-                swingTree._globalAwtBinding.clear();
-                if ( swingTree._uiScale.hasValue() ) {
-                    swingTree._uiScale.get().cleanup();
-                }
-                EnterExitComponentBoundsEventDispatcher.clear(); // The singleton may hold a now outdated AWTEvent binding!
-            }
+            _disposeCurrentContext();
             _INSTANCE = null;
         });
     }
 
     /**
+     *  Detaches the current library context from everything global it registered itself with,
+     *  so that it stops receiving events and can be garbage collected once the last reference
+     *  to it is gone. This must run before the context is dropped or replaced, because a
+     *  {@link UiScale} keeps a {@link PropertyChangeListener} on the {@link UIManager} and on
+     *  its defaults table, and neither of those is replaced along with the context. A context
+     *  left attached goes on translating every {@code "defaultFont"} write into a scale factor
+     *  change for the components that were built while it was current.
+     */
+    private static void _disposeCurrentContext() {
+        if ( _INSTANCE != null && _INSTANCE.hasValue() ) {
+            SwingTree swingTree = _INSTANCE.get();
+            swingTree._iconCache.clear();
+            swingTree._globalAwtBinding.values().forEach( pair ->{
+                Toolkit.getDefaultToolkit().removeAWTEventListener(pair.first());
+            });
+            swingTree._globalAwtBinding.clear();
+            if ( swingTree._uiScale.hasValue() ) {
+                swingTree._uiScale.get().cleanup();
+            }
+            EnterExitComponentBoundsEventDispatcher.clear(); // The singleton may hold a now outdated AWTEvent binding!
+        }
+    }
+
+    /**
      *  A lazy initialization of the singleton instance of the {@link SwingTree} class
      *  causing it to be recreated the next time it is requested through {@link #get()}.<br>
+     *  The context being replaced is detached from the {@link UIManager} and the AWT
+     *  {@link Toolkit} first, so it stops reacting to font and event changes.<br>
      *  This is useful for testing purposes, also in cases where
      *  the UI scale changes (through the reference font).<br>
      *  Also see {@link #initializeUsing(SwingTreeConfigurator)}.
      */
     public static void initialize() {
         UI.runNow(()-> {
+            _disposeCurrentContext();
             _INSTANCE = new LazyRef<>(SwingTree::new);
         });
     }
@@ -106,6 +122,8 @@ public final class SwingTree
      *  causing it to be recreated the next time it is requested through {@link #get()},<br>
      *  but with a {@link SwingTreeConfigurator} that is used
      *  to configure the {@link SwingTree} instance.<br>
+     *  The context being replaced is detached from the {@link UIManager} and the AWT
+     *  {@link Toolkit} first, so it stops reacting to font and event changes.<br>
      *  This is useful for testing purposes, but also in cases where
      *  the UI scale must be initialized or changed manually (through the reference font).<br>
      *  Also see {@link #initialize()}.
@@ -115,6 +133,7 @@ public final class SwingTree
      */
     public static void initializeUsing( SwingTreeConfigurator configurator ) {
         UI.runNow(()->{
+            _disposeCurrentContext();
             _INSTANCE = new LazyRef<>(()->new SwingTree(configurator));
         });
     }
