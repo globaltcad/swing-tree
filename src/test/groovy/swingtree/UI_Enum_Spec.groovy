@@ -251,7 +251,7 @@ class UI_Enum_Spec extends Specification
         and : 'An unknown reading direction is treated as left to right, matching AWT.'
             UI.Placement.of(vertical, atTextStart, UI.ComponentOrientation.UNKNOWN) == UI.Placement.TOP_LEFT
             UI.Placement.of(vertical, atTextStart) == UI.Placement.TOP_LEFT
-            UI.ComponentOrientation.UNKNOWN.isLeftToRight()
+            UI.ComponentOrientation.UNKNOWN.isLeftToRightOrUnknown()
 
         and : 'A resolved placement never reports leading or trailing back to you, only real sides.'
             english.horizontal() == UI.HorizontalAlignment.LEFT

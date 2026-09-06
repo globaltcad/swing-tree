@@ -930,8 +930,8 @@ public final class UI extends UIFactoryMethods
             ComponentOrientation orientation
         ) {
             switch ( horizontal ) {
-                case LEADING:  return orientation.isLeftToRight() ? HorizontalAlignment.LEFT  : HorizontalAlignment.RIGHT;
-                case TRAILING: return orientation.isLeftToRight() ? HorizontalAlignment.RIGHT : HorizontalAlignment.LEFT;
+                case LEADING:  return orientation.isLeftToRightOrUnknown() ? HorizontalAlignment.LEFT  : HorizontalAlignment.RIGHT;
+                case TRAILING: return orientation.isLeftToRightOrUnknown() ? HorizontalAlignment.RIGHT : HorizontalAlignment.LEFT;
                 case LEFT: case RIGHT: case CENTER: case UNDEFINED: return horizontal;
             }
             throw new RuntimeException();
@@ -1269,7 +1269,7 @@ public final class UI extends UIFactoryMethods
          *
          * @return True for {@link #LEFT_TO_RIGHT} and {@link #UNKNOWN}.
          */
-        public boolean isLeftToRight() { return this != RIGHT_TO_LEFT; }
+        public boolean isLeftToRightOrUnknown() { return this != RIGHT_TO_LEFT; }
     }
 
     /**
