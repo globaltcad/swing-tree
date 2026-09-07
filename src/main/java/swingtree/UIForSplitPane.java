@@ -48,7 +48,8 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
      * You can also directly construct a split pane with the desired layout through the
      * {@link UI#splitPane(UI.Axis)} and {@link UI#splitPane(Val)} factory methods.
      *
-     * @param axis The axis of the components in the split pane, which determines the layout of the split pane.
+     * @param axis The axis the two components are arranged along, so {@link UI.Axis#HORIZONTAL}
+     *             places them side by side and {@link UI.Axis#VERTICAL} one above the other.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if the provided axis is null.
      */
@@ -69,7 +70,9 @@ public final class UIForSplitPane<P extends JSplitPane> extends UIForAnySwing<UI
      * You can also directly construct a split pane with the desired layout through the
      * {@link UI#splitPane(UI.Axis)} and {@link UI#splitPane(Val)} factory methods.
      *
-     * @param axis A property dynamically determining the axis of the components in the split pane, which determines the layout of the split pane.
+     * @param axis A property holding the axis the two components are arranged along, so
+     *             {@link UI.Axis#HORIZONTAL} places them side by side and
+     *             {@link UI.Axis#VERTICAL} one above the other.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code axis} is {@code null}.
      */

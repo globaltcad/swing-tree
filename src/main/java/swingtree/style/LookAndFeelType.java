@@ -9,11 +9,12 @@ import swingtree.UIEnum;
 import javax.swing.*;
 
 /**
- * Set of enum instances defining common types of Swing look and feels.
- * Use {@link LookAndFeelType#current()} to check which look and feel is currently active.<br>
- * <b>Note: This enum is deliberately package private and should stay that way.</b>
- * SwingTree consults it to work around look and feel quirks, which is an implementation
- * detail rather than something client code should branch on.
+ * Names the Swing look and feels SwingTree recognises by name, so that it can work
+ * around the quirks of each of them. {@link LookAndFeelType#current()} reports which
+ * one is installed right now.<br>
+ * <b>Note: this enum is package private and should stay that way.</b> Which look and
+ * feel is installed is something SwingTree compensates for internally; client code
+ * which branches on it hard-codes an assumption that a later release may invalidate.
  */
 @Immutable
 enum LookAndFeelType implements UIEnum<LookAndFeelType> {
@@ -24,11 +25,8 @@ enum LookAndFeelType implements UIEnum<LookAndFeelType> {
     private static final Logger log = LoggerFactory.getLogger(LookAndFeelType.class);
 
     /**
-     * SwingTree tries to be compatible with different look and feels, which is
-     * why it maintains a set of constants for the most common look and feels through
-     * the {@link LookAndFeelType} enum.
-     * This method returns the current look and feel of the application
-     * or {@link LookAndFeelType#OTHER} if the look and feel is not recognized.
+     * Reads the class name of the look and feel currently installed in the
+     * {@link UIManager} and returns the constant standing for it.
      *
      * @return One of
      * <ul>

@@ -408,13 +408,14 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
      *     .peek( label -> label.setHorizontalAlignment(...); label.setVerticalAlignment(...) );
      *  }</pre>
      *  <p>
-     *  A {@link UI.Placement} names a single point, so it sets both axes at once and
-     *  the four side constants centre the other axis: {@link UI.Placement#TOP} is the
-     *  middle of the top edge, not merely the top. Name a corner, such as
+     *  A {@link UI.Placement} names a single point, so it sets both axes at once, and the
+     *  four side constants centre the content along the axis they do not name:
+     *  {@link UI.Placement#TOP} is the middle of the top edge, so it puts the content at
+     *  the top and centres it horizontally as well. Name a corner, such as
      *  {@link UI.Placement#TOP_LEFT}, to pin both axes, or call
      *  {@link #withHorizontalAlignment(UI.HorizontalAlignment)} and
-     *  {@link #withVerticalAlignment(UI.VerticalAlignment)} to set one axis and leave
-     *  the other alone. Those two also accept {@link UI.HorizontalAlignment#LEADING}
+     *  {@link #withVerticalAlignment(UI.VerticalAlignment)} to move one axis and leave
+     *  the other where it is. Those two also accept {@link UI.HorizontalAlignment#LEADING}
      *  and {@link UI.HorizontalAlignment#TRAILING}, which {@link UI.Placement} does not
      *  name, because it names points rather than reading directions.
      *
@@ -546,9 +547,10 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
      *         .peek( label -> label.setHorizontalTextPosition(...); label.setVerticalTextPosition(...) );
      *  }</pre>
      *  <p>
-     *  A {@link UI.Placement} names a single point, so it sets both axes at once and the
-     *  four side constants centre the other axis: {@link UI.Placement#TOP} puts the text
-     *  above the image and horizontally centred on it, not merely above it.
+     *  A {@link UI.Placement} names a single point, so it sets both axes at once, and the
+     *  four side constants centre the text along the axis they do not name:
+     *  {@link UI.Placement#TOP} puts the text above the image and horizontally centred
+     *  on it.
      *
      * @param alignment The point of the image the text sits at.
      * @return This very builder to allow for method chaining.

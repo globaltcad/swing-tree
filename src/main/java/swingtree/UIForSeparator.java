@@ -45,7 +45,7 @@ public final class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UI
      * This method is a convenience method for {@link JSeparator#setOrientation(int)}
      * which receives the {@link UI.Axis} enum instead of an integer.
      *
-     * @param axis The orientation of the separator.
+     * @param axis The axis the separator line runs along.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code axis} is {@code null}.
      */
@@ -61,7 +61,7 @@ public final class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UI
      *  Binds the supplied axis property to the orientation of the separator,
      *  so that whenever the property changes, the orientation of the separator will be updated accordingly.
      *
-     * @param axis The axis property used to dynamically update the axis of the separator.
+     * @param axis A property holding the axis the separator line runs along.
      * @return This very instance, which enables builder-style method chaining.
      * @throws IllegalArgumentException if {@code axis} is {@code null}.
      */
@@ -78,10 +78,10 @@ public final class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UI
     }
 
     /**
-     *  Sets the length of the separation line either horizontally or vertically
-     *  depending on the orientation of the separator.
-     *  This method is an axis aware convenience method for
-     *  {@link JSeparator#setPreferredSize(Dimension)}.
+     *  Sets how long the separation line is, which is its width on a horizontal
+     *  separator and its height on a vertical one.
+     *  This is a convenience method for {@link JSeparator#setPreferredSize(Dimension)}
+     *  which reads the axis of the separator and sets the matching dimension.
      *
      * @param separatorLength The length of the separation line.
      * @return This very builder to allow for method chaining.
