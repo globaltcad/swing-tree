@@ -142,7 +142,7 @@ class Layout_Styling_Spec extends Specification
                         .layout(Layout.border())
                     )
                     .add(
-                        UI.slider(UI.Align.VERTICAL).withStyle( it -> it
+                        UI.slider(UI.Axis.VERTICAL).withStyle( it -> it
                             .addConstraint(BorderLayout.WEST)
                         )
                     )

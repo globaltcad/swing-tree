@@ -1114,7 +1114,7 @@ class Tab_Binding_Spec extends Specification
                             return UI.tab("T3").add(
                                         UI.panel().id("sub-3")
                                         .add(UI.label("Price:"))
-                                        .add(UI.slider(UI.Align.HORIZONTAL).withValue(price))
+                                        .add(UI.slider(UI.Axis.HORIZONTAL).withValue(price))
                                         .add(UI.button("Update").onClick( it -> price.set(2000000.0) ))
                                     )
                     case "Dummy View Model 4":
@@ -1226,7 +1226,7 @@ class Tab_Binding_Spec extends Specification
                             return UI.tab("T3").add(
                                         UI.panel().id("sub-3")
                                         .add(UI.label("Price:"))
-                                        .add(UI.slider(UI.Align.HORIZONTAL).withValue(price))
+                                        .add(UI.slider(UI.Axis.HORIZONTAL).withValue(price))
                                         .add(UI.button("Update").onClick( it -> price.set(2000000.0) ))
                                     )
                     case "Dummy View Model 4":

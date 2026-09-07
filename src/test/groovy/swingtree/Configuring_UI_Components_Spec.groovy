@@ -96,7 +96,7 @@ class Configuring_UI_Components_Spec extends Specification
             var ui =
                 UI.panel()
                 .add(
-                    UI.slider(UI.Align.HORIZONTAL).id("C1").isVisibleIf(true),
+                    UI.slider(UI.Axis.HORIZONTAL).id("C1").isVisibleIf(true),
                     UI.editorPane().id("C2").isVisibleIf(false),
                     UI.splitButton("Button").id("C3").isVisibleIfNot(true),
                     UI.toggleButton("Toggle").id("C4").isVisibleIfNot(false)

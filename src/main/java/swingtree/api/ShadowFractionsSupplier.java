@@ -23,7 +23,7 @@ import swingtree.style.ShadowConf;
  * least two fractions</b>. The renderer treats a smaller tuple as a configuration error and
  * defensively falls back to a plain linear falloff ({@code [1, 0]}) rather than failing.
  * <p>
- * <b>Please take a look at {@link swingtree.UI.ShadowType} for a rich set of
+ * <b>Please take a look at {@link swingtree.UI.ShadowFalloff} for a rich set of
  * predefined shadow falloff implementations.<br>
  * There you will most likely find a shadow type that fits your needs.</b>
  */

@@ -47,36 +47,36 @@ public final class UIForSlider<S extends JSlider> extends UIForAnySwing<UIForSli
 
     /**
      *  Sets the orientation of the slider.
-     *  @param align The orientation of the slider.
+     *  @param axis The orientation of the slider.
      *  @return This builder node.
      */
-    public final UIForSlider<S> withOrientation( UI.Align align ) {
-        NullUtil.nullArgCheck( align, "align", UI.Align.class );
+    public final UIForSlider<S> withOrientation( UI.Axis axis ) {
+        NullUtil.nullArgCheck( axis, "axis", UI.Axis.class );
         return _with( thisComponent -> {
-                   _setOrientation( thisComponent, align );
+                   _setOrientation( thisComponent, axis );
                })
                ._this();
     }
 
-    private void _setOrientation( S thisComponent, UI.Align align ) {
+    private void _setOrientation( S thisComponent, UI.Axis axis ) {
         _doWithoutListeners(thisComponent,
-            () -> thisComponent.setOrientation(align.forSlider())
+            () -> thisComponent.setOrientation(axis.forSlider())
         );
     }
 
     /**
      *  Dynamically sets the orientation of the slider.
-     *  @param align The orientation of the slider.
+     *  @param axis The orientation of the slider.
      *  @return This builder node.
      */
-    public final UIForSlider<S> withOrientation( Val<UI.Align> align ) {
-        NullUtil.nullArgCheck( align, "align", Val.class );
-        NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment" );
-        return _withOnShow( align, (thisComponent,v) -> {
-                    _setOrientation(thisComponent, align.orElseThrowUnchecked());
+    public final UIForSlider<S> withOrientation( Val<UI.Axis> axis ) {
+        NullUtil.nullArgCheck( axis, "axis", Val.class );
+        NullUtil.nullPropertyCheck( axis, "axis", "Null is not a valid axis" );
+        return _withOnShow( axis, (thisComponent,v) -> {
+                    _setOrientation(thisComponent, axis.orElseThrowUnchecked());
                })
                 ._with( thisComponent -> {
-                    _setOrientation(thisComponent, align.orElseThrowUnchecked());
+                    _setOrientation(thisComponent, axis.orElseThrowUnchecked());
                 })
                ._this();
     }

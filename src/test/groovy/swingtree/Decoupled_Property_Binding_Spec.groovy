@@ -372,7 +372,7 @@ class Decoupled_Property_Binding_Spec extends Specification
             'JTextField text'            | Var.of("Old")          | "New!"        | { p -> UI.textField(p).get(JTextField) }                                                | { c -> c.text }
             'JCheckBox selection'        | Var.of(false)          | true          | { p -> UI.checkBox("Check me", p).get(JCheckBox) }                                      | { c -> c.selected }
             'JToggleButton selection'    | Var.of(false)          | true          | { p -> UI.toggleButton("Toggle me", p).get(JToggleButton) }                             | { c -> c.selected }
-            'JSlider value'              | Var.of(10)             | 90            | { p -> UI.slider(UI.Align.HORIZONTAL).withMin(0).withMax(100).withValue(p).get(JSlider) } | { c -> c.value }
+            'JSlider value'              | Var.of(10)             | 90            | { p -> UI.slider(UI.Axis.HORIZONTAL).withMin(0).withMax(100).withValue(p).get(JSlider) } | { c -> c.value }
             'JProgressBar value'         | Var.of(10)             | 90            | { p -> UI.progressBar(0, 100, p).get(JProgressBar) }                                    | { c -> c.value }
             'JSpinner value'             | Var.of(5)              | 42            | { p -> UI.spinner(p).get(JSpinner) }                                                    | { c -> c.value }
             'JComboBox selection'        | Var.of("B")            | "C"           | { p -> UI.comboBox(p, ["A", "B", "C"]).get(JComboBox) }                                 | { c -> c.selectedItem }
@@ -814,7 +814,7 @@ class Decoupled_Property_Binding_Spec extends Specification
             var percentage = Var.of(0.5d)
             var pane = UI.runAndGet({
                 UI.use(EventProcessor.DECOUPLED, ()->
-                    UI.splitPane(UI.Align.HORIZONTAL).withDivisionOf(percentage)
+                    UI.splitPane(UI.Axis.HORIZONTAL).withDivisionOf(percentage)
                 ).get(JSplitPane)
             })
         and : 'The pane receives a concrete size, and we let the resulting resize event settle.'
@@ -901,7 +901,7 @@ class Decoupled_Property_Binding_Spec extends Specification
             var current = Var.of(0.5d)
             var slider = UI.runAndGet({
                 UI.use(EventProcessor.DECOUPLED, ()->
-                    UI.slider(UI.Align.HORIZONTAL, min, max, current)
+                    UI.slider(UI.Axis.HORIZONTAL, min, max, current)
                 ).get(JSlider)
             })
         expect : 'The knob starts out in the middle of the integer range.'

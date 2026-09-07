@@ -72,7 +72,7 @@ public class ModelledAnimationView extends Panel
             )
         )
         .add(GROW_X, label("opacity"))
-        .add(GROW_X, progressBar(Align.HORIZONTAL, borderOpacity));
+        .add(GROW_X, progressBar(Axis.HORIZONTAL, borderOpacity));
     }
 
     public static void main(String[] args) {

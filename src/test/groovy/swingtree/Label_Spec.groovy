@@ -121,7 +121,7 @@ class Label_Spec extends Specification
         when : 'We use the `withAlignment` method to create another label...'
             ui =
                 UI.label("Test2")
-                .withAlignment(UI.Alignment.TOP_RIGHT)
+                .withAlignment(UI.Placement.TOP_RIGHT)
         and : 'We build the component.'
             label = ui.get(JLabel)
 
@@ -146,7 +146,7 @@ class Label_Spec extends Specification
         when : 'We use the `withTextPosition` method to create another label...'
             ui =
                 UI.label("Test2")
-                .withTextPosition(UI.Alignment.TOP_RIGHT)
+                .withTextPosition(UI.Placement.TOP_RIGHT)
         and : 'Once again we build the component.'
             label = ui.get(JLabel)
 

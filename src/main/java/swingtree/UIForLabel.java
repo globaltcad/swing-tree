@@ -407,16 +407,27 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
      *     UI.label("Something")
      *     .peek( label -> label.setHorizontalAlignment(...); label.setVerticalAlignment(...) );
      *  }</pre>
+     *  <p>
+     *  A {@link UI.Placement} names a single point, so it sets both axes at once, and the
+     *  four side constants centre the content along the axis they do not name:
+     *  {@link UI.Placement#TOP} is the middle of the top edge, so it puts the content at
+     *  the top and centres it horizontally as well. Name a corner, such as
+     *  {@link UI.Placement#TOP_LEFT}, to pin both axes, or call
+     *  {@link #withHorizontalAlignment(UI.HorizontalAlignment)} and
+     *  {@link #withVerticalAlignment(UI.VerticalAlignment)} to move one axis and leave
+     *  the other where it is. Those two also accept {@link UI.HorizontalAlignment#LEADING}
+     *  and {@link UI.HorizontalAlignment#TRAILING}, which {@link UI.Placement} does not
+     *  name, because it names points rather than reading directions.
      *
-     * @param alignment The alignment which should be applied to the underlying component.
+     * @param alignment The point of the label its content is aligned with.
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code alignment} is {@code null}.
      */
-    public UIForLabel<L> withAlignment( UI.Alignment alignment ) {
-        NullUtil.nullArgCheck( alignment, "alignment", UI.Alignment.class );
+    public UIForLabel<L> withAlignment( UI.Placement alignment ) {
+        NullUtil.nullArgCheck( alignment, "alignment", UI.Placement.class );
         return _with( thisComponent -> {
-                    alignment.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);
-                    alignment.getVertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);
+                    alignment.horizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);
+                    alignment.vertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);
                 })
                 ._this();
     }
@@ -430,17 +441,17 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code alignment} is {@code null}.
      */
-    public UIForLabel<L> withAlignment( Val<UI.Alignment> alignment ) {
+    public UIForLabel<L> withAlignment( Val<UI.Placement> alignment ) {
         NullUtil.nullArgCheck( alignment, "alignment", Val.class );
         NullUtil.nullPropertyCheck( alignment, "alignment", "Null is not a valid alignment." );
         return _withOnShow( alignment, (thisComponent,v) -> {
-                    v.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);
-                    v.getVertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);
+                    v.horizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);
+                    v.vertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);
                 })
                 ._with( thisComponent -> {
-                    UI.Alignment a = alignment.orElseThrowUnchecked();
-                    a.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);
-                    a.getVertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);
+                    UI.Placement a = alignment.orElseThrowUnchecked();
+                    a.horizontal().forSwing().ifPresent(thisComponent::setHorizontalAlignment);
+                    a.vertical().forSwing().ifPresent(thisComponent::setVerticalAlignment);
                 })
                 ._this();
     }
@@ -535,16 +546,21 @@ public final class UIForLabel<L extends JLabel> extends UIForAnySwing<UIForLabel
      *     UI.label("Something")
      *         .peek( label -> label.setHorizontalTextPosition(...); label.setVerticalTextPosition(...) );
      *  }</pre>
+     *  <p>
+     *  A {@link UI.Placement} names a single point, so it sets both axes at once, and the
+     *  four side constants centre the text along the axis they do not name:
+     *  {@link UI.Placement#TOP} puts the text above the image and horizontally centred
+     *  on it.
      *
-     * @param alignment The alignment which should be applied to the text of the underlying component.
+     * @param alignment The point of the image the text sits at.
      * @return This very builder to allow for method chaining.
      * @throws IllegalArgumentException if {@code alignment} is {@code null}.
      */
-    public UIForLabel<L> withTextPosition( UI.Alignment alignment ) {
-        NullUtil.nullArgCheck( alignment, "alignment", UI.Alignment.class );
+    public UIForLabel<L> withTextPosition( UI.Placement alignment ) {
+        NullUtil.nullArgCheck( alignment, "alignment", UI.Placement.class );
         return _with( thisComponent -> {
-                    alignment.getHorizontal().forSwing().ifPresent(thisComponent::setHorizontalTextPosition);
-                    alignment.getVertical().forSwing().ifPresent(thisComponent::setVerticalTextPosition);
+                    alignment.horizontal().forSwing().ifPresent(thisComponent::setHorizontalTextPosition);
+                    alignment.vertical().forSwing().ifPresent(thisComponent::setVerticalTextPosition);
                 })
                 ._this();
     }

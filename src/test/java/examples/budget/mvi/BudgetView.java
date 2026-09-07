@@ -314,7 +314,7 @@ public final class BudgetView extends JPanel {
             .add(GROW_X,
                 box(FILL).withLayout("fill, ins 2 18 6 18, gap 10", "[][grow][70!]")
                 .add(label("Budget").withStyle(it -> it.componentFont(f -> f.family("SansSerif").size(12).weight(2f).color(SUBTEXT))))
-                .add(GROW_X, slider(UI.Align.HORIZONTAL, 0.0, 5000.0, budget))
+                .add(GROW_X, slider(UI.Axis.HORIZONTAL, 0.0, 5000.0, budget))
                 .add(label(budget.viewAsString(Budget::money)).withStyle(it -> it.componentFont(f -> f.family("SansSerif").size(13).weight(2f).color(INK))))
             )
             .add(GROW_X,

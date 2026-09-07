@@ -43,45 +43,45 @@ public final class UIForSeparator<S extends JSeparator> extends UIForAnySwing<UI
      * Sets the orientation of the separator which can be either
      * {@link SwingConstants#HORIZONTAL} or {@link SwingConstants#VERTICAL}.
      * This method is a convenience method for {@link JSeparator#setOrientation(int)}
-     * which receives the {@link UI.Align} enum instead of an integer.
+     * which receives the {@link UI.Axis} enum instead of an integer.
      *
-     * @param align The orientation of the separator.
+     * @param axis The axis the separator line runs along.
      * @return This very instance, which enables builder-style method chaining.
-     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     * @throws IllegalArgumentException if {@code axis} is {@code null}.
      */
-    public final UIForSeparator<S> withOrientation( UI.Align align ) {
-        NullUtil.nullArgCheck( align, "align", UI.Align.class );
+    public final UIForSeparator<S> withOrientation( UI.Axis axis ) {
+        NullUtil.nullArgCheck( axis, "axis", UI.Axis.class );
         return _with( thisComponent -> {
-                    thisComponent.setOrientation( align.forSeparator() );
+                    thisComponent.setOrientation( axis.forSeparator() );
                 })
                 ._this();
     }
 
     /**
-     *  Binds the supplied alignment property to the orientation of the separator,
+     *  Binds the supplied axis property to the orientation of the separator,
      *  so that whenever the property changes, the orientation of the separator will be updated accordingly.
      *
-     * @param align The alignment property used to dynamically update the alignment of the separator.
+     * @param axis A property holding the axis the separator line runs along.
      * @return This very instance, which enables builder-style method chaining.
-     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     * @throws IllegalArgumentException if {@code axis} is {@code null}.
      */
-    public final UIForSeparator<S> withOrientation( Val<UI.Align> align ) {
-        NullUtil.nullArgCheck( align, "align", Val.class );
-        NullUtil.nullPropertyCheck( align, "align", "Null is not a valid alignment." );
-        return _withOnShow( align, (c,v) -> {
+    public final UIForSeparator<S> withOrientation( Val<UI.Axis> axis ) {
+        NullUtil.nullArgCheck( axis, "axis", Val.class );
+        NullUtil.nullPropertyCheck( axis, "axis", "Null is not a valid axis." );
+        return _withOnShow( axis, (c,v) -> {
                     c.setOrientation( v.forSeparator() );
                 })
                 ._with( thisComponent -> {
-                    thisComponent.setOrientation( align.orElseThrowUnchecked().forSeparator() );
+                    thisComponent.setOrientation( axis.orElseThrowUnchecked().forSeparator() );
                 })
                 ._this();
     }
 
     /**
-     *  Sets the length of the separation line either horizontally or vertically
-     *  depending on the orientation of the separator.
-     *  This method is an alignment aware convenience method for
-     *  {@link JSeparator#setPreferredSize(Dimension)}.
+     *  Sets how long the separation line is, which is its width on a horizontal
+     *  separator and its height on a vertical one.
+     *  This is a convenience method for {@link JSeparator#setPreferredSize(Dimension)}
+     *  which reads the axis of the separator and sets the matching dimension.
      *
      * @param separatorLength The length of the separation line.
      * @return This very builder to allow for method chaining.

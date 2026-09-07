@@ -278,7 +278,7 @@ public final class TrainsView extends JPanel {
     /** Landscape: board and route side by side, each scrolling on its own. */
     private UIForSplitPane<JSplitPane> wideBody() {
         return
-            splitPane(UI.Align.HORIZONTAL).withDivisionOf(0.52)
+            splitPane(UI.Axis.HORIZONTAL).withDivisionOf(0.52)
             .add(boardCard(true))
             .add(routeCard(true));
     }

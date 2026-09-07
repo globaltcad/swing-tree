@@ -106,7 +106,7 @@ public final class StyleStudioView extends Panel {
             .withPrefSize(1180, 820)
             .add("growx", header(vm, canUndo, canRedo))
             .add("grow, push",
-                splitPane(Align.HORIZONTAL).withDivisionOf(0.46)
+                splitPane(Axis.HORIZONTAL).withDivisionOf(0.46)
                 .add(editor(current))
                 .add(rightTabs(vm, checkpoints, code))
             )
@@ -384,7 +384,7 @@ public final class StyleStudioView extends Panel {
                 .add("growx", checkBox("A check box", Var.of(true)))
                 .add("growx", button("Plain JButton"))
                 .add("span, growx", comboBox(Var.of("Combo box"), Tuple.of("Combo box", "Item B", "Item C")))
-                .add("span, growx", slider(Align.HORIZONTAL, 0, 100).withValue(45))
+                .add("span, growx", slider(Axis.HORIZONTAL, 0, 100).withValue(45))
                 .add("span, growx", textField("Plain JTextField"))
             )
             // ── A list ──
@@ -463,14 +463,14 @@ public final class StyleStudioView extends Panel {
     private static UIForPanel<JPanel> intRow(String name, Var<Integer> value, int min, int max) {
         return panel("fillx, ins 0", "[90::][grow][36!]").withStyle(it -> it.backgroundColor(new Color(0,0,0,0)))
             .add(label(name + ":"))
-            .add("growx", slider(Align.HORIZONTAL, min, max, value))
+            .add("growx", slider(Axis.HORIZONTAL, min, max, value))
             .add(label(value.viewAsString()));
     }
 
     private static UIForPanel<JPanel> dblRow(String name, Var<Double> value, double min, double max) {
         return panel("fillx, ins 0", "[90::][grow][36!]").withStyle(it -> it.backgroundColor(new Color(0,0,0,0)))
             .add(label(name + ":"))
-            .add("growx", slider(Align.HORIZONTAL, min, max, value))
+            .add("growx", slider(Axis.HORIZONTAL, min, max, value))
             .add(label(value.viewAsString(d -> String.format("%.2f", d))));
     }
 

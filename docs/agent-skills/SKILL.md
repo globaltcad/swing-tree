@@ -104,8 +104,8 @@ Rules of `.add(..)`:
 | `label(text)`, `html("<h1>..</h1>")` | `JLabel` (html(..) renders HTML) |
 | `button(text)`, `toggleButton(text)`, `checkBox(text)`, `radioButton(text)` | buttons |
 | `textField(text)`, `textArea(text)`, `passwordField()`, `numericTextField(var)` | text inputs |
-| `comboBox(...)`, `slider(Align, min, max)`, `spinner(...)`, `progressBar(...)` | value pickers |
-| `separator()`, `scrollPane()`, `scrollPanels()`, `splitPane(Align)`, `tabbedPane()` | structure |
+| `comboBox(...)`, `slider(Axis, min, max)`, `spinner(...)`, `progressBar(...)` | value pickers |
+| `separator()`, `scrollPane()`, `scrollPanels()`, `splitPane(Axis)`, `tabbedPane()` | structure |
 | `table(Var<TableData>)`, `table()`, `tree(Var<N>, conf)`, `trees(Var<Tuple<N>>, conf)`, `list(...)`, `menu(...)`, `menuItem(...)`, `splitButton(text)` | data / menus (bind a `TableData` value — see §10; a tree binds one nested value, a *forest* a tuple of them — see §10) |
 | `icon(path)`, `icon(w,h,path)` | `JIcon` (supports SVG, see §10) |
 
@@ -170,6 +170,44 @@ Per-child constants: `GROW`, `GROW_X`, `GROW_Y`, `PUSH`, `PUSH_X`, `PUSH_Y`, `SP
 
 String constraints and constants are interchangeable — pick whichever reads
 clearer locally. (Examples in this codebase mix both freely.)
+
+### The geometry enums (`UI.Axis`, `UI.Placement`, and friends)
+
+Wherever Swing wants an `int` constant, SwingTree wants one of these. They are
+the vocabulary the whole API shares, so learn them once:
+
+- **`UI.Axis`** — `HORIZONTAL`, `VERTICAL`, `LINE`, `PAGE`. Which way a thing
+  runs: `slider(Axis)`, `progressBar(Axis, ..)`, `separator(Axis)`,
+  `splitPane(Axis)`, `toolBar(Axis)`, `scrollPanels(Axis, ..)`,
+  `Layout.box(Axis)`, `withBoxLayout(Axis)`. `LINE` and `PAGE` follow the
+  container's `ComponentOrientation`, but only a `BoxLayout` acts on that
+  difference; every other component calls `Axis.resolve()` and so reads `LINE`
+  as `HORIZONTAL` and `PAGE` as `VERTICAL`.
+- **`UI.Placement`** — `UNDEFINED`, the four corners (`TOP_LEFT` …), the middle
+  of the four sides (`TOP`, `LEFT`, `BOTTOM`, `RIGHT`) and `CENTER`. One named
+  point of a rectangle: `img.placement(..)`, `text.placement(..)`,
+  `SvgIcon.withPreferredPlacement(..)`, `label(text, Placement)`,
+  `withAlignment(..)`, `withTextPosition(..)`, `fontAlignment(..)`.
+  Careful: `Placement.TOP` is the *middle* of the top edge, so aligning a label
+  with it also centres the label horizontally. Use `Placement.TOP_LEFT` to pin
+  both axes.
+- **`UI.Side`** (`TOP`/`LEFT`/`BOTTOM`/`RIGHT`) picks an edge to dock to, e.g.
+  `tabbedPane(Side.LEFT)`. **`UI.Edge`** picks an edge to draw on
+  (`borderAt(Edge.TOP, 1, color)`), **`UI.Corner`** picks a corner to round
+  (`borderRadiusAt(Corner.TOP_LEFT, w, h)`, plus `Corner.EVERY`).
+- **`UI.Span`** names the direction a gradient travels — either side to side
+  (`LEFT_TO_RIGHT`, `TOP_TO_BOTTOM`, …) or corner to corner
+  (`TOP_LEFT_TO_BOTTOM_RIGHT`, …).
+- **`UI.ComponentArea`** (`ALL`, `EXTERIOR`, `BORDER`, `INTERIOR`, `BODY`) names
+  a *region* of the box model and **`UI.ComponentBoundary`**
+  (`OUTER_TO_EXTERIOR` … `CENTER_TO_CONTENT`) names the *line* between two
+  regions. `clipTo(..)` and `parentFilter(f -> f.area(..))` take an area;
+  `gradient(g -> g.boundary(..))` takes a boundary.
+
+Each of these carries small helper methods so you rarely have to write a switch
+over them yourself — `Axis.perpendicular()`, `Side.opposite()`,
+`Placement.opposite()`, `Span.reversed()`, `Cursor.resizeAt(Side)`,
+`Active.decide(boolean)`, `FontStyle.withBold(boolean)`.
 
 ### 2c. Convergence — a SwingTree view is expected to survive any window shape
 
@@ -348,7 +386,7 @@ layout.set(Layout.mig("fill, wrap 2").withChildConstraints(
 ```
 
 `Layout` factories: `Layout.mig(constraints)`, `Layout.flow(FlowCell...)`,
-`Layout.border()`, `Layout.grid(rows,cols)`, `Layout.box(UI.Axis.X)`,
+`Layout.border()`, `Layout.grid(rows,cols)`, `Layout.box(UI.Axis.HORIZONTAL)`,
 `Layout.none()` (absolute positioning — `setLayout(null)`), `Layout.unspecific()`
 (no-op, leaves current manager alone). `withChildConstraints(...)` maps
 positionally to children. This is how `SalesDashboard`, `AlmanackView` and
@@ -424,10 +462,10 @@ Pass the property to the factory and the binding is automatic and bidirectional:
 ```java
 textField(name)                 // user typing -> name.set(..); name.set(..) -> field text
 checkBox("Agree", ok)           // toggling <-> ok
-slider(Align.HORIZONTAL, 0.0, 1.0, ratio)   // generic over Number: int OR double
+slider(Axis.HORIZONTAL, 0.0, 1.0, ratio)   // generic over Number: int OR double
 comboBox(selectedEnum, e -> prettyLabel(e)) // selection <-> Var<MyEnum>
 label(name)                     // one-way: label text follows name
-progressBar(Align.HORIZONTAL, ratioVal)     // one-way Val<Double> 0..1
+progressBar(Axis.HORIZONTAL, ratioVal)     // one-way Val<Double> 0..1
 ```
 
 Flags bind through `isXyzIf(Val<Boolean>)`:
@@ -877,7 +915,10 @@ Frequently used delegate methods (all chainable, all DPI/HiDPI aware):
 
 - Box: `margin`, `padding`, `borderRadius`, `borderRadiusAt(Corner, w, h)`, `border`, `borderAt(Edge, w, color)`, `prefSize`, `size`.
 - Fill: `backgroundColor` / `foundationColor`, `foregroundColor`, `gradient(...)`, `noise(...)`, `image(img -> ...)`.
-- Shadow: `shadowColor`, `shadowBlurRadius`, `shadowSpreadRadius`, `shadowOffset`, `shadowIsInset`. Named shadows: `.shadow("name", s -> s.color(..).offset(..))`.
+- Shadow: `shadowColor`, `shadowBlurRadius`, `shadowSpreadRadius`, `shadowOffset`, `shadowIsInset`,
+  `shadowFalloff(UI.ShadowFalloff)` — the curve the shadow fades along: `BLUR` (the default, a
+  Gaussian edge), `FLAT`, `PENUMBRA` (an area light), `CONTACT`, `GLOW`. Named shadows:
+  `.shadow("name", s -> s.color(..).offset(..).falloff(..))`.
 - Layered painting: `.painter(Layer.CONTENT, g -> ...)` for raw `Graphics2D`.
 - `component()` returns the live component, so you can branch on its state (e.g. `it.component().isSelected()`). **Deprecated for reading geometry** — its sizes are in *component pixels* and double-scale if fed back in; use `componentWidth/Height()` / `componentPrefWidth/Height()` instead (§13).
 
@@ -1396,7 +1437,7 @@ deliberately resets the icon to flexible. While a dimension is unknown, two
 policies control rendering: `UI.FitComponent` — `NO`, `WIDTH`, `HEIGHT`,
 `WIDTH_AND_HEIGHT` (these three may distort), `MIN_DIM`/`MAX_DIM` (fit
 smaller/larger dimension, keep aspect ratio — usually what you want) — and
-`UI.Placement` (`CENTER`, `TOP_LEFT`, … 9 positions). `.getImage()` rasterizes
+`UI.Placement` (`CENTER`, `TOP_LEFT`, … 9 positions, see §2). `.getImage()` rasterizes
 to a `BufferedImage` (loses scalability — visibly blurry when stretched).
 
 **Style API images:** `.image(img -> img.svg(svgText).fitMode(..).placement(..))`

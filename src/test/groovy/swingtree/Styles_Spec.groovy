@@ -160,7 +160,7 @@ class Styles_Spec extends Specification
                                     .borderWidths(1, 2, 3, 4)
                                     .borderRadius(12, 18)
                                     .shadowColor("yellow")
-                                    .shadowType(UI.ShadowType.FLAT)
+                                    .shadowFalloff(UI.ShadowFalloff.FLAT)
                                     .fontSelectionColor("cyan")
                                     .fontColor("magenta")
                                     .fontFamily("Times New Roman")
@@ -228,7 +228,7 @@ class Styles_Spec extends Specification
                                                     "spreadRadius=0, " +
                                                     "color=rgba(255,255,0,255), " +
                                                     "isInset=false, " +
-                                                    "type=FLAT" +
+                                                    "falloff=FLAT" +
                                                 "], " +
                                                 "painters=PainterConf[NONE], " +
                                                 "gradients=GradientConf[NONE], " +
@@ -248,7 +248,7 @@ class Styles_Spec extends Specification
             var transform = AffineTransform.getRotateInstance(0.5)
             style = ComponentExtension.from(
                                 UI.of(new JSpinner()).withStyle(conf->conf
-                                    .fontAlignment(UI.Alignment.CENTER)
+                                    .fontAlignment(UI.Placement.CENTER)
                                     .fontBackgroundColor("cyan")
                                     .fontBackgroundColor(new Color(0, 42, 42, 42))
                                     .fontBackgroundPaint(paint1)
@@ -872,7 +872,7 @@ class Styles_Spec extends Specification
                             .shadow("y", {it.color("dark red").isOutset(true)})
                             .shadow("e", {it.color("rgba(0.1,1,0.7,0%)")})
                             .shadow("f", {it.color(UI.Color.UNDEFINED).isOutset(false)})
-                            .shadowType(UI.ShadowType.FLAT)
+                            .shadowFalloff(UI.ShadowFalloff.FLAT)
                         )
                         .get(JLabel)
         expect : """
@@ -898,7 +898,7 @@ class Styles_Spec extends Specification
                                         "spreadRadius=0, " +
                                         "color=rgba(0,0,255,255), " +
                                         "isInset=false, " +
-                                        "type=FLAT" +
+                                        "falloff=FLAT" +
                                     "], " +
                                     "y=ShadowConf[" +
                                         "horizontalOffset=0, " +
@@ -907,7 +907,7 @@ class Styles_Spec extends Specification
                                         "spreadRadius=0, " +
                                         "color=rgba(179,0,0,255), " +
                                         "isInset=false, " +
-                                        "type=FLAT" +
+                                        "falloff=FLAT" +
                                     "]" +
                                 "], " +
                                 "painters=PainterConf[NONE], " +

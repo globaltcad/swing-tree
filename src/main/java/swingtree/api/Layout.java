@@ -457,8 +457,8 @@ public interface Layout
      *  {@link BoxLayout}.
      *
      * @param axis The axis for the layout, which has to be one of <ul>
-     *                 <li>{@link UI.Axis#X}</li>
-     *                 <li>{@link UI.Axis#Y}</li>
+     *                 <li>{@link UI.Axis#HORIZONTAL}</li>
+     *                 <li>{@link UI.Axis#VERTICAL}</li>
      *                 <li>{@link UI.Axis#LINE}</li>
      *                 <li>{@link UI.Axis#PAGE}</li>
      *             </ul>
@@ -471,7 +471,7 @@ public interface Layout
 
     /**
      *  A factory method for creating a layout that installs the {@link BoxLayout}
-     *  onto a component with a default axis of {@link UI.Axis#X}.
+     *  onto a component with a default axis of {@link UI.Axis#HORIZONTAL}.
      *
      * @return A layout that installs the default {@link BoxLayout} onto a component.
      */

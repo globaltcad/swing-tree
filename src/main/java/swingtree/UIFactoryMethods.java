@@ -987,24 +987,24 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  responsible for building a {@link JSeparator} by exposing helpful utility methods for it.
      *  This is in essence a convenience method for {@code UI.of(new JSeparator(JSeparator.VERTICAL))}.
      *
-     * @param align The alignment of the separator which may either be horizontal or vertical.
+     * @param axis The axis the separator runs along, which is horizontal or vertical.
      * @return A {@link UIForSeparator} UI builder instance which wraps the {@link JSeparator} and exposes helpful methods.
      */
-    public static UIForSeparator<JSeparator> separator( UI.Align align ) {
-        NullUtil.nullArgCheck(align, "align", UI.Align.class);
-        return separator().withOrientation(align);
+    public static UIForSeparator<JSeparator> separator( UI.Axis axis ) {
+        NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
+        return separator().withOrientation(axis);
     }
 
     /**
      *  Use this to create a swing tree builder node for the {@link JSeparator} whose
-     *  alignment is dynamically determined based on a provided property.
+     *  axis is dynamically determined based on a provided property.
      *
-     * @param align The alignment property of the separator which may either be horizontal or vertical.
+     * @param axis The property holding the axis the separator runs along.
      * @return A {@link UIForSeparator} UI builder instance which wraps the {@link JSeparator} and exposes helpful methods.
      */
-    public static UIForSeparator<JSeparator> separator( Val<UI.Align> align ) {
-        NullUtil.nullArgCheck(align, "align", Val.class);
-        return separator().withOrientation(align);
+    public static UIForSeparator<JSeparator> separator( Val<UI.Axis> axis ) {
+        NullUtil.nullArgCheck(axis, "axis", Val.class);
+        return separator().withOrientation(axis);
     }
 
     /**
@@ -2424,15 +2424,15 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  A factory method for creating a {@link JToolBar} instance where
-     *  the provided {@link UI.Align} enum defines the orientation of the {@link JToolBar}.
+     *  the provided {@link UI.Axis} enum defines the orientation of the {@link JToolBar}.
      *
-     * @param align The {@link UI.Align} enum which defines the orientation of the {@link JToolBar}.
+     * @param axis The {@link UI.Axis} enum which defines the orientation of the {@link JToolBar}.
      * @return A builder instance for the provided {@link JToolBar}, which enables fluent method chaining.
-     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     * @throws IllegalArgumentException if {@code axis} is {@code null}.
      */
-    public static UIForToolBar<JToolBar> toolBar( UI.Align align ) {
-        NullUtil.nullArgCheck(align, "align", UI.Align.class);
-        return toolBar().withOrientation(align);
+    public static UIForToolBar<JToolBar> toolBar( UI.Axis axis ) {
+        NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
+        return toolBar().withOrientation(axis);
     }
 
     /**
@@ -2440,13 +2440,13 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  the provided {@link Val} property dynamically defines
      *  the orientation of the {@link JToolBar}
      *
-     * @param align The {@link Val} property which dynamically defines the orientation of the {@link JToolBar}.
+     * @param axis The {@link Val} property which dynamically defines the orientation of the {@link JToolBar}.
      * @return A builder instance for the provided {@link JToolBar}, which enables fluent method chaining.
-     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     * @throws IllegalArgumentException if {@code axis} is {@code null}.
      */
-    public static UIForToolBar<JToolBar> toolBar( Val<UI.Align> align ) {
-        NullUtil.nullArgCheck(align, "align", Val.class);
-        return toolBar().withOrientation(align);
+    public static UIForToolBar<JToolBar> toolBar( Val<UI.Axis> axis ) {
+        NullUtil.nullArgCheck(axis, "axis", Val.class);
+        return toolBar().withOrientation(axis);
     }
 
     /**
@@ -2566,7 +2566,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance for a new {@link JScrollPanels}, which enables fluent method chaining.
      */
     public static UIForScrollPanels<JScrollPanels> scrollPanels() {
-        return new UIForScrollPanels<>(new BuilderState<>(JScrollPanels.class, ()->JScrollPanels.of(UI.Align.VERTICAL, new Dimension(100,100))));
+        return new UIForScrollPanels<>(new BuilderState<>(JScrollPanels.class, ()->JScrollPanels.of(UI.Axis.VERTICAL, new Dimension(100,100))));
     }
 
     /**
@@ -2574,18 +2574,18 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  This is in essence a convenience method for {@code UI.of(new JScrollPanels())}. <br>
      *  Here is an example of a simple scroll panel with a text area inside:
      *  <pre>{@code
-     *      UI.scrollPanels(UI.Align.HORIZONTAL)
+     *      UI.scrollPanels(UI.Axis.HORIZONTAL)
      *      .withScrollBarPolicy(UI.Scroll.NEVER)
      *      .add(UI.textArea("I am a text area with this text inside."))
      *      .add(UI.label("I am a label!"))
      *      .add(UI.button("I am a button! Click me!"))
      *  }</pre>
      *
-     * @param align The alignment of the scroll panels.
+     * @param axis The axis the scroll panels are stacked along.
      * @return A builder instance for a new {@link JScrollPanels}, which enables fluent method chaining.
      */
-    public static UIForScrollPanels<JScrollPanels> scrollPanels( UI.Align align ) {
-        return new UIForScrollPanels<>(new BuilderState<>(JScrollPanels.class, ()->JScrollPanels.of(align, null)));
+    public static UIForScrollPanels<JScrollPanels> scrollPanels( UI.Axis axis ) {
+        return new UIForScrollPanels<>(new BuilderState<>(JScrollPanels.class, ()->JScrollPanels.of(axis, null)));
     }
 
     /**
@@ -2593,19 +2593,19 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  This is in essence a convenience method for {@code UI.of(new JScrollPanels())}. <br>
      *  Here is an example of a simple scroll panel with a text area inside:
      *  <pre>{@code
-     *      UI.scrollPanels(UI.Align.HORIZONTAL, new Dimension(100,100))
+     *      UI.scrollPanels(UI.Axis.HORIZONTAL, new Dimension(100,100))
      *      .withScrollBarPolicy(UI.Scroll.NEVER)
      *      .add(UI.textArea("I am a text area with this text inside."))
      *      .add(UI.label("I am a label!"))
      *      .add(UI.button("I am a button! Click me!"))
      *  }</pre>
      *
-     * @param align The alignment of the scroll panels.
+     * @param axis The axis the scroll panels are stacked along.
      * @param size The size of the scroll panels.
      * @return A builder instance for a new {@link JScrollPanels}, which enables fluent method chaining.
      */
-    public static UIForScrollPanels<JScrollPanels> scrollPanels(UI.Align align, Dimension size) {
-        return new UIForScrollPanels<>(new BuilderState<>(JScrollPanels.class, ()->JScrollPanels.of(align, size)));
+    public static UIForScrollPanels<JScrollPanels> scrollPanels(UI.Axis axis, Dimension size) {
+        return new UIForScrollPanels<>(new BuilderState<>(JScrollPanels.class, ()->JScrollPanels.of(axis, size)));
     }
 
     /**
@@ -2640,19 +2640,19 @@ public abstract class UIFactoryMethods extends UILayoutConstants
         Configurator<ScrollableComponentDelegate> configurator
     ) {
         Objects.requireNonNull(configurator);
-        return new UIForScrollPanels<>(new BuilderState<>(JScrollPanels.class, ()->JScrollPanels.of(UI.Align.VERTICAL, new Dimension(100,100), configurator)));
+        return new UIForScrollPanels<>(new BuilderState<>(JScrollPanels.class, ()->JScrollPanels.of(UI.Axis.VERTICAL, new Dimension(100,100), configurator)));
     }
 
     /**
      *  Allows you to create a declarative builder for the {@link JScrollPanels} component type,
-     *  with a custom alignment and a configurator which defines how the internal entry container
+     *  with a custom axis and a configurator which defines how the internal entry container
      *  of the scroll panels should behave in the scroll pane viewport. <br>
      *  The configurator receives a {@link ScrollableComponentDelegate} on which you can define
      *  properties like the preferred viewport size, unit increment, block increment, and whether
      *  the entry container should fit the width or height of the viewport. <br>
      *  Here is a usage example:
      *  <pre>{@code
-     *  UI.scrollPanels(UI.Align.HORIZONTAL, conf -> conf
+     *  UI.scrollPanels(UI.Axis.HORIZONTAL, conf -> conf
      *      .unitIncrement(20)
      *      .blockIncrement(60)
      *      .fitHeight(true)
@@ -2662,30 +2662,30 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  .add(UI.label("Rightmost entry"))
      *  }</pre>
      *
-     * @param align        The alignment of the scroll panels.
+     * @param axis        The axis the scroll panels are stacked along.
      * @param configurator A configurator for configuring the scrollable behavior of
      *                     the entry container of the scroll panels.
      * @return A builder instance for a new {@link JScrollPanels}, which enables fluent method chaining.
      */
     public static UIForScrollPanels<JScrollPanels> scrollPanels(
-        UI.Align align,
+        UI.Axis axis,
         Configurator<ScrollableComponentDelegate> configurator
     ) {
-        Objects.requireNonNull(align);
+        Objects.requireNonNull(axis);
         Objects.requireNonNull(configurator);
-        return new UIForScrollPanels<>(new BuilderState<>(JScrollPanels.class, ()->JScrollPanels.of(align, null, configurator)));
+        return new UIForScrollPanels<>(new BuilderState<>(JScrollPanels.class, ()->JScrollPanels.of(axis, null, configurator)));
     }
 
     /**
      *  Allows you to create a declarative builder for the {@link JScrollPanels} component type,
-     *  with a custom alignment, a fixed entry shape and a configurator which defines how the
+     *  with a custom axis, a fixed entry shape and a configurator which defines how the
      *  internal entry container of the scroll panels should behave in the scroll pane viewport. <br>
      *  The configurator receives a {@link ScrollableComponentDelegate} on which you can define
      *  properties like the preferred viewport size, unit increment, block increment, and whether
      *  the entry container should fit the width or height of the viewport. <br>
      *  Here is a usage example:
      *  <pre>{@code
-     *  UI.scrollPanels(UI.Align.VERTICAL, new Dimension(200, 50), conf -> conf
+     *  UI.scrollPanels(UI.Axis.VERTICAL, new Dimension(200, 50), conf -> conf
      *      .unitIncrement(25)
      *      .blockIncrement(75)
      *      .fitWidth(true)
@@ -2695,21 +2695,21 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  .add(UI.label("Bottom entry"))
      *  }</pre>
      *
-     * @param align        The alignment of the scroll panels.
+     * @param axis        The axis the scroll panels are stacked along.
      * @param size         The size of the scroll panels' entries.
      * @param configurator A configurator for configuring the scrollable behavior of
      *                     the entry container of the scroll panels.
      * @return A builder instance for a new {@link JScrollPanels}, which enables fluent method chaining.
      */
     public static UIForScrollPanels<JScrollPanels> scrollPanels(
-        UI.Align align,
+        UI.Axis axis,
         Dimension size,
         Configurator<ScrollableComponentDelegate> configurator
     ) {
-        Objects.requireNonNull(align);
+        Objects.requireNonNull(axis);
         Objects.requireNonNull(size);
         Objects.requireNonNull(configurator);
-        return new UIForScrollPanels<>(new BuilderState<>(JScrollPanels.class, ()->JScrollPanels.of(align, size, configurator)));
+        return new UIForScrollPanels<>(new BuilderState<>(JScrollPanels.class, ()->JScrollPanels.of(axis, size, configurator)));
     }
 
     /**
@@ -2727,37 +2727,39 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to create a builder for a new {@link JSplitPane} instance
-     *  based on the provided {@link swingtree.UI.Align} enum constant.
-     *  The constant can either be {@code UI.Align.HORIZONTAL} or {@code UI.Align.VERTICAL}, and it <br>
-     *  refers to the layout of the two components in the split pane to either be
-     *  placed left to right (horizontal split) or on top of each other (vertical split).
+     *  based on the provided {@link swingtree.UI.Axis} enum constant.
+     *  The axis refers to the layout of the two components in the split pane, which are
+     *  either placed left to right (a horizontal axis) or on top of each other (a vertical one).
+     *  {@link swingtree.UI.Axis#LINE} and {@link swingtree.UI.Axis#PAGE} select the horizontal
+     *  and the vertical axis respectively, as {@link swingtree.UI.Axis#resolve()} describes.<br>
      *  You can create a simple split pane based UI like so: <br>
      *  <pre>{@code
-     *      UI.splitPane(UI.Align.HORIZONTAL) // The split bar is along the vertical axis!
+     *      UI.splitPane(UI.Axis.HORIZONTAL) // The split bar is along the vertical axis!
      *      .withDividerAt(50)
      *      .add(UI.panel().add(...)) // left
      *      .add(UI.scrollPane().add(...)) // right
      *  }</pre>
      *
-     * @param align The layout alignment determining if the {@link JSplitPane} components are placed left to right (horizontal split) or on top of each other (vertical split).
+     * @param axis The axis determining if the {@link JSplitPane} components are placed left to right (horizontal split) or on top of each other (vertical split).
      * @return A builder instance for the provided {@link JSplitPane}, which enables fluent method chaining.
-     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     * @throws IllegalArgumentException if {@code axis} is {@code null}.
      */
-    public static UIForSplitPane<JSplitPane> splitPane( UI.Align align ) {
-        NullUtil.nullArgCheck(align, "align", UI.Align.class);
-        return new UIForSplitPane<>(new BuilderState<>(JSplitPane.class, ()->new UI.SplitPane(align)))
-                .withLayoutOrientation(align);
+    public static UIForSplitPane<JSplitPane> splitPane( UI.Axis axis ) {
+        NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
+        return new UIForSplitPane<>(new BuilderState<>(JSplitPane.class, ()->new UI.SplitPane(axis)))
+                .withLayoutOrientation(axis);
     }
 
     /**
      *  Use this to create a builder for a new {@link JSplitPane} instance
-     *  based on the provided {@link Val} property containing a {@link swingtree.UI.Align} enum constant.
-     *  The constant can either be {@code UI.Align.HORIZONTAL} or {@code UI.Align.VERTICAL}, and it <br>
-     *  refers to the layout of the two components in the split pane to either be
-     *  placed left to right (horizontal split) or on top of each other (vertical split).
+     *  based on the provided {@link Val} property containing a {@link swingtree.UI.Axis} enum constant.
+     *  The axis refers to the layout of the two components in the split pane, which are
+     *  either placed left to right (a horizontal axis) or on top of each other (a vertical one).
+     *  {@link swingtree.UI.Axis#LINE} and {@link swingtree.UI.Axis#PAGE} select the horizontal
+     *  and the vertical axis respectively, as {@link swingtree.UI.Axis#resolve()} describes.<br>
      *  You can create a simple split pane based UI like so: <br>
      *  <pre>{@code
-     *    UI.splitPane(viewModel.getAlignment())
+     *    UI.splitPane(viewModel.getSplitAxis())
      *    .withDividerAt(50)
      *    .add(UI.panel().add(...)) // left or top
      *    .add(UI.scrollPane().add(...)) // right or bottom
@@ -2766,20 +2768,20 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *  The split pane will be updated whenever the provided property changes.
      *  This allows you to dynamically change the layout of the split pane at runtime by changing
      *  the value of the supplied property. For example, you could have a simple toggle button that switches
-     *  the value of the property between the two alignments.
+     *  the value of the property between the two axes.
      *  <br>
      *  <b>Note:</b> The supplied property must not be {@code null} and it must never contain any {@code null} values!
      *  Otherwise, an {@link IllegalArgumentException} will be thrown.
      *  <br>
-     * @param align The layout alignment property determining if the {@link JSplitPane} components are placed left to right (horizontal split) or on top of each other (vertical split).
+     * @param axis The property holding the axis determining if the {@link JSplitPane} components are placed left to right (horizontal split) or on top of each other (vertical split).
      * @return A builder instance for the provided {@link JSplitPane}, which enables fluent method chaining.
-     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     * @throws IllegalArgumentException if {@code axis} is {@code null}.
      */
-    public static UIForSplitPane<JSplitPane> splitPane( Val<UI.Align> align ) {
-        NullUtil.nullArgCheck(align, "align", Val.class);
-        NullUtil.nullPropertyCheck(align, "align", "Null is not a valid alignment.");
-        return new UIForSplitPane<>(new BuilderState<>(JSplitPane.class, ()->new UI.SplitPane(align.get())))
-                .withLayoutOrientation(align);
+    public static UIForSplitPane<JSplitPane> splitPane( Val<UI.Axis> axis ) {
+        NullUtil.nullArgCheck(axis, "axis", Val.class);
+        NullUtil.nullPropertyCheck(axis, "axis", "Null is not a valid axis.");
+        return new UIForSplitPane<>(new BuilderState<>(JSplitPane.class, ()->new UI.SplitPane(axis.get())))
+                .withLayoutOrientation(axis);
     }
 
     /**
@@ -2843,124 +2845,124 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to create a builder for a new {@link JSlider} instance
-     *  based on tbe provided alignment type determining if
-     *  the slider will be aligned vertically or horizontally.
+     *  which runs along the provided {@link UI.Axis}, so either from left to
+     *  right or from bottom to top.
      *
-     * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
+     * @param axis The axis the {@link JSlider} runs along.
      * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
-     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     * @throws IllegalArgumentException if {@code axis} is {@code null}.
      *
      * @see JSlider#setOrientation
      */
-    public static UIForSlider<JSlider> slider( UI.Align align ) {
-        NullUtil.nullArgCheck(align, "align", UI.Align.class);
+    public static UIForSlider<JSlider> slider( UI.Axis axis ) {
+        NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
         return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
-                .withOrientation(align);
+                .withOrientation(axis);
     }
 
     /**
-     *  Use this to create a builder for a new {@link JSlider} instance
-     *  based on the provided alignment property which dynamically
-     *  determines if the property is aligned vertically or horizontally.
+     *  Use this to create a builder for a new {@link JSlider} instance whose
+     *  {@link UI.Axis} is read from the supplied property, so that the slider
+     *  turns from horizontal to vertical whenever your view model says so.
      *
-     * @param align The alignment property determining if the {@link JSlider} aligns vertically or horizontally.
+     * @param axis The property holding the axis the {@link JSlider} runs along.
      * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
-     * @throws IllegalArgumentException if the {@code align} property is {@code null}.
+     * @throws IllegalArgumentException if the {@code axis} property is {@code null}.
      *
      * @see JSlider#setOrientation
      */
-    public static UIForSlider<JSlider> slider( Val<UI.Align> align ) {
-        NullUtil.nullArgCheck( align, "align", Val.class );
+    public static UIForSlider<JSlider> slider( Val<UI.Axis> axis ) {
+        NullUtil.nullArgCheck( axis, "axis", Val.class );
         return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
-                .withOrientation(align);
+                .withOrientation(axis);
     }
 
     /**
-     *  Use this to create a builder for a new {@link JSlider} instance
-     *  based on tbe provided alignment type, min slider value and max slider value.
+     *  Use this to create a builder for a new {@link JSlider} instance running
+     *  along the provided {@link UI.Axis}, with the provided minimum and maximum values.
      *
-     * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
+     * @param axis The axis the {@link JSlider} runs along.
      * @param min The minimum possible value of the slider.
      * @param max The maximum possible value of the slider.
      * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
      *
-     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     * @throws IllegalArgumentException if {@code axis} is {@code null}.
      *
      * @see JSlider#setOrientation
      * @see JSlider#setMinimum
      * @see JSlider#setMaximum
      */
-    public static UIForSlider<JSlider> slider( UI.Align align, int min, int max ) {
-        NullUtil.nullArgCheck(align, "align", UI.Align.class);
+    public static UIForSlider<JSlider> slider( UI.Axis axis, int min, int max ) {
+        NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
         return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
-                .withOrientation(align)
+                .withOrientation(axis)
                 .withMin(min)
                 .withMax(max)
                 .withValue((min + max) / 2);
     }
 
     /**
-     * Creates a slider with the specified alignment and the
-     * specified minimum, maximum, and initial values.
+     * Creates a slider running along the specified {@link UI.Axis}, with the
+     * specified minimum, maximum and initial values.
      *
-     * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
+     * @param axis The axis the {@link JSlider} runs along.
      * @param min The minimum possible value of the slider.
      * @param max The maximum possible value of the slider.
      * @param value  the initial value of the slider
      * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
      *
-     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     * @throws IllegalArgumentException if {@code axis} is {@code null}.
      *
      * @see JSlider#setOrientation
      * @see JSlider#setMinimum
      * @see JSlider#setMaximum
      * @see JSlider#setValue
      */
-    public static UIForSlider<JSlider> slider( UI.Align align, int min, int max, int value ) {
-        NullUtil.nullArgCheck(align, "align", UI.Align.class);
+    public static UIForSlider<JSlider> slider( UI.Axis axis, int min, int max, int value ) {
+        NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
         return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
-                .withOrientation(align)
+                .withOrientation(axis)
                 .withMin(min)
                 .withMax(max)
                 .withValue(value);
     }
 
     /**
-     * Creates a slider with the specified alignment and the
+     * Creates a slider running along the specified {@link UI.Axis}, with the
      * specified minimum, maximum, and dynamic value. <br>
      * The slider will be updated whenever the provided property changes.
      * But note that the property is of the read only {@link Val} type,
      * which means that when the user moves the slider, the property will not be updated.
      * <br>
-     * If you want bidirectional binding, use {@link #slider(UI.Align, Number, Number, Var)}
+     * If you want bidirectional binding, use {@link #slider(UI.Axis, Number, Number, Var)}
      * instead of this method.
      *
-     * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
+     * @param axis The axis the {@link JSlider} runs along.
      * @param min The minimum possible value of the slider.
      * @param max The maximum possible value of the slider.
      * @param value The property holding the value of the slider
      * @param <N> The type of the number used for the slider values.
      * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
      *
-     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     * @throws IllegalArgumentException if {@code axis} is {@code null}.
      *
      * @see JSlider#setOrientation
      * @see JSlider#setMinimum
      * @see JSlider#setMaximum
      * @see JSlider#setValue
      */
-    public static <N extends Number> UIForSlider<JSlider> slider( UI.Align align, N min, N max, Val<N> value ) {
-        NullUtil.nullArgCheck(align, "align", UI.Align.class);
+    public static <N extends Number> UIForSlider<JSlider> slider( UI.Axis axis, N min, N max, Val<N> value ) {
+        NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
         NullUtil.nullPropertyCheck(value, "value", "The state of the slider should not be null!");
         Objects.requireNonNull(min, "The minimum value of the slider should not be null!");
         Objects.requireNonNull(max, "The maximum value of the slider should not be null!");
         return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
-                .withOrientation(align)
+                .withOrientation(axis)
                 ._withBinding(Val.of(min), Val.of(max), value, false);
     }
 
     /**
-     * Creates a slider with the specified alignment and the
+     * Creates a slider running along the specified {@link UI.Axis}, with the
      * specified minimum, maximum, and dynamic value property.
      * The property will be updated whenever the user
      * moves the slider and the slider will be updated whenever
@@ -2968,31 +2970,31 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *
      * @param <N> The type of the number used for the slider values.
      *            This may be {@link Integer}, {@link Double}, {@link Float}, {@link Long} or any other number type.
-     * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
+     * @param axis The axis the {@link JSlider} runs along.
      * @param min The minimum possible value of the slider.
      * @param max The maximum possible value of the slider.
      * @param value The property holding the value of the slider
      * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
      *
-     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     * @throws IllegalArgumentException if {@code axis} is {@code null}.
      *
      * @see JSlider#setOrientation
      * @see JSlider#setMinimum
      * @see JSlider#setMaximum
      * @see JSlider#setValue
      */
-    public static <N extends Number> UIForSlider<JSlider> slider( UI.Align align, N min, N max, Var<N> value ) {
-        NullUtil.nullArgCheck(align, "align", UI.Align.class);
+    public static <N extends Number> UIForSlider<JSlider> slider( UI.Axis axis, N min, N max, Var<N> value ) {
+        NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
         NullUtil.nullPropertyCheck(value, "value", "The state of the slider should not be null!");
         Objects.requireNonNull(min, "The minimum value of the slider should not be null!");
         Objects.requireNonNull(max, "The maximum value of the slider should not be null!");
         return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
-                .withOrientation(align)
+                .withOrientation(axis)
                 ._withBinding(Val.of(min), Val.of(max), value, true);
     }
 
     /**
-     * Creates a slider with the specified alignment and the
+     * Creates a slider running along the specified {@link UI.Axis}, with the
      * specified minimum, maximum, and value property views.
      * The min, max and value may be updated dynamically
      * when the properties change their values.
@@ -3002,7 +3004,7 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *
      * @param <N> The type of the number used for the slider values.
      *            This may be {@link Integer}, {@link Double}, {@link Float}, {@link Long} or any other number type.
-     * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
+     * @param axis The axis the {@link JSlider} runs along.
      * @param min The minimum possible value of the slider, which
      *            may be updated dynamically when the property changes.
      * @param max The maximum possible value of the slider, which
@@ -3012,36 +3014,36 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *              in your code (see {@link Var#set(Object)}).
      * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
      *
-     * @throws IllegalArgumentException if {@code align}, {@code min}, {@code max} or {@code value} is {@code null}.
+     * @throws IllegalArgumentException if {@code axis}, {@code min}, {@code max} or {@code value} is {@code null}.
      *
      * @see JSlider#setOrientation
      * @see JSlider#setMinimum
      * @see JSlider#setMaximum
      * @see JSlider#setValue
      */
-    public static <N extends Number> UIForSlider<JSlider> slider( UI.Align align, Val<N> min, Val<N> max, Val<N> value ) {
-        NullUtil.nullArgCheck(align, "align", UI.Align.class);
+    public static <N extends Number> UIForSlider<JSlider> slider( UI.Axis axis, Val<N> min, Val<N> max, Val<N> value ) {
+        NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
         NullUtil.nullPropertyCheck(min, "min", "The minimum value of the slider should not be null!");
         NullUtil.nullPropertyCheck(max, "max", "The maximum value of the slider should not be null!");
         NullUtil.nullPropertyCheck(value, "value", "The state of the slider should not be null!");
         return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
-                .withOrientation(align)
+                .withOrientation(axis)
                 ._withBinding(min, max, value, false);
     }
 
     /**
-     * Creates a slider with the specified alignment and the
+     * Creates a slider running along the specified {@link UI.Axis}, with the
      * specified minimum, maximum, and value property views.
      * The min, max and value may be updated dynamically
      * when the properties change their values in your code.
      * The current value property may also be updated
      * by the user moving the slider due to the
      * usage of the read-write {@link Var} type
-     * here in contrast to {@link #slider(UI.Align, Val, Val, Val)}.
+     * here in contrast to {@link #slider(UI.Axis, Val, Val, Val)}.
      *
      * @param <N> The type of the number used for the slider values.
      *            This may be {@link Integer}, {@link Double}, {@link Float}, {@link Long} or any other number type.
-     * @param align The alignment determining if the {@link JSlider} aligns vertically or horizontally.
+     * @param axis The axis the {@link JSlider} runs along.
      * @param min The minimum possible value of the slider, which
      *            may be updated dynamically when the property changes.
      * @param max The maximum possible value of the slider, which
@@ -3051,20 +3053,20 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *              in your code (see {@link Var#set(Object)}) or when the user moves the slider.
      * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
      *
-     * @throws IllegalArgumentException if {@code align}, {@code min}, {@code max} or {@code value} is {@code null}.
+     * @throws IllegalArgumentException if {@code axis}, {@code min}, {@code max} or {@code value} is {@code null}.
      *
      * @see JSlider#setOrientation
      * @see JSlider#setMinimum
      * @see JSlider#setMaximum
      * @see JSlider#setValue
      */
-    public static <N extends Number> UIForSlider<JSlider> slider( UI.Align align, Val<N> min, Val<N> max, Var<N> value ) {
-        NullUtil.nullArgCheck(align, "align", UI.Align.class);
+    public static <N extends Number> UIForSlider<JSlider> slider( UI.Axis axis, Val<N> min, Val<N> max, Var<N> value ) {
+        NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
         NullUtil.nullPropertyCheck(min, "min", "The minimum value of the slider should not be null!");
         NullUtil.nullPropertyCheck(max, "max", "The maximum value of the slider should not be null!");
         NullUtil.nullPropertyCheck(value, "value", "The state of the slider should not be null!");
         return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
-                .withOrientation(align)
+                .withOrientation(axis)
                 ._withBinding(min, max, value, true);
     }
 
@@ -3950,15 +3952,21 @@ public abstract class UIFactoryMethods extends UILayoutConstants
     }
 
     /**
-     *  Use this to create a builder for the {@link JLabel} UI component.
+     *  Use this to create a builder for the {@link JLabel} UI component,
+     *  with the text placed at one named point of the label.
+     *  <p>
+     *  A {@link UI.Placement} sets both axes at once, so the four side constants
+     *  centre the other axis: {@link UI.Placement#TOP} puts the text at the middle
+     *  of the top edge, not merely at the top. Name a corner, such as
+     *  {@link UI.Placement#TOP_LEFT}, to pin both axes.
      *
      * @param text The text which should be displayed on the label.
-     * @param alignment The vertical and horizontal alignment of the text.
+     * @param alignment The point of the label the text sits at.
      * @return A builder instance for the label, which enables fluent method chaining.
      */
-    public static UIForLabel<JLabel> label( String text, UI.Alignment alignment ) {
+    public static UIForLabel<JLabel> label( String text, UI.Placement alignment ) {
         NullUtil.nullArgCheck(text, "text", String.class);
-        NullUtil.nullArgCheck(alignment, "alignment", UI.Alignment.class);
+        NullUtil.nullArgCheck(alignment, "alignment", UI.Placement.class);
         return _label().withText(text).withAlignment( alignment );
     }
 
@@ -5351,108 +5359,114 @@ public abstract class UIFactoryMethods extends UILayoutConstants
 
     /**
      *  Use this to create a builder for a new {@link JProgressBar} instance with
-     *  the provided alignment, minimum and maximum values.
-     *  The alignment is a {@link UI.Align} value, which may be either {@link UI.Align#HORIZONTAL}
-     *  or {@link UI.Align#VERTICAL}.
+     *  the provided axis, minimum and maximum values.
+     *  The axis is one of {@link UI.Axis#HORIZONTAL}, {@link UI.Axis#VERTICAL},
+     *  {@link UI.Axis#LINE} or {@link UI.Axis#PAGE}, where the latter two select the
+     *  horizontal and the vertical axis respectively, as {@link UI.Axis#resolve()} describes.
      *
-     * @param align The alignment of the progress bar.
+     * @param axis The axis the progress bar runs along.
      * @param min The minimum value of the progress bar.
      * @param max The maximum value of the progress bar.
      * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
      */
-    public static UIForProgressBar<JProgressBar> progressBar(UI.Align align, int min, int max ) {
-        NullUtil.nullArgCheck(align, "align", UI.Align.class);
-        return progressBar().withOrientation(align).withMin(min).withMax(max);
+    public static UIForProgressBar<JProgressBar> progressBar(UI.Axis axis, int min, int max ) {
+        NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
+        return progressBar().withOrientation(axis).withMin(min).withMax(max);
     }
 
     /**
      *  Use this to create a builder for a new {@link JProgressBar} instance with
-     *  the provided alignment, minimum, maximum and current value.
-     *  The alignment is a {@link UI.Align} value, which may be either {@link UI.Align#HORIZONTAL}
-     *  or {@link UI.Align#VERTICAL}.
+     *  the provided axis, minimum, maximum and current value.
+     *  The axis is one of {@link UI.Axis#HORIZONTAL}, {@link UI.Axis#VERTICAL},
+     *  {@link UI.Axis#LINE} or {@link UI.Axis#PAGE}, where the latter two select the
+     *  horizontal and the vertical axis respectively, as {@link UI.Axis#resolve()} describes.
      *
-     * @param align The alignment of the progress bar.
+     * @param axis The axis the progress bar runs along.
      * @param min The minimum value of the progress bar.
      * @param max The maximum value of the progress bar.
      * @param value The current value of the progress bar.
      * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
      */
-    public static UIForProgressBar<JProgressBar> progressBar(UI.Align align, int min, int max, int value ) {
-        NullUtil.nullArgCheck(align, "align", UI.Align.class);
-        return progressBar().withOrientation(align).withMin(min).withMax(max).withValue(value);
+    public static UIForProgressBar<JProgressBar> progressBar(UI.Axis axis, int min, int max, int value ) {
+        NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
+        return progressBar().withOrientation(axis).withMin(min).withMax(max).withValue(value);
     }
 
     /**
      *  Use this to create a builder for a new {@link JProgressBar} instance with
-     *  the provided alignment, minimum, maximum and current value property dynamically bound to the progress bar.
-     *  The alignment is a {@link UI.Align} value, which may be either {@link UI.Align#HORIZONTAL}
-     *  or {@link UI.Align#VERTICAL}.
+     *  the provided axis, minimum, maximum and a current value property dynamically bound to the progress bar.
+     *  The axis is one of {@link UI.Axis#HORIZONTAL}, {@link UI.Axis#VERTICAL},
+     *  {@link UI.Axis#LINE} or {@link UI.Axis#PAGE}, where the latter two select the
+     *  horizontal and the vertical axis respectively, as {@link UI.Axis#resolve()} describes.
      *
-     * @param align The alignment of the progress bar.
+     * @param axis The axis the progress bar runs along.
      * @param min The minimum value of the progress bar.
      * @param max The maximum value of the progress bar.
      * @param value The current value property of the progress bar.
      * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
      */
-    public static UIForProgressBar<JProgressBar> progressBar(UI.Align align, int min, int max, Val<Integer> value ) {
-        NullUtil.nullArgCheck(align, "align", UI.Align.class);
+    public static UIForProgressBar<JProgressBar> progressBar(UI.Axis axis, int min, int max, Val<Integer> value ) {
+        NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
         NullUtil.nullArgCheck(value, "value", Val.class);
         NullUtil.nullPropertyCheck(value, "value", "Null is not a valid value for the value property of a progress bar.");
-        return progressBar().withOrientation(align).withMin(min).withMax(max).withValue(value);
+        return progressBar().withOrientation(axis).withMin(min).withMax(max).withValue(value);
     }
 
     /**
      *  Use this to create a builder for a new {@link JProgressBar} instance with a default minimum and maximum value
-     *  of 0 and 100 and the provided alignment and double based progress property (a property wrapping a double value between 0 and 1)
+     *  of 0 and 100 and the provided axis and double based progress property (a property wrapping a double value between 0 and 1)
      *  dynamically bound to the progress bar.
-     *  The alignment is a {@link UI.Align} value, which may be either {@link UI.Align#HORIZONTAL}
-     *  or {@link UI.Align#VERTICAL}.
+     *  The axis is one of {@link UI.Axis#HORIZONTAL}, {@link UI.Axis#VERTICAL},
+     *  {@link UI.Axis#LINE} or {@link UI.Axis#PAGE}, where the latter two select the
+     *  horizontal and the vertical axis respectively, as {@link UI.Axis#resolve()} describes.
      *
-     * @param align The alignment of the progress bar.
+     * @param axis The axis the progress bar runs along.
      * @param progress The current progress property of the progress bar, a property wrapping a double value between 0 and 1.
      * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
      */
-    public static UIForProgressBar<JProgressBar> progressBar(UI.Align align, Val<Double> progress ) {
-        NullUtil.nullArgCheck(align, "align", UI.Align.class);
+    public static UIForProgressBar<JProgressBar> progressBar(UI.Axis axis, Val<Double> progress ) {
+        NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
         NullUtil.nullArgCheck(progress, "progress", Val.class);
         NullUtil.nullPropertyCheck(progress, "progress", "Null is not a valid value for the progress property of a progress bar.");
-        return progressBar().withOrientation(align).withMin(0).withMax(100).withProgress(progress);
+        return progressBar().withOrientation(axis).withMin(0).withMax(100).withProgress(progress);
     }
 
     /**
      *  Use this to create a builder for a new {@link JProgressBar} instance with a default minimum and maximum value
-     *  of 0 and 100 and the provided alignment and double based progress property (a property wrapping a double value between 0 and 1)
+     *  of 0 and 100 and the provided axis and double based progress property (a property wrapping a double value between 0 and 1)
      *  dynamically bound to the progress bar.
-     *  The alignment is a {@link UI.Align} value, which may be either {@link UI.Align#HORIZONTAL}
-     *  or {@link UI.Align#VERTICAL}.
+     *  The axis is one of {@link UI.Axis#HORIZONTAL}, {@link UI.Axis#VERTICAL},
+     *  {@link UI.Axis#LINE} or {@link UI.Axis#PAGE}, where the latter two select the
+     *  horizontal and the vertical axis respectively, as {@link UI.Axis#resolve()} describes.
      *
-     * @param align The alignment of the progress bar.
+     * @param axis The axis the progress bar runs along.
      * @param progress The current progress property of the progress bar, a property wrapping a double value between 0 and 1.
      * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
      */
-    public static UIForProgressBar<JProgressBar> progressBar(UI.Align align, double progress ) {
-        NullUtil.nullArgCheck(align, "align", UI.Align.class);
-        return progressBar().withOrientation(align).withMin(0).withMax(100).withProgress(progress);
+    public static UIForProgressBar<JProgressBar> progressBar(UI.Axis axis, double progress ) {
+        NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
+        return progressBar().withOrientation(axis).withMin(0).withMax(100).withProgress(progress);
     }
 
     /**
      *  Use this to create a builder for a new {@link JProgressBar} instance with a default minimum and maximum value
-     *  of 0 and 100 and the provided alignment property and double based progress
+     *  of 0 and 100 and the provided axis property and double based progress
      *  property (a property wrapping a double value between 0 and 1)
      *  dynamically bound to the progress bar.
-     *  The alignment property wraps a {@link UI.Align} value, which may be either {@link UI.Align#HORIZONTAL}
-     *  or {@link UI.Align#VERTICAL}.
+     *  The axis is one of {@link UI.Axis#HORIZONTAL}, {@link UI.Axis#VERTICAL},
+     *  {@link UI.Axis#LINE} or {@link UI.Axis#PAGE}, where the latter two select the
+     *  horizontal and the vertical axis respectively, as {@link UI.Axis#resolve()} describes.
      *  When any of the two properties change in your view model, the progress bar will be updated accordingly.
      *
-     * @param align The alignment of the progress bar.
+     * @param axis The axis the progress bar runs along.
      * @param progress The current progress property of the progress bar, a property wrapping a double value between 0 and 1.
      * @return A builder instance for the provided {@link JProgressBar}, which enables fluent method chaining.
      */
-    public static UIForProgressBar<JProgressBar> progressBar(Val<UI.Align> align, Val<Double> progress ) {
-        NullUtil.nullArgCheck(align, "align", UI.Align.class);
+    public static UIForProgressBar<JProgressBar> progressBar(Val<UI.Axis> axis, Val<Double> progress ) {
+        NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
         NullUtil.nullArgCheck(progress, "progress", Val.class);
         NullUtil.nullPropertyCheck(progress, "progress", "Null is not a valid value for the progress property of a progress bar.");
-        return progressBar().withOrientation(align).withMin(0).withMax(100).withProgress(progress);
+        return progressBar().withOrientation(axis).withMin(0).withMax(100).withProgress(progress);
     }
 
     /**

@@ -13,7 +13,7 @@ import sprouts.Tuple;
  *  {@link swingtree.api.ShadowFractionsSupplier}.
  *  <p>
  *  The functions in this class are also supposed to serve as an example which demonstrates
- *  how to create custom shadow falloff curves yourself. See {@link swingtree.UI.ShadowType}
+ *  how to create custom shadow falloff curves yourself. See {@link swingtree.UI.ShadowFalloff}
  *  for the real world phenomenon and the exact math behind each curve.
  */
 public final class ShadowFractions

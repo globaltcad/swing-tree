@@ -59,63 +59,222 @@ import java.util.function.Supplier;
  */
 public final class UI extends UIFactoryMethods
 {
-    private static final Logger log = LoggerFactory.getLogger(UI.class);
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     /**
-     *  An enum set of all the available swing cursors which
-     *  map to the cursor type id.
-     *  This exists simply because swing was created before enums were added to Java.
+     *  Names the shape the mouse pointer takes while it is over a component, with one
+     *  constant for every pointer shape {@link java.awt.Cursor} predefines. AWT identifies
+     *  those shapes by {@code int} constants, because it was written before Java had enums.
+     *  <p>
+     *  The eight resize constants are named after the side or the corner of the component
+     *  a drag would move, rather than after a compass direction: {@link #RESIZE_BOTTOM_LEFT}
+     *  is the arrow AWT calls {@link java.awt.Cursor#SW_RESIZE_CURSOR}. Code which already
+     *  holds a {@link Side} or a {@link Corner}, such as the handler of a resize handle, can
+     *  let {@link #resizeAt(Side)} and {@link #resizeAt(Corner)} pick the matching constant.
+     *
      * @see UIForAnySwing#withCursor(Cursor)
-     * @see UIForAnySwing#withCursor(Val) 
+     * @see UIForAnySwing#withCursor(Val)
      */
     @Immutable
     public enum Cursor implements UIEnum<Cursor>
     {
+        /** The ordinary arrow pointer, which is what a component shows unless it asks for something else. */
         DEFAULT(java.awt.Cursor.DEFAULT_CURSOR),
+        /** The crosshair, for picking an exact point. */
         CROSS(java.awt.Cursor.CROSSHAIR_CURSOR),
+        /** The upright bar shown over text which can be selected or typed into. */
         TEXT(java.awt.Cursor.TEXT_CURSOR),
+        /** The busy pointer, telling the user that the program is working and not listening. */
         WAIT(java.awt.Cursor.WAIT_CURSOR),
-        RESIZE_SOUTH_WEST(java.awt.Cursor.SW_RESIZE_CURSOR),
-        RESIZE_SOUTH_EAST(java.awt.Cursor.SE_RESIZE_CURSOR),
-        RESIZE_NORTH_WEST(java.awt.Cursor.NW_RESIZE_CURSOR),
-        RESIZE_NORTH_EAST(java.awt.Cursor.NE_RESIZE_CURSOR),
-        RESIZE_NORTH(java.awt.Cursor.N_RESIZE_CURSOR),
-        RESIZE_SOUTH(java.awt.Cursor.S_RESIZE_CURSOR),
-        RESIZE_WEST(java.awt.Cursor.W_RESIZE_CURSOR),
-        RESIZE_EAST(java.awt.Cursor.E_RESIZE_CURSOR),
+        /** The arrow for a handle which moves the top edge of a component. AWT calls it {@link java.awt.Cursor#N_RESIZE_CURSOR}. */
+        RESIZE_TOP(java.awt.Cursor.N_RESIZE_CURSOR),
+        /** The arrow for a handle which moves the left edge of a component. AWT calls it {@link java.awt.Cursor#W_RESIZE_CURSOR}. */
+        RESIZE_LEFT(java.awt.Cursor.W_RESIZE_CURSOR),
+        /** The arrow for a handle which moves the bottom edge of a component. AWT calls it {@link java.awt.Cursor#S_RESIZE_CURSOR}. */
+        RESIZE_BOTTOM(java.awt.Cursor.S_RESIZE_CURSOR),
+        /** The arrow for a handle which moves the right edge of a component. AWT calls it {@link java.awt.Cursor#E_RESIZE_CURSOR}. */
+        RESIZE_RIGHT(java.awt.Cursor.E_RESIZE_CURSOR),
+        /** The arrow for a handle which moves the top left corner of a component. AWT calls it {@link java.awt.Cursor#NW_RESIZE_CURSOR}. */
+        RESIZE_TOP_LEFT(java.awt.Cursor.NW_RESIZE_CURSOR),
+        /** The arrow for a handle which moves the top right corner of a component. AWT calls it {@link java.awt.Cursor#NE_RESIZE_CURSOR}. */
+        RESIZE_TOP_RIGHT(java.awt.Cursor.NE_RESIZE_CURSOR),
+        /** The arrow for a handle which moves the bottom left corner of a component. AWT calls it {@link java.awt.Cursor#SW_RESIZE_CURSOR}. */
+        RESIZE_BOTTOM_LEFT(java.awt.Cursor.SW_RESIZE_CURSOR),
+        /** The arrow for a handle which moves the bottom right corner of a component. AWT calls it {@link java.awt.Cursor#SE_RESIZE_CURSOR}. */
+        RESIZE_BOTTOM_RIGHT(java.awt.Cursor.SE_RESIZE_CURSOR),
+        /** The pointing hand, for something the user can click through, like a link. */
         HAND(java.awt.Cursor.HAND_CURSOR),
+        /** The four way arrow, for something the user can drag to a new place. */
         MOVE(java.awt.Cursor.MOVE_CURSOR);
 
+        /**
+         *  Returns the cursor which tells the user that dragging will move the given
+         *  side of a component, so that code which already holds a {@link Side} can
+         *  ask for the matching cursor instead of naming it a second time.
+         *
+         * @param side The side of the component whose size a drag would change.
+         * @return One of {@link #RESIZE_TOP}, {@link #RESIZE_LEFT},
+         *         {@link #RESIZE_BOTTOM} or {@link #RESIZE_RIGHT}.
+         */
+        public static Cursor resizeAt( Side side ) {
+            switch ( side ) {
+                case TOP:    return RESIZE_TOP;
+                case LEFT:   return RESIZE_LEFT;
+                case BOTTOM: return RESIZE_BOTTOM;
+                case RIGHT:  return RESIZE_RIGHT;
+            }
+            throw new RuntimeException();
+        }
 
-        final int type;
+        /**
+         *  Returns the cursor which tells the user that dragging will move the given
+         *  corner of a component, so that code which already holds a {@link Corner} can
+         *  ask for the matching cursor instead of naming it a second time.
+         *
+         * @param corner The corner of the component whose size a drag would change.
+         * @return One of {@link #RESIZE_TOP_LEFT}, {@link #RESIZE_TOP_RIGHT},
+         *         {@link #RESIZE_BOTTOM_LEFT} or {@link #RESIZE_BOTTOM_RIGHT}, and
+         *         {@link #DEFAULT} for {@link Corner#EVERY}, which names no single corner.
+         */
+        public static Cursor resizeAt( Corner corner ) {
+            switch ( corner ) {
+                case TOP_LEFT:     return RESIZE_TOP_LEFT;
+                case TOP_RIGHT:    return RESIZE_TOP_RIGHT;
+                case BOTTOM_LEFT:  return RESIZE_BOTTOM_LEFT;
+                case BOTTOM_RIGHT: return RESIZE_BOTTOM_RIGHT;
+                case EVERY:        return DEFAULT;
+            }
+            throw new RuntimeException();
+        }
+
+        private final int type;
 
 
         Cursor( int type ) { this.type = type; }
 
+        /**
+         *  Returns the {@link java.awt.Cursor} AWT predefines for the pointer shape this
+         *  constant names. AWT keeps one instance per shape and hands out that same
+         *  instance every time, so assigning a cursor allocates nothing.
+         *
+         * @return The result of {@link java.awt.Cursor#getPredefinedCursor(int)} for the
+         *         cursor type this constant maps to.
+         */
         public java.awt.Cursor toAWTCursor() { return java.awt.Cursor.getPredefinedCursor(type); }
     }
 
     /**
-     *  A general purpose enum describing if something is never, always or sometimes active.
-     *  This is mostly used to configure the scroll bar policy for UI components with scroll behaviour.
+     *  A three way answer to "should this be here?": {@link #NEVER} says no whatever
+     *  happens, {@link #ALWAYS} says yes whatever happens, and {@link #AS_NEEDED} hands
+     *  the question on to the situation at hand.
+     *  <p>
+     *  SwingTree uses it for the scroll bar policy of a scroll pane, where the situation
+     *  is whether the content is taller or wider than the viewport. Nothing about it is
+     *  specific to scroll bars though, and {@link #decide(boolean)} applies the same
+     *  three way choice to a condition of your own.
+     *
+     * @see UIForAnyScrollPane#withScrollBarPolicy(Active)
+     * @see UIForAnyScrollPane#withVerticalScrollBarPolicy(Active)
      */
     @Immutable
     public enum Active implements UIEnum<Active>{
-        NEVER, AS_NEEDED, ALWAYS
+        /** Keep the thing away, whatever the situation. */
+        NEVER,
+        /** Let the situation decide, so the thing is there exactly when it is called for. */
+        AS_NEEDED,
+        /** Keep the thing present, whatever the situation. */
+        ALWAYS;
+
+        /**
+         *  Answers whether the thing this policy governs should be present, given whether
+         *  the situation calls for it. {@link #NEVER} and {@link #ALWAYS} are answers the
+         *  user of your program already gave, so they ignore the argument; only
+         *  {@link #AS_NEEDED} passes it through. Writing the decision as
+         *  {@code policy == ALWAYS || needed} instead lets a runtime condition overrule
+         *  a {@link #NEVER} the user asked for.
+         *
+         * @param needed Whether the situation calls for the thing being decided about.
+         * @return {@code false} for {@link #NEVER}, {@code true} for {@link #ALWAYS},
+         *         and {@code needed} for {@link #AS_NEEDED}.
+         */
+        public boolean decide( boolean needed ) {
+            switch ( this ) {
+                case NEVER:     return false;
+                case ALWAYS:    return true;
+                case AS_NEEDED: return needed;
+            }
+            throw new RuntimeException();
+        }
     }
 
     /**
-     *  All UI components are at their core rectangular, meaning they
-     *  always have exactly 4 uniquely identifiable sides.
-     *  This enum is used to target specific sides of a {@link JComponent}
-     *  in various API methods like for example {@link UIForTabbedPane#withTabPlacementAt(swingtree.UI.Side)}
-     *  or the tapped pane factory method {@link UI#tabbedPane(swingtree.UI.Side)}.
+     *  Names one of the four edges of a component: {@link #TOP}, {@link #LEFT},
+     *  {@link #BOTTOM} or {@link #RIGHT}. Every {@link JComponent} is a rectangle, so
+     *  those four are all there are. Pass one to
+     *  {@link UIForTabbedPane#withTabPlacementAt(swingtree.UI.Side)} or to the tabbed pane
+     *  factory method {@link UI#tabbedPane(swingtree.UI.Side)} to say where the tabs go,
+     *  or to {@link UILayoutConstants#DOCK(swingtree.UI.Side)} to dock a child component
+     *  against one edge of a MigLayout panel.
+     *  <p>
+     *  An edge is a line, and {@link #axis()} names the axis it runs along: the top and
+     *  the bottom edge are horizontal lines, the left and the right edge vertical ones.
+     *  {@link #opposite()} names the edge facing this one across the component, and
+     *  {@link #toPlacement()} turns the edge into the point at the middle of it, for the
+     *  parts of the API which place things by {@link Placement}.
      */
     @Immutable
     public enum Side implements UIEnum<Side>
     {
-        TOP, LEFT, BOTTOM, RIGHT;
+        /** The top edge, which is a horizontal line. */
+        TOP,
+        /** The left edge, which is a vertical line. */
+        LEFT,
+        /** The bottom edge, which is a horizontal line. */
+        BOTTOM,
+        /** The right edge, which is a vertical line. */
+        RIGHT;
+
+        /**
+         *  Returns the side facing this one across the component, which is the side to
+         *  move something to when the user asks for it to sit on the other side.
+         *  @return {@link #BOTTOM} for {@link #TOP}, {@link #TOP} for {@link #BOTTOM},
+         *          {@link #RIGHT} for {@link #LEFT} and {@link #LEFT} for {@link #RIGHT}.
+         */
+        public Side opposite() {
+            switch ( this ) {
+                case TOP:    return BOTTOM;
+                case BOTTOM: return TOP;
+                case LEFT:   return RIGHT;
+                case RIGHT:  return LEFT;
+            }
+            throw new RuntimeException();
+        }
+
+        /**
+         *  Returns the axis the line of this edge runs along, which is also the axis a tab
+         *  strip, a tool bar or a divider docked to this edge is laid out on. Tabs docked
+         *  to the top sit in a row, tabs docked to the left stack downwards.
+         *  @return {@link Axis#HORIZONTAL} for {@link #TOP} and {@link #BOTTOM},
+         *          {@link Axis#VERTICAL} for {@link #LEFT} and {@link #RIGHT}.
+         */
+        public Axis axis() {
+            return isOneOf(TOP, BOTTOM) ? Axis.HORIZONTAL : Axis.VERTICAL;
+        }
+
+        /**
+         *  Returns the point at the middle of this side, which is how a side is handed
+         *  to the parts of the API that place things by {@link Placement}, such as
+         *  {@link ImageConf#placement(Placement)}.
+         *  @return {@link Placement#TOP}, {@link Placement#LEFT},
+         *          {@link Placement#BOTTOM} or {@link Placement#RIGHT}.
+         */
+        public Placement toPlacement() {
+            switch ( this ) {
+                case TOP:    return Placement.TOP;
+                case LEFT:   return Placement.LEFT;
+                case BOTTOM: return Placement.BOTTOM;
+                case RIGHT:  return Placement.RIGHT;
+            }
+            throw new RuntimeException();
+        }
 
         int forTabbedPane() {
             switch ( this ) {
@@ -168,59 +327,37 @@ public final class UI extends UIFactoryMethods
     }
 
     /**
-     *  Vertical or horizontal alignment.
-     * @see UI#progressBar(Align, double)
-     * @see UI#slider(Align)
-     */
-    @Immutable
-    public enum Align implements UIEnum<Align>
-    {
-        HORIZONTAL, VERTICAL;
-
-        int forSlider() {
-            switch ( this ) {
-                case HORIZONTAL: return JSlider.HORIZONTAL;
-                case VERTICAL  : return JSlider.VERTICAL;
-            }
-            throw new RuntimeException();
-        }
-        int forProgressBar() {
-            switch ( this ) {
-                case HORIZONTAL: return JProgressBar.HORIZONTAL;
-                case VERTICAL  : return JProgressBar.VERTICAL;
-            }
-            throw new RuntimeException();
-        }
-        int forSeparator() {
-            switch ( this ) {
-                case HORIZONTAL: return JSeparator.HORIZONTAL;
-                case VERTICAL  : return JSeparator.VERTICAL;
-            }
-            throw new RuntimeException();
-        }
-        int forSplitPane() {
-            switch ( this ) {
-                case HORIZONTAL: return JSplitPane.HORIZONTAL_SPLIT;
-                case VERTICAL:   return JSplitPane.VERTICAL_SPLIT;
-            }
-            throw new RuntimeException();
-        }
-        int forToolBar() {
-            switch ( this ) {
-                case HORIZONTAL: return JToolBar.HORIZONTAL;
-                case VERTICAL  : return JToolBar.VERTICAL;
-            }
-            throw new RuntimeException();
-        }
-    }
-
-    /**
-     *  Different positions along a vertically aligned UI component.
+     *  Names where something sits on the vertical axis of a component: at the {@link #TOP},
+     *  in the {@link #CENTER}, or at the {@link #BOTTOM}. {@link #UNDEFINED} names no
+     *  position, and passing it leaves the vertical alignment of the component untouched.
+     *  <p>
+     *  This is one half of a {@link Placement}, which is a whole point of a component:
+     *  {@link Placement#vertical()} reads this half back out of such a point, and
+     *  {@link Placement#of(VerticalAlignment, HorizontalAlignment)} builds a point from
+     *  this half and a {@link HorizontalAlignment}.
+     *
+     * @see UIForLabel#withVerticalAlignment(UI.VerticalAlignment)
+     * @see ComponentStyleDelegate#fontAlignment(UI.VerticalAlignment)
      */
     @Immutable
     public enum VerticalAlignment implements UIEnum<VerticalAlignment>{
-        UNDEFINED, TOP, CENTER, BOTTOM;
+        /** No position, which leaves the vertical alignment of the component as it was. */
+        UNDEFINED,
+        /** At the top of the component. */
+        TOP,
+        /** Halfway between the top and the bottom of the component. */
+        CENTER,
+        /** At the bottom of the component. */
+        BOTTOM;
 
+        /**
+         *  Returns the number Swing uses for this position, which is what methods like
+         *  {@link javax.swing.JLabel#setVerticalAlignment(int)} take.
+         *
+         * @return {@link SwingConstants#TOP}, {@link SwingConstants#CENTER} or
+         *         {@link SwingConstants#BOTTOM}, and an empty {@link Optional} for
+         *         {@link #UNDEFINED}, which names no position to hand to Swing.
+         */
         public Optional<Integer> forSwing() {
             switch ( this ) {
                 case TOP:    return Optional.of(SwingConstants.TOP);
@@ -233,14 +370,55 @@ public final class UI extends UIFactoryMethods
     }
 
     /**
-     *  Different positions along a horizontally aligned UI component.
+     *  Names where something sits on the horizontal axis of a component: at the
+     *  {@link #LEFT}, in the {@link #CENTER}, at the {@link #RIGHT}, or at the
+     *  {@link #LEADING} or {@link #TRAILING} end of a line of text. {@link #UNDEFINED}
+     *  names no position, and passing it leaves the horizontal alignment of the component
+     *  untouched.
+     *  <p>
+     *  {@link #LEADING} and {@link #TRAILING} are the two constants which are not sides.
+     *  They mean "where a line of text begins" and "where it ends", which is the left and
+     *  the right in English, and the right and the left in Arabic or Hebrew. Swing answers
+     *  that question from the {@link java.awt.ComponentOrientation} of the component the
+     *  alignment is applied to, so a component aligned this way follows the reading
+     *  direction it ends up in.
+     *  <p>
+     *  This is one half of a {@link Placement}, which is a whole point of a component.
+     *  A point has already been placed, so {@link Placement#horizontal()} never answers
+     *  with {@link #LEADING} or {@link #TRAILING}; building a point out of either of them
+     *  through {@link Placement#of(VerticalAlignment, HorizontalAlignment,
+     *  ComponentOrientation)} is where the reading direction is read exactly once.
+     *
+     * @see UIForLabel#withHorizontalAlignment(UI.HorizontalAlignment)
+     * @see ComponentStyleDelegate#fontAlignment(UI.HorizontalAlignment)
      */
     @Immutable
     public enum HorizontalAlignment implements UIEnum<HorizontalAlignment>
     {
+        /** No position, which leaves the horizontal alignment of the component as it was. */
         UNDEFINED,
-        LEFT, CENTER, RIGHT, LEADING, TRAILING;
+        /** At the left of the component, whichever way it reads. */
+        LEFT,
+        /** Halfway between the left and the right of the component. */
+        CENTER,
+        /** At the right of the component, whichever way it reads. */
+        RIGHT,
+        /** Where a line of text begins: the left in English, the right in Arabic or Hebrew. */
+        LEADING,
+        /** Where a line of text ends: the right in English, the left in Arabic or Hebrew. */
+        TRAILING;
 
+        /**
+         *  Returns the number Swing uses for this position, which is what methods like
+         *  {@link javax.swing.JLabel#setHorizontalAlignment(int)} take. Swing resolves
+         *  {@link SwingConstants#LEADING} and {@link SwingConstants#TRAILING} itself,
+         *  from the orientation of the component they are given to.
+         *
+         * @return {@link SwingConstants#LEFT}, {@link SwingConstants#CENTER},
+         *         {@link SwingConstants#RIGHT}, {@link SwingConstants#LEADING} or
+         *         {@link SwingConstants#TRAILING}, and an empty {@link Optional} for
+         *         {@link #UNDEFINED}, which names no position to hand to Swing.
+         */
         public final Optional<Integer> forSwing() {
             switch ( this ) {
                 case LEFT:     return Optional.of(SwingConstants.LEFT);
@@ -253,6 +431,15 @@ public final class UI extends UIFactoryMethods
             }
         }
 
+        /**
+         *  Returns the number {@link FlowLayout} uses for this position, which is what its
+         *  {@link FlowLayout#setAlignment(int)} method and its constructors take.
+         *
+         * @return {@link FlowLayout#LEFT}, {@link FlowLayout#CENTER},
+         *         {@link FlowLayout#RIGHT}, {@link FlowLayout#LEADING} or
+         *         {@link FlowLayout#TRAILING}, and an empty {@link Optional} for
+         *         {@link #UNDEFINED}, which names no position to hand to the layout.
+         */
         public final Optional<Integer> forFlowLayout() {
             switch ( this ) {
                 case LEFT:     return Optional.of(FlowLayout.LEFT);
@@ -263,50 +450,6 @@ public final class UI extends UIFactoryMethods
                 default:
                     return Optional.empty();
             }
-        }
-    }
-
-    /**
-     *  The logical combination of a vertical and horizontal alignment.
-     * @see UIForLabel#withTextPosition(Alignment) 
-     * @see ComponentStyleDelegate#fontAlignment(Alignment) 
-     */
-    @Immutable
-    public enum Alignment implements UIEnum<Alignment>
-    {
-        UNDEFINED,
-        TOP_LEFT,    TOP_CENTER, TOP_RIGHT, TOP_LEADING, TOP_TRAILING,
-        CENTER_LEFT, CENTER, CENTER_RIGHT, CENTER_LEADING, CENTER_TRAILING,
-        BOTTOM_LEFT, BOTTOM_CENTER, BOTTOM_RIGHT, BOTTOM_LEADING, BOTTOM_TRAILING;
-
-        public VerticalAlignment getVertical() {
-            switch ( this ) {
-                case UNDEFINED : return VerticalAlignment.UNDEFINED;
-                case TOP_LEFT: case TOP_CENTER: case TOP_RIGHT: case TOP_LEADING: case TOP_TRAILING:
-                    return VerticalAlignment.TOP;
-                case CENTER_LEFT: case CENTER: case CENTER_RIGHT: case CENTER_LEADING: case CENTER_TRAILING:
-                    return VerticalAlignment.CENTER;
-                case BOTTOM_LEFT: case BOTTOM_CENTER: case BOTTOM_RIGHT: case BOTTOM_LEADING: case BOTTOM_TRAILING:
-                    return VerticalAlignment.BOTTOM;
-            }
-            throw new RuntimeException();
-        }
-
-        public HorizontalAlignment getHorizontal() {
-            switch ( this ) {
-                case UNDEFINED : return HorizontalAlignment.UNDEFINED;
-                case TOP_LEFT: case CENTER_LEFT: case BOTTOM_LEFT:
-                    return HorizontalAlignment.LEFT;
-                case TOP_CENTER: case CENTER: case BOTTOM_CENTER:
-                    return HorizontalAlignment.CENTER;
-                case TOP_RIGHT: case CENTER_RIGHT: case BOTTOM_RIGHT:
-                    return HorizontalAlignment.RIGHT;
-                case TOP_LEADING: case CENTER_LEADING: case BOTTOM_LEADING:
-                    return HorizontalAlignment.LEADING;
-                case TOP_TRAILING: case CENTER_TRAILING: case BOTTOM_TRAILING:
-                    return HorizontalAlignment.TRAILING;
-            }
-            throw new RuntimeException();
         }
     }
 
@@ -331,7 +474,9 @@ public final class UI extends UIFactoryMethods
     @Immutable
     public enum CellOrder implements UIEnum<CellOrder>
     {
+        /** The outer sequence holds the rows, and each inner sequence the cells of one row. */
         ROW_MAJOR,
+        /** The outer sequence holds the columns, and each inner sequence the cells of one column. */
         COLUMN_MAJOR;
 
         /**
@@ -366,7 +511,23 @@ public final class UI extends UIFactoryMethods
     @Immutable
     public enum Editability implements UIEnum<Editability>
     {
-        EDITABLE, READ_ONLY;
+        /** The user may type into the cells of the table. */
+        EDITABLE,
+        /** The user may read the cells of the table but not change them. */
+        READ_ONLY;
+
+        /**
+         *  Turns a boolean into the matching constant, so that editability which already
+         *  lives in a flag, such as a view model property derived from a permission, can
+         *  become one of these two constants at the single place it enters the user
+         *  interface.
+         *
+         * @param editable Whether the user should be permitted to edit the cells.
+         * @return {@link #EDITABLE} if {@code editable} is true, {@link #READ_ONLY} otherwise.
+         */
+        public static Editability of( boolean editable ) {
+            return editable ? EDITABLE : READ_ONLY;
+        }
 
         /**
          *  Tells if the cells of a table using this setting may be edited by the user.
@@ -529,30 +690,114 @@ public final class UI extends UIFactoryMethods
     }
 
     /**
-     *  Use these enum instances to specify the gradient alignment for various sub styles,
-     *  like for example the gradient style API exposed by {@link ComponentStyleDelegate#gradient(Configurator)}
-     *  or {@link ComponentStyleDelegate#gradient(Configurator)} methods (see {@link UIForAnySwing#withStyle(Styler)}).
-     * <p>
-     *  {@link GradientConf#span(swingtree.UI.Span)} method exposed by methods like
-     *  {@link ComponentStyleDelegate#gradient(String, Configurator)} or
-     *  {@link ComponentStyleDelegate#gradient(swingtree.UI.Layer, String, Configurator)}.
+     *  Names the direction a gradient travels across a component. The four straight spans
+     *  run from the middle of one side to the middle of the facing side, and the four
+     *  diagonal ones run from one corner to the facing corner. The first color of the
+     *  gradient sits at {@link #from()} and the last one at {@link #to()}, which are
+     *  points of the component named by {@link Placement}.
+     *  <p>
+     *  Pass one to {@link GradientConf#span(swingtree.UI.Span)} while configuring a
+     *  gradient through {@link ComponentStyleDelegate#gradient(Configurator)} or
+     *  {@link ComponentStyleDelegate#gradient(swingtree.UI.Layer, String, Configurator)},
+     *  as part of the style API (see {@link UIForAnySwing#withStyle(Styler)}).
+     *  <p>
+     *  {@link #reversed()} returns the span running the other way, {@link #isDiagonal()}
+     *  tells the corner to corner spans from the side to side ones, and {@link #axis()}
+     *  names the axis a side to side span travels along.
+     *
+     * @see GradientConf#span(swingtree.UI.Span)
      */
     @Immutable
     public enum Span implements UIEnum<Span>
     {
-        TOP_LEFT_TO_BOTTOM_RIGHT, BOTTOM_LEFT_TO_TOP_RIGHT,
-        TOP_RIGHT_TO_BOTTOM_LEFT, BOTTOM_RIGHT_TO_TOP_LEFT,
+        /** Diagonally from the top left corner down to the bottom right corner. */
+        TOP_LEFT_TO_BOTTOM_RIGHT(Placement.TOP_LEFT,     Placement.BOTTOM_RIGHT),
+        /** Diagonally from the bottom left corner up to the top right corner. */
+        BOTTOM_LEFT_TO_TOP_RIGHT(Placement.BOTTOM_LEFT,  Placement.TOP_RIGHT),
+        /** Diagonally from the top right corner down to the bottom left corner. */
+        TOP_RIGHT_TO_BOTTOM_LEFT(Placement.TOP_RIGHT,    Placement.BOTTOM_LEFT),
+        /** Diagonally from the bottom right corner up to the top left corner. */
+        BOTTOM_RIGHT_TO_TOP_LEFT(Placement.BOTTOM_RIGHT, Placement.TOP_LEFT),
 
-        TOP_TO_BOTTOM, LEFT_TO_RIGHT,
-        BOTTOM_TO_TOP, RIGHT_TO_LEFT;
+        /** Straight down, from the middle of the top edge to the middle of the bottom edge. */
+        TOP_TO_BOTTOM(Placement.TOP,    Placement.BOTTOM),
+        /** Straight across, from the middle of the left edge to the middle of the right edge. */
+        LEFT_TO_RIGHT(Placement.LEFT,   Placement.RIGHT),
+        /** Straight up, from the middle of the bottom edge to the middle of the top edge. */
+        BOTTOM_TO_TOP(Placement.BOTTOM, Placement.TOP),
+        /** Straight across, from the middle of the right edge to the middle of the left edge. */
+        RIGHT_TO_LEFT(Placement.RIGHT,  Placement.LEFT);
+
+
+        private final Placement from;
+        private final Placement to;
+
+
+        Span( Placement from, Placement to ) {
+            this.from = from;
+            this.to   = to;
+        }
 
         /**
-         *  Use this to check if the alignment is diagonal and not horizontal or vertical.
-         * @return {@code true} if this alignment is diagonal, {@code false} otherwise.
+         *  Returns the point of the component this span starts at, which is where the
+         *  first color handed to {@link GradientConf#colors(java.awt.Color...)} sits.
+         *  @return The starting point: a corner for a diagonal span,
+         *          and the middle of a side for a straight one.
+         */
+        public Placement from() { return from; }
+
+        /**
+         *  Returns the point of the component this span ends at, which is where the
+         *  last color handed to {@link GradientConf#colors(java.awt.Color...)} sits.
+         *  @return The ending point, which is always {@link Placement#opposite()}
+         *          of what {@link #from()} returns.
+         */
+        public Placement to() { return to; }
+
+        /**
+         *  Returns the span running the other way, so that a gradient held in a variable
+         *  can be turned around without naming the constant it turns into. Reversing a
+         *  span paints the same picture as keeping it and handing
+         *  {@link GradientConf#colors(java.awt.Color...)} its colors in the reverse order.
+         *  @return The span whose {@link #from()} is this span's {@link #to()}.
+         */
+        public Span reversed() {
+            switch ( this ) {
+                case TOP_LEFT_TO_BOTTOM_RIGHT: return BOTTOM_RIGHT_TO_TOP_LEFT;
+                case BOTTOM_RIGHT_TO_TOP_LEFT: return TOP_LEFT_TO_BOTTOM_RIGHT;
+                case BOTTOM_LEFT_TO_TOP_RIGHT: return TOP_RIGHT_TO_BOTTOM_LEFT;
+                case TOP_RIGHT_TO_BOTTOM_LEFT: return BOTTOM_LEFT_TO_TOP_RIGHT;
+                case TOP_TO_BOTTOM:            return BOTTOM_TO_TOP;
+                case BOTTOM_TO_TOP:            return TOP_TO_BOTTOM;
+                case LEFT_TO_RIGHT:            return RIGHT_TO_LEFT;
+                case RIGHT_TO_LEFT:            return LEFT_TO_RIGHT;
+            }
+            throw new RuntimeException();
+        }
+
+        /**
+         *  Returns the axis this span travels along. A diagonal span travels along both
+         *  axes at once, so it names neither, and answers with an empty {@link Optional}
+         *  rather than picking one of the two.
+         *  @return {@link Axis#HORIZONTAL} for {@link #LEFT_TO_RIGHT} and
+         *          {@link #RIGHT_TO_LEFT}, {@link Axis#VERTICAL} for {@link #TOP_TO_BOTTOM}
+         *          and {@link #BOTTOM_TO_TOP}, and an empty {@link Optional} for the four
+         *          corner to corner spans.
+         */
+        public Optional<Axis> axis() {
+            if ( isDiagonal() )
+                return Optional.empty();
+            return Optional.of( isOneOf(LEFT_TO_RIGHT, RIGHT_TO_LEFT) ? Axis.HORIZONTAL : Axis.VERTICAL );
+        }
+
+        /**
+         *  Tells whether this span runs from a corner to a corner rather than from the
+         *  middle of one side to the middle of another.
+         * @return {@code true} for the four corner to corner spans,
+         *         {@code false} for the four side to side ones.
          */
         public boolean isDiagonal() {
-            return this == TOP_LEFT_TO_BOTTOM_RIGHT || this == BOTTOM_LEFT_TO_TOP_RIGHT ||
-                    this == TOP_RIGHT_TO_BOTTOM_LEFT || this == BOTTOM_RIGHT_TO_TOP_LEFT;
+            return from.isCorner();
         }
     }
 
@@ -593,7 +838,7 @@ public final class UI extends UIFactoryMethods
      *  Defines the shape of the "falloff curve" of a shadow, that is to say,
      *  the way in which the shadow color fades from its full strength into full
      *  transparency across the blur region of a {@link ShadowConf}.
-     *  Pass one of these to {@link ShadowConf#type(swingtree.UI.ShadowType)}
+     *  Pass one of these to {@link ShadowConf#falloff(swingtree.UI.ShadowFalloff)}
      *  as part of the style API (see {@link UIForAnySwing#withStyle(Styler)}).
      *  <p>
      *  Real world shadows are produced by very different optical situations, and they
@@ -618,10 +863,10 @@ public final class UI extends UIFactoryMethods
      *  exact math of each falloff. In all formulas below {@code frac(x)} denotes the
      *  fractional part {@code x - floor(x)}.
      *
-     * @see ShadowConf#type(swingtree.UI.ShadowType)
+     * @see ShadowConf#falloff(swingtree.UI.ShadowFalloff)
      */
     @Immutable
-    public enum ShadowType implements UIEnum<ShadowType>, ShadowFractionsSupplier
+    public enum ShadowFalloff implements UIEnum<ShadowFalloff>, ShadowFractionsSupplier
     {
         /**
          *  A constant rate fade from full shadow color to transparency, producing a
@@ -722,7 +967,7 @@ public final class UI extends UIFactoryMethods
 
         private final ShadowFractionsSupplier fractions;
 
-        ShadowType( ShadowFractionsSupplier fractions ) {
+        ShadowFalloff( ShadowFractionsSupplier fractions ) {
             this.fractions = fractions;
         }
 
@@ -733,36 +978,254 @@ public final class UI extends UIFactoryMethods
     }
 
     /**
-     *  Use this in the style API (see {@link UIForAnySwing#withStyle(Styler)})
-     *  to target specific corners of a {@link JComponent} and apply
-     *  custom {@link StyleConf} properties to them.
-     *  <br>
-     *  See {@link ComponentStyleDelegate#borderRadiusAt(swingtree.UI.Corner, double, double)}.
+     *  Names one corner of a component, or, as {@link #EVERY}, all four of them at once.
+     *  Pass one to {@link ComponentStyleDelegate#borderRadiusAt(swingtree.UI.Corner, double, double)}
+     *  in the style API (see {@link UIForAnySwing#withStyle(Styler)}) to round that corner
+     *  by itself, which is how a component takes a shape other than a plain rectangle.
+     *  <p>
+     *  {@link #opposite()} names the corner diagonally across the component, so that a
+     *  shape rounding two facing corners can be driven by a single value, and
+     *  {@link #toPlacement()} turns the corner into the point sitting at it, for the parts
+     *  of the API which place things by {@link Placement}.
+     *
+     * @see ComponentStyleDelegate#borderRadiusAt(swingtree.UI.Corner, double, double)
      */
     @Immutable
     public enum Corner implements UIEnum<Corner>
     {
+        /** All four corners at once, rather than any single one of them. */
         EVERY,
-        TOP_LEFT,    TOP_RIGHT,
-        BOTTOM_LEFT, BOTTOM_RIGHT
+        /** The top left corner. */
+        TOP_LEFT,
+        /** The top right corner. */
+        TOP_RIGHT,
+        /** The bottom left corner. */
+        BOTTOM_LEFT,
+        /** The bottom right corner. */
+        BOTTOM_RIGHT;
+
+        /**
+         *  Returns the corner diagonally across the component from this one.
+         *  @return {@link #BOTTOM_RIGHT} for {@link #TOP_LEFT} and so on,
+         *          with {@link #EVERY} returning itself, because it names no single corner.
+         */
+        public Corner opposite() {
+            switch ( this ) {
+                case TOP_LEFT:     return BOTTOM_RIGHT;
+                case BOTTOM_RIGHT: return TOP_LEFT;
+                case TOP_RIGHT:    return BOTTOM_LEFT;
+                case BOTTOM_LEFT:  return TOP_RIGHT;
+                case EVERY:        return EVERY;
+            }
+            throw new RuntimeException();
+        }
+
+        /**
+         *  Returns the point at this corner, which is how a corner is handed to the
+         *  parts of the API that place things by {@link Placement}, such as
+         *  {@link ImageConf#placement(Placement)}.
+         *  @return The matching corner of {@link Placement}, and {@link Placement#UNDEFINED}
+         *          for {@link #EVERY}, which names no single corner.
+         */
+        public Placement toPlacement() {
+            switch ( this ) {
+                case TOP_LEFT:     return Placement.TOP_LEFT;
+                case TOP_RIGHT:    return Placement.TOP_RIGHT;
+                case BOTTOM_LEFT:  return Placement.BOTTOM_LEFT;
+                case BOTTOM_RIGHT: return Placement.BOTTOM_RIGHT;
+                case EVERY:        return Placement.UNDEFINED;
+            }
+            throw new RuntimeException();
+        }
     }
 
     /**
-     *  Use this to specify the placement of an image as part of the {@link ImageConf} through
-     *  the {@link ImageConf#placement(swingtree.UI.Placement)} method exposed by the
-     *  style API (see {@link UIForAnySwing#withStyle(Styler)}).
+     *  Names a point of a rectangular component: one of its four corners, the middle of one
+     *  of its four sides, or its center. Use it to place an image or a text as part of the
+     *  {@link ImageConf} and {@link TextConf} styles, and to align the contents of a label
+     *  through {@link UIForLabel#withAlignment(Placement)}.
+     *  <p>
+     *  {@link #UNDEFINED} names no point at all, which leaves the choice to whoever does
+     *  the placing: an image style falls back to the preferred placement of an
+     *  {@link SvgIcon}, and to {@link #CENTER} where there is none.
+     *  <p>
+     *  A placement is a point which has already been chosen, so this enum names no reading
+     *  direction: it has no leading and no trailing constant.
+     *  {@link #of(VerticalAlignment, HorizontalAlignment, ComponentOrientation)} accepts
+     *  {@link HorizontalAlignment#LEADING} and {@link HorizontalAlignment#TRAILING} and
+     *  resolves them against an orientation, but {@link #horizontal()} never answers with
+     *  either of them. To align a component along the reading direction rather than at a
+     *  fixed side, pass those two constants to
+     *  {@link UIForLabel#withHorizontalAlignment(UI.HorizontalAlignment)} instead.
+     *
      * @see ImageConf#placement(Placement)
      * @see TextConf#placement(Placement)
-     * @see SvgIcon#withPreferredPlacement(Placement) 
+     * @see SvgIcon#withPreferredPlacement(Placement)
+     * @see UIForLabel#withAlignment(Placement)
+     * @see ComponentStyleDelegate#fontAlignment(Placement)
      */
     @Immutable
     public enum Placement implements UIEnum<Placement>
     {
+        /** No point at all, which leaves the choice of one to whoever does the placing. */
         UNDEFINED,
-        TOP, LEFT, BOTTOM, RIGHT,
-        TOP_LEFT, TOP_RIGHT,
-        BOTTOM_LEFT, BOTTOM_RIGHT,
-        CENTER
+        /** The middle of the top edge, so at the top and horizontally centred. */
+        TOP,
+        /** The middle of the left edge, so at the left and vertically centred. */
+        LEFT,
+        /** The middle of the bottom edge, so at the bottom and horizontally centred. */
+        BOTTOM,
+        /** The middle of the right edge, so at the right and vertically centred. */
+        RIGHT,
+        /** The top left corner. */
+        TOP_LEFT,
+        /** The top right corner. */
+        TOP_RIGHT,
+        /** The bottom left corner. */
+        BOTTOM_LEFT,
+        /** The bottom right corner. */
+        BOTTOM_RIGHT,
+        /** The middle of the component, on both axes. */
+        CENTER;
+
+        /**
+         *  Combines a vertical and a horizontal alignment into the single point they name,
+         *  reading {@link HorizontalAlignment#LEADING} and {@link HorizontalAlignment#TRAILING}
+         *  against the given orientation, which is the only place their meaning is decided.
+         *
+         * @param vertical Which of the top, the middle or the bottom of the component to use.
+         * @param horizontal Which of the left, the middle or the right of the component to use.
+         * @param orientation The reading direction that turns {@link HorizontalAlignment#LEADING}
+         *                    into a left or a right; {@link UI.ComponentOrientation#UNKNOWN} reads
+         *                    left to right, matching {@link java.awt.ComponentOrientation#UNKNOWN}.
+         * @return The point named by both alignments, or {@link #UNDEFINED} if neither names one.
+         */
+        public static Placement of(
+            VerticalAlignment   vertical,
+            HorizontalAlignment horizontal,
+            ComponentOrientation orientation
+        ) {
+            Objects.requireNonNull(vertical);
+            Objects.requireNonNull(horizontal);
+            Objects.requireNonNull(orientation);
+            HorizontalAlignment side = _sideOf(horizontal, orientation);
+            boolean left  = ( side == HorizontalAlignment.LEFT  );
+            boolean right = ( side == HorizontalAlignment.RIGHT );
+            switch ( vertical ) {
+                case TOP:       return left ? TOP_LEFT    : right ? TOP_RIGHT    : TOP;
+                case BOTTOM:    return left ? BOTTOM_LEFT : right ? BOTTOM_RIGHT : BOTTOM;
+                case CENTER:    return left ? LEFT        : right ? RIGHT        : CENTER;
+                case UNDEFINED: return left ? LEFT        : right ? RIGHT
+                                            : side == HorizontalAlignment.CENTER ? CENTER : UNDEFINED;
+            }
+            throw new RuntimeException();
+        }
+
+        private static HorizontalAlignment _sideOf(
+            HorizontalAlignment  horizontal,
+            ComponentOrientation orientation
+        ) {
+            switch ( horizontal ) {
+                case LEADING:  return orientation.isLeftToRightOrUnknown() ? HorizontalAlignment.LEFT  : HorizontalAlignment.RIGHT;
+                case TRAILING: return orientation.isLeftToRightOrUnknown() ? HorizontalAlignment.RIGHT : HorizontalAlignment.LEFT;
+                case LEFT: case RIGHT: case CENTER: case UNDEFINED: return horizontal;
+            }
+            throw new RuntimeException();
+        }
+
+        /**
+         *  Combines a vertical and a horizontal alignment into the single point they name,
+         *  reading {@link HorizontalAlignment#LEADING} and {@link HorizontalAlignment#TRAILING}
+         *  left to right. Call {@link #of(VerticalAlignment, HorizontalAlignment, ComponentOrientation)}
+         *  where the reading direction of the component is known.
+         *
+         * @param vertical Which of the top, the middle or the bottom of the component to use.
+         * @param horizontal Which of the left, the middle or the right of the component to use.
+         * @return The point named by both alignments, or {@link #UNDEFINED} if neither names one.
+         */
+        public static Placement of( VerticalAlignment vertical, HorizontalAlignment horizontal ) {
+            return of( vertical, horizontal, ComponentOrientation.UNKNOWN );
+        }
+
+        /**
+         *  Returns which of the top, the middle or the bottom of the component this point
+         *  sits at. A point has both coordinates, so the side constants answer here too:
+         *  {@link #LEFT} sits at the middle of the left edge and answers
+         *  {@link VerticalAlignment#CENTER}.
+         *  @return The vertical half of this point, and {@link VerticalAlignment#UNDEFINED}
+         *          only for {@link #UNDEFINED}.
+         */
+        public VerticalAlignment vertical() {
+            switch ( this ) {
+                case TOP: case TOP_LEFT: case TOP_RIGHT:
+                    return VerticalAlignment.TOP;
+                case BOTTOM: case BOTTOM_LEFT: case BOTTOM_RIGHT:
+                    return VerticalAlignment.BOTTOM;
+                case LEFT: case RIGHT: case CENTER:
+                    return VerticalAlignment.CENTER;
+                case UNDEFINED:
+                    return VerticalAlignment.UNDEFINED;
+            }
+            throw new RuntimeException();
+        }
+
+        /**
+         *  Returns which of the left, the middle or the right of the component this point
+         *  sits at. A point has both coordinates, so the side constants answer here too:
+         *  {@link #TOP} sits at the middle of the top edge and answers
+         *  {@link HorizontalAlignment#CENTER}. This never answers
+         *  {@link HorizontalAlignment#LEADING} or {@link HorizontalAlignment#TRAILING},
+         *  because the reading direction was already resolved when the point was built.
+         *  @return The horizontal half of this point, and
+         *          {@link HorizontalAlignment#UNDEFINED} only for {@link #UNDEFINED}.
+         */
+        public HorizontalAlignment horizontal() {
+            switch ( this ) {
+                case LEFT: case TOP_LEFT: case BOTTOM_LEFT:
+                    return HorizontalAlignment.LEFT;
+                case RIGHT: case TOP_RIGHT: case BOTTOM_RIGHT:
+                    return HorizontalAlignment.RIGHT;
+                case TOP: case BOTTOM: case CENTER:
+                    return HorizontalAlignment.CENTER;
+                case UNDEFINED:
+                    return HorizontalAlignment.UNDEFINED;
+            }
+            throw new RuntimeException();
+        }
+
+        /**
+         *  Returns the point reached by going from this one through the center of the
+         *  component and out the other side, which is where to put something that should
+         *  sit across from whatever this point marks.
+         *  @return The point across the component, so {@link #BOTTOM_RIGHT} for
+         *          {@link #TOP_LEFT} and {@link #RIGHT} for {@link #LEFT}. {@link #CENTER}
+         *          and {@link #UNDEFINED} return themselves, because neither marks a side
+         *          to be across from.
+         */
+        public Placement opposite() {
+            switch ( this ) {
+                case TOP:          return BOTTOM;
+                case BOTTOM:       return TOP;
+                case LEFT:         return RIGHT;
+                case RIGHT:        return LEFT;
+                case TOP_LEFT:     return BOTTOM_RIGHT;
+                case BOTTOM_RIGHT: return TOP_LEFT;
+                case TOP_RIGHT:    return BOTTOM_LEFT;
+                case BOTTOM_LEFT:  return TOP_RIGHT;
+                case CENTER: case UNDEFINED: return this;
+            }
+            throw new RuntimeException();
+        }
+
+        /**
+         *  Tells whether this point is one of the four corners rather than a side or the center.
+         *  @return True for {@link #TOP_LEFT}, {@link #TOP_RIGHT},
+         *          {@link #BOTTOM_LEFT} and {@link #BOTTOM_RIGHT}.
+         */
+        public boolean isCorner() {
+            return this == TOP_LEFT  || this == TOP_RIGHT
+                || this == BOTTOM_LEFT || this == BOTTOM_RIGHT;
+        }
     }
 
     /**
@@ -829,32 +1292,37 @@ public final class UI extends UIFactoryMethods
     }
 
     /**
-     *  Defines the areas of a component, which is used
-     *  to by the {@link ImageConf} to determine if and how an image should be clipped.
-     *  Pass instances of this to {@link ImageConf#clipTo(swingtree.UI.ComponentArea)} to configure the clipping behaviour
-     *  as part of the style API (see {@link UIForAnySwing#withStyle(Styler)}). <br>
+     *  Names a region of a styled component. A style lays a component out as three nested
+     *  rings: the margin holds the outermost ring, the border width the next one, and what
+     *  the border leaves over is the innermost region. This enum names those three, and
+     *  two more which are unions of them.
+     *  <p>
+     *  Pass one to {@link ImageConf#clipTo(swingtree.UI.ComponentArea)} to clip an image to
+     *  a region, to {@link ComponentStyleDelegate#painter(Layer, ComponentArea, Painter)}
+     *  to confine your own painting to it, or to
+     *  {@link UIForAnySwing#onMouseEnter(ComponentArea, Action)} to be told when the cursor
+     *  reaches it, all as part of the style API (see {@link UIForAnySwing#withStyle(Styler)}).
+     *  <br>
      *  The following list describes what each enum instance represents:
      *  <ul>
-     *      <li>{@link swingtree.UI.ComponentArea#ALL} -
-     *      The entire component, which is the union of all other clip
-     *      areas ({@code INTERIOR + EXTERIOR + BORDER + CONTENT}).
-     *      </li>
-     *      <li>{@link swingtree.UI.ComponentArea#INTERIOR} -
-     *      The inner component area, which is defined as {@code ALL - EXTERIOR - BORDER}.
-     *      </li>
      *      <li>{@link swingtree.UI.ComponentArea#EXTERIOR} -
-     *      The outer component area, which can be expressed as {@code ALL - INTERIOR - BORDER},
-     *      or {@code ALL - CONTENT}.
+     *      The ring the margin leaves around everything else.
      *      </li>
      *      <li>{@link swingtree.UI.ComponentArea#BORDER} -
-     *      The border of the component, which is the area between the inner and outer component area
-     *      and which can be expressed as {@code ALL - INTERIOR - EXTERIOR}.
+     *      The ring the border width fills, between the exterior and the interior.
+     *      </li>
+     *      <li>{@link swingtree.UI.ComponentArea#INTERIOR} -
+     *      Everything the border leaves over, which is {@code ALL - EXTERIOR - BORDER}.
      *      </li>
      *      <li>{@link swingtree.UI.ComponentArea#BODY} -
-     *      The body of the component is the inner component area including the border area.
-     *      It can be expressed as {@code ALL - EXTERIOR}, or {@code INTERIOR + BORDER}.
+     *      The border and the interior together, which is {@code ALL - EXTERIOR}.
+     *      </li>
+     *      <li>{@link swingtree.UI.ComponentArea#ALL} -
+     *      The whole component, which is {@code EXTERIOR + BORDER + INTERIOR}.
      *      </li>
      *  </ul>
+     *  {@link #contains(ComponentArea)} spells those unions out, and
+     *  {@link #outerBoundary()} names the {@link ComponentBoundary} an area starts at.
      * @see TextConf#clipTo(ComponentArea)
      * @see TextConf#obstaclesFromChildren(ComponentBoundary)
      * @see ImageConf#clipTo(ComponentArea)
@@ -866,35 +1334,91 @@ public final class UI extends UIFactoryMethods
     @Immutable
     public enum ComponentArea implements UIEnum<ComponentArea>
     {
-        ALL, EXTERIOR, BORDER, INTERIOR, BODY
+        /** The whole component, which is {@link #EXTERIOR}, {@link #BORDER} and {@link #INTERIOR} together. */
+        ALL,
+        /** The ring the margin leaves around everything else. */
+        EXTERIOR,
+        /** The ring the border width fills, between the {@link #EXTERIOR} and the {@link #INTERIOR}. */
+        BORDER,
+        /** Everything the border leaves over, which is {@link #ALL} without {@link #EXTERIOR} and {@link #BORDER}. */
+        INTERIOR,
+        /** The {@link #BORDER} and the {@link #INTERIOR} together, which is {@link #ALL} without the {@link #EXTERIOR}. */
+        BODY;
+
+        /**
+         *  Returns the boundary line this area starts at, coming from the outside in.
+         *  {@link #ALL} and {@link #EXTERIOR} both start at the outer edge of the component,
+         *  {@link #BORDER} and {@link #BODY} both start where the margin ends, and
+         *  {@link #INTERIOR} starts where the border ends.
+         *  <p>
+         *  Two areas can share one boundary, so this is not the inverse of
+         *  {@link ComponentBoundary#wrappedArea()}: {@link ComponentBoundary#OUTER_TO_EXTERIOR}
+         *  is the answer for both {@link #ALL} and {@link #EXTERIOR}, and going back from it
+         *  answers {@link #ALL}. Only {@link #ALL}, {@link #BODY} and {@link #INTERIOR}
+         *  survive the round trip.
+         *
+         * @return The {@link ComponentBoundary} that tightly wraps this area.
+         */
+        public ComponentBoundary outerBoundary() {
+            switch ( this ) {
+                case INTERIOR:            return ComponentBoundary.BORDER_TO_INTERIOR;
+                case BORDER: case BODY:   return ComponentBoundary.EXTERIOR_TO_BORDER;
+                case ALL: case EXTERIOR:  return ComponentBoundary.OUTER_TO_EXTERIOR;
+            }
+            throw new RuntimeException();
+        }
+
+        /**
+         *  Tells whether this area covers every pixel the given area covers, which spells out
+         *  the set algebra the constants of this enum are defined by: {@link #ALL} covers all
+         *  of them, {@link #BODY} covers {@link #BORDER} and {@link #INTERIOR}, and the three
+         *  remaining areas cover only themselves, because they do not overlap.
+         *
+         * @param other The area to test for being covered by this one.
+         * @return True if every pixel of {@code other} also belongs to this area.
+         */
+        public boolean contains( ComponentArea other ) {
+            Objects.requireNonNull(other);
+            switch ( this ) {
+                case ALL:  return true;
+                case BODY: return other == BODY || other == BORDER || other == INTERIOR;
+                case EXTERIOR: case BORDER: case INTERIOR: return this == other;
+            }
+            throw new RuntimeException();
+        }
     }
 
     /**
-     * An enum representing the different boundaries of a UI component.
-     * These boundaries can be thought of as rectangular bounding boxes that capture
-     * <b>the transitional bounding lines between different {@link UI.ComponentArea}s in the
-     * box model (margin|border|padding) of a styled component.</b><br>
-     * These bounding rectangles consisting of infinitely thin boundary lines,
-     * whereas the {@link UI.ComponentArea} refer to the areas bordering between these lines.
+     * Names one of the infinitely thin lines at which the box model (margin|border|padding)
+     * of a styled component steps from one layer into the next, whereas a
+     * {@link UI.ComponentArea} names a whole region lying between two such lines.
+     * A style can anchor a gradient to a boundary through
+     * {@link GradientConf#boundary(ComponentBoundary)}, and place an image or a text
+     * against one through {@link ImageConf#placementBoundary(ComponentBoundary)}.<br>
      * Here's a brief explanation of each enum entry:
      * <ul>
      *     <li>{@link ComponentBoundary#OUTER_TO_EXTERIOR} -
-     *     The outermost boundary of the entire component, including any margin that might be applied.
+     *     The outer edge of the whole component, which is where its margin starts.
      *     </li>
      *     <li>{@link ComponentBoundary#EXTERIOR_TO_BORDER} -
-     *     The boundary located after the margin but before the border.
-     *     This tightly wraps the entire {@link ComponentArea#BODY}.
+     *     The line after the margin and before the border,
+     *     which tightly wraps the entire {@link ComponentArea#BODY}.
      *     </li>
      *     <li>{@link ComponentBoundary#BORDER_TO_INTERIOR} -
-     *     The boundary located after the border but before the padding.
-     *     It represents the edge of the component's interior.
+     *     The line after the border and before the padding,
+     *     which is the outer edge of the {@link ComponentArea#INTERIOR}.
      *     </li>
      *     <li>{@link ComponentBoundary#INTERIOR_TO_CONTENT} -
-     *     The boundary located after the padding.
-     *     It represents the innermost boundary of the component, where the actual content of the component begins,
+     *     The line after the padding, where the content of the component begins,
      *     like for example the contents of a {@link JPanel} or {@link JScrollPane}.
      *     </li>
+     *     <li>{@link ComponentBoundary#CENTER_TO_CONTENT} -
+     *     The center point of the component, which is a point rather than a line.
+     *     </li>
      * </ul>
+     * {@link #OUTER_TO_EXTERIOR}, {@link #EXTERIOR_TO_BORDER} and {@link #BORDER_TO_INTERIOR}
+     * each wrap a whole {@link UI.ComponentArea}, which {@link #wrappedArea()} returns.
+     * The other two lie inside the interior and wrap no named area.
      * @see TextConf#placementBoundary(ComponentBoundary)
      * @see ImageConf#placementBoundary(ComponentBoundary)
      * @see GradientConf#boundary(ComponentBoundary)
@@ -903,40 +1427,88 @@ public final class UI extends UIFactoryMethods
     @Immutable
     public enum ComponentBoundary implements UIEnum<ComponentBoundary> {
         /**
-         * The outermost boundary of the component, including any margin that might be applied.
+         * The outer edge of the whole component, which is where its margin starts.
+         * This tightly wraps the entire {@link ComponentArea#ALL}.
          */
-        OUTER_TO_EXTERIOR, // The outermost boundary of the component.
+        OUTER_TO_EXTERIOR,
         /**
-         * The boundary located after the margin but before the border. This wraps the {@link ComponentArea#BODY}.
+         * The line after the margin and before the border.
+         * This tightly wraps the entire {@link ComponentArea#BODY}.
          */
-        EXTERIOR_TO_BORDER, // After the margin, before the border.
+        EXTERIOR_TO_BORDER,
         /**
-         * The boundary located after the border but before the padding. It represents the edge of the component's interior.
+         * The line after the border and before the padding.
+         * This tightly wraps the entire {@link ComponentArea#INTERIOR}.
          */
-        BORDER_TO_INTERIOR, // After the border, before the padding.
+        BORDER_TO_INTERIOR,
         /**
-         * The boundary located after the padding.
-         * It represents the innermost boundary of the component, where the actual content of the component begins,
-         * like for example the contents of a {@link JPanel} or {@link JScrollPane}.
+         * The line after the padding, and the innermost boundary of the component:
+         * it is where the content of the component begins, like for example the
+         * contents of a {@link JPanel} or {@link JScrollPane}.
          */
-        INTERIOR_TO_CONTENT, // After the padding, before the content.
+        INTERIOR_TO_CONTENT,
         /**
-         * The center point of the component.
+         * The center point of the component, which is a point rather than a line.
          */
-        CENTER_TO_CONTENT, // The center of the component.
+        CENTER_TO_CONTENT;
+
+        /**
+         *  Returns the {@link ComponentArea} this boundary tightly wraps, so that the two
+         *  enums describing one box model cannot drift apart:
+         *  {@link #OUTER_TO_EXTERIOR} wraps {@link ComponentArea#ALL},
+         *  {@link #EXTERIOR_TO_BORDER} wraps {@link ComponentArea#BODY} and
+         *  {@link #BORDER_TO_INTERIOR} wraps {@link ComponentArea#INTERIOR}.
+         *  Each of those three areas returns this same boundary from
+         *  {@link ComponentArea#outerBoundary()}.
+         *
+         * @return The wrapped area, and an empty {@link Optional} for
+         *         {@link #INTERIOR_TO_CONTENT} and {@link #CENTER_TO_CONTENT},
+         *         which enclose the content rather than a named area.
+         */
+        public Optional<ComponentArea> wrappedArea() {
+            switch ( this ) {
+                case OUTER_TO_EXTERIOR:  return Optional.of(ComponentArea.ALL);
+                case EXTERIOR_TO_BORDER: return Optional.of(ComponentArea.BODY);
+                case BORDER_TO_INTERIOR: return Optional.of(ComponentArea.INTERIOR);
+                case INTERIOR_TO_CONTENT: case CENTER_TO_CONTENT: return Optional.empty();
+            }
+            throw new RuntimeException();
+        }
     }
 
     /**
-     *  Use this to specify the orientation of a component.
-     *  This is especially important for components that display text.
+     *  Names the reading direction of a component: {@link #LEFT_TO_RIGHT} as in English,
+     *  {@link #RIGHT_TO_LEFT} as in Arabic or Hebrew, or {@link #UNKNOWN} where none was
+     *  chosen. It decides where a line of text begins, and therefore where the leading
+     *  and the trailing end of a component are, which is why
+     *  {@link HorizontalAlignment#LEADING} and {@link HorizontalAlignment#TRAILING} can
+     *  only be resolved against one.
      *  <br>
      *  See {@link UIForAnySwing#withStyle(Styler)} and {@link ComponentStyleDelegate#orientation(swingtree.UI.ComponentOrientation)}.
      * @see Container#applyComponentOrientation(java.awt.ComponentOrientation)
+     * @see Placement#of(VerticalAlignment, HorizontalAlignment, ComponentOrientation)
      */
     @Immutable
     public enum ComponentOrientation implements UIEnum<ComponentOrientation>
     {
-        UNKNOWN, LEFT_TO_RIGHT, RIGHT_TO_LEFT
+        /** No reading direction was chosen, which SwingTree and AWT both read as left to right. */
+        UNKNOWN,
+        /** Lines of text run from left to right, as in English. */
+        LEFT_TO_RIGHT,
+        /** Lines of text run from right to left, as in Arabic or Hebrew. */
+        RIGHT_TO_LEFT;
+
+        /**
+         *  Tells whether text and components laid out under this orientation run from
+         *  left to right. {@link #UNKNOWN} answers {@code true} here, which is the same
+         *  choice AWT makes: {@link java.awt.ComponentOrientation#isLeftToRight()} also
+         *  answers {@code true} for {@link java.awt.ComponentOrientation#UNKNOWN}. That
+         *  is why a component whose orientation was never set behaves like an English one.
+         *
+         * @return True for {@link #LEFT_TO_RIGHT} and {@link #UNKNOWN},
+         *         false for {@link #RIGHT_TO_LEFT}.
+         */
+        public boolean isLeftToRightOrUnknown() { return this != RIGHT_TO_LEFT; }
     }
 
     /**
@@ -973,61 +1545,200 @@ public final class UI extends UIFactoryMethods
     }
 
     /**
-     *  Used to define how a layout manager (typically the {@link BoxLayout})
-     *  will lay out components along the given axis. <br>
-     *  Create a simple box layout for your components
-     *  by calling the {@link UIForAnySwing#withBoxLayout(swingtree.UI.Axis)} method,
-     *  or use {@link Layout#box(swingtree.UI.Axis)} factory method returning a {@link Layout} config
+     *  Names the axis along which a component or a layout manager arranges things:
+     *  the axis a {@link JSlider}, {@link JProgressBar}, {@link JSeparator},
+     *  {@link JSplitPane} or {@link JToolBar} runs along, and the axis a
+     *  {@link BoxLayout} stacks its children on.
+     *  <p>
+     *  Two of the four constants say which way a thing runs outright:
+     *  {@link #HORIZONTAL} and {@link #VERTICAL}. The other two say it by way of the
+     *  reading direction of the container: {@link #LINE} is the way a line of text runs
+     *  and {@link #PAGE} is the way lines follow each other down a page. A
+     *  {@link BoxLayout} is the only place in SwingTree where that detour changes the
+     *  outcome, so every other component asks {@link #resolve()} and reads {@link #LINE}
+     *  as {@link #HORIZONTAL} and {@link #PAGE} as {@link #VERTICAL}. That way a view
+     *  model which models its axis as {@link #LINE} can feed a slider and a box layout
+     *  from one property.
+     *  <p>
+     *  Create a box layout for your components by calling the
+     *  {@link UIForAnySwing#withBoxLayout(swingtree.UI.Axis)} method, or use the
+     *  {@link Layout#box(swingtree.UI.Axis)} factory method returning a {@link Layout} config
      *  object which can be passed to the style API (see {@link UIForAnySwing#withStyle(Styler)}
      *  and {@link ComponentStyleDelegate#layout(Layout)}).
+     *
+     * @see UI#slider(Axis)
+     * @see UI#progressBar(Axis, double)
+     * @see UI#splitPane(Axis)
      */
     @Immutable
     public enum Axis implements UIEnum<Axis>
     {
         /**
-         * Specifies that something is laid out left to right.
+         * Specifies that something runs from left to right.
          */
-        X,
+        HORIZONTAL,
         /**
-         * Specifies that something is laid out top to bottom.
+         * Specifies that something runs from top to bottom.
          */
-        Y,
+        VERTICAL,
         /**
-         * Specifies that something is laid out in the direction of
-         * a line of text as determined by the target container's
-         * {@code ComponentOrientation} property.
+         * Specifies that something runs in the direction of a line of text, as determined
+         * by the target container's {@link java.awt.ComponentOrientation}.
+         * That direction is always the horizontal one:
+         * {@link java.awt.ComponentOrientation} is a final class offering three constants,
+         * {@code LEFT_TO_RIGHT}, {@code RIGHT_TO_LEFT} and {@code UNKNOWN}, and all three
+         * report {@link java.awt.ComponentOrientation#isHorizontal()} as {@code true}.
+         * So {@link #resolve()} answers {@link #HORIZONTAL} here, and a {@link BoxLayout}
+         * is the one place which still tells the two apart: given {@link #LINE} it places
+         * the children from right to left when the container reads right to left.
          */
         LINE,
         /**
-         * Specifies that something is laid out in the direction that
-         * lines flow across a page as determined by the target container's
-         * {@code ComponentOrientation} property.
+         * Specifies that something runs in the direction that lines follow each other down
+         * a page, as determined by the target container's
+         * {@link java.awt.ComponentOrientation}. Every one of the three orientations runs
+         * its lines of text horizontally, which leaves its pages running vertically, so
+         * {@link #resolve()} answers {@link #VERTICAL} here. A {@link BoxLayout} is the one
+         * place which still tells the two apart: given {@link #PAGE} it mirrors the
+         * horizontal alignment of the stacked children when the container reads right to left.
          */
         PAGE;
 
-        public int forBoxLayout() {
+        /**
+         *  Reduces this axis to the one of {@link #HORIZONTAL} or {@link #VERTICAL} it
+         *  selects, which is what a {@link JSlider} or a {@link JSeparator} needs, because
+         *  neither of them has a reading direction to honour.
+         *  <p>
+         *  No orientation has to be passed in to do this: {@link java.awt.ComponentOrientation}
+         *  is a final class offering three constants, and all three run their lines of text
+         *  horizontally, so {@link #LINE} is a horizontal axis under every one of them.
+         *
+         * @return {@link #HORIZONTAL} for {@link #HORIZONTAL} and {@link #LINE},
+         *         {@link #VERTICAL} for {@link #VERTICAL} and {@link #PAGE}.
+         */
+        public Axis resolve() {
             switch ( this ) {
-                case X:    return BoxLayout.X_AXIS;
-                case Y:    return BoxLayout.Y_AXIS;
-                case LINE: return BoxLayout.LINE_AXIS;
-                case PAGE: return BoxLayout.PAGE_AXIS;
+                case LINE: return HORIZONTAL;
+                case PAGE: return VERTICAL;
+                case HORIZONTAL: case VERTICAL: return this;
             }
             throw new RuntimeException();
         }
+
+        /**
+         *  Tells whether this axis runs from side to side rather than from top to bottom.
+         *  @return True for {@link #HORIZONTAL} and {@link #LINE},
+         *          false for {@link #VERTICAL} and {@link #PAGE}.
+         */
+        public boolean isHorizontal() { return resolve() == HORIZONTAL; }
+
+        /**
+         *  Returns the axis at a right angle to this one, so that code holding one axis in
+         *  a variable can name the other without spelling out both constants. A
+         *  {@link JSplitPane} laid out along {@link #HORIZONTAL} puts its two components
+         *  side by side, which makes the divider between them a vertical bar.
+         *  @return {@link #VERTICAL} for {@link #HORIZONTAL} and {@link #LINE},
+         *          {@link #HORIZONTAL} for {@link #VERTICAL} and {@link #PAGE}.
+         */
+        public Axis perpendicular() { return isHorizontal() ? VERTICAL : HORIZONTAL; }
+
+        /**
+         *  Converts this axis into the constant a {@link BoxLayout} expects. A box layout
+         *  is the one place which still tells {@link #LINE} and {@link #PAGE} apart from
+         *  {@link #HORIZONTAL} and {@link #VERTICAL}, so this method keeps all four apart
+         *  rather than resolving them the way {@link #resolve()} does.
+         *
+         * @return {@link BoxLayout#X_AXIS} for {@link #HORIZONTAL},
+         *         {@link BoxLayout#Y_AXIS} for {@link #VERTICAL},
+         *         {@link BoxLayout#LINE_AXIS} for {@link #LINE} and
+         *         {@link BoxLayout#PAGE_AXIS} for {@link #PAGE}.
+         */
+        public int forBoxLayout() {
+            switch ( this ) {
+                case HORIZONTAL: return BoxLayout.X_AXIS;
+                case VERTICAL:   return BoxLayout.Y_AXIS;
+                case LINE:       return BoxLayout.LINE_AXIS;
+                case PAGE:       return BoxLayout.PAGE_AXIS;
+            }
+            throw new RuntimeException();
+        }
+
+        int forSlider()      { return isHorizontal() ? JSlider.HORIZONTAL      : JSlider.VERTICAL;      }
+        int forProgressBar() { return isHorizontal() ? JProgressBar.HORIZONTAL : JProgressBar.VERTICAL; }
+        int forSeparator()   { return isHorizontal() ? JSeparator.HORIZONTAL   : JSeparator.VERTICAL;   }
+        int forToolBar()     { return isHorizontal() ? JToolBar.HORIZONTAL     : JToolBar.VERTICAL;     }
+        int forSplitPane()   { return isHorizontal() ? JSplitPane.HORIZONTAL_SPLIT : JSplitPane.VERTICAL_SPLIT; }
     }
 
     /**
-     *  Use this to specify the font style of a component.
-     *  <br>
+     *  Names how the glyphs of a font are drawn: upright and thin as {@link #PLAIN},
+     *  thickened as {@link #BOLD}, slanted as {@link #ITALIC}, or both at once as
+     *  {@link #BOLD_ITALIC}. There are four constants because boldness and slant are two
+     *  independent switches.
+     *  <p>
+     *  {@link #isBold()} and {@link #isItalic()} read those two switches back out, and
+     *  {@link #withBold(boolean)} and {@link #withItalic(boolean)} change one of them
+     *  while keeping the other, which is what a toolbar with a separate bold button and
+     *  italic button needs.
+     *
      *  @see UIForAnySwing#withStyle(Styler)
      *  @see ComponentStyleDelegate#fontStyle(swingtree.UI.FontStyle)
      *  @see FontConf#style(FontStyle)
-     *  @see Font#of(String, FontStyle, int) 
+     *  @see Font#of(String, FontStyle, int)
      */
     @Immutable
     public enum FontStyle implements UIEnum<FontStyle>
     {
-        PLAIN, BOLD, ITALIC, BOLD_ITALIC;
+        /** Glyphs drawn upright and unthickened. */
+        PLAIN,
+        /** Glyphs drawn with thickened strokes and upright. */
+        BOLD,
+        /** Glyphs drawn slanted and unthickened. */
+        ITALIC,
+        /** Glyphs drawn with thickened strokes and slanted. */
+        BOLD_ITALIC;
+
+        /**
+         *  Tells whether this style draws its glyphs with thickened strokes.
+         *  @return True for {@link #BOLD} and {@link #BOLD_ITALIC}.
+         */
+        public boolean isBold() { return isOneOf(BOLD, BOLD_ITALIC); }
+
+        /**
+         *  Tells whether this style draws its glyphs slanted.
+         *  @return True for {@link #ITALIC} and {@link #BOLD_ITALIC}.
+         */
+        public boolean isItalic() { return isOneOf(ITALIC, BOLD_ITALIC); }
+
+        /**
+         *  Returns the style which is this one with boldness turned on or off and the
+         *  slant left as it is. Turning boldness on for {@link #ITALIC} therefore gives
+         *  {@link #BOLD_ITALIC} rather than {@link #BOLD}, which is what a bold button
+         *  sitting next to an italic button has to do.
+         *
+         * @param bold Whether the returned style should thicken its strokes.
+         * @return The style with the requested boldness and the slant of this one.
+         */
+        public FontStyle withBold( boolean bold ) {
+            if ( bold )
+                return isItalic() ? BOLD_ITALIC : BOLD;
+            return isItalic() ? ITALIC : PLAIN;
+        }
+
+        /**
+         *  Returns the style which is this one with the slant turned on or off and the
+         *  boldness left as it is. Turning the slant off for {@link #BOLD_ITALIC}
+         *  therefore gives {@link #BOLD} rather than {@link #PLAIN}, which is what an
+         *  italic button sitting next to a bold button has to do.
+         *
+         * @param italic Whether the returned style should slant its glyphs.
+         * @return The style with the requested slant and the boldness of this one.
+         */
+        public FontStyle withItalic( boolean italic ) {
+            if ( italic )
+                return isBold() ? BOLD_ITALIC : ITALIC;
+            return isBold() ? BOLD : PLAIN;
+        }
 
         int toAWTFontStyle() {
             switch ( this ) {
@@ -1041,46 +1752,59 @@ public final class UI extends UIFactoryMethods
     }
 
     /**
-     * This enum contains constant values representing
-     * the type of action(s) to be performed by a Drag and Drop operation.
-     * These constants are a direct mapping to the constants defined in the {@link TransferHandler} class
-     * as well as the {@link java.awt.dnd.DnDConstants} class.
-     * 
-     * @see DragAwayComponentConf#dragAction(DragAction) 
+     * Names which transfers a drag and drop operation permits: copying, moving, linking,
+     * copying or moving, or nothing at all. Every constant maps onto one of the
+     * {@code int} constants of {@link TransferHandler} and {@link java.awt.dnd.DnDConstants},
+     * which {@link #toIntCode()} returns.
+     * <p>
+     * {@link #COPY_OR_MOVE} permits two transfers at once, which is why comparing two
+     * constants for equality is not enough to tell whether one is acceptable where the
+     * other was asked for. {@link #includes(DragAction)} asks that question instead:
+     * does this constant permit everything the other one permits?
+     *
+     * @see DragAwayComponentConf#dragAction(DragAction)
      */
     @Immutable
     public enum DragAction implements UIEnum<DragAction>
     {
         /**
-         * An <code>int</code> representing no transfer action.
+         * Permits no transfer at all, which is how a component refuses to be dragged
+         * away and how a target refuses every drop.
          */
         NONE,
         /**
-         * An <code>int</code> representing a &quot;copy&quot; transfer action.
-         * This value is used when data is copied to a clipboard
-         * or copied elsewhere in a drag and drop operation.
+         * Permits copying, and nothing else. The data is copied to a clipboard, or
+         * copied elsewhere in a drag and drop operation, and the source keeps its own.
          */
         COPY,
         /**
-         * An <code>int</code> representing a &quot;move&quot; transfer action.
-         * This value is used when data is moved to a clipboard (i.e. a cut)
-         * or moved elsewhere in a drag and drop operation.
+         * Permits moving, and nothing else. The data is moved to a clipboard (a cut),
+         * or moved elsewhere in a drag and drop operation, and the source gives it up.
          */
         MOVE,
         /**
-         * An <code>int</code> representing a source action capability of either
-         * &quot;copy&quot; or &quot;move&quot;.
+         * Permits both copying and moving, leaving the choice between the two to the
+         * drag and drop operation itself. This is the one constant which permits more
+         * than a single transfer, so {@link #includes(DragAction)} answers true for both
+         * {@link #COPY} and {@link #MOVE} here.
          */
         COPY_OR_MOVE,
         /**
-         * An <code>int</code> representing a &quot;link&quot; transfer action.
-         * This value is used to specify that data should be linked in a drag
-         * and drop operation.
+         * Permits linking, and nothing else: the drop creates a reference to the data
+         * rather than a copy of it, and neither {@link #COPY} nor {@link #MOVE} covers it.
          *
          * @see java.awt.dnd.DnDConstants#ACTION_LINK
          */
         LINK;
 
+        /**
+         *  Returns the number AWT and Swing use for this set of transfers, which is what
+         *  {@link TransferHandler} and {@link java.awt.dnd.DnDConstants} speak in.
+         *
+         * @return {@link TransferHandler#NONE}, {@link TransferHandler#COPY},
+         *         {@link TransferHandler#MOVE}, {@link TransferHandler#COPY_OR_MOVE}
+         *         or {@link TransferHandler#LINK}.
+         */
         public int toIntCode() {
             switch ( this ) {
                 case NONE:        return TransferHandler.NONE;
@@ -1093,54 +1817,40 @@ public final class UI extends UIFactoryMethods
         }
 
         /**
-         *  Use this to check if this enum action is a particular {@link java.awt.dnd.DnDConstants} action.
-         *  @param action The action to check against.
-         *  @return {@code true} if this enum action is the same as the given {@code action}, {@code false} otherwise.
+         *  Tells whether copying is one of the transfers this constant permits.
+         *  @return True for {@link #COPY} and {@link #COPY_OR_MOVE}.
          */
-        public boolean is( int action ) {
-            return (action & toIntCode()) != 0;
-        }
-    }
+        public boolean isCopy() { return isOneOf(COPY, COPY_OR_MOVE); }
 
-    /**
-     *  Set of enum instances defining common types of Swing look and feels.
-     *  Use {@link UI#currentLookAndFeel()} to check which look and feel is currently active.
-     */
-    @Immutable
-    public enum LookAndFeel implements UIEnum<LookAndFeel> {
-        OTHER,
-        METAL,
-        FLAT_LAF,
-        NIMBUS;
-    }
+        /**
+         *  Tells whether moving is one of the transfers this constant permits.
+         *  @return True for {@link #MOVE} and {@link #COPY_OR_MOVE}.
+         */
+        public boolean isMove() { return isOneOf(MOVE, COPY_OR_MOVE); }
 
-    /**
-     *  SwingTree tries to be compatible with different look and feels, which is
-     *  why it maintains a set of constants for the most common look and feels through
-     *  the {@link swingtree.UI.LookAndFeel} enum.
-     *  This method returns the current look and feel of the application
-     *  or {@link swingtree.UI.LookAndFeel#OTHER} if the look and feel is not recognized.
-     * @return One of
-     *            <ul>
-     *                <li>{@link swingtree.UI.LookAndFeel#FLAT_LAF}</li>
-     *                <li>{@link swingtree.UI.LookAndFeel#NIMBUS}</li>
-     *                <li>{@link swingtree.UI.LookAndFeel#METAL}</li>
-     *            </ul>
-     *            or {@link swingtree.UI.LookAndFeel#OTHER} if none of the above
-     *            was recognized.
-     */
-    public static LookAndFeel currentLookAndFeel() {
-        try {
-            String laf = UIManager.getLookAndFeel().getClass().getName();
-            if ( laf.contains("FlatLaf") ) return LookAndFeel.FLAT_LAF;
-            if ( laf.contains("Nimbus")  ) return LookAndFeel.NIMBUS;
-            if ( laf.contains("Metal")   ) return LookAndFeel.METAL;
-        }
-        catch (Exception e) {
-            log.warn(SwingTree.get().logMarker(), "Failed to determine current look and feel.", e);
-        }
+        /**
+         *  Tells whether linking is the transfer this constant permits.
+         *  @return True for {@link #LINK}.
+         */
+        public boolean isLink() { return this == LINK; }
 
-        return LookAndFeel.OTHER;
+        /**
+         *  Tells whether every transfer the given action permits is also permitted by this
+         *  one. A drop target which accepts {@link #COPY_OR_MOVE} accepts a source asking
+         *  only to copy, while a target which accepts {@link #COPY} has to refuse a source
+         *  insisting on being allowed to move as well. Comparing the two constants for
+         *  equality answers neither of those correctly.
+         *  <p>
+         *  Every action permits everything it permits itself, and every action permits
+         *  everything {@link #NONE} permits, which is nothing.
+         *
+         * @param action The action to test for being permitted by this one.
+         * @return True if this action permits everything {@code action} permits.
+         */
+        public boolean includes( DragAction action ) {
+            Objects.requireNonNull(action);
+            return (toIntCode() & action.toIntCode()) == action.toIntCode();
+        }
     }
 
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -2005,7 +2715,7 @@ public final class UI extends UIFactoryMethods
      *  it directly instead of having to install a custom {@code ComponentUI} delegate.
      */
     public static class SplitPane extends JSplitPane implements StylableComponent {
-        SplitPane( Align align ) { super(align.forSplitPane()); }
+        SplitPane( Axis axis ) { super(axis.forSplitPane()); }
         @Override public void paintComponent(Graphics g){ paintBackground(g, super::paintComponent); }
         @Override public void paintChildren(Graphics g) { paintForeground(g, super::paintChildren); }
         @Override public void setUISilently( ComponentUI ui ) { this.ui = ui; }

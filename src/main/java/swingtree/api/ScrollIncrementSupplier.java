@@ -51,7 +51,7 @@ public interface ScrollIncrementSupplier
      */
     int get(
         Bounds   visibleRectangle,
-        UI.Align orientation,
+        UI.Axis orientation,
         int      direction
     );
 }

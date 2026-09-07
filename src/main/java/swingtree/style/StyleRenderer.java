@@ -650,7 +650,7 @@ final class StyleRenderer
 
     /**
      *  Caches the geometry-independent parts of a shadow's gradient color stops for one
-     *  {@link ShadowConf} (normalized to its color, inset/outset direction and {@link UI.ShadowType}).
+     *  {@link ShadowConf} (normalized to its color, inset/outset direction and {@link UI.ShadowFalloff}).
      *  <p>
      *  The blended transition colors do not depend on the gradient's geometry at all, so they are
      *  blended once (lazily) and reused. Only the {@code fractions} positions depend on the
@@ -698,7 +698,7 @@ final class StyleRenderer
             final Color outerColor = isOutset ? transparentBg : shadowColor;
             // A gradient needs at least two stops; a well behaved ShadowFractionsSupplier always
             // supplies >= 2, but as it is a public interface we defensively fall back to the flat falloff:
-            final Tuple<Float> falloff = _conf.type().getFractions();
+            final Tuple<Float> falloff = _conf.falloff().getFractions();
             final Tuple<Float> curve   = falloff.size() >= 2 ? falloff : ShadowFractions.flat();
             final int n = curve.size() - 1; // number of sampling intervals
             final Color[] transition = new Color[n];
@@ -1469,54 +1469,14 @@ final class StyleRenderer
     private static UI.Placement _findDesiredPlacementFrom(TextConf text) {
         UI.Placement chosenPlacement = text.placement();
         if ( chosenPlacement == UI.Placement.UNDEFINED ) {
-            // We determine the placement of the text from the font configuration if not explicitly set:
-            UI.HorizontalAlignment horizontalAlignment = text.fontConf().horizontalAlignment();
-            UI.VerticalAlignment verticalAlignment = text.fontConf().verticalAlignment();
-            chosenPlacement = _placementOf(horizontalAlignment, verticalAlignment);
+            chosenPlacement = UI.Placement.of(
+                                    text.fontConf().verticalAlignment(),
+                                    text.fontConf().horizontalAlignment()
+                                );
         }
         return chosenPlacement;
     }
 
-    private static UI.Placement _placementOf(
-        UI.HorizontalAlignment horizontalAlignment, 
-        UI.VerticalAlignment verticalAlignment
-    ) {
-        UI.Placement currentPlacement = UI.Placement.UNDEFINED;
-        switch (horizontalAlignment) {
-            case LEFT: currentPlacement = UI.Placement.LEFT;break;
-            case CENTER: currentPlacement = UI.Placement.CENTER;break;
-            case RIGHT: currentPlacement = UI.Placement.RIGHT;break;
-            case LEADING: currentPlacement = UI.Placement.LEFT;break; // leading means: "align with the reading direction of the text". In most cases, this is equivalent to LEFT, but it can be different for right-to-left languages. For simplicity, we treat it as LEFT here.
-            case TRAILING: currentPlacement = UI.Placement.RIGHT;break;// trailing means: "align with the opposite of the reading direction of the text". In most cases, this is equivalent to RIGHT, but it can be different for right-to-left languages. For simplicity, we treat it as RIGHT here.
-            default: break;
-        }
-        switch (verticalAlignment) {
-            case TOP:
-                switch (currentPlacement) {
-                    case LEFT: return UI.Placement.TOP_LEFT;
-                    case CENTER: return UI.Placement.TOP;
-                    case RIGHT: return UI.Placement.TOP_RIGHT;
-                    default: return UI.Placement.TOP;
-                }
-            case CENTER:
-                switch (currentPlacement) {
-                    case LEFT: return UI.Placement.LEFT;
-                    case CENTER: return UI.Placement.CENTER;
-                    case RIGHT: return UI.Placement.RIGHT;
-                    default: return UI.Placement.CENTER;
-                }
-            case BOTTOM:
-                switch (currentPlacement) {
-                    case LEFT: return UI.Placement.BOTTOM_LEFT;
-                    case CENTER: return UI.Placement.BOTTOM;
-                    case RIGHT: return UI.Placement.BOTTOM_RIGHT;
-                    default: return UI.Placement.BOTTOM;
-                }
-            default:
-                return currentPlacement;
-        }
-    }
-    
     private static void _renderTextInternal(
         final Graphics2D       g2d,
         final Font             font,

@@ -1461,21 +1461,21 @@ public final class ComponentStyleDelegate<C extends JComponent>
     }
 
     /**
-     *  Defines the {@link UI.ShadowType}, the shape of the "falloff curve" that
+     *  Defines the {@link UI.ShadowFalloff}, the shape of the "falloff curve" that
      *  determines how the shadow color fades from full strength into transparency across
      *  the blur region. The various types model different real world shadow phenomena
-     *  (see {@link UI.ShadowType} for a description, real world analogue and exact math
+     *  (see {@link UI.ShadowFalloff} for a description, real world analogue and exact math
      *  of each). <br>
      *  Note that this property will be applied to all shadow effects of all layers, including
      *  the default shadow and named shadows defined using {@link #shadow(String, Configurator)}. <br>
-     *  The default value is {@link UI.ShadowType#BLUR}.
+     *  The default value is {@link UI.ShadowFalloff#BLUR}.
      *
-     * @param type The {@link UI.ShadowType} defining how the shadow color fades
-     *             from full strength into transparency across the blur region.
-     * @return A new {@link ComponentStyleDelegate} with the provided shadow type.
+     * @param falloff The {@link UI.ShadowFalloff} defining how the shadow color fades
+     *                from full strength into transparency across the blur region.
+     * @return A new {@link ComponentStyleDelegate} with the provided falloff curve.
      */
-    public ComponentStyleDelegate<C> shadowType( UI.ShadowType type ) {
-        return _withStyle(_styleConf._withShadow(shadow -> shadow.type(type)));
+    public ComponentStyleDelegate<C> shadowFalloff( UI.ShadowFalloff falloff ) {
+        return _withStyle(_styleConf._withShadow(shadow -> shadow.falloff(falloff)));
     }
 
     /**
@@ -2438,14 +2438,14 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  also supports displaying text, or has a custom text style (see {@link TextConf}). <br>
      *  Also note that not all text based components support text alignment.
      *  @param alignment The horizontal and vertical alignment of the font.
-     *                   See {@link UI.Alignment} for more information.
+     *                   See {@link UI.Placement} for more information.
      *  @return A new {@link ComponentStyleDelegate} with the provided font alignment.
      *  throws NullPointerException If the alignment is {@code null}.
-     *          Use {@link UI.Alignment#UNDEFINED} to remove the font alignment style.
+     *          Use {@link UI.Placement#UNDEFINED} to remove the font alignment style.
      */
-    public ComponentStyleDelegate<C> fontAlignment( UI.Alignment alignment ) {
+    public ComponentStyleDelegate<C> fontAlignment( UI.Placement alignment ) {
         Objects.requireNonNull(alignment);
-        return fontAlignment(alignment.getHorizontal()).fontAlignment(alignment.getVertical());
+        return fontAlignment(alignment.horizontal()).fontAlignment(alignment.vertical());
     }
 
     /**
