@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>StylableComponent.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">StylableComponent.java</span></div><h1>StylableComponent.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import javax.swing.JComponent;
+import javax.swing.plaf.ComponentUI;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.util.function.Consumer;
+
+/**
+ *  Implementations of this interface are SwingTree native components
+ *  which enjoy the full support of the style API.
+ *  Regular Swing components can be styled on most layers
+ *  but not all. The {@link swingtree.UI.Layer#BACKGROUND} and
+ *  {@link swingtree.UI.Layer#FOREGROUND} layers are not supported
+ *  for some components for which SwingTree tries to install a
+ *  custom UI delegate. &lt;br&gt;
+ *  This however is prone to side effects and can cause issues
+ *  with third party look and feels. &lt;br&gt;
+ *  For full support of the style API for your custom components
+ *  you should implement this interface.
+ */
+public interface StylableComponent
+{
+    /**
+     *  Certain style configurations require SwingTree to install a
+     *  custom UI delegate. This method is used to set the UI delegate
+     *  for the component but without triggering side effects like
+     *  the former UI being uninstalled (which itself can cause
+     *  a lot of undesired side effects).
+     *  &lt;p&gt;
+     *  &lt;b&gt;This method is not intended to be called by client code!
+     *  It exists for internal use only and unfortunately cannot be
+     *  protected or private due to the nature of the Swing API.&lt;/b&gt;
+     *  &lt;p&gt;
+     *  The implementation of this method is expected to look like this:
+     *  &lt;pre&gt;
+     *  {@literal @}Override
+     *  public void setUISilently(ComponentUI ui){
+     *      this.ui = ui; // no side effects
+     *  }
+     *  &lt;/pre&gt;
+     * @param ui the UI delegate to set for the component
+     *           without triggering side effects.
+     */
+    void setUISilently( ComponentUI ui );
+
+    /**
+     *  This method is expected to be implemented as follows
+     *  within a component extension which ought to be made compatible
+     *  with SwingTree.
+     *  &lt;pre&gt;
+     *      {@literal @}Override
+     *      public void paint(Graphics g){
+     *          paintBackground(g, ()-&amp;gt;super.paint(g));
+     *      }
+     *  &lt;/pre&gt;
+     * @param g the graphics context to paint on,
+     *          obtained from the component's {@link JComponent#paint(Graphics)} method.
+     */
+    void paint( Graphics g );
+
+    /**
+     *  This method is expected to be implemented as follows:
+     *  &lt;pre&gt;
+     *      {@literal @}Override
+     *      public void paintChildren(Graphics g){
+     *          paintForeground(g, ()-&amp;gt;super.paintChildren(g));
+     *      }
+     *  &lt;/pre&gt;
+     * @param g the graphics context to paint on,
+     *          obtained from the component's {@code JComponent::paintChildren(Graphics)} method.
+     */
+    void paintChildren( Graphics g );
+
+    /**
+     *  &lt;b&gt;
+     *      This default method is not intended to be overridden by client code!
+     *      It delegates the painting to the library internal {@link ComponentExtension}.
+     *  &lt;/b&gt;
+     *
+     * @param g The graphics context to paint on.
+     * @param superPaint The super.paint() method to call.
+     */
+    /*final*/ default void paintBackground( Graphics g, Consumer&lt;Graphics&gt; superPaint ) {
+<span class="pc bpc" id="L85" title="1 of 2 branches missed.">        if ( this instanceof JComponent ) {</span>
+<span class="fc" id="L86">            ComponentExtension.from((JComponent) this).paintBackgroundIfNeeded( g, superPaint );</span>
+        }
+        else
+<span class="nc" id="L89">            throw new UnsupportedOperationException( &quot;This interface is only intended for JComponent implementations&quot; );</span>
+<span class="fc" id="L90">    }</span>
+
+    /**
+     *  &lt;b&gt;
+     *      This default method is not intended to be overridden by client code!
+     *      It delegates the painting to the library internal {@link ComponentExtension}.
+     *  &lt;/b&gt;
+     *
+     * @param g The graphics context to paint on.
+     * @param superPaint The super.paintChildren() method to call.
+     */
+    /*final*/ default void paintForeground( Graphics g, Consumer&lt;Graphics&gt; superPaint ) {
+<span class="pc bpc" id="L102" title="1 of 2 branches missed.">        if ( this instanceof JComponent ) {</span>
+<span class="fc" id="L103">            ComponentExtension.from((JComponent) this).paintForeground( (Graphics2D) g, superPaint );</span>
+        }
+        else
+<span class="nc" id="L106">            throw new UnsupportedOperationException( &quot;This interface is only intended for JComponent implementations&quot; );</span>
+<span class="fc" id="L107">    }</span>
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

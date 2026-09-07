@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ItemStyler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.api</a> &gt; <span class="el_source">ItemStyler.java</span></div><h1>ItemStyler.java</h1><pre class="source lang-java linenums">package swingtree.api;
+
+import swingtree.style.ComponentStyleDelegate;
+
+import javax.swing.JComponent;
+import java.util.Objects;
+
+/**
+ * An {@link ItemStyler} is conceptually a union of a property observer and the
+ * {@link Styler} function, which is to say that it takes both the current item
+ * of a bound {@link sprouts.Val} property and a {@link ComponentStyleDelegate}
+ * to produce a new {@link ComponentStyleDelegate} with some style properties
+ * applied to it (usually based on the supplied item). &lt;br&gt;
+ * Note that both parameters are immutable value oriented objects, so the function
+ * is pure and does not modify the original {@link ComponentStyleDelegate} or item. &lt;br&gt;
+ * &lt;p&gt;
+ * This interface exists specifically for property driven styling through
+ * {@link swingtree.UIForAnySwing#withStyle(sprouts.Val, ItemStyler)}, whose whole
+ * purpose is thread safety in the decoupled threading mode
+ * (see {@link swingtree.threading.EventProcessor#DECOUPLED}): &lt;br&gt;
+ * Style gathering is owned by the UI thread, which means a plain {@link Styler}
+ * lambda which reads a property from its enclosing scope (through {@code myProperty.get()})
+ * leaks the UI thread into application thread owned state. An {@link ItemStyler}
+ * closes that leak by receiving the item &lt;b&gt;as an explicit argument&lt;/b&gt;, captured
+ * from the property change event on the property's owning thread and published
+ * to the UI thread, where this function is then evaluated safely. &lt;br&gt;
+ * So instead of:
+ * &lt;pre&gt;{@code
+ *   UI.label(&quot;...&quot;)
+ *   .withRepaintOn(person)
+ *   .withStyle( it -&gt; it.backgroundColor(person.get().color()) ) // &lt;- live read on the UI thread!
+ * }&lt;/pre&gt;
+ * ...you write:
+ * &lt;pre&gt;{@code
+ *   UI.label(&quot;...&quot;)
+ *   .withStyle( person, (p, it) -&gt; it.backgroundColor(p.color()) ) // &lt;- captured item, no property access
+ * }&lt;/pre&gt;
+ * ...which also repaints automatically whenever the property changes, making a
+ * separate {@link swingtree.UIForAnySwing#withRepaintOn(sprouts.Observable)} binding unnecessary.
+ * &lt;p&gt;
+ * When a single {@link ItemStyler} should follow &lt;b&gt;several&lt;/b&gt; properties at once, merge them
+ * into one record with the composite view builder
+ * {@link sprouts.Viewable#of(Object, java.util.function.Function)} (requires Sprouts 2.7.0 or above)
+ * and bind that one merged property, instead of chaining a
+ * {@link swingtree.UIForAnySwing#withStyle(sprouts.Val, ItemStyler)} per property.
+ *
+ * @param &lt;T&gt; the type of the item of the bound property, supplied to this function as the first argument.
+ * @param &lt;C&gt; the type of the {@link JComponent} that the {@link ComponentStyleDelegate} is delegating to.
+ * @see swingtree.UIForAnySwing#withStyle(sprouts.Val, ItemStyler) The builder method consuming this function.
+ * @see Styler The plain, non property driven counterpart of this function.
+ * @see AnimatedItemStyler The animated counterpart which also receives an animation status per repaint.
+ * @see AnimatedStyler The animation status driven styler used for transitional and transitory styles.
+ */
+@FunctionalInterface
+public interface ItemStyler&lt;T, C extends JComponent&gt;
+{
+    /**
+     * An {@link ItemStyler} that does nothing, meaning it simply returns the given
+     * {@link ComponentStyleDelegate} without applying any style to it.
+     * Conceptually speaking, this returns the null object of the {@link ItemStyler} type.
+     *
+     * @param &lt;T&gt; The type of the item of the bound property.
+     * @param &lt;C&gt; The type of the {@link JComponent} that the {@link ComponentStyleDelegate} is delegating to.
+     * @return An {@link ItemStyler} that does nothing.
+     */
+    static &lt;T, C extends JComponent&gt; ItemStyler&lt;T, C&gt; none() {
+<span class="nc" id="L67">        return (ItemStyler&lt;T, C&gt;) Constants.ITEM_STYLER_NONE;</span>
+    }
+
+    /**
+     * Applies some style to the given {@link ComponentStyleDelegate}, usually based on
+     * the supplied property item, and returns a new {@link ComponentStyleDelegate}
+     * that has the style applied (if any). &lt;br&gt;
+     * Note that this method deliberately requires the handling of checked exceptions
+     * at its invocation sites because there may be any number of implementations
+     * hiding behind this interface and so it is unwise to assume that
+     * all of them will be able to execute gracefully without throwing exceptions.
+     *
+     * @param item The current item of the bound property, captured from the property change
+     *             event on the property's owning thread. Style based on this argument only,
+     *             never on the property itself!
+     * @param delegate The {@link ComponentStyleDelegate} to apply the style to.
+     * @return A new {@link ComponentStyleDelegate} that has the style applied.
+     * @throws Exception if the style could not be applied by the client code.
+     */
+    ComponentStyleDelegate&lt;C&gt; style( T item, ComponentStyleDelegate&lt;C&gt; delegate ) throws Exception;
+
+    /**
+     * Returns a new {@link ItemStyler} that applies the style of this {@link ItemStyler}
+     * and then applies the style of the given {@link ItemStyler}.
+     *
+     * @param other the {@link ItemStyler} to apply after this one.
+     * @return a new {@link ItemStyler} that applies the style of this and then the given one.
+     */
+    default ItemStyler&lt;T, C&gt; andThen( ItemStyler&lt;T, C&gt; other ) {
+<span class="nc" id="L96">        Objects.requireNonNull(other);</span>
+<span class="nc bnc" id="L97" title="All 2 branches missed.">        if ( this == none() )</span>
+<span class="nc" id="L98">            return other;</span>
+<span class="nc bnc" id="L99" title="All 2 branches missed.">        if ( other == none() )</span>
+<span class="nc" id="L100">            return this;</span>
+
+<span class="nc" id="L102">        return ( item, delegate ) -&gt; {</span>
+<span class="nc" id="L103">            ComponentStyleDelegate&lt;C&gt; result = delegate;</span>
+            try {
+<span class="nc" id="L105">                result = style( item, delegate );</span>
+<span class="nc" id="L106">            } catch ( Exception e ) {</span>
+                // Exceptions inside a styler should not be fatal.
+<span class="nc" id="L108">                Constants.LOG.error(</span>
+                    &quot;Error trying to run '&quot;+delegate+&quot;' through item styler '&quot;+this+&quot;'.&quot;,
+                    e
+                );
+<span class="nc" id="L112">            }</span>
+<span class="nc" id="L113">            return other.style( item, result );</span>
+        };
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

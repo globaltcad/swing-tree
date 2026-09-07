@@ -1,0 +1,777 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LayerPartitionCache.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">LayerPartitionCache.java</span></div><h1>LayerPartitionCache.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import swingtree.SwingTree;
+import swingtree.UI;
+import swingtree.layout.Size;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DirectColorModel;
+import java.awt.image.Raster;
+import java.util.Map;
+import java.util.Objects;
+import java.util.WeakHashMap;
+import java.util.function.BiConsumer;
+
+/**
+ *  This class manages the cached rendering of one piece of a component's style: usually a whole
+ *  layer ({@link LayerRenderConfPartition#WHOLE}), and otherwise one part of a layer that could
+ *  not be drawn into a single image. &lt;br&gt;
+ *  The cache key is the deeply immutable {@link LayerRenderConf} describing that piece, so a
+ *  paint whose description is unchanged blits the image we already have, and a paint whose
+ *  description changed drops the entry and draws again. There is one instance of this per
+ *  component, layer and part, but the images themselves live in a global pool keyed weakly by
+ *  the description, so every component with an equal style shares one image. &lt;br&gt;
+ *  &lt;br&gt;
+ *  &lt;b&gt;Size independent caching through stretch tiling (&quot;nine slice&quot;):&lt;/b&gt;&lt;br&gt;
+ *  The render configuration includes the exact component {@link Size}, so naively every frame of
+ *  a live resize would be a cache miss and heavily styled components would be rasterized from
+ *  scratch dozens of times per second. For eligible styles this cache therefore keys its entry
+ *  on a &lt;b&gt;minimal exemplar&lt;/b&gt; of the style instead: the same configuration with its size
+ *  replaced by the smallest size at which every size dependent pixel still exists. Because
+ *  {@link Size} is the &lt;i&gt;only&lt;/i&gt; size dependent property in the whole configuration, the
+ *  exemplar works as a size independent cache key, mapping all sizes of a style onto one value,
+ *  and at the same time as a valid render instruction: {@link StyleRenderer} receives exactly
+ *  what a real component of that small size would send, so it needs no special case for tiling.
+ *  The exemplar rendering then acts like a small texture atlas from which the actual rendering
+ *  is reconstructed on the fly using nine tile blits: the four corners copied 1:1, the four edge
+ *  bands and the center stretched - the technique behind Android 9-patch drawables and CSS
+ *  {@code border-image}. &lt;br&gt;
+ *  &lt;br&gt;
+ *  This gives back exactly the same pixels, but only for styles that meet one condition: &lt;b&gt;the
+ *  parts we stretch have to look the same all the way along the direction we stretch them&lt;/b&gt;. Flat
+ *  background/foundation fills, borders and shadows satisfy it. Noises, images, texts and custom
+ *  painters do not, their pixels depending on the full component bounds. A border with a
+ *  different color per edge satisfies it as long as its miter joints land in the same place at
+ *  every size. &lt;br&gt;
+ *  &lt;br&gt;
+ *  There are two directions we can stretch, so that is two separate conditions, and a style can
+ *  pass one and fail the other. A gradient running top to bottom paints every
+ *  pixel strip along the y axis the same, so its width can be compacted while its height stays
+ *  exactly the component's. {@link LayerRenderConf.Compaction} says which of the two dimensions we
+ *  compacted. Resizing the component in an uncompacted dimension gives a new key; resizing it
+ *  in a compacted dimension does not. &lt;br&gt;
+ *  &lt;br&gt;
+ *  Two places in this class use that. The first decides whether to allocate an image buffer
+ *  while a component resizes: we do that only for a key with a compacted dimension, and only
+ *  when its uncompacted dimensions still hold last paint's values, because a buffer drawn for a
+ *  key that the next paint replaces is blitted once and then never asked for again. The second
+ *  is {@link #wouldCompactADimension}, which {@link StyleLayerCache} calls to decide whether
+ *  cutting a layer around its noise is worth a second cache entry; one compacted dimension
+ *  already pays for one, so it asks for no more than that.
+ *  The eligibility check must stay conservative, because an over-eager rule produces subtly wrong
+ *  pixels, not a crash.
+ *  A style we turn down is keyed on its real size and blitted one to one, with no stretching
+ *  involved. A component the exemplar already fills in one dimension is keyed on its own
+ *  measurement in that dimension, and the other dimension can still be compacted, which is what
+ *  lets a wide, short bar be cached at all. &lt;br&gt;
+ *  &lt;br&gt;
+ *  So two configurations are in play at once, and most of the code below only makes sense if
+ *  you keep them apart:
+ *  &lt;ul&gt;
+ *      &lt;li&gt;&lt;b&gt;the render input&lt;/b&gt; ({@code _renderInput}) - always the actual configuration
+ *          at the real component size. All direct-render fallbacks receive it, and it determines
+ *          the destination geometry of the final cache blit.&lt;/li&gt;
+ *      &lt;li&gt;&lt;b&gt;the cache key&lt;/b&gt; ({@code Cached._key}) - the canonical (possibly exemplar sized)
+ *          form of the render input. It keys the entry in the global cache, it is what the
+ *          renderer receives when filling the shared image, and its strong reference is what
+ *          keeps the weakly keyed entry alive.&lt;/li&gt;
+ *  &lt;/ul&gt;
+ */
+final class LayerPartitionCache
+{
+<span class="fc" id="L90">    private static final Logger log = LoggerFactory.getLogger(LayerPartitionCache.class);</span>
+<span class="fc" id="L91">    enum PaintOutcome {</span>
+<span class="fc" id="L92">        NOTHING_RENDERED,</span>
+<span class="fc" id="L93">        RENDERED_FROM_CACHE,</span>
+<span class="fc" id="L94">        RENDERED_FROM_STYLE</span>
+    }
+
+<span class="fc" id="L97">    private static final Map&lt;Pooled&lt;LayerRenderConf&gt;, CachedImage&gt; _CACHE = new WeakHashMap&lt;&gt;();</span>
+
+    private static final int    MAX_CACHE_ENTRIES                 = 1024; // There can never be more entries!
+    private static final int    PIXELS_PER_UNIT_OF_AGGRESSIVENESS = 256 * 256; // Determines how many pixels a single unit of cache aggressiveness can cache
+    private static final double EAGER_ALLOCATION_FRIENDLINESS     = 0.1; // Has to be between 0 and 1!
+    private static final int    MAX_CACHE_HIT_COUNT               = 12;
+    private static final int    HITS_UNTIL_ALLOCATION_WHILE_RESIZING = 1;
+    private static final int    BYTES_PER_PIXEL                   = 4; // Every cached rendering is 32 bit ARGB, see CachedImage._allocate.
+
+<span class="fc" id="L106">    private static int  _maxCacheableImageArea() { return (int) (CacheBudget.units() * PIXELS_PER_UNIT_OF_AGGRESSIVENESS); }</span>
+<span class="fc" id="L107">    private static int  _maxCacheEntries()       { return Math.min(MAX_CACHE_ENTRIES, CacheBudget.maxEntriesFor(CacheBudget.Kind.STYLE_LAYER)); }</span>
+
+    static int globalEntryCount() {
+<span class="fc" id="L110">        return _CACHE.size();</span>
+    }
+
+    static long globalBytesReserved() {
+<span class="fc" id="L114">        long total = 0;</span>
+<span class="fc bfc" id="L115" title="All 2 branches covered.">        for ( CachedImage image : _CACHE.values() )</span>
+<span class="fc" id="L116">            total += image.reservedBytes();</span>
+<span class="fc" id="L117">        return total;</span>
+    }
+
+    static void clearGlobalCache() {
+<span class="fc" id="L121">        _CACHE.clear();</span>
+<span class="fc" id="L122">    }</span>
+
+    // Sum type based states
+    private interface CacheState {
+<span class="fc" id="L126">        final class Nothing  implements CacheState { static final Nothing  INSTANCE = new Nothing();  }</span>
+<span class="fc" id="L127">        final class Rejected implements CacheState { static final Rejected INSTANCE = new Rejected(); }</span>
+        final class Cached   implements CacheState {
+            final Pooled&lt;LayerRenderConf&gt; _key;
+            final CachedImage             _image;
+<span class="fc" id="L131">            Cached( Pooled&lt;LayerRenderConf&gt; key, CachedImage image ) {</span>
+<span class="fc" id="L132">                _key   = key;</span>
+<span class="fc" id="L133">                _image = image;</span>
+<span class="fc" id="L134">            }</span>
+        }
+    }
+
+    private final UI.Layer                 _layer;
+    private final LayerRenderConfPartition _part;
+    private LayerRenderConf                _renderInput;
+    private CacheState                     _state;
+
+
+<span class="fc" id="L144">    public LayerPartitionCache( UI.Layer layer, LayerRenderConfPartition part ) {</span>
+<span class="fc" id="L145">        _layer       = Objects.requireNonNull(layer);</span>
+<span class="fc" id="L146">        _part        = Objects.requireNonNull(part);</span>
+<span class="fc" id="L147">        _renderInput = LayerRenderConf.none();</span>
+<span class="fc" id="L148">        _state       = CacheState.Nothing.INSTANCE;</span>
+<span class="fc" id="L149">    }</span>
+
+    /** A part has no admission decisions left open if it is either cached, or there
+     *  is nothing to cache. But a part that was refused admission may be admitted later, because
+     *  that decision also depends on how full the global cache is, so it has to be re-validated
+     *  and offered again on the next paint. */
+    boolean admissionDecisionLeftOpen() {
+<span class="fc" id="L156">        return _state instanceof CacheState.Rejected;</span>
+    }
+
+    public @Nullable BufferedImage renderedImage() {
+<span class="fc bfc" id="L160" title="All 2 branches covered.">        if ( !(_state instanceof CacheState.Cached) )</span>
+<span class="fc" id="L161">            return null;</span>
+<span class="fc" id="L162">        final CachedImage image = ((CacheState.Cached) _state)._image;</span>
+<span class="fc bfc" id="L163" title="All 2 branches covered.">        return image.isRendered() ? image.getImage() : null;</span>
+    }
+
+    public void validate( ComponentConf newConf, boolean isResizing )
+    {
+<span class="fc bfc" id="L168" title="All 4 branches covered.">        if ( newConf.currentBounds().hasWidth(0) || newConf.currentBounds().hasHeight(0) ) {</span>
+<span class="fc" id="L169">            _renderInput = LayerRenderConf.none();</span>
+<span class="fc" id="L170">            _state       = CacheState.Nothing.INSTANCE;</span>
+<span class="fc" id="L171">            return;</span>
+        }
+
+<span class="fc" id="L174">        final LayerRenderConf previousInput = _renderInput;</span>
+<span class="fc" id="L175">        _renderInput = _part.restrict(newConf.renderConfFor(_layer));</span>
+<span class="fc bfc" id="L176" title="All 2 branches covered.">        if ( _renderInput.rendersNothing() ) {</span>
+<span class="fc" id="L177">            _state = CacheState.Nothing.INSTANCE;</span>
+<span class="fc" id="L178">            return;</span>
+        }
+
+<span class="fc bfc" id="L181" title="All 2 branches covered.">        final LayerRenderConf keyConf = CacheBudget.tilingEnabled()</span>
+<span class="fc" id="L182">                                            ? _renderInput.canonicalRepresentation()</span>
+<span class="fc" id="L183">                                            : _renderInput;</span>
+
+<span class="fc bfc" id="L185" title="All 4 branches covered.">        if ( _state instanceof CacheState.Cached &amp;&amp; ((CacheState.Cached) _state)._key.get().equals(keyConf) )</span>
+<span class="fc" id="L186">            return;</span>
+
+<span class="fc" id="L188">        final int hitsUntilAllocation = _hitsUntilAllocationFor(keyConf, _renderInput, previousInput, isResizing);</span>
+<span class="fc bfc" id="L189" title="All 2 branches covered.">        if ( hitsUntilAllocation &lt; 0 ) {</span>
+<span class="fc" id="L190">            _state = CacheState.Rejected.INSTANCE; // The cache refused admission!</span>
+        } else {
+<span class="fc" id="L192">            final Pooled&lt;LayerRenderConf&gt; key = new Pooled&lt;&gt;(keyConf).intern();</span>
+
+<span class="fc" id="L194">            CachedImage image = _CACHE.get(key);</span>
+<span class="fc bfc" id="L195" title="All 2 branches covered.">            if (image == null) {</span>
+<span class="fc" id="L196">                image = new CachedImage(keyConf.boxModel().size(), hitsUntilAllocation);</span>
+<span class="fc" id="L197">                _CACHE.put(key, image);</span>
+            }
+<span class="fc" id="L199">            _state = new CacheState.Cached(key, image);</span>
+        }
+<span class="fc" id="L201">    }</span>
+
+    PaintOutcome paint( Graphics2D g, BiConsumer&lt;LayerRenderConf, Graphics2D&gt; renderer )
+    {
+<span class="fc" id="L205">        final Size size = _renderInput.boxModel().size();</span>
+
+<span class="fc bfc" id="L207" title="All 2 branches covered.">        if ( _state instanceof CacheState.Nothing )</span>
+<span class="fc" id="L208">            return PaintOutcome.NOTHING_RENDERED;</span>
+
+<span class="pc bpc" id="L210" title="2 of 4 branches missed.">        if ( size.widthOrElse(0f) == 0f || size.heightOrElse(0f) == 0f )</span>
+<span class="nc" id="L211">            return PaintOutcome.NOTHING_RENDERED;</span>
+
+<span class="fc bfc" id="L213" title="All 2 branches covered.">        if ( !(_state instanceof CacheState.Cached) ) {</span>
+<span class="fc" id="L214">            renderer.accept(_renderInput, g);</span>
+<span class="fc" id="L215">            return PaintOutcome.RENDERED_FROM_STYLE;</span>
+        }
+
+<span class="fc" id="L218">        final CacheState.Cached cached = (CacheState.Cached) _state;</span>
+<span class="fc" id="L219">        final CachedImage image        = cached._image;</span>
+<span class="fc" id="L220">        final LayerRenderConf cacheKey = cached._key.get();</span>
+        /*
+            A cache key size differing from the actual size means the entry is the small
+            exemplar rendering, and painting means reconstructing the actual size from it
+            through nine tile blits. That is only possible for plain scaling transforms;
+            under anything more exotic (rotation, shear, flips) we render directly
+            instead of using the cache for this paint.
+        */
+<span class="fc bfc" id="L228" title="All 2 branches covered.">        final boolean isTiled = !cacheKey.boxModel().size().equals(size);</span>
+<span class="fc bfc" id="L229" title="All 4 branches covered.">        if ( isTiled &amp;&amp; !_isBlitCompatible(g.getTransform()) ) {</span>
+<span class="fc" id="L230">            renderer.accept(_renderInput, g);</span>
+<span class="fc" id="L231">            return PaintOutcome.RENDERED_FROM_STYLE;</span>
+        }
+
+        final PaintOutcome outcome;
+<span class="fc bfc" id="L235" title="All 2 branches covered.">        if ( !image.isRendered() ) {</span>
+<span class="fc" id="L236">            Graphics2D g2 = image.createGraphics(g.getDeviceConfiguration());</span>
+<span class="fc bfc" id="L237" title="All 2 branches covered.">            if ( g2 == null ) {</span>
+                /*
+                    The cache is not yet ready to render into!
+                    It will need a few more hits to be ready...
+                    So we just do normal rendering instead:
+                */
+<span class="fc" id="L243">                renderer.accept(_renderInput, g);</span>
+<span class="fc" id="L244">                return PaintOutcome.RENDERED_FROM_STYLE;</span>
+            }
+            try {
+<span class="fc" id="L247">                StyleUtil.transferConfigurations(g, g2);</span>
+            }
+<span class="nc" id="L249">            catch ( Exception ignored ) {</span>
+<span class="nc" id="L250">                log.debug(SwingTree.get().logMarker(), &quot;Error while transferring configurations to the cached image graphics context.&quot;);</span>
+            }
+            finally {
+                /*
+                    Note the deliberate asymmetry: the shared image is filled by rendering
+                    the *cache key* configuration (possibly the small exemplar), whereas
+                    the direct-render fallbacks above render the full sized render input.
+                */
+<span class="fc" id="L258">                renderer.accept(cacheKey, g2);</span>
+<span class="fc" id="L259">                g2.dispose();</span>
+            }
+<span class="fc" id="L261">            outcome = PaintOutcome.RENDERED_FROM_STYLE;</span>
+<span class="fc" id="L262">        } else {</span>
+<span class="fc" id="L263">            outcome = PaintOutcome.RENDERED_FROM_CACHE;</span>
+        }
+
+<span class="fc" id="L266">        final BufferedImage cachedImage = image.getImage();</span>
+<span class="pc bpc" id="L267" title="1 of 2 branches missed.">        if ( cachedImage == null )</span>
+<span class="nc" id="L268">            return outcome; // Cannot happen (the count-down path returned above), but let's be defensive.</span>
+
+<span class="fc bfc" id="L270" title="All 2 branches covered.">        if ( isTiled )</span>
+<span class="fc" id="L271">            image.paintStretched(g, cacheKey, size);</span>
+        else
+<span class="fc" id="L273">            g.drawImage(cachedImage, 0, 0, null);</span>
+
+<span class="fc" id="L275">        return outcome;</span>
+    }
+
+    private int _hitsUntilAllocationFor(
+        LayerRenderConf cacheKey, LayerRenderConf renderInput, LayerRenderConf previousInput, boolean isResizing
+    ) {
+<span class="fc bfc" id="L281" title="All 2 branches covered.">        if ( _isWorthAllocatingRightAway(cacheKey, renderInput, previousInput, isResizing) )</span>
+<span class="fc" id="L282">            return _cachingMakesSenseFor(_layer, cacheKey);</span>
+
+<span class="fc bfc" id="L284" title="All 2 branches covered.">        if ( _isTooLargeToAllocateWhileResizing(cacheKey) )</span>
+<span class="fc" id="L285">            return _hitsForReusingAFinishedRendering(cacheKey);</span>
+
+<span class="fc" id="L287">        final int hits = _cachingMakesSenseFor(_layer, cacheKey);</span>
+<span class="fc bfc" id="L288" title="All 4 branches covered.">        if ( hits &lt; 0 || _isTrivialToAllocateWhileResizing(cacheKey) )</span>
+<span class="fc" id="L289">            return hits;</span>
+<span class="fc" id="L290">        return Math.max(HITS_UNTIL_ALLOCATION_WHILE_RESIZING, hits);</span>
+    }
+
+    /**
+     *  Whether this key's image buffer may be allocated on the spot, rather than only once a
+     *  second user has asked for it. The entry itself is created either way; only the buffer
+     *  waits. Naively, we would allocate a buffer as soon as a key appears. While a component
+     *  is resizing, however, it changes size between paints, so the buffer we just filled is
+     *  blitted once and then never asked for again. To avoid that, we only allocate when the
+     *  resize cannot replace the key: the key is replaced only if the component changed size in
+     *  an uncompacted dimension, so we compare the component's size at this paint against its
+     *  size at the previous paint, in exactly those dimensions.
+     */
+    private static boolean _isWorthAllocatingRightAway(
+        LayerRenderConf cacheKey, LayerRenderConf renderInput, LayerRenderConf previousInput, boolean isResizing
+    ) {
+<span class="fc bfc" id="L306" title="All 2 branches covered.">        if ( !isResizing )</span>
+<span class="fc" id="L307">            return true;</span>
+
+<span class="fc" id="L309">        final Size actual = renderInput.boxModel().size();</span>
+<span class="fc" id="L310">        final LayerRenderConf.Compaction compacted =</span>
+<span class="fc" id="L311">                    LayerRenderConf.Compaction.between(cacheKey.boxModel().size(), actual);</span>
+
+<span class="fc bfc" id="L313" title="All 2 branches covered.">        if ( compacted == LayerRenderConf.Compaction.NONE )</span>
+<span class="fc" id="L314">            return false; // An exact-size key is invalidated by any frame of any drag.</span>
+
+<span class="fc" id="L316">        final Size previous = previousInput.boxModel().size();</span>
+<span class="pc bpc" id="L317" title="1 of 4 branches missed.">        return ( compacted.includesWidth()  || previous.widthOrElse(0f)  == actual.widthOrElse(0f)  )</span>
+<span class="fc bfc" id="L318" title="All 4 branches covered.">            &amp;&amp; ( compacted.includesHeight() || previous.heightOrElse(0f) == actual.heightOrElse(0f) );</span>
+    }
+
+    private static boolean _isTooLargeToAllocateWhileResizing( LayerRenderConf cacheKey ) {
+<span class="fc" id="L322">        final Size size = cacheKey.boxModel().size();</span>
+<span class="fc bfc" id="L323" title="All 2 branches covered.">        return size.widthOrElse(0f) * size.heightOrElse(0f) &gt; _eagerAllocationLimit();</span>
+    }
+
+    private static boolean _isTrivialToAllocateWhileResizing( LayerRenderConf cacheKey ) {
+<span class="fc" id="L327">        final Size size = cacheKey.boxModel().size();</span>
+<span class="fc" id="L328">        final int trivialAllocationLimit = (int) ( _eagerAllocationLimit() * EAGER_ALLOCATION_FRIENDLINESS );</span>
+<span class="fc bfc" id="L329" title="All 2 branches covered.">        return size.widthOrElse(0f) * size.heightOrElse(0f) &lt;= trivialAllocationLimit;</span>
+    }
+
+    private static int _hitsForReusingAFinishedRendering( LayerRenderConf cacheKey ) {
+        /*
+            Deliberately not interned: `Pooled` compares by value, so a plain probe finds the
+            entry without putting anything into the object pool for a key we may not use.
+        */
+<span class="fc" id="L337">        final @Nullable CachedImage existing = _CACHE.get(new Pooled&lt;&gt;(cacheKey));</span>
+<span class="pc bpc" id="L338" title="3 of 4 branches missed.">        return ( existing != null &amp;&amp; existing.isRendered() ? 0 : -1 );</span>
+    }
+
+    /** The image area up to which an entry is worth allocating right away rather than after a
+     *  warm-up of cache hits; also the line above which allocating one mid-resize is a loss. */
+    private static int _eagerAllocationLimit() {
+<span class="fc" id="L344">        return (int) ( _maxCacheableImageArea() * EAGER_ALLOCATION_FRIENDLINESS );</span>
+    }
+
+    static boolean wouldBeAdmitted( UI.Layer layer, LayerRenderConf conf ) {
+<span class="fc bfc" id="L348" title="All 2 branches covered.">        return _cachingMakesSenseFor(layer, conf) &gt;= 0;</span>
+    }
+
+    private static int _cachingMakesSenseFor( UI.Layer layer, LayerRenderConf conf )
+    {
+<span class="fc" id="L353">        final int maxEntries = _maxCacheEntries();</span>
+<span class="pc bpc" id="L354" title="1 of 4 branches missed.">        if ( maxEntries &lt;= 0 || _CACHE.size() &gt;= maxEntries )</span>
+<span class="fc" id="L355">            return -1; // Caching disabled or cache already too full, don't admit more entries.</span>
+
+<span class="fc" id="L357">        final Size size = conf.boxModel().size();</span>
+
+<span class="pc bpc" id="L359" title="1 of 4 branches missed.">        if ( !size.hasPositiveWidth() || !size.hasPositiveHeight() )</span>
+<span class="fc" id="L360">            return -1; // The component does not have a size that can be displayed.</span>
+
+<span class="fc bfc" id="L362" title="All 2 branches covered.">        if ( conf.layer().hasPaintersWhichCannotBeCached() )</span>
+<span class="fc" id="L363">            return -1; // We don't know what the painters will do, so we don't cache their painting!</span>
+
+<span class="fc" id="L365">        int heavyStyleCount = 0;</span>
+
+<span class="fc bfc" id="L367" title="All 2 branches covered.">        for ( ImageConf imageConf : conf.layer().images().sortedByNames() )</span>
+<span class="fc bfc" id="L368" title="All 4 branches covered.">            if ( !imageConf.equals(ImageConf.none()) &amp;&amp; imageConf.image().isPresent() ) {</span>
+<span class="fc" id="L369">                ImageIcon icon = imageConf.image().get();</span>
+<span class="fc bfc" id="L370" title="All 4 branches covered.">                boolean isSpecialIcon = ( icon.getClass() != ImageIcon.class &amp;&amp; icon.getClass() != ScalableImageIcon.class );</span>
+<span class="pc bpc" id="L371" title="1 of 4 branches missed.">                boolean hasSize = ( icon.getIconHeight() &gt; 0 || icon.getIconWidth() &gt; 0 );</span>
+<span class="pc bpc" id="L372" title="1 of 4 branches missed.">                if ( isSpecialIcon || hasSize )</span>
+<span class="fc" id="L373">                    heavyStyleCount++;</span>
+            }
+<span class="fc bfc" id="L375" title="All 2 branches covered.">        for ( GradientConf gradient : conf.layer().gradients().sortedByNames() )</span>
+<span class="pc bpc" id="L376" title="1 of 4 branches missed.">            if ( !gradient.equals(GradientConf.none()) &amp;&amp; gradient.colors().length &gt; 0 )</span>
+<span class="fc" id="L377">                heavyStyleCount++;</span>
+<span class="fc bfc" id="L378" title="All 2 branches covered.">        for ( Pooled&lt;NoiseConf&gt; noise : conf.layer().noises().sortedByNames() )</span>
+<span class="pc bpc" id="L379" title="1 of 4 branches missed.">            if ( !noise.get().equals(NoiseConf.none()) &amp;&amp; noise.get().colors().length &gt; 0 )</span>
+<span class="fc" id="L380">                heavyStyleCount += 2;</span>
+<span class="fc bfc" id="L381" title="All 2 branches covered.">        for ( TextConf text : conf.layer().texts().sortedByNames() )</span>
+<span class="pc bpc" id="L382" title="1 of 4 branches missed.">            if ( !text.equals(TextConf.none()) &amp;&amp; !text.content().isEmpty() )</span>
+<span class="fc" id="L383">                heavyStyleCount++;</span>
+<span class="fc bfc" id="L384" title="All 2 branches covered.">        for ( ShadowConf shadow : conf.layer().shadows().sortedByNames() )</span>
+<span class="pc bpc" id="L385" title="1 of 4 branches missed.">            if ( !shadow.equals(ShadowConf.none()) &amp;&amp; shadow.color().isPresent() )</span>
+<span class="fc" id="L386">                heavyStyleCount++;</span>
+<span class="fc bfc" id="L387" title="All 2 branches covered.">        for ( PainterConf painter : conf.layer().painters().sortedByNames() )</span>
+<span class="pc bpc" id="L388" title="1 of 4 branches missed.">            if ( !painter.equals(PainterConf.none()) &amp;&amp; painter.painter().canBeCached() )</span>
+<span class="fc" id="L389">                heavyStyleCount++;</span>
+
+<span class="fc" id="L391">        final BaseColorConf baseColors = conf.baseColors();</span>
+<span class="fc" id="L392">        final BoxModelConf  boxModel   = conf.boxModel();</span>
+<span class="fc" id="L393">        final boolean       isRounded  = boxModel.hasAnyNonZeroArcs();</span>
+
+<span class="fc bfc" id="L395" title="All 2 branches covered.">        if ( layer == UI.Layer.BORDER ) {</span>
+<span class="fc bfc" id="L396" title="All 2 branches covered.">            boolean hasWidth = !Outline.none().equals(boxModel.widths());</span>
+<span class="fc bfc" id="L397" title="All 2 branches covered.">            boolean hasColoring = !baseColors.borderColor().equals(BorderColorsConf.none());</span>
+<span class="pc bpc" id="L398" title="1 of 4 branches missed.">            if ( hasWidth &amp;&amp; hasColoring )</span>
+<span class="fc" id="L399">                heavyStyleCount++;</span>
+        }
+<span class="fc bfc" id="L401" title="All 2 branches covered.">        if ( layer == UI.Layer.BACKGROUND ) {</span>
+<span class="fc bfc" id="L402" title="All 4 branches covered.">            boolean roundedOrHasMargin = isRounded || !boxModel.margin().equals(Outline.none());</span>
+<span class="fc bfc" id="L403" title="All 2 branches covered.">            if ( roundedOrHasMargin ) {</span>
+<span class="fc bfc" id="L404" title="All 4 branches covered.">                if ( baseColors.backgroundColor().filter( c -&gt; c.getAlpha() &gt; 0 ).isPresent() )</span>
+<span class="fc" id="L405">                    heavyStyleCount++;</span>
+<span class="fc bfc" id="L406" title="All 4 branches covered.">                if ( baseColors.foundationColor().filter( c -&gt; c.getAlpha() &gt; 0 ).isPresent() )</span>
+<span class="fc" id="L407">                    heavyStyleCount++;</span>
+            }
+        }
+
+<span class="fc bfc" id="L411" title="All 2 branches covered.">        if ( heavyStyleCount &lt; 1 )</span>
+<span class="fc" id="L412">            return -1;</span>
+
+<span class="fc" id="L414">        final int maxSizeLimit         = _maxCacheableImageArea();</span>
+<span class="fc" id="L415">        final int eagerAllocationLimit = _eagerAllocationLimit();</span>
+<span class="fc" id="L416">        final int cacheHitCountLimit   = (int) (maxSizeLimit * (1 - EAGER_ALLOCATION_FRIENDLINESS));</span>
+
+<span class="fc" id="L418">        final int pixelCount = (int) (size.widthOrElse(0f) * size.heightOrElse(0f));</span>
+<span class="fc" id="L419">        final int score      = pixelCount / Math.min(heavyStyleCount, 5); // Heavier styles get cached more easily!</span>
+
+<span class="fc bfc" id="L421" title="All 2 branches covered.">        if ( score &gt; maxSizeLimit )</span>
+<span class="fc" id="L422">            return -1; // We are not going to cache such a large image!</span>
+<span class="fc bfc" id="L423" title="All 2 branches covered.">        else if ( score &lt;= eagerAllocationLimit )</span>
+<span class="fc" id="L424">            return 0; // Nice and small, definitely worth allocating and caching right away!</span>
+        else
+<span class="fc" id="L426">            return 1 + (score - eagerAllocationLimit) / Math.max(1, cacheHitCountLimit / MAX_CACHE_HIT_COUNT);</span>
+            // Here we return the number of cache hits until allocation and rendering should happen.
+    }
+
+    /*  ------------------------------------------------------------------------------------
+        Stretch tiling geometry - pure functions deriving the size independent cache key
+        and the slice cut lines from a render configuration (see class javadoc).
+        ------------------------------------------------------------------------------------ */
+
+    /**
+     *  Whether the cache would compact a dimension of this configuration, so that a resize
+     *  changing only that dimension is served from the entry rather than rendered again.
+     *  Deliberately weaker than {@link #_isWorthAllocatingRightAway}, which also asks that the
+     *  component's uncompacted dimensions still hold last paint's values.
+     */
+    static boolean wouldCompactADimension( LayerRenderConf conf ) {
+<span class="pc bpc" id="L442" title="1 of 2 branches missed.">        if ( !CacheBudget.tilingEnabled() )</span>
+<span class="nc" id="L443">            return false;</span>
+<span class="fc" id="L444">        final Size key    = conf.canonicalRepresentation().boxModel().size();</span>
+<span class="fc" id="L445">        final Size actual = conf.boxModel().size();</span>
+<span class="fc bfc" id="L446" title="All 2 branches covered.">        return LayerRenderConf.Compaction.between(key, actual) != LayerRenderConf.Compaction.NONE;</span>
+    }
+
+    /** Tile blits support positive scaling and translation; rotation, shear and flips do not. */
+    private static boolean _isBlitCompatible( AffineTransform transform ) {
+<span class="fc bfc" id="L451" title="All 2 branches covered.">        return transform.getShearX() == 0 &amp;&amp;</span>
+<span class="pc bpc" id="L452" title="1 of 2 branches missed.">               transform.getShearY() == 0 &amp;&amp;</span>
+<span class="pc bpc" id="L453" title="1 of 2 branches missed.">               transform.getScaleX() &gt;  0 &amp;&amp;</span>
+<span class="fc bfc" id="L454" title="All 2 branches covered.">               transform.getScaleY() &gt;  0;</span>
+    }
+
+    /**
+     *  A wrapper for a cached image that is either rendered or not yet allocated and
+     *  associated with a particular {@link LayerRenderConf} key, which is used
+     *  by the {@link LayerPartitionCache} instance of a particular component to get a strong
+     *  reference to the key (causing it to stay in cache and not get garbage collected). &lt;br&gt;
+     *  &lt;br&gt;
+     *  So instances of this are stored as values in the global {@link #_CACHE},
+     *  and can be accessed and shared by multiple {@link LayerPartitionCache} instances.
+     *  (So be careful with modifying this class!)&lt;br&gt;
+     *  The image can be allocated lazily only after a certain number of cache
+     *  hits have been reached. This is to avoid allocating and rendering cache
+     *  data for short-lived paint jobs (like animations for example). &lt;br&gt;
+     *  &lt;br&gt;
+     *  When the image is an exemplar rendering, this class also owns its reconstruction:
+     *  {@link #paintStretched} reassembles any actual component size from the image
+     *  through nine tile blits.
+     */
+    private static final class CachedImage
+    {
+        /** Indices into the {@link #_stretchTiles} array. */
+        private static final int TOP = 0, LEFT = 1, CENTER = 2, RIGHT = 3, BOTTOM = 4;
+        private interface StretchTile {
+<span class="fc" id="L479">            final class Nothing implements StretchTile {</span>
+<span class="fc" id="L480">                static final Nothing INSTANCE = new Nothing();</span>
+            }
+            final class FillColor implements StretchTile {
+                final Color _color;
+<span class="fc" id="L484">                FillColor( Color color ) { _color = color; }</span>
+            }
+            final class Image implements StretchTile {
+                final BufferedImage _image;
+<span class="fc" id="L488">                Image( BufferedImage image ) { _image = image; }</span>
+            }
+        }
+
+        private final int                      _width;
+        private final int                      _height;
+        private @Nullable BufferedImage        _image;
+        private StretchTile @Nullable []       _stretchTiles;
+        private boolean                        _isRendered;
+        private int                            _numberOfHitsUntilAllocation;
+
+
+<span class="fc" id="L500">        CachedImage( Size size, int numberOfHitsUntilAllocation ) {</span>
+<span class="fc" id="L501">            _isRendered                  = false;</span>
+<span class="fc" id="L502">            _width                       = Math.max(1, size.width().map(Number::intValue).orElse(1));</span>
+<span class="fc" id="L503">            _height                      = Math.max(1, size.height().map(Number::intValue).orElse(1));</span>
+<span class="fc" id="L504">            _image                       = null;</span>
+<span class="fc" id="L505">            _numberOfHitsUntilAllocation = numberOfHitsUntilAllocation;</span>
+<span class="fc" id="L506">        }</span>
+
+        /** The memory this entry has claimed: its image - counted from the moment the entry
+         *  exists, not from the moment the buffer is actually allocated.  */
+        long reservedBytes() {
+<span class="fc" id="L511">            long total = (long) _width * _height * BYTES_PER_PIXEL;</span>
+<span class="fc bfc" id="L512" title="All 2 branches covered.">            if ( _stretchTiles != null )</span>
+<span class="fc bfc" id="L513" title="All 2 branches covered.">                for ( StretchTile tile : _stretchTiles )</span>
+<span class="fc bfc" id="L514" title="All 2 branches covered.">                    if ( tile instanceof StretchTile.Image )</span>
+<span class="fc" id="L515">                        total += _bytesOf(((StretchTile.Image) tile)._image);</span>
+<span class="fc" id="L516">            return total;</span>
+        }
+
+        private static long _bytesOf( BufferedImage image ) {
+<span class="fc" id="L520">            return (long) image.getWidth() * image.getHeight() * BYTES_PER_PIXEL;</span>
+        }
+
+        private static BufferedImage _allocate( @Nullable GraphicsConfiguration gc, int width, int height ) {
+<span class="pc bpc" id="L524" title="1 of 2 branches missed.">            BufferedImage img = ( gc != null )</span>
+<span class="fc" id="L525">                    ? gc.createCompatibleImage(width, height, Transparency.TRANSLUCENT) // potentially accelerated</span>
+<span class="pc" id="L526">                    : new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB); // probably headless</span>
+<span class="fc" id="L527">            img.setAccelerationPriority(1.0f);</span>
+<span class="fc" id="L528">            return img;</span>
+        }
+
+        public @Nullable BufferedImage getImage() {
+<span class="fc" id="L532">            return _image;</span>
+        }
+
+        /**
+         *  Creates a {@link Graphics2D} for rendering into the cached image, or returns
+         *  null while the hits-until-allocation count-down (which this call decrements)
+         *  has not reached zero yet. The image is allocated on the first call after that.
+         */
+        public @Nullable Graphics2D createGraphics( @Nullable GraphicsConfiguration gc ) {
+<span class="pc bpc" id="L541" title="1 of 2 branches missed.">            if ( _isRendered )</span>
+<span class="nc" id="L542">                throw new IllegalStateException(&quot;This image has already been rendered into!&quot;);</span>
+<span class="fc bfc" id="L543" title="All 2 branches covered.">            if ( _numberOfHitsUntilAllocation &gt; 0 ) {</span>
+<span class="fc" id="L544">                _numberOfHitsUntilAllocation--;</span>
+<span class="fc" id="L545">                return null;</span>
+            }
+<span class="pc bpc" id="L547" title="1 of 2 branches missed.">            if ( _image == null )</span>
+<span class="fc" id="L548">                _image = _allocate(gc, _width, _height);</span>
+<span class="fc" id="L549">            _isRendered = true;</span>
+<span class="fc" id="L550">            return _image.createGraphics();</span>
+        }
+
+        public boolean isRendered() {
+<span class="fc" id="L554">            return _isRendered;</span>
+        }
+
+        /**
+         *  Reconstructs the rendering of this (exemplar) image at the supplied actual
+         *  component size by drawing nine tiles: the four corners 1:1 straight from the
+         *  image, the four edge bands stretched along their edge and the center stretched
+         *  in both directions - the latter five from their dedicated tile images. &lt;br&gt;
+         *  &lt;br&gt;
+         *  Cutting a dimension is what makes it stretchable, so a dimension this image already
+         *  carries at the component's own measurement is not cut: an image compacted in one
+         *  dimension only is drawn as three tiles rather than nine. &lt;br&gt;
+         *  &lt;br&gt;
+         *  The tiles are drawn in &lt;b&gt;integer device space&lt;/b&gt;: the cut lines are transformed
+         *  to device pixels once and shared between adjacent tiles, so that under fractional
+         *  HiDPI scales the independent rounding of nine user space rectangles can never
+         *  produce one pixel gaps or double blended overlaps. Nearest neighbor interpolation
+         *  ensures that stretching a constant source band produces an exactly constant
+         *  destination band and that sampling never bleeds across tile boundaries. &lt;br&gt;
+         *  Note: Antialiasing is switched off for the whole reconstruction so that solid FillColor tiles can be drawn efficiently. &lt;br&gt;
+         *
+         * @param g The destination graphics to draw the tiles into.
+         * @param canonicalConf The exemplar configuration this image was rendered from,
+         *                      used to recompute the slice insets.
+         * @param actualSize The actual component size to reconstruct.
+         */
+        public void paintStretched( Graphics2D g, LayerRenderConf canonicalConf, Size actualSize )
+        {
+<span class="fc" id="L582">            final BufferedImage image = _image;</span>
+<span class="pc bpc" id="L583" title="1 of 2 branches missed.">            if ( image == null )</span>
+<span class="nc" id="L584">                return; // Cannot happen (callers check `isRendered()` first), but let's be defensive.</span>
+
+<span class="fc" id="L586">            final Outline insets = canonicalConf.nineTileSliceInsets();</span>
+<span class="fc" id="L587">            final LayerRenderConf.Compaction compaction =</span>
+<span class="fc" id="L588">                        LayerRenderConf.Compaction.between(canonicalConf.boxModel().size(), actualSize);</span>
+<span class="fc bfc" id="L589" title="All 2 branches covered.">            final int insetTop    = compaction.includesHeight() ? insets.top().orElse(0f).intValue()    : 0;</span>
+<span class="fc bfc" id="L590" title="All 2 branches covered.">            final int insetRight  = compaction.includesWidth()  ? insets.right().orElse(0f).intValue()  : 0;</span>
+<span class="fc bfc" id="L591" title="All 2 branches covered.">            final int insetBottom = compaction.includesHeight() ? insets.bottom().orElse(0f).intValue() : 0;</span>
+<span class="fc bfc" id="L592" title="All 2 branches covered.">            final int insetLeft   = compaction.includesWidth()  ? insets.left().orElse(0f).intValue()   : 0;</span>
+
+<span class="fc" id="L594">            StretchTile[] tiles = _stretchTiles;</span>
+<span class="fc bfc" id="L595" title="All 2 branches covered.">            if ( tiles == null ) {</span>
+<span class="fc" id="L596">                tiles = _extractStretchTiles(g.getDeviceConfiguration(), image, insetTop, insetRight, insetBottom, insetLeft);</span>
+<span class="fc" id="L597">                _stretchTiles = tiles;</span>
+            }
+
+<span class="fc" id="L600">            final float actualWidth  = actualSize.widthOrElse(0f);</span>
+<span class="fc" id="L601">            final float actualHeight = actualSize.heightOrElse(0f);</span>
+
+<span class="fc" id="L603">            final AffineTransform transform = g.getTransform();</span>
+<span class="fc" id="L604">            final double scaleX     = transform.getScaleX();</span>
+<span class="fc" id="L605">            final double scaleY     = transform.getScaleY();</span>
+<span class="fc" id="L606">            final double translateX = transform.getTranslateX();</span>
+<span class="fc" id="L607">            final double translateY = transform.getTranslateY();</span>
+
+            // The horizontal and vertical cut lines in integer device space,
+            // shared between adjacent tiles (no seams, no overlaps):
+<span class="fc" id="L611">            final int[] dx = {</span>
+<span class="fc" id="L612">                            (int) Math.round(translateX),</span>
+<span class="fc" id="L613">                            (int) Math.round(translateX + insetLeft * scaleX),</span>
+<span class="fc" id="L614">                            (int) Math.round(translateX + (actualWidth - insetRight) * scaleX),</span>
+<span class="fc" id="L615">                            (int) Math.round(translateX + actualWidth * scaleX)</span>
+                        };
+<span class="fc" id="L617">            final int[] dy = {</span>
+<span class="fc" id="L618">                            (int) Math.round(translateY),</span>
+<span class="fc" id="L619">                            (int) Math.round(translateY + insetTop * scaleY),</span>
+<span class="fc" id="L620">                            (int) Math.round(translateY + (actualHeight - insetBottom) * scaleY),</span>
+<span class="fc" id="L621">                            (int) Math.round(translateY + actualHeight * scaleY)</span>
+                        };
+            // The corresponding cut lines in the exemplar source image:
+<span class="fc" id="L624">            final int[] sx = { 0, insetLeft, _width  - insetRight,  _width  };</span>
+<span class="fc" id="L625">            final int[] sy = { 0, insetTop,  _height - insetBottom, _height };</span>
+
+<span class="fc" id="L627">            final Graphics2D g2 = (Graphics2D) g.create();</span>
+            try {
+<span class="fc" id="L629">                g2.setTransform(new AffineTransform()); // We draw in device space.</span>
+<span class="fc" id="L630">                g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);</span>
+<span class="fc" id="L631">                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_OFF);</span>
+                // The four corners, 1:1 sub-rectangle copies from the exemplar image:
+<span class="fc" id="L633">                _drawRegion(g2, image, dx[0], dy[0], dx[1], dy[1], sx[0], sy[0], sx[1], sy[1]); // top-left</span>
+<span class="fc" id="L634">                _drawRegion(g2, image, dx[2], dy[0], dx[3], dy[1], sx[2], sy[0], sx[3], sy[1]); // top-right</span>
+<span class="fc" id="L635">                _drawRegion(g2, image, dx[0], dy[2], dx[1], dy[3], sx[0], sy[2], sx[1], sy[3]); // bottom-left</span>
+<span class="fc" id="L636">                _drawRegion(g2, image, dx[2], dy[2], dx[3], dy[3], sx[2], sy[2], sx[3], sy[3]); // bottom-right</span>
+                // The stretched bands and center, each a whole dedicated image:
+<span class="fc" id="L638">                _drawStretched(g2, tiles[TOP],    dx[1], dy[0], dx[2], dy[1]);</span>
+<span class="fc" id="L639">                _drawStretched(g2, tiles[LEFT],   dx[0], dy[1], dx[1], dy[2]);</span>
+<span class="fc" id="L640">                _drawStretched(g2, tiles[CENTER], dx[1], dy[1], dx[2], dy[2]);</span>
+<span class="fc" id="L641">                _drawStretched(g2, tiles[RIGHT],  dx[2], dy[1], dx[3], dy[2]);</span>
+<span class="fc" id="L642">                _drawStretched(g2, tiles[BOTTOM], dx[1], dy[2], dx[2], dy[3]);</span>
+            } finally {
+<span class="fc" id="L644">                g2.dispose();</span>
+            }
+<span class="fc" id="L646">        }</span>
+
+        /**
+         *  Copies the five stretchable regions (four edge bands + center) into dedicated,
+         *  exactly-fitting images. &lt;br&gt;
+         *  &lt;br&gt;
+         *  &lt;b&gt;Why:&lt;/b&gt; the stretched tiles could in principle be drawn straight out of the
+         *  exemplar image with sub-rectangle {@code drawImage} calls - and on software
+         *  surfaces that is pixel perfect. But on accelerated pipelines (notably XRender on
+         *  Linux) a scaled blit whose source is an &lt;i&gt;interior sub-rectangle&lt;/i&gt; of a larger
+         *  texture breaks down at large stretch ratios: beyond a few hundred times, the blit
+         *  samples outside the source band or produces nothing at all, which visually
+         *  manifested as long component edges losing their shadows. A scaled blit whose
+         *  source is a &lt;i&gt;whole image&lt;/i&gt; measures pixel perfect even at extreme ratios -
+         *  so each stretched tile gets its own image, while the corner tiles (copied 1:1,
+         *  never stretched) keep sourcing the exemplar image directly. &lt;br&gt;
+         *  &lt;br&gt;
+         *  A region that turns out to be empty or single colored needs no image and no blit
+         *  at all - see {@link StretchTile} for what those cases are and what is done with
+         *  them instead.
+         */
+        private static StretchTile[] _extractStretchTiles(
+            final @Nullable GraphicsConfiguration gc,
+            final BufferedImage image,
+            final int insetTop, final int insetRight, final int insetBottom, final int insetLeft
+        ) {
+<span class="fc" id="L672">            final int width  = image.getWidth();</span>
+<span class="fc" id="L673">            final int height = image.getHeight();</span>
+<span class="fc" id="L674">            final StretchTile[] tiles = new StretchTile[5];</span>
+<span class="fc" id="L675">            tiles[TOP]    = _extractTile(gc, image, insetLeft,          0,                    width - insetRight, insetTop           );</span>
+<span class="fc" id="L676">            tiles[LEFT]   = _extractTile(gc, image, 0,                  insetTop,             insetLeft,          height - insetBottom);</span>
+<span class="fc" id="L677">            tiles[CENTER] = _extractTile(gc, image, insetLeft,          insetTop,             width - insetRight, height - insetBottom);</span>
+<span class="fc" id="L678">            tiles[RIGHT]  = _extractTile(gc, image, width - insetRight, insetTop,             width,              height - insetBottom);</span>
+<span class="fc" id="L679">            tiles[BOTTOM] = _extractTile(gc, image, insetLeft,          height - insetBottom, width - insetRight, height             );</span>
+<span class="fc" id="L680">            return tiles;</span>
+        }
+
+        private static StretchTile _extractTile(
+            final @Nullable GraphicsConfiguration gc,
+            final BufferedImage source,
+            final int x1, final int y1, final int x2, final int y2
+        ) {
+<span class="fc" id="L688">            final @Nullable StretchTile bufferless = _scanForBufferlessTile(source, x1, y1, x2, y2);</span>
+<span class="fc bfc" id="L689" title="All 2 branches covered.">            if ( bufferless != null )</span>
+<span class="fc" id="L690">                return bufferless;</span>
+<span class="fc" id="L691">            final int width  = Math.max(1, x2 - x1);</span>
+<span class="fc" id="L692">            final int height = Math.max(1, y2 - y1);</span>
+<span class="fc" id="L693">            final BufferedImage region = _allocate(gc, width, height);</span>
+<span class="fc" id="L694">            final Graphics2D g = region.createGraphics();</span>
+            try {
+<span class="fc" id="L696">                g.setComposite(AlphaComposite.Src); // exact pixel copy, including alpha</span>
+<span class="fc" id="L697">                g.drawImage(source, 0, 0, width, height, x1, y1, x2, y2, null);</span>
+            } finally {
+<span class="fc" id="L699">                g.dispose();</span>
+            }
+<span class="fc" id="L701">            return new StretchTile.Image(region);</span>
+        }
+
+        private static @Nullable StretchTile _scanForBufferlessTile(
+            final BufferedImage image,
+            final int x1, final int y1, final int x2, final int y2
+        ) {
+<span class="fc" id="L708">            final ColorModel colorModel = image.getColorModel();</span>
+<span class="pc bpc" id="L709" title="2 of 4 branches missed.">            if ( !(colorModel instanceof DirectColorModel) || !colorModel.hasAlpha() )</span>
+<span class="nc" id="L710">                return null;</span>
+<span class="fc" id="L711">            final Raster raster = image.getRaster();</span>
+<span class="pc bpc" id="L712" title="2 of 4 branches missed.">            if ( raster.getTransferType() != DataBuffer.TYPE_INT || raster.getNumDataElements() != 1 )</span>
+<span class="nc" id="L713">                return null;</span>
+<span class="fc" id="L714">            final int alphaMask = ((DirectColorModel) colorModel).getAlphaMask();</span>
+<span class="fc" id="L715">            final int startX = Math.max(0, x1);</span>
+<span class="fc" id="L716">            final int startY = Math.max(0, y1);</span>
+<span class="fc" id="L717">            final int width  = Math.min(image.getWidth(),  x2) - startX;</span>
+<span class="fc" id="L718">            final int endY   = Math.min(image.getHeight(), y2);</span>
+<span class="fc bfc" id="L719" title="All 4 branches covered.">            if ( width &lt;= 0 || endY &lt;= startY )</span>
+<span class="fc" id="L720">                return StretchTile.Nothing.INSTANCE;</span>
+
+<span class="fc" id="L722">            final int[] row = new int[width];</span>
+<span class="fc" id="L723">            int     alphaBits = 0;</span>
+<span class="fc" id="L724">            int     firstPixel = 0;</span>
+<span class="fc" id="L725">            boolean isUniform  = true;</span>
+<span class="fc bfc" id="L726" title="All 2 branches covered.">            for ( int y = startY; y &lt; endY; y++ ) {</span>
+<span class="fc" id="L727">                raster.getDataElements(startX, y, width, 1, row);</span>
+<span class="fc bfc" id="L728" title="All 2 branches covered.">                if ( y == startY )</span>
+<span class="fc" id="L729">                    firstPixel = row[0];</span>
+<span class="fc bfc" id="L730" title="All 2 branches covered.">                for ( int i = 0; i &lt; width; i++ ) {</span>
+<span class="fc" id="L731">                    final int pixel = row[i];</span>
+<span class="fc" id="L732">                    alphaBits |= pixel;</span>
+<span class="fc bfc" id="L733" title="All 2 branches covered.">                    isUniform &amp;= ( pixel == firstPixel );</span>
+                }
+<span class="pc bpc" id="L735" title="1 of 4 branches missed.">                if ( !isUniform &amp;&amp; (alphaBits &amp; alphaMask) != 0 )</span>
+<span class="fc" id="L736">                    return null; // Neither empty nor uniform, so an image it is.</span>
+            }
+<span class="fc bfc" id="L738" title="All 2 branches covered.">            if ( (alphaBits &amp; alphaMask) == 0 )</span>
+<span class="fc" id="L739">                return StretchTile.Nothing.INSTANCE;</span>
+<span class="pc bpc" id="L740" title="1 of 2 branches missed.">            if ( !isUniform )</span>
+<span class="nc" id="L741">                return null;</span>
+<span class="fc" id="L742">            final int argb = colorModel.getRGB(firstPixel);</span>
+<span class="fc bfc" id="L743" title="All 2 branches covered.">            if ( (argb &gt;&gt;&gt; 24) != 0xFF )</span>
+<span class="fc" id="L744">                return null;</span>
+<span class="fc" id="L745">            return new StretchTile.FillColor(new Color(argb, true));</span>
+        }
+
+        private static void _drawRegion(
+            final Graphics2D g2, final BufferedImage source,
+            final int dx1, final int dy1, final int dx2, final int dy2,
+            final int sx1, final int sy1, final int sx2, final int sy2
+        ) {
+<span class="fc bfc" id="L753" title="All 4 branches covered.">            if ( dx2 &lt;= dx1 || dy2 &lt;= dy1 )</span>
+<span class="fc" id="L754">                return; // Degenerate tile, nothing to draw (a negative span would mirror the image!).</span>
+<span class="fc" id="L755">            g2.drawImage(source, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null);</span>
+<span class="fc" id="L756">        }</span>
+
+        private static void _drawStretched(
+            final Graphics2D g2, final StretchTile tile,
+            final int dx1, final int dy1, final int dx2, final int dy2
+        ) {
+<span class="fc bfc" id="L762" title="All 2 branches covered.">            if ( tile instanceof StretchTile.Nothing )</span>
+<span class="fc" id="L763">                return;</span>
+<span class="pc bpc" id="L764" title="2 of 4 branches missed.">            if ( dx2 &lt;= dx1 || dy2 &lt;= dy1 )</span>
+<span class="nc" id="L765">                return; // Degenerate tile, nothing to draw.</span>
+<span class="fc bfc" id="L766" title="All 2 branches covered.">            if ( tile instanceof StretchTile.FillColor ) {</span>
+<span class="fc" id="L767">                g2.setColor(((StretchTile.FillColor) tile)._color);</span>
+<span class="fc" id="L768">                g2.fillRect(dx1, dy1, dx2 - dx1, dy2 - dy1);</span>
+<span class="fc" id="L769">                return;</span>
+            }
+<span class="fc" id="L771">            final BufferedImage image = ((StretchTile.Image) tile)._image;</span>
+<span class="fc" id="L772">            g2.drawImage(image, dx1, dy1, dx2, dy2, 0, 0, image.getWidth(), image.getHeight(), null);</span>
+<span class="fc" id="L773">        }</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

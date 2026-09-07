@@ -1,0 +1,315 @@
+{
+  "className":"swingtree.Rounded_Fill_Equivalence_Spec",
+  "title":"Rounded Fill Equivalence",
+  "narrative":"A component with a corner radius and a single background colour describes a\n    very ordinary shape: a rounded rectangle, filled. Whatever SwingTree does to\n    make that fast, it has to keep producing exactly that shape — so these\n    scenarios paint the styled component and compare it against the same rounded\n    rectangle filled with plain `Graphics2D.fill(..)`, drawn right here in the\n    specification. Nothing about how the style engine rasterizes anything is\n    referred to; the reference is one line of AWT that any reader can check by eye.\n\n    That comparison is sharper than it looks, because SwingTree does *not* simply\n    forward the shape to `fill`. A large rounded area is rasterized in pieces —\n    the interior, which is fully covered and needs no antialiasing, separately\n    from the four corners, which do — and the pieces have to reassemble into\n    something indistinguishable from the undivided fill. A seam between two of\n    them, a corner drawn a pixel small, or an interior band reaching into the\n    curve would each show up here as a component that no longer matches the\n    rectangle it claims to be.\n\n    The scenarios therefore vary the two things that decide whether that division\n    happens at all, both of them ordinary public API: the **size** of the\n    component, and the **transform** it is painted through. Large and small, plain\n    and rotated, whole and fractional scale — every one of them has to match the\n    same hand drawn reference. Which of them SwingTree chooses to divide is a\n    performance trade-off free to change; that you cannot tell from the pixels is\n    the promise.",
+  "subjects":["swingtree.UI","swingtree.SwingTree"],
+  "statistics":{
+    "runs":"13",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A rounded component is exactly the rounded rectangle it describes. (a flat fill, large) [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Two things are varied here. The **size**, because a large rounded fill is worth\n            rasterizing in pieces and a small one is not, so the two sizes of each style take\n            different routes to the same pixels. And the **kind of fill**: a plain background\n            colour, and a *gradient between one colour and itself* - which looks identical but\n            is not treated identically, because a gradient makes its layer depend on the\n            component bounds and so denies it every size independent shortcut the style engine\n            has. Between them the two cover both routes, and both must land on the reference.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A styled component at that size.","code":["var box = UI.box().withStyle(conf -> styler(conf)).get(JBox)","box.setSize(width, height)"]},
+
+        {"kind":"and","text":"\n            And the reference: the very same rounded rectangle, filled the ordinary way with\n            one call to AWT, on an image of the same size and rendering hints the component is\n            painted onto.\n        ","code":["var reference   = Utility.createDeterministicImage(width, height)","var referenceG2d = Utility.createDeterministicGraphics(reference)","referenceG2d.setColor(FILL)","referenceG2d.fill(new RoundRectangle2D.Float(0, 0, width, height, arc, arc))","referenceG2d.dispose()"]},
+
+        {"kind":"when","text":"The component is painted, and we look for the worst deviating colour channel:","code":["var painted = Utility.renderSingleComponent(box)","int worstChannelDelta = 0","for ( int y = 0; y < height; y++ )","    for ( int x = 0; x < width; x++ )","        for ( int shift : [0, 8, 16, 24] ) { // blue, green, red and alpha","            int delta = Math.abs(","                            ((reference.getRGB(x, y) >> shift) & 0xff) -","                            ((painted.getRGB(x, y)   >> shift) & 0xff)","                        )","            worstChannelDelta = Math.max(worstChannelDelta, delta)","        }"]},
+
+        {"kind":"then","text":"Not one channel of one pixel deviates from the plain fill, alpha included:","code":["worstChannelDelta <= 1"]},
+
+        {"kind":"where","text":"","code":{"description":["\"a flat fill, large\"","\"a flat fill, small\"","\"a gradient of one repeated colour, large\"","\"a gradient of one repeated colour, small\"","\"a gentle arc on a wide component\"","\"an arc larger than half the component\"","\"a tall component\""],"width":["400","120","400","120","500","240","160"],"height":["300","90","300","90","320","120","420"],"arc":["24","24","24","24","6","200","30"],"styler":["{ it.borderRadius(24).backgroundColor(FILL) }","{ it.borderRadius(24).backgroundColor(FILL) }","{ it.borderRadius(24)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(24)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(6)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(200)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(30)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A rounded component is exactly the rounded rectangle it describes. (a flat fill, small) [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Two things are varied here. The **size**, because a large rounded fill is worth\n            rasterizing in pieces and a small one is not, so the two sizes of each style take\n            different routes to the same pixels. And the **kind of fill**: a plain background\n            colour, and a *gradient between one colour and itself* - which looks identical but\n            is not treated identically, because a gradient makes its layer depend on the\n            component bounds and so denies it every size independent shortcut the style engine\n            has. Between them the two cover both routes, and both must land on the reference.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A styled component at that size.","code":["var box = UI.box().withStyle(conf -> styler(conf)).get(JBox)","box.setSize(width, height)"]},
+
+        {"kind":"and","text":"\n            And the reference: the very same rounded rectangle, filled the ordinary way with\n            one call to AWT, on an image of the same size and rendering hints the component is\n            painted onto.\n        ","code":["var reference   = Utility.createDeterministicImage(width, height)","var referenceG2d = Utility.createDeterministicGraphics(reference)","referenceG2d.setColor(FILL)","referenceG2d.fill(new RoundRectangle2D.Float(0, 0, width, height, arc, arc))","referenceG2d.dispose()"]},
+
+        {"kind":"when","text":"The component is painted, and we look for the worst deviating colour channel:","code":["var painted = Utility.renderSingleComponent(box)","int worstChannelDelta = 0","for ( int y = 0; y < height; y++ )","    for ( int x = 0; x < width; x++ )","        for ( int shift : [0, 8, 16, 24] ) { // blue, green, red and alpha","            int delta = Math.abs(","                            ((reference.getRGB(x, y) >> shift) & 0xff) -","                            ((painted.getRGB(x, y)   >> shift) & 0xff)","                        )","            worstChannelDelta = Math.max(worstChannelDelta, delta)","        }"]},
+
+        {"kind":"then","text":"Not one channel of one pixel deviates from the plain fill, alpha included:","code":["worstChannelDelta <= 1"]},
+
+        {"kind":"where","text":"","code":{"description":["\"a flat fill, large\"","\"a flat fill, small\"","\"a gradient of one repeated colour, large\"","\"a gradient of one repeated colour, small\"","\"a gentle arc on a wide component\"","\"an arc larger than half the component\"","\"a tall component\""],"width":["400","120","400","120","500","240","160"],"height":["300","90","300","90","320","120","420"],"arc":["24","24","24","24","6","200","30"],"styler":["{ it.borderRadius(24).backgroundColor(FILL) }","{ it.borderRadius(24).backgroundColor(FILL) }","{ it.borderRadius(24)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(24)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(6)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(200)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(30)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A rounded component is exactly the rounded rectangle it describes. (a gradient of one repeated colour, large) [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Two things are varied here. The **size**, because a large rounded fill is worth\n            rasterizing in pieces and a small one is not, so the two sizes of each style take\n            different routes to the same pixels. And the **kind of fill**: a plain background\n            colour, and a *gradient between one colour and itself* - which looks identical but\n            is not treated identically, because a gradient makes its layer depend on the\n            component bounds and so denies it every size independent shortcut the style engine\n            has. Between them the two cover both routes, and both must land on the reference.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A styled component at that size.","code":["var box = UI.box().withStyle(conf -> styler(conf)).get(JBox)","box.setSize(width, height)"]},
+
+        {"kind":"and","text":"\n            And the reference: the very same rounded rectangle, filled the ordinary way with\n            one call to AWT, on an image of the same size and rendering hints the component is\n            painted onto.\n        ","code":["var reference   = Utility.createDeterministicImage(width, height)","var referenceG2d = Utility.createDeterministicGraphics(reference)","referenceG2d.setColor(FILL)","referenceG2d.fill(new RoundRectangle2D.Float(0, 0, width, height, arc, arc))","referenceG2d.dispose()"]},
+
+        {"kind":"when","text":"The component is painted, and we look for the worst deviating colour channel:","code":["var painted = Utility.renderSingleComponent(box)","int worstChannelDelta = 0","for ( int y = 0; y < height; y++ )","    for ( int x = 0; x < width; x++ )","        for ( int shift : [0, 8, 16, 24] ) { // blue, green, red and alpha","            int delta = Math.abs(","                            ((reference.getRGB(x, y) >> shift) & 0xff) -","                            ((painted.getRGB(x, y)   >> shift) & 0xff)","                        )","            worstChannelDelta = Math.max(worstChannelDelta, delta)","        }"]},
+
+        {"kind":"then","text":"Not one channel of one pixel deviates from the plain fill, alpha included:","code":["worstChannelDelta <= 1"]},
+
+        {"kind":"where","text":"","code":{"description":["\"a flat fill, large\"","\"a flat fill, small\"","\"a gradient of one repeated colour, large\"","\"a gradient of one repeated colour, small\"","\"a gentle arc on a wide component\"","\"an arc larger than half the component\"","\"a tall component\""],"width":["400","120","400","120","500","240","160"],"height":["300","90","300","90","320","120","420"],"arc":["24","24","24","24","6","200","30"],"styler":["{ it.borderRadius(24).backgroundColor(FILL) }","{ it.borderRadius(24).backgroundColor(FILL) }","{ it.borderRadius(24)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(24)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(6)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(200)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(30)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A rounded component is exactly the rounded rectangle it describes. (a gradient of one repeated colour, small) [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Two things are varied here. The **size**, because a large rounded fill is worth\n            rasterizing in pieces and a small one is not, so the two sizes of each style take\n            different routes to the same pixels. And the **kind of fill**: a plain background\n            colour, and a *gradient between one colour and itself* - which looks identical but\n            is not treated identically, because a gradient makes its layer depend on the\n            component bounds and so denies it every size independent shortcut the style engine\n            has. Between them the two cover both routes, and both must land on the reference.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A styled component at that size.","code":["var box = UI.box().withStyle(conf -> styler(conf)).get(JBox)","box.setSize(width, height)"]},
+
+        {"kind":"and","text":"\n            And the reference: the very same rounded rectangle, filled the ordinary way with\n            one call to AWT, on an image of the same size and rendering hints the component is\n            painted onto.\n        ","code":["var reference   = Utility.createDeterministicImage(width, height)","var referenceG2d = Utility.createDeterministicGraphics(reference)","referenceG2d.setColor(FILL)","referenceG2d.fill(new RoundRectangle2D.Float(0, 0, width, height, arc, arc))","referenceG2d.dispose()"]},
+
+        {"kind":"when","text":"The component is painted, and we look for the worst deviating colour channel:","code":["var painted = Utility.renderSingleComponent(box)","int worstChannelDelta = 0","for ( int y = 0; y < height; y++ )","    for ( int x = 0; x < width; x++ )","        for ( int shift : [0, 8, 16, 24] ) { // blue, green, red and alpha","            int delta = Math.abs(","                            ((reference.getRGB(x, y) >> shift) & 0xff) -","                            ((painted.getRGB(x, y)   >> shift) & 0xff)","                        )","            worstChannelDelta = Math.max(worstChannelDelta, delta)","        }"]},
+
+        {"kind":"then","text":"Not one channel of one pixel deviates from the plain fill, alpha included:","code":["worstChannelDelta <= 1"]},
+
+        {"kind":"where","text":"","code":{"description":["\"a flat fill, large\"","\"a flat fill, small\"","\"a gradient of one repeated colour, large\"","\"a gradient of one repeated colour, small\"","\"a gentle arc on a wide component\"","\"an arc larger than half the component\"","\"a tall component\""],"width":["400","120","400","120","500","240","160"],"height":["300","90","300","90","320","120","420"],"arc":["24","24","24","24","6","200","30"],"styler":["{ it.borderRadius(24).backgroundColor(FILL) }","{ it.borderRadius(24).backgroundColor(FILL) }","{ it.borderRadius(24)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(24)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(6)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(200)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(30)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A rounded component is exactly the rounded rectangle it describes. (a gentle arc on a wide component) [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Two things are varied here. The **size**, because a large rounded fill is worth\n            rasterizing in pieces and a small one is not, so the two sizes of each style take\n            different routes to the same pixels. And the **kind of fill**: a plain background\n            colour, and a *gradient between one colour and itself* - which looks identical but\n            is not treated identically, because a gradient makes its layer depend on the\n            component bounds and so denies it every size independent shortcut the style engine\n            has. Between them the two cover both routes, and both must land on the reference.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A styled component at that size.","code":["var box = UI.box().withStyle(conf -> styler(conf)).get(JBox)","box.setSize(width, height)"]},
+
+        {"kind":"and","text":"\n            And the reference: the very same rounded rectangle, filled the ordinary way with\n            one call to AWT, on an image of the same size and rendering hints the component is\n            painted onto.\n        ","code":["var reference   = Utility.createDeterministicImage(width, height)","var referenceG2d = Utility.createDeterministicGraphics(reference)","referenceG2d.setColor(FILL)","referenceG2d.fill(new RoundRectangle2D.Float(0, 0, width, height, arc, arc))","referenceG2d.dispose()"]},
+
+        {"kind":"when","text":"The component is painted, and we look for the worst deviating colour channel:","code":["var painted = Utility.renderSingleComponent(box)","int worstChannelDelta = 0","for ( int y = 0; y < height; y++ )","    for ( int x = 0; x < width; x++ )","        for ( int shift : [0, 8, 16, 24] ) { // blue, green, red and alpha","            int delta = Math.abs(","                            ((reference.getRGB(x, y) >> shift) & 0xff) -","                            ((painted.getRGB(x, y)   >> shift) & 0xff)","                        )","            worstChannelDelta = Math.max(worstChannelDelta, delta)","        }"]},
+
+        {"kind":"then","text":"Not one channel of one pixel deviates from the plain fill, alpha included:","code":["worstChannelDelta <= 1"]},
+
+        {"kind":"where","text":"","code":{"description":["\"a flat fill, large\"","\"a flat fill, small\"","\"a gradient of one repeated colour, large\"","\"a gradient of one repeated colour, small\"","\"a gentle arc on a wide component\"","\"an arc larger than half the component\"","\"a tall component\""],"width":["400","120","400","120","500","240","160"],"height":["300","90","300","90","320","120","420"],"arc":["24","24","24","24","6","200","30"],"styler":["{ it.borderRadius(24).backgroundColor(FILL) }","{ it.borderRadius(24).backgroundColor(FILL) }","{ it.borderRadius(24)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(24)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(6)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(200)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(30)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A rounded component is exactly the rounded rectangle it describes. (an arc larger than half the component) [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Two things are varied here. The **size**, because a large rounded fill is worth\n            rasterizing in pieces and a small one is not, so the two sizes of each style take\n            different routes to the same pixels. And the **kind of fill**: a plain background\n            colour, and a *gradient between one colour and itself* - which looks identical but\n            is not treated identically, because a gradient makes its layer depend on the\n            component bounds and so denies it every size independent shortcut the style engine\n            has. Between them the two cover both routes, and both must land on the reference.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A styled component at that size.","code":["var box = UI.box().withStyle(conf -> styler(conf)).get(JBox)","box.setSize(width, height)"]},
+
+        {"kind":"and","text":"\n            And the reference: the very same rounded rectangle, filled the ordinary way with\n            one call to AWT, on an image of the same size and rendering hints the component is\n            painted onto.\n        ","code":["var reference   = Utility.createDeterministicImage(width, height)","var referenceG2d = Utility.createDeterministicGraphics(reference)","referenceG2d.setColor(FILL)","referenceG2d.fill(new RoundRectangle2D.Float(0, 0, width, height, arc, arc))","referenceG2d.dispose()"]},
+
+        {"kind":"when","text":"The component is painted, and we look for the worst deviating colour channel:","code":["var painted = Utility.renderSingleComponent(box)","int worstChannelDelta = 0","for ( int y = 0; y < height; y++ )","    for ( int x = 0; x < width; x++ )","        for ( int shift : [0, 8, 16, 24] ) { // blue, green, red and alpha","            int delta = Math.abs(","                            ((reference.getRGB(x, y) >> shift) & 0xff) -","                            ((painted.getRGB(x, y)   >> shift) & 0xff)","                        )","            worstChannelDelta = Math.max(worstChannelDelta, delta)","        }"]},
+
+        {"kind":"then","text":"Not one channel of one pixel deviates from the plain fill, alpha included:","code":["worstChannelDelta <= 1"]},
+
+        {"kind":"where","text":"","code":{"description":["\"a flat fill, large\"","\"a flat fill, small\"","\"a gradient of one repeated colour, large\"","\"a gradient of one repeated colour, small\"","\"a gentle arc on a wide component\"","\"an arc larger than half the component\"","\"a tall component\""],"width":["400","120","400","120","500","240","160"],"height":["300","90","300","90","320","120","420"],"arc":["24","24","24","24","6","200","30"],"styler":["{ it.borderRadius(24).backgroundColor(FILL) }","{ it.borderRadius(24).backgroundColor(FILL) }","{ it.borderRadius(24)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(24)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(6)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(200)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(30)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A rounded component is exactly the rounded rectangle it describes. (a tall component) [6]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Two things are varied here. The **size**, because a large rounded fill is worth\n            rasterizing in pieces and a small one is not, so the two sizes of each style take\n            different routes to the same pixels. And the **kind of fill**: a plain background\n            colour, and a *gradient between one colour and itself* - which looks identical but\n            is not treated identically, because a gradient makes its layer depend on the\n            component bounds and so denies it every size independent shortcut the style engine\n            has. Between them the two cover both routes, and both must land on the reference.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A styled component at that size.","code":["var box = UI.box().withStyle(conf -> styler(conf)).get(JBox)","box.setSize(width, height)"]},
+
+        {"kind":"and","text":"\n            And the reference: the very same rounded rectangle, filled the ordinary way with\n            one call to AWT, on an image of the same size and rendering hints the component is\n            painted onto.\n        ","code":["var reference   = Utility.createDeterministicImage(width, height)","var referenceG2d = Utility.createDeterministicGraphics(reference)","referenceG2d.setColor(FILL)","referenceG2d.fill(new RoundRectangle2D.Float(0, 0, width, height, arc, arc))","referenceG2d.dispose()"]},
+
+        {"kind":"when","text":"The component is painted, and we look for the worst deviating colour channel:","code":["var painted = Utility.renderSingleComponent(box)","int worstChannelDelta = 0","for ( int y = 0; y < height; y++ )","    for ( int x = 0; x < width; x++ )","        for ( int shift : [0, 8, 16, 24] ) { // blue, green, red and alpha","            int delta = Math.abs(","                            ((reference.getRGB(x, y) >> shift) & 0xff) -","                            ((painted.getRGB(x, y)   >> shift) & 0xff)","                        )","            worstChannelDelta = Math.max(worstChannelDelta, delta)","        }"]},
+
+        {"kind":"then","text":"Not one channel of one pixel deviates from the plain fill, alpha included:","code":["worstChannelDelta <= 1"]},
+
+        {"kind":"where","text":"","code":{"description":["\"a flat fill, large\"","\"a flat fill, small\"","\"a gradient of one repeated colour, large\"","\"a gradient of one repeated colour, small\"","\"a gentle arc on a wide component\"","\"an arc larger than half the component\"","\"a tall component\""],"width":["400","120","400","120","500","240","160"],"height":["300","90","300","90","320","120","420"],"arc":["24","24","24","24","6","200","30"],"styler":["{ it.borderRadius(24).backgroundColor(FILL) }","{ it.borderRadius(24).backgroundColor(FILL) }","{ it.borderRadius(24)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(24)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(6)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(200)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }","{ it.borderRadius(30)\n                                                                           .gradient(\"g\", g -> g.colors(FILL, FILL)\n                                                                                                .clipTo(UI.ComponentArea.BODY)) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A rounded component survives being painted through a transform. (no transform at all) [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Rasterizing a rounded fill in pieces means placing rectangles, and rectangles can\n            only stand in for parts of the shape while the pieces still meet exactly on whole\n            device pixels. A scale, a translation or a quarter turn all move where those seams\n            land, and a corner radius which halves to something fractional can put them between\n            two pixels - at which point a component would come out with a visible seam across\n            it, or with its corners a pixel adrift from its sides.\n\n            So the same comparison is made again through each of those transforms, against a\n            reference drawn through the identical transform. The component has to look like its\n            rounded rectangle however it is painted.\n\n            Two transforms are deliberately absent: an arbitrary rotation and a shear. A\n            SwingTree component painted through those already differs wholesale from a plain\n            fill of the same shape, for reasons that have nothing to do with this - measured, a\n            worst channel deviation of 255 - so a comparison against this reference would be\n            asserting something the library has never promised rather than anything about how a\n            rounded fill is rasterized.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            The style caches turned off, through the public cache mode. This is what puts the\n            destination's own transform in front of the fill: with a cache to render into, the\n            fill happens inside that image under no transform at all, and what reaches the\n            destination is a blit of the finished image - which under a scale or a rotation is a\n            resampling of it, a different picture by design and not what is being asked about here.\n        ","code":["SwingTree.get().setCacheMode(SwingTreeInitConfig.CacheMode.DISABLED)","ComponentExtension.updateAllCachesFromLibraryConfig()"]},
+
+        {"kind":"and","text":"A styled component, and the rounded rectangle it describes.","code":["var arc   = 21 // Deliberately odd: halved, it lands between device pixels under a fractional scale.","var box   = UI.box()","              .withStyle( it -> it.borderRadius(arc)","                                  .gradient(\"g\", g -> g.colors(FILL, FILL)","                                                       .clipTo(UI.ComponentArea.BODY)) )","              .get(JBox)","box.setSize(300, 200)","var shape = new RoundRectangle2D.Float(0, 0, 300, 200, arc, arc)"]},
+
+        {"kind":"and","text":"The reference, filled the ordinary way through that same transform.","code":["var reference = Utility.createDeterministicImage(500, 400)","var refG = Utility.createDeterministicGraphics(reference)","transformer(refG)","refG.setColor(FILL)","refG.fill(shape)","refG.dispose()"]},
+
+        {"kind":"when","text":"The component is painted through that transform.","code":["var painted = Utility.createDeterministicImage(500, 400)","UI.runNow {","    var g = Utility.createDeterministicGraphics(painted)","    transformer(g)","    box.paint(g)","    g.dispose()","}"]},
+
+        {"kind":"and","text":"We look for the worst deviating colour channel of the whole image:","code":["int worstChannelDelta = 0","for ( int y = 0; y < 400; y++ )","    for ( int x = 0; x < 500; x++ )","        for ( int shift : [0, 8, 16, 24] ) {","            int delta = Math.abs(","                            ((reference.getRGB(x, y) >> shift) & 0xff) -","                            ((painted.getRGB(x, y)   >> shift) & 0xff)","                        )","            worstChannelDelta = Math.max(worstChannelDelta, delta)","        }"]},
+
+        {"kind":"then","text":"It still is the rounded rectangle it describes:","code":["worstChannelDelta <= 1"]},
+
+        {"kind":"where","text":"","code":{"description":["\"no transform at all\"","\"a translation\"","\"a whole scale\"","\"a fractional scale\"","\"a half turn\"","\"a quarter turn\""],"transformer":["{ Graphics2D g -> }","{ Graphics2D g -> g.translate(40, 30) }","{ Graphics2D g -> g.scale(2d, 2d) }","{ Graphics2D g -> g.scale(1.3d, 1.3d) }","{ Graphics2D g -> g.translate(300, 200); g.rotate(Math.PI) }","{ Graphics2D g -> g.translate(200, 0); g.rotate(Math.PI / 2) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A rounded component survives being painted through a transform. (a translation) [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Rasterizing a rounded fill in pieces means placing rectangles, and rectangles can\n            only stand in for parts of the shape while the pieces still meet exactly on whole\n            device pixels. A scale, a translation or a quarter turn all move where those seams\n            land, and a corner radius which halves to something fractional can put them between\n            two pixels - at which point a component would come out with a visible seam across\n            it, or with its corners a pixel adrift from its sides.\n\n            So the same comparison is made again through each of those transforms, against a\n            reference drawn through the identical transform. The component has to look like its\n            rounded rectangle however it is painted.\n\n            Two transforms are deliberately absent: an arbitrary rotation and a shear. A\n            SwingTree component painted through those already differs wholesale from a plain\n            fill of the same shape, for reasons that have nothing to do with this - measured, a\n            worst channel deviation of 255 - so a comparison against this reference would be\n            asserting something the library has never promised rather than anything about how a\n            rounded fill is rasterized.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            The style caches turned off, through the public cache mode. This is what puts the\n            destination's own transform in front of the fill: with a cache to render into, the\n            fill happens inside that image under no transform at all, and what reaches the\n            destination is a blit of the finished image - which under a scale or a rotation is a\n            resampling of it, a different picture by design and not what is being asked about here.\n        ","code":["SwingTree.get().setCacheMode(SwingTreeInitConfig.CacheMode.DISABLED)","ComponentExtension.updateAllCachesFromLibraryConfig()"]},
+
+        {"kind":"and","text":"A styled component, and the rounded rectangle it describes.","code":["var arc   = 21 // Deliberately odd: halved, it lands between device pixels under a fractional scale.","var box   = UI.box()","              .withStyle( it -> it.borderRadius(arc)","                                  .gradient(\"g\", g -> g.colors(FILL, FILL)","                                                       .clipTo(UI.ComponentArea.BODY)) )","              .get(JBox)","box.setSize(300, 200)","var shape = new RoundRectangle2D.Float(0, 0, 300, 200, arc, arc)"]},
+
+        {"kind":"and","text":"The reference, filled the ordinary way through that same transform.","code":["var reference = Utility.createDeterministicImage(500, 400)","var refG = Utility.createDeterministicGraphics(reference)","transformer(refG)","refG.setColor(FILL)","refG.fill(shape)","refG.dispose()"]},
+
+        {"kind":"when","text":"The component is painted through that transform.","code":["var painted = Utility.createDeterministicImage(500, 400)","UI.runNow {","    var g = Utility.createDeterministicGraphics(painted)","    transformer(g)","    box.paint(g)","    g.dispose()","}"]},
+
+        {"kind":"and","text":"We look for the worst deviating colour channel of the whole image:","code":["int worstChannelDelta = 0","for ( int y = 0; y < 400; y++ )","    for ( int x = 0; x < 500; x++ )","        for ( int shift : [0, 8, 16, 24] ) {","            int delta = Math.abs(","                            ((reference.getRGB(x, y) >> shift) & 0xff) -","                            ((painted.getRGB(x, y)   >> shift) & 0xff)","                        )","            worstChannelDelta = Math.max(worstChannelDelta, delta)","        }"]},
+
+        {"kind":"then","text":"It still is the rounded rectangle it describes:","code":["worstChannelDelta <= 1"]},
+
+        {"kind":"where","text":"","code":{"description":["\"no transform at all\"","\"a translation\"","\"a whole scale\"","\"a fractional scale\"","\"a half turn\"","\"a quarter turn\""],"transformer":["{ Graphics2D g -> }","{ Graphics2D g -> g.translate(40, 30) }","{ Graphics2D g -> g.scale(2d, 2d) }","{ Graphics2D g -> g.scale(1.3d, 1.3d) }","{ Graphics2D g -> g.translate(300, 200); g.rotate(Math.PI) }","{ Graphics2D g -> g.translate(200, 0); g.rotate(Math.PI / 2) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A rounded component survives being painted through a transform. (a whole scale) [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Rasterizing a rounded fill in pieces means placing rectangles, and rectangles can\n            only stand in for parts of the shape while the pieces still meet exactly on whole\n            device pixels. A scale, a translation or a quarter turn all move where those seams\n            land, and a corner radius which halves to something fractional can put them between\n            two pixels - at which point a component would come out with a visible seam across\n            it, or with its corners a pixel adrift from its sides.\n\n            So the same comparison is made again through each of those transforms, against a\n            reference drawn through the identical transform. The component has to look like its\n            rounded rectangle however it is painted.\n\n            Two transforms are deliberately absent: an arbitrary rotation and a shear. A\n            SwingTree component painted through those already differs wholesale from a plain\n            fill of the same shape, for reasons that have nothing to do with this - measured, a\n            worst channel deviation of 255 - so a comparison against this reference would be\n            asserting something the library has never promised rather than anything about how a\n            rounded fill is rasterized.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            The style caches turned off, through the public cache mode. This is what puts the\n            destination's own transform in front of the fill: with a cache to render into, the\n            fill happens inside that image under no transform at all, and what reaches the\n            destination is a blit of the finished image - which under a scale or a rotation is a\n            resampling of it, a different picture by design and not what is being asked about here.\n        ","code":["SwingTree.get().setCacheMode(SwingTreeInitConfig.CacheMode.DISABLED)","ComponentExtension.updateAllCachesFromLibraryConfig()"]},
+
+        {"kind":"and","text":"A styled component, and the rounded rectangle it describes.","code":["var arc   = 21 // Deliberately odd: halved, it lands between device pixels under a fractional scale.","var box   = UI.box()","              .withStyle( it -> it.borderRadius(arc)","                                  .gradient(\"g\", g -> g.colors(FILL, FILL)","                                                       .clipTo(UI.ComponentArea.BODY)) )","              .get(JBox)","box.setSize(300, 200)","var shape = new RoundRectangle2D.Float(0, 0, 300, 200, arc, arc)"]},
+
+        {"kind":"and","text":"The reference, filled the ordinary way through that same transform.","code":["var reference = Utility.createDeterministicImage(500, 400)","var refG = Utility.createDeterministicGraphics(reference)","transformer(refG)","refG.setColor(FILL)","refG.fill(shape)","refG.dispose()"]},
+
+        {"kind":"when","text":"The component is painted through that transform.","code":["var painted = Utility.createDeterministicImage(500, 400)","UI.runNow {","    var g = Utility.createDeterministicGraphics(painted)","    transformer(g)","    box.paint(g)","    g.dispose()","}"]},
+
+        {"kind":"and","text":"We look for the worst deviating colour channel of the whole image:","code":["int worstChannelDelta = 0","for ( int y = 0; y < 400; y++ )","    for ( int x = 0; x < 500; x++ )","        for ( int shift : [0, 8, 16, 24] ) {","            int delta = Math.abs(","                            ((reference.getRGB(x, y) >> shift) & 0xff) -","                            ((painted.getRGB(x, y)   >> shift) & 0xff)","                        )","            worstChannelDelta = Math.max(worstChannelDelta, delta)","        }"]},
+
+        {"kind":"then","text":"It still is the rounded rectangle it describes:","code":["worstChannelDelta <= 1"]},
+
+        {"kind":"where","text":"","code":{"description":["\"no transform at all\"","\"a translation\"","\"a whole scale\"","\"a fractional scale\"","\"a half turn\"","\"a quarter turn\""],"transformer":["{ Graphics2D g -> }","{ Graphics2D g -> g.translate(40, 30) }","{ Graphics2D g -> g.scale(2d, 2d) }","{ Graphics2D g -> g.scale(1.3d, 1.3d) }","{ Graphics2D g -> g.translate(300, 200); g.rotate(Math.PI) }","{ Graphics2D g -> g.translate(200, 0); g.rotate(Math.PI / 2) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A rounded component survives being painted through a transform. (a fractional scale) [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Rasterizing a rounded fill in pieces means placing rectangles, and rectangles can\n            only stand in for parts of the shape while the pieces still meet exactly on whole\n            device pixels. A scale, a translation or a quarter turn all move where those seams\n            land, and a corner radius which halves to something fractional can put them between\n            two pixels - at which point a component would come out with a visible seam across\n            it, or with its corners a pixel adrift from its sides.\n\n            So the same comparison is made again through each of those transforms, against a\n            reference drawn through the identical transform. The component has to look like its\n            rounded rectangle however it is painted.\n\n            Two transforms are deliberately absent: an arbitrary rotation and a shear. A\n            SwingTree component painted through those already differs wholesale from a plain\n            fill of the same shape, for reasons that have nothing to do with this - measured, a\n            worst channel deviation of 255 - so a comparison against this reference would be\n            asserting something the library has never promised rather than anything about how a\n            rounded fill is rasterized.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            The style caches turned off, through the public cache mode. This is what puts the\n            destination's own transform in front of the fill: with a cache to render into, the\n            fill happens inside that image under no transform at all, and what reaches the\n            destination is a blit of the finished image - which under a scale or a rotation is a\n            resampling of it, a different picture by design and not what is being asked about here.\n        ","code":["SwingTree.get().setCacheMode(SwingTreeInitConfig.CacheMode.DISABLED)","ComponentExtension.updateAllCachesFromLibraryConfig()"]},
+
+        {"kind":"and","text":"A styled component, and the rounded rectangle it describes.","code":["var arc   = 21 // Deliberately odd: halved, it lands between device pixels under a fractional scale.","var box   = UI.box()","              .withStyle( it -> it.borderRadius(arc)","                                  .gradient(\"g\", g -> g.colors(FILL, FILL)","                                                       .clipTo(UI.ComponentArea.BODY)) )","              .get(JBox)","box.setSize(300, 200)","var shape = new RoundRectangle2D.Float(0, 0, 300, 200, arc, arc)"]},
+
+        {"kind":"and","text":"The reference, filled the ordinary way through that same transform.","code":["var reference = Utility.createDeterministicImage(500, 400)","var refG = Utility.createDeterministicGraphics(reference)","transformer(refG)","refG.setColor(FILL)","refG.fill(shape)","refG.dispose()"]},
+
+        {"kind":"when","text":"The component is painted through that transform.","code":["var painted = Utility.createDeterministicImage(500, 400)","UI.runNow {","    var g = Utility.createDeterministicGraphics(painted)","    transformer(g)","    box.paint(g)","    g.dispose()","}"]},
+
+        {"kind":"and","text":"We look for the worst deviating colour channel of the whole image:","code":["int worstChannelDelta = 0","for ( int y = 0; y < 400; y++ )","    for ( int x = 0; x < 500; x++ )","        for ( int shift : [0, 8, 16, 24] ) {","            int delta = Math.abs(","                            ((reference.getRGB(x, y) >> shift) & 0xff) -","                            ((painted.getRGB(x, y)   >> shift) & 0xff)","                        )","            worstChannelDelta = Math.max(worstChannelDelta, delta)","        }"]},
+
+        {"kind":"then","text":"It still is the rounded rectangle it describes:","code":["worstChannelDelta <= 1"]},
+
+        {"kind":"where","text":"","code":{"description":["\"no transform at all\"","\"a translation\"","\"a whole scale\"","\"a fractional scale\"","\"a half turn\"","\"a quarter turn\""],"transformer":["{ Graphics2D g -> }","{ Graphics2D g -> g.translate(40, 30) }","{ Graphics2D g -> g.scale(2d, 2d) }","{ Graphics2D g -> g.scale(1.3d, 1.3d) }","{ Graphics2D g -> g.translate(300, 200); g.rotate(Math.PI) }","{ Graphics2D g -> g.translate(200, 0); g.rotate(Math.PI / 2) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A rounded component survives being painted through a transform. (a half turn) [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Rasterizing a rounded fill in pieces means placing rectangles, and rectangles can\n            only stand in for parts of the shape while the pieces still meet exactly on whole\n            device pixels. A scale, a translation or a quarter turn all move where those seams\n            land, and a corner radius which halves to something fractional can put them between\n            two pixels - at which point a component would come out with a visible seam across\n            it, or with its corners a pixel adrift from its sides.\n\n            So the same comparison is made again through each of those transforms, against a\n            reference drawn through the identical transform. The component has to look like its\n            rounded rectangle however it is painted.\n\n            Two transforms are deliberately absent: an arbitrary rotation and a shear. A\n            SwingTree component painted through those already differs wholesale from a plain\n            fill of the same shape, for reasons that have nothing to do with this - measured, a\n            worst channel deviation of 255 - so a comparison against this reference would be\n            asserting something the library has never promised rather than anything about how a\n            rounded fill is rasterized.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            The style caches turned off, through the public cache mode. This is what puts the\n            destination's own transform in front of the fill: with a cache to render into, the\n            fill happens inside that image under no transform at all, and what reaches the\n            destination is a blit of the finished image - which under a scale or a rotation is a\n            resampling of it, a different picture by design and not what is being asked about here.\n        ","code":["SwingTree.get().setCacheMode(SwingTreeInitConfig.CacheMode.DISABLED)","ComponentExtension.updateAllCachesFromLibraryConfig()"]},
+
+        {"kind":"and","text":"A styled component, and the rounded rectangle it describes.","code":["var arc   = 21 // Deliberately odd: halved, it lands between device pixels under a fractional scale.","var box   = UI.box()","              .withStyle( it -> it.borderRadius(arc)","                                  .gradient(\"g\", g -> g.colors(FILL, FILL)","                                                       .clipTo(UI.ComponentArea.BODY)) )","              .get(JBox)","box.setSize(300, 200)","var shape = new RoundRectangle2D.Float(0, 0, 300, 200, arc, arc)"]},
+
+        {"kind":"and","text":"The reference, filled the ordinary way through that same transform.","code":["var reference = Utility.createDeterministicImage(500, 400)","var refG = Utility.createDeterministicGraphics(reference)","transformer(refG)","refG.setColor(FILL)","refG.fill(shape)","refG.dispose()"]},
+
+        {"kind":"when","text":"The component is painted through that transform.","code":["var painted = Utility.createDeterministicImage(500, 400)","UI.runNow {","    var g = Utility.createDeterministicGraphics(painted)","    transformer(g)","    box.paint(g)","    g.dispose()","}"]},
+
+        {"kind":"and","text":"We look for the worst deviating colour channel of the whole image:","code":["int worstChannelDelta = 0","for ( int y = 0; y < 400; y++ )","    for ( int x = 0; x < 500; x++ )","        for ( int shift : [0, 8, 16, 24] ) {","            int delta = Math.abs(","                            ((reference.getRGB(x, y) >> shift) & 0xff) -","                            ((painted.getRGB(x, y)   >> shift) & 0xff)","                        )","            worstChannelDelta = Math.max(worstChannelDelta, delta)","        }"]},
+
+        {"kind":"then","text":"It still is the rounded rectangle it describes:","code":["worstChannelDelta <= 1"]},
+
+        {"kind":"where","text":"","code":{"description":["\"no transform at all\"","\"a translation\"","\"a whole scale\"","\"a fractional scale\"","\"a half turn\"","\"a quarter turn\""],"transformer":["{ Graphics2D g -> }","{ Graphics2D g -> g.translate(40, 30) }","{ Graphics2D g -> g.scale(2d, 2d) }","{ Graphics2D g -> g.scale(1.3d, 1.3d) }","{ Graphics2D g -> g.translate(300, 200); g.rotate(Math.PI) }","{ Graphics2D g -> g.translate(200, 0); g.rotate(Math.PI / 2) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A rounded component survives being painted through a transform. (a quarter turn) [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Rasterizing a rounded fill in pieces means placing rectangles, and rectangles can\n            only stand in for parts of the shape while the pieces still meet exactly on whole\n            device pixels. A scale, a translation or a quarter turn all move where those seams\n            land, and a corner radius which halves to something fractional can put them between\n            two pixels - at which point a component would come out with a visible seam across\n            it, or with its corners a pixel adrift from its sides.\n\n            So the same comparison is made again through each of those transforms, against a\n            reference drawn through the identical transform. The component has to look like its\n            rounded rectangle however it is painted.\n\n            Two transforms are deliberately absent: an arbitrary rotation and a shear. A\n            SwingTree component painted through those already differs wholesale from a plain\n            fill of the same shape, for reasons that have nothing to do with this - measured, a\n            worst channel deviation of 255 - so a comparison against this reference would be\n            asserting something the library has never promised rather than anything about how a\n            rounded fill is rasterized.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"\n            The style caches turned off, through the public cache mode. This is what puts the\n            destination's own transform in front of the fill: with a cache to render into, the\n            fill happens inside that image under no transform at all, and what reaches the\n            destination is a blit of the finished image - which under a scale or a rotation is a\n            resampling of it, a different picture by design and not what is being asked about here.\n        ","code":["SwingTree.get().setCacheMode(SwingTreeInitConfig.CacheMode.DISABLED)","ComponentExtension.updateAllCachesFromLibraryConfig()"]},
+
+        {"kind":"and","text":"A styled component, and the rounded rectangle it describes.","code":["var arc   = 21 // Deliberately odd: halved, it lands between device pixels under a fractional scale.","var box   = UI.box()","              .withStyle( it -> it.borderRadius(arc)","                                  .gradient(\"g\", g -> g.colors(FILL, FILL)","                                                       .clipTo(UI.ComponentArea.BODY)) )","              .get(JBox)","box.setSize(300, 200)","var shape = new RoundRectangle2D.Float(0, 0, 300, 200, arc, arc)"]},
+
+        {"kind":"and","text":"The reference, filled the ordinary way through that same transform.","code":["var reference = Utility.createDeterministicImage(500, 400)","var refG = Utility.createDeterministicGraphics(reference)","transformer(refG)","refG.setColor(FILL)","refG.fill(shape)","refG.dispose()"]},
+
+        {"kind":"when","text":"The component is painted through that transform.","code":["var painted = Utility.createDeterministicImage(500, 400)","UI.runNow {","    var g = Utility.createDeterministicGraphics(painted)","    transformer(g)","    box.paint(g)","    g.dispose()","}"]},
+
+        {"kind":"and","text":"We look for the worst deviating colour channel of the whole image:","code":["int worstChannelDelta = 0","for ( int y = 0; y < 400; y++ )","    for ( int x = 0; x < 500; x++ )","        for ( int shift : [0, 8, 16, 24] ) {","            int delta = Math.abs(","                            ((reference.getRGB(x, y) >> shift) & 0xff) -","                            ((painted.getRGB(x, y)   >> shift) & 0xff)","                        )","            worstChannelDelta = Math.max(worstChannelDelta, delta)","        }"]},
+
+        {"kind":"then","text":"It still is the rounded rectangle it describes:","code":["worstChannelDelta <= 1"]},
+
+        {"kind":"where","text":"","code":{"description":["\"no transform at all\"","\"a translation\"","\"a whole scale\"","\"a fractional scale\"","\"a half turn\"","\"a quarter turn\""],"transformer":["{ Graphics2D g -> }","{ Graphics2D g -> g.translate(40, 30) }","{ Graphics2D g -> g.scale(2d, 2d) }","{ Graphics2D g -> g.scale(1.3d, 1.3d) }","{ Graphics2D g -> g.translate(300, 200); g.rotate(Math.PI) }","{ Graphics2D g -> g.translate(200, 0); g.rotate(Math.PI / 2) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

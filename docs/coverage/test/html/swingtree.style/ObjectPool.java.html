@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>ObjectPool.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">ObjectPool.java</span></div><h1>ObjectPool.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import java.lang.ref.WeakReference;
+import java.util.Map;
+import java.util.WeakHashMap;
+
+/**
+ *  The process-wide weak interner backing {@link Pooled#intern()} — conceptually
+ *  {@link String#intern()} for SwingTree's large immutable configuration objects.
+ *  It collapses every {@link Pooled} that is {@code equal} to one already seen onto a
+ *  single &lt;em&gt;canonical&lt;/em&gt; instance, so equal config values can be compared by
+ *  reference and, crucially, share a single entry in the various {@link WeakHashMap}-based
+ *  rendering caches (style layers, noise, shadows, text images, layouts, component areas).
+ *
+ *  &lt;h2&gt;Why both the keys and the values are weak&lt;/h2&gt;
+ *  The backing map holds its keys weakly (it is a {@link WeakHashMap}) &lt;em&gt;and&lt;/em&gt; wraps
+ *  each canonical value in a {@link WeakReference}. A canonical {@link Pooled} therefore
+ *  stays interned only while something &lt;em&gt;outside&lt;/em&gt; the pool still references it
+ *  strongly; once the last such reference is dropped it is reclaimed and falls out of the
+ *  pool on its own. This is the linchpin of SwingTree's self-clearing cache design: a
+ *  rendering cache keyed by these canonical instances keeps an entry alive for exactly as
+ *  long as a live component or style configuration still holds the corresponding key, and
+ *  not a moment longer. The pool itself pins nothing.
+ *
+ *  &lt;h2&gt;Threading&lt;/h2&gt;
+ *  Interning happens on the Event Dispatch Thread, like all of SwingTree's painting and
+ *  layout work — it is, after all, built on single-threaded Swing. The pool is therefore a
+ *  plain, unsynchronized {@link WeakHashMap}, consistent with every cache that funnels its
+ *  keys through it.
+ */
+final class ObjectPool {
+<span class="fc" id="L32">    private static final ObjectPool INSTANCE = new ObjectPool();</span>
+
+    static ObjectPool get() {
+<span class="fc" id="L35">        return INSTANCE;</span>
+    }
+
+<span class="fc" id="L38">    private final Map&lt;Pooled&lt;?&gt;, WeakReference&lt;Pooled&lt;?&gt;&gt;&gt; pool = new WeakHashMap&lt;&gt;();</span>
+
+<span class="fc" id="L40">    private ObjectPool(){}</span>
+
+    public &lt;T&gt; Pooled&lt;T&gt; intern(Pooled&lt;T&gt; value ) {
+<span class="fc" id="L43">        WeakReference&lt;Pooled&lt;T&gt;&gt; ref = (WeakReference) pool.get(value);</span>
+
+<span class="fc bfc" id="L45" title="All 2 branches covered.">        if (ref != null) {</span>
+<span class="fc" id="L46">            Pooled&lt;T&gt; canonical = ref.get();</span>
+<span class="pc bpc" id="L47" title="1 of 2 branches missed.">            if (canonical != null) {</span>
+<span class="fc" id="L48">                return canonical;</span>
+            }
+        }
+<span class="fc" id="L51">        pool.put(value, new WeakReference&lt;&gt;(value));</span>
+<span class="fc" id="L52">        return value;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

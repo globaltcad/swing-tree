@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>UIForEditorPane.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">UIForEditorPane.java</span></div><h1>UIForEditorPane.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import javax.swing.*;
+import java.util.Objects;
+
+/**
+ *  A SwingTree builder node designed for configuring {@link JEditorPane} instances.
+ * 	&lt;p&gt;
+ * 	&lt;b&gt;Take a look at the &lt;a href=&quot;https://globaltcad.github.io/swing-tree/&quot;&gt;living swing-tree documentation&lt;/a&gt;
+ * 	where you can browse a large collection of examples demonstrating how to use the API of this class or other classes.&lt;/b&gt;
+ *
+ * @param &lt;P&gt; The type of the {@link JEditorPane} being built.
+ */
+public final class UIForEditorPane&lt;P extends JEditorPane&gt; extends UIForAnyEditorPane&lt;UIForEditorPane&lt;P&gt;, P&gt;
+{
+    private final BuilderState&lt;P&gt; _state;
+
+    /**
+     * {@link UIForAnySwing} (sub)types always wrap
+     * a single component for which they are responsible.
+     *
+     * @param state The {@link BuilderState} containing the component which will be managed by this builder.
+     */
+<span class="fc" id="L24">    UIForEditorPane( BuilderState&lt;P&gt; state ) {</span>
+<span class="fc" id="L25">        Objects.requireNonNull(state, &quot;state&quot;);</span>
+<span class="fc" id="L26">        _state = state;</span>
+<span class="fc" id="L27">    }</span>
+
+    @Override
+    protected BuilderState&lt;P&gt; _state() {
+<span class="fc" id="L31">        return _state;</span>
+    }
+    
+    @Override
+    protected UIForEditorPane&lt;P&gt; _newBuilderWithState(BuilderState&lt;P&gt; newState ) {
+<span class="fc" id="L36">        return new UIForEditorPane&lt;&gt;(newState);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

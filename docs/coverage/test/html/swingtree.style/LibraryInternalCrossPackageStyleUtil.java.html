@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LibraryInternalCrossPackageStyleUtil.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">LibraryInternalCrossPackageStyleUtil.java</span></div><h1>LibraryInternalCrossPackageStyleUtil.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import com.google.errorprone.annotations.DoNotCall;
+import org.jspecify.annotations.Nullable;
+import sprouts.Result;
+import swingtree.UI;
+
+import javax.swing.*;
+import javax.swing.border.Border;
+import javax.swing.plaf.ComponentUI;
+import javax.swing.table.JTableHeader;
+import javax.swing.text.JTextComponent;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+import javax.swing.text.StyledDocument;
+import java.awt.*;
+import java.util.Objects;
+
+
+/**
+ *  &lt;b&gt;This class is technically public, but NOT INTENDED TO BE CALLED BY CLIENT CODE!&lt;/b&gt;
+ *  It has to be public to allow for code reuse between the {@link swingtree} and {@link swingtree.style} packages.
+ */
+@Deprecated
+<span class="nc" id="L25">public final class LibraryInternalCrossPackageStyleUtil {</span>
+<span class="fc" id="L26">    private static final Insets ZERO_INSETS = new Insets(0,0,0,0);</span>
+
+    @DoNotCall @Deprecated
+    public static boolean _currentLookAndFeelHasBadScaling() {
+<span class="fc" id="L30">        return LookAndFeelType.current().isOneOf(LookAndFeelType.METAL, LookAndFeelType.NIMBUS);</span>
+    }
+
+    @DoNotCall @Deprecated
+    public static Result&lt;Insets&gt; _onlyBorderInsetsOf(@Nullable Border b, java.awt.Component c) {
+<span class="fc" id="L35">        return Result.ofTry(Insets.class, ()-&gt;{</span>
+<span class="pc bpc" id="L36" title="1 of 2 branches missed.">            if ( b == null )</span>
+<span class="nc" id="L37">                return ZERO_INSETS;</span>
+
+<span class="fc bfc" id="L39" title="All 2 branches covered.">            if ( b instanceof StyleAndAnimationBorder )</span>
+<span class="fc" id="L40">                return ((StyleAndAnimationBorder&lt;?&gt;)b).getFullPaddingInsets();</span>
+
+            // Compound border
+<span class="pc bpc" id="L43" title="1 of 2 branches missed.">            if ( b instanceof javax.swing.border.CompoundBorder ) {</span>
+<span class="nc" id="L44">                javax.swing.border.CompoundBorder cb = (javax.swing.border.CompoundBorder) b;</span>
+<span class="nc" id="L45">                return cb.getOutsideBorder().getBorderInsets(c);</span>
+            }
+<span class="fc" id="L47">            Insets insets = b.getBorderInsets(c);</span>
+<span class="pc bpc" id="L48" title="1 of 2 branches missed.">            if ( _needsNimbusBorderInsetsCorrection(c) ) {</span>
+<span class="fc" id="L49">                int min = Math.min(insets.top, Math.min(insets.left, Math.min(insets.bottom, insets.right)));</span>
+<span class="fc" id="L50">                insets = new Insets(min, min, min, min);</span>
+            }
+<span class="fc" id="L52">            return insets;</span>
+        });
+    }
+
+    private static boolean _needsNimbusBorderInsetsCorrection(Component c) {
+<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        if ( LookAndFeelType.current() == LookAndFeelType.NIMBUS ) {</span>
+<span class="pc bpc" id="L58" title="2 of 4 branches missed.">            return c instanceof JButton || c instanceof JToggleButton;</span>
+        }
+<span class="nc" id="L60">        return false;</span>
+    }
+
+    @DoNotCall @Deprecated
+    public static void applyFontConfAlignmentsToComponent(FontConf fontConf, JComponent owner) {
+<span class="fc" id="L65">        fontConf.horizontalAlignment().forSwing().ifPresent( forSwing -&gt; {</span>
+<span class="fc bfc" id="L66" title="All 2 branches covered.">            if ( owner instanceof JLabel ) {</span>
+<span class="fc" id="L67">                JLabel label = (JLabel) owner;</span>
+<span class="fc bfc" id="L68" title="All 2 branches covered.">                if ( !Objects.equals( label.getHorizontalAlignment(), forSwing ) )</span>
+<span class="fc" id="L69">                    label.setHorizontalAlignment( forSwing );</span>
+            }
+<span class="fc bfc" id="L71" title="All 2 branches covered.">            if ( owner instanceof AbstractButton ) {</span>
+<span class="fc" id="L72">                AbstractButton button = (AbstractButton) owner;</span>
+<span class="fc bfc" id="L73" title="All 2 branches covered.">                if ( !Objects.equals( button.getHorizontalAlignment(), forSwing ) )</span>
+<span class="fc" id="L74">                    button.setHorizontalAlignment( forSwing );</span>
+            }
+<span class="fc bfc" id="L76" title="All 2 branches covered.">            if ( owner instanceof JTextField ) {</span>
+<span class="fc" id="L77">                JTextField textField = (JTextField) owner;</span>
+<span class="fc bfc" id="L78" title="All 2 branches covered.">                if ( !Objects.equals( textField.getHorizontalAlignment(), forSwing ) )</span>
+<span class="fc" id="L79">                    textField.setHorizontalAlignment( forSwing );</span>
+            }
+<span class="fc bfc" id="L81" title="All 2 branches covered.">            if ( owner instanceof JTextPane ) {</span>
+<span class="fc" id="L82">                int forStyle = StyleConstants.ALIGN_LEFT;</span>
+<span class="fc bfc" id="L83" title="All 2 branches covered.">                if ( forSwing == SwingConstants.LEFT ) {</span>
+<span class="fc" id="L84">                    forStyle = StyleConstants.ALIGN_LEFT;</span>
+<span class="fc bfc" id="L85" title="All 2 branches covered.">                } else if ( forSwing == SwingConstants.RIGHT ) {</span>
+<span class="fc" id="L86">                    forStyle = StyleConstants.ALIGN_RIGHT;</span>
+<span class="fc bfc" id="L87" title="All 2 branches covered.">                } else if ( forSwing == SwingConstants.CENTER ) {</span>
+<span class="fc" id="L88">                    forStyle = StyleConstants.ALIGN_CENTER;</span>
+                } else {
+<span class="fc" id="L90">                    forStyle = StyleConstants.ALIGN_JUSTIFIED;</span>
+                }
+<span class="fc" id="L92">                JTextPane textPane = (JTextPane) owner;</span>
+<span class="fc" id="L93">                StyledDocument style = textPane.getStyledDocument();</span>
+<span class="fc" id="L94">                SimpleAttributeSet align= new SimpleAttributeSet();</span>
+<span class="fc" id="L95">                StyleConstants.setAlignment(align, forStyle);</span>
+<span class="fc" id="L96">                style.setParagraphAttributes(0, style.getLength(), align, false);</span>
+            }
+<span class="fc" id="L98">        });</span>
+<span class="fc" id="L99">        fontConf.verticalAlignment().forSwing().ifPresent( forSwing -&gt; {</span>
+<span class="fc bfc" id="L100" title="All 2 branches covered.">            if ( owner instanceof JLabel ) {</span>
+<span class="fc" id="L101">                JLabel label = (JLabel) owner;</span>
+<span class="fc bfc" id="L102" title="All 2 branches covered.">                if ( !Objects.equals( label.getVerticalAlignment(), forSwing ) )</span>
+<span class="fc" id="L103">                    label.setVerticalAlignment( forSwing );</span>
+            }
+<span class="fc bfc" id="L105" title="All 2 branches covered.">            if ( owner instanceof AbstractButton ) {</span>
+<span class="fc" id="L106">                AbstractButton button = (AbstractButton) owner;</span>
+<span class="fc bfc" id="L107" title="All 2 branches covered.">                if ( !Objects.equals( button.getVerticalAlignment(), forSwing ) )</span>
+<span class="fc" id="L108">                    button.setVerticalAlignment( forSwing );</span>
+            }
+<span class="fc" id="L110">        });</span>
+<span class="fc" id="L111">    }</span>
+
+    @DoNotCall @Deprecated
+    public static @Nullable ComponentUI _findComponentUIOf(JComponent component) {
+        // Try to cast to known component types that have getUI() method
+<span class="fc bfc" id="L116" title="All 2 branches covered.">        if (component instanceof AbstractButton) {</span>
+<span class="fc" id="L117">            return ((AbstractButton) component).getUI();</span>
+            /*
+                Note, this branch also covers:
+                    JButton, JToggleButton, JMenu, JMenuItem,
+                    JCheckBox, JCheckBoxMenuItem and JRadioButtonMenuItem
+            */
+        }
+<span class="fc bfc" id="L124" title="All 2 branches covered.">        if (component instanceof JTextComponent) {</span>
+<span class="fc" id="L125">            return ((JTextComponent) component).getUI();</span>
+            /*
+                Note, this branch also covers:
+                    JTextField, JPasswordField, JFormattedTextField,
+                    JTextArea,
+            */
+        }
+<span class="fc bfc" id="L132" title="All 2 branches covered.">        if (component instanceof JPanel) {</span>
+<span class="fc" id="L133">            return ((JPanel) component).getUI();</span>
+        }
+<span class="pc bpc" id="L135" title="1 of 2 branches missed.">        if ( component instanceof JTableHeader) {</span>
+<span class="nc" id="L136">            return ((JTableHeader)component).getUI();</span>
+        }
+<span class="pc bpc" id="L138" title="1 of 2 branches missed.">        if ( component instanceof JLayer&lt;?&gt;) {</span>
+<span class="nc" id="L139">            return ((JLayer&lt;?&gt;)component).getUI();</span>
+        }
+<span class="fc bfc" id="L141" title="All 2 branches covered.">        if (component instanceof JSeparator) {</span>
+<span class="fc" id="L142">            return ((JSeparator)component).getUI();</span>
+        }
+<span class="fc bfc" id="L144" title="All 2 branches covered.">        if (component instanceof JLabel) {</span>
+<span class="fc" id="L145">            return ((JLabel) component).getUI();</span>
+        }
+<span class="pc bpc" id="L147" title="1 of 2 branches missed.">        if (component instanceof JScrollBar) {</span>
+<span class="nc" id="L148">            return ((JScrollBar) component).getUI();</span>
+        }
+<span class="fc bfc" id="L150" title="All 2 branches covered.">        if (component instanceof JScrollPane) {</span>
+<span class="fc" id="L151">            return ((JScrollPane) component).getUI();</span>
+        }
+<span class="fc bfc" id="L153" title="All 2 branches covered.">        if (component instanceof JSplitPane) {</span>
+<span class="fc" id="L154">            return ((JSplitPane) component).getUI();</span>
+        }
+<span class="fc bfc" id="L156" title="All 2 branches covered.">        if (component instanceof JTabbedPane) {</span>
+<span class="fc" id="L157">            return ((JTabbedPane) component).getUI();</span>
+        }
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">        if (component instanceof JToolBar) {</span>
+<span class="nc" id="L160">            return ((JToolBar) component).getUI();</span>
+        }
+<span class="fc bfc" id="L162" title="All 2 branches covered.">        if (component instanceof JRootPane) {</span>
+<span class="fc" id="L163">            return ((JRootPane) component).getUI();</span>
+        }
+<span class="pc bpc" id="L165" title="1 of 2 branches missed.">        if (component instanceof JPopupMenu) {</span>
+<span class="nc" id="L166">            return ((JPopupMenu) component).getUI();</span>
+        }
+<span class="pc bpc" id="L168" title="1 of 2 branches missed.">        if (component instanceof JMenuBar) {</span>
+<span class="nc" id="L169">            return ((JMenuBar) component).getUI();</span>
+        }
+<span class="fc bfc" id="L171" title="All 2 branches covered.">        if (component instanceof JProgressBar) {</span>
+<span class="fc" id="L172">            return ((JProgressBar) component).getUI();</span>
+        }
+<span class="fc bfc" id="L174" title="All 2 branches covered.">        if (component instanceof JSlider) {</span>
+<span class="fc" id="L175">            return ((JSlider) component).getUI();</span>
+        }
+<span class="fc bfc" id="L177" title="All 2 branches covered.">        if (component instanceof JSpinner) {</span>
+<span class="fc" id="L178">            return ((JSpinner) component).getUI();</span>
+        }
+<span class="pc bpc" id="L180" title="1 of 2 branches missed.">        if (component instanceof JToolTip) {</span>
+<span class="nc" id="L181">            return ((JToolTip) component).getUI();</span>
+        }
+<span class="fc bfc" id="L183" title="All 2 branches covered.">        if (component instanceof JTable) {</span>
+<span class="fc" id="L184">            return ((JTable) component).getUI();</span>
+        }
+<span class="fc bfc" id="L186" title="All 2 branches covered.">        if (component instanceof JTree) {</span>
+<span class="fc" id="L187">            return ((JTree) component).getUI();</span>
+        }
+<span class="fc bfc" id="L189" title="All 2 branches covered.">        if (component instanceof JList&lt;?&gt;) {</span>
+<span class="fc" id="L190">            return ((JList&lt;?&gt;) component).getUI();</span>
+        }
+<span class="pc bpc" id="L192" title="1 of 2 branches missed.">        if (component instanceof JColorChooser) {</span>
+<span class="nc" id="L193">            return ((JColorChooser) component).getUI();</span>
+        }
+<span class="pc bpc" id="L195" title="1 of 2 branches missed.">        if (component instanceof JFileChooser) {</span>
+<span class="nc" id="L196">            return ((JFileChooser) component).getUI();</span>
+        }
+<span class="pc bpc" id="L198" title="1 of 2 branches missed.">        if (component instanceof JDesktopPane) {</span>
+<span class="nc" id="L199">            return ((JDesktopPane) component).getUI();</span>
+        }
+<span class="pc bpc" id="L201" title="1 of 2 branches missed.">        if (component instanceof JInternalFrame) {</span>
+<span class="nc" id="L202">            return ((JInternalFrame) component).getUI();</span>
+        }
+<span class="pc bpc" id="L204" title="1 of 2 branches missed.">        if (component instanceof JViewport) {</span>
+<span class="nc" id="L205">            return ((JViewport) component).getUI();</span>
+        }
+<span class="fc bfc" id="L207" title="All 2 branches covered.">        if (component instanceof JComboBox&lt;?&gt;) {</span>
+<span class="fc" id="L208">            return ((JComboBox&lt;?&gt;) component).getUI();</span>
+        }
+<span class="pc bpc" id="L210" title="1 of 2 branches missed.">        if (component instanceof JOptionPane) {</span>
+<span class="nc" id="L211">            return ((JOptionPane) component).getUI();</span>
+        }
+
+<span class="fc" id="L214">        return null;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

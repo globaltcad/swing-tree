@@ -1,0 +1,375 @@
+{
+  "className":"swingtree.Bounds_And_Location_Binding_Spec",
+  "title":"Binding Bounds and Locations",
+  "narrative":"SwingTree's declarative builder API exposes a family of methods for setting\n    the *imperative* `setBounds(...)` / `setLocation(...)` properties of a\n    `JComponent` directly from the builder, both as static one-shot values\n    and as reactive `Val` properties that follow a view model.\n\n    These methods are the natural complement of `Layout.none()` (and other\n    layout managers that do not reposition their children): when a parent\n    layout will not lay out the children for you, you typically still want\n    to dictate **where** a child sits and **how big** it is. The methods\n    in this specification are exactly that escape hatch, but lifted into\n    SwingTree's declarative, reactive, and DPI-aware idiom.\n\n    A central design decision here is that the supplied `Bounds`/`Position`\n    values live in **developer pixel space**, not in raw component pixel\n    space. Internally, SwingTree multiplies them by the active UI scale\n    factor (`UI.scale()`) before forwarding them to the underlying\n    `JComponent`. This keeps your view-model coordinates DPI-independent:\n    the same model renders pixel-correctly at 1x, 1.5x, 2x, ... and is also\n    re-applied automatically when the UI scale factor is changed at runtime.\n\n    Each scenario in this specification is parameterised over a range of\n    UI scale factors (1.0, 1.5, 2.0) so that the developer-pixel-space\n    contract is verified end-to-end – not just on a single happy-path scale.",
+  "subjects":["swingtree.UIForAnySwing"],
+  "statistics":{
+    "runs":"15",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A static `Bounds` value can be installed onto a component via `withBounds(Bounds)`. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `withBounds(Bounds)` method takes a single `Bounds` value, which is\n            the algebraic union of a `Position` (top-left corner) and a `Size`\n            (width, height). It is the imperative twin of `setBounds(...)`\n            on the underlying `JComponent`, but expressed declaratively as\n            part of the builder chain.\n\n            Use it when you place a component into a parent that uses\n            `Layout.none()` or any other layout that does not reposition\n            its children, and you want the initial position-and-size to come\n            from a single, atomic value instead of two separate calls to\n            `withLocation(...)` and `withSize(...)`.\n\n            Because the `Bounds` value lives in *developer pixel space*,\n            we parameterise this scenario over a range of UI scale factors\n            and verify that the rendered component dimensions scale linearly.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We pin the UI scale factor *before* we build the component:","code":["SwingTree.get().setUiScaleFactor(uiScaleFactor)"]},
+
+        {"kind":"and","text":"A `Bounds` value describing where and how big the component should be.","code":["var bounds = Bounds.of(40, 60, 120, 80)"]},
+
+        {"kind":"when","text":"We build a panel and seed its bounds via `withBounds(Bounds)`:","code":["var panel = UI.panel().withBounds(bounds).get(JPanel.class)"]},
+
+        {"kind":"then","text":"The component's bounds match the supplied developer-pixel value, scaled by the UI factor.","code":["panel.getX()      == Math.round(40  * uiScaleFactor)","panel.getY()      == Math.round(60  * uiScaleFactor)","panel.getWidth()  == Math.round(120 * uiScaleFactor)","panel.getHeight() == Math.round(80  * uiScaleFactor)"]},
+
+        {"kind":"where","text":"","code":{"uiScaleFactor":["1.0f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A static `Bounds` value can be installed onto a component via `withBounds(Bounds)`. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `withBounds(Bounds)` method takes a single `Bounds` value, which is\n            the algebraic union of a `Position` (top-left corner) and a `Size`\n            (width, height). It is the imperative twin of `setBounds(...)`\n            on the underlying `JComponent`, but expressed declaratively as\n            part of the builder chain.\n\n            Use it when you place a component into a parent that uses\n            `Layout.none()` or any other layout that does not reposition\n            its children, and you want the initial position-and-size to come\n            from a single, atomic value instead of two separate calls to\n            `withLocation(...)` and `withSize(...)`.\n\n            Because the `Bounds` value lives in *developer pixel space*,\n            we parameterise this scenario over a range of UI scale factors\n            and verify that the rendered component dimensions scale linearly.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We pin the UI scale factor *before* we build the component:","code":["SwingTree.get().setUiScaleFactor(uiScaleFactor)"]},
+
+        {"kind":"and","text":"A `Bounds` value describing where and how big the component should be.","code":["var bounds = Bounds.of(40, 60, 120, 80)"]},
+
+        {"kind":"when","text":"We build a panel and seed its bounds via `withBounds(Bounds)`:","code":["var panel = UI.panel().withBounds(bounds).get(JPanel.class)"]},
+
+        {"kind":"then","text":"The component's bounds match the supplied developer-pixel value, scaled by the UI factor.","code":["panel.getX()      == Math.round(40  * uiScaleFactor)","panel.getY()      == Math.round(60  * uiScaleFactor)","panel.getWidth()  == Math.round(120 * uiScaleFactor)","panel.getHeight() == Math.round(80  * uiScaleFactor)"]},
+
+        {"kind":"where","text":"","code":{"uiScaleFactor":["1.0f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A static `Bounds` value can be installed onto a component via `withBounds(Bounds)`. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `withBounds(Bounds)` method takes a single `Bounds` value, which is\n            the algebraic union of a `Position` (top-left corner) and a `Size`\n            (width, height). It is the imperative twin of `setBounds(...)`\n            on the underlying `JComponent`, but expressed declaratively as\n            part of the builder chain.\n\n            Use it when you place a component into a parent that uses\n            `Layout.none()` or any other layout that does not reposition\n            its children, and you want the initial position-and-size to come\n            from a single, atomic value instead of two separate calls to\n            `withLocation(...)` and `withSize(...)`.\n\n            Because the `Bounds` value lives in *developer pixel space*,\n            we parameterise this scenario over a range of UI scale factors\n            and verify that the rendered component dimensions scale linearly.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We pin the UI scale factor *before* we build the component:","code":["SwingTree.get().setUiScaleFactor(uiScaleFactor)"]},
+
+        {"kind":"and","text":"A `Bounds` value describing where and how big the component should be.","code":["var bounds = Bounds.of(40, 60, 120, 80)"]},
+
+        {"kind":"when","text":"We build a panel and seed its bounds via `withBounds(Bounds)`:","code":["var panel = UI.panel().withBounds(bounds).get(JPanel.class)"]},
+
+        {"kind":"then","text":"The component's bounds match the supplied developer-pixel value, scaled by the UI factor.","code":["panel.getX()      == Math.round(40  * uiScaleFactor)","panel.getY()      == Math.round(60  * uiScaleFactor)","panel.getWidth()  == Math.round(120 * uiScaleFactor)","panel.getHeight() == Math.round(80  * uiScaleFactor)"]},
+
+        {"kind":"where","text":"","code":{"uiScaleFactor":["1.0f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A reactive `Val<Bounds>` keeps the component's bounds in sync with a view model. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `withBounds(Val<Bounds>)` overload is the reactive counterpart of\n            `withBounds(Bounds)`. It is bound to a sprouts `Val` property and\n            re-applies the bounds whenever that property changes.\n\n            This is the canonical way to seed and update a component's location\n            and size from a view model: the model owns the truth, the view\n            simply mirrors it. No `peek(c -> c.setBounds(...))` boilerplate\n            necessary – and importantly, the developer-pixel-space contract\n            is preserved on every property change, not just on initial display.\n\n            We parameterise over multiple UI scale factors to demonstrate that\n            *both* the initial seeding *and* every subsequent reactive update\n            honour the same DPI-aware contract.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A pinned UI scale factor:","code":["SwingTree.get().setUiScaleFactor(uiScaleFactor)"]},
+
+        {"kind":"and","text":"A `Var<Bounds>` modeled as part of our (mock) view model:","code":["Var<Bounds> bounds = Var.of(Bounds.of(10, 10, 50, 50))"]},
+
+        {"kind":"when","text":"We bind the property to a panel via `withBounds(Val<Bounds>)`:","code":["var panel = UI.panel().withBounds(bounds).get(JPanel.class)"]},
+
+        {"kind":"then","text":"The component is initially seeded with the model's bounds, scaled by the UI factor.","code":["panel.getBounds().x      == Math.round(10 * uiScaleFactor)","panel.getBounds().y      == Math.round(10 * uiScaleFactor)","panel.getBounds().width  == Math.round(50 * uiScaleFactor)","panel.getBounds().height == Math.round(50 * uiScaleFactor)"]},
+
+        {"kind":"when","text":"The view model produces an updated `Bounds` value (e.g. via a wither):","code":["bounds.set(Bounds.of(100, 200, 300, 400))","UI.sync()"]},
+
+        {"kind":"then","text":"The component's bounds reactively follow the property update, still in developer pixel space.","code":["panel.getBounds().x      == Math.round(100 * uiScaleFactor)","panel.getBounds().y      == Math.round(200 * uiScaleFactor)","panel.getBounds().width  == Math.round(300 * uiScaleFactor)","panel.getBounds().height == Math.round(400 * uiScaleFactor)"]},
+
+        {"kind":"where","text":"","code":{"uiScaleFactor":["1.0f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A reactive `Val<Bounds>` keeps the component's bounds in sync with a view model. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `withBounds(Val<Bounds>)` overload is the reactive counterpart of\n            `withBounds(Bounds)`. It is bound to a sprouts `Val` property and\n            re-applies the bounds whenever that property changes.\n\n            This is the canonical way to seed and update a component's location\n            and size from a view model: the model owns the truth, the view\n            simply mirrors it. No `peek(c -> c.setBounds(...))` boilerplate\n            necessary – and importantly, the developer-pixel-space contract\n            is preserved on every property change, not just on initial display.\n\n            We parameterise over multiple UI scale factors to demonstrate that\n            *both* the initial seeding *and* every subsequent reactive update\n            honour the same DPI-aware contract.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A pinned UI scale factor:","code":["SwingTree.get().setUiScaleFactor(uiScaleFactor)"]},
+
+        {"kind":"and","text":"A `Var<Bounds>` modeled as part of our (mock) view model:","code":["Var<Bounds> bounds = Var.of(Bounds.of(10, 10, 50, 50))"]},
+
+        {"kind":"when","text":"We bind the property to a panel via `withBounds(Val<Bounds>)`:","code":["var panel = UI.panel().withBounds(bounds).get(JPanel.class)"]},
+
+        {"kind":"then","text":"The component is initially seeded with the model's bounds, scaled by the UI factor.","code":["panel.getBounds().x      == Math.round(10 * uiScaleFactor)","panel.getBounds().y      == Math.round(10 * uiScaleFactor)","panel.getBounds().width  == Math.round(50 * uiScaleFactor)","panel.getBounds().height == Math.round(50 * uiScaleFactor)"]},
+
+        {"kind":"when","text":"The view model produces an updated `Bounds` value (e.g. via a wither):","code":["bounds.set(Bounds.of(100, 200, 300, 400))","UI.sync()"]},
+
+        {"kind":"then","text":"The component's bounds reactively follow the property update, still in developer pixel space.","code":["panel.getBounds().x      == Math.round(100 * uiScaleFactor)","panel.getBounds().y      == Math.round(200 * uiScaleFactor)","panel.getBounds().width  == Math.round(300 * uiScaleFactor)","panel.getBounds().height == Math.round(400 * uiScaleFactor)"]},
+
+        {"kind":"where","text":"","code":{"uiScaleFactor":["1.0f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A reactive `Val<Bounds>` keeps the component's bounds in sync with a view model. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `withBounds(Val<Bounds>)` overload is the reactive counterpart of\n            `withBounds(Bounds)`. It is bound to a sprouts `Val` property and\n            re-applies the bounds whenever that property changes.\n\n            This is the canonical way to seed and update a component's location\n            and size from a view model: the model owns the truth, the view\n            simply mirrors it. No `peek(c -> c.setBounds(...))` boilerplate\n            necessary – and importantly, the developer-pixel-space contract\n            is preserved on every property change, not just on initial display.\n\n            We parameterise over multiple UI scale factors to demonstrate that\n            *both* the initial seeding *and* every subsequent reactive update\n            honour the same DPI-aware contract.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A pinned UI scale factor:","code":["SwingTree.get().setUiScaleFactor(uiScaleFactor)"]},
+
+        {"kind":"and","text":"A `Var<Bounds>` modeled as part of our (mock) view model:","code":["Var<Bounds> bounds = Var.of(Bounds.of(10, 10, 50, 50))"]},
+
+        {"kind":"when","text":"We bind the property to a panel via `withBounds(Val<Bounds>)`:","code":["var panel = UI.panel().withBounds(bounds).get(JPanel.class)"]},
+
+        {"kind":"then","text":"The component is initially seeded with the model's bounds, scaled by the UI factor.","code":["panel.getBounds().x      == Math.round(10 * uiScaleFactor)","panel.getBounds().y      == Math.round(10 * uiScaleFactor)","panel.getBounds().width  == Math.round(50 * uiScaleFactor)","panel.getBounds().height == Math.round(50 * uiScaleFactor)"]},
+
+        {"kind":"when","text":"The view model produces an updated `Bounds` value (e.g. via a wither):","code":["bounds.set(Bounds.of(100, 200, 300, 400))","UI.sync()"]},
+
+        {"kind":"then","text":"The component's bounds reactively follow the property update, still in developer pixel space.","code":["panel.getBounds().x      == Math.round(100 * uiScaleFactor)","panel.getBounds().y      == Math.round(200 * uiScaleFactor)","panel.getBounds().width  == Math.round(300 * uiScaleFactor)","panel.getBounds().height == Math.round(400 * uiScaleFactor)"]},
+
+        {"kind":"where","text":"","code":{"uiScaleFactor":["1.0f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A static `Position` value can be installed via `withLocation(Position)` without affecting the size. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `withLocation(Position)` is the location-only counterpart of\n            `withSize(Size)`: it moves the component's top-left corner to\n            the supplied position but leaves its width and height untouched.\n            Use it when you want to dictate *where* a component sits but\n            its size should keep coming from elsewhere – e.g. from\n            `withSize(...)`, `withPrefSize(...)` or an automatic computation.\n\n            Because both `withSize(...)` and `withLocation(...)` interpret\n            their arguments in developer pixel space, they compose cleanly\n            under any UI scale factor.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A pinned UI scale factor:","code":["SwingTree.get().setUiScaleFactor(uiScaleFactor)"]},
+
+        {"kind":"and","text":"A panel with an initial size and a separate location property:","code":["var panel = UI.panel()","                .withSize(80, 40)","                .withLocation(Position.of(120, 30))","                .get(JPanel.class)"]},
+
+        {"kind":"expect","text":"The size came from `withSize(...)`, scaled by the UI factor:","code":["panel.getWidth()  == Math.round(80 * uiScaleFactor)","panel.getHeight() == Math.round(40 * uiScaleFactor)"]},
+
+        {"kind":"and","text":"and the location came from `withLocation(Position)`, scaled by the same UI factor.","code":["panel.getX() == Math.round(120 * uiScaleFactor)","panel.getY() == Math.round(30  * uiScaleFactor)"]},
+
+        {"kind":"where","text":"","code":{"uiScaleFactor":["1.0f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A static `Position` value can be installed via `withLocation(Position)` without affecting the size. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `withLocation(Position)` is the location-only counterpart of\n            `withSize(Size)`: it moves the component's top-left corner to\n            the supplied position but leaves its width and height untouched.\n            Use it when you want to dictate *where* a component sits but\n            its size should keep coming from elsewhere – e.g. from\n            `withSize(...)`, `withPrefSize(...)` or an automatic computation.\n\n            Because both `withSize(...)` and `withLocation(...)` interpret\n            their arguments in developer pixel space, they compose cleanly\n            under any UI scale factor.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A pinned UI scale factor:","code":["SwingTree.get().setUiScaleFactor(uiScaleFactor)"]},
+
+        {"kind":"and","text":"A panel with an initial size and a separate location property:","code":["var panel = UI.panel()","                .withSize(80, 40)","                .withLocation(Position.of(120, 30))","                .get(JPanel.class)"]},
+
+        {"kind":"expect","text":"The size came from `withSize(...)`, scaled by the UI factor:","code":["panel.getWidth()  == Math.round(80 * uiScaleFactor)","panel.getHeight() == Math.round(40 * uiScaleFactor)"]},
+
+        {"kind":"and","text":"and the location came from `withLocation(Position)`, scaled by the same UI factor.","code":["panel.getX() == Math.round(120 * uiScaleFactor)","panel.getY() == Math.round(30  * uiScaleFactor)"]},
+
+        {"kind":"where","text":"","code":{"uiScaleFactor":["1.0f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A static `Position` value can be installed via `withLocation(Position)` without affecting the size. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `withLocation(Position)` is the location-only counterpart of\n            `withSize(Size)`: it moves the component's top-left corner to\n            the supplied position but leaves its width and height untouched.\n            Use it when you want to dictate *where* a component sits but\n            its size should keep coming from elsewhere – e.g. from\n            `withSize(...)`, `withPrefSize(...)` or an automatic computation.\n\n            Because both `withSize(...)` and `withLocation(...)` interpret\n            their arguments in developer pixel space, they compose cleanly\n            under any UI scale factor.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A pinned UI scale factor:","code":["SwingTree.get().setUiScaleFactor(uiScaleFactor)"]},
+
+        {"kind":"and","text":"A panel with an initial size and a separate location property:","code":["var panel = UI.panel()","                .withSize(80, 40)","                .withLocation(Position.of(120, 30))","                .get(JPanel.class)"]},
+
+        {"kind":"expect","text":"The size came from `withSize(...)`, scaled by the UI factor:","code":["panel.getWidth()  == Math.round(80 * uiScaleFactor)","panel.getHeight() == Math.round(40 * uiScaleFactor)"]},
+
+        {"kind":"and","text":"and the location came from `withLocation(Position)`, scaled by the same UI factor.","code":["panel.getX() == Math.round(120 * uiScaleFactor)","panel.getY() == Math.round(30  * uiScaleFactor)"]},
+
+        {"kind":"where","text":"","code":{"uiScaleFactor":["1.0f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A reactive `Val<Position>` keeps the component's location in sync with a view model. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `withLocation(Val<Position>)` reactively mirrors a `Val<Position>`\n            into the component's `setLocation(...)`. It is the perfect\n            companion for drag-and-drop interactions in a `Layout.none()`\n            container: drag updates the property, the property updates the\n            component – no imperative bookkeeping in the view.\n\n            The DPI-aware contract again applies *both* on initial seeding\n            *and* on every reactive update, which is exactly what we\n            demonstrate by sweeping the UI scale factor.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A pinned UI scale factor:","code":["SwingTree.get().setUiScaleFactor(uiScaleFactor)"]},
+
+        {"kind":"and","text":"A reactive position property modelled as part of our view model:","code":["Var<Position> position = Var.of(Position.of(0, 0))"]},
+
+        {"kind":"and","text":"A panel of fixed size whose location is bound to that property:","code":["var panel = UI.panel()","                .withSize(60, 60)","                .withLocation(position)","                .get(JPanel.class)"]},
+
+        {"kind":"expect","text":"The panel is initially located at the position carried by the property,","code":["panel.getX() == 0","panel.getY() == 0"]},
+
+        {"kind":"and","text":"and its size came from `withSize(...)`, scaled by the UI factor.","code":["panel.getWidth()  == Math.round(60 * uiScaleFactor)","panel.getHeight() == Math.round(60 * uiScaleFactor)"]},
+
+        {"kind":"when","text":"We update the position property (e.g. as part of a drag):","code":["position.set(Position.of(75, 125))","UI.sync()"]},
+
+        {"kind":"then","text":"The panel reactively moves to the new location, in developer pixel space:","code":["panel.getX() == Math.round(75  * uiScaleFactor)","panel.getY() == Math.round(125 * uiScaleFactor)"]},
+
+        {"kind":"and","text":"its size is unaffected.","code":["panel.getWidth()  == Math.round(60 * uiScaleFactor)","panel.getHeight() == Math.round(60 * uiScaleFactor)"]},
+
+        {"kind":"where","text":"","code":{"uiScaleFactor":["1.0f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A reactive `Val<Position>` keeps the component's location in sync with a view model. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `withLocation(Val<Position>)` reactively mirrors a `Val<Position>`\n            into the component's `setLocation(...)`. It is the perfect\n            companion for drag-and-drop interactions in a `Layout.none()`\n            container: drag updates the property, the property updates the\n            component – no imperative bookkeeping in the view.\n\n            The DPI-aware contract again applies *both* on initial seeding\n            *and* on every reactive update, which is exactly what we\n            demonstrate by sweeping the UI scale factor.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A pinned UI scale factor:","code":["SwingTree.get().setUiScaleFactor(uiScaleFactor)"]},
+
+        {"kind":"and","text":"A reactive position property modelled as part of our view model:","code":["Var<Position> position = Var.of(Position.of(0, 0))"]},
+
+        {"kind":"and","text":"A panel of fixed size whose location is bound to that property:","code":["var panel = UI.panel()","                .withSize(60, 60)","                .withLocation(position)","                .get(JPanel.class)"]},
+
+        {"kind":"expect","text":"The panel is initially located at the position carried by the property,","code":["panel.getX() == 0","panel.getY() == 0"]},
+
+        {"kind":"and","text":"and its size came from `withSize(...)`, scaled by the UI factor.","code":["panel.getWidth()  == Math.round(60 * uiScaleFactor)","panel.getHeight() == Math.round(60 * uiScaleFactor)"]},
+
+        {"kind":"when","text":"We update the position property (e.g. as part of a drag):","code":["position.set(Position.of(75, 125))","UI.sync()"]},
+
+        {"kind":"then","text":"The panel reactively moves to the new location, in developer pixel space:","code":["panel.getX() == Math.round(75  * uiScaleFactor)","panel.getY() == Math.round(125 * uiScaleFactor)"]},
+
+        {"kind":"and","text":"its size is unaffected.","code":["panel.getWidth()  == Math.round(60 * uiScaleFactor)","panel.getHeight() == Math.round(60 * uiScaleFactor)"]},
+
+        {"kind":"where","text":"","code":{"uiScaleFactor":["1.0f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A reactive `Val<Position>` keeps the component's location in sync with a view model. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `withLocation(Val<Position>)` reactively mirrors a `Val<Position>`\n            into the component's `setLocation(...)`. It is the perfect\n            companion for drag-and-drop interactions in a `Layout.none()`\n            container: drag updates the property, the property updates the\n            component – no imperative bookkeeping in the view.\n\n            The DPI-aware contract again applies *both* on initial seeding\n            *and* on every reactive update, which is exactly what we\n            demonstrate by sweeping the UI scale factor.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A pinned UI scale factor:","code":["SwingTree.get().setUiScaleFactor(uiScaleFactor)"]},
+
+        {"kind":"and","text":"A reactive position property modelled as part of our view model:","code":["Var<Position> position = Var.of(Position.of(0, 0))"]},
+
+        {"kind":"and","text":"A panel of fixed size whose location is bound to that property:","code":["var panel = UI.panel()","                .withSize(60, 60)","                .withLocation(position)","                .get(JPanel.class)"]},
+
+        {"kind":"expect","text":"The panel is initially located at the position carried by the property,","code":["panel.getX() == 0","panel.getY() == 0"]},
+
+        {"kind":"and","text":"and its size came from `withSize(...)`, scaled by the UI factor.","code":["panel.getWidth()  == Math.round(60 * uiScaleFactor)","panel.getHeight() == Math.round(60 * uiScaleFactor)"]},
+
+        {"kind":"when","text":"We update the position property (e.g. as part of a drag):","code":["position.set(Position.of(75, 125))","UI.sync()"]},
+
+        {"kind":"then","text":"The panel reactively moves to the new location, in developer pixel space:","code":["panel.getX() == Math.round(75  * uiScaleFactor)","panel.getY() == Math.round(125 * uiScaleFactor)"]},
+
+        {"kind":"and","text":"its size is unaffected.","code":["panel.getWidth()  == Math.round(60 * uiScaleFactor)","panel.getHeight() == Math.round(60 * uiScaleFactor)"]},
+
+        {"kind":"where","text":"","code":{"uiScaleFactor":["1.0f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Val<Position>` update only moves the component – width and height stay put. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is a regression-style guard for the documented intent:\n            `withLocation(...)` is *strictly* a location concern. Even when\n            the bound `Val<Position>` changes, the component's size is\n            never touched. This makes the method composable with\n            independent size sources like `withPrefSize(...)` or\n            `withSize(...)`.\n\n            We sweep the UI scale factor to make sure this invariant holds\n            on every supported DPI tier, not just on a 1.0 pass-through.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A pinned UI scale factor:","code":["SwingTree.get().setUiScaleFactor(uiScaleFactor)"]},
+
+        {"kind":"and","text":"A panel sized via `withSize(...)` and located via a reactive property:","code":["Var<Position> position = Var.of(Position.of(10, 10))","var panel = UI.panel()","                .withSize(Size.of(100, 50))","                .withLocation(position)","                .get(JPanel.class)"]},
+
+        {"kind":"when","text":"We move the panel several times via the property:","code":["position.set(Position.of(50, 60));   UI.sync()","position.set(Position.of(50, 60));   UI.sync()","position.set(Position.of(200, 300)); UI.sync()","position.set(Position.of(200, 300)); UI.sync()"]},
+
+        {"kind":"then","text":"The size never changes (still the originally scaled `withSize(...)`):","code":["panel.getWidth()  == Math.round(100 * uiScaleFactor)","panel.getHeight() == Math.round(50  * uiScaleFactor)"]},
+
+        {"kind":"and","text":"but the location follows the latest property value, in developer pixel space.","code":["panel.getX() == Math.round(200 * uiScaleFactor)","panel.getY() == Math.round(300 * uiScaleFactor)"]},
+
+        {"kind":"where","text":"","code":{"uiScaleFactor":["1.0f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Val<Position>` update only moves the component – width and height stay put. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is a regression-style guard for the documented intent:\n            `withLocation(...)` is *strictly* a location concern. Even when\n            the bound `Val<Position>` changes, the component's size is\n            never touched. This makes the method composable with\n            independent size sources like `withPrefSize(...)` or\n            `withSize(...)`.\n\n            We sweep the UI scale factor to make sure this invariant holds\n            on every supported DPI tier, not just on a 1.0 pass-through.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A pinned UI scale factor:","code":["SwingTree.get().setUiScaleFactor(uiScaleFactor)"]},
+
+        {"kind":"and","text":"A panel sized via `withSize(...)` and located via a reactive property:","code":["Var<Position> position = Var.of(Position.of(10, 10))","var panel = UI.panel()","                .withSize(Size.of(100, 50))","                .withLocation(position)","                .get(JPanel.class)"]},
+
+        {"kind":"when","text":"We move the panel several times via the property:","code":["position.set(Position.of(50, 60));   UI.sync()","position.set(Position.of(50, 60));   UI.sync()","position.set(Position.of(200, 300)); UI.sync()","position.set(Position.of(200, 300)); UI.sync()"]},
+
+        {"kind":"then","text":"The size never changes (still the originally scaled `withSize(...)`):","code":["panel.getWidth()  == Math.round(100 * uiScaleFactor)","panel.getHeight() == Math.round(50  * uiScaleFactor)"]},
+
+        {"kind":"and","text":"but the location follows the latest property value, in developer pixel space.","code":["panel.getX() == Math.round(200 * uiScaleFactor)","panel.getY() == Math.round(300 * uiScaleFactor)"]},
+
+        {"kind":"where","text":"","code":{"uiScaleFactor":["1.0f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Val<Position>` update only moves the component – width and height stay put. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            This is a regression-style guard for the documented intent:\n            `withLocation(...)` is *strictly* a location concern. Even when\n            the bound `Val<Position>` changes, the component's size is\n            never touched. This makes the method composable with\n            independent size sources like `withPrefSize(...)` or\n            `withSize(...)`.\n\n            We sweep the UI scale factor to make sure this invariant holds\n            on every supported DPI tier, not just on a 1.0 pass-through.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A pinned UI scale factor:","code":["SwingTree.get().setUiScaleFactor(uiScaleFactor)"]},
+
+        {"kind":"and","text":"A panel sized via `withSize(...)` and located via a reactive property:","code":["Var<Position> position = Var.of(Position.of(10, 10))","var panel = UI.panel()","                .withSize(Size.of(100, 50))","                .withLocation(position)","                .get(JPanel.class)"]},
+
+        {"kind":"when","text":"We move the panel several times via the property:","code":["position.set(Position.of(50, 60));   UI.sync()","position.set(Position.of(50, 60));   UI.sync()","position.set(Position.of(200, 300)); UI.sync()","position.set(Position.of(200, 300)); UI.sync()"]},
+
+        {"kind":"then","text":"The size never changes (still the originally scaled `withSize(...)`):","code":["panel.getWidth()  == Math.round(100 * uiScaleFactor)","panel.getHeight() == Math.round(50  * uiScaleFactor)"]},
+
+        {"kind":"and","text":"but the location follows the latest property value, in developer pixel space.","code":["panel.getX() == Math.round(200 * uiScaleFactor)","panel.getY() == Math.round(300 * uiScaleFactor)"]},
+
+        {"kind":"where","text":"","code":{"uiScaleFactor":["1.0f","1.5f","2.0f"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

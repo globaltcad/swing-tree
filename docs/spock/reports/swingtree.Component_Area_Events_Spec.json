@@ -1,0 +1,260 @@
+{
+  "className":"swingtree.Component_Area_Events_Spec",
+  "title":"Component Areas and the Mouse Events Bound to Them",
+  "narrative":"A style divides a component into areas, and `UI.ComponentArea` names them:\n    `EXTERIOR` is the ring a margin leaves around the body, `BORDER` is the ring a border\n    width fills, `INTERIOR` is what lies inside the border, `BODY` is the border and the\n    interior together, and `ALL` is the whole component. A border of four different\n    widths, or a corner radius, makes these areas shapes no rectangle describes, so a\n    component has to be able to return each area as a `java.awt.Shape` when asked.\n    `ComponentExtension.getComponentArea(..)` does that, `shapeOf(..)` on the event and\n    style delegates passes the answer on to application code, and the style painters and\n    mouse event handlers bound to an area use the very same shapes.\n\n    Swing tells you when the cursor entered a component. SwingTree lets you ask a\n    narrower question: `onMouseEnter(UI.ComponentArea.BORDER, ..)` fires when the cursor\n    reaches the border ring, stays silent while the cursor is in the middle of the\n    component, and `onMouseExit(UI.ComponentArea.BORDER, ..)` fires when the cursor leaves\n    the ring again - also when it leaves by moving inward, which Swing itself never\n    reports as an exit.\n\n    Every scenario in this specification checks one requirement: **which shapes a\n    component returns is decided by its style, and by nothing else.** In particular not by\n    how, or whether, its rendering happens to be cached.\n\n    See also: `Stretch_Tiling_Eligibility_Spec` for how renderings are cached,\n    `Cache_Configuration_Spec` for the switches that govern the cache, and\n    `Individual_Component_Styling_Spec` for the styles that define the areas in the first\n    place.",
+  "subjects":["swingtree.UI","swingtree.style.ComponentExtension"],
+  "statistics":{
+    "runs":"10",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"A component with a border returns the shape of its border area. (a border of one width and one color) [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A border width turns the outermost pixels of a component into its\n            `UI.ComponentArea.BORDER` area: a ring which follows every edge of the component\n            and leaves the middle out. A component has to return that ring as a\n            `java.awt.Shape` from `ComponentExtension.getComponentArea(UI.ComponentArea.BORDER)`,\n            because `shapeOf(..)` on the delegates and the\n            `onMouseEnter(UI.ComponentArea.BORDER, ..)` events are built on that answer.\n            So we paint a panel of 300 by 200 pixels with a border at least 12 pixels wide,\n            ask for the ring, and test three points: the point (6, 100) lies inside the left\n            edge, the point (150, 6) lies inside the top edge, and the center point (150, 100)\n            lies in the middle, outside of the ring.\n\n            **Why this is fragile:** building a shape is expensive, so SwingTree builds the\n            shape of an area only when something asks for it, and it shares the shapes\n            between all components which have the same border widths, margin, corner\n            rounding and size. That makes it tempting to answer \"does this component have a\n            border area?\" with \"has a border shape been built for it yet?\". The two\n            questions only agree as long as painting a component builds the shapes of that\n            component. Commit \"570 Improve Cache Hits and Reduce Memory Consumption through\n            9 Patch Tiling\" (#571) broke that: when a style looks the same along its edges\n            at every size, SwingTree now paints it only once, at a small size of a few tens\n            of pixels, and stretches the edges and corners of that small painting to the\n            real size of the component. The shapes built while painting are those of the\n            small painting. The shapes of the component itself are never built, and so, from\n            its first paint onward, the component returned no border area at all.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel of 300 by 200 pixels with a border.","code":["var panel = UI.panel().withStyle(styler).get(JPanel)","panel.setSize(300, 200)"]},
+
+        {"kind":"and","text":"It is painted once, the way any component on screen is.","code":["Utility.renderSingleComponent(panel)"]},
+
+        {"kind":"when","text":"We ask the panel for the shape of its border area.","code":["Shape borderArea = ComponentExtension.from(panel).getComponentArea(UI.ComponentArea.BORDER).orElse(null)"]},
+
+        {"kind":"then","text":"It returns a shape, because its style defines a border width.","code":["borderArea != null"]},
+
+        {"kind":"and","text":"The point 6 pixels into the left edge and the point 6 pixels into the top edge lie inside the shape...","code":["borderArea.contains(6, 100)","borderArea.contains(150, 6)"]},
+
+        {"kind":"and","text":"...and the center point of the panel lies outside of it.","code":["!borderArea.contains(150, 100)"]},
+
+        {"kind":"where","text":"","code":{"description":["'a border of one width and one color'","'a border with rounded corners'","'a border of four different widths'"],"styler":["{ it.border(12, \"black\") }","{ it.border(12, \"black\").borderRadius(20) }","{ it.borderWidths(14, 16, 18, 20).borderColor(\"black\") }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A component with a border returns the shape of its border area. (a border with rounded corners) [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A border width turns the outermost pixels of a component into its\n            `UI.ComponentArea.BORDER` area: a ring which follows every edge of the component\n            and leaves the middle out. A component has to return that ring as a\n            `java.awt.Shape` from `ComponentExtension.getComponentArea(UI.ComponentArea.BORDER)`,\n            because `shapeOf(..)` on the delegates and the\n            `onMouseEnter(UI.ComponentArea.BORDER, ..)` events are built on that answer.\n            So we paint a panel of 300 by 200 pixels with a border at least 12 pixels wide,\n            ask for the ring, and test three points: the point (6, 100) lies inside the left\n            edge, the point (150, 6) lies inside the top edge, and the center point (150, 100)\n            lies in the middle, outside of the ring.\n\n            **Why this is fragile:** building a shape is expensive, so SwingTree builds the\n            shape of an area only when something asks for it, and it shares the shapes\n            between all components which have the same border widths, margin, corner\n            rounding and size. That makes it tempting to answer \"does this component have a\n            border area?\" with \"has a border shape been built for it yet?\". The two\n            questions only agree as long as painting a component builds the shapes of that\n            component. Commit \"570 Improve Cache Hits and Reduce Memory Consumption through\n            9 Patch Tiling\" (#571) broke that: when a style looks the same along its edges\n            at every size, SwingTree now paints it only once, at a small size of a few tens\n            of pixels, and stretches the edges and corners of that small painting to the\n            real size of the component. The shapes built while painting are those of the\n            small painting. The shapes of the component itself are never built, and so, from\n            its first paint onward, the component returned no border area at all.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel of 300 by 200 pixels with a border.","code":["var panel = UI.panel().withStyle(styler).get(JPanel)","panel.setSize(300, 200)"]},
+
+        {"kind":"and","text":"It is painted once, the way any component on screen is.","code":["Utility.renderSingleComponent(panel)"]},
+
+        {"kind":"when","text":"We ask the panel for the shape of its border area.","code":["Shape borderArea = ComponentExtension.from(panel).getComponentArea(UI.ComponentArea.BORDER).orElse(null)"]},
+
+        {"kind":"then","text":"It returns a shape, because its style defines a border width.","code":["borderArea != null"]},
+
+        {"kind":"and","text":"The point 6 pixels into the left edge and the point 6 pixels into the top edge lie inside the shape...","code":["borderArea.contains(6, 100)","borderArea.contains(150, 6)"]},
+
+        {"kind":"and","text":"...and the center point of the panel lies outside of it.","code":["!borderArea.contains(150, 100)"]},
+
+        {"kind":"where","text":"","code":{"description":["'a border of one width and one color'","'a border with rounded corners'","'a border of four different widths'"],"styler":["{ it.border(12, \"black\") }","{ it.border(12, \"black\").borderRadius(20) }","{ it.borderWidths(14, 16, 18, 20).borderColor(\"black\") }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A component with a border returns the shape of its border area. (a border of four different widths) [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A border width turns the outermost pixels of a component into its\n            `UI.ComponentArea.BORDER` area: a ring which follows every edge of the component\n            and leaves the middle out. A component has to return that ring as a\n            `java.awt.Shape` from `ComponentExtension.getComponentArea(UI.ComponentArea.BORDER)`,\n            because `shapeOf(..)` on the delegates and the\n            `onMouseEnter(UI.ComponentArea.BORDER, ..)` events are built on that answer.\n            So we paint a panel of 300 by 200 pixels with a border at least 12 pixels wide,\n            ask for the ring, and test three points: the point (6, 100) lies inside the left\n            edge, the point (150, 6) lies inside the top edge, and the center point (150, 100)\n            lies in the middle, outside of the ring.\n\n            **Why this is fragile:** building a shape is expensive, so SwingTree builds the\n            shape of an area only when something asks for it, and it shares the shapes\n            between all components which have the same border widths, margin, corner\n            rounding and size. That makes it tempting to answer \"does this component have a\n            border area?\" with \"has a border shape been built for it yet?\". The two\n            questions only agree as long as painting a component builds the shapes of that\n            component. Commit \"570 Improve Cache Hits and Reduce Memory Consumption through\n            9 Patch Tiling\" (#571) broke that: when a style looks the same along its edges\n            at every size, SwingTree now paints it only once, at a small size of a few tens\n            of pixels, and stretches the edges and corners of that small painting to the\n            real size of the component. The shapes built while painting are those of the\n            small painting. The shapes of the component itself are never built, and so, from\n            its first paint onward, the component returned no border area at all.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel of 300 by 200 pixels with a border.","code":["var panel = UI.panel().withStyle(styler).get(JPanel)","panel.setSize(300, 200)"]},
+
+        {"kind":"and","text":"It is painted once, the way any component on screen is.","code":["Utility.renderSingleComponent(panel)"]},
+
+        {"kind":"when","text":"We ask the panel for the shape of its border area.","code":["Shape borderArea = ComponentExtension.from(panel).getComponentArea(UI.ComponentArea.BORDER).orElse(null)"]},
+
+        {"kind":"then","text":"It returns a shape, because its style defines a border width.","code":["borderArea != null"]},
+
+        {"kind":"and","text":"The point 6 pixels into the left edge and the point 6 pixels into the top edge lie inside the shape...","code":["borderArea.contains(6, 100)","borderArea.contains(150, 6)"]},
+
+        {"kind":"and","text":"...and the center point of the panel lies outside of it.","code":["!borderArea.contains(150, 100)"]},
+
+        {"kind":"where","text":"","code":{"description":["'a border of one width and one color'","'a border with rounded corners'","'a border of four different widths'"],"styler":["{ it.border(12, \"black\") }","{ it.border(12, \"black\").borderRadius(20) }","{ it.borderWidths(14, 16, 18, 20).borderColor(\"black\") }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A component returns the shape of its interior, its exterior and its body as its style defines them. (the interior inside a 13 pixel border) [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A style defines up to four areas of a component, and each one is a\n            `java.awt.Shape` which `ComponentExtension.getComponentArea(..)` returns:\n            a border width fills the `BORDER` ring, what lies inside that ring is the\n            `INTERIOR`, a margin leaves an `EXTERIOR` ring around the body, and the `BODY`\n            is the border and the interior together. This scenario paints a panel of 300 by\n            200 pixels, asks for one of the three areas beside the border, and tests two\n            points: one that lies in the area and one that lies outside of it. For the\n            interior of a panel with a 13 pixel border, for example, the center point\n            (150, 100) lies inside, and the point (6, 100) lies in the border, outside of it.\n\n            **Why this is fragile:** `getComponentArea(INTERIOR)` and `getComponentArea(BODY)`\n            return the full bounds of the component when SwingTree has no shape for the\n            area, so a missing interior shape does not show up as an empty answer but as a\n            wrong one: an `onMouseEnter(UI.ComponentArea.INTERIOR, ..)` handler on a\n            bordered panel fired when the cursor reached the edge of the panel instead of\n            when it crossed the border. The exterior went missing for a second reason.\n            SwingTree used to build the shape of an area only while painting that area, and\n            answered \"does this area exist?\" with \"has its shape been built?\". But when the\n            background color is opaque, and the border, if there is one, is opaque too,\n            SwingTree paints the background by filling the whole component with the\n            foundation color, which is the color of the margin, and then filling the body\n            with the background color on top of it, because that is cheaper than filling\n            the exterior ring on its own. So painting never built the exterior shape, and a\n            panel with an opaque background returned no exterior at all. Deciding from the\n            style alone whether an area exists closes both gaps.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel of 300 by 200 pixels, styled so that it has the area in question.","code":["var panel = UI.panel().withStyle(styler).get(JPanel)","panel.setSize(300, 200)"]},
+
+        {"kind":"and","text":"It is painted once, the way any component on screen is.","code":["Utility.renderSingleComponent(panel)"]},
+
+        {"kind":"when","text":"We ask the panel for the shape of that area.","code":["Shape shape = ComponentExtension.from(panel).getComponentArea(area).orElse(null)"]},
+
+        {"kind":"then","text":"It returns a shape, because its style defines the area.","code":["shape != null"]},
+
+        {"kind":"and","text":"The point that lies in the area is inside the shape, and the point that lies beside the area is outside of it.","code":["shape.contains(inside[0], inside[1])","!shape.contains(outside[0], outside[1])"]},
+
+        {"kind":"where","text":"","code":{"description":["'the interior inside a 13 pixel border'","'the exterior left by a 15 pixel margin'","'the body inside a 17 pixel margin'"],"area":["UI.ComponentArea.INTERIOR","UI.ComponentArea.EXTERIOR","UI.ComponentArea.BODY"],"styler":["{ it.border(13, \"black\") }","{ it.margin(15).foundationColor(\"black\").backgroundColor(\"white\") }","{ it.margin(17).foundationColor(\"black\").backgroundColor(\"white\") }"],"inside":["[150, 100]","[7, 100]","[150, 100]"],"outside":["[6, 100]","[150, 100]","[8, 100]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A component returns the shape of its interior, its exterior and its body as its style defines them. (the exterior left by a 15 pixel margin) [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A style defines up to four areas of a component, and each one is a\n            `java.awt.Shape` which `ComponentExtension.getComponentArea(..)` returns:\n            a border width fills the `BORDER` ring, what lies inside that ring is the\n            `INTERIOR`, a margin leaves an `EXTERIOR` ring around the body, and the `BODY`\n            is the border and the interior together. This scenario paints a panel of 300 by\n            200 pixels, asks for one of the three areas beside the border, and tests two\n            points: one that lies in the area and one that lies outside of it. For the\n            interior of a panel with a 13 pixel border, for example, the center point\n            (150, 100) lies inside, and the point (6, 100) lies in the border, outside of it.\n\n            **Why this is fragile:** `getComponentArea(INTERIOR)` and `getComponentArea(BODY)`\n            return the full bounds of the component when SwingTree has no shape for the\n            area, so a missing interior shape does not show up as an empty answer but as a\n            wrong one: an `onMouseEnter(UI.ComponentArea.INTERIOR, ..)` handler on a\n            bordered panel fired when the cursor reached the edge of the panel instead of\n            when it crossed the border. The exterior went missing for a second reason.\n            SwingTree used to build the shape of an area only while painting that area, and\n            answered \"does this area exist?\" with \"has its shape been built?\". But when the\n            background color is opaque, and the border, if there is one, is opaque too,\n            SwingTree paints the background by filling the whole component with the\n            foundation color, which is the color of the margin, and then filling the body\n            with the background color on top of it, because that is cheaper than filling\n            the exterior ring on its own. So painting never built the exterior shape, and a\n            panel with an opaque background returned no exterior at all. Deciding from the\n            style alone whether an area exists closes both gaps.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel of 300 by 200 pixels, styled so that it has the area in question.","code":["var panel = UI.panel().withStyle(styler).get(JPanel)","panel.setSize(300, 200)"]},
+
+        {"kind":"and","text":"It is painted once, the way any component on screen is.","code":["Utility.renderSingleComponent(panel)"]},
+
+        {"kind":"when","text":"We ask the panel for the shape of that area.","code":["Shape shape = ComponentExtension.from(panel).getComponentArea(area).orElse(null)"]},
+
+        {"kind":"then","text":"It returns a shape, because its style defines the area.","code":["shape != null"]},
+
+        {"kind":"and","text":"The point that lies in the area is inside the shape, and the point that lies beside the area is outside of it.","code":["shape.contains(inside[0], inside[1])","!shape.contains(outside[0], outside[1])"]},
+
+        {"kind":"where","text":"","code":{"description":["'the interior inside a 13 pixel border'","'the exterior left by a 15 pixel margin'","'the body inside a 17 pixel margin'"],"area":["UI.ComponentArea.INTERIOR","UI.ComponentArea.EXTERIOR","UI.ComponentArea.BODY"],"styler":["{ it.border(13, \"black\") }","{ it.margin(15).foundationColor(\"black\").backgroundColor(\"white\") }","{ it.margin(17).foundationColor(\"black\").backgroundColor(\"white\") }"],"inside":["[150, 100]","[7, 100]","[150, 100]"],"outside":["[6, 100]","[150, 100]","[8, 100]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A component returns the shape of its interior, its exterior and its body as its style defines them. (the body inside a 17 pixel margin) [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A style defines up to four areas of a component, and each one is a\n            `java.awt.Shape` which `ComponentExtension.getComponentArea(..)` returns:\n            a border width fills the `BORDER` ring, what lies inside that ring is the\n            `INTERIOR`, a margin leaves an `EXTERIOR` ring around the body, and the `BODY`\n            is the border and the interior together. This scenario paints a panel of 300 by\n            200 pixels, asks for one of the three areas beside the border, and tests two\n            points: one that lies in the area and one that lies outside of it. For the\n            interior of a panel with a 13 pixel border, for example, the center point\n            (150, 100) lies inside, and the point (6, 100) lies in the border, outside of it.\n\n            **Why this is fragile:** `getComponentArea(INTERIOR)` and `getComponentArea(BODY)`\n            return the full bounds of the component when SwingTree has no shape for the\n            area, so a missing interior shape does not show up as an empty answer but as a\n            wrong one: an `onMouseEnter(UI.ComponentArea.INTERIOR, ..)` handler on a\n            bordered panel fired when the cursor reached the edge of the panel instead of\n            when it crossed the border. The exterior went missing for a second reason.\n            SwingTree used to build the shape of an area only while painting that area, and\n            answered \"does this area exist?\" with \"has its shape been built?\". But when the\n            background color is opaque, and the border, if there is one, is opaque too,\n            SwingTree paints the background by filling the whole component with the\n            foundation color, which is the color of the margin, and then filling the body\n            with the background color on top of it, because that is cheaper than filling\n            the exterior ring on its own. So painting never built the exterior shape, and a\n            panel with an opaque background returned no exterior at all. Deciding from the\n            style alone whether an area exists closes both gaps.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel of 300 by 200 pixels, styled so that it has the area in question.","code":["var panel = UI.panel().withStyle(styler).get(JPanel)","panel.setSize(300, 200)"]},
+
+        {"kind":"and","text":"It is painted once, the way any component on screen is.","code":["Utility.renderSingleComponent(panel)"]},
+
+        {"kind":"when","text":"We ask the panel for the shape of that area.","code":["Shape shape = ComponentExtension.from(panel).getComponentArea(area).orElse(null)"]},
+
+        {"kind":"then","text":"It returns a shape, because its style defines the area.","code":["shape != null"]},
+
+        {"kind":"and","text":"The point that lies in the area is inside the shape, and the point that lies beside the area is outside of it.","code":["shape.contains(inside[0], inside[1])","!shape.contains(outside[0], outside[1])"]},
+
+        {"kind":"where","text":"","code":{"description":["'the interior inside a 13 pixel border'","'the exterior left by a 15 pixel margin'","'the body inside a 17 pixel margin'"],"area":["UI.ComponentArea.INTERIOR","UI.ComponentArea.EXTERIOR","UI.ComponentArea.BODY"],"styler":["{ it.border(13, \"black\") }","{ it.margin(15).foundationColor(\"black\").backgroundColor(\"white\") }","{ it.margin(17).foundationColor(\"black\").backgroundColor(\"white\") }"],"inside":["[150, 100]","[7, 100]","[150, 100]"],"outside":["[6, 100]","[150, 100]","[8, 100]"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Handlers bound to the border area fire when the cursor crosses into and out of the border ring.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            `onMouseEnter(UI.ComponentArea.BORDER, ..)` must fire when the cursor moves onto\n            the border of a panel, and `onMouseExit(UI.ComponentArea.BORDER, ..)` must fire\n            when the cursor moves on into the middle of that same panel, even though the\n            cursor never left the component. Swing reports neither. SwingTree derives both\n            by asking the component for the shape of its border area on every mouse move\n            and testing whether the cursor is inside that shape.\n            `examples.hover.BorderHoverExample` was written to demonstrate this behaviour.\n\n            The panel here is 300 by 200 pixels with a 12 pixel border, so the point\n            (6, 100) lies in the border, the point (150, 100) lies in the middle, and the\n            point (150, 6) lies in the border again. We move the cursor to these three\n            points in that order and expect an enter, an exit, and a second enter.\n\n            **Why this is fragile:** a handler that never runs looks like a broken listener\n            registration, but the listener is not what fails here. When the component\n            returns no shape for its border area, SwingTree treats the cursor as being\n            outside of the area, so the handler never runs, and nothing is logged. That is\n            how commit \"570 Improve Cache Hits and Reduce Memory Consumption through 9 Patch\n            Tiling\" (#571) switched off every handler bound to a border area without a\n            warning, a stack trace or a single failing rendering test. Until then, SwingTree\n            built the shape of the border area while painting the border, and answered\n            \"does this component have a border area?\" with \"has its border shape been\n            built?\". Since then, when a style looks the same along its edges at every size,\n            SwingTree paints it only once, at a small size of a few tens of pixels, and\n            stretches the edges and corners of that small painting to the real size of the\n            component. Painting the component no longer built the shapes of the component\n            itself, only those of the small painting, and so the component returned no\n            border shape.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel of 300 by 200 pixels with a 12 pixel border, counting the enter and exit events on that border.","code":["var enterCount = new AtomicInteger(0)","var exitCount  = new AtomicInteger(0)","var panel = UI.panel()","                .withStyle(it -> it.border(12, \"black\"))","                .onMouseEnter(UI.ComponentArea.BORDER, it -> enterCount.incrementAndGet() )","                .onMouseExit(UI.ComponentArea.BORDER, it -> exitCount.incrementAndGet() )","                .get(JPanel)"]},
+
+        {"kind":"and","text":"It is painted once, the way any component on screen is.","code":["panel.setSize(300, 200)","Utility.renderSingleComponent(panel)"]},
+
+        {"kind":"expect","text":"Nothing has been counted yet, because the cursor has not moved anywhere.","code":["enterCount.get() == 0","exitCount.get() == 0"]},
+
+        {"kind":"when","text":"The cursor moves to (6, 100), six pixels into the left border.","code":["moveMouseTo(panel, 6, 100)"]},
+
+        {"kind":"then","text":"That is an enter, and not yet an exit.","code":["enterCount.get() == 1","exitCount.get() == 0"]},
+
+        {"kind":"when","text":"The cursor moves on to (150, 100), the middle of the same panel.","code":["moveMouseTo(panel, 150, 100)"]},
+
+        {"kind":"then","text":"It left the border ring, so this is an exit, although the cursor is still over the component.","code":["enterCount.get() == 1","exitCount.get() == 1"]},
+
+        {"kind":"when","text":"The cursor moves to (150, 6), six pixels into the top border.","code":["moveMouseTo(panel, 150, 6)"]},
+
+        {"kind":"then","text":"The ring is entered a second time.","code":["enterCount.get() == 2","exitCount.get() == 1"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A painter started by a border enter handler shows up in the rendering of the component.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A handler bound to the border area of a panel can start an animation, and the\n            animation can add a painter to the panel through\n            `delegate.paint(UI.ComponentArea.BORDER, status, painter)`. What that painter\n            draws must appear in the next rendering of the panel and in every rendering\n            after it while the animation runs. `examples.hover.BorderHoverExample` does\n            exactly this: when the cursor enters the border, it paints a cyan disc at the\n            cursor for a quarter of a second.\n\n            The panel here is 300 by 200 pixels with a 24 pixel border. Its enter handler\n            starts a five second animation which paints a cyan disc 30 pixels wide around\n            the cursor. We move the cursor to (12, 100), inside the left border, wait 100\n            milliseconds for the animation to register its painter, and count the cyan\n            pixels in three consecutive renderings of the panel. Nothing else in the panel\n            is cyan.\n\n            **Why this is fragile:** five things have to work in a row for one disc to\n            appear: the panel returns the shape of its border area, SwingTree derives an\n            enter event from that shape, the animation starts, its painter is registered on\n            the panel, and the panel is not painted from a cached rendering which was made\n            before the painter existed. A break anywhere in the row shows up as the same\n            symptom: nothing\n            appears. This scenario is deliberately end to end so that it fails whichever of\n            the five breaks. When commit \"570 Improve Cache Hits and Reduce Memory\n            Consumption through 9 Patch Tiling\" (#571) landed, the disc vanished from\n            `examples.hover.BorderHoverExample` while the animation and the painter were\n            intact: the panel no longer returned a border shape, so the enter handler never\n            ran.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel of 300 by 200 pixels with a 24 pixel border, whose border enter handler paints a cyan disc around the cursor for five seconds.","code":["var panel = UI.panel()","                .withStyle(it -> it.border(24, \"black\"))","                .withBackground(Color.WHITE)","                .onMouseEnter(UI.ComponentArea.BORDER, it ->","                    it.animateFor(5, TimeUnit.SECONDS, status ->","                        it.paint(UI.ComponentArea.BORDER, status, g -> {","                            g.setColor(Color.CYAN)","                            g.fillOval(it.mouseX() - 15, it.mouseY() - 15, 30, 30)","                        })","                    )","                )","                .get(JPanel)"]},
+
+        {"kind":"and","text":"It is painted once, the way any component on screen is.","code":["panel.setSize(300, 200)","Utility.renderSingleComponent(panel)"]},
+
+        {"kind":"expect","text":"Nothing cyan has been painted so far.","code":["cyanPixelsIn(Utility.renderSingleComponent(panel)) == 0"]},
+
+        {"kind":"when","text":"The cursor moves to (12, 100), inside the left border, and the animation gets 100 milliseconds to start.","code":["moveMouseTo(panel, 12, 100)","Thread.sleep(100)","UI.sync()"]},
+
+        {"kind":"then","text":"The disc is in this rendering of the panel and in the two after it.","code":["(1..3).every { cyanPixelsIn(Utility.renderSingleComponent(panel)) > 300 }"]},
+
+        {"kind":"and","text":"The point the cursor stopped at is cyan, because it is the center of the disc.","code":["Utility.renderSingleComponent(panel).getRGB(12, 100) == Color.CYAN.getRGB()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The shape a component returns is the same with the stretch tiling cache switched on and off. (a straight border ring) [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            SwingTree caches the painting of a component. When a style looks the same along\n            its edges at every size, SwingTree paints it only once, at a small size of a few\n            tens of pixels, and stretches the edges and corners of that small painting to\n            the real size of the component whenever the component is painted. That is a\n            decision about pixels, taken to keep resizing cheap, and it must be invisible\n            from the outside. `SwingTree.get().setCacheTilingEnabled(..)` switches it on and\n            off at runtime, so the invisibility is something a test can state outright:\n            what a component returns from `getComponentArea(UI.ComponentArea.BORDER)` has to\n            be the same shape with the switch in either position.\n\n            Here we paint a panel of 300 by 200 pixels with a border, first with the switch\n            on and then with it off, and compare the border shape returned after each\n            painting.\n\n            **Why this is fragile:** with the switch on, what gets painted is not the\n            component but a small painting of its style at a different size. Anything\n            computed as a side effect of painting is therefore computed for the small\n            painting, and a question answered from such side effects quietly turns into a\n            question about a caching decision. The area shapes were such a side effect:\n            SwingTree built them while painting, and answered \"does this component have a\n            border area?\" with \"has its border shape been built yet?\". With the switch on\n            the shape was never built and the panel returned no border shape; with the\n            switch off it was built and the panel returned one.\n\n            The two panels use border widths of 9 and 10 pixels, which no other scenario in\n            this specification uses. SwingTree shares area shapes between all components\n            which have the same border widths, margin, corner rounding and size, so a shape\n            built by another scenario for an identically styled panel would be found here\n            and returned as this panel's own, and the comparison would prove nothing.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel of 300 by 200 pixels with a border, far larger than the small painting the cache makes of its style.","code":["var panel = UI.panel().withStyle(styler).get(JPanel)","panel.setSize(300, 200)"]},
+
+        {"kind":"when","text":"We paint it with the cache switch on, which is the production default, and ask for its border shape.","code":["Utility.renderSingleComponent(panel)","Shape whenTiled = ComponentExtension.from(panel).getComponentArea(UI.ComponentArea.BORDER).orElse(null)"]},
+
+        {"kind":"and","text":"Then we paint it again with the cache switch off and ask once more.","code":["SwingTree.get().setCacheTilingEnabled(false)","Utility.renderSingleComponent(panel)","Shape whenNotTiled = ComponentExtension.from(panel).getComponentArea(UI.ComponentArea.BORDER).orElse(null)"]},
+
+        {"kind":"then","text":"The style defines a border width, so the panel returns a shape both times.","code":["whenTiled != null","whenNotTiled != null"]},
+
+        {"kind":"and","text":"Both are the same shape, because the cache has no say in the matter.","code":["new Area(whenTiled) == new Area(whenNotTiled)"]},
+
+        {"kind":"where","text":"","code":{"description":["'a straight border ring'","'a rounded border ring'"],"styler":["{ it.border(9, \"black\") }","{ it.border(10, \"black\").borderRadius(17) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The shape a component returns is the same with the stretch tiling cache switched on and off. (a rounded border ring) [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            SwingTree caches the painting of a component. When a style looks the same along\n            its edges at every size, SwingTree paints it only once, at a small size of a few\n            tens of pixels, and stretches the edges and corners of that small painting to\n            the real size of the component whenever the component is painted. That is a\n            decision about pixels, taken to keep resizing cheap, and it must be invisible\n            from the outside. `SwingTree.get().setCacheTilingEnabled(..)` switches it on and\n            off at runtime, so the invisibility is something a test can state outright:\n            what a component returns from `getComponentArea(UI.ComponentArea.BORDER)` has to\n            be the same shape with the switch in either position.\n\n            Here we paint a panel of 300 by 200 pixels with a border, first with the switch\n            on and then with it off, and compare the border shape returned after each\n            painting.\n\n            **Why this is fragile:** with the switch on, what gets painted is not the\n            component but a small painting of its style at a different size. Anything\n            computed as a side effect of painting is therefore computed for the small\n            painting, and a question answered from such side effects quietly turns into a\n            question about a caching decision. The area shapes were such a side effect:\n            SwingTree built them while painting, and answered \"does this component have a\n            border area?\" with \"has its border shape been built yet?\". With the switch on\n            the shape was never built and the panel returned no border shape; with the\n            switch off it was built and the panel returned one.\n\n            The two panels use border widths of 9 and 10 pixels, which no other scenario in\n            this specification uses. SwingTree shares area shapes between all components\n            which have the same border widths, margin, corner rounding and size, so a shape\n            built by another scenario for an identically styled panel would be found here\n            and returned as this panel's own, and the comparison would prove nothing.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A panel of 300 by 200 pixels with a border, far larger than the small painting the cache makes of its style.","code":["var panel = UI.panel().withStyle(styler).get(JPanel)","panel.setSize(300, 200)"]},
+
+        {"kind":"when","text":"We paint it with the cache switch on, which is the production default, and ask for its border shape.","code":["Utility.renderSingleComponent(panel)","Shape whenTiled = ComponentExtension.from(panel).getComponentArea(UI.ComponentArea.BORDER).orElse(null)"]},
+
+        {"kind":"and","text":"Then we paint it again with the cache switch off and ask once more.","code":["SwingTree.get().setCacheTilingEnabled(false)","Utility.renderSingleComponent(panel)","Shape whenNotTiled = ComponentExtension.from(panel).getComponentArea(UI.ComponentArea.BORDER).orElse(null)"]},
+
+        {"kind":"then","text":"The style defines a border width, so the panel returns a shape both times.","code":["whenTiled != null","whenNotTiled != null"]},
+
+        {"kind":"and","text":"Both are the same shape, because the cache has no say in the matter.","code":["new Area(whenTiled) == new Area(whenNotTiled)"]},
+
+        {"kind":"where","text":"","code":{"description":["'a straight border ring'","'a rounded border ring'"],"styler":["{ it.border(9, \"black\") }","{ it.border(10, \"black\").borderRadius(17) }"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}
