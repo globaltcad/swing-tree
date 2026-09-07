@@ -181,11 +181,11 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
 <span class="fc bfc" id="L181" title="All 4 branches covered.">        if ( span       == none._span &amp;&amp;</span>
              type       == none._type       &amp;&amp;
 <span class="fc bfc" id="L183" title="All 2 branches covered.">             Arrays.equals(colors, none._colors) &amp;&amp;</span>
-<span class="pc bpc" id="L184" title="4 of 8 branches missed.">             Objects.equals(offset, none._offset) &amp;&amp;</span>
+<span class="pc bpc" id="L184" title="3 of 8 branches missed.">             Objects.equals(offset, none._offset) &amp;&amp;</span>
              size       == none._size &amp;&amp;
              area       == none._area       &amp;&amp;
              boundary   == none._boundary   &amp;&amp;
-<span class="pc bpc" id="L188" title="2 of 4 branches missed.">             Objects.equals(focus, none._focus) &amp;&amp;</span>
+<span class="pc bpc" id="L188" title="1 of 4 branches missed.">             Objects.equals(focus, none._focus) &amp;&amp;</span>
              rotation   == none._rotation   &amp;&amp;
 <span class="pc bpc" id="L190" title="2 of 4 branches missed.">             Arrays.equals(fractions, none._fractions) &amp;&amp;</span>
              cycle      == none._cycle
@@ -490,7 +490,7 @@ public final class GradientConf implements Simplifiable&lt;GradientConf&gt;
      *  @return An updated gradient configuration with the specified rotation.
      */
     public GradientConf rotation( float rotation ) {
-<span class="nc" id="L493">        return of(_span, _type, _colors, _offset, _size, _area, _boundary, _focus, rotation, _fractions, _cycle);</span>
+<span class="fc" id="L493">        return of(_span, _type, _colors, _offset, _size, _area, _boundary, _focus, rotation, _fractions, _cycle);</span>
     }
 
     /**

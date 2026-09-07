@@ -43,45 +43,45 @@ public final class UIForSeparator&lt;S extends JSeparator&gt; extends UIForAnySw
      * Sets the orientation of the separator which can be either
      * {@link SwingConstants#HORIZONTAL} or {@link SwingConstants#VERTICAL}.
      * This method is a convenience method for {@link JSeparator#setOrientation(int)}
-     * which receives the {@link UI.Align} enum instead of an integer.
+     * which receives the {@link UI.Axis} enum instead of an integer.
      *
-     * @param align The orientation of the separator.
+     * @param axis The axis the separator line runs along.
      * @return This very instance, which enables builder-style method chaining.
-     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     * @throws IllegalArgumentException if {@code axis} is {@code null}.
      */
-    public final UIForSeparator&lt;S&gt; withOrientation( UI.Align align ) {
-<span class="fc" id="L53">        NullUtil.nullArgCheck( align, &quot;align&quot;, UI.Align.class );</span>
+    public final UIForSeparator&lt;S&gt; withOrientation( UI.Axis axis ) {
+<span class="fc" id="L53">        NullUtil.nullArgCheck( axis, &quot;axis&quot;, UI.Axis.class );</span>
 <span class="fc" id="L54">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L55">                    thisComponent.setOrientation( align.forSeparator() );</span>
+<span class="fc" id="L55">                    thisComponent.setOrientation( axis.forSeparator() );</span>
 <span class="fc" id="L56">                })</span>
 <span class="fc" id="L57">                ._this();</span>
     }
 
     /**
-     *  Binds the supplied alignment property to the orientation of the separator,
+     *  Binds the supplied axis property to the orientation of the separator,
      *  so that whenever the property changes, the orientation of the separator will be updated accordingly.
      *
-     * @param align The alignment property used to dynamically update the alignment of the separator.
+     * @param axis A property holding the axis the separator line runs along.
      * @return This very instance, which enables builder-style method chaining.
-     * @throws IllegalArgumentException if {@code align} is {@code null}.
+     * @throws IllegalArgumentException if {@code axis} is {@code null}.
      */
-    public final UIForSeparator&lt;S&gt; withOrientation( Val&lt;UI.Align&gt; align ) {
-<span class="fc" id="L69">        NullUtil.nullArgCheck( align, &quot;align&quot;, Val.class );</span>
-<span class="fc" id="L70">        NullUtil.nullPropertyCheck( align, &quot;align&quot;, &quot;Null is not a valid alignment.&quot; );</span>
-<span class="fc" id="L71">        return _withOnShow( align, (c,v) -&gt; {</span>
+    public final UIForSeparator&lt;S&gt; withOrientation( Val&lt;UI.Axis&gt; axis ) {
+<span class="fc" id="L69">        NullUtil.nullArgCheck( axis, &quot;axis&quot;, Val.class );</span>
+<span class="fc" id="L70">        NullUtil.nullPropertyCheck( axis, &quot;axis&quot;, &quot;Null is not a valid axis.&quot; );</span>
+<span class="fc" id="L71">        return _withOnShow( axis, (c,v) -&gt; {</span>
 <span class="fc" id="L72">                    c.setOrientation( v.forSeparator() );</span>
 <span class="fc" id="L73">                })</span>
 <span class="fc" id="L74">                ._with( thisComponent -&gt; {</span>
-<span class="fc" id="L75">                    thisComponent.setOrientation( align.orElseThrowUnchecked().forSeparator() );</span>
+<span class="fc" id="L75">                    thisComponent.setOrientation( axis.orElseThrowUnchecked().forSeparator() );</span>
 <span class="fc" id="L76">                })</span>
 <span class="fc" id="L77">                ._this();</span>
     }
 
     /**
-     *  Sets the length of the separation line either horizontally or vertically
-     *  depending on the orientation of the separator.
-     *  This method is an alignment aware convenience method for
-     *  {@link JSeparator#setPreferredSize(Dimension)}.
+     *  Sets how long the separation line is, which is its width on a horizontal
+     *  separator and its height on a vertical one.
+     *  This is a convenience method for {@link JSeparator#setPreferredSize(Dimension)}
+     *  which reads the axis of the separator and sets the matching dimension.
      *
      * @param separatorLength The length of the separation line.
      * @return This very builder to allow for method chaining.

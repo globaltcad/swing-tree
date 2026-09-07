@@ -627,49 +627,53 @@ public final class UIForTree&lt;I, N, T extends JTree&gt; extends UIForAnySwing&
         }
 <span class="fc" id="L628">    }</span>
 
-    /** Unwraps the node handle and renders the node by the rules declared for its type. */
+    /**
+     *  Unwraps the node handle and renders the node by the rules declared for its type.
+     *  @param &lt;I&gt; The identity type of the nodes, which selection paths are made of.
+     *  @param &lt;N&gt; The common node type of the tree.
+     */
     private static final class DefaultBoundRenderer&lt;I, N&gt; extends DefaultTreeCellRenderer
     {
         private final PropertyTreeModel&lt;I, N, ?&gt; _model;
 
-<span class="fc" id="L635">        DefaultBoundRenderer( PropertyTreeModel&lt;I, N, ?&gt; model ) {</span>
-<span class="fc" id="L636">            _model = model;</span>
-<span class="fc" id="L637">        }</span>
+<span class="fc" id="L639">        DefaultBoundRenderer( PropertyTreeModel&lt;I, N, ?&gt; model ) {</span>
+<span class="fc" id="L640">            _model = model;</span>
+<span class="fc" id="L641">        }</span>
 
         @Override
         public Component getTreeCellRendererComponent(
             JTree tree, Object value, boolean selected,
             boolean expanded, boolean leaf, int row, boolean hasFocus
         ) {
-<span class="fc" id="L644">            Object node = _model.valueOf(value);</span>
-<span class="fc" id="L645">            TreeNodeConf&lt;N, ?&gt; rule = _model.ruleOf(value);</span>
-<span class="fc" id="L646">            String text = null;</span>
-<span class="fc" id="L647">            IconDeclaration iconDeclaration = null;</span>
-<span class="fc" id="L648">            String toolTip = null;</span>
-<span class="pc bpc" id="L649" title="1 of 4 branches missed.">            if ( rule != null &amp;&amp; node != null ) {</span>
+<span class="fc" id="L648">            Object node = _model.valueOf(value);</span>
+<span class="fc" id="L649">            TreeNodeConf&lt;N, ?&gt; rule = _model.ruleOf(value);</span>
+<span class="fc" id="L650">            String text = null;</span>
+<span class="fc" id="L651">            IconDeclaration iconDeclaration = null;</span>
+<span class="fc" id="L652">            String toolTip = null;</span>
+<span class="pc bpc" id="L653" title="1 of 4 branches missed.">            if ( rule != null &amp;&amp; node != null ) {</span>
                 try {
-<span class="fc" id="L651">                    text            = rule.textOf(node);</span>
-<span class="fc" id="L652">                    iconDeclaration = rule.iconOf(node);</span>
-<span class="fc" id="L653">                    toolTip         = rule.toolTipOf(node);</span>
-<span class="nc" id="L654">                } catch (Exception e) {</span>
-<span class="nc" id="L655">                    log.error(SwingTree.get().logMarker(),</span>
+<span class="fc" id="L655">                    text            = rule.textOf(node);</span>
+<span class="fc" id="L656">                    iconDeclaration = rule.iconOf(node);</span>
+<span class="fc" id="L657">                    toolTip         = rule.toolTipOf(node);</span>
+<span class="nc" id="L658">                } catch (Exception e) {</span>
+<span class="nc" id="L659">                    log.error(SwingTree.get().logMarker(),</span>
                             &quot;Failed to render a tree node of type '{}'.&quot;,
-<span class="nc" id="L657">                            node.getClass().getSimpleName(), e);</span>
-<span class="fc" id="L658">                }</span>
+<span class="nc" id="L661">                            node.getClass().getSimpleName(), e);</span>
+<span class="fc" id="L662">                }</span>
             }
-<span class="fc bfc" id="L660" title="All 2 branches covered.">            if ( text == null )</span>
-<span class="fc" id="L661">                text = String.valueOf(node);</span>
-<span class="fc" id="L662">            Component view = super.getTreeCellRendererComponent(</span>
+<span class="fc bfc" id="L664" title="All 2 branches covered.">            if ( text == null )</span>
+<span class="fc" id="L665">                text = String.valueOf(node);</span>
+<span class="fc" id="L666">            Component view = super.getTreeCellRendererComponent(</span>
                 tree, text, selected, expanded, leaf, row, hasFocus
             );
             // After the super call, which picks a leaf/open/closed icon of its own every time:
-<span class="fc bfc" id="L666" title="All 2 branches covered.">            if ( iconDeclaration != null ) {</span>
-<span class="fc" id="L667">                Icon icon = iconDeclaration.find().orElse(null);</span>
-<span class="fc bfc" id="L668" title="All 2 branches covered.">                if ( icon != null )</span>
-<span class="fc" id="L669">                    setIcon(icon);</span>
+<span class="fc bfc" id="L670" title="All 2 branches covered.">            if ( iconDeclaration != null ) {</span>
+<span class="fc" id="L671">                Icon icon = iconDeclaration.find().orElse(null);</span>
+<span class="fc bfc" id="L672" title="All 2 branches covered.">                if ( icon != null )</span>
+<span class="fc" id="L673">                    setIcon(icon);</span>
             }
-<span class="fc" id="L671">            setToolTipText(toolTip);</span>
-<span class="fc" id="L672">            return view;</span>
+<span class="fc" id="L675">            setToolTipText(toolTip);</span>
+<span class="fc" id="L676">            return view;</span>
         }
     }
 
@@ -679,18 +683,18 @@ public final class UIForTree&lt;I, N, T extends JTree&gt; extends UIForAnySwing&
         private final PropertyTreeModel&lt;?, ?, ?&gt; _model;
         private final TreeCellRenderer       _delegate;
 
-<span class="fc" id="L682">        UnwrappingRenderer( PropertyTreeModel&lt;?, ?, ?&gt; model, TreeCellRenderer delegate ) {</span>
-<span class="fc" id="L683">            _model    = model;</span>
-<span class="fc" id="L684">            _delegate = delegate;</span>
-<span class="fc" id="L685">        }</span>
+<span class="fc" id="L686">        UnwrappingRenderer( PropertyTreeModel&lt;?, ?, ?&gt; model, TreeCellRenderer delegate ) {</span>
+<span class="fc" id="L687">            _model    = model;</span>
+<span class="fc" id="L688">            _delegate = delegate;</span>
+<span class="fc" id="L689">        }</span>
 
         @Override
         public Component getTreeCellRendererComponent(
             JTree tree, Object value, boolean selected,
             boolean expanded, boolean leaf, int row, boolean hasFocus
         ) {
-<span class="fc" id="L692">            return _delegate.getTreeCellRendererComponent(</span>
-<span class="fc" id="L693">                tree, _model.valueOf(value), selected, expanded, leaf, row, hasFocus</span>
+<span class="fc" id="L696">            return _delegate.getTreeCellRendererComponent(</span>
+<span class="fc" id="L697">                tree, _model.valueOf(value), selected, expanded, leaf, row, hasFocus</span>
             );
         }
     }
@@ -705,42 +709,42 @@ public final class UIForTree&lt;I, N, T extends JTree&gt; extends UIForAnySwing&
         private final PropertyTreeModel&lt;I, N, ?&gt; _model;
 
         BoundCellEditor( JTree tree, DefaultTreeCellRenderer renderer, PropertyTreeModel&lt;I, N, ?&gt; model ) {
-<span class="fc" id="L708">            super(tree, renderer);</span>
-<span class="fc" id="L709">            _model = model;</span>
-<span class="fc" id="L710">        }</span>
+<span class="fc" id="L712">            super(tree, renderer);</span>
+<span class="fc" id="L713">            _model = model;</span>
+<span class="fc" id="L714">        }</span>
 
         @Override
         public Component getTreeCellEditorComponent(
             JTree tree, Object value, boolean isSelected, boolean expanded, boolean leaf, int row
         ) {
-<span class="fc" id="L716">            Object node = _model.valueOf(value);</span>
-<span class="fc" id="L717">            TreeNodeConf&lt;N, ?&gt; rule = _model.ruleOf(value);</span>
-<span class="pc bpc" id="L718" title="2 of 4 branches missed.">            String text = ( rule == null || node == null ? null : rule.textOf(node) );</span>
-<span class="fc" id="L719">            return super.getTreeCellEditorComponent(</span>
-<span class="pc bpc" id="L720" title="1 of 2 branches missed.">                tree, text == null ? String.valueOf(node) : text, isSelected, expanded, leaf, row</span>
+<span class="fc" id="L720">            Object node = _model.valueOf(value);</span>
+<span class="fc" id="L721">            TreeNodeConf&lt;N, ?&gt; rule = _model.ruleOf(value);</span>
+<span class="pc bpc" id="L722" title="2 of 4 branches missed.">            String text = ( rule == null || node == null ? null : rule.textOf(node) );</span>
+<span class="fc" id="L723">            return super.getTreeCellEditorComponent(</span>
+<span class="pc bpc" id="L724" title="1 of 2 branches missed.">                tree, text == null ? String.valueOf(node) : text, isSelected, expanded, leaf, row</span>
             );
         }
 
         @Override
         public boolean isCellEditable( EventObject event ) {
-<span class="pc bpc" id="L726" title="1 of 2 branches missed.">            if ( !super.isCellEditable(event) )</span>
-<span class="nc" id="L727">                return false;</span>
-<span class="fc" id="L728">            TreePath path = _pathTargetedBy(event);</span>
-<span class="pc bpc" id="L729" title="1 of 2 branches missed.">            if ( path == null )</span>
-<span class="fc" id="L730">                return true;</span>
-<span class="nc" id="L731">            TreeNodeConf&lt;N, ?&gt; rule = _model.ruleOf(path.getLastPathComponent());</span>
-<span class="nc bnc" id="L732" title="All 4 branches missed.">            return rule != null &amp;&amp; rule.isRenamable();</span>
+<span class="pc bpc" id="L730" title="1 of 2 branches missed.">            if ( !super.isCellEditable(event) )</span>
+<span class="nc" id="L731">                return false;</span>
+<span class="fc" id="L732">            TreePath path = _pathTargetedBy(event);</span>
+<span class="pc bpc" id="L733" title="1 of 2 branches missed.">            if ( path == null )</span>
+<span class="fc" id="L734">                return true;</span>
+<span class="nc" id="L735">            TreeNodeConf&lt;N, ?&gt; rule = _model.ruleOf(path.getLastPathComponent());</span>
+<span class="nc bnc" id="L736" title="All 4 branches missed.">            return rule != null &amp;&amp; rule.isRenamable();</span>
         }
 
         private @Nullable TreePath _pathTargetedBy( @Nullable EventObject event ) {
-<span class="pc bpc" id="L736" title="3 of 4 branches missed.">            if ( event instanceof MouseEvent &amp;&amp; event.getSource() instanceof JTree ) {</span>
-<span class="nc" id="L737">                MouseEvent click = (MouseEvent) event;</span>
-<span class="nc" id="L738">                TreePath clicked = ((JTree) event.getSource())</span>
-<span class="nc" id="L739">                                        .getPathForLocation(click.getX(), click.getY());</span>
-<span class="nc bnc" id="L740" title="All 2 branches missed.">                if ( clicked != null )</span>
-<span class="nc" id="L741">                    return clicked;</span>
+<span class="pc bpc" id="L740" title="3 of 4 branches missed.">            if ( event instanceof MouseEvent &amp;&amp; event.getSource() instanceof JTree ) {</span>
+<span class="nc" id="L741">                MouseEvent click = (MouseEvent) event;</span>
+<span class="nc" id="L742">                TreePath clicked = ((JTree) event.getSource())</span>
+<span class="nc" id="L743">                                        .getPathForLocation(click.getX(), click.getY());</span>
+<span class="nc bnc" id="L744" title="All 2 branches missed.">                if ( clicked != null )</span>
+<span class="nc" id="L745">                    return clicked;</span>
             }
-<span class="fc" id="L743">            return lastPath;</span>
+<span class="fc" id="L747">            return lastPath;</span>
         }
     }
 }

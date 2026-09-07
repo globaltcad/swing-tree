@@ -130,14 +130,14 @@
     },
   
     {
-      "id":"Choose between a horizontal and a vertical progress bar using the `UI.Align` enum.",
+      "id":"Choose between a horizontal and a vertical progress bar using the `UI.Axis` enum.",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The `withOrientation(UI.Align)` method, as well as various\n            alignment accepting factory methods, allow you to choose between\n            a horizontal and a vertical progress bar.\n            The `UI.Align` enum is SwingTree's type safe alternative to the\n            integer constants used by `JProgressBar.setOrientation(int)`.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The `withOrientation(UI.Axis)` method, as well as the various\n            axis accepting factory methods, allow you to choose between\n            a horizontal and a vertical progress bar.\n            The `UI.Axis` enum is SwingTree's type safe alternative to the\n            integer constants used by `JProgressBar.setOrientation(int)`.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A vertical and a horizontal progress bar.","code":["var vertical   = UI.progressBar(UI.Align.VERTICAL, 0, 10).get(JProgressBar)","var horizontal = UI.progressBar().withOrientation(UI.Align.HORIZONTAL).get(JProgressBar)"]},
+        {"kind":"given","text":"A vertical and a horizontal progress bar.","code":["var vertical   = UI.progressBar(UI.Axis.VERTICAL, 0, 10).get(JProgressBar)","var horizontal = UI.progressBar().withOrientation(UI.Axis.HORIZONTAL).get(JProgressBar)"]},
 
         {"kind":"expect","text":"The orientations of the underlying Swing components match the declarations.","code":["vertical.orientation   == SwingConstants.VERTICAL","horizontal.orientation == SwingConstants.HORIZONTAL"]}
       ],
@@ -145,14 +145,14 @@
     },
   
     {
-      "id":"The `progressBar(Align, double)` factory gives you a percentage based bar with a default range.",
+      "id":"The `progressBar(Axis, double)` factory gives you a percentage based bar with a default range.",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            For the common case of a simple percentage based progress bar,\n            the `progressBar(UI.Align, double)` factory method configures\n            a default range of 0 to 100 for you, so the resulting integer\n            value of the bar conveniently corresponds to the progress\n            in percent.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            For the common case of a simple percentage based progress bar,\n            the `progressBar(UI.Axis, double)` factory method configures\n            a default range of 0 to 100 for you, so the resulting integer\n            value of the bar conveniently corresponds to the progress\n            in percent.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"","code":["var progressBar = UI.progressBar(UI.Align.HORIZONTAL, 0.5).get(JProgressBar)"]},
+        {"kind":"given","text":"","code":["var progressBar = UI.progressBar(UI.Axis.HORIZONTAL, 0.5).get(JProgressBar)"]},
 
         {"kind":"expect","text":"The default range is 0 to 100, and 50% progress maps to a value of 50.","code":["progressBar.minimum == 0","progressBar.maximum == 100","progressBar.value   == 50"]}
       ],
@@ -164,16 +164,16 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The `progressBar(Val<UI.Align>, Val<Double>)` factory method\n            creates a fully view model driven progress bar whose orientation\n            and percentage based progress are both bound to properties.\n            When either property changes, the component updates accordingly.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The `progressBar(Val<UI.Axis>, Val<Double>)` factory method\n            creates a fully view model driven progress bar whose orientation\n            and percentage based progress are both bound to properties.\n            When either property changes, the component updates accordingly.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"Two properties, one for the alignment and one for the progress.","code":["var alignment = Var.of(UI.Align.HORIZONTAL)","var progress  = Var.of(0.1d)"]},
+        {"kind":"given","text":"Two properties, one for the axis and one for the progress.","code":["var axis = Var.of(UI.Axis.HORIZONTAL)","var progress  = Var.of(0.1d)"]},
 
-        {"kind":"and","text":"A progress bar bound to both of them.","code":["var progressBar = UI.progressBar(alignment, progress).get(JProgressBar)"]},
+        {"kind":"and","text":"A progress bar bound to both of them.","code":["var progressBar = UI.progressBar(axis, progress).get(JProgressBar)"]},
 
         {"kind":"expect","text":"Initially, the component reflects both property values.","code":["progressBar.orientation == SwingConstants.HORIZONTAL","progressBar.value       == 10"]},
 
-        {"kind":"when","text":"We flip the alignment and advance the progress in the view model.","code":["UI.runNow({","    alignment.set(UI.Align.VERTICAL)","    progress.set(0.9d)","})"]},
+        {"kind":"when","text":"We flip the axis and advance the progress in the view model.","code":["UI.runNow({","    axis.set(UI.Axis.VERTICAL)","    progress.set(0.9d)","})"]},
 
         {"kind":"then","text":"The progress bar reflects the new state.","code":["progressBar.orientation == SwingConstants.VERTICAL","progressBar.value       == 90"]}
       ],

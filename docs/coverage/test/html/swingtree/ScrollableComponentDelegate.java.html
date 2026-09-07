@@ -102,11 +102,11 @@ public final class ScrollableComponentDelegate
 <span class="nc" id="L102">            fitWidth  = Lazy.from(scrollable::getScrollableTracksViewportWidth);</span>
 <span class="nc" id="L103">            fitHeight = Lazy.from(scrollable::getScrollableTracksViewportHeight);</span>
 <span class="nc" id="L104">            unitIncrementSupplier = (a,b,c) -&gt; {</span>
-<span class="nc bnc" id="L105" title="All 2 branches missed.">                int orientation = b == UI.Align.HORIZONTAL ? SwingConstants.HORIZONTAL : SwingConstants.VERTICAL;</span>
+<span class="nc bnc" id="L105" title="All 2 branches missed.">                int orientation = b.isHorizontal() ? SwingConstants.HORIZONTAL : SwingConstants.VERTICAL;</span>
 <span class="nc" id="L106">                return scrollable.getScrollableUnitIncrement(a.toRectangle(),orientation,c);</span>
             };
 <span class="nc" id="L108">            blockIncrementSupplier = (a,b,c) -&gt; {</span>
-<span class="nc bnc" id="L109" title="All 2 branches missed.">                int orientation = b == UI.Align.HORIZONTAL ? SwingConstants.HORIZONTAL : SwingConstants.VERTICAL;</span>
+<span class="nc bnc" id="L109" title="All 2 branches missed.">                int orientation = b.isHorizontal() ? SwingConstants.HORIZONTAL : SwingConstants.VERTICAL;</span>
 <span class="nc" id="L110">                return scrollable.getScrollableBlockIncrement(a.toRectangle(),orientation,c);</span>
             };
 <span class="nc" id="L112">        } else {</span>
@@ -459,13 +459,13 @@ public final class ScrollableComponentDelegate
      * {@link Scrollable#getScrollableUnitIncrement(java.awt.Rectangle, int, int)}.
      *
      * @param viewRectangle The view area visible within the viewport.
-     * @param orientation Either {@link UI.Align#VERTICAL} or {@link UI.Align#HORIZONTAL}.
+     * @param orientation Either {@link UI.Axis#VERTICAL} or {@link UI.Axis#HORIZONTAL}.
      * @param direction Less than zero to scroll up/left, greater than zero for down/right.
      * @return The configured unit increment for the given context.
      */
     public int unitIncrement(
         Bounds   viewRectangle,
-        UI.Align orientation,
+        UI.Axis orientation,
         int      direction
     ) {
 <span class="fc" id="L471">        return _unitIncrement.get(viewRectangle, orientation, direction);</span>
@@ -476,13 +476,13 @@ public final class ScrollableComponentDelegate
      * {@link Scrollable#getScrollableBlockIncrement(java.awt.Rectangle, int, int)}.
      *
      * @param viewRectangle The view area visible within the viewport.
-     * @param orientation Either {@link UI.Align#VERTICAL} or {@link UI.Align#HORIZONTAL}.
+     * @param orientation Either {@link UI.Axis#VERTICAL} or {@link UI.Axis#HORIZONTAL}.
      * @param direction Less than zero to scroll up/left, greater than zero for down/right.
      * @return The configured block increment for the given context.
      */
     public int blockIncrement(
         Bounds   viewRectangle,
-        UI.Align orientation,
+        UI.Axis orientation,
         int      direction
     ) {
 <span class="fc" id="L488">        return _blockIncrement.get(viewRectangle, orientation, direction);</span>

@@ -47,36 +47,36 @@ public final class UIForSlider&lt;S extends JSlider&gt; extends UIForAnySwing&lt
 
     /**
      *  Sets the orientation of the slider.
-     *  @param align The orientation of the slider.
+     *  @param axis The orientation of the slider.
      *  @return This builder node.
      */
-    public final UIForSlider&lt;S&gt; withOrientation( UI.Align align ) {
-<span class="fc" id="L54">        NullUtil.nullArgCheck( align, &quot;align&quot;, UI.Align.class );</span>
+    public final UIForSlider&lt;S&gt; withOrientation( UI.Axis axis ) {
+<span class="fc" id="L54">        NullUtil.nullArgCheck( axis, &quot;axis&quot;, UI.Axis.class );</span>
 <span class="fc" id="L55">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L56">                   _setOrientation( thisComponent, align );</span>
+<span class="fc" id="L56">                   _setOrientation( thisComponent, axis );</span>
 <span class="fc" id="L57">               })</span>
 <span class="fc" id="L58">               ._this();</span>
     }
 
-    private void _setOrientation( S thisComponent, UI.Align align ) {
+    private void _setOrientation( S thisComponent, UI.Axis axis ) {
 <span class="fc" id="L62">        _doWithoutListeners(thisComponent,</span>
-<span class="fc" id="L63">            () -&gt; thisComponent.setOrientation(align.forSlider())</span>
+<span class="fc" id="L63">            () -&gt; thisComponent.setOrientation(axis.forSlider())</span>
         );
 <span class="fc" id="L65">    }</span>
 
     /**
      *  Dynamically sets the orientation of the slider.
-     *  @param align The orientation of the slider.
+     *  @param axis The orientation of the slider.
      *  @return This builder node.
      */
-    public final UIForSlider&lt;S&gt; withOrientation( Val&lt;UI.Align&gt; align ) {
-<span class="nc" id="L73">        NullUtil.nullArgCheck( align, &quot;align&quot;, Val.class );</span>
-<span class="nc" id="L74">        NullUtil.nullPropertyCheck( align, &quot;align&quot;, &quot;Null is not a valid alignment&quot; );</span>
-<span class="nc" id="L75">        return _withOnShow( align, (thisComponent,v) -&gt; {</span>
-<span class="nc" id="L76">                    _setOrientation(thisComponent, align.orElseThrowUnchecked());</span>
+    public final UIForSlider&lt;S&gt; withOrientation( Val&lt;UI.Axis&gt; axis ) {
+<span class="nc" id="L73">        NullUtil.nullArgCheck( axis, &quot;axis&quot;, Val.class );</span>
+<span class="nc" id="L74">        NullUtil.nullPropertyCheck( axis, &quot;axis&quot;, &quot;Null is not a valid axis&quot; );</span>
+<span class="nc" id="L75">        return _withOnShow( axis, (thisComponent,v) -&gt; {</span>
+<span class="nc" id="L76">                    _setOrientation(thisComponent, axis.orElseThrowUnchecked());</span>
 <span class="nc" id="L77">               })</span>
 <span class="nc" id="L78">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L79">                    _setOrientation(thisComponent, align.orElseThrowUnchecked());</span>
+<span class="nc" id="L79">                    _setOrientation(thisComponent, axis.orElseThrowUnchecked());</span>
 <span class="nc" id="L80">                })</span>
 <span class="nc" id="L81">               ._this();</span>
     }

@@ -1200,7 +1200,7 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
     public final AbstractDelegate&lt;C&gt; setCursor( UI.Cursor cursor ) {
 <span class="nc" id="L1201">        Objects.requireNonNull(cursor);</span>
 <span class="nc" id="L1202">        UI.run(()-&gt;{</span>
-<span class="nc" id="L1203">            _component().setCursor(Cursor.getPredefinedCursor(cursor.type));</span>
+<span class="nc" id="L1203">            _component().setCursor(cursor.toAWTCursor());</span>
 <span class="nc" id="L1204">        });</span>
 <span class="nc" id="L1205">        return this;</span>
     }
@@ -1536,11 +1536,11 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      * @param painter The rendering task which should be executed on the EDT at the end of the current event cycle.
      */
     public final void paint( UI.ComponentArea area, AnimationStatus status, Painter painter ) {
-<span class="nc" id="L1539">        Objects.requireNonNull(area);</span>
-<span class="nc" id="L1540">        Objects.requireNonNull(status);</span>
-<span class="nc" id="L1541">        Objects.requireNonNull(painter);</span>
-<span class="nc" id="L1542">        this.paint(area, UI.Layer.BORDER, status, painter);</span>
-<span class="nc" id="L1543">    }</span>
+<span class="fc" id="L1539">        Objects.requireNonNull(area);</span>
+<span class="fc" id="L1540">        Objects.requireNonNull(status);</span>
+<span class="fc" id="L1541">        Objects.requireNonNull(painter);</span>
+<span class="fc" id="L1542">        this.paint(area, UI.Layer.BORDER, status, painter);</span>
+<span class="fc" id="L1543">    }</span>
 
     /**
      *  A common use case is to render something on top of the {@link UI.ComponentArea#BODY}
@@ -1610,13 +1610,13 @@ public class AbstractDelegate&lt;C extends JComponent&gt;
      *                {@link Graphics2D} instance for doing paint operations...
      */
     public final void paint( UI.ComponentArea area, UI.Layer layer, AnimationStatus status, Painter painter ) {
-<span class="nc" id="L1613">        Objects.requireNonNull(status);</span>
-<span class="nc" id="L1614">        Objects.requireNonNull(painter);</span>
-<span class="nc" id="L1615">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
+<span class="fc" id="L1613">        Objects.requireNonNull(status);</span>
+<span class="fc" id="L1614">        Objects.requireNonNull(painter);</span>
+<span class="fc" id="L1615">        UI.run(()-&gt;{ // This method might be called by the application thread, so we need to run on the EDT!</span>
             // We do the rendering later in the paint method of a custom border implementation!
-<span class="nc" id="L1617">            ComponentExtension.from(_component).addAnimatedPainter(status, layer, area, painter);</span>
-<span class="nc" id="L1618">        });</span>
-<span class="nc" id="L1619">    }</span>
+<span class="fc" id="L1617">            ComponentExtension.from(_component).addAnimatedPainter(status, layer, area, painter);</span>
+<span class="fc" id="L1618">        });</span>
+<span class="fc" id="L1619">    }</span>
 
     /**
      *  Use this method to delegate to the parent of the component.

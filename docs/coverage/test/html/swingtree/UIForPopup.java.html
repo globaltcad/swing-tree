@@ -124,7 +124,7 @@ public final class UIForPopup&lt;P extends JPopupMenu&gt; extends UIForAnySwing&
 <span class="nc" id="L124">                    _onPopupClose(thisComponent,</span>
 <span class="nc" id="L125">                        e -&gt; _runInApp(()-&gt;{</span>
                             try {
-<span class="nc" id="L127">                                action.accept(new ComponentDelegate&lt;&gt;((P) thisComponent, e));</span>
+<span class="nc" id="L127">                                action.accept(new ComponentDelegate&lt;&gt;(thisComponent, e));</span>
 <span class="nc" id="L128">                            } catch (Exception ex) {</span>
 <span class="nc" id="L129">                                log.error(SwingTree.get().logMarker(), &quot;Error while executing action on popup close!&quot;, ex);</span>
 <span class="nc" id="L130">                            }</span>

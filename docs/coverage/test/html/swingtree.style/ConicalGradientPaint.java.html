@@ -108,10 +108,10 @@ final class ConicalGradientPaint implements Paint {
                 Point2D         center, 
                 AffineTransform transform
         ) {
-<span class="nc bnc" id="L111" title="All 6 branches missed.">            if (_bounds.equals(bounds) &amp;&amp; _center.equals(center) &amp;&amp; _transform.equals(transform))</span>
-<span class="nc" id="L112">                return _cachedContext;</span>
+<span class="pc bpc" id="L111" title="2 of 6 branches missed.">            if (_bounds.equals(bounds) &amp;&amp; _center.equals(center) &amp;&amp; _transform.equals(transform))</span>
+<span class="fc" id="L112">                return _cachedContext;</span>
             else
-<span class="nc" id="L114">                return null;</span>
+<span class="fc" id="L114">                return null;</span>
         }
     }
 
@@ -323,10 +323,10 @@ final class ConicalGradientPaint implements Paint {
 
 
         //KK - speed up repaints by caching the context
-<span class="pc bpc" id="L326" title="1 of 2 branches missed.">        if (_cached != null) {</span>
-<span class="nc" id="L327">            ConicalGradientPaintContext c = _cached.get(DEVICE_BOUNDS, _center, TRANSFORM);</span>
-<span class="nc bnc" id="L328" title="All 2 branches missed.">            if (c != null)</span>
-<span class="nc" id="L329">                return c;</span>
+<span class="fc bfc" id="L326" title="All 2 branches covered.">        if (_cached != null) {</span>
+<span class="fc" id="L327">            ConicalGradientPaintContext c = _cached.get(DEVICE_BOUNDS, _center, TRANSFORM);</span>
+<span class="fc bfc" id="L328" title="All 2 branches covered.">            if (c != null)</span>
+<span class="fc" id="L329">                return c;</span>
         }
 
 <span class="fc" id="L332">        ConicalGradientPaintContext context = new ConicalGradientPaintContext(_center, TRANSFORM);</span>

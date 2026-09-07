@@ -4,7 +4,7 @@
   "narrative":"SwingTree is a feature rich library in which the\n    default behavior does not fit every use case.\n    This is why you can initialize the library with a custom\n    start configuration expressing your needs.\n\n    This library context is a singleton called `SwingTree` and\n    it can be initialized with a `SwingTreeInitConfig`\n    inside of a configurator lambda like so:\n\n    ```\n        SwingTree.initializeUsing( conf -> conf\n            .uiScaleFactor(2f)\n            .styleSheet(myStyleSheet)\n            .defaultAnimationInterval(42)\n        )\n    ```",
   "subjects":["swingtree.SwingTree","swingtree.SwingTreeInitConfig"],
   "statistics":{
-    "runs":"17",
+    "runs":"18",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -440,6 +440,27 @@
         {"kind":"given","text":"We initialize `SwingTree` with a custom dev tool keystroke:","code":["SwingTree.initializeUsing(conf -> conf","    .devToolKeyStrokeShortcut(\"ctrl shift alt D\")",")"]},
 
         {"kind":"expect","text":"The dev tool keystroke is the one we specified:","code":["SwingTree.get().getDevToolKeyStrokeShortcut().toString() == \"ctrl shift alt D\""]},
+
+        {"kind":"cleanup","text":"Reset the library context!","code":["SwingTree.clear()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Re-initializing the library context detaches the context it replaces from the `UIManager`.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A library context installs a `PropertyChangeListener` on the `UIManager`\n            and on its defaults table, so that it notices when the look and feel or the\n            default font changes and can recompute the UI scale factor from it.\n\n            That listener has to come off again when the context is replaced. The\n            `UIManager` and its defaults table are singletons which outlive any number\n            of library contexts, so a context that is dropped without being detached\n            keeps on listening forever. It would then go on translating every\n            `\"defaultFont\"` write into a scale factor change and push that change into\n            every component that was built while it was the current context, long after\n            those components and that context were abandoned.\n\n            The most visible consequence is a slow one: each re-initialization adds\n            another listener, so a single font change eventually runs the whole font\n            rescaling cascade once per context ever created. The nastiest consequence\n            is a rare one: those cascades call `setFont(..)` on live components, which\n            takes the AWT tree lock, and a context is built while holding the lock that\n            guards the singleton. A paint on the event dispatch thread holds the tree\n            lock and wants the singleton, and the two threads can meet head on.\n\n            So this scenario simply counts listeners: building five contexts in a row\n            must leave the `UIManager` no busier than building one.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A first library context, built far enough for it to install its listener.","code":["SwingTree.initializeUsing(conf -> conf.uiScaleFactor(2f))","SwingTree.get().getUiScaleFactor()"]},
+
+        {"kind":"and","text":"We note how many listeners the `UIManager` and its defaults table carry now.","code":["var managerListeners  = UIManager.getPropertyChangeListeners().length","var defaultsListeners = UIManager.getDefaults().getPropertyChangeListeners().length"]},
+
+        {"kind":"when","text":"We replace that context four more times, building each one.","code":["4.times {","    SwingTree.initializeUsing(conf -> conf.uiScaleFactor(2f))","    SwingTree.get().getUiScaleFactor()","}"]},
+
+        {"kind":"then","text":"Neither the `UIManager` nor its defaults table accumulated listeners.","code":["UIManager.getPropertyChangeListeners().length == managerListeners","UIManager.getDefaults().getPropertyChangeListeners().length == defaultsListeners"]},
 
         {"kind":"cleanup","text":"Reset the library context!","code":["SwingTree.clear()"]}
       ],

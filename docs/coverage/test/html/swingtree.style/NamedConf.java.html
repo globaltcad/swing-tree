@@ -59,7 +59,7 @@ final class NamedConf&lt;S&gt; implements Simplifiable&lt;NamedConf&lt;S&gt;&gt;
 <span class="pc bpc" id="L59" title="1 of 2 branches missed.">        if ( obj == this ) return true;</span>
 <span class="pc bpc" id="L60" title="1 of 2 branches missed.">        if ( obj.getClass() != getClass() ) return false;</span>
 <span class="fc" id="L61">        NamedConf&lt;?&gt; rhs = (NamedConf&lt;?&gt;) obj;</span>
-<span class="pc bpc" id="L62" title="1 of 2 branches missed.">        return Objects.equals(_name, rhs._name) &amp;&amp;</span>
+<span class="fc bfc" id="L62" title="All 2 branches covered.">        return Objects.equals(_name, rhs._name) &amp;&amp;</span>
 <span class="fc bfc" id="L63" title="All 2 branches covered.">               Objects.equals(_style, rhs._style);</span>
     }
 

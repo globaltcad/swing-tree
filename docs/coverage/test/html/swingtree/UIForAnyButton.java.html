@@ -1640,8 +1640,8 @@ import java.util.function.Consumer;
 <span class="fc" id="L1640">        Insets insets = thisComponent.getInsets();</span>
 <span class="fc" id="L1641">        float fittedWidth = Math.max(thisComponent.getWidth(),  thisComponent.getMinimumSize().width);</span>
 <span class="fc" id="L1642">        float fittedHeight = Math.max(thisComponent.getHeight(), thisComponent.getMinimumSize().height);</span>
-<span class="fc" id="L1643">        fittedWidth  = Math.max(0, UI.unscale((float) fittedWidth - insets.left - insets.right)); // We unscale because the icon will be scaled internally</span>
-<span class="fc" id="L1644">        fittedHeight = Math.max(0, UI.unscale((float) fittedHeight - insets.top  - insets.bottom));</span>
+<span class="fc" id="L1643">        fittedWidth  = Math.max(0, UI.unscale(fittedWidth - insets.left - insets.right)); // We unscale because the icon will be scaled internally</span>
+<span class="fc" id="L1644">        fittedHeight = Math.max(0, UI.unscale(fittedHeight - insets.top  - insets.bottom));</span>
 <span class="fc" id="L1645">        int iconWidth  = icon.getIconWidth();</span>
 <span class="fc" id="L1646">        int iconHeight = icon.getIconHeight();</span>
         // We need to determine and return a base size to be scaled later on...

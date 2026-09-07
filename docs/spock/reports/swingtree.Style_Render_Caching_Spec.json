@@ -4,7 +4,7 @@
   "narrative":"SwingTree's style API can express rather elaborate visuals: rounded\n    backgrounds, gradients, shadows, painted text, noise, sized images,\n    coloured borders, ... rendering all of that on every repaint is not\n    free. SwingTree therefore transparently caches the *rendered output*\n    of a layer's style configuration into a `BufferedImage`, keyed by the\n    deeply-immutable style configuration object itself. As long as the\n    style configuration of a layer is `equal` across paint calls, the\n    cached image is simply blitted onto the component – no fresh rendering\n    happens.\n\n    This specification documents that behaviour **through the public\n    SwingTree API only**, by:\n\n      1. Building components the way an application would (`UI.button(...).withStyle(...)`),\n      2. Painting them with the regular paint pipeline (`Utility.renderSingleComponent(...)`\n         which ultimately calls `JComponent.paint(g)`),\n      3. Observing the resulting cache state via `ComponentExtension.cachedRendering(layer).isNotEmpty()`,\n         `ComponentExtension.cacheHitCount(layer)` and `ComponentExtension.cacheMissCount(layer)`.\n\n    Crucially, this spec does **not** instantiate any of SwingTree's internal\n    style classes directly, nor does it mock a `Graphics2D` to count cache\n    side effects. The point is that the caching mechanism is observable\n    from the outside and that this living documentation can therefore\n    survive aggressive internal refactors.\n\n    A note on the single fixture poke we still do: the `setupSpec` block\n    pins `CacheBudget.UNITS_OVERRIDE` to a deterministic value. That global\n    controls how eagerly small images get allocated and is otherwise derived\n    from the configured cache mode and system RAM, which\n    would make tests flaky across CI runners. Pinning it removes the\n    *only* coupling and is purely a fixture concern – nothing in the\n    actual scenarios below speaks to internal classes.",
   "subjects":["swingtree.style.ComponentExtension","swingtree.UI"],
   "statistics":{
-    "runs":"21",
+    "runs":"24",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -271,14 +271,14 @@
     },
   
     {
-      "id":"A large exact-size rendering is not minted while the component is being resized.",
+      "id":"A large exact-size rendering is not allocated while the component is being resized.",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            A cached rendering earns its keep by being blitted more than once. An entry keyed\n            on the exact component size, for a component whose size is currently changing, is\n            the one case where that cannot happen: it is allocated, rendered into, blitted\n            once, and invalidated by the very next frame. For a large image that is strictly\n            more work than having drawn straight onto the destination - a multi megabyte\n            allocation per frame, and a software blit rather than an accelerated one, because\n            Java2D only promotes an image to a server side pixmap after several uses.\n\n            So while the size is in flux, a *large* exact-size entry is not minted at all.\n            Note the two qualifiers: a stretch tileable style is keyed size independently and\n            is not affected, and small entries are always minted - see the scenario after this\n            one for why that second exception is essential.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            A cached rendering earns its keep by being blitted more than once. An entry keyed\n            on the exact component size, for a component whose size is currently changing, is\n            the one case where that cannot happen: it is allocated, rendered into, blitted\n            once, and invalidated by the very next frame. For a large image that is strictly\n            more work than having drawn straight onto the destination - a multi megabyte\n            allocation per frame, and a software blit rather than an accelerated one, because\n            Java2D only promotes an image to a server side pixmap after several uses.\n\n            So while the size is in flux, a *large* exact-size image is not allocated at all.\n            Note the two qualifiers: a stretch tileable style is keyed size independently and\n            is not affected, and small images are always allocated - see the scenario after this\n            one for why that second exception is essential.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A gradient styled button - heavy enough to cache, too gradient-y to stretch tile.","code":["var button =","    UI.button(\"Wide\")","      .withStyle( it -> it","            .borderRadius(10)","            .gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) )","      )","      .get(JButton)","var ext = ComponentExtension.from(button)"]},
+        {"kind":"given","text":"A radial gradient styled button - heavy enough to cache, and not stretch tileable in either direction.","code":["var button =","    UI.button(\"Wide\")","      .withStyle( it -> it","            .borderRadius(10)","            .gradient( g -> g.type(UI.GradientType.RADIAL).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )","      )","      .get(JButton)","var ext = ComponentExtension.from(button)"]},
 
         {"kind":"and","text":"It is large: above the size up to which an image is worth allocating eagerly.","code":["button.setSize(600, 400)"]},
 
@@ -288,7 +288,7 @@
 
         {"kind":"when","text":"The component is then resized and painted again.","code":["button.setSize(620, 400)","Utility.renderSingleComponent(button)"]},
 
-        {"kind":"then","text":"No image was minted for the new size.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()"]},
+        {"kind":"then","text":"No image was allocated for the new size.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()"]},
 
         {"kind":"when","text":"The size settles and the component keeps being painted.","code":["8.times { Utility.renderSingleComponent(button) }"]},
 
@@ -305,7 +305,7 @@
       "tags":{},"see":[],"extraInfo":["\n            A cached rendering pays for itself by being blitted more than once. During a live\n            resize of a style that cannot be stretch tiled, an entry keyed on the exact\n            component size can almost never manage that: it would be allocated, rendered into,\n            blitted once, and thrown away by the very next frame, which arrives at a width no\n            frame has had before. Measured on one of the example UIs shipped with SwingTree,\n            that came to roughly three megabytes of freshly allocated image memory *per drag\n            frame*, of which more than nine tenths was never read a second time.\n\n            So an entry whose key contains a size that is currently changing is not allocated\n            on the spot any more. The entry itself is still created, and it still waits in the\n            shared pool where any other component with the very same style can find it - but\n            the pixel memory behind it is only committed once a second user actually asks for\n            it. A component being dragged on its own never produces that second user, and\n            therefore never pays for an image it would immediately discard.\n\n            Below, the component is first painted at a settled size, where the ordinary rule\n            applies and it does get a cached rendering. It is then dragged across four widths\n            it has never had, and none of those frames leaves a rendering behind. As soon as\n            the size stops changing, caching returns of its own accord.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A gradient styled button, heavy enough to be cached, but not stretch tileable.","code":["var button =","    UI.button(\"Drag me\")","      .withStyle( it -> it","            .borderRadius(10)","            .gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) )","      )","      .get(JButton)","var ext = ComponentExtension.from(button)"]},
+        {"kind":"given","text":"A radial gradient styled button, heavy enough to be cached, but not stretch tileable.","code":["var button =","    UI.button(\"Drag me\")","      .withStyle( it -> it","            .borderRadius(10)","            .gradient( g -> g.type(UI.GradientType.RADIAL).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )","      )","      .get(JButton)","var ext = ComponentExtension.from(button)"]},
 
         {"kind":"and","text":"It sits at a settled size, painted often enough to be cached there.","code":["button.setSize(100, 60)","2.times { Utility.renderSingleComponent(button) }"]},
 
@@ -325,6 +325,81 @@
     },
   
     {
+      "id":"A style cached size independently along one axis only is not allocated while the other axis is dragged.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            We hold back renderings whose key contains a size that is currently changing.\n            A key can contain one of the component's dimensions without the\n            other. For a gradient running straight down a component we compact the width and\n            take the height from the component itself.\n\n            Dragging such a component sideways is free, and the scenario after this one is\n            about that. Dragging it *downwards* changes the key on every frame, exactly like an\n            exact-size key, and it has to be held back for exactly the same reason - otherwise\n            each frame allocates an image, blits it once and throws it away.\n\n            Two comparisons are possible here and only one of them works. The key's size and\n            the component's size always differ for a gradient running down a component,\n            including on every frame of a vertical drag, so allocating whenever they differ\n            allocates a buffer on every frame and throws each one away. Comparing the\n            component's uncompacted dimensions against the values they had at the previous paint\n            is the one that works: during a vertical drag the height has moved, so we allocate\n            nothing.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A button with a gradient running straight down it, at a settled size.","code":["var button =","    UI.button(\"Taller\")","      .withStyle( it -> it","            .borderRadius(10)","            .gradient( g -> g.span(UI.Span.TOP_TO_BOTTOM).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )","      )","      .get(JButton)","var ext = ComponentExtension.from(button)"]},
+
+        {"kind":"and","text":"\n            Tall enough that its exemplar is above the size up to which an image is allocated\n            eagerly. Images below that size are always allocated, so a short component would be\n            allocated on every frame quite legitimately and the question would never come up.\n        ","code":["button.setSize(300, 500)","4.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"expect","text":"It really is cached, and at a width far below its own.","code":["button.width == 300 && button.height == 500","ext.cachedRendering(UI.Layer.BACKGROUND).every( image -> image.width < 100 )"]},
+
+        {"kind":"when","text":"The component is dragged through four heights it has never had before.","code":["var renderingsPerFrame = []","[520, 540, 560, 580].each { height ->","    button.setSize(300, height)","    Utility.renderSingleComponent(button)","    renderingsPerFrame << ext.cachedRendering(UI.Layer.BACKGROUND).size()","}"]},
+
+        {"kind":"then","text":"The component really did arrive at the last of those heights.","code":["button.height == 580"]},
+
+        {"kind":"and","text":"Not one of those frames left a finished rendering behind.","code":["renderingsPerFrame == [0, 0, 0, 0]"]},
+
+        {"kind":"when","text":"The drag ends and the component keeps being painted at its final height.","code":["2.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"then","text":"Caching resumes, just as it does for a fully compacted or an exact-size key.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The axis a one axis gradient does not vary along is still dragged for free.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The other side of holding a rendering back, and the reason a key with one\n            compacted dimension may not simply be treated as an exact-size key everywhere. Holding a rendering back is only right\n            while the key is actually moving. Dragged along the axis its gradient does not vary\n            along, this very same style keeps one and the same key from frame to frame, and\n            every one of those frames is served from the cache without re-rendering anything.\n\n            Both halves have to be pinned together: a fix which stopped the churn by never\n            allocating for a key with one compacted dimension would have cured it by giving up\n            the feature.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"The same style, settled at a size where it is cached.","code":["var button =","    UI.button(\"Wider\")","      .withStyle( it -> it","            .borderRadius(10)","            .gradient( g -> g.span(UI.Span.TOP_TO_BOTTOM).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )","      )","      .get(JButton)","var ext = ComponentExtension.from(button)","button.setSize(300, 500)","4.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"expect","text":"A rendering exists to be dragged against.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()"]},
+
+        {"kind":"when","text":"The component is dragged through four widths it has never had before.","code":["int missesBefore = ext.cacheMissCount(UI.Layer.BACKGROUND)","int hitsBefore   = ext.cacheHitCount(UI.Layer.BACKGROUND)","[340, 380, 420, 460].each { width ->","    button.setSize(width, 500)","    Utility.renderSingleComponent(button)","}"]},
+
+        {"kind":"then","text":"The component really did arrive at the last of those widths.","code":["button.width == 460 && button.height == 500"]},
+
+        {"kind":"and","text":"Not one of those frames re-rendered the style - all four were cache hits.","code":["ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBefore","ext.cacheHitCount(UI.Layer.BACKGROUND)  == hitsBefore + 4"]},
+
+        {"kind":"and","text":"And they were all served from the one exemplar, which never changed.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).every( image -> image.width < 100 )"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A drag which stops changing the exact dimension of a key starts caching again mid-drag.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A key which is compact in one dimension and exact in the other is invalidated when\n            the component changes size in the exact dimension, and by nothing else. A window\n            drag stops changing both dimensions quickly: grab a corner, pull it down and then\n            mostly sideways, and from the moment the height stops changing, the key of a button\n            with a vertical gradient survives the rest of the drag untouched. Withholding its\n            image buffer until the drag ends renders every one of those frames from scratch\n            instead.\n\n            The button below has to be genuinely tall for the scenario to reach that decision at\n            all. Its exemplar is 26 pixels wide, so a short button's exemplar is small enough to\n            be allocated during a resize regardless and the question never comes up. A tall\n            one's exemplar is above that size, and the entry is then refused admission on every\n            frame the component counts as resizing.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A tall button whose background is a gradient running straight down it.","code":["var button =","    UI.button(\"Tall\")","      .withStyle( it -> it","            .borderRadius(10)","            .gradient( g -> g.span(UI.Span.TOP_TO_BOTTOM).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )","      )","      .get(JButton)","var ext = ComponentExtension.from(button)","button.setSize(300, 2800)","4.times { Utility.renderSingleComponent(button) }"]},
+
+        {"kind":"expect","text":"It is cached at this settled size, in an image far narrower than the component.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).every( image -> image.width < 100 )"]},
+
+        {"kind":"when","text":"The drag starts by pulling the height, which invalidates that key.","code":["button.setSize(300, 2900)","Utility.renderSingleComponent(button)"]},
+
+        {"kind":"then","text":"Nothing is cached for the new height yet, as for any key whose exact dimension just changed.","code":["button.height == 2900","ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()"]},
+
+        {"kind":"when","text":"The drag continues sideways alone, so the component stops changing size in the exact dimension.","code":["int hitsBefore = ext.cacheHitCount(UI.Layer.BACKGROUND)","[340, 380, 420, 460].each { width ->","    button.setSize(width, 2900)","    Utility.renderSingleComponent(button)","    assert button.width == width","}"]},
+
+        {"kind":"then","text":"The rendering was allocated during the drag rather than after it...","code":["ext.cachedRendering(UI.Layer.BACKGROUND).every( image -> image.width < 100 )"]},
+
+        {"kind":"and","text":"...and the later frames of that same drag were served from it.","code":["ext.cacheHitCount(UI.Layer.BACKGROUND) > hitsBefore"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
       "id":"Equally styled components resizing together still end up sharing one rendering.",
       "result":"PASS",
       "duration":"?",
@@ -332,7 +407,7 @@
       "tags":{},"see":[],"extraInfo":["\n            This is the guard rail on the scenario above, and the reason the entry is still\n            created rather than skipped altogether. Renderings are keyed on the style\n            configuration and not on the component, so a window full of identically styled\n            cells produces *one* rendering that all of them blit. That kind of sharing happens\n            within a single frame and survives a resize perfectly well - refusing it would\n            turn one rendering per frame into dozens.\n\n            What \"wait for a second user\" therefore means in a UI of equally styled siblings\n            is only this: the first sibling to be painted renders straight onto the screen,\n            and the second one commits the shared image. Every sibling after that blits it,\n            and - because they were all pointed at the same entry - the first one finds it\n            waiting on its next repaint too, without having asked for it again.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"Two buttons carrying the exact same style.","code":["def styler = { conf -> conf","    .borderRadius(10)","    .gradient( g -> g.colors(new Color(200, 30, 70), new Color(30, 70, 200)) )","}","var first  = UI.button(\"A\").withStyle(styler as swingtree.api.Styler).get(JButton)","var second = UI.button(\"B\").withStyle(styler as swingtree.api.Styler).get(JButton)","var firstExt  = ComponentExtension.from(first)","var secondExt = ComponentExtension.from(second)"]},
+        {"kind":"given","text":"Two buttons carrying the exact same style.","code":["def styler = { conf -> conf","    .borderRadius(10)","    .gradient( g -> g.type(UI.GradientType.RADIAL).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )","}","var first  = UI.button(\"A\").withStyle(styler as swingtree.api.Styler).get(JButton)","var second = UI.button(\"B\").withStyle(styler as swingtree.api.Styler).get(JButton)","var firstExt  = ComponentExtension.from(first)","var secondExt = ComponentExtension.from(second)"]},
 
         {"kind":"and","text":"Both are painted once at a common size, so that neither is newborn any more.","code":["first.setSize(100, 60)","second.setSize(100, 60)","Utility.renderSingleComponent(first)","Utility.renderSingleComponent(second)"]},
 
@@ -358,7 +433,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            What the rule above suppresses is *minting*, and only that. If a finished rendering\n            for exactly this style and size happens to be there already, using it costs no\n            allocation and no rendering at all - it is a blit, which is strictly cheaper than\n            the fresh render that refusing it would force. There is nothing to save by saying\n            no.\n\n            And this is not a corner case, because renderings are keyed globally on the style\n            rather than per component: a component being dragged through a size at which an\n            identically styled sibling already sits finds that sibling's rendering waiting for\n            it. Refusing it would re-render a page sized layer in order to avoid an allocation\n            that was never going to happen.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            What the rule above suppresses is *allocation*, and only that. If a finished rendering\n            for exactly this style and size happens to be there already, using it costs no\n            allocation and no rendering at all - it is a blit, which is strictly cheaper than\n            the fresh render that refusing it would force. There is nothing to save by saying\n            no.\n\n            And this is not a corner case, because renderings are keyed globally on the style\n            rather than per component: a component being dragged through a size at which an\n            identically styled sibling already sits finds that sibling's rendering waiting for\n            it. Refusing it would re-render a page sized layer in order to avoid an allocation\n            that was never going to happen.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"A large gradient style, too gradient-y to be stretch tiled, in two components.","code":["def styler = { conf -> conf","    .borderRadius(10)","    .gradient( g -> g.colors(new Color(40, 160, 90), new Color(160, 40, 90)) )","}","var settled  = UI.button(\"Settled\").withStyle(styler as swingtree.api.Styler).get(JButton)","var resizing = UI.button(\"Resizing\").withStyle(styler as swingtree.api.Styler).get(JButton)","var resizingExt = ComponentExtension.from(resizing)"]},
@@ -434,7 +509,7 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Cached renderings are keyed on the style configuration and shared globally, so a UI\n            full of identically styled components renders one image and blits it for all of\n            them. A layer carrying an uncacheable painter is cut in two, and what is cached is\n            then everything *except* the painter - so what is cached is identical for two\n            components which differ only in their painter.\n\n            The *name* of the painter must therefore not survive into that key. A name is how a\n            style is addressed while it is being configured, not something the user expects to\n            change what is drawn - so two components whose only difference is that one calls its\n            painter \"mark\" and the other calls it \"logo\" have to share the one cached image.\n            Were they not to, each would mint an entry of its own, and since the number of\n            entries is capped, that debris would lock other components out of the cache too.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Cached renderings are keyed on the style configuration and shared globally, so a UI\n            full of identically styled components renders one image and blits it for all of\n            them. A layer carrying an uncacheable painter is cut in two, and what is cached is\n            then everything *except* the painter - so what is cached is identical for two\n            components which differ only in their painter.\n\n            The *name* of the painter must therefore not survive into that key. A name is how a\n            style is addressed while it is being configured, not something the user expects to\n            change what is drawn - so two components whose only difference is that one calls its\n            painter \"mark\" and the other calls it \"logo\" have to share the one cached image.\n            Were they not to, each would allocate an image of its own, and since the number of\n            entries is capped, that debris would lock other components out of the cache too.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"Two boxes with the same background, each with an uncacheable painter of its own name.","code":["var first = UI.box().withStyle( it -> it","                .backgroundColor(new Color(35, 95, 125)).borderRadius(11).margin(4)","                .painter(UI.Layer.BACKGROUND, \"mark\", { g ->","                    g.setColor(new Color(240, 120, 30)); g.fillOval(10, 10, 40, 30)","                })","            ).get(JBox)","var second = UI.box().withStyle( it -> it","                .backgroundColor(new Color(35, 95, 125)).borderRadius(11).margin(4)","                .painter(UI.Layer.BACKGROUND, \"logo\", { g ->","                    g.setColor(new Color(30, 200, 160)); g.fillRect(20, 20, 30, 20)","                })","            ).get(JBox)","first.setSize(260, 140)","second.setSize(260, 140)"]},
@@ -466,7 +541,7 @@
 
         {"kind":"when","text":"The second one is painted for the very first time.","code":["Utility.renderSingleComponent(second)"]},
 
-        {"kind":"then","text":"It found that very image, rather than minting one of its own.","code":["ComponentExtension.from(second).cacheHitCount(UI.Layer.BACKGROUND)  == 1","ComponentExtension.from(second).cacheMissCount(UI.Layer.BACKGROUND) == 0"]}
+        {"kind":"then","text":"It found that very image, rather than allocating one of its own.","code":["ComponentExtension.from(second).cacheHitCount(UI.Layer.BACKGROUND)  == 1","ComponentExtension.from(second).cacheMissCount(UI.Layer.BACKGROUND) == 0"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

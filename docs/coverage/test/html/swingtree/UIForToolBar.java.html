@@ -35,14 +35,14 @@ public final class UIForToolBar&lt;T extends JToolBar&gt; extends UIForAnySwing&
      *  which is a layout mode that is either horizontal or vertical.
      *  It translates to a call to {@link JToolBar#setOrientation(int)}.
      *
-     * @param alignment The {@link UI.Align} value mapping to the {@link JToolBar}'s orientation.
+     * @param axis The {@link UI.Axis} value mapping to the {@link JToolBar}'s orientation.
      *                  See {@link JToolBar#setOrientation(int)}.
      * @return This builder node.
      */
-    public final UIForToolBar&lt;T&gt; withOrientation( UI.Align alignment ) {
-<span class="nc" id="L43">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, UI.Align.class);</span>
+    public final UIForToolBar&lt;T&gt; withOrientation( UI.Axis axis ) {
+<span class="nc" id="L43">        NullUtil.nullArgCheck(axis, &quot;axis&quot;, UI.Axis.class);</span>
 <span class="nc" id="L44">        return _with( thisComponent -&gt; {</span>
-<span class="nc" id="L45">                    thisComponent.setOrientation(alignment.forToolBar());</span>
+<span class="nc" id="L45">                    thisComponent.setOrientation(axis.forToolBar());</span>
 <span class="nc" id="L46">                })</span>
 <span class="nc" id="L47">                ._this();</span>
     }
@@ -53,18 +53,18 @@ public final class UIForToolBar&lt;T extends JToolBar&gt; extends UIForAnySwing&
      *  This translates to a call to {@link JToolBar#setOrientation(int)}.
      *  The orientation must have either the value HORIZONTAL or VERTICAL.
      *
-     * @param alignment The {@link UI.Align} property mapping to the {@link JToolBar}'s orientation.
+     * @param axis The {@link UI.Axis} property mapping to the {@link JToolBar}'s orientation.
      *                  See {@link JToolBar#setOrientation(int)}.
      * @return This builder node.
      */
-    public final UIForToolBar&lt;T&gt; withOrientation( Val&lt;UI.Align&gt; alignment ) {
-<span class="nc" id="L61">        NullUtil.nullArgCheck(alignment, &quot;alignment&quot;, Val.class);</span>
-<span class="nc" id="L62">        NullUtil.nullPropertyCheck(alignment, &quot;alignment&quot;, &quot;Null is not a valid alignment.&quot;);</span>
-<span class="nc" id="L63">        return _withOnShow( alignment, (c,v) -&gt; {</span>
+    public final UIForToolBar&lt;T&gt; withOrientation( Val&lt;UI.Axis&gt; axis ) {
+<span class="nc" id="L61">        NullUtil.nullArgCheck(axis, &quot;axis&quot;, Val.class);</span>
+<span class="nc" id="L62">        NullUtil.nullPropertyCheck(axis, &quot;axis&quot;, &quot;Null is not a valid axis.&quot;);</span>
+<span class="nc" id="L63">        return _withOnShow( axis, (c,v) -&gt; {</span>
 <span class="nc" id="L64">                    c.setOrientation(v.forToolBar());</span>
 <span class="nc" id="L65">                })</span>
 <span class="nc" id="L66">                ._with( thisComponent -&gt; {</span>
-<span class="nc" id="L67">                    thisComponent.setOrientation(alignment.orElseThrowUnchecked().forToolBar());</span>
+<span class="nc" id="L67">                    thisComponent.setOrientation(axis.orElseThrowUnchecked().forToolBar());</span>
 <span class="nc" id="L68">                })</span>
 <span class="nc" id="L69">                ._this();</span>
     }

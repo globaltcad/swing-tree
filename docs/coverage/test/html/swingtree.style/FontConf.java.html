@@ -990,7 +990,7 @@ public final class FontConf
      * &lt;/ul&gt;
      * This property will have no effect on components that don't support text alignment,
      * except for when you use this property to render text through the SwingTree style API.
-     * (see {@link ComponentStyleDelegate#fontAlignment(UI.Alignment)})
+     * (see {@link ComponentStyleDelegate#fontAlignment(UI.Placement)})
      *
      * &lt;p&gt;&lt;b&gt;Recommended Usage:&lt;/b&gt;&lt;br&gt;
      * For effective alignment specification, use either:
@@ -998,7 +998,7 @@ public final class FontConf
      *   &lt;li&gt;{@link ComponentStyleDelegate#fontAlignment(UI.VerticalAlignment)} for individual alignment&lt;/li&gt;
      *   &lt;li&gt;{@link FontConf} within a {@link UI.Font} passed to:
      *     &lt;ul&gt;
-     *       &lt;li&gt;see {@link ComponentStyleDelegate#fontAlignment(UI.Alignment)}&lt;/li&gt;
+     *       &lt;li&gt;see {@link ComponentStyleDelegate#fontAlignment(UI.Placement)}&lt;/li&gt;
      *       &lt;li&gt;{@link swingtree.UIForAnySwing#withFont(UI.Font)}&lt;/li&gt;
      *       &lt;li&gt;{@link swingtree.UIForAnySwing#withFont(Val)}&lt;/li&gt;
      *     &lt;/ul&gt;
@@ -1016,14 +1016,14 @@ public final class FontConf
      *
      * @see #horizontalAlignment(UI.HorizontalAlignment)
      * @see #verticalAlignment(UI.VerticalAlignment)
-     * @see UI.Alignment
+     * @see UI.Placement
      * @see UI.HorizontalAlignment
      * @see UI.VerticalAlignment
      * @throws NullPointerException if the supplied enum constant is null.
      */
-    public FontConf alignment( UI.Alignment alignment ) {
+    public FontConf alignment( UI.Placement alignment ) {
 <span class="fc" id="L1025">        Objects.requireNonNull(alignment);</span>
-<span class="fc" id="L1026">        return verticalAlignment(alignment.getVertical()).horizontalAlignment(alignment.getHorizontal());</span>
+<span class="fc" id="L1026">        return verticalAlignment(alignment.vertical()).horizontalAlignment(alignment.horizontal());</span>
     }
 
     /**

@@ -23,7 +23,7 @@
       "blocks":[
         {"kind":"given","text":"We instantiate the view model, a simple map.","code":["var vm = [","        forename:        Var.of(\"John\"),","        surname:         Var.of(\"Doe\"),","        favouriteNumber: Var.of(42)","    ]"]},
 
-        {"kind":"when","text":"We create a view for our view model...","code":["UI.panel(\"fill, wrap 2\")",".add( UI.label( \"Forename:\" ) )",".add( \"grow\", UI.textField(vm.forename))",".add( UI.label( \"Surname:\" ) )",".add( \"grow\", UI.passwordField(vm.surname))",".add( UI.label( \"Favourite Number:\" ) )",".add( \"grow\",","    UI.slider(UI.Align.HORIZONTAL, 0, 100)","    .withValue(vm.favouriteNumber)",")"]},
+        {"kind":"when","text":"We create a view for our view model...","code":["UI.panel(\"fill, wrap 2\")",".add( UI.label( \"Forename:\" ) )",".add( \"grow\", UI.textField(vm.forename))",".add( UI.label( \"Surname:\" ) )",".add( \"grow\", UI.passwordField(vm.surname))",".add( UI.label( \"Favourite Number:\" ) )",".add( \"grow\",","    UI.slider(UI.Axis.HORIZONTAL, 0, 100)","    .withValue(vm.favouriteNumber)",")"]},
 
         {"kind":"and","text":"We set the view to null and wait a bit... let the GC do its thing...","code":["System.gc()","Thread.sleep(100)"]},
 

@@ -623,7 +623,11 @@ public final class SwingTreeInitConfig
      *  (also known as &quot;nine slice&quot; rendering): the style is rendered once at a small
      *  canonical size and any component size is reconstructed by copying the corner
      *  tiles and stretching the edge bands. This makes live-resizing styled components
-     *  dramatically cheaper, because no re-rendering happens at all.
+     *  dramatically cheaper, because no re-rendering happens at all. A linear gradient running
+     *  straight up, down or across qualifies in one dimension only. A gradient from top to
+     *  bottom paints every pixel strip along the y axis alike, so we render it once at the
+     *  component's real height but only a fraction of its width. Widening such a component is
+     *  then free, while making it taller renders it again.
      *  &lt;p&gt;
      *  This flag exists as a safety hatch: disabling it makes every style fall back to
      *  the classic exact-size cache keying. It can also be set through the system
@@ -637,7 +641,7 @@ public final class SwingTreeInitConfig
      * @see SwingTree#isCacheTilingEnabled()
      */
     public SwingTreeInitConfig withCacheTilingEnabled( boolean enabled ) {
-<span class="fc" id="L640">        return new SwingTreeInitConfig(</span>
+<span class="fc" id="L644">        return new SwingTreeInitConfig(</span>
                 _defaultFont, _fontInstallation, _eventProcessor, _styleSheet, _uiScale, _uiScaleEnabled,
                 _uiScaleAllowScaleDown, _defaultAnimationInterval, _logMarker, _recordDebugSourceTrace,
                 _devToolKeyStrokeShortcut, _cacheMode, enabled
@@ -738,49 +742,49 @@ public final class SwingTreeInitConfig
          * If the system property is not set, {@code defaultValue} is returned.
          */
         static boolean getBool( String key, boolean defaultValue ) {
-<span class="fc" id="L741">            String value = System.getProperty( key );</span>
-<span class="pc bpc" id="L742" title="1 of 2 branches missed.">            return (value != null) ? Boolean.parseBoolean( value ) : defaultValue;</span>
+<span class="fc" id="L745">            String value = System.getProperty( key );</span>
+<span class="pc bpc" id="L746" title="1 of 2 branches missed.">            return (value != null) ? Boolean.parseBoolean( value ) : defaultValue;</span>
         }
 
         /**
          * Similar to sun.java2d.SunGraphicsEnvironment.getScaleFactor(String)
          */
         static float getFloat( String key, float defaultValue ) {
-<span class="fc" id="L749">            String s = System.getProperty( key );</span>
+<span class="fc" id="L753">            String s = System.getProperty( key );</span>
 
-<span class="pc bpc" id="L751" title="1 of 2 branches missed.">            if ( s == null )</span>
-<span class="fc" id="L752">                return defaultValue;</span>
+<span class="pc bpc" id="L755" title="1 of 2 branches missed.">            if ( s == null )</span>
+<span class="fc" id="L756">                return defaultValue;</span>
 
-<span class="nc" id="L754">            float units = 1;</span>
-<span class="nc bnc" id="L755" title="All 2 branches missed.">            if ( s.endsWith( &quot;x&quot; ) )</span>
-<span class="nc" id="L756">                s = s.substring( 0, s.length() - 1 );</span>
-<span class="nc bnc" id="L757" title="All 2 branches missed.">            else if ( s.endsWith( &quot;dpi&quot; ) ) {</span>
-<span class="nc" id="L758">                units = 96;</span>
-<span class="nc" id="L759">                s = s.substring( 0, s.length() - 3 );</span>
-<span class="nc bnc" id="L760" title="All 2 branches missed.">            } else if ( s.endsWith( &quot;%&quot; ) ) {</span>
-<span class="nc" id="L761">                units = 100;</span>
-<span class="nc" id="L762">                s = s.substring( 0, s.length() - 1 );</span>
+<span class="nc" id="L758">            float units = 1;</span>
+<span class="nc bnc" id="L759" title="All 2 branches missed.">            if ( s.endsWith( &quot;x&quot; ) )</span>
+<span class="nc" id="L760">                s = s.substring( 0, s.length() - 1 );</span>
+<span class="nc bnc" id="L761" title="All 2 branches missed.">            else if ( s.endsWith( &quot;dpi&quot; ) ) {</span>
+<span class="nc" id="L762">                units = 96;</span>
+<span class="nc" id="L763">                s = s.substring( 0, s.length() - 3 );</span>
+<span class="nc bnc" id="L764" title="All 2 branches missed.">            } else if ( s.endsWith( &quot;%&quot; ) ) {</span>
+<span class="nc" id="L765">                units = 100;</span>
+<span class="nc" id="L766">                s = s.substring( 0, s.length() - 1 );</span>
             }
 
             try {
-<span class="nc" id="L766">                float scale = Float.parseFloat( s );</span>
-<span class="nc bnc" id="L767" title="All 2 branches missed.">                return scale &gt; 0 ? scale / units : -1;</span>
-<span class="nc" id="L768">            } catch( NumberFormatException ex ) {</span>
-<span class="nc" id="L769">                return defaultValue;</span>
+<span class="nc" id="L770">                float scale = Float.parseFloat( s );</span>
+<span class="nc bnc" id="L771" title="All 2 branches missed.">                return scale &gt; 0 ? scale / units : -1;</span>
+<span class="nc" id="L772">            } catch( NumberFormatException ex ) {</span>
+<span class="nc" id="L773">                return defaultValue;</span>
             }
         }
 
         static long getLong( String key, long defaultValue ) {
-<span class="fc" id="L774">            String s = System.getProperty( key );</span>
+<span class="fc" id="L778">            String s = System.getProperty( key );</span>
 
-<span class="pc bpc" id="L776" title="1 of 2 branches missed.">            if ( s == null )</span>
-<span class="fc" id="L777">                return defaultValue;</span>
+<span class="pc bpc" id="L780" title="1 of 2 branches missed.">            if ( s == null )</span>
+<span class="fc" id="L781">                return defaultValue;</span>
 
             try {
-<span class="nc" id="L780">                long interval = Long.parseLong( s );</span>
-<span class="nc bnc" id="L781" title="All 2 branches missed.">                return interval &gt; 0 ? interval : defaultValue;</span>
-<span class="nc" id="L782">            } catch( NumberFormatException ex ) {</span>
-<span class="nc" id="L783">                return defaultValue;</span>
+<span class="nc" id="L784">                long interval = Long.parseLong( s );</span>
+<span class="nc bnc" id="L785" title="All 2 branches missed.">                return interval &gt; 0 ? interval : defaultValue;</span>
+<span class="nc" id="L786">            } catch( NumberFormatException ex ) {</span>
+<span class="nc" id="L787">                return defaultValue;</span>
             }
         }
 
@@ -791,13 +795,13 @@ public final class SwingTreeInitConfig
          * is returned.
          */
         static &lt;E extends Enum&lt;E&gt;&gt; E getEnum( String key, Class&lt;E&gt; type, E defaultValue ) {
-<span class="fc" id="L794">            String s = System.getProperty( key );</span>
-<span class="pc bpc" id="L795" title="1 of 2 branches missed.">            if ( s == null )</span>
-<span class="fc" id="L796">                return defaultValue;</span>
-<span class="nc bnc" id="L797" title="All 2 branches missed.">            for ( E constant : type.getEnumConstants() )</span>
-<span class="nc bnc" id="L798" title="All 2 branches missed.">                if ( constant.name().equalsIgnoreCase( s.trim() ) )</span>
-<span class="nc" id="L799">                    return constant;</span>
-<span class="nc" id="L800">            return defaultValue;</span>
+<span class="fc" id="L798">            String s = System.getProperty( key );</span>
+<span class="pc bpc" id="L799" title="1 of 2 branches missed.">            if ( s == null )</span>
+<span class="fc" id="L800">                return defaultValue;</span>
+<span class="nc bnc" id="L801" title="All 2 branches missed.">            for ( E constant : type.getEnumConstants() )</span>
+<span class="nc bnc" id="L802" title="All 2 branches missed.">                if ( constant.name().equalsIgnoreCase( s.trim() ) )</span>
+<span class="nc" id="L803">                    return constant;</span>
+<span class="nc" id="L804">            return defaultValue;</span>
         }
     }
 }

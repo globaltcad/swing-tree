@@ -40,7 +40,7 @@ final class EnterExitComponentBoundsEventDispatcher {
 <span class="fc" id="L40">        this.mouseEventListener = SwingTree.get().getAwtEventView(AWTEvent.MOUSE_EVENT_MASK);</span>
 <span class="fc" id="L41">        this.mouseMotionEventListener = SwingTree.get().getAwtEventView(AWTEvent.MOUSE_MOTION_EVENT_MASK);</span>
 <span class="fc" id="L42">        this.mouseEventListener.onChange(From.ALL, it -&gt; it.currentValue().ifPresent(this::onMouseEvent));</span>
-<span class="pc" id="L43">        this.mouseMotionEventListener.onChange(From.ALL, it -&gt; it.currentValue().ifPresent(this::onMouseEvent));</span>
+<span class="fc" id="L43">        this.mouseMotionEventListener.onChange(From.ALL, it -&gt; it.currentValue().ifPresent(this::onMouseEvent));</span>
 <span class="fc" id="L44">    }</span>
 
     static EnterExitComponentBoundsEventDispatcher get() {
@@ -125,11 +125,11 @@ final class EnterExitComponentBoundsEventDispatcher {
 <span class="fc" id="L125">        }</span>
 
         private final boolean areaIsEqualToBounds(Component component) {
-<span class="pc bpc" id="L128" title="1 of 2 branches missed.">            if ( this.area == UI.ComponentArea.ALL ) {</span>
-<span class="nc" id="L129">                return true;</span>
+<span class="fc bfc" id="L128" title="All 2 branches covered.">            if ( this.area == UI.ComponentArea.ALL ) {</span>
+<span class="fc" id="L129">                return true;</span>
             }
 <span class="fc" id="L131">            Shape shape = ComponentExtension.from((JComponent) component).getComponentArea(area).orElse(null);</span>
-<span class="pc bpc" id="L132" title="2 of 4 branches missed.">            return shape != null &amp;&amp; shape.equals(component.getBounds());</span>
+<span class="fc bfc" id="L132" title="All 4 branches covered.">            return shape != null &amp;&amp; shape.equals(component.getBounds());</span>
         }
 
         public void addEnterListener(MouseListener listener) {
@@ -143,7 +143,7 @@ final class EnterExitComponentBoundsEventDispatcher {
         public void dispatch(JComponent component, MouseEvent event) {
 <span class="pc bpc" id="L144" title="1 of 2 branches missed.">            assert isRelated(component, event.getComponent());</span>
 
-<span class="pc bpc" id="L146" title="3 of 4 branches missed.">            switch (event.getID()) {</span>
+<span class="pc bpc" id="L146" title="2 of 4 branches missed.">            switch (event.getID()) {</span>
                 case MouseEvent.MOUSE_ENTERED:
 <span class="fc bfc" id="L148" title="All 2 branches covered.">                    if (location == Location.INSIDE)</span>
 <span class="fc" id="L149">                        return;</span>
@@ -160,11 +160,11 @@ final class EnterExitComponentBoundsEventDispatcher {
 <span class="nc" id="L160">                    location = onMouseExit(component, event);</span>
 <span class="nc" id="L161">                    break;</span>
                 case MouseEvent.MOUSE_MOVED:
-<span class="nc bnc" id="L163" title="All 2 branches missed.">                    if ( !areaIsEqualToBounds(component) ) {</span>
-<span class="nc bnc" id="L164" title="All 2 branches missed.">                        if ( location == Location.INSIDE ) {</span>
-<span class="nc" id="L165">                            location = onMouseExit(component, event);</span>
-<span class="nc bnc" id="L166" title="All 2 branches missed.">                        } else if ( location == Location.OUTSIDE ) {</span>
-<span class="nc" id="L167">                            location = onMouseEnter(component, event);</span>
+<span class="fc bfc" id="L163" title="All 2 branches covered.">                    if ( !areaIsEqualToBounds(component) ) {</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">                        if ( location == Location.INSIDE ) {</span>
+<span class="fc" id="L165">                            location = onMouseExit(component, event);</span>
+<span class="pc bpc" id="L166" title="1 of 2 branches missed.">                        } else if ( location == Location.OUTSIDE ) {</span>
+<span class="fc" id="L167">                            location = onMouseEnter(component, event);</span>
                         }
                     }
                 break;
@@ -210,32 +210,32 @@ final class EnterExitComponentBoundsEventDispatcher {
 
         private Location onMouseExit(JComponent component, MouseEvent mouseEvent)
         {
-<span class="nc" id="L213">            mouseEvent = withNewSource(mouseEvent, component);</span>
+<span class="fc" id="L213">            mouseEvent = withNewSource(mouseEvent, component);</span>
 
-<span class="nc bnc" id="L215" title="All 2 branches missed.">            if (exitListeners.isEmpty())</span>
-<span class="nc" id="L216">                return determineCurrentLocationOf(mouseEvent);</span>
+<span class="fc bfc" id="L215" title="All 2 branches covered.">            if (exitListeners.isEmpty())</span>
+<span class="fc" id="L216">                return determineCurrentLocationOf(mouseEvent);</span>
 
-<span class="nc bnc" id="L218" title="All 2 branches missed.">            if ( areaIsEqualToBounds(component) ) {</span>
+<span class="pc bpc" id="L218" title="1 of 2 branches missed.">            if ( areaIsEqualToBounds(component) ) {</span>
 <span class="nc" id="L219">                dispatchExitToAllListeners(mouseEvent);</span>
 <span class="nc" id="L220">                return Location.OUTSIDE;</span>
             } else {
-<span class="nc" id="L222">                Location nextLocation = determineCurrentLocationOf(mouseEvent);</span>
-<span class="nc bnc" id="L223" title="All 4 branches missed.">                if ( nextLocation == Location.OUTSIDE &amp;&amp; this.location == Location.INSIDE )</span>
-<span class="nc" id="L224">                    dispatchExitToAllListeners(mouseEvent);</span>
+<span class="fc" id="L222">                Location nextLocation = determineCurrentLocationOf(mouseEvent);</span>
+<span class="pc bpc" id="L223" title="2 of 4 branches missed.">                if ( nextLocation == Location.OUTSIDE &amp;&amp; this.location == Location.INSIDE )</span>
+<span class="fc" id="L224">                    dispatchExitToAllListeners(mouseEvent);</span>
 
-<span class="nc" id="L226">                return nextLocation;</span>
+<span class="fc" id="L226">                return nextLocation;</span>
             }
         }
 
         private void dispatchExitToAllListeners(MouseEvent mouseEvent) {
-<span class="nc bnc" id="L231" title="All 2 branches missed.">            for ( MouseListener listener : exitListeners ) {</span>
+<span class="fc bfc" id="L231" title="All 2 branches covered.">            for ( MouseListener listener : exitListeners ) {</span>
                 try {
-<span class="nc" id="L233">                    listener.mouseExited(mouseEvent);</span>
+<span class="fc" id="L233">                    listener.mouseExited(mouseEvent);</span>
 <span class="nc" id="L234">                } catch (Exception e) {</span>
 <span class="nc" id="L235">                    log.error(SwingTree.get().logMarker(), &quot;Failed to process mouseExited event {}. Error: {}&quot;, mouseEvent, e.getMessage(), e);</span>
-<span class="nc" id="L236">                }</span>
-<span class="nc" id="L237">            }</span>
-<span class="nc" id="L238">        }</span>
+<span class="fc" id="L236">                }</span>
+<span class="fc" id="L237">            }</span>
+<span class="fc" id="L238">        }</span>
     }
 
     private static boolean isRelated(Component parent, Component other) {

@@ -145,7 +145,7 @@ final class StyleLayerCache
     }
 
     private static boolean _isWorthCuttingOut( LayerRenderConf part ) {
-<span class="fc bfc" id="L148" title="All 4 branches covered.">        return part.rendersNothing() || LayerPartitionCache.cachesSizeIndependently(part);</span>
+<span class="fc bfc" id="L148" title="All 4 branches covered.">        return part.rendersNothing() || LayerPartitionCache.wouldCompactADimension(part);</span>
     }
 
     void paint( Graphics2D g2d ) {
@@ -213,23 +213,24 @@ final class StyleLayerCache
             LayerRenderConfPartition.PAINTERS
         );
 
+        @SuppressWarnings(&quot;ImmutableEnumChecker&quot;) // A Tuple is immutable, it is simply not annotated as such.
         private final Tuple&lt;LayerRenderConfPartition&gt;    _cachedParts;
         private final @Nullable LayerRenderConfPartition _uncachedPart;
 
-<span class="fc" id="L219">        PartitioningPolicy( Tuple&lt;LayerRenderConfPartition&gt; cachedParts, @Nullable LayerRenderConfPartition uncachedPart ) {</span>
-<span class="fc" id="L220">            _cachedParts  = cachedParts;</span>
-<span class="fc" id="L221">            _uncachedPart = uncachedPart;</span>
-<span class="fc" id="L222">        }</span>
+<span class="fc" id="L220">        PartitioningPolicy( Tuple&lt;LayerRenderConfPartition&gt; cachedParts, @Nullable LayerRenderConfPartition uncachedPart ) {</span>
+<span class="fc" id="L221">            _cachedParts  = cachedParts;</span>
+<span class="fc" id="L222">            _uncachedPart = uncachedPart;</span>
+<span class="fc" id="L223">        }</span>
 
         LayerPartitionCache[] newPartsFor( UI.Layer layer ) {
-<span class="fc" id="L225">            LayerPartitionCache[] parts = new LayerPartitionCache[_cachedParts.size()];</span>
-<span class="fc bfc" id="L226" title="All 2 branches covered.">            for ( int i = 0; i &lt; parts.length; i++ )</span>
-<span class="fc" id="L227">                parts[i] = new LayerPartitionCache(layer, _cachedParts.get(i));</span>
-<span class="fc" id="L228">            return parts;</span>
+<span class="fc" id="L226">            LayerPartitionCache[] parts = new LayerPartitionCache[_cachedParts.size()];</span>
+<span class="fc bfc" id="L227" title="All 2 branches covered.">            for ( int i = 0; i &lt; parts.length; i++ )</span>
+<span class="fc" id="L228">                parts[i] = new LayerPartitionCache(layer, _cachedParts.get(i));</span>
+<span class="fc" id="L229">            return parts;</span>
         }
 
         LayerRenderConf uncachedPartitionOf( LayerRenderConf full ) {
-<span class="fc bfc" id="L232" title="All 2 branches covered.">            return ( _uncachedPart == null ? LayerRenderConf.none() : _uncachedPart.restrict(full) );</span>
+<span class="fc bfc" id="L233" title="All 2 branches covered.">            return ( _uncachedPart == null ? LayerRenderConf.none() : _uncachedPart.restrict(full) );</span>
         }
     }
 

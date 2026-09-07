@@ -603,7 +603,7 @@
       "blocks":[
         {"kind":"given","text":"We create a property representing the visibility state of a component.","code":["Val<Boolean> property = Var.of(true)"]},
 
-        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var ui = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Below me is a spinner!\"))","            .add(UI.spinner().isVisibleIf(property))","            .add(UI.textArea(\"I am here for decoration...\"))","            .add(UI.slider(UI.Align.VERTICAL).isVisibleIfNot(property))"]},
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var ui = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Below me is a spinner!\"))","            .add(UI.spinner().isVisibleIf(property))","            .add(UI.textArea(\"I am here for decoration...\"))","            .add(UI.slider(UI.Axis.VERTICAL).isVisibleIfNot(property))"]},
 
         {"kind":"and","text":"We build the component:","code":["var panel = ui.get(JPanel)"]},
 
@@ -719,7 +719,7 @@
       "blocks":[
         {"kind":"given","text":"We create a property representing the focusability state of a component.","code":["Val<Boolean> property = Var.of(true)"]},
 
-        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var ui = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Below me is a spinner!\"))","            .add(UI.spinner().isFocusableIf(property))","            .add(UI.textArea(\"I am here for decoration...\"))","            .add(UI.slider(UI.Align.VERTICAL).isFocusableIfNot(property))"]},
+        {"kind":"and","text":"We create a UI to which we want to bind:","code":["var ui = UI.panel(\"fill, wrap 1\")","            .add(UI.label(\"Below me is a spinner!\"))","            .add(UI.spinner().isFocusableIf(property))","            .add(UI.textArea(\"I am here for decoration...\"))","            .add(UI.slider(UI.Axis.VERTICAL).isFocusableIfNot(property))"]},
 
         {"kind":"and","text":"We build the component:","code":["var panel = ui.get(JPanel)"]},
 

@@ -497,11 +497,11 @@
 
         {"kind":"then","text":"The row/column counts are updated in-place on the existing GridLayout instance:","code":["panel.getLayout().is(firstGridLayout)","((GridLayout) panel.getLayout()).getRows() == 3","((GridLayout) panel.getLayout()).getColumns() == 2"]},
 
-        {"kind":"when","text":"We switch to a horizontal BoxLayout:","code":["layout.set(Layout.box(UI.Axis.X))"]},
+        {"kind":"when","text":"We switch to a horizontal BoxLayout:","code":["layout.set(Layout.box(UI.Axis.HORIZONTAL))"]},
 
         {"kind":"then","text":"A BoxLayout is installed along the X axis:","code":["panel.getLayout() instanceof BoxLayout","((BoxLayout) panel.getLayout()).getAxis() == BoxLayout.X_AXIS"]},
 
-        {"kind":"when","text":"We switch to a vertical BoxLayout — a new instance is created since the axis changed:","code":["layout.set(Layout.box(UI.Axis.Y))"]},
+        {"kind":"when","text":"We switch to a vertical BoxLayout — a new instance is created since the axis changed:","code":["layout.set(Layout.box(UI.Axis.VERTICAL))"]},
 
         {"kind":"then","text":"A BoxLayout is installed along the Y axis:","code":["panel.getLayout() instanceof BoxLayout","((BoxLayout) panel.getLayout()).getAxis() == BoxLayout.Y_AXIS"]},
 

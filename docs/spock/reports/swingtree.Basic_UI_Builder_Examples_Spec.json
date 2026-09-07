@@ -123,7 +123,7 @@
 
         {"kind":"expect","text":"At the beginning the default cursor will be set.","code":["button.cursor.type == Cursor.DEFAULT_CURSOR"]},
 
-        {"kind":"when","text":"We set the cursor of the button to be something else...","code":["ui = ui.withCursor(UI.Cursor.RESIZE_SOUTH_EAST)"]},
+        {"kind":"when","text":"We set the cursor of the button to be something else...","code":["ui = ui.withCursor(UI.Cursor.RESIZE_BOTTOM_RIGHT)"]},
 
         {"kind":"and","text":"We re-build the component.","code":["button = ui.get(JButton)"]},
 

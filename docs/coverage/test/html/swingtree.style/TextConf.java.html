@@ -819,15 +819,15 @@ public final class TextConf implements Simplifiable&lt;TextConf&gt;
         // Scale each StyledString inside every paragraph, wrapping them back into un-interned
         // Pooled&lt;Paragraph&gt; objects.  Interning happens later in simplified().
 <span class="fc" id="L821">        final List&lt;Pooled&lt;Paragraph&gt;&gt; scaledParagraphs = new ArrayList&lt;&gt;(_content.size());</span>
-<span class="fc bfc" id="L822" title="All 2 branches covered.">        for ( Pooled&lt;Paragraph&gt; pooled : _content ) {</span>
-<span class="fc" id="L823">            final Paragraph original = pooled.get();</span>
-<span class="pc bpc" id="L824" title="1 of 2 branches missed.">            if ( original.isBlankLine ) {</span>
+<span class="pc bpc" id="L822" title="1 of 2 branches missed.">        for ( Pooled&lt;Paragraph&gt; pooled : _content ) {</span>
+<span class="nc" id="L823">            final Paragraph original = pooled.get();</span>
+<span class="nc bnc" id="L824" title="All 2 branches missed.">            if ( original.isBlankLine ) {</span>
 <span class="nc" id="L825">                scaledParagraphs.add(new Pooled&lt;&gt;(Paragraph.blankLine()));</span>
             } else {
-<span class="pc" id="L827">                final Tuple&lt;StyledString&gt; scaledStrings = original.styledStrings.map( s -&gt; s.mapStyle( st -&gt; st._scale(scale) ) );</span>
-<span class="fc" id="L828">                scaledParagraphs.add(new Pooled&lt;&gt;(Paragraph.of(scaledStrings)));</span>
+<span class="nc" id="L827">                final Tuple&lt;StyledString&gt; scaledStrings = original.styledStrings.map( s -&gt; s.mapStyle( st -&gt; st._scale(scale) ) );</span>
+<span class="nc" id="L828">                scaledParagraphs.add(new Pooled&lt;&gt;(Paragraph.of(scaledStrings)));</span>
             }
-<span class="fc" id="L830">        }</span>
+<span class="nc" id="L830">        }</span>
 
 <span class="fc" id="L832">        return of(</span>
 <span class="fc" id="L833">            Tuple.of(Pooled.classTyped(Paragraph.class), scaledParagraphs),</span>

@@ -1246,14 +1246,14 @@
     },
   
     {
-      "id":"The `UI.scrollPanels(UI.Align, Configurator)` factory accepts a custom alignment alongside the configurator.",
+      "id":"The `UI.scrollPanels(UI.Axis, Configurator)` factory accepts a custom axis alongside the configurator.",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            Sometimes you want the scroll panels widget to lay its entries out\n            horizontally instead of vertically. The\n            `UI.scrollPanels(UI.Align, Configurator)` factory lets you do that\n            while still letting you tweak the `Scrollable` behavior\n            through a declarative lambda.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            Sometimes you want the scroll panels widget to lay its entries out\n            horizontally instead of vertically. The\n            `UI.scrollPanels(UI.Axis, Configurator)` factory lets you do that\n            while still letting you tweak the `Scrollable` behavior\n            through a declarative lambda.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A horizontally aligned scroll panels widget with a custom scrollable config.","code":["var ui =","        UI.scrollPanels(UI.Align.HORIZONTAL, conf -> conf","            .unitIncrement(7)","            .blockIncrement(21)","            .fitHeight(true)","        )","        .add(UI.label(\"Left\"))","        .add(UI.label(\"Center\"))","        .add(UI.label(\"Right\"))"]},
+        {"kind":"given","text":"A scroll panels widget stacking its entries along the horizontal axis, with a custom scrollable config.","code":["var ui =","        UI.scrollPanels(UI.Axis.HORIZONTAL, conf -> conf","            .unitIncrement(7)","            .blockIncrement(21)","            .fitHeight(true)","        )","        .add(UI.label(\"Left\"))","        .add(UI.label(\"Center\"))","        .add(UI.label(\"Right\"))"]},
 
         {"kind":"and","text":"We get the underlying `JScrollPanels` and its internal `Scrollable` container.","code":["var panels = ui.get(JScrollPanels)","var inner = panels.getViewport().getView() as Scrollable"]},
 
@@ -1270,7 +1270,7 @@
       "tags":{},"see":[],"extraInfo":["\n            For the most demanding use cases, you don't have to commit\n            to a single fixed increment value. Instead, you can plug in\n            a `ScrollIncrementSupplier` that receives the visible rectangle,\n            orientation and direction and returns a dynamically computed\n            scroll increment.\n\n            This is useful for example when the increment should depend on\n            the orientation of the scroll, or on the current view rectangle.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A scroll panels widget which uses a custom `ScrollIncrementSupplier`.","code":["var ui =","        UI.scrollPanels( conf -> conf","            .unitIncrement((rect, align, dir) -> align == UI.Align.VERTICAL ? 11 : 33)","            .blockIncrement((rect, align, dir) -> align == UI.Align.VERTICAL ? 22 : 66)","        )","        .add(UI.label(\"Alpha\"))","        .add(UI.label(\"Beta\"))","        .add(UI.label(\"Gamma\"))"]},
+        {"kind":"given","text":"A scroll panels widget which uses a custom `ScrollIncrementSupplier`.","code":["var ui =","        UI.scrollPanels( conf -> conf","            .unitIncrement((rect, axis, dir) -> axis.isHorizontal() ? 33 : 11)","            .blockIncrement((rect, axis, dir) -> axis.isHorizontal() ? 66 : 22)","        )","        .add(UI.label(\"Alpha\"))","        .add(UI.label(\"Beta\"))","        .add(UI.label(\"Gamma\"))"]},
 
         {"kind":"and","text":"We build the component and access the internal `Scrollable`.","code":["var panels = ui.get(JScrollPanels)","var inner = panels.getViewport().getView() as Scrollable"]},
 
@@ -1280,14 +1280,14 @@
     },
   
     {
-      "id":"The `UI.scrollPanels(UI.Align, Dimension, Configurator)` factory accepts an entry shape together with the configurator.",
+      "id":"The `UI.scrollPanels(UI.Axis, Dimension, Configurator)` factory accepts an entry shape together with the configurator.",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The most expressive overload of the `UI.scrollPanels` factory family\n            takes the alignment, a `Dimension` describing the shape of the\n            entry slots and a `Configurator` lambda for the `Scrollable`\n            behavior. This is useful when you want to set a fixed entry\n            shape and a custom scroll behavior at once.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The most expressive overload of the `UI.scrollPanels` factory family\n            takes the axis, a `Dimension` describing the shape of the\n            entry slots and a `Configurator` lambda for the `Scrollable`\n            behavior. This is useful when you want to set a fixed entry\n            shape and a custom scroll behavior at once.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A scroll panels widget with a fixed entry shape and a custom configurator.","code":["var ui =","        UI.scrollPanels(UI.Align.VERTICAL, new Dimension(200, 40), conf -> conf","            .prefSize(200, 240)","            .fitWidth(true)","        )","        .add(UI.label(\"First entry\"))","        .add(UI.label(\"Second entry\"))"]},
+        {"kind":"given","text":"A scroll panels widget with a fixed entry shape and a custom configurator.","code":["var ui =","        UI.scrollPanels(UI.Axis.VERTICAL, new Dimension(200, 40), conf -> conf","            .prefSize(200, 240)","            .fitWidth(true)","        )","        .add(UI.label(\"First entry\"))","        .add(UI.label(\"Second entry\"))"]},
 
         {"kind":"and","text":"We retrieve the underlying `JScrollPanels`.","code":["var panels = ui.get(JScrollPanels)","var inner = panels.getViewport().getView() as Scrollable"]},
 

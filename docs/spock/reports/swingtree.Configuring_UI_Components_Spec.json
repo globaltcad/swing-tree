@@ -61,7 +61,7 @@
       "tags":{},"see":[],"extraInfo":[]
       },
       "blocks":[
-        {"kind":"given","text":"We create a UI with a button which may or may not be visible.","code":["var ui =","    UI.panel()","    .add(","        UI.slider(UI.Align.HORIZONTAL).id(\"C1\").isVisibleIf(true),","        UI.editorPane().id(\"C2\").isVisibleIf(false),","        UI.splitButton(\"Button\").id(\"C3\").isVisibleIfNot(true),","        UI.toggleButton(\"Toggle\").id(\"C4\").isVisibleIfNot(false)","    )"]},
+        {"kind":"given","text":"We create a UI with a button which may or may not be visible.","code":["var ui =","    UI.panel()","    .add(","        UI.slider(UI.Axis.HORIZONTAL).id(\"C1\").isVisibleIf(true),","        UI.editorPane().id(\"C2\").isVisibleIf(false),","        UI.splitButton(\"Button\").id(\"C3\").isVisibleIfNot(true),","        UI.toggleButton(\"Toggle\").id(\"C4\").isVisibleIfNot(false)","    )"]},
 
         {"kind":"and","text":"We build the panel based component tree.","code":["var panel = ui.get(JPanel)"]},
 

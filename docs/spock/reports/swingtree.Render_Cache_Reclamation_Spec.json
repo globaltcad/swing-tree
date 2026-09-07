@@ -294,7 +294,7 @@
       "blocks":[
         {"kind":"given","text":"Two identically styled components, both painted until the style is cached.","code":["var styler = { conf -> conf.borderRadius(11).margin(4)","                           .gradient( g -> g.colors(new Color(90, 30, 140), new Color(20, 90, 140)) ) }","var survivor = UI.box().withStyle(styler as swingtree.api.Styler).get(JBox)","survivor.setSize(260, 150)","var box = UI.box().withStyle(styler as swingtree.api.Styler).get(JBox)","box.setSize(260, 150)","12.times { Utility.renderSingleComponent(box) }","var ghost = new WeakReference<>(box)","box = null // Causing the component + style conf garbage collection","8.times { Utility.renderSingleComponent(survivor) }"]},
 
-        {"kind":"expect","text":"They shared a single entry rather than minting one each.","code":["ComponentExtension.from(survivor).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()","ComponentExtension.from(survivor).cacheHitCount(UI.Layer.BACKGROUND) >= 1"]},
+        {"kind":"expect","text":"They shared a single rendering rather than allocating one each.","code":["ComponentExtension.from(survivor).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()","ComponentExtension.from(survivor).cacheHitCount(UI.Layer.BACKGROUND) >= 1"]},
 
         {"kind":"when","text":"One of the two is dropped and collected.","code":["var twinWasCollected = eventually(24, { ghost.get() == null })"]},
 

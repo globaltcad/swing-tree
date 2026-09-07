@@ -161,8 +161,8 @@ public final class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAny
 <span class="fc" id="L161">                Bounds bounds = Bounds.none();</span>
 <span class="pc bpc" id="L162" title="1 of 2 branches missed.">                if ( visibleRect != null )</span>
 <span class="nc" id="L163">                    bounds = Bounds.of(visibleRect);</span>
-<span class="fc bfc" id="L164" title="All 2 branches covered.">                UI.Align align = (orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL);</span>
-<span class="fc" id="L165">                return delegate.unitIncrement(bounds, align, direction);</span>
+<span class="fc bfc" id="L164" title="All 2 branches covered.">                UI.Axis axis = (orientation == SwingConstants.VERTICAL ? UI.Axis.VERTICAL : UI.Axis.HORIZONTAL);</span>
+<span class="fc" id="L165">                return delegate.unitIncrement(bounds, axis, direction);</span>
 <span class="nc" id="L166">            } catch ( Exception e ) {</span>
 <span class="nc" id="L167">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating unit increment for scrollable component.&quot;, e);</span>
 <span class="nc" id="L168">                return 0;</span>
@@ -176,8 +176,8 @@ public final class UIForScrollPane&lt;P extends JScrollPane&gt; extends UIForAny
 <span class="fc" id="L176">                Bounds bounds = Bounds.none();</span>
 <span class="pc bpc" id="L177" title="1 of 2 branches missed.">                if ( visibleRect != null )</span>
 <span class="nc" id="L178">                    bounds = Bounds.of(visibleRect);</span>
-<span class="fc bfc" id="L179" title="All 2 branches covered.">                UI.Align align = (orientation == SwingConstants.VERTICAL ? UI.Align.VERTICAL : UI.Align.HORIZONTAL);</span>
-<span class="fc" id="L180">                return delegate.blockIncrement(bounds, align, direction);</span>
+<span class="fc bfc" id="L179" title="All 2 branches covered.">                UI.Axis axis = (orientation == SwingConstants.VERTICAL ? UI.Axis.VERTICAL : UI.Axis.HORIZONTAL);</span>
+<span class="fc" id="L180">                return delegate.blockIncrement(bounds, axis, direction);</span>
 <span class="nc" id="L181">            } catch ( Exception e ) {</span>
 <span class="nc" id="L182">                log.error(SwingTree.get().logMarker(), &quot;Error while calculating block increment for scrollable component.&quot;, e);</span>
 <span class="nc" id="L183">                return 0;</span>

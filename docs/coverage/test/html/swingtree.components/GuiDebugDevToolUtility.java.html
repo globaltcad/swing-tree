@@ -496,7 +496,7 @@ final class GuiDebugDevToolUtility {
 <span class="nc" id="L496">                setTitle(titleFromFocus(focusedDebugComponent));</span>
 <span class="nc" id="L497">            });</span>
 <span class="nc" id="L498">            this.add(</span>
-<span class="nc" id="L499">                    UI.splitPane(UI.Align.VERTICAL)</span>
+<span class="nc" id="L499">                    UI.splitPane(UI.Axis.VERTICAL)</span>
 <span class="nc" id="L500">                    .withDivisionOf(0.0)</span>
 <span class="nc" id="L501">                    .add(</span>
 <span class="nc" id="L502">                        UI.scrollPane()</span>
@@ -504,7 +504,7 @@ final class GuiDebugDevToolUtility {
 <span class="nc" id="L504">                        .withMinSize(0, 0) // let the divider collapse fully to the top</span>
                     )
 <span class="nc" id="L506">                    .add(</span>
-<span class="nc" id="L507">                        UI.splitPane(UI.Align.HORIZONTAL)</span>
+<span class="nc" id="L507">                        UI.splitPane(UI.Axis.HORIZONTAL)</span>
 <span class="nc" id="L508">                        .add(</span>
 <span class="nc" id="L509">                            buildInfoDisplay(debugState, FOCUS_COLOR,</span>
                                 &quot;&lt;html&gt;&quot; +
@@ -631,240 +631,244 @@ final class GuiDebugDevToolUtility {
                             &quot;CSS &lt;code&gt;border-image&lt;/code&gt;). Resizing such a component then costs nothing to re-render, and all&lt;br&gt;&quot; +
                             &quot;its differently sized siblings share the one small image.&lt;br&gt;&quot; +
                             &quot;&lt;br&gt;&quot; +
-                            &quot;Styles whose pixels depend on the full bounds (gradients, noises, images, text, custom painters,&lt;br&gt;&quot; +
-                            &quot;and per-edge border colors on rounded corners) are never tiled and keep their exact-size cache.&lt;br&gt;&quot; +
+                            &quot;A gradient from top to bottom paints every pixel strip along the y axis alike, so we render&lt;br&gt;&quot; +
+                            &quot;it at the component's real height but only a fraction of its width. Widening such a component&lt;br&gt;&quot; +
+                            &quot;is then free, making it taller renders it again. Styles whose pixels depend on the full&lt;br&gt;&quot; +
+                            &quot;bounds (gradients whose color depends on both x and y, noises, images, text, custom&lt;br&gt;&quot; +
+                            &quot;painters, and per-edge border colors on rounded corners) are never tiled and keep&lt;br&gt;&quot; +
+                            &quot;their exact-size cache.&lt;br&gt;&quot; +
                             &quot;&lt;br&gt;&quot; +
                             &quot;Unchecking this is a &lt;b&gt;safety hatch&lt;/b&gt;: it makes every style fall back to exact-size caching,&lt;br&gt;&quot; +
                             &quot;so a resize re-renders. Use it to confirm whether a suspicious rendering artifact comes from the&lt;br&gt;&quot; +
                             &quot;reconstruction. Rendering stays correct either way, only slower.&quot; +
                             &quot;&lt;/html&gt;&quot;
                         )
-<span class="nc" id="L642">                        .onClick( it -&gt; SwingTree.get().setCacheTilingEnabled(it.get().isSelected()))</span>
+<span class="nc" id="L646">                        .onClick( it -&gt; SwingTree.get().setCacheTilingEnabled(it.get().isSelected()))</span>
                     )
                 )
-<span class="nc" id="L645">                .add(&quot;wrap&quot;,</span>
-<span class="nc" id="L646">                    UI.panel(&quot;fillx, wrap 1&quot;)</span>
-<span class="nc" id="L647">                    .add(UI.label(&quot;UI scale factor:&quot;))</span>
-<span class="nc" id="L648">                    .add(&quot;growx&quot;,</span>
-<span class="nc" id="L649">                        UI.comboBox(uiScaleFactor, scaleOptions).withStyle(it-&gt;it.marginLeft(24))</span>
-<span class="nc" id="L650">                        .withMaxWidth(160)</span>
-<span class="nc" id="L651">                        .withTooltip(&quot;The HiDPI scale factor SwingTree applies to every component.&quot;)</span>
-<span class="nc" id="L652">                        .onSelection( it -&gt; SwingTree.get().setUiScaleFactor(uiScaleFactor.get().floatValue()) )</span>
+<span class="nc" id="L649">                .add(&quot;wrap&quot;,</span>
+<span class="nc" id="L650">                    UI.panel(&quot;fillx, wrap 1&quot;)</span>
+<span class="nc" id="L651">                    .add(UI.label(&quot;UI scale factor:&quot;))</span>
+<span class="nc" id="L652">                    .add(&quot;growx&quot;,</span>
+<span class="nc" id="L653">                        UI.comboBox(uiScaleFactor, scaleOptions).withStyle(it-&gt;it.marginLeft(24))</span>
+<span class="nc" id="L654">                        .withMaxWidth(160)</span>
+<span class="nc" id="L655">                        .withTooltip(&quot;The HiDPI scale factor SwingTree applies to every component.&quot;)</span>
+<span class="nc" id="L656">                        .onSelection( it -&gt; SwingTree.get().setUiScaleFactor(uiScaleFactor.get().floatValue()) )</span>
                     )
                 )
-<span class="nc" id="L655">                .add(&quot;span, growx&quot;, UI.separator())</span>
-<span class="nc" id="L656">                .get(JPanel.class);</span>
+<span class="nc" id="L659">                .add(&quot;span, growx&quot;, UI.separator())</span>
+<span class="nc" id="L660">                .get(JPanel.class);</span>
         }
 
         private static JPanel buildInfoDisplay(Var&lt;ComponentDebugInfo&gt; debugState, UI.Color themeColor, String toolTip) {
-<span class="nc" id="L660">            return</span>
-<span class="nc" id="L661">                UI.panel(&quot;fill, wrap 1&quot;).withPrefSize(650, 375)</span>
-<span class="nc" id="L662">                .withStyle( it -&gt; it</span>
-<span class="nc" id="L663">                    .gradient( g -&gt; g</span>
-<span class="nc" id="L664">                        .type(UI.GradientType.RADIAL)</span>
-<span class="nc" id="L665">                        .offset(-100, 30)</span>
-<span class="nc" id="L666">                        .span(UI.Span.TOP_RIGHT_TO_BOTTOM_LEFT)</span>
-<span class="nc" id="L667">                        .colors(</span>
-<span class="nc" id="L668">                            themeColor.brighterBy(0.70).desaturateBy(0.8),</span>
-<span class="nc" id="L669">                            themeColor.brighterBy(0.50).desaturateBy(0.7),</span>
+<span class="nc" id="L664">            return</span>
+<span class="nc" id="L665">                UI.panel(&quot;fill, wrap 1&quot;).withPrefSize(650, 375)</span>
+<span class="nc" id="L666">                .withStyle( it -&gt; it</span>
+<span class="nc" id="L667">                    .gradient( g -&gt; g</span>
+<span class="nc" id="L668">                        .type(UI.GradientType.RADIAL)</span>
+<span class="nc" id="L669">                        .offset(-100, 30)</span>
+<span class="nc" id="L670">                        .span(UI.Span.TOP_RIGHT_TO_BOTTOM_LEFT)</span>
+<span class="nc" id="L671">                        .colors(</span>
+<span class="nc" id="L672">                            themeColor.brighterBy(0.70).desaturateBy(0.8),</span>
+<span class="nc" id="L673">                            themeColor.brighterBy(0.50).desaturateBy(0.7),</span>
                             themeColor
                         )
                     )
                 )
-<span class="nc" id="L674">                .add(&quot;growx, pushx&quot;,</span>
-<span class="nc" id="L675">                    UI.box(&quot;fill, gap rel 3&quot;, &quot;[shrink][shrink][grow]&quot;)</span>
-<span class="nc" id="L676">                    .add(&quot;left&quot;,</span>
-<span class="nc" id="L677">                        UI.label(</span>
-<span class="nc" id="L678">                            debugState.viewAsString(it -&gt;</span>
-<span class="nc" id="L679">                                getClassNameWithoutPackage(it.type())</span>
+<span class="nc" id="L678">                .add(&quot;growx, pushx&quot;,</span>
+<span class="nc" id="L679">                    UI.box(&quot;fill, gap rel 3&quot;, &quot;[shrink][shrink][grow]&quot;)</span>
+<span class="nc" id="L680">                    .add(&quot;left&quot;,</span>
+<span class="nc" id="L681">                        UI.label(</span>
+<span class="nc" id="L682">                            debugState.viewAsString(it -&gt;</span>
+<span class="nc" id="L683">                                getClassNameWithoutPackage(it.type())</span>
                             )
                         )
-<span class="nc" id="L682">                        .withTooltip(toolTip)</span>
-<span class="nc" id="L683">                        .withStyle( it -&gt; it</span>
-<span class="nc" id="L684">                            .borderRadius(8)</span>
-<span class="nc" id="L685">                            .padding(4, 8, 4, 8)</span>
-<span class="nc" id="L686">                            .backgroundColor(themeColor)</span>
-<span class="nc" id="L687">                            .fontColor(UI.Color.WHITE)</span>
-<span class="nc" id="L688">                            .fontWeight(2)</span>
+<span class="nc" id="L686">                        .withTooltip(toolTip)</span>
+<span class="nc" id="L687">                        .withStyle( it -&gt; it</span>
+<span class="nc" id="L688">                            .borderRadius(8)</span>
+<span class="nc" id="L689">                            .padding(4, 8, 4, 8)</span>
+<span class="nc" id="L690">                            .backgroundColor(themeColor)</span>
+<span class="nc" id="L691">                            .fontColor(UI.Color.WHITE)</span>
+<span class="nc" id="L692">                            .fontWeight(2)</span>
                         )
                     )
-<span class="nc" id="L691">                    .add(&quot;left&quot;,</span>
-<span class="nc" id="L692">                        UI.label(</span>
-<span class="nc" id="L693">                            debugState.viewAsString(it -&gt;</span>
-<span class="nc bnc" id="L694" title="All 2 branches missed.">                                (it.id().isEmpty() ? &quot;&quot; : &quot;id='&quot;+it.id()+&quot;'&quot;)</span>
+<span class="nc" id="L695">                    .add(&quot;left&quot;,</span>
+<span class="nc" id="L696">                        UI.label(</span>
+<span class="nc" id="L697">                            debugState.viewAsString(it -&gt;</span>
+<span class="nc bnc" id="L698" title="All 2 branches missed.">                                (it.id().isEmpty() ? &quot;&quot; : &quot;id='&quot;+it.id()+&quot;'&quot;)</span>
                             )
                         )
-<span class="nc" id="L697">                        .withStyle( it -&gt; it.fontColor(UI.Color.BLACK))</span>
+<span class="nc" id="L701">                        .withStyle( it -&gt; it.fontColor(UI.Color.BLACK))</span>
                     )
-<span class="nc" id="L699">                    .add(&quot;right&quot;,</span>
-<span class="nc" id="L700">                        UI.label(</span>
-<span class="nc" id="L701">                            debugState.viewAs(Bounds.class, ComponentDebugInfo::bounds)</span>
-<span class="nc" id="L702">                            .viewAsString(it -&gt;</span>
-<span class="nc" id="L703">                                    &quot;x=&quot;+((int)it.location().x())+&quot;, &quot; +</span>
-<span class="nc" id="L704">                                    &quot;y=&quot;+((int)it.location().y())+&quot;, &quot; +</span>
-<span class="nc" id="L705">                                    &quot;width=&quot;+it.size().width().map(Number::intValue).orElse(-1)+&quot;, &quot; +</span>
-<span class="nc" id="L706">                                    &quot;height=&quot;+it.size().height().map(Number::intValue).orElse(-1</span>
+<span class="nc" id="L703">                    .add(&quot;right&quot;,</span>
+<span class="nc" id="L704">                        UI.label(</span>
+<span class="nc" id="L705">                            debugState.viewAs(Bounds.class, ComponentDebugInfo::bounds)</span>
+<span class="nc" id="L706">                            .viewAsString(it -&gt;</span>
+<span class="nc" id="L707">                                    &quot;x=&quot;+((int)it.location().x())+&quot;, &quot; +</span>
+<span class="nc" id="L708">                                    &quot;y=&quot;+((int)it.location().y())+&quot;, &quot; +</span>
+<span class="nc" id="L709">                                    &quot;width=&quot;+it.size().width().map(Number::intValue).orElse(-1)+&quot;, &quot; +</span>
+<span class="nc" id="L710">                                    &quot;height=&quot;+it.size().height().map(Number::intValue).orElse(-1</span>
                             )
                         ))
-<span class="nc" id="L709">                        .withStyle( it -&gt; it.fontColor(UI.Color.BLACK))</span>
+<span class="nc" id="L713">                        .withStyle( it -&gt; it.fontColor(UI.Color.BLACK))</span>
                     )
                 )
-<span class="nc" id="L712">                .add(&quot;push, grow&quot;,</span>
-<span class="nc" id="L713">                    UI.tabbedPane()</span>
-<span class="nc" id="L714">                    .withStyle( it -&gt; it</span>
-<span class="nc" id="L715">                        .borderRadiusAt(UI.Corner.TOP_LEFT, 24)</span>
-<span class="nc" id="L716">                        .borderRadiusAt(UI.Corner.TOP_RIGHT, 24)</span>
+<span class="nc" id="L716">                .add(&quot;push, grow&quot;,</span>
+<span class="nc" id="L717">                    UI.tabbedPane()</span>
+<span class="nc" id="L718">                    .withStyle( it -&gt; it</span>
+<span class="nc" id="L719">                        .borderRadiusAt(UI.Corner.TOP_LEFT, 24)</span>
+<span class="nc" id="L720">                        .borderRadiusAt(UI.Corner.TOP_RIGHT, 24)</span>
                     )
-<span class="nc" id="L718">                    .add(</span>
-<span class="nc" id="L719">                        UI.tab(&quot;Source Trace&quot;)</span>
-<span class="nc" id="L720">                        .add(</span>
-<span class="nc" id="L721">                            UI.scrollPane().add(</span>
-<span class="nc" id="L722">                                UI.textArea(</span>
-<span class="nc" id="L723">                                    debugState.viewAsString(it -&gt;</span>
-<span class="nc" id="L724">                                        it.type().getCanonicalName() +&quot;\n&quot;+</span>
-<span class="nc" id="L725">                                        stackTraceToString(it.sourceCodeLocation())</span>
+<span class="nc" id="L722">                    .add(</span>
+<span class="nc" id="L723">                        UI.tab(&quot;Source Trace&quot;)</span>
+<span class="nc" id="L724">                        .add(</span>
+<span class="nc" id="L725">                            UI.scrollPane().add(</span>
+<span class="nc" id="L726">                                UI.textArea(</span>
+<span class="nc" id="L727">                                    debugState.viewAsString(it -&gt;</span>
+<span class="nc" id="L728">                                        it.type().getCanonicalName() +&quot;\n&quot;+</span>
+<span class="nc" id="L729">                                        stackTraceToString(it.sourceCodeLocation())</span>
                                     )
                                 )
-<span class="nc" id="L728">                                .isEditableIf(false)</span>
+<span class="nc" id="L732">                                .isEditableIf(false)</span>
                             )
                         )
                     )
-<span class="nc" id="L732">                    .add(</span>
-<span class="nc" id="L733">                        UI.tab(&quot;Style&quot;)</span>
-<span class="nc" id="L734">                        .add(</span>
-<span class="nc" id="L735">                            UI.scrollPane().add(</span>
-<span class="nc" id="L736">                                UI.textArea(</span>
-<span class="nc" id="L737">                                    debugState.viewAsString(it -&gt; {</span>
+<span class="nc" id="L736">                    .add(</span>
+<span class="nc" id="L737">                        UI.tab(&quot;Style&quot;)</span>
+<span class="nc" id="L738">                        .add(</span>
+<span class="nc" id="L739">                            UI.scrollPane().add(</span>
+<span class="nc" id="L740">                                UI.textArea(</span>
+<span class="nc" id="L741">                                    debugState.viewAsString(it -&gt; {</span>
                                         try {
-<span class="nc" id="L739">                                            return prettyRecord(it.styleConf().toString());</span>
-<span class="nc" id="L740">                                        } catch (RuntimeException e) {</span>
-<span class="nc" id="L741">                                            log.error(&quot;Error while pretty-printing style conf: {}&quot;, e.getMessage(), e);</span>
-<span class="nc" id="L742">                                            return it.styleConf().toString();</span>
+<span class="nc" id="L743">                                            return prettyRecord(it.styleConf().toString());</span>
+<span class="nc" id="L744">                                        } catch (RuntimeException e) {</span>
+<span class="nc" id="L745">                                            log.error(&quot;Error while pretty-printing style conf: {}&quot;, e.getMessage(), e);</span>
+<span class="nc" id="L746">                                            return it.styleConf().toString();</span>
                                         }
                                     })
                                 )
-<span class="nc" id="L746">                                .isEditableIf(false)</span>
+<span class="nc" id="L750">                                .isEditableIf(false)</span>
                             )
                         )
                     )
-<span class="nc" id="L750">                    .add(</span>
-<span class="nc" id="L751">                        UI.tab(&quot;Layout&quot;)</span>
-<span class="nc" id="L752">                        .add(</span>
-<span class="nc" id="L753">                            UI.scrollPane().add(</span>
-<span class="nc" id="L754">                                UI.textArea(</span>
-<span class="nc" id="L755">                                    debugState.viewAsString(ComponentDebugInfo::layoutInformation)</span>
+<span class="nc" id="L754">                    .add(</span>
+<span class="nc" id="L755">                        UI.tab(&quot;Layout&quot;)</span>
+<span class="nc" id="L756">                        .add(</span>
+<span class="nc" id="L757">                            UI.scrollPane().add(</span>
+<span class="nc" id="L758">                                UI.textArea(</span>
+<span class="nc" id="L759">                                    debugState.viewAsString(ComponentDebugInfo::layoutInformation)</span>
                                 )
-<span class="nc" id="L757">                                .isEditableIf(false)</span>
+<span class="nc" id="L761">                                .isEditableIf(false)</span>
                             )
                         )
                     )
-<span class="nc" id="L761">                    .add(</span>
-<span class="nc" id="L762">                        UI.tab(&quot;toString&quot;)</span>
-<span class="nc" id="L763">                        .add(</span>
-<span class="nc" id="L764">                            UI.scrollPane().add(</span>
-<span class="nc" id="L765">                                UI.textArea(</span>
-<span class="nc" id="L766">                                    debugState.viewAsString(it -&gt; {</span>
+<span class="nc" id="L765">                    .add(</span>
+<span class="nc" id="L766">                        UI.tab(&quot;toString&quot;)</span>
+<span class="nc" id="L767">                        .add(</span>
+<span class="nc" id="L768">                            UI.scrollPane().add(</span>
+<span class="nc" id="L769">                                UI.textArea(</span>
+<span class="nc" id="L770">                                    debugState.viewAsString(it -&gt; {</span>
                                         try {
-<span class="nc" id="L768">                                            return prettyRecord(it.asString());</span>
-<span class="nc" id="L769">                                        } catch (RuntimeException e) {</span>
-<span class="nc" id="L770">                                            log.error(&quot;Error while pretty-printing style conf: {}&quot;, e.getMessage(), e);</span>
-<span class="nc" id="L771">                                            return it.asString();</span>
+<span class="nc" id="L772">                                            return prettyRecord(it.asString());</span>
+<span class="nc" id="L773">                                        } catch (RuntimeException e) {</span>
+<span class="nc" id="L774">                                            log.error(&quot;Error while pretty-printing style conf: {}&quot;, e.getMessage(), e);</span>
+<span class="nc" id="L775">                                            return it.asString();</span>
                                         }
                                     })
                                 )
-<span class="nc" id="L775">                                .isEditableIf(false)</span>
+<span class="nc" id="L779">                                .isEditableIf(false)</span>
                             )
                         )
                     )
                 )
-<span class="nc" id="L780">                .get(JPanel.class);</span>
+<span class="nc" id="L784">                .get(JPanel.class);</span>
         }
     }
 
     private static String prettyRecord(String input) {
-<span class="nc bnc" id="L785" title="All 2 branches missed.">        if (input.isEmpty())</span>
-<span class="nc" id="L786">            return input;</span>
+<span class="nc bnc" id="L789" title="All 2 branches missed.">        if (input.isEmpty())</span>
+<span class="nc" id="L790">            return input;</span>
 
-<span class="nc" id="L788">        StringBuilder out = new StringBuilder(input.length() + 128);</span>
-<span class="nc" id="L789">        int depth = 0;</span>
-<span class="nc" id="L790">        boolean newLine = false;</span>
+<span class="nc" id="L792">        StringBuilder out = new StringBuilder(input.length() + 128);</span>
+<span class="nc" id="L793">        int depth = 0;</span>
+<span class="nc" id="L794">        boolean newLine = false;</span>
 
-<span class="nc" id="L792">        java.util.regex.Pattern colorPattern = java.util.regex.Pattern.compile(&quot;rgb[a]?\\([^)]*\\)&quot;);</span>
-<span class="nc bnc" id="L793" title="All 2 branches missed.">        for (int i = 0; i &lt; input.length(); i++) {</span>
+<span class="nc" id="L796">        java.util.regex.Pattern colorPattern = java.util.regex.Pattern.compile(&quot;rgb[a]?\\([^)]*\\)&quot;);</span>
+<span class="nc bnc" id="L797" title="All 2 branches missed.">        for (int i = 0; i &lt; input.length(); i++) {</span>
             try {
-<span class="nc" id="L795">                i = maybeSkip(i, input, &quot;[]&quot;, out);</span>
-<span class="nc" id="L796">                i = maybeSkip(i, input, &quot;[NONE]&quot;, out);</span>
-<span class="nc" id="L797">                i = maybeSkip(i, input, &quot;[EMPTY]&quot;, out);</span>
-<span class="nc" id="L798">                i = maybeSkipRegex(i, input, colorPattern, out);</span>
-<span class="nc" id="L799">            } catch (RuntimeException e) {</span>
-<span class="nc" id="L800">                log.error(&quot;Error while pretty-printing record: {}&quot;, e.getMessage(), e);</span>
-<span class="nc" id="L801">            }</span>
-<span class="nc" id="L802">            char c = input.charAt(i);</span>
+<span class="nc" id="L799">                i = maybeSkip(i, input, &quot;[]&quot;, out);</span>
+<span class="nc" id="L800">                i = maybeSkip(i, input, &quot;[NONE]&quot;, out);</span>
+<span class="nc" id="L801">                i = maybeSkip(i, input, &quot;[EMPTY]&quot;, out);</span>
+<span class="nc" id="L802">                i = maybeSkipRegex(i, input, colorPattern, out);</span>
+<span class="nc" id="L803">            } catch (RuntimeException e) {</span>
+<span class="nc" id="L804">                log.error(&quot;Error while pretty-printing record: {}&quot;, e.getMessage(), e);</span>
+<span class="nc" id="L805">            }</span>
+<span class="nc" id="L806">            char c = input.charAt(i);</span>
 
-<span class="nc bnc" id="L804" title="All 4 branches missed.">            switch (c) {</span>
+<span class="nc bnc" id="L808" title="All 4 branches missed.">            switch (c) {</span>
                 case '[' : {
-<span class="nc" id="L806">                    out.append(c);</span>
-<span class="nc" id="L807">                    depth++;</span>
-<span class="nc" id="L808">                    out.append('\n');</span>
-<span class="nc" id="L809">                    indent(out, depth);</span>
-<span class="nc" id="L810">                    newLine = true;</span>
-<span class="nc" id="L811">                    break;</span>
+<span class="nc" id="L810">                    out.append(c);</span>
+<span class="nc" id="L811">                    depth++;</span>
+<span class="nc" id="L812">                    out.append('\n');</span>
+<span class="nc" id="L813">                    indent(out, depth);</span>
+<span class="nc" id="L814">                    newLine = true;</span>
+<span class="nc" id="L815">                    break;</span>
                 }
                 case ']' : {
-<span class="nc" id="L814">                    depth--;</span>
-<span class="nc" id="L815">                    out.append('\n');</span>
-<span class="nc" id="L816">                    indent(out, depth);</span>
-<span class="nc" id="L817">                    out.append(c);</span>
-<span class="nc" id="L818">                    newLine = false;</span>
-<span class="nc" id="L819">                    break;</span>
+<span class="nc" id="L818">                    depth--;</span>
+<span class="nc" id="L819">                    out.append('\n');</span>
+<span class="nc" id="L820">                    indent(out, depth);</span>
+<span class="nc" id="L821">                    out.append(c);</span>
+<span class="nc" id="L822">                    newLine = false;</span>
+<span class="nc" id="L823">                    break;</span>
                 }
                 case ',' : {
-<span class="nc" id="L822">                    out.append(c);</span>
-<span class="nc" id="L823">                    out.append('\n');</span>
-<span class="nc" id="L824">                    indent(out, depth);</span>
-<span class="nc" id="L825">                    newLine = true;</span>
-<span class="nc" id="L826">                    break;</span>
+<span class="nc" id="L826">                    out.append(c);</span>
+<span class="nc" id="L827">                    out.append('\n');</span>
+<span class="nc" id="L828">                    indent(out, depth);</span>
+<span class="nc" id="L829">                    newLine = true;</span>
+<span class="nc" id="L830">                    break;</span>
                 }
                 default : {
-<span class="nc bnc" id="L829" title="All 4 branches missed.">                    if (newLine &amp;&amp; Character.isWhitespace(c)) {</span>
+<span class="nc bnc" id="L833" title="All 4 branches missed.">                    if (newLine &amp;&amp; Character.isWhitespace(c)) {</span>
                         // skip whitespace immediately after newline
-<span class="nc" id="L831">                        break;</span>
+<span class="nc" id="L835">                        break;</span>
                     }
-<span class="nc" id="L833">                    out.append(c);</span>
-<span class="nc" id="L834">                    newLine = false;</span>
+<span class="nc" id="L837">                    out.append(c);</span>
+<span class="nc" id="L838">                    newLine = false;</span>
                     break;
                 }
             }
         }
-<span class="nc" id="L839">        return out.toString();</span>
+<span class="nc" id="L843">        return out.toString();</span>
     }
 
     private static int maybeSkip(int i, String input, String toMatch, StringBuilder out) {
-<span class="nc bnc" id="L843" title="All 2 branches missed.">        if ( (i+toMatch.length()) &lt;= input.length() ) {</span>
+<span class="nc bnc" id="L847" title="All 2 branches missed.">        if ( (i+toMatch.length()) &lt;= input.length() ) {</span>
             // Special handling for 'toMatch' to keep it compact
-<span class="nc bnc" id="L845" title="All 2 branches missed.">            if ( input.startsWith(toMatch, i) ) {</span>
-<span class="nc" id="L846">                out.append(toMatch);</span>
-<span class="nc" id="L847">                return i + toMatch.length();</span>
+<span class="nc bnc" id="L849" title="All 2 branches missed.">            if ( input.startsWith(toMatch, i) ) {</span>
+<span class="nc" id="L850">                out.append(toMatch);</span>
+<span class="nc" id="L851">                return i + toMatch.length();</span>
             }
         }
-<span class="nc" id="L850">        return i;</span>
+<span class="nc" id="L854">        return i;</span>
     }
 
     private static int maybeSkipRegex(int i, String input, java.util.regex.Pattern pattern, StringBuilder out) {
-<span class="nc" id="L854">        java.util.regex.Matcher matcher = pattern.matcher(input);</span>
-<span class="nc" id="L855">        matcher.region(i, input.length());</span>
-<span class="nc bnc" id="L856" title="All 2 branches missed.">        if (matcher.lookingAt()) {</span>
-<span class="nc" id="L857">            String match = matcher.group();</span>
-<span class="nc" id="L858">            out.append(match);</span>
-<span class="nc" id="L859">            return i + match.length();</span>
+<span class="nc" id="L858">        java.util.regex.Matcher matcher = pattern.matcher(input);</span>
+<span class="nc" id="L859">        matcher.region(i, input.length());</span>
+<span class="nc bnc" id="L860" title="All 2 branches missed.">        if (matcher.lookingAt()) {</span>
+<span class="nc" id="L861">            String match = matcher.group();</span>
+<span class="nc" id="L862">            out.append(match);</span>
+<span class="nc" id="L863">            return i + match.length();</span>
         }
-<span class="nc" id="L861">        return i;</span>
+<span class="nc" id="L865">        return i;</span>
     }
 
     private static void indent(StringBuilder sb, int depth) {
-<span class="nc bnc" id="L865" title="All 2 branches missed.">        for (int i = 0; i &lt; Math.max(0, depth); i++) {</span>
-<span class="nc" id="L866">            sb.append(&quot;  &quot;);</span>
+<span class="nc bnc" id="L869" title="All 2 branches missed.">        for (int i = 0; i &lt; Math.max(0, depth); i++) {</span>
+<span class="nc" id="L870">            sb.append(&quot;  &quot;);</span>
         }
-<span class="nc" id="L868">    }</span>
+<span class="nc" id="L872">    }</span>
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

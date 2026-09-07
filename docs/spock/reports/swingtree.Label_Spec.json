@@ -133,7 +133,7 @@
 
         {"kind":"expect","text":"The label should have the specified alignment.","code":["label.horizontalAlignment == SwingConstants.CENTER","label.verticalAlignment == SwingConstants.TOP"]},
 
-        {"kind":"when","text":"We use the `withAlignment` method to create another label...","code":["ui =","    UI.label(\"Test2\")","    .withAlignment(UI.Alignment.TOP_RIGHT)"]},
+        {"kind":"when","text":"We use the `withAlignment` method to create another label...","code":["ui =","    UI.label(\"Test2\")","    .withAlignment(UI.Placement.TOP_RIGHT)"]},
 
         {"kind":"and","text":"We build the component.","code":["label = ui.get(JLabel)"]},
 
@@ -156,7 +156,7 @@
 
         {"kind":"expect","text":"The label should have the specified text position.","code":["label.horizontalTextPosition == SwingConstants.CENTER","label.verticalTextPosition == SwingConstants.TOP"]},
 
-        {"kind":"when","text":"We use the `withTextPosition` method to create another label...","code":["ui =","    UI.label(\"Test2\")","    .withTextPosition(UI.Alignment.TOP_RIGHT)"]},
+        {"kind":"when","text":"We use the `withTextPosition` method to create another label...","code":["ui =","    UI.label(\"Test2\")","    .withTextPosition(UI.Placement.TOP_RIGHT)"]},
 
         {"kind":"and","text":"Once again we build the component.","code":["label = ui.get(JLabel)"]},
 

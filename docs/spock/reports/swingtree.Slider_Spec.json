@@ -14,16 +14,16 @@
   "headers":[],"tags":{},"see":[],
   "features":[ 
     {
-      "id":"Use the `slider(Align)` factory method to build a `JSlider`.",
+      "id":"Use the `slider(Axis)` factory method to build a `JSlider`.",
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            The `slider(Align)` factory method returns a builder instance\n            which can be used to configure the JSlider instance\n            using method chaining.\n            Use the \"show()\" method at the end of your chain to\n            show the JSlider to the user.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            The `slider(Axis)` factory method returns a builder instance\n            which can be used to configure the JSlider instance\n            using method chaining.\n            Use the \"show()\" method at the end of your chain to\n            show the JSlider to the user.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"","code":["var record = []"]},
 
-        {"kind":"and","text":"Then we create UI declaration for the `JSlider` component.","code":["var slider =","        UI.slider(UI.Align.HORIZONTAL)","        .withMin(0)","        .withMax(100)","        .withValue(50)","        .onChange( it -> record << \"value changed to ${it.get().value}\" )","        .get(JSlider)"]},
+        {"kind":"and","text":"Then we create UI declaration for the `JSlider` component.","code":["var slider =","        UI.slider(UI.Axis.HORIZONTAL)","        .withMin(0)","        .withMax(100)","        .withValue(50)","        .onChange( it -> record << \"value changed to ${it.get().value}\" )","        .get(JSlider)"]},
 
         {"kind":"expect","text":"","code":["slider.minimum == 0","slider.maximum == 100","slider.value == 50"]},
 
@@ -39,12 +39,12 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            You can use the `slider(Align, N, N, Var<N>)` factory method\n            to bind a number based property to the slider's current value.\n            This includes floating point numbers, like `double` or `float`.\n\n            When the slider's value changes through user interaction,\n            the bound property will be updated\n            and conversely, when the property changes, the slider's \n            value will be updated.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            You can use the `slider(Axis, N, N, Var<N>)` factory method\n            to bind a number based property to the slider's current value.\n            This includes floating point numbers, like `double` or `float`.\n\n            When the slider's value changes through user interaction,\n            the bound property will be updated\n            and conversely, when the property changes, the slider's \n            value will be updated.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a double based Sprouts property and a list for recording changes.","code":["var currentState = Var.of(0.42d)","var trace = []","currentState.onChange(From.ALL, it -> trace << \"property=${it.currentValue().orElseThrowUnchecked()}\" )"]},
 
-        {"kind":"and","text":"Then we build a declarative JSlider.","code":["var slider =","        UI.slider(UI.Align.HORIZONTAL, -2d, 2d, currentState)","        .onChange( it -> trace << \"slider=${it.get().value}\" )","        .get(JSlider)"]},
+        {"kind":"and","text":"Then we build a declarative JSlider.","code":["var slider =","        UI.slider(UI.Axis.HORIZONTAL, -2d, 2d, currentState)","        .onChange( it -> trace << \"slider=${it.get().value}\" )","        .get(JSlider)"]},
 
         {"kind":"and","text":"We calculate the internal scale based on the min-max range","code":["var scale = UIForSlider.PREFERRED_STEPS / 4d"]},
 
@@ -68,14 +68,14 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            You can use the `slider(Align, Val<N>, Val<N>, Var<N>)` factory method\n            to bind min, max and value properties to the slider's current state.\n            This works for any `Number` based property, including `double` or `float`.\n\n            When the slider's value changes through user interaction,\n            the bound property will be updated and conversely, when the property changes,\n            the slider's value will be updated.\n\n            The min and max range may not be updated by the user, but they can be\n            updated programmatically through the bound properties.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            You can use the `slider(Axis, Val<N>, Val<N>, Var<N>)` factory method\n            to bind min, max and value properties to the slider's current state.\n            This works for any `Number` based property, including `double` or `float`.\n\n            When the slider's value changes through user interaction,\n            the bound property will be updated and conversely, when the property changes,\n            the slider's value will be updated.\n\n            The min and max range may not be updated by the user, but they can be\n            updated programmatically through the bound properties.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a double based Sprouts property and a list for recording changes.","code":["var currentState = Var.of(0.42d)","var trace = []","currentState.onChange(From.ALL, it -> trace << \"property=${it.currentValue().orElseThrowUnchecked()}\" )"]},
 
         {"kind":"and","text":"Two more properties for min and max","code":["var min = Var.of(-3d)","var max = Var.of(4d)","min.onChange(From.ALL, it -> trace << \"min=${it.currentValue().orElseThrowUnchecked()}\" )","max.onChange(From.ALL, it -> trace << \"max=${it.currentValue().orElseThrowUnchecked()}\" )"]},
 
-        {"kind":"and","text":"Then we build a declarative JSlider.","code":["var slider =","        UI.slider(UI.Align.VERTICAL, min, max, currentState)","        .onChange( it -> trace << \"slider=${it.get().value}\" )","        .get(JSlider)"]},
+        {"kind":"and","text":"Then we build a declarative JSlider.","code":["var slider =","        UI.slider(UI.Axis.VERTICAL, min, max, currentState)","        .onChange( it -> trace << \"slider=${it.get().value}\" )","        .get(JSlider)"]},
 
         {"kind":"and","text":"We calculate the internal scale based on the min-max range","code":["var scale = UIForSlider.PREFERRED_STEPS / 7d"]},
 
@@ -112,7 +112,7 @@
       "tags":{},"see":[],"extraInfo":["\n            This is a regression test for a bug where the slider's internal\n            scaling used for non-whole-number bindings could become stale when\n            one of the `min` or `max` properties changed dynamically.\n            When the user then moved the slider knob, the resulting value\n            written into the bound property could fall outside the current\n            `[min, max]` range.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A bidirectional slider bound to three double properties.","code":["var min = Var.of(5d)","var max = Var.of(10d)","var value = Var.of(7.5d)","var slider =","        UI.slider(UI.Align.HORIZONTAL, min, max, value)","          .get(JSlider)"]},
+        {"kind":"given","text":"A bidirectional slider bound to three double properties.","code":["var min = Var.of(5d)","var max = Var.of(10d)","var value = Var.of(7.5d)","var slider =","        UI.slider(UI.Axis.HORIZONTAL, min, max, value)","          .get(JSlider)"]},
 
         {"kind":"and","text":"We compute the slider integer range after dropping the max.","code":["var newMax = 6d"]},
 
