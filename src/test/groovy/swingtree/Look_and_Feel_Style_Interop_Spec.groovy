@@ -11,6 +11,12 @@ import swingtree.style.ComponentExtension
 import swingtree.style.ComponentStyleDelegate
 import swingtree.style.StyleConf
 
+import sprouts.Var
+import swingtree.threading.EventProcessor
+import utility.ConstructionCountingPanel
+import utility.SwingTreeTestConfigurator
+import utility.Utility
+
 import javax.swing.*
 import javax.swing.plaf.basic.BasicButtonUI
 import java.awt.*
@@ -32,6 +38,11 @@ import java.awt.image.BufferedImage
 @Subject([SwingTreeStyledComponentUI])
 class Look_and_Feel_Style_Interop_Spec extends Specification
 {
+    def setupSpec() {
+        SwingTree.initializeUsing(SwingTreeTestConfigurator.get())
+        SwingTree.get().setEventProcessor(EventProcessor.COUPLED_STRICT)
+    }
+
     static class MyButtonUI extends BasicButtonUI implements SwingTreeStyledComponentUI<AbstractButton> {
         private final boolean supportsSwingTree;
         private final Styler<AbstractButton> styler;
@@ -274,6 +285,57 @@ class Look_and_Feel_Style_Interop_Spec extends Specification
                  { it.parentFilter( conf -> conf.blur(0.0) ) },
                  { it.parentFilter( conf -> conf.kernel(Size.of(2, 1), 1,0) ) }
             ]
+    }
+
+    def 'Styling a component does not run the constructor of the application class it belongs to.'()
+    {
+        reportInfo """
+            Before anything else styles a component, the style engine has to know what
+            background the component would have had without it, so that it can put that
+            background back when no style asks to paint one. It used to find out by
+            constructing a second instance of the component's *own* class.
+            
+            For a library type that is harmless. For an application's own view class it runs
+            that view's constructor, with every side effect the constructor has. One such
+            constructor calls `FlatLightLaf.setup()`, and styling a view that contained it
+            silently replaced the look and feel which had just been installed - so a whole
+            application was drawn by the wrong delegates, with nothing logged.
+            
+            Styling reads state. It must not create application objects to do it.
+        """
+        given : 'A panel class of our own, which counts how often it has been constructed.'
+            ConstructionCountingPanel.CONSTRUCTIONS.set(0)
+        and : '''
+            A style whose background SwingTree has to paint itself. This is what puts the
+            component's background into the undefined state the default lookup answers from:
+            a gradient cannot be expressed as an AWT background colour, so the colour is
+            replaced by a sentinel until something needs a real one back.
+        '''
+            var paintsItsOwnBackground = Var.of(true)
+            var panel =
+                    UI.of(new ConstructionCountingPanel())
+                    .withStyle( it -> paintsItsOwnBackground.get()
+                        ? it.gradient( g -> g.colors(Color.RED, Color.BLUE) )
+                        : it
+                    )
+                    .get(ConstructionCountingPanel)
+            panel.setSize(60, 40)
+
+        when : 'We paint it, which is what makes the style engine apply the style.'
+            Utility.renderSingleComponent(panel)
+        then : 'The panel has been constructed exactly once - by this test.'
+            ConstructionCountingPanel.CONSTRUCTIONS.get() == 1
+        and : 'Its background is the sentinel, so the next paint has to look a real one up.'
+            panel.getBackground() === UI.Color.UNDEFINED
+
+        when : '''
+            The gradient goes away and we paint again. The engine now has to restore a real
+            background colour, which is the lookup this scenario is about.
+        '''
+            paintsItsOwnBackground.set(false)
+            Utility.renderSingleComponent(panel)
+        then : 'It is still exactly one construction: the style engine created nothing.'
+            ConstructionCountingPanel.CONSTRUCTIONS.get() == 1
     }
 
 }
