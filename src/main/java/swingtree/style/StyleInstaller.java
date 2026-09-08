@@ -20,6 +20,7 @@ import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicHTML;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.lang.reflect.Modifier;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -1041,16 +1042,48 @@ final class StyleInstaller<C extends JComponent>
         }
     }
 
+    /**
+     *  The background a component type has before anything styles it is whatever the look and
+     *  feel installs on a fresh instance of that type, so a fresh instance is what this asks.
+     *  <p>
+     *  It asks the nearest JDK or SwingTree superclass rather than the component's own class,
+     *  because the component's own class may be the application's, and constructing an
+     *  application's view runs that view's constructor with every side effect it has. One such
+     *  constructor installs a look and feel, so building a window that contained it replaced
+     *  the look and feel the application had just chosen, and the whole window was then drawn
+     *  by the wrong delegates. Styling reads state; it must not create application objects to
+     *  do it.
+     *  <p>
+     *  The answer for an application subclass is therefore the one its nearest library
+     *  ancestor gets - which is what the look and feel would have installed on it anyway,
+     *  since a look and feel keys its defaults off the component type it knows about.
+     *
+     * @param type the class of the component whose default background is wanted
+     * @return the nearest class that may be constructed to answer the question, or null if
+     *         there is none - every candidate up to {@link JComponent} being abstract
+     */
+    private static @Nullable Class<?> _nearestLibraryAncestorOf( Class<?> type ) {
+        for ( Class<?> candidate = type; candidate != null; candidate = candidate.getSuperclass() ) {
+            if ( Modifier.isAbstract(candidate.getModifiers()) )
+                continue;
+            String name = candidate.getName();
+            if ( name.startsWith("java.") || name.startsWith("javax.") || name.startsWith("swingtree.") )
+                return candidate;
+        }
+        return null;
+    }
+
     private void _establishDefaultBackgroundColorFor(JComponent owner) {
-        Class<?> type = owner.getClass();
+        Class<?> type = _nearestLibraryAncestorOf(owner.getClass());
         JComponent other = null;
         try {
-            other = (JComponent) type.getDeclaredConstructor().newInstance();
+            if ( type != null )
+                other = (JComponent) type.getDeclaredConstructor().newInstance();
         } catch (Exception e) {
             log.debug(SwingTree.get().logMarker(),
                     "Failed to instantiate component '{}' as part of an " +
                     "attempt to get the default color of said type!",
-                    type.getName(), e
+                    type == null ? owner.getClass().getName() : type.getName(), e
                 );
         }
         Color defaultBackgroundColor = null;
