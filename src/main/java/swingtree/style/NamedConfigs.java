@@ -64,11 +64,16 @@ final class NamedConfigs<S> implements Simplifiable<NamedConfigs<S>>
         for ( NamedConf<S> style : styles )
             Objects.requireNonNull(style);
 
-        // No duplicate names:
-        Set<String> names = new HashSet<>(styles.length * 2);
-        for ( NamedConf<S> style : styles )
-            if ( !names.add(style.name()) )
-                throw new IllegalArgumentException("Duplicate style name: " + style.name());
+        /*
+            No duplicate names, checked by comparing pairs quadratically rather than through a set because:
+            These arrays hold only a handful of entries and this code is on a hot path
+            (on every layer of every style gathered on every paint of every component).
+            So in practice the quadratic solution below is much faster!
+         */
+        for ( int i = 0; i < styles.length; i++ )
+            for ( int k = i + 1; k < styles.length; k++ )
+                if ( styles[i].name().equals(styles[k].name()) )
+                    throw new IllegalArgumentException("Duplicate style name: " + styles[k].name());
     }
 
     public int size() { return _styles.length; }

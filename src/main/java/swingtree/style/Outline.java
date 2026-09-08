@@ -4,23 +4,35 @@ import com.google.errorprone.annotations.Immutable;
 import org.jspecify.annotations.Nullable;
 
 import java.awt.Insets;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 
 /**
  *  Outline is an immutable value object that represents the outline of a UI component
  *  where every side of the outline can have varying thicknesses and even be completely
- *  optional (null).
+ *  unspecified.
  *  <p>
- *  The values of this object are optional in order to determine if the outline
- *  was specified through the styling API or not so that the default properties of a component
- *  can be preserved (the insets of a layout manager, for example).
+ *  A side is optional in order to tell "the styling API asked for this thickness" apart from
+ *  "the styling API said nothing about this side", so that a component's own defaults - the
+ *  insets a layout manager wants, for example - survive being styled.
+ *  <p>
+ *  <b>A side is stored as a primitive float, and {@link Float#NaN} is what "unspecified"
+ *  means.</b> The obvious spelling of an optional side is a boxed {@code Float}, and it is the
+ *  wrong one here: an outline carries margins, paddings, border widths and corner radii, four
+ *  of them are built for every layer of every style gathered on every paint of every component,
+ *  and {@code Float.valueOf} has no cache, so each side was a heap allocation. Sides are
+ *  compared by their bit patterns rather than with {@code ==}, which keeps every distinction
+ *  {@code Float.equals} used to make - {@code 0.0} apart from {@code -0.0}, and one unspecified
+ *  side equal to another. The one consequence is that a side which really is {@code NaN} now
+ *  reads as unspecified instead of propagating a {@code NaN} into a layout.
  */
 @Immutable
 final class Outline
 {
-    private static final Outline _NONE = new Outline(null, null, null, null);
+    /** What a side holds when the styling API said nothing about it. */
+    private static final float UNSPECIFIED = Float.NaN;
+
+    private static final Outline _NONE = new Outline(UNSPECIFIED, UNSPECIFIED, UNSPECIFIED, UNSPECIFIED);
 
     static Outline none() { return _NONE; }
 
@@ -45,20 +57,45 @@ final class Outline
     }
 
 
-    private final @Nullable Float top;
-    private final @Nullable Float right;
-    private final @Nullable Float bottom;
-    private final @Nullable Float left;
+    private final float top;
+    private final float right;
+    private final float bottom;
+    private final float left;
 
 
-    static Outline ofNullable( @Nullable Float top, @Nullable Float right, @Nullable Float bottom, @Nullable Float left ) {
-        if ( top == null && right == null && bottom == null && left == null )
+    private static Outline _of( float top, float right, float bottom, float left ) {
+        if ( _isUnset(top) && _isUnset(right) && _isUnset(bottom) && _isUnset(left) )
             return _NONE;
 
         return new Outline(top, right, bottom, left);
     }
-    
-    private Outline( @Nullable Float top, @Nullable Float right, @Nullable Float bottom, @Nullable Float left ) {
+
+    private static Outline _ofNullable( @Nullable Float top, @Nullable Float right, @Nullable Float bottom, @Nullable Float left ) {
+        return _of(_unbox(top), _unbox(right), _unbox(bottom), _unbox(left));
+    }
+
+    private static float _unbox( @Nullable Float value ) {
+        return value == null ? UNSPECIFIED : value;
+    }
+
+    private static boolean _isUnset( float value ) {
+        return Float.isNaN(value);
+    }
+
+    /**
+     *  Whether two sides are the same side, which for an unspecified one means both are
+     *  unspecified. Comparing the bit patterns rather than the numbers is what keeps
+     *  {@code 0.0} and {@code -0.0} distinct, exactly as boxed {@code Float} equality did.
+     *
+     * @param a one side
+     * @param b the other side
+     * @return true when the two sides carry the same value, or are both unspecified
+     */
+    private static boolean _same( float a, float b ) {
+        return Float.floatToIntBits(a) == Float.floatToIntBits(b);
+    }
+
+    private Outline( float top, float right, float bottom, float left ) {
         this.top    = top;
         this.right  = right;
         this.bottom = bottom;
@@ -72,7 +109,7 @@ final class Outline
      * @return An {@link Optional} containing the top outline value if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
-    Optional<Float> top() { return Optional.ofNullable(top); }
+    Optional<Float> top() { return _isUnset(top) ? Optional.empty() : Optional.of(top); }
 
     /**
      *  An optional value for the right outline.
@@ -80,7 +117,7 @@ final class Outline
      * @return An {@link Optional} containing the right outline value if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
-    Optional<Float> right() { return Optional.ofNullable(right); }
+    Optional<Float> right() { return _isUnset(right) ? Optional.empty() : Optional.of(right); }
 
     /**
      *  The bottom outline value in the form of an {@link Optional}, where {@link Optional#empty()}
@@ -89,7 +126,7 @@ final class Outline
      * @return An {@link Optional} containing the bottom outline value if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
-    Optional<Float> bottom() { return Optional.ofNullable(bottom); }
+    Optional<Float> bottom() { return _isUnset(bottom) ? Optional.empty() : Optional.of(bottom); }
 
     /**
      *  Returns an optional value for the left outline where {@link Optional#empty()}
@@ -98,7 +135,7 @@ final class Outline
      * @return An {@link Optional} containing the left outline value if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
-    Optional<Float> left() { return Optional.ofNullable(left); }
+    Optional<Float> left() { return _isUnset(left) ? Optional.empty() : Optional.of(left); }
 
     /**
      *  Creates an updated {@link Outline} with the specified {@code top} outline value.
@@ -106,7 +143,7 @@ final class Outline
      * @param top The top outline value.
      * @return A new {@link Outline} with the specified top outline value.
      */
-    Outline withTop( float top ) { return Outline.ofNullable(top, right, bottom, left); }
+    Outline withTop( float top ) { return _of(top, right, bottom, left); }
 
     /**
      *  Creates an updated {@link Outline} with the specified {@code right} outline value.
@@ -114,7 +151,7 @@ final class Outline
      * @param right The right outline value.
      * @return A new {@link Outline} with the specified right outline value.
      */
-    Outline withRight( float right ) { return Outline.ofNullable(top, right, bottom, left); }
+    Outline withRight( float right ) { return _of(top, right, bottom, left); }
 
     /**
      *  Creates an updated {@link Outline} with the specified {@code bottom} outline value.
@@ -122,22 +159,28 @@ final class Outline
      * @param bottom The bottom outline value.
      * @return A new {@link Outline} with the specified bottom outline value.
      */
-    Outline withBottom( float bottom ) { return Outline.ofNullable(top, right, bottom, left); }
+    Outline withBottom( float bottom ) { return _of(top, right, bottom, left); }
 
     /**
      *  Creates an updated {@link Outline} with the specified {@code left} outline value.
      * @param left The left outline value.
      * @return A new {@link Outline} with the specified left outline value.
      */
-    Outline withLeft( float left ) { return Outline.ofNullable(top, right, bottom, left); }
+    Outline withLeft( float left ) { return _of(top, right, bottom, left); }
 
     Outline minus( Outline other ) {
-        return Outline.ofNullable(
-                    top    == null ? null : top    - (other.top    == null ? 0 : other.top),
-                    right  == null ? null : right  - (other.right  == null ? 0 : other.right),
-                    bottom == null ? null : bottom - (other.bottom == null ? 0 : other.bottom),
-                    left   == null ? null : left   - (other.left   == null ? 0 : other.left)
+        return _of(
+                    _minus(top,    other.top   ),
+                    _minus(right,  other.right ),
+                    _minus(bottom, other.bottom),
+                    _minus(left,   other.left  )
                 );
+    }
+
+    private static float _minus( float a, float b ) {
+        if ( _isUnset(a) )
+            return UNSPECIFIED;
+        return _isUnset(b) ? a : a - b;
     }
 
     /**
@@ -148,11 +191,11 @@ final class Outline
      * @return A new {@link Outline} with the outline values scaled by the specified factor.
      */
     Outline scale( double scale ) {
-        return Outline.ofNullable(
-                    top    == null ? null : (float) ( top    * scale ),
-                    right  == null ? null : (float) ( right  * scale ),
-                    bottom == null ? null : (float) ( bottom * scale ),
-                    left   == null ? null : (float) ( left   * scale )
+        return _of(
+                    _isUnset(top)    ? UNSPECIFIED : (float) ( top    * scale ),
+                    _isUnset(right)  ? UNSPECIFIED : (float) ( right  * scale ),
+                    _isUnset(bottom) ? UNSPECIFIED : (float) ( bottom * scale ),
+                    _isUnset(left)   ? UNSPECIFIED : (float) ( left   * scale )
                 );
     }
 
@@ -160,15 +203,12 @@ final class Outline
         if ( this.equals(_NONE) )
             return _NONE;
 
-        Float top    = Objects.equals(this.top   , 0f) ? null : this.top;
-        Float right  = Objects.equals(this.right , 0f) ? null : this.right;
-        Float bottom = Objects.equals(this.bottom, 0f) ? null : this.bottom;
-        Float left   = Objects.equals(this.left  , 0f) ? null : this.left;
-
-        if ( top == null && right == null && bottom == null && left == null )
-            return _NONE;
-
-        return Outline.ofNullable(top, right, bottom, left);
+        return _of(
+                    _same(this.top   , 0f) ? UNSPECIFIED : this.top,
+                    _same(this.right , 0f) ? UNSPECIFIED : this.right,
+                    _same(this.bottom, 0f) ? UNSPECIFIED : this.bottom,
+                    _same(this.left  , 0f) ? UNSPECIFIED : this.left
+                );
     }
 
     /**
@@ -180,16 +220,14 @@ final class Outline
      *         {@code false} otherwise.
      */
     public boolean isPositive() {
-        return ( top    != null && top    > 0 ) ||
-               ( right  != null && right  > 0 ) ||
-               ( bottom != null && bottom > 0 ) ||
-               ( left   != null && left   > 0 );
+        // An unspecified side is NaN, and no comparison against NaN is ever true:
+        return top > 0 || right > 0 || bottom > 0 || left > 0;
     }
 
-    private static @Nullable Float _plus( @Nullable Float a, @Nullable Float b ) {
-        if ( a == null && b == null )
-            return null;
-        return a == null ? b : b == null ? a : a + b;
+    private static float _plus( float a, float b ) {
+        if ( _isUnset(a) )
+            return b;
+        return _isUnset(b) ? a : a + b;
     }
 
     /**
@@ -204,7 +242,7 @@ final class Outline
         if ( other.equals(_NONE) )
             return this;
 
-        return Outline.ofNullable(
+        return _of(
                     _plus(top,    other.top   ),
                     _plus(right,  other.right ),
                     _plus(bottom, other.bottom),
@@ -218,11 +256,11 @@ final class Outline
         if ( other.equals(_NONE) )
             return this;
 
-        return Outline.ofNullable(
-                    top    == null ? other.top    : top,
-                    right  == null ? other.right  : right,
-                    bottom == null ? other.bottom : bottom,
-                    left   == null ? other.left   : left
+        return _of(
+                    _isUnset(top)    ? other.top    : top,
+                    _isUnset(right)  ? other.right  : right,
+                    _isUnset(bottom) ? other.bottom : bottom,
+                    _isUnset(left)   ? other.left   : left
                 );
     }
 
@@ -233,21 +271,21 @@ final class Outline
      * @return A new {@link Outline} with the mapped outline values.
      */
     public Outline map( Function<Float, @Nullable Float> mapper ) {
-        return Outline.ofNullable(
-                    top    == null ? null : mapper.apply(top),
-                    right  == null ? null : mapper.apply(right),
-                    bottom == null ? null : mapper.apply(bottom),
-                    left   == null ? null : mapper.apply(left)
+        return _ofNullable(
+                    _isUnset(top)    ? null : mapper.apply(top),
+                    _isUnset(right)  ? null : mapper.apply(right),
+                    _isUnset(bottom) ? null : mapper.apply(bottom),
+                    _isUnset(left)   ? null : mapper.apply(left)
                 );
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 97 * hash + Objects.hashCode(this.top);
-        hash = 97 * hash + Objects.hashCode(this.right);
-        hash = 97 * hash + Objects.hashCode(this.bottom);
-        hash = 97 * hash + Objects.hashCode(this.left);
+        hash = 97 * hash + Float.floatToIntBits(this.top);
+        hash = 97 * hash + Float.floatToIntBits(this.right);
+        hash = 97 * hash + Float.floatToIntBits(this.bottom);
+        hash = 97 * hash + Float.floatToIntBits(this.left);
         return hash;
     }
 
@@ -257,10 +295,10 @@ final class Outline
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
         Outline rhs = (Outline) obj;
-        return Objects.equals(top,    rhs.top   ) &&
-               Objects.equals(right,  rhs.right ) &&
-               Objects.equals(bottom, rhs.bottom) &&
-               Objects.equals(left,   rhs.left  );
+        return _same(top,    rhs.top   ) &&
+               _same(right,  rhs.right ) &&
+               _same(bottom, rhs.bottom) &&
+               _same(left,   rhs.left  );
     }
 
     @Override
@@ -273,8 +311,8 @@ final class Outline
                 "]";
     }
 
-    private static String _toString( @Nullable Float value ) {
-        return value == null ? "?" : value.toString().replace(".0", "");
+    private static String _toString( float value ) {
+        return _isUnset(value) ? "?" : String.valueOf(value).replace(".0", "");
     }
 
 }
