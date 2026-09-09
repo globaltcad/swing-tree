@@ -8,6 +8,7 @@ import swingtree.UI;
 import swingtree.api.Painter;
 import swingtree.style.ComponentExtension;
 
+import javax.swing.AbstractButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -16,15 +17,18 @@ import javax.swing.SwingUtilities;
 import javax.swing.JViewport;
 import javax.swing.UIManager;
 import javax.swing.event.CaretListener;
+import javax.swing.plaf.basic.BasicGraphicsUtils;
 import javax.swing.text.JTextComponent;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.LinearGradientPaint;
 import java.awt.Paint;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.event.FocusEvent;
@@ -196,6 +200,31 @@ final class LafUtilities
         Container parent = c.getParent();
         if ( wasOpaque && !c.isOpaque() && parent != null )
             parent.repaint(c.getX(), c.getY(), c.getWidth(), c.getHeight());
+    }
+
+    /**
+     *  Draws the label of a button, a check box or a radio button whose model is disabled.
+     *  <p>
+     *  {@code BasicButtonUI.paintText} embosses that label out of the button's own background, by
+     *  writing it twice in that background lightened and then darkened. A control this look and
+     *  feel styles has no background to emboss from - a check box's is fully transparent, so both
+     *  passes are drawn in nothing and the label does not appear at all. The style rule for a
+     *  disabled control already names the ink it wants, and the component is wearing it, so this
+     *  writes the label once in the component's own foreground.
+     *
+     * @param g the context the button is being painted on
+     * @param b the button whose label this is
+     * @param textRect where the label goes, as the button's own layout worked it out
+     * @param text the label, already clipped to fit
+     */
+    static void paintDisabledText( Graphics g, AbstractButton b, Rectangle textRect, String text ) {
+        FontMetrics fm = g.getFontMetrics(b.getFont());
+        g.setColor(b.getForeground());
+        // The overload that takes the button as well arrived in Java 9, and these examples are
+        // compiled at source level 8.
+        BasicGraphicsUtils.drawStringUnderlineCharAt(
+                g, text, b.getDisplayedMnemonicIndex(), textRect.x, textRect.y + fm.getAscent()
+        );
     }
 
     /** Turns on shape antialiasing, which every symbol wants and none of them want to repeat. */
