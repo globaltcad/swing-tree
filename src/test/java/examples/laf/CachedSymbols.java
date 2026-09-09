@@ -180,10 +180,13 @@ final class CachedSymbols implements Symbols
     }
 
     @Override
-    public void paintSliderThumb( Graphics2D g, Palette p, Rectangle thumb, boolean enabled, boolean focused ) {
-        _paint(g, p, Symbol.SLIDER_THUMB, _bits(enabled, focused), thumb.x, thumb.y, thumb.width, thumb.height,
+    public void paintSliderThumb(
+        Graphics2D g, Palette p, Rectangle thumb, boolean enabled, boolean focused, boolean rollover
+    ) {
+        _paint(g, p, Symbol.SLIDER_THUMB, _bits(enabled, focused, rollover),
+               thumb.x, thumb.y, thumb.width, thumb.height,
                (tile, tx, ty) -> _symbols.paintSliderThumb(
-                       tile, p, new Rectangle(tx, ty, thumb.width, thumb.height), enabled, focused));
+                       tile, p, new Rectangle(tx, ty, thumb.width, thumb.height), enabled, focused, rollover));
     }
 
     @Override

@@ -1,5 +1,6 @@
 package examples.laf;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 import swingtree.api.laf.SwingTreeStyledComponentUI;
 import swingtree.style.ComponentStyleDelegate;
@@ -12,6 +13,9 @@ import javax.swing.plaf.basic.BasicSliderUI;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 /**
  *  The {@link JSlider} UI delegate. The symbol set draws the groove, the filled part of it and
@@ -116,12 +120,50 @@ public final class SwingTreeSliderUI
         try {
             SwingTreeLookAndFeel.symbols().paintSliderThumb(
                     g2, SwingTreeLookAndFeel.palette(), thumbRect,
-                    slider.isEnabled(), slider.isFocusOwner()
+                    slider.isEnabled(), slider.isFocusOwner(), _handleUnderPointer
             );
         } finally {
             g2.dispose();
         }
     }
+
+    /**
+     *  Whether the pointer is resting on the handle. {@link BasicSliderUI} follows the pointer only
+     *  once a drag is under way, so a handle that answers a pointer merely resting on it has to be
+     *  told about that here.
+     */
+    private boolean _handleUnderPointer = false;
+
+    @Override
+    protected void installListeners( JSlider s ) {
+        super.installListeners(s);
+        s.addMouseListener(_handleTracker);
+        s.addMouseMotionListener(_handleTracker);
+    }
+
+    @Override
+    protected void uninstallListeners( JSlider s ) {
+        s.removeMouseListener(_handleTracker);
+        s.removeMouseMotionListener(_handleTracker);
+        super.uninstallListeners(s);
+    }
+
+    private final MouseAdapter _handleTracker = new MouseAdapter() {
+        @Override public void mouseMoved( MouseEvent e )   { _pointerAt(e.getPoint()); }
+        @Override public void mouseDragged( MouseEvent e ) { _pointerAt(e.getPoint()); }
+        @Override public void mouseEntered( MouseEvent e ) { _pointerAt(e.getPoint()); }
+        @Override public void mouseExited( MouseEvent e )  { _pointerAt(null); }
+
+        private void _pointerAt( @Nullable Point at ) {
+            boolean onHandle = at != null && thumbRect != null && thumbRect.contains(at);
+            if ( onHandle == _handleUnderPointer )
+                return;
+            _handleUnderPointer = onHandle;
+            // A preset may grow a halo well outside the handle's own rectangle, so the whole strip
+            // is repainted rather than that rectangle.
+            slider.repaint();
+        }
+    };
 
     @Override
     public ComponentStyleDelegate<JSlider> style( ComponentStyleDelegate<JSlider> it ) throws Exception {

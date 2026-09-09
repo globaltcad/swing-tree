@@ -177,8 +177,19 @@ final class LafUtilities
      *         {@code resting} itself otherwise
      */
     static Color underPointer( SwingTreeLookAndFeel.Palette p, Color resting, JComponent c ) {
-        if ( !isUnderPointer(c) )
-            return resting;
+        return isUnderPointer(c) ? underPointer(p, resting) : resting;
+    }
+
+    /**
+     *  The same step, applied unconditionally, for a caller that has already established where the
+     *  pointer is: a {@link Symbols} glyph is handed a rectangle rather than a component, so it
+     *  cannot ask.
+     *
+     * @param p the palette whose hover step is read
+     * @param resting the colour the surface wears while the pointer is elsewhere
+     * @return {@code resting} moved by that step, with its own opacity kept
+     */
+    static Color underPointer( SwingTreeLookAndFeel.Palette p, Color resting ) {
         Color from = p.surface();
         Color to   = p.surfaceHover();
         int   red   = to.getRed()   - from.getRed();

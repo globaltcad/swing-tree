@@ -117,7 +117,9 @@ interface Symbols
         boolean horizontal, boolean inverted, boolean enabled
     );
 
-    void paintSliderThumb( Graphics2D g, Palette p, Rectangle thumb, boolean enabled, boolean focused );
+    void paintSliderThumb(
+        Graphics2D g, Palette p, Rectangle thumb, boolean enabled, boolean focused, boolean rollover
+    );
 
     /**
      *  Draws a scroll bar's thumb. The groove it slides along is a style rule rather than a symbol,
@@ -248,7 +250,7 @@ interface Symbols
             boolean horizontal, boolean inverted, boolean enabled
         ) {}
 
-        @Override public void paintSliderThumb( Graphics2D g, Palette p, Rectangle thumb, boolean enabled, boolean focused ) {}
+        @Override public void paintSliderThumb( Graphics2D g, Palette p, Rectangle thumb, boolean enabled, boolean focused, boolean rollover ) {}
 
         @Override public void paintScrollThumb( Graphics2D g, Palette p, Rectangle thumb, boolean active ) {}
 
@@ -447,11 +449,12 @@ interface Symbols
         }
 
         @Override
-        public void paintSliderThumb( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused ) {
+        public void paintSliderThumb( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused, boolean rollover ) {
             antialias(g);
             float stroke = Math.max(1f, UI.scale(1f));
             float half   = stroke / 2f;
-            g.setColor(enabled ? p.surfaceField() : p.surfaceDisabled());
+            Color face = enabled ? p.surfaceField() : p.surfaceDisabled();
+            g.setColor(enabled && rollover ? LafUtilities.underPointer(p, face) : face);
             g.fill(new Ellipse2D.Float(r.x, r.y, r.width - 1, r.height - 1));
             g.setStroke(new BasicStroke(stroke));
             g.setColor(enabled ? ( focused ? p.accent() : p.border() ) : p.borderSoft());
@@ -774,10 +777,11 @@ interface Symbols
         }
 
         @Override
-        public void paintSliderThumb( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused ) {
+        public void paintSliderThumb( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused, boolean rollover ) {
             LafUtilities.antialiasShapes(g);
             Ellipse2D.Float body = new Ellipse2D.Float(r.x, r.y, r.width - 1, r.height - 1);
-            g.setColor(enabled ? p.surface() : p.surfaceDisabled());
+            Color face = enabled ? p.surface() : p.surfaceDisabled();
+            g.setColor(enabled && rollover ? LafUtilities.underPointer(p, face) : face);
             g.fill(body);
             strokeRim(g, body, p, r.y, r.height, false);
             if ( !enabled )
@@ -1072,9 +1076,11 @@ interface Symbols
         }
 
         @Override
-        public void paintSliderThumb( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused ) {
+        public void paintSliderThumb( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused, boolean rollover ) {
             LafUtilities.antialiasShapes(g);
             Color base = enabled ? ( focused ? LafUtilities.shadeTowardsWhite(p.accent(), 0.30) : p.surfaceField() ) : p.surfaceDisabled();
+            if ( enabled && rollover )
+                base = LafUtilities.underPointer(p, base);
             Ellipse2D.Float body = new Ellipse2D.Float(r.x, r.y, r.width - 1, r.height - 1);
             g.setPaint(LafUtilities.glossGradient(r.y, r.height - 1, base));
             g.fill(body);
@@ -1376,9 +1382,9 @@ interface Symbols
         }
 
         @Override
-        public void paintSliderThumb( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused ) {
+        public void paintSliderThumb( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused, boolean rollover ) {
             LafUtilities.antialiasShapes(g);
-            if ( enabled && focused ) {
+            if ( enabled && ( focused || rollover ) ) {
                 // The halo a Material handle grows under the pointer, and keeps while it has focus.
                 g.setColor(LafUtilities.withOpacity(p.accent(), 46));
                 float grow = UI.scale(5f);
@@ -1635,8 +1641,8 @@ interface Symbols
 
         /** A bar rather than a knob, because a knob would need a rim to read as one. */
         @Override
-        public void paintSliderThumb( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused ) {
-            g.setColor(enabled ? ( focused ? p.accent() : p.text() ) : p.textDisabled());
+        public void paintSliderThumb( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused, boolean rollover ) {
+            g.setColor(enabled ? ( focused || rollover ? p.accent() : p.text() ) : p.textDisabled());
             int narrow = Math.max(2, r.width / 3);
             g.fillRect(r.x + (r.width - narrow) / 2, r.y, narrow, r.height);
         }
@@ -1902,9 +1908,9 @@ interface Symbols
         }
 
         @Override
-        public void paintSliderThumb( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused ) {
+        public void paintSliderThumb( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused, boolean rollover ) {
             LafUtilities.antialiasShapes(g);
-            knob(g, p, r, enabled, focused);
+            knob(g, p, r, enabled, focused, rollover);
         }
 
         @Override
@@ -2006,8 +2012,12 @@ interface Symbols
         }
 
         /** A milled knob: a gloss down its face, a dark rim, and its own shadow underneath. */
-        private static void knob( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused ) {
+        private static void knob(
+            Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused, boolean rollover
+        ) {
             Color base = enabled ? p.surface() : p.surfaceDisabled();
+            if ( enabled && rollover )
+                base = LafUtilities.underPointer(p, base);
             g.setColor(LafUtilities.withOpacity(Color.BLACK, 80));
             g.fill(new Ellipse2D.Float(r.x, r.y + 1.5f, r.width - 1, r.height - 1));
             g.setPaint(LafUtilities.glossGradient(r.y, r.height, base));
@@ -2191,12 +2201,13 @@ interface Symbols
         }
 
         @Override
-        public void paintSliderThumb( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused ) {
+        public void paintSliderThumb( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused, boolean rollover ) {
             LafUtilities.antialiasShapes(g);
             Ellipse2D.Float bead = new Ellipse2D.Float(r.x, r.y, r.width - 1, r.height - 1);
             g.setColor(LafUtilities.withOpacity(Color.BLACK, 70));
             g.fill(new Ellipse2D.Float(r.x, r.y + 2, r.width - 1, r.height - 1));
-            g.setColor(LafUtilities.withOpacity(enabled ? p.surface() : p.surfaceDisabled(), 150));
+            g.setColor(LafUtilities.withOpacity(enabled ? p.surface() : p.surfaceDisabled(),
+                                                enabled && rollover ? 190 : 150));
             g.fill(bead);
             rim(g, p, bead, enabled, focused);
         }
@@ -2457,9 +2468,9 @@ interface Symbols
         }
 
         @Override
-        public void paintSliderThumb( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused ) {
+        public void paintSliderThumb( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused, boolean rollover ) {
             Shape knob = new Ellipse2D.Float(r.x + 0.5f, r.y + 0.5f, r.width - 1, r.height - 1);
-            mould(g, p, knob, r.y, r.height, enabled, false, false, focused);
+            mould(g, p, knob, r.y, r.height, enabled, false, false, focused || rollover);
         }
 
         @Override
@@ -2665,7 +2676,7 @@ interface Symbols
         @Override public void paintComboArrow( Graphics2D g, Palette p, int w, int h, boolean enabled, boolean rollover, boolean pressed ) { chosen().paintComboArrow(g, p, w, h, enabled, rollover, pressed); }
         @Override public void paintSpinnerArrow( Graphics2D g, Palette p, int w, int h, boolean up, boolean enabled, boolean rollover, boolean pressed ) { chosen().paintSpinnerArrow(g, p, w, h, up, enabled, rollover, pressed); }
         @Override public void paintSliderTrack( Graphics2D g, Palette p, Rectangle track, int thumbCentre, boolean horizontal, boolean inverted, boolean enabled ) { chosen().paintSliderTrack(g, p, track, thumbCentre, horizontal, inverted, enabled); }
-        @Override public void paintSliderThumb( Graphics2D g, Palette p, Rectangle thumb, boolean enabled, boolean focused ) { chosen().paintSliderThumb(g, p, thumb, enabled, focused); }
+        @Override public void paintSliderThumb( Graphics2D g, Palette p, Rectangle thumb, boolean enabled, boolean focused, boolean rollover ) { chosen().paintSliderThumb(g, p, thumb, enabled, focused, rollover); }
         @Override public void paintScrollThumb( Graphics2D g, Palette p, Rectangle thumb, boolean active ) { chosen().paintScrollThumb(g, p, thumb, active); }
         @Override public void paintSplitGrip( Graphics2D g, Palette p, int w, int h, boolean horizontalSplit, boolean enabled ) { chosen().paintSplitGrip(g, p, w, h, horizontalSplit, enabled); }
         @Override public void paintDragHandle( Graphics2D g, Palette p, int w, int h, boolean horizontal ) { chosen().paintDragHandle(g, p, w, h, horizontal); }
