@@ -140,6 +140,37 @@ public final class SwingTreeTabbedPaneUI
 
     // ── Tab painting ─────────────────────────────────────────────────────
 
+    /**
+     *  Repaints the tab the pointer left and the one it arrived at.
+     *  <p>
+     *  {@link BasicTabbedPaneUI} records which tab the pointer is over and asks for no repaint when
+     *  that changes, so a symbol set's surface for a tab under the pointer is painted only when
+     *  something else happens to repaint the strip. Every preset draws one; without this none of
+     *  them were reached.
+     */
+    @Override
+    protected void setRolloverTab( int index ) {
+        int left = getRolloverTab();
+        super.setRolloverTab(index);
+        if ( left == index || tabPane == null || !SwingTreeLookAndFeel.drawsOwnChrome() )
+            return;
+        repaintTab(left);
+        repaintTab(index);
+    }
+
+    private void repaintTab( int index ) {
+        if ( index < 0 || index >= tabPane.getTabCount() )
+            return;
+        Rectangle bounds = getTabBounds(tabPane, index);
+        if ( bounds == null )
+            return;
+        // A preset may lay a tab's contact shadow a pixel or two outside the rectangle the layout
+        // gave it, and a repaint clipped to the rectangle would leave that behind.
+        int bleed = UI.scale(2);
+        tabPane.repaint(bounds.x - bleed, bounds.y - bleed,
+                        bounds.width + bleed * 2, bounds.height + bleed * 2);
+    }
+
     @Override
     protected void paintTabBackground(
         Graphics g, int tabPlacement, int tabIndex, int x, int y, int w, int h, boolean isSelected
