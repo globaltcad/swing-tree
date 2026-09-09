@@ -450,7 +450,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             table.put(prefix + ".inactiveForeground",  ui(p.textDisabled()));
             table.put(prefix + ".caretForeground",     ui(p.accent()));
             table.put(prefix + ".selectionBackground", ui(p.accentSoft()));
-            table.put(prefix + ".selectionForeground", ui(p.text()));
+            table.put(prefix + ".selectionForeground", onSelection(p));
             table.put(prefix + ".font",                baseFont);
         }
 
@@ -491,7 +491,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         table.put("ComboBox.background",          ui(p.surfaceField()));
         table.put("ComboBox.foreground",          ui(p.text()));
         table.put("ComboBox.selectionBackground", ui(p.accentSoft()));
-        table.put("ComboBox.selectionForeground", ui(p.text()));
+        table.put("ComboBox.selectionForeground", onSelection(p));
         table.put("ComboBox.disabledBackground",  ui(p.surfaceDisabled()));
         table.put("ComboBox.disabledForeground",  ui(p.textDisabled()));
         table.put("ComboBox.font",                baseFont);
@@ -514,16 +514,21 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         table.put("List.background",          ui(p.surfaceField()));
         table.put("List.foreground",          ui(p.text()));
         table.put("List.selectionBackground", ui(p.accentSoft()));
-        table.put("List.selectionForeground", ui(p.text()));
+        table.put("List.selectionForeground", onSelection(p));
         table.put("List.focusCellHighlightBorder", BorderFactory.createEmptyBorder(2, 6, 2, 6));
         table.put("List.font",                baseFont);
 
         table.put("Table.background",          ui(p.surfaceField()));
         table.put("Table.foreground",          ui(p.text()));
         table.put("Table.selectionBackground", ui(p.accentSoft()));
-        table.put("Table.selectionForeground", ui(p.text()));
+        table.put("Table.selectionForeground", onSelection(p));
         table.put("Table.gridColor",           ui(p.borderSoft()));
-        table.put("Table.alternateRowColor",   ui(p.surface()));
+        // Only a symbol set that stripes its tables leaves a colour here: SwingTreeTableUI fills
+        // every second row with whatever this key holds, so a colour written unconditionally would
+        // stripe the tables of every theme.
+        Color stripe = s.tableRowStripe(p);
+        if ( stripe != null )
+            table.put("Table.alternateRowColor", ui(stripe));
         table.put("Table.font",                baseFont);
         table.put("TableHeader.background",    ui(p.surface()));
         table.put("TableHeader.foreground",    ui(p.textMuted()));
@@ -536,7 +541,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         table.put("Tree.textBackground",       ui(Palette.TRANSPARENT));
         table.put("Tree.textForeground",       ui(p.text()));
         table.put("Tree.selectionBackground",  ui(p.accentSoft()));
-        table.put("Tree.selectionForeground",  ui(p.text()));
+        table.put("Tree.selectionForeground",  onSelection(p));
         table.put("Tree.selectionBorderColor", ui(p.accent()));
         table.put("Tree.line",                 ui(p.borderSoft()));
         table.put("Tree.hash",                 ui(p.borderSoft()));
@@ -562,7 +567,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             table.put(prefix + ".background",          ui("Menu".equals(prefix) ? p.surface() : p.surfaceField()));
             table.put(prefix + ".foreground",          ui(p.text()));
             table.put(prefix + ".selectionBackground", ui(p.accentSoft()));
-            table.put(prefix + ".selectionForeground", ui(p.text()));
+            table.put(prefix + ".selectionForeground", onSelection(p));
             table.put(prefix + ".disabledForeground",  ui(p.textDisabled()));
             table.put(prefix + ".font",                baseFont);
         }
@@ -586,6 +591,13 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             table.put("Tree.collapsedIcon", GlyphIcons.treeCollapsed());
             table.put("Menu.arrowIcon",     GlyphIcons.submenuArrow());
         }
+        // A set with no icon for a node leaves these empty, and a tree then indents its labels by
+        // the disclosure handle alone rather than by the width of an icon that draws nothing.
+        if ( s.treeNodeGlyphSize() > 0 ) {
+            table.put("Tree.leafIcon",   GlyphIcons.treeLeaf());
+            table.put("Tree.closedIcon", GlyphIcons.treeClosed());
+            table.put("Tree.openIcon",   GlyphIcons.treeOpen());
+        }
 
         table.put("TabbedPane.background",            ui(p.background()));
         table.put("TabbedPane.foreground",            ui(p.text()));
@@ -601,6 +613,16 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
     }
 
     private static ColorUIResource ui( Color c ) { return new ColorUIResource(c); }
+
+    /**
+     *  The ink for a label lying on a selection band. A palette is free to make
+     *  {@link Palette#accentSoft()} a dark colour - {@link PalettePreset#NIMBUS} does, because
+     *  Nimbus selects with a saturated blue - and the ordinary text colour cannot be read on one,
+     *  so the ink is chosen against the band rather than written down.
+     */
+    private static ColorUIResource onSelection( Palette p ) {
+        return ui(LafUtilities.readableOn(p.accentSoft(), p.text(), p.onFilled()));
+    }
 
     /**
      *  Writes {@code font} into every {@code *.font} key this look and feel owns and asks each
@@ -992,7 +1014,9 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *
          * @param base     the one saturated colour: focus rings, selections, the default button,
          *                 a slider's filled track, the selected tab. Nimbus calls it
-         *                 {@code nimbusBase}
+         *                 {@code nimbusBase}. Its washed out shade is barely a shade at all here:
+         *                 Nimbus selects a row with a saturated blue and writes the label on it in
+         *                 white, rather than tinting the row and keeping the label black
          * @param chrome   the neutral every unlit surface is derived from - the window, a button
          *                 at rest, a table header, a scroll bar. Nimbus calls it
          *                 {@code nimbusBlueGrey}. It is a good deal darker than anything painted
@@ -1022,7 +1046,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
                     .textMuted      (LafUtilities.shiftHsb(chrome, +0.029, -0.408))
                     .textDisabled   (LafUtilities.shiftHsb(chrome, -0.090, -0.177))
                     .accent         (base)
-                    .accentSoft     (LafUtilities.shiftHsb(base,   -0.483, +0.377))
+                    .accentSoft     (LafUtilities.shiftHsb(base,   -0.049, -0.008))
                     .textureLight   (notice)
                     .textureDark    (LafUtilities.shiftHsb(notice, +0.180, -0.245))
                     .primary        (positive)

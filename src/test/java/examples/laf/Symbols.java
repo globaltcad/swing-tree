@@ -4,6 +4,8 @@ import examples.laf.SwingTreeLookAndFeel.Palette;
 import swingtree.UI;
 import swingtree.api.laf.OptimizedShapeRendering;
 
+import org.jspecify.annotations.Nullable;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.geom.Ellipse2D;
@@ -154,6 +156,107 @@ interface Symbols
     void paintTabAccent(
         Graphics2D g, Palette p, int x, int y, int w, int h, int tabPlacement, boolean enabled
     );
+
+    /**
+     *  How deep the strip between a tabbed pane's tabs and its page is, in developer pixels. A set
+     *  that separates the two with a rule answers one.
+     *  <p>
+     *  This is one of the few members here carrying an answer of its own. Each of those describes a
+     *  habit one set has rather than a decision every set has to take, so its answer is the habit's
+     *  absence and a set says nothing at all unless it has that habit.
+     *
+     * @return how many developer pixels the edge occupies
+     */
+    default int tabEdgeThickness() { return 1; }
+
+    /**
+     *  Draws that strip, across the whole pane rather than under one tab.
+     *
+     * @param g the context to draw on
+     * @param p the palette in force
+     * @param edge the whole strip, in component pixels
+     * @param selectedTab where the selected tab is, so that an edge may open under it and let the
+     *                    tab run into the page; {@code null} when no tab is selected
+     * @param tabPlacement which side of the page the tabs are on, as a
+     *                     {@link javax.swing.SwingConstants} edge
+     */
+    default void paintTabEdge(
+        Graphics2D g, Palette p, Rectangle edge, @Nullable Rectangle selectedTab, int tabPlacement
+    ) {
+        g.setColor(p.borderSoft());
+        g.fillRect(edge.x, edge.y, edge.width, edge.height);
+    }
+
+    /**
+     *  Whether a scroll bar has a button at each end that scrolls it a line at a time. A set
+     *  answering {@code false}, which is all but one of them, gets a bar that is only its groove
+     *  and its thumb.
+     *
+     * @return whether {@link #paintScrollStepper} should be asked for those two buttons
+     */
+    default boolean scrollBarHasSteppers() { return false; }
+
+    /**
+     *  Draws one of them.
+     *
+     * @param g the context to draw on, whose origin is the button's own corner
+     * @param p the palette in force
+     * @param w how wide the button is, in component pixels
+     * @param h how tall it is
+     * @param direction which way it scrolls, which is also which way its arrow points
+     * @param enabled whether the scroll bar can be worked
+     * @param rollover whether the pointer is over this button
+     * @param pressed whether it is being held down
+     */
+    default void paintScrollStepper(
+        Graphics2D g, Palette p, int w, int h, LafUtilities.Direction direction,
+        boolean enabled, boolean rollover, boolean pressed
+    ) {}
+
+    /**
+     *  What the line between two column headings is drawn in. A set that rules its headings apart
+     *  names a colour; one that draws the heading row as a single strip says nothing.
+     *
+     * @param p the palette in force
+     * @return that colour, or {@code null} for a heading row with no lines in it
+     */
+    default @Nullable Color tableHeaderDivider( Palette p ) { return null; }
+
+    /**
+     *  What every second row of a table is tinted with, so that a wide row can be followed across
+     *  it. A set that leaves a table as one unbroken sheet says nothing.
+     *
+     * @param p the palette in force
+     * @return that colour, or {@code null} for a table with no stripes
+     */
+    default @Nullable Color tableRowStripe( Palette p ) { return null; }
+
+    /**
+     *  How wide the icon in front of a tree node is, in developer pixels. A set that puts nothing
+     *  there answers zero, the look and feel installs no node icons, and a tree then indents its
+     *  labels by the disclosure handle alone.
+     *
+     * @return the side of the square that icon occupies, or zero for no icon
+     */
+    default int treeNodeGlyphSize() { return 0; }
+
+    /**
+     *  Draws that icon.
+     *
+     * @param g the context to draw on
+     * @param p the palette in force
+     * @param x the left edge of the icon's box, in component pixels
+     * @param y its top edge
+     * @param w how wide the box is
+     * @param h how tall it is
+     * @param leaf whether the node can have no children
+     * @param expanded whether a node that can have children is showing them
+     * @param enabled whether the tree can be used
+     */
+    default void paintTreeNode(
+        Graphics2D g, Palette p, int x, int y, int w, int h,
+        boolean leaf, boolean expanded, boolean enabled
+    ) {}
 
     // IMPLEMENTATIONS:
 
@@ -1268,7 +1371,7 @@ interface Symbols
         @Override public int treeRowHeight()         { return 28; }
         @Override public int tabPaddingVertical()    { return 10; }
         @Override public int tabPaddingHorizontal()  { return 18; }
-        @Override public int tabAreaGap()            { return  0; }
+        @Override public int tabAreaGap()            { return  2; }
 
         // ── Glyphs ───────────────────────────────────────────────────────────
 
@@ -1535,7 +1638,7 @@ interface Symbols
         @Override public int treeRowHeight()         { return 22; }
         @Override public int tabPaddingVertical()    { return  8; }
         @Override public int tabPaddingHorizontal()  { return 16; }
-        @Override public int tabAreaGap()            { return  0; }
+        @Override public int tabAreaGap()            { return  2; }
 
         // ── Glyphs ───────────────────────────────────────────────────────────
 
@@ -2344,6 +2447,13 @@ interface Symbols
         /** The corner radius of the small rounded squares, in developer pixels. */
         private static final float GLYPH_ARC = 4f;
 
+        /**
+         *  How far inside its 18-pixel icon the box of a check box or a radio button is drawn.
+         *  Nimbus lays both out to an 18-pixel icon and paints a 14-pixel box in the middle of it,
+         *  which is what leaves a check box the same height as the label beside it.
+         */
+        private static final int GLYPH_INSET = 2;
+
         @Override public boolean drawsItsOwnChrome() { return true; }
 
         // The metrics the original lays out with, read out of its own UIDefaults.
@@ -2358,11 +2468,11 @@ interface Symbols
         @Override public int splitDividerThickness() { return 10; }
         @Override public int progressBarThickness()  { return 19; }
         @Override public int separatorThickness()    { return  1; }
-        @Override public int tableRowHeight()        { return 20; }
+        @Override public int tableRowHeight()        { return 16; }
         @Override public int treeRowHeight()         { return 20; }
-        @Override public int tabPaddingVertical()    { return  4; }
-        @Override public int tabPaddingHorizontal()  { return 12; }
-        @Override public int tabAreaGap()            { return  3; }
+        @Override public int tabPaddingVertical()    { return  2; }
+        @Override public int tabPaddingHorizontal()  { return  9; }
+        @Override public int tabAreaGap()            { return  2; }
 
         // ── Glyphs in front of a label ───────────────────────────────────────
 
@@ -2371,15 +2481,17 @@ interface Symbols
             Graphics2D g, Palette p, int x, int y, int w, int h,
             boolean enabled, boolean focused, boolean rollover, boolean pressed, boolean selected
         ) {
+            int   pad = UI.scale(GLYPH_INSET);
             float arc = UI.scale(GLYPH_ARC);
-            mould(g, p, new RoundRectangle2D.Float(x + 0.5f, y + 0.5f, w - 1, h - 1, arc, arc),
-                  y, h, enabled, selected, pressed, rollover);
+            int   bx  = x + pad, by = y + pad, bw = w - 2 * pad, bh = h - 2 * pad;
+            mould(g, p, new RoundRectangle2D.Float(bx + 0.5f, by + 0.5f, bw - 1, bh - 1, arc, arc),
+                  by, bh, enabled, selected, pressed, rollover);
             if ( !selected )
                 return;
             g.setColor(enabled ? p.text() : p.textDisabled());
-            g.setStroke(new BasicStroke(Math.max(1.8f, UI.scale(2.4f)), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-            float inset = w * 0.20f;
-            g.draw(LafUtilities.tickShape(x + inset, y + inset, w - 2 * inset, h - 2 * inset));
+            g.setStroke(new BasicStroke(Math.max(1.4f, UI.scale(1.8f)), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+            float inset = bw * 0.22f;
+            g.draw(LafUtilities.tickShape(bx + inset, by + inset, bw - 2 * inset, bh - 2 * inset));
         }
 
         @Override
@@ -2387,13 +2499,15 @@ interface Symbols
             Graphics2D g, Palette p, int x, int y, int w, int h,
             boolean enabled, boolean focused, boolean rollover, boolean pressed, boolean selected
         ) {
-            mould(g, p, new Ellipse2D.Float(x + 0.5f, y + 0.5f, w - 1, h - 1),
-                  y, h, enabled, selected, pressed, rollover);
+            int pad = UI.scale(GLYPH_INSET);
+            int bx  = x + pad, by = y + pad, bw = w - 2 * pad, bh = h - 2 * pad;
+            mould(g, p, new Ellipse2D.Float(bx + 0.5f, by + 0.5f, bw - 1, bh - 1),
+                  by, bh, enabled, selected, pressed, rollover);
             if ( !selected )
                 return;
-            float dot = w * 0.29f;
+            float dot = bw * 0.29f;
             g.setColor(enabled ? p.text() : p.textDisabled());
-            g.fill(new Ellipse2D.Float(x + dot, y + dot, w - 2 * dot, h - 2 * dot));
+            g.fill(new Ellipse2D.Float(bx + dot, by + dot, bw - 2 * dot, bh - 2 * dot));
         }
 
         // ── Arrows ───────────────────────────────────────────────────────────
@@ -2415,7 +2529,7 @@ interface Symbols
         public void paintComboArrow(
             Graphics2D g, Palette p, int w, int h, boolean enabled, boolean rollover, boolean pressed
         ) {
-            stepper(g, p, w, h, enabled, rollover, pressed);
+            stepper(g, p, w, h, enabled, rollover, pressed, true, true);
             wedge(g, p, w / 2f, h / 2f, UI.scale(3.6f), LafUtilities.Direction.DOWN, enabled);
         }
 
@@ -2424,7 +2538,7 @@ interface Symbols
             Graphics2D g, Palette p, int w, int h, boolean up,
             boolean enabled, boolean rollover, boolean pressed
         ) {
-            stepper(g, p, w, h, enabled, rollover, pressed);
+            stepper(g, p, w, h, enabled, rollover, pressed, up, !up);
             wedge(g, p, w / 2f, h / 2f, UI.scale(2.8f),
                   up ? LafUtilities.Direction.UP : LafUtilities.Direction.DOWN, enabled);
         }
@@ -2436,13 +2550,44 @@ interface Symbols
          *  inside the first would draw a box around the arrow.
          */
         private static void stepper(
-            Graphics2D g, Palette p, int w, int h, boolean enabled, boolean rollover, boolean pressed
+            Graphics2D g, Palette p, int w, int h, boolean enabled, boolean rollover, boolean pressed,
+            boolean roundTopRight, boolean roundBottomRight
         ) {
+            LafUtilities.antialiasShapes(g);
             Color tone = enabled ? Styles.Nimbus.accentedTone(p, pressed, rollover) : p.surfaceDisabled();
             g.setPaint(Styles.Nimbus.relief(enabled, true).paint(0, h, tone));
-            g.fillRect(0, 0, w, h);
+            g.fill(rightRounded(w, h, roundTopRight, roundBottomRight));
             g.setColor(enabled ? Styles.Nimbus.accentedEdge(p) : Styles.Nimbus.surfaceEdge(p, false, false, false));
             g.fillRect(0, 0, 1, h);
+        }
+
+        /**
+         *  The actuator's own outline: square where it meets the value it works, and cut to the
+         *  control's own corner radius where it meets the outline at the right.
+         *
+         * @param w how wide the actuator is, in component pixels
+         * @param h how tall it is
+         * @param topRight whether its top right corner meets a corner of the control
+         * @param bottomRight whether its bottom right corner does
+         * @return the shape to fill
+         */
+        private static Shape rightRounded( int w, int h, boolean topRight, boolean bottomRight ) {
+            float arc = UI.scale(Styles.Nimbus.RADIUS - 1);
+            Path2D.Float shape = new Path2D.Float();
+            shape.moveTo(0, 0);
+            if ( topRight ) {
+                shape.lineTo(w - arc, 0);
+                shape.quadTo(w, 0, w, arc);
+            } else
+                shape.lineTo(w, 0);
+            if ( bottomRight ) {
+                shape.lineTo(w, h - arc);
+                shape.quadTo(w, h, w - arc, h);
+            } else
+                shape.lineTo(w, h);
+            shape.lineTo(0, h);
+            shape.closePath();
+            return shape;
         }
 
         // ── Chrome ───────────────────────────────────────────────────────────
@@ -2467,16 +2612,135 @@ interface Symbols
             g.fill(groove);
         }
 
+        /**
+         *  A knob of the accented material, two pixels inside the box the slider lays out for it,
+         *  the way a check box's box sits inside its icon. Nimbus makes the one part of a slider
+         *  you can take hold of the only coloured thing on it.
+         */
         @Override
-        public void paintSliderThumb( Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused, boolean rollover ) {
-            Shape knob = new Ellipse2D.Float(r.x + 0.5f, r.y + 0.5f, r.width - 1, r.height - 1);
-            mould(g, p, knob, r.y, r.height, enabled, false, false, focused || rollover);
+        public void paintSliderThumb(
+            Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused, boolean rollover
+        ) {
+            int   pad  = UI.scale(GLYPH_INSET);
+            int   d    = Math.min(r.width, r.height) - 2 * pad;
+            Shape knob = new Ellipse2D.Float(r.x + pad + 0.5f, r.y + pad + 0.5f, d - 1, d - 1);
+            mould(g, p, knob, r.y + pad, d, enabled, true, false, focused || rollover);
+        }
+
+        @Override public boolean scrollBarHasSteppers() { return true; }
+
+        @Override public @Nullable Color tableHeaderDivider( Palette p ) { return p.border(); }
+
+        /** The sheet itself, moved a little of the way towards the chrome. Nimbus's stripe is very
+         *  nearly white, which the surface colour is not. */
+        @Override public @Nullable Color tableRowStripe( Palette p ) {
+            return LafUtilities.wash(p.surfaceField(), p.surface(), 1.0, 0.30);
+        }
+
+        @Override public int treeNodeGlyphSize() { return 16; }
+
+        /**
+         *  A folder for a node that can hold others and a sheet of paper for one that cannot, both
+         *  cast in the same two materials as the rest of the theme: the folder in the accented one
+         *  a selected tab is made of, the sheet in the white a text field is cut into.
+         */
+        @Override
+        public void paintTreeNode(
+            Graphics2D g, Palette p, int x, int y, int w, int h,
+            boolean leaf, boolean expanded, boolean enabled
+        ) {
+            LafUtilities.antialiasShapes(g);
+            g.setStroke(new BasicStroke(1f));
+            if ( leaf )
+                sheet(g, p, x, y, w, h, enabled);
+            else
+                folder(g, p, x, y, w, h, expanded, enabled);
+        }
+
+        /** A page with its top corner turned back, which is the corner that says it is a page. */
+        private static void sheet( Graphics2D g, Palette p, int x, int y, int w, int h, boolean enabled ) {
+            float pw   = UI.scale(11f);
+            float ph   = UI.scale(14f);
+            float fold = UI.scale(4f);
+            float left = x + ( w - pw ) / 2f + 0.5f;
+            float top  = y + ( h - ph ) / 2f + 0.5f;
+            Path2D.Float page = new Path2D.Float();
+            page.moveTo(left, top);
+            page.lineTo(left + pw - fold, top);
+            page.lineTo(left + pw, top + fold);
+            page.lineTo(left + pw, top + ph);
+            page.lineTo(left, top + ph);
+            page.closePath();
+            g.setColor(enabled ? p.surfaceField() : p.surfaceDisabled());
+            g.fill(page);
+            g.setColor(Styles.Nimbus.surfaceEdge(p, enabled, false, false));
+            g.draw(page);
+            g.draw(new java.awt.geom.Line2D.Float(left + pw - fold, top, left + pw - fold, top + fold));
+            g.draw(new java.awt.geom.Line2D.Float(left + pw - fold, top + fold, left + pw, top + fold));
+        }
+
+        /** A folder, with its front flap standing away from the back when it is open. */
+        private static void folder(
+            Graphics2D g, Palette p, int x, int y, int w, int h, boolean expanded, boolean enabled
+        ) {
+            float fw   = UI.scale(14f);
+            float fh   = UI.scale(11f);
+            float tab  = UI.scale(3f);
+            float left = x + ( w - fw ) / 2f + 0.5f;
+            float top  = y + ( h - fh ) / 2f + 0.5f;
+            Color tone = enabled ? Styles.Nimbus.accentedTone(p, false, false) : p.surfaceDisabled();
+            Color edge = enabled ? LafUtilities.wash(p.accent(), p.text(), 0.766, 0.443)
+                                 : Styles.Nimbus.surfaceEdge(p, false, false, false);
+            Path2D.Float body = new Path2D.Float();
+            body.moveTo(left, top + fh);
+            body.lineTo(left, top + tab);
+            body.lineTo(left + fw * 0.42f, top + tab);
+            body.lineTo(left + fw * 0.55f, top);
+            body.lineTo(left + fw, top);
+            body.lineTo(left + fw, top + fh);
+            body.closePath();
+            g.setPaint(Styles.Nimbus.relief(enabled, enabled).paint(top, fh, tone));
+            g.fill(body);
+            g.setColor(edge);
+            g.draw(body);
+            if ( !expanded )
+                return;
+            // The flap, leaning out to the right, is the whole of the difference an open folder makes.
+            Path2D.Float flap = new Path2D.Float();
+            flap.moveTo(left, top + fh);
+            flap.lineTo(left + fw * 0.16f, top + fh * 0.45f);
+            flap.lineTo(left + fw, top + fh * 0.45f);
+            flap.lineTo(left + fw * 0.84f, top + fh);
+            flap.closePath();
+            g.setPaint(Styles.Nimbus.relief(enabled, enabled)
+                                    .paint(top + fh * 0.45f, fh * 0.55f, LafUtilities.shiftHsb(tone, -0.030, +0.080)));
+            g.fill(flap);
+            g.setColor(edge);
+            g.draw(flap);
+        }
+
+        /**
+         *  The same moulding a button is made of, filling the whole end of the bar. It carries no
+         *  outline of its own: the groove beside it already ends in one.
+         */
+        @Override
+        public void paintScrollStepper(
+            Graphics2D g, Palette p, int w, int h, LafUtilities.Direction direction,
+            boolean enabled, boolean rollover, boolean pressed
+        ) {
+            Color tone = Styles.Nimbus.surfaceTone(p, enabled, pressed, rollover);
+            g.setPaint(Styles.Nimbus.relief(enabled, false).paint(0, h, tone));
+            g.fillRect(0, 0, w, h);
+            wedge(g, p, w / 2f, h / 2f, UI.scale(3.2f), direction, enabled);
         }
 
         @Override
         public void paintScrollThumb( Graphics2D g, Palette p, Rectangle r, boolean active ) {
             LafUtilities.antialiasShapes(g);
-            int   pad  = UI.scale(1);
+            // No room left around it: Nimbus's thumb fills the groove from wall to wall, which is
+            // what makes the groove read as a channel the thumb runs in rather than a strip it
+            // floats over.
+            int   pad  = 0;
             float arc  = Math.min(r.width, r.height) - 2 * pad;
             Shape pill = new RoundRectangle2D.Float(
                                 r.x + pad + 0.5f, r.y + pad + 0.5f,
@@ -2500,17 +2764,23 @@ interface Symbols
             dots(g, p, w, h, horizontalSplit, UI.scale(4));
         }
 
+        /** A pale rounded bar laid against the near edge of the tool bar, rather than a column of
+         *  bumps: Nimbus grips everything by a moulding and this is the smallest one it has. */
         @Override
         public void paintDragHandle( Graphics2D g, Palette p, int w, int h, boolean horizontal ) {
-            int size = Math.max(2, UI.scale(2));
-            g.setColor(p.border());
-            for ( int i = 0; i < 4; i++ ) {
-                int step = i * UI.scale(4);
-                if ( horizontal )
-                    g.fillRect(UI.scale(4), h / 2 - UI.scale(6) + step, size, size);
-                else
-                    g.fillRect(w / 2 - UI.scale(6) + step, UI.scale(4), size, size);
-            }
+            LafUtilities.antialiasShapes(g);
+            float thick = UI.scale(4f);
+            float inset = UI.scale(3f);
+            float along = ( horizontal ? h : w ) - 2 * inset;
+            Shape grip  = horizontal
+                    ? new RoundRectangle2D.Float(inset, inset, thick, along, thick, thick)
+                    : new RoundRectangle2D.Float(inset, inset, along, thick, thick, thick);
+            java.awt.geom.Rectangle2D span = grip.getBounds2D();
+            g.setPaint(NimbusRelief.LIT.paint((float) span.getY(), (float) span.getHeight(), p.surfaceHover()));
+            g.fill(grip);
+            g.setColor(p.borderSoft());
+            g.setStroke(new BasicStroke(1f));
+            g.draw(grip);
         }
 
         /** The one wet thing in the theme: a saturated bar under a hard sheen, closed top and bottom
@@ -2528,8 +2798,12 @@ interface Symbols
             int   fillY = horizontal ? 0 : h - fillH;
             g.setPaint(NimbusRelief.GLOSS.paint(fillY, fillH, tone));
             g.fillRect(0, fillY, fillW, fillH);
+            // Closed on all four sides, so that a bar part way along still ends in an edge rather
+            // than fading into the trough.
             g.setColor(LafUtilities.shiftHsb(tone, 0, -0.153));
             g.fillRect(0, fillY, fillW, 1);
+            g.fillRect(0, fillY, 1, fillH);
+            g.fillRect(fillW - 1, fillY, 1, fillH);
             g.setColor(LafUtilities.shiftHsb(tone, -0.082, -0.224));
             g.fillRect(0, fillY + fillH - 1, fillW, 1);
         }
@@ -2539,34 +2813,94 @@ interface Symbols
             Graphics2D g, Palette p, int x, int y, int w, int h, boolean selected, boolean rollover
         ) {
             LafUtilities.antialiasShapes(g);
-            float arc = UI.scale(7f);
+            float arc = UI.scale(4f);
             // Rounded at the top only: the bottom edge has to meet the page squarely, or the tab and
-            // the page it belongs to read as two separate things.
+            // the page it belongs to read as two separate things. The part of the shape below the
+            // tab is what squares that edge off, and is clipped away rather than drawn on the page.
             Shape tab = new RoundRectangle2D.Float(x + 0.5f, y + 0.5f, w - 1, h - 1 + arc, arc, arc);
             Color tone = selected ? Styles.Nimbus.accentedTone(p, false, false)
                                   : rollover ? p.surfaceHover() : p.surface();
+            Shape clip = g.getClip();
+            g.clipRect(x, y, w, h);
             // A tab that is not the one you are on has no bottom lip to catch the light: it runs under
             // the page rather than standing beside it.
             g.setPaint(( selected ? NimbusRelief.LIT_ACCENTED : NimbusRelief.STRIP ).paint(y, h, tone));
             g.fill(tab);
-            g.setColor(selected ? Styles.Nimbus.accentedEdge(p) : p.border());
+            g.setColor(tabEdge(p, selected));
             g.setStroke(new BasicStroke(1f));
             g.draw(tab);
+            g.setClip(clip);
         }
 
+        /**
+         *  What a tab is outlined in: much darker than the outline of a button, and darker still,
+         *  and in the accent's own hue, for the tab you are on.
+         *
+         * @param p the palette in force
+         * @param selected whether this is the tab whose page is showing
+         * @return the colour to outline it with
+         */
+        private static Color tabEdge( Palette p, boolean selected ) {
+            return selected ? LafUtilities.wash(p.accent(), p.text(), 0.766, 0.443)
+                            : LafUtilities.wash(p.border(), p.text(), 1.000, 0.620);
+        }
+
+        /** Nothing: the selected tab is already the only one whose colour runs on into
+         *  {@link #paintTabEdge}'s band, which is a stronger mark than a line and is the one
+         *  Nimbus uses. */
         @Override
         public void paintTabAccent(
             Graphics2D g, Palette p, int x, int y, int w, int h, int tabPlacement, boolean enabled
+        ) {}
+
+        @Override public int tabEdgeThickness() { return 5; }
+
+        /**
+         *  A rule, a band of the selected tab's own colour, and a second rule. The band is what the
+         *  selected tab's bottom lip runs into, and the first rule is left out along the width of
+         *  that tab, so the tab and the page it belongs to are one shape and every other tab stops
+         *  at a line.
+         */
+        @Override
+        public void paintTabEdge(
+            Graphics2D g, Palette p, Rectangle edge, @Nullable Rectangle selectedTab, int tabPlacement
         ) {
-            int line = Math.max(1, UI.scale(2));
-            g.setColor(enabled ? LafUtilities.shiftHsb(p.accent(), 0, -0.180) : p.border());
-            switch ( tabPlacement ) {
-                case SwingConstants.BOTTOM: g.fillRect(x, y, w, line);            break;
-                case SwingConstants.LEFT:   g.fillRect(x + w - line, y, line, h); break;
-                case SwingConstants.RIGHT:  g.fillRect(x, y, line, h);            break;
-                case SwingConstants.TOP:
-                default:                    g.fillRect(x, y + h - line, w, line); break;
-            }
+            int   rule = Math.max(1, UI.scale(1));
+            Color ink  = p.text();
+            Color band = NimbusRelief.LIT_ACCENTED.bottom(Styles.Nimbus.accentedTone(p, false, false));
+            boolean vertical = tabPlacement == SwingConstants.LEFT || tabPlacement == SwingConstants.RIGHT;
+            // The depth axis runs from the tabs towards the page, whichever side they are on.
+            boolean fromStart = tabPlacement == SwingConstants.TOP || tabPlacement == SwingConstants.LEFT;
+            int     depth     = vertical ? edge.width : edge.height;
+
+            g.setColor(band);
+            g.fillRect(edge.x, edge.y, edge.width, edge.height);
+            g.setColor(ink);
+            fillAcross(g, edge, vertical, fromStart ? 0 : depth - rule, rule);
+            fillAcross(g, edge, vertical, fromStart ? depth - rule : 0, rule);
+            if ( selectedTab == null )
+                return;
+            g.setColor(band);
+            fillUnder(g, edge, selectedTab, vertical, fromStart ? 0 : depth - rule, rule);
+        }
+
+        /** Fills a slice of the edge the whole way along it, {@code depth} pixels in from the edge's
+         *  own origin and {@code thickness} pixels deep. */
+        private static void fillAcross( Graphics2D g, Rectangle edge, boolean vertical, int depth, int thickness ) {
+            if ( vertical )
+                g.fillRect(edge.x + depth, edge.y, thickness, edge.height);
+            else
+                g.fillRect(edge.x, edge.y + depth, edge.width, thickness);
+        }
+
+        /** The same slice, but only where the selected tab lies over it. */
+        private static void fillUnder(
+            Graphics2D g, Rectangle edge, Rectangle tab, boolean vertical, int depth, int thickness
+        ) {
+            if ( vertical )
+                g.fillRect(edge.x + depth, tab.y, thickness, tab.height);
+            else
+                g.fillRect(tab.x, edge.y + depth, tab.width, thickness);
         }
 
         // ── Internals ────────────────────────────────────────────────────────
@@ -2683,5 +3017,13 @@ interface Symbols
         @Override public void paintProgressFill( Graphics2D g, Palette p, int w, int h, double ratio, boolean horizontal, boolean enabled ) { chosen().paintProgressFill(g, p, w, h, ratio, horizontal, enabled); }
         @Override public void paintTabSurface( Graphics2D g, Palette p, int x, int y, int w, int h, boolean selected, boolean rollover ) { chosen().paintTabSurface(g, p, x, y, w, h, selected, rollover); }
         @Override public void paintTabAccent( Graphics2D g, Palette p, int x, int y, int w, int h, int tabPlacement, boolean enabled ) { chosen().paintTabAccent(g, p, x, y, w, h, tabPlacement, enabled); }
+        @Override public boolean scrollBarHasSteppers() { return chosen().scrollBarHasSteppers(); }
+        @Override public @Nullable Color tableHeaderDivider( Palette p ) { return chosen().tableHeaderDivider(p); }
+        @Override public @Nullable Color tableRowStripe( Palette p ) { return chosen().tableRowStripe(p); }
+        @Override public int treeNodeGlyphSize() { return chosen().treeNodeGlyphSize(); }
+        @Override public void paintTreeNode( Graphics2D g, Palette p, int x, int y, int w, int h, boolean leaf, boolean expanded, boolean enabled ) { chosen().paintTreeNode(g, p, x, y, w, h, leaf, expanded, enabled); }
+        @Override public void paintScrollStepper( Graphics2D g, Palette p, int w, int h, LafUtilities.Direction direction, boolean enabled, boolean rollover, boolean pressed ) { chosen().paintScrollStepper(g, p, w, h, direction, enabled, rollover, pressed); }
+        @Override public int tabEdgeThickness() { return chosen().tabEdgeThickness(); }
+        @Override public void paintTabEdge( Graphics2D g, Palette p, Rectangle edge, @Nullable Rectangle selectedTab, int tabPlacement ) { chosen().paintTabEdge(g, p, edge, selectedTab, tabPlacement); }
     }
 }

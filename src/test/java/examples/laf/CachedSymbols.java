@@ -1,8 +1,10 @@
 package examples.laf;
 
 import examples.laf.SwingTreeLookAndFeel.Palette;
+import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
@@ -76,7 +78,8 @@ final class CachedSymbols implements Symbols
     private enum Symbol
     {
         CHECK, RADIO, DISCLOSURE, SUBMENU_ARROW, COMBO_ARROW, SPINNER_ARROW,
-        SLIDER_THUMB, SCROLL_THUMB, SPLIT_GRIP, DRAG_HANDLE, TAB_SURFACE, TAB_ACCENT
+        SLIDER_THUMB, SCROLL_THUMB, SCROLL_STEPPER, SPLIT_GRIP, DRAG_HANDLE, TREE_NODE,
+        TAB_SURFACE, TAB_ACCENT
     }
 
     private final Symbols _symbols;
@@ -233,6 +236,54 @@ final class CachedSymbols implements Symbols
                (tile, tx, ty) -> _symbols.paintTabAccent(tile, p, tx, ty, w, h, tabPlacement, enabled));
     }
 
+    @Override public boolean scrollBarHasSteppers() { return _symbols.scrollBarHasSteppers(); }
+
+    @Override
+    public @Nullable Color tableHeaderDivider( Palette p ) { return _symbols.tableHeaderDivider(p); }
+
+    @Override
+    public @Nullable Color tableRowStripe( Palette p ) { return _symbols.tableRowStripe(p); }
+
+    @Override public int treeNodeGlyphSize() { return _symbols.treeNodeGlyphSize(); }
+
+    @Override
+    public void paintTreeNode(
+        Graphics2D g, Palette p, int x, int y, int w, int h,
+        boolean leaf, boolean expanded, boolean enabled
+    ) {
+        _paint(g, p, Symbol.TREE_NODE, _bits(leaf, expanded, enabled), x, y, w, h,
+               (tile, tx, ty) -> _symbols.paintTreeNode(tile, p, tx, ty, w, h, leaf, expanded, enabled));
+    }
+
+    @Override
+    public void paintScrollStepper(
+        Graphics2D g, Palette p, int w, int h, LafUtilities.Direction direction,
+        boolean enabled, boolean rollover, boolean pressed
+    ) {
+        _paint(g, p, Symbol.SCROLL_STEPPER,
+               _code(direction) << 3 | _bits(enabled, rollover, pressed), 0, 0, w, h,
+               (tile, tx, ty) -> {
+                   Graphics2D shifted = (Graphics2D) tile.create();
+                   try {
+                       shifted.translate(tx, ty);
+                       _symbols.paintScrollStepper(shifted, p, w, h, direction, enabled, rollover, pressed);
+                   } finally {
+                       shifted.dispose();
+                   }
+               });
+    }
+
+    @Override public int tabEdgeThickness() { return _symbols.tabEdgeThickness(); }
+
+    /** Never stored: like {@link #paintSliderTrack}, it is handed a position rather than a state,
+     *  and one entry per pane width would be an entry used once. */
+    @Override
+    public void paintTabEdge(
+        Graphics2D g, Palette p, Rectangle edge, @Nullable Rectangle selectedTab, int tabPlacement
+    ) {
+        _symbols.paintTabEdge(g, p, edge, selectedTab, tabPlacement);
+    }
+
     // ── Internals ────────────────────────────────────────────────────────
 
     /** What a symbol set is asked to do, once, so that the result can be kept. */
@@ -341,6 +392,19 @@ final class CachedSymbols implements Symbols
 
     private static long _bytesOf( BufferedImage tile ) {
         return (long) tile.getWidth() * tile.getHeight() * 4;
+    }
+
+    /** Which way a stepper points, as a number a key can hold. It is written out rather than read
+     *  off the enum's position, so that reordering {@link LafUtilities.Direction} cannot quietly
+     *  make two different steppers share one tile. */
+    private static int _code( LafUtilities.Direction direction ) {
+        switch ( direction ) {
+            case UP:    return 0;
+            case DOWN:  return 1;
+            case LEFT:  return 2;
+            case RIGHT:
+            default:    return 3;
+        }
     }
 
     private static int _bits( boolean... flags ) {

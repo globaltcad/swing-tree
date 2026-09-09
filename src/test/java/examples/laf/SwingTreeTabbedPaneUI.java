@@ -1,5 +1,6 @@
 package examples.laf;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 import swingtree.api.laf.SwingTreeStyledComponentUI;
 import swingtree.style.ComponentStyleDelegate;
@@ -67,8 +68,8 @@ public final class SwingTreeTabbedPaneUI
     protected Insets getContentBorderInsets( int tabPlacement ) {
         if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
             return super.getContentBorderInsets(tabPlacement);
-        // A hairline on whichever side of the page the tabs sit.
-        int n = UI.scale(1);
+        // The symbol set's edge, on whichever side of the page the tabs sit.
+        int n = Math.max(1, UI.scale(SwingTreeLookAndFeel.symbols().tabEdgeThickness()));
         switch ( tabPlacement ) {
             case SwingConstants.LEFT:   return new Insets(0, n, 0, 0);
             case SwingConstants.RIGHT:  return new Insets(0, 0, 0, n);
@@ -255,21 +256,32 @@ public final class SwingTreeTabbedPaneUI
         }
         Graphics2D g2 = (Graphics2D) g.create();
         try {
-            int n = Math.max(1, UI.scale(1));
-            g2.setColor(SwingTreeLookAndFeel.palette().borderSoft());
+            int n = Math.max(1, UI.scale(SwingTreeLookAndFeel.symbols().tabEdgeThickness()));
             int w = tabPane.getWidth(), h = tabPane.getHeight();
             int tabAreaH = calculateTabAreaHeight(tabPlacement, runCount, maxTabHeight);
             int tabAreaW = calculateTabAreaWidth(tabPlacement, runCount, maxTabWidth);
+            Rectangle edge;
             switch ( tabPlacement ) {
-                case SwingConstants.BOTTOM: g2.fillRect(0, h - tabAreaH - n, w, n); break;
-                case SwingConstants.LEFT:   g2.fillRect(tabAreaW, 0, n, h);         break;
-                case SwingConstants.RIGHT:  g2.fillRect(w - tabAreaW - n, 0, n, h); break;
+                case SwingConstants.BOTTOM: edge = new Rectangle(0, h - tabAreaH - n, w, n); break;
+                case SwingConstants.LEFT:   edge = new Rectangle(tabAreaW, 0, n, h);         break;
+                case SwingConstants.RIGHT:  edge = new Rectangle(w - tabAreaW - n, 0, n, h); break;
                 case SwingConstants.TOP:
-                default:                    g2.fillRect(0, tabAreaH, w, n);         break;
+                default:                    edge = new Rectangle(0, tabAreaH, w, n);         break;
             }
+            SwingTreeLookAndFeel.symbols().paintTabEdge(
+                    g2, SwingTreeLookAndFeel.palette(), edge, selectedTabBounds(selectedIndex), tabPlacement
+            );
         } finally {
             g2.dispose();
         }
+    }
+
+    /** @return where the selected tab is, or {@code null} when the pane has no tabs, so that a
+     *          symbol set may leave its edge open under that tab. */
+    private @Nullable Rectangle selectedTabBounds( int selectedIndex ) {
+        if ( selectedIndex < 0 || selectedIndex >= tabPane.getTabCount() )
+            return null;
+        return getTabBounds(tabPane, selectedIndex);
     }
 
     @Override
