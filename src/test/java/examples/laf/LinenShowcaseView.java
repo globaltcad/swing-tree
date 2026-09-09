@@ -27,7 +27,7 @@ public final class LinenShowcaseView
 
     /** @param args ignored */
     public static void main( String... args ) {
-        UI.show("Flaxen — Aspang Weaving Atelier · a Linen look-and-feel showcase", frame -> createView());
+        UI.show("Flaxen — Weaving Atelier · a Linen look-and-feel showcase", frame -> createView());
         EventProcessor.DECOUPLED.join();
     }
 

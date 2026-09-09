@@ -387,7 +387,7 @@ public final class AtelierView extends JPanel
             )
             .add(menu("Help").peek( m -> m.setMnemonic(KeyEvent.VK_H) )
                 .add(menuItem("About Flaxen…").onClick( it -> UI.message(
-                        "Flaxen — the order book of the Aspang weaving atelier.\n\n"
+                        "Flaxen — the order book of the weaving atelier.\n\n"
                       + "A SwingTree application, painted by the Linen look-and-feel."
                      ).titled("About Flaxen").showAsInfo() ))
             );

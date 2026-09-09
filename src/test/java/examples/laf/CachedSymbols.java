@@ -43,10 +43,19 @@ final class CachedSymbols implements Symbols
     private static final int BLEED = 8;
 
     /**
-     *  The largest tile worth storing, in device pixels. A larger symbol is mostly one flat fill,
-     *  which is what a rasterizer is fastest at, so the blit stops being the cheaper of the two.
+     *  The largest tile worth storing, in bytes, so that no single symbol may take more than an
+     *  eighth of {@link #MAX_BYTES} and crowd out the small glyphs a repaint asks for by the
+     *  dozen.
+     *  <p>
+     *  This used to be a square ceiling of 256 by 256 device pixels, on the reasoning that a
+     *  larger symbol is mostly one flat fill and a rasterizer is faster at those than a blit is.
+     *  That reasoning is about a symbol's <i>shape</i> and was written as a limit on its area,
+     *  and a scroll bar's thumb is where the two part company: at 28 by 1042 developer pixels it
+     *  is a stroked, gradient-filled rounded rectangle spanning the whole bar, nothing like a
+     *  flat fill, drawn once on every single repaint - and it missed the square ceiling by 0.06%.
+     *  It was the only symbol in the whole showcase that did.
      */
-    private static final long MAX_TILE_PIXELS = 256L * 256L;
+    private static final long MAX_TILE_BYTES = 512L * 1024L;
 
     /** How much the whole cache may hold before the least recently used tiles are dropped. */
     private static final long MAX_BYTES = 4L * 1024 * 1024;
@@ -262,7 +271,7 @@ final class CachedSymbols implements Symbols
         int  margin = Math.max(1, UI.scale(BLEED));
         int  tileW  = (int) Math.ceil((w + 2 * margin) * scaleX) + 1;
         int  tileH  = (int) Math.ceil((h + 2 * margin) * scaleY) + 1;
-        if ( (long) tileW * tileH > MAX_TILE_PIXELS ) {
+        if ( (long) tileW * tileH * 4 > MAX_TILE_BYTES ) {
             drawing.draw(g, x, y);
             return;
         }

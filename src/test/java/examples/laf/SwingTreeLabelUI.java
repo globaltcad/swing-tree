@@ -3,15 +3,20 @@ package examples.laf;
 import swingtree.api.laf.SwingTreeStyledComponentUI;
 import swingtree.style.ComponentStyleDelegate;
 
+import org.jspecify.annotations.Nullable;
+
 import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicHTML;
 import javax.swing.plaf.basic.BasicLabelUI;
+import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Insets;
 import java.awt.Rectangle;
+import java.util.Objects;
 
 /**
  *  The {@link JLabel} UI delegate. It paints no background, not even behind a selected table or
@@ -91,6 +96,129 @@ public final class SwingTreeLabelUI
 
     @Override
     public boolean canForwardPaintingToSwingTree() { return true; }
+
+    /**
+     *  Where the label's text sits, which a layout manager asks for in order to line the label up
+     *  with whatever shares its row.
+     *  <p>
+     *  The layout underneath is already remembered by {@link #layoutCL}, and that is not the whole
+     *  cost: measured over the showcase, only a twentieth of what this method spends reaches the
+     *  layout, while a third goes on {@code getFontMetrics} - resolving a font to its metrics goes
+     *  through a client property and the look and feel defaults - and the rest on setting up the
+     *  three rectangles the layout is written into. Remembering the finished answer skips all of
+     *  it, including the lookup that dominates.
+     *  <p>
+     *  Markup is never remembered, for the same reason {@link #layoutCL} does not remember it:
+     *  Swing measures markup through a document view which keeps its own measurements and discards
+     *  them on its own, and this delegate cannot see that happen.
+     */
+    @Override
+    public int getBaseline( JComponent c, int width, int height ) {
+        if ( c == null )
+            throw new NullPointerException("Component must be non-null");
+        if ( width < 0 || height < 0 )
+            throw new IllegalArgumentException("Width and height must be >= 0");
+
+        JLabel label = (JLabel) c;
+        if ( BasicHTML.isHTMLString(label.getText()) )
+            return super.getBaseline(c, width, height);
+
+        Insets insets = label.getInsets(_scratchInsets);
+        for ( Baseline remembered : _baselines ) {
+            if ( remembered != null && remembered.answers(label, width, height, insets) )
+                return remembered.baseline();
+        }
+        int baseline = super.getBaseline(c, width, height);
+        _baselines[_nextBaseline] = new Baseline(label, width, height, insets, baseline);
+        _nextBaseline = ( _nextBaseline + 1 ) % _baselines.length;
+        return baseline;
+    }
+
+    /**
+     *  Three remembered baselines, which is what it takes and no more. A layout manager asks a
+     *  component about several sizes in one pass - its minimum, its preferred, and the one it
+     *  settles on - and with fewer slots those questions evict each other. Measured over the
+     *  showcase across six fresh widths: 48.4% with one slot, 83.2% with two, and 100% with three,
+     *  with nothing further gained from a fourth.
+     */
+    private final Baseline[] _baselines     = new Baseline[3];
+    private       int        _nextBaseline  = 0;
+    private final Insets     _scratchInsets = new Insets(0, 0, 0, 0);
+
+    /**
+     *  One remembered answer of {@link #getBaseline(JComponent, int, int)}, together with every
+     *  input Swing reads to arrive at it. Only an icon's size is held, for the reason
+     *  {@link Placement} holds only a size, and the icon asked for is the one the layout would
+     *  use - a disabled label lays out its disabled icon.
+     */
+    private static final class Baseline
+    {
+        private final int              _width;
+        private final int              _height;
+        private final int              _insetTop;
+        private final int              _insetLeft;
+        private final int              _insetBottom;
+        private final int              _insetRight;
+        private final @Nullable String _text;
+        private final @Nullable Font   _font;
+        private final boolean          _enabled;
+        private final int              _iconWidth;
+        private final int              _iconHeight;
+        private final int              _verticalAlignment;
+        private final int              _horizontalAlignment;
+        private final int              _verticalTextPosition;
+        private final int              _horizontalTextPosition;
+        private final int              _iconTextGap;
+        private final boolean          _leftToRight;
+        private final int              _baseline;
+
+        Baseline( JLabel label, int width, int height, Insets insets, int baseline ) {
+            Icon icon = _laidOutIconOf(label);
+            _width                  = width;
+            _height                 = height;
+            _insetTop               = insets.top;
+            _insetLeft              = insets.left;
+            _insetBottom            = insets.bottom;
+            _insetRight             = insets.right;
+            _text                   = label.getText();
+            _font                   = label.getFont();
+            _enabled                = label.isEnabled();
+            _iconWidth              = ( icon == null ? 0 : icon.getIconWidth() );
+            _iconHeight             = ( icon == null ? 0 : icon.getIconHeight() );
+            _verticalAlignment      = label.getVerticalAlignment();
+            _horizontalAlignment    = label.getHorizontalAlignment();
+            _verticalTextPosition   = label.getVerticalTextPosition();
+            _horizontalTextPosition = label.getHorizontalTextPosition();
+            _iconTextGap            = label.getIconTextGap();
+            _leftToRight            = label.getComponentOrientation().isLeftToRight();
+            _baseline               = baseline;
+        }
+
+        boolean answers( JLabel label, int width, int height, Insets insets ) {
+            if ( _width != width || _height != height
+              || _insetTop    != insets.top    || _insetLeft  != insets.left
+              || _insetBottom != insets.bottom || _insetRight != insets.right
+              || _enabled     != label.isEnabled()
+              || _iconTextGap != label.getIconTextGap()
+              || _verticalAlignment      != label.getVerticalAlignment()
+              || _horizontalAlignment    != label.getHorizontalAlignment()
+              || _verticalTextPosition   != label.getVerticalTextPosition()
+              || _horizontalTextPosition != label.getHorizontalTextPosition()
+              || _leftToRight            != label.getComponentOrientation().isLeftToRight() )
+                return false;
+            if ( !Objects.equals(_text, label.getText()) || !Objects.equals(_font, label.getFont()) )
+                return false;
+            Icon icon = _laidOutIconOf(label);
+            return _iconWidth  == ( icon == null ? 0 : icon.getIconWidth() )
+                && _iconHeight == ( icon == null ? 0 : icon.getIconHeight() );
+        }
+
+        int baseline() { return _baseline; }
+
+        private static @Nullable Icon _laidOutIconOf( JLabel label ) {
+            return label.isEnabled() ? label.getIcon() : label.getDisabledIcon();
+        }
+    }
 
     @Override
     public ComponentStyleDelegate<JLabel> style( ComponentStyleDelegate<JLabel> it ) throws Exception {
