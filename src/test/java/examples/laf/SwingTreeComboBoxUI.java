@@ -40,11 +40,13 @@ public final class SwingTreeComboBoxUI
         JComboBox<?> combo = (JComboBox<?>) c;
         if ( combo.getEditor() != null )
             LafUtilities.repaintOnFocusChange(combo, combo.getEditor().getEditorComponent());
+        LafUtilities.repaintOnPointerChange(combo);
     }
 
     @Override
     public void uninstallUI( JComponent c ) {
         JComboBox<?> combo = (JComboBox<?>) c;
+        LafUtilities.uninstallPointerRepaint(combo);
         if ( combo.getEditor() != null )
             LafUtilities.uninstallFocusRepaint(combo, combo.getEditor().getEditorComponent());
         super.uninstallUI(c);

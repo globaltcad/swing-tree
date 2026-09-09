@@ -377,13 +377,14 @@ final class Styles
             boolean      enabled = combo.isEnabled();
             boolean      focused = enabled && LafUtilities.hasFocus(combo);
 
+            Color resting = enabled ? p.surfaceField() : p.surfaceDisabled();
             return it
                     .margin(focused ? 0 : 1)
                     .padding(4, 8, 4, 4)
                     .borderRadius(7)
                     .borderWidth(focused ? 2 : 1)
                     .borderColor(focused ? p.accent() : p.border())
-                    .backgroundColor(enabled ? p.surfaceField() : p.surfaceDisabled())
+                    .backgroundColor(LafUtilities.underPointer(p, resting, combo))
                     .foregroundColor(enabled ? p.text() : p.textDisabled());
         }
 
@@ -872,18 +873,20 @@ final class Styles
             JComboBox<?> combo   = it.component();
             boolean      enabled = combo.isEnabled();
             boolean      focused = enabled && LafUtilities.hasFocus(combo);
-            int lift = focused ? 4 : 6;
+            int   lift    = focused ? 4 : 6;
+            Color resting = enabled ? p.surface() : p.surfaceDisabled();
+            Color fill    = LafUtilities.underPointer(p, resting, combo);
             it = it
                     .margin(lift)
                     .padding(6, 10, 6, 6)
                     .borderRadius(14)
                     .borderWidth(focused ? 2 : 0)
                     .borderColor(focused ? p.accent() : SwingTreeLookAndFeel.Palette.TRANSPARENT)
-                    .backgroundColor(enabled ? p.surface() : p.surfaceDisabled())
+                    .backgroundColor(fill)
                     .foregroundColor(enabled ? p.text() : p.textDisabled());
             if ( !enabled )
                 return it;
-            return raised(curved(it, p.surface(), false), p, lift);
+            return raised(curved(it, fill, false), p, lift);
         }
 
         @SuppressWarnings("deprecation")
@@ -1303,7 +1306,8 @@ final class Styles
             JComboBox<?> combo   = it.component();
             boolean      enabled = combo.isEnabled();
             boolean      focused = enabled && LafUtilities.hasFocus(combo);
-            Color        base    = enabled ? p.surfaceField() : p.surfaceDisabled();
+            Color        base    = LafUtilities.underPointer(
+                                        p, enabled ? p.surfaceField() : p.surfaceDisabled(), combo);
             return it
                     .margin(focused ? 1 : 2)
                     .padding(5, 10, 5, 4)
@@ -1733,9 +1737,11 @@ final class Styles
          *  on the rule underneath rather than floating, and that rule thickens into the accent colour
          *  the moment the field takes focus.
          */
+        @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
         private static <C extends JComponent> ComponentStyleDelegate<C> underlined(
                 ComponentStyleDelegate<C> it, SwingTreeLookAndFeel.Palette p, boolean enabled, boolean focused, int padY, int padX, int padRight
         ) {
+            Color resting = enabled ? p.surfaceField() : p.surfaceDisabled();
             return it
                     // The rule is a border, so it grows downwards; the margin gives back what it takes.
                     .margin(0, 0, focused ? 0 : 1, 0)
@@ -1743,7 +1749,7 @@ final class Styles
                     .borderRadiusAt(UI.Corner.TOP_LEFT, RADIUS, RADIUS)
                     .borderRadiusAt(UI.Corner.TOP_RIGHT, RADIUS, RADIUS)
                     .borderAt(UI.Edge.BOTTOM, focused ? 2 : 1, focused ? p.accent() : p.border())
-                    .backgroundColor(enabled ? p.surfaceField() : p.surfaceDisabled())
+                    .backgroundColor(LafUtilities.underPointer(p, resting, it.component()))
                     .foregroundColor(enabled ? p.text() : p.textDisabled());
         }
 
@@ -2059,16 +2065,18 @@ final class Styles
          *  The hard rule every input is boxed in. Focus doubles its width and takes the accent, and
          *  the margin gives back exactly what the extra width took, so nothing shifts.
          */
+        @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
         private static <C extends JComponent> ComponentStyleDelegate<C> ruled(
             ComponentStyleDelegate<C> it, boolean enabled, boolean focused, int padY, int padX, int padRight
         ) {
             SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+            Color resting = enabled ? p.surfaceField() : p.surfaceDisabled();
             return it
                     .margin(focused ? 0 : 1)
                     .padding(padY, padRight, padY, padX)
                     .borderRadius(0)
                     .border(focused ? 2 : 1, focused ? p.accent() : p.border())
-                    .backgroundColor(enabled ? p.surfaceField() : p.surfaceDisabled())
+                    .backgroundColor(LafUtilities.underPointer(p, resting, it.component()))
                     .foregroundColor(enabled ? p.text() : p.textDisabled());
         }
 
@@ -2458,16 +2466,18 @@ final class Styles
          *  rather than from the component, and anything else would carry a rectangle of paper colour
          *  across its middle.
          */
+        @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
         private static <C extends JComponent> ComponentStyleDelegate<C> machined(
                 ComponentStyleDelegate<C> it, SwingTreeLookAndFeel.Palette p, boolean enabled, boolean focused,
                 int padY, int padX, int padRight
         ) {
+            Color resting = enabled ? p.surfaceField() : p.surfaceDisabled();
             it = it
                     .margin(3)
                     .padding(padY, padRight, padY, padX)
                     .borderRadius(RADIUS)
                     .border(1, focused ? p.accent() : p.border())
-                    .backgroundColor(enabled ? p.surfaceField() : p.surfaceDisabled())
+                    .backgroundColor(LafUtilities.underPointer(p, resting, it.component()))
                     .foregroundColor(enabled ? p.text() : p.textDisabled());
             return enabled ? well(it, 3) : it;
         }
@@ -2893,6 +2903,7 @@ final class Styles
         }
 
         /** A pane you reach into: darker than the ones you only look at, so text stands off it. */
+        @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
         private static <C extends JComponent> ComponentStyleDelegate<C> frosted(
             ComponentStyleDelegate<C> it, boolean enabled, boolean focused, int padY, int padX, int padRight
         ) {
@@ -2908,8 +2919,11 @@ final class Styles
             if ( !enabled )
                 return it.backgroundColor(LafUtilities.withOpacity(p.surfaceDisabled(), 30))
                          .borderColor(LafUtilities.withOpacity(p.border(), 40));
+            // This idiom answers the pointer the way its buttons do, by letting more of the surface
+            // through the glass rather than by moving the colour behind it.
+            int veil = WELL + 40 + ( LafUtilities.isUnderPointer(it.component()) ? 22 : 0 );
             return pane(it, WELL, 2)
-                    .backgroundColor(LafUtilities.withOpacity(p.surfaceField(), WELL + 40))
+                    .backgroundColor(LafUtilities.withOpacity(p.surfaceField(), veil))
                     .borderColor(LafUtilities.withOpacity(focused ? p.accent() : p.border(), focused ? 220 : RIM));
         }
 
@@ -3411,9 +3425,10 @@ final class Styles
             if ( combo.isEditable() )
                 return inset(it, p, enabled, focused).padding(0, 3, 0, 6);
 
-            Color        tone   = enabled ? p.surface() : p.surfaceDisabled();
+            Color        tone   = LafUtilities.underPointer(
+                                        p, enabled ? p.surface() : p.surfaceDisabled(), combo);
             NimbusRelief relief = relief(enabled, false);
-            Color        edge   = surfaceEdge(p, enabled, false, false);
+            Color        edge   = surfaceEdge(p, enabled, false, LafUtilities.isUnderPointer(combo));
             return focused(it
                     .margin(MARGIN)
                     .padding(4, 6, 4, 3)
@@ -3863,8 +3878,8 @@ final class Styles
             boolean      on    = combo.isEnabled();
             it = it.margin(4).padding(6, 4, 6, 10)
                    .foregroundColor(on ? p.text() : p.textDisabled());
-            Color fill = on ? p.surface() : p.surfaceDisabled();
-            return lift(it.borderWidth(0), fill, radiusOf(combo), STEP);
+            Color fill = LafUtilities.underPointer(p, on ? p.surface() : p.surfaceDisabled(), combo);
+            return lift(it, fill, radiusOf(combo), STEP);
         }
 
         @SuppressWarnings("deprecation")
