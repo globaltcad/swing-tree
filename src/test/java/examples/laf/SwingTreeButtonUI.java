@@ -8,6 +8,7 @@ import javax.swing.AbstractButton;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicButtonUI;
 import java.awt.Graphics;
+import java.awt.Rectangle;
 
 /**
  *  The {@link AbstractButton} UI delegate, shared by {@link javax.swing.JButton} and
@@ -41,6 +42,16 @@ public final class SwingTreeButtonUI
 
     @Override
     public void update( Graphics g, JComponent c ) { paint(g, c); }
+
+    /** Basic embosses a disabled label out of a background this look and feel does not give a
+     *  button, so the label is written in the ink the style rule chose instead. */
+    @Override
+    protected void paintText( Graphics g, AbstractButton b, Rectangle textRect, String text ) {
+        if ( b.getModel().isEnabled() || !SwingTreeLookAndFeel.styles(b.getClass()) )
+            super.paintText(g, b, textRect, text);
+        else
+            LafUtilities.paintDisabledText(g, b, textRect, text);
+    }
 
     @Override
     public boolean canForwardPaintingToSwingTree() { return true; }

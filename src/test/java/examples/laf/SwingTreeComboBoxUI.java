@@ -40,11 +40,13 @@ public final class SwingTreeComboBoxUI
         JComboBox<?> combo = (JComboBox<?>) c;
         if ( combo.getEditor() != null )
             LafUtilities.repaintOnFocusChange(combo, combo.getEditor().getEditorComponent());
+        LafUtilities.repaintOnPointerChange(combo);
     }
 
     @Override
     public void uninstallUI( JComponent c ) {
         JComboBox<?> combo = (JComboBox<?>) c;
+        LafUtilities.uninstallPointerRepaint(combo);
         if ( combo.getEditor() != null )
             LafUtilities.uninstallFocusRepaint(combo, combo.getEditor().getEditorComponent());
         super.uninstallUI(c);
@@ -194,40 +196,21 @@ public final class SwingTreeComboBoxUI
         return SwingTreeLookAndFeel.applyStyle(it);
     }
 
-    /**
-     *  A flat transparent button carrying the symbol set's drop-down arrow. It paints itself
-     *  instead of going through the style engine, because the combo box around it is already a
-     *  styled surface and a second one would draw a box around the arrow.
-     */
-    private static final class ArrowButton extends JButton
+    /** The button carrying the symbol set's drop-down arrow. */
+    private static final class ArrowButton extends ActuatorButton
     {
-        ArrowButton() {
-            setBorder(null);
-            setContentAreaFilled(false);
-            setFocusable(false);
-            setOpaque(false);
-            setRolloverEnabled(true);
-        }
-
         @Override public Dimension getPreferredSize() {
             int side = UI.scale(SwingTreeLookAndFeel.symbols().comboArrowButtonSize());
             return new Dimension(side, side);
         }
 
-        @Override public Insets getInsets() { return new Insets(0, 0, 0, 0); }
-
-
-        @Override protected void paintComponent( Graphics g ) {
+        @Override
+        void paintActuator( Graphics2D g, Symbols symbols, SwingTreeLookAndFeel.Palette palette ) {
             ButtonModel model = getModel();
-            Graphics2D  g2    = (Graphics2D) g.create();
-            try {
-                SwingTreeLookAndFeel.symbols().paintComboArrow(
-                        g2, SwingTreeLookAndFeel.palette(), getWidth(), getHeight(),
-                        isEnabled(), model.isRollover(), model.isPressed()
-                );
-            } finally {
-                g2.dispose();
-            }
+            symbols.paintComboArrow(
+                    g, palette, getWidth(), getHeight(),
+                    isEnabled(), model.isRollover(), model.isPressed()
+            );
         }
     }
 }

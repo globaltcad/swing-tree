@@ -78,21 +78,12 @@ public final class SwingTreeSpinnerUI
         return SwingTreeLookAndFeel.applyStyle(it);
     }
 
-    /** One of the two stepper buttons. It paints itself instead of going through the style
-     *  engine, because the spinner around it is already a styled surface and a second one would
-     *  draw a box around the arrow. */
-    private static final class StepperButton extends JButton
+    /** One of the two stepper buttons. */
+    private static final class StepperButton extends ActuatorButton
     {
         private final boolean _up;
 
-        StepperButton( boolean up ) {
-            _up = up;
-            setBorder(null);
-            setContentAreaFilled(false);
-            setFocusable(false);
-            setOpaque(false);
-            setRolloverEnabled(true);
-        }
+        StepperButton( boolean up ) { _up = up; }
 
         @Override public Dimension getPreferredSize() {
             Symbols symbols = SwingTreeLookAndFeel.symbols();
@@ -100,20 +91,13 @@ public final class SwingTreeSpinnerUI
                                  UI.scale(symbols.spinnerButtonHeight()));
         }
 
-        @Override public Insets getInsets() { return new Insets(0, 0, 0, 0); }
-
-
-        @Override protected void paintComponent( Graphics g ) {
+        @Override
+        void paintActuator( Graphics2D g, Symbols symbols, SwingTreeLookAndFeel.Palette palette ) {
             ButtonModel model = getModel();
-            Graphics2D  g2    = (Graphics2D) g.create();
-            try {
-                SwingTreeLookAndFeel.symbols().paintSpinnerArrow(
-                        g2, SwingTreeLookAndFeel.palette(), getWidth(), getHeight(), _up,
-                        isEnabled(), model.isRollover(), model.isPressed()
-                );
-            } finally {
-                g2.dispose();
-            }
+            symbols.paintSpinnerArrow(
+                    g, palette, getWidth(), getHeight(), _up,
+                    isEnabled(), model.isRollover(), model.isPressed()
+            );
         }
     }
 }

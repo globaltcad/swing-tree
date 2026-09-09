@@ -377,13 +377,14 @@ final class Styles
             boolean      enabled = combo.isEnabled();
             boolean      focused = enabled && LafUtilities.hasFocus(combo);
 
+            Color resting = enabled ? p.surfaceField() : p.surfaceDisabled();
             return it
                     .margin(focused ? 0 : 1)
                     .padding(4, 8, 4, 4)
                     .borderRadius(7)
                     .borderWidth(focused ? 2 : 1)
                     .borderColor(focused ? p.accent() : p.border())
-                    .backgroundColor(enabled ? p.surfaceField() : p.surfaceDisabled())
+                    .backgroundColor(LafUtilities.underPointer(p, resting, combo))
                     .foregroundColor(enabled ? p.text() : p.textDisabled());
         }
 
@@ -872,18 +873,20 @@ final class Styles
             JComboBox<?> combo   = it.component();
             boolean      enabled = combo.isEnabled();
             boolean      focused = enabled && LafUtilities.hasFocus(combo);
-            int lift = focused ? 4 : 6;
+            int   lift    = focused ? 4 : 6;
+            Color resting = enabled ? p.surface() : p.surfaceDisabled();
+            Color fill    = LafUtilities.underPointer(p, resting, combo);
             it = it
                     .margin(lift)
                     .padding(6, 10, 6, 6)
                     .borderRadius(14)
                     .borderWidth(focused ? 2 : 0)
                     .borderColor(focused ? p.accent() : SwingTreeLookAndFeel.Palette.TRANSPARENT)
-                    .backgroundColor(enabled ? p.surface() : p.surfaceDisabled())
+                    .backgroundColor(fill)
                     .foregroundColor(enabled ? p.text() : p.textDisabled());
             if ( !enabled )
                 return it;
-            return raised(curved(it, p.surface(), false), p, lift);
+            return raised(curved(it, fill, false), p, lift);
         }
 
         @SuppressWarnings("deprecation")
@@ -1303,7 +1306,8 @@ final class Styles
             JComboBox<?> combo   = it.component();
             boolean      enabled = combo.isEnabled();
             boolean      focused = enabled && LafUtilities.hasFocus(combo);
-            Color        base    = enabled ? p.surfaceField() : p.surfaceDisabled();
+            Color        base    = LafUtilities.underPointer(
+                                        p, enabled ? p.surfaceField() : p.surfaceDisabled(), combo);
             return it
                     .margin(focused ? 1 : 2)
                     .padding(5, 10, 5, 4)
@@ -1663,12 +1667,15 @@ final class Styles
             SwingTreeLookAndFeel.Variant variant   = SwingTreeLookAndFeel.Variant.of(b);
             boolean contained = variant.isFilled();
 
+            boolean outlined = !contained && variant != SwingTreeLookAndFeel.Variant.QUIET;
             it = it
+                    // The ring grows into the margin, so taking focus never moves the row.
                     .margin(focused ? 1 : 2)
                     .padding(8, 16, 8, 16)
                     .borderRadius(RADIUS)
-                    .borderWidth(focused ? 2 : ( contained || variant == SwingTreeLookAndFeel.Variant.QUIET ? 0 : 1 ))
-                    .borderColor(focused ? p.accent() : p.border())
+                    .borderWidth(focused ? 2 : 1)
+                    .borderColor(focused ? p.accent()
+                                         : outlined ? p.border() : SwingTreeLookAndFeel.Palette.TRANSPARENT)
                     .backgroundColor(fill(variant, p, enabled, sunken, rollover))
                     .foregroundColor(ink(variant, p, enabled));
 
@@ -1730,9 +1737,11 @@ final class Styles
          *  on the rule underneath rather than floating, and that rule thickens into the accent colour
          *  the moment the field takes focus.
          */
+        @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
         private static <C extends JComponent> ComponentStyleDelegate<C> underlined(
                 ComponentStyleDelegate<C> it, SwingTreeLookAndFeel.Palette p, boolean enabled, boolean focused, int padY, int padX, int padRight
         ) {
+            Color resting = enabled ? p.surfaceField() : p.surfaceDisabled();
             return it
                     // The rule is a border, so it grows downwards; the margin gives back what it takes.
                     .margin(0, 0, focused ? 0 : 1, 0)
@@ -1740,7 +1749,7 @@ final class Styles
                     .borderRadiusAt(UI.Corner.TOP_LEFT, RADIUS, RADIUS)
                     .borderRadiusAt(UI.Corner.TOP_RIGHT, RADIUS, RADIUS)
                     .borderAt(UI.Edge.BOTTOM, focused ? 2 : 1, focused ? p.accent() : p.border())
-                    .backgroundColor(enabled ? p.surfaceField() : p.surfaceDisabled())
+                    .backgroundColor(LafUtilities.underPointer(p, resting, it.component()))
                     .foregroundColor(enabled ? p.text() : p.textDisabled());
         }
 
@@ -1994,7 +2003,7 @@ final class Styles
                     // The focus ring grows into the footprint the margin was holding, so a button
                     // taking focus never moves the row it sits in.
                     .margin(focused ? 0 : 2)
-                    .padding(focused ? 7 : 9, focused ? 16 : 18, focused ? 7 : 9, focused ? 16 : 18)
+                    .padding(9, 18, 9, 18)
                     .borderRadius(0)
                     .borderWidth(focused ? 2 : 0)
                     .borderColor(focused ? p.accent() : SwingTreeLookAndFeel.Palette.TRANSPARENT)
@@ -2056,16 +2065,18 @@ final class Styles
          *  The hard rule every input is boxed in. Focus doubles its width and takes the accent, and
          *  the margin gives back exactly what the extra width took, so nothing shifts.
          */
+        @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
         private static <C extends JComponent> ComponentStyleDelegate<C> ruled(
             ComponentStyleDelegate<C> it, boolean enabled, boolean focused, int padY, int padX, int padRight
         ) {
             SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+            Color resting = enabled ? p.surfaceField() : p.surfaceDisabled();
             return it
                     .margin(focused ? 0 : 1)
                     .padding(padY, padRight, padY, padX)
                     .borderRadius(0)
                     .border(focused ? 2 : 1, focused ? p.accent() : p.border())
-                    .backgroundColor(enabled ? p.surfaceField() : p.surfaceDisabled())
+                    .backgroundColor(LafUtilities.underPointer(p, resting, it.component()))
                     .foregroundColor(enabled ? p.text() : p.textDisabled());
         }
 
@@ -2455,16 +2466,18 @@ final class Styles
          *  rather than from the component, and anything else would carry a rectangle of paper colour
          *  across its middle.
          */
+        @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
         private static <C extends JComponent> ComponentStyleDelegate<C> machined(
                 ComponentStyleDelegate<C> it, SwingTreeLookAndFeel.Palette p, boolean enabled, boolean focused,
                 int padY, int padX, int padRight
         ) {
+            Color resting = enabled ? p.surfaceField() : p.surfaceDisabled();
             it = it
                     .margin(3)
                     .padding(padY, padRight, padY, padX)
                     .borderRadius(RADIUS)
                     .border(1, focused ? p.accent() : p.border())
-                    .backgroundColor(enabled ? p.surfaceField() : p.surfaceDisabled())
+                    .backgroundColor(LafUtilities.underPointer(p, resting, it.component()))
                     .foregroundColor(enabled ? p.text() : p.textDisabled());
             return enabled ? well(it, 3) : it;
         }
@@ -2890,12 +2903,15 @@ final class Styles
         }
 
         /** A pane you reach into: darker than the ones you only look at, so text stands off it. */
+        @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
         private static <C extends JComponent> ComponentStyleDelegate<C> frosted(
             ComponentStyleDelegate<C> it, boolean enabled, boolean focused, int padY, int padX, int padRight
         ) {
             SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
             it = it
-                    .margin(3)
+                    // The thicker focused edge is taken out of the margin, so a field keeps its
+                    // footprint when you click into it.
+                    .margin(focused ? 2 : 3)
                     .padding(padY, padRight, padY, padX)
                     .borderRadius(RADIUS - 5)
                     .borderWidth(focused ? 2 : 1)
@@ -2903,8 +2919,11 @@ final class Styles
             if ( !enabled )
                 return it.backgroundColor(LafUtilities.withOpacity(p.surfaceDisabled(), 30))
                          .borderColor(LafUtilities.withOpacity(p.border(), 40));
+            // This idiom answers the pointer the way its buttons do, by letting more of the surface
+            // through the glass rather than by moving the colour behind it.
+            int veil = WELL + 40 + ( LafUtilities.isUnderPointer(it.component()) ? 22 : 0 );
             return pane(it, WELL, 2)
-                    .backgroundColor(LafUtilities.withOpacity(p.surfaceField(), WELL + 40))
+                    .backgroundColor(LafUtilities.withOpacity(p.surfaceField(), veil))
                     .borderColor(LafUtilities.withOpacity(focused ? p.accent() : p.border(), focused ? 220 : RIM));
         }
 
@@ -3345,12 +3364,14 @@ final class Styles
 
             SwingTreeLookAndFeel.Variant variant = SwingTreeLookAndFeel.Variant.of(b);
             if ( variant == SwingTreeLookAndFeel.Variant.QUIET && !sunken && !rollover )
-                return it
+                return focused(it
                         .margin(MARGIN)
                         .padding(6, 14, 6, 14)
                         .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
-                        .borderWidth(0)
-                        .foregroundColor(enabled ? p.text() : p.textDisabled());
+                        // The edge the loud states draw is reserved here too, and left unpainted,
+                        // so a tool bar button keeps its size when the pointer arrives.
+                        .border(1, SwingTreeLookAndFeel.Palette.TRANSPARENT)
+                        .foregroundColor(enabled ? p.text() : p.textDisabled()), p, focused);
 
             Color        tone   = tone(p, variant, enabled, sunken, rollover, isDefault);
             NimbusRelief relief = relief(enabled, isDefault || variant.isFilled());
@@ -3404,9 +3425,10 @@ final class Styles
             if ( combo.isEditable() )
                 return inset(it, p, enabled, focused).padding(0, 3, 0, 6);
 
-            Color        tone   = enabled ? p.surface() : p.surfaceDisabled();
+            Color        tone   = LafUtilities.underPointer(
+                                        p, enabled ? p.surface() : p.surfaceDisabled(), combo);
             NimbusRelief relief = relief(enabled, false);
-            Color        edge   = surfaceEdge(p, enabled, false, false);
+            Color        edge   = surfaceEdge(p, enabled, false, LafUtilities.isUnderPointer(combo));
             return focused(it
                     .margin(MARGIN)
                     .padding(4, 6, 4, 3)
@@ -3714,7 +3736,7 @@ final class Styles
             switch ( Mood.of(p) ) {
                 case RELIEF:
                     return it
-                            .borderWidth(0)
+                            .border(1, SwingTreeLookAndFeel.Palette.TRANSPARENT)
                             .shadow(LIT,  s -> s.color(LafUtilities.shadeBySteps(p.background(), LIGHT_STEP))
                                                 .offset(-off, -off).blurRadius(lift)
                                                 .falloff(UI.ShadowFalloff.GLOW).isInset(false))
@@ -3730,7 +3752,7 @@ final class Styles
                 case SHEET:
                 default:
                     return it
-                            .borderWidth(0)
+                            .border(1, SwingTreeLookAndFeel.Palette.TRANSPARENT)
                             .shadow(DROP, s -> s.color(LafUtilities.withOpacity(p.text(), 46))
                                                 .offset(0, off).blurRadius(lift + 1).spreadRadius(-1)
                                                 .falloff(UI.ShadowFalloff.BLUR).isInset(false));
@@ -3739,21 +3761,34 @@ final class Styles
 
         /** The same three answers for a surface that has to read as something you reach into. */
         private static <C extends JComponent> ComponentStyleDelegate<C> recess(
-            ComponentStyleDelegate<C> it, Color fill, int radius, boolean focused
+            ComponentStyleDelegate<C> it, Color fill, int radius
         ) {
             SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
             it = it.backgroundColor(fill).borderRadius(radius);
             if ( Mood.of(p) == Mood.RELIEF )
                 return it
-                        .borderWidth(focused ? 2 : 0)
-                        .borderColor(focused ? p.accent() : SwingTreeLookAndFeel.Palette.TRANSPARENT)
+                        .border(1, SwingTreeLookAndFeel.Palette.TRANSPARENT)
                         .shadow(DROP, s -> s.color(LafUtilities.shadeBySteps(p.background(), -SHADE_STEP / 2))
                                             .offset(3, 3).blurRadius(6)
                                             .falloff(UI.ShadowFalloff.PENUMBRA).isInset(true))
                         .shadow(LIT,  s -> s.color(LafUtilities.shadeBySteps(p.background(), LIGHT_STEP / 2))
                                             .offset(-3, -3).blurRadius(6)
                                             .falloff(UI.ShadowFalloff.PENUMBRA).isInset(true));
-            return it.border(focused ? 2 : 1, focused ? p.accent() : p.border());
+            return it.border(1, p.border());
+        }
+
+        /**
+         *  Rings a control that has the keyboard. It is a hard-edged shadow rather than a thicker
+         *  border, so the ring grows outwards into the margin every control here already keeps and
+         *  the label underneath it never moves.
+         */
+        private static <C extends JComponent> ComponentStyleDelegate<C> focused(
+            ComponentStyleDelegate<C> it, SwingTreeLookAndFeel.Palette p, boolean focused
+        ) {
+            if ( !focused )
+                return it;
+            return it.shadow("focus", s -> s.color(LafUtilities.withOpacity(p.accent(), 190))
+                                            .blurRadius(0).spreadRadius(2).isInset(false));
         }
 
         // ── Surfaces ─────────────────────────────────────────────────────────
@@ -3790,7 +3825,7 @@ final class Styles
                 }
                 case RAIL:        return it.backgroundColor(p.surface()).borderWidth(0).borderRadius(0).padding(0);
                 case WINDOW:
-                default:          return recess(it.margin(3).padding(3), p.surfaceField(), MAX_RADIUS - 4, false);
+                default:          return recess(it.margin(3).padding(3), p.surfaceField(), MAX_RADIUS - 4);
             }
         }
 
@@ -3812,19 +3847,18 @@ final class Styles
             int     radius  = radiusOf(b);
             Color   fill    = fill(variant, p, enabled, sunken, rollover);
 
-            it = it
+            it = focused(it
                     .margin(4)
                     .padding(7, 16, 7, 16)
                     .borderRadius(radius)
-                    .borderWidth(focused ? 2 : 0)
-                    .borderColor(focused ? p.accent() : SwingTreeLookAndFeel.Palette.TRANSPARENT)
+                    .border(1, SwingTreeLookAndFeel.Palette.TRANSPARENT)
                     .backgroundColor(fill)
-                    .foregroundColor(ink(variant, p, enabled));
+                    .foregroundColor(ink(variant, p, enabled)), p, focused);
 
             if ( !enabled || ( variant == SwingTreeLookAndFeel.Variant.QUIET && !sunken && !rollover ) )
                 return it;
             if ( sunken )
-                return recess(it, fill, radius, focused);
+                return recess(it, fill, radius);
             return lift(it, fill, radius, rollover ? STEP + 2 : STEP);
         }
 
@@ -3844,8 +3878,8 @@ final class Styles
             boolean      on    = combo.isEnabled();
             it = it.margin(4).padding(6, 4, 6, 10)
                    .foregroundColor(on ? p.text() : p.textDisabled());
-            Color fill = on ? p.surface() : p.surfaceDisabled();
-            return lift(it.borderWidth(0), fill, radiusOf(combo), STEP);
+            Color fill = LafUtilities.underPointer(p, on ? p.surface() : p.surfaceDisabled(), combo);
+            return lift(it, fill, radiusOf(combo), STEP);
         }
 
         @SuppressWarnings("deprecation")
@@ -3884,8 +3918,8 @@ final class Styles
                         .foregroundColor(text.isEnabled() ? p.text() : p.textDisabled());
             it = it.margin(4).padding(padY, padX, padY, padX)
                    .foregroundColor(text.isEnabled() ? p.text() : p.textDisabled());
-            return recess(it, editable ? p.surfaceField() : p.surfaceDisabled(),
-                          radiusOf(text), editable && text.isFocusOwner());
+            return focused(recess(it, editable ? p.surfaceField() : p.surfaceDisabled(), radiusOf(text)),
+                           p, editable && text.isFocusOwner());
         }
 
         // ── The rest ─────────────────────────────────────────────────────────
@@ -3941,7 +3975,7 @@ final class Styles
             SwingTreeLookAndFeel.Palette p   = SwingTreeLookAndFeel.palette();
             JProgressBar bar = it.component();
             return recess(it.margin(2).foregroundColor(p.accent()),
-                          Mood.of(p) == Mood.RELIEF ? p.background() : p.accentSoft(), radiusOf(bar), false);
+                          Mood.of(p) == Mood.RELIEF ? p.background() : p.accentSoft(), radiusOf(bar));
         }
 
         private static ComponentStyleDelegate<JScrollBar> scrollBar( ComponentStyleDelegate<JScrollBar> it ) {

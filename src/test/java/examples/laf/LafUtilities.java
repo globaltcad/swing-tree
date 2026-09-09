@@ -8,6 +8,7 @@ import swingtree.UI;
 import swingtree.api.Painter;
 import swingtree.style.ComponentExtension;
 
+import javax.swing.AbstractButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -16,19 +17,26 @@ import javax.swing.SwingUtilities;
 import javax.swing.JViewport;
 import javax.swing.UIManager;
 import javax.swing.event.CaretListener;
+import javax.swing.plaf.basic.BasicGraphicsUtils;
 import javax.swing.text.JTextComponent;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.FontMetrics;
 import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.LinearGradientPaint;
 import java.awt.Paint;
+import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
+import java.awt.event.ContainerEvent;
+import java.awt.event.ContainerListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.Map;
@@ -150,6 +158,67 @@ final class LafUtilities
 
     private static double clamp01( double value ) { return Math.max(0, Math.min(1, value)); }
 
+    /**
+     *  Moves a colour by the step the palette puts between {@link SwingTreeLookAndFeel.Palette#surface()}
+     *  and {@link SwingTreeLookAndFeel.Palette#surfaceHover()}, which is what that theme says a
+     *  surface does when the pointer arrives over it.
+     *  <p>
+     *  Taking the step rather than the destination lets a field, a heading and a panel each answer
+     *  the pointer by the same amount from wherever each of them starts, and lets a dark theme
+     *  answer by lightening while a light one darkens.
+     *  <p>
+     *  A component no {@link #repaintOnPointerChange} tracks is never under the pointer, so a rule
+     *  may hand every control it styles through here and only the tracked ones light up.
+     *
+     * @param p the palette whose hover step is read
+     * @param resting the colour the surface wears while the pointer is elsewhere
+     * @param c the component the rule is styling
+     * @return {@code resting} moved by that step while the pointer is over {@code c}, and
+     *         {@code resting} itself otherwise
+     */
+    static Color underPointer( SwingTreeLookAndFeel.Palette p, Color resting, JComponent c ) {
+        return isUnderPointer(c) ? underPointer(p, resting) : resting;
+    }
+
+    /**
+     *  The same step, applied unconditionally, for a caller that has already established where the
+     *  pointer is: a {@link Symbols} glyph is handed a rectangle rather than a component, so it
+     *  cannot ask.
+     *
+     * @param p the palette whose hover step is read
+     * @param resting the colour the surface wears while the pointer is elsewhere
+     * @return {@code resting} moved by that step, with its own opacity kept
+     */
+    static Color underPointer( SwingTreeLookAndFeel.Palette p, Color resting ) {
+        Color from = p.surface();
+        Color to   = p.surfaceHover();
+        int   red   = to.getRed()   - from.getRed();
+        int   green = to.getGreen() - from.getGreen();
+        int   blue  = to.getBlue()  - from.getBlue();
+        // A surface already at the end of the range the step travels towards - a white field in a
+        // theme whose surfaces answer by lightening - has nowhere to go, and covers the same
+        // distance the other way instead.
+        if ( leavesTheRange(resting.getRed(), red)
+          || leavesTheRange(resting.getGreen(), green)
+          || leavesTheRange(resting.getBlue(), blue) ) {
+            red   = -red;
+            green = -green;
+            blue  = -blue;
+        }
+        return new Color(
+                clampByte(resting.getRed()   + red),
+                clampByte(resting.getGreen() + green),
+                clampByte(resting.getBlue()  + blue),
+                resting.getAlpha()
+            );
+    }
+
+    private static boolean leavesTheRange( int channel, int step ) {
+        return channel + step < 0 || channel + step > 255;
+    }
+
+    private static int clampByte( int channel ) { return Math.max(0, Math.min(255, channel)); }
+
     /** The same colour at a different opacity, from 0 to 255. */
     static Color withOpacity( Color base, int alpha ) {
         return new Color(base.getRed(), base.getGreen(), base.getBlue(), Math.max(0, Math.min(255, alpha)));
@@ -196,6 +265,31 @@ final class LafUtilities
         Container parent = c.getParent();
         if ( wasOpaque && !c.isOpaque() && parent != null )
             parent.repaint(c.getX(), c.getY(), c.getWidth(), c.getHeight());
+    }
+
+    /**
+     *  Draws the label of a button, a check box or a radio button whose model is disabled.
+     *  <p>
+     *  {@code BasicButtonUI.paintText} embosses that label out of the button's own background, by
+     *  writing it twice in that background lightened and then darkened. A control this look and
+     *  feel styles has no background to emboss from - a check box's is fully transparent, so both
+     *  passes are drawn in nothing and the label does not appear at all. The style rule for a
+     *  disabled control already names the ink it wants, and the component is wearing it, so this
+     *  writes the label once in the component's own foreground.
+     *
+     * @param g the context the button is being painted on
+     * @param b the button whose label this is
+     * @param textRect where the label goes, as the button's own layout worked it out
+     * @param text the label, already clipped to fit
+     */
+    static void paintDisabledText( Graphics g, AbstractButton b, Rectangle textRect, String text ) {
+        FontMetrics fm = g.getFontMetrics(b.getFont());
+        g.setColor(b.getForeground());
+        // The overload that takes the button as well arrived in Java 9, and these examples are
+        // compiled at source level 8.
+        BasicGraphicsUtils.drawStringUnderlineCharAt(
+                g, text, b.getDisplayedMnemonicIndex(), textRect.x, textRect.y + fm.getAscent()
+        );
     }
 
     /** Turns on shape antialiasing, which every symbol wants and none of them want to repeat. */
@@ -475,9 +569,93 @@ final class LafUtilities
         target.putClientProperty(UI_SCALE_ACTION, null);
     }
 
+    /**
+     *  Repaints {@code target} when the pointer arrives over it and again when the pointer leaves,
+     *  and remembers which of the two happened last so that a style rule can ask
+     *  {@link #isUnderPointer(JComponent)}.
+     *  <p>
+     *  Swing tracks this for a button, in the rollover flag on its model, and for nothing else. A
+     *  control built out of several components would also stop being under the pointer the moment
+     *  the pointer reached one of its own parts - a combo box's actuator, a spinner's steppers - so
+     *  the parts are followed along with the whole, and so are parts put in later.
+     *
+     * @param target the component whose style asks where the pointer is
+     */
+    static void repaintOnPointerChange( JComponent target ) {
+        if ( target.getClientProperty(POINTER_TRACKER) != null )
+            return;
+        PointerTracker tracker = new PointerTracker(target);
+        target.putClientProperty(POINTER_TRACKER, tracker);
+        tracker.follow(target);
+    }
+
+    /** Undoes {@link #repaintOnPointerChange}. */
+    static void uninstallPointerRepaint( JComponent target ) {
+        Object stored = target.getClientProperty(POINTER_TRACKER);
+        if ( stored instanceof PointerTracker )
+            ((PointerTracker) stored).release(target);
+        target.putClientProperty(POINTER_TRACKER, null);
+    }
+
+    /**
+     * @param target a component {@link #repaintOnPointerChange} was installed on
+     * @return whether the pointer is over {@code target} or over one of the parts it is built from,
+     *         and {@code false} for a component nothing is tracking
+     */
+    static boolean isUnderPointer( JComponent target ) {
+        Object stored = target.getClientProperty(POINTER_TRACKER);
+        return stored instanceof PointerTracker && ((PointerTracker) stored).isOver();
+    }
+
+    private static final class PointerTracker extends MouseAdapter implements ContainerListener
+    {
+        private final JComponent _target;
+        private       boolean    _over;
+
+        PointerTracker( JComponent target ) { _target = target; }
+
+        boolean isOver() { return _over; }
+
+        void follow( Component part ) {
+            part.addMouseListener(this);
+            if ( !(part instanceof Container) )
+                return;
+            Container container = (Container) part;
+            container.addContainerListener(this);
+            for ( Component child : container.getComponents() )
+                follow(child);
+        }
+
+        void release( Component part ) {
+            part.removeMouseListener(this);
+            if ( !(part instanceof Container) )
+                return;
+            Container container = (Container) part;
+            container.removeContainerListener(this);
+            for ( Component child : container.getComponents() )
+                release(child);
+        }
+
+        @Override public void componentAdded( ContainerEvent e )   { follow(e.getChild()); }
+        @Override public void componentRemoved( ContainerEvent e ) { release(e.getChild()); }
+
+        // Crossing from the control onto one of its parts arrives as a leaving and an arriving in
+        // the same batch, which Swing folds into one repaint.
+        @Override public void mouseEntered( MouseEvent e ) { _pointerIsOver(true); }
+        @Override public void mouseExited( MouseEvent e )  { _pointerIsOver(false); }
+
+        private void _pointerIsOver( boolean over ) {
+            if ( _over == over )
+                return;
+            _over = over;
+            _target.repaint();
+        }
+    }
+
     // Each key guards against a second installUI(..) stacking listeners, and is the handle the
     // matching uninstall method removes them by.
     private static final String FOCUS_LISTENER     = "swingtree.laf.focusRepaint.listener";
     private static final String SELECTION_LISTENER = "swingtree.laf.selectionRepaint.listener";
     private static final String UI_SCALE_ACTION    = "swingtree.laf.uiScaleRescale.action";
+    private static final String POINTER_TRACKER    = "swingtree.laf.pointerRepaint.tracker";
 }
