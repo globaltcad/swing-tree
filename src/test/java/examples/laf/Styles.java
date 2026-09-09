@@ -27,6 +27,62 @@ final class Styles
 
 
     /**
+     *  Draws the handle a floatable tool bar is dragged by, on the tool bar's content layer. It
+     *  is a named painter rather than a lambda because a style rule runs on every paint, and a
+     *  capturing lambda is a new object each time, which would tell the style engine the tool
+     *  bar's style had changed. Two of these compare equal whenever they would draw the same
+     *  thing.
+     */
+    private static final class DragHandlePainter implements Painter
+    {
+        private final JToolBar _bar;
+        private final boolean  _floatable;
+        private final int      _orientation;
+
+        DragHandlePainter( JToolBar bar ) {
+            _bar         = bar;
+            _floatable   = bar.isFloatable();
+            _orientation = bar.getOrientation();
+        }
+
+        @Override
+        public void paint( Graphics2D g ) {
+            if ( !_floatable )
+                return;
+            Graphics2D scratch = (Graphics2D) g.create();
+            try {
+                SwingTreeLookAndFeel.symbols().paintDragHandle(
+                        scratch, SwingTreeLookAndFeel.palette(),
+                        _bar.getWidth(), _bar.getHeight(),
+                        _orientation == JToolBar.HORIZONTAL
+                );
+            } finally {
+                scratch.dispose();
+            }
+        }
+
+        @Override
+        public boolean equals( Object other ) {
+            if ( this == other ) return true;
+            if ( !(other instanceof DragHandlePainter) ) return false;
+            DragHandlePainter that = (DragHandlePainter) other;
+            return this._bar == that._bar
+                && this._floatable == that._floatable
+                && this._orientation == that._orientation;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(System.identityHashCode(_bar), _floatable, _orientation);
+        }
+
+        @Override
+        public String toString() {
+            return getClass().getSimpleName() + "[floatable=" + _floatable + ", orientation=" + _orientation + "]";
+        }
+    }
+
+    /**
      *  <b>Linen</b>: a calm, paper-like theme of cream surfaces, taupe borders and a woven grain on
      *  the window. A control that takes focus grows its border and gives the same amount back from
      *  its margin, so tabbing through a form never shifts the layout around it.
@@ -527,62 +583,6 @@ final class Styles
 
         private static Color shadowOf( Color base, int alpha ) {
             return new Color(base.getRed(), base.getGreen(), base.getBlue(), alpha);
-        }
-
-        /**
-         *  Draws the handle a floatable tool bar is dragged by, on the tool bar's content layer. It
-         *  is a named painter rather than a lambda because a style rule runs on every paint, and a
-         *  capturing lambda is a new object each time, which would tell the style engine the tool
-         *  bar's style had changed. Two of these compare equal whenever they would draw the same
-         *  thing.
-         */
-        private static final class DragHandlePainter implements Painter
-        {
-            private final JToolBar _bar;
-            private final boolean  _floatable;
-            private final int      _orientation;
-
-            DragHandlePainter( JToolBar bar ) {
-                _bar         = bar;
-                _floatable   = bar.isFloatable();
-                _orientation = bar.getOrientation();
-            }
-
-            @Override
-            public void paint( Graphics2D g ) {
-                if ( !_floatable )
-                    return;
-                Graphics2D scratch = (Graphics2D) g.create();
-                try {
-                    SwingTreeLookAndFeel.symbols().paintDragHandle(
-                            scratch, SwingTreeLookAndFeel.palette(),
-                            _bar.getWidth(), _bar.getHeight(),
-                            _orientation == JToolBar.HORIZONTAL
-                    );
-                } finally {
-                    scratch.dispose();
-                }
-            }
-
-            @Override
-            public boolean equals( Object other ) {
-                if ( this == other ) return true;
-                if ( !(other instanceof DragHandlePainter) ) return false;
-                DragHandlePainter that = (DragHandlePainter) other;
-                return this._bar == that._bar
-                    && this._floatable == that._floatable
-                    && this._orientation == that._orientation;
-            }
-
-            @Override
-            public int hashCode() {
-                return Objects.hash(System.identityHashCode(_bar), _floatable, _orientation);
-            }
-
-            @Override
-            public String toString() {
-                return getClass().getSimpleName() + "[floatable=" + _floatable + ", orientation=" + _orientation + "]";
-            }
         }
     }
 
@@ -3115,11 +3115,38 @@ final class Styles
     {
         private Nimbus() {}
 
-        /** The corner radius of everything that has one, in developer pixels. */
-        private static final int RADIUS = 5;
+        /** The corner radius of everything that has one, in developer pixels. {@link Symbols.Nimbus}
+         *  reads it too, so that an actuator standing against a rounded outline is cut to the same
+         *  curve rather than squared off across it. */
+        static final int RADIUS = 5;
 
-        /** The room kept around a control for its focus ring and the shadow it drops. */
-        private static final int MARGIN = 2;
+        /**
+         *  The room kept outside a control's outline for the ring it wears while focused. Nimbus
+         *  paints a control right out to its own bounds, so every pixel spent here is a pixel of
+         *  the control that is not painted: one is what the ring needs and therefore all it gets.
+         */
+        private static final int MARGIN = 1;
+
+        /**
+         *  What a button keeps between its label and its outline, vertically and then horizontally.
+         *  Nimbus lays a button out to its {@code Button.contentMargins} of six by fourteen, which
+         *  is measured from the component's edge and therefore has to lose the {@link #MARGIN} and
+         *  the pixel of outline that stand outside the padding here.
+         */
+        private static final int PAD_Y = 6 - MARGIN - 1;
+        private static final int PAD_X = 14 - MARGIN - 1;
+
+        /** What a button on a tool bar keeps beside its label instead, which is a good deal less.
+         *  Nimbus sets a row of tool bar buttons close enough together to read as one strip, where
+         *  the same buttons on a form read as separate things. */
+        private static final int TOOL_PAD_X = 5;
+
+        /** What anything you can type into keeps between its text and its outline, from Nimbus's
+         *  {@code TextField.contentMargins} of six all round, measured the same way. */
+        private static final int FIELD_PAD = 6 - MARGIN - 1;
+
+        /** The same for a combo box, which Nimbus lays out two pixels shorter than a text field. */
+        private static final int COMBO_PAD = 4 - MARGIN - 1;
 
         private static final Tuple<StyleRule> RULES = Tuple.of(
             StyleRule.of(JPanel.class,         Nimbus::panel),
@@ -3281,13 +3308,7 @@ final class Styles
         ) {
             if ( !focused )
                 return it;
-            return it.shadow("focus", s -> s.color(focusRing(p)).blurRadius(0).spreadRadius(2).isInset(false));
-        }
-
-        /** The soft contact shadow a raised control drops on the panel it stands on. */
-        private static <C extends JComponent> ComponentStyleDelegate<C> lifted( ComponentStyleDelegate<C> it, SwingTreeLookAndFeel.Palette p ) {
-            return it.shadow("lift", s -> s.color(LafUtilities.withOpacity(p.border(), 90))
-                                           .offset(0, 1).blurRadius(2).isInset(false));
+            return it.shadow("focus", s -> s.color(focusRing(p)).blurRadius(0).spreadRadius(MARGIN).isInset(false));
         }
 
         // ── Surfaces ─────────────────────────────────────────────────────────
@@ -3330,7 +3351,7 @@ final class Styles
                     .backgroundColor(p.surfaceField())
                     .border(1, p.border())
                     .borderRadius(RADIUS)
-                    .padding(3);
+                    .padding(2);
         }
 
         @SuppressWarnings("deprecation")
@@ -3363,10 +3384,16 @@ final class Styles
             boolean isDefault = b instanceof JButton && ((JButton) b).isDefaultButton();
 
             SwingTreeLookAndFeel.Variant variant = SwingTreeLookAndFeel.Variant.of(b);
+            // Nimbus leaves a tool bar's buttons unpainted until the pointer is on one, which is
+            // what the quiet variant already means, so a tool bar makes its buttons quiet.
+            boolean onToolBar = b.getParent() instanceof JToolBar;
+            if ( variant == SwingTreeLookAndFeel.Variant.NEUTRAL && onToolBar )
+                variant = SwingTreeLookAndFeel.Variant.QUIET;
+            int padX = onToolBar ? TOOL_PAD_X : PAD_X;
             if ( variant == SwingTreeLookAndFeel.Variant.QUIET && !sunken && !rollover )
                 return focused(it
                         .margin(MARGIN)
-                        .padding(6, 14, 6, 14)
+                        .padding(PAD_Y, padX, PAD_Y, padX)
                         .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
                         // The edge the loud states draw is reserved here too, and left unpainted,
                         // so a tool bar button keeps its size when the pointer arrives.
@@ -3380,7 +3407,7 @@ final class Styles
                                               : surfaceEdge(p, enabled, sunken, rollover);
             it = it
                     .margin(MARGIN)
-                    .padding(6, 14, 6, 14)
+                    .padding(PAD_Y, padX, PAD_Y, padX)
                     .borderRadius(RADIUS)
                     .border(1, edge)
                     .borderAt(UI.Edge.BOTTOM, 1, enabled ? contactEdge(edge) : edge)
@@ -3388,8 +3415,7 @@ final class Styles
                     .gradient("relief", g -> relief.over(g, tone))
                     .foregroundColor(ink(p, variant, enabled));
 
-            it = focused(it, p, focused);
-            return enabled && !sunken ? lifted(it, p) : it;
+            return focused(it, p, focused);
         }
 
         private static Color ink(SwingTreeLookAndFeel.Palette p, SwingTreeLookAndFeel.Variant variant, boolean enabled ) {
@@ -3407,8 +3433,8 @@ final class Styles
             SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
             C       b = it.component();
             return focused(it, p, b.isEnabled() && b.isFocusOwner())
-                    .margin(MARGIN)
-                    .padding(2, 3, 2, 3)
+                    .margin(0)
+                    .padding(0)
                     .borderRadius(RADIUS)
                     .borderWidth(0)
                     .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
@@ -3423,15 +3449,17 @@ final class Styles
             boolean      focused = enabled && LafUtilities.hasFocus(combo);
 
             if ( combo.isEditable() )
-                return inset(it, p, enabled, focused).padding(0, 3, 0, 6);
+                return inset(it, p, enabled, focused).padding(0);
 
             Color        tone   = LafUtilities.underPointer(
                                         p, enabled ? p.surface() : p.surfaceDisabled(), combo);
             NimbusRelief relief = relief(enabled, false);
             Color        edge   = surfaceEdge(p, enabled, false, LafUtilities.isUnderPointer(combo));
+            // No padding on the right: the actuator is laid out inside the padding and Nimbus runs
+            // it right up to the outline.
             return focused(it
                     .margin(MARGIN)
-                    .padding(4, 6, 4, 3)
+                    .padding(COMBO_PAD, 0, COMBO_PAD, FIELD_PAD)
                     .borderRadius(RADIUS)
                     .border(1, edge)
                     .borderAt(UI.Edge.BOTTOM, 1, enabled ? contactEdge(edge) : edge)
@@ -3445,7 +3473,7 @@ final class Styles
             SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
             JSpinner spinner = it.component();
             boolean  enabled = spinner.isEnabled();
-            return inset(it, p, enabled, enabled && LafUtilities.hasFocus(spinner)).padding(0, 3, 0, 6);
+            return inset(it, p, enabled, enabled && LafUtilities.hasFocus(spinner)).padding(0);
         }
 
         // ── Inputs ───────────────────────────────────────────────────────────
@@ -3471,7 +3499,7 @@ final class Styles
                         .margin(0).padding(2, 6, 2, 6).borderWidth(0)
                         .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
                         .foregroundColor(text.isEnabled() ? p.text() : p.textDisabled());
-            return inset(it, p, on, on && text.isFocusOwner()).padding(6, 6, 6, 6);
+            return inset(it, p, on, on && text.isFocusOwner()).padding(FIELD_PAD, FIELD_PAD, FIELD_PAD, FIELD_PAD);
         }
 
         /**
@@ -3504,8 +3532,11 @@ final class Styles
             boolean     enabled = item.isEnabled();
             boolean     armed   = enabled && ( m.isArmed() || m.isSelected() );
             Color       tone    = p.accent();
+            // A menu on the bar is laid out much tighter than an entry in one: it has no room to
+            // leave for a tick, an accelerator or a submenu arrow.
+            boolean onBar = item.getParent() instanceof JMenuBar;
             return it
-                    .padding(3, 12, 4, 13)
+                    .padding(1, onBar ? 4 : item instanceof JMenu ? 5 : 13, 2, onBar ? 4 : 12)
                     .borderRadius(0)
                     .borderWidth(0)
                     .backgroundColor(armed ? tone : SwingTreeLookAndFeel.Palette.TRANSPARENT)
@@ -3541,16 +3572,14 @@ final class Styles
         private static ComponentStyleDelegate<JToolTip> toolTip( ComponentStyleDelegate<JToolTip> it ) {
             SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
             return it
-                    .margin(2)
-                    .padding(4, 4, 4, 4)
+                    .margin(0)
+                    .padding(3, 3, 3, 3)
                     .borderRadius(0)
                     .border(1, p.textureDark())
                     .backgroundColor(p.textureLight())
                     // The notice colour is chosen, not derived, so nothing here knows whether it came
                     // out light or dark.
-                    .foregroundColor(LafUtilities.readableOn(p.textureLight(), p.text(), p.onFilled()))
-                    .shadow("lift", s -> s.color(LafUtilities.withOpacity(p.border(), 90))
-                                          .offset(0, 1).blurRadius(3).isInset(false));
+                    .foregroundColor(LafUtilities.readableOn(p.textureLight(), p.text(), p.onFilled()));
         }
 
         // ── The rest ─────────────────────────────────────────────────────────
@@ -3561,9 +3590,11 @@ final class Styles
             return it.foregroundColor(it.component().isEnabled() ? p.text() : p.textDisabled());
         }
 
+        /** A hairline the delegate draws across the middle: a ground would make it a bar as tall
+         *  as whatever box a layout gave it. */
         private static ComponentStyleDelegate<JSeparator> separator( ComponentStyleDelegate<JSeparator> it ) {
             SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
-            return it.backgroundColor(p.borderSoft()).foregroundColor(p.borderSoft());
+            return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(p.borderSoft());
         }
 
         /**
@@ -3578,7 +3609,7 @@ final class Styles
                     .borderRadius(3)
                     .border(1, p.border())
                     .backgroundColor(tone)
-                    .gradient("trough", g -> NimbusRelief.UNLIT.over(g, tone))
+                    .gradient("trough", g -> NimbusRelief.TUBE.over(g, tone))
                     .foregroundColor(p.primary());
         }
 
@@ -3587,9 +3618,17 @@ final class Styles
             return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(p.text());
         }
 
+        @SuppressWarnings("deprecation")
         private static ComponentStyleDelegate<JScrollBar> scrollBar( ComponentStyleDelegate<JScrollBar> it ) {
             SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
-            return it.backgroundColor(p.surfaceHover()).foregroundColor(p.border());
+            // The groove runs across the bar rather than along it, so a vertical bar is cut from
+            // its left edge and a horizontal one from its top.
+            UI.Span span = it.component().getOrientation() == JScrollBar.VERTICAL
+                                ? UI.Span.LEFT_TO_RIGHT : UI.Span.TOP_TO_BOTTOM;
+            return it
+                    .backgroundColor(p.surface())
+                    .foregroundColor(p.border())
+                    .gradient("groove", g -> NimbusRelief.GROOVE.over(g, p.border()).span(span));
         }
 
         private static ComponentStyleDelegate<JTabbedPane> tabbedPane( ComponentStyleDelegate<JTabbedPane> it ) {
@@ -3613,15 +3652,18 @@ final class Styles
                     .borderAt(UI.Edge.BOTTOM, 1, LafUtilities.shiftHsb(p.border(), 0, -0.130));
         }
 
+        @SuppressWarnings("deprecation")
         private static ComponentStyleDelegate<JToolBar> toolBar( ComponentStyleDelegate<JToolBar> it ) {
             SwingTreeLookAndFeel.Palette p    = SwingTreeLookAndFeel.palette();
             Color   tone = p.surface();
             return it
-                    .padding(2)
+                    .padding(2, 2, 2, 10)
                     .borderWidth(0)
+                    .borderAt(UI.Edge.BOTTOM, 1, p.border())
                     .backgroundColor(tone)
                     .gradient("relief", g -> NimbusRelief.STRIP.over(g, tone))
-                    .foregroundColor(p.text());
+                    .foregroundColor(p.text())
+                    .painter(UI.Layer.CONTENT, new DragHandlePainter(it.component()));
         }
     }
 

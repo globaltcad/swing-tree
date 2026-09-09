@@ -6,8 +6,10 @@ import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.JComponent;
 import javax.swing.JTable;
+import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicTableUI;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -42,6 +44,7 @@ public final class SwingTreeTableUI
     @Override
     public void paint( Graphics g, JComponent c ) {
         LafUtilities.paintStyled(g, c, g2 -> {
+            paintStripes(g2, (JTable) c);
             paintSelectionBands(g2, (JTable) c);
             super.paint(g2, c);
         });
@@ -52,6 +55,29 @@ public final class SwingTreeTableUI
         java.awt.Font font = table.getFont();
         int size = font == null ? UI.scale(13) : Math.round(font.getSize2D());
         return Math.round(size * 1.9f);
+    }
+
+    /**
+     *  Tints every second row, so that a wide row can be followed across the table.
+     *  <p>
+     *  Swing has no notion of this: {@code Table.alternateRowColor} is read by whichever renderer
+     *  a look and feel installs, and a table with a renderer of its own therefore loses the
+     *  stripes. Filling them under the renderers puts them back whatever renders the cells, for
+     *  the reason {@link #paintSelectionBands} fills its bands there.
+     */
+    private static void paintStripes( Graphics2D g, JTable table ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+            return;
+        Color stripe = UIManager.getColor("Table.alternateRowColor");
+        if ( stripe == null || stripe.equals(table.getBackground()) )
+            return;
+        Rectangle clip = g.getClipBounds();
+        g.setColor(stripe);
+        for ( int row = 1; row < table.getRowCount(); row += 2 ) {
+            Rectangle band = table.getCellRect(row, 0, true);
+            if ( clip == null || (band.y + band.height >= clip.y && band.y <= clip.y + clip.height) )
+                g.fillRect(0, band.y, table.getWidth(), band.height);
+        }
     }
 
     /** Fills a band behind each selected row, for the reason {@link SwingTreeListUI} paints its

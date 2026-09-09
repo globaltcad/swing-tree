@@ -10,6 +10,8 @@ import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicTreeUI;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 
 /**
  *  The {@link JTree} UI delegate. The disclosure handles are the symbol set's, installed as the
@@ -62,7 +64,32 @@ public final class SwingTreeTreeUI
 
     @Override
     public void paint( Graphics g, JComponent c ) {
-        LafUtilities.paintStyled(g, c, g2 -> super.paint(g2, c));
+        LafUtilities.paintStyled(g, c, g2 -> {
+            paintSelectionBands(g2, (JTree) c);
+            super.paint(g2, c);
+        });
+    }
+
+    /**
+     *  Fills a band the width of the tree behind each selected row.
+     *  <p>
+     *  A tree cell renderer only ever fills the box its own label occupies, so selecting a deep
+     *  node marks a short bar somewhere off to the right rather than the row. The tree knows which
+     *  rows are selected and is painted once, so the band is filled here and the renderers, which
+     *  are not opaque, are painted over it.
+     */
+    private static void paintSelectionBands( Graphics2D g, JTree tree ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+            return; // Swing's own renderer is carrying the selection colour
+        int[] selected = tree.getSelectionRows();
+        if ( selected == null )
+            return;
+        g.setColor(SwingTreeLookAndFeel.palette().accentSoft());
+        for ( int row : selected ) {
+            Rectangle band = tree.getRowBounds(row);
+            if ( band != null )
+                g.fillRect(0, band.y, tree.getWidth(), band.height);
+        }
     }
 
     @Override

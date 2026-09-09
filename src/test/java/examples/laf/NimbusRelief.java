@@ -67,6 +67,23 @@ enum NimbusRelief
          new double[][]{ {0, 0}, {-0.019, 0.161}, {-0.077, 0.314} } ),
 
     /**
+     *  A groove cut much deeper than {@link #CUT}: nearly all of the shading is in the first fifth,
+     *  so the wall of the cut reads as an edge and the floor as flat. Worn by a scroll bar, whose
+     *  groove is the one place in the theme where the cut has to be legible at fifteen pixels.
+     */
+    GROOVE( new double[]  {  0.00,   0.15,  0.40,   1.00 },
+            new double[][]{ {-0.047, -0.204}, {-0.020, 0.050}, {-0.030, 0.157}, {-0.053, 0.243} } ),
+
+    /**
+     *  The inside of a tube seen end on: a white lip just under the top wall, a shallow dip through
+     *  the middle where the tone itself shows, and the far wall catching the light again. It is what
+     *  makes an empty progress bar read as something a fill can run along rather than as a slot.
+     */
+    TUBE( new double[]  {  0.00,   0.08,  0.23,   0.46,   0.69,  1.00 },
+          new double[][]{ {-0.037, 0.157}, {-0.025, 0.098}, {-0.024, 0.059},
+                          {-0.009, -0.008}, {-0.010, 0.035}, {-0.014, 0.157} } ),
+
+    /**
      *  A saturated bar under a hard sheen: the top washes almost to white while keeping its hue,
      *  the middle stays the colour itself, and the bottom lip flares. It is the one relief that
      *  moves the saturation further than the brightness, which is what makes a progress bar look
@@ -119,6 +136,18 @@ enum NimbusRelief
                     fractions, stops,
                     MultipleGradientPaint.CycleMethod.NO_CYCLE
                 );
+    }
+
+    /**
+     *  The colour this relief ends on, which anything continuing a lit surface past its own bottom
+     *  edge has to match: a tabbed pane's page begins where its selected tab stops.
+     *
+     * @param tone the colour the middle of the relief reproduces exactly
+     * @return the colour of its last stop
+     */
+    Color bottom( Color tone ) {
+        Color[] stops = stops(tone);
+        return stops[stops.length - 1];
     }
 
     private Color[] stops( Color tone ) {

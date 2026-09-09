@@ -13,10 +13,11 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.util.function.Supplier;
 
 /**
- *  The {@link JScrollBar} UI delegate: a slim bar with no increment or decrement buttons, and a
- *  thumb the symbol set draws.
+ *  The {@link JScrollBar} UI delegate: a bar carrying a thumb the symbol set draws, and, when that
+ *  set asks for them, a button at each end that scrolls a line at a time.
  *  <p>
  *  Its thickness is computed in {@link #getPreferredSize(JComponent)} rather than read from the
  *  {@code ScrollBar.width} default, because Swing reads that default as raw screen pixels and it
@@ -57,12 +58,24 @@ public final class SwingTreeScrollBarUI
 
     @Override
     protected JButton createDecreaseButton( int orientation ) {
-        return SwingTreeLookAndFeel.drawsOwnChrome() ? zeroButton() : super.createDecreaseButton(orientation);
+        return endButton(orientation, false, () -> super.createDecreaseButton(orientation));
     }
 
     @Override
     protected JButton createIncreaseButton( int orientation ) {
-        return SwingTreeLookAndFeel.drawsOwnChrome() ? zeroButton() : super.createIncreaseButton(orientation);
+        return endButton(orientation, true, () -> super.createIncreaseButton(orientation));
+    }
+
+    /** @return the button for one end of the bar: Swing's own when nothing here draws chrome, a
+     *          stepper when the symbol set has them, and otherwise one taking up no space. */
+    private JButton endButton( int orientation, boolean forward, Supplier<JButton> basic ) {
+        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+            return basic.get();
+        if ( !SwingTreeLookAndFeel.symbols().scrollBarHasSteppers() )
+            return zeroButton();
+        boolean vertical = orientation == JScrollBar.VERTICAL;
+        return new StepperButton(vertical ? ( forward ? LafUtilities.Direction.DOWN : LafUtilities.Direction.UP )
+                                          : ( forward ? LafUtilities.Direction.RIGHT : LafUtilities.Direction.LEFT ));
     }
 
     /**
@@ -95,6 +108,27 @@ public final class SwingTreeScrollBarUI
     @Override
     public ComponentStyleDelegate<JScrollBar> style( ComponentStyleDelegate<JScrollBar> it ) throws Exception {
         return SwingTreeLookAndFeel.applyStyle(it);
+    }
+
+    /** The button at one end of the bar, carrying the symbol set's stepper. */
+    private static final class StepperButton extends ActuatorButton
+    {
+        private final LafUtilities.Direction _direction;
+
+        StepperButton( LafUtilities.Direction direction ) { _direction = direction; }
+
+        @Override public Dimension getPreferredSize() {
+            int side = UI.scale(SwingTreeLookAndFeel.symbols().scrollBarThickness());
+            return new Dimension(side, side);
+        }
+
+        @Override
+        void paintActuator( Graphics2D g, Symbols symbols, SwingTreeLookAndFeel.Palette palette ) {
+            symbols.paintScrollStepper(
+                    g, palette, getWidth(), getHeight(), _direction,
+                    isEnabled(), getModel().isRollover(), getModel().isPressed()
+            );
+        }
     }
 
     /** A button that takes up no space and is never shown: Swing insists a scroll bar has two. */

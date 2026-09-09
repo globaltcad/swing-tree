@@ -15,8 +15,11 @@ import javax.swing.plaf.basic.BasicTableHeaderUI;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumnModel;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 
 /**
  *  The {@link JTableHeader} UI delegate. It installs a default cell renderer, so that a heading is
@@ -48,7 +51,31 @@ public final class SwingTreeTableHeaderUI
 
     @Override
     public void paint( Graphics g, JComponent c ) {
-        LafUtilities.paintStyled(g, c, g2 -> super.paint(g2, c));
+        LafUtilities.paintStyled(g, c, g2 -> {
+            super.paint(g2, c);
+            paintColumnDividers(g2, (JTableHeader) c);
+        });
+    }
+
+    /**
+     *  Rules one heading off from the next, when the symbol set asks for it.
+     *  <p>
+     *  A table is free to be drawn without grid lines and still want its headings separated, so the
+     *  lines are drawn here from the column model rather than left to {@link javax.swing.JTable}'s
+     *  own vertical grid.
+     */
+    private static void paintColumnDividers( Graphics2D g, JTableHeader header ) {
+        Color line = SwingTreeLookAndFeel.symbols().tableHeaderDivider(SwingTreeLookAndFeel.palette());
+        if ( line == null )
+            return;
+        TableColumnModel columns = header.getColumnModel();
+        int thickness = Math.max(1, UI.scale(1));
+        int x = 0;
+        g.setColor(line);
+        for ( int column = 0; column < columns.getColumnCount() - 1; column++ ) {
+            x += columns.getColumn(column).getWidth();
+            g.fillRect(x - thickness, 0, thickness, header.getHeight());
+        }
     }
 
     @Override
@@ -63,8 +90,9 @@ public final class SwingTreeTableHeaderUI
     }
 
     /**
-     *  The default header cell renderer: a padded label in the palette's muted text colour. It is
-     *  a {@link UIResource} so that the next look and feel replaces it instead of keeping it.
+     *  The default header cell renderer: a padded label in whatever ink the header itself wears,
+     *  which is the one the style rule for {@link JTableHeader} put there. It is a
+     *  {@link UIResource} so that the next look and feel replaces it instead of keeping it.
      */
     private static final class HeaderRenderer extends DefaultTableCellRenderer implements UIResource
     {
@@ -75,7 +103,8 @@ public final class SwingTreeTableHeaderUI
             JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column
         ) {
             JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-            label.setForeground(SwingTreeLookAndFeel.palette().textMuted());
+            JTableHeader header = table == null ? null : table.getTableHeader();
+            label.setForeground(header == null ? SwingTreeLookAndFeel.palette().textMuted() : header.getForeground());
             label.setBackground(SwingTreeLookAndFeel.Palette.TRANSPARENT);
             label.setOpaque(false);
             label.setBorder(new EmptyBorder(UI.scale(4), UI.scale(10), UI.scale(4), UI.scale(10)));

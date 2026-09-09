@@ -28,6 +28,9 @@ final class GlyphIcons
     private static final Icon TREE_EXPANDED = new GlyphIcon(Shape.TREE_EXPANDED);
     private static final Icon TREE_COLLAPSED= new GlyphIcon(Shape.TREE_COLLAPSED);
     private static final Icon SUBMENU_ARROW = new GlyphIcon(Shape.SUBMENU_ARROW);
+    private static final Icon TREE_LEAF     = new GlyphIcon(Shape.TREE_LEAF);
+    private static final Icon TREE_CLOSED   = new GlyphIcon(Shape.TREE_CLOSED);
+    private static final Icon TREE_OPEN     = new GlyphIcon(Shape.TREE_OPEN);
 
     /** @return the glyph in front of a check box and a check-box menu item. */
     static Icon checkBox() { return CHECK_BOX; }
@@ -44,8 +47,20 @@ final class GlyphIcons
     /** @return the arrow at the right edge of a menu entry that opens a submenu. */
     static Icon submenuArrow() { return SUBMENU_ARROW; }
 
+    /** @return the icon in front of a tree node that can have no children. */
+    static Icon treeLeaf() { return TREE_LEAF; }
+
+    /** @return the icon in front of a tree node whose children are hidden. */
+    static Icon treeClosed() { return TREE_CLOSED; }
+
+    /** @return the icon in front of a tree node whose children are showing. */
+    static Icon treeOpen() { return TREE_OPEN; }
+
     /** Which of the symbol set's glyph methods an icon stands for. */
-    private enum Shape { CHECK, RADIO, TREE_EXPANDED, TREE_COLLAPSED, SUBMENU_ARROW }
+    private enum Shape {
+        CHECK, RADIO, TREE_EXPANDED, TREE_COLLAPSED, SUBMENU_ARROW,
+        TREE_LEAF, TREE_CLOSED, TREE_OPEN
+    }
 
     private static final class GlyphIcon implements Icon, UIResource
     {
@@ -58,9 +73,14 @@ final class GlyphIcons
 
         private int side() {
             Symbols symbols = SwingTreeLookAndFeel.symbols();
-            return _shape == Shape.CHECK || _shape == Shape.RADIO
-                    ? symbols.checkGlyphSize()
-                    : symbols.arrowGlyphSize();
+            switch ( _shape ) {
+                case CHECK:
+                case RADIO:       return symbols.checkGlyphSize();
+                case TREE_LEAF:
+                case TREE_CLOSED:
+                case TREE_OPEN:   return symbols.treeNodeGlyphSize();
+                default:          return symbols.arrowGlyphSize();
+            }
         }
 
         @Override
@@ -92,6 +112,15 @@ final class GlyphIcons
                         break;
                     case TREE_COLLAPSED:
                         symbols.paintDisclosure(g2, palette, x, y, w, h, false, enabled);
+                        break;
+                    case TREE_LEAF:
+                        symbols.paintTreeNode(g2, palette, x, y, w, h, true, false, enabled);
+                        break;
+                    case TREE_CLOSED:
+                        symbols.paintTreeNode(g2, palette, x, y, w, h, false, false, enabled);
+                        break;
+                    case TREE_OPEN:
+                        symbols.paintTreeNode(g2, palette, x, y, w, h, false, true, enabled);
                         break;
                     case SUBMENU_ARROW:
                     default:
