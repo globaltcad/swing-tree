@@ -296,34 +296,35 @@ public final class ComponentBackend<C extends JComponent>
      * @param type The type of the extra state to attach.
      * @param fetcher A supplier which is used to create a new object of the given type.
      * @return The extra state object of the given type which is attached to the component.
-     * @param <P> The type of the extra state.
+     * @param <S> The type of the extra state.
      */
-    public <P> P getOrSet( Class<P> type, Supplier<P> fetcher ) {
-        for ( Object plugin : _extraState)
-            if ( type.isInstance(plugin) )
-                return (P) plugin;
+    public <S> S getOrSet( Class<S> type, Supplier<S> fetcher ) {
+        for ( Object extraState : _extraState )
+            if ( type.isInstance(extraState) )
+                return (S) extraState;
 
-        P plugin = fetcher.get();
-        _extraState.add(plugin);
-        return plugin;
+        S extraState = fetcher.get();
+        _extraState.add(extraState);
+        return extraState;
     }
 
     /**
-     *  Looks up an extra-state object of the given type previously attached to this
+     *  Looks up an extra state object of the given type previously attached to this
      *  component backend (see {@link #getOrSet(Class, Supplier)}), without creating
      *  or attaching anything. This is the pure-read companion to
      *  {@link #getOrSet(Class, Supplier)}: it never has side effects and simply tells
-     *  you whether a plugin of the given type is currently present, and what it is.
+     *  you whether an extra state object of the given type is currently attached,
+     *  and what it is.
      *
      * @param type The type of the extra state to look up.
      * @return An {@link Optional} holding the attached object of the given type,
      *         or an empty {@link Optional} if none is currently attached.
-     * @param <P> The type of the extra state.
+     * @param <S> The type of the extra state.
      */
-    public <P> Optional<P> get( Class<P> type ) {
-        for ( Object plugin : _extraState )
-            if ( type.isInstance(plugin) )
-                return Optional.of(type.cast(plugin));
+    public <S> Optional<S> get( Class<S> type ) {
+        for ( Object extraState : _extraState )
+            if ( type.isInstance(extraState) )
+                return Optional.of(type.cast(extraState));
 
         return Optional.empty();
     }
