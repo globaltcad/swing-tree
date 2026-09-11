@@ -3,7 +3,7 @@ package swingtree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.*;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
@@ -157,7 +157,7 @@ public final class UIForTextField<F extends JTextField> extends UIForAnyTextComp
         Var<String> text = Var.of( formatter.apply(number.get()) );
         return ((UIForTextField<F>)_with( thisComponent -> {
                     _onShow( number, thisComponent, (c,n) -> _setTextSilently( thisComponent, formatter.apply(n) ) );
-                    ComponentExtension.from(thisComponent).storeBoundObservable(
+                    ComponentBackend.powering(thisComponent).storeBoundObservable(
                         text.view().onChange(From.VIEW, s -> {
                             try {
                                 if ( number.type() == Integer.class )

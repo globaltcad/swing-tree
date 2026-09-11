@@ -2,7 +2,7 @@ package examples.laf;
 
 import examples.laf.SwingTreeLookAndFeel.PopupWindowMode;
 import swingtree.UI;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 
 import javax.swing.JComponent;
 import javax.swing.Popup;
@@ -157,9 +157,9 @@ final class SwingTreePopupFactory extends PopupFactory
         }
 
         private Shape _sheetShapeIn( Window host ) {
-            ComponentExtension<?> extension = ComponentExtension.from(_sheet);
-            extension.gatherApplyAndInstallStyle(true);
-            Shape body = extension.getComponentArea(UI.ComponentArea.BODY).orElse(null);
+            ComponentBackend<?> backend = ComponentBackend.powering(_sheet);
+            backend.gatherApplyAndInstallStyle(true);
+            Shape body = backend.getComponentArea(UI.ComponentArea.BODY).orElse(null);
             if ( body == null )
                 return null;
             Point origin = SwingUtilities.convertPoint(_sheet, 0, 0, host);

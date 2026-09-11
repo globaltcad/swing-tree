@@ -7,7 +7,7 @@ import swingtree.SwingTree;
 import swingtree.layout.Bounds;
 import swingtree.layout.Position;
 import swingtree.layout.Size;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 
 import javax.swing.*;
 import java.awt.*;
@@ -93,7 +93,7 @@ final class ActiveDrag {
 
         Optional<DragAwayComponentConf<JComponent>> dragConf;
         do {
-            dragConf = ComponentExtension.from((JComponent) component).getDragAwayConf(mousePosition);
+            dragConf = ComponentBackend.powering((JComponent) component).getDragAwayConf(mousePosition);
             if ( !dragConf.isPresent() || dragConf.map(it->!it.enabled()).orElse(false) ) {
                 Component parent = component.getParent();
                 if ( parent instanceof JComponent )
@@ -124,7 +124,7 @@ final class ActiveDrag {
 
         int currentComponentHash;
         if ( component instanceof JComponent ) {
-            currentComponentHash = ComponentExtension.from((JComponent) component).viewStateHashCode();
+            currentComponentHash = ComponentBackend.powering((JComponent) component).viewStateHashCode();
             if ( currentComponentHash == this.componentHash && image != null )
                 return this;
         }

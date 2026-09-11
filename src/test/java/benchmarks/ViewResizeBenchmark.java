@@ -31,7 +31,7 @@ import sprouts.Var;
 import swingtree.SwingTree;
 import swingtree.SwingTreeInitConfig;
 import swingtree.UI;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -304,7 +304,7 @@ public final class ViewResizeBenchmark
              *  numbers of an application sharing its process with six others, which is not a
              *  situation anyone is in.
              */
-            UI.runNow(ComponentExtension::updateAllCachesFromLibraryConfig);
+            UI.runNow(ComponentBackend::updateAllCachesFromLibraryConfig);
             results.put(example, measure(example));
         }
 
@@ -627,10 +627,10 @@ public final class ViewResizeBenchmark
     ) {
         if ( component instanceof JComponent ) {
             components[0]++;
-            ComponentExtension<?> extension = ComponentExtension.from((JComponent) component);
+            ComponentBackend<?> backend = ComponentBackend.powering((JComponent) component);
             for ( int i = 0; i < layers.length; i++ ) {
-                hits[i]   += extension.cacheHitCount(layers[i]);
-                misses[i] += extension.cacheMissCount(layers[i]);
+                hits[i]   += backend.cacheHitCount(layers[i]);
+                misses[i] += backend.cacheMissCount(layers[i]);
             }
         }
         if ( component instanceof Container )

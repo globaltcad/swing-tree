@@ -14,7 +14,7 @@ import swingtree.api.Styler;
 import swingtree.layout.Bounds;
 import swingtree.layout.Position;
 import swingtree.layout.Size;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 
 import javax.swing.Action;
 import javax.swing.JComponent;
@@ -649,7 +649,7 @@ public class AbstractDelegate<C extends JComponent>
      *  The {@link swingtree.UI.ComponentArea#BORDER} for example, may not be present
      *  in case of there not being a border width defined through {@link UIForAnySwing#withStyle(Styler)}.
      *  <p>
-     *  See {@link ComponentExtension#getComponentArea(UI.ComponentArea)} for more information.
+     *  See {@link ComponentBackend#getComponentArea(UI.ComponentArea)} for more information.
      *  </p>
      *
      * @param area The component area to access.
@@ -657,7 +657,7 @@ public class AbstractDelegate<C extends JComponent>
      */
     public Optional<Shape> shapeOf( UI.ComponentArea area ) {
         return Objects.requireNonNull(UI.runAndGet(()->{
-            return ComponentExtension.from(_component()).getComponentArea(area);
+            return ComponentBackend.powering(_component()).getComponentArea(area);
         }));
     }
 
@@ -1354,7 +1354,7 @@ public class AbstractDelegate<C extends JComponent>
     public final <T extends JComponent> OptionalUI<T> find( Class<T> type, String id ) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(id);
-        return this.find( type, c -> ComponentExtension.from(c).hasId(id) );
+        return this.find( type, c -> ComponentBackend.powering(c).hasId(id) );
     }
 
     /**
@@ -1370,7 +1370,7 @@ public class AbstractDelegate<C extends JComponent>
     public final <T extends JComponent> OptionalUI<T> find( Class<T> type, Enum<?> id ) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(id);
-        return this.find( type, c -> ComponentExtension.from(c).hasId(id) );
+        return this.find( type, c -> ComponentBackend.powering(c).hasId(id) );
     }
 
     /**
@@ -1426,7 +1426,7 @@ public class AbstractDelegate<C extends JComponent>
     public final <T extends JComponent> Tuple<T> findAllByGroup( Class<T> type, String group ) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(group);
-        return this.findAll( type, c -> ComponentExtension.from(c).belongsToGroup(group) );
+        return this.findAll( type, c -> ComponentBackend.powering(c).belongsToGroup(group) );
     }
 
     /**
@@ -1439,7 +1439,7 @@ public class AbstractDelegate<C extends JComponent>
      */
     public final Tuple<JComponent> findAllByGroup( String group ) {
         Objects.requireNonNull(group);
-        return this.findAll( JComponent.class, c -> ComponentExtension.from(c).belongsToGroup(group) );
+        return this.findAll( JComponent.class, c -> ComponentBackend.powering(c).belongsToGroup(group) );
     }
 
 
@@ -1455,7 +1455,7 @@ public class AbstractDelegate<C extends JComponent>
     public final <T extends JComponent> Tuple<T> findAllByGroup( Class<T> type, Enum<?> group ) {
         Objects.requireNonNull(type);
         Objects.requireNonNull(group);
-        return this.findAll( type, c -> ComponentExtension.from(c).belongsToGroup(group) );
+        return this.findAll( type, c -> ComponentBackend.powering(c).belongsToGroup(group) );
     }
 
     /**
@@ -1467,7 +1467,7 @@ public class AbstractDelegate<C extends JComponent>
      */
     public final Tuple<JComponent> findAllByGroup( Enum<?> group ) {
         Objects.requireNonNull(group);
-        return this.findAll( JComponent.class, c -> ComponentExtension.from(c).belongsToGroup(group) );
+        return this.findAll( JComponent.class, c -> ComponentBackend.powering(c).belongsToGroup(group) );
     }
 
     /**
@@ -1614,7 +1614,7 @@ public class AbstractDelegate<C extends JComponent>
         Objects.requireNonNull(painter);
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
             // We do the rendering later in the paint method of a custom border implementation!
-            ComponentExtension.from(_component).addAnimatedPainter(status, layer, area, painter);
+            ComponentBackend.powering(_component).addAnimatedPainter(status, layer, area, painter);
         });
     }
 
@@ -1733,7 +1733,7 @@ public class AbstractDelegate<C extends JComponent>
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
             // We do the styling later in the paint method of a custom border implementation!
             this.animateFor(duration, unit, status ->
-                ComponentExtension.from(_component).addAnimatedStyler(status, conf -> styler.style(status, conf))
+                ComponentBackend.powering(_component).addAnimatedStyler(status, conf -> styler.style(status, conf))
             );
         });
     }
@@ -1783,7 +1783,7 @@ public class AbstractDelegate<C extends JComponent>
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
             // We do the styling later in the paint method of a custom border implementation!
             this.animateFor(lifetime, status ->
-                ComponentExtension.from(_component).addAnimatedStyler(status, conf -> styler.style(status, conf))
+                ComponentBackend.powering(_component).addAnimatedStyler(status, conf -> styler.style(status, conf))
             );
         });
     }
@@ -1816,7 +1816,7 @@ public class AbstractDelegate<C extends JComponent>
         Objects.requireNonNull(styler);
         UI.run(()->{ // This method might be called by the application thread, so we need to run on the EDT!
             // We do the styling later in the paint method of a custom border implementation!
-            ComponentExtension.from(_component).addAnimatedStyler(state, styler);
+            ComponentBackend.powering(_component).addAnimatedStyler(state, styler);
         });
     }
 

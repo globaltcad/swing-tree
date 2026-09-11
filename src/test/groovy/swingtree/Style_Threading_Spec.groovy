@@ -11,7 +11,7 @@ import swingtree.animation.LifeTime
 import swingtree.api.AnimatedItemStyler
 import swingtree.api.ItemStyler
 import swingtree.api.Styler
-import swingtree.style.ComponentExtension
+import swingtree.style.ComponentBackend
 import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
 import utility.Wait
@@ -98,7 +98,7 @@ class Style_Threading_Spec extends Specification
             !evaluationThreads.isEmpty()
 
         when : 'We force a fresh style gathering, the way a new paint cycle would.'
-            UI.runNow({ ComponentExtension.from(label).gatherApplyAndInstallStyle(true) })
+            UI.runNow({ ComponentBackend.powering(label).gatherApplyAndInstallStyle(true) })
         then : 'Every single evaluation of the styler happened on the UI thread.'
             evaluationThreads.every( { it == true } )
     }
@@ -193,7 +193,7 @@ class Style_Threading_Spec extends Specification
             Wait.until({
                 UI.sync()
                 UI.runAndGet({
-                    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)
+                    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)
                     label.foreground
                 }) == Color.GREEN
             }, 5_000)
@@ -240,7 +240,7 @@ class Style_Threading_Spec extends Specification
             Wait.until({
                 UI.sync()
                 UI.runAndGet({
-                    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)
+                    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)
                     label.foreground
                 }) == Color.ORANGE
             }, 5_000)

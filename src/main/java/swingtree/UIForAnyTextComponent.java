@@ -8,7 +8,7 @@ import sprouts.Action;
 import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -412,7 +412,7 @@ public abstract class UIForAnyTextComponent<I, C extends JTextComponent> extends
     private static class ExtraState
     {
         static ExtraState of( JTextComponent textComponent ) {
-            return ComponentExtension.from(textComponent)
+            return ComponentBackend.powering(textComponent)
                                      .getOrSet(ExtraState.class, ExtraState::new);
         }
 

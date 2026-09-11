@@ -4,7 +4,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
-import swingtree.style.ComponentExtension
+import swingtree.style.ComponentBackend
 import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
 
@@ -101,7 +101,7 @@ class Html_Editor_Font_Styling_Spec extends Specification
                 editor.setContentType("text/html")
                 editor.setText("<html><h2>Hello</h2></html>")
 
-                ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(editor).gatherApplyAndInstallStyle(true)
 
                 return editor
             })
@@ -110,7 +110,7 @@ class Html_Editor_Font_Styling_Spec extends Specification
         when : 'We force three more full style cycles:'
             3.times {
                 UI.runNow({
-                    ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)
+                    ComponentBackend.powering(editor).gatherApplyAndInstallStyle(true)
                 })
             }
             var text = UI.runAndGet(()->editor.getText())
@@ -158,28 +158,28 @@ class Html_Editor_Font_Styling_Spec extends Specification
         when : 'Inject at scale 1 (default font ~15pt):'
             UI.runNow({
                 SwingTree.get().setUiScaleFactor(1f)
-                ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(editor).gatherApplyAndInstallStyle(true)
             })
             UI.sync() // Await one EDT cycle just to make sure...
             String textAt1 = UI.runAndGet(()->editor.getText())
 
             UI.runNow({
                 SwingTree.get().setUiScaleFactor(2f)
-                ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(editor).gatherApplyAndInstallStyle(true)
             })
             UI.sync() // Await one EDT cycle just to make sure...
             String textAt2 = UI.runAndGet(()->editor.getText())
 
             UI.runNow({
                 SwingTree.get().setUiScaleFactor(3f)
-                ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(editor).gatherApplyAndInstallStyle(true)
             })
             UI.sync() // Await one EDT cycle just to make sure...
             String textAt3 = UI.runAndGet(()->editor.getText())
 
             UI.runNow({
                 SwingTree.get().setUiScaleFactor(1f)
-                ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(editor).gatherApplyAndInstallStyle(true)
             })
             UI.sync() // Await one EDT cycle just to make sure...
             String textBackTo1 = UI.runAndGet(()->editor.getText())
@@ -220,7 +220,7 @@ class Html_Editor_Font_Styling_Spec extends Specification
                 var editor = UI.editorPane().get(JEditorPane)
                 editor.setContentType("text/html")
                 editor.setText("<html><h2>Progress</h2></html>")
-                ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(editor).gatherApplyAndInstallStyle(true)
                 return editor
             })
             String textAt1 = UI.runAndGet(()->editor.getText())
@@ -228,7 +228,7 @@ class Html_Editor_Font_Styling_Spec extends Specification
         when : 'Change scale to 2 and re-inject:'
             UI.runNow({
                 SwingTree.get().setUiScaleFactor(2f)
-                ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(editor).gatherApplyAndInstallStyle(true)
             })
             String textAt2 = UI.runAndGet(()->editor.getText())
 
@@ -259,13 +259,13 @@ class Html_Editor_Font_Styling_Spec extends Specification
         when : 'Run a full injection cycle at scale 1:'
             UI.runNow({
                 SwingTree.get().setUiScaleFactor(1f)
-                ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(editor).gatherApplyAndInstallStyle(true)
             })
             String textAt1 = UI.runAndGet(()->editor.getText())
 
             SwingTree.get().setUiScaleFactor(2f)
             3.times {
-                ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(editor).gatherApplyAndInstallStyle(true)
                 UI.sync()
             }
             Thread.sleep(100)
@@ -273,7 +273,7 @@ class Html_Editor_Font_Styling_Spec extends Specification
 
             SwingTree.get().setUiScaleFactor(1f)
             3.times {
-                ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(editor).gatherApplyAndInstallStyle(true)
                 UI.sync()
             }
             Thread.sleep(100)
@@ -288,7 +288,7 @@ class Html_Editor_Font_Styling_Spec extends Specification
             // After settling, repeated cycles at same scale should produce stable output.
             String settled = UI.runAndGet(()->editor.getText())
             UI.runNow({and
-                ComponentExtension.from(editor).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(editor).gatherApplyAndInstallStyle(true)
             })
             String again = UI.runAndGet(()->editor.getText())
         then : 'Document does not grow unboundedly (settled at scale 2):'
@@ -317,7 +317,7 @@ class Html_Editor_Font_Styling_Spec extends Specification
                             .get(JEditorPane)
             styled.setContentType("text/html")
             styled.setText("<html><p>Hello world</p></html>")
-            ComponentExtension.from(styled).gatherApplyAndInstallStyle(false)
+            ComponentBackend.powering(styled).gatherApplyAndInstallStyle(false)
             styled.setSize(400, 100)
 
         when : 'Both panes are rendered:'
@@ -366,7 +366,7 @@ class Html_Editor_Font_Styling_Spec extends Specification
 
         when : 'A full style cycle runs at scale 1 (no CSS to inject):'
             SwingTree.get().setUiScaleFactor(1f)
-            UI.runNow({ ComponentExtension.from(editor).gatherApplyAndInstallStyle(true) })
+            UI.runNow({ ComponentBackend.powering(editor).gatherApplyAndInstallStyle(true) })
 
         then : 'The caret has not moved:'
             UI.runAndGet({ editor.getCaret().getDot() }) == caret
@@ -397,7 +397,7 @@ class Html_Editor_Font_Styling_Spec extends Specification
             var editor = UI.editorPane().withStyle({ it.fontColor("blue") }).get(JEditorPane)
             editor.setContentType("text/html")
             editor.setText("<html><p>hello world</p></html>")
-            UI.runNow({ ComponentExtension.from(editor).gatherApplyAndInstallStyle(true) })
+            UI.runNow({ ComponentBackend.powering(editor).gatherApplyAndInstallStyle(true) })
             boolean styledBefore = UI.runAndGet({ editor.getText().contains('#0000ff') })
             assert styledBefore
 
@@ -443,19 +443,19 @@ class Html_Editor_Font_Styling_Spec extends Specification
             editor.setContentType("text/html")
             editor.setText("<html><h2>Delivery note</h2></html>")
             editor.setEditable(true)
-            UI.runNow({ ComponentExtension.from(editor).gatherApplyAndInstallStyle(true) })
+            UI.runNow({ ComponentBackend.powering(editor).gatherApplyAndInstallStyle(true) })
             String atScale2 = UI.runAndGet({ editor.getText() })
             assert atScale2.contains('font-size')
 
         when : 'The scale returns to 1 and a full style cycle runs:'
             SwingTree.get().setUiScaleFactor(1f)
-            UI.runNow({ ComponentExtension.from(editor).gatherApplyAndInstallStyle(true) })
+            UI.runNow({ ComponentBackend.powering(editor).gatherApplyAndInstallStyle(true) })
 
         then : 'The injected font-size CSS has been removed from the document:'
             UI.runAndGet({ editor.getText().contains('font-size') }) == false
         and : 'A second cycle is a no-op (document is stable, caret undisturbed):'
             int caret = UI.runAndGet({ editor.getCaret().setDot(8); editor.getCaret().getDot() })
-            UI.runNow({ ComponentExtension.from(editor).gatherApplyAndInstallStyle(true) })
+            UI.runNow({ ComponentBackend.powering(editor).gatherApplyAndInstallStyle(true) })
             UI.runAndGet({ editor.getCaret().getDot() }) == caret
     }
 

@@ -6,7 +6,7 @@ import spock.lang.Subject
 import spock.lang.Timeout
 import spock.lang.Title
 import swingtree.components.JBox
-import swingtree.style.ComponentExtension
+import swingtree.style.ComponentBackend
 import swingtree.threading.EventProcessor
 import utility.Utility
 
@@ -65,7 +65,7 @@ class Border_Corner_Miter_Spec extends Specification
     def setup() {
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         SwingTree.get().setUiScaleFactor(1f)
-        ComponentExtension.updateAllCachesFromLibraryConfig() // Every scenario starts with empty caches.
+        ComponentBackend.updateAllCachesFromLibraryConfig() // Every scenario starts with empty caches.
     }
 
     def cleanup() {

@@ -1,7 +1,7 @@
 package swingtree.components;
 
 import net.miginfocom.swing.MigLayout;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 import swingtree.style.StylableComponent;
 
 import javax.accessibility.Accessible;
@@ -107,7 +107,7 @@ public class JBox extends JComponent implements Accessible, StylableComponent
      */
     @Override
     public void updateUI() {
-        ComponentExtension.from(this).installCustomUIIfPossible();
+        ComponentBackend.powering(this).installCustomUIIfPossible();
         /*
             The JBox is a SwingTree native type, so it also
             enjoys the perks of having a SwingTree look and feel!

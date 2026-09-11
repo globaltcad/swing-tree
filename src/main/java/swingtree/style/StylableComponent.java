@@ -46,7 +46,7 @@ public interface StylableComponent
 
     /**
      *  This method is expected to be implemented as follows
-     *  within a component extension which ought to be made compatible
+     *  within a component backend which ought to be made compatible
      *  with SwingTree.
      *  <pre>
      *      {@literal @}Override
@@ -75,7 +75,7 @@ public interface StylableComponent
     /**
      *  <b>
      *      This default method is not intended to be overridden by client code!
-     *      It delegates the painting to the library internal {@link ComponentExtension}.
+     *      It delegates the painting to the library internal {@link ComponentBackend}.
      *  </b>
      *
      * @param g The graphics context to paint on.
@@ -83,7 +83,7 @@ public interface StylableComponent
      */
     /*final*/ default void paintBackground( Graphics g, Consumer<Graphics> superPaint ) {
         if ( this instanceof JComponent ) {
-            ComponentExtension.from((JComponent) this).paintBackgroundIfNeeded( g, superPaint );
+            ComponentBackend.powering((JComponent) this).paintBackgroundIfNeeded( g, superPaint );
         }
         else
             throw new UnsupportedOperationException( "This interface is only intended for JComponent implementations" );
@@ -92,7 +92,7 @@ public interface StylableComponent
     /**
      *  <b>
      *      This default method is not intended to be overridden by client code!
-     *      It delegates the painting to the library internal {@link ComponentExtension}.
+     *      It delegates the painting to the library internal {@link ComponentBackend}.
      *  </b>
      *
      * @param g The graphics context to paint on.
@@ -100,7 +100,7 @@ public interface StylableComponent
      */
     /*final*/ default void paintForeground( Graphics g, Consumer<Graphics> superPaint ) {
         if ( this instanceof JComponent ) {
-            ComponentExtension.from((JComponent) this).paintForeground( (Graphics2D) g, superPaint );
+            ComponentBackend.powering((JComponent) this).paintForeground( (Graphics2D) g, superPaint );
         }
         else
             throw new UnsupportedOperationException( "This interface is only intended for JComponent implementations" );

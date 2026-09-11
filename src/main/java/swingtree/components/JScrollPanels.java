@@ -16,7 +16,7 @@ import swingtree.layout.AddConstraint;
 import swingtree.layout.Bounds;
 import swingtree.layout.ResponsiveGridFlowLayout;
 import swingtree.layout.Size;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 
 import javax.swing.*;
 import java.awt.*;
@@ -852,7 +852,7 @@ public class JScrollPanels extends UI.ScrollPane
             }
             this.add(_lastState, constraints != null ? constraints.toConstraintForLayoutManager() : "grow" );
 
-            ComponentExtension.from(this).storeBoundObservable(
+            ComponentBackend.powering(this).storeBoundObservable(
                     _viewable.isSelected().view().onChange(From.VIEW_MODEL, it -> _selectThis(components) )
                 );
             if ( _viewable.isSelected().is(true) )

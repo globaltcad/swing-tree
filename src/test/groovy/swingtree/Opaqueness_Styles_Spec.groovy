@@ -7,7 +7,7 @@ import sprouts.Var
 import swingtree.animation.LifeTime
 import swingtree.api.Styler
 import swingtree.components.JBox
-import swingtree.style.ComponentExtension
+import swingtree.style.ComponentBackend
 import swingtree.style.StyleConf
 import utility.Utility
 
@@ -1274,14 +1274,14 @@ class Opaqueness_Styles_Spec extends Specification
         when : 'We set the `isOn` flag to true and then refresh the UI:'
             isOn = true
             UI.runNow(()->{
-                ComponentExtension.from(box).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)
             })
         then : 'The box has the expected opaqueness:'
             box.isOpaque() == opaque
         when : 'We set the `isOn` flag to false and then refresh the UI:'
             isOn = false
             UI.runNow(()->{
-                ComponentExtension.from(box).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)
             })
         then : 'The box has the expected opaqueness:'
             !box.isOpaque()
@@ -1324,14 +1324,14 @@ class Opaqueness_Styles_Spec extends Specification
         when : 'We set the `isOn` flag to true and then refresh the UI:'
             isOn = true
             UI.runNow(()->{
-                ComponentExtension.from(label).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)
             })
         then : 'The label has the expected opaqueness:'
             label.isOpaque() == opaque
         when : 'We set the `isOn` flag to false and then refresh the UI:'
             isOn = false
             UI.runNow(()->{
-                ComponentExtension.from(label).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)
             })
         then : 'The label has the expected opaqueness:'
             !label.isOpaque()
@@ -1383,14 +1383,14 @@ class Opaqueness_Styles_Spec extends Specification
         when : 'We set the `isOn` flag to true and then refresh the UI:'
             isOn = true
             UI.runNow(()->{
-                ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)
             })
         then : 'The menu item has the expected opaqueness:'
             checkBoxMenuItem.isOpaque() == opaque
         when : 'We set the `isOn` flag to false and then refresh the UI:'
             isOn = false
             UI.runNow(()->{
-                ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)
             })
         then : 'The menu item has the expected opaqueness:'
             !checkBoxMenuItem.isOpaque()
@@ -1433,14 +1433,14 @@ class Opaqueness_Styles_Spec extends Specification
         when : 'We set the `isOn` flag to true and then refresh the UI:'
             isOn = true
             UI.runNow(()->{
-                ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)
             })
         then : 'The menu item has the expected opaqueness:'
             checkBoxMenuItem.isOpaque() == opaque
         when : 'We set the `isOn` flag to false and then refresh the UI:'
             isOn = false
             UI.runNow(()->{
-                ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)
             })
         then : 'The menu item is opaque again, just like it was initially:'
             checkBoxMenuItem.isOpaque()
@@ -1485,14 +1485,14 @@ class Opaqueness_Styles_Spec extends Specification
         when : 'We set the `isOn` flag to true and then refresh the UI:'
             isOn = true
             UI.runNow(()->{
-                ComponentExtension.from(label).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)
             })
         then : 'The label has the expected opaqueness:'
             label.isOpaque() == opaque
         when : 'We set the `isOn` flag to false and then refresh the UI:'
             isOn = false
             UI.runNow(()->{
-                ComponentExtension.from(label).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)
             })
         then : 'The label has the initial opaqueness again:'
             label.isOpaque() == (color.alpha == 255)
@@ -1549,14 +1549,14 @@ class Opaqueness_Styles_Spec extends Specification
         when : 'We set the `isOn` flag to true and then refresh the UI:'
             isOn = true
             UI.runNow(()->{
-                ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)
             })
         then : 'The panel has the expected opaqueness:'
             panel.isOpaque() == opaque
         when : 'We set the `isOn` flag to false and then refresh the UI:'
             isOn = false
             UI.runNow(()->{
-                ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)
             })
         then : 'The panel has the initial opaqueness again:'
             panel.isOpaque() == (color.alpha == 255)
@@ -1622,25 +1622,25 @@ class Opaqueness_Styles_Spec extends Specification
             var panel = ui.get(JPanel)
         expect : 'The panel is opaque initially:'
             panel.isOpaque()
-            ComponentExtension.from(panel).getStyle() == StyleConf.none()
+            ComponentBackend.powering(panel).getStyle() == StyleConf.none()
         when : 'We set the `isOn` flag to true and then refresh the UI:'
             isOn = true
             UI.runNow(()->{
-                ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)
             })
         then : 'The panel has the expected opaqueness:'
             panel.isOpaque() == opaque
-            ComponentExtension.from(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass
+            ComponentBackend.powering(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass
             !isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED
 
         when : 'We set the `isOn` flag to false and then refresh the UI:'
             isOn = false
             UI.runNow(()->{
-                ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)
+                ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)
             })
         then : 'The panel, once again, is opaque:'
             panel.isOpaque()
-            ComponentExtension.from(panel).getStyle() == StyleConf.none()
+            ComponentBackend.powering(panel).getStyle() == StyleConf.none()
         where :
             isColorBypass | opaque | styler
              false        | true   | {it}

@@ -84,7 +84,7 @@ import swingtree.SwingTreeInitConfig.CacheMode;
  *  The current mode is resolved <em>lazily</em> from {@link SwingTree#getCacheMode()} on the
  *  first read after a {@link #markUnresolved() dirty} mark and then cached in a {@code volatile},
  *  so the hot painting path never repeatedly consults the library singleton.
- *  {@link ComponentExtension#updateAllCachesFromLibraryConfig()} marks it dirty (and empties the
+ *  {@link ComponentBackend#updateAllCachesFromLibraryConfig()} marks it dirty (and empties the
  *  caches) whenever the library configuration changes, so a runtime
  *  {@link SwingTree#setCacheMode(CacheMode)} shrinks memory immediately and the new budget takes
  *  effect on the next paint.

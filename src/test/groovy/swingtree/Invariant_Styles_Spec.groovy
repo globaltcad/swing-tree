@@ -8,7 +8,7 @@ import sprouts.Var
 import swingtree.api.Configurator
 import swingtree.api.Styler
 import swingtree.components.JBox
-import swingtree.style.ComponentExtension
+import swingtree.style.ComponentBackend
 import swingtree.style.FontConf
 import utility.Utility
 
@@ -48,7 +48,7 @@ class Invariant_Styles_Spec extends Specification
         // Re-initializing swaps the library instance but does not by itself re-resolve the
         // already computed cache budget, nor empty the globally shared caches - this does both,
         // so the isolation holds whatever ran before this specification.
-        ComponentExtension.updateAllCachesFromLibraryConfig()
+        ComponentBackend.updateAllCachesFromLibraryConfig()
     }
 
     /** Also drops the UI scale factor each scenario sets, which used to leak into whatever ran next. */
@@ -416,28 +416,28 @@ class Invariant_Styles_Spec extends Specification
             ]
     }
 
-    def 'The view state hash code function on the SingTree internal ComponentExtension hashes view related state.'(
+    def 'The view state hash code function on the SwingTree internal ComponentBackend hashes view related state.'(
         boolean isEqual, UIForAnySwing ui1, UIForAnySwing ui2
     ) {
         given : 'We build the actual components of the UI declarations:'
             var comp1 = ui1.get(ui1.getType())
             var comp2 = ui2.get(ui2.getType())
         expect : 'Initially, the component hashes are 0, because the components have no size!'
-            ComponentExtension.from(comp1).viewStateHashCode() == 0
-            ComponentExtension.from(comp2).viewStateHashCode() == 0
+            ComponentBackend.powering(comp1).viewStateHashCode() == 0
+            ComponentBackend.powering(comp2).viewStateHashCode() == 0
         when : 'We change one of the size dimensions each...'
             comp1.setSize(0, 100)
             comp2.setSize(100, 0)
         then : 'The hashes are still 0, because the component is not visible.'
-            ComponentExtension.from(comp1).viewStateHashCode() == 0
-            ComponentExtension.from(comp2).viewStateHashCode() == 0
+            ComponentBackend.powering(comp1).viewStateHashCode() == 0
+            ComponentBackend.powering(comp2).viewStateHashCode() == 0
 
         when : 'We change both size dimensions...'
             comp1.setSize(200, 100)
             comp2.setSize(100, 200)
         and : 'We calculate the hash codes of the two components again:'
-            var hash1 = ComponentExtension.from(comp1).viewStateHashCode()
-            var hash2 = ComponentExtension.from(comp2).viewStateHashCode()
+            var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()
+            var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()
 
         then : 'The hash codes are no longer 0 (or at least it should be super unlikely).'
             hash1 != 0

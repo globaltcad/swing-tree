@@ -10,7 +10,7 @@ import sprouts.Var
 import swingtree.layout.Size
 import swingtree.threading.EventProcessor
 
-import swingtree.style.ComponentExtension
+import swingtree.style.ComponentBackend
 
 import javax.swing.*
 import javax.swing.tree.DefaultTreeCellRenderer
@@ -1549,13 +1549,13 @@ class UI_Scaling_Spec extends Specification
             SwingTree.get().setUiScaleFactor(1f)
             var tree = UI.of(new JTree()).get(JTree)
         and : '''
-            Its renderer, holding the `ComponentExtension` that a SwingTree look and feel
-            attaches to every component it paints. The extension is the thing that rescales
+            Its renderer, holding the `ComponentBackend` that a SwingTree look and feel
+            attaches to every component it paints. The backend is the thing that rescales
             a font size, so the renderer has to have one for the mistake to be possible at
             all.
         '''
             var renderer = tree.cellRenderer as DefaultTreeCellRenderer
-            ComponentExtension.from(renderer)
+            ComponentBackend.powering(renderer)
         and : '''
             One painted row. `getTreeCellRendererComponent(..)` is where the renderer stores
             the tree it was called for, and `DefaultTreeCellRenderer.getFont()` reads the
@@ -1654,15 +1654,15 @@ class UI_Scaling_Spec extends Specification
             var spinner = UI.spinner(new SpinnerNumberModel(1, 1, 999, 1)).get(JSpinner)
             var textField = (spinner.editor as JSpinner.DefaultEditor).textField
         and : '''
-            The `ComponentExtension` that a SwingTree look and feel attaches to every
-            component it paints. The extension is the thing that rescales a font size, so the
-            spinner and its text field each need one. The text field is given its extension
+            The `ComponentBackend` that a SwingTree look and feel attaches to every
+            component it paints. The backend is the thing that rescales a font size, so the
+            spinner and its text field each need one. The text field is given its backend
             first here, because that is the order a look and feel reaches the two in: a
             `JSpinner` builds its editor inside its own constructor, before Swing installs
             the delegate that would style the spinner.
         '''
-            ComponentExtension.from(textField)
-            ComponentExtension.from(spinner)
+        ComponentBackend.powering(textField)
+            ComponentBackend.powering(spinner)
 
         expect : 'The spinner and the text field inside it start out at the same font size.'
             textField.font.size == spinner.font.size
@@ -1727,15 +1727,15 @@ class UI_Scaling_Spec extends Specification
             var spinner = new JSpinner(new SpinnerNumberModel(1, 1, 999, 1))
             var textField = (spinner.editor as JSpinner.DefaultEditor).textField
         and : '''
-            The `ComponentExtension` that a SwingTree look and feel attaches to every
-            component it paints. The extension is the thing that rescales a font, so the
-            spinner and its text field each need one. The text field is given its extension
+            The `ComponentBackend` that a SwingTree look and feel attaches to every
+            component it paints. The backend is the thing that rescales a font, so the
+            spinner and its text field each need one. The text field is given its backend
             first, which is the order a look and feel reaches the two in: a `JSpinner` builds
             its editor, and Swing gives that editor its delegate, inside the `JSpinner`
             constructor, before the spinner is given a delegate of its own.
         '''
-            ComponentExtension.from(textField)
-            ComponentExtension.from(spinner)
+            ComponentBackend.powering(textField)
+            ComponentBackend.powering(spinner)
 
         expect : 'The number and the box around it start out at the same size.'
             textField.font.size == spinner.font.size

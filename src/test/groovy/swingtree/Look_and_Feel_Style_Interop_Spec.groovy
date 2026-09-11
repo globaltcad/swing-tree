@@ -7,7 +7,7 @@ import spock.lang.Title
 import swingtree.api.Styler
 import swingtree.api.laf.SwingTreeStyledComponentUI
 import swingtree.layout.Size
-import swingtree.style.ComponentExtension
+import swingtree.style.ComponentBackend
 import swingtree.style.ComponentStyleDelegate
 import swingtree.style.StyleConf
 
@@ -65,7 +65,7 @@ class Look_and_Feel_Style_Interop_Spec extends Specification
         @Override
         public void paint(Graphics g2d, JComponent component) {
             if ( supportsSwingTree )
-                ComponentExtension.from(component).paintBackground(g2d, g2d2->super.paint(g2d2, component));
+                ComponentBackend.powering(component).paintBackground(g2d, g2d2->super.paint(g2d2, component));
             else
                 super.paint(g2d, component);
         }
@@ -92,7 +92,7 @@ class Look_and_Feel_Style_Interop_Spec extends Specification
             This cooperation has two parts:
             
             1. Supplying style information for the `SwingTree` style engine.
-            2. Delegating the `paint` call to `SwingTree`s `ComponentExtension`. 
+            2. Delegating the `paint` call to `SwingTree`s `ComponentBackend`. 
             
             In this unit test, the `ComponentUI` under test only supports 1.
             but not 2...
@@ -115,7 +115,7 @@ class Look_and_Feel_Style_Interop_Spec extends Specification
         when : 'We build the button'
             button = ui.get(JButton)
         then : 'Depending on the applied style, there may or may not be a `StyleConf` installed:'
-            (ComponentExtension.from(button).getStyle() != StyleConf.none()) == isStyled
+            (ComponentBackend.powering(button).getStyle() != StyleConf.none()) == isStyled
         and : 'The custom `MyButtonUI` may or may not be overridden by `SwingTree`:'
             !(button.getUI() instanceof MyButtonUI) == overridden
 
@@ -127,7 +127,7 @@ class Look_and_Feel_Style_Interop_Spec extends Specification
             BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
             button.paint(image.createGraphics())
         then : 'The style must be reset to being `StyleConf.none()`:'
-            ComponentExtension.from(button).gatherStyle() == StyleConf.none()
+        ComponentBackend.powering(button).gatherStyle() == StyleConf.none()
         and : 'The original custom UI should be installed because the component is no longer styled'
             (button.getUI() instanceof MyButtonUI)
 
@@ -200,7 +200,7 @@ class Look_and_Feel_Style_Interop_Spec extends Specification
             This cooperation has two parts:
             
             1. Supplying style information for the `SwingTree` style engine.
-            2. Delegating the `paint` call to `SwingTree`s `ComponentExtension`. 
+            2. Delegating the `paint` call to `SwingTree`s `ComponentBackend`. 
             
             In this unit test, the `ComponentUI` under test supports 
             both 1. as well as 2. and so in this unit test we verify that `SwingTree` will never override

@@ -6,7 +6,7 @@ import spock.lang.Title
 import spock.util.concurrent.PollingConditions
 import sprouts.Var
 import swingtree.animation.LifeTime
-import swingtree.style.ComponentExtension
+import swingtree.style.ComponentBackend
 import utility.Utility
 import swingtree.threading.EventProcessor
 
@@ -357,7 +357,7 @@ class Style_Animations_Spec extends Specification
                         )
                         .get(JLabel)
         and : 'Then we get a string encoding of the entire style:'
-            var styleString = ComponentExtension.from(label).getStyle().toString()
+            var styleString = ComponentBackend.powering(label).getStyle().toString()
 
         expect :
             styleString.contains("BorderConf[NONE]")
@@ -370,7 +370,7 @@ class Style_Animations_Spec extends Specification
         """
             width.set(2.5f)
             UI.sync()
-            styleString = ComponentExtension.from(label).getStyle().toString()
+            styleString = ComponentBackend.powering(label).getStyle().toString()
         then : """
             Here you can see that the custom border automatically created
             a fractional margin by which always produces a component with
@@ -396,7 +396,7 @@ class Style_Animations_Spec extends Specification
         when : 'We go back to the old value...'
             width.set(0f)
             UI.sync()
-            styleString = ComponentExtension.from(label).getStyle().toString()
+            styleString = ComponentBackend.powering(label).getStyle().toString()
         then : 'Everything is back to normal! No style.'
             styleString.contains("BorderConf[NONE]")
             styleString.contains("backgroundColor=rgba(216,181,137,255)")

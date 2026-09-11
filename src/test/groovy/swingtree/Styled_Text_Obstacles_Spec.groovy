@@ -1043,7 +1043,7 @@ class Styled_Text_Obstacles_Spec extends Specification
                     var buf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
                     box.paintComponent(buf.createGraphics())
                     captured[0] = box.getPreferredSize().height
-                    captured[1] = ComponentExtension.from(box).getStyle().toString()
+                    captured[1] = ComponentBackend.powering(box).getStyle().toString()
                 })
                 return captured
             }
@@ -1100,7 +1100,7 @@ class Styled_Text_Obstacles_Spec extends Specification
                 var buf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
                 box.paintComponent(buf.createGraphics())
                 capturedLeft[0] = box.getPreferredSize().height
-                capturedLeft[1] = ComponentExtension.from(box).getStyle().toString()
+                capturedLeft[1] = ComponentBackend.powering(box).getStyle().toString()
             })
         then : 'A left-half child produces the same preferred height as a right-half child (symmetric):'
             (capturedLeft[0] as int) == (withChild[0] as int)
@@ -1183,7 +1183,7 @@ class Styled_Text_Obstacles_Spec extends Specification
                     var buf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
                     box.paintComponent(buf.createGraphics())
                     captured[0] = box.getPreferredSize().height
-                    captured[1] = ComponentExtension.from(box).getStyle().toString()
+                    captured[1] = ComponentBackend.powering(box).getStyle().toString()
                 })
                 return captured
             }
@@ -1296,7 +1296,7 @@ class Styled_Text_Obstacles_Spec extends Specification
                     child.setBounds(200, 0, 200, 500)
                     // Force the child's style engine to compute its ComponentConf from the styler
                     // so that `childShapeForArea(...)` can observe the margin/border/padding values:
-                    ComponentExtension.from(child).gatherApplyAndInstallStyle(true)
+                    ComponentBackend.powering(child).gatherApplyAndInstallStyle(true)
                     parent.add(child)
 
                     var buf = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)

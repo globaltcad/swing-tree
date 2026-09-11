@@ -141,7 +141,7 @@ Concretely:
   `ComponentStyleDelegate` configured to look the way the component should
   look in that state. You do not paint anything here.
 - The `paint(..)` method is invoked by Swing once the engine has finished its
-  layers. You delegate to `ComponentExtension.paintBackground(..)` and let the
+  layers. You delegate to `ComponentBackend.paintBackground(..)` and let the
   engine paint background + border + shadows + gradients + noise, then —
   inside the callback — call `super.paint(g, c)` so the inherited
   `BasicXxxUI` can draw the icon/text on top.
@@ -162,7 +162,7 @@ your own LAF.
 package com.example.lookandfeel;
 
 import swingtree.api.laf.SwingTreeStyledComponentUI;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.*;
@@ -183,12 +183,12 @@ public final class MyButtonUI
     public void installUI(JComponent c) {
         super.installUI(c);
         // Tell SwingTree to gather, apply and install the style right away.
-        ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        ComponentBackend.powering(c).gatherApplyAndInstallStyle(true);
     }
 
     @Override
     public void paint(Graphics g, JComponent c) {
-        ComponentExtension.from(c).paintBackground(g, g2d -> {
+        ComponentBackend.powering(c).paintBackground(g, g2d -> {
             // SwingTree has already drawn the background, border, shadows,
             // gradients, noise — now let the basic LAF paint icon & text.
             super.paint(g2d, c);
@@ -289,7 +289,7 @@ Your `installUI` is invoked by Swing whenever a component first acquires this UI
 @Override
 public void installUI(JComponent c) {
     super.installUI(c);                                   // install BasicXxxUI defaults
-    ComponentExtension.from(c).gatherApplyAndInstallStyle(true);  // ← key line
+    ComponentBackend.powering(c).gatherApplyAndInstallStyle(true);  // ← key line
 }
 ```
 
@@ -309,7 +309,7 @@ The recommended body is the same shape for every component:
 ```java
 @Override
 public void paint(Graphics g, JComponent c) {
-    ComponentExtension.from(c).paintBackground(g, g2d -> {
+    ComponentBackend.powering(c).paintBackground(g, g2d -> {
         super.paint(g2d, c);   // basic LAF draws icon/text in a clipped region
     });
 }
@@ -368,7 +368,7 @@ apply. Inline `.withStyle(..)` on a specific component then has the final say.
 
 Returning `true` tells SwingTree:
 
-> "My `paint(..)` forwards to `ComponentExtension.paintBackground(..)`. You may
+> "My `paint(..)` forwards to `ComponentBackend.paintBackground(..)`. You may
 > rely on me to be the **only** hook into Swing's rendering pipeline for this
 > component type."
 
@@ -667,11 +667,11 @@ public final class GlassyPanelUI
 
     @Override public void installUI(JComponent c) {
         super.installUI(c);
-        ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        ComponentBackend.powering(c).gatherApplyAndInstallStyle(true);
     }
 
     @Override public void paint(Graphics g, JComponent c) {
-        ComponentExtension.from(c).paintBackground(g, g2d -> super.paint(g2d, c));
+        ComponentBackend.powering(c).paintBackground(g, g2d -> super.paint(g2d, c));
     }
     @Override public void update(Graphics g, JComponent c) { paint(g, c); }
 
@@ -763,7 +763,7 @@ you, and your LAF should be designed with that in mind:
 - [`DynamicLaF.PanelStyler` / `ButtonStyler` / `LabelStyler` / `TextFieldStyler`](../../src/main/java/swingtree/style/DynamicLaF.java)
   — the four implementations SwingTree ships internally; the canonical
   reference for the forwarding pattern.
-- [`ComponentExtension`](../../src/main/java/swingtree/style/ComponentExtension.java)
+- [`ComponentBackend`](../../src/main/java/swingtree/style/ComponentBackend.java)
   — the entry point for `paintBackground(..)` and `gatherApplyAndInstallStyle(..)`.
 - [Style Sheets and Groups](./Style-Sheets-And-Groups.md) — layer 1 of the
   cascade; combine with your LAF to give applications a turnkey theming story.

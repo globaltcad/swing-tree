@@ -17,7 +17,6 @@ import swingtree.layout.Bounds;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.plaf.basic.BasicHTML;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.lang.reflect.Modifier;
@@ -103,7 +102,7 @@ final class StyleInstaller<C extends JComponent>
     void installCustomBorderBasedStyleAndAnimationRenderer( C owner, StyleConf styleConf) {
         Border currentBorder = owner.getBorder();
         if ( !(currentBorder instanceof StyleAndAnimationBorder) )
-            owner.setBorder(new StyleAndAnimationBorder<>(ComponentExtension.from(owner), currentBorder, styleConf));
+            owner.setBorder(new StyleAndAnimationBorder<>(ComponentBackend.powering(owner), currentBorder, styleConf));
     }
 
     StyleConf recalculateInsets( C owner, StyleConf styleConf ) {

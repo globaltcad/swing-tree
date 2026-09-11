@@ -5,7 +5,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import sprouts.Var
-import swingtree.style.ComponentExtension
+import swingtree.style.ComponentBackend
 import swingtree.threading.EventProcessor
 import utility.Utility
 
@@ -34,8 +34,8 @@ import java.awt.Color
       1. Building components the way an application would (`UI.button(...).withStyle(...)`),
       2. Painting them with the regular paint pipeline (`Utility.renderSingleComponent(...)`
          which ultimately calls `JComponent.paint(g)`),
-      3. Observing the resulting cache state via `ComponentExtension.cachedRendering(layer).isNotEmpty()`,
-         `ComponentExtension.cacheHitCount(layer)` and `ComponentExtension.cacheMissCount(layer)`.
+      3. Observing the resulting cache state via `ComponentBackend.cachedRendering(layer).isNotEmpty()`,
+         `ComponentBackend.cacheHitCount(layer)` and `ComponentBackend.cacheMissCount(layer)`.
 
     Crucially, this spec does **not** instantiate any of SwingTree's internal
     style classes directly, nor does it mock a `Graphics2D` to count cache
@@ -52,7 +52,7 @@ import java.awt.Color
     actual scenarios below speaks to internal classes.
 
 ''')
-@Subject([ComponentExtension, UI])
+@Subject([ComponentBackend, UI])
 class Style_Render_Caching_Spec extends Specification
 {
     def setupSpec() {
@@ -99,26 +99,26 @@ class Style_Render_Caching_Spec extends Specification
                         .foundationColor(Color.WHITE)
                   )
                   .get(JButton)
-        and : 'We grab the public extension associated with the component.'
-            var ext = ComponentExtension.from(button)
+        and : 'We grab the public backend associated with the component.'
+            var backend = ComponentBackend.powering(button)
 
         when : 'We render the component once through the regular paint pipeline.'
             Utility.renderSingleComponent(button)
         then : 'The background layer has produced a cached rendering after that first paint.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
         and  : 'The renderer was invoked at least once to produce the cached image.'
-            ext.cacheMissCount(UI.Layer.BACKGROUND) >= 1
-            ext.cacheHitCount(UI.Layer.BACKGROUND)  == 0
+            backend.cacheMissCount(UI.Layer.BACKGROUND) >= 1
+            backend.cacheHitCount(UI.Layer.BACKGROUND)  == 0
 
         when : 'We render the same component a second time.'
-            int missesBeforeRepaint = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            int missesBeforeRepaint = backend.cacheMissCount(UI.Layer.BACKGROUND)
             Utility.renderSingleComponent(button)
         then : 'The hit counter went up – the second paint was served from the cache.'
-            ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
+            backend.cacheHitCount(UI.Layer.BACKGROUND) >= 1
         and  : 'And the miss counter did *not* increase – no fresh rendering was needed.'
-            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeRepaint
+            backend.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeRepaint
         and  : 'The cached rendering is, of course, still there.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
     }
 
     def 'The cache reports a layer as a tuple of images, one per separately cached part.'()
@@ -147,16 +147,16 @@ class Style_Render_Caching_Spec extends Specification
                         .foundationColor(Color.WHITE)
                   )
                   .get(JButton)
-        and : 'We grab the public extension associated with the component.'
-            var ext = ComponentExtension.from(button)
+        and : 'We grab the public backend associated with the component.'
+            var backend = ComponentBackend.powering(button)
 
         when : 'We paint it through the regular paint pipeline.'
             2.times { Utility.renderSingleComponent(button) }
 
         then : 'The background layer rasterized into a single cached image.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1
+            backend.cachedRendering(UI.Layer.BACKGROUND).size() == 1
         and  : 'A layer without any style of its own has nothing to show.'
-            ext.cachedRendering(UI.Layer.FOREGROUND).isEmpty()
+            backend.cachedRendering(UI.Layer.FOREGROUND).isEmpty()
     }
 
     def 'The hit and miss counts keep counting when a layer changes how it is cached.'()
@@ -190,14 +190,14 @@ class Style_Render_Caching_Spec extends Specification
                   )
                   .get(JButton)
             button.setSize(400, 240)
-            var ext = ComponentExtension.from(button)
+            var backend = ComponentBackend.powering(button)
 
         when : 'We paint it three times at a settled size.'
             3.times { Utility.renderSingleComponent(button) }
         then : 'Every one of those paints was counted, as a hit or as a miss.'
-            ext.cacheHitCount(UI.Layer.BACKGROUND) + ext.cacheMissCount(UI.Layer.BACKGROUND) == 3
+            backend.cacheHitCount(UI.Layer.BACKGROUND) + backend.cacheMissCount(UI.Layer.BACKGROUND) == 3
         and  : 'And the cache did serve some of them, so there is something to lose.'
-            ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
+            backend.cacheHitCount(UI.Layer.BACKGROUND) >= 1
 
         when : 'It is dragged, so the layer is cut around its noise.'
             [[440, 260], [480, 280], [520, 300]].each { w, h ->
@@ -205,12 +205,12 @@ class Style_Render_Caching_Spec extends Specification
                 Utility.renderSingleComponent(button)
             }
         then : 'Not one of the earlier paints was forgotten, and the new ones were counted too.'
-            ext.cacheHitCount(UI.Layer.BACKGROUND) + ext.cacheMissCount(UI.Layer.BACKGROUND) == 6
+            backend.cacheHitCount(UI.Layer.BACKGROUND) + backend.cacheMissCount(UI.Layer.BACKGROUND) == 6
 
         when : 'The drag ends and the layer becomes a single rasterization again.'
             12.times { Utility.renderSingleComponent(button) }
         then : 'Still nothing was taken back.'
-            ext.cacheHitCount(UI.Layer.BACKGROUND) + ext.cacheMissCount(UI.Layer.BACKGROUND) == 18
+            backend.cacheHitCount(UI.Layer.BACKGROUND) + backend.cacheMissCount(UI.Layer.BACKGROUND) == 18
     }
 
     def 'A paint no cache took part in is counted as a miss, not lost.'()
@@ -234,12 +234,12 @@ class Style_Render_Caching_Spec extends Specification
                 UI.box()
                   .withStyle( it -> it.noise("grain", n -> n.colors(Color.BLACK, Color.WHITE)) )
                   .get(JBox)
-            var ext = ComponentExtension.from(box)
+            var backend = ComponentBackend.powering(box)
             box.setSize(300, 200)
 
         when : 'It is painted at a settled size, and then dragged.'
             3.times { Utility.renderSingleComponent(box) }
-            int countedWhenSettled = ext.cacheHitCount(UI.Layer.BACKGROUND) + ext.cacheMissCount(UI.Layer.BACKGROUND)
+            int countedWhenSettled = backend.cacheHitCount(UI.Layer.BACKGROUND) + backend.cacheMissCount(UI.Layer.BACKGROUND)
             [[320, 210], [340, 220], [360, 230]].each { w, h ->
                 box.setSize(w, h)
                 Utility.renderSingleComponent(box)
@@ -247,11 +247,11 @@ class Style_Render_Caching_Spec extends Specification
 
         then : 'Every paint of both phases is accounted for.'
             countedWhenSettled == 3
-            ext.cacheHitCount(UI.Layer.BACKGROUND) + ext.cacheMissCount(UI.Layer.BACKGROUND) == 6
+            backend.cacheHitCount(UI.Layer.BACKGROUND) + backend.cacheMissCount(UI.Layer.BACKGROUND) == 6
         and : 'And the drag paints, which no cache served, are misses.'
-            ext.cacheMissCount(UI.Layer.BACKGROUND) >= 3
+            backend.cacheMissCount(UI.Layer.BACKGROUND) >= 3
         and : 'Which is consistent with there being nothing cached for that layer mid-drag.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
     }
 
     def 'A plain, undecorated component is *never* cached.'()
@@ -272,19 +272,19 @@ class Style_Render_Caching_Spec extends Specification
         """
         given : 'A bog-standard label without any SwingTree style.'
             var label = UI.label("Hello!").get(JLabel)
-            var ext   = ComponentExtension.from(label)
+            var backend = ComponentBackend.powering(label)
 
         when : 'We render it several times in a row.'
             Utility.renderSingleComponent(label)
             Utility.renderSingleComponent(label)
             Utility.renderSingleComponent(label)
         then : 'No layer ever produced a cached rendering.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
-            ext.cachedRendering(UI.Layer.CONTENT).isEmpty()
-            ext.cachedRendering(UI.Layer.BORDER).isEmpty()
-            ext.cachedRendering(UI.Layer.FOREGROUND).isEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
+            backend.cachedRendering(UI.Layer.CONTENT).isEmpty()
+            backend.cachedRendering(UI.Layer.BORDER).isEmpty()
+            backend.cachedRendering(UI.Layer.FOREGROUND).isEmpty()
         and  : 'And the cache hit counter for the background never increased.'
-            ext.cacheHitCount(UI.Layer.BACKGROUND)  == 0
+            backend.cacheHitCount(UI.Layer.BACKGROUND)  == 0
     }
 
     def 'Multiple components with the exact same heavy style share a single cached rendering.'()
@@ -314,22 +314,22 @@ class Style_Render_Caching_Spec extends Specification
             def buttons = (1..5).collect {
                 UI.button("Btn " + it).withStyle(common as swingtree.api.Styler).get(JButton)
             }
-        and : 'And the matching extensions to query the cache state through.'
-            def exts = buttons.collect { ComponentExtension.from(it) }
+        and : 'And the matching backends to query the cache state through.'
+            def backends = buttons.collect { ComponentBackend.powering(it) }
 
         when : 'We render every button exactly once.'
             buttons.each { Utility.renderSingleComponent(it) }
 
         then : 'Every button reports that its background layer is cached.'
-            exts.every { it.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty() }
+            backends.every { it.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty() }
 
         and : """
             The first button to render had to actually invoke the style
             renderer – there was nothing in the cache yet, so it counts
             as a miss with no hits:
         """
-            exts[0].cacheMissCount(UI.Layer.BACKGROUND) >= 1
-            exts[0].cacheHitCount(UI.Layer.BACKGROUND)  == 0
+            backends[0].cacheMissCount(UI.Layer.BACKGROUND) >= 1
+            backends[0].cacheHitCount(UI.Layer.BACKGROUND)  == 0
 
         and : """
             Every subsequent button, however, found the cached image
@@ -337,8 +337,8 @@ class Style_Render_Caching_Spec extends Specification
             served from the cache on its very first paint – no fresh
             rendering invocation needed:
         """
-            exts[1..-1].every { it.cacheMissCount(UI.Layer.BACKGROUND) == 0 }
-            exts[1..-1].every { it.cacheHitCount(UI.Layer.BACKGROUND)  >= 1 }
+            backends[1..-1].every { it.cacheMissCount(UI.Layer.BACKGROUND) == 0 }
+            backends[1..-1].every { it.cacheHitCount(UI.Layer.BACKGROUND)  >= 1 }
     }
 
     def 'Changing the style configuration invalidates the cached rendering.'()
@@ -375,33 +375,33 @@ class Style_Render_Caching_Spec extends Specification
                         .foundationColor(Color.WHITE)
                   )
                   .get(JButton)
-            var ext = ComponentExtension.from(button)
+            var backend = ComponentBackend.powering(button)
 
         when : 'We render the component twice with the initial RED tint to warm the cache.'
             Utility.renderSingleComponent(button)
             Utility.renderSingleComponent(button)
         then : 'The cache is now populated and the second paint counted as a hit.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
-            ext.cacheHitCount(UI.Layer.BACKGROUND)  >= 1
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cacheHitCount(UI.Layer.BACKGROUND)  >= 1
 
         when : 'The view model produces a new tint and we paint again.'
-            int missesBeforeMutation = ext.cacheMissCount(UI.Layer.BACKGROUND)
-            int hitsBeforeMutation   = ext.cacheHitCount(UI.Layer.BACKGROUND)
+            int missesBeforeMutation = backend.cacheMissCount(UI.Layer.BACKGROUND)
+            int hitsBeforeMutation   = backend.cacheHitCount(UI.Layer.BACKGROUND)
             tint.set(Color.GREEN)
             Utility.renderSingleComponent(button)
         then : 'A fresh miss is recorded for the new style configuration...'
-            ext.cacheMissCount(UI.Layer.BACKGROUND) > missesBeforeMutation
+            backend.cacheMissCount(UI.Layer.BACKGROUND) > missesBeforeMutation
         and  : '...and the hit count did *not* go up: invalidation forced a re-render, not a blit.'
-            ext.cacheHitCount(UI.Layer.BACKGROUND) == hitsBeforeMutation
+            backend.cacheHitCount(UI.Layer.BACKGROUND) == hitsBeforeMutation
 
         when : 'We paint that same new (GREEN) style a second time.'
-            int missesBeforeBlit = ext.cacheMissCount(UI.Layer.BACKGROUND)
-            int hitsBeforeBlit   = ext.cacheHitCount(UI.Layer.BACKGROUND)
+            int missesBeforeBlit = backend.cacheMissCount(UI.Layer.BACKGROUND)
+            int hitsBeforeBlit   = backend.cacheHitCount(UI.Layer.BACKGROUND)
             Utility.renderSingleComponent(button)
         then : 'It is served from the cache again – the cache repopulated after invalidation.'
-            ext.cacheHitCount(UI.Layer.BACKGROUND)  > hitsBeforeBlit
-            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeBlit
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cacheHitCount(UI.Layer.BACKGROUND)  > hitsBeforeBlit
+            backend.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeBlit
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
     }
 
     def 'Resizing a styled component does not invalidate its cached rendering.'()
@@ -430,32 +430,32 @@ class Style_Render_Caching_Spec extends Specification
                   )
                   .get(JButton)
             button.setSize(120, 60) // Size set on the component itself, so resizing below actually takes effect.
-            var ext = ComponentExtension.from(button)
+            var backend = ComponentBackend.powering(button)
             Utility.renderSingleComponent(button)
             Utility.renderSingleComponent(button)
         expect : 'The cache is warm.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
-            ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cacheHitCount(UI.Layer.BACKGROUND) >= 1
 
         when : 'The component grows substantially and is painted again.'
-            int missesBeforeResize = ext.cacheMissCount(UI.Layer.BACKGROUND)
-            int hitsBeforeResize   = ext.cacheHitCount(UI.Layer.BACKGROUND)
+            int missesBeforeResize = backend.cacheMissCount(UI.Layer.BACKGROUND)
+            int hitsBeforeResize   = backend.cacheHitCount(UI.Layer.BACKGROUND)
             button.setSize(300, 90)
             Utility.renderSingleComponent(button)
         then : 'The resize actually took effect (the style engine did not override it).'
             button.width == 300 && button.height == 90
         and : 'The paint was served from the cache - no fresh rendering despite the new size!'
-            ext.cacheHitCount(UI.Layer.BACKGROUND)  > hitsBeforeResize
-            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeResize
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cacheHitCount(UI.Layer.BACKGROUND)  > hitsBeforeResize
+            backend.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeResize
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
 
         when : 'The component shrinks to yet another size and is painted again.'
-            int missesBeforeShrink = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            int missesBeforeShrink = backend.cacheMissCount(UI.Layer.BACKGROUND)
             button.setSize(150, 70)
             Utility.renderSingleComponent(button)
         then : 'Still no fresh rendering - every size maps onto the same cached rendering.'
-            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeShrink
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cacheMissCount(UI.Layer.BACKGROUND) == missesBeforeShrink
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
     }
 
     def 'Shrinking a styled component to a zero size releases its cached rendering.'()
@@ -486,10 +486,10 @@ class Style_Render_Caching_Spec extends Specification
                   )
                   .get(JButton)
             button.setSize(120, 60) // Size set on the component itself, so collapsing below actually takes effect.
-            var ext = ComponentExtension.from(button)
+            var backend = ComponentBackend.powering(button)
             Utility.renderSingleComponent(button)
         expect : 'The cache is warm - the background layer produced a cached rendering.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
 
         when : '''
             The component collapses to a zero height and its style is re-validated -
@@ -497,15 +497,15 @@ class Style_Render_Caching_Spec extends Specification
             would not do, since `JComponent.paint` bails out at a zero size).
         '''
             button.setSize(120, 0)
-            ext.gatherApplyAndInstallStyle(true)
+            backend.gatherApplyAndInstallStyle(true)
         then : 'The cached rendering was released - nothing keeps the image reachable through this component anymore.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
 
         when : 'The component regains a real size and is painted once more.'
             button.setSize(120, 60)
             Utility.renderSingleComponent(button)
         then : 'The cache repopulates from scratch - the rendering is available again.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
     }
 
     def 'Components of different sizes but the same style share a single cached rendering.'()
@@ -528,8 +528,8 @@ class Style_Render_Caching_Spec extends Specification
             var second = UI.button("Second").withStyle(common as swingtree.api.Styler).get(JButton)
             first.setSize(200, 80)
             second.setSize(340, 120)
-            var firstExt  = ComponentExtension.from(first)
-            var secondExt = ComponentExtension.from(second)
+            var firstExt  = ComponentBackend.powering(first)
+            var secondExt = ComponentBackend.powering(second)
 
         when : 'Both are rendered once, the differently sized one second.'
             Utility.renderSingleComponent(first)
@@ -561,21 +561,21 @@ class Style_Render_Caching_Spec extends Specification
                   )
                   .get(JButton)
             button.setSize(120, 60) // Size set on the component itself, so resizing below actually takes effect.
-            var ext = ComponentExtension.from(button)
+            var backend = ComponentBackend.powering(button)
             Utility.renderSingleComponent(button)
             Utility.renderSingleComponent(button)
         expect : 'The gradient is cached and served from the cache at a stable size.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
-            ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cacheHitCount(UI.Layer.BACKGROUND) >= 1
 
         when : 'The component is resized and painted again.'
-            int missesBeforeResize = ext.cacheMissCount(UI.Layer.BACKGROUND)
-            int hitsBeforeResize   = ext.cacheHitCount(UI.Layer.BACKGROUND)
+            int missesBeforeResize = backend.cacheMissCount(UI.Layer.BACKGROUND)
+            int hitsBeforeResize   = backend.cacheHitCount(UI.Layer.BACKGROUND)
             button.setSize(300, 90)
             Utility.renderSingleComponent(button)
         then : 'The new size required a fresh rendering (a miss), not a cache hit.'
-            ext.cacheMissCount(UI.Layer.BACKGROUND) > missesBeforeResize
-            ext.cacheHitCount(UI.Layer.BACKGROUND)  == hitsBeforeResize
+            backend.cacheMissCount(UI.Layer.BACKGROUND) > missesBeforeResize
+            backend.cacheHitCount(UI.Layer.BACKGROUND)  == hitsBeforeResize
     }
 
     def 'A large exact-size rendering is not allocated while the component is being resized.'()
@@ -605,25 +605,25 @@ class Style_Render_Caching_Spec extends Specification
                         .gradient( g -> g.type(UI.GradientType.RADIAL).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
                   )
                   .get(JButton)
-            var ext = ComponentExtension.from(button)
+            var backend = ComponentBackend.powering(button)
         and : 'It is large: above the size up to which an image is worth allocating eagerly.'
             button.setSize(600, 400)
 
         when : 'It is painted a few times at its first size, which is a birth rather than a resize.'
             8.times { Utility.renderSingleComponent(button) }
         then : 'It is cached, as any heavy style of this size would be.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
 
         when : 'The component is then resized and painted again.'
             button.setSize(620, 400)
             Utility.renderSingleComponent(button)
         then : 'No image was allocated for the new size.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
 
         when : 'The size settles and the component keeps being painted.'
             8.times { Utility.renderSingleComponent(button) }
         then : 'Caching resumes, because the reason to suppress it is gone.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
     }
 
     def 'A component dragged through fresh sizes leaves no finished renderings behind.'()
@@ -659,19 +659,19 @@ class Style_Render_Caching_Spec extends Specification
                         .gradient( g -> g.type(UI.GradientType.RADIAL).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
                   )
                   .get(JButton)
-            var ext = ComponentExtension.from(button)
+            var backend = ComponentBackend.powering(button)
         and : 'It sits at a settled size, painted often enough to be cached there.'
             button.setSize(100, 60)
             2.times { Utility.renderSingleComponent(button) }
         expect : 'A rendering exists, because nothing about this size is in flux.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
 
         when : 'The component is dragged across four widths it has never had before.'
             var renderingsPerFrame = []
             [120, 140, 160, 180].each { width ->
                 button.setSize(width, 60)
                 Utility.renderSingleComponent(button)
-                renderingsPerFrame << ext.cachedRendering(UI.Layer.BACKGROUND).size()
+                renderingsPerFrame << backend.cachedRendering(UI.Layer.BACKGROUND).size()
             }
         then : 'The component really did arrive at the last of those widths.'
             button.width == 180
@@ -681,7 +681,7 @@ class Style_Render_Caching_Spec extends Specification
         when : 'The drag ends and the component keeps being painted at its final size.'
             2.times { Utility.renderSingleComponent(button) }
         then : 'Caching resumes on its own, because the reason to hold back is gone.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
     }
 
     def 'A style cached size independently along one axis only is not allocated while the other axis is dragged.'()
@@ -713,7 +713,7 @@ class Style_Render_Caching_Spec extends Specification
                         .gradient( g -> g.span(UI.Span.TOP_TO_BOTTOM).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
                   )
                   .get(JButton)
-            var ext = ComponentExtension.from(button)
+            var backend = ComponentBackend.powering(button)
         and : """
             Tall enough that its exemplar is above the size up to which an image is allocated
             eagerly. Images below that size are always allocated, so a short component would be
@@ -723,14 +723,14 @@ class Style_Render_Caching_Spec extends Specification
             4.times { Utility.renderSingleComponent(button) }
         expect : 'It really is cached, and at a width far below its own.'
             button.width == 300 && button.height == 500
-            ext.cachedRendering(UI.Layer.BACKGROUND).every( image -> image.width < 100 )
+            backend.cachedRendering(UI.Layer.BACKGROUND).every( image -> image.width < 100 )
 
         when : 'The component is dragged through four heights it has never had before.'
             var renderingsPerFrame = []
             [520, 540, 560, 580].each { height ->
                 button.setSize(300, height)
                 Utility.renderSingleComponent(button)
-                renderingsPerFrame << ext.cachedRendering(UI.Layer.BACKGROUND).size()
+                renderingsPerFrame << backend.cachedRendering(UI.Layer.BACKGROUND).size()
             }
         then : 'The component really did arrive at the last of those heights.'
             button.height == 580
@@ -740,7 +740,7 @@ class Style_Render_Caching_Spec extends Specification
         when : 'The drag ends and the component keeps being painted at its final height.'
             2.times { Utility.renderSingleComponent(button) }
         then : 'Caching resumes, just as it does for a fully compacted or an exact-size key.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
     }
 
     def 'The axis a one axis gradient does not vary along is still dragged for free.'()
@@ -764,15 +764,15 @@ class Style_Render_Caching_Spec extends Specification
                         .gradient( g -> g.span(UI.Span.TOP_TO_BOTTOM).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
                   )
                   .get(JButton)
-            var ext = ComponentExtension.from(button)
+            var backend = ComponentBackend.powering(button)
             button.setSize(300, 500)
             4.times { Utility.renderSingleComponent(button) }
         expect : 'A rendering exists to be dragged against.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
 
         when : 'The component is dragged through four widths it has never had before.'
-            int missesBefore = ext.cacheMissCount(UI.Layer.BACKGROUND)
-            int hitsBefore   = ext.cacheHitCount(UI.Layer.BACKGROUND)
+            int missesBefore = backend.cacheMissCount(UI.Layer.BACKGROUND)
+            int hitsBefore   = backend.cacheHitCount(UI.Layer.BACKGROUND)
             [340, 380, 420, 460].each { width ->
                 button.setSize(width, 500)
                 Utility.renderSingleComponent(button)
@@ -780,10 +780,10 @@ class Style_Render_Caching_Spec extends Specification
         then : 'The component really did arrive at the last of those widths.'
             button.width == 460 && button.height == 500
         and  : 'Not one of those frames re-rendered the style - all four were cache hits.'
-            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBefore
-            ext.cacheHitCount(UI.Layer.BACKGROUND)  == hitsBefore + 4
+            backend.cacheMissCount(UI.Layer.BACKGROUND) == missesBefore
+            backend.cacheHitCount(UI.Layer.BACKGROUND)  == hitsBefore + 4
         and  : 'And they were all served from the one exemplar, which never changed.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).every( image -> image.width < 100 )
+            backend.cachedRendering(UI.Layer.BACKGROUND).every( image -> image.width < 100 )
     }
 
     def 'A drag which stops changing the exact dimension of a key starts caching again mid-drag.'()
@@ -811,30 +811,30 @@ class Style_Render_Caching_Spec extends Specification
                         .gradient( g -> g.span(UI.Span.TOP_TO_BOTTOM).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
                   )
                   .get(JButton)
-            var ext = ComponentExtension.from(button)
+            var backend = ComponentBackend.powering(button)
             button.setSize(300, 2800)
             4.times { Utility.renderSingleComponent(button) }
         expect : 'It is cached at this settled size, in an image far narrower than the component.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).every( image -> image.width < 100 )
+            backend.cachedRendering(UI.Layer.BACKGROUND).every( image -> image.width < 100 )
 
         when : 'The drag starts by pulling the height, which invalidates that key.'
             button.setSize(300, 2900)
             Utility.renderSingleComponent(button)
         then : 'Nothing is cached for the new height yet, as for any key whose exact dimension just changed.'
             button.height == 2900
-            ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
 
         when : 'The drag continues sideways alone, so the component stops changing size in the exact dimension.'
-            int hitsBefore = ext.cacheHitCount(UI.Layer.BACKGROUND)
+            int hitsBefore = backend.cacheHitCount(UI.Layer.BACKGROUND)
             [340, 380, 420, 460].each { width ->
                 button.setSize(width, 2900)
                 Utility.renderSingleComponent(button)
                 assert button.width == width
             }
         then : 'The rendering was allocated during the drag rather than after it...'
-            ext.cachedRendering(UI.Layer.BACKGROUND).every( image -> image.width < 100 )
+            backend.cachedRendering(UI.Layer.BACKGROUND).every( image -> image.width < 100 )
         and : '...and the later frames of that same drag were served from it.'
-            ext.cacheHitCount(UI.Layer.BACKGROUND) > hitsBefore
+            backend.cacheHitCount(UI.Layer.BACKGROUND) > hitsBefore
     }
 
     def 'Equally styled components resizing together still end up sharing one rendering.'()
@@ -862,8 +862,8 @@ class Style_Render_Caching_Spec extends Specification
             }
             var first  = UI.button("A").withStyle(styler as swingtree.api.Styler).get(JButton)
             var second = UI.button("B").withStyle(styler as swingtree.api.Styler).get(JButton)
-            var firstExt  = ComponentExtension.from(first)
-            var secondExt = ComponentExtension.from(second)
+            var firstExt  = ComponentBackend.powering(first)
+            var secondExt = ComponentBackend.powering(second)
         and : 'Both are painted once at a common size, so that neither is newborn any more.'
             first.setSize(100, 60)
             second.setSize(100, 60)
@@ -914,7 +914,7 @@ class Style_Render_Caching_Spec extends Specification
             }
             var settled  = UI.button("Settled").withStyle(styler as swingtree.api.Styler).get(JButton)
             var resizing = UI.button("Resizing").withStyle(styler as swingtree.api.Styler).get(JButton)
-            var resizingExt = ComponentExtension.from(resizing)
+            var resizingExt = ComponentBackend.powering(resizing)
 
         and : """
             The first one sits still at a large size until its rendering exists. It is kept
@@ -924,7 +924,7 @@ class Style_Render_Caching_Spec extends Specification
         """
             settled.setSize(400, 200)
             6.times { Utility.renderSingleComponent(settled) }
-            assert ComponentExtension.from(settled).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            assert ComponentBackend.powering(settled).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
 
         when : 'The second component is dragged, arriving at the size the first one holds.'
             resizing.setSize(360, 200)
@@ -961,16 +961,16 @@ class Style_Render_Caching_Spec extends Specification
                             })
             var box = UI.box().withStyle( it -> it.painter(UI.Layer.BACKGROUND, "mark", painter) ).get(JBox)
             box.setSize(200, 120)
-            var ext = ComponentExtension.from(box)
+            var backend = ComponentBackend.powering(box)
 
         when : 'It is painted a handful of times.'
             5.times { Utility.renderSingleComponent(box) }
 
         then : 'There is a cached rendering of that layer.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
         and : 'And the painter really did run only while that rendering was being made.'
             runs.get() == 1
-            ext.cacheHitCount(UI.Layer.BACKGROUND) >= 3
+            backend.cacheHitCount(UI.Layer.BACKGROUND) >= 3
     }
 
     def 'A cacheable painter ahead of an uncacheable one is baked into the cached image.'()
@@ -1102,13 +1102,13 @@ class Style_Render_Caching_Spec extends Specification
         when : 'The first one is painted until its background is cached.'
             3.times { Utility.renderSingleComponent(first) }
         then : 'It is: the painter was cut out of the layer, so the rest of it could be cached.'
-            ComponentExtension.from(first).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            ComponentBackend.powering(first).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
 
         when : 'The second one is painted for the very first time.'
             Utility.renderSingleComponent(second)
         then : 'It found the image the first one had already rendered, instead of rendering again.'
-            ComponentExtension.from(second).cacheHitCount(UI.Layer.BACKGROUND)  == 1
-            ComponentExtension.from(second).cacheMissCount(UI.Layer.BACKGROUND) == 0
+            ComponentBackend.powering(second).cacheHitCount(UI.Layer.BACKGROUND)  == 1
+            ComponentBackend.powering(second).cacheMissCount(UI.Layer.BACKGROUND) == 0
     }
 
     def 'A painter baked into a cached image does not tie it to the names of the painters replayed over it.'()
@@ -1155,13 +1155,13 @@ class Style_Render_Caching_Spec extends Specification
         when : 'The first one is painted until its background is cached.'
             3.times { Utility.renderSingleComponent(first) }
         then : 'It is - the cut put the background and the cacheable painter into one image.'
-            ComponentExtension.from(first).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            ComponentBackend.powering(first).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
 
         when : 'The second one is painted for the very first time.'
             Utility.renderSingleComponent(second)
         then : 'It found that very image, rather than allocating one of its own.'
-            ComponentExtension.from(second).cacheHitCount(UI.Layer.BACKGROUND)  == 1
-            ComponentExtension.from(second).cacheMissCount(UI.Layer.BACKGROUND) == 0
+            ComponentBackend.powering(second).cacheHitCount(UI.Layer.BACKGROUND)  == 1
+            ComponentBackend.powering(second).cacheMissCount(UI.Layer.BACKGROUND) == 0
     }
 
     def 'Caching is per-layer: a heavy background does not imply a cached foreground.'()
@@ -1191,15 +1191,15 @@ class Style_Render_Caching_Spec extends Specification
                         .foundationColor(Color.WHITE)
                   )
                   .get(JButton)
-            var ext = ComponentExtension.from(button)
+            var backend = ComponentBackend.powering(button)
 
         when : 'We render the component once.'
             Utility.renderSingleComponent(button)
 
         then : 'The background layer is cached, just like in the other scenarios.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
 
         and : 'But the foreground layer was skipped by the cache because it carries no heavy ingredients.'
-            ext.cachedRendering(UI.Layer.FOREGROUND).isEmpty()
+            backend.cachedRendering(UI.Layer.FOREGROUND).isEmpty()
     }
 }

@@ -24,7 +24,7 @@ import swingtree.components.JBox;
 import swingtree.components.JScrollPanels;
 import swingtree.input.Keyboard;
 import swingtree.layout.*;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 import swingtree.style.FontConf;
 import swingtree.style.LibraryInternalCrossPackageStyleUtil;
 
@@ -80,9 +80,9 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     private void _bindRepaintOn( JComponent thisComponent, Observable event ) {
-        ComponentExtension.from(thisComponent).storeBoundObservable(
+        ComponentBackend.powering(thisComponent).storeBoundObservable(
                 event.subscribe( () -> _runInUI( ()->{
-                    ComponentExtension.from(thisComponent).gatherApplyAndInstallStyle(false);
+                    ComponentBackend.powering(thisComponent).gatherApplyAndInstallStyle(false);
                     thisComponent.repaint();
                 }))
             );
@@ -296,7 +296,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @return The JComponent type which will be managed by this builder.
      */
     public final I id( String id ) {
-        return _with( c -> ComponentExtension.from(c).setId(id) )._this();
+        return _with( c -> ComponentBackend.powering(c).setId(id) )._this();
     }
 
     /**
@@ -316,7 +316,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     public final <E extends Enum<E>> I id( E id ) {
         Objects.requireNonNull(id);
-        return _with( c -> ComponentExtension.from(c).setId(id) )._this();
+        return _with( c -> ComponentBackend.powering(c).setId(id) )._this();
     }
 
     /**
@@ -358,7 +358,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I group( String... groupTags ) {
-        return _with( c -> ComponentExtension.from(c).setStyleGroups(groupTags) )._this();
+        return _with( c -> ComponentBackend.powering(c).setStyleGroups(groupTags) )._this();
     }
 
     /**
@@ -399,7 +399,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      */
     @SafeVarargs
     public final <E extends Enum<E>> I group( E... groupTags ) {
-        return _with( c -> ComponentExtension.from(c).setStyleGroups(groupTags) )._this();
+        return _with( c -> ComponentBackend.powering(c).setStyleGroups(groupTags) )._this();
     }
 
     /**
@@ -2446,7 +2446,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withStyle( Styler<C> styler ) {
         NullUtil.nullArgCheck(styler, "styler", Styler.class);
         return _with( c -> {
-                    ComponentExtension.from(c).addStyler( styler );
+                    ComponentBackend.powering(c).addStyler( styler );
                 })
                 ._this();
     }
@@ -2541,10 +2541,10 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     // the property change events, so the styler never touches the property itself,
                     // which belongs to the application thread.
                     AtomicReference<@Nullable T> shownItem = new AtomicReference<>(item.orElseNull());
-                    ComponentExtension.from(c).addStyler( delegate -> styler.style(NullUtil.fakeNonNull(shownItem.get()), delegate) );
+                    ComponentBackend.powering(c).addStyler(delegate -> styler.style(NullUtil.fakeNonNull(shownItem.get()), delegate) );
                     _onShow( item, c, (comp, v) -> {
                         shownItem.set(v);
-                        ComponentExtension.from(comp).gatherApplyAndInstallStyle(false);
+                        ComponentBackend.powering(comp).gatherApplyAndInstallStyle(false);
                         comp.repaint();
                     });
                 })
@@ -2625,7 +2625,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(styler, "styler", AnimatedItemStyler.class);
         return _with( c -> {
                     ItemTransitionStyler<T, C> transition = new ItemTransitionStyler<>(item.orElseNull(), c, transitionLifeTime, styler);
-                    ComponentExtension.from(c).addStyler(transition::style);
+                    ComponentBackend.powering(c).addStyler(transition::style);
                     _onShow( item, c, (comp, v) -> transition.set(v) );
                 })
                 ._this();
@@ -2675,7 +2675,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(styler, "styler", AnimatedStyler.class);
         return _with( c -> {
                     FlipFlopStyler<C> flipFlopStyler = new FlipFlopStyler<>(transitionToggle.get(), c, transitionLifeTime, styler);
-                    ComponentExtension.from(c).addStyler(flipFlopStyler::style);
+                    ComponentBackend.powering(c).addStyler(flipFlopStyler::style);
                     _onShow( transitionToggle, c, (comp, v) -> flipFlopStyler.set(v) );
                 })
                 ._this();
@@ -2724,13 +2724,13 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(styler, "styler", AnimatedStyler.class);
         return _with( thisComponent -> {
                     WeakReference<C> thisComponentRef = new WeakReference<>(thisComponent);
-                    ComponentExtension.from(thisComponent).storeBoundObservable(
+                    ComponentBackend.powering(thisComponent).storeBoundObservable(
                             styleTrigger.subscribe(()->{
                                 C innerComponent = thisComponentRef.get();
                                 if (innerComponent == null)
                                     return;
                                 AnimationDispatcher.animateFor(styleLifeTime, thisComponent).go(status ->
-                                        ComponentExtension.from(thisComponent)
+                                        ComponentBackend.powering(thisComponent)
                                                 .addAnimatedStyler(status, conf -> styler.style(status, conf))
                                 );
                             })
@@ -2962,7 +2962,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(size, "size", Dimension.class);
         return _with( c -> {
             c.setMinimumSize(UI.scale(size.toDimension()));
-            ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+            ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                 c.setMinimumSize(UI.scale(size.toDimension()));
                 _revalidate(c);
             });
@@ -2994,7 +2994,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     c.setMinimumSize( UI.scale(size.get().toDimension()) );
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setMinimumSize( UI.scale(size.get().toDimension()) );
                         _revalidate(c);
                     });
@@ -3036,7 +3036,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     c.setMinimumSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setMinimumSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );
                         _revalidate(c);
                     });
@@ -3053,7 +3053,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withMinWidth( int width ) {
         return _with( c -> {
                     _setMinWidth(c, width);
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setMinWidth(c, width);
                         _revalidate(c);
                     });
@@ -3084,7 +3084,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     _setMinWidth(c, width.get());
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setMinWidth(c, width.get());
                         _revalidate(c);
                     });
@@ -3102,7 +3102,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withMinHeight( int height ) {
         return _with( c -> {
                     _setMinHeight(c, height);
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setMinHeight(c, height);
                         _revalidate(c);
                     });
@@ -3133,7 +3133,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     _setMinHeight(c, height.get());
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setMinHeight(c, height.get());
                         _revalidate(c);
                     });
@@ -3151,7 +3151,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(size, "size", Size.class);
         return _with( c -> {
                     c.setMaximumSize(UI.scale(size.toDimension()));
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setMaximumSize(UI.scale(size.toDimension()));
                         _revalidate(c);
                     });
@@ -3174,7 +3174,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     c.setMaximumSize( UI.scale(size.get().toDimension()) );
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setMaximumSize( UI.scale(size.get().toDimension()) );
                         _revalidate(c);
                     });
@@ -3215,7 +3215,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     c.setMaximumSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setMaximumSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );
                         _revalidate(c);
                     });
@@ -3232,7 +3232,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withMaxWidth( int width ) {
         return _with( c -> {
                     c.setMaximumSize(new Dimension(UI.scale(width), c.getMaximumSize().height));
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setMaximumSize(new Dimension(UI.scale(width), c.getMaximumSize().height));
                         _revalidate(c);
                     });
@@ -3263,7 +3263,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     _setMaxWidth(c, width.get());
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setMaxWidth(c, width.get());
                         _revalidate(c);
                     });
@@ -3280,7 +3280,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withMaxHeight( int height ) {
         return _with( c -> {
                     _setMaxHeight(c, height);
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setMaxHeight(c, height);
                         _revalidate(c);
                     });
@@ -3311,7 +3311,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     _setMaxHeight(c, height.get());
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setMaxHeight(c, height.get());
                         _revalidate(c);
                     });
@@ -3331,7 +3331,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(size, "size", Size.class);
         return _with( c -> {
             c.setPreferredSize(UI.scale(size.toDimension()));
-            ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+            ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                 c.setPreferredSize(UI.scale(size.toDimension()));
                 _revalidate(c);
             });
@@ -3356,7 +3356,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     c.setPreferredSize( UI.scale(size.get().toDimension()) );
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setPreferredSize( UI.scale(size.get().toDimension()) );
                         _revalidate(c);
                     });
@@ -3401,7 +3401,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     c.setPreferredSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setPreferredSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );
                         _revalidate(c);
                     });
@@ -3419,7 +3419,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withPrefWidth( int width ) {
         return _with( c -> {
                     _setPrefWidth(c, width);
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setPrefWidth(c, width);
                         _revalidate(c);
                     });
@@ -3451,7 +3451,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     _setPrefWidth(c, width.get());
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setPrefWidth(c, width.get());
                         _revalidate(c);
                     });
@@ -3469,7 +3469,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withPrefHeight( int height ) {
         return _with( c -> {
                     _setPrefHeight(c, height);
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setPrefHeight(c, height);
                         _revalidate(c);
                     });
@@ -3501,7 +3501,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     _setPrefHeight(c, height.get());
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         _setPrefHeight(c, height.get());
                         _revalidate(c);
                     });
@@ -3524,7 +3524,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(size, "size", Dimension.class);
         return _with( c -> {
             c.setSize(UI.scale(size.toDimension()));
-            ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+            ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                 c.setSize(UI.scale(size.toDimension()));
                 _revalidate(c);
             });
@@ -3553,7 +3553,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     c.setSize( UI.scale(size.get().toDimension()) );
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setSize( UI.scale(size.get().toDimension()) );
                         _revalidate(c);
                     });
@@ -3592,7 +3592,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withWidth( int width ) {
         return _with( c -> {
                     c.setSize(new Dimension(UI.scale(width), c.getSize().height));
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setSize(new Dimension(UI.scale(width), c.getSize().height));
                         _revalidate(c);
                     });
@@ -3619,7 +3619,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     c.setSize(new Dimension(UI.scale(width.get()), c.getSize().height));
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setSize(new Dimension(UI.scale(width.get()), c.getSize().height));
                         _revalidate(c);
                     });
@@ -3640,7 +3640,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withHeight( int height ) {
         return _with( c -> {
                     c.setSize(new Dimension(c.getSize().width, UI.scale(height)));
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setSize(new Dimension(c.getSize().width, UI.scale(height)));
                         _revalidate(c);
                     });
@@ -3667,7 +3667,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     c.setSize(new Dimension(c.getSize().width, UI.scale(height.get())));
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setSize(new Dimension(c.getSize().width, UI.scale(height.get())));
                         _revalidate(c);
                     });
@@ -3702,7 +3702,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(position, "position", Position.class);
         return _with( c -> {
                     c.setLocation(UI.scale((int) position.x()), UI.scale((int) position.y()));
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setLocation(UI.scale((int) position.x()), UI.scale((int) position.y()));
                     });
                 })
@@ -3742,7 +3742,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._with( c -> {
                     Position p = position.get();
                     c.setLocation(UI.scale((int) p.x()), UI.scale((int) p.y()));
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         Position cur = position.get();
                         c.setLocation(UI.scale((int) cur.x()), UI.scale((int) cur.y()));
                     });
@@ -3782,7 +3782,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(bounds, "bounds", Bounds.class);
         return _with( c -> {
                     c.setBounds(UI.scale(bounds.toRectangle()));
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setBounds(UI.scale(bounds.toRectangle()));
                         _revalidate(c);
                     });
@@ -3825,7 +3825,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 })
                 ._with( c -> {
                     c.setBounds(UI.scale(bounds.get().toRectangle()));
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setBounds(UI.scale(bounds.get().toRectangle()));
                         _revalidate(c);
                     });
@@ -3935,7 +3935,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                     c.setMinimumSize(UI.scale(size.get().toDimension()));
                     c.setMaximumSize(UI.scale(size.get().toDimension()));
                     c.setPreferredSize(UI.scale(size.get().toDimension()));
-                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it->{
+                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it->{
                         c.setMinimumSize(UI.scale(size.get().toDimension()));
                         c.setMaximumSize(UI.scale(size.get().toDimension()));
                         c.setPreferredSize(UI.scale(size.get().toDimension()));
@@ -4175,7 +4175,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         return _with( thisComponent -> {
                     Font f = thisComponent.getFont();
                     thisComponent.setFont(f.deriveFont(UI.scale((float)size)));
-                    ComponentExtension.from(thisComponent).localUiScaleFactor().onChange(From.ALL, it -> {
+                    ComponentBackend.powering(thisComponent).localUiScaleFactor().onChange(From.ALL, it -> {
                         thisComponent.setFont(f.deriveFont(UI.scale((float)size)));
                     });
                 })
@@ -4202,7 +4202,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
                 ._with( thisComponent -> {
                     Font f = thisComponent.getFont();
                     thisComponent.setFont(f.deriveFont(UI.scale((float)size.orElseThrowUnchecked())));
-                    ComponentExtension.from(thisComponent).localUiScaleFactor().onChange(From.ALL, it -> {
+                    ComponentBackend.powering(thisComponent).localUiScaleFactor().onChange(From.ALL, it -> {
                         thisComponent.setFont(f.deriveFont(UI.scale((float)size.orElseThrowUnchecked())));
                     });
                 })
@@ -5137,7 +5137,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withDragAway( Configurator<DragAwayComponentConf<C>> configurator ) {
         NullUtil.nullArgCheck(configurator, "configurator", Configurator.class);
         return _with( thisComponent -> {
-                    ComponentExtension.from(thisComponent).addDragAwayConf(mousePosition -> {
+                    ComponentBackend.powering(thisComponent).addDragAwayConf(mousePosition -> {
                         DragAwayComponentConf<C> conf = DragAwayComponentConf.of(thisComponent, mousePosition);
                         try {
                             return configurator.configure(conf);
@@ -5245,7 +5245,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(observableEvent, "observableEvent", Observable.class);
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
-                    ComponentExtension.from(thisComponent).storeBoundObservable(
+                    ComponentBackend.powering(thisComponent).storeBoundObservable(
                         observableEvent.subscribe(() -> {
                             _runInUI(() -> {
                                 try {
@@ -5298,7 +5298,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(observableEvent, "observableEvent", Observable.class);
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
-                   ComponentExtension.from(thisComponent).storeBoundObservable(
+                   ComponentBackend.powering(thisComponent).storeBoundObservable(
                        observableEvent.subscribe(() -> {
                            _runInApp(() -> {
                                try {
@@ -5356,7 +5356,7 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         NullUtil.nullArgCheck(action, "action", Action.class);
         return _with( thisComponent -> {
                    E observableEvent = eventSource.apply(thisComponent);
-                   ComponentExtension.from(thisComponent).storeBoundObservable(
+                   ComponentBackend.powering(thisComponent).storeBoundObservable(
                        observableEvent.subscribe(() -> {
                            _runInApp(() -> {
                                try {

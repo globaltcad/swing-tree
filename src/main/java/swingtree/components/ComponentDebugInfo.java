@@ -3,7 +3,7 @@ package swingtree.components;
 import net.miginfocom.swing.MigLayout;
 import sprouts.Tuple;
 import swingtree.layout.Bounds;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 import swingtree.style.StyleConf;
 
 import javax.swing.*;
@@ -105,7 +105,7 @@ final class ComponentDebugInfo {
 
     static StyleConf findStyleConfOf(Component component) {
         if ( component instanceof JComponent ) {
-            return ComponentExtension.from((JComponent) component).getStyle();
+            return ComponentBackend.powering((JComponent) component).getStyle();
         }
         return StyleConf.none();
     }

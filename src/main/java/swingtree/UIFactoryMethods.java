@@ -24,10 +24,7 @@ import swingtree.dialogs.MessageDialog;
 import swingtree.dialogs.OptionsDialog;
 import swingtree.layout.LayoutConstraint;
 import swingtree.layout.Size;
-import swingtree.style.ComponentExtension;
-import swingtree.style.ScalableImageIcon;
-import swingtree.style.StyleSheet;
-import swingtree.style.SvgIcon;
+import swingtree.style.*;
 import swingtree.threading.EventProcessor;
 
 import javax.swing.*;
@@ -7178,11 +7175,11 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                 component = resultSwing.get(resultSwing.getType());
             }
             if ( component != null ) {
-                ComponentExtension<JComponent> extension = ComponentExtension.from(component);
-                extension.gatherApplyAndInstallStyle(true);
+                ComponentBackend<JComponent> backend = ComponentBackend.powering(component);
+                backend.gatherApplyAndInstallStyle(true);
                 if ( styleSheet != StyleSheet.none() ) {
                     JComponent finalComponent = component;
-                    extension.storeBoundObservable(styleSheet.observable().subscribe(() -> {
+                    backend.storeBoundObservable(styleSheet.observable().subscribe(() -> {
                         finalComponent.repaint();
                     }));
                 }

@@ -28,12 +28,12 @@ import java.util.function.Supplier;
  *  Is attached to UI components in the form of a client property.
  *  It exists to give Swing-Tree components some custom style and animation capabilities.
  *
- * @param <C> The type of the component to which this extension is attached
+ * @param <C> The type of the component to which this backend is attached
  *            as a client property (see {@link JComponent#putClientProperty(Object, Object)}).
  */
-public final class ComponentExtension<C extends JComponent>
+public final class ComponentBackend<C extends JComponent>
 {
-    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ComponentExtension.class);
+    private static final Logger log = org.slf4j.LoggerFactory.getLogger(ComponentBackend.class);
     /**
      *  Remembers per component class whether its border is painted by
      *  {@code JComponent.paintBorder(Graphics)} rather than by an override of that method.
@@ -54,32 +54,32 @@ public final class ComponentExtension<C extends JComponent>
     private static long _anonymousPainterCounter = 0;
 
     /**
-     * Returns the {@link ComponentExtension} associated with the given component.
-     * If the component does not have an extension, a new one is created and associated with the component.
+     * Returns the {@link ComponentBackend} associated with the given component.
+     * If the component does not have a backend, a new one is created and associated with the component.
      *
-     * @param comp The component for which to get the extension.
-     * @return The extension associated with the component.
+     * @param comp The component for which to get the backend.
+     * @return The backend associated with the component.
      * @param <C> The type of the component.
      */
-    public static <C extends JComponent> ComponentExtension<C> from( C comp ) {
-        ComponentExtension<C> ext = (ComponentExtension<C>) comp.getClientProperty( ComponentExtension.class );
-        if ( ext == null ) {
-            ext = new ComponentExtension<>(comp);
-            comp.putClientProperty( ComponentExtension.class, ext );
+    public static <C extends JComponent> ComponentBackend<C> powering( C comp ) {
+        ComponentBackend<C> backend = (ComponentBackend<C>) comp.getClientProperty( ComponentBackend.class );
+        if ( backend == null ) {
+            backend = new ComponentBackend<>(comp);
+            comp.putClientProperty( ComponentBackend.class, backend );
         }
-        return ext;
+        return backend;
     }
 
     /**
-     *  Initializes the given component with a new {@link ComponentExtension}.
+     *  Initializes the given component with a new {@link ComponentBackend}.
      *  This method is called by a SwingTree builder node when it
      *  receives and builds a new component.
-     *  The former extension of the component is replaced by a new one.
+     *  The former backend of the component is replaced by a new one.
      *
      * @param comp The component to initialize.
      */
     public static void initializeFor( JComponent comp ) {
-        from(comp);
+        powering(comp);
     }
 
     private final C _owner;
@@ -101,7 +101,7 @@ public final class ComponentExtension<C extends JComponent>
     private @Nullable Function<Position, DragAwayComponentConf<C>> _dragAwayConfigurator = null;
 
 
-    private ComponentExtension( C owner ) {
+    private ComponentBackend(C owner ) {
         _owner = Objects.requireNonNull(owner);
         _rememberFontToScaleFrom();
         owner.addPropertyChangeListener("font", event -> {
@@ -186,7 +186,7 @@ public final class ComponentExtension<C extends JComponent>
      * <pre>{@code
      * //Override
      * public void paint(Graphics g, JComponent comp) {
-     *     ComponentExtension.from(comp).paintBackground(g, g2d -> {
+     *     ComponentBackend.powering(comp).paintBackground(g, g2d -> {
      *         super.paint(g2d, comp); // Native look and feel painting
      *     });
      * }
@@ -217,10 +217,10 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
-     *  Stores the given observable in the extension in order to ensure that
+     *  Stores the given observable in the backend in order to ensure that
      *  it is not garbage collected before the component is garbage collected.
      *  The Sprouts library is based on the idea of event systems being weakly referenced
-     *  by theirs event sources, which means that if the observable is not stored in the extension,
+     *  by theirs event sources, which means that if the observable is not stored in the backend,
      *  the binding will be lost when the observable is garbage collected.
      * @param observable The observable to store using a strong reference
      *                   to ensure it is not garbage collected.
@@ -230,7 +230,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
-     *  Frees all bound observables from the extension.
+     *  Frees all bound observables from the backend.
      *  This is useful when the component is no longer needed and is about to be garbage collected.
      */
     public void freeBoundObservables() {
@@ -251,7 +251,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
-     *  Adds a drag away configurator to this component extension.
+     *  Adds a drag away configurator to this component backend.
      *  The configurator will be invoked to provide drag away configuration based on the mouse position.
      *  @param supplier A function that provides a drag away configuration given a mouse position.
      *  @throws IllegalStateException If a drag away configurator has already been set.
@@ -286,7 +286,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
-     *  Allows for extra state to be attached to the component extension.
+     *  Allows for extra state to be attached to the component backend.
      *  (Conceptually similar to how Swing components can have client properties.)<br>
      *  If the component already has an object of the given type attached,
      *  that object is returned. Otherwise, the given fetcher is used to create
@@ -296,34 +296,35 @@ public final class ComponentExtension<C extends JComponent>
      * @param type The type of the extra state to attach.
      * @param fetcher A supplier which is used to create a new object of the given type.
      * @return The extra state object of the given type which is attached to the component.
-     * @param <P> The type of the extra state.
+     * @param <S> The type of the extra state.
      */
-    public <P> P getOrSet( Class<P> type, Supplier<P> fetcher ) {
-        for ( Object plugin : _extraState)
-            if ( type.isInstance(plugin) )
-                return (P) plugin;
+    public <S> S getOrSet( Class<S> type, Supplier<S> fetcher ) {
+        for ( Object extraState : _extraState )
+            if ( type.isInstance(extraState) )
+                return (S) extraState;
 
-        P plugin = fetcher.get();
-        _extraState.add(plugin);
-        return plugin;
+        S extraState = fetcher.get();
+        _extraState.add(extraState);
+        return extraState;
     }
 
     /**
-     *  Looks up an extra-state object of the given type previously attached to this
-     *  component extension (see {@link #getOrSet(Class, Supplier)}), without creating
+     *  Looks up an extra state object of the given type previously attached to this
+     *  component backend (see {@link #getOrSet(Class, Supplier)}), without creating
      *  or attaching anything. This is the pure-read companion to
      *  {@link #getOrSet(Class, Supplier)}: it never has side effects and simply tells
-     *  you whether a plugin of the given type is currently present, and what it is.
+     *  you whether an extra state object of the given type is currently attached,
+     *  and what it is.
      *
      * @param type The type of the extra state to look up.
      * @return An {@link Optional} holding the attached object of the given type,
      *         or an empty {@link Optional} if none is currently attached.
-     * @param <P> The type of the extra state.
+     * @param <S> The type of the extra state.
      */
-    public <P> Optional<P> get( Class<P> type ) {
-        for ( Object plugin : _extraState )
-            if ( type.isInstance(plugin) )
-                return Optional.of(type.cast(plugin));
+    public <S> Optional<S> get( Class<S> type ) {
+        for ( Object extraState : _extraState )
+            if ( type.isInstance(extraState) )
+                return Optional.of(type.cast(extraState));
 
         return Optional.empty();
     }
@@ -552,7 +553,7 @@ public final class ComponentExtension<C extends JComponent>
         Objects.requireNonNull(layer);
         StyleLayerCache[] caches = _styleEngine.getLayerCaches();
         return caches[layer.ordinal()].renderedImages()
-                                      .mapTo(BufferedImage.class, ComponentExtension::_defensiveCopyOf);
+                                      .mapTo(BufferedImage.class, ComponentBackend::_defensiveCopyOf);
     }
 
     private static BufferedImage _defensiveCopyOf( BufferedImage image ) {
@@ -939,7 +940,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     /**
-     *  This method scans the {@link JComponent} of this {@link ComponentExtension} to check if the
+     *  This method scans the {@link JComponent} of this {@link ComponentBackend} to check if the
      *  "border paint step" is going to run. This is important, because when we render the component into a buffer,
      *  we need to know what the last paint step is going to be before blitting the buffer onto the application window...
      *  <p>
@@ -1029,7 +1030,7 @@ public final class ComponentExtension<C extends JComponent>
     }
 
     private boolean _hasParentFilter( JComponent aComponent ) {
-        FilterConf otherFilter = from(aComponent).getConf().style().layers().filter();
+        FilterConf otherFilter = powering(aComponent).getConf().style().layers().filter();
         return !otherFilter.equals(FilterConf.none());
     }
 
@@ -1105,7 +1106,7 @@ public final class ComponentExtension<C extends JComponent>
             // Sometimes needed to render filtered backgrounds:
             BufferedImage parentRendering = Optional.ofNullable(_owner.getParent())
                                             .map( c -> c instanceof JComponent ? (JComponent) c : null )
-                                            .map(ComponentExtension::from)
+                                            .map(ComponentBackend::powering)
                                             .map(e -> e._bufferedImage)
                                             .orElse(null);
 
@@ -1353,8 +1354,8 @@ public final class ComponentExtension<C extends JComponent>
         try {
             for ( Component child : _owner.getComponents() ) {
                 if ( child instanceof JComponent ) {
-                    ComponentExtension<?> childExtension = from((JComponent) child);
-                    hashCode = hashCode * 31 + childExtension.viewStateHashCode();
+                    ComponentBackend<?> childBackend = powering((JComponent) child);
+                    hashCode = hashCode * 31 + childBackend.viewStateHashCode();
                 }
             }
         } catch ( Exception e ) {

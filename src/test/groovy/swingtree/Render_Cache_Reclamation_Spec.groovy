@@ -7,7 +7,7 @@ import spock.lang.Timeout
 import spock.lang.Title
 import swingtree.components.JBox
 import swingtree.style.CacheBudget
-import swingtree.style.ComponentExtension
+import swingtree.style.ComponentBackend
 import swingtree.threading.EventProcessor
 import utility.Utility
 
@@ -44,7 +44,7 @@ import java.util.concurrent.TimeUnit
     where a single layer is cached in more than one piece.
 
 ''')
-@Subject([ComponentExtension])
+@Subject([ComponentBackend])
 @Timeout(value = 120, unit = TimeUnit.SECONDS)
 class Render_Cache_Reclamation_Spec extends Specification
 {
@@ -52,7 +52,7 @@ class Render_Cache_Reclamation_Spec extends Specification
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         SwingTree.get().setUiScaleFactor(1f)
         CacheBudget.UNITS_OVERRIDE = 10 // A deterministic budget, independent of the runner's RAM.
-        UI.runNow( () -> ComponentExtension.updateAllCachesFromLibraryConfig() ) // Every scenario starts with empty caches.
+        UI.runNow( () -> ComponentBackend.updateAllCachesFromLibraryConfig() ) // Every scenario starts with empty caches.
     }
 
     def cleanup() {
@@ -75,8 +75,8 @@ class Render_Cache_Reclamation_Spec extends Specification
             is an entry that keeps a future component out.
         """
         given : 'An empty cache to measure against.'
-            final var styleLayerEntries = {return UI.runAndGet({ComponentExtension.globalRenderCacheEntryCounts().toMap()["style layers"]})}
-            final var globalStyleLayerCacheBytesReserved = {UI.runAndGet({ComponentExtension.globalStyleLayerCacheBytesReserved()})}
+            final var styleLayerEntries = {return UI.runAndGet({ComponentBackend.globalRenderCacheEntryCounts().toMap()["style layers"]})}
+            final var globalStyleLayerCacheBytesReserved = {UI.runAndGet({ComponentBackend.globalStyleLayerCacheBytesReserved()})}
             var entriesBefore = styleLayerEntries()
             var bytesBefore = globalStyleLayerCacheBytesReserved()
 
@@ -146,8 +146,8 @@ class Render_Cache_Reclamation_Spec extends Specification
             would, before dropping it.
         """
         given : 'An empty cache to measure against.'
-            final var styleLayerEntries = {return UI.runAndGet({ComponentExtension.globalRenderCacheEntryCounts().toMap()["style layers"]})}
-            final var globalStyleLayerCacheBytesReserved = {UI.runAndGet({ComponentExtension.globalStyleLayerCacheBytesReserved()})}
+            final var styleLayerEntries = {return UI.runAndGet({ComponentBackend.globalRenderCacheEntryCounts().toMap()["style layers"]})}
+            final var globalStyleLayerCacheBytesReserved = {UI.runAndGet({ComponentBackend.globalStyleLayerCacheBytesReserved()})}
             var entriesBefore = styleLayerEntries()
             var bytesBefore = globalStyleLayerCacheBytesReserved()
 
@@ -198,8 +198,8 @@ class Render_Cache_Reclamation_Spec extends Specification
             8.times { Utility.renderSingleComponent(survivor) }
 
         expect : 'They shared a single rendering rather than allocating one each.'
-            ComponentExtension.from(survivor).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
-            ComponentExtension.from(survivor).cacheHitCount(UI.Layer.BACKGROUND) >= 1
+            ComponentBackend.powering(survivor).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            ComponentBackend.powering(survivor).cacheHitCount(UI.Layer.BACKGROUND) >= 1
 
         when : 'One of the two is dropped and collected.'
             var twinWasCollected = eventually(24, { ghost.get() == null })
@@ -209,11 +209,11 @@ class Render_Cache_Reclamation_Spec extends Specification
             The shared rendering stayed, because the survivor still holds that style - and it
             keeps being served from the cache rather than having to render again.
         """
-            var hitsBefore = ComponentExtension.from(survivor).cacheHitCount(UI.Layer.BACKGROUND)
-            var missesBefore = ComponentExtension.from(survivor).cacheMissCount(UI.Layer.BACKGROUND)
+            var hitsBefore = ComponentBackend.powering(survivor).cacheHitCount(UI.Layer.BACKGROUND)
+            var missesBefore = ComponentBackend.powering(survivor).cacheMissCount(UI.Layer.BACKGROUND)
             Utility.renderSingleComponent(survivor)
-            ComponentExtension.from(survivor).cacheHitCount(UI.Layer.BACKGROUND) == hitsBefore + 1
-            ComponentExtension.from(survivor).cacheMissCount(UI.Layer.BACKGROUND) == missesBefore
+            ComponentBackend.powering(survivor).cacheHitCount(UI.Layer.BACKGROUND) == hitsBefore + 1
+        ComponentBackend.powering(survivor).cacheMissCount(UI.Layer.BACKGROUND) == missesBefore
     }
 
     /**

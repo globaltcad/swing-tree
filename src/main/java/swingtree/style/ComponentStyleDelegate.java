@@ -281,14 +281,14 @@ public final class ComponentStyleDelegate<C extends JComponent>
      *  The {@link swingtree.UI.ComponentArea#BORDER} for example, may not be present
      *  in case of there not being a border width defined through {@link UIForAnySwing#withStyle(Styler)}.
      *  <p>
-     *  See {@link ComponentExtension#getComponentArea(UI.ComponentArea)} for more information.
+     *  See {@link ComponentBackend#getComponentArea(UI.ComponentArea)} for more information.
      *  </p>
      *
      * @param area The component area to access.
      * @return An optional value that contains the component area if it is present.
      */
     public Optional<Shape> shapeOf( UI.ComponentArea area ) {
-        return ComponentExtension.from(_component).getComponentArea(area);
+        return ComponentBackend.powering(_component).getComponentArea(area);
     }
 
     /**

@@ -6,7 +6,7 @@ import sprouts.Viewable;
 import swingtree.SwingTree;
 import swingtree.api.Configurator;
 import swingtree.api.Styler;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.BorderFactory;
@@ -41,7 +41,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *  A configurable Swing <i>Look and Feel</i> which paints every component through the
- *  {@linkplain swingtree.style.ComponentExtension SwingTree style engine} rather than through
+ *  {@linkplain ComponentBackend SwingTree style engine} rather than through
  *  hand written {@link java.awt.Graphics} code. Its appearance is data instead of code: a
  *  {@link Palette} of named colours, a {@link StylePreset} of {@link Styler} rules keyed by
  *  component type, and a {@link SymbolPreset} drawing the small geometry no rule can express.
@@ -322,7 +322,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             _restoreDefaultColours(c);
         else if ( c.getBorder() instanceof UIResource )
             c.setBorder(null);
-        ComponentExtension.from(c).gatherApplyAndInstallStyle(true);
+        ComponentBackend.powering(c).gatherApplyAndInstallStyle(true);
     }
 
     /** Re-reads the two colour defaults of a component's own UI class, e.g. "Button.background". */
@@ -1422,9 +1422,9 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          * @return the first variant the component belongs to, or {@link #NEUTRAL}
          */
         static Variant of( JComponent component ) {
-            ComponentExtension<?> extension = ComponentExtension.from(component);
+            ComponentBackend<?> backend = ComponentBackend.powering(component);
             for ( Variant variant : VALUES )
-                if ( variant != NEUTRAL && extension.belongsToGroup(variant) )
+                if ( variant != NEUTRAL && backend.belongsToGroup(variant) )
                     return variant;
             return NEUTRAL;
         }
@@ -1481,9 +1481,9 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             JComponent tagged = component;
             if ( component instanceof JViewport && component.getParent() instanceof JScrollPane )
                 tagged = (JScrollPane) component.getParent();
-            ComponentExtension<?> extension = ComponentExtension.from(tagged);
+            ComponentBackend<?> backend = ComponentBackend.powering(tagged);
             for ( Surface surface : VALUES )
-                if ( surface != WINDOW && extension.belongsToGroup(surface) )
+                if ( surface != WINDOW && backend.belongsToGroup(surface) )
                     return surface;
             return WINDOW;
         }

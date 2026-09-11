@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.From;
 import sprouts.Viewable;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 
 import javax.swing.*;
 import java.awt.*;
@@ -128,7 +128,7 @@ final class EnterExitComponentBoundsEventDispatcher {
             if ( this.area == UI.ComponentArea.ALL ) {
                 return true;
             }
-            Shape shape = ComponentExtension.from((JComponent) component).getComponentArea(area).orElse(null);
+            Shape shape = ComponentBackend.powering((JComponent) component).getComponentArea(area).orElse(null);
             return shape != null && shape.equals(component.getBounds());
         }
 
@@ -172,7 +172,7 @@ final class EnterExitComponentBoundsEventDispatcher {
         }
 
         private Location determineCurrentLocationOf(MouseEvent event) {
-            return ComponentExtension.from((JComponent) event.getComponent())
+            return ComponentBackend.powering((JComponent) event.getComponent())
                     .getComponentArea(area)
                     .filter( shape -> shape.contains(event.getPoint()) )
                     .map( isInsideShape -> Location.INSIDE )
