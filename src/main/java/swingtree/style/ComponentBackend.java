@@ -56,6 +56,8 @@ public final class ComponentBackend<C extends JComponent>
     /**
      * Returns the {@link ComponentBackend} associated with the given component.
      * If the component does not have a backend, a new one is created and associated with the component.
+     * Use {@link #installedOn(JComponent)} instead when you only want to ask whether
+     * a component already has a backend, without giving it one.
      *
      * @param comp The component for which to get the backend.
      * @return The backend associated with the component.
@@ -68,6 +70,24 @@ public final class ComponentBackend<C extends JComponent>
             comp.putClientProperty( ComponentBackend.class, backend );
         }
         return backend;
+    }
+
+    /**
+     * Returns the {@link ComponentBackend} already installed on the given component,
+     * or an empty {@link Optional} if the component does not have one.
+     * In contrast to {@link #powering(JComponent)}, this method never installs a backend,
+     * which matters because installing one subscribes the component to the library global
+     * UI scale factor and adds a font listener to it. Reach for this method when merely
+     * asking about a component the caller does not own, like a parent or a child
+     * encountered while painting.
+     *
+     * @param comp The component to look up the backend of.
+     * @return An {@link Optional} holding the backend installed on the given component,
+     *         or an empty {@link Optional} if no backend is installed on it.
+     * @param <C> The type of the component.
+     */
+    public static <C extends JComponent> Optional<ComponentBackend<C>> installedOn( C comp ) {
+        return Optional.ofNullable( (ComponentBackend<C>) comp.getClientProperty( ComponentBackend.class ) );
     }
 
     /**
@@ -1030,8 +1050,10 @@ public final class ComponentBackend<C extends JComponent>
     }
 
     private boolean _hasParentFilter( JComponent aComponent ) {
-        FilterConf otherFilter = powering(aComponent).getConf().style().layers().filter();
-        return !otherFilter.equals(FilterConf.none());
+        return installedOn(aComponent)
+                .map( backend -> backend.getConf().style().layers().filter() )
+                .map( filter -> !filter.equals(FilterConf.none()) )
+                .orElse(false);
     }
 
     /**
@@ -1106,8 +1128,8 @@ public final class ComponentBackend<C extends JComponent>
             // Sometimes needed to render filtered backgrounds:
             BufferedImage parentRendering = Optional.ofNullable(_owner.getParent())
                                             .map( c -> c instanceof JComponent ? (JComponent) c : null )
-                                            .map(ComponentBackend::powering)
-                                            .map(e -> e._bufferedImage)
+                                            .flatMap(ComponentBackend::installedOn)
+                                            .map( backend -> backend._bufferedImage )
                                             .orElse(null);
 
             // Location relative to the parent:
