@@ -1071,8 +1071,8 @@ public final class UIForTabbedPane<P extends JTabbedPane> extends UIForAnySwing<
 
     private static final class OnSelectionMultiplexer implements ChangeListener {
         static OnSelectionMultiplexer of(JTabbedPane pane) {
-            ComponentBackend<JTabbedPane> extension = ComponentBackend.powering(pane);
-            OnSelectionMultiplexer found = extension.getOrSet(OnSelectionMultiplexer.class, ()->new OnSelectionMultiplexer(pane));
+            ComponentBackend<JTabbedPane> backend = ComponentBackend.powering(pane);
+            OnSelectionMultiplexer found = backend.getOrSet(OnSelectionMultiplexer.class, ()->new OnSelectionMultiplexer(pane));
             return found;
         }
 

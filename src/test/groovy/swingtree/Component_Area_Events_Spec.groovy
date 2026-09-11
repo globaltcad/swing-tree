@@ -27,7 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger
     interior together, and `ALL` is the whole component. A border of four different
     widths, or a corner radius, makes these areas shapes no rectangle describes, so a
     component has to be able to return each area as a `java.awt.Shape` when asked.
-    `ComponentExtension.getComponentArea(..)` does that, `shapeOf(..)` on the event and
+    `ComponentBackend.getComponentArea(..)` does that, `shapeOf(..)` on the event and
     style delegates passes the answer on to application code, and the style painters and
     mouse event handlers bound to an area use the very same shapes.
 
@@ -89,7 +89,7 @@ class Component_Area_Events_Spec extends Specification
             A border width turns the outermost pixels of a component into its
             `UI.ComponentArea.BORDER` area: a ring which follows every edge of the component
             and leaves the middle out. A component has to return that ring as a
-            `java.awt.Shape` from `ComponentExtension.getComponentArea(UI.ComponentArea.BORDER)`,
+            `java.awt.Shape` from `ComponentBackend.getComponentArea(UI.ComponentArea.BORDER)`,
             because `shapeOf(..)` on the delegates and the
             `onMouseEnter(UI.ComponentArea.BORDER, ..)` events are built on that answer.
             So we paint a panel of 300 by 200 pixels with a border at least 12 pixels wide,
@@ -141,7 +141,7 @@ class Component_Area_Events_Spec extends Specification
     ) {
         reportInfo """
             A style defines up to four areas of a component, and each one is a
-            `java.awt.Shape` which `ComponentExtension.getComponentArea(..)` returns:
+            `java.awt.Shape` which `ComponentBackend.getComponentArea(..)` returns:
             a border width fills the `BORDER` ring, what lies inside that ring is the
             `INTERIOR`, a margin leaves an `EXTERIOR` ring around the body, and the `BODY`
             is the border and the interior together. This scenario paints a panel of 300 by

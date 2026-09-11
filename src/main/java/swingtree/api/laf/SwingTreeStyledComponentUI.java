@@ -84,7 +84,7 @@ import java.util.function.Supplier;
  *        Graphics g,
  *        JComponent comp
  *    ) {
- *        ComponentExtension.from(comp)
+ *        ComponentBackend.powering(comp)
  *            .paintBackground(g, g2d -> {
  *                super.paint(g2d, comp);
  *            });
@@ -181,7 +181,7 @@ public interface SwingTreeStyledComponentUI<C extends JComponent>
      *    public void installUI(
      *        JComponent comp
      *    ) {
-     *        ComponentExtension.from(comp)
+     *        ComponentBackend.powering(comp)
      *            .gatherApplyAndInstallStyle(true);
      *    }
      *  }</pre>
@@ -211,7 +211,7 @@ public interface SwingTreeStyledComponentUI<C extends JComponent>
      *        Graphics g,
      *        JComponent comp
      *    ) {
-     *        ComponentExtension.from(comp)
+     *        ComponentBackend.powering(comp)
      *            .paintBackground(g, g2d->{
      *                super.paint(g2d, comp);
      *            });
@@ -262,7 +262,7 @@ public interface SwingTreeStyledComponentUI<C extends JComponent>
      *        Graphics g,
      *        JComponent comp
      *    ) {
-     *        ComponentExtension.from(comp)
+     *        ComponentBackend.powering(comp)
      *            .paintBackground(g, g2d->{
      *                super.paint(g2d, comp);
      *            });

@@ -100,7 +100,7 @@ class Styled_Text_Spec extends Specification
             When `StyledString` instances are assembled into a `Tuple<StyledString>` and
             passed to `TextConf#content(...)` via the component style API, the style engine
             stores them verbatim inside the `TextConf`.  The resulting style configuration
-            is then observable through `ComponentExtension.from(component).getStyle()`.
+            is then observable through `ComponentBackend.powering(component).getStyle()`.
             
             This unit test verifies the round-trip: a sequence of three styled segments
             — a blue bold header, a plain body paragraph, and a green italic conclusion —

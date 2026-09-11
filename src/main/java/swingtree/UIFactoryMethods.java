@@ -7175,11 +7175,11 @@ public abstract class UIFactoryMethods extends UILayoutConstants
                 component = resultSwing.get(resultSwing.getType());
             }
             if ( component != null ) {
-                ComponentBackend<JComponent> extension = ComponentBackend.powering(component);
-                extension.gatherApplyAndInstallStyle(true);
+                ComponentBackend<JComponent> backend = ComponentBackend.powering(component);
+                backend.gatherApplyAndInstallStyle(true);
                 if ( styleSheet != StyleSheet.none() ) {
                     JComponent finalComponent = component;
-                    extension.storeBoundObservable(styleSheet.observable().subscribe(() -> {
+                    backend.storeBoundObservable(styleSheet.observable().subscribe(() -> {
                         finalComponent.repaint();
                     }));
                 }

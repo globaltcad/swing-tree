@@ -416,7 +416,7 @@ class Invariant_Styles_Spec extends Specification
             ]
     }
 
-    def 'The view state hash code function on the SingTree internal ComponentExtension hashes view related state.'(
+    def 'The view state hash code function on the SwingTree internal ComponentBackend hashes view related state.'(
         boolean isEqual, UIForAnySwing ui1, UIForAnySwing ui2
     ) {
         given : 'We build the actual components of the UI declarations:'

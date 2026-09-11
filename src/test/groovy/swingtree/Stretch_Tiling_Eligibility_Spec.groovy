@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit
     This specification pins down that boundary purely through the public
     API: it builds ordinary styled components, paints them through the
     regular paint pipeline and observes the cache through
-    `ComponentExtension.cacheHitCount(layer)` / `cacheMissCount(layer)` /
+    `ComponentBackend.cacheHitCount(layer)` / `cacheMissCount(layer)` /
     `cachedRendering(layer).isNotEmpty()`. Which styles resize for free and which
     re-render is the user visible requirement; how the machinery decides
     is deliberately not referenced anywhere in here.
@@ -107,24 +107,24 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         given : 'A styled button, warmed up with two paints at its initial size.'
             var button = buttonWith(styler)
             button.setSize(220, 160)
-            var ext = ComponentBackend.powering(button)
+            var backend = ComponentBackend.powering(button)
             2.times { Utility.renderSingleComponent(button) }
         expect : 'The size stuck, the cache is populated and the second paint already hit it.'
             button.width == 220 && button.height == 160
-            ext.cachedRendering(layer).isNotEmpty()
-            ext.cacheHitCount(layer) >= 1
+            backend.cachedRendering(layer).isNotEmpty()
+            backend.cacheHitCount(layer) >= 1
 
         when : 'The button grows substantially and is painted again.'
-            int missesBeforeResize = ext.cacheMissCount(layer)
-            int hitsBeforeResize   = ext.cacheHitCount(layer)
+            int missesBeforeResize = backend.cacheMissCount(layer)
+            int hitsBeforeResize   = backend.cacheHitCount(layer)
             button.setSize(420, 240)
             Utility.renderSingleComponent(button)
         then : 'The resize took effect...'
             button.width == 420 && button.height == 240
         and : '...and the paint at the new size was still served from the cache.'
-            ext.cacheMissCount(layer) == missesBeforeResize
-            ext.cacheHitCount(layer)  >  hitsBeforeResize
-            ext.cachedRendering(layer).isNotEmpty()
+            backend.cacheMissCount(layer) == missesBeforeResize
+            backend.cacheHitCount(layer)  >  hitsBeforeResize
+            backend.cachedRendering(layer).isNotEmpty()
 
         where :
             description                               | layer               | styler
@@ -160,22 +160,22 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         given : 'A styled button, warmed up with two paints at its initial size.'
             var button = buttonWith(styler)
             button.setSize(220, 160)
-            var ext = ComponentBackend.powering(button)
+            var backend = ComponentBackend.powering(button)
             2.times { Utility.renderSingleComponent(button) }
         expect : 'The cache is populated and serving hits at this stable size.'
             button.width == 220 && button.height == 160
-            ext.cachedRendering(layer).isNotEmpty()
-            ext.cacheHitCount(layer) >= 1
+            backend.cachedRendering(layer).isNotEmpty()
+            backend.cacheHitCount(layer) >= 1
 
         when : 'The button is resized and painted again.'
-            int missesBeforeResize = ext.cacheMissCount(layer)
-            int hitsBeforeResize   = ext.cacheHitCount(layer)
+            int missesBeforeResize = backend.cacheMissCount(layer)
+            int hitsBeforeResize   = backend.cacheHitCount(layer)
             button.setSize(420, 240)
             Utility.renderSingleComponent(button)
         then : 'The new size required a fresh rendering, not a cache hit.'
             button.width == 420 && button.height == 240
-            ext.cacheMissCount(layer) >  missesBeforeResize
-            ext.cacheHitCount(layer)  == hitsBeforeResize
+            backend.cacheMissCount(layer) >  missesBeforeResize
+            backend.cacheHitCount(layer)  == hitsBeforeResize
 
         where :
             description            | layer               | styler
@@ -209,23 +209,23 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         given : 'A button styled with the gradient, warmed up with two paints at its initial size.'
             var button = buttonWith(styler)
             button.setSize(220, 160)
-            var ext = ComponentBackend.powering(button)
+            var backend = ComponentBackend.powering(button)
             2.times { Utility.renderSingleComponent(button) }
         expect : 'The size stuck and the cache is warm.'
             button.width == 220 && button.height == 160
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
-            ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cacheHitCount(UI.Layer.BACKGROUND) >= 1
 
         when : 'The component grows along the axis the gradient does not vary along.'
-            int missesBefore = ext.cacheMissCount(UI.Layer.BACKGROUND)
-            int hitsBefore   = ext.cacheHitCount(UI.Layer.BACKGROUND)
+            int missesBefore = backend.cacheMissCount(UI.Layer.BACKGROUND)
+            int hitsBefore   = backend.cacheHitCount(UI.Layer.BACKGROUND)
             button.setSize(grownWidth, grownHeight)
             Utility.renderSingleComponent(button)
         then : 'The resize took effect...'
             button.width == grownWidth && button.height == grownHeight
         and : '...and the paint at the new size was still served from the cache.'
-            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesBefore
-            ext.cacheHitCount(UI.Layer.BACKGROUND)  >  hitsBefore
+            backend.cacheMissCount(UI.Layer.BACKGROUND) == missesBefore
+            backend.cacheHitCount(UI.Layer.BACKGROUND)  >  hitsBefore
 
         where :
             description                        | styler                                                                                                              | grownWidth | grownHeight
@@ -256,20 +256,20 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         given : 'A button styled with the gradient, warmed up with two paints at its initial size.'
             var button = buttonWith(styler)
             button.setSize(220, 160)
-            var ext = ComponentBackend.powering(button)
+            var backend = ComponentBackend.powering(button)
             2.times { Utility.renderSingleComponent(button) }
         expect : 'The cache is warm and serving hits at this settled size.'
-            ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
+            backend.cacheHitCount(UI.Layer.BACKGROUND) >= 1
 
         when : 'The component grows along the very axis the gradient varies along.'
-            int missesBefore = ext.cacheMissCount(UI.Layer.BACKGROUND)
-            int hitsBefore   = ext.cacheHitCount(UI.Layer.BACKGROUND)
+            int missesBefore = backend.cacheMissCount(UI.Layer.BACKGROUND)
+            int hitsBefore   = backend.cacheHitCount(UI.Layer.BACKGROUND)
             button.setSize(grownWidth, grownHeight)
             Utility.renderSingleComponent(button)
         then : 'The new size required a fresh rendering, not a cache hit.'
             button.width == grownWidth && button.height == grownHeight
-            ext.cacheMissCount(UI.Layer.BACKGROUND) >  missesBefore
-            ext.cacheHitCount(UI.Layer.BACKGROUND)  == hitsBefore
+            backend.cacheMissCount(UI.Layer.BACKGROUND) >  missesBefore
+            backend.cacheHitCount(UI.Layer.BACKGROUND)  == hitsBefore
 
         where :
             description                    | styler                                                                                             | grownWidth | grownHeight
@@ -301,18 +301,18 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         given : 'A button styled with the gradient, warmed up with two paints.'
             var button = buttonWith(styler)
             button.setSize(220, 160)
-            var ext = ComponentBackend.powering(button)
+            var backend = ComponentBackend.powering(button)
             2.times { Utility.renderSingleComponent(button) }
         expect : 'The cache is warm at this settled size.'
-            ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
+            backend.cacheHitCount(UI.Layer.BACKGROUND) >= 1
 
         when : 'The component grows in width alone, the direction a vertical gradient would get for free.'
-            int missesBefore = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            int missesBefore = backend.cacheMissCount(UI.Layer.BACKGROUND)
             button.setSize(460, 160)
             Utility.renderSingleComponent(button)
         then : 'It still had to be rendered again.'
             button.width == 460 && button.height == 160
-            ext.cacheMissCount(UI.Layer.BACKGROUND) > missesBefore
+            backend.cacheMissCount(UI.Layer.BACKGROUND) > missesBefore
 
         where :
             description                          | styler
@@ -361,19 +361,19 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             // Comfortably large, because a noise is only lifted out when it is big enough to be
             // drawn by blitting tiles - see the scenario after the next one.
             button.setSize(500, 300)
-            var ext = ComponentBackend.powering(button)
+            var backend = ComponentBackend.powering(button)
         and : 'A drag is started, which is what makes the layer worth cutting in two.'
             2.times { Utility.renderSingleComponent(button) }
             button.setSize(640, 360)
             2.times { Utility.renderSingleComponent(button) }
 
         expect : 'The layer is cached in two pieces: the part under the noise and the part over it.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).size() == 2
+            backend.cachedRendering(UI.Layer.BACKGROUND).size() == 2
         and : 'Both are small exemplars, not full sized renderings of a 640x360 component.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).all( image -> image.width < 640 && image.height < 360 )
+            backend.cachedRendering(UI.Layer.BACKGROUND).all( image -> image.width < 640 && image.height < 360 )
 
         when : 'The drag continues through a series of very different sizes.'
-            int missesWhenWarm = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            int missesWhenWarm = backend.cacheMissCount(UI.Layer.BACKGROUND)
             var journey = [[700, 400], [400, 500], [900, 320], [501, 301], [500, 300]]
             journey.each { w, h ->
                 button.setSize(w, h)
@@ -382,9 +382,9 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             }
 
         then : 'Not one of those paints re-rendered the style, despite the noise on the layer.'
-            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesWhenWarm
+            backend.cacheMissCount(UI.Layer.BACKGROUND) == missesWhenWarm
         and : 'And the two exemplars are still the ones being painted from.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).size() == 2
+            backend.cachedRendering(UI.Layer.BACKGROUND).size() == 2
     }
 
     def 'A noise is lifted out even when the layer under it is only free along one axis.'()
@@ -412,7 +412,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
                   )
                   .get(JButton)
             button.setSize(500, 300)
-            var ext = ComponentBackend.powering(button)
+            var backend = ComponentBackend.powering(button)
         and : 'A drag is started along the axis the gradient does not vary along.'
             2.times { Utility.renderSingleComponent(button) }
             button.setSize(640, 300)
@@ -420,12 +420,12 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
 
         expect : 'The layer was cut, and the piece under the noise is a compact exemplar.'
             button.width == 640 && button.height == 300
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
-            ext.cachedRendering(UI.Layer.BACKGROUND).all( image -> image.width < 640 )
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).all( image -> image.width < 640 )
 
         when : 'The drag continues through a series of fresh widths.'
-            int missesWhenWarm = ext.cacheMissCount(UI.Layer.BACKGROUND)
-            int hitsWhenWarm   = ext.cacheHitCount(UI.Layer.BACKGROUND)
+            int missesWhenWarm = backend.cacheMissCount(UI.Layer.BACKGROUND)
+            int hitsWhenWarm   = backend.cacheHitCount(UI.Layer.BACKGROUND)
             [700, 780, 900, 1010].each { width ->
                 button.setSize(width, 300)
                 Utility.renderSingleComponent(button)
@@ -433,8 +433,8 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             }
 
         then : 'Not one of those paints re-rendered the style, despite the noise on the layer.'
-            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesWhenWarm
-            ext.cacheHitCount(UI.Layer.BACKGROUND)  == hitsWhenWarm + 4
+            backend.cacheMissCount(UI.Layer.BACKGROUND) == missesWhenWarm
+            backend.cacheHitCount(UI.Layer.BACKGROUND)  == hitsWhenWarm + 4
     }
 
     def 'Once the size settles again, the noise goes back into a single cached image.'()
@@ -463,7 +463,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
                         .noise(UI.Layer.BACKGROUND, "grain", n -> n.colors("#202020", "#dedede"))
                   )
                   .get(JButton)
-            var ext = ComponentBackend.powering(button)
+            var backend = ComponentBackend.powering(button)
             [[500, 300], [560, 320], [620, 340]].each { w, h ->
                 button.setSize(w, h)
                 Utility.renderSingleComponent(button)
@@ -475,21 +475,21 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             (There is one image rather than two only because nothing on this style
             sits over the noise, so the part over it has nothing to cache.)
         """
-            ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1
-            ext.cachedRendering(UI.Layer.BACKGROUND).first().width < 620
+            backend.cachedRendering(UI.Layer.BACKGROUND).size() == 1
+            backend.cachedRendering(UI.Layer.BACKGROUND).first().width < 620
 
         when : 'The drag ends and the button is simply repainted at that size.'
             12.times { Utility.renderSingleComponent(button) }
 
         then : 'The layer is a single image again, holding the noise along with everything else.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1
-            ext.cachedRendering(UI.Layer.BACKGROUND).first().width == 620
+            backend.cachedRendering(UI.Layer.BACKGROUND).size() == 1
+            backend.cachedRendering(UI.Layer.BACKGROUND).first().width == 620
 
         and : 'And repainting it is served from that image, not re-rendered.'
-            int missesWhenSettled = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            int missesWhenSettled = backend.cacheMissCount(UI.Layer.BACKGROUND)
             5.times { Utility.renderSingleComponent(button) }
-            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesWhenSettled
-            ext.cacheHitCount(UI.Layer.BACKGROUND) >= 5
+            backend.cacheMissCount(UI.Layer.BACKGROUND) == missesWhenSettled
+            backend.cacheHitCount(UI.Layer.BACKGROUND) >= 5
     }
 
     def 'A noise is only lifted out when it is big enough to be drawn by blitting tiles.'()
@@ -647,7 +647,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
                         .shadow(UI.Layer.BACKGROUND, "glow", s -> s.color("#0a0a14").blurRadius(14))
                   )
                   .get(JButton)
-            var ext = ComponentBackend.powering(button)
+            var backend = ComponentBackend.powering(button)
 
         when : 'It is dragged, which is exactly when a layer would be cut around its noise.'
             [[400, 60], [420, 62], [440, 64]].each { w, h ->
@@ -662,10 +662,10 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             Utility.renderSingleComponent(button)
 
         then : 'It was not cut: there is a single cached image, not one per side of the noise.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1
+            backend.cachedRendering(UI.Layer.BACKGROUND).size() == 1
         and : 'And that image is the plain exact size rendering it would have been anyway.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).first().width  == 440
-            ext.cachedRendering(UI.Layer.BACKGROUND).first().height == 64
+            backend.cachedRendering(UI.Layer.BACKGROUND).first().width  == 440
+            backend.cachedRendering(UI.Layer.BACKGROUND).first().height == 64
 
         when : """
             The very same style is dragged on a button turned on its side, where the room and
@@ -710,18 +710,18 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
                   .withStyle( it -> it.noise(n -> n.colors("#111111", "#eeeeee")) )
                   .get(JButton)
             button.setSize(220, 160)
-            var ext = ComponentBackend.powering(button)
+            var backend = ComponentBackend.powering(button)
 
         when : 'We paint it a few times and then drag it.'
             5.times { Utility.renderSingleComponent(button) }
         then : 'At a settled size it is one cached image, like any other layer.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1
+            backend.cachedRendering(UI.Layer.BACKGROUND).size() == 1
 
         when : 'The drag begins, and there is suddenly nothing left to cache.'
             button.setSize(420, 240)
             Utility.renderSingleComponent(button)
         then : 'There is no cached image for that layer.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
     }
 
     def 'A rounded border with a color per edge resizes for free when its edges are equally thick.'()
@@ -793,30 +793,30 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         given : 'A tiny button with a comparatively heavy style, warmed up.'
             var button = buttonWith({ it.borderRadius(16).margin(6).backgroundColor("#5a8a1e").foundationColor("#f4f0e8") })
             button.setSize(40, 40)
-            var ext = ComponentBackend.powering(button)
+            var backend = ComponentBackend.powering(button)
             2.times { Utility.renderSingleComponent(button) }
         expect :
             button.width == 40 && button.height == 40
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
-            ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cacheHitCount(UI.Layer.BACKGROUND) >= 1
 
         when : 'The tiny button is resized ever so slightly, staying tiny.'
-            int missesWhileTiny = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            int missesWhileTiny = backend.cacheMissCount(UI.Layer.BACKGROUND)
             button.setSize(44, 44)
             Utility.renderSingleComponent(button)
         then : 'That small resize required a fresh rendering — the classic exact-size behavior.'
-            ext.cacheMissCount(UI.Layer.BACKGROUND) > missesWhileTiny
+            backend.cacheMissCount(UI.Layer.BACKGROUND) > missesWhileTiny
 
         when : 'The button grows well past the minimal reconstructable size and is painted once...'
             button.setSize(220, 160)
             Utility.renderSingleComponent(button)
         and : '...after which it is resized again.'
-            int missesWhileLarge = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            int missesWhileLarge = backend.cacheMissCount(UI.Layer.BACKGROUND)
             button.setSize(260, 180)
             Utility.renderSingleComponent(button)
         then : 'Now resizing no longer re-renders: the style crossed into size independent caching.'
             button.width == 260 && button.height == 180
-            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesWhileLarge
+            backend.cacheMissCount(UI.Layer.BACKGROUND) == missesWhileLarge
     }
 
     def 'A component with room to stretch in one dimension only is compacted in that one. (#description)'(
@@ -887,14 +887,14 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
         given : 'A styled button, warmed up at its initial size.'
             var button = buttonWith({ it.borderRadius(20).margin(4).backgroundColor("#1e5a8a").foundationColor("#efe9dc") })
             button.setSize(200, 150)
-            var ext = ComponentBackend.powering(button)
+            var backend = ComponentBackend.powering(button)
             2.times { Utility.renderSingleComponent(button) }
         expect :
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
-            ext.cacheHitCount(UI.Layer.BACKGROUND) >= 1
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cacheHitCount(UI.Layer.BACKGROUND) >= 1
 
         when : 'The button is dragged through wildly different sizes and painted at every one of them.'
-            int missesWhenWarm = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            int missesWhenWarm = backend.cacheMissCount(UI.Layer.BACKGROUND)
             var journey = [[500, 150], [200, 600], [3000, 200], [201, 151], [200, 150]]
             journey.each { w, h ->
                 button.setSize(w, h)
@@ -902,8 +902,8 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
                 assert button.width == w && button.height == h
             }
         then : 'Not a single one of those paints re-rendered the style.'
-            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesWhenWarm
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cacheMissCount(UI.Layer.BACKGROUND) == missesWhenWarm
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
     }
 
     def 'The dimensions of the cached rendering reveal how a style is cached. (#description)'(
@@ -1072,24 +1072,24 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
                                         .gradient(g -> g.type(UI.GradientType.RADIAL).colors("#a02050", "#2050a0"))
                                         .shadowColor("#0a0a12").shadowBlurRadius(7).shadowSpreadRadius(2) })
             button.setSize(300, 200)
-            var ext = ComponentBackend.powering(button)
+            var backend = ComponentBackend.powering(button)
             3.times { Utility.renderSingleComponent(button) }
 
         expect : 'The gradient background is cached at the full component size...'
-            ext.cachedRendering(UI.Layer.BACKGROUND).first().width  == 300
-            ext.cachedRendering(UI.Layer.BACKGROUND).first().height == 200
+            backend.cachedRendering(UI.Layer.BACKGROUND).first().width  == 300
+            backend.cachedRendering(UI.Layer.BACKGROUND).first().height == 200
         and : '...while the shadow on the content layer is a small atlas.'
-            ext.cachedRendering(UI.Layer.CONTENT).first().width  < 300
-            ext.cachedRendering(UI.Layer.CONTENT).first().height < 200
+            backend.cachedRendering(UI.Layer.CONTENT).first().width  < 300
+            backend.cachedRendering(UI.Layer.CONTENT).first().height < 200
 
         when : 'The button is resized and painted again.'
-            int backgroundMisses = ext.cacheMissCount(UI.Layer.BACKGROUND)
-            int shadowMisses     = ext.cacheMissCount(UI.Layer.CONTENT)
+            int backgroundMisses = backend.cacheMissCount(UI.Layer.BACKGROUND)
+            int shadowMisses     = backend.cacheMissCount(UI.Layer.CONTENT)
             button.setSize(420, 260)
             Utility.renderSingleComponent(button)
         then : 'Only the gradient had to be re-rendered; the shadow was reconstructed for free.'
-            ext.cacheMissCount(UI.Layer.BACKGROUND) > backgroundMisses
-            ext.cacheMissCount(UI.Layer.CONTENT)   == shadowMisses
+            backend.cacheMissCount(UI.Layer.BACKGROUND) > backgroundMisses
+            backend.cacheMissCount(UI.Layer.CONTENT)   == shadowMisses
     }
 
     def 'A style animation churning through cache keys does not starve other components of caching.'()
@@ -1113,7 +1113,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
             var frame  = new java.util.concurrent.atomic.AtomicInteger(0)
             var button = buttonWith({ it.borderRadius(16).backgroundColor(new Color(10 + frame.get(), 80, 160)) })
             button.setSize(240, 120)
-            var ext = ComponentBackend.powering(button)
+            var backend = ComponentBackend.powering(button)
 
         when : 'A hundred frames, each with its own unique style configuration, are painted.'
             (1..100).each { i ->
@@ -1121,7 +1121,7 @@ class Stretch_Tiling_Eligibility_Spec extends Specification
                 Utility.renderSingleComponent(button)
             }
         then : 'Every frame was a fresh rendering (a new style is a new key, by definition).'
-            ext.cacheMissCount(UI.Layer.BACKGROUND) >= 100
+            backend.cacheMissCount(UI.Layer.BACKGROUND) >= 100
 
         when : 'The garbage collector gets a chance to run.'
             System.gc()

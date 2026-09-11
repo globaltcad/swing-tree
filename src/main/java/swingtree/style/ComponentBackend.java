@@ -28,7 +28,7 @@ import java.util.function.Supplier;
  *  Is attached to UI components in the form of a client property.
  *  It exists to give Swing-Tree components some custom style and animation capabilities.
  *
- * @param <C> The type of the component to which this extension is attached
+ * @param <C> The type of the component to which this backend is attached
  *            as a client property (see {@link JComponent#putClientProperty(Object, Object)}).
  */
 public final class ComponentBackend<C extends JComponent>
@@ -55,26 +55,26 @@ public final class ComponentBackend<C extends JComponent>
 
     /**
      * Returns the {@link ComponentBackend} associated with the given component.
-     * If the component does not have an extension, a new one is created and associated with the component.
+     * If the component does not have a backend, a new one is created and associated with the component.
      *
-     * @param comp The component for which to get the extension.
-     * @return The extension associated with the component.
+     * @param comp The component for which to get the backend.
+     * @return The backend associated with the component.
      * @param <C> The type of the component.
      */
     public static <C extends JComponent> ComponentBackend<C> powering( C comp ) {
-        ComponentBackend<C> ext = (ComponentBackend<C>) comp.getClientProperty( ComponentBackend.class );
-        if ( ext == null ) {
-            ext = new ComponentBackend<>(comp);
-            comp.putClientProperty( ComponentBackend.class, ext );
+        ComponentBackend<C> backend = (ComponentBackend<C>) comp.getClientProperty( ComponentBackend.class );
+        if ( backend == null ) {
+            backend = new ComponentBackend<>(comp);
+            comp.putClientProperty( ComponentBackend.class, backend );
         }
-        return ext;
+        return backend;
     }
 
     /**
      *  Initializes the given component with a new {@link ComponentBackend}.
      *  This method is called by a SwingTree builder node when it
      *  receives and builds a new component.
-     *  The former extension of the component is replaced by a new one.
+     *  The former backend of the component is replaced by a new one.
      *
      * @param comp The component to initialize.
      */
@@ -186,7 +186,7 @@ public final class ComponentBackend<C extends JComponent>
      * <pre>{@code
      * //Override
      * public void paint(Graphics g, JComponent comp) {
-     *     ComponentExtension.from(comp).paintBackground(g, g2d -> {
+     *     ComponentBackend.powering(comp).paintBackground(g, g2d -> {
      *         super.paint(g2d, comp); // Native look and feel painting
      *     });
      * }
@@ -217,10 +217,10 @@ public final class ComponentBackend<C extends JComponent>
     }
 
     /**
-     *  Stores the given observable in the extension in order to ensure that
+     *  Stores the given observable in the backend in order to ensure that
      *  it is not garbage collected before the component is garbage collected.
      *  The Sprouts library is based on the idea of event systems being weakly referenced
-     *  by theirs event sources, which means that if the observable is not stored in the extension,
+     *  by theirs event sources, which means that if the observable is not stored in the backend,
      *  the binding will be lost when the observable is garbage collected.
      * @param observable The observable to store using a strong reference
      *                   to ensure it is not garbage collected.
@@ -230,7 +230,7 @@ public final class ComponentBackend<C extends JComponent>
     }
 
     /**
-     *  Frees all bound observables from the extension.
+     *  Frees all bound observables from the backend.
      *  This is useful when the component is no longer needed and is about to be garbage collected.
      */
     public void freeBoundObservables() {
@@ -1353,8 +1353,8 @@ public final class ComponentBackend<C extends JComponent>
         try {
             for ( Component child : _owner.getComponents() ) {
                 if ( child instanceof JComponent ) {
-                    ComponentBackend<?> childExtension = powering((JComponent) child);
-                    hashCode = hashCode * 31 + childExtension.viewStateHashCode();
+                    ComponentBackend<?> childBackend = powering((JComponent) child);
+                    hashCode = hashCode * 31 + childBackend.viewStateHashCode();
                 }
             }
         } catch ( Exception e ) {

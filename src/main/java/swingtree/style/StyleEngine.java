@@ -156,7 +156,7 @@ final class StyleEngine
             them - deliberately not a hardcoded layer-to-index switch. Each cache now renders
             through the layer it was constructed with, so a mapping that disagreed with
             ALL_LAYERS would not merely cache in the wrong slot, it would paint the wrong
-            layer's style. ComponentExtension indexes the very same array the same way.
+            layer's style. ComponentBackend indexes the very same array the same way.
         */
         final int layerIndex = layer.ordinal();
         if ( layerIndex >= 0 && layerIndex < _layerCaches.length )

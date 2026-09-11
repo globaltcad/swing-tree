@@ -92,7 +92,7 @@ class Look_and_Feel_Style_Interop_Spec extends Specification
             This cooperation has two parts:
             
             1. Supplying style information for the `SwingTree` style engine.
-            2. Delegating the `paint` call to `SwingTree`s `ComponentExtension`. 
+            2. Delegating the `paint` call to `SwingTree`s `ComponentBackend`. 
             
             In this unit test, the `ComponentUI` under test only supports 1.
             but not 2...
@@ -200,7 +200,7 @@ class Look_and_Feel_Style_Interop_Spec extends Specification
             This cooperation has two parts:
             
             1. Supplying style information for the `SwingTree` style engine.
-            2. Delegating the `paint` call to `SwingTree`s `ComponentExtension`. 
+            2. Delegating the `paint` call to `SwingTree`s `ComponentBackend`. 
             
             In this unit test, the `ComponentUI` under test supports 
             both 1. as well as 2. and so in this unit test we verify that `SwingTree` will never override

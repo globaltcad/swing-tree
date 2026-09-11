@@ -32,7 +32,7 @@ import java.awt.Color
 
     These scenarios pin the contract down through the *public* API
     (`SwingTree.get().getCacheMode()` / `setCacheMode(..)` and the
-    `ComponentExtension` cache observers) so they survive internal refactors; the
+    `ComponentBackend` cache observers) so they survive internal refactors; the
     one non-public touch-point is the `CacheBudget.UNITS_OVERRIDE` test hook, used
     purely to make the otherwise RAM-dependent budget deterministic regardless of
     the runner's physical memory.
@@ -91,13 +91,13 @@ class Cache_Configuration_Spec extends Specification
                         .foundationColor(Color.WHITE)
                   )
                   .get(JButton)
-            var ext = ComponentBackend.powering(button)
+            var backend = ComponentBackend.powering(button)
 
         when : 'We render it twice.'
             2.times { Utility.renderSingleComponent(button) }
 
         then : 'Its background layer is never promoted to a cached image.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
     }
 
     def 'Raising the budget at runtime takes effect without re-initializing the library.'()
@@ -149,40 +149,40 @@ class Cache_Configuration_Spec extends Specification
                   )
                   .get(JButton)
             button.setSize(140, 60)
-            var ext = ComponentBackend.powering(button)
+            var backend = ComponentBackend.powering(button)
 
         expect : 'Stretch tiling is enabled by default.'
             SwingTree.get().isCacheTilingEnabled()
 
         when : 'We warm the cache and then resize, with tiling enabled.'
             2.times { Utility.renderSingleComponent(button) }
-            int missesWhileTiled = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            int missesWhileTiled = backend.cacheMissCount(UI.Layer.BACKGROUND)
             button.setSize(280, 90)
             Utility.renderSingleComponent(button)
         then : 'The resize did not require any fresh rendering.'
-            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesWhileTiled
+            backend.cacheMissCount(UI.Layer.BACKGROUND) == missesWhileTiled
 
         when : 'We flip the safety hatch and resize twice more.'
             SwingTree.get().setCacheTilingEnabled(false)
             button.setSize(310, 100)
             Utility.renderSingleComponent(button)
-            int missesAfterFirstUntiledPaint = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            int missesAfterFirstUntiledPaint = backend.cacheMissCount(UI.Layer.BACKGROUND)
             button.setSize(340, 110)
             Utility.renderSingleComponent(button)
         then : 'The flag is off, and now every new size requires a fresh rendering - the classic behavior.'
             !SwingTree.get().isCacheTilingEnabled()
-            ext.cacheMissCount(UI.Layer.BACKGROUND) > missesAfterFirstUntiledPaint
+            backend.cacheMissCount(UI.Layer.BACKGROUND) > missesAfterFirstUntiledPaint
 
         when : 'We re-enable tiling, let one paint repopulate the canonical rendering, and resize again.'
             SwingTree.get().setCacheTilingEnabled(true)
             button.setSize(360, 120)
             Utility.renderSingleComponent(button)
-            int missesAfterRepopulation = ext.cacheMissCount(UI.Layer.BACKGROUND)
+            int missesAfterRepopulation = backend.cacheMissCount(UI.Layer.BACKGROUND)
             button.setSize(400, 130)
             Utility.renderSingleComponent(button)
         then : 'Resizing is miss-resistant again.'
             SwingTree.get().isCacheTilingEnabled()
-            ext.cacheMissCount(UI.Layer.BACKGROUND) == missesAfterRepopulation
+            backend.cacheMissCount(UI.Layer.BACKGROUND) == missesAfterRepopulation
     }
 
     def 'Turning stretch tiling off also stops layers being cut around their noises.'()
@@ -205,7 +205,7 @@ class Cache_Configuration_Spec extends Specification
                         .noise("grain", n -> n.colors(new Color(32, 32, 32), new Color(222, 222, 222)))
                   )
                   .get(JButton)
-            var ext = ComponentBackend.powering(button)
+            var backend = ComponentBackend.powering(button)
 
         when : 'It is dragged with the hatch open, which is when a layer gets cut.'
             [[500, 300], [560, 320], [620, 340]].each { w, h ->
@@ -213,8 +213,8 @@ class Cache_Configuration_Spec extends Specification
                 Utility.renderSingleComponent(button)
             }
         then : 'What is cached is the size independent exemplar of everything but the noise.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
-            ext.cachedRendering(UI.Layer.BACKGROUND).all( image -> image.width < 620 )
+            backend.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).all( image -> image.width < 620 )
 
         when : 'The hatch is closed and it is dragged further.'
             SwingTree.get().setCacheTilingEnabled(false)
@@ -227,14 +227,14 @@ class Cache_Configuration_Spec extends Specification
             left to cache, and a full sized image is not worth allocating for a size the drag
             is about to leave behind anyway.
         """
-            ext.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
+            backend.cachedRendering(UI.Layer.BACKGROUND).isEmpty()
 
         when : 'The drag ends, and it is painted a few times at that final size.'
             6.times { Utility.renderSingleComponent(button) }
         then : 'The layer is one whole image at the component size, noise and all.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1
-            ext.cachedRendering(UI.Layer.BACKGROUND).first().width  == 700
-            ext.cachedRendering(UI.Layer.BACKGROUND).first().height == 380
+            backend.cachedRendering(UI.Layer.BACKGROUND).size() == 1
+            backend.cachedRendering(UI.Layer.BACKGROUND).first().width  == 700
+            backend.cachedRendering(UI.Layer.BACKGROUND).first().height == 380
 
         cleanup :
             SwingTree.get().setCacheTilingEnabled(true)
@@ -269,21 +269,21 @@ class Cache_Configuration_Spec extends Specification
                   )
                   .get(JButton)
             button.setSize(300, 120)
-            var ext = ComponentBackend.powering(button)
+            var backend = ComponentBackend.powering(button)
 
         when : 'It is painted a number of times, without ever changing in any way.'
             6.times { Utility.renderSingleComponent(button) }
         then : 'What it holds is the small exemplar that every size is reconstructed from.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1
-            ext.cachedRendering(UI.Layer.BACKGROUND).first().width < 300
+            backend.cachedRendering(UI.Layer.BACKGROUND).size() == 1
+            backend.cachedRendering(UI.Layer.BACKGROUND).first().width < 300
 
         when : 'The hatch is closed, and it is painted again - still without changing anything.'
             SwingTree.get().setCacheTilingEnabled(false)
             6.times { Utility.renderSingleComponent(button) }
         then : 'It now holds a rendering of its own size, which is the classic keying.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).size() == 1
-            ext.cachedRendering(UI.Layer.BACKGROUND).first().width  == 300
-            ext.cachedRendering(UI.Layer.BACKGROUND).first().height == 120
+            backend.cachedRendering(UI.Layer.BACKGROUND).size() == 1
+            backend.cachedRendering(UI.Layer.BACKGROUND).first().width  == 300
+            backend.cachedRendering(UI.Layer.BACKGROUND).first().height == 120
 
         cleanup : 'We open the hatch again and hand the library back its own budget.'
             SwingTree.get().setCacheTilingEnabled(true)
@@ -294,7 +294,7 @@ class Cache_Configuration_Spec extends Specification
     def 'The live cache monitoring snapshot covers every global rendering cache.'()
     {
         reportInfo """
-            `ComponentExtension.globalRenderCacheEntryCounts()` is the observation point
+            `ComponentBackend.globalRenderCacheEntryCounts()` is the observation point
             for cache monitoring — the dev tool displays it live, and tests pin the
             budget contract through it. Its keys are a stable, display-friendly
             inventory of SwingTree's global rendering caches.

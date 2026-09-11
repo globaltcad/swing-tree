@@ -539,13 +539,13 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             SwingTree.get().setCacheTilingEnabled(true)
             ComponentBackend.updateAllCachesFromLibraryConfig()
             var box = boxWith(300, 200, styler)
-            var ext = ComponentBackend.powering(box)
+            var backend = ComponentBackend.powering(box)
             paintTransformed(box, transformer)
             var tiled = paintTransformed(box, transformer)
 
         then : 'Not a single one of those paints was served from the cache - the fallback engaged every time.'
-            ext.cacheHitCount(UI.Layer.BACKGROUND) == 0
-            ext.cacheMissCount(UI.Layer.BACKGROUND) >= 2
+            backend.cacheHitCount(UI.Layer.BACKGROUND) == 0
+            backend.cacheMissCount(UI.Layer.BACKGROUND) >= 2
 
         and : 'And the pixels are bit identical to the uncached direct rendering.'
             for ( int y = 0; y < uncached.getHeight(); y++ )
@@ -580,10 +580,10 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             var styler = { it.backgroundColor("#7a4ab1").foundationColor("#efe6d8").borderRadius(16).margin(6) }
             SwingTree.get().setCacheTilingEnabled(true)
             var box = boxWith(400, 300, styler)
-            var ext = ComponentBackend.powering(box)
+            var backend = ComponentBackend.powering(box)
             2.times { Utility.renderSingleComponent(box) }
         expect : 'It really is cached as a small atlas at this point.'
-            ext.cachedRendering(UI.Layer.BACKGROUND).first().width < 400
+            backend.cachedRendering(UI.Layer.BACKGROUND).first().width < 400
 
         when : '...and is then dragged back down to a size far below the reconstructable minimum.'
             box.setSize(30, 24)
@@ -591,8 +591,8 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             var shrunk = Utility.renderSingleComponent(box)
         then : 'The size took effect, and the style is cached at that real size again - the atlas is gone.'
             box.width == 30 && box.height == 24
-            ext.cachedRendering(UI.Layer.BACKGROUND).first().width  == 30
-            ext.cachedRendering(UI.Layer.BACKGROUND).first().height == 24
+            backend.cachedRendering(UI.Layer.BACKGROUND).first().width  == 30
+            backend.cachedRendering(UI.Layer.BACKGROUND).first().height == 24
         and : 'Its pixels are exactly the classic rendering of a component which was never anything else.'
             var classic = renderedClassically(30, 24, styler)
             for ( int y = 0; y < classic.getHeight(); y++ )
