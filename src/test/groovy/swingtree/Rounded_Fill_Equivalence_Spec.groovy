@@ -5,9 +5,8 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Timeout
 import spock.lang.Title
-import swingtree.SwingTreeInitConfig
 import swingtree.components.JBox
-import swingtree.style.ComponentExtension
+import swingtree.style.ComponentBackend
 import swingtree.threading.EventProcessor
 import utility.Utility
 
@@ -55,7 +54,7 @@ class Rounded_Fill_Equivalence_Spec extends Specification
     def setup() {
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         SwingTree.get().setUiScaleFactor(1f)
-        ComponentExtension.updateAllCachesFromLibraryConfig() // Every scenario starts with empty caches.
+        ComponentBackend.updateAllCachesFromLibraryConfig() // Every scenario starts with empty caches.
     }
 
     def cleanup() {
@@ -156,7 +155,7 @@ class Rounded_Fill_Equivalence_Spec extends Specification
             resampling of it, a different picture by design and not what is being asked about here.
         """
             SwingTree.get().setCacheMode(SwingTreeInitConfig.CacheMode.DISABLED)
-            ComponentExtension.updateAllCachesFromLibraryConfig()
+            ComponentBackend.updateAllCachesFromLibraryConfig()
 
         and : 'A styled component, and the rounded rectangle it describes.'
             var arc   = 21 // Deliberately odd: halved, it lands between device pixels under a fractional scale.

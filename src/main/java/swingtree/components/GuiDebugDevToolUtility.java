@@ -12,7 +12,7 @@ import swingtree.SwingTreeInitConfig;
 import swingtree.UI;
 import swingtree.input.Keyboard;
 import swingtree.layout.Bounds;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 
 import javax.swing.*;
 import java.awt.*;
@@ -538,7 +538,7 @@ final class GuiDebugDevToolUtility {
 
         private static String formattedCacheStats() {
             StringBuilder text = new StringBuilder("<html>");
-            ComponentExtension.globalRenderCacheEntryCounts().forEach( pair ->
+            ComponentBackend.globalRenderCacheEntryCounts().forEach(pair ->
                 text.append(pair.first()).append(": ").append(pair.second()).append("<br>")
             );
             return text.append("</html>").toString();

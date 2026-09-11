@@ -191,7 +191,7 @@ final class LabelStyleInstallerUtility {
             actual text was just reset externally — so the conf-equality
             short-circuit would skip the re-injection we need.
         */
-        ComponentExtension.from(component).gatherApplyAndInstallStyle(true);
+        ComponentBackend.powering(component).gatherApplyAndInstallStyle(true);
     }
 
     /**

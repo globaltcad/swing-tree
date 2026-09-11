@@ -14,7 +14,7 @@ import swingtree.api.Painter;
 import swingtree.layout.Bounds;
 import swingtree.layout.Position;
 import swingtree.layout.Size;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 import swingtree.style.StylableComponent;
 
 import javax.swing.*;
@@ -407,7 +407,7 @@ public class JGlassPane extends JPanel implements StylableComponent
      */
     @Override
     public void updateUI() {
-        ComponentExtension.from(this).installCustomUIIfPossible();
+        ComponentBackend.powering(this).installCustomUIIfPossible();
         /*
             The JGlassPane is a SwingTree native type, so it also
             enjoys the perks of having a SwingTree based look and feel!

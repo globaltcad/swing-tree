@@ -7,7 +7,7 @@ import spock.lang.Timeout
 import spock.lang.Title
 import swingtree.components.JBox
 import swingtree.style.CacheBudget
-import swingtree.style.ComponentExtension
+import swingtree.style.ComponentBackend
 import swingtree.threading.EventProcessor
 import utility.Utility
 
@@ -54,7 +54,7 @@ import java.util.concurrent.TimeUnit
     express the same requirement: both switch positions, same pixels.
 
 ''')
-@Subject([SwingTree, UI, ComponentExtension])
+@Subject([SwingTree, UI, ComponentBackend])
 @Timeout(value = 90, unit = TimeUnit.SECONDS)
 class Stretch_Tiling_Equivalence_Spec extends Specification
 {
@@ -70,7 +70,7 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
     def setup() {
         SwingTree.get().setEventProcessor(EventProcessor.COUPLED)
         SwingTree.get().setUiScaleFactor(1f)
-        ComponentExtension.updateAllCachesFromLibraryConfig() // Every scenario starts with empty caches.
+        ComponentBackend.updateAllCachesFromLibraryConfig() // Every scenario starts with empty caches.
     }
 
     def cleanup() {
@@ -135,8 +135,8 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
         """
             var sibling = boxWith(width + 16, height + 12, styler)
             Utility.renderSingleComponent(sibling)
-            assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0
-            assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1
+            assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0
+            assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1
 
         expect : 'Both switch positions produced practically identical pixels:'
             // `tiledBox` is deliberately painted here, *after* the sibling check: this keeps
@@ -218,8 +218,8 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
         """
             var sibling = boxWith(siblingWidth, siblingHeight, styler)
             Utility.renderSingleComponent(sibling)
-            assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0
-            assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1
+            assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0
+            assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1
 
         expect : 'Not one channel of one pixel deviates between the two switch positions, alpha included:'
             var tiled = Utility.renderSingleComponent(tiledBox)
@@ -296,7 +296,7 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             Proof that the comparison is not vacuous: what is cached for that layer is a size
             independent exemplar, which it could only be with the noise lifted out of it.
         """
-            var cached = ComponentExtension.from(tiledBox).cachedRendering(UI.Layer.BACKGROUND)
+            var cached = ComponentBackend.powering(tiledBox).cachedRendering(UI.Layer.BACKGROUND)
             assert !cached.isEmpty()
             assert cached.all( image -> image.width < width )
 
@@ -373,7 +373,7 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             at all. A layer carrying an uncacheable painter is refused by the cache as a whole,
             so an image can only exist for it if the painters really were cut out of it.
         """
-            assert !ComponentExtension.from(cutBox).cachedRendering(layer).isEmpty()
+            assert !ComponentBackend.powering(cutBox).cachedRendering(layer).isEmpty()
 
         when : 'We look for the single worst deviating colour channel of the whole image:'
             var cut = Utility.renderSingleComponent(cutBox)
@@ -494,7 +494,7 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             var box = boxWith(width, height, styler)
             paintScaled(box, deviceWidth, deviceHeight, scale)
             var tiled = paintScaled(box, deviceWidth, deviceHeight, scale)
-            assert ComponentExtension.from(box).cacheHitCount(UI.Layer.BACKGROUND) >= 1
+            assert ComponentBackend.powering(box).cacheHitCount(UI.Layer.BACKGROUND) >= 1
 
         expect : 'No transparent seam anywhere along the horizontal center line:'
             int centerY = (int) (deviceHeight / 2)
@@ -537,9 +537,9 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
         when : 'The same component is painted through that transform with stretch tiling fully enabled.'
             CacheBudget.UNITS_OVERRIDE = 10
             SwingTree.get().setCacheTilingEnabled(true)
-            ComponentExtension.updateAllCachesFromLibraryConfig()
+            ComponentBackend.updateAllCachesFromLibraryConfig()
             var box = boxWith(300, 200, styler)
-            var ext = ComponentExtension.from(box)
+            var ext = ComponentBackend.powering(box)
             paintTransformed(box, transformer)
             var tiled = paintTransformed(box, transformer)
 
@@ -580,7 +580,7 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             var styler = { it.backgroundColor("#7a4ab1").foundationColor("#efe6d8").borderRadius(16).margin(6) }
             SwingTree.get().setCacheTilingEnabled(true)
             var box = boxWith(400, 300, styler)
-            var ext = ComponentExtension.from(box)
+            var ext = ComponentBackend.powering(box)
             2.times { Utility.renderSingleComponent(box) }
         expect : 'It really is cached as a small atlas at this point.'
             ext.cachedRendering(UI.Layer.BACKGROUND).first().width < 400
@@ -648,8 +648,8 @@ class Stretch_Tiling_Equivalence_Spec extends Specification
             }
 
         expect : 'The repeated paints really were served from the cache.'
-            ComponentExtension.from(box).cachedRendering(UI.Layer.CONTENT).isNotEmpty()
-            ComponentExtension.from(box).cacheHitCount(UI.Layer.CONTENT) >= 1
+            ComponentBackend.powering(box).cachedRendering(UI.Layer.CONTENT).isNotEmpty()
+            ComponentBackend.powering(box).cacheHitCount(UI.Layer.CONTENT) >= 1
         and : 'The accelerated painting matches the classic software rendering.'
             Utility.similarityBetween(classic, accelerated) >= 99.9
         and : 'The long top edge really contains shadow pixels (exactly what the XRender defect used to erase).'

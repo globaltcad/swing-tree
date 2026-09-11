@@ -10,7 +10,7 @@ import swingtree.layout.FlowCellConf;
 import swingtree.layout.LayoutConstraint;
 import swingtree.layout.MigAddConstraint;
 import swingtree.layout.ResponsiveGridFlowLayout;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 import swingtree.style.ComponentStyleDelegate;
 import swingtree.style.StyleConf;
 
@@ -1021,8 +1021,8 @@ public interface Layout
          */
         @Override
         public void installFor( JComponent component ) {
-            ComponentExtension<?> extension = ComponentExtension.from(component);
-            StyleConf styleConf = extension.getStyle();
+            ComponentBackend<?> backend = ComponentBackend.powering(component);
+            StyleConf styleConf = backend.getStyle();
             if ( styleConf.layoutConstraint().isPresent() ) {
                 // Phase 1: push this component's own layout constraint into its parent MigLayout:
                 LayoutManager parentLayout = ( component.getParent() == null ? null : component.getParent().getLayout() );

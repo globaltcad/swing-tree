@@ -6,7 +6,7 @@ import spock.lang.Subject
 import spock.lang.Title
 import swingtree.api.Styler
 import swingtree.layout.Size
-import swingtree.style.ComponentExtension
+import swingtree.style.ComponentBackend
 import utility.Utility
 import swingtree.style.StyleConf
 import swingtree.style.StyleSheet
@@ -587,8 +587,8 @@ class Style_Installation_Spec extends Specification
             label.foreground == Color.DARK_GRAY
 
         and: 'The style configurations reflect the theme changes'
-            var buttonStyle = ComponentExtension.from(button).getStyle()
-            var labelStyle = ComponentExtension.from(label).getStyle()
+            var buttonStyle = ComponentBackend.powering(button).getStyle()
+            var labelStyle = ComponentBackend.powering(label).getStyle()
 
             buttonStyle.base().backgroundColor().get() == Color.PINK // Gradient primer color
             labelStyle.base().backgroundColor().get() == Color.PINK
@@ -716,7 +716,7 @@ class Style_Installation_Spec extends Specification
         when: 'We build the button'
             var button = ui.get(JButton)
         then:
-            (ComponentExtension.from(button).getStyle() != StyleConf.none()) == hasEffect
+            (ComponentBackend.powering(button).getStyle() != StyleConf.none()) == hasEffect
 
         when : """
             We de-activate the style and check if the style was properly reset to being "none"!
@@ -725,7 +725,7 @@ class Style_Installation_Spec extends Specification
             BufferedImage image = new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB)
             button.paint(image.createGraphics())
         then :
-            ComponentExtension.from(button).getStyle() == StyleConf.none()
+            ComponentBackend.powering(button).getStyle() == StyleConf.none()
 
         where : """
             We populate this test with various styles and "hasEffect" flags
@@ -1038,7 +1038,7 @@ class Style_Installation_Spec extends Specification
             var naturalMinimum = panel.getMinimumSize()
         and : 'The leftover style on its own is a real (non-empty) style:'
             !clamp
-            ComponentExtension.from(panel).getStyle() != StyleConf.none()
+            ComponentBackend.powering(panel).getStyle() != StyleConf.none()
 
         when: 'We apply the clamp and paint:'
             clamp = true
@@ -1054,7 +1054,7 @@ class Style_Installation_Spec extends Specification
             !panel.isMinimumSizeSet()
             panel.getMinimumSize() == naturalMinimum
         and: 'The component is indeed still styled (it was never fully reset to "no style"):'
-            ComponentExtension.from(panel).getStyle() != StyleConf.none()
+            ComponentBackend.powering(panel).getStyle() != StyleConf.none()
 
         where : 'The leftover, non-size styling takes various installation routes through the engine:'
             remaining            | otherStyle

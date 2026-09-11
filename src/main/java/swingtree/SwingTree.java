@@ -9,6 +9,7 @@ import sprouts.Var;
 import sprouts.Viewable;
 import swingtree.api.IconDeclaration;
 import swingtree.api.Painter;
+import swingtree.style.ComponentBackend;
 import swingtree.style.StyleSheet;
 import swingtree.threading.EventProcessor;
 
@@ -182,7 +183,7 @@ public final class SwingTree
         // Let the rendering caches pick up the configured cache mode and start from a clean
         // slate matching it. This is recursion-safe: it never reads SwingTree.get() (which is
         // mid-construction here); the budget is resolved later, lazily, from the paint thread.
-        swingtree.style.ComponentExtension.updateAllCachesFromLibraryConfig();
+        ComponentBackend.updateAllCachesFromLibraryConfig();
     }
 
     private SwingTreeInitConfig _resolveConfiguration( SwingTreeConfigurator configurator ) {
@@ -722,7 +723,7 @@ public void setCacheMode( SwingTreeInitConfig.CacheMode cacheMode ) {
         UI.runNow(() -> setCacheMode(cacheMode));
     } else {
         _config = _config.withCacheMode(cacheMode);
-        swingtree.style.ComponentExtension.updateAllCachesFromLibraryConfig();
+        ComponentBackend.updateAllCachesFromLibraryConfig();
     }
 }
 
@@ -755,7 +756,7 @@ public void setCacheMode( SwingTreeInitConfig.CacheMode cacheMode ) {
             UI.runNow(() -> setCacheTilingEnabled(enabled));
         } else {
             _config = _config.withCacheTilingEnabled(enabled);
-            swingtree.style.ComponentExtension.updateAllCachesFromLibraryConfig();
+            ComponentBackend.updateAllCachesFromLibraryConfig();
         }
     }
 

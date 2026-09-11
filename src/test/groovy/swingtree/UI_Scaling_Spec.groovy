@@ -10,7 +10,7 @@ import sprouts.Var
 import swingtree.layout.Size
 import swingtree.threading.EventProcessor
 
-import swingtree.style.ComponentExtension
+import swingtree.style.ComponentBackend
 
 import javax.swing.*
 import javax.swing.tree.DefaultTreeCellRenderer
@@ -1555,7 +1555,7 @@ class UI_Scaling_Spec extends Specification
             all.
         '''
             var renderer = tree.cellRenderer as DefaultTreeCellRenderer
-            ComponentExtension.from(renderer)
+            ComponentBackend.powering(renderer)
         and : '''
             One painted row. `getTreeCellRendererComponent(..)` is where the renderer stores
             the tree it was called for, and `DefaultTreeCellRenderer.getFont()` reads the
@@ -1661,8 +1661,8 @@ class UI_Scaling_Spec extends Specification
             `JSpinner` builds its editor inside its own constructor, before Swing installs
             the delegate that would style the spinner.
         '''
-            ComponentExtension.from(textField)
-            ComponentExtension.from(spinner)
+        ComponentBackend.powering(textField)
+            ComponentBackend.powering(spinner)
 
         expect : 'The spinner and the text field inside it start out at the same font size.'
             textField.font.size == spinner.font.size
@@ -1734,8 +1734,8 @@ class UI_Scaling_Spec extends Specification
             its editor, and Swing gives that editor its delegate, inside the `JSpinner`
             constructor, before the spinner is given a delegate of its own.
         '''
-            ComponentExtension.from(textField)
-            ComponentExtension.from(spinner)
+            ComponentBackend.powering(textField)
+            ComponentBackend.powering(spinner)
 
         expect : 'The number and the box around it start out at the same size.'
             textField.font.size == spinner.font.size

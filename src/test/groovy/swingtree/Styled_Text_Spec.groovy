@@ -128,7 +128,7 @@ class Styled_Text_Spec extends Specification
                         .get(JBox)
 
         when : 'We extract the full style configuration of the box:'
-            var styleString = ComponentExtension.from(box).getStyle().toString()
+            var styleString = ComponentBackend.powering(box).getStyle().toString()
 
         then : 'The style string confirms that a non-trivial TextConf is present in the content layer:'
             !styleString.contains("texts=TextConf[NONE]")
@@ -181,7 +181,7 @@ class Styled_Text_Spec extends Specification
                         .get(JBox)
 
         expect : 'The style string shows that the empty text configuration was simplified to NONE:'
-            ComponentExtension.from(box).getStyle().toString() == "StyleConf[" +
+            ComponentBackend.powering(box).getStyle().toString() == "StyleConf[" +
                     "LayoutConf[NONE], " +
                     "BorderConf[NONE], " +
                     "BaseConf[NONE], " +
@@ -325,8 +325,8 @@ class Styled_Text_Spec extends Specification
             box.getPreferredSize().height > 50
             box.getPreferredSize().height < 60
         and : 'We verify that the string representation of the style conf is as expected:'
-            ComponentExtension.from(box).getStyle().toString().contains("DimensionalityConf[minWidth=?, minHeight=?, maxWidth=?, maxHeight=?, preferredWidth=?, preferredHeight=${box.getPreferredSize().height as int}, width=?, height=?]")
-            ComponentExtension.from(box).getStyle().toString().contains(
+            ComponentBackend.powering(box).getStyle().toString().contains("DimensionalityConf[minWidth=?, minHeight=?, maxWidth=?, maxHeight=?, preferredWidth=?, preferredHeight=${box.getPreferredSize().height as int}, width=?, height=?]")
+            ComponentBackend.powering(box).getStyle().toString().contains(
                     "texts=TextConf[" +
                             "content=Tuple<StyledString>[" +
                                 "StyledString[string='This is a test of the autoPreferredHeight property.', style=FontConf[family=Ubuntu, size=24, posture=?, weight=?, spacing=0.0, underlined=?, strikeThrough=?, selectionColor=?, transform=?, paint=FontPaintConf[NONE], backgroundPaint=FontPaintConf[NONE], horizontalAlignment=?, verticalAlignment=?]]" +

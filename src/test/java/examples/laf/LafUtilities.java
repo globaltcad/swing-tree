@@ -6,7 +6,7 @@ import sprouts.Subscriber;
 import sprouts.ValDelegate;
 import swingtree.UI;
 import swingtree.api.Painter;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 
 import javax.swing.AbstractButton;
 import javax.swing.JComboBox;
@@ -250,7 +250,7 @@ final class LafUtilities
      */
     static void paintStyled( Graphics g, JComponent c, Painter inheritedPainting ) {
         boolean wasOpaque = c.isOpaque();
-        ComponentExtension.from(c).paintBackground(g, g2 -> {
+        ComponentBackend.powering(c).paintBackground(g, g2 -> {
             Object formerShapeAntialiasing = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
             applyDesktopTextHints(g2);
             g2.setColor(c.getForeground());
@@ -557,7 +557,7 @@ final class LafUtilities
         if ( target.getClientProperty(UI_SCALE_ACTION) != null )
             return;
         Action<ValDelegate<Float>> action = ignored -> UI.runLater(scaledMetrics);
-        ComponentExtension.from(target).localUiScaleFactor().onChange(From.ALL, action);
+        ComponentBackend.powering(target).localUiScaleFactor().onChange(From.ALL, action);
         target.putClientProperty(UI_SCALE_ACTION, action);
     }
 
@@ -565,7 +565,7 @@ final class LafUtilities
     static void uninstallUiScaleRescale( JComponent target ) {
         Object stored = target.getClientProperty(UI_SCALE_ACTION);
         if ( stored instanceof Subscriber )
-            ComponentExtension.from(target).localUiScaleFactor().unsubscribe((Subscriber) stored);
+            ComponentBackend.powering(target).localUiScaleFactor().unsubscribe((Subscriber) stored);
         target.putClientProperty(UI_SCALE_ACTION, null);
     }
 

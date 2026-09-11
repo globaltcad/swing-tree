@@ -5,7 +5,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import sprouts.Var
-import swingtree.style.ComponentExtension
+import swingtree.style.ComponentBackend
 import swingtree.threading.EventProcessor
 import utility.Utility
 
@@ -52,7 +52,7 @@ import java.awt.Color
     actual scenarios below speaks to internal classes.
 
 ''')
-@Subject([ComponentExtension, UI])
+@Subject([ComponentBackend, UI])
 class Style_Render_Caching_Spec extends Specification
 {
     def setupSpec() {
@@ -100,7 +100,7 @@ class Style_Render_Caching_Spec extends Specification
                   )
                   .get(JButton)
         and : 'We grab the public extension associated with the component.'
-            var ext = ComponentExtension.from(button)
+            var ext = ComponentBackend.powering(button)
 
         when : 'We render the component once through the regular paint pipeline.'
             Utility.renderSingleComponent(button)
@@ -148,7 +148,7 @@ class Style_Render_Caching_Spec extends Specification
                   )
                   .get(JButton)
         and : 'We grab the public extension associated with the component.'
-            var ext = ComponentExtension.from(button)
+            var ext = ComponentBackend.powering(button)
 
         when : 'We paint it through the regular paint pipeline.'
             2.times { Utility.renderSingleComponent(button) }
@@ -190,7 +190,7 @@ class Style_Render_Caching_Spec extends Specification
                   )
                   .get(JButton)
             button.setSize(400, 240)
-            var ext = ComponentExtension.from(button)
+            var ext = ComponentBackend.powering(button)
 
         when : 'We paint it three times at a settled size.'
             3.times { Utility.renderSingleComponent(button) }
@@ -234,7 +234,7 @@ class Style_Render_Caching_Spec extends Specification
                 UI.box()
                   .withStyle( it -> it.noise("grain", n -> n.colors(Color.BLACK, Color.WHITE)) )
                   .get(JBox)
-            var ext = ComponentExtension.from(box)
+            var ext = ComponentBackend.powering(box)
             box.setSize(300, 200)
 
         when : 'It is painted at a settled size, and then dragged.'
@@ -272,7 +272,7 @@ class Style_Render_Caching_Spec extends Specification
         """
         given : 'A bog-standard label without any SwingTree style.'
             var label = UI.label("Hello!").get(JLabel)
-            var ext   = ComponentExtension.from(label)
+            var ext   = ComponentBackend.powering(label)
 
         when : 'We render it several times in a row.'
             Utility.renderSingleComponent(label)
@@ -315,7 +315,7 @@ class Style_Render_Caching_Spec extends Specification
                 UI.button("Btn " + it).withStyle(common as swingtree.api.Styler).get(JButton)
             }
         and : 'And the matching extensions to query the cache state through.'
-            def exts = buttons.collect { ComponentExtension.from(it) }
+            def exts = buttons.collect { ComponentBackend.powering(it) }
 
         when : 'We render every button exactly once.'
             buttons.each { Utility.renderSingleComponent(it) }
@@ -375,7 +375,7 @@ class Style_Render_Caching_Spec extends Specification
                         .foundationColor(Color.WHITE)
                   )
                   .get(JButton)
-            var ext = ComponentExtension.from(button)
+            var ext = ComponentBackend.powering(button)
 
         when : 'We render the component twice with the initial RED tint to warm the cache.'
             Utility.renderSingleComponent(button)
@@ -430,7 +430,7 @@ class Style_Render_Caching_Spec extends Specification
                   )
                   .get(JButton)
             button.setSize(120, 60) // Size set on the component itself, so resizing below actually takes effect.
-            var ext = ComponentExtension.from(button)
+            var ext = ComponentBackend.powering(button)
             Utility.renderSingleComponent(button)
             Utility.renderSingleComponent(button)
         expect : 'The cache is warm.'
@@ -486,7 +486,7 @@ class Style_Render_Caching_Spec extends Specification
                   )
                   .get(JButton)
             button.setSize(120, 60) // Size set on the component itself, so collapsing below actually takes effect.
-            var ext = ComponentExtension.from(button)
+            var ext = ComponentBackend.powering(button)
             Utility.renderSingleComponent(button)
         expect : 'The cache is warm - the background layer produced a cached rendering.'
             ext.cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
@@ -528,8 +528,8 @@ class Style_Render_Caching_Spec extends Specification
             var second = UI.button("Second").withStyle(common as swingtree.api.Styler).get(JButton)
             first.setSize(200, 80)
             second.setSize(340, 120)
-            var firstExt  = ComponentExtension.from(first)
-            var secondExt = ComponentExtension.from(second)
+            var firstExt  = ComponentBackend.powering(first)
+            var secondExt = ComponentBackend.powering(second)
 
         when : 'Both are rendered once, the differently sized one second.'
             Utility.renderSingleComponent(first)
@@ -561,7 +561,7 @@ class Style_Render_Caching_Spec extends Specification
                   )
                   .get(JButton)
             button.setSize(120, 60) // Size set on the component itself, so resizing below actually takes effect.
-            var ext = ComponentExtension.from(button)
+            var ext = ComponentBackend.powering(button)
             Utility.renderSingleComponent(button)
             Utility.renderSingleComponent(button)
         expect : 'The gradient is cached and served from the cache at a stable size.'
@@ -605,7 +605,7 @@ class Style_Render_Caching_Spec extends Specification
                         .gradient( g -> g.type(UI.GradientType.RADIAL).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
                   )
                   .get(JButton)
-            var ext = ComponentExtension.from(button)
+            var ext = ComponentBackend.powering(button)
         and : 'It is large: above the size up to which an image is worth allocating eagerly.'
             button.setSize(600, 400)
 
@@ -659,7 +659,7 @@ class Style_Render_Caching_Spec extends Specification
                         .gradient( g -> g.type(UI.GradientType.RADIAL).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
                   )
                   .get(JButton)
-            var ext = ComponentExtension.from(button)
+            var ext = ComponentBackend.powering(button)
         and : 'It sits at a settled size, painted often enough to be cached there.'
             button.setSize(100, 60)
             2.times { Utility.renderSingleComponent(button) }
@@ -713,7 +713,7 @@ class Style_Render_Caching_Spec extends Specification
                         .gradient( g -> g.span(UI.Span.TOP_TO_BOTTOM).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
                   )
                   .get(JButton)
-            var ext = ComponentExtension.from(button)
+            var ext = ComponentBackend.powering(button)
         and : """
             Tall enough that its exemplar is above the size up to which an image is allocated
             eagerly. Images below that size are always allocated, so a short component would be
@@ -764,7 +764,7 @@ class Style_Render_Caching_Spec extends Specification
                         .gradient( g -> g.span(UI.Span.TOP_TO_BOTTOM).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
                   )
                   .get(JButton)
-            var ext = ComponentExtension.from(button)
+            var ext = ComponentBackend.powering(button)
             button.setSize(300, 500)
             4.times { Utility.renderSingleComponent(button) }
         expect : 'A rendering exists to be dragged against.'
@@ -811,7 +811,7 @@ class Style_Render_Caching_Spec extends Specification
                         .gradient( g -> g.span(UI.Span.TOP_TO_BOTTOM).colors(new Color(200, 30, 70), new Color(30, 70, 200)) )
                   )
                   .get(JButton)
-            var ext = ComponentExtension.from(button)
+            var ext = ComponentBackend.powering(button)
             button.setSize(300, 2800)
             4.times { Utility.renderSingleComponent(button) }
         expect : 'It is cached at this settled size, in an image far narrower than the component.'
@@ -862,8 +862,8 @@ class Style_Render_Caching_Spec extends Specification
             }
             var first  = UI.button("A").withStyle(styler as swingtree.api.Styler).get(JButton)
             var second = UI.button("B").withStyle(styler as swingtree.api.Styler).get(JButton)
-            var firstExt  = ComponentExtension.from(first)
-            var secondExt = ComponentExtension.from(second)
+            var firstExt  = ComponentBackend.powering(first)
+            var secondExt = ComponentBackend.powering(second)
         and : 'Both are painted once at a common size, so that neither is newborn any more.'
             first.setSize(100, 60)
             second.setSize(100, 60)
@@ -914,7 +914,7 @@ class Style_Render_Caching_Spec extends Specification
             }
             var settled  = UI.button("Settled").withStyle(styler as swingtree.api.Styler).get(JButton)
             var resizing = UI.button("Resizing").withStyle(styler as swingtree.api.Styler).get(JButton)
-            var resizingExt = ComponentExtension.from(resizing)
+            var resizingExt = ComponentBackend.powering(resizing)
 
         and : """
             The first one sits still at a large size until its rendering exists. It is kept
@@ -924,7 +924,7 @@ class Style_Render_Caching_Spec extends Specification
         """
             settled.setSize(400, 200)
             6.times { Utility.renderSingleComponent(settled) }
-            assert ComponentExtension.from(settled).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            assert ComponentBackend.powering(settled).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
 
         when : 'The second component is dragged, arriving at the size the first one holds.'
             resizing.setSize(360, 200)
@@ -961,7 +961,7 @@ class Style_Render_Caching_Spec extends Specification
                             })
             var box = UI.box().withStyle( it -> it.painter(UI.Layer.BACKGROUND, "mark", painter) ).get(JBox)
             box.setSize(200, 120)
-            var ext = ComponentExtension.from(box)
+            var ext = ComponentBackend.powering(box)
 
         when : 'It is painted a handful of times.'
             5.times { Utility.renderSingleComponent(box) }
@@ -1102,13 +1102,13 @@ class Style_Render_Caching_Spec extends Specification
         when : 'The first one is painted until its background is cached.'
             3.times { Utility.renderSingleComponent(first) }
         then : 'It is: the painter was cut out of the layer, so the rest of it could be cached.'
-            ComponentExtension.from(first).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            ComponentBackend.powering(first).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
 
         when : 'The second one is painted for the very first time.'
             Utility.renderSingleComponent(second)
         then : 'It found the image the first one had already rendered, instead of rendering again.'
-            ComponentExtension.from(second).cacheHitCount(UI.Layer.BACKGROUND)  == 1
-            ComponentExtension.from(second).cacheMissCount(UI.Layer.BACKGROUND) == 0
+            ComponentBackend.powering(second).cacheHitCount(UI.Layer.BACKGROUND)  == 1
+            ComponentBackend.powering(second).cacheMissCount(UI.Layer.BACKGROUND) == 0
     }
 
     def 'A painter baked into a cached image does not tie it to the names of the painters replayed over it.'()
@@ -1155,13 +1155,13 @@ class Style_Render_Caching_Spec extends Specification
         when : 'The first one is painted until its background is cached.'
             3.times { Utility.renderSingleComponent(first) }
         then : 'It is - the cut put the background and the cacheable painter into one image.'
-            ComponentExtension.from(first).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
+            ComponentBackend.powering(first).cachedRendering(UI.Layer.BACKGROUND).isNotEmpty()
 
         when : 'The second one is painted for the very first time.'
             Utility.renderSingleComponent(second)
         then : 'It found that very image, rather than allocating one of its own.'
-            ComponentExtension.from(second).cacheHitCount(UI.Layer.BACKGROUND)  == 1
-            ComponentExtension.from(second).cacheMissCount(UI.Layer.BACKGROUND) == 0
+            ComponentBackend.powering(second).cacheHitCount(UI.Layer.BACKGROUND)  == 1
+            ComponentBackend.powering(second).cacheMissCount(UI.Layer.BACKGROUND) == 0
     }
 
     def 'Caching is per-layer: a heavy background does not imply a cached foreground.'()
@@ -1191,7 +1191,7 @@ class Style_Render_Caching_Spec extends Specification
                         .foundationColor(Color.WHITE)
                   )
                   .get(JButton)
-            var ext = ComponentExtension.from(button)
+            var ext = ComponentBackend.powering(button)
 
         when : 'We render the component once.'
             Utility.renderSingleComponent(button)

@@ -3,7 +3,7 @@ package swingtree;
 import org.slf4j.Logger;
 import sprouts.*;
 import swingtree.components.JSplitButton;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 
 import javax.swing.AbstractButton;
 import javax.swing.JMenuItem;
@@ -554,7 +554,7 @@ public final class UIForSplitButton<B extends JSplitButton> extends UIForAnyButt
             return of(pane, state->{});
         }
         static ExtraState of( JSplitButton pane, Consumer<ExtraState> ini ) {
-            return ComponentExtension.from(pane)
+            return ComponentBackend.powering(pane)
                                     .getOrSet(ExtraState.class, ()->{
                                         ExtraState s = new ExtraState();
                                         ini.accept(s);

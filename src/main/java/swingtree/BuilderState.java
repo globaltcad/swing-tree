@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.Tuple;
 import swingtree.api.laf.SwingTreeStyledComponentUI;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 import swingtree.style.LibraryInternalCrossPackageStyleUtil;
 import swingtree.threading.EventProcessor;
 
@@ -126,7 +126,7 @@ final class BuilderState<C extends java.awt.Component>
                 if ( stackTraceElement != null ) {
                     ((JComponent)component).putClientProperty("built-at", stackTraceElement);
                 }
-                ComponentExtension.initializeFor((JComponent) component);
+                ComponentBackend.initializeFor((JComponent) component);
             }
             return component;
         };
@@ -155,13 +155,13 @@ final class BuilderState<C extends java.awt.Component>
             JComponent jComponent = ((JComponent) component);
             ComponentUI componentUI = LibraryInternalCrossPackageStyleUtil._findComponentUIOf((JComponent) component);
             if ( componentUI instanceof SwingTreeStyledComponentUI<?> ) {
-                ComponentExtension.from(jComponent).gatherApplyAndInstallStyle(false);
+                ComponentBackend.powering(jComponent).gatherApplyAndInstallStyle(false);
             } else if ( jComponent instanceof JLabel
                     && BasicHTML.isHTMLString( ((JLabel)jComponent).getText() ) ) {
-                ComponentExtension.from(jComponent).gatherApplyAndInstallStyle(false);
+                ComponentBackend.powering(jComponent).gatherApplyAndInstallStyle(false);
             } else if ( jComponent instanceof JEditorPane
                     && BasicHTML.isHTMLString( ((JEditorPane)jComponent).getText() ) ) {
-                ComponentExtension.from(jComponent).gatherApplyAndInstallStyle(false);
+                ComponentBackend.powering(jComponent).gatherApplyAndInstallStyle(false);
             }
         }
 

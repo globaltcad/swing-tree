@@ -7,7 +7,6 @@ import sprouts.Lens;
 import sprouts.Observable;
 import sprouts.Tuple;
 import sprouts.Val;
-import sprouts.Vals;
 import sprouts.Var;
 import swingtree.api.Buildable;
 import swingtree.api.Configurator;
@@ -15,7 +14,7 @@ import swingtree.api.model.BasicTableModel;
 import swingtree.api.model.TableListDataSource;
 import swingtree.api.model.TableMapDataSource;
 import swingtree.api.model.TableData;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 
 import javax.swing.*;
 import javax.swing.table.*;
@@ -987,7 +986,7 @@ public final class UIForTable<T extends JTable> extends UIForAnySwing<UIForTable
         Objects.requireNonNull(observable);
         return _with( thisComponent -> {
                     WeakReference<T> thisComponentRef = new WeakReference<>(thisComponent);
-                    ComponentExtension.from(thisComponent).storeBoundObservable(
+                    ComponentBackend.powering(thisComponent).storeBoundObservable(
                         observable.subscribe(()-> {
                             T innerComponent = thisComponentRef.get();
                             if (innerComponent == null)

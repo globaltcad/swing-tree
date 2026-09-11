@@ -5,7 +5,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Timeout
 import spock.lang.Title
-import swingtree.style.ComponentExtension
+import swingtree.style.ComponentBackend
 import swingtree.threading.EventProcessor
 import utility.Utility
 
@@ -48,7 +48,7 @@ import java.util.concurrent.atomic.AtomicInteger
     place.
 
 ''')
-@Subject([UI, ComponentExtension])
+@Subject([UI, ComponentBackend])
 @Timeout(value = 45, unit = TimeUnit.SECONDS)
 class Component_Area_Events_Spec extends Specification
 {
@@ -118,7 +118,7 @@ class Component_Area_Events_Spec extends Specification
             Utility.renderSingleComponent(panel)
 
         when : 'We ask the panel for the shape of its border area.'
-            Shape borderArea = ComponentExtension.from(panel).getComponentArea(UI.ComponentArea.BORDER).orElse(null)
+            Shape borderArea = ComponentBackend.powering(panel).getComponentArea(UI.ComponentArea.BORDER).orElse(null)
 
         then : 'It returns a shape, because its style defines a border width.'
             borderArea != null
@@ -173,7 +173,7 @@ class Component_Area_Events_Spec extends Specification
             Utility.renderSingleComponent(panel)
 
         when : 'We ask the panel for the shape of that area.'
-            Shape shape = ComponentExtension.from(panel).getComponentArea(area).orElse(null)
+            Shape shape = ComponentBackend.powering(panel).getComponentArea(area).orElse(null)
 
         then : 'It returns a shape, because its style defines the area.'
             shape != null
@@ -358,11 +358,11 @@ class Component_Area_Events_Spec extends Specification
 
         when : 'We paint it with the cache switch on, which is the production default, and ask for its border shape.'
             Utility.renderSingleComponent(panel)
-            Shape whenTiled = ComponentExtension.from(panel).getComponentArea(UI.ComponentArea.BORDER).orElse(null)
+            Shape whenTiled = ComponentBackend.powering(panel).getComponentArea(UI.ComponentArea.BORDER).orElse(null)
         and : 'Then we paint it again with the cache switch off and ask once more.'
             SwingTree.get().setCacheTilingEnabled(false)
             Utility.renderSingleComponent(panel)
-            Shape whenNotTiled = ComponentExtension.from(panel).getComponentArea(UI.ComponentArea.BORDER).orElse(null)
+            Shape whenNotTiled = ComponentBackend.powering(panel).getComponentArea(UI.ComponentArea.BORDER).orElse(null)
 
         then : 'The style defines a border width, so the panel returns a shape both times.'
             whenTiled != null

@@ -722,11 +722,11 @@ of this.
 For tests and tooling, every styled component can report on its own caching:
 
 ```java
-ComponentExtension<?> ext = ComponentExtension.from(myComponent);
+ComponentBackend<?> backend = ComponentBackend.powering(myComponent);
 
-Tuple<BufferedImage> images = ext.cachedRendering(UI.Layer.BACKGROUND);
-int hits   = ext.cacheHitCount(UI.Layer.BACKGROUND);
-int misses = ext.cacheMissCount(UI.Layer.BACKGROUND);
+Tuple<BufferedImage> images = backend.cachedRendering(UI.Layer.BACKGROUND);
+int hits   = backend.cacheHitCount(UI.Layer.BACKGROUND);
+int misses = backend.cacheMissCount(UI.Layer.BACKGROUND);
 ```
 
 The image dimensions tell you how the style was cached. A dimension much smaller than the

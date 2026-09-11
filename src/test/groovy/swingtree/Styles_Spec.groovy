@@ -5,7 +5,7 @@ import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import swingtree.components.JBox
-import swingtree.style.ComponentExtension
+import swingtree.style.ComponentBackend
 import swingtree.api.Layout
 import swingtree.threading.EventProcessor
 import swingtree.style.StyleConf
@@ -65,7 +65,7 @@ class Styles_Spec extends Specification
     ) {
         given : 'We use method chaining within the style API to build a colorful style:'
             var style =
-                            ComponentExtension.from(
+                            ComponentBackend.powering(
                                 UI.of(new JComponent(){})
                                 .withStyle(conf -> conf
                                     .foundationColor(colorString)
@@ -152,7 +152,7 @@ class Styles_Spec extends Specification
             we apply a style to it by updating its style configuration.
         """
             var style =
-                            ComponentExtension.from(
+                            ComponentBackend.powering(
                                 UI.of(new JSpinner()).withStyle(conf->conf
                                     .foundationColor("red")
                                     .backgroundColor("green")
@@ -246,7 +246,7 @@ class Styles_Spec extends Specification
             var paint1 = new GradientPaint(0, 0, Color.RED, 100, 100, Color.BLUE)
             var paint2 = new GradientPaint(0, 0, Color.BLACK, 100, 100, Color.GREEN)
             var transform = AffineTransform.getRotateInstance(0.5)
-            style = ComponentExtension.from(
+            style = ComponentBackend.powering(
                                 UI.of(new JSpinner()).withStyle(conf->conf
                                     .fontAlignment(UI.Placement.CENTER)
                                     .fontBackgroundColor("cyan")
@@ -318,7 +318,7 @@ class Styles_Spec extends Specification
                                     "]"
 
         when : 'We create another style with some other properties:'
-            style = ComponentExtension.from(
+            style = ComponentBackend.powering(
                                 UI.of(new JPanel()).withStyle(conf->conf
                                     .layout(Layout.border(2, 4))
                                     .size(100, 200)
@@ -410,7 +410,7 @@ class Styles_Spec extends Specification
 
         and : 'Then we create a starting style with various properties:'
             var style1 =
-                            ComponentExtension.from(
+                            ComponentBackend.powering(
                                 UI.box().withStyle(conf->conf
                                     .foundationColor("red")
                                     .backgroundColor("green")
@@ -433,7 +433,7 @@ class Styles_Spec extends Specification
 
         and : 'We then create a second style with the same properties:'
             var style2 =
-                            ComponentExtension.from(
+                    ComponentBackend.powering(
                                 UI.box().withStyle(conf->conf
                                     .foundationColor("red")
                                     .backgroundColor("green")
@@ -517,7 +517,7 @@ class Styles_Spec extends Specification
                         )
                         .get(JPanel)
         expect : 'The style config has the expected string representation.'
-            ComponentExtension.from(button).getStyle().toString() == "StyleConf[" +
+            ComponentBackend.powering(button).getStyle().toString() == "StyleConf[" +
                     "LayoutConf[NONE], " +
                     "BorderConf[NONE], " +
                     "BaseConf[NONE], " +
@@ -542,7 +542,7 @@ class Styles_Spec extends Specification
                      )
                      .get(JButton)
         then : 'The style config has the expected string representation.'
-            ComponentExtension.from(button).getStyle().toString() == "StyleConf[" +
+            ComponentBackend.powering(button).getStyle().toString() == "StyleConf[" +
                     "LayoutConf[NONE], " +
                     "BorderConf[" +
                         "radius=" + scaledToString(40) + ", " +
@@ -618,7 +618,7 @@ class Styles_Spec extends Specification
             This is because the border width is 0, so the border is invisible
             and the border color is irrelevant.
         """
-            ComponentExtension.from(panel).getStyle().toString() == "StyleConf[" +
+            ComponentBackend.powering(panel).getStyle().toString() == "StyleConf[" +
                     "LayoutConf[NONE], " +
                     "BorderConf[NONE], " +
                     "BaseConf[NONE], " +
@@ -658,7 +658,7 @@ class Styles_Spec extends Specification
             So in order to make the transition between styles look smooth, we need the margin
             to buffer the fractional part of the border width.
         """
-            ComponentExtension.from(panel).getStyle().toString() == "StyleConf[" +
+            ComponentBackend.powering(panel).getStyle().toString() == "StyleConf[" +
                     "LayoutConf[NONE], " +
                     "BorderConf[" +
                         "radius=?, " +
@@ -736,7 +736,7 @@ class Styles_Spec extends Specification
             The foundation color is used by the SwingTree style engine only, which does not impose
             any default value for it (defaults may come from `StyleSheet` objects, but that is a different story).
         """
-            ComponentExtension.from(aToggleButton).getStyle().toString() == "StyleConf[" +
+            ComponentBackend.powering(aToggleButton).getStyle().toString() == "StyleConf[" +
                     "LayoutConf[NONE], " +
                     "BorderConf[NONE], " +
                     "BaseConf[" +
@@ -793,7 +793,7 @@ class Styles_Spec extends Specification
             The style configuration of the component will be simplified heavily, to
             the point where it is effectively considered to have no style at all.
         """
-            ComponentExtension.from(aComboBox).getStyle().toString() == "StyleConf[" +
+            ComponentBackend.powering(aComboBox).getStyle().toString() == "StyleConf[" +
                     "LayoutConf[NONE], " +
                     "BorderConf[NONE], " +
                     "BaseConf[NONE], " +
@@ -831,7 +831,7 @@ class Styles_Spec extends Specification
             The style configuration of the component will be simplified heavily, to
             the point where it is effectively considered to have no style at all.
         """
-            ComponentExtension.from(aComboBox).getStyle().toString() == "StyleConf[" +
+            ComponentBackend.powering(aComboBox).getStyle().toString() == "StyleConf[" +
                     "LayoutConf[NONE], " +
                     "BorderConf[NONE], " +
                     "BaseConf[NONE], " +
@@ -879,7 +879,7 @@ class Styles_Spec extends Specification
             The style configuration resulting from the above declaration
             will only contain two named shadow styles! The "x" and "y" shadows:
         """
-            ComponentExtension.from(aLabel).getStyle().toString() == "StyleConf[" +
+            ComponentBackend.powering(aLabel).getStyle().toString() == "StyleConf[" +
                         "LayoutConf[NONE], " +
                         "BorderConf[NONE], " +
                         "BaseConf[NONE], " +
@@ -1011,7 +1011,7 @@ class Styles_Spec extends Specification
             grad2.getColor1() == Color.CYAN
             grad2.getColor2() == Color.MAGENTA
         and : 'Finally, we verify if the string representation of the style config is as expected:'
-            ComponentExtension.from(label).getStyle().toString().contains(
+            ComponentBackend.powering(label).getStyle().toString().contains(
                     "paint=FontPaintConf[" +
                         "GradientConf[" +
                             "transition=TOP_TO_BOTTOM, " +
@@ -1029,7 +1029,7 @@ class Styles_Spec extends Specification
                     "]"
                 )
                 and :
-                    ComponentExtension.from(label).getStyle().toString().contains(
+                    ComponentBackend.powering(label).getStyle().toString().contains(
                         "backgroundPaint=FontPaintConf[" +
                             "GradientConf[" +
                                 "transition=RIGHT_TO_LEFT, " +
@@ -1173,7 +1173,7 @@ class Styles_Spec extends Specification
         and : 'We build the text pane component...'
             var textPane = ui.get(JTextPane)
         and : 'Finally we access the underlying style configuration of the text pane...'
-            var style = ComponentExtension.from(textPane).getStyle()
+            var style = ComponentBackend.powering(textPane).getStyle()
         expect : """
             Now we look at the gradient colors an verify that their are all
             the same as the ones we specified in the style configuration, but with the

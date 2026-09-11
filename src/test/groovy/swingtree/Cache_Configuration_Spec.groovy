@@ -9,12 +9,11 @@ import spock.lang.Title
 import java.util.concurrent.TimeUnit
 import swingtree.SwingTreeInitConfig.CacheMode
 import swingtree.style.CacheBudget
-import swingtree.style.ComponentExtension
+import swingtree.style.ComponentBackend
 import swingtree.threading.EventProcessor
 import utility.Utility
 
 import javax.swing.JButton
-import javax.swing.JLabel
 import java.awt.Color
 
 @Title("Configuring the Memory/CPU Trade-off")
@@ -39,7 +38,7 @@ import java.awt.Color
     the runner's physical memory.
 
 ''')
-@Subject([SwingTree, SwingTreeInitConfig, ComponentExtension])
+@Subject([SwingTree, SwingTreeInitConfig, ComponentBackend])
 @Timeout(value = 25, unit = TimeUnit.SECONDS)
 class Cache_Configuration_Spec extends Specification
 {
@@ -92,7 +91,7 @@ class Cache_Configuration_Spec extends Specification
                         .foundationColor(Color.WHITE)
                   )
                   .get(JButton)
-            var ext = ComponentExtension.from(button)
+            var ext = ComponentBackend.powering(button)
 
         when : 'We render it twice.'
             2.times { Utility.renderSingleComponent(button) }
@@ -111,19 +110,19 @@ class Cache_Configuration_Spec extends Specification
         """
         given : 'A zero budget (a maximally constrained machine) and a styled label painted repeatedly.'
             CacheBudget.UNITS_OVERRIDE = 0
-            ComponentExtension.updateAllCachesFromLibraryConfig() // clears every global rendering cache
+            ComponentBackend.updateAllCachesFromLibraryConfig() // clears every global rendering cache
             var label = UI.label("Platform 9")
                           .withStyle({ it.backgroundColor(java.awt.Color.BLUE).borderRadius(8) })
                           .get(javax.swing.JLabel)
             5.times { paint(label) }
         expect : 'Nothing was admitted to the style-layer cache while the budget was zero.'
-            ComponentExtension.globalRenderCacheEntryCounts().toMap()["style layers"] == 0
+            ComponentBackend.globalRenderCacheEntryCounts().toMap()["style layers"] == 0
 
         when : 'We raise the budget at runtime and paint a few more times.'
             CacheBudget.UNITS_OVERRIDE = 10
             5.times { paint(label) }
         then : 'Caching kicks in — the live limit reacted to the runtime change.'
-            ComponentExtension.globalRenderCacheEntryCounts().toMap()["style layers"] > 0
+            ComponentBackend.globalRenderCacheEntryCounts().toMap()["style layers"] > 0
     }
 
     def 'Stretch tiling can be turned off at runtime, restoring exact-size cache keys.'()
@@ -140,7 +139,7 @@ class Cache_Configuration_Spec extends Specification
         """
         given : 'A deterministic budget and a styled button (flat colors: stretch tileable).'
             CacheBudget.UNITS_OVERRIDE = 10
-            ComponentExtension.updateAllCachesFromLibraryConfig()
+            ComponentBackend.updateAllCachesFromLibraryConfig()
             var button =
                 UI.button("Switch")
                   .withStyle( it -> it
@@ -150,7 +149,7 @@ class Cache_Configuration_Spec extends Specification
                   )
                   .get(JButton)
             button.setSize(140, 60)
-            var ext = ComponentExtension.from(button)
+            var ext = ComponentBackend.powering(button)
 
         expect : 'Stretch tiling is enabled by default.'
             SwingTree.get().isCacheTilingEnabled()
@@ -197,7 +196,7 @@ class Cache_Configuration_Spec extends Specification
         """
         given : 'A deterministic budget, and a big button with a noise over a rounded fill.'
             CacheBudget.UNITS_OVERRIDE = 10
-            ComponentExtension.updateAllCachesFromLibraryConfig()
+            ComponentBackend.updateAllCachesFromLibraryConfig()
             var button =
                 UI.button("Grain me")
                   .withStyle( it -> it
@@ -206,7 +205,7 @@ class Cache_Configuration_Spec extends Specification
                         .noise("grain", n -> n.colors(new Color(32, 32, 32), new Color(222, 222, 222)))
                   )
                   .get(JButton)
-            var ext = ComponentExtension.from(button)
+            var ext = ComponentBackend.powering(button)
 
         when : 'It is dragged with the hatch open, which is when a layer gets cut.'
             [[500, 300], [560, 320], [620, 340]].each { w, h ->
@@ -240,7 +239,7 @@ class Cache_Configuration_Spec extends Specification
         cleanup :
             SwingTree.get().setCacheTilingEnabled(true)
             CacheBudget.UNITS_OVERRIDE = -1
-            ComponentExtension.updateAllCachesFromLibraryConfig()
+        ComponentBackend.updateAllCachesFromLibraryConfig()
     }
 
     def 'Flipping the stretch tiling hatch reaches a component that is not changing at all.'()
@@ -260,7 +259,7 @@ class Cache_Configuration_Spec extends Specification
         """
         given : 'A deterministic budget and a large, flatly coloured, stretch tileable button.'
             CacheBudget.UNITS_OVERRIDE = 10
-            ComponentExtension.updateAllCachesFromLibraryConfig()
+            ComponentBackend.updateAllCachesFromLibraryConfig()
             var button =
                 UI.button("Hold still")
                   .withStyle( it -> it
@@ -270,7 +269,7 @@ class Cache_Configuration_Spec extends Specification
                   )
                   .get(JButton)
             button.setSize(300, 120)
-            var ext = ComponentExtension.from(button)
+            var ext = ComponentBackend.powering(button)
 
         when : 'It is painted a number of times, without ever changing in any way.'
             6.times { Utility.renderSingleComponent(button) }
@@ -289,7 +288,7 @@ class Cache_Configuration_Spec extends Specification
         cleanup : 'We open the hatch again and hand the library back its own budget.'
             SwingTree.get().setCacheTilingEnabled(true)
             CacheBudget.UNITS_OVERRIDE = -1
-            ComponentExtension.updateAllCachesFromLibraryConfig()
+            ComponentBackend.updateAllCachesFromLibraryConfig()
     }
 
     def 'The live cache monitoring snapshot covers every global rendering cache.'()
@@ -301,7 +300,7 @@ class Cache_Configuration_Spec extends Specification
             inventory of SwingTree's global rendering caches.
         """
         expect : 'One entry per global rendering cache, in stable order, never negative.'
-            ComponentExtension.globalRenderCacheEntryCounts().keySet().toList() == ["style layers", "text layouts", "noise paints", "shadow gradients"]
-            ComponentExtension.globalRenderCacheEntryCounts().values().every { it >= 0 }
+            ComponentBackend.globalRenderCacheEntryCounts().keySet().toList() == ["style layers", "text layouts", "noise paints", "shadow gradients"]
+            ComponentBackend.globalRenderCacheEntryCounts().values().every { it >= 0 }
     }
 }

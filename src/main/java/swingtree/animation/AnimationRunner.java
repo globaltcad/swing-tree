@@ -3,7 +3,7 @@ package swingtree.animation;
 import org.slf4j.Logger;
 import swingtree.SwingTree;
 import swingtree.UI;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 
 import javax.swing.JComponent;
 import javax.swing.Timer;
@@ -60,7 +60,7 @@ final class AnimationRunner
 
         // In a previous run the animation terminated, so we remove animations from the component state:
         for ( JComponent component : _toBeCleaned )
-            ComponentExtension.from(component).clearAnimations();
+            ComponentBackend.powering(component).clearAnimations();
         _toBeCleaned.clear();
 
         if ( _runningAnimations.isEmpty() ) {
@@ -72,7 +72,7 @@ final class AnimationRunner
 
         for ( RunningAnimation running : _runningAnimations )
             running.component().ifPresent( component -> {
-                ComponentExtension.from(component).clearAnimations();
+                ComponentBackend.powering(component).clearAnimations();
             });
 
         long now = System.currentTimeMillis();
@@ -132,7 +132,7 @@ final class AnimationRunner
         Runnable requestComponentRepaint = () -> {
                                                 if ( component != null ) {
                                                     if ( component.getParent() == null || !_isVisible(component) ) {
-                                                        ComponentExtension.from((JComponent) component).gatherApplyAndInstallStyle(false);
+                                                        ComponentBackend.powering((JComponent) component).gatherApplyAndInstallStyle(false);
                                                         /*
                                                             There will be no repaint if the component is not visible.
                                                             If the paint method encounters a component

@@ -58,7 +58,7 @@ final class StyleRenderer
     static int shadowGradientCacheSize() { return _SHADOW_GRADIENT_CACHE.size(); }
 
     /** Drops the globally cached noise paints/tiles and shadow gradient stops. Called when the
-     *  library cache configuration changes (see {@link ComponentExtension#updateAllCachesFromLibraryConfig()})
+     *  library cache configuration changes (see {@link ComponentBackend#updateAllCachesFromLibraryConfig()})
      *  so memory shrinks immediately; both maps repopulate lazily under the new budget. */
     static void clearGlobalRenderCaches() {
         _NOISE_PAINT_CACHE.clear();

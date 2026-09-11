@@ -4,6 +4,7 @@ import spock.lang.Narrative
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
+import swingtree.style.ComponentBackend
 import swingtree.style.FontConf
 import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
@@ -775,7 +776,7 @@ class Html_Label_Font_Styling_Spec extends Specification
 
         when : 'The style cycle is forced to run a few more times:'
             UI.runNow {
-                3.times { swingtree.style.ComponentExtension.from(label).gatherApplyAndInstallStyle(true) }
+                3.times { ComponentBackend.powering(label).gatherApplyAndInstallStyle(true) }
             }
 
         then : 'The scaled value is exactly 30 — not 45, not 67.5, not 101.25:'

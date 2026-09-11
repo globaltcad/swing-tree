@@ -353,7 +353,7 @@ final class DynamicLaF
         }
 
         @Override public void paint(Graphics g, JComponent c ) {
-            ComponentExtension.from(c).paintBackground(g, true, null);
+            ComponentBackend.powering(c).paintBackground(g, true, null);
         }
         @Override public void update( Graphics g, JComponent c ) { paint(g, c); }
 
@@ -376,7 +376,7 @@ final class DynamicLaF
 
         @Override public void paint( Graphics g, JComponent c ) {
             boolean customWipe = _formerUI == null;
-            ComponentExtension.from(c).paintBackground(g, customWipe, localGraphics->{
+            ComponentBackend.powering(c).paintBackground(g, customWipe, localGraphics->{
                 if ( _formerUI != null )
                     _paintComponentThroughFormerUI(_formerUI, localGraphics, c);
             });
@@ -400,7 +400,7 @@ final class DynamicLaF
         }
 
         @Override public void paint( Graphics g, JComponent c ) {
-            ComponentExtension.from(c).paintBackground(g, false, localGraphics->{
+            ComponentBackend.powering(c).paintBackground(g, false, localGraphics->{
                 if ( _formerUI != null )
                     _paintComponentThroughFormerUI(_formerUI, localGraphics, c);
                 else
@@ -428,21 +428,21 @@ final class DynamicLaF
             if ( !getComponent().isOpaque() )
                 paintBackground(g);
 
-            ComponentExtension.from(getComponent()).gatherStyleAndPaintInScope(g, ()->{
+            ComponentBackend.powering(getComponent()).gatherStyleAndPaintInScope(g, ()->{
                 super.paintSafely(g);// Paints the text
             });
         }
         @Override protected void paintBackground(Graphics g) {
             JComponent c = getComponent();
 
-            Insets margins = ComponentExtension.from(c).getMarginInsets();
+            Insets margins = ComponentBackend.powering(c).getMarginInsets();
             int insetTop    = margins.top   ;
             int insetLeft   = margins.left  ;
             int insetBottom = margins.bottom;
             int insetRight  = margins.right ;
 
             g.setColor(c.getBackground());
-            ComponentExtension.from(getComponent()).gatherStyleAndPaintInScope(g, ()->{
+            ComponentBackend.powering(getComponent()).gatherStyleAndPaintInScope(g, ()->{
                 g.fillRect(
                         insetLeft, insetTop,
                         c.getWidth() - insetLeft - insetRight, c.getHeight() - insetTop - insetBottom
@@ -451,7 +451,7 @@ final class DynamicLaF
 
             boolean customWipe = _formerUI == null;
             boolean shouldPaintFormerUI = (insetLeft == 0 && insetRight == 0 && insetTop == 0 && insetBottom == 0);
-            ComponentExtension.from(c).paintBackground(g, customWipe, localGraphics -> {
+            ComponentBackend.powering(c).paintBackground(g, customWipe, localGraphics -> {
                 if (shouldPaintFormerUI && _formerUI != null)
                     _paintComponentThroughFormerUI(_formerUI, localGraphics, c);
             });
@@ -472,13 +472,13 @@ final class DynamicLaF
     ) {
         try {
             if ( formerUI != null ) {
-                StyleConf styleConf = ComponentExtension.from(c).getStyle();
+                StyleConf styleConf = ComponentBackend.powering(c).getStyle();
                 boolean hasMargin       = styleConf.margin().isPositive();
                 boolean hasBorderRadius = styleConf.border().hasAnyNonZeroArcs();
                 if ( !hasMargin && !hasBorderRadius )
                     formerUI.update(g, c);
                 else {
-                    ComponentExtension.from(c).gatherStyleAndPaintInScope(g, ()->{
+                    ComponentBackend.powering(c).gatherStyleAndPaintInScope(g, ()->{
                         formerUI.update(g, c);
                     });
                 }
@@ -543,7 +543,7 @@ final class DynamicLaF
                 return;
             }
             JComponent owner = (JComponent) source;
-            ComponentExtension.from(owner).updateDynamicLookAndFeel( oldLaf -> {
+            ComponentBackend.powering(owner).updateDynamicLookAndFeel(oldLaf -> {
                 if (  oldLaf.customLookAndFeelIsInstalled() )
                     oldLaf = oldLaf._installCustomLaF(owner, true);
                 return oldLaf;

@@ -9,7 +9,7 @@ import swingtree.SwingTree;
 import swingtree.UI;
 import swingtree.api.IconDeclaration;
 import swingtree.layout.Size;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 import swingtree.style.StylableComponent;
 
 import javax.swing.Icon;
@@ -116,7 +116,7 @@ public class JIcon extends JLabel implements StylableComponent
      *  @param declaration A property holding the icon declaration to display.
      */
     public JIcon( Val<IconDeclaration> declaration ) {
-        ComponentExtension.from(this).storeBoundObservable(
+        ComponentBackend.powering(this).storeBoundObservable(
                 declaration.view().onChange(From.ALL, it -> {
                     UI.runNow(()->{
                         setIcon(_getFromCacheOrLoadFrom(it.currentValue().orElseThrowUnchecked()));
@@ -153,7 +153,7 @@ public class JIcon extends JLabel implements StylableComponent
 
     @Override
     public void updateUI() {
-        ComponentExtension.from(this).installCustomUIIfPossible();
+        ComponentBackend.powering(this).installCustomUIIfPossible();
         /*
             The JIcon is a SwingTree native component type, so it also
             enjoys the perks of having a SwingTree based look and feel!

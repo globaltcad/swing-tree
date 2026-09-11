@@ -1130,7 +1130,7 @@ public final class SvgIcon extends ImageIcon
         if ( fitComponent == UI.FitComponent.UNDEFINED )
             fitComponent = UI.FitComponent.MIN_DIM; // best default!
         if ( preferredPlacement == UI.Placement.UNDEFINED && c instanceof JComponent )
-            preferredPlacement = ComponentExtension.from((JComponent) c).preferredIconPlacement();
+            preferredPlacement = ComponentBackend.powering((JComponent) c).preferredIconPlacement();
 
         Insets insets = ZERO_INSETS;
 

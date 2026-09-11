@@ -38,7 +38,7 @@ import spock.lang.Title
 import sprouts.Var
 import swingtree.components.JSplitButton
 import swingtree.examples.AdvancedUI
-import swingtree.style.ComponentExtension
+import swingtree.style.ComponentBackend
 import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
 import utility.Utility
@@ -213,8 +213,8 @@ class Examples_Spec extends Specification
         expect : 'It is rendered as shown in the image.'
             Utility.similarityBetween(view, "views/glass-style-example-view.png", 98) > 98
         and :
-            ComponentExtension.from(view).getBufferedImage().isPresent()
-            !ComponentExtension.from(view.getComponent(0)).getBufferedImage().isPresent()
+            ComponentBackend.powering(view).getBufferedImage().isPresent()
+            !ComponentBackend.powering(view.getComponent(0)).getBufferedImage().isPresent()
 
     }
 
