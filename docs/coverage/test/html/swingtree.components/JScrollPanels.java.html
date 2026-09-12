@@ -16,7 +16,7 @@ import swingtree.layout.AddConstraint;
 import swingtree.layout.Bounds;
 import swingtree.layout.ResponsiveGridFlowLayout;
 import swingtree.layout.Size;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 
 import javax.swing.*;
 import java.awt.*;
@@ -852,7 +852,7 @@ public class JScrollPanels extends UI.ScrollPane
             }
 <span class="pc bpc" id="L853" title="1 of 2 branches missed.">            this.add(_lastState, constraints != null ? constraints.toConstraintForLayoutManager() : &quot;grow&quot; );</span>
 
-<span class="fc" id="L855">            ComponentExtension.from(this).storeBoundObservable(</span>
+<span class="fc" id="L855">            ComponentBackend.powering(this).storeBoundObservable(</span>
 <span class="pc" id="L856">                    _viewable.isSelected().view().onChange(From.VIEW_MODEL, it -&gt; _selectThis(components) )</span>
                 );
 <span class="pc bpc" id="L858" title="1 of 2 branches missed.">            if ( _viewable.isSelected().is(true) )</span>

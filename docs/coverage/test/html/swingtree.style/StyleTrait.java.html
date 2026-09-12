@@ -159,7 +159,7 @@ public final class StyleTrait&lt;C extends JComponent&gt;
         // Only resolve the component's style groups when the group actually needs matching.
         // 'belongsToGroup' is a plain list lookup, avoiding the Tuple + Stream allocations of
         // the former 'getStyleGroups().any(..)' on every applicability check.
-<span class="fc bfc" id="L162" title="All 4 branches covered.">        boolean nameIsCompatible = _group.isEmpty() || ComponentExtension.from(component).belongsToGroup(_group);</span>
+<span class="fc bfc" id="L162" title="All 4 branches covered.">        boolean nameIsCompatible = _group.isEmpty() || ComponentBackend.powering(component).belongsToGroup(_group);</span>
 <span class="fc bfc" id="L163" title="All 6 branches covered.">        return typeIsCompatible &amp;&amp; idIsCompatible &amp;&amp; nameIsCompatible;</span>
     }
 

@@ -142,15 +142,15 @@
 
         {"kind":"and","text":"\n            We create a Swing component, a JLabel, and\n            apply a style to it based on a float property which\n            is bound to the 'withRepaintOn' method.\n        ","code":["var label =","            UI.label(\"Title\").withSizeExactly(84, 42)","            .withRepaintOn(width)","            .withStyle(conf -> conf","                .border(width.get(), \"green\")","                .borderRadius(width.get())","                .backgroundColor(\"oak\")","            )","            .get(JLabel)"]},
 
-        {"kind":"and","text":"Then we get a string encoding of the entire style:","code":["var styleString = ComponentExtension.from(label).getStyle().toString()"]},
+        {"kind":"and","text":"Then we get a string encoding of the entire style:","code":["var styleString = ComponentBackend.powering(label).getStyle().toString()"]},
 
         {"kind":"expect","text":"","code":["styleString.contains(\"BorderConf[NONE]\")","styleString.contains(\"backgroundColor=rgba(216,181,137,255)\")"]},
 
-        {"kind":"when","text":"\n            We noe set a fractional border width! Note that Swing does not\n            support fractional components widths, so how does it ensure that\n            the layout is not broken? Well...\n        ","code":["width.set(2.5f)","UI.sync()","styleString = ComponentExtension.from(label).getStyle().toString()"]},
+        {"kind":"when","text":"\n            We noe set a fractional border width! Note that Swing does not\n            support fractional components widths, so how does it ensure that\n            the layout is not broken? Well...\n        ","code":["width.set(2.5f)","UI.sync()","styleString = ComponentBackend.powering(label).getStyle().toString()"]},
 
         {"kind":"then","text":"\n            Here you can see that the custom border automatically created\n            a fractional margin by which always produces a component with\n            a whole width and height!\n\n            All of this dynamically updated because of the 'withRepaintOn' method!\n        ","code":["!styleString.contains(\"BorderConf[NONE]\")","styleString.contains(\"backgroundColor=rgba(216,181,137,255)\")","styleString.contains(\"BorderConf[\" +","            \"radius=${scaledToString(2.5)}, \" +","            \"width=${scaledToString(2.5)}, \" +","            \"margin=Outline[\" +","                \"top=${scaleErrorToString(2.5)}, \" +","                \"right=${scaleErrorToString(2.5)}, \" +","                \"bottom=${scaleErrorToString(2.5)}, \" +","                \"left=${scaleErrorToString(2.5)}\" +","            \"], \" +","            \"padding=Outline[top=?, right=?, bottom=?, left=?], \" +","            \"color=rgba(0,128,0,255)\" +","        \"]\")"]},
 
-        {"kind":"when","text":"We go back to the old value...","code":["width.set(0f)","UI.sync()","styleString = ComponentExtension.from(label).getStyle().toString()"]},
+        {"kind":"when","text":"We go back to the old value...","code":["width.set(0f)","UI.sync()","styleString = ComponentBackend.powering(label).getStyle().toString()"]},
 
         {"kind":"then","text":"Everything is back to normal! No style.","code":["styleString.contains(\"BorderConf[NONE]\")","styleString.contains(\"backgroundColor=rgba(216,181,137,255)\")"]},
 
@@ -173,15 +173,15 @@
 
         {"kind":"and","text":"\n            We create a Swing component, a JLabel, and\n            apply a style to it based on a float property which\n            is bound to the 'withRepaintOn' method.\n        ","code":["var label =","            UI.label(\"Title\").withSizeExactly(84, 42)","            .withRepaintOn(width)","            .withStyle(conf -> conf","                .border(width.get(), \"green\")","                .borderRadius(width.get())","                .backgroundColor(\"oak\")","            )","            .get(JLabel)"]},
 
-        {"kind":"and","text":"Then we get a string encoding of the entire style:","code":["var styleString = ComponentExtension.from(label).getStyle().toString()"]},
+        {"kind":"and","text":"Then we get a string encoding of the entire style:","code":["var styleString = ComponentBackend.powering(label).getStyle().toString()"]},
 
         {"kind":"expect","text":"","code":["styleString.contains(\"BorderConf[NONE]\")","styleString.contains(\"backgroundColor=rgba(216,181,137,255)\")"]},
 
-        {"kind":"when","text":"\n            We noe set a fractional border width! Note that Swing does not\n            support fractional components widths, so how does it ensure that\n            the layout is not broken? Well...\n        ","code":["width.set(2.5f)","UI.sync()","styleString = ComponentExtension.from(label).getStyle().toString()"]},
+        {"kind":"when","text":"\n            We noe set a fractional border width! Note that Swing does not\n            support fractional components widths, so how does it ensure that\n            the layout is not broken? Well...\n        ","code":["width.set(2.5f)","UI.sync()","styleString = ComponentBackend.powering(label).getStyle().toString()"]},
 
         {"kind":"then","text":"\n            Here you can see that the custom border automatically created\n            a fractional margin by which always produces a component with\n            a whole width and height!\n\n            All of this dynamically updated because of the 'withRepaintOn' method!\n        ","code":["!styleString.contains(\"BorderConf[NONE]\")","styleString.contains(\"backgroundColor=rgba(216,181,137,255)\")","styleString.contains(\"BorderConf[\" +","            \"radius=${scaledToString(2.5)}, \" +","            \"width=${scaledToString(2.5)}, \" +","            \"margin=Outline[\" +","                \"top=${scaleErrorToString(2.5)}, \" +","                \"right=${scaleErrorToString(2.5)}, \" +","                \"bottom=${scaleErrorToString(2.5)}, \" +","                \"left=${scaleErrorToString(2.5)}\" +","            \"], \" +","            \"padding=Outline[top=?, right=?, bottom=?, left=?], \" +","            \"color=rgba(0,128,0,255)\" +","        \"]\")"]},
 
-        {"kind":"when","text":"We go back to the old value...","code":["width.set(0f)","UI.sync()","styleString = ComponentExtension.from(label).getStyle().toString()"]},
+        {"kind":"when","text":"We go back to the old value...","code":["width.set(0f)","UI.sync()","styleString = ComponentBackend.powering(label).getStyle().toString()"]},
 
         {"kind":"then","text":"Everything is back to normal! No style.","code":["styleString.contains(\"BorderConf[NONE]\")","styleString.contains(\"backgroundColor=rgba(216,181,137,255)\")"]},
 
@@ -204,15 +204,15 @@
 
         {"kind":"and","text":"\n            We create a Swing component, a JLabel, and\n            apply a style to it based on a float property which\n            is bound to the 'withRepaintOn' method.\n        ","code":["var label =","            UI.label(\"Title\").withSizeExactly(84, 42)","            .withRepaintOn(width)","            .withStyle(conf -> conf","                .border(width.get(), \"green\")","                .borderRadius(width.get())","                .backgroundColor(\"oak\")","            )","            .get(JLabel)"]},
 
-        {"kind":"and","text":"Then we get a string encoding of the entire style:","code":["var styleString = ComponentExtension.from(label).getStyle().toString()"]},
+        {"kind":"and","text":"Then we get a string encoding of the entire style:","code":["var styleString = ComponentBackend.powering(label).getStyle().toString()"]},
 
         {"kind":"expect","text":"","code":["styleString.contains(\"BorderConf[NONE]\")","styleString.contains(\"backgroundColor=rgba(216,181,137,255)\")"]},
 
-        {"kind":"when","text":"\n            We noe set a fractional border width! Note that Swing does not\n            support fractional components widths, so how does it ensure that\n            the layout is not broken? Well...\n        ","code":["width.set(2.5f)","UI.sync()","styleString = ComponentExtension.from(label).getStyle().toString()"]},
+        {"kind":"when","text":"\n            We noe set a fractional border width! Note that Swing does not\n            support fractional components widths, so how does it ensure that\n            the layout is not broken? Well...\n        ","code":["width.set(2.5f)","UI.sync()","styleString = ComponentBackend.powering(label).getStyle().toString()"]},
 
         {"kind":"then","text":"\n            Here you can see that the custom border automatically created\n            a fractional margin by which always produces a component with\n            a whole width and height!\n\n            All of this dynamically updated because of the 'withRepaintOn' method!\n        ","code":["!styleString.contains(\"BorderConf[NONE]\")","styleString.contains(\"backgroundColor=rgba(216,181,137,255)\")","styleString.contains(\"BorderConf[\" +","            \"radius=${scaledToString(2.5)}, \" +","            \"width=${scaledToString(2.5)}, \" +","            \"margin=Outline[\" +","                \"top=${scaleErrorToString(2.5)}, \" +","                \"right=${scaleErrorToString(2.5)}, \" +","                \"bottom=${scaleErrorToString(2.5)}, \" +","                \"left=${scaleErrorToString(2.5)}\" +","            \"], \" +","            \"padding=Outline[top=?, right=?, bottom=?, left=?], \" +","            \"color=rgba(0,128,0,255)\" +","        \"]\")"]},
 
-        {"kind":"when","text":"We go back to the old value...","code":["width.set(0f)","UI.sync()","styleString = ComponentExtension.from(label).getStyle().toString()"]},
+        {"kind":"when","text":"We go back to the old value...","code":["width.set(0f)","UI.sync()","styleString = ComponentBackend.powering(label).getStyle().toString()"]},
 
         {"kind":"then","text":"Everything is back to normal! No style.","code":["styleString.contains(\"BorderConf[NONE]\")","styleString.contains(\"backgroundColor=rgba(216,181,137,255)\")"]},
 
@@ -235,15 +235,15 @@
 
         {"kind":"and","text":"\n            We create a Swing component, a JLabel, and\n            apply a style to it based on a float property which\n            is bound to the 'withRepaintOn' method.\n        ","code":["var label =","            UI.label(\"Title\").withSizeExactly(84, 42)","            .withRepaintOn(width)","            .withStyle(conf -> conf","                .border(width.get(), \"green\")","                .borderRadius(width.get())","                .backgroundColor(\"oak\")","            )","            .get(JLabel)"]},
 
-        {"kind":"and","text":"Then we get a string encoding of the entire style:","code":["var styleString = ComponentExtension.from(label).getStyle().toString()"]},
+        {"kind":"and","text":"Then we get a string encoding of the entire style:","code":["var styleString = ComponentBackend.powering(label).getStyle().toString()"]},
 
         {"kind":"expect","text":"","code":["styleString.contains(\"BorderConf[NONE]\")","styleString.contains(\"backgroundColor=rgba(216,181,137,255)\")"]},
 
-        {"kind":"when","text":"\n            We noe set a fractional border width! Note that Swing does not\n            support fractional components widths, so how does it ensure that\n            the layout is not broken? Well...\n        ","code":["width.set(2.5f)","UI.sync()","styleString = ComponentExtension.from(label).getStyle().toString()"]},
+        {"kind":"when","text":"\n            We noe set a fractional border width! Note that Swing does not\n            support fractional components widths, so how does it ensure that\n            the layout is not broken? Well...\n        ","code":["width.set(2.5f)","UI.sync()","styleString = ComponentBackend.powering(label).getStyle().toString()"]},
 
         {"kind":"then","text":"\n            Here you can see that the custom border automatically created\n            a fractional margin by which always produces a component with\n            a whole width and height!\n\n            All of this dynamically updated because of the 'withRepaintOn' method!\n        ","code":["!styleString.contains(\"BorderConf[NONE]\")","styleString.contains(\"backgroundColor=rgba(216,181,137,255)\")","styleString.contains(\"BorderConf[\" +","            \"radius=${scaledToString(2.5)}, \" +","            \"width=${scaledToString(2.5)}, \" +","            \"margin=Outline[\" +","                \"top=${scaleErrorToString(2.5)}, \" +","                \"right=${scaleErrorToString(2.5)}, \" +","                \"bottom=${scaleErrorToString(2.5)}, \" +","                \"left=${scaleErrorToString(2.5)}\" +","            \"], \" +","            \"padding=Outline[top=?, right=?, bottom=?, left=?], \" +","            \"color=rgba(0,128,0,255)\" +","        \"]\")"]},
 
-        {"kind":"when","text":"We go back to the old value...","code":["width.set(0f)","UI.sync()","styleString = ComponentExtension.from(label).getStyle().toString()"]},
+        {"kind":"when","text":"We go back to the old value...","code":["width.set(0f)","UI.sync()","styleString = ComponentBackend.powering(label).getStyle().toString()"]},
 
         {"kind":"then","text":"Everything is back to normal! No style.","code":["styleString.contains(\"BorderConf[NONE]\")","styleString.contains(\"backgroundColor=rgba(216,181,137,255)\")"]},
 
@@ -266,15 +266,15 @@
 
         {"kind":"and","text":"\n            We create a Swing component, a JLabel, and\n            apply a style to it based on a float property which\n            is bound to the 'withRepaintOn' method.\n        ","code":["var label =","            UI.label(\"Title\").withSizeExactly(84, 42)","            .withRepaintOn(width)","            .withStyle(conf -> conf","                .border(width.get(), \"green\")","                .borderRadius(width.get())","                .backgroundColor(\"oak\")","            )","            .get(JLabel)"]},
 
-        {"kind":"and","text":"Then we get a string encoding of the entire style:","code":["var styleString = ComponentExtension.from(label).getStyle().toString()"]},
+        {"kind":"and","text":"Then we get a string encoding of the entire style:","code":["var styleString = ComponentBackend.powering(label).getStyle().toString()"]},
 
         {"kind":"expect","text":"","code":["styleString.contains(\"BorderConf[NONE]\")","styleString.contains(\"backgroundColor=rgba(216,181,137,255)\")"]},
 
-        {"kind":"when","text":"\n            We noe set a fractional border width! Note that Swing does not\n            support fractional components widths, so how does it ensure that\n            the layout is not broken? Well...\n        ","code":["width.set(2.5f)","UI.sync()","styleString = ComponentExtension.from(label).getStyle().toString()"]},
+        {"kind":"when","text":"\n            We noe set a fractional border width! Note that Swing does not\n            support fractional components widths, so how does it ensure that\n            the layout is not broken? Well...\n        ","code":["width.set(2.5f)","UI.sync()","styleString = ComponentBackend.powering(label).getStyle().toString()"]},
 
         {"kind":"then","text":"\n            Here you can see that the custom border automatically created\n            a fractional margin by which always produces a component with\n            a whole width and height!\n\n            All of this dynamically updated because of the 'withRepaintOn' method!\n        ","code":["!styleString.contains(\"BorderConf[NONE]\")","styleString.contains(\"backgroundColor=rgba(216,181,137,255)\")","styleString.contains(\"BorderConf[\" +","            \"radius=${scaledToString(2.5)}, \" +","            \"width=${scaledToString(2.5)}, \" +","            \"margin=Outline[\" +","                \"top=${scaleErrorToString(2.5)}, \" +","                \"right=${scaleErrorToString(2.5)}, \" +","                \"bottom=${scaleErrorToString(2.5)}, \" +","                \"left=${scaleErrorToString(2.5)}\" +","            \"], \" +","            \"padding=Outline[top=?, right=?, bottom=?, left=?], \" +","            \"color=rgba(0,128,0,255)\" +","        \"]\")"]},
 
-        {"kind":"when","text":"We go back to the old value...","code":["width.set(0f)","UI.sync()","styleString = ComponentExtension.from(label).getStyle().toString()"]},
+        {"kind":"when","text":"We go back to the old value...","code":["width.set(0f)","UI.sync()","styleString = ComponentBackend.powering(label).getStyle().toString()"]},
 
         {"kind":"then","text":"Everything is back to normal! No style.","code":["styleString.contains(\"BorderConf[NONE]\")","styleString.contains(\"backgroundColor=rgba(216,181,137,255)\")"]},
 

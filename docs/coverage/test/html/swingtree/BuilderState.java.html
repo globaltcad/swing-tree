@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.Tuple;
 import swingtree.api.laf.SwingTreeStyledComponentUI;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 import swingtree.style.LibraryInternalCrossPackageStyleUtil;
 import swingtree.threading.EventProcessor;
 
@@ -126,7 +126,7 @@ final class BuilderState&lt;C extends java.awt.Component&gt;
 <span class="fc bfc" id="L126" title="All 2 branches covered.">                if ( stackTraceElement != null ) {</span>
 <span class="fc" id="L127">                    ((JComponent)component).putClientProperty(&quot;built-at&quot;, stackTraceElement);</span>
                 }
-<span class="fc" id="L129">                ComponentExtension.initializeFor((JComponent) component);</span>
+<span class="fc" id="L129">                ComponentBackend.initializeFor((JComponent) component);</span>
             }
 <span class="fc" id="L131">            return component;</span>
         };
@@ -155,13 +155,13 @@ final class BuilderState&lt;C extends java.awt.Component&gt;
 <span class="fc" id="L155">            JComponent jComponent = ((JComponent) component);</span>
 <span class="fc" id="L156">            ComponentUI componentUI = LibraryInternalCrossPackageStyleUtil._findComponentUIOf((JComponent) component);</span>
 <span class="fc bfc" id="L157" title="All 2 branches covered.">            if ( componentUI instanceof SwingTreeStyledComponentUI&lt;?&gt; ) {</span>
-<span class="fc" id="L158">                ComponentExtension.from(jComponent).gatherApplyAndInstallStyle(false);</span>
+<span class="fc" id="L158">                ComponentBackend.powering(jComponent).gatherApplyAndInstallStyle(false);</span>
 <span class="fc bfc" id="L159" title="All 2 branches covered.">            } else if ( jComponent instanceof JLabel</span>
 <span class="fc bfc" id="L160" title="All 2 branches covered.">                    &amp;&amp; BasicHTML.isHTMLString( ((JLabel)jComponent).getText() ) ) {</span>
-<span class="fc" id="L161">                ComponentExtension.from(jComponent).gatherApplyAndInstallStyle(false);</span>
+<span class="fc" id="L161">                ComponentBackend.powering(jComponent).gatherApplyAndInstallStyle(false);</span>
 <span class="fc bfc" id="L162" title="All 2 branches covered.">            } else if ( jComponent instanceof JEditorPane</span>
 <span class="pc bpc" id="L163" title="1 of 2 branches missed.">                    &amp;&amp; BasicHTML.isHTMLString( ((JEditorPane)jComponent).getText() ) ) {</span>
-<span class="nc" id="L164">                ComponentExtension.from(jComponent).gatherApplyAndInstallStyle(false);</span>
+<span class="nc" id="L164">                ComponentBackend.powering(jComponent).gatherApplyAndInstallStyle(false);</span>
             }
         }
 

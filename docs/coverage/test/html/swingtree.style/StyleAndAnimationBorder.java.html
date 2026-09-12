@@ -29,7 +29,7 @@ final class StyleAndAnimationBorder&lt;C extends JComponent&gt; implements Borde
 {
 <span class="fc" id="L30">    private static final Logger log = org.slf4j.LoggerFactory.getLogger(StyleAndAnimationBorder.class);</span>
 
-    private final ComponentExtension&lt;C&gt; _compExt;
+    private final ComponentBackend&lt;C&gt; _compExt;
     private final Border                _formerBorder;
     private final boolean               _borderWasNotPainted;
 
@@ -39,7 +39,7 @@ final class StyleAndAnimationBorder&lt;C extends JComponent&gt; implements Borde
 <span class="fc" id="L39">    private final Insets _fullPaddingInsets = new Insets(0, 0, 0, 0);</span>
 
 
-<span class="fc" id="L42">    StyleAndAnimationBorder( ComponentExtension&lt;C&gt; compExt, Border formerBorder, StyleConf styleConf) {</span>
+<span class="fc" id="L42">    StyleAndAnimationBorder(ComponentBackend&lt;C&gt; compExt, Border formerBorder, StyleConf styleConf) {</span>
 <span class="fc" id="L43">        _compExt       = compExt;</span>
 <span class="fc" id="L44">        _insets        = null;</span>
 <span class="fc" id="L45">        _formerBorder  = formerBorder;</span>

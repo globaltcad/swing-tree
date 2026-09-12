@@ -130,7 +130,7 @@
 
         {"kind":"expect","text":"It is rendered as shown in the image.","code":["Utility.similarityBetween(view, \"views/glass-style-example-view.png\", 98) > 98"]},
 
-        {"kind":"and","text":"","code":["ComponentExtension.from(view).getBufferedImage().isPresent()","!ComponentExtension.from(view.getComponent(0)).getBufferedImage().isPresent()"]}
+        {"kind":"and","text":"","code":["ComponentBackend.powering(view).getBufferedImage().isPresent()","!ComponentBackend.powering(view.getComponent(0)).getBufferedImage().isPresent()"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },

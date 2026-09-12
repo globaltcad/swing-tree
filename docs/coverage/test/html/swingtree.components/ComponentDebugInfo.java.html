@@ -3,7 +3,7 @@
 import net.miginfocom.swing.MigLayout;
 import sprouts.Tuple;
 import swingtree.layout.Bounds;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 import swingtree.style.StyleConf;
 
 import javax.swing.*;
@@ -105,7 +105,7 @@ final class ComponentDebugInfo {
 
     static StyleConf findStyleConfOf(Component component) {
 <span class="nc bnc" id="L107" title="All 2 branches missed.">        if ( component instanceof JComponent ) {</span>
-<span class="nc" id="L108">            return ComponentExtension.from((JComponent) component).getStyle();</span>
+<span class="nc" id="L108">            return ComponentBackend.powering((JComponent) component).getStyle();</span>
         }
 <span class="nc" id="L110">        return StyleConf.none();</span>
     }

@@ -8,7 +8,7 @@ import sprouts.Action;
 import sprouts.From;
 import sprouts.Val;
 import sprouts.Var;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -412,7 +412,7 @@ import java.util.function.Consumer;
 <span class="fc" id="L412">    private static class ExtraState</span>
     {
         static ExtraState of( JTextComponent textComponent ) {
-<span class="fc" id="L415">            return ComponentExtension.from(textComponent)</span>
+<span class="fc" id="L415">            return ComponentBackend.powering(textComponent)</span>
 <span class="fc" id="L416">                                     .getOrSet(ExtraState.class, ExtraState::new);</span>
         }
 

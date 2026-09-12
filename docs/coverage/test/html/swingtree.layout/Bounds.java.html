@@ -118,10 +118,10 @@ public final class Bounds
      *  in the form of x and y coordinates, width and height.
      */
     public static Bounds of( double x, double y, double width, double height ) {
-<span class="nc bnc" id="L121" title="All 4 branches missed.">        if ( width &lt; 0 || height &lt; 0 )</span>
+<span class="pc bpc" id="L121" title="2 of 4 branches missed.">        if ( width &lt; 0 || height &lt; 0 )</span>
 <span class="nc" id="L122">            return EMPTY;</span>
 
-<span class="nc" id="L124">        return new Bounds(Position.of(x, y), Size.of(width, height));</span>
+<span class="fc" id="L124">        return new Bounds(Position.of(x, y), Size.of(width, height));</span>
     }
 
     /**
@@ -413,7 +413,7 @@ public final class Bounds
 
     @Override
     public String toString() {
-<span class="nc" id="L416">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
+<span class="fc" id="L416">        return this.getClass().getSimpleName()+&quot;[&quot; +</span>
                     &quot;location=&quot; + _position + &quot;, &quot;+
                     &quot;size=&quot;     + _size     +
                 &quot;]&quot;;

@@ -1855,11 +1855,11 @@
 
         {"kind":"expect","text":"A plain box is transparent by default:","code":["!box.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["box.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
 
@@ -1884,11 +1884,11 @@
 
         {"kind":"expect","text":"A plain box is transparent by default:","code":["!box.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["box.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
 
@@ -1913,11 +1913,11 @@
 
         {"kind":"expect","text":"A plain box is transparent by default:","code":["!box.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["box.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
 
@@ -1942,11 +1942,11 @@
 
         {"kind":"expect","text":"A plain box is transparent by default:","code":["!box.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["box.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
 
@@ -1971,11 +1971,11 @@
 
         {"kind":"expect","text":"A plain box is transparent by default:","code":["!box.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["box.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
 
@@ -2000,11 +2000,11 @@
 
         {"kind":"expect","text":"A plain box is transparent by default:","code":["!box.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["box.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
 
@@ -2029,11 +2029,11 @@
 
         {"kind":"expect","text":"A plain box is transparent by default:","code":["!box.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["box.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
 
@@ -2058,11 +2058,11 @@
 
         {"kind":"expect","text":"A plain box is transparent by default:","code":["!box.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["box.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
 
@@ -2087,11 +2087,11 @@
 
         {"kind":"expect","text":"A plain box is transparent by default:","code":["!box.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["box.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
 
@@ -2116,11 +2116,11 @@
 
         {"kind":"expect","text":"A plain box is transparent by default:","code":["!box.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["box.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
 
@@ -2145,11 +2145,11 @@
 
         {"kind":"expect","text":"A plain box is transparent by default:","code":["!box.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["box.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
 
@@ -2174,11 +2174,11 @@
 
         {"kind":"expect","text":"A plain box is transparent by default:","code":["!box.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["box.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(box).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(box).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The box has the expected opaqueness:","code":["!box.isOpaque()"]},
 
@@ -2203,11 +2203,11 @@
 
         {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
 
@@ -2232,11 +2232,11 @@
 
         {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
 
@@ -2261,11 +2261,11 @@
 
         {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
 
@@ -2290,11 +2290,11 @@
 
         {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
 
@@ -2319,11 +2319,11 @@
 
         {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
 
@@ -2348,11 +2348,11 @@
 
         {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
 
@@ -2377,11 +2377,11 @@
 
         {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
 
@@ -2406,11 +2406,11 @@
 
         {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
 
@@ -2435,11 +2435,11 @@
 
         {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
 
@@ -2464,11 +2464,11 @@
 
         {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
 
@@ -2493,11 +2493,11 @@
 
         {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
 
@@ -2522,11 +2522,11 @@
 
         {"kind":"expect","text":"A plain label is transparent (not opaque) by default:","code":["!label.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["!label.isOpaque()"]},
 
@@ -2551,11 +2551,11 @@
 
         {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
 
@@ -2580,11 +2580,11 @@
 
         {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
 
@@ -2609,11 +2609,11 @@
 
         {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
 
@@ -2638,11 +2638,11 @@
 
         {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
 
@@ -2667,11 +2667,11 @@
 
         {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
 
@@ -2696,11 +2696,11 @@
 
         {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
 
@@ -2725,11 +2725,11 @@
 
         {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
 
@@ -2754,11 +2754,11 @@
 
         {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
 
@@ -2783,11 +2783,11 @@
 
         {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
 
@@ -2812,11 +2812,11 @@
 
         {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
 
@@ -2841,11 +2841,11 @@
 
         {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
 
@@ -2870,11 +2870,11 @@
 
         {"kind":"expect","text":"A plain menu item is transparent (not opaque) by default:","code":["!checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["!checkBoxMenuItem.isOpaque()"]},
 
@@ -2897,11 +2897,11 @@
 
         {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
 
@@ -2924,11 +2924,11 @@
 
         {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
 
@@ -2951,11 +2951,11 @@
 
         {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
 
@@ -2978,11 +2978,11 @@
 
         {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
 
@@ -3005,11 +3005,11 @@
 
         {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
 
@@ -3032,11 +3032,11 @@
 
         {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
 
@@ -3059,11 +3059,11 @@
 
         {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
 
@@ -3086,11 +3086,11 @@
 
         {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
 
@@ -3113,11 +3113,11 @@
 
         {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
 
@@ -3140,11 +3140,11 @@
 
         {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
 
@@ -3167,11 +3167,11 @@
 
         {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
 
@@ -3194,11 +3194,11 @@
 
         {"kind":"expect","text":"A plain menu item is opaque (not transparent) by default:","code":["checkBoxMenuItem.isOpaque()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item has the expected opaqueness:","code":["checkBoxMenuItem.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(checkBoxMenuItem).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The menu item is opaque again, just like it was initially:","code":["checkBoxMenuItem.isOpaque()"]},
 
@@ -3223,11 +3223,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3252,11 +3252,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3281,11 +3281,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3310,11 +3310,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3339,11 +3339,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3368,11 +3368,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3397,11 +3397,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3426,11 +3426,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3455,11 +3455,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3484,11 +3484,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3513,11 +3513,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3542,11 +3542,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3571,11 +3571,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3600,11 +3600,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3629,11 +3629,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3658,11 +3658,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3687,11 +3687,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3716,11 +3716,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3745,11 +3745,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3774,11 +3774,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3803,11 +3803,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3832,11 +3832,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3861,11 +3861,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3890,11 +3890,11 @@
 
         {"kind":"expect","text":"The label is opaque if the color is opaque:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the expected opaqueness:","code":["label.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The label has the initial opaqueness again:","code":["label.isOpaque() == (color.alpha == 255)"]},
 
@@ -3919,11 +3919,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -3948,11 +3948,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -3977,11 +3977,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4006,11 +4006,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4035,11 +4035,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4064,11 +4064,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4093,11 +4093,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4122,11 +4122,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4151,11 +4151,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4180,11 +4180,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4209,11 +4209,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4238,11 +4238,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4267,11 +4267,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4296,11 +4296,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4325,11 +4325,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4354,11 +4354,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4383,11 +4383,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4412,11 +4412,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4441,11 +4441,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4470,11 +4470,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4499,11 +4499,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4528,11 +4528,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4557,11 +4557,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4586,11 +4586,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4615,11 +4615,11 @@
 
         {"kind":"expect","text":"The panel is opaque if the color is opaque:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
         {"kind":"then","text":"The panel has the initial opaqueness again:","code":["panel.isOpaque() == (color.alpha == 255)"]},
 
@@ -4642,15 +4642,15 @@
 
         {"kind":"and","text":"We build the underlying panel:","code":["var panel = ui.get(JPanel)"]},
 
-        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentExtension.from(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
+        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentBackend.powering(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
         {"kind":"where","text":"","code":{"isColorBypass":["false","true","true","true","true","true","true","true","true","true","true","false","true"],"opaque":["true","true","false","true","true","false","true","true","false","true","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}","{it.gradient( g -> g.type(UI.GradientType.RADIAL).colors(UI.Color.BLUEVIOLET, UI.Color.WHITE.withAlpha(0)) )}"]}}
       ],
@@ -4671,15 +4671,15 @@
 
         {"kind":"and","text":"We build the underlying panel:","code":["var panel = ui.get(JPanel)"]},
 
-        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentExtension.from(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
+        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentBackend.powering(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
         {"kind":"where","text":"","code":{"isColorBypass":["false","true","true","true","true","true","true","true","true","true","true","false","true"],"opaque":["true","true","false","true","true","false","true","true","false","true","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}","{it.gradient( g -> g.type(UI.GradientType.RADIAL).colors(UI.Color.BLUEVIOLET, UI.Color.WHITE.withAlpha(0)) )}"]}}
       ],
@@ -4700,15 +4700,15 @@
 
         {"kind":"and","text":"We build the underlying panel:","code":["var panel = ui.get(JPanel)"]},
 
-        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentExtension.from(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
+        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentBackend.powering(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
         {"kind":"where","text":"","code":{"isColorBypass":["false","true","true","true","true","true","true","true","true","true","true","false","true"],"opaque":["true","true","false","true","true","false","true","true","false","true","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}","{it.gradient( g -> g.type(UI.GradientType.RADIAL).colors(UI.Color.BLUEVIOLET, UI.Color.WHITE.withAlpha(0)) )}"]}}
       ],
@@ -4729,15 +4729,15 @@
 
         {"kind":"and","text":"We build the underlying panel:","code":["var panel = ui.get(JPanel)"]},
 
-        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentExtension.from(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
+        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentBackend.powering(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
         {"kind":"where","text":"","code":{"isColorBypass":["false","true","true","true","true","true","true","true","true","true","true","false","true"],"opaque":["true","true","false","true","true","false","true","true","false","true","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}","{it.gradient( g -> g.type(UI.GradientType.RADIAL).colors(UI.Color.BLUEVIOLET, UI.Color.WHITE.withAlpha(0)) )}"]}}
       ],
@@ -4758,15 +4758,15 @@
 
         {"kind":"and","text":"We build the underlying panel:","code":["var panel = ui.get(JPanel)"]},
 
-        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentExtension.from(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
+        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentBackend.powering(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
         {"kind":"where","text":"","code":{"isColorBypass":["false","true","true","true","true","true","true","true","true","true","true","false","true"],"opaque":["true","true","false","true","true","false","true","true","false","true","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}","{it.gradient( g -> g.type(UI.GradientType.RADIAL).colors(UI.Color.BLUEVIOLET, UI.Color.WHITE.withAlpha(0)) )}"]}}
       ],
@@ -4787,15 +4787,15 @@
 
         {"kind":"and","text":"We build the underlying panel:","code":["var panel = ui.get(JPanel)"]},
 
-        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentExtension.from(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
+        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentBackend.powering(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
         {"kind":"where","text":"","code":{"isColorBypass":["false","true","true","true","true","true","true","true","true","true","true","false","true"],"opaque":["true","true","false","true","true","false","true","true","false","true","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}","{it.gradient( g -> g.type(UI.GradientType.RADIAL).colors(UI.Color.BLUEVIOLET, UI.Color.WHITE.withAlpha(0)) )}"]}}
       ],
@@ -4816,15 +4816,15 @@
 
         {"kind":"and","text":"We build the underlying panel:","code":["var panel = ui.get(JPanel)"]},
 
-        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentExtension.from(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
+        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentBackend.powering(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
         {"kind":"where","text":"","code":{"isColorBypass":["false","true","true","true","true","true","true","true","true","true","true","false","true"],"opaque":["true","true","false","true","true","false","true","true","false","true","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}","{it.gradient( g -> g.type(UI.GradientType.RADIAL).colors(UI.Color.BLUEVIOLET, UI.Color.WHITE.withAlpha(0)) )}"]}}
       ],
@@ -4845,15 +4845,15 @@
 
         {"kind":"and","text":"We build the underlying panel:","code":["var panel = ui.get(JPanel)"]},
 
-        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentExtension.from(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
+        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentBackend.powering(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
         {"kind":"where","text":"","code":{"isColorBypass":["false","true","true","true","true","true","true","true","true","true","true","false","true"],"opaque":["true","true","false","true","true","false","true","true","false","true","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}","{it.gradient( g -> g.type(UI.GradientType.RADIAL).colors(UI.Color.BLUEVIOLET, UI.Color.WHITE.withAlpha(0)) )}"]}}
       ],
@@ -4874,15 +4874,15 @@
 
         {"kind":"and","text":"We build the underlying panel:","code":["var panel = ui.get(JPanel)"]},
 
-        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentExtension.from(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
+        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentBackend.powering(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
         {"kind":"where","text":"","code":{"isColorBypass":["false","true","true","true","true","true","true","true","true","true","true","false","true"],"opaque":["true","true","false","true","true","false","true","true","false","true","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}","{it.gradient( g -> g.type(UI.GradientType.RADIAL).colors(UI.Color.BLUEVIOLET, UI.Color.WHITE.withAlpha(0)) )}"]}}
       ],
@@ -4903,15 +4903,15 @@
 
         {"kind":"and","text":"We build the underlying panel:","code":["var panel = ui.get(JPanel)"]},
 
-        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentExtension.from(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
+        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentBackend.powering(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
         {"kind":"where","text":"","code":{"isColorBypass":["false","true","true","true","true","true","true","true","true","true","true","false","true"],"opaque":["true","true","false","true","true","false","true","true","false","true","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}","{it.gradient( g -> g.type(UI.GradientType.RADIAL).colors(UI.Color.BLUEVIOLET, UI.Color.WHITE.withAlpha(0)) )}"]}}
       ],
@@ -4932,15 +4932,15 @@
 
         {"kind":"and","text":"We build the underlying panel:","code":["var panel = ui.get(JPanel)"]},
 
-        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentExtension.from(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
+        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentBackend.powering(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
         {"kind":"where","text":"","code":{"isColorBypass":["false","true","true","true","true","true","true","true","true","true","true","false","true"],"opaque":["true","true","false","true","true","false","true","true","false","true","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}","{it.gradient( g -> g.type(UI.GradientType.RADIAL).colors(UI.Color.BLUEVIOLET, UI.Color.WHITE.withAlpha(0)) )}"]}}
       ],
@@ -4961,15 +4961,15 @@
 
         {"kind":"and","text":"We build the underlying panel:","code":["var panel = ui.get(JPanel)"]},
 
-        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentExtension.from(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
+        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentBackend.powering(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
         {"kind":"where","text":"","code":{"isColorBypass":["false","true","true","true","true","true","true","true","true","true","true","false","true"],"opaque":["true","true","false","true","true","false","true","true","false","true","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}","{it.gradient( g -> g.type(UI.GradientType.RADIAL).colors(UI.Color.BLUEVIOLET, UI.Color.WHITE.withAlpha(0)) )}"]}}
       ],
@@ -4990,15 +4990,15 @@
 
         {"kind":"and","text":"We build the underlying panel:","code":["var panel = ui.get(JPanel)"]},
 
-        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"expect","text":"The panel is opaque initially:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to true and then refresh the UI:","code":["isOn = true","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentExtension.from(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
+        {"kind":"then","text":"The panel has the expected opaqueness:","code":["panel.isOpaque() == opaque","ComponentBackend.powering(panel).getStyle().base().backgroundColor().isPresent() == isColorBypass","!isColorBypass || !opaque || panel.getBackground() === UI.Color.UNDEFINED"]},
 
-        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentExtension.from(panel).gatherApplyAndInstallStyle(true)","})"]},
+        {"kind":"when","text":"We set the `isOn` flag to false and then refresh the UI:","code":["isOn = false","UI.runNow(()->{","    ComponentBackend.powering(panel).gatherApplyAndInstallStyle(true)","})"]},
 
-        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentExtension.from(panel).getStyle() == StyleConf.none()"]},
+        {"kind":"then","text":"The panel, once again, is opaque:","code":["panel.isOpaque()","ComponentBackend.powering(panel).getStyle() == StyleConf.none()"]},
 
         {"kind":"where","text":"","code":{"isColorBypass":["false","true","true","true","true","true","true","true","true","true","true","false","true"],"opaque":["true","true","false","true","true","false","true","true","false","true","true","true","true"],"styler":["{it}","{it.backgroundColor(\"red\")}","{it.backgroundColor(\"transparent red\")}","{it.backgroundColor(UI.color(255,255,255, 255))}","{it.backgroundColor(\"blue\").foundationColor(\"red\")}","{it.backgroundColor(\"blue\").foundationColor(\"red\").border(2, \"transparent oak\")}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.foundationColor(\"transparent light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).borderRadius(24).margin(16).padding(16)}","{it.backgroundColor(\"rgb(220,220,220)\").foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.foundationColor(\"light oak\").shadowIsInset(true).shadowColor(\"black\").shadowBlurRadius(3).margin(16).padding(16)}","{it.shadowColor(Color.BLACK).shadowBlurRadius(6)}","{it.gradient( g -> g.type(UI.GradientType.RADIAL).colors(UI.Color.BLUEVIOLET, UI.Color.WHITE.withAlpha(0)) )}"]}}
       ],

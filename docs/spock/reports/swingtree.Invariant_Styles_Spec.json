@@ -596,7 +596,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [0]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [0]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -605,15 +605,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -625,7 +625,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [1]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [1]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -634,15 +634,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -654,7 +654,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [2]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [2]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -663,15 +663,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -683,7 +683,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [3]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [3]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -692,15 +692,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -712,7 +712,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [4]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [4]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -721,15 +721,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -741,7 +741,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [5]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [5]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -750,15 +750,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -770,7 +770,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [6]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [6]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -779,15 +779,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -799,7 +799,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [7]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [7]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -808,15 +808,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -828,7 +828,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [8]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [8]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -837,15 +837,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -857,7 +857,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [9]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [9]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -866,15 +866,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -886,7 +886,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [10]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [10]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -895,15 +895,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -915,7 +915,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [11]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [11]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -924,15 +924,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -944,7 +944,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [12]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [12]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -953,15 +953,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -973,7 +973,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [13]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [13]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -982,15 +982,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1002,7 +1002,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [14]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [14]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1011,15 +1011,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1031,7 +1031,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [15]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [15]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1040,15 +1040,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1060,7 +1060,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [16]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [16]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1069,15 +1069,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1089,7 +1089,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [17]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [17]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1098,15 +1098,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1118,7 +1118,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [18]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [18]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1127,15 +1127,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1147,7 +1147,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [19]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [19]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1156,15 +1156,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1176,7 +1176,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [20]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [20]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1185,15 +1185,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1205,7 +1205,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [21]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [21]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1214,15 +1214,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1234,7 +1234,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [22]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [22]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1243,15 +1243,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1263,7 +1263,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [23]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [23]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1272,15 +1272,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1292,7 +1292,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [24]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [24]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1301,15 +1301,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1321,7 +1321,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [25]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [25]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1330,15 +1330,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1350,7 +1350,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [26]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [26]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1359,15 +1359,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1379,7 +1379,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [27]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [27]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1388,15 +1388,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1408,7 +1408,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [28]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [28]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1417,15 +1417,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1437,7 +1437,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [29]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [29]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1446,15 +1446,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1466,7 +1466,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [30]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [30]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1475,15 +1475,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1495,7 +1495,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [31]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [31]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1504,15 +1504,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1524,7 +1524,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [32]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [32]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1533,15 +1533,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1553,7 +1553,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [33]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [33]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1562,15 +1562,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1582,7 +1582,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [34]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [34]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1591,15 +1591,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1611,7 +1611,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [35]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [35]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1620,15 +1620,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 
@@ -1640,7 +1640,7 @@
     },
   
     {
-      "id":"The view state hash code function on the SingTree internal ComponentExtension hashes view related state. [36]",
+      "id":"The view state hash code function on the SwingTree internal ComponentBackend hashes view related state. [36]",
       "result":"PASS",
       "duration":"?",
       "iterations":{
@@ -1649,15 +1649,15 @@
       "blocks":[
         {"kind":"given","text":"We build the actual components of the UI declarations:","code":["var comp1 = ui1.get(ui1.getType())","var comp2 = ui2.get(ui2.getType())"]},
 
-        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"expect","text":"Initially, the component hashes are 0, because the components have no size!","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change one of the size dimensions each...","code":["comp1.setSize(0, 100)","comp2.setSize(100, 0)"]},
 
-        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentExtension.from(comp1).viewStateHashCode() == 0","ComponentExtension.from(comp2).viewStateHashCode() == 0"]},
+        {"kind":"then","text":"The hashes are still 0, because the component is not visible.","code":["ComponentBackend.powering(comp1).viewStateHashCode() == 0","ComponentBackend.powering(comp2).viewStateHashCode() == 0"]},
 
         {"kind":"when","text":"We change both size dimensions...","code":["comp1.setSize(200, 100)","comp2.setSize(100, 200)"]},
 
-        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentExtension.from(comp1).viewStateHashCode()","var hash2 = ComponentExtension.from(comp2).viewStateHashCode()"]},
+        {"kind":"and","text":"We calculate the hash codes of the two components again:","code":["var hash1 = ComponentBackend.powering(comp1).viewStateHashCode()","var hash2 = ComponentBackend.powering(comp2).viewStateHashCode()"]},
 
         {"kind":"then","text":"The hash codes are no longer 0 (or at least it should be super unlikely).","code":["hash1 != 0","hash2 != 0"]},
 

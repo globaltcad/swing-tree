@@ -10,7 +10,7 @@ import swingtree.layout.FlowCellConf;
 import swingtree.layout.LayoutConstraint;
 import swingtree.layout.MigAddConstraint;
 import swingtree.layout.ResponsiveGridFlowLayout;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 import swingtree.style.ComponentStyleDelegate;
 import swingtree.style.StyleConf;
 
@@ -1021,8 +1021,8 @@ public interface Layout
          */
         @Override
         public void installFor( JComponent component ) {
-<span class="fc" id="L1024">            ComponentExtension&lt;?&gt; extension = ComponentExtension.from(component);</span>
-<span class="fc" id="L1025">            StyleConf styleConf = extension.getStyle();</span>
+<span class="fc" id="L1024">            ComponentBackend&lt;?&gt; backend = ComponentBackend.powering(component);</span>
+<span class="fc" id="L1025">            StyleConf styleConf = backend.getStyle();</span>
 <span class="pc bpc" id="L1026" title="1 of 2 branches missed.">            if ( styleConf.layoutConstraint().isPresent() ) {</span>
                 // Phase 1: push this component's own layout constraint into its parent MigLayout:
 <span class="nc bnc" id="L1028" title="All 2 branches missed.">                LayoutManager parentLayout = ( component.getParent() == null ? null : component.getParent().getLayout() );</span>

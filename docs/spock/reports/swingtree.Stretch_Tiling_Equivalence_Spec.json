@@ -2,7 +2,7 @@
   "className":"swingtree.Stretch_Tiling_Equivalence_Spec",
   "title":"Stretch Tiling Pixel Equivalence",
   "narrative":"For styles whose pixels look the same along the component edges no\n    matter the size — flat colors, borders and shadows — SwingTree makes\n    its render cache *size independent*: it renders one small \"exemplar\"\n    of the style and reconstructs any actual component size from it by\n    copying the four corners and stretching the edge bands and the center\n    (a \"nine slice\", like Android 9-patch images or CSS border-image).\n\n    Some style renderings are reconstructible along one axis only: a\n    gradient running straight down a component varies from top to bottom,\n    but every pixel strip along its y axis is identical, so we can stretch\n    it sideways while its height comes from the component itself. Those\n    are compacted along one axis only. The requirement stated below\n    applies to them exactly as it does to a style compacted in both\n    dimensions.\n\n    That optimization is only acceptable if it is invisible. Painting a\n    component with stretch tiling enabled must produce (practically) the\n    same pixels as painting it the classic way, where every size is\n    rendered from scratch — otherwise resizing a component would visibly\n    change it.\n\n    This specification pins that promise entirely through the public API:\n    it builds ordinary styled components, paints them through the regular\n    paint pipeline (`JComponent.paint`), and compares the pixels produced\n    with stretch tiling enabled against the pixels produced with it\n    disabled via the public `SwingTree.get().setCacheTilingEnabled(..)`\n    switch (see `Cache_Configuration_Spec` for that safety hatch itself).\n    Nothing in here refers to how the reconstruction works internally —\n    if the whole backend were rewritten, these scenarios would still\n    express the same requirement: both switch positions, same pixels.",
-  "subjects":["swingtree.SwingTree","swingtree.UI","swingtree.style.ComponentExtension"],
+  "subjects":["swingtree.SwingTree","swingtree.UI","swingtree.style.ComponentBackend"],
   "statistics":{
     "runs":"49",
     "successRate":"100.0%",
@@ -25,7 +25,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Both switch positions produced practically identical pixels:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.similarityBetween(classic, tiled) >= 99.9"]},
 
@@ -46,7 +46,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Both switch positions produced practically identical pixels:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.similarityBetween(classic, tiled) >= 99.9"]},
 
@@ -67,7 +67,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Both switch positions produced practically identical pixels:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.similarityBetween(classic, tiled) >= 99.9"]},
 
@@ -88,7 +88,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Both switch positions produced practically identical pixels:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.similarityBetween(classic, tiled) >= 99.9"]},
 
@@ -109,7 +109,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Both switch positions produced practically identical pixels:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.similarityBetween(classic, tiled) >= 99.9"]},
 
@@ -130,7 +130,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Both switch positions produced practically identical pixels:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.similarityBetween(classic, tiled) >= 99.9"]},
 
@@ -151,7 +151,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Both switch positions produced practically identical pixels:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.similarityBetween(classic, tiled) >= 99.9"]},
 
@@ -172,7 +172,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Both switch positions produced practically identical pixels:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.similarityBetween(classic, tiled) >= 99.9"]},
 
@@ -193,7 +193,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Both switch positions produced practically identical pixels:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.similarityBetween(classic, tiled) >= 99.9"]},
 
@@ -214,7 +214,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Both switch positions produced practically identical pixels:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.similarityBetween(classic, tiled) >= 99.9"]},
 
@@ -235,7 +235,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Both switch positions produced practically identical pixels:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.similarityBetween(classic, tiled) >= 99.9"]},
 
@@ -256,7 +256,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Both switch positions produced practically identical pixels:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.similarityBetween(classic, tiled) >= 99.9"]},
 
@@ -277,7 +277,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Both switch positions produced practically identical pixels:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.similarityBetween(classic, tiled) >= 99.9"]},
 
@@ -298,7 +298,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Both switch positions produced practically identical pixels:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.similarityBetween(classic, tiled) >= 99.9"]},
 
@@ -319,7 +319,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous, i.e. that the style really\n            is being cached size independently and not just re-rendered: a\n            differently sized sibling finds the shared cache entry already\n            populated and is served from it on its very first paint.\n        ","code":["var sibling = boxWith(width + 16, height + 12, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Both switch positions produced practically identical pixels:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.similarityBetween(classic, tiled) >= 99.9"]},
 
@@ -340,7 +340,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Not one channel of one pixel deviates between the two switch positions, alpha included:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.worstChannelDelta(classic, tiled) <= 2"]},
 
@@ -361,7 +361,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Not one channel of one pixel deviates between the two switch positions, alpha included:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.worstChannelDelta(classic, tiled) <= 2"]},
 
@@ -382,7 +382,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Not one channel of one pixel deviates between the two switch positions, alpha included:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.worstChannelDelta(classic, tiled) <= 2"]},
 
@@ -403,7 +403,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Not one channel of one pixel deviates between the two switch positions, alpha included:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.worstChannelDelta(classic, tiled) <= 2"]},
 
@@ -424,7 +424,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Not one channel of one pixel deviates between the two switch positions, alpha included:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.worstChannelDelta(classic, tiled) <= 2"]},
 
@@ -445,7 +445,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Not one channel of one pixel deviates between the two switch positions, alpha included:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.worstChannelDelta(classic, tiled) <= 2"]},
 
@@ -466,7 +466,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Not one channel of one pixel deviates between the two switch positions, alpha included:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.worstChannelDelta(classic, tiled) <= 2"]},
 
@@ -487,7 +487,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Not one channel of one pixel deviates between the two switch positions, alpha included:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.worstChannelDelta(classic, tiled) <= 2"]},
 
@@ -508,7 +508,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Not one channel of one pixel deviates between the two switch positions, alpha included:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.worstChannelDelta(classic, tiled) <= 2"]},
 
@@ -529,7 +529,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Not one channel of one pixel deviates between the two switch positions, alpha included:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.worstChannelDelta(classic, tiled) <= 2"]},
 
@@ -550,7 +550,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Not one channel of one pixel deviates between the two switch positions, alpha included:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.worstChannelDelta(classic, tiled) <= 2"]},
 
@@ -571,7 +571,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Not one channel of one pixel deviates between the two switch positions, alpha included:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.worstChannelDelta(classic, tiled) <= 2"]},
 
@@ -592,7 +592,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Not one channel of one pixel deviates between the two switch positions, alpha included:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.worstChannelDelta(classic, tiled) <= 2"]},
 
@@ -613,7 +613,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Not one channel of one pixel deviates between the two switch positions, alpha included:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.worstChannelDelta(classic, tiled) <= 2"]},
 
@@ -634,7 +634,7 @@
 
         {"kind":"and","text":"An identically styled box painted with stretch tiling enabled and warmed into the shared cache:","code":["var tiledBox = tiledAndWarmed(width, height, styler)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentExtension.from(sibling).cacheMissCount(layer) == 0","assert ComponentExtension.from(sibling).cacheHitCount(layer)  >= 1"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: a sibling differing only along\n            the compacted dimension finds the shared entry already populated and is\n            served from it on its first paint.\n        ","code":["var sibling = boxWith(siblingWidth, siblingHeight, styler)","Utility.renderSingleComponent(sibling)","assert ComponentBackend.powering(sibling).cacheMissCount(layer) == 0","assert ComponentBackend.powering(sibling).cacheHitCount(layer)  >= 1"]},
 
         {"kind":"expect","text":"Not one channel of one pixel deviates between the two switch positions, alpha included:","code":["var tiled = Utility.renderSingleComponent(tiledBox)","Utility.worstChannelDelta(classic, tiled) <= 2"]},
 
@@ -655,7 +655,7 @@
 
         {"kind":"and","text":"\n            An identically styled box which is *dragged* to that size with stretch tiling\n            enabled, because that is what makes its layer be cut around the noise. The last\n            paint of the drag lands on the very size the classic box was painted at.\n        ","code":["SwingTree.get().setCacheTilingEnabled(true)","var tiledBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)","[[width - 40, height - 20], [width - 20, height - 10], [width, height]].each { w, h ->","    tiledBox.setSize(w, h)","    Utility.renderSingleComponent(tiledBox)","}"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: what is cached for that layer is a size\n            independent exemplar, which it could only be with the noise lifted out of it.\n        ","code":["var cached = ComponentExtension.from(tiledBox).cachedRendering(UI.Layer.BACKGROUND)","assert !cached.isEmpty()","assert cached.all( image -> image.width < width )"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: what is cached for that layer is a size\n            independent exemplar, which it could only be with the noise lifted out of it.\n        ","code":["var cached = ComponentBackend.powering(tiledBox).cachedRendering(UI.Layer.BACKGROUND)","assert !cached.isEmpty()","assert cached.all( image -> image.width < width )"]},
 
         {"kind":"when","text":"We look for the single worst deviating colour channel of the whole image:","code":["var tiled = Utility.renderSingleComponent(tiledBox)"]},
 
@@ -678,7 +678,7 @@
 
         {"kind":"and","text":"\n            An identically styled box which is *dragged* to that size with stretch tiling\n            enabled, because that is what makes its layer be cut around the noise. The last\n            paint of the drag lands on the very size the classic box was painted at.\n        ","code":["SwingTree.get().setCacheTilingEnabled(true)","var tiledBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)","[[width - 40, height - 20], [width - 20, height - 10], [width, height]].each { w, h ->","    tiledBox.setSize(w, h)","    Utility.renderSingleComponent(tiledBox)","}"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: what is cached for that layer is a size\n            independent exemplar, which it could only be with the noise lifted out of it.\n        ","code":["var cached = ComponentExtension.from(tiledBox).cachedRendering(UI.Layer.BACKGROUND)","assert !cached.isEmpty()","assert cached.all( image -> image.width < width )"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: what is cached for that layer is a size\n            independent exemplar, which it could only be with the noise lifted out of it.\n        ","code":["var cached = ComponentBackend.powering(tiledBox).cachedRendering(UI.Layer.BACKGROUND)","assert !cached.isEmpty()","assert cached.all( image -> image.width < width )"]},
 
         {"kind":"when","text":"We look for the single worst deviating colour channel of the whole image:","code":["var tiled = Utility.renderSingleComponent(tiledBox)"]},
 
@@ -701,7 +701,7 @@
 
         {"kind":"and","text":"\n            An identically styled box which is *dragged* to that size with stretch tiling\n            enabled, because that is what makes its layer be cut around the noise. The last\n            paint of the drag lands on the very size the classic box was painted at.\n        ","code":["SwingTree.get().setCacheTilingEnabled(true)","var tiledBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)","[[width - 40, height - 20], [width - 20, height - 10], [width, height]].each { w, h ->","    tiledBox.setSize(w, h)","    Utility.renderSingleComponent(tiledBox)","}"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: what is cached for that layer is a size\n            independent exemplar, which it could only be with the noise lifted out of it.\n        ","code":["var cached = ComponentExtension.from(tiledBox).cachedRendering(UI.Layer.BACKGROUND)","assert !cached.isEmpty()","assert cached.all( image -> image.width < width )"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: what is cached for that layer is a size\n            independent exemplar, which it could only be with the noise lifted out of it.\n        ","code":["var cached = ComponentBackend.powering(tiledBox).cachedRendering(UI.Layer.BACKGROUND)","assert !cached.isEmpty()","assert cached.all( image -> image.width < width )"]},
 
         {"kind":"when","text":"We look for the single worst deviating colour channel of the whole image:","code":["var tiled = Utility.renderSingleComponent(tiledBox)"]},
 
@@ -724,7 +724,7 @@
 
         {"kind":"and","text":"\n            An identically styled box which is *dragged* to that size with stretch tiling\n            enabled, because that is what makes its layer be cut around the noise. The last\n            paint of the drag lands on the very size the classic box was painted at.\n        ","code":["SwingTree.get().setCacheTilingEnabled(true)","var tiledBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)","[[width - 40, height - 20], [width - 20, height - 10], [width, height]].each { w, h ->","    tiledBox.setSize(w, h)","    Utility.renderSingleComponent(tiledBox)","}"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: what is cached for that layer is a size\n            independent exemplar, which it could only be with the noise lifted out of it.\n        ","code":["var cached = ComponentExtension.from(tiledBox).cachedRendering(UI.Layer.BACKGROUND)","assert !cached.isEmpty()","assert cached.all( image -> image.width < width )"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: what is cached for that layer is a size\n            independent exemplar, which it could only be with the noise lifted out of it.\n        ","code":["var cached = ComponentBackend.powering(tiledBox).cachedRendering(UI.Layer.BACKGROUND)","assert !cached.isEmpty()","assert cached.all( image -> image.width < width )"]},
 
         {"kind":"when","text":"We look for the single worst deviating colour channel of the whole image:","code":["var tiled = Utility.renderSingleComponent(tiledBox)"]},
 
@@ -747,7 +747,7 @@
 
         {"kind":"and","text":"An identically styled box painted with the cache on, so that its layer is cut:","code":["CacheBudget.UNITS_OVERRIDE = 10","var cutBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)","cutBox.setSize(width, height)","Utility.renderSingleComponent(cutBox)","Utility.renderSingleComponent(cutBox)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: there is a cached image for that layer\n            at all. A layer carrying an uncacheable painter is refused by the cache as a whole,\n            so an image can only exist for it if the painters really were cut out of it.\n        ","code":["assert !ComponentExtension.from(cutBox).cachedRendering(layer).isEmpty()"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: there is a cached image for that layer\n            at all. A layer carrying an uncacheable painter is refused by the cache as a whole,\n            so an image can only exist for it if the painters really were cut out of it.\n        ","code":["assert !ComponentBackend.powering(cutBox).cachedRendering(layer).isEmpty()"]},
 
         {"kind":"when","text":"We look for the single worst deviating colour channel of the whole image:","code":["var cut = Utility.renderSingleComponent(cutBox)"]},
 
@@ -772,7 +772,7 @@
 
         {"kind":"and","text":"An identically styled box painted with the cache on, so that its layer is cut:","code":["CacheBudget.UNITS_OVERRIDE = 10","var cutBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)","cutBox.setSize(width, height)","Utility.renderSingleComponent(cutBox)","Utility.renderSingleComponent(cutBox)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: there is a cached image for that layer\n            at all. A layer carrying an uncacheable painter is refused by the cache as a whole,\n            so an image can only exist for it if the painters really were cut out of it.\n        ","code":["assert !ComponentExtension.from(cutBox).cachedRendering(layer).isEmpty()"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: there is a cached image for that layer\n            at all. A layer carrying an uncacheable painter is refused by the cache as a whole,\n            so an image can only exist for it if the painters really were cut out of it.\n        ","code":["assert !ComponentBackend.powering(cutBox).cachedRendering(layer).isEmpty()"]},
 
         {"kind":"when","text":"We look for the single worst deviating colour channel of the whole image:","code":["var cut = Utility.renderSingleComponent(cutBox)"]},
 
@@ -797,7 +797,7 @@
 
         {"kind":"and","text":"An identically styled box painted with the cache on, so that its layer is cut:","code":["CacheBudget.UNITS_OVERRIDE = 10","var cutBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)","cutBox.setSize(width, height)","Utility.renderSingleComponent(cutBox)","Utility.renderSingleComponent(cutBox)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: there is a cached image for that layer\n            at all. A layer carrying an uncacheable painter is refused by the cache as a whole,\n            so an image can only exist for it if the painters really were cut out of it.\n        ","code":["assert !ComponentExtension.from(cutBox).cachedRendering(layer).isEmpty()"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: there is a cached image for that layer\n            at all. A layer carrying an uncacheable painter is refused by the cache as a whole,\n            so an image can only exist for it if the painters really were cut out of it.\n        ","code":["assert !ComponentBackend.powering(cutBox).cachedRendering(layer).isEmpty()"]},
 
         {"kind":"when","text":"We look for the single worst deviating colour channel of the whole image:","code":["var cut = Utility.renderSingleComponent(cutBox)"]},
 
@@ -822,7 +822,7 @@
 
         {"kind":"and","text":"An identically styled box painted with the cache on, so that its layer is cut:","code":["CacheBudget.UNITS_OVERRIDE = 10","var cutBox = UI.box().withStyle(conf -> styler(conf)).get(JBox)","cutBox.setSize(width, height)","Utility.renderSingleComponent(cutBox)","Utility.renderSingleComponent(cutBox)"]},
 
-        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: there is a cached image for that layer\n            at all. A layer carrying an uncacheable painter is refused by the cache as a whole,\n            so an image can only exist for it if the painters really were cut out of it.\n        ","code":["assert !ComponentExtension.from(cutBox).cachedRendering(layer).isEmpty()"]},
+        {"kind":"and","text":"\n            Proof that the comparison is not vacuous: there is a cached image for that layer\n            at all. A layer carrying an uncacheable painter is refused by the cache as a whole,\n            so an image can only exist for it if the painters really were cut out of it.\n        ","code":["assert !ComponentBackend.powering(cutBox).cachedRendering(layer).isEmpty()"]},
 
         {"kind":"when","text":"We look for the single worst deviating colour channel of the whole image:","code":["var cut = Utility.renderSingleComponent(cutBox)"]},
 
@@ -879,7 +879,7 @@
 
         {"kind":"and","text":"The classic rendering, painted through a scaling transform:","code":["SwingTree.get().setCacheTilingEnabled(false)","var classic = paintScaled(boxWith(width, height, styler), deviceWidth, deviceHeight, scale)"]},
 
-        {"kind":"and","text":"The stretch tiled rendering, painted the same way, twice, so it is cache served:","code":["SwingTree.get().setCacheTilingEnabled(true)","var box = boxWith(width, height, styler)","paintScaled(box, deviceWidth, deviceHeight, scale)","var tiled = paintScaled(box, deviceWidth, deviceHeight, scale)","assert ComponentExtension.from(box).cacheHitCount(UI.Layer.BACKGROUND) >= 1"]},
+        {"kind":"and","text":"The stretch tiled rendering, painted the same way, twice, so it is cache served:","code":["SwingTree.get().setCacheTilingEnabled(true)","var box = boxWith(width, height, styler)","paintScaled(box, deviceWidth, deviceHeight, scale)","var tiled = paintScaled(box, deviceWidth, deviceHeight, scale)","assert ComponentBackend.powering(box).cacheHitCount(UI.Layer.BACKGROUND) >= 1"]},
 
         {"kind":"expect","text":"No transparent seam anywhere along the horizontal center line:","code":["int centerY = (int) (deviceHeight / 2)","for ( int x = 1; x < (int) Math.floor(width * scale) - 1; x++ )","    assert ((tiled.getRGB(x, centerY) >> 24) & 0xFF) == 255"]},
 
@@ -904,7 +904,7 @@
 
         {"kind":"and","text":"The classic rendering, painted through a scaling transform:","code":["SwingTree.get().setCacheTilingEnabled(false)","var classic = paintScaled(boxWith(width, height, styler), deviceWidth, deviceHeight, scale)"]},
 
-        {"kind":"and","text":"The stretch tiled rendering, painted the same way, twice, so it is cache served:","code":["SwingTree.get().setCacheTilingEnabled(true)","var box = boxWith(width, height, styler)","paintScaled(box, deviceWidth, deviceHeight, scale)","var tiled = paintScaled(box, deviceWidth, deviceHeight, scale)","assert ComponentExtension.from(box).cacheHitCount(UI.Layer.BACKGROUND) >= 1"]},
+        {"kind":"and","text":"The stretch tiled rendering, painted the same way, twice, so it is cache served:","code":["SwingTree.get().setCacheTilingEnabled(true)","var box = boxWith(width, height, styler)","paintScaled(box, deviceWidth, deviceHeight, scale)","var tiled = paintScaled(box, deviceWidth, deviceHeight, scale)","assert ComponentBackend.powering(box).cacheHitCount(UI.Layer.BACKGROUND) >= 1"]},
 
         {"kind":"expect","text":"No transparent seam anywhere along the horizontal center line:","code":["int centerY = (int) (deviceHeight / 2)","for ( int x = 1; x < (int) Math.floor(width * scale) - 1; x++ )","    assert ((tiled.getRGB(x, centerY) >> 24) & 0xFF) == 255"]},
 
@@ -929,7 +929,7 @@
 
         {"kind":"and","text":"The classic rendering, painted through a scaling transform:","code":["SwingTree.get().setCacheTilingEnabled(false)","var classic = paintScaled(boxWith(width, height, styler), deviceWidth, deviceHeight, scale)"]},
 
-        {"kind":"and","text":"The stretch tiled rendering, painted the same way, twice, so it is cache served:","code":["SwingTree.get().setCacheTilingEnabled(true)","var box = boxWith(width, height, styler)","paintScaled(box, deviceWidth, deviceHeight, scale)","var tiled = paintScaled(box, deviceWidth, deviceHeight, scale)","assert ComponentExtension.from(box).cacheHitCount(UI.Layer.BACKGROUND) >= 1"]},
+        {"kind":"and","text":"The stretch tiled rendering, painted the same way, twice, so it is cache served:","code":["SwingTree.get().setCacheTilingEnabled(true)","var box = boxWith(width, height, styler)","paintScaled(box, deviceWidth, deviceHeight, scale)","var tiled = paintScaled(box, deviceWidth, deviceHeight, scale)","assert ComponentBackend.powering(box).cacheHitCount(UI.Layer.BACKGROUND) >= 1"]},
 
         {"kind":"expect","text":"No transparent seam anywhere along the horizontal center line:","code":["int centerY = (int) (deviceHeight / 2)","for ( int x = 1; x < (int) Math.floor(width * scale) - 1; x++ )","    assert ((tiled.getRGB(x, centerY) >> 24) & 0xFF) == 255"]},
 
@@ -954,7 +954,7 @@
 
         {"kind":"and","text":"The classic rendering, painted through a scaling transform:","code":["SwingTree.get().setCacheTilingEnabled(false)","var classic = paintScaled(boxWith(width, height, styler), deviceWidth, deviceHeight, scale)"]},
 
-        {"kind":"and","text":"The stretch tiled rendering, painted the same way, twice, so it is cache served:","code":["SwingTree.get().setCacheTilingEnabled(true)","var box = boxWith(width, height, styler)","paintScaled(box, deviceWidth, deviceHeight, scale)","var tiled = paintScaled(box, deviceWidth, deviceHeight, scale)","assert ComponentExtension.from(box).cacheHitCount(UI.Layer.BACKGROUND) >= 1"]},
+        {"kind":"and","text":"The stretch tiled rendering, painted the same way, twice, so it is cache served:","code":["SwingTree.get().setCacheTilingEnabled(true)","var box = boxWith(width, height, styler)","paintScaled(box, deviceWidth, deviceHeight, scale)","var tiled = paintScaled(box, deviceWidth, deviceHeight, scale)","assert ComponentBackend.powering(box).cacheHitCount(UI.Layer.BACKGROUND) >= 1"]},
 
         {"kind":"expect","text":"No transparent seam anywhere along the horizontal center line:","code":["int centerY = (int) (deviceHeight / 2)","for ( int x = 1; x < (int) Math.floor(width * scale) - 1; x++ )","    assert ((tiled.getRGB(x, centerY) >> 24) & 0xFF) == 255"]},
 
@@ -977,9 +977,9 @@
       "blocks":[
         {"kind":"given","text":"The reference: the transformed component painted with all caching switched off.","code":["var styler = { it.backgroundColor(\"#3f6fa1\").foundationColor(\"#1c2026\").borderRadius(14).margin(5) }","CacheBudget.UNITS_OVERRIDE = 0 // no cache budget at all -> always render directly","var uncached = paintTransformed(boxWith(300, 200, styler), transformer)"]},
 
-        {"kind":"when","text":"The same component is painted through that transform with stretch tiling fully enabled.","code":["CacheBudget.UNITS_OVERRIDE = 10","SwingTree.get().setCacheTilingEnabled(true)","ComponentExtension.updateAllCachesFromLibraryConfig()","var box = boxWith(300, 200, styler)","var ext = ComponentExtension.from(box)","paintTransformed(box, transformer)","var tiled = paintTransformed(box, transformer)"]},
+        {"kind":"when","text":"The same component is painted through that transform with stretch tiling fully enabled.","code":["CacheBudget.UNITS_OVERRIDE = 10","SwingTree.get().setCacheTilingEnabled(true)","ComponentBackend.updateAllCachesFromLibraryConfig()","var box = boxWith(300, 200, styler)","var backend = ComponentBackend.powering(box)","paintTransformed(box, transformer)","var tiled = paintTransformed(box, transformer)"]},
 
-        {"kind":"then","text":"Not a single one of those paints was served from the cache - the fallback engaged every time.","code":["ext.cacheHitCount(UI.Layer.BACKGROUND) == 0","ext.cacheMissCount(UI.Layer.BACKGROUND) >= 2"]},
+        {"kind":"then","text":"Not a single one of those paints was served from the cache - the fallback engaged every time.","code":["backend.cacheHitCount(UI.Layer.BACKGROUND) == 0","backend.cacheMissCount(UI.Layer.BACKGROUND) >= 2"]},
 
         {"kind":"and","text":"And the pixels are bit identical to the uncached direct rendering.","code":["for ( int y = 0; y < uncached.getHeight(); y++ )","    for ( int x = 0; x < uncached.getWidth(); x++ )","        assert uncached.getRGB(x, y) == tiled.getRGB(x, y)"]},
 
@@ -1000,9 +1000,9 @@
       "blocks":[
         {"kind":"given","text":"The reference: the transformed component painted with all caching switched off.","code":["var styler = { it.backgroundColor(\"#3f6fa1\").foundationColor(\"#1c2026\").borderRadius(14).margin(5) }","CacheBudget.UNITS_OVERRIDE = 0 // no cache budget at all -> always render directly","var uncached = paintTransformed(boxWith(300, 200, styler), transformer)"]},
 
-        {"kind":"when","text":"The same component is painted through that transform with stretch tiling fully enabled.","code":["CacheBudget.UNITS_OVERRIDE = 10","SwingTree.get().setCacheTilingEnabled(true)","ComponentExtension.updateAllCachesFromLibraryConfig()","var box = boxWith(300, 200, styler)","var ext = ComponentExtension.from(box)","paintTransformed(box, transformer)","var tiled = paintTransformed(box, transformer)"]},
+        {"kind":"when","text":"The same component is painted through that transform with stretch tiling fully enabled.","code":["CacheBudget.UNITS_OVERRIDE = 10","SwingTree.get().setCacheTilingEnabled(true)","ComponentBackend.updateAllCachesFromLibraryConfig()","var box = boxWith(300, 200, styler)","var backend = ComponentBackend.powering(box)","paintTransformed(box, transformer)","var tiled = paintTransformed(box, transformer)"]},
 
-        {"kind":"then","text":"Not a single one of those paints was served from the cache - the fallback engaged every time.","code":["ext.cacheHitCount(UI.Layer.BACKGROUND) == 0","ext.cacheMissCount(UI.Layer.BACKGROUND) >= 2"]},
+        {"kind":"then","text":"Not a single one of those paints was served from the cache - the fallback engaged every time.","code":["backend.cacheHitCount(UI.Layer.BACKGROUND) == 0","backend.cacheMissCount(UI.Layer.BACKGROUND) >= 2"]},
 
         {"kind":"and","text":"And the pixels are bit identical to the uncached direct rendering.","code":["for ( int y = 0; y < uncached.getHeight(); y++ )","    for ( int x = 0; x < uncached.getWidth(); x++ )","        assert uncached.getRGB(x, y) == tiled.getRGB(x, y)"]},
 
@@ -1023,9 +1023,9 @@
       "blocks":[
         {"kind":"given","text":"The reference: the transformed component painted with all caching switched off.","code":["var styler = { it.backgroundColor(\"#3f6fa1\").foundationColor(\"#1c2026\").borderRadius(14).margin(5) }","CacheBudget.UNITS_OVERRIDE = 0 // no cache budget at all -> always render directly","var uncached = paintTransformed(boxWith(300, 200, styler), transformer)"]},
 
-        {"kind":"when","text":"The same component is painted through that transform with stretch tiling fully enabled.","code":["CacheBudget.UNITS_OVERRIDE = 10","SwingTree.get().setCacheTilingEnabled(true)","ComponentExtension.updateAllCachesFromLibraryConfig()","var box = boxWith(300, 200, styler)","var ext = ComponentExtension.from(box)","paintTransformed(box, transformer)","var tiled = paintTransformed(box, transformer)"]},
+        {"kind":"when","text":"The same component is painted through that transform with stretch tiling fully enabled.","code":["CacheBudget.UNITS_OVERRIDE = 10","SwingTree.get().setCacheTilingEnabled(true)","ComponentBackend.updateAllCachesFromLibraryConfig()","var box = boxWith(300, 200, styler)","var backend = ComponentBackend.powering(box)","paintTransformed(box, transformer)","var tiled = paintTransformed(box, transformer)"]},
 
-        {"kind":"then","text":"Not a single one of those paints was served from the cache - the fallback engaged every time.","code":["ext.cacheHitCount(UI.Layer.BACKGROUND) == 0","ext.cacheMissCount(UI.Layer.BACKGROUND) >= 2"]},
+        {"kind":"then","text":"Not a single one of those paints was served from the cache - the fallback engaged every time.","code":["backend.cacheHitCount(UI.Layer.BACKGROUND) == 0","backend.cacheMissCount(UI.Layer.BACKGROUND) >= 2"]},
 
         {"kind":"and","text":"And the pixels are bit identical to the uncached direct rendering.","code":["for ( int y = 0; y < uncached.getHeight(); y++ )","    for ( int x = 0; x < uncached.getWidth(); x++ )","        assert uncached.getRGB(x, y) == tiled.getRGB(x, y)"]},
 
@@ -1044,13 +1044,13 @@
       "tags":{},"see":[],"extraInfo":["\n            A component only gets reconstructed from tiles while it is strictly\n            larger than the style's minimal exemplar. But a component does not\n            only *grow* - a split pane divider or a collapsing panel can drag it\n            back down below that threshold, and it has to survive the trip back\n            without painting garbage (the tiles would have to overlap to fit).\n\n            So we take a component up into stretch tiled territory, then shrink\n            it far below the threshold, and demand that its pixels still match\n            the classic rendering of that small size exactly - and that it is now\n            cached at its real size again, not as an atlas.\n        "]
       },
       "blocks":[
-        {"kind":"given","text":"A styled box which is first grown large (so it gets stretch tiled)...","code":["var styler = { it.backgroundColor(\"#7a4ab1\").foundationColor(\"#efe6d8\").borderRadius(16).margin(6) }","SwingTree.get().setCacheTilingEnabled(true)","var box = boxWith(400, 300, styler)","var ext = ComponentExtension.from(box)","2.times { Utility.renderSingleComponent(box) }"]},
+        {"kind":"given","text":"A styled box which is first grown large (so it gets stretch tiled)...","code":["var styler = { it.backgroundColor(\"#7a4ab1\").foundationColor(\"#efe6d8\").borderRadius(16).margin(6) }","SwingTree.get().setCacheTilingEnabled(true)","var box = boxWith(400, 300, styler)","var backend = ComponentBackend.powering(box)","2.times { Utility.renderSingleComponent(box) }"]},
 
-        {"kind":"expect","text":"It really is cached as a small atlas at this point.","code":["ext.cachedRendering(UI.Layer.BACKGROUND).first().width < 400"]},
+        {"kind":"expect","text":"It really is cached as a small atlas at this point.","code":["backend.cachedRendering(UI.Layer.BACKGROUND).first().width < 400"]},
 
         {"kind":"when","text":"...and is then dragged back down to a size far below the reconstructable minimum.","code":["box.setSize(30, 24)","Utility.renderSingleComponent(box)","var shrunk = Utility.renderSingleComponent(box)"]},
 
-        {"kind":"then","text":"The size took effect, and the style is cached at that real size again - the atlas is gone.","code":["box.width == 30 && box.height == 24","ext.cachedRendering(UI.Layer.BACKGROUND).first().width  == 30","ext.cachedRendering(UI.Layer.BACKGROUND).first().height == 24"]},
+        {"kind":"then","text":"The size took effect, and the style is cached at that real size again - the atlas is gone.","code":["box.width == 30 && box.height == 24","backend.cachedRendering(UI.Layer.BACKGROUND).first().width  == 30","backend.cachedRendering(UI.Layer.BACKGROUND).first().height == 24"]},
 
         {"kind":"and","text":"Its pixels are exactly the classic rendering of a component which was never anything else.","code":["var classic = renderedClassically(30, 24, styler)","for ( int y = 0; y < classic.getHeight(); y++ )","    for ( int x = 0; x < classic.getWidth(); x++ )","        assert classic.getRGB(x, y) == shrunk.getRGB(x, y)"]}
       ],
@@ -1071,7 +1071,7 @@
 
         {"kind":"and","text":"A stretch tiled component, painted repeatedly onto an accelerated VolatileImage:","code":["SwingTree.get().setCacheTilingEnabled(true)","var box = boxWith(W, H, styler)","var gc = GraphicsEnvironment.localGraphicsEnvironment.defaultScreenDevice.defaultConfiguration","var volatileDestination = gc.createCompatibleVolatileImage(W, H, Transparency.TRANSLUCENT)","BufferedImage accelerated = null","UI.runNow {","    8.times {","        var vg = volatileDestination.createGraphics()","        vg.setComposite(AlphaComposite.Clear)","        vg.fillRect(0, 0, W, H)","        vg.setComposite(AlphaComposite.SrcOver)","        box.paint(vg)","        vg.dispose()","    }","    accelerated = volatileDestination.getSnapshot()","}"]},
 
-        {"kind":"expect","text":"The repeated paints really were served from the cache.","code":["ComponentExtension.from(box).cachedRendering(UI.Layer.CONTENT).isNotEmpty()","ComponentExtension.from(box).cacheHitCount(UI.Layer.CONTENT) >= 1"]},
+        {"kind":"expect","text":"The repeated paints really were served from the cache.","code":["ComponentBackend.powering(box).cachedRendering(UI.Layer.CONTENT).isNotEmpty()","ComponentBackend.powering(box).cacheHitCount(UI.Layer.CONTENT) >= 1"]},
 
         {"kind":"and","text":"The accelerated painting matches the classic software rendering.","code":["Utility.similarityBetween(classic, accelerated) >= 99.9"]},
 

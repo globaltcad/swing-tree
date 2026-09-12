@@ -77,8 +77,8 @@ final class StyleSource&lt;C extends JComponent&gt;
         // 0: Some things are inherited from the parent component:
 <span class="fc" id="L78">        StyleConf styleConf = Optional.ofNullable(owner.getParent())</span>
 <span class="fc bfc" id="L79" title="All 2 branches covered.">                              .map( p -&gt; p instanceof JComponent ? (JComponent) p : null )</span>
-<span class="fc" id="L80">                              .map(ComponentExtension::from)</span>
-<span class="fc" id="L81">                              .map(ComponentExtension::getStyle)</span>
+<span class="fc" id="L80">                              .map(ComponentBackend::powering)</span>
+<span class="fc" id="L81">                              .map(ComponentBackend::getStyle)</span>
 <span class="fc" id="L82">                              .map(StyleConf::font)</span>
 <span class="fc bfc" id="L83" title="All 2 branches covered.">                              .filter( f -&gt; !f.equals(FontConf.none()) )</span>
 <span class="fc" id="L84">                              .map( f -&gt; StyleConf.none()._withFont(f._scale(1/UI.scale())) )</span>

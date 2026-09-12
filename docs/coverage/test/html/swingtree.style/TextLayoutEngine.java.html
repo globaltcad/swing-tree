@@ -100,7 +100,7 @@ final class TextLayoutEngine {
 <span class="pc bpc" id="L100" title="1 of 4 branches missed.">        if ( area == UI.ComponentBoundary.OUTER_TO_EXTERIOR || !(child instanceof JComponent) )</span>
 <span class="fc" id="L101">            return child.getBounds();</span>
 <span class="fc" id="L102">        final JComponent asJComponent = (JComponent) child;</span>
-<span class="fc" id="L103">        final ComponentConf previousComponentConf = ComponentExtension.from(asJComponent).getConf();</span>
+<span class="fc" id="L103">        final ComponentConf previousComponentConf = ComponentBackend.powering(asJComponent).getConf();</span>
 <span class="fc" id="L104">        final Pair&lt;BoxModelConf, ComponentConf&gt; boxAndCompConf = StyleEngine._calculateBoxModelAndComponentConfs(</span>
 <span class="fc" id="L105">                Bounds.of(asJComponent.getX(), asJComponent.getY(), asJComponent.getWidth(), asJComponent.getHeight()),</span>
 <span class="fc" id="L106">                previousComponentConf.style(),</span>
@@ -205,7 +205,7 @@ final class TextLayoutEngine {
     }
 
     /** Drops every cached text layout and paragraph-layout datum. Called when the library
-     *  cache configuration changes (see {@link ComponentExtension#updateAllCachesFromLibraryConfig()})
+     *  cache configuration changes (see {@link ComponentBackend#updateAllCachesFromLibraryConfig()})
      *  so memory shrinks immediately; both caches repopulate lazily under the new budget. */
     static void clearGlobalCaches() {
 <span class="fc" id="L211">        _LAYOUT_CACHE.clear();</span>

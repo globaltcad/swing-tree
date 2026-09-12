@@ -5,7 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sprouts.From;
 import sprouts.Viewable;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 
 import javax.swing.*;
 import java.awt.*;
@@ -128,7 +128,7 @@ final class EnterExitComponentBoundsEventDispatcher {
 <span class="fc bfc" id="L128" title="All 2 branches covered.">            if ( this.area == UI.ComponentArea.ALL ) {</span>
 <span class="fc" id="L129">                return true;</span>
             }
-<span class="fc" id="L131">            Shape shape = ComponentExtension.from((JComponent) component).getComponentArea(area).orElse(null);</span>
+<span class="fc" id="L131">            Shape shape = ComponentBackend.powering((JComponent) component).getComponentArea(area).orElse(null);</span>
 <span class="fc bfc" id="L132" title="All 4 branches covered.">            return shape != null &amp;&amp; shape.equals(component.getBounds());</span>
         }
 
@@ -172,7 +172,7 @@ final class EnterExitComponentBoundsEventDispatcher {
 <span class="fc" id="L172">        }</span>
 
         private Location determineCurrentLocationOf(MouseEvent event) {
-<span class="fc" id="L175">            return ComponentExtension.from((JComponent) event.getComponent())</span>
+<span class="fc" id="L175">            return ComponentBackend.powering((JComponent) event.getComponent())</span>
 <span class="fc" id="L176">                    .getComponentArea(area)</span>
 <span class="fc" id="L177">                    .filter( shape -&gt; shape.contains(event.getPoint()) )</span>
 <span class="fc" id="L178">                    .map( isInsideShape -&gt; Location.INSIDE )</span>

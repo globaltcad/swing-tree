@@ -3,7 +3,7 @@
 import org.slf4j.Logger;
 import swingtree.SwingTree;
 import swingtree.UI;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 
 import javax.swing.JComponent;
 import javax.swing.Timer;
@@ -60,7 +60,7 @@ final class AnimationRunner
 
         // In a previous run the animation terminated, so we remove animations from the component state:
 <span class="fc bfc" id="L62" title="All 2 branches covered.">        for ( JComponent component : _toBeCleaned )</span>
-<span class="fc" id="L63">            ComponentExtension.from(component).clearAnimations();</span>
+<span class="fc" id="L63">            ComponentBackend.powering(component).clearAnimations();</span>
 <span class="fc" id="L64">        _toBeCleaned.clear();</span>
 
 <span class="fc bfc" id="L66" title="All 2 branches covered.">        if ( _runningAnimations.isEmpty() ) {</span>
@@ -72,7 +72,7 @@ final class AnimationRunner
 
 <span class="fc bfc" id="L73" title="All 2 branches covered.">        for ( RunningAnimation running : _runningAnimations )</span>
 <span class="fc" id="L74">            running.component().ifPresent( component -&gt; {</span>
-<span class="fc" id="L75">                ComponentExtension.from(component).clearAnimations();</span>
+<span class="fc" id="L75">                ComponentBackend.powering(component).clearAnimations();</span>
 <span class="fc" id="L76">            });</span>
 
 <span class="fc" id="L78">        long now = System.currentTimeMillis();</span>
@@ -132,7 +132,7 @@ final class AnimationRunner
 <span class="fc" id="L132">        Runnable requestComponentRepaint = () -&gt; {</span>
 <span class="fc bfc" id="L133" title="All 2 branches covered.">                                                if ( component != null ) {</span>
 <span class="pc bpc" id="L134" title="3 of 4 branches missed.">                                                    if ( component.getParent() == null || !_isVisible(component) ) {</span>
-<span class="fc" id="L135">                                                        ComponentExtension.from((JComponent) component).gatherApplyAndInstallStyle(false);</span>
+<span class="fc" id="L135">                                                        ComponentBackend.powering((JComponent) component).gatherApplyAndInstallStyle(false);</span>
                                                         /*
                                                             There will be no repaint if the component is not visible.
                                                             If the paint method encounters a component

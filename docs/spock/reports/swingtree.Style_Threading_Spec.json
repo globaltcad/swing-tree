@@ -27,7 +27,7 @@
 
         {"kind":"expect","text":"The styler ran at least once, while the component was being built and styled.","code":["!evaluationThreads.isEmpty()"]},
 
-        {"kind":"when","text":"We force a fresh style gathering, the way a new paint cycle would.","code":["UI.runNow({ ComponentExtension.from(label).gatherApplyAndInstallStyle(true) })"]},
+        {"kind":"when","text":"We force a fresh style gathering, the way a new paint cycle would.","code":["UI.runNow({ ComponentBackend.powering(label).gatherApplyAndInstallStyle(true) })"]},
 
         {"kind":"then","text":"Every single evaluation of the styler happened on the UI thread.","code":["evaluationThreads.every( { it == true } )"]}
       ],
@@ -75,7 +75,7 @@
 
         {"kind":"expect","text":"The label starts out in the off state.","code":["UI.runAndGet({ label.foreground }) == Color.RED"]},
 
-        {"kind":"when","text":"The application thread flips the toggle, and we wait for the transition to complete.","code":["isOn.set(true)","Wait.until({","    UI.sync()","    UI.runAndGet({","        ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","        label.foreground","    }) == Color.GREEN","}, 5_000)"]},
+        {"kind":"when","text":"The application thread flips the toggle, and we wait for the transition to complete.","code":["isOn.set(true)","Wait.until({","    UI.sync()","    UI.runAndGet({","        ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","        label.foreground","    }) == Color.GREEN","}, 5_000)"]},
 
         {"kind":"then","text":"The label transitioned to the on state.","code":["UI.runAndGet({ label.foreground }) == Color.GREEN"]},
 
@@ -98,7 +98,7 @@
 
         {"kind":"expect","text":"The initial item is considered fully settled, so the styler saw it with a progress of 1.","code":["itemsObserved.contains(\"calm\")","progresses.first() == 1.0d"]},
 
-        {"kind":"when","text":"The application thread changes the mood, and we wait for the transition towards it to complete.","code":["mood.set(\"excited\")","Wait.until({","    UI.sync()","    UI.runAndGet({","        ComponentExtension.from(label).gatherApplyAndInstallStyle(true)","        label.foreground","    }) == Color.ORANGE","}, 5_000)"]},
+        {"kind":"when","text":"The application thread changes the mood, and we wait for the transition towards it to complete.","code":["mood.set(\"excited\")","Wait.until({","    UI.sync()","    UI.runAndGet({","        ComponentBackend.powering(label).gatherApplyAndInstallStyle(true)","        label.foreground","    }) == Color.ORANGE","}, 5_000)"]},
 
         {"kind":"then","text":"The styler observed the new captured item and completed the transition towards it.","code":["itemsObserved.contains(\"excited\")","UI.runAndGet({ label.foreground }) == Color.ORANGE"]},
 

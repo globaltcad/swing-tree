@@ -24,7 +24,7 @@ import swingtree.components.JBox;
 import swingtree.components.JScrollPanels;
 import swingtree.input.Keyboard;
 import swingtree.layout.*;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 import swingtree.style.FontConf;
 import swingtree.style.LibraryInternalCrossPackageStyleUtil;
 
@@ -80,9 +80,9 @@ import java.util.function.Function;
     }
 
     private void _bindRepaintOn( JComponent thisComponent, Observable event ) {
-<span class="fc" id="L83">        ComponentExtension.from(thisComponent).storeBoundObservable(</span>
+<span class="fc" id="L83">        ComponentBackend.powering(thisComponent).storeBoundObservable(</span>
 <span class="fc" id="L84">                event.subscribe( () -&gt; _runInUI( ()-&gt;{</span>
-<span class="fc" id="L85">                    ComponentExtension.from(thisComponent).gatherApplyAndInstallStyle(false);</span>
+<span class="fc" id="L85">                    ComponentBackend.powering(thisComponent).gatherApplyAndInstallStyle(false);</span>
 <span class="fc" id="L86">                    thisComponent.repaint();</span>
 <span class="fc" id="L87">                }))</span>
             );
@@ -296,7 +296,7 @@ import java.util.function.Function;
      * @return The JComponent type which will be managed by this builder.
      */
     public final I id( String id ) {
-<span class="fc" id="L299">        return _with( c -&gt; ComponentExtension.from(c).setId(id) )._this();</span>
+<span class="fc" id="L299">        return _with( c -&gt; ComponentBackend.powering(c).setId(id) )._this();</span>
     }
 
     /**
@@ -316,7 +316,7 @@ import java.util.function.Function;
      */
     public final &lt;E extends Enum&lt;E&gt;&gt; I id( E id ) {
 <span class="fc" id="L318">        Objects.requireNonNull(id);</span>
-<span class="fc" id="L319">        return _with( c -&gt; ComponentExtension.from(c).setId(id) )._this();</span>
+<span class="fc" id="L319">        return _with( c -&gt; ComponentBackend.powering(c).setId(id) )._this();</span>
     }
 
     /**
@@ -358,7 +358,7 @@ import java.util.function.Function;
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I group( String... groupTags ) {
-<span class="fc" id="L361">        return _with( c -&gt; ComponentExtension.from(c).setStyleGroups(groupTags) )._this();</span>
+<span class="fc" id="L361">        return _with( c -&gt; ComponentBackend.powering(c).setStyleGroups(groupTags) )._this();</span>
     }
 
     /**
@@ -399,7 +399,7 @@ import java.util.function.Function;
      */
     @SafeVarargs
     public final &lt;E extends Enum&lt;E&gt;&gt; I group( E... groupTags ) {
-<span class="fc" id="L402">        return _with( c -&gt; ComponentExtension.from(c).setStyleGroups(groupTags) )._this();</span>
+<span class="fc" id="L402">        return _with( c -&gt; ComponentBackend.powering(c).setStyleGroups(groupTags) )._this();</span>
     }
 
     /**
@@ -2446,7 +2446,7 @@ import java.util.function.Function;
     public final I withStyle( Styler&lt;C&gt; styler ) {
 <span class="fc" id="L2447">        NullUtil.nullArgCheck(styler, &quot;styler&quot;, Styler.class);</span>
 <span class="fc" id="L2448">        return _with( c -&gt; {</span>
-<span class="fc" id="L2449">                    ComponentExtension.from(c).addStyler( styler );</span>
+<span class="fc" id="L2449">                    ComponentBackend.powering(c).addStyler( styler );</span>
 <span class="fc" id="L2450">                })</span>
 <span class="fc" id="L2451">                ._this();</span>
     }
@@ -2541,10 +2541,10 @@ import java.util.function.Function;
                     // the property change events, so the styler never touches the property itself,
                     // which belongs to the application thread.
 <span class="fc" id="L2543">                    AtomicReference&lt;@Nullable T&gt; shownItem = new AtomicReference&lt;&gt;(item.orElseNull());</span>
-<span class="fc" id="L2544">                    ComponentExtension.from(c).addStyler( delegate -&gt; styler.style(NullUtil.fakeNonNull(shownItem.get()), delegate) );</span>
+<span class="fc" id="L2544">                    ComponentBackend.powering(c).addStyler(delegate -&gt; styler.style(NullUtil.fakeNonNull(shownItem.get()), delegate) );</span>
 <span class="fc" id="L2545">                    _onShow( item, c, (comp, v) -&gt; {</span>
 <span class="fc" id="L2546">                        shownItem.set(v);</span>
-<span class="fc" id="L2547">                        ComponentExtension.from(comp).gatherApplyAndInstallStyle(false);</span>
+<span class="fc" id="L2547">                        ComponentBackend.powering(comp).gatherApplyAndInstallStyle(false);</span>
 <span class="fc" id="L2548">                        comp.repaint();</span>
 <span class="fc" id="L2549">                    });</span>
 <span class="fc" id="L2550">                })</span>
@@ -2625,7 +2625,7 @@ import java.util.function.Function;
 <span class="fc" id="L2625">        NullUtil.nullArgCheck(styler, &quot;styler&quot;, AnimatedItemStyler.class);</span>
 <span class="fc" id="L2626">        return _with( c -&gt; {</span>
 <span class="fc" id="L2627">                    ItemTransitionStyler&lt;T, C&gt; transition = new ItemTransitionStyler&lt;&gt;(item.orElseNull(), c, transitionLifeTime, styler);</span>
-<span class="fc" id="L2628">                    ComponentExtension.from(c).addStyler(transition::style);</span>
+<span class="fc" id="L2628">                    ComponentBackend.powering(c).addStyler(transition::style);</span>
 <span class="fc" id="L2629">                    _onShow( item, c, (comp, v) -&gt; transition.set(v) );</span>
 <span class="fc" id="L2630">                })</span>
 <span class="fc" id="L2631">                ._this();</span>
@@ -2675,7 +2675,7 @@ import java.util.function.Function;
 <span class="fc" id="L2675">        NullUtil.nullArgCheck(styler, &quot;styler&quot;, AnimatedStyler.class);</span>
 <span class="fc" id="L2676">        return _with( c -&gt; {</span>
 <span class="fc" id="L2677">                    FlipFlopStyler&lt;C&gt; flipFlopStyler = new FlipFlopStyler&lt;&gt;(transitionToggle.get(), c, transitionLifeTime, styler);</span>
-<span class="fc" id="L2678">                    ComponentExtension.from(c).addStyler(flipFlopStyler::style);</span>
+<span class="fc" id="L2678">                    ComponentBackend.powering(c).addStyler(flipFlopStyler::style);</span>
 <span class="fc" id="L2679">                    _onShow( transitionToggle, c, (comp, v) -&gt; flipFlopStyler.set(v) );</span>
 <span class="fc" id="L2680">                })</span>
 <span class="fc" id="L2681">                ._this();</span>
@@ -2724,13 +2724,13 @@ import java.util.function.Function;
 <span class="fc" id="L2724">        NullUtil.nullArgCheck(styler, &quot;styler&quot;, AnimatedStyler.class);</span>
 <span class="fc" id="L2725">        return _with( thisComponent -&gt; {</span>
 <span class="fc" id="L2726">                    WeakReference&lt;C&gt; thisComponentRef = new WeakReference&lt;&gt;(thisComponent);</span>
-<span class="fc" id="L2727">                    ComponentExtension.from(thisComponent).storeBoundObservable(</span>
+<span class="fc" id="L2727">                    ComponentBackend.powering(thisComponent).storeBoundObservable(</span>
 <span class="fc" id="L2728">                            styleTrigger.subscribe(()-&gt;{</span>
 <span class="fc" id="L2729">                                C innerComponent = thisComponentRef.get();</span>
 <span class="pc bpc" id="L2730" title="1 of 2 branches missed.">                                if (innerComponent == null)</span>
 <span class="nc" id="L2731">                                    return;</span>
 <span class="fc" id="L2732">                                AnimationDispatcher.animateFor(styleLifeTime, thisComponent).go(status -&gt;</span>
-<span class="fc" id="L2733">                                        ComponentExtension.from(thisComponent)</span>
+<span class="fc" id="L2733">                                        ComponentBackend.powering(thisComponent)</span>
 <span class="fc" id="L2734">                                                .addAnimatedStyler(status, conf -&gt; styler.style(status, conf))</span>
                                 );
 <span class="fc" id="L2736">                            })</span>
@@ -2962,7 +2962,7 @@ import java.util.function.Function;
 <span class="fc" id="L2962">        NullUtil.nullArgCheck(size, &quot;size&quot;, Dimension.class);</span>
 <span class="fc" id="L2963">        return _with( c -&gt; {</span>
 <span class="fc" id="L2964">            c.setMinimumSize(UI.scale(size.toDimension()));</span>
-<span class="fc" id="L2965">            ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L2965">            ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L2966">                c.setMinimumSize(UI.scale(size.toDimension()));</span>
 <span class="fc" id="L2967">                _revalidate(c);</span>
 <span class="fc" id="L2968">            });</span>
@@ -2994,7 +2994,7 @@ import java.util.function.Function;
 <span class="fc" id="L2994">                })</span>
 <span class="fc" id="L2995">                ._with( c -&gt; {</span>
 <span class="fc" id="L2996">                    c.setMinimumSize( UI.scale(size.get().toDimension()) );</span>
-<span class="fc" id="L2997">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L2997">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L2998">                        c.setMinimumSize( UI.scale(size.get().toDimension()) );</span>
 <span class="fc" id="L2999">                        _revalidate(c);</span>
 <span class="fc" id="L3000">                    });</span>
@@ -3036,7 +3036,7 @@ import java.util.function.Function;
 <span class="fc" id="L3036">                })</span>
 <span class="fc" id="L3037">                ._with( c -&gt; {</span>
 <span class="fc" id="L3038">                    c.setMinimumSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );</span>
-<span class="fc" id="L3039">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3039">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3040">                        c.setMinimumSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );</span>
 <span class="fc" id="L3041">                        _revalidate(c);</span>
 <span class="fc" id="L3042">                    });</span>
@@ -3053,7 +3053,7 @@ import java.util.function.Function;
     public final I withMinWidth( int width ) {
 <span class="fc" id="L3054">        return _with( c -&gt; {</span>
 <span class="fc" id="L3055">                    _setMinWidth(c, width);</span>
-<span class="fc" id="L3056">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3056">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3057">                        _setMinWidth(c, width);</span>
 <span class="fc" id="L3058">                        _revalidate(c);</span>
 <span class="fc" id="L3059">                    });</span>
@@ -3084,7 +3084,7 @@ import java.util.function.Function;
 <span class="fc" id="L3084">                })</span>
 <span class="fc" id="L3085">                ._with( c -&gt; {</span>
 <span class="fc" id="L3086">                    _setMinWidth(c, width.get());</span>
-<span class="fc" id="L3087">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3087">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3088">                        _setMinWidth(c, width.get());</span>
 <span class="fc" id="L3089">                        _revalidate(c);</span>
 <span class="fc" id="L3090">                    });</span>
@@ -3102,7 +3102,7 @@ import java.util.function.Function;
     public final I withMinHeight( int height ) {
 <span class="fc" id="L3103">        return _with( c -&gt; {</span>
 <span class="fc" id="L3104">                    _setMinHeight(c, height);</span>
-<span class="fc" id="L3105">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3105">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3106">                        _setMinHeight(c, height);</span>
 <span class="fc" id="L3107">                        _revalidate(c);</span>
 <span class="fc" id="L3108">                    });</span>
@@ -3133,7 +3133,7 @@ import java.util.function.Function;
 <span class="fc" id="L3133">                })</span>
 <span class="fc" id="L3134">                ._with( c -&gt; {</span>
 <span class="fc" id="L3135">                    _setMinHeight(c, height.get());</span>
-<span class="fc" id="L3136">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3136">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3137">                        _setMinHeight(c, height.get());</span>
 <span class="fc" id="L3138">                        _revalidate(c);</span>
 <span class="fc" id="L3139">                    });</span>
@@ -3151,7 +3151,7 @@ import java.util.function.Function;
 <span class="fc" id="L3151">        NullUtil.nullArgCheck(size, &quot;size&quot;, Size.class);</span>
 <span class="fc" id="L3152">        return _with( c -&gt; {</span>
 <span class="fc" id="L3153">                    c.setMaximumSize(UI.scale(size.toDimension()));</span>
-<span class="fc" id="L3154">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3154">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3155">                        c.setMaximumSize(UI.scale(size.toDimension()));</span>
 <span class="fc" id="L3156">                        _revalidate(c);</span>
 <span class="fc" id="L3157">                    });</span>
@@ -3174,7 +3174,7 @@ import java.util.function.Function;
 <span class="fc" id="L3174">                })</span>
 <span class="fc" id="L3175">                ._with( c -&gt; {</span>
 <span class="fc" id="L3176">                    c.setMaximumSize( UI.scale(size.get().toDimension()) );</span>
-<span class="fc" id="L3177">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3177">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3178">                        c.setMaximumSize( UI.scale(size.get().toDimension()) );</span>
 <span class="fc" id="L3179">                        _revalidate(c);</span>
 <span class="fc" id="L3180">                    });</span>
@@ -3215,7 +3215,7 @@ import java.util.function.Function;
 <span class="fc" id="L3215">                })</span>
 <span class="fc" id="L3216">                ._with( c -&gt; {</span>
 <span class="fc" id="L3217">                    c.setMaximumSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );</span>
-<span class="fc" id="L3218">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3218">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3219">                        c.setMaximumSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );</span>
 <span class="fc" id="L3220">                        _revalidate(c);</span>
 <span class="fc" id="L3221">                    });</span>
@@ -3232,7 +3232,7 @@ import java.util.function.Function;
     public final I withMaxWidth( int width ) {
 <span class="fc" id="L3233">        return _with( c -&gt; {</span>
 <span class="fc" id="L3234">                    c.setMaximumSize(new Dimension(UI.scale(width), c.getMaximumSize().height));</span>
-<span class="fc" id="L3235">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3235">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3236">                        c.setMaximumSize(new Dimension(UI.scale(width), c.getMaximumSize().height));</span>
 <span class="fc" id="L3237">                        _revalidate(c);</span>
 <span class="fc" id="L3238">                    });</span>
@@ -3263,7 +3263,7 @@ import java.util.function.Function;
 <span class="fc" id="L3263">                })</span>
 <span class="fc" id="L3264">                ._with( c -&gt; {</span>
 <span class="fc" id="L3265">                    _setMaxWidth(c, width.get());</span>
-<span class="fc" id="L3266">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3266">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3267">                        _setMaxWidth(c, width.get());</span>
 <span class="fc" id="L3268">                        _revalidate(c);</span>
 <span class="fc" id="L3269">                    });</span>
@@ -3280,7 +3280,7 @@ import java.util.function.Function;
     public final I withMaxHeight( int height ) {
 <span class="fc" id="L3281">        return _with( c -&gt; {</span>
 <span class="fc" id="L3282">                    _setMaxHeight(c, height);</span>
-<span class="fc" id="L3283">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3283">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3284">                        _setMaxHeight(c, height);</span>
 <span class="fc" id="L3285">                        _revalidate(c);</span>
 <span class="fc" id="L3286">                    });</span>
@@ -3311,7 +3311,7 @@ import java.util.function.Function;
 <span class="fc" id="L3311">                })</span>
 <span class="fc" id="L3312">                ._with( c -&gt; {</span>
 <span class="fc" id="L3313">                    _setMaxHeight(c, height.get());</span>
-<span class="fc" id="L3314">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3314">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3315">                        _setMaxHeight(c, height.get());</span>
 <span class="fc" id="L3316">                        _revalidate(c);</span>
 <span class="fc" id="L3317">                    });</span>
@@ -3331,7 +3331,7 @@ import java.util.function.Function;
 <span class="fc" id="L3331">        NullUtil.nullArgCheck(size, &quot;size&quot;, Size.class);</span>
 <span class="fc" id="L3332">        return _with( c -&gt; {</span>
 <span class="fc" id="L3333">            c.setPreferredSize(UI.scale(size.toDimension()));</span>
-<span class="fc" id="L3334">            ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3334">            ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3335">                c.setPreferredSize(UI.scale(size.toDimension()));</span>
 <span class="fc" id="L3336">                _revalidate(c);</span>
 <span class="fc" id="L3337">            });</span>
@@ -3356,7 +3356,7 @@ import java.util.function.Function;
 <span class="fc" id="L3356">                })</span>
 <span class="fc" id="L3357">                ._with( c -&gt; {</span>
 <span class="fc" id="L3358">                    c.setPreferredSize( UI.scale(size.get().toDimension()) );</span>
-<span class="fc" id="L3359">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3359">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3360">                        c.setPreferredSize( UI.scale(size.get().toDimension()) );</span>
 <span class="fc" id="L3361">                        _revalidate(c);</span>
 <span class="fc" id="L3362">                    });</span>
@@ -3401,7 +3401,7 @@ import java.util.function.Function;
 <span class="fc" id="L3401">                })</span>
 <span class="fc" id="L3402">                ._with( c -&gt; {</span>
 <span class="fc" id="L3403">                    c.setPreferredSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );</span>
-<span class="fc" id="L3404">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3404">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3405">                        c.setPreferredSize( new Dimension(UI.scale(width.get()), UI.scale(height.get())) );</span>
 <span class="fc" id="L3406">                        _revalidate(c);</span>
 <span class="fc" id="L3407">                    });</span>
@@ -3419,7 +3419,7 @@ import java.util.function.Function;
     public final I withPrefWidth( int width ) {
 <span class="fc" id="L3420">        return _with( c -&gt; {</span>
 <span class="fc" id="L3421">                    _setPrefWidth(c, width);</span>
-<span class="fc" id="L3422">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3422">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3423">                        _setPrefWidth(c, width);</span>
 <span class="fc" id="L3424">                        _revalidate(c);</span>
 <span class="fc" id="L3425">                    });</span>
@@ -3451,7 +3451,7 @@ import java.util.function.Function;
 <span class="fc" id="L3451">                })</span>
 <span class="fc" id="L3452">                ._with( c -&gt; {</span>
 <span class="fc" id="L3453">                    _setPrefWidth(c, width.get());</span>
-<span class="fc" id="L3454">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3454">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3455">                        _setPrefWidth(c, width.get());</span>
 <span class="fc" id="L3456">                        _revalidate(c);</span>
 <span class="fc" id="L3457">                    });</span>
@@ -3469,7 +3469,7 @@ import java.util.function.Function;
     public final I withPrefHeight( int height ) {
 <span class="fc" id="L3470">        return _with( c -&gt; {</span>
 <span class="fc" id="L3471">                    _setPrefHeight(c, height);</span>
-<span class="fc" id="L3472">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3472">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3473">                        _setPrefHeight(c, height);</span>
 <span class="fc" id="L3474">                        _revalidate(c);</span>
 <span class="fc" id="L3475">                    });</span>
@@ -3501,7 +3501,7 @@ import java.util.function.Function;
 <span class="fc" id="L3501">                })</span>
 <span class="fc" id="L3502">                ._with( c -&gt; {</span>
 <span class="fc" id="L3503">                    _setPrefHeight(c, height.get());</span>
-<span class="fc" id="L3504">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3504">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3505">                        _setPrefHeight(c, height.get());</span>
 <span class="fc" id="L3506">                        _revalidate(c);</span>
 <span class="fc" id="L3507">                    });</span>
@@ -3524,7 +3524,7 @@ import java.util.function.Function;
 <span class="fc" id="L3524">        NullUtil.nullArgCheck(size, &quot;size&quot;, Dimension.class);</span>
 <span class="fc" id="L3525">        return _with( c -&gt; {</span>
 <span class="fc" id="L3526">            c.setSize(UI.scale(size.toDimension()));</span>
-<span class="fc" id="L3527">            ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3527">            ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3528">                c.setSize(UI.scale(size.toDimension()));</span>
 <span class="fc" id="L3529">                _revalidate(c);</span>
 <span class="fc" id="L3530">            });</span>
@@ -3553,7 +3553,7 @@ import java.util.function.Function;
 <span class="fc" id="L3553">                })</span>
 <span class="fc" id="L3554">                ._with( c -&gt; {</span>
 <span class="fc" id="L3555">                    c.setSize( UI.scale(size.get().toDimension()) );</span>
-<span class="fc" id="L3556">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3556">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="nc" id="L3557">                        c.setSize( UI.scale(size.get().toDimension()) );</span>
 <span class="nc" id="L3558">                        _revalidate(c);</span>
 <span class="nc" id="L3559">                    });</span>
@@ -3592,7 +3592,7 @@ import java.util.function.Function;
     public final I withWidth( int width ) {
 <span class="fc" id="L3593">        return _with( c -&gt; {</span>
 <span class="fc" id="L3594">                    c.setSize(new Dimension(UI.scale(width), c.getSize().height));</span>
-<span class="fc" id="L3595">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3595">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3596">                        c.setSize(new Dimension(UI.scale(width), c.getSize().height));</span>
 <span class="fc" id="L3597">                        _revalidate(c);</span>
 <span class="fc" id="L3598">                    });</span>
@@ -3619,7 +3619,7 @@ import java.util.function.Function;
 <span class="fc" id="L3619">                })</span>
 <span class="fc" id="L3620">                ._with( c -&gt; {</span>
 <span class="fc" id="L3621">                    c.setSize(new Dimension(UI.scale(width.get()), c.getSize().height));</span>
-<span class="fc" id="L3622">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3622">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3623">                        c.setSize(new Dimension(UI.scale(width.get()), c.getSize().height));</span>
 <span class="fc" id="L3624">                        _revalidate(c);</span>
 <span class="fc" id="L3625">                    });</span>
@@ -3640,7 +3640,7 @@ import java.util.function.Function;
     public final I withHeight( int height ) {
 <span class="fc" id="L3641">        return _with( c -&gt; {</span>
 <span class="fc" id="L3642">                    c.setSize(new Dimension(c.getSize().width, UI.scale(height)));</span>
-<span class="fc" id="L3643">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3643">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3644">                        c.setSize(new Dimension(c.getSize().width, UI.scale(height)));</span>
 <span class="fc" id="L3645">                        _revalidate(c);</span>
 <span class="fc" id="L3646">                    });</span>
@@ -3667,7 +3667,7 @@ import java.util.function.Function;
 <span class="fc" id="L3667">                })</span>
 <span class="fc" id="L3668">                ._with( c -&gt; {</span>
 <span class="fc" id="L3669">                    c.setSize(new Dimension(c.getSize().width, UI.scale(height.get())));</span>
-<span class="fc" id="L3670">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3670">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="fc" id="L3671">                        c.setSize(new Dimension(c.getSize().width, UI.scale(height.get())));</span>
 <span class="fc" id="L3672">                        _revalidate(c);</span>
 <span class="fc" id="L3673">                    });</span>
@@ -3702,7 +3702,7 @@ import java.util.function.Function;
 <span class="fc" id="L3702">        NullUtil.nullArgCheck(position, &quot;position&quot;, Position.class);</span>
 <span class="fc" id="L3703">        return _with( c -&gt; {</span>
 <span class="fc" id="L3704">                    c.setLocation(UI.scale((int) position.x()), UI.scale((int) position.y()));</span>
-<span class="fc" id="L3705">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3705">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="nc" id="L3706">                        c.setLocation(UI.scale((int) position.x()), UI.scale((int) position.y()));</span>
 <span class="nc" id="L3707">                    });</span>
 <span class="fc" id="L3708">                })</span>
@@ -3742,7 +3742,7 @@ import java.util.function.Function;
 <span class="fc" id="L3742">                ._with( c -&gt; {</span>
 <span class="fc" id="L3743">                    Position p = position.get();</span>
 <span class="fc" id="L3744">                    c.setLocation(UI.scale((int) p.x()), UI.scale((int) p.y()));</span>
-<span class="fc" id="L3745">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3745">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="nc" id="L3746">                        Position cur = position.get();</span>
 <span class="nc" id="L3747">                        c.setLocation(UI.scale((int) cur.x()), UI.scale((int) cur.y()));</span>
 <span class="nc" id="L3748">                    });</span>
@@ -3782,7 +3782,7 @@ import java.util.function.Function;
 <span class="fc" id="L3782">        NullUtil.nullArgCheck(bounds, &quot;bounds&quot;, Bounds.class);</span>
 <span class="fc" id="L3783">        return _with( c -&gt; {</span>
 <span class="fc" id="L3784">                    c.setBounds(UI.scale(bounds.toRectangle()));</span>
-<span class="fc" id="L3785">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3785">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="nc" id="L3786">                        c.setBounds(UI.scale(bounds.toRectangle()));</span>
 <span class="nc" id="L3787">                        _revalidate(c);</span>
 <span class="nc" id="L3788">                    });</span>
@@ -3825,7 +3825,7 @@ import java.util.function.Function;
 <span class="fc" id="L3825">                })</span>
 <span class="fc" id="L3826">                ._with( c -&gt; {</span>
 <span class="fc" id="L3827">                    c.setBounds(UI.scale(bounds.get().toRectangle()));</span>
-<span class="fc" id="L3828">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3828">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="nc" id="L3829">                        c.setBounds(UI.scale(bounds.get().toRectangle()));</span>
 <span class="nc" id="L3830">                        _revalidate(c);</span>
 <span class="nc" id="L3831">                    });</span>
@@ -3935,7 +3935,7 @@ import java.util.function.Function;
 <span class="fc" id="L3935">                    c.setMinimumSize(UI.scale(size.get().toDimension()));</span>
 <span class="fc" id="L3936">                    c.setMaximumSize(UI.scale(size.get().toDimension()));</span>
 <span class="fc" id="L3937">                    c.setPreferredSize(UI.scale(size.get().toDimension()));</span>
-<span class="fc" id="L3938">                    ComponentExtension.from(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
+<span class="fc" id="L3938">                    ComponentBackend.powering(c).localUiScaleFactor().onChange(From.ALL, it-&gt;{</span>
 <span class="nc" id="L3939">                        c.setMinimumSize(UI.scale(size.get().toDimension()));</span>
 <span class="nc" id="L3940">                        c.setMaximumSize(UI.scale(size.get().toDimension()));</span>
 <span class="nc" id="L3941">                        c.setPreferredSize(UI.scale(size.get().toDimension()));</span>
@@ -4175,7 +4175,7 @@ import java.util.function.Function;
 <span class="fc" id="L4175">        return _with( thisComponent -&gt; {</span>
 <span class="fc" id="L4176">                    Font f = thisComponent.getFont();</span>
 <span class="fc" id="L4177">                    thisComponent.setFont(f.deriveFont(UI.scale((float)size)));</span>
-<span class="fc" id="L4178">                    ComponentExtension.from(thisComponent).localUiScaleFactor().onChange(From.ALL, it -&gt; {</span>
+<span class="fc" id="L4178">                    ComponentBackend.powering(thisComponent).localUiScaleFactor().onChange(From.ALL, it -&gt; {</span>
 <span class="fc" id="L4179">                        thisComponent.setFont(f.deriveFont(UI.scale((float)size)));</span>
 <span class="fc" id="L4180">                    });</span>
 <span class="fc" id="L4181">                })</span>
@@ -4202,7 +4202,7 @@ import java.util.function.Function;
 <span class="fc" id="L4202">                ._with( thisComponent -&gt; {</span>
 <span class="fc" id="L4203">                    Font f = thisComponent.getFont();</span>
 <span class="fc" id="L4204">                    thisComponent.setFont(f.deriveFont(UI.scale((float)size.orElseThrowUnchecked())));</span>
-<span class="fc" id="L4205">                    ComponentExtension.from(thisComponent).localUiScaleFactor().onChange(From.ALL, it -&gt; {</span>
+<span class="fc" id="L4205">                    ComponentBackend.powering(thisComponent).localUiScaleFactor().onChange(From.ALL, it -&gt; {</span>
 <span class="fc" id="L4206">                        thisComponent.setFont(f.deriveFont(UI.scale((float)size.orElseThrowUnchecked())));</span>
 <span class="fc" id="L4207">                    });</span>
 <span class="fc" id="L4208">                })</span>
@@ -5137,7 +5137,7 @@ import java.util.function.Function;
     public final I withDragAway( Configurator&lt;DragAwayComponentConf&lt;C&gt;&gt; configurator ) {
 <span class="fc" id="L5138">        NullUtil.nullArgCheck(configurator, &quot;configurator&quot;, Configurator.class);</span>
 <span class="fc" id="L5139">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L5140">                    ComponentExtension.from(thisComponent).addDragAwayConf(mousePosition -&gt; {</span>
+<span class="fc" id="L5140">                    ComponentBackend.powering(thisComponent).addDragAwayConf(mousePosition -&gt; {</span>
 <span class="nc" id="L5141">                        DragAwayComponentConf&lt;C&gt; conf = DragAwayComponentConf.of(thisComponent, mousePosition);</span>
                         try {
 <span class="nc" id="L5143">                            return configurator.configure(conf);</span>
@@ -5245,7 +5245,7 @@ import java.util.function.Function;
 <span class="fc" id="L5245">        NullUtil.nullArgCheck(observableEvent, &quot;observableEvent&quot;, Observable.class);</span>
 <span class="fc" id="L5246">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="fc" id="L5247">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L5248">                    ComponentExtension.from(thisComponent).storeBoundObservable(</span>
+<span class="fc" id="L5248">                    ComponentBackend.powering(thisComponent).storeBoundObservable(</span>
 <span class="fc" id="L5249">                        observableEvent.subscribe(() -&gt; {</span>
 <span class="fc" id="L5250">                            _runInUI(() -&gt; {</span>
                                 try {
@@ -5298,7 +5298,7 @@ import java.util.function.Function;
 <span class="fc" id="L5298">        NullUtil.nullArgCheck(observableEvent, &quot;observableEvent&quot;, Observable.class);</span>
 <span class="fc" id="L5299">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="fc" id="L5300">        return _with( thisComponent -&gt; {</span>
-<span class="fc" id="L5301">                   ComponentExtension.from(thisComponent).storeBoundObservable(</span>
+<span class="fc" id="L5301">                   ComponentBackend.powering(thisComponent).storeBoundObservable(</span>
 <span class="fc" id="L5302">                       observableEvent.subscribe(() -&gt; {</span>
 <span class="fc" id="L5303">                           _runInApp(() -&gt; {</span>
                                try {
@@ -5356,7 +5356,7 @@ import java.util.function.Function;
 <span class="nc" id="L5356">        NullUtil.nullArgCheck(action, &quot;action&quot;, Action.class);</span>
 <span class="nc" id="L5357">        return _with( thisComponent -&gt; {</span>
 <span class="nc" id="L5358">                   E observableEvent = eventSource.apply(thisComponent);</span>
-<span class="nc" id="L5359">                   ComponentExtension.from(thisComponent).storeBoundObservable(</span>
+<span class="nc" id="L5359">                   ComponentBackend.powering(thisComponent).storeBoundObservable(</span>
 <span class="nc" id="L5360">                       observableEvent.subscribe(() -&gt; {</span>
 <span class="nc" id="L5361">                           _runInApp(() -&gt; {</span>
                                try {

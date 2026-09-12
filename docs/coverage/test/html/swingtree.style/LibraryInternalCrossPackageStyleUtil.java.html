@@ -45,7 +45,7 @@ import java.util.Objects;
 <span class="nc" id="L45">                return cb.getOutsideBorder().getBorderInsets(c);</span>
             }
 <span class="fc" id="L47">            Insets insets = b.getBorderInsets(c);</span>
-<span class="pc bpc" id="L48" title="1 of 2 branches missed.">            if ( _needsNimbusBorderInsetsCorrection(c) ) {</span>
+<span class="fc bfc" id="L48" title="All 2 branches covered.">            if ( _needsNimbusBorderInsetsCorrection(c) ) {</span>
 <span class="fc" id="L49">                int min = Math.min(insets.top, Math.min(insets.left, Math.min(insets.bottom, insets.right)));</span>
 <span class="fc" id="L50">                insets = new Insets(min, min, min, min);</span>
             }
@@ -54,10 +54,10 @@ import java.util.Objects;
     }
 
     private static boolean _needsNimbusBorderInsetsCorrection(Component c) {
-<span class="pc bpc" id="L57" title="1 of 2 branches missed.">        if ( LookAndFeelType.current() == LookAndFeelType.NIMBUS ) {</span>
+<span class="fc bfc" id="L57" title="All 2 branches covered.">        if ( LookAndFeelType.current() == LookAndFeelType.NIMBUS ) {</span>
 <span class="pc bpc" id="L58" title="2 of 4 branches missed.">            return c instanceof JButton || c instanceof JToggleButton;</span>
         }
-<span class="nc" id="L60">        return false;</span>
+<span class="fc" id="L60">        return false;</span>
     }
 
     @DoNotCall @Deprecated

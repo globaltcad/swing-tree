@@ -7,7 +7,7 @@ import swingtree.SwingTree;
 import swingtree.layout.Bounds;
 import swingtree.layout.Position;
 import swingtree.layout.Size;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 
 import javax.swing.*;
 import java.awt.*;
@@ -93,7 +93,7 @@ final class ActiveDrag {
 
         Optional&lt;DragAwayComponentConf&lt;JComponent&gt;&gt; dragConf;
         do {
-<span class="nc" id="L96">            dragConf = ComponentExtension.from((JComponent) component).getDragAwayConf(mousePosition);</span>
+<span class="nc" id="L96">            dragConf = ComponentBackend.powering((JComponent) component).getDragAwayConf(mousePosition);</span>
 <span class="nc bnc" id="L97" title="All 6 branches missed.">            if ( !dragConf.isPresent() || dragConf.map(it-&gt;!it.enabled()).orElse(false) ) {</span>
 <span class="nc" id="L98">                Component parent = component.getParent();</span>
 <span class="nc bnc" id="L99" title="All 2 branches missed.">                if ( parent instanceof JComponent )</span>
@@ -124,7 +124,7 @@ final class ActiveDrag {
 
         int currentComponentHash;
 <span class="nc bnc" id="L126" title="All 2 branches missed.">        if ( component instanceof JComponent ) {</span>
-<span class="nc" id="L127">            currentComponentHash = ComponentExtension.from((JComponent) component).viewStateHashCode();</span>
+<span class="nc" id="L127">            currentComponentHash = ComponentBackend.powering((JComponent) component).viewStateHashCode();</span>
 <span class="nc bnc" id="L128" title="All 4 branches missed.">            if ( currentComponentHash == this.componentHash &amp;&amp; image != null )</span>
 <span class="nc" id="L129">                return this;</span>
         }

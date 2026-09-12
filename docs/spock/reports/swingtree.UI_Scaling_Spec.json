@@ -727,7 +727,7 @@
       "blocks":[
         {"kind":"given","text":"A scale factor of one, and a tree.","code":["SwingTree.get().setUiScaleFactor(1f)","var tree = UI.of(new JTree()).get(JTree)"]},
 
-        {"kind":"and","text":"\n            Its renderer, holding the `ComponentExtension` that a SwingTree look and feel\n            attaches to every component it paints. The extension is the thing that rescales\n            a font size, so the renderer has to have one for the mistake to be possible at\n            all.\n        ","code":["var renderer = tree.cellRenderer as DefaultTreeCellRenderer","ComponentExtension.from(renderer)"]},
+        {"kind":"and","text":"\n            Its renderer, holding the `ComponentBackend` that a SwingTree look and feel\n            attaches to every component it paints. The backend is the thing that rescales\n            a font size, so the renderer has to have one for the mistake to be possible at\n            all.\n        ","code":["var renderer = tree.cellRenderer as DefaultTreeCellRenderer","ComponentBackend.powering(renderer)"]},
 
         {"kind":"and","text":"\n            One painted row. `getTreeCellRendererComponent(..)` is where the renderer stores\n            the tree it was called for, and `DefaultTreeCellRenderer.getFont()` reads the\n            font off that stored tree. Until the renderer has painted once, it has no tree\n            to read from.\n        ","code":["UI.runNow({ renderer.getTreeCellRendererComponent(tree, \"leaf\", false, false, true, 0, false) })"]},
 
@@ -758,7 +758,7 @@
 
         {"kind":"and","text":"A scale factor of one, and a spinner.","code":["SwingTree.get().setUiScaleFactor(1f)","var spinner = UI.spinner(new SpinnerNumberModel(1, 1, 999, 1)).get(JSpinner)","var textField = (spinner.editor as JSpinner.DefaultEditor).textField"]},
 
-        {"kind":"and","text":"\n            The `ComponentExtension` that a SwingTree look and feel attaches to every\n            component it paints. The extension is the thing that rescales a font size, so the\n            spinner and its text field each need one. The text field is given its extension\n            first here, because that is the order a look and feel reaches the two in: a\n            `JSpinner` builds its editor inside its own constructor, before Swing installs\n            the delegate that would style the spinner.\n        ","code":["ComponentExtension.from(textField)","ComponentExtension.from(spinner)"]},
+        {"kind":"and","text":"\n            The `ComponentBackend` that a SwingTree look and feel attaches to every\n            component it paints. The backend is the thing that rescales a font size, so the\n            spinner and its text field each need one. The text field is given its backend\n            first here, because that is the order a look and feel reaches the two in: a\n            `JSpinner` builds its editor inside its own constructor, before Swing installs\n            the delegate that would style the spinner.\n        ","code":["ComponentBackend.powering(textField)","ComponentBackend.powering(spinner)"]},
 
         {"kind":"expect","text":"The spinner and the text field inside it start out at the same font size.","code":["textField.font.size == spinner.font.size"]},
 
@@ -785,7 +785,7 @@
       "blocks":[
         {"kind":"given","text":"A spinner, at a scale factor of one, wearing whatever font the look and feel gave it.","code":["SwingTree.get().setUiScaleFactor(1f)","var spinner = new JSpinner(new SpinnerNumberModel(1, 1, 999, 1))","var textField = (spinner.editor as JSpinner.DefaultEditor).textField"]},
 
-        {"kind":"and","text":"\n            The `ComponentExtension` that a SwingTree look and feel attaches to every\n            component it paints. The extension is the thing that rescales a font, so the\n            spinner and its text field each need one. The text field is given its extension\n            first, which is the order a look and feel reaches the two in: a `JSpinner` builds\n            its editor, and Swing gives that editor its delegate, inside the `JSpinner`\n            constructor, before the spinner is given a delegate of its own.\n        ","code":["ComponentExtension.from(textField)","ComponentExtension.from(spinner)"]},
+        {"kind":"and","text":"\n            The `ComponentBackend` that a SwingTree look and feel attaches to every\n            component it paints. The backend is the thing that rescales a font, so the\n            spinner and its text field each need one. The text field is given its backend\n            first, which is the order a look and feel reaches the two in: a `JSpinner` builds\n            its editor, and Swing gives that editor its delegate, inside the `JSpinner`\n            constructor, before the spinner is given a delegate of its own.\n        ","code":["ComponentBackend.powering(textField)","ComponentBackend.powering(spinner)"]},
 
         {"kind":"expect","text":"The number and the box around it start out at the same size.","code":["textField.font.size == spinner.font.size"]},
 

@@ -17,9 +17,9 @@ import swingtree.layout.Bounds;
 
 import javax.swing.*;
 import javax.swing.border.Border;
-import javax.swing.plaf.basic.BasicHTML;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
+import java.lang.reflect.Modifier;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -102,7 +102,7 @@ import java.util.function.Predicate;
     void installCustomBorderBasedStyleAndAnimationRenderer( C owner, StyleConf styleConf) {
 <span class="fc" id="L103">        Border currentBorder = owner.getBorder();</span>
 <span class="fc bfc" id="L104" title="All 2 branches covered.">        if ( !(currentBorder instanceof StyleAndAnimationBorder) )</span>
-<span class="fc" id="L105">            owner.setBorder(new StyleAndAnimationBorder&lt;&gt;(ComponentExtension.from(owner), currentBorder, styleConf));</span>
+<span class="fc" id="L105">            owner.setBorder(new StyleAndAnimationBorder&lt;&gt;(ComponentBackend.powering(owner), currentBorder, styleConf));</span>
 <span class="fc" id="L106">    }</span>
 
     StyleConf recalculateInsets( C owner, StyleConf styleConf ) {
@@ -1041,30 +1041,62 @@ import java.util.function.Predicate;
         }
 <span class="fc" id="L1042">    }</span>
 
+    /**
+     *  The background a component type has before anything styles it is whatever the look and
+     *  feel installs on a fresh instance of that type, so a fresh instance is what this asks.
+     *  &lt;p&gt;
+     *  It asks the nearest JDK or SwingTree superclass rather than the component's own class,
+     *  because the component's own class may be the application's, and constructing an
+     *  application's view runs that view's constructor with every side effect it has. One such
+     *  constructor installs a look and feel, so building a window that contained it replaced
+     *  the look and feel the application had just chosen, and the whole window was then drawn
+     *  by the wrong delegates. Styling reads state; it must not create application objects to
+     *  do it.
+     *  &lt;p&gt;
+     *  The answer for an application subclass is therefore the one its nearest library
+     *  ancestor gets - which is what the look and feel would have installed on it anyway,
+     *  since a look and feel keys its defaults off the component type it knows about.
+     *
+     * @param type the class of the component whose default background is wanted
+     * @return the nearest class that may be constructed to answer the question, or null if
+     *         there is none - every candidate up to {@link JComponent} being abstract
+     */
+    private static @Nullable Class&lt;?&gt; _nearestLibraryAncestorOf( Class&lt;?&gt; type ) {
+<span class="pc bpc" id="L1065" title="1 of 2 branches missed.">        for ( Class&lt;?&gt; candidate = type; candidate != null; candidate = candidate.getSuperclass() ) {</span>
+<span class="pc bpc" id="L1066" title="1 of 2 branches missed.">            if ( Modifier.isAbstract(candidate.getModifiers()) )</span>
+<span class="nc" id="L1067">                continue;</span>
+<span class="fc" id="L1068">            String name = candidate.getName();</span>
+<span class="pc bpc" id="L1069" title="2 of 6 branches missed.">            if ( name.startsWith(&quot;java.&quot;) || name.startsWith(&quot;javax.&quot;) || name.startsWith(&quot;swingtree.&quot;) )</span>
+<span class="fc" id="L1070">                return candidate;</span>
+        }
+<span class="nc" id="L1072">        return null;</span>
+    }
+
     private void _establishDefaultBackgroundColorFor(JComponent owner) {
-<span class="fc" id="L1045">        Class&lt;?&gt; type = owner.getClass();</span>
-<span class="fc" id="L1046">        JComponent other = null;</span>
+<span class="fc" id="L1076">        Class&lt;?&gt; type = _nearestLibraryAncestorOf(owner.getClass());</span>
+<span class="fc" id="L1077">        JComponent other = null;</span>
         try {
-<span class="fc" id="L1048">            other = (JComponent) type.getDeclaredConstructor().newInstance();</span>
-<span class="nc" id="L1049">        } catch (Exception e) {</span>
-<span class="nc" id="L1050">            log.debug(SwingTree.get().logMarker(),</span>
+<span class="pc bpc" id="L1079" title="1 of 2 branches missed.">            if ( type != null )</span>
+<span class="fc" id="L1080">                other = (JComponent) type.getDeclaredConstructor().newInstance();</span>
+<span class="nc" id="L1081">        } catch (Exception e) {</span>
+<span class="nc" id="L1082">            log.debug(SwingTree.get().logMarker(),</span>
                     &quot;Failed to instantiate component '{}' as part of an &quot; +
                     &quot;attempt to get the default color of said type!&quot;,
-<span class="nc" id="L1053">                    type.getName(), e</span>
+<span class="nc bnc" id="L1085" title="All 2 branches missed.">                    type == null ? owner.getClass().getName() : type.getName(), e</span>
                 );
-<span class="fc" id="L1055">        }</span>
-<span class="fc" id="L1056">        Color defaultBackgroundColor = null;</span>
-<span class="pc bpc" id="L1057" title="1 of 2 branches missed.">        if ( other != null ) {</span>
-<span class="fc" id="L1058">            defaultBackgroundColor = other.getBackground();</span>
+<span class="fc" id="L1087">        }</span>
+<span class="fc" id="L1088">        Color defaultBackgroundColor = null;</span>
+<span class="pc bpc" id="L1089" title="1 of 2 branches missed.">        if ( other != null ) {</span>
+<span class="fc" id="L1090">            defaultBackgroundColor = other.getBackground();</span>
         }
-<span class="fc bfc" id="L1060" title="All 2 branches covered.">        if ( defaultBackgroundColor == null ) {</span>
-<span class="fc bfc" id="L1061" title="All 2 branches covered.">            if ( owner.isBackgroundSet() ) // is this is false then the component already has it set to null!</span>
-<span class="fc" id="L1062">                owner.setBackground(defaultBackgroundColor);</span>
+<span class="fc bfc" id="L1092" title="All 2 branches covered.">        if ( defaultBackgroundColor == null ) {</span>
+<span class="fc bfc" id="L1093" title="All 2 branches covered.">            if ( owner.isBackgroundSet() ) // is this is false then the component already has it set to null!</span>
+<span class="fc" id="L1094">                owner.setBackground(defaultBackgroundColor);</span>
         } else {
-<span class="pc bpc" id="L1064" title="1 of 2 branches missed.">            if ( !Objects.equals(owner.getBackground(), defaultBackgroundColor) )</span>
-<span class="fc" id="L1065">                owner.setBackground(defaultBackgroundColor);</span>
+<span class="pc bpc" id="L1096" title="1 of 2 branches missed.">            if ( !Objects.equals(owner.getBackground(), defaultBackgroundColor) )</span>
+<span class="fc" id="L1097">                owner.setBackground(defaultBackgroundColor);</span>
         }
-<span class="fc" id="L1067">    }</span>
+<span class="fc" id="L1099">    }</span>
 
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>

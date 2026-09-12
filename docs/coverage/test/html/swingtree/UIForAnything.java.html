@@ -7,7 +7,7 @@ import sprouts.Action;
 import sprouts.*;
 import swingtree.api.Peeker;
 import swingtree.layout.AddConstraint;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 import swingtree.style.StyleConf;
 import swingtree.threading.EventProcessor;
 
@@ -452,16 +452,16 @@ import java.util.function.Supplier;
 <span class="pc bpc" id="L452" title="1 of 2 branches missed.">        if ( childComponent instanceof JComponent ) {</span>
 <span class="fc" id="L453">            JComponent child = (JComponent) childComponent;</span>
 
-<span class="fc bfc" id="L455" title="All 2 branches covered.">            StyleConf styleConf = ( conf != null ? null : ComponentExtension.from(child).gatherStyle() );</span>
+<span class="fc bfc" id="L455" title="All 2 branches covered.">            StyleConf styleConf = ( conf != null ? null : ComponentBackend.powering(child).gatherStyle() );</span>
 <span class="fc bfc" id="L456" title="All 2 branches covered.">            if ( styleConf != null )</span>
 <span class="fc" id="L457">                conf = styleConf.layoutConstraint().map(it-&gt; (AddConstraint) () -&gt; it).orElse(null);</span>
 
 <span class="fc" id="L459">            _addComponentTo(thisComponent, childComponent, conf);</span>
 
 <span class="fc bfc" id="L461" title="All 2 branches covered.">            if ( styleConf != null )</span>
-<span class="fc" id="L462">                ComponentExtension.from(child).applyAndInstallStyle(styleConf, true);</span>
+<span class="fc" id="L462">                ComponentBackend.powering(child).applyAndInstallStyle(styleConf, true);</span>
             else
-<span class="fc" id="L464">                ComponentExtension.from(child).gatherApplyAndInstallStyle(true);</span>
+<span class="fc" id="L464">                ComponentBackend.powering(child).gatherApplyAndInstallStyle(true);</span>
 <span class="fc" id="L465">        }</span>
         else
 <span class="nc" id="L467">            _addComponentTo(thisComponent, childComponent, conf);</span>
@@ -634,7 +634,7 @@ import java.util.function.Supplier;
 <span class="fc" id="L634">        Optional.ofNullable(propertyRef.get()).ifPresent(</span>
             property -&gt; {
 <span class="fc" id="L636">                JComponent component = (JComponent) Objects.requireNonNull(weakComponent.get());</span>
-<span class="fc" id="L637">                ComponentExtension.from(component).storeBoundObservable(</span>
+<span class="fc" id="L637">                ComponentBackend.powering(component).storeBoundObservable(</span>
 <span class="fc" id="L638">                        property.view().onChange(From.ALL, action)</span>
                     );
 <span class="fc" id="L640">            }</span>
@@ -696,7 +696,7 @@ import java.util.function.Supplier;
         }
 <span class="fc" id="L697">        Viewables&lt;T&gt; viewables = properties.view();</span>
 <span class="fc" id="L698">        viewables.onChange(action);</span>
-<span class="fc" id="L699">        ComponentExtension.from((JComponent) component).storeBoundObservable(viewables);</span>
+<span class="fc" id="L699">        ComponentBackend.powering((JComponent) component).storeBoundObservable(viewables);</span>
 <span class="fc" id="L700">    }</span>
 
     /**

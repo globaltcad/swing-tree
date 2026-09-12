@@ -531,7 +531,7 @@ public final class StyleConf
 <span class="fc bfc" id="L531" title="All 2 branches covered.">        if ( !hasStyledText )</span>
 <span class="fc" id="L532">            return this;</span>
         // We look for text configs with non-empty contents and compute the preferred height from those:
-<span class="fc" id="L534">        final ComponentConf previousComponentConf = ComponentExtension.from(owner).getConf();</span>
+<span class="fc" id="L534">        final ComponentConf previousComponentConf = ComponentBackend.powering(owner).getConf();</span>
 <span class="fc" id="L535">        final Pair&lt;BoxModelConf, ComponentConf&gt; boxAndCompConf = StyleEngine._calculateBoxModelAndComponentConfs(</span>
 <span class="fc" id="L536">                Bounds.of(owner.getX(), owner.getY(), owner.getWidth(), owner.getHeight()),</span>
                 this,

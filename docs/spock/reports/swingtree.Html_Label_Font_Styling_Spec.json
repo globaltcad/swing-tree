@@ -640,7 +640,7 @@
 
         {"kind":"and","text":"A label built through SwingTree at that scale:","code":["var label = UI.of(new JLabel(html))","              .withStyle({ it.fontColor(\"orange\") })","              .get(JLabel)"]},
 
-        {"kind":"when","text":"The style cycle is forced to run a few more times:","code":["UI.runNow {","    3.times { swingtree.style.ComponentExtension.from(label).gatherApplyAndInstallStyle(true) }","}"]},
+        {"kind":"when","text":"The style cycle is forced to run a few more times:","code":["UI.runNow {","    3.times { ComponentBackend.powering(label).gatherApplyAndInstallStyle(true) }","}"]},
 
         {"kind":"then","text":"The scaled value is exactly 30 — not 45, not 67.5, not 101.25:","code":["label.getText().contains('font-size:30px')","!label.getText().contains('font-size:45px')","!label.getText().contains('font-size:67')","!label.getText().contains('font-size:101')"]}
       ],

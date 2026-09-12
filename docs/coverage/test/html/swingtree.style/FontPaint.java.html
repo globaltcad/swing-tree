@@ -28,7 +28,7 @@ final class FontPaint implements Paint
     private void _init() {
 <span class="fc" id="L29">        JComponent component = _componentRef.get();</span>
 <span class="pc bpc" id="L30" title="1 of 2 branches missed.">        if ( component != null ) {</span>
-<span class="fc" id="L31">            BoxModelConf latestBoxModelConf = ComponentExtension.from(component).getBoxModelConf();</span>
+<span class="fc" id="L31">            BoxModelConf latestBoxModelConf = ComponentBackend.powering(component).getBoxModelConf();</span>
 <span class="fc bfc" id="L32" title="All 2 branches covered.">            if ( !latestBoxModelConf.equals(_boxModelConf) ) {</span>
 <span class="fc" id="L33">                _boxModelConf = latestBoxModelConf;</span>
 <span class="fc" id="L34">                _delegatedPaint = _fontPaintConf.getFor(latestBoxModelConf);</span>

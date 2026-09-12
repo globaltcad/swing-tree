@@ -353,7 +353,7 @@ final class DynamicLaF
 <span class="fc" id="L353">        }</span>
 
         @Override public void paint(Graphics g, JComponent c ) {
-<span class="fc" id="L356">            ComponentExtension.from(c).paintBackground(g, true, null);</span>
+<span class="fc" id="L356">            ComponentBackend.powering(c).paintBackground(g, true, null);</span>
 <span class="fc" id="L357">        }</span>
 <span class="fc" id="L358">        @Override public void update( Graphics g, JComponent c ) { paint(g, c); }</span>
 
@@ -376,7 +376,7 @@ final class DynamicLaF
 
         @Override public void paint( Graphics g, JComponent c ) {
 <span class="pc bpc" id="L378" title="1 of 2 branches missed.">            boolean customWipe = _formerUI == null;</span>
-<span class="fc" id="L379">            ComponentExtension.from(c).paintBackground(g, customWipe, localGraphics-&gt;{</span>
+<span class="fc" id="L379">            ComponentBackend.powering(c).paintBackground(g, customWipe, localGraphics-&gt;{</span>
 <span class="pc bpc" id="L380" title="1 of 2 branches missed.">                if ( _formerUI != null )</span>
 <span class="fc" id="L381">                    _paintComponentThroughFormerUI(_formerUI, localGraphics, c);</span>
 <span class="fc" id="L382">            });</span>
@@ -400,7 +400,7 @@ final class DynamicLaF
 <span class="fc" id="L400">        }</span>
 
         @Override public void paint( Graphics g, JComponent c ) {
-<span class="fc" id="L403">            ComponentExtension.from(c).paintBackground(g, false, localGraphics-&gt;{</span>
+<span class="fc" id="L403">            ComponentBackend.powering(c).paintBackground(g, false, localGraphics-&gt;{</span>
 <span class="fc bfc" id="L404" title="All 2 branches covered.">                if ( _formerUI != null )</span>
 <span class="fc" id="L405">                    _paintComponentThroughFormerUI(_formerUI, localGraphics, c);</span>
                 else
@@ -428,21 +428,21 @@ final class DynamicLaF
 <span class="pc bpc" id="L428" title="1 of 2 branches missed.">            if ( !getComponent().isOpaque() )</span>
 <span class="nc" id="L429">                paintBackground(g);</span>
 
-<span class="fc" id="L431">            ComponentExtension.from(getComponent()).gatherStyleAndPaintInScope(g, ()-&gt;{</span>
+<span class="fc" id="L431">            ComponentBackend.powering(getComponent()).gatherStyleAndPaintInScope(g, ()-&gt;{</span>
 <span class="fc" id="L432">                super.paintSafely(g);// Paints the text</span>
 <span class="fc" id="L433">            });</span>
 <span class="fc" id="L434">        }</span>
         @Override protected void paintBackground(Graphics g) {
 <span class="fc" id="L436">            JComponent c = getComponent();</span>
 
-<span class="fc" id="L438">            Insets margins = ComponentExtension.from(c).getMarginInsets();</span>
+<span class="fc" id="L438">            Insets margins = ComponentBackend.powering(c).getMarginInsets();</span>
 <span class="fc" id="L439">            int insetTop    = margins.top   ;</span>
 <span class="fc" id="L440">            int insetLeft   = margins.left  ;</span>
 <span class="fc" id="L441">            int insetBottom = margins.bottom;</span>
 <span class="fc" id="L442">            int insetRight  = margins.right ;</span>
 
 <span class="fc" id="L444">            g.setColor(c.getBackground());</span>
-<span class="fc" id="L445">            ComponentExtension.from(getComponent()).gatherStyleAndPaintInScope(g, ()-&gt;{</span>
+<span class="fc" id="L445">            ComponentBackend.powering(getComponent()).gatherStyleAndPaintInScope(g, ()-&gt;{</span>
 <span class="fc" id="L446">                g.fillRect(</span>
                         insetLeft, insetTop,
 <span class="fc" id="L448">                        c.getWidth() - insetLeft - insetRight, c.getHeight() - insetTop - insetBottom</span>
@@ -451,7 +451,7 @@ final class DynamicLaF
 
 <span class="pc bpc" id="L452" title="1 of 2 branches missed.">            boolean customWipe = _formerUI == null;</span>
 <span class="pc bpc" id="L453" title="3 of 8 branches missed.">            boolean shouldPaintFormerUI = (insetLeft == 0 &amp;&amp; insetRight == 0 &amp;&amp; insetTop == 0 &amp;&amp; insetBottom == 0);</span>
-<span class="fc" id="L454">            ComponentExtension.from(c).paintBackground(g, customWipe, localGraphics -&gt; {</span>
+<span class="fc" id="L454">            ComponentBackend.powering(c).paintBackground(g, customWipe, localGraphics -&gt; {</span>
 <span class="pc bpc" id="L455" title="1 of 4 branches missed.">                if (shouldPaintFormerUI &amp;&amp; _formerUI != null)</span>
 <span class="fc" id="L456">                    _paintComponentThroughFormerUI(_formerUI, localGraphics, c);</span>
 <span class="fc" id="L457">            });</span>
@@ -472,13 +472,13 @@ final class DynamicLaF
     ) {
         try {
 <span class="pc bpc" id="L474" title="1 of 2 branches missed.">            if ( formerUI != null ) {</span>
-<span class="fc" id="L475">                StyleConf styleConf = ComponentExtension.from(c).getStyle();</span>
+<span class="fc" id="L475">                StyleConf styleConf = ComponentBackend.powering(c).getStyle();</span>
 <span class="fc" id="L476">                boolean hasMargin       = styleConf.margin().isPositive();</span>
 <span class="fc" id="L477">                boolean hasBorderRadius = styleConf.border().hasAnyNonZeroArcs();</span>
 <span class="fc bfc" id="L478" title="All 4 branches covered.">                if ( !hasMargin &amp;&amp; !hasBorderRadius )</span>
 <span class="fc" id="L479">                    formerUI.update(g, c);</span>
                 else {
-<span class="fc" id="L481">                    ComponentExtension.from(c).gatherStyleAndPaintInScope(g, ()-&gt;{</span>
+<span class="fc" id="L481">                    ComponentBackend.powering(c).gatherStyleAndPaintInScope(g, ()-&gt;{</span>
 <span class="fc" id="L482">                        formerUI.update(g, c);</span>
 <span class="fc" id="L483">                    });</span>
                 }
@@ -543,7 +543,7 @@ final class DynamicLaF
 <span class="nc" id="L543">                return;</span>
             }
 <span class="fc" id="L545">            JComponent owner = (JComponent) source;</span>
-<span class="fc" id="L546">            ComponentExtension.from(owner).updateDynamicLookAndFeel( oldLaf -&gt; {</span>
+<span class="fc" id="L546">            ComponentBackend.powering(owner).updateDynamicLookAndFeel(oldLaf -&gt; {</span>
 <span class="pc bpc" id="L547" title="1 of 2 branches missed.">                if (  oldLaf.customLookAndFeelIsInstalled() )</span>
 <span class="fc" id="L548">                    oldLaf = oldLaf._installCustomLaF(owner, true);</span>
 <span class="fc" id="L549">                return oldLaf;</span>

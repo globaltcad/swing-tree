@@ -46,7 +46,7 @@ public interface StylableComponent
 
     /**
      *  This method is expected to be implemented as follows
-     *  within a component extension which ought to be made compatible
+     *  within a component backend which ought to be made compatible
      *  with SwingTree.
      *  &lt;pre&gt;
      *      {@literal @}Override
@@ -75,7 +75,7 @@ public interface StylableComponent
     /**
      *  &lt;b&gt;
      *      This default method is not intended to be overridden by client code!
-     *      It delegates the painting to the library internal {@link ComponentExtension}.
+     *      It delegates the painting to the library internal {@link ComponentBackend}.
      *  &lt;/b&gt;
      *
      * @param g The graphics context to paint on.
@@ -83,7 +83,7 @@ public interface StylableComponent
      */
     /*final*/ default void paintBackground( Graphics g, Consumer&lt;Graphics&gt; superPaint ) {
 <span class="pc bpc" id="L85" title="1 of 2 branches missed.">        if ( this instanceof JComponent ) {</span>
-<span class="fc" id="L86">            ComponentExtension.from((JComponent) this).paintBackgroundIfNeeded( g, superPaint );</span>
+<span class="fc" id="L86">            ComponentBackend.powering((JComponent) this).paintBackgroundIfNeeded( g, superPaint );</span>
         }
         else
 <span class="nc" id="L89">            throw new UnsupportedOperationException( &quot;This interface is only intended for JComponent implementations&quot; );</span>
@@ -92,7 +92,7 @@ public interface StylableComponent
     /**
      *  &lt;b&gt;
      *      This default method is not intended to be overridden by client code!
-     *      It delegates the painting to the library internal {@link ComponentExtension}.
+     *      It delegates the painting to the library internal {@link ComponentBackend}.
      *  &lt;/b&gt;
      *
      * @param g The graphics context to paint on.
@@ -100,7 +100,7 @@ public interface StylableComponent
      */
     /*final*/ default void paintForeground( Graphics g, Consumer&lt;Graphics&gt; superPaint ) {
 <span class="pc bpc" id="L102" title="1 of 2 branches missed.">        if ( this instanceof JComponent ) {</span>
-<span class="fc" id="L103">            ComponentExtension.from((JComponent) this).paintForeground( (Graphics2D) g, superPaint );</span>
+<span class="fc" id="L103">            ComponentBackend.powering((JComponent) this).paintForeground( (Graphics2D) g, superPaint );</span>
         }
         else
 <span class="nc" id="L106">            throw new UnsupportedOperationException( &quot;This interface is only intended for JComponent implementations&quot; );</span>

@@ -8,7 +8,7 @@ import sprouts.Action;
 import sprouts.impl.SequenceDiff;
 import sprouts.impl.SequenceDiffOwner;
 import swingtree.api.mvvm.TabSupplier;
-import swingtree.style.ComponentExtension;
+import swingtree.style.ComponentBackend;
 import swingtree.threading.EventProcessor;
 
 import javax.swing.*;
@@ -1071,8 +1071,8 @@ public final class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAny
 
     private static final class OnSelectionMultiplexer implements ChangeListener {
         static OnSelectionMultiplexer of(JTabbedPane pane) {
-<span class="nc" id="L1074">            ComponentExtension&lt;JTabbedPane&gt; extension = ComponentExtension.from(pane);</span>
-<span class="nc" id="L1075">            OnSelectionMultiplexer found = extension.getOrSet(OnSelectionMultiplexer.class, ()-&gt;new OnSelectionMultiplexer(pane));</span>
+<span class="nc" id="L1074">            ComponentBackend&lt;JTabbedPane&gt; backend = ComponentBackend.powering(pane);</span>
+<span class="nc" id="L1075">            OnSelectionMultiplexer found = backend.getOrSet(OnSelectionMultiplexer.class, ()-&gt;new OnSelectionMultiplexer(pane));</span>
 <span class="nc" id="L1076">            return found;</span>
         }
 
@@ -1167,7 +1167,7 @@ public final class UIForTabbedPane&lt;P extends JTabbedPane&gt; extends UIForAny
 <span class="fc" id="L1167">    private static class ExtraState extends DefaultSingleSelectionModel</span>
     {
         static ExtraState of( JTabbedPane pane ) {
-<span class="fc" id="L1170">            return ComponentExtension.from(pane)</span>
+<span class="fc" id="L1170">            return ComponentBackend.powering(pane)</span>
 <span class="fc" id="L1171">                    .getOrSet(ExtraState.class, ExtraState::new);</span>
         }
 
