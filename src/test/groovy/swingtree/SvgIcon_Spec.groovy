@@ -2147,7 +2147,7 @@ class SvgIcon_Spec extends Specification
             '0 0 100 100'| UI.FitComponent.MAX_DIM   | 60        | 90         || Bounds.of(0, 0, 90, 90)
             // `NO` has no declared size to keep, so it reaches for the area as well:
             '0 0 100 100'| UI.FitComponent.NO        | 90        | 60         || Bounds.of(0, 0, 60, 60)
-            '0 0 100 100'| UI.FitComponent.NO        | 60        | 90         || Bounds.of(0, 0, 90, 90)
+            '0 0 100 100'| UI.FitComponent.NO        | 60        | 90         || Bounds.of(0, 0, 60, 60)
 
             // A view box twice as wide as it is tall keeps that ratio in every area shape:
             '0 0 200 100'| UI.FitComponent.UNDEFINED | 90        | 60         || Bounds.of(0, 0, 120, 60)
@@ -2158,6 +2158,87 @@ class SvgIcon_Spec extends Specification
             '0 0 200 100'| UI.FitComponent.MIN_DIM   | 60        | 90         || Bounds.of(0, 0,  60, 30)
             '0 0 200 100'| UI.FitComponent.MAX_DIM   | 90        | 60         || Bounds.of(0, 0,  90, 45)
             '0 0 200 100'| UI.FitComponent.MAX_DIM   | 60        | 90         || Bounds.of(0, 0, 180, 90)
+    }
+
+    def 'A document without a declared size is sized the same way whichever way round it is.'(
+        String viewBox, UI.FitComponent fitMode, int areaWidth, int areaHeight, Bounds expectedCoverage
+    ) {
+        reportInfo """
+            A document that declares no `width` and no `height` is sized entirely by the area it is
+            painted into, and nothing about that sizing may depend on which way round the document
+            happens to be drawn. Turning both the document and the area on their side has to turn
+            the result on its side too: a view box twice as wide as it is tall, painted into an area
+            of 90 by 60 pixels, must end up as wide as a view box twice as tall as it is wide ends
+            up tall in an area of 60 by 90 pixels.
+
+            The rule that decides the size is the one `UI.FitComponent.MIN_DIM` names, because a
+            document without a declared size has nothing for `NO` or `UNDEFINED` to keep: the
+            document grows until the smaller of the two area dimensions is full, which for a view
+            box that is not square means the larger dimension overflows the area.
+        """
+        given : 'A UI scale factor of 1, so that developer pixels and component pixels agree.'
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(1f) )
+        and : 'An SVG document without declared dimensions, whose view box is filled edge to edge with orange.'
+            var viewBoxParts = viewBox.split(" ")
+            var icon = SvgIcon.of(
+                        "<svg viewBox=\"${viewBox}\"><rect x=\"0\" y=\"0\" " +
+                        "width=\"${viewBoxParts[2]}\" height=\"${viewBoxParts[3]}\" fill=\"orange\"/></svg>"
+                    )
+                    .withFitComponent(fitMode)
+                    .withPreferredPlacement(UI.Placement.TOP_LEFT)
+        and : 'A way to measure the rectangle of pixels the orange of the document ended up covering.'
+            var orangeCoverage = { BufferedImage img ->
+                int left = Integer.MAX_VALUE, top = Integer.MAX_VALUE, right = -1, bottom = -1
+                for ( int y = 0; y < img.getHeight(); y++ )
+                    for ( int x = 0; x < img.getWidth(); x++ ) {
+                        var pixel = new Color(img.getRGB(x, y), true)
+                        if ( pixel.getAlpha() >= 128 && pixel.getRed() >= 128 && pixel.getBlue() < 128 ) {
+                            left = Math.min(left, x) ; top    = Math.min(top, y)
+                            right = Math.max(right, x); bottom = Math.max(bottom, y)
+                        }
+                    }
+                return right < 0 ? Bounds.none() : Bounds.of(left, top, right - left + 1, bottom - top + 1)
+            }
+
+        when : 'We paint the icon into the top left corner of an area of the given shape...'
+            var panel = UI.panel().get(JPanel)
+            panel.setSize(areaWidth, areaHeight)
+            var image = new BufferedImage(250, 250, BufferedImage.TYPE_INT_ARGB)
+            var graphics = image.createGraphics()
+            icon.paintIcon(panel, graphics, 0, 0)
+            graphics.dispose()
+        then : 'The orange covers exactly the area we expect.'
+            orangeCoverage(image) == expectedCoverage
+
+        cleanup :
+            SwingTree.clear()
+
+        where :
+            viewBox       | fitMode                   | areaWidth | areaHeight || expectedCoverage
+
+            // A square view box fills the smaller area dimension, whichever of the two it is:
+            '0 0 100 100' | UI.FitComponent.MIN_DIM   | 90        | 60         || Bounds.of(0, 0,  60,  60)
+            '0 0 100 100' | UI.FitComponent.MIN_DIM   | 60        | 90         || Bounds.of(0, 0,  60,  60)
+            '0 0 100 100' | UI.FitComponent.UNDEFINED | 90        | 60         || Bounds.of(0, 0,  60,  60)
+            '0 0 100 100' | UI.FitComponent.UNDEFINED | 60        | 90         || Bounds.of(0, 0,  60,  60)
+            '0 0 100 100' | UI.FitComponent.NO        | 90        | 60         || Bounds.of(0, 0,  60,  60)
+            '0 0 100 100' | UI.FitComponent.NO        | 60        | 90         || Bounds.of(0, 0,  60,  60)
+
+            // A view box twice as wide as it is tall, and its mirror image, in mirrored areas:
+            '0 0 200 100' | UI.FitComponent.MIN_DIM   | 90        | 60         || Bounds.of(0, 0, 120,  60)
+            '0 0 100 200' | UI.FitComponent.MIN_DIM   | 60        | 90         || Bounds.of(0, 0,  60, 120)
+            '0 0 200 100' | UI.FitComponent.UNDEFINED | 90        | 60         || Bounds.of(0, 0, 120,  60)
+            '0 0 100 200' | UI.FitComponent.UNDEFINED | 60        | 90         || Bounds.of(0, 0,  60, 120)
+            '0 0 200 100' | UI.FitComponent.NO        | 90        | 60         || Bounds.of(0, 0, 120,  60)
+            '0 0 100 200' | UI.FitComponent.NO        | 60        | 90         || Bounds.of(0, 0,  60, 120)
+
+            // ...and the other way around, where the smaller area dimension crops the long side:
+            '0 0 200 100' | UI.FitComponent.MIN_DIM   | 60        | 90         || Bounds.of(0, 0,  60,  30)
+            '0 0 100 200' | UI.FitComponent.MIN_DIM   | 90        | 60         || Bounds.of(0, 0,  30,  60)
+            '0 0 200 100' | UI.FitComponent.UNDEFINED | 60        | 90         || Bounds.of(0, 0,  60,  30)
+            '0 0 100 200' | UI.FitComponent.UNDEFINED | 90        | 60         || Bounds.of(0, 0,  30,  60)
+            '0 0 200 100' | UI.FitComponent.NO        | 60        | 90         || Bounds.of(0, 0,  60,  30)
+            '0 0 100 200' | UI.FitComponent.NO        | 90        | 60         || Bounds.of(0, 0,  30,  60)
     }
 
     def 'An `SvgIcon` larger than the component it is painted onto is not cropped to it.'(
