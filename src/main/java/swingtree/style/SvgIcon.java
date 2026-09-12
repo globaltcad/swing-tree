@@ -60,12 +60,23 @@ import java.util.regex.Pattern;
  *   scaled to the current DPI settings (component pixel space), whereas {@link #getBaseWidth()}
  *   and {@link #getBaseHeight()} expose the unscaled size (developer pixel space).
  *   <p>
- *   An {@link SvgIcon} with an undefined width or height will also be using the {@link UI.FitComponent}
- *   and {@link UI.Placement} policies to determine how the icon should be placed and sized within a component.
- *   Use the {@link #withFitComponent(UI.FitComponent)} and {@link #withPreferredPlacement(UI.Placement)}
- *   methods to create a new {@link SvgIcon} with the given policies and use the {@link #getFitComponent()}
- *   and {@link #getPreferredPlacement()} methods to retrieve the current policies
- *   (Note that these will not have any effect if the width and height are both defined).
+ *   Where inside a component the icon is drawn, and how large, is decided by two policies the icon
+ *   carries: {@link UI.Placement} names the position and {@link UI.FitComponent} names the size.
+ *   Use {@link #withPreferredPlacement(UI.Placement)} and {@link #withFitComponent(UI.FitComponent)}
+ *   to create a new {@link SvgIcon} with the given policies, and {@link #getPreferredPlacement()}
+ *   and {@link #getFitComponent()} to read them back. They divide the work as follows:
+ *   <ul>
+ *       <li>A named {@link UI.FitComponent} always decides the size, whether or not the icon
+ *       has a size of its own.</li>
+ *       <li>Without one, an icon that has a size keeps it, and a {@link UI.Placement} only moves
+ *       it around, which is why {@link UI.FitComponent#UNDEFINED} then behaves like
+ *       {@link UI.FitComponent#NO}.</li>
+ *       <li>Without one, an icon that has neither a width nor a height has no size to keep,
+ *       so it is measured against the component the way {@link UI.FitComponent#MIN_DIM}
+ *       measures it.</li>
+ *   </ul>
+ *   An icon is never shrunk below the size it reports: a component smaller than the icon is
+ *   painted over rather than fitted to.
  *   <p>
  *   <b>Also note that the direct use of this class and its API is discouraged in favour of simply
  *   calling the {@link UI#findIcon(String)} or {@link UI#findSvgIcon(String)} methods, which
@@ -1131,14 +1142,12 @@ public final class SvgIcon extends ImageIcon
         final int scaledHeight = getIconHeight();
 
         UI.Placement preferredPlacement = _preferredPlacement;
-        UI.FitComponent fitComponent = _fitComponent;
+        UI.FitComponent fitComponent = _resolvedFitComponent();
 
         // If this SVG has no special layout requirements, we render it exactly like expected in Swing:
         boolean weNeedToRenderLikeTheInvokerWantsTo = preferredPlacement == UI.Placement.UNDEFINED &&
-                                                      fitComponent == UI.FitComponent.UNDEFINED;
+                                                      _fitComponent == UI.FitComponent.UNDEFINED;
 
-        if ( fitComponent == UI.FitComponent.UNDEFINED )
-            fitComponent = UI.FitComponent.MIN_DIM; // best default!
         if ( preferredPlacement == UI.Placement.UNDEFINED && c instanceof JComponent )
             preferredPlacement = ComponentBackend.powering((JComponent) c).preferredIconPlacement();
 
@@ -1214,11 +1223,16 @@ public final class SvgIcon extends ImageIcon
         final Offset offset,
         final Outline padding
     ) {
+        _paintIcon( c, g, bounds, offset, _preferredPlacement, _resolvedFitComponent(), padding);
+    }
+
+    private UI.FitComponent _resolvedFitComponent() {
+        if ( _fitComponent != UI.FitComponent.UNDEFINED )
+            return _fitComponent;
         Size size = _size();
-        UI.FitComponent fitComponent = _fitComponent;
-        if ( fitComponent == UI.FitComponent.UNDEFINED && !size.width().isPresent() && !size.height().isPresent() )
-            fitComponent = UI.FitComponent.MIN_DIM; // best default!
-        _paintIcon( c, g, bounds, offset, _preferredPlacement, fitComponent, padding);
+        if ( size.width().isPresent() || size.height().isPresent() )
+            return UI.FitComponent.UNDEFINED;
+        return UI.FitComponent.MIN_DIM;
     }
 
     private Size _computeBaseSizeFrom( int areaWidth, int areaHeight ) {
@@ -1346,8 +1360,6 @@ public final class SvgIcon extends ImageIcon
                 return Size.of(iconWidth * toAreaWidth, iconHeight * toAreaHeight);
             case MIN_DIM:
             case MAX_DIM:
-                if ( areaWidth == areaHeight )
-                    return Size.of(iconWidth, iconHeight);
                 boolean widthIsTheShorterSide = ( areaWidth < areaHeight );
                 boolean fitToAreaWidth = ( widthIsTheShorterSide == ( fitComponent == UI.FitComponent.MIN_DIM ) );
                 float   scale          = ( fitToAreaWidth ? toAreaWidth : toAreaHeight );
