@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>LayerRenderConf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.style</a> &gt; <span class="el_source">LayerRenderConf.java</span></div><h1>LayerRenderConf.java</h1><pre class="source lang-java linenums">package swingtree.style;
+
+import com.google.errorprone.annotations.Immutable;
+import swingtree.UI;
+import swingtree.layout.Size;
+
+import java.awt.Graphics2D;
+import java.util.Objects;
+import java.util.Optional;
+
+/**
+ *  An immutable snapshot of essential component state needed for rendering
+ *  the style of a particular component layer using the {@link StyleRenderer} and its
+ *  {@link StyleRenderer#renderStyleOn(UI.Layer, LayerRenderConf, Graphics2D)} method. &lt;br&gt;
+ *  This (and all of its parts) is immutable to use it as a basis for caching.
+ *  When the config changes compared to the previous one, the image buffer based
+ *  render cache is being invalidated and the component is rendered again
+ *  (potentially with a new cached image buffer).
+ *  &lt;p&gt;
+ *  &lt;b&gt;Warning to maintainers:&lt;/b&gt; the component {@link swingtree.layout.Size} carried by the
+ *  {@link #boxModel()} must remain the &lt;i&gt;only&lt;/i&gt; size dependent property reachable from here.
+ *  {@link LayerPartitionCache} relies on it: for stretch tileable styles it derives a size independent
+ *  cache key by swapping in a smaller size through {@link #withBoxModel(BoxModelConf)} and
+ *  reconstructs any actual size from the resulting rendering. A newly added field whose value
+ *  (or whose rendering) depends on the component size would silently break that reconstruction,
+ *  producing subtly wrong pixels rather than a failure. Should such a field become necessary,
+ *  {@link #_compactionFor(LayerRenderConf)} must return {@link Compaction#NONE} whenever it is
+ *  set.
+ */
+@Immutable
+@SuppressWarnings(&quot;Immutable&quot;)
+final class LayerRenderConf
+{
+    private static final int STRETCH_BAND  = 2; // Freely stretchable band between the slice insets; one pixel suffices mathematically, two give slack.
+    private static final int SAFETY_MARGIN = 2; // Added to every slice inset to absorb antialiasing bleed and artifact adjustments in the renderer.
+<span class="fc" id="L36">    private static final LayerRenderConf _NONE = new LayerRenderConf(</span>
+<span class="fc" id="L37">                                                    BoxModelConf.none(),</span>
+<span class="fc" id="L38">                                                    BaseColorConf.none(),</span>
+<span class="fc" id="L39">                                                    StyleConfLayer.empty()</span>
+                                                );
+
+<span class="fc" id="L42">    public static LayerRenderConf none() { return _NONE; }</span>
+
+    private final Pooled&lt;BoxModelConf&gt; _boxModelConf;
+    private final BaseColorConf _baseColor;
+    private final StyleConfLayer _layer;
+    private final LazyRef&lt;LayerRenderConf&gt; _canonicalRepresentation;
+    private final LazyRef&lt;Outline&gt; _nineTileSliceInsets;
+
+    private LayerRenderConf(
+        BoxModelConf   boxModelConf,
+        BaseColorConf  base,
+        StyleConfLayer layers
+<span class="fc" id="L54">    ) {</span>
+<span class="fc" id="L55">        _boxModelConf = new Pooled&lt;&gt;(Objects.requireNonNull(boxModelConf)).intern();</span>
+<span class="fc" id="L56">        _baseColor    = Objects.requireNonNull(base);</span>
+<span class="fc" id="L57">        _layer        = Objects.requireNonNull(layers);</span>
+<span class="fc" id="L58">        _canonicalRepresentation = new LazyRef&lt;&gt;(this, LayerRenderConf::_canonicalize);</span>
+<span class="fc" id="L59">        _nineTileSliceInsets = new LazyRef&lt;&gt;(this, LayerRenderConf::_compute9PatchSliceInsets);</span>
+<span class="fc" id="L60">    }</span>
+
+    static LayerRenderConf of( UI.Layer layer, ComponentConf fullConf ) {
+<span class="fc" id="L63">        BoxModelConf boxModelConf = BoxModelConf.of(</span>
+<span class="fc" id="L64">                                        fullConf.style().border(),</span>
+<span class="fc" id="L65">                                        fullConf.areaMarginCorrection(),</span>
+<span class="fc" id="L66">                                        fullConf.currentBounds().size()</span>
+                                    );
+<span class="fc" id="L68">        BaseColorConf colorConf = BaseColorConf.of(</span>
+<span class="fc bfc" id="L69" title="All 2 branches covered.">                                    fullConf.style().base().foundationColor().filter( c -&gt; layer == UI.Layer.BACKGROUND ).orElse(null),</span>
+<span class="fc bfc" id="L70" title="All 2 branches covered.">                                    fullConf.style().base().backgroundColor().filter( c -&gt; layer == UI.Layer.BACKGROUND ).orElse(null),</span>
+<span class="fc bfc" id="L71" title="All 2 branches covered.">                                    layer == UI.Layer.BORDER ? fullConf.style().border().colors() : BorderColorsConf.none()</span>
+                                );
+<span class="fc" id="L73">        return of(</span>
+                    boxModelConf,
+                    colorConf,
+<span class="fc" id="L76">                    fullConf.style().layer(layer)</span>
+                );
+    }
+
+    private static LayerRenderConf of(
+        final BoxModelConf   boxModelConf,
+        final BaseColorConf  base,
+        final StyleConfLayer layers
+    ) {
+<span class="fc" id="L85">        if (</span>
+<span class="pc bpc" id="L86" title="1 of 2 branches missed.">                boxModelConf .equals( BoxModelConf.none()  ) &amp;&amp;</span>
+<span class="nc bnc" id="L87" title="All 2 branches missed.">                        base         .equals( BaseColorConf.none() ) &amp;&amp;</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">                        layers       .equals( _NONE._layer )</span>
+        )
+<span class="nc" id="L90">            return _NONE;</span>
+        else
+<span class="fc" id="L92">            return new LayerRenderConf(boxModelConf, base, layers);</span>
+    }
+
+<span class="fc" id="L95">    BoxModelConf boxModel() { return _boxModelConf.get(); }</span>
+
+    /**
+     *  Returns a new {@link LayerRenderConf} with the supplied box model
+     *  and everything else unchanged. Used by {@link LayerPartitionCache} to derive
+     *  a size independent canonical render configuration from this one.
+     */
+    LayerRenderConf withBoxModel( BoxModelConf boxModelConf ) {
+<span class="pc bpc" id="L103" title="1 of 2 branches missed.">        if ( boxModelConf.equals(_boxModelConf.get()) )</span>
+<span class="nc" id="L104">            return this;</span>
+<span class="fc" id="L105">        return of(boxModelConf, _baseColor, _layer);</span>
+    }
+
+<span class="fc" id="L108">    BaseColorConf baseColors() { return _baseColor; }</span>
+
+    /**
+     *  Returns a new {@link LayerRenderConf} with the supplied base colors and everything
+     *  else unchanged. Used by {@link LayerRenderConfPartition} to narrow this configuration down to
+     *  a single part of the layer.
+     */
+    LayerRenderConf withBaseColors( BaseColorConf baseColors ) {
+<span class="fc bfc" id="L116" title="All 2 branches covered.">        if ( baseColors.equals(_baseColor) )</span>
+<span class="fc" id="L117">            return this;</span>
+<span class="fc" id="L118">        return of(_boxModelConf.get(), baseColors, _layer);</span>
+    }
+
+<span class="fc" id="L121">    StyleConfLayer layer() { return _layer; }</span>
+
+    /**
+     *  Returns a new {@link LayerRenderConf} with the supplied style layer and everything
+     *  else unchanged. Used by {@link LayerRenderConfPartition} to narrow this configuration down to
+     *  a single part of the layer.
+     */
+    LayerRenderConf withLayer( StyleConfLayer layer ) {
+<span class="fc bfc" id="L129" title="All 2 branches covered.">        if ( layer.equals(_layer) )</span>
+<span class="fc" id="L130">            return this;</span>
+<span class="fc" id="L131">        return of(_boxModelConf.get(), _baseColor, layer);</span>
+    }
+
+    /** Whether handing this to the style renderer would put no pixels anywhere - a common
+     *  outcome of narrowing a configuration down to a {@link LayerRenderConfPartition}. */
+    boolean rendersNothing() {
+<span class="fc bfc" id="L137" title="All 4 branches covered.">        return _baseColor.equals(BaseColorConf.none()) &amp;&amp; _layer.isNone();</span>
+    }
+
+<span class="fc" id="L140">    ComponentAreas areas() { return ComponentAreas.of(_boxModelConf); }</span>
+
+    LayerRenderConf canonicalRepresentation() {
+<span class="fc" id="L143">        return _canonicalRepresentation.get();</span>
+    }
+
+    Outline nineTileSliceInsets() {
+<span class="fc" id="L147">        return _nineTileSliceInsets.get();</span>
+    }
+
+    @Override
+    public int hashCode() {
+<span class="fc" id="L152">        return Objects.hash(_boxModelConf, _baseColor, _layer);</span>
+    }
+
+    @Override
+    public boolean equals( Object o ) {
+<span class="fc bfc" id="L157" title="All 2 branches covered.">        if ( o == this ) return true;</span>
+<span class="pc bpc" id="L158" title="1 of 2 branches missed.">        if ( o == null ) return false;</span>
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">        if ( o.getClass() != this.getClass() ) return false;</span>
+<span class="fc" id="L160">        LayerRenderConf other = (LayerRenderConf) o;</span>
+<span class="fc bfc" id="L161" title="All 2 branches covered.">        return Objects.equals(_boxModelConf, other._boxModelConf) &amp;&amp;</span>
+<span class="fc bfc" id="L162" title="All 2 branches covered.">               Objects.equals(_baseColor, other._baseColor) &amp;&amp;</span>
+<span class="fc bfc" id="L163" title="All 2 branches covered.">               Objects.equals(_layer, other._layer);</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L168">        return getClass().getSimpleName()+&quot;[&quot; +</span>
+<span class="nc" id="L169">                    &quot;boxModel=&quot; + _boxModelConf.get() + &quot;, &quot; +</span>
+                    &quot;baseColor=&quot; + _baseColor + &quot;, &quot; +
+                    &quot;layer=&quot; + _layer +
+                ']';
+    }
+
+
+    // Canonical (size independent) representation for 9 patch caching:
+
+    /**
+     *  Maps a configuration of any size onto its exemplar key. A dimension is compacted only if
+     *  the layer repeats along it (see the {@link LayerPartitionCache} class documentation) and
+     *  the component is larger than the exemplar in it, because a dimension the exemplar already
+     *  fills has nothing left for the blit to stretch. A layer can repeat along the width while
+     *  only the height is larger than the exemplar, and then neither dimension is compacted and
+     *  the configuration comes back unchanged. Compacting a dimension also takes away its room
+     *  to stretch, which is what makes this idempotent: a configuration already at the exemplar
+     *  size maps onto itself.
+     */
+    private static LayerRenderConf _canonicalize( LayerRenderConf conf ) {
+<span class="fc" id="L189">        Compaction compaction = _compactionFor(conf);</span>
+<span class="fc bfc" id="L190" title="All 2 branches covered.">        if ( compaction == Compaction.NONE )</span>
+<span class="fc" id="L191">            return conf;</span>
+
+<span class="fc" id="L193">        final Outline sliceInsets = conf.nineTileSliceInsets();</span>
+<span class="fc" id="L194">        final Size    exemplar    = _exemplarSize(sliceInsets);</span>
+<span class="fc" id="L195">        final Size    actual      = conf.boxModel().size();</span>
+
+<span class="fc bfc" id="L197" title="All 2 branches covered.">        if ( !_borderEdgeSeamsAreSizeIndependent(conf, sliceInsets, exemplar) )</span>
+<span class="fc" id="L198">            return conf;</span>
+
+<span class="fc" id="L200">        compaction = compaction.and(Compaction._of(</span>
+<span class="fc bfc" id="L201" title="All 2 branches covered.">                            actual.widthOrElse(0f)  &gt; exemplar.widthOrElse(0f),</span>
+<span class="fc bfc" id="L202" title="All 2 branches covered.">                            actual.heightOrElse(0f) &gt; exemplar.heightOrElse(0f)</span>
+                        ));
+<span class="fc bfc" id="L204" title="All 2 branches covered.">        if ( compaction == Compaction.NONE )</span>
+<span class="fc" id="L205">            return conf;</span>
+
+<span class="fc" id="L207">        final Size canonical = Size.of(</span>
+<span class="fc bfc" id="L208" title="All 2 branches covered.">                                    compaction.includesWidth()  ? exemplar.widthOrElse(0f)  : actual.widthOrElse(0f),</span>
+<span class="fc bfc" id="L209" title="All 2 branches covered.">                                    compaction.includesHeight() ? exemplar.heightOrElse(0f) : actual.heightOrElse(0f)</span>
+                                );
+
+<span class="fc" id="L212">        return conf.withBoxModel(conf.boxModel().withSize(canonical));</span>
+    }
+
+    /**
+     *  Which of an exemplar's two dimensions we compacted to their minimum instead of taking
+     *  them from the component, and stretch back on paint. A resize in a compacted dimension
+     *  keeps the key; a resize in an uncompacted dimension gives a new one.
+     */
+<span class="fc" id="L220">    enum Compaction</span>
+    {
+<span class="fc" id="L222">        NONE(false, false), WIDTH(true, false), HEIGHT(false, true), BOTH(true, true);</span>
+
+        static Compaction between( Size key, Size actual ) {
+<span class="fc" id="L225">            return _of(</span>
+<span class="fc bfc" id="L226" title="All 2 branches covered.">                    key.widthOrElse(0f)  != actual.widthOrElse(0f),</span>
+<span class="fc bfc" id="L227" title="All 2 branches covered.">                    key.heightOrElse(0f) != actual.heightOrElse(0f)</span>
+                );
+        }
+
+        private final boolean _width;
+        private final boolean _height;
+
+<span class="fc" id="L234">        Compaction( boolean width, boolean height ) {</span>
+<span class="fc" id="L235">            _width  = width;</span>
+<span class="fc" id="L236">            _height = height;</span>
+<span class="fc" id="L237">        }</span>
+
+<span class="fc" id="L239">        boolean includesWidth()  { return _width;  }</span>
+<span class="fc" id="L240">        boolean includesHeight() { return _height; }</span>
+
+        /** The dimensions both of them allow, for a layer that has to satisfy two of these at once. */
+        Compaction and( Compaction other ) {
+<span class="fc bfc" id="L244" title="All 8 branches covered.">            return _of(_width &amp;&amp; other._width, _height &amp;&amp; other._height);</span>
+        }
+
+        private static Compaction _of( boolean width, boolean height ) {
+<span class="fc bfc" id="L248" title="All 2 branches covered.">            if ( width )</span>
+<span class="fc bfc" id="L249" title="All 2 branches covered.">                return height ? BOTH : WIDTH;</span>
+            else
+<span class="fc bfc" id="L251" title="All 2 branches covered.">                return height ? HEIGHT : NONE;</span>
+        }
+    }
+
+    /**
+     *  How far the size dependent pixels reach into the component from each side; everything
+     *  between opposite insets repeats and may be stretched freely. A pure function of the size
+     *  independent parts of the configuration, so the blit can recompute it and is guaranteed
+     *  to agree with the canonicalization.
+     */
+    private static Outline _compute9PatchSliceInsets(LayerRenderConf conf ) {
+<span class="fc" id="L262">        final BoxModelConf box = conf.boxModel();</span>
+
+<span class="fc" id="L264">        final float marginTop    = _positive(box.margin().top());</span>
+<span class="fc" id="L265">        final float marginRight  = _positive(box.margin().right());</span>
+<span class="fc" id="L266">        final float marginBottom = _positive(box.margin().bottom());</span>
+<span class="fc" id="L267">        final float marginLeft   = _positive(box.margin().left());</span>
+
+<span class="fc" id="L269">        final float baseTop    = _positive(box.baseOutline().top());</span>
+<span class="fc" id="L270">        final float baseRight  = _positive(box.baseOutline().right());</span>
+<span class="fc" id="L271">        final float baseBottom = _positive(box.baseOutline().bottom());</span>
+<span class="fc" id="L272">        final float baseLeft   = _positive(box.baseOutline().left());</span>
+
+<span class="fc" id="L274">        final float widthTop    = _positive(box.widths().top());</span>
+<span class="fc" id="L275">        final float widthRight  = _positive(box.widths().right());</span>
+<span class="fc" id="L276">        final float widthBottom = _positive(box.widths().bottom());</span>
+<span class="fc" id="L277">        final float widthLeft   = _positive(box.widths().left());</span>
+
+        // Per side, the larger of the two adjacent corner arc extents:
+<span class="fc" id="L280">        final float arcTop    = Math.max(_arcHeight(box.topLeftArc()),    _arcHeight(box.topRightArc())   );</span>
+<span class="fc" id="L281">        final float arcRight  = Math.max(_arcWidth(box.topRightArc()),    _arcWidth(box.bottomRightArc()) );</span>
+<span class="fc" id="L282">        final float arcBottom = Math.max(_arcHeight(box.bottomLeftArc()), _arcHeight(box.bottomRightArc()));</span>
+<span class="fc" id="L283">        final float arcLeft   = Math.max(_arcWidth(box.topLeftArc()),     _arcWidth(box.bottomLeftArc())  );</span>
+
+        /*
+            A shadow's 2D-varying pixels extend beyond its geometric box: its gradients
+            fade over blur + spread + gradient start offset, and the whole shadow box is
+            displaced by the shadow offset. We conservatively use the same reach for all
+            four sides (overestimation only costs a few exemplar pixels).
+        */
+<span class="fc" id="L291">        float shadowReachH = 0;</span>
+<span class="fc" id="L292">        float shadowReachV = 0;</span>
+<span class="fc bfc" id="L293" title="All 2 branches covered.">        for ( ShadowConf shadow : conf.layer().shadows().sortedByNames() ) {</span>
+<span class="pc bpc" id="L294" title="1 of 4 branches missed.">            if ( shadow.equals(ShadowConf.none()) || !shadow.color().isPresent() )</span>
+<span class="nc" id="L295">                continue;</span>
+<span class="fc" id="L296">            final float blur   = Math.max(0, shadow.blurRadius());</span>
+<span class="fc" id="L297">            final float spread = Math.abs(shadow.spreadRadius());</span>
+<span class="fc" id="L298">            final float fade   = StyleRenderer.shadowGradientStartOffset(box, shadow);</span>
+<span class="fc" id="L299">            shadowReachH = Math.max(shadowReachH, blur + spread + fade + Math.abs(shadow.horizontalOffset()));</span>
+<span class="fc" id="L300">            shadowReachV = Math.max(shadowReachV, blur + spread + fade + Math.abs(shadow.verticalOffset()));</span>
+<span class="fc" id="L301">        }</span>
+
+<span class="fc" id="L303">        final float top    = marginTop    + baseTop    + widthTop    + arcTop    + shadowReachV + SAFETY_MARGIN;</span>
+<span class="fc" id="L304">        final float right  = marginRight  + baseRight  + widthRight  + arcRight  + shadowReachH + SAFETY_MARGIN;</span>
+<span class="fc" id="L305">        final float bottom = marginBottom + baseBottom + widthBottom + arcBottom + shadowReachV + SAFETY_MARGIN;</span>
+<span class="fc" id="L306">        final float left   = marginLeft   + baseLeft   + widthLeft   + arcLeft   + shadowReachH + SAFETY_MARGIN;</span>
+
+<span class="fc" id="L308">        return Outline.of(</span>
+<span class="fc" id="L309">                    (float) Math.ceil(top),</span>
+<span class="fc" id="L310">                    (float) Math.ceil(right),</span>
+<span class="fc" id="L311">                    (float) Math.ceil(bottom),</span>
+<span class="fc" id="L312">                    (float) Math.ceil(left)</span>
+                );
+    }
+
+    /** Which dimensions we may compact: we can shrink the width when every pixel strip along
+     *  the y axis is identical, and the height when every pixel strip along the x axis is. */
+    private static Compaction _compactionFor( LayerRenderConf conf ) {
+<span class="fc" id="L319">        final StyleConfLayer layer = conf.layer();</span>
+
+<span class="fc bfc" id="L321" title="All 2 branches covered.">        for ( Pooled&lt;NoiseConf&gt; noise : layer.noises().sortedByNames() )</span>
+<span class="fc bfc" id="L322" title="All 2 branches covered.">            if ( !noise.get().equals(NoiseConf.none()) )</span>
+<span class="fc" id="L323">                return Compaction.NONE; // Noise varies per pixel position.</span>
+
+<span class="fc bfc" id="L325" title="All 2 branches covered.">        for ( ImageConf image : layer.images().sortedByNames() )</span>
+<span class="fc bfc" id="L326" title="All 2 branches covered.">            if ( !image.equals(ImageConf.none()) )</span>
+<span class="fc" id="L327">                return Compaction.NONE; // Image placement/fit depends on the component bounds.</span>
+
+<span class="fc bfc" id="L329" title="All 2 branches covered.">        for ( TextConf text : layer.texts().sortedByNames() )</span>
+<span class="fc bfc" id="L330" title="All 2 branches covered.">            if ( !text.equals(TextConf.none()) )</span>
+<span class="fc" id="L331">                return Compaction.NONE; // Text layout depends on the component bounds.</span>
+
+<span class="fc bfc" id="L333" title="All 2 branches covered.">        for ( PainterConf painter : layer.painters().sortedByNames() )</span>
+<span class="fc bfc" id="L334" title="All 2 branches covered.">            if ( !painter.equals(PainterConf.none()) )</span>
+<span class="fc" id="L335">                return Compaction.NONE; // We cannot know what a custom painter does.</span>
+
+<span class="fc" id="L337">        Compaction compaction = Compaction.BOTH;</span>
+<span class="fc bfc" id="L338" title="All 2 branches covered.">        for ( GradientConf gradient : layer.gradients().sortedByNames() ) {</span>
+<span class="fc bfc" id="L339" title="All 2 branches covered.">            if ( gradient.equals(GradientConf.none()) )</span>
+<span class="fc" id="L340">                continue;</span>
+<span class="fc" id="L341">            compaction = compaction.and(_compactionAllowedBy(gradient));</span>
+<span class="fc bfc" id="L342" title="All 2 branches covered.">            if ( compaction == Compaction.NONE )</span>
+<span class="fc" id="L343">                return compaction;</span>
+<span class="fc" id="L344">        }</span>
+<span class="fc" id="L345">        return compaction;</span>
+    }
+
+    /**
+     *  A linear gradient straight down a component is built by
+     *  {@link StyleRenderer#createGradientPaint(BoxModelConf, GradientConf)} from two points
+     *  sharing an x coordinate, so the component width never enters its rendering and we can
+     *  compact the width; a gradient straight across is the same with the axes swapped. We turn
+     *  down every other kind, because they vary with x and y at once -
+     *  {@link UI.ComponentBoundary#CENTER_TO_CONTENT} because it derives its insets from the
+     *  component size itself.
+     */
+    private static Compaction _compactionAllowedBy( GradientConf gradient ) {
+<span class="fc bfc" id="L358" title="All 2 branches covered.">        if ( gradient.type() != UI.GradientType.LINEAR )</span>
+<span class="fc" id="L359">            return Compaction.NONE;</span>
+<span class="fc bfc" id="L360" title="All 2 branches covered.">        if ( gradient.rotation() % 360f != 0f )</span>
+<span class="fc" id="L361">            return Compaction.NONE;</span>
+<span class="fc bfc" id="L362" title="All 2 branches covered.">        if ( gradient.boundary() == UI.ComponentBoundary.CENTER_TO_CONTENT )</span>
+<span class="fc" id="L363">            return Compaction.NONE;</span>
+<span class="fc bfc" id="L364" title="All 3 branches covered.">        switch ( gradient.span() ) {</span>
+            case TOP_TO_BOTTOM:
+            case BOTTOM_TO_TOP:
+<span class="fc" id="L367">                return Compaction.WIDTH;</span>
+            case LEFT_TO_RIGHT:
+            case RIGHT_TO_LEFT:
+<span class="fc" id="L370">                return Compaction.HEIGHT;</span>
+            default:
+<span class="fc" id="L372">                return Compaction.NONE;</span>
+        }
+    }
+
+    /**
+     *  Whether the seams of a border with a different color per edge fall in the same place in
+     *  the exemplar as they do at any larger size, which is what lets such a border be
+     *  reconstructed from an exemplar rather than re-rendered per size. &lt;br&gt;
+     *  &lt;br&gt;
+     *  Note that the border edges divide the &lt;i&gt;margin box&lt;/i&gt; rather than the component: the
+     *  seams are placed within, and the slice insets measured from, two different origins, so the
+     *  margins have to be taken out of both before they can be compared.
+     * @see ComponentAreas#getEdgeAreas() For more context related code...
+     */
+    private static boolean _borderEdgeSeamsAreSizeIndependent(
+        LayerRenderConf conf,
+        Outline         sliceInsets,
+        Size            exemplar
+    ) {
+<span class="fc" id="L391">        final BorderColorsConf borderColors = conf.baseColors().borderColor();</span>
+<span class="fc bfc" id="L392" title="All 4 branches covered.">        if ( borderColors.equals(BorderColorsConf.none()) || borderColors.isHomogeneous() )</span>
+<span class="fc" id="L393">            return true;</span>
+<span class="fc bfc" id="L394" title="All 2 branches covered.">        if ( !conf.boxModel().hasAnyNonZeroArcs() )</span>
+<span class="fc" id="L395">            return true;</span>
+
+<span class="fc" id="L397">        final Outline widths = conf.boxModel().widths();</span>
+<span class="fc" id="L398">        final float   top    = _positive(widths.top());</span>
+<span class="fc" id="L399">        final float   right  = _positive(widths.right());</span>
+<span class="fc" id="L400">        final float   bottom = _positive(widths.bottom());</span>
+<span class="fc" id="L401">        final float   left   = _positive(widths.left());</span>
+<span class="pc bpc" id="L402" title="4 of 8 branches missed.">        if ( top &lt;= 0 || right &lt;= 0 || bottom &lt;= 0 || left &lt;= 0 )</span>
+<span class="nc" id="L403">            return false;</span>
+
+<span class="fc" id="L405">        final Outline margin       = conf.boxModel().margin();</span>
+<span class="fc" id="L406">        final float   marginTop    = _positive(margin.top());</span>
+<span class="fc" id="L407">        final float   marginRight  = _positive(margin.right());</span>
+<span class="fc" id="L408">        final float   marginBottom = _positive(margin.bottom());</span>
+<span class="fc" id="L409">        final float   marginLeft   = _positive(margin.left());</span>
+
+<span class="fc" id="L411">        final float boxWidth  = exemplar.widthOrElse(0f)  - marginLeft - marginRight;</span>
+<span class="fc" id="L412">        final float boxHeight = exemplar.heightOrElse(0f) - marginTop  - marginBottom;</span>
+<span class="pc bpc" id="L413" title="2 of 4 branches missed.">        if ( boxWidth &lt;= 0 || boxHeight &lt;= 0 )</span>
+<span class="nc" id="L414">            return false;</span>
+
+<span class="fc bfc" id="L416" title="All 2 branches covered.">        return boxHeight * top    &gt; ( _positive(sliceInsets.top())    - marginTop    ) * ( top  + bottom )</span>
+<span class="pc bpc" id="L417" title="1 of 2 branches missed.">            &amp;&amp; boxHeight * bottom &gt; ( _positive(sliceInsets.bottom()) - marginBottom ) * ( top  + bottom )</span>
+<span class="pc bpc" id="L418" title="1 of 2 branches missed.">            &amp;&amp; boxWidth  * left   &gt; ( _positive(sliceInsets.left())   - marginLeft   ) * ( left + right  )</span>
+<span class="pc bpc" id="L419" title="1 of 2 branches missed.">            &amp;&amp; boxWidth  * right  &gt; ( _positive(sliceInsets.right())  - marginRight  ) * ( left + right  );</span>
+    }
+
+    /**
+     *  The exemplar size for the supplied slice insets: {@code 2 * max(insetA, insetB) + band}
+     *  per axis. Symmetric, because some rendering internals split their work at the component
+     *  &lt;i&gt;center&lt;/i&gt; - corner shadow clip boxes meet there, and so do the seams between two
+     *  opposite border edges. The symmetric size guarantees the exemplar's center line falls
+     *  into the repeating band, keeping those artifacts pixel-identical to a real rendering of
+     *  any larger size.
+     */
+    private static Size _exemplarSize( Outline sliceInsets ) {
+<span class="fc" id="L431">        final float maxHorizontal = Math.max(sliceInsets.left().orElse(0f), sliceInsets.right().orElse(0f));</span>
+<span class="fc" id="L432">        final float maxVertical   = Math.max(sliceInsets.top().orElse(0f),  sliceInsets.bottom().orElse(0f));</span>
+<span class="fc" id="L433">        return Size.of(</span>
+                    2 * maxHorizontal + STRETCH_BAND,
+                    2 * maxVertical   + STRETCH_BAND
+                );
+    }
+
+    private static float _positive( Optional&lt;Float&gt; value ) {
+<span class="fc" id="L440">        return Math.max(0f, value.orElse(0f));</span>
+    }
+
+    private static float _arcWidth( Optional&lt;Arc&gt; arc ) {
+<span class="fc" id="L444">        return arc.map( a -&gt; Math.max(0f, a.width()) ).orElse(0f);</span>
+    }
+
+    private static float _arcHeight( Optional&lt;Arc&gt; arc ) {
+<span class="fc" id="L448">        return arc.map( a -&gt; Math.max(0f, a.height()) ).orElse(0f);</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
