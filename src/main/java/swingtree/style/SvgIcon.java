@@ -1348,6 +1348,7 @@ public final class SvgIcon extends ImageIcon
         }
 
         {
+            viewBox = new ViewBox(viewBox.x, viewBox.y, viewBox.width*scaleX, viewBox.height*scaleY);
             // Finally, the padding:
             if ( !Outline.none().equals(padding) ) {
                 viewBox = new ViewBox(
@@ -1357,7 +1358,6 @@ public final class SvgIcon extends ImageIcon
                         viewBox.height - (padding.top().orElse(0f) + padding.bottom().orElse(0f))
                 );
             }
-            viewBox = new ViewBox(viewBox.x, viewBox.y, viewBox.width*scaleX, viewBox.height*scaleY);
             FloatSize svgSize = _core.svgDocument.viewBox().size();
             float svgRefWidth = (svgSize.width / svgSize.height);
             float svgRefHeight = (svgSize.height / svgSize.width);
@@ -1373,40 +1373,44 @@ public final class SvgIcon extends ImageIcon
             is a preferred placement that is not the center.
             If that is the case we move the view box accordingly.
         */
-        final float scaledAreaX = x / scaleX;
-        final float scaledAreaY = y / scaleY;
-        final float scaledWidth = width / scaleX;
-        final float scaledHeight = height / scaleY;
-        final float shiftHalfX = ((scaledWidth - viewBox.width) / 2f);
-        final float shiftHalfY = ((scaledHeight - viewBox.height) / 2f);
+        final float contentX      = ( x + padding.left().orElse(0f) ) / scaleX;
+        final float contentY      = ( y + padding.top().orElse(0f)  ) / scaleY;
+        final float contentWidth  = ( width  - (padding.left().orElse(0f) + padding.right().orElse(0f)) ) / scaleX;
+        final float contentHeight = ( height - (padding.top().orElse(0f)  + padding.bottom().orElse(0f)) ) / scaleY;
+        final float leftAlignedX   = contentX;
+        final float topAlignedY    = contentY;
+        final float rightAlignedX  = contentX + contentWidth  - viewBox.width;
+        final float bottomAlignedY = contentY + contentHeight - viewBox.height;
+        final float centeredX      = contentX + ( ( contentWidth  - viewBox.width  ) / 2f );
+        final float centeredY      = contentY + ( ( contentHeight - viewBox.height ) / 2f );
         switch ( preferredPlacement ) {
             case TOP_LEFT:
-                viewBox = new ViewBox( scaledAreaX + padding.left().orElse(0f) / scaleX, scaledAreaY + padding.top().orElse(0f) / scaleY, viewBox.width, viewBox.height );
+                viewBox = new ViewBox( leftAlignedX, topAlignedY, viewBox.width, viewBox.height );
                 break;
             case TOP_RIGHT:
-                viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, scaledAreaY + padding.top().orElse(0f) / scaleY, viewBox.width, viewBox.height );
+                viewBox = new ViewBox( rightAlignedX, topAlignedY, viewBox.width, viewBox.height );
                 break;
             case BOTTOM_LEFT:
-                viewBox = new ViewBox( scaledAreaX + padding.left().orElse(0f) / scaleX, scaledAreaY + scaledHeight - viewBox.height, viewBox.width, viewBox.height );
+                viewBox = new ViewBox( leftAlignedX, bottomAlignedY, viewBox.width, viewBox.height );
                 break;
             case BOTTOM_RIGHT:
-                viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, scaledAreaY + scaledHeight - viewBox.height, viewBox.width, viewBox.height );
+                viewBox = new ViewBox( rightAlignedX, bottomAlignedY, viewBox.width, viewBox.height );
                 break;
             case TOP:
-                viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY + padding.top().orElse(0f) / scaleY, viewBox.width, viewBox.height );
+                viewBox = new ViewBox( centeredX, topAlignedY, viewBox.width, viewBox.height );
                 break;
             case BOTTOM:
-                viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY + scaledHeight - viewBox.height , viewBox.width, viewBox.height );
+                viewBox = new ViewBox( centeredX, bottomAlignedY, viewBox.width, viewBox.height );
                 break;
             case LEFT:
-                viewBox = new ViewBox( scaledAreaX + padding.left().orElse(0f) / scaleX, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );
+                viewBox = new ViewBox( leftAlignedX, centeredY, viewBox.width, viewBox.height );
                 break;
             case RIGHT:
-                viewBox = new ViewBox( scaledAreaX + scaledWidth - viewBox.width, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );
+                viewBox = new ViewBox( rightAlignedX, centeredY, viewBox.width, viewBox.height );
                 break;
             case CENTER:
             case UNDEFINED:
-                viewBox = new ViewBox( scaledAreaX + shiftHalfX, scaledAreaY + shiftHalfY, viewBox.width, viewBox.height );
+                viewBox = new ViewBox( centeredX, centeredY, viewBox.width, viewBox.height );
                 break;
             default:
                 log.warn(SwingTree.get().logMarker(), "Unknown preferred placement: {}", preferredPlacement);
