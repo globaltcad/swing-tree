@@ -1,6 +1,7 @@
 package swingtree
 
 import spock.lang.Narrative
+import spock.lang.PendingFeature
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
@@ -1684,6 +1685,73 @@ class SvgIcon_Spec extends Specification
             // `MAX_DIM` grows it until the larger one is full, so it fills the component here:
             UI.FitComponent.MAX_DIM          | UI.Placement.UNDEFINED    || Bounds.of( 0,  0, 90, 60)
             UI.FitComponent.MAX_DIM          | UI.Placement.TOP_LEFT     || Bounds.of( 0,  0, 90, 60)
+    }
+
+    @PendingFeature(reason = "A square component is today the one shape in which MIN_DIM and MAX_DIM do nothing.")
+    def 'A fit policy which names a component dimension also fills a square component.'(
+        UI.FitComponent fitMode, int componentWidth, int componentHeight, Bounds expectedCoverage
+    ) {
+        reportInfo """
+            `UI.FitComponent.MIN_DIM` grows the document until the smaller of the two component
+            dimensions is full, and `UI.FitComponent.MAX_DIM` until the larger one is. A component
+            whose width and height are equal has only one such dimension, which both policies then
+            name, so a square document painted into a square component fills it edge to edge under
+            either policy.
+
+            This is the one shape where the two policies have to agree, and it is also the shape
+            where a reader is most likely to be surprised: a component one pixel wider than it is
+            tall, and one a pixel taller than it is wide, both fill the 60 pixels they have in
+            common, so the square between them cannot suddenly fall back to the size the document
+            declared for itself.
+        """
+        given : 'A UI scale factor of 1, so that developer pixels and component pixels agree.'
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(1f) )
+        and : 'An SVG document declaring 30 by 30 pixels, filled edge to edge with orange.'
+            var icon = SvgIcon.of(
+                        "<svg width=\"30\" height=\"30\" viewBox=\"0 0 100 100\">" +
+                        "<rect x=\"0\" y=\"0\" width=\"100\" height=\"100\" fill=\"orange\"/></svg>"
+                    )
+                    .withFitComponent(fitMode)
+                    .withPreferredPlacement(UI.Placement.TOP_LEFT)
+        and : 'A way to measure the rectangle of pixels the orange of the document ended up covering.'
+            var orangeCoverage = { BufferedImage img ->
+                int left = Integer.MAX_VALUE, top = Integer.MAX_VALUE, right = -1, bottom = -1
+                for ( int y = 0; y < img.getHeight(); y++ )
+                    for ( int x = 0; x < img.getWidth(); x++ ) {
+                        var pixel = new Color(img.getRGB(x, y), true)
+                        if ( pixel.getAlpha() >= 128 && pixel.getRed() >= 128 && pixel.getBlue() < 128 ) {
+                            left = Math.min(left, x) ; top    = Math.min(top, y)
+                            right = Math.max(right, x); bottom = Math.max(bottom, y)
+                        }
+                    }
+                return right < 0 ? Bounds.none() : Bounds.of(left, top, right - left + 1, bottom - top + 1)
+            }
+
+        when : 'We paint the icon into the top left corner of a component of the given shape...'
+            var panel = UI.panel().get(JPanel)
+            panel.setSize(componentWidth, componentHeight)
+            var image = new BufferedImage(200, 200, BufferedImage.TYPE_INT_ARGB)
+            var graphics = image.createGraphics()
+            icon.paintIcon(panel, graphics, 0, 0)
+            graphics.dispose()
+        then : 'The orange covers exactly the area we expect.'
+            orangeCoverage(image) == expectedCoverage
+
+        cleanup :
+            SwingTree.clear()
+
+        where :
+            fitMode                 | componentWidth | componentHeight || expectedCoverage
+
+            // `MIN_DIM` fills the smaller dimension, which is 60 in all three of these shapes:
+            UI.FitComponent.MIN_DIM | 61             | 60              || Bounds.of(0, 0, 60, 60)
+            UI.FitComponent.MIN_DIM | 60             | 61              || Bounds.of(0, 0, 60, 60)
+            UI.FitComponent.MIN_DIM | 60             | 60              || Bounds.of(0, 0, 60, 60)
+
+            // `MAX_DIM` fills the larger dimension, which in a square component is the same one:
+            UI.FitComponent.MAX_DIM | 61             | 60              || Bounds.of(0, 0, 61, 61)
+            UI.FitComponent.MAX_DIM | 60             | 61              || Bounds.of(0, 0, 61, 61)
+            UI.FitComponent.MAX_DIM | 60             | 60              || Bounds.of(0, 0, 60, 60)
     }
 
     def 'An `SvgIcon` painted onto a bordered component keeps out of the border.'(
