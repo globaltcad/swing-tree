@@ -74,6 +74,14 @@ final class CachedSymbols implements Symbols
      */
     private static final double PHASE_STEPS = 1024;
 
+    /**
+     *  The pixel format of a tile. It is not premultiplied, because Java2D's XRender pipeline
+     *  can upload an {@code INT_ARGB} image to the X server but has no such loop for
+     *  {@code INT_ARGB_PRE}: it draws a premultiplied tile it has not cached yet by reading the
+     *  destination back from the server, blending in memory and sending the result again.
+     */
+    private static final int TILE_TYPE = BufferedImage.TYPE_INT_ARGB;
+
     /** Which piece of geometry a tile holds, so that two of them are never mistaken for each other. */
     private enum Symbol
     {
@@ -341,7 +349,7 @@ final class CachedSymbols implements Symbols
         Key           key  = new Key(symbol, flags, w, h, UI.scale(), scaleX, scaleY, phaseX, phaseY);
         BufferedImage tile = _lookUp(key);
         if ( tile == null ) {
-            tile = new BufferedImage(tileW, tileH, BufferedImage.TYPE_INT_ARGB_PRE);
+            tile = new BufferedImage(tileW, tileH, TILE_TYPE);
             Graphics2D tileGraphics = tile.createGraphics();
             try {
                 tileGraphics.setRenderingHints(g.getRenderingHints());
