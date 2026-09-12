@@ -1058,8 +1058,15 @@ public final class SvgIcon extends ImageIcon
     }
 
     /**
-     *  Creates a new {@link Image} from the SVG document.
-     * @return A new {@link Image} where the SVG document has been rendered into.
+     *  Renders the SVG document into a newly created {@link Image} whose size is what
+     *  {@link #getIconWidth()} and {@link #getIconHeight()} report, and which therefore
+     *  follows the current {@link UI#scale()} factor. An icon without a size of its own
+     *  falls back to the size the document declared for itself (see {@link #getSvgSize()}),
+     *  scaled the same way, and an icon which has neither, because its source could not be
+     *  parsed, yields a single fully transparent pixel.
+     *
+     * @return A new {@link Image} where the SVG document has been rendered into,
+     *         at least one pixel wide and one pixel tall.
      */
     @Override
     public Image getImage() {
@@ -1076,6 +1083,9 @@ public final class SvgIcon extends ImageIcon
             if (height < 0)
                 height = (int) UI.scale(_core.docHeight);
         }
+
+        width  = Math.max(1, width);
+        height = Math.max(1, height);
 
         // We create a new buffered image, render into it, and then return it.
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
@@ -1476,8 +1486,8 @@ public final class SvgIcon extends ImageIcon
         SvgIcon rhs = (SvgIcon) obj;
         return Objects.equals(_size,               rhs._size)        &&
                Objects.equals(_core.svgDocument,   rhs._core.svgDocument)  &&
-               Objects.equals(_widthUnit,          rhs._heightUnit)  &&
-               Objects.equals(_heightUnit,         rhs._widthUnit)  &&
+               Objects.equals(_widthUnit,          rhs._widthUnit)  &&
+               Objects.equals(_heightUnit,         rhs._heightUnit)  &&
                Objects.equals(_fitComponent,       rhs._fitComponent) &&
                Objects.equals(_preferredPlacement, rhs._preferredPlacement) &&
                Float.compare(_opacity, rhs._opacity) == 0;
