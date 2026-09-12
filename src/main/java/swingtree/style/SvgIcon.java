@@ -1221,54 +1221,31 @@ public final class SvgIcon extends ImageIcon
         _paintIcon( c, g, bounds, offset, _preferredPlacement, fitComponent, padding);
     }
 
-    private Size _computeBaseSizeFrom(int areaWidth, int areaHeight) {
+    private Size _computeBaseSizeFrom( int areaWidth, int areaHeight ) {
         if ( _core.svgDocument == null )
             return Size.unknown();
+
         final int iconWidth  = getIconWidth();
         final int iconHeight = getIconHeight();
+        if ( iconWidth > 0 && iconHeight > 0 )
+            return Size.of(iconWidth, iconHeight);
 
-        float finalWidth  = ( iconWidth  > 0 || areaWidth  < 0 ? iconWidth  : -1 );
-        float finalHeight = ( iconHeight > 0 || areaHeight < 0 ? iconHeight : -1 );
-        boolean hasPercentageScaling = false;
-        if ( finalWidth <= 0 || finalHeight <= 0 ) {
-            finalWidth = iconWidth;
-            if ( iconWidth < 0 ) {
-                if ( _widthUnit == Unit.PERCENTAGE && _size.width().isPresent() ) {
-                    finalWidth = areaWidth * _size.width().get() / 100f;
-                    hasPercentageScaling = true;
-                } else {
-                    finalWidth = _core.docWidth;
-                }
-            }
-            finalHeight = iconHeight;
-            if ( iconHeight < 0 ) {
-                if ( _heightUnit == Unit.PERCENTAGE && _size.height().isPresent() ) {
-                    finalHeight = areaHeight * _size.height().get() / 100f;
-                    hasPercentageScaling = true;
-                } else {
-                    finalHeight = _core.docHeight;
-                }
-            }
-            if ( !hasPercentageScaling ) {
-                float scale;
-                if (areaWidth < areaHeight) { // <- Tall area
-                    if (finalWidth > finalHeight) {
-                        scale = areaWidth / finalWidth;
-                    } else {
-                        scale = areaHeight / finalHeight;
-                    }
-                } else { // < - Wide area
-                    if (finalWidth < finalHeight) {
-                        scale = areaWidth / finalWidth;
-                    } else {
-                        scale = areaHeight / finalHeight;
-                    }
-                }
-                finalWidth = finalWidth * scale;
-                finalHeight = finalHeight * scale;
-            }
-        }
-        return Size.of(finalWidth, finalHeight);
+        final boolean widthIsPercentage  = iconWidth  < 0 && _widthUnit  == Unit.PERCENTAGE && _size.width().isPresent();
+        final boolean heightIsPercentage = iconHeight < 0 && _heightUnit == Unit.PERCENTAGE && _size.height().isPresent();
+
+        final float width  = iconWidth  >= 0    ? iconWidth
+                           : widthIsPercentage  ? areaWidth  * _size.width().get()  / 100f
+                                                : _core.docWidth;
+        final float height = iconHeight >= 0    ? iconHeight
+                           : heightIsPercentage ? areaHeight * _size.height().get() / 100f
+                                                : _core.docHeight;
+
+        if ( widthIsPercentage || heightIsPercentage )
+            return Size.of(width, height);
+
+        final boolean fitToAreaWidth = ( areaWidth < areaHeight ? width > height : width < height );
+        final float   scale          = ( fitToAreaWidth ? areaWidth / width : areaHeight / height );
+        return Size.of(width * scale, height * scale);
     }
 
     private void _paintIcon(
@@ -1280,199 +1257,136 @@ public final class SvgIcon extends ImageIcon
         final UI.FitComponent fitComponent,
         final Outline padding
     ) {
-        final int areaX = Math.round(bounds.location().x() + offset.x());
-        final int areaY = Math.round(bounds.location().y() + offset.y());
-        final int areaWidth  = bounds.size().width().map(Math::round).orElse(0);
-        final int areaHeight = bounds.size().height().map(Math::round).orElse(0);
-                
-        if ( _core.svgDocument == null )
+        if ( _core.svgDocument == null || _opacity <= 0 )
             return;
 
-        final Size iconSize = _computeBaseSizeFrom(areaWidth, areaHeight);
-        final int iconWidth = iconSize.width().map(Math::round).orElse(0);
-        final int iconHeight = iconSize.height().map(Math::round).orElse(0);
+        final int areaX      = Math.round(bounds.location().x() + offset.x());
+        final int areaY      = Math.round(bounds.location().y() + offset.y());
+        final int areaWidth  = bounds.size().width().map(Math::round).orElse(0);
+        final int areaHeight = bounds.size().height().map(Math::round).orElse(0);
 
-        int x = areaX;
-        int y = areaY;
-        int width  = ( areaWidth  < 0 ? iconWidth  : areaWidth  );
-        int height = ( areaHeight < 0 ? iconHeight : areaHeight );
+        final Size iconSize   = _computeBaseSizeFrom(areaWidth, areaHeight);
+        final int  iconWidth  = iconSize.width().map(Math::round).orElse(0);
+        final int  iconHeight = iconSize.height().map(Math::round).orElse(0);
 
-        Graphics2D g2d = (Graphics2D) g.create();
+        final Size fittedSize = _fitIconIntoArea(fitComponent, areaWidth, areaHeight, iconWidth, iconHeight);
 
-        float scaleX = 1f;
-        float scaleY = 1f;
+        final float paddingLeft   = padding.left().orElse(0f);
+        final float paddingTop    = padding.top().orElse(0f);
+        final float paddingWidth  = paddingLeft + padding.right().orElse(0f);
+        final float paddingHeight = paddingTop  + padding.bottom().orElse(0f);
 
-        if ( fitComponent == UI.FitComponent.MIN_DIM || fitComponent == UI.FitComponent.MAX_DIM ) {
-            if ( fitComponent == UI.FitComponent.MIN_DIM ) {
-                 if (areaWidth < areaHeight) {
-                    scaleX = (float) width / iconWidth;
-                    scaleY = scaleX;
-                 }
-                if (areaHeight < areaWidth) {
-                    scaleY = (float) height / iconHeight;
-                    scaleX = scaleY;
-                }
-            } else {
-                if (areaWidth > areaHeight) {
-                    scaleX = (float) width / iconWidth;
-                    scaleY = scaleX;
-                }
-                if (areaHeight > areaWidth) {
-                    scaleY = (float) height / iconHeight;
-                    scaleX = scaleY;
-                }
-            }
-        }
+        final float iconAreaWidth  = fittedSize.widthOrElse(0f)  - paddingWidth;
+        final float iconAreaHeight = fittedSize.heightOrElse(0f) - paddingHeight;
 
-        if ( fitComponent == UI.FitComponent.WIDTH || fitComponent == UI.FitComponent.WIDTH_AND_HEIGHT ) {
-            scaleX = (float) width / iconWidth;
-        }
+        final FloatSize documentSize  = _core.svgDocument.viewBox().size();
+        final float     documentRatio = documentSize.width / documentSize.height;
+        final float     iconAreaRatio = iconAreaWidth / iconAreaHeight;
+        final float     stretchX      = Math.max(1f, iconAreaRatio / documentRatio);
+        final float     stretchY      = Math.max(1f, documentRatio / iconAreaRatio);
 
-        if ( fitComponent == UI.FitComponent.HEIGHT || fitComponent == UI.FitComponent.WIDTH_AND_HEIGHT ) {
-            scaleY = (float) height / iconHeight;
-        }
+        final float viewBoxWidth  = iconAreaWidth  / stretchX;
+        final float viewBoxHeight = iconAreaHeight / stretchY;
+        final float contentX      = ( areaX      + paddingLeft   ) / stretchX;
+        final float contentY      = ( areaY      + paddingTop    ) / stretchY;
+        final float contentWidth  = ( areaWidth  - paddingWidth  ) / stretchX;
+        final float contentHeight = ( areaHeight - paddingHeight ) / stretchY;
 
-        boolean sizeIsUnknown = false;
-        if ( getIconWidth() < 0 && getIconHeight() < 0 && preferredPlacement == UI.Placement.UNDEFINED && fitComponent == UI.FitComponent.UNDEFINED ) {
-            sizeIsUnknown = true;
-        }
-        ViewBox viewBox = new ViewBox(x, y, !sizeIsUnknown ? iconWidth : areaWidth, !sizeIsUnknown ? iconHeight : areaHeight);
+        final ViewBox viewBox = new ViewBox(
+                                    contentX + _horizontalAlignmentOf(preferredPlacement) * ( contentWidth  - viewBoxWidth  ),
+                                    contentY + _verticalAlignmentOf(preferredPlacement)   * ( contentHeight - viewBoxHeight ),
+                                    viewBoxWidth, viewBoxHeight
+                                );
 
-        if ( fitComponent == UI.FitComponent.NO || fitComponent == UI.FitComponent.UNDEFINED ) {
-            float newWidth   = iconWidth  >= 0 ? iconWidth  : _core.docWidth;
-            float newHeight  = iconHeight >= 0 ? iconHeight : _core.docHeight;
-            final FloatSize viewBoxSize = _core.svgDocument.viewBox().size();
-            newWidth   = newWidth  >= 0 ? newWidth  : viewBoxSize.width;
-            newHeight  = newHeight >= 0 ? newHeight : viewBoxSize.height;
-            viewBox = new ViewBox( x, y, newWidth, newHeight );
-        }
-
-        {
-            viewBox = new ViewBox(viewBox.x, viewBox.y, viewBox.width*scaleX, viewBox.height*scaleY);
-            // Finally, the padding:
-            if ( !Outline.none().equals(padding) ) {
-                viewBox = new ViewBox(
-                        viewBox.x + padding.left().orElse(0f),
-                        viewBox.y + padding.top().orElse(0f),
-                        viewBox.width - (padding.left().orElse(0f) + padding.right().orElse(0f)),
-                        viewBox.height - (padding.top().orElse(0f) + padding.bottom().orElse(0f))
-                );
-            }
-            FloatSize svgSize = _core.svgDocument.viewBox().size();
-            float svgRefWidth = (svgSize.width / svgSize.height);
-            float svgRefHeight = (svgSize.height / svgSize.width);
-            float imgRefWidth = (viewBox.width / viewBox.height);
-            float imgRefHeight = (viewBox.height / viewBox.width);
-
-            scaleX = Math.max(1f, imgRefWidth / svgRefWidth);
-            scaleY = Math.max(1f, imgRefHeight / svgRefHeight);
-            viewBox = new ViewBox(viewBox.x / scaleX, viewBox.y / scaleY, viewBox.width / scaleX, viewBox.height / scaleY);
-        }
-        /*
-            Before we do the actual rendering we first check if there
-            is a preferred placement that is not the center.
-            If that is the case we move the view box accordingly.
-        */
-        final float contentX      = ( x + padding.left().orElse(0f) ) / scaleX;
-        final float contentY      = ( y + padding.top().orElse(0f)  ) / scaleY;
-        final float contentWidth  = ( width  - (padding.left().orElse(0f) + padding.right().orElse(0f)) ) / scaleX;
-        final float contentHeight = ( height - (padding.top().orElse(0f)  + padding.bottom().orElse(0f)) ) / scaleY;
-        final float leftAlignedX   = contentX;
-        final float topAlignedY    = contentY;
-        final float rightAlignedX  = contentX + contentWidth  - viewBox.width;
-        final float bottomAlignedY = contentY + contentHeight - viewBox.height;
-        final float centeredX      = contentX + ( ( contentWidth  - viewBox.width  ) / 2f );
-        final float centeredY      = contentY + ( ( contentHeight - viewBox.height ) / 2f );
-        switch ( preferredPlacement ) {
-            case TOP_LEFT:
-                viewBox = new ViewBox( leftAlignedX, topAlignedY, viewBox.width, viewBox.height );
-                break;
-            case TOP_RIGHT:
-                viewBox = new ViewBox( rightAlignedX, topAlignedY, viewBox.width, viewBox.height );
-                break;
-            case BOTTOM_LEFT:
-                viewBox = new ViewBox( leftAlignedX, bottomAlignedY, viewBox.width, viewBox.height );
-                break;
-            case BOTTOM_RIGHT:
-                viewBox = new ViewBox( rightAlignedX, bottomAlignedY, viewBox.width, viewBox.height );
-                break;
-            case TOP:
-                viewBox = new ViewBox( centeredX, topAlignedY, viewBox.width, viewBox.height );
-                break;
-            case BOTTOM:
-                viewBox = new ViewBox( centeredX, bottomAlignedY, viewBox.width, viewBox.height );
-                break;
-            case LEFT:
-                viewBox = new ViewBox( leftAlignedX, centeredY, viewBox.width, viewBox.height );
-                break;
-            case RIGHT:
-                viewBox = new ViewBox( rightAlignedX, centeredY, viewBox.width, viewBox.height );
-                break;
-            case CENTER:
-            case UNDEFINED:
-                viewBox = new ViewBox( centeredX, centeredY, viewBox.width, viewBox.height );
-                break;
-            default:
-                log.warn(SwingTree.get().logMarker(), "Unknown preferred placement: {}", preferredPlacement);
-        }
-
-        // Let's check if the view box exists:
         if ( viewBox.width <= 0 || viewBox.height <= 0 )
             return;
 
-        // Also let's check if the view box has valid values:
         if ( Float.isNaN(viewBox.x) || Float.isNaN(viewBox.y) || Float.isNaN(viewBox.width) || Float.isNaN(viewBox.height) )
             return;
 
-        if ( _opacity >= 1 ) {
-            render(g2d, c, viewBox, scaleX, scaleY);
-        } else if ( _opacity > 0 ) {
-            // We render into a buffered image first, and then we draw that buffered image with the appropriate opacity!
-            // This is important, because doing it directly causes overlapped elements in the SVG to leak through each other, which looks wrong.
-            int imageWidth  = Math.max(1, Math.round(viewBox.width * scaleX));
-            int imageHeight = Math.max(1, Math.round(viewBox.height * scaleY));
-            BufferedImage image = new BufferedImage(imageWidth, imageHeight, BufferedImage.TYPE_INT_ARGB);
+        final Graphics2D g2d = (Graphics2D) g.create();
+        try {
+            if ( _opacity >= 1 ) {
+                _render(g2d, c, viewBox, stretchX, stretchY);
+                return;
+            }
+            /*
+                Drawing the document through a translucent composite would let its overlapping
+                elements shine through each other, so it is rendered opaquely into an image
+                first, and only that image is then drawn with the opacity.
+            */
+            BufferedImage image = new BufferedImage(
+                                        Math.max(1, Math.round(viewBox.width  * stretchX)),
+                                        Math.max(1, Math.round(viewBox.height * stretchY)),
+                                        BufferedImage.TYPE_INT_ARGB
+                                    );
             Graphics2D bufferGraphics = image.createGraphics();
             StyleUtil.transferConfigurations(g2d, bufferGraphics);
-            render(bufferGraphics, c, new ViewBox(0, 0, viewBox.width, viewBox.height), scaleX, scaleY);
+            _render(bufferGraphics, c, new ViewBox(0, 0, viewBox.width, viewBox.height), stretchX, stretchY);
             bufferGraphics.dispose();
             g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, _opacity));
-            g2d.drawImage(image, Math.round(viewBox.x*scaleX), Math.round(viewBox.y*scaleY), null);
+            g2d.drawImage(image, Math.round(viewBox.x * stretchX), Math.round(viewBox.y * stretchY), null);
+        } finally {
+            g2d.dispose();
         }
     }
 
-    private void render( Graphics2D g2d, @Nullable Component c, ViewBox viewBox, float scaleX, float scaleY ) {
+    private static Size _fitIconIntoArea(
+        final UI.FitComponent fitComponent,
+        final int areaWidth,  final int areaHeight,
+        final int iconWidth,  final int iconHeight
+    ) {
+        final float toAreaWidth  = (float) areaWidth  / iconWidth;
+        final float toAreaHeight = (float) areaHeight / iconHeight;
+        switch ( fitComponent ) {
+            case WIDTH:
+                return Size.of(iconWidth * toAreaWidth, iconHeight);
+            case HEIGHT:
+                return Size.of(iconWidth, iconHeight * toAreaHeight);
+            case WIDTH_AND_HEIGHT:
+                return Size.of(iconWidth * toAreaWidth, iconHeight * toAreaHeight);
+            case MIN_DIM:
+            case MAX_DIM:
+                if ( areaWidth == areaHeight )
+                    return Size.of(iconWidth, iconHeight);
+                boolean widthIsTheShorterSide = ( areaWidth < areaHeight );
+                boolean fitToAreaWidth = ( widthIsTheShorterSide == ( fitComponent == UI.FitComponent.MIN_DIM ) );
+                float   scale          = ( fitToAreaWidth ? toAreaWidth : toAreaHeight );
+                return Size.of(iconWidth * scale, iconHeight * scale);
+            default:
+                return Size.of(iconWidth, iconHeight);
+        }
+    }
+
+    private static float _horizontalAlignmentOf( UI.Placement placement ) {
+        switch ( placement ) {
+            case TOP_LEFT:  case LEFT:  case BOTTOM_LEFT:  return 0f;
+            case TOP_RIGHT: case RIGHT: case BOTTOM_RIGHT: return 1f;
+            default:                                       return 0.5f;
+        }
+    }
+
+    private static float _verticalAlignmentOf( UI.Placement placement ) {
+        switch ( placement ) {
+            case TOP_LEFT:    case TOP:    case TOP_RIGHT:    return 0f;
+            case BOTTOM_LEFT: case BOTTOM: case BOTTOM_RIGHT: return 1f;
+            default:                                          return 0.5f;
+        }
+    }
+
+    private void _render( Graphics2D g2d, @Nullable Component c, ViewBox viewBox, float stretchX, float stretchY ) {
         if ( _core.svgDocument == null )
             return;
-        // Now onto the actual rendering:
-        boolean doAntiAliasing  = StyleEngine.IS_ANTIALIASING_ENABLED();
-        boolean wasAntiAliasing = g2d.getRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING ) == java.awt.RenderingHints.VALUE_ANTIALIAS_ON;
-        if ( doAntiAliasing && !wasAntiAliasing )
-            g2d.setRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_ON );
 
-        boolean needsScaling = ( scaleX != 1 || scaleY != 1 );
-        AffineTransform oldTransform = g2d.getTransform();
+        if ( StyleEngine.IS_ANTIALIASING_ENABLED() )
+            g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        if ( needsScaling ) {
-            AffineTransform newTransform = new AffineTransform(oldTransform);
-            newTransform.scale(scaleX, scaleY);
-            g2d.setTransform(newTransform);
-        }
-
+        g2d.scale(stretchX, stretchY);
         try {
-            // We also have to scale x and y, this is because the SVGDocument does not
-            // account for the scale of the transform with respect to the view box!
-            if ( _opacity > 0f )
-                _core.svgDocument.render(c, g2d, viewBox);
+            _core.svgDocument.render(c, g2d, viewBox);
         } catch (Exception e) {
             log.warn(SwingTree.get().logMarker(), "Failed to render SVG document.", e);
         }
-
-        if ( needsScaling )
-            g2d.setTransform(oldTransform); // back to the previous scaling!
-
-        if ( doAntiAliasing && !wasAntiAliasing )
-            g2d.setRenderingHint( java.awt.RenderingHints.KEY_ANTIALIASING, java.awt.RenderingHints.VALUE_ANTIALIAS_OFF );
     }
 
     @Override
