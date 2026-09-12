@@ -4264,7 +4264,7 @@ class Individual_Component_Styling_Spec extends Specification
               1   | 'variant-1' | {it}
               2   | 'variant-2' | {it.fitMode(UI.FitComponent.MIN_DIM)}
               3   | 'variant-3' | {it.fitMode(UI.FitComponent.MAX_DIM)}
-              //1   | 'variant-4' | {it.padding(1, 2, 3, 8).size(54, 22)}
+              1   | 'variant-4' | {it.padding(1, 2, 3, 8).size(54, 22)}
               3   | 'variant-5' | {it.width(35)}
               3   | 'variant-6' | {it.size(15, 15)}
               3   | 'variant-6' | {it.padding(5).size(25, 25)}
@@ -4276,6 +4276,11 @@ class Individual_Component_Styling_Spec extends Specification
               2   | 'variant-10'| {it.fitMode(UI.FitComponent.WIDTH_AND_HEIGHT).placementBoundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)}
               3   | 'variant-11'| {it.size(25, 15).opacity(0.5f)}
               1   | 'variant-12'| {it.placement(UI.Placement.LEFT).padding(0,0,0,6).size(22, 16)}
+              // A padding is a number of component pixels, so a fit mode that stretches the document must not stretch it too:
+              2   | 'variant-13'| {it.padding(4).fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)}
+              // ...and a padding that differs per side has to move the document, not just shrink it:
+              1   | 'variant-14'| {it.padding(1, 2, 3, 8).size(30, 14).placement(UI.Placement.BOTTOM_RIGHT)}
+              3   | 'variant-15'| {it.padding(3, 9).fitMode(UI.FitComponent.MIN_DIM).placement(UI.Placement.TOP_RIGHT)}
     }
 
     def 'You can render a radial gradient onto a panel using the style API.'( float scale )

@@ -1863,14 +1863,20 @@ class SvgIcon_Spec extends Specification
             ''          | ComponentOrientation.RIGHT_TO_LEFT   || Bounds.of(60, 15, 30, 30)
     }
 
-    def 'The padding of the image sub style keeps the SVG document away from the component edge.'(
-        int padding, UI.Placement placement, Bounds expectedCoverage
+    def 'The padding of the image sub style is measured in pixels of the component, not of the SVG document.'(
+        UI.FitComponent fitMode, int padding, Bounds expectedCoverage
     ) {
         reportInfo """
             An SVG handed to the style API through `image(conf -> conf.svg(..))` can be given a
-            padding of its own, which is subtracted from the area the document is drawn into on
-            every side. With the fit mode `NO`, where the document keeps the size it declares,
-            that padding therefore both moves the document inwards and makes it smaller.
+            padding, and that padding is a number of component pixels. It is taken off the drawing
+            *after* the fit mode has decided how large the document is drawn, so the same number
+            always frees the same number of pixels, whether the fit mode blew the document up to
+            fill the component or left it at the size it declares.
+
+            A padding measured in the document's own coordinates instead would be stretched along
+            with the document: the same `padding(10)` would free 60 pixels under a fit mode that
+            triples the document and 3 pixels under one that shrinks it to a third, so the number
+            would mean something different in every component it is used in.
         """
         given : 'A UI scale factor of 1, so that developer pixels and component pixels agree.'
             SwingTree.initializeUsing(it -> it.uiScaleFactor(1f) )
@@ -1887,7 +1893,102 @@ class SvgIcon_Spec extends Specification
                     }
                 return right < 0 ? Bounds.none() : Bounds.of(left, top, right - left + 1, bottom - top + 1)
             }
-        and : 'A 90 by 60 pixel box whose image sub style carries an SVG declaring 30 by 30 pixels.'
+        and : 'An SVG document declaring 30 by 30 pixels, filled edge to edge with orange.'
+            var svg = "<svg width=\"30\" height=\"30\" viewBox=\"0 0 100 100\">" +
+                      "<rect x=\"0\" y=\"0\" width=\"100\" height=\"100\" fill=\"orange\"/></svg>"
+
+        when : 'We render a 90 by 60 pixel box showing that document with the padding of the current data table row...'
+            var padded = Utility.renderSingleComponent(
+                    UI.box().withStyle( it -> it
+                        .size(90, 60)
+                        .image( conf -> conf.svg(svg).placement(UI.Placement.TOP_LEFT).fitMode(fitMode).padding(padding) )
+                    ).get(JBox)
+                )
+        then : 'The document covers exactly the rectangle we expect.'
+            orangeCoverage(padded) == expectedCoverage
+
+        when : 'We render the very same box once more, without any padding...'
+            var unpadded = orangeCoverage(Utility.renderSingleComponent(
+                    UI.box().withStyle( it -> it
+                        .size(90, 60)
+                        .image( conf -> conf.svg(svg).placement(UI.Placement.TOP_LEFT).fitMode(fitMode) )
+                    ).get(JBox)
+                ))
+        then : """
+            The padded drawing is the unpadded one moved in by the padding and shortened by twice
+            it, which is the whole promise: the padding costs the drawing the same pixels here as
+            it does under every other fit mode.
+        """
+            orangeCoverage(padded) == Bounds.of(
+                                            padding,
+                                            padding,
+                                            unpadded.size().widthOrElse(0f)  - 2 * padding,
+                                            unpadded.size().heightOrElse(0f) - 2 * padding
+                                        )
+
+        cleanup :
+            SwingTree.clear()
+
+        where :
+            fitMode                          | padding || expectedCoverage
+
+            // The document keeps the size it declares, so the padding takes 20 off 30:
+            UI.FitComponent.NO               | 0       || Bounds.of( 0,  0, 30, 30)
+            UI.FitComponent.NO               | 5       || Bounds.of( 5,  5, 20, 20)
+            UI.FitComponent.NO               | 10      || Bounds.of(10, 10, 10, 10)
+
+            // The document is stretched across the component, and the padding still takes 20:
+            UI.FitComponent.WIDTH            | 0       || Bounds.of( 0,  0, 90, 30)
+            UI.FitComponent.WIDTH            | 5       || Bounds.of( 5,  5, 80, 20)
+            UI.FitComponent.WIDTH            | 10      || Bounds.of(10, 10, 70, 10)
+
+            UI.FitComponent.HEIGHT           | 0       || Bounds.of( 0,  0, 30, 60)
+            UI.FitComponent.HEIGHT           | 5       || Bounds.of( 5,  5, 20, 50)
+            UI.FitComponent.HEIGHT           | 10      || Bounds.of(10, 10, 10, 40)
+
+            UI.FitComponent.WIDTH_AND_HEIGHT | 0       || Bounds.of( 0,  0, 90, 60)
+            UI.FitComponent.WIDTH_AND_HEIGHT | 5       || Bounds.of( 5,  5, 80, 50)
+            UI.FitComponent.WIDTH_AND_HEIGHT | 10      || Bounds.of(10, 10, 70, 40)
+
+            UI.FitComponent.MIN_DIM          | 0       || Bounds.of( 0,  0, 60, 60)
+            UI.FitComponent.MIN_DIM          | 5       || Bounds.of( 5,  5, 50, 50)
+            UI.FitComponent.MIN_DIM          | 10      || Bounds.of(10, 10, 40, 40)
+    }
+
+    def 'A padding that differs per side decides where inside the component the SVG document sits.'(
+        UI.Placement placement, Bounds expectedCoverage
+    ) {
+        reportInfo """
+            A padding names four numbers, and they need not be the same. Together they cut a
+            smaller rectangle out of the component, and it is that rectangle, not the component,
+            that the placement then works within: `TOP_LEFT` puts the document in its top left
+            corner, `BOTTOM_RIGHT` in its bottom right one, and `CENTER` in its middle.
+
+            A placement that reached for the component instead would ignore the difference between
+            the four numbers entirely, because it would recompute the position from edges the
+            padding never moved.
+
+            The component below is 90 by 60 pixels and the padding is 1 at the top, 2 on the right,
+            3 at the bottom and 8 on the left. That leaves a rectangle of 80 by 56 pixels at (8, 1),
+            and the document, which declares 30 by 30 pixels and keeps that size, is drawn 20 by 26
+            pixels large inside it.
+        """
+        given : 'A UI scale factor of 1, so that developer pixels and component pixels agree.'
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(1f) )
+        and : 'A way to measure the rectangle of pixels the orange of the document ended up covering.'
+            var orangeCoverage = { BufferedImage img ->
+                int left = Integer.MAX_VALUE, top = Integer.MAX_VALUE, right = -1, bottom = -1
+                for ( int y = 0; y < img.getHeight(); y++ )
+                    for ( int x = 0; x < img.getWidth(); x++ ) {
+                        var pixel = new Color(img.getRGB(x, y), true)
+                        if ( pixel.getAlpha() >= 128 && pixel.getRed() >= 128 && pixel.getBlue() < 128 ) {
+                            left = Math.min(left, x) ; top    = Math.min(top, y)
+                            right = Math.max(right, x); bottom = Math.max(bottom, y)
+                        }
+                    }
+                return right < 0 ? Bounds.none() : Bounds.of(left, top, right - left + 1, bottom - top + 1)
+            }
+        and : 'A 90 by 60 pixel box showing a 30 by 30 pixel document with a different padding on every side.'
             var box =
                     UI.box().withStyle( it -> it
                         .size(90, 60)
@@ -1896,26 +1997,89 @@ class SvgIcon_Spec extends Specification
                                  "<rect x=\"0\" y=\"0\" width=\"100\" height=\"100\" fill=\"orange\"/></svg>")
                             .placement(placement)
                             .fitMode(UI.FitComponent.NO)
-                            .padding(padding)
+                            .padding(1, 2, 3, 8)
                         )
                     )
 
         when : 'We render the box into an image...'
             var image = Utility.renderSingleComponent(box.get(JBox))
-        then : 'The orange covers exactly the area we expect.'
+        then : 'The document sits where the placement puts it inside the padded rectangle.'
             orangeCoverage(image) == expectedCoverage
 
         cleanup :
             SwingTree.clear()
 
         where :
-            padding | placement                 || expectedCoverage
-            0       | UI.Placement.TOP_LEFT     || Bounds.of( 0,  0, 30, 30)
-            0       | UI.Placement.CENTER       || Bounds.of(30, 15, 30, 30)
-            0       | UI.Placement.BOTTOM_RIGHT || Bounds.of(60, 30, 30, 30)
-            10      | UI.Placement.TOP_LEFT     || Bounds.of(10, 10, 10, 10)
-            10      | UI.Placement.CENTER       || Bounds.of(40, 25, 10, 10)
-            10      | UI.Placement.BOTTOM_RIGHT || Bounds.of(80, 50, 10, 10)
+            placement                 || expectedCoverage
+            UI.Placement.TOP_LEFT     || Bounds.of( 8,  1, 20, 26)
+            UI.Placement.TOP          || Bounds.of(38,  1, 20, 26)
+            UI.Placement.TOP_RIGHT    || Bounds.of(68,  1, 20, 26)
+            UI.Placement.LEFT         || Bounds.of( 8, 16, 20, 26)
+            UI.Placement.CENTER       || Bounds.of(38, 16, 20, 26)
+            UI.Placement.RIGHT        || Bounds.of(68, 16, 20, 26)
+            UI.Placement.BOTTOM_LEFT  || Bounds.of( 8, 31, 20, 26)
+            UI.Placement.BOTTOM       || Bounds.of(38, 31, 20, 26)
+            UI.Placement.BOTTOM_RIGHT || Bounds.of(68, 31, 20, 26)
+            UI.Placement.UNDEFINED    || Bounds.of(38, 16, 20, 26)
+    }
+
+    def 'The padding of the image sub style grows with the DPI scaling factor, like every other style dimension.'(
+        float uiScale, Bounds expectedCoverage
+    ) {
+        reportInfo """
+            The numbers you hand to the style API are developer pixels, and SwingTree turns them
+            into component pixels using the DPI scaling factor of the machine the UI runs on. The
+            padding of the image sub style is no exception: on a screen that scales everything by
+            two, a `padding(10)` frees twenty component pixels, so it keeps looking like the same
+            gap next to a component and a document that grew by the same factor.
+        """
+        given : 'We start with the UI scale factor of the current data table row.'
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(uiScale) )
+        and : 'A way to measure the rectangle of pixels the orange of the document ended up covering.'
+            var orangeCoverage = { BufferedImage img ->
+                int left = Integer.MAX_VALUE, top = Integer.MAX_VALUE, right = -1, bottom = -1
+                for ( int y = 0; y < img.getHeight(); y++ )
+                    for ( int x = 0; x < img.getWidth(); x++ ) {
+                        var pixel = new Color(img.getRGB(x, y), true)
+                        if ( pixel.getAlpha() >= 128 && pixel.getRed() >= 128 && pixel.getBlue() < 128 ) {
+                            left = Math.min(left, x) ; top    = Math.min(top, y)
+                            right = Math.max(right, x); bottom = Math.max(bottom, y)
+                        }
+                    }
+                return right < 0 ? Bounds.none() : Bounds.of(left, top, right - left + 1, bottom - top + 1)
+            }
+        and : 'A 90 by 60 pixel box stretching a 30 by 30 pixel document across itself, with a padding of 10.'
+            var box =
+                    UI.box().withStyle( it -> it
+                        .size(90, 60)
+                        .image( conf -> conf
+                            .svg("<svg width=\"30\" height=\"30\" viewBox=\"0 0 100 100\">" +
+                                 "<rect x=\"0\" y=\"0\" width=\"100\" height=\"100\" fill=\"orange\"/></svg>")
+                            .placement(UI.Placement.TOP_LEFT)
+                            .fitMode(UI.FitComponent.WIDTH_AND_HEIGHT)
+                            .padding(10)
+                        )
+                    )
+
+        when : 'We render the box into an image...'
+            var image = Utility.renderSingleComponent(box.get(JBox))
+        then : 'Both the component and the padding have grown by the scaling factor.'
+            orangeCoverage(image) == expectedCoverage
+        and : 'Which is the scaled component minus twice the scaled padding.'
+            orangeCoverage(image) == Bounds.of(
+                                            UI.scale(10), UI.scale(10),
+                                            UI.scale(90) - 2 * UI.scale(10),
+                                            UI.scale(60) - 2 * UI.scale(10)
+                                        )
+
+        cleanup :
+            SwingTree.clear()
+
+        where :
+            uiScale || expectedCoverage
+            1       || Bounds.of(10, 10,  70,  40)
+            2       || Bounds.of(20, 20, 140,  80)
+            3       || Bounds.of(30, 30, 210, 120)
     }
 
     def 'An `SvgIcon` without a size of its own is measured against the shape of the area it is painted into.'(
