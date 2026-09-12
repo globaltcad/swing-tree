@@ -1593,10 +1593,10 @@ class SvgIcon_Spec extends Specification
 
             Leaving *both* policies undefined is the one case that is not SwingTree's own layout at
             all: the document is then drawn at the position the caller passed in, at the size the
-            icon reports, which is what a plain `ImageIcon` would have done. As soon as either
-            policy is named, SwingTree measures the icon against the component instead, and an
-            undefined fit policy then means `MIN_DIM`, which is the largest size that still fits
-            inside both dimensions of the component.
+            icon reports, which is what a plain `ImageIcon` would have done. Naming a placement
+            hands the position to SwingTree, which measures it against the component, but an
+            undefined fit policy leaves the declared size alone, so the `UNDEFINED` rows below
+            match the `NO` rows.
 
             In this specification an SVG document declaring 30 by 30 pixels, whose whole view box
             is one orange rectangle, is painted at the origin of a 90 by 60 pixel component, and
@@ -1644,10 +1644,10 @@ class SvgIcon_Spec extends Specification
 
             // Both policies undefined is the plain Swing case: the icon draws itself where it was told to.
             UI.FitComponent.UNDEFINED        | UI.Placement.UNDEFINED    || Bounds.of( 0,  0, 30, 30)
-            // Naming a placement hands the layout to SwingTree, whose default fit policy is MIN_DIM:
-            UI.FitComponent.UNDEFINED        | UI.Placement.CENTER       || Bounds.of(15,  0, 60, 60)
-            UI.FitComponent.UNDEFINED        | UI.Placement.TOP_LEFT     || Bounds.of( 0,  0, 60, 60)
-            UI.FitComponent.UNDEFINED        | UI.Placement.BOTTOM_RIGHT || Bounds.of(30,  0, 60, 60)
+            // Naming a placement hands the position to SwingTree, but not the declared size:
+            UI.FitComponent.UNDEFINED        | UI.Placement.CENTER       || Bounds.of(30, 15, 30, 30)
+            UI.FitComponent.UNDEFINED        | UI.Placement.TOP_LEFT     || Bounds.of( 0,  0, 30, 30)
+            UI.FitComponent.UNDEFINED        | UI.Placement.BOTTOM_RIGHT || Bounds.of(60, 30, 30, 30)
 
             // `NO` keeps the size the icon declares and moves it to the named corner or edge:
             UI.FitComponent.NO               | UI.Placement.UNDEFINED    || Bounds.of(30, 15, 30, 30)
@@ -1684,6 +1684,150 @@ class SvgIcon_Spec extends Specification
             // `MAX_DIM` grows it until the larger one is full, so it fills the component here:
             UI.FitComponent.MAX_DIM          | UI.Placement.UNDEFINED    || Bounds.of( 0,  0, 90, 60)
             UI.FitComponent.MAX_DIM          | UI.Placement.TOP_LEFT     || Bounds.of( 0,  0, 90, 60)
+    }
+
+    def 'A `UI.Placement` says where an `SvgIcon` goes, not how large it is drawn.'(
+        String sizeAttributes, UI.FitComponent fitMode, UI.Placement placement, Bounds expectedCoverage
+    ) {
+        reportInfo """
+            Naming a `UI.Placement` hands the position of the icon to SwingTree. It does not hand
+            over the size: a document that declares a width and a height keeps them, and a named
+            `UI.FitComponent` is the only thing that overrides them. This is what makes
+            `UI.FitComponent.UNDEFINED` "typically equivalent to `UI.FitComponent.NO`" true in
+            practice, and the `UNDEFINED` and `NO` rows below say so by agreeing.
+
+            A document that declares no size has nothing to keep, so for it the component decides,
+            the same way `UI.FitComponent.MIN_DIM` decides: the document grows until the shorter
+            component dimension is full.
+
+            The component below is 90 by 60 pixels and the document, where it declares a size at
+            all, is 30 by 30. The image painted into is larger than the component, so a document
+            that outgrows the component can be measured instead of being cropped away.
+        """
+        given : 'A UI scale factor of 1, so that developer pixels and component pixels agree.'
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(1f) )
+        and : 'An SVG document with the given size attributes, filled edge to edge with orange.'
+            var icon = SvgIcon.of(
+                        "<svg ${sizeAttributes}viewBox=\"0 0 100 100\">" +
+                        "<rect x=\"0\" y=\"0\" width=\"100\" height=\"100\" fill=\"orange\"/></svg>"
+                    )
+                    .withFitComponent(fitMode)
+                    .withPreferredPlacement(placement)
+        and : 'A way to measure the rectangle of pixels the orange of the document ended up covering.'
+            var orangeCoverage = { BufferedImage img ->
+                int left = Integer.MAX_VALUE, top = Integer.MAX_VALUE, right = -1, bottom = -1
+                for ( int y = 0; y < img.getHeight(); y++ )
+                    for ( int x = 0; x < img.getWidth(); x++ ) {
+                        var pixel = new Color(img.getRGB(x, y), true)
+                        if ( pixel.getAlpha() >= 128 && pixel.getRed() >= 128 && pixel.getBlue() < 128 ) {
+                            left = Math.min(left, x) ; top    = Math.min(top, y)
+                            right = Math.max(right, x); bottom = Math.max(bottom, y)
+                        }
+                    }
+                return right < 0 ? Bounds.none() : Bounds.of(left, top, right - left + 1, bottom - top + 1)
+            }
+
+        when : 'We paint the icon into the top left corner of a 90 by 60 pixel component...'
+            var panel = UI.panel().get(JPanel)
+            panel.setSize(90, 60)
+            var image = new BufferedImage(200, 200, BufferedImage.TYPE_INT_ARGB)
+            var graphics = image.createGraphics()
+            icon.paintIcon(panel, graphics, 0, 0)
+            graphics.dispose()
+        then : 'The orange covers exactly the area we expect.'
+            orangeCoverage(image) == expectedCoverage
+
+        cleanup :
+            SwingTree.clear()
+
+        where :
+            sizeAttributes            | fitMode                          | placement                 || expectedCoverage
+
+            // A document with a size of its own keeps it, wherever the placement puts it:
+            'width="30" height="30" ' | UI.FitComponent.UNDEFINED        | UI.Placement.TOP_LEFT     || Bounds.of( 0,  0, 30, 30)
+            'width="30" height="30" ' | UI.FitComponent.UNDEFINED        | UI.Placement.CENTER       || Bounds.of(30, 15, 30, 30)
+            'width="30" height="30" ' | UI.FitComponent.UNDEFINED        | UI.Placement.BOTTOM_RIGHT || Bounds.of(60, 30, 30, 30)
+            // ...which is the same thing `NO` does, since there is no size for it to override:
+            'width="30" height="30" ' | UI.FitComponent.NO               | UI.Placement.TOP_LEFT     || Bounds.of( 0,  0, 30, 30)
+            'width="30" height="30" ' | UI.FitComponent.NO               | UI.Placement.CENTER       || Bounds.of(30, 15, 30, 30)
+            'width="30" height="30" ' | UI.FitComponent.NO               | UI.Placement.BOTTOM_RIGHT || Bounds.of(60, 30, 30, 30)
+            // A named fit policy is the one thing that does override the declared size:
+            'width="30" height="30" ' | UI.FitComponent.MIN_DIM          | UI.Placement.TOP_LEFT     || Bounds.of( 0,  0, 60, 60)
+            'width="30" height="30" ' | UI.FitComponent.MAX_DIM          | UI.Placement.TOP_LEFT     || Bounds.of( 0,  0, 90, 90)
+            'width="30" height="30" ' | UI.FitComponent.WIDTH_AND_HEIGHT | UI.Placement.TOP_LEFT     || Bounds.of( 0,  0, 90, 60)
+
+            // Without a declared size there is nothing to keep, so the component decides:
+            ''                        | UI.FitComponent.UNDEFINED        | UI.Placement.TOP_LEFT     || Bounds.of( 0,  0, 60, 60)
+            ''                        | UI.FitComponent.UNDEFINED        | UI.Placement.CENTER       || Bounds.of(15,  0, 60, 60)
+            ''                        | UI.FitComponent.UNDEFINED        | UI.Placement.BOTTOM_RIGHT || Bounds.of(30,  0, 60, 60)
+            ''                        | UI.FitComponent.MIN_DIM          | UI.Placement.TOP_LEFT     || Bounds.of( 0,  0, 60, 60)
+            ''                        | UI.FitComponent.MAX_DIM          | UI.Placement.TOP_LEFT     || Bounds.of( 0,  0, 90, 90)
+    }
+
+    def 'A fit policy which names a component dimension also fills a square component.'(
+        UI.FitComponent fitMode, int componentWidth, int componentHeight, Bounds expectedCoverage
+    ) {
+        reportInfo """
+            `UI.FitComponent.MIN_DIM` grows the document until the smaller of the two component
+            dimensions is full, and `UI.FitComponent.MAX_DIM` until the larger one is. A component
+            whose width and height are equal has only one such dimension, which both policies then
+            name, so a square document painted into a square component fills it edge to edge under
+            either policy.
+
+            This is the one shape where the two policies have to agree, and it is also the shape
+            where a reader is most likely to be surprised: a component one pixel wider than it is
+            tall, and one a pixel taller than it is wide, both fill the 60 pixels they have in
+            common, so the square between them cannot suddenly fall back to the size the document
+            declared for itself.
+        """
+        given : 'A UI scale factor of 1, so that developer pixels and component pixels agree.'
+            SwingTree.initializeUsing(it -> it.uiScaleFactor(1f) )
+        and : 'An SVG document declaring 30 by 30 pixels, filled edge to edge with orange.'
+            var icon = SvgIcon.of(
+                        "<svg width=\"30\" height=\"30\" viewBox=\"0 0 100 100\">" +
+                        "<rect x=\"0\" y=\"0\" width=\"100\" height=\"100\" fill=\"orange\"/></svg>"
+                    )
+                    .withFitComponent(fitMode)
+                    .withPreferredPlacement(UI.Placement.TOP_LEFT)
+        and : 'A way to measure the rectangle of pixels the orange of the document ended up covering.'
+            var orangeCoverage = { BufferedImage img ->
+                int left = Integer.MAX_VALUE, top = Integer.MAX_VALUE, right = -1, bottom = -1
+                for ( int y = 0; y < img.getHeight(); y++ )
+                    for ( int x = 0; x < img.getWidth(); x++ ) {
+                        var pixel = new Color(img.getRGB(x, y), true)
+                        if ( pixel.getAlpha() >= 128 && pixel.getRed() >= 128 && pixel.getBlue() < 128 ) {
+                            left = Math.min(left, x) ; top    = Math.min(top, y)
+                            right = Math.max(right, x); bottom = Math.max(bottom, y)
+                        }
+                    }
+                return right < 0 ? Bounds.none() : Bounds.of(left, top, right - left + 1, bottom - top + 1)
+            }
+
+        when : 'We paint the icon into the top left corner of a component of the given shape...'
+            var panel = UI.panel().get(JPanel)
+            panel.setSize(componentWidth, componentHeight)
+            var image = new BufferedImage(200, 200, BufferedImage.TYPE_INT_ARGB)
+            var graphics = image.createGraphics()
+            icon.paintIcon(panel, graphics, 0, 0)
+            graphics.dispose()
+        then : 'The orange covers exactly the area we expect.'
+            orangeCoverage(image) == expectedCoverage
+
+        cleanup :
+            SwingTree.clear()
+
+        where :
+            fitMode                 | componentWidth | componentHeight || expectedCoverage
+
+            // `MIN_DIM` fills the smaller dimension, which is 60 in all three of these shapes:
+            UI.FitComponent.MIN_DIM | 61             | 60              || Bounds.of(0, 0, 60, 60)
+            UI.FitComponent.MIN_DIM | 60             | 61              || Bounds.of(0, 0, 60, 60)
+            UI.FitComponent.MIN_DIM | 60             | 60              || Bounds.of(0, 0, 60, 60)
+
+            // `MAX_DIM` fills the larger dimension, which in a square component is the same one:
+            UI.FitComponent.MAX_DIM | 61             | 60              || Bounds.of(0, 0, 61, 61)
+            UI.FitComponent.MAX_DIM | 60             | 61              || Bounds.of(0, 0, 61, 61)
+            UI.FitComponent.MAX_DIM | 60             | 60              || Bounds.of(0, 0, 60, 60)
     }
 
     def 'An `SvgIcon` painted onto a bordered component keeps out of the border.'(
@@ -1746,8 +1890,8 @@ class SvgIcon_Spec extends Specification
             // The plain Swing case paints where the caller asked, border or no border:
             UI.FitComponent.UNDEFINED        | UI.Placement.UNDEFINED || Bounds.of( 0, 0, 30, 30)
             // Everything else starts at the inner edge of the border and measures what is left:
-            UI.FitComponent.UNDEFINED        | UI.Placement.CENTER    || Bounds.of(20, 5, 50, 50)
-            UI.FitComponent.UNDEFINED        | UI.Placement.TOP_LEFT  || Bounds.of( 5, 5, 50, 50)
+            UI.FitComponent.UNDEFINED        | UI.Placement.CENTER    || Bounds.of(30, 15, 30, 30)
+            UI.FitComponent.UNDEFINED        | UI.Placement.TOP_LEFT  || Bounds.of( 5,  5, 30, 30)
             UI.FitComponent.NO               | UI.Placement.UNDEFINED || Bounds.of(30, 15, 30, 30)
             UI.FitComponent.NO               | UI.Placement.TOP_LEFT  || Bounds.of( 5, 5, 30, 30)
             UI.FitComponent.WIDTH_AND_HEIGHT | UI.Placement.UNDEFINED || Bounds.of( 5, 5, 80, 50)

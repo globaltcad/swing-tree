@@ -1254,7 +1254,9 @@ public final class UI extends UIFactoryMethods
         /**
          *  How a particular image is supposed to fit a component is unknown
          *  and <b>may be overridden by another policy or default behavior</b>.
-         *  Typically, this is equivalent to {@link #NO}.
+         *  For an image or icon which has a size of its own this is equivalent
+         *  to {@link #NO}, and for one which has none it is equivalent
+         *  to {@link #MIN_DIM}, there being no size to keep.
          */
         UNDEFINED,
         /**
