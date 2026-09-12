@@ -1243,8 +1243,7 @@ public final class SvgIcon extends ImageIcon
         if ( widthIsPercentage || heightIsPercentage )
             return Size.of(width, height);
 
-        final boolean fitToAreaWidth = ( areaWidth < areaHeight ? width > height : width < height );
-        final float   scale          = ( fitToAreaWidth ? areaWidth / width : areaHeight / height );
+        final float scale = ( areaWidth < areaHeight ? areaWidth / width : areaHeight / height );
         return Size.of(width * scale, height * scale);
     }
 
