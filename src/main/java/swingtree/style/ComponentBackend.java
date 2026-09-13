@@ -1233,8 +1233,11 @@ public final class ComponentBackend<C extends JComponent>
                     children to be clipped by the round border (and the viewport).
                     So we use the inner component area as the clip for the children.
                 */
-                Shape localClip = StyleUtil.intersect( _styleEngine.componentArea(UI.ComponentArea.BODY).orElse(formerClip), formerClip );
-                paintWithClip(internalGraphics, localClip, ()-> superPaint.accept(internalGraphics));
+                Shape body = _styleEngine.componentArea(UI.ComponentArea.BODY).orElse(formerClip);
+                if ( body != null && _everyVisibleChildLiesWithin(body) )
+                    superPaint.accept(internalGraphics);
+                else
+                    paintWithClip(internalGraphics, StyleUtil.intersect( body, formerClip ), ()-> superPaint.accept(internalGraphics));
             }
             else
                 superPaint.accept(internalGraphics);
@@ -1249,6 +1252,13 @@ public final class ComponentBackend<C extends JComponent>
             if ( internalGraphics.getClip() != formerClip )
                 internalGraphics.setClip(formerClip);
         });
+    }
+
+    private boolean _everyVisibleChildLiesWithin( Shape area ) {
+        for ( Component child : _owner.getComponents() )
+            if ( child.isVisible() && !area.contains(child.getX(), child.getY(), child.getWidth(), child.getHeight()) )
+                return false;
+        return true;
     }
 
     void gatherStyleAndPaintInScope( Graphics g, Runnable painter ) {
