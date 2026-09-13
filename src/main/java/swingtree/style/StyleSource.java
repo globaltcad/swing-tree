@@ -158,12 +158,14 @@ final class StyleSource<C extends JComponent>
 
     private StyleConf _scaledAndCorrectedForRounding( StyleConf simplified ) {
         final float scale = UI.scale();
+        if ( scale == 1f )
+            return simplified.correctedForRounding();
+
         final @Nullable ScaledStyle previous = _lastScaledStyle;
         if ( previous != null && previous.isFor(simplified, scale) )
             return previous.result;
 
-        StyleConf scaled = ( scale == 1f ? simplified : simplified.scale(scale) );
-        StyleConf result = scaled.correctedForRounding();
+        StyleConf result = simplified.scale(scale).correctedForRounding();
         _lastScaledStyle = new ScaledStyle(simplified, scale, result);
         return result;
     }
