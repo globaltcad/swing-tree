@@ -250,6 +250,22 @@ final class Outline
                 );
     }
 
+    static Outline roundingCorrectionOf( Outline first, Outline second, Outline third ) {
+        return _of(
+                    _roundingCorrectionOf(_plus(_plus(first.top,    second.top   ), third.top   )),
+                    _roundingCorrectionOf(_plus(_plus(first.right,  second.right ), third.right )),
+                    _roundingCorrectionOf(_plus(_plus(first.bottom, second.bottom), third.bottom)),
+                    _roundingCorrectionOf(_plus(_plus(first.left,   second.left  ), third.left  ))
+                );
+    }
+
+    private static float _roundingCorrectionOf( float sum ) {
+        if ( !(sum > 0f) )
+            return UNSPECIFIED;
+        float fraction = sum - (float) Math.floor(sum);
+        return fraction > 0f ? 1f - fraction : UNSPECIFIED;
+    }
+
     public Outline or( Outline other ) {
         if ( this.equals(_NONE) )
             return other;

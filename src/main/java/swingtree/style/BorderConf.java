@@ -327,12 +327,7 @@ final class BorderConf
     }
 
     BorderConf correctedForRounding() {
-        Outline correction = _borderWidths.plus(_padding).plus(_margin)
-                                .map( v -> v % 1 )
-                                .map( v -> v > 0f ? 1f - v : 0f )
-                                .map( v -> v == 0f ? null : v )
-                                .simplified();
-
+        Outline correction = Outline.roundingCorrectionOf(_borderWidths, _padding, _margin);
         return this.withMargin(_margin.plus(correction));
     }
 
