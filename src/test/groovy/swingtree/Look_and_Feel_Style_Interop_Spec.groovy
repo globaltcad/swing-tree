@@ -322,18 +322,63 @@ class Look_and_Feel_Style_Interop_Spec extends Specification
     ){
         reportInfo """
             A `SwingTreeStyledComponentUI` forwards its `paint` call to
-            `ComponentBackend.paintBackground(Graphics, Painter)`, and the `Painter` it passes
-            is the painting it inherits from its Swing look and feel. SwingTree paints the style
-            first and then runs that painter clipped to the component's `BODY` area, so that
-            nothing the look and feel draws spills over rounded corners.
+            `ComponentBackend.paintBackground(Graphics, Painter)`. The `Painter` it passes is the
+            painting it inherits from its Swing look and feel. SwingTree paints the style first,
+            then sets the component's rounded outline as the clip of the `Graphics` and runs that
+            painter inside it, so that nothing the look and feel draws spills over the round
+            corners.
             
             Many inherited delegates draw nothing at all: `BasicPanelUI`, `BasicViewportUI` and
             `BasicToolBarUI` do not even override `paint`. For such a `ComponentUI` the right
-            painter to pass is `Painter.none()`. The pixels are the same as with a painter that
-            does nothing, but no clip is built for it, and for a component with round corners
-            that clip is not free: Java2D walks the rounded shape one scanline at a time to
-            turn it into a clip region, so a tall rounded card pays for its height on every
-            repaint.
+            painter to pass is `Painter.none()`, and a panel painted that way must look exactly
+            like a panel whose painter does nothing.
+            
+            You may wonder why a scenario about pixels talks so much about clips. The reason is
+            a small optimization inside SwingTree. When it is handed `Painter.none()`, it paints
+            the style and then simply stops, without setting up the clip at all. It does this
+            only for speed. A clip in the shape of a rounded outline is not free, because Java2D
+            turns that shape into a clip region one row of pixels at a time. A card 1,200 pixels
+            tall would pay for 1,200 rows on every repaint, all of it to run a painter that
+            draws nothing.
+            
+            A shortcut like that is easy to get subtly wrong. If it stopped a little too early,
+            it would skip the style as well, and the panel would be painted without its
+            background colour, its gradient or its shadow. So we render the same style twice,
+            once through a painter that does nothing and once through `Painter.none()`, and we
+            expect the two images to agree down to the last channel of the last pixel.
+            
+            To do that, we need a way to hand SwingTree a painter of our own choosing. The
+            shortcut sits inside `ComponentBackend.paintBackground(Graphics, Painter)`, and
+            SwingTree never calls that method by itself. A look and feel calls it, from the
+            `paint` method of its `ComponentUI`. A plain `JPanel` comes with a plain
+            `BasicPanelUI`, whose `paint` method is empty, so painting a plain panel would never
+            reach the shortcut.
+            
+            In this scenario we are therefore using a simple custom `ComponentUI` extension
+            called `ForwardingPanelUI`, in order to play the part of a look and feel and pass
+            SwingTree exactly the painter we want to test. It extends `BasicPanelUI` and
+            implements `SwingTreeStyledComponentUI`, which is how SwingTree recognises a
+            `ComponentUI` that cooperates with its styles. Its `style(..)` method hands the style
+            back unchanged, so everything we see in the images comes from the panel's own
+            `withStyle(..)`. Its `canForwardPaintingToSwingTree()` method answers `true`, which
+            tells SwingTree that the `paint` method will call `paintBackground` itself; a
+            `ComponentUI` that answered `false` could be replaced by one of SwingTree's own once
+            the panel is styled, and then our painter would never run. Its `paint` method does
+            nothing but call `ComponentBackend.powering(panel).paintBackground(g, painter)` with
+            the painter it was constructed with, which lets us build one panel around a painter
+            that does nothing and another around `Painter.none()`. Finally, its `update` method
+            calls `paint` directly, because the `update` inherited from `ComponentUI` would first
+            fill an opaque panel with its background colour, and those pixels would not come
+            from SwingTree.
+            
+            The painter that "does nothing" is not entirely idle, though. It draws nothing, but
+            it writes down the clip of the `Graphics` it is handed. That is the one clip we look
+            at, and it turns out not to be a rectangle: a painter which does run really is placed
+            inside the rounded outline. That is exactly the work the shortcut saves. On the
+            `Painter.none()` side there is nothing comparable to inspect, since no painter runs
+            there and the clip is taken off the `Graphics` again before `paintBackground`
+            returns. The painted panel is what a user sees, and so the pixels are what we
+            compare.
         """
         given : 'Two panels under the same style, one handing SwingTree a painter which does nothing...'
             var clipsSeenByThePainter = []

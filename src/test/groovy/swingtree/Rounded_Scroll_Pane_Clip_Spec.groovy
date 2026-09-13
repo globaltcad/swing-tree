@@ -61,10 +61,35 @@ class Rounded_Scroll_Pane_Clip_Spec extends Specification
     def 'Content which reaches into the round corners of a scroll pane is cut off at the corner.'()
     {
         reportInfo """
-            Nothing keeps this view away from the edge of the scroll pane: there is no border
-            and no padding, so the viewport covers the scroll pane from corner to corner and
-            the red view fills the viewport. The corners of the scroll pane curve away from
-            that rectangle, and the red must follow the curve rather than the rectangle.
+            A scroll pane with round corners keeps its content inside those corners, even when
+            nothing else would. Here there is no border and no padding, so the viewport covers
+            the whole 200 by 160 pixel scroll pane from corner to corner, and the red view fills
+            the viewport. `borderRadius(40)` rounds each corner with an arc 40 pixels wide, so
+            the curve takes up the outermost 20 pixels of every corner. The red has to follow
+            that curve: the pixel at (1, 1) lies more than 26 pixels from the centre of the top left
+            curve at (20, 20), which is outside its radius of 20, so it must not be red.
+            
+            You may wonder why a scenario that only reads pixels is named after a clip. SwingTree
+            paints the children of a round scroll pane through a clip in the shape of its rounded
+            outline, and that is what cuts the red off at the corner. But it also has a small
+            optimization: when every visible child already lies completely inside the rounded
+            outline, the clip could not remove a single pixel from any of them, so SwingTree
+            leaves it out. It does this only for speed, because Java2D builds a rounded clip one
+            row of pixels at a time, and every child painted inside it pays for an intersection
+            with that shape.
+            
+            Here we look at the situation in which that optimization must *not* kick in. The
+            viewport's corner at (0, 0) lies outside the curve. Suppose the check behind the
+            optimization were one day written a little too generously, for instance by testing
+            the children against the scroll pane's rectangle instead of its rounded outline.
+            Then the clip would be left out, the red would be painted straight into the corner,
+            and the pixel at (1, 1) would be red.
+            
+            We check the pixel rather than the clip because the clip is set on a `Graphics` deep
+            inside SwingTree's painting and taken off again before painting returns, so there is
+            nothing left to look at afterwards. And what matters to a user is whether the red
+            reaches past the curve, which we can read straight off the painted image, whichever
+            way SwingTree got there.
         """
         given : 'A scroll pane with round corners and nothing between its edge and its view.'
             var scrollPane =
@@ -92,11 +117,34 @@ class Rounded_Scroll_Pane_Clip_Spec extends Specification
     def 'Content which stays clear of the round corners of a scroll pane is painted in full.'()
     {
         reportInfo """
-            Here padding holds the view far enough in from the edge that the corners never
-            curve into it. Clipping the children to the rounded body would not change one of
-            their pixels, which is why SwingTree does not set that clip up at all in this
-            situation. Whether it does or not, every pixel of the view has to arrive, right up
-            to its own corners.
+            A scroll pane with round corners paints content that stays clear of those corners
+            in full, right up to the content's own corners. Here the scroll pane is 200 by 160
+            pixels and `borderRadius(40)` rounds each corner with an arc 40 pixels wide, so the
+            curve takes up only the outermost 20 pixels of every corner. A padding of 20 pixels
+            puts the viewport's top left corner at (20, 20), where the curve has already ended,
+            and the same holds at the other three corners. So all four corners of the red view
+            must be red.
+            
+            You may wonder why a scenario that only reads pixels is named after a clip. SwingTree
+            normally paints the children of a round scroll pane through a clip in the shape of its
+            rounded outline. But it also has a small optimization: when every visible child
+            already lies completely inside the rounded outline, the clip could not remove a single
+            pixel from any of them, so SwingTree leaves it out. It does this only for speed,
+            because Java2D builds a rounded clip one row of pixels at a time, and every child
+            painted inside it pays for an intersection with that shape.
+            
+            Here we look at the situation in which that optimization *does* kick in, and we make
+            sure that it is safe: the image has to be exactly what clipping would have produced,
+            which in this case is the whole view. If a later change started cutting into content
+            it should leave alone, for instance by clipping the children to a shape smaller than
+            the rounded outline, the view's corner pixels at (20, 20), (179, 20), (20, 139) and
+            (179, 139) would stop being red, and this scenario would tell us.
+            
+            We check pixels rather than the clip because the clip is set on a `Graphics` deep
+            inside SwingTree's painting and taken off again before painting returns, and in this
+            situation there is not even a clip to find. What matters to a user is whether every
+            pixel of the view arrives, which we can read straight off the painted image,
+            whichever way SwingTree got there.
         """
         given : 'A scroll pane with round corners and enough padding to keep its view clear of them.'
             var scrollPane =
