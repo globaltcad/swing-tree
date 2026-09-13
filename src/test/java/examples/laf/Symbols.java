@@ -2797,15 +2797,15 @@ interface Symbols
             int   fillH = horizontal ? h : (int) Math.round(h * ratio);
             int   fillY = horizontal ? 0 : h - fillH;
             g.setPaint(NimbusRelief.GLOSS.paint(fillY, fillH, tone));
-            g.fillRect(0, fillY, fillW, fillH);
+            OptimizedShapeRendering.fill(g, new Rectangle(0, fillY, fillW, fillH));
             // Closed on all four sides, so that a bar part way along still ends in an edge rather
             // than fading into the trough.
             g.setColor(LafUtilities.shiftHsb(tone, 0, -0.153));
-            g.fillRect(0, fillY, fillW, 1);
-            g.fillRect(0, fillY, 1, fillH);
-            g.fillRect(fillW - 1, fillY, 1, fillH);
+            OptimizedShapeRendering.fill(g, new Rectangle(0, fillY, fillW, 1));
+            OptimizedShapeRendering.fill(g, new Rectangle(0, fillY, 1, fillH));
+            OptimizedShapeRendering.fill(g, new Rectangle(fillW - 1, fillY, 1, fillH));
             g.setColor(LafUtilities.shiftHsb(tone, -0.082, -0.224));
-            g.fillRect(0, fillY + fillH - 1, fillW, 1);
+            OptimizedShapeRendering.fill(g, new Rectangle(0, fillY + fillH - 1, fillW, 1));
         }
 
         @Override

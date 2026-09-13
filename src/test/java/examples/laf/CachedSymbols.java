@@ -85,12 +85,21 @@ final class CachedSymbols implements Symbols
     private static final int TILE_TYPE = BufferedImage.TYPE_INT_ARGB;
 
     /**
-     *  How many keys that were asked for once, and drawn straight through, are remembered.
-     *  A tile is only made on the second request for the same key, because during a window drag
-     *  a split pane grip or a scroll thumb is asked for at a new size on every frame, and a tile
-     *  made for a size no later paint asks for again costs an image and an upload for nothing.
+     *  How many requests for the same key are drawn straight through before a tile is made.
+     *  <p>
+     *  During a window drag a split pane grip or a scroll thumb is asked for at a new size on
+     *  almost every frame, and a tile made for a size no later paint asks for again costs an image
+     *  and an upload for nothing - the upload is where the time goes, because Java2D copies a new
+     *  image into a temporary pixmap through a shared memory image the X server has to attach
+     *  first. A tile made on the second request still paid that for most drag sizes: over 1,350
+     *  frames of the showcase 449 thumb tiles were made and almost none was read more than once
+     *  again. A repaint at an unchanged size asks for every key once per paint, so it reaches its
+     *  tiles one paint later and loses nothing after that.
      */
-    private static final int MAX_FIRST_REQUESTS = 256;
+    private static final int REQUESTS_DRAWN_STRAIGHT_THROUGH = 2;
+
+    /** How many keys that are still being drawn straight through are remembered. */
+    private static final int MAX_EARLY_REQUESTS = 256;
 
     /** Which piece of geometry a tile holds, so that two of them are never mistaken for each other. */
     private enum Symbol
@@ -107,11 +116,11 @@ final class CachedSymbols implements Symbols
     private final Map<Key, BufferedImage> _tiles = new LinkedHashMap<>(64, 0.75f, true);
     private long _bytes = 0;
 
-    /** The keys asked for once without a tile, oldest first, bounded by {@link #MAX_FIRST_REQUESTS}. */
-    private final Map<Key, Boolean> _requestedOnce = new LinkedHashMap<Key, Boolean>(64, 0.75f, false) {
+    /** How often each key without a tile was asked for, oldest first, bounded by {@link #MAX_EARLY_REQUESTS}. */
+    private final Map<Key, Integer> _earlyRequests = new LinkedHashMap<Key, Integer>(64, 0.75f, false) {
         @Override
-        protected boolean removeEldestEntry( Map.Entry<Key, Boolean> eldest ) {
-            return size() > MAX_FIRST_REQUESTS;
+        protected boolean removeEldestEntry( Map.Entry<Key, Integer> eldest ) {
+            return size() > MAX_EARLY_REQUESTS;
         }
     };
 
@@ -366,7 +375,7 @@ final class CachedSymbols implements Symbols
 
         Key           key  = new Key(symbol, flags, w, h, UI.scale(), scaleX, scaleY, phaseX, phaseY);
         BufferedImage tile = _lookUp(key);
-        if ( tile == null && _isFirstRequest(key) ) {
+        if ( tile == null && _isDrawnStraightThrough(key) ) {
             drawing.draw(g, x, y);
             return;
         }
@@ -400,9 +409,9 @@ final class CachedSymbols implements Symbols
         return Math.rint(fraction * PHASE_STEPS) / PHASE_STEPS;
     }
 
-    private boolean _isFirstRequest( Key key ) {
+    private boolean _isDrawnStraightThrough( Key key ) {
         synchronized ( _tiles ) {
-            return _requestedOnce.put(key, Boolean.TRUE) == null;
+            return _earlyRequests.merge(key, 1, Integer::sum) <= REQUESTS_DRAWN_STRAIGHT_THROUGH;
         }
     }
 

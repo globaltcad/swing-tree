@@ -1,5 +1,6 @@
 package examples.laf;
 
+import swingtree.api.Painter;
 import swingtree.api.laf.SwingTreeStyledComponentUI;
 import swingtree.style.ComponentStyleDelegate;
 
@@ -27,7 +28,7 @@ public final class SwingTreeScrollPaneUI
 
     @Override
     public void paint( Graphics g, JComponent c ) {
-        LafUtilities.paintStyled(g, c, g2 -> super.paint(g2, c));
+        LafUtilities.paintStyled(g, c, ((JScrollPane) c).getViewportBorder() == null ? Painter.none() : g2 -> super.paint(g2, c));
     }
 
     @Override

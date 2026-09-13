@@ -9,6 +9,7 @@ import swingtree.api.Painter;
 import swingtree.style.ComponentBackend;
 
 import javax.swing.AbstractButton;
+import javax.swing.CellRendererPane;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -247,10 +248,15 @@ final class LafUtilities
      *  has already skipped repainting what is behind it, and nothing covers the pixels it used to
      *  fill. That is how a menu row filled only while armed leaves its highlight behind. Repainting
      *  the bounds it vacated costs one extra repaint on that one frame.
+     *  <p>
+     *  <b>Nothing inherited.</b> The basic panel, viewport, tool bar, menu bar, popup menu and
+     *  spinner delegates paint nothing of their own, and a scroll pane's paints only a viewport
+     *  border. Those pass {@link Painter#none()}: the engine still paints the style, but does not
+     *  build a clip of the component's rounded body for a painter that would draw nothing into it.
      */
     static void paintStyled( Graphics g, JComponent c, Painter inheritedPainting ) {
         boolean wasOpaque = c.isOpaque();
-        ComponentBackend.powering(c).paintBackground(g, g2 -> {
+        ComponentBackend.powering(c).paintBackground(g, inheritedPainting == Painter.none() ? Painter.none() : g2 -> {
             Object formerShapeAntialiasing = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
             applyDesktopTextHints(g2);
             g2.setColor(c.getForeground());
@@ -578,6 +584,11 @@ final class LafUtilities
      *  control built out of several components would also stop being under the pointer the moment
      *  the pointer reached one of its own parts - a combo box's actuator, a spinner's steppers - so
      *  the parts are followed along with the whole, and so are parts put in later.
+     *  <p>
+     *  A {@link CellRendererPane} is not followed. It is invisible, so the pointer never reaches it,
+     *  and the combo box's own delegate adds its renderer to it and removes it again on every
+     *  paint: a listener on it turned each repaint of a combo box into two container events, each
+     *  of which walks the whole paint stack for an access control context.
      *
      * @param target the component whose style asks where the pointer is
      */
@@ -617,6 +628,8 @@ final class LafUtilities
         boolean isOver() { return _over; }
 
         void follow( Component part ) {
+            if ( part instanceof CellRendererPane )
+                return;
             part.addMouseListener(this);
             if ( !(part instanceof Container) )
                 return;
@@ -627,6 +640,8 @@ final class LafUtilities
         }
 
         void release( Component part ) {
+            if ( part instanceof CellRendererPane )
+                return;
             part.removeMouseListener(this);
             if ( !(part instanceof Container) )
                 return;

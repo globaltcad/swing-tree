@@ -220,10 +220,16 @@ public final class ComponentBackend<C extends JComponent>
      *   <li>Invokes the supplied look and feel {@link Painter} for additional native component rendering</li>
      *   <li>Handles buffering for components with parent filters</li>
      * </ul>
+     * <p>
+     * Pass {@link Painter#none()} when the inherited look and feel painting draws nothing,
+     * as {@code BasicPanelUI} does. The style is then painted exactly the same, but no clip
+     * is set up for a painter that would not use it. For a component with round corners that
+     * clip is not free: Java2D walks the rounded shape one scanline at a time to build it.
      *
      * @param graphics The graphics context to paint into
      * @param lookAndFeelPainting Callback that performs native Swing painting
-     *                            (will be clipped to the {@link UI.ComponentArea#BODY}, which is based on the current style)
+     *                            (will be clipped to the {@link UI.ComponentArea#BODY}, which is based on the current style),
+     *                            or {@link Painter#none()} if there is none
      * @throws ClassCastException if the provided {@code graphics} is not a {@link Graphics2D} instance
      *         (should never happen in standard Swing usage)
      *
@@ -233,7 +239,10 @@ public final class ComponentBackend<C extends JComponent>
      * @see StyleConf
      */
     public void paintBackground( Graphics graphics, Painter lookAndFeelPainting ) {
-        paintBackground(graphics, true, g2d->lookAndFeelPainting.paint((Graphics2D) g2d));
+        if ( lookAndFeelPainting == Painter.none() )
+            paintBackground(graphics, true, null);
+        else
+            paintBackground(graphics, true, g2d->lookAndFeelPainting.paint((Graphics2D) g2d));
     }
 
     /**
@@ -1224,8 +1233,11 @@ public final class ComponentBackend<C extends JComponent>
                     children to be clipped by the round border (and the viewport).
                     So we use the inner component area as the clip for the children.
                 */
-                Shape localClip = StyleUtil.intersect( _styleEngine.componentArea(UI.ComponentArea.BODY).orElse(formerClip), formerClip );
-                paintWithClip(internalGraphics, localClip, ()-> superPaint.accept(internalGraphics));
+                Shape body = _styleEngine.componentArea(UI.ComponentArea.BODY).orElse(formerClip);
+                if ( body != null && _everyVisibleChildLiesWithin(body) )
+                    superPaint.accept(internalGraphics);
+                else
+                    paintWithClip(internalGraphics, StyleUtil.intersect( body, formerClip ), ()-> superPaint.accept(internalGraphics));
             }
             else
                 superPaint.accept(internalGraphics);
@@ -1240,6 +1252,13 @@ public final class ComponentBackend<C extends JComponent>
             if ( internalGraphics.getClip() != formerClip )
                 internalGraphics.setClip(formerClip);
         });
+    }
+
+    private boolean _everyVisibleChildLiesWithin( Shape area ) {
+        for ( Component child : _owner.getComponents() )
+            if ( child.isVisible() && !area.contains(child.getX(), child.getY(), child.getWidth(), child.getHeight()) )
+                return false;
+        return true;
     }
 
     void gatherStyleAndPaintInScope( Graphics g, Runnable painter ) {
