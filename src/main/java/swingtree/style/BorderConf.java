@@ -21,9 +21,9 @@ final class BorderConf
                                                 Arc.none(),
                                                 Arc.none(),
                                                 Arc.none(),
-                                                Outline.none(),
-                                                Outline.none(),
-                                                Outline.none(),
+                                                OptionalInsets.none(),
+                                                OptionalInsets.none(),
+                                                OptionalInsets.none(),
                                                 BorderColorsConf.none()
                                             );
 
@@ -34,18 +34,18 @@ final class BorderConf
         Arc              topRightArc,
         Arc              bottomLeftArc,
         Arc              bottomRightArc,
-        Outline          borderWidths,
-        Outline          margin,
-        Outline          padding,
+        OptionalInsets   borderWidths,
+        OptionalInsets   margin,
+        OptionalInsets   padding,
         BorderColorsConf borderColor
     ) {
         if ( topLeftArc    .equals( Arc.none()     ) &&
              topRightArc   .equals( Arc.none()     ) &&
              bottomLeftArc .equals( Arc.none()     ) &&
              bottomRightArc.equals( Arc.none()     ) &&
-             borderWidths  .equals( Outline.none() ) &&
-             margin        .equals( Outline.none() ) &&
-             padding       .equals( Outline.none() ) &&
+             borderWidths  .equals( OptionalInsets.none() ) &&
+             margin        .equals( OptionalInsets.none() ) &&
+             padding       .equals( OptionalInsets.none() ) &&
              borderColor   .equals( BorderColorsConf.none() )
         )
             return _NONE;
@@ -59,9 +59,9 @@ final class BorderConf
     private final Arc   _bottomLeftArc;
     private final Arc   _bottomRightArc;
 
-    private final Outline _borderWidths;
-    private final Outline _margin;
-    private final Outline _padding;
+    private final OptionalInsets _borderWidths;
+    private final OptionalInsets _margin;
+    private final OptionalInsets _padding;
 
     private final BorderColorsConf _borderColors;
 
@@ -71,9 +71,9 @@ final class BorderConf
         Arc              topRightArc,
         Arc              bottomLeftArc,
         Arc              bottomRightArc,
-        Outline          borderWidths,
-        Outline          margin,
-        Outline          padding,
+        OptionalInsets   borderWidths,
+        OptionalInsets   margin,
+        OptionalInsets   padding,
         BorderColorsConf borderColors
     ) {
         _topLeftArc      = topLeftArc;
@@ -109,29 +109,29 @@ final class BorderConf
 
     public float bottomRightRadius() { return !_bottomRightArc.equals(Arc.none()) ? (_bottomRightArc.width() + _bottomRightArc.height()) / 2 : 0; }
 
-    public Outline widths() { return _borderWidths; }
+    public OptionalInsets widths() { return _borderWidths; }
 
-    public Outline margin() { return _margin; }
+    public OptionalInsets margin() { return _margin; }
 
-    public Outline padding() { return _padding; }
+    public OptionalInsets padding() { return _padding; }
 
     public BorderColorsConf colors() {
         return _borderColors;
     }
 
-    BorderConf withWidths( Outline borderWidths ) {
+    BorderConf withWidths( OptionalInsets borderWidths ) {
         if ( borderWidths.equals(_borderWidths) )
             return this;
         return BorderConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, borderWidths, _margin, _padding, _borderColors);
     }
 
-    BorderConf withMargin( Outline margin ) {
+    BorderConf withMargin( OptionalInsets margin ) {
         if ( margin.equals(_margin) )
             return this;
         return BorderConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, margin, _padding, _borderColors);
     }
 
-    BorderConf withPadding( Outline padding ) {
+    BorderConf withPadding( OptionalInsets padding ) {
         if ( padding.equals(_padding) )
             return this;
         return BorderConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, padding, _borderColors);
@@ -291,12 +291,12 @@ final class BorderConf
         Arc simplifiedTopRightArc      = _topRightArc.simplified();
         Arc simplifiedBottomLeftArc    = _bottomLeftArc.simplified();
         Arc simplifiedBottomRightArc   = _bottomRightArc.simplified();
-        Outline simplifiedBorderWidths = _borderWidths.simplified();
-        Outline simplifiedMargin       = _margin.simplified();
-        Outline simplifiedPadding      = _padding; // Allowing the user to set an all 0 padding is needed for overriding the default insets (from former border!)
+        OptionalInsets simplifiedBorderWidths = _borderWidths.simplified();
+        OptionalInsets simplifiedMargin       = _margin.simplified();
+        OptionalInsets simplifiedPadding      = _padding; // Allowing the user to set an all 0 padding is needed for overriding the default insets (from former border!)
         BorderColorsConf simplifiedBorderColor = _borderColors.isAnyVisible() ? _borderColors : BorderColorsConf.none();
 
-        boolean hasNoBorderWidths = simplifiedBorderWidths.equals(Outline.none());
+        boolean hasNoBorderWidths = simplifiedBorderWidths.equals(OptionalInsets.none());
 
         if ( hasNoBorderWidths ) {
             simplifiedBorderColor = BorderColorsConf.none();
@@ -327,12 +327,7 @@ final class BorderConf
     }
 
     BorderConf correctedForRounding() {
-        Outline correction = _borderWidths.plus(_padding).plus(_margin)
-                                .map( v -> v % 1 )
-                                .map( v -> v > 0f ? 1f - v : 0f )
-                                .map( v -> v == 0f ? null : v )
-                                .simplified();
-
+        OptionalInsets correction = OptionalInsets.roundingCorrectionOf(_borderWidths, _padding, _margin);
         return this.withMargin(_margin.plus(correction));
     }
 

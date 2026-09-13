@@ -83,7 +83,7 @@ final class ComponentAreas
     }
 
     private static Area _produceContentArea( BoxModelConf boxModel, LazyRef<Shape> interiorArea ) {
-        Outline insets = boxModel.insetsFor(UI.ComponentBoundary.INTERIOR_TO_CONTENT);
+        OptionalInsets insets = boxModel.insetsFor(UI.ComponentBoundary.INTERIOR_TO_CONTENT);
         Size size = boxModel.size();
         Area contentArea = new Area(new Rectangle2D.Float(
                 insets.left().orElse(0f),
@@ -131,7 +131,7 @@ final class ComponentAreas
     /**
      *  Tells whether the box model carves the given area out of the plain component bounds.
      *  A {@link UI.ComponentArea#BORDER} exists when a border width is positive, an
-     *  {@link UI.ComponentArea#EXTERIOR} when a margin, a base outline or a corner arc pushes
+     *  {@link UI.ComponentArea#EXTERIOR} when a margin, a base inset or a corner arc pushes
      *  the body inward, and an {@link UI.ComponentArea#INTERIOR} or {@link UI.ComponentArea#BODY}
      *  when either of the two does. The answer depends on the box model alone,
      *  never on which shapes have been built so far.
@@ -156,7 +156,7 @@ final class ComponentAreas
 
     private boolean _bodyIsInsetFromBounds() {
         return _boxModel.margin().isPositive()
-            || _boxModel.baseOutline().isPositive()
+            || _boxModel.baseInsets().isPositive()
             || _boxModel.hasAnyNonZeroArcs();
     }
 
@@ -178,7 +178,7 @@ final class ComponentAreas
     }
 
     private static Shape _produceInteriorArea(BoxModelConf currentState) {
-        Outline widths = currentState.widths();
+        OptionalInsets widths = currentState.widths();
         float leftBorderWidth   = widths.left().orElse(0f);
         float topBorderWidth    = widths.top().orElse(0f);
         float rightBorderWidth  = widths.right().orElse(0f);
@@ -212,12 +212,12 @@ final class ComponentAreas
         float insBottom,
         float insRight
     ) {
-        final Outline margin  = border.margin();
-        final Size    size    = border.size();
-        final Outline outline = border.baseOutline();
+        final OptionalInsets margin     = border.margin();
+        final Size           size       = border.size();
+        final OptionalInsets baseInsets = border.baseInsets();
 
         if ( BoxModelConf.none().equals(border) ) {
-            Outline insets = outline.plus(margin).plus(Outline.of(insTop, insLeft, insBottom, insRight));
+            OptionalInsets insets = baseInsets.plus(margin).plus(OptionalInsets.of(insTop, insLeft, insBottom, insRight));
             // If there is no style, we just return the component's bounds:
             float left   = insets.left().orElse(0f);
             float top    = insets.top().orElse(0f);
@@ -228,10 +228,10 @@ final class ComponentAreas
             return _rectangularShapeFrom(left, top, width, height);
         }
 
-        insTop    += outline.top().orElse(0f);
-        insLeft   += outline.left().orElse(0f);
-        insBottom += outline.bottom().orElse(0f);
-        insRight  += outline.right().orElse(0f);
+        insTop    += baseInsets.top().orElse(0f);
+        insLeft   += baseInsets.left().orElse(0f);
+        insBottom += baseInsets.bottom().orElse(0f);
+        insRight  += baseInsets.right().orElse(0f);
 
         // The background box is calculated from the margins and border radius:
         float left   = Math.max(margin.left().orElse(0f), 0)   + insLeft  ;
@@ -437,8 +437,8 @@ final class ComponentAreas
      */
     private static Area[] calculateEdgeBorderAreas( BoxModelConf boxModel ) {
         final Size    size   = boxModel.size();
-        final Outline margin = boxModel.margin();
-        final Outline widths = boxModel.widths();
+        final OptionalInsets margin = boxModel.margin();
+        final OptionalInsets widths = boxModel.widths();
 
         final double boxLeft   = Math.max(margin.left().orElse(0f), 0f);
         final double boxTop    = Math.max(margin.top().orElse(0f),  0f);

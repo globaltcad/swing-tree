@@ -26,34 +26,34 @@ final class BoxModelConf
                                                 Arc.none(),
                                                 Arc.none(),
                                                 Arc.none(),
-                                                Outline.none(),
-                                                Outline.none(),
-                                                Outline.none(),
-                                                Outline.none(),
+                                                OptionalInsets.none(),
+                                                OptionalInsets.none(),
+                                                OptionalInsets.none(),
+                                                OptionalInsets.none(),
                                                 Size.unknown()
                                             );
 
     public static BoxModelConf none() { return _NONE; }
 
     static BoxModelConf of(
-        Arc     topLeftArc,
-        Arc     topRightArc,
-        Arc     bottomLeftArc,
-        Arc     bottomRightArc,
-        Outline borderWidths,
-        Outline margin,
-        Outline padding,
-        Outline baseOutline,
-        Size    size
+        Arc            topLeftArc,
+        Arc            topRightArc,
+        Arc            bottomLeftArc,
+        Arc            bottomRightArc,
+        OptionalInsets borderWidths,
+        OptionalInsets margin,
+        OptionalInsets padding,
+        OptionalInsets baseInsets,
+        Size           size
     ) {
         if ( topLeftArc      .equals( Arc.none() ) &&
              topRightArc     .equals( Arc.none() ) &&
              bottomLeftArc   .equals( Arc.none() ) &&
              bottomRightArc  .equals( Arc.none() ) &&
-             borderWidths    .equals( Outline.none() ) &&
-             margin          .equals( Outline.none() ) &&
-             padding         .equals( Outline.none() ) &&
-             baseOutline     .equals( Outline.none() ) &&
+             borderWidths    .equals( OptionalInsets.none() ) &&
+             margin          .equals( OptionalInsets.none() ) &&
+             padding         .equals( OptionalInsets.none() ) &&
+             baseInsets      .equals( OptionalInsets.none() ) &&
              size            .equals( Size.unknown() )
         )
             return _NONE;
@@ -62,13 +62,13 @@ final class BoxModelConf
                                         topLeftArc,    topRightArc,
                                         bottomLeftArc, bottomRightArc,
                                         borderWidths,  margin,
-                                        padding,       baseOutline,
+                                        padding,       baseInsets,
                                         size
                                     );
         }
     }
 
-    static BoxModelConf of( BorderConf borderConf, Outline baseOutline, Size size )   {
+    static BoxModelConf of( BorderConf borderConf, OptionalInsets baseInsets, Size size )   {
         return BoxModelConf.of(
             borderConf.topLeftArc().orElse(Arc.none()),
             borderConf.topRightArc().orElse(Arc.none()),
@@ -77,7 +77,7 @@ final class BoxModelConf
             borderConf.widths(),
             borderConf.margin(),
             borderConf.padding(),
-            baseOutline,
+            baseInsets,
             size
         );
     }
@@ -88,27 +88,27 @@ final class BoxModelConf
     private final Arc   _bottomLeftArc;
     private final Arc   _bottomRightArc;
 
-    private final Outline _borderWidths;
-    private final Outline _margin;
-    private final Outline _padding;
-    private final Outline _baseOutline;
+    private final OptionalInsets _borderWidths;
+    private final OptionalInsets _margin;
+    private final OptionalInsets _padding;
+    private final OptionalInsets _baseInsets;
 
     private final Size    _size;
 
-    private final LazyRef<Outline[]> _boundaryInsets;
+    private final LazyRef<OptionalInsets[]> _boundaryInsets;
 
 
     @SuppressWarnings("EnumOrdinal") // Enum ordinals are used intentionally to index a fixed boundary lookup table.
     private BoxModelConf(
-        Arc     topLeftArc,
-        Arc     topRightArc,
-        Arc     bottomLeftArc,
-        Arc     bottomRightArc,
-        Outline borderWidths,
-        Outline margin,
-        Outline padding,
-        Outline baseOutline,
-        Size    size
+        Arc            topLeftArc,
+        Arc            topRightArc,
+        Arc            bottomLeftArc,
+        Arc            bottomRightArc,
+        OptionalInsets borderWidths,
+        OptionalInsets margin,
+        OptionalInsets padding,
+        OptionalInsets baseInsets,
+        Size           size
     ) {
         _topLeftArc      = topLeftArc;
         _topRightArc     = topRightArc;
@@ -117,11 +117,11 @@ final class BoxModelConf
         _borderWidths    = Objects.requireNonNull(borderWidths);
         _margin          = Objects.requireNonNull(margin);
         _padding         = Objects.requireNonNull(padding);
-        _baseOutline     = Objects.requireNonNull(baseOutline);
+        _baseInsets      = Objects.requireNonNull(baseInsets);
         _size            = Objects.requireNonNull(size);
         _boundaryInsets  = new LazyRef<>(this, boxModel->{
             UI.ComponentBoundary[] allBoundaries = UI.ComponentBoundary.values();
-            Outline[] boundaryLookup = new Outline[allBoundaries.length];
+            OptionalInsets[] boundaryLookup = new OptionalInsets[allBoundaries.length];
             for ( UI.ComponentBoundary currentBoundary : allBoundaries ) {
                 boundaryLookup[currentBoundary.ordinal()] = _insetsFor(boxModel, currentBoundary);
             }
@@ -152,26 +152,26 @@ final class BoxModelConf
 
     public float bottomRightRadius() { return !_bottomRightArc.equals(Arc.none()) ? (_bottomRightArc.width() + _bottomRightArc.height()) / 2 : 0; }
 
-    public Outline widths() { return _borderWidths; }
+    public OptionalInsets widths() { return _borderWidths; }
 
-    public Outline margin() { return _margin; }
+    public OptionalInsets margin() { return _margin; }
 
-    public Outline padding() { return _padding; }
+    public OptionalInsets padding() { return _padding; }
 
-    public Outline baseOutline() { return _baseOutline; }
+    public OptionalInsets baseInsets() { return _baseInsets; }
     
     public Size size() { return _size; }
 
     @SuppressWarnings("EnumOrdinal") // Enum ordinals are used intentionally to index a fixed boundary lookup table.
-    Outline insetsFor(UI.ComponentBoundary boundary) {
+    OptionalInsets insetsFor(UI.ComponentBoundary boundary) {
         return Objects.requireNonNull(_boundaryInsets.get()[boundary.ordinal()]);
     }
 
-    private static Outline _insetsFor(BoxModelConf boxModel, UI.ComponentBoundary boundary) {
-        Outline insets = Outline.none();
+    private static OptionalInsets _insetsFor(final BoxModelConf boxModel, final UI.ComponentBoundary boundary) {
+        OptionalInsets insets = OptionalInsets.none();
         switch ( boundary ) {
             case OUTER_TO_EXTERIOR:
-                return Outline.none();
+                return OptionalInsets.none();
             case EXTERIOR_TO_BORDER:
                 return boxModel.margin();
             case BORDER_TO_INTERIOR:
@@ -184,7 +184,7 @@ final class BoxModelConf
                 float deltaHeight = boxModel.size().heightOrElse(0f) - insets.top().orElse(0f) - insets.bottom().orElse(0f);
                 float halfWidth = deltaWidth / 2f;
                 float halfHeight = deltaHeight / 2f;
-                return insets.plus(Outline.of(halfHeight, halfWidth, halfHeight, halfWidth));
+                return insets.plus(OptionalInsets.of(halfHeight, halfWidth, halfHeight, halfWidth));
         }
         return insets;
     }
@@ -196,16 +196,16 @@ final class BoxModelConf
         switch ( corner ) {
             case TOP_LEFT:
                 arcHeight = !_topLeftArc.equals(Arc.none()) ? _topLeftArc.height() : 0;
-                return BoxModelConf.of(Arc.of(borderArcWidth, arcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
+                return BoxModelConf.of(Arc.of(borderArcWidth, arcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseInsets, _size);
             case TOP_RIGHT:
                 arcHeight = !_topRightArc.equals(Arc.none()) ? _topRightArc.height() : 0;
-                return BoxModelConf.of(_topLeftArc, Arc.of(borderArcWidth, arcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
+                return BoxModelConf.of(_topLeftArc, Arc.of(borderArcWidth, arcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseInsets, _size);
             case BOTTOM_LEFT:
                 arcHeight = !_bottomLeftArc.equals(Arc.none()) ? _bottomLeftArc.height() : 0;
-                return BoxModelConf.of(_topLeftArc, _topRightArc, Arc.of(borderArcWidth, arcHeight), _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
+                return BoxModelConf.of(_topLeftArc, _topRightArc, Arc.of(borderArcWidth, arcHeight), _bottomRightArc, _borderWidths, _margin, _padding, _baseInsets, _size);
             case BOTTOM_RIGHT:
                 arcHeight = !_bottomRightArc.equals(Arc.none()) ? _bottomRightArc.height() : 0;
-                return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(borderArcWidth, arcHeight), _borderWidths, _margin, _padding, _baseOutline, _size);
+                return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(borderArcWidth, arcHeight), _borderWidths, _margin, _padding, _baseInsets, _size);
             default:
                 throw new IllegalArgumentException("Unknown corner: " + corner);
         }
@@ -225,16 +225,16 @@ final class BoxModelConf
         switch ( corner ) {
             case TOP_LEFT:
                 arcWidth = !_topLeftArc.equals(Arc.none()) ? _topLeftArc.width() : 0;
-                return BoxModelConf.of(Arc.of(arcWidth, borderArcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
+                return BoxModelConf.of(Arc.of(arcWidth, borderArcHeight), _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseInsets, _size);
             case TOP_RIGHT:
                 arcWidth = !_topRightArc.equals(Arc.none()) ? _topRightArc.width() : 0;
-                return BoxModelConf.of(_topLeftArc, Arc.of(arcWidth, borderArcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
+                return BoxModelConf.of(_topLeftArc, Arc.of(arcWidth, borderArcHeight), _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseInsets, _size);
             case BOTTOM_LEFT:
                 arcWidth = !_bottomLeftArc.equals(Arc.none()) ? _bottomLeftArc.width() : 0;
-                return BoxModelConf.of(_topLeftArc, _topRightArc, Arc.of(arcWidth, borderArcHeight), _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, _size);
+                return BoxModelConf.of(_topLeftArc, _topRightArc, Arc.of(arcWidth, borderArcHeight), _bottomRightArc, _borderWidths, _margin, _padding, _baseInsets, _size);
             case BOTTOM_RIGHT:
                 arcWidth = !_bottomRightArc.equals(Arc.none()) ? _bottomRightArc.width() : 0;
-                return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(arcWidth, borderArcHeight), _borderWidths, _margin, _padding, _baseOutline, _size);
+                return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, Arc.of(arcWidth, borderArcHeight), _borderWidths, _margin, _padding, _baseInsets, _size);
             default:
                 throw new IllegalArgumentException("Unknown corner: " + corner);
         }
@@ -251,10 +251,10 @@ final class BoxModelConf
         if ( edge == UI.Edge.EVERY )
             return this.withBorderWidth(borderWidth);
         switch (edge) {
-            case TOP:    return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withTop(borderWidth), _margin, _padding, _baseOutline, _size);
-            case RIGHT:  return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withRight(borderWidth), _margin, _padding, _baseOutline, _size);
-            case BOTTOM: return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withBottom(borderWidth), _margin, _padding, _baseOutline, _size);
-            case LEFT:   return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withLeft(borderWidth), _margin, _padding, _baseOutline, _size);
+            case TOP:    return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withTop(borderWidth), _margin, _padding, _baseInsets, _size);
+            case RIGHT:  return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withRight(borderWidth), _margin, _padding, _baseInsets, _size);
+            case BOTTOM: return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withBottom(borderWidth), _margin, _padding, _baseInsets, _size);
+            case LEFT:   return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths.withLeft(borderWidth), _margin, _padding, _baseInsets, _size);
             default:
                 throw new IllegalArgumentException("Unknown side: " + edge);
         }
@@ -268,7 +268,7 @@ final class BoxModelConf
     }
 
     BoxModelConf withSize(Size size) {
-        return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseOutline, size);
+        return BoxModelConf.of(_topLeftArc, _topRightArc, _bottomLeftArc, _bottomRightArc, _borderWidths, _margin, _padding, _baseInsets, size);
     }
 
     boolean allCornersShareTheSameArc() {
@@ -287,7 +287,7 @@ final class BoxModelConf
         hash = 97 * hash + _borderWidths.hashCode();
         hash = 97 * hash + _margin.hashCode();
         hash = 97 * hash + _padding.hashCode();
-        hash = 97 * hash + _baseOutline.hashCode();
+        hash = 97 * hash + _baseInsets.hashCode();
         hash = 97 * hash + _size.hashCode();
         return hash;
     }
@@ -306,7 +306,7 @@ final class BoxModelConf
             Objects.equals(_borderWidths,   rhs._borderWidths)   &&
             Objects.equals(_margin,         rhs._margin)         &&
             Objects.equals(_padding,        rhs._padding)        &&
-            Objects.equals(_baseOutline,    rhs._baseOutline)    &&
+            Objects.equals(_baseInsets,     rhs._baseInsets)     &&
             Objects.equals(_size,           rhs._size);
     }
 
@@ -324,7 +324,7 @@ final class BoxModelConf
                     "borderWidths="   + _borderWidths   + ", " +
                     "margin="         + _margin         + ", " +
                     "padding="        + _padding        + ", " +
-                    "baseOutline="    + _baseOutline    + ", " +
+                    "baseInsets="     + _baseInsets     + ", " +
                     "size="           + _size           +
                 "]";
     }

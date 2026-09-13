@@ -182,7 +182,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
                                                 UI.FitComponent.UNDEFINED,
                                                 Size.unknown(),
                                                 1.0f,
-                                                Outline.none(),
+                                                OptionalInsets.none(),
                                                 Offset.none(),
                                                 UI.ComponentArea.BODY
                                             );
@@ -198,7 +198,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
         UI.FitComponent      fitMode,
         Size                 size,
         float                opacity,
-        Outline              padding,
+        OptionalInsets       padding,
         Offset               offset,
         UI.ComponentArea     clipArea
     ) {
@@ -270,7 +270,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
     private final UI.FitComponent      _fitMode;
     private final Size                 _size;
     private final float                _opacity;
-    private final Outline              _padding;
+    private final OptionalInsets       _padding;
     private final Offset               _offset;
     private final UI.ComponentArea     _clipArea;
 
@@ -284,7 +284,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
         UI.FitComponent      fitMode,
         Size                 size,
         float                opacity,
-        Outline              padding,
+        OptionalInsets       padding,
         Offset               offset,
         UI.ComponentArea     clipArea
     ) {
@@ -329,7 +329,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
 
     float opacity() { return _opacity; }
 
-    Outline padding() { return _padding; }
+    OptionalInsets padding() { return _padding; }
     
     int horizontalOffset() { return (int) _offset.x(); }
     
@@ -734,7 +734,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @param padding The padding of the image.
      * @return A new {@link ImageConf} instance with the specified padding.
      */
-    ImageConf padding( Outline padding ) {
+    ImageConf padding( OptionalInsets padding ) {
         return ImageConf.of(_primer, _payload, _placement, _placementBoundary, _repeat, _fitMode, _size, _opacity, padding, _offset, _clipArea);
     }
 
@@ -750,7 +750,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @return A new {@link ImageConf} instance with the specified padding.
      */
     public ImageConf padding( int top, int right, int bottom, int left ) {
-        return padding(Outline.of(top, right, bottom, left));
+        return padding(OptionalInsets.of(top, right, bottom, left));
     }
 
     /**
@@ -763,7 +763,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @return A new {@link ImageConf} instance with the specified padding.
      */
     public ImageConf padding( int topBottom, int leftRight ) {
-        return padding(Outline.of(topBottom, leftRight, topBottom, leftRight));
+        return padding(OptionalInsets.of(topBottom, leftRight, topBottom, leftRight));
     }
 
     /**
@@ -775,7 +775,7 @@ public final class ImageConf implements Simplifiable<ImageConf>
      * @return A new {@link ImageConf} instance with the specified padding.
      */
     public ImageConf padding( int padding ) {
-        return padding(Outline.of(padding, padding, padding, padding));
+        return padding(OptionalInsets.of(padding, padding, padding, padding));
     }
 
     /**

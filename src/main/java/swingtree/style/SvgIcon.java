@@ -1109,7 +1109,7 @@ public final class SvgIcon extends ImageIcon
                     Offset.none(),
                     UI.Placement.CENTER,
                     UI.FitComponent.WIDTH_AND_HEIGHT,
-                    Outline.none()
+                    OptionalInsets.none()
                 );
             g2d.dispose();
         }
@@ -1200,12 +1200,12 @@ public final class SvgIcon extends ImageIcon
                 g.drawImage(_cache, x, y, width, height, null);
             else {
                 _cache = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-                paintIcon(c, _cache.getGraphics(), Bounds.of(0, 0, width, height), Offset.none(), Outline.none() );
+                paintIcon(c, _cache.getGraphics(), Bounds.of(0, 0, width, height), Offset.none(), OptionalInsets.none() );
                 g.drawImage(_cache, x, y, width, height, null);
             }
         }
         else
-            _paintIcon( c, g, Bounds.of(x, y, width, height), Offset.of(0, 0), preferredPlacement, fitComponent, Outline.none() );
+            _paintIcon( c, g, Bounds.of(x, y, width, height), Offset.of(0, 0), preferredPlacement, fitComponent, OptionalInsets.none() );
     }
 
     @SuppressWarnings("DoNotCall")
@@ -1221,7 +1221,7 @@ public final class SvgIcon extends ImageIcon
         final Graphics g,
         final Bounds bounds,
         final Offset offset,
-        final Outline padding
+        final OptionalInsets padding
     ) {
         _paintIcon( c, g, bounds, offset, _preferredPlacement, _resolvedFitComponent(), padding);
     }
@@ -1268,7 +1268,7 @@ public final class SvgIcon extends ImageIcon
         final Offset offset,
         final UI.Placement preferredPlacement,
         final UI.FitComponent fitComponent,
-        final Outline padding
+        final OptionalInsets padding
     ) {
         if ( _core.svgDocument == null || _opacity <= 0 )
             return;

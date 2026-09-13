@@ -183,13 +183,13 @@ class Styles_Spec extends Specification
                                             "rightWidth=" + scaledToString(2) + ", " +
                                             "bottomWidth=" + scaledToString(3) + ", " +
                                             "leftWidth=" + scaledToString(4) + ", " +
-                                            "margin=Outline[" +
+                                            "margin=OptionalInsets[" +
                                                 "top=${(scale(1) % 1 == 0 ? "?" : 1 - scale(1) % 1 )}, " +
                                                 "right=${(scale(2) % 1 == 0 ? "?" : 1 - scale(2) % 1 )}, " +
                                                 "bottom=${(scale(3) % 1 == 0 ? "?" : 1 - scale(3) % 1 )}, " +
                                                 "left=${(scale(4) % 1 == 0 ? "?" : 1 - scale(4) % 1 )}" +
                                             "], " +
-                                            "padding=Outline[top=?, right=?, bottom=?, left=?], " +
+                                            "padding=OptionalInsets[top=?, right=?, bottom=?, left=?], " +
                                             "color=rgba(0,0,255,255)" +
                                         "], " +
                                         "BaseConf[" +
@@ -306,7 +306,7 @@ class Styles_Spec extends Specification
                                                         "fitComponent=WIDTH, " +
                                                         "width=?, height=?, " +
                                                         "opacity=1.0, " +
-                                                        "padding=Outline[top=?, right=?, bottom=?, left=?], " +
+                                                        "padding=OptionalInsets[top=?, right=?, bottom=?, left=?], " +
                                                         "offset=Offset[x=0, y=0], " +
                                                         "clipArea=BODY" +
                                                     "]" +
@@ -547,8 +547,8 @@ class Styles_Spec extends Specification
                     "BorderConf[" +
                         "radius=" + scaledToString(40) + ", " +
                         "width=?, " +
-                        "margin=Outline[top=?, right=?, bottom=?, left=?], " +
-                        "padding=Outline[top=?, right=?, bottom=?, left=?], " +
+                        "margin=OptionalInsets[top=?, right=?, bottom=?, left=?], " +
+                        "padding=OptionalInsets[top=?, right=?, bottom=?, left=?], " +
                         "color=?" +
                     "], " +
                     "BaseConf[" +
@@ -666,8 +666,8 @@ class Styles_Spec extends Specification
                         "rightWidth=?, " +
                         "bottomWidth=?, " +
                         "leftWidth=" + String.valueOf(uiScale).replace(".0", "") + ", " +
-                        "margin=Outline[top=?, right=?, bottom=?, left=${( uiScale % 1 == 0 ? "?" : 1 - uiScale % 1 )}], " +
-                        "padding=Outline[top=0, right=0, bottom=0, left=0], " +
+                        "margin=OptionalInsets[top=?, right=?, bottom=?, left=${( uiScale % 1 == 0 ? "?" : 1 - uiScale % 1 )}], " +
+                        "padding=OptionalInsets[top=0, right=0, bottom=0, left=0], " +
                         "color=rgba(0,255,0,255)" +
                     "], " +
                     "BaseConf[" +

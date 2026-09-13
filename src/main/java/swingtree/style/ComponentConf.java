@@ -18,16 +18,16 @@ final class ComponentConf
     private static final ComponentConf _NONE = new ComponentConf(
                                                     StyleConf.none(),
                                                     Bounds.none(),
-                                                    Outline.none()
+                                                    OptionalInsets.none()
                                                 );
 
     public static ComponentConf none() {
         return _NONE;
     }
 
-    private final StyleConf _styleConf;
-    private final Bounds    _currentBounds;
-    private final Outline   _marginCorrection;
+    private final StyleConf      _styleConf;
+    private final Bounds         _currentBounds;
+    private final OptionalInsets _marginCorrection;
     private final LazyRef<RenderConf> _renderConf; // Computed constant, used for rendering!
 
     /*
@@ -42,7 +42,7 @@ final class ComponentConf
     ComponentConf(
             StyleConf styleConf,
             Bounds currentBounds,
-            Outline marginCorrection
+            OptionalInsets marginCorrection
     ) {
         _styleConf        = Objects.requireNonNull(styleConf);
         _currentBounds    = Objects.requireNonNull(currentBounds);
@@ -54,7 +54,7 @@ final class ComponentConf
 
     Bounds currentBounds() { return _currentBounds; }
 
-    Outline areaMarginCorrection() { return _marginCorrection; }
+    OptionalInsets areaMarginCorrection() { return _marginCorrection; }
 
     ComponentConf withSize( int width, int height ) {
         return new ComponentConf(

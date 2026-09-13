@@ -45,7 +45,7 @@ final class LayerRenderConf
     private final BaseColorConf _baseColor;
     private final StyleConfLayer _layer;
     private final LazyRef<LayerRenderConf> _canonicalRepresentation;
-    private final LazyRef<Outline> _nineTileSliceInsets;
+    private final LazyRef<OptionalInsets> _nineTileSliceInsets;
 
     private LayerRenderConf(
         BoxModelConf   boxModelConf,
@@ -143,7 +143,7 @@ final class LayerRenderConf
         return _canonicalRepresentation.get();
     }
 
-    Outline nineTileSliceInsets() {
+    OptionalInsets nineTileSliceInsets() {
         return _nineTileSliceInsets.get();
     }
 
@@ -190,9 +190,9 @@ final class LayerRenderConf
         if ( compaction == Compaction.NONE )
             return conf;
 
-        final Outline sliceInsets = conf.nineTileSliceInsets();
-        final Size    exemplar    = _exemplarSize(sliceInsets);
-        final Size    actual      = conf.boxModel().size();
+        final OptionalInsets sliceInsets = conf.nineTileSliceInsets();
+        final Size           exemplar    = _exemplarSize(sliceInsets);
+        final Size           actual      = conf.boxModel().size();
 
         if ( !_borderEdgeSeamsAreSizeIndependent(conf, sliceInsets, exemplar) )
             return conf;
@@ -258,7 +258,7 @@ final class LayerRenderConf
      *  independent parts of the configuration, so the blit can recompute it and is guaranteed
      *  to agree with the canonicalization.
      */
-    private static Outline _compute9PatchSliceInsets(LayerRenderConf conf ) {
+    private static OptionalInsets _compute9PatchSliceInsets(LayerRenderConf conf ) {
         final BoxModelConf box = conf.boxModel();
 
         final float marginTop    = _positive(box.margin().top());
@@ -266,10 +266,10 @@ final class LayerRenderConf
         final float marginBottom = _positive(box.margin().bottom());
         final float marginLeft   = _positive(box.margin().left());
 
-        final float baseTop    = _positive(box.baseOutline().top());
-        final float baseRight  = _positive(box.baseOutline().right());
-        final float baseBottom = _positive(box.baseOutline().bottom());
-        final float baseLeft   = _positive(box.baseOutline().left());
+        final float baseTop    = _positive(box.baseInsets().top());
+        final float baseRight  = _positive(box.baseInsets().right());
+        final float baseBottom = _positive(box.baseInsets().bottom());
+        final float baseLeft   = _positive(box.baseInsets().left());
 
         final float widthTop    = _positive(box.widths().top());
         final float widthRight  = _positive(box.widths().right());
@@ -305,7 +305,7 @@ final class LayerRenderConf
         final float bottom = marginBottom + baseBottom + widthBottom + arcBottom + shadowReachV + SAFETY_MARGIN;
         final float left   = marginLeft   + baseLeft   + widthLeft   + arcLeft   + shadowReachH + SAFETY_MARGIN;
 
-        return Outline.of(
+        return OptionalInsets.of(
                     (float) Math.ceil(top),
                     (float) Math.ceil(right),
                     (float) Math.ceil(bottom),
@@ -385,7 +385,7 @@ final class LayerRenderConf
      */
     private static boolean _borderEdgeSeamsAreSizeIndependent(
         LayerRenderConf conf,
-        Outline         sliceInsets,
+        OptionalInsets  sliceInsets,
         Size            exemplar
     ) {
         final BorderColorsConf borderColors = conf.baseColors().borderColor();
@@ -394,19 +394,19 @@ final class LayerRenderConf
         if ( !conf.boxModel().hasAnyNonZeroArcs() )
             return true;
 
-        final Outline widths = conf.boxModel().widths();
-        final float   top    = _positive(widths.top());
-        final float   right  = _positive(widths.right());
-        final float   bottom = _positive(widths.bottom());
-        final float   left   = _positive(widths.left());
+        final OptionalInsets widths = conf.boxModel().widths();
+        final float          top    = _positive(widths.top());
+        final float          right  = _positive(widths.right());
+        final float          bottom = _positive(widths.bottom());
+        final float          left   = _positive(widths.left());
         if ( top <= 0 || right <= 0 || bottom <= 0 || left <= 0 )
             return false;
 
-        final Outline margin       = conf.boxModel().margin();
-        final float   marginTop    = _positive(margin.top());
-        final float   marginRight  = _positive(margin.right());
-        final float   marginBottom = _positive(margin.bottom());
-        final float   marginLeft   = _positive(margin.left());
+        final OptionalInsets margin       = conf.boxModel().margin();
+        final float          marginTop    = _positive(margin.top());
+        final float          marginRight  = _positive(margin.right());
+        final float          marginBottom = _positive(margin.bottom());
+        final float          marginLeft   = _positive(margin.left());
 
         final float boxWidth  = exemplar.widthOrElse(0f)  - marginLeft - marginRight;
         final float boxHeight = exemplar.heightOrElse(0f) - marginTop  - marginBottom;
@@ -427,7 +427,7 @@ final class LayerRenderConf
      *  into the repeating band, keeping those artifacts pixel-identical to a real rendering of
      *  any larger size.
      */
-    private static Size _exemplarSize( Outline sliceInsets ) {
+    private static Size _exemplarSize( final OptionalInsets sliceInsets ) {
         final float maxHorizontal = Math.max(sliceInsets.left().orElse(0f), sliceInsets.right().orElse(0f));
         final float maxVertical   = Math.max(sliceInsets.top().orElse(0f),  sliceInsets.bottom().orElse(0f));
         return Size.of(

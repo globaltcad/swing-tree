@@ -9,7 +9,7 @@ import swingtree.style.ShadowConf
 import swingtree.threading.EventProcessor
 import swingtree.style.Arc
 
-import swingtree.style.Outline
+import swingtree.style.OptionalInsets
 
 import swingtree.style.StyleConf
 import swingtree.style.StyleSheet
@@ -274,8 +274,8 @@ class Style_Sheet_Spec extends Specification
             var s1 = ss.computeStyleFrom(textField)
             var s2 = ss.computeStyleFrom(textArea)
         then : 'We can indeed verify that style 2 inherits from style 1.'
-            s1.padding() == Outline.of(1, 2, 3, 4)
-            s2.padding() == Outline.of(1, 2, 3, 4)
+            s1.padding() == OptionalInsets.of(1, 2, 3, 4)
+            s2.padding() == OptionalInsets.of(1, 2, 3, 4)
             s2.base().foundationColor().get() == Color.CYAN
     }
 
@@ -430,7 +430,7 @@ class Style_Sheet_Spec extends Specification
             s1.border().topRightArc().get() == Arc.of(19, 19)
             s1.border().bottomLeftArc().get() == Arc.of(19, 19)
             s1.border().bottomRightArc().get() == Arc.of(19, 19)
-            s1.padding() == Outline.of(42, 42, 42, 42)
+            s1.padding() == OptionalInsets.of(42, 42, 42, 42)
             s1.shadow().isInset() == true
             s1.shadow().blurRadius() == 22
             s1.shadow().spreadRadius() == 6
@@ -444,7 +444,7 @@ class Style_Sheet_Spec extends Specification
             s2.border().topRightArc().get() == Arc.of(19, 19)
             s2.border().bottomLeftArc().get() == Arc.of(19, 19)
             s2.border().bottomRightArc().get() == Arc.of(19, 19)
-            s2.padding() == Outline.of(42, 42, 42, 42)
+            s2.padding() == OptionalInsets.of(42, 42, 42, 42)
             s2.shadow().isInset() == false
             s2.shadow().blurRadius() == 22
             s2.shadow().spreadRadius() == 6
@@ -458,7 +458,7 @@ class Style_Sheet_Spec extends Specification
             s3.border().topRightArc().get() == Arc.of(3, 3)
             s3.border().bottomLeftArc().get() == Arc.of(3, 3)
             s3.border().bottomRightArc().get() == Arc.of(3, 3)
-            s3.padding() == Outline.of(42, 42, 42, 42)
+            s3.padding() == OptionalInsets.of(42, 42, 42, 42)
             s3.shadow().isInset() == true
             s3.shadow().blurRadius() == 22
             s3.shadow().spreadRadius() == 6
@@ -472,7 +472,7 @@ class Style_Sheet_Spec extends Specification
             s4.border().topRightArc().get() == Arc.of(19, 19)
             s4.border().bottomLeftArc().get() == Arc.of(19, 19)
             s4.border().bottomRightArc().get() == Arc.of(19, 19)
-            s4.padding() == Outline.of(42, 42, 42, 42)
+            s4.padding() == OptionalInsets.of(42, 42, 42, 42)
             s4.shadow().isInset() == false
             s4.shadow().blurRadius() == 22
             s4.shadow().spreadRadius() == 6
@@ -486,7 +486,7 @@ class Style_Sheet_Spec extends Specification
             s5.border().topRightArc().get() == Arc.of(3, 3)
             s5.border().bottomLeftArc().get() == Arc.of(3, 3)
             s5.border().bottomRightArc().get() == Arc.of(3, 3)
-            s5.padding() == Outline.of(42, 42, 42, 42)
+            s5.padding() == OptionalInsets.of(42, 42, 42, 42)
             s5.shadow().isInset() == true
             s5.shadow().blurRadius() == 22
             s5.shadow().spreadRadius() == 6
@@ -807,7 +807,7 @@ class Style_Sheet_Spec extends Specification
             s4 == ss.computeStyleFrom(label1)
             s5 == ss.computeStyleFrom(label2)
         and : 'We also check that they have the expected commonalities:'
-            [s1, s2, s3, s4, s5].every { it.padding() == Outline.of(24, 72, 42, 12) }
+            [s1, s2, s3, s4, s5].every { it.padding() == OptionalInsets.of(24, 72, 42, 12) }
             [s1, s2, s3, s4, s5].every { it.border().widths().bottom().get() == 42 }
             [s1, s2, s3, s4, s5].every { it.border().topRightArc().get() == Arc.of(9, 9) }
             [s1, s2, s3, s4, s5].every { it.border().bottomLeftArc().get() == Arc.of(9, 9) }

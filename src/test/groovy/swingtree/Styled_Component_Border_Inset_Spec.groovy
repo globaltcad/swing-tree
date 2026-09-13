@@ -189,4 +189,59 @@ class Styled_Component_Border_Inset_Spec extends Specification
             //3       | { it -> it.painter(UI.Layer.BACKGROUND, g2d->{}) } || javax.swing.plaf.synth.SynthBorder
     }
 
+    def 'Fractional `padding`, `border` and `margin` widths are rounded up to whole pixel insets by growing the margin.'(
+        float uiScale, double padding, double borderWidth, double margin, int insets
+    ) {
+        reportInfo """
+            Swing measures the border of a component in whole pixels, because
+            `Border.getBorderInsets(Component)` returns an `Insets` object, and `Insets`
+            holds `int` values. The padding, border width and margin of a SwingTree style
+            are `double` values, and the UI scale factor multiplies all three of them.
+            So on one side of a component they can add up to a number like 9.75.
+            When that happens, SwingTree adds the missing fraction of a pixel to the
+            margin on that side, so that padding, border width and margin add up
+            to a whole number of pixels, and Swing and the style agree on where
+            the content of the component starts.
+
+            Take a padding of 6.25, a border width of 1.5 and a margin of 2 at a
+            UI scale factor of 1. Together they are 6.25 + 1.5 + 2 = 9.75 pixels.
+            The missing fraction is 1 - 0.75 = 0.25, so the margin becomes 2.25,
+            and the insets are 6.25 + 1.5 + 2.25 = 10 pixels on every side.
+            Without that correction, Swing would cut 9.75 down to 9 and lay the
+            content out 9 pixels in from the edge, while the style paints its
+            padding all the way to 9.75 pixels in.
+
+            The UI scale factor is applied before the fraction is measured.
+            At a factor of 1.25, a padding of 5, a border width of 1 and a margin of 1
+            become 6.25, 1.25 and 1.25, which add up to 8.75, so the margin grows by
+            0.25 and the insets are 9 pixels.
+
+            When the widths already add up to a whole number, nothing is added.
+            A padding of 6.5, a border width of 1 and a margin of 2.5 are exactly
+            10 pixels, and the insets stay at 10, not 11.
+        """
+        given : 'We set the UI scale factor that the widths are multiplied by:'
+            SwingTree.get().setUiScaleFactor(uiScale)
+        and : 'We create a panel whose padding, border width and margin are fractional:'
+            var ui =
+                    UI.panel()
+                    .withStyle( it -> it
+                        .padding(padding)
+                        .border(borderWidth, Color.BLACK)
+                        .margin(margin)
+                    )
+        and : 'We unpack the panel:'
+            var component = ui.get(JPanel)
+
+        expect : 'The insets are the rounded up sum of padding, border width and margin on every side.'
+            component.getInsets() == new Insets(insets, insets, insets, insets)
+
+        where :
+            uiScale | padding | borderWidth | margin || insets
+            1       | 6.25    | 1.5         | 2      || 10
+            1       | 6.5     | 1           | 2.5    || 10
+            1.25    | 5       | 1           | 1      || 9
+            2       | 3.125   | 0.5         | 1      || 10
+    }
+
 }

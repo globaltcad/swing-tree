@@ -383,13 +383,13 @@ class Style_Animations_Spec extends Specification
             styleString.contains("BorderConf[" +
                         "radius=${scaledToString(2.5)}, " +
                         "width=${scaledToString(2.5)}, " +
-                        "margin=Outline[" +
+                        "margin=OptionalInsets[" +
                             "top=${scaleErrorToString(2.5)}, " +
                             "right=${scaleErrorToString(2.5)}, " +
                             "bottom=${scaleErrorToString(2.5)}, " +
                             "left=${scaleErrorToString(2.5)}" +
                         "], " +
-                        "padding=Outline[top=?, right=?, bottom=?, left=?], " +
+                        "padding=OptionalInsets[top=?, right=?, bottom=?, left=?], " +
                         "color=rgba(0,128,0,255)" +
                     "]")
 

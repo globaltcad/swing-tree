@@ -304,7 +304,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided padding distances.
      */
     public ComponentStyleDelegate<C> margin( double top, double right, double bottom, double left ) {
-        return _withStyle(_styleConf._withBorder(_styleConf.border().withMargin(Outline.of(top, right, bottom, left))));
+        return _withStyle(_styleConf._withBorder(_styleConf.border().withMargin(OptionalInsets.of(top, right, bottom, left))));
     }
 
     /**
@@ -317,7 +317,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
     public ComponentStyleDelegate<C> margin( double margin ) {
-        return _withStyle(_styleConf._withBorder(_styleConf.border().withMargin(Outline.of((float) margin))));
+        return _withStyle(_styleConf._withBorder(_styleConf.border().withMargin(OptionalInsets.of((float) margin))));
     }
 
     /**
@@ -411,7 +411,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided padding distances.
      */
     public ComponentStyleDelegate<C> padding( double top, double right, double bottom, double left ) {
-        return _withStyle(_styleConf._withBorder(_styleConf.border().withPadding(Outline.of(top, right, bottom, left))));
+        return _withStyle(_styleConf._withBorder(_styleConf.border().withPadding(OptionalInsets.of(top, right, bottom, left))));
     }
 
     /**
@@ -424,7 +424,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
     public ComponentStyleDelegate<C> padding( double padding ) {
-        return _withStyle(_styleConf._withBorder(_styleConf.border().withPadding(Outline.of((float) padding))));
+        return _withStyle(_styleConf._withBorder(_styleConf.border().withPadding(OptionalInsets.of((float) padding))));
     }
 
     /**
@@ -545,7 +545,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @return A new {@link ComponentStyleDelegate} with the provided border widths and border color.
      */
     public ComponentStyleDelegate<C> border( double top, double right, double bottom, double left, Color color ) {
-        return _withStyle(_styleConf._withBorder(_styleConf.border().withWidths(Outline.of(top, right, bottom, left)).withColor(color)));
+        return _withStyle(_styleConf._withBorder(_styleConf.border().withWidths(OptionalInsets.of(top, right, bottom, left)).withColor(color)));
     }
 
     /**
@@ -726,7 +726,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @see #borderWidthAt(UI.Edge, double)
      */
     public ComponentStyleDelegate<C> borderWidths( double top, double right, double bottom, double left ) {
-        return _withStyle(_styleConf._withBorder(_styleConf.border().withWidths(Outline.of(top, right, bottom, left))));
+        return _withStyle(_styleConf._withBorder(_styleConf.border().withWidths(OptionalInsets.of(top, right, bottom, left))));
     }
 
     /**
@@ -748,7 +748,7 @@ public final class ComponentStyleDelegate<C extends JComponent>
      * @see #borderWidthAt(UI.Edge, double)
      */
     public ComponentStyleDelegate<C> borderWidths( double topBottom, double leftRight ) {
-        return _withStyle(_styleConf._withBorder(_styleConf.border().withWidths(Outline.of(topBottom, leftRight, topBottom, leftRight))));
+        return _withStyle(_styleConf._withBorder(_styleConf.border().withWidths(OptionalInsets.of(topBottom, leftRight, topBottom, leftRight))));
     }
 
     /**
