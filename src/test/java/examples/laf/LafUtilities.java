@@ -247,10 +247,15 @@ final class LafUtilities
      *  has already skipped repainting what is behind it, and nothing covers the pixels it used to
      *  fill. That is how a menu row filled only while armed leaves its highlight behind. Repainting
      *  the bounds it vacated costs one extra repaint on that one frame.
+     *  <p>
+     *  <b>Nothing inherited.</b> The basic panel, viewport, tool bar, menu bar, popup menu and
+     *  spinner delegates paint nothing of their own, and a scroll pane's paints only a viewport
+     *  border. Those pass {@link Painter#none()}: the engine still paints the style, but does not
+     *  build a clip of the component's rounded body for a painter that would draw nothing into it.
      */
     static void paintStyled( Graphics g, JComponent c, Painter inheritedPainting ) {
         boolean wasOpaque = c.isOpaque();
-        ComponentBackend.powering(c).paintBackground(g, g2 -> {
+        ComponentBackend.powering(c).paintBackground(g, inheritedPainting == Painter.none() ? Painter.none() : g2 -> {
             Object formerShapeAntialiasing = g2.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
             applyDesktopTextHints(g2);
             g2.setColor(c.getForeground());

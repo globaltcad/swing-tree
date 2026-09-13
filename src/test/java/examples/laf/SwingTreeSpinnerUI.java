@@ -1,6 +1,7 @@
 package examples.laf;
 
 import swingtree.UI;
+import swingtree.api.Painter;
 import swingtree.api.laf.SwingTreeStyledComponentUI;
 import swingtree.style.ComponentStyleDelegate;
 
@@ -46,7 +47,7 @@ public final class SwingTreeSpinnerUI
 
     @Override
     public void paint( Graphics g, JComponent c ) {
-        LafUtilities.paintStyled(g, c, g2 -> super.paint(g2, c));
+        LafUtilities.paintStyled(g, c, Painter.none());
     }
 
     @Override
