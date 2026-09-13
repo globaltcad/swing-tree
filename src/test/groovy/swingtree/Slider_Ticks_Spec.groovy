@@ -210,8 +210,8 @@ class Slider_Ticks_Spec extends Specification
     def 'Tick marks and the labels at them count from the minimum of the slider.'()
     {
         reportInfo """
-            Every Swing look and feel draws tick marks by starting at the minimum of the
-            slider and stepping forward by the spacing. So on a slider running from 3 to 97
+            `BasicSliderUI`, which the look and feels of Swing and FlatLaf build on, draws
+            tick marks by starting at the minimum of the slider and stepping forward by the spacing. So on a slider running from 3 to 97
             with a major spacing of 25, the major tick marks sit at 3, 28, 53 and 78, not at
             25, 50 and 75. The labels at the major tick marks follow the tick marks, because a
             label is only useful where its tick mark is.

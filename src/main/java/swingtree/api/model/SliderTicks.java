@@ -55,8 +55,9 @@ import java.util.function.Function;
  *
  *  Tick marks, and the labels at the major tick marks, count from the minimum of
  *  the slider. On a slider running from 3 to 97 with a major spacing of 25, the major
- *  tick marks sit at 3, 28, 53 and 78. This is how every Swing look and feel draws tick
- *  marks, and a label is only useful where its tick mark is. A label which has to sit
+ *  tick marks sit at 3, 28, 53 and 78. This is how {@link javax.swing.plaf.basic.BasicSliderUI},
+ *  which the look and feels of Swing build on, draws tick marks, and a label is only useful
+ *  where its tick mark is. A label which has to sit
  *  somewhere else can be placed at any number through {@link #withLabelAt(Number, String)}.
  *
  *  <h2>It is a value</h2>
