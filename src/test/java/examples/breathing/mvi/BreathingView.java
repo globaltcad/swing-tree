@@ -9,6 +9,7 @@ import sprouts.Var;
 import sprouts.Viewable;
 import swingtree.UI;
 import swingtree.UIForAnySwing;
+import swingtree.api.model.SliderTicks;
 import swingtree.layout.FlowCell;
 import swingtree.threading.EventProcessor;
 
@@ -340,11 +341,11 @@ public final class BreathingView extends Panel {
             .add("growx, gaptop 16, wmin 0",
                 sectionTitle("Timing")
             )
-            .add("growx, wmin 0", sliderRow("Inhale",  inhale,  1, 12))
-            .add("growx, wmin 0", sliderRow("Hold",    holdIn,  0, 12))
-            .add("growx, wmin 0", sliderRow("Exhale",  exhale,  1, 12))
-            .add("growx, wmin 0", sliderRow("Rest",    holdOut, 0, 12))
-            .add("growx, wmin 0", sliderRow("Cycles",  cycles,  1, 12))
+            .add("growx, wmin 0", sliderRow("Inhale",  inhale,  1, 12, 0.5))
+            .add("growx, wmin 0", sliderRow("Hold",    holdIn,  0, 12, 0.5))
+            .add("growx, wmin 0", sliderRow("Exhale",  exhale,  1, 12, 0.5))
+            .add("growx, wmin 0", sliderRow("Rest",    holdOut, 0, 12, 0.5))
+            .add("growx, wmin 0", sliderRow("Cycles",  cycles,  1, 12, 1))
             .add("growx, gaptop 18, wmin 0",
                 panel("fill, insets 0").withStyle( it -> it.backgroundColor(new Color(0, 0, 0, 0)) )
                 .add("grow, wmin 0",
@@ -398,7 +399,13 @@ public final class BreathingView extends Panel {
             .onClick( it -> vm.update( m -> m.applyPreset(preset) ) );
     }
 
-    private static UIForAnySwing<?,?> sliderRow( String name, Var<Double> value, double min, double max ) {
+    /**
+     *  A labelled slider for one of the timing settings. The knob snaps to tick marks
+     *  {@code step} apart, which are not drawn: a {@link SliderTicks} whose tick marks
+     *  are invisible is simply a step size, so the timings move in half seconds and
+     *  the cycles in whole cycles.
+     */
+    private static UIForAnySwing<?,?> sliderRow( String name, Var<Double> value, double min, double max, double step ) {
         return panel("fill, insets 3 0 3 0").withStyle( it -> it.backgroundColor(new Color(0, 0, 0, 0)) )
             .add("width 58!",
                 label(name).withStyle( it -> it
@@ -408,6 +415,12 @@ public final class BreathingView extends Panel {
             )
             .add("growx, pushx, wmin 0",
                 slider(Axis.HORIZONTAL, min, max, value)
+                .withTicks(
+                    SliderTicks.of(Double.class)
+                    .withMajorSpacing(step)
+                    .withTickMarksVisible(false)
+                    .withSnapToTicks(true)
+                )
             )
             .add("width 42!",
                 label(value.viewAsString( d -> formatSeconds(name, d) ))
