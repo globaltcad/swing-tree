@@ -9,6 +9,7 @@ import swingtree.api.Painter;
 import swingtree.style.ComponentBackend;
 
 import javax.swing.AbstractButton;
+import javax.swing.CellRendererPane;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
@@ -583,6 +584,11 @@ final class LafUtilities
      *  control built out of several components would also stop being under the pointer the moment
      *  the pointer reached one of its own parts - a combo box's actuator, a spinner's steppers - so
      *  the parts are followed along with the whole, and so are parts put in later.
+     *  <p>
+     *  A {@link CellRendererPane} is not followed. It is invisible, so the pointer never reaches it,
+     *  and the combo box's own delegate adds its renderer to it and removes it again on every
+     *  paint: a listener on it turned each repaint of a combo box into two container events, each
+     *  of which walks the whole paint stack for an access control context.
      *
      * @param target the component whose style asks where the pointer is
      */
@@ -622,6 +628,8 @@ final class LafUtilities
         boolean isOver() { return _over; }
 
         void follow( Component part ) {
+            if ( part instanceof CellRendererPane )
+                return;
             part.addMouseListener(this);
             if ( !(part instanceof Container) )
                 return;
@@ -632,6 +640,8 @@ final class LafUtilities
         }
 
         void release( Component part ) {
+            if ( part instanceof CellRendererPane )
+                return;
             part.removeMouseListener(this);
             if ( !(part instanceof Container) )
                 return;
