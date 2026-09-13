@@ -33,7 +33,9 @@ import java.util.Objects;
  *  arriving with a different palette is drawn straight through.
  *  <p>
  *  {@link #paintSliderTrack} and {@link #paintProgressFill} are never stored, because both are
- *  handed a position rather than a state and would fill the cache with entries used once.
+ *  handed a position rather than a state and would fill the cache with entries used once. Every
+ *  other symbol is drawn straight through the first time its key is asked for, and stored as a
+ *  tile the second time.
  *  <p>
  *  Tiles are stored in device pixels with a margin around the box the symbol was given, because a
  *  symbol may draw outside it: Material grows a translucent halo five developer pixels beyond a
@@ -74,6 +76,22 @@ final class CachedSymbols implements Symbols
      */
     private static final double PHASE_STEPS = 1024;
 
+    /**
+     *  The pixel format of a tile. It is not premultiplied, because Java2D's XRender pipeline
+     *  can upload an {@code INT_ARGB} image to the X server but has no such loop for
+     *  {@code INT_ARGB_PRE}: it draws a premultiplied tile it has not cached yet by reading the
+     *  destination back from the server, blending in memory and sending the result again.
+     */
+    private static final int TILE_TYPE = BufferedImage.TYPE_INT_ARGB;
+
+    /**
+     *  How many keys that were asked for once, and drawn straight through, are remembered.
+     *  A tile is only made on the second request for the same key, because during a window drag
+     *  a split pane grip or a scroll thumb is asked for at a new size on every frame, and a tile
+     *  made for a size no later paint asks for again costs an image and an upload for nothing.
+     */
+    private static final int MAX_FIRST_REQUESTS = 256;
+
     /** Which piece of geometry a tile holds, so that two of them are never mistaken for each other. */
     private enum Symbol
     {
@@ -88,6 +106,14 @@ final class CachedSymbols implements Symbols
     /** Least-recently-used first, which is the order {@link #_store} evicts in. */
     private final Map<Key, BufferedImage> _tiles = new LinkedHashMap<>(64, 0.75f, true);
     private long _bytes = 0;
+
+    /** The keys asked for once without a tile, oldest first, bounded by {@link #MAX_FIRST_REQUESTS}. */
+    private final Map<Key, Boolean> _requestedOnce = new LinkedHashMap<Key, Boolean>(64, 0.75f, false) {
+        @Override
+        protected boolean removeEldestEntry( Map.Entry<Key, Boolean> eldest ) {
+            return size() > MAX_FIRST_REQUESTS;
+        }
+    };
 
     CachedSymbols( Symbols symbols, Palette palette ) {
         _symbols = Objects.requireNonNull(symbols);
@@ -340,8 +366,12 @@ final class CachedSymbols implements Symbols
 
         Key           key  = new Key(symbol, flags, w, h, UI.scale(), scaleX, scaleY, phaseX, phaseY);
         BufferedImage tile = _lookUp(key);
+        if ( tile == null && _isFirstRequest(key) ) {
+            drawing.draw(g, x, y);
+            return;
+        }
         if ( tile == null ) {
-            tile = new BufferedImage(tileW, tileH, BufferedImage.TYPE_INT_ARGB_PRE);
+            tile = new BufferedImage(tileW, tileH, TILE_TYPE);
             Graphics2D tileGraphics = tile.createGraphics();
             try {
                 tileGraphics.setRenderingHints(g.getRenderingHints());
@@ -368,6 +398,12 @@ final class CachedSymbols implements Symbols
 
     private static double _phase( double fraction ) {
         return Math.rint(fraction * PHASE_STEPS) / PHASE_STEPS;
+    }
+
+    private boolean _isFirstRequest( Key key ) {
+        synchronized ( _tiles ) {
+            return _requestedOnce.put(key, Boolean.TRUE) == null;
+        }
     }
 
     private BufferedImage _lookUp( Key key ) {

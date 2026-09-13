@@ -32,6 +32,11 @@ final class Styles
      *  capturing lambda is a new object each time, which would tell the style engine the tool
      *  bar's style had changed. Two of these compare equal whenever they would draw the same
      *  thing.
+     *  <p>
+     *  The symbol is handed the strip the tool bar's leading inset leaves free, not the whole
+     *  bar, because every symbol set draws the handle within a few pixels of that edge. A box
+     *  as long as the bar is keyed on the window's width and too large to keep as a tile, so it
+     *  would be rasterized again on every paint.
      */
     private static final class DragHandlePainter implements Painter
     {
@@ -51,10 +56,13 @@ final class Styles
                 return;
             Graphics2D scratch = (Graphics2D) g.create();
             try {
+                boolean horizontal = _orientation == JToolBar.HORIZONTAL;
+                Insets  insets     = _bar.getInsets();
                 SwingTreeLookAndFeel.symbols().paintDragHandle(
                         scratch, SwingTreeLookAndFeel.palette(),
-                        _bar.getWidth(), _bar.getHeight(),
-                        _orientation == JToolBar.HORIZONTAL
+                        horizontal ? insets.left : _bar.getWidth(),
+                        horizontal ? _bar.getHeight() : insets.top,
+                        horizontal
                 );
             } finally {
                 scratch.dispose();
