@@ -34,11 +34,13 @@ import swingtree.layout.Bounds
     data changes at runtime.
 
     The entry point for this feature is `UIForAnySwing::withLayout(Val<Layout>)`.
-    Internally, it combines `withRepaintOn(layout)` with `withStyle(it -> it.layout(layout.get()))`,
+    Internally, it is the property driven style `withStyle(layout, (l, it) -> it.layout(l))`,
     which means:
 
-      - Whenever the `layout` property fires a change event, the style is re-evaluated.
-      - The re-evaluation calls `layout.get()` to pick up the latest `Layout` object.
+      - Whenever the `layout` property fires a change event, the new `Layout` object
+        travels to the UI thread as part of that event, and the style is re-evaluated.
+      - The re-evaluation hands that `Layout` object to the style, so the UI thread never
+        reads the property itself.
       - That object's `installFor(component)` method is called, which installs or
         updates the layout manager on the panel in-place.
 
@@ -116,8 +118,8 @@ class Reactive_Layout_Spec extends Specification
             to a compact layout in a narrow viewport. From the application code's perspective,
             only the `Var.set(...)` call is needed; SwingTree handles all the plumbing.
 
-            Internally, the style engine's repaint subscription fires when the property changes.
-            This re-evaluates the style function `it -> it.layout(layout.get())`, producing a
+            Internally, the property change event carries the new `Layout` object to the UI thread,
+            which re-evaluates the style function `(l, it) -> it.layout(l)` with it, producing a
             new `StyleConf`. The `StyleInstaller` then calls `installFor(panel)` on the new
             `Layout` object, which checks the currently installed layout manager type and
             replaces it if it no longer matches.

@@ -10,6 +10,8 @@ import sprouts.From
 import sprouts.Tuple
 import sprouts.Var
 import sprouts.Vars
+import net.miginfocom.swing.MigLayout
+import swingtree.api.Layout
 import swingtree.api.mvvm.BoundViewSupplier
 import swingtree.api.mvvm.TabSupplier
 import swingtree.threading.EventProcessor
@@ -18,8 +20,12 @@ import utility.LogSpy
 import utility.SwingTreeTestConfigurator
 
 import javax.swing.*
+import java.awt.BorderLayout
+import java.awt.LayoutManager
+import java.awt.image.BufferedImage
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.CountDownLatch
+import java.util.concurrent.atomic.AtomicReference
 
 @Title("Property Binding Across Threads")
 @Narrative('''
@@ -936,6 +942,62 @@ class Decoupled_Property_Binding_Spec extends Specification
             EventProcessor.DECOUPLED.joinUntilDoneOrException()
         then : 'Now the property holds the exact maximum of the bound range.'
             current.is(3d)
+    }
+
+    def 'A panel bound to a layout property only installs a new layout once the change reaches the UI thread.'()
+    {
+        reportInfo """
+            You can bind the layout of a panel to a property with `withLayout(Val<Layout>)`,
+            so that your view model decides how the panel arranges its children.
+            In the decoupled mode that property belongs to the application thread,
+            and a new layout must reach the panel the same way every other property
+            change does: as a change event, which the UI thread processes in the order
+            the changes were made.
+
+            That order matters, because a layout change rarely comes alone. A view
+            model which switches from one column to two columns might add a child and
+            give it a new constraint in the same breath. If the UI thread picked up the
+            new layout the moment it was written, it could install it before it has
+            processed the events which come before it, and arrange the panel for a
+            state that does not exist yet.
+
+            The UI thread picks up a layout whenever it paints the panel, because a
+            layout is part of the style of a component, and the style is re-evaluated
+            before painting. So in this scenario we park the UI thread, change the
+            layout from this thread, and let the UI thread paint the panel *before* it
+            gets to the change event. That early painting has to keep the layout from
+            before the change. Once the UI thread has caught up with its events, the
+            new layout is installed.
+        """
+        given : 'A layout property, as it would live in one of your view models, holding a MigLayout configuration.'
+            var layout = Var.of(Layout.class, Layout.mig("fill"))
+        and : 'A panel built in the decoupled mode, with its layout bound to the property.'
+            var panel = UI.runAndGet({
+                UI.use(EventProcessor.DECOUPLED, ()-> UI.panel().withLayout(layout)).get(JPanel)
+            })
+        expect : 'Initially, the panel uses a MigLayout.'
+            UI.runAndGet({ panel.layout instanceof MigLayout })
+
+        when : 'We park the UI thread behind a gate, and queue up a painting of the panel for when the gate opens.'
+            var gate = new CountDownLatch(1)
+            var layoutAfterEarlyPainting = new AtomicReference<LayoutManager>()
+            UI.run({
+                gate.await()
+                panel.setSize(120, 80)
+                panel.paint(new BufferedImage(120, 80, BufferedImage.TYPE_INT_ARGB).createGraphics())
+                layoutAfterEarlyPainting.set(panel.layout)
+            })
+        and : 'We switch the property to a BorderLayout from this thread, which queues its change event behind the painting, and then open the gate.'
+            try {
+                layout.set(Layout.border())
+            } finally {
+                gate.countDown()
+            }
+            UI.sync()
+        then : 'The painting ran before the change event reached the UI thread, so it kept the MigLayout...'
+            layoutAfterEarlyPainting.get() instanceof MigLayout
+        and : '...and once the UI thread processed the change event, the panel switched to the BorderLayout.'
+            UI.runAndGet({ panel.layout instanceof BorderLayout })
     }
 
     private static double _fractionOf( JSlider slider ) {
