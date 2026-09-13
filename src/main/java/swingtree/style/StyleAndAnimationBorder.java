@@ -159,21 +159,21 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
         return false;
     }
 
-    public Outline getDelegatedInsets( StyleConf conf )
+    public OptionalInsets getDelegatedInsets( StyleConf conf )
     {
         if ( _doesNotDelegateAdditionalInsets() )
-            return Outline.of(0, 0, 0, 0);
+            return OptionalInsets.of(0, 0, 0, 0);
         else
         {
             Insets formerInsets = _formerBorder.getBorderInsets(_compExt.getOwner());
-            return conf.padding().map(v->0f).or(Outline.of(formerInsets));
+            return conf.padding().map(v->0f).or(OptionalInsets.of(formerInsets));
         }
     }
 
-    public Outline getDelegatedInsetsComponentAreaCorrection()
+    public OptionalInsets getDelegatedInsetsComponentAreaCorrection()
     {
         if ( _doesNotDelegateAdditionalInsets() )
-            return Outline.of(0, 0, 0, 0);
+            return OptionalInsets.of(0, 0, 0, 0);
         else
         {
             if (
@@ -185,10 +185,10 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
                 int top    = formerInsets.top    / 2;
                 int right  = formerInsets.right  / 2;
                 int bottom = formerInsets.bottom / 2;
-                return Outline.of(top, right, bottom, left);
+                return OptionalInsets.of(top, right, bottom, left);
             }
 
-            return Outline.of(0, 0, 0, 0);
+            return OptionalInsets.of(0, 0, 0, 0);
         }
     }
 

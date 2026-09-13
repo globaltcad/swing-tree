@@ -107,8 +107,8 @@ final class StyleInstaller<C extends JComponent>
 
     StyleConf recalculateInsets( C owner, StyleConf styleConf ) {
         if ( owner.getBorder() instanceof StyleAndAnimationBorder ) {
-            final Outline paddingCorrection = _formerBorderPaddingCorrection(owner, styleConf);
-            final Outline adjustedPadding   = styleConf.border().padding().or(paddingCorrection);
+            final OptionalInsets paddingCorrection = _formerBorderPaddingCorrection(owner, styleConf);
+            final OptionalInsets adjustedPadding   = styleConf.border().padding().or(paddingCorrection);
             styleConf = styleConf._withBorder(styleConf.border().withPadding(adjustedPadding));
             StyleAndAnimationBorder<?> border = (StyleAndAnimationBorder<?>) owner.getBorder();
             border.recalculateInsets(styleConf);
@@ -124,17 +124,17 @@ final class StyleInstaller<C extends JComponent>
         return _dynamicLaF.customLookAndFeelIsInstalled(owner) || _dynamicLaF.currentLookAndFeelSupportsSwingTree(owner);
     }
 
-    static Outline _formerBorderMarginCorrection(JComponent owner) {
+    static OptionalInsets _formerBorderMarginCorrection(JComponent owner) {
         Border border = owner.getBorder();
         if ( border instanceof StyleAndAnimationBorder ) {
             return ((StyleAndAnimationBorder<?>) border).getDelegatedInsetsComponentAreaCorrection();
         }
-        return Outline.none();
+        return OptionalInsets.none();
     }
 
-    Outline _formerBorderPaddingCorrection( C owner, StyleConf conf ) {
+    OptionalInsets _formerBorderPaddingCorrection( C owner, StyleConf conf ) {
         Border border = owner.getBorder();
-        Outline result = Outline.none();
+        OptionalInsets result = OptionalInsets.none();
         if ( border instanceof StyleAndAnimationBorder ) {
             result = ((StyleAndAnimationBorder<?>) border).getDelegatedInsets(conf);
         }
@@ -220,8 +220,8 @@ final class StyleInstaller<C extends JComponent>
         }
 
         if ( !doInstallation ) {
-            final Outline paddingCorrection = _formerBorderPaddingCorrection(owner, newStyle);
-            final Outline adjustedPadding   = newStyle.border().padding().or(paddingCorrection);
+            final OptionalInsets paddingCorrection = _formerBorderPaddingCorrection(owner, newStyle);
+            final OptionalInsets adjustedPadding   = newStyle.border().padding().or(paddingCorrection);
             newStyle = newStyle._withBorder(newStyle.border().withPadding(adjustedPadding));
 
             if ( owner.getBorder() instanceof StyleAndAnimationBorder<?> ) {

@@ -117,7 +117,7 @@ final class StyleRenderer
     ) {
         final Color foundationColor = conf.baseColors().foundationColor().map( c -> c.getAlpha() == 0 ? null : c ).orElse(UI.Color.UNDEFINED);
         final Color backgroundColor = conf.baseColors().backgroundColor().map( c -> c.getAlpha() == 0 ? null : c ).orElse(UI.Color.UNDEFINED);
-        final boolean borderIsOpaque = conf.boxModel().widths().equals(Outline.none()) || conf.baseColors().borderColor().isFullyOpaque();
+        final boolean borderIsOpaque = conf.boxModel().widths().equals(OptionalInsets.none()) || conf.baseColors().borderColor().isFullyOpaque();
         final boolean bodyIsOpaque = backgroundColor.getAlpha() == 255;
         if ( bodyIsOpaque && borderIsOpaque ) {
             Shape fullArea = conf.areas().get(UI.ComponentArea.ALL);
@@ -148,7 +148,7 @@ final class StyleRenderer
         if ( colors.equals(BorderColorsConf.none()) )
             return;
 
-        if ( !Outline.none().equals(conf.boxModel().widths()) ) {
+        if ( !OptionalInsets.none().equals(conf.boxModel().widths()) ) {
             try {
                 Shape borderArea = conf.areas().get(UI.ComponentArea.BORDER);
                 Objects.requireNonNull(borderArea);
@@ -782,12 +782,12 @@ final class StyleRenderer
         final GradientConf gradient
     ) {
         final Size dimensions = boxModel.size();
-        Outline insets;
+        OptionalInsets insets;
         if ( gradient.boundary() == UI.ComponentBoundary.CENTER_TO_CONTENT ) {
-            final Outline contentIns = boxModel.insetsFor(UI.ComponentBoundary.INTERIOR_TO_CONTENT);
+            final OptionalInsets contentIns = boxModel.insetsFor(UI.ComponentBoundary.INTERIOR_TO_CONTENT);
             final float verticalInset = dimensions.heightOrElse(0f) / 2f;
             final float horizontalInset = dimensions.widthOrElse(0f) / 2f;
-            insets = Outline.of(verticalInset, horizontalInset);
+            insets = OptionalInsets.of(verticalInset, horizontalInset);
             switch ( gradient.span() ) {
                 case TOP_TO_BOTTOM:
                     insets = insets.withBottom(contentIns.bottom().orElse(0f));
@@ -1258,8 +1258,8 @@ final class StyleRenderer
             final UI.FitComponent      fit               = style.fitMode();
             final UI.Placement         placement         = style.placement();
             final UI.ComponentBoundary placementBoundary = style.placementBoundary();
-            final Outline              insets            = conf.boxModel().insetsFor(placementBoundary);
-            final Outline      padding         = style.padding();
+            final OptionalInsets       insets            = conf.boxModel().insetsFor(placementBoundary);
+            final OptionalInsets       padding           = style.padding();
             final int          componentWidth  = componentSize.width().orElse(0f).intValue() - (insets.left().orElse(0f).intValue() + insets.right().orElse(0f).intValue());
             final int          componentHeight = componentSize.height().orElse(0f).intValue() - (insets.top().orElse(0f).intValue()  + insets.bottom().orElse(0f).intValue());
             final int          iconBaseWidth   = imageIcon.getIconWidth();
@@ -1455,7 +1455,7 @@ final class StyleRenderer
     static Bounds computeTextBounds(final TextConf text, final BoxModelConf boxModel) {
         final UI.ComponentBoundary placementBoundary = text.placementBoundary();
         final Offset               offset            = text.offset();
-        final Outline              insets            = boxModel.insetsFor(placementBoundary);
+        final OptionalInsets       insets            = boxModel.insetsFor(placementBoundary);
         // Computing the area available for text rendering after applying the offset and insets:
         final float insLeft   = insets.left().orElse(0f);
         final float insTop    = insets.top().orElse(0f);
@@ -2019,7 +2019,7 @@ final class StyleRenderer
                 return;
             }
 
-            final Outline insets = boxModel.insetsFor(noise.get().boundary());
+            final OptionalInsets insets = boxModel.insetsFor(noise.get().boundary());
             final Point2D.Float center = new Point2D.Float(
                     insets.left().orElse(0f) + noise.get().offset().x(),
                     insets.top().orElse(0f) + noise.get().offset().y()
@@ -2138,7 +2138,7 @@ final class StyleRenderer
             if ( colors.length == 1 ) {
                 return colors[0];
             }
-            final Outline insets = boxModel.insetsFor(noise.get().boundary());
+            final OptionalInsets insets = boxModel.insetsFor(noise.get().boundary());
             final Point2D.Float center = new Point2D.Float(
                     insets.left().orElse(0f) + noise.get().offset().x(),
                     insets.top().orElse(0f) + noise.get().offset().y()

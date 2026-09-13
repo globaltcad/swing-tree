@@ -393,13 +393,13 @@ final class LayerPartitionCache
         final boolean       isRounded  = boxModel.hasAnyNonZeroArcs();
 
         if ( layer == UI.Layer.BORDER ) {
-            boolean hasWidth = !Outline.none().equals(boxModel.widths());
+            boolean hasWidth = !OptionalInsets.none().equals(boxModel.widths());
             boolean hasColoring = !baseColors.borderColor().equals(BorderColorsConf.none());
             if ( hasWidth && hasColoring )
                 heavyStyleCount++;
         }
         if ( layer == UI.Layer.BACKGROUND ) {
-            boolean roundedOrHasMargin = isRounded || !boxModel.margin().equals(Outline.none());
+            boolean roundedOrHasMargin = isRounded || !boxModel.margin().equals(OptionalInsets.none());
             if ( roundedOrHasMargin ) {
                 if ( baseColors.backgroundColor().filter( c -> c.getAlpha() > 0 ).isPresent() )
                     heavyStyleCount++;
@@ -583,7 +583,7 @@ final class LayerPartitionCache
             if ( image == null )
                 return; // Cannot happen (callers check `isRendered()` first), but let's be defensive.
 
-            final Outline insets = canonicalConf.nineTileSliceInsets();
+            final OptionalInsets insets = canonicalConf.nineTileSliceInsets();
             final LayerRenderConf.Compaction compaction =
                         LayerRenderConf.Compaction.between(canonicalConf.boxModel().size(), actualSize);
             final int insetTop    = compaction.includesHeight() ? insets.top().orElse(0f).intValue()    : 0;

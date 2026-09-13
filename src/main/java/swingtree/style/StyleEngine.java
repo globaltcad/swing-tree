@@ -65,9 +65,9 @@ final class StyleEngine
 
     @SuppressWarnings("ReferenceEquality") // Identity means the configuration is literally the one already installed.
     StyleEngine update(
-        final Bounds      newBounds,
-        final StyleConf   newStyle,
-        final Outline     marginCorrection
+        final Bounds         newBounds,
+        final StyleConf      newStyle,
+        final OptionalInsets marginCorrection
     ) {
         final ComponentConf currentConf = getComponentConf();
         final Pair<BoxModelConf, ComponentConf> boxModelAndComponentConfs = _calculateBoxModelAndComponentConfs(newBounds, newStyle, marginCorrection, currentConf);
@@ -83,10 +83,10 @@ final class StyleEngine
     }
 
     static sprouts.Pair<BoxModelConf, ComponentConf> _calculateBoxModelAndComponentConfs(
-            final Bounds        newBounds,
-            final StyleConf     newStyle,
-            final Outline       marginCorrection,
-            final ComponentConf previousConf
+            final Bounds         newBounds,
+            final StyleConf      newStyle,
+            final OptionalInsets marginCorrection,
+            final ComponentConf  previousConf
     ) {
         final boolean sameStyle      = previousConf.style().equals(newStyle);
         final boolean sameBounds     = previousConf.currentBounds().equals(newBounds);

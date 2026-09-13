@@ -8,9 +8,9 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /**
- *  Outline is an immutable value object that represents the outline of a UI component
- *  where every side of the outline can have varying thicknesses and even be completely
- *  unspecified.
+ *  OptionalInsets is an immutable value object holding four inset thicknesses, one for each
+ *  side of a UI component, where any side may also be left unspecified. Unlike
+ *  {@link java.awt.Insets}, a side is a {@code float} and does not have to have a value.
  *  <p>
  *  A side is optional in order to tell "the styling API asked for this thickness" apart from
  *  "the styling API said nothing about this side", so that a component's own defaults - the
@@ -18,41 +18,42 @@ import java.util.function.Function;
  *  <p>
  *  <b>A side is stored as a primitive float, and {@link Float#NaN} is what "unspecified"
  *  means.</b> The obvious spelling of an optional side is a boxed {@code Float}, and it is the
- *  wrong one here: an outline carries margins, paddings, border widths and corner radii, four
- *  of them are built for every layer of every style gathered on every paint of every component,
- *  and {@code Float.valueOf} has no cache, so each side was a heap allocation. Sides are
+ *  wrong one here: a box model holds four of these objects - margin, padding, border widths
+ *  and the insets a former border leaves behind - and they are built for every layer of every
+ *  style gathered on every paint of every component, and {@code Float.valueOf} has no cache,
+ *  so each side used to be a heap allocation in a former version of this class. Sides are
  *  compared by their bit patterns rather than with {@code ==}, which keeps every distinction
  *  {@code Float.equals} used to make - {@code 0.0} apart from {@code -0.0}, and one unspecified
  *  side equal to another. The one consequence is that a side which really is {@code NaN} now
  *  reads as unspecified instead of propagating a {@code NaN} into a layout.
  */
 @Immutable
-final class Outline
+final class OptionalInsets
 {
     /** What a side holds when the styling API said nothing about it. */
     private static final float UNSPECIFIED = Float.NaN;
 
-    private static final Outline _NONE = new Outline(UNSPECIFIED, UNSPECIFIED, UNSPECIFIED, UNSPECIFIED);
+    private static final OptionalInsets _NONE = new OptionalInsets(UNSPECIFIED, UNSPECIFIED, UNSPECIFIED, UNSPECIFIED);
 
-    static Outline none() { return _NONE; }
+    static OptionalInsets none() { return _NONE; }
 
-    static Outline of( float top, float right, float bottom, float left ) {
-        return new Outline(top, right, bottom, left);
+    static OptionalInsets of( float top, float right, float bottom, float left ) {
+        return new OptionalInsets(top, right, bottom, left);
     }
 
-    static Outline of( float topAndBottom, float rightAndLeft ) {
-        return new Outline(topAndBottom, rightAndLeft, topAndBottom, rightAndLeft);
+    static OptionalInsets of( float topAndBottom, float rightAndLeft ) {
+        return new OptionalInsets(topAndBottom, rightAndLeft, topAndBottom, rightAndLeft);
     }
 
-    static Outline of( double top, double right, double bottom, double left ) {
-        return new Outline((float) top, (float) right, (float) bottom, (float) left);
+    static OptionalInsets of( double top, double right, double bottom, double left ) {
+        return new OptionalInsets((float) top, (float) right, (float) bottom, (float) left);
     }
 
-    static Outline of( float allSides ) {
-        return new Outline(allSides, allSides, allSides, allSides);
+    static OptionalInsets of( float allSides ) {
+        return new OptionalInsets(allSides, allSides, allSides, allSides);
     }
 
-    static Outline of( Insets insets ) {
+    static OptionalInsets of( Insets insets ) {
         return of(insets.top, insets.right, insets.bottom, insets.left);
     }
 
@@ -63,14 +64,14 @@ final class Outline
     private final float left;
 
 
-    private static Outline _of( float top, float right, float bottom, float left ) {
+    private static OptionalInsets _of( float top, float right, float bottom, float left ) {
         if ( _isUnset(top) && _isUnset(right) && _isUnset(bottom) && _isUnset(left) )
             return _NONE;
 
-        return new Outline(top, right, bottom, left);
+        return new OptionalInsets(top, right, bottom, left);
     }
 
-    private static Outline _ofNullable( @Nullable Float top, @Nullable Float right, @Nullable Float bottom, @Nullable Float left ) {
+    private static OptionalInsets _ofNullable( @Nullable Float top, @Nullable Float right, @Nullable Float bottom, @Nullable Float left ) {
         return _of(_unbox(top), _unbox(right), _unbox(bottom), _unbox(left));
     }
 
@@ -95,7 +96,7 @@ final class Outline
         return Float.floatToIntBits(a) == Float.floatToIntBits(b);
     }
 
-    private Outline( float top, float right, float bottom, float left ) {
+    private OptionalInsets( float top, float right, float bottom, float left ) {
         this.top    = top;
         this.right  = right;
         this.bottom = bottom;
@@ -103,72 +104,72 @@ final class Outline
     }
 
     /**
-     *  The top outline value in the form of an {@link Optional}, where {@link Optional#empty()}
-     *  means that the top outline was not specified.
+     *  The top inset in the form of an {@link Optional}, where {@link Optional#empty()}
+     *  means that the top inset was not specified.
      *
-     * @return An {@link Optional} containing the top outline value if it was specified,
+     * @return An {@link Optional} containing the top inset if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
     Optional<Float> top() { return _isUnset(top) ? Optional.empty() : Optional.of(top); }
 
     /**
-     *  An optional value for the right outline.
+     *  An optional value for the right inset.
      *
-     * @return An {@link Optional} containing the right outline value if it was specified,
+     * @return An {@link Optional} containing the right inset if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
     Optional<Float> right() { return _isUnset(right) ? Optional.empty() : Optional.of(right); }
 
     /**
-     *  The bottom outline value in the form of an {@link Optional}, where {@link Optional#empty()}
-     *  means that the bottom outline was not specified.
+     *  The bottom inset in the form of an {@link Optional}, where {@link Optional#empty()}
+     *  means that the bottom inset was not specified.
      *
-     * @return An {@link Optional} containing the bottom outline value if it was specified,
+     * @return An {@link Optional} containing the bottom inset if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
     Optional<Float> bottom() { return _isUnset(bottom) ? Optional.empty() : Optional.of(bottom); }
 
     /**
-     *  Returns an optional value for the left outline where {@link Optional#empty()}
-     *  means that the left outline was not specified.
+     *  Returns an optional value for the left inset where {@link Optional#empty()}
+     *  means that the left inset was not specified.
      *
-     * @return An {@link Optional} containing the left outline value if it was specified,
+     * @return An {@link Optional} containing the left inset if it was specified,
      *        {@link Optional#empty()} otherwise.
      */
     Optional<Float> left() { return _isUnset(left) ? Optional.empty() : Optional.of(left); }
 
     /**
-     *  Creates an updated {@link Outline} with the specified {@code top} outline value.
+     *  Creates an updated {@link OptionalInsets} with the specified {@code top} inset.
      *
-     * @param top The top outline value.
-     * @return A new {@link Outline} with the specified top outline value.
+     * @param top The top inset.
+     * @return A new {@link OptionalInsets} with the specified top inset.
      */
-    Outline withTop( float top ) { return _of(top, right, bottom, left); }
+    OptionalInsets withTop( float top ) { return _of(top, right, bottom, left); }
 
     /**
-     *  Creates an updated {@link Outline} with the specified {@code right} outline value.
+     *  Creates an updated {@link OptionalInsets} with the specified {@code right} inset.
      *
-     * @param right The right outline value.
-     * @return A new {@link Outline} with the specified right outline value.
+     * @param right The right inset.
+     * @return A new {@link OptionalInsets} with the specified right inset.
      */
-    Outline withRight( float right ) { return _of(top, right, bottom, left); }
+    OptionalInsets withRight( float right ) { return _of(top, right, bottom, left); }
 
     /**
-     *  Creates an updated {@link Outline} with the specified {@code bottom} outline value.
+     *  Creates an updated {@link OptionalInsets} with the specified {@code bottom} inset.
      *
-     * @param bottom The bottom outline value.
-     * @return A new {@link Outline} with the specified bottom outline value.
+     * @param bottom The bottom inset.
+     * @return A new {@link OptionalInsets} with the specified bottom inset.
      */
-    Outline withBottom( float bottom ) { return _of(top, right, bottom, left); }
+    OptionalInsets withBottom( float bottom ) { return _of(top, right, bottom, left); }
 
     /**
-     *  Creates an updated {@link Outline} with the specified {@code left} outline value.
-     * @param left The left outline value.
-     * @return A new {@link Outline} with the specified left outline value.
+     *  Creates an updated {@link OptionalInsets} with the specified {@code left} inset.
+     * @param left The left inset.
+     * @return A new {@link OptionalInsets} with the specified left inset.
      */
-    Outline withLeft( float left ) { return _of(top, right, bottom, left); }
+    OptionalInsets withLeft( float left ) { return _of(top, right, bottom, left); }
 
-    Outline minus( Outline other ) {
+    OptionalInsets minus( OptionalInsets other ) {
         return _of(
                     _minus(top,    other.top   ),
                     _minus(right,  other.right ),
@@ -184,13 +185,13 @@ final class Outline
     }
 
     /**
-     *  An {@link Outline} may be scaled by a factor to increase or decrease the thickness of the outline.
+     *  An {@link OptionalInsets} may be scaled by a factor to increase or decrease the thickness of every side.
      *  If any of the sides was not specified, it will remain unspecified.
      *
      * @param scale The scale factor.
-     * @return A new {@link Outline} with the outline values scaled by the specified factor.
+     * @return A new {@link OptionalInsets} with the insets scaled by the specified factor.
      */
-    Outline scale( double scale ) {
+    OptionalInsets scale( double scale ) {
         return _of(
                     _isUnset(top)    ? UNSPECIFIED : (float) ( top    * scale ),
                     _isUnset(right)  ? UNSPECIFIED : (float) ( right  * scale ),
@@ -199,7 +200,7 @@ final class Outline
                 );
     }
 
-    Outline simplified() {
+    OptionalInsets simplified() {
         if ( this.equals(_NONE) )
             return _NONE;
 
@@ -212,11 +213,11 @@ final class Outline
     }
 
     /**
-     *  Determines if any of the outline values are not null and positive,
-     *  which means that the outline is visible as part of the component's
+     *  Determines if any of the sides is specified and positive,
+     *  which means that these insets take up room in the component's
      *  appearance or layout.
      *
-     * @return {@code true} if any of the outline values are not null and positive,
+     * @return {@code true} if any of the sides is specified and positive,
      *         {@code false} otherwise.
      */
     public boolean isPositive() {
@@ -231,12 +232,12 @@ final class Outline
     }
 
     /**
-     *  Adds the outline values of this {@link Outline} with the specified {@code other} {@link Outline} values.
+     *  Adds the sides of this {@link OptionalInsets} to the sides of the specified {@code other} {@link OptionalInsets}.
      *
-     * @param other The other {@link Outline} to merge with.
-     * @return A new {@link Outline} with the merged outline values.
+     * @param other The other {@link OptionalInsets} to merge with.
+     * @return A new {@link OptionalInsets} with the summed insets.
      */
-    public Outline plus( Outline other ) {
+    public OptionalInsets plus( OptionalInsets other ) {
         if ( this.equals(_NONE) )
             return other;
         if ( other.equals(_NONE) )
@@ -250,7 +251,7 @@ final class Outline
                 );
     }
 
-    static Outline roundingCorrectionOf( Outline first, Outline second, Outline third ) {
+    static OptionalInsets roundingCorrectionOf( OptionalInsets first, OptionalInsets second, OptionalInsets third ) {
         return _of(
                     _roundingCorrectionOf(_plus(_plus(first.top,    second.top   ), third.top   )),
                     _roundingCorrectionOf(_plus(_plus(first.right,  second.right ), third.right )),
@@ -266,7 +267,7 @@ final class Outline
         return fraction > 0f ? 1f - fraction : UNSPECIFIED;
     }
 
-    public Outline or( Outline other ) {
+    public OptionalInsets or( OptionalInsets other ) {
         if ( this.equals(_NONE) )
             return other;
         if ( other.equals(_NONE) )
@@ -281,12 +282,12 @@ final class Outline
     }
 
     /**
-     *  Maps the outline values of this {@link Outline} using the specified {@code mapper} function.
+     *  Maps the specified sides of this {@link OptionalInsets} using the specified {@code mapper} function.
      *
      * @param mapper The mapper function.
-     * @return A new {@link Outline} with the mapped outline values.
+     * @return A new {@link OptionalInsets} with the mapped insets.
      */
-    public Outline map( Function<Float, @Nullable Float> mapper ) {
+    public OptionalInsets map( Function<Float, @Nullable Float> mapper ) {
         return _ofNullable(
                     _isUnset(top)    ? null : mapper.apply(top),
                     _isUnset(right)  ? null : mapper.apply(right),
@@ -310,7 +311,7 @@ final class Outline
         if ( obj == null ) return false;
         if ( obj == this ) return true;
         if ( obj.getClass() != getClass() ) return false;
-        Outline rhs = (Outline) obj;
+        OptionalInsets rhs = (OptionalInsets) obj;
         return _same(top,    rhs.top   ) &&
                _same(right,  rhs.right ) &&
                _same(bottom, rhs.bottom) &&

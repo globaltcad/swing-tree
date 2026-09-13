@@ -211,7 +211,7 @@ final class StyleConfLayers
                     .map(NamedConf::style)
                     .filter(TextConf::autoPreferredHeight)
                     .mapToDouble( textConf -> {
-                        final Outline insets = predictedBoxModel.insetsFor(textConf.placementBoundary());
+                        final OptionalInsets insets = predictedBoxModel.insetsFor(textConf.placementBoundary());
                             if ( textConf.content().isEmpty() ) {
                                 double totalHeight = 0;
                                 totalHeight += insets.top().orElse(0f);

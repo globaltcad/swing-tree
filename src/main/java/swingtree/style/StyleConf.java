@@ -140,9 +140,9 @@ public final class StyleConf
 
     public LayoutConf layout() { return _layout; }
 
-    Outline padding() { return _border.padding(); }
+    OptionalInsets padding() { return _border.padding(); }
 
-    Outline margin() { return _border.margin(); }
+    OptionalInsets margin() { return _border.margin(); }
 
     BorderConf border() { return _border; }
 
