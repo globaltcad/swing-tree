@@ -8,10 +8,12 @@ import spock.lang.Timeout
 import spock.lang.Title
 import sprouts.From
 import sprouts.Tuple
+import sprouts.Val
 import sprouts.Var
 import sprouts.Vars
 import net.miginfocom.swing.MigLayout
 import swingtree.api.Layout
+import swingtree.api.model.SliderTicks
 import swingtree.api.mvvm.BoundViewSupplier
 import swingtree.api.mvvm.TabSupplier
 import swingtree.threading.EventProcessor
@@ -942,6 +944,105 @@ class Decoupled_Property_Binding_Spec extends Specification
             EventProcessor.DECOUPLED.joinUntilDoneOrException()
         then : 'Now the property holds the exact maximum of the bound range.'
             current.is(3d)
+    }
+
+    def 'The tick marks and labels of a slider bound to a `SliderTicks` property change asynchronously, on the UI thread.'()
+    {
+        reportInfo """
+            You can bind the tick marks and labels of a slider to a property holding a
+            `SliderTicks` value with `withTicks(Val<SliderTicks>)`. In the decoupled mode
+            that property belongs to the application thread, so a new `SliderTicks` value
+            reaches the slider the same way every other property change does: as a change
+            event, which the UI thread processes when it gets around to it.
+
+            Since a `SliderTicks` is an immutable value, nothing about it can change while
+            it travels from one thread to the other, and the UI thread never has to read
+            the property itself.
+
+            In this scenario we park the UI thread, change the major spacing of the tick
+            marks from 50 to 25 on this thread, and look at the labels of the slider before
+            releasing the UI thread again.
+        """
+        given : 'A property holding tick marks every 50 with a label at each of them.'
+            var ticks = Var.of(
+                            SliderTicks.classTyped(Integer.class),
+                            SliderTicks.of(Integer.class).withMajorSpacing(50).withLabelsAtMajorTicks()
+                        )
+        and : 'A slider built in the decoupled mode, with its tick marks bound to the property.'
+            var slider = UI.runAndGet({
+                UI.use(EventProcessor.DECOUPLED, ()->
+                    UI.slider(UI.Axis.HORIZONTAL, 0, 100, Var.of(0)).withTicks(ticks)
+                ).get(JSlider)
+            })
+        expect : 'Initially, the slider has labels at 0, 50 and 100.'
+            UI.runAndGet({ slider.labelTable.keySet().sort() }) == [0, 50, 100]
+
+        when : 'We park the UI thread, change the major spacing to 25 from this thread, and look at the labels before releasing the UI thread.'
+            var gate = new CountDownLatch(1)
+            UI.run({ gate.await() })
+            var labelsWhileParked = null
+            try {
+                ticks.set(ticks.get().withMajorSpacing(25))
+                labelsWhileParked = slider.labelTable.keySet().sort()
+            } finally {
+                gate.countDown()
+            }
+            UI.sync()
+        then : 'While the UI thread was parked, the labels had not changed yet...'
+            labelsWhileParked == [0, 50, 100]
+        and : '...but once the UI thread processed the change event, there is a label every 25.'
+            UI.runAndGet({ slider.labelTable.keySet().sort() }) == [0, 25, 50, 75, 100]
+    }
+
+    def 'A value picked by the user just before a smaller maximum reaches the UI thread still ends up within that maximum.'()
+    {
+        reportInfo """
+            A slider bound to a maximum property never writes a value larger than that
+            maximum into its value property. In the decoupled mode this needs a little care,
+            because the UI thread only learns about a new maximum when it processes the change
+            event, and the user can move the knob before that happens.
+
+            Imagine a slider from 0 to 10. The application lowers the maximum to 8, and in the
+            very same moment the user drags the knob to the end of the slider, which the UI
+            thread still believes to be at 10. The UI thread hands the 10 over to the
+            application thread, which owns the value property. By the time the application
+            thread writes it, the maximum is already 8, so writing 10 would put the value
+            outside of the range of its own slider.
+
+            That is why the application thread keeps the value within the minimum and maximum
+            properties which are current at the moment it writes the value. In this scenario we
+            arrange exactly that race by parking the UI thread.
+        """
+        given : 'Properties for the maximum and the value, as they would live in a view model.'
+            var max = Var.of(10)
+            var value = Var.of(5)
+        and : 'A slider built in the decoupled mode, bound to both.'
+            var slider = UI.runAndGet({
+                UI.use(EventProcessor.DECOUPLED, ()->
+                    UI.slider(UI.Axis.HORIZONTAL, Val.of(0), max, value)
+                ).get(JSlider)
+            })
+
+        when : 'We park the UI thread, and queue up the user dragging the knob to the end of the slider for when it is released.'
+            var gate = new CountDownLatch(1)
+            UI.run({
+                gate.await()
+                slider.value = slider.maximum
+            })
+        and : 'The application lowers the maximum to 8, which queues its change event behind the drag, and then the UI thread is released.'
+            try {
+                max.set(8)
+            } finally {
+                gate.countDown()
+            }
+            UI.sync()
+        and : 'This test thread, playing the application thread, processes the event queue, which contains the value of the drag.'
+            EventProcessor.DECOUPLED.joinUntilDoneOrException()
+            UI.sync()
+        then : 'The user dragged to 10, but the value was written as the current maximum of 8.'
+            value.get() == 8
+        and : 'The slider shows the knob at the end of its new range.'
+            UI.runAndGet({ slider.maximum == 8 && slider.value == 8 })
     }
 
     def 'A panel bound to a layout property only installs a new layout once the change reaches the UI thread.'()

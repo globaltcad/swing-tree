@@ -1,0 +1,284 @@
+package swingtree;
+
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import sprouts.From;
+import sprouts.Val;
+import sprouts.Var;
+import swingtree.api.model.SliderTicks;
+import swingtree.style.ComponentBackend;
+import swingtree.threading.EventProcessor;
+
+import javax.swing.BoundedRangeModel;
+import javax.swing.Icon;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.plaf.UIResource;
+import java.awt.Color;
+import java.awt.Font;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.text.NumberFormat;
+import java.util.Hashtable;
+import java.util.Locale;
+import java.util.function.Function;
+
+final class SliderState
+{
+    private static final Logger log = LoggerFactory.getLogger(SliderState.class);
+
+    static SliderState of( JSlider slider, Class<? extends Number> numberType, EventProcessor eventProcessor ) {
+        return ComponentBackend.powering(slider)
+                .getOrSet(SliderState.class, () -> new SliderState(slider, numberType, eventProcessor));
+    }
+
+    private final JSlider                 _slider;
+    private final Class<? extends Number> _numberType;
+    private final EventProcessor          _eventProcessor;
+
+    private Number                       _min;
+    private Number                       _max;
+    private Number                       _value;
+    private @Nullable SliderTicks<?>     _ticks;
+    private SliderGrid                   _grid;
+    private @Nullable SliderGrid         _gridOfInstalledTicks;
+    private @Nullable SliderTicks<?>     _installedTicks;
+    private @Nullable Var<Number>        _valueTarget;
+    private @Nullable Val<Number>        _minSource;
+    private @Nullable Val<Number>        _maxSource;
+    private int                          _lastSeenStep;
+
+    private SliderState( JSlider slider, Class<? extends Number> numberType, EventProcessor eventProcessor ) {
+        _slider         = slider;
+        _numberType     = numberType;
+        _eventProcessor = eventProcessor;
+        BoundedRangeModel model = slider.getModel();
+        _min   = SliderGrid.convert(numberType, model.getMinimum());
+        _max   = SliderGrid.convert(numberType, model.getMaximum());
+        _value = SliderGrid.convert(numberType, model.getValue());
+        _grid  = SliderGrid.of(numberType, _min, _max, null);
+        _lastSeenStep = model.getValue();
+        slider.addChangeListener(new UserChangeListener());
+    }
+
+    void setMin( Number min ) {
+        _min = SliderGrid.convert(_numberType, min);
+        _apply();
+    }
+
+    void setMax( Number max ) {
+        _max = SliderGrid.convert(_numberType, max);
+        _apply();
+    }
+
+    void setValue( Number value ) {
+        _value = SliderGrid.convert(_numberType, value);
+        _apply();
+    }
+
+    void setTicks( SliderTicks<?> ticks ) {
+        _ticks = ticks;
+        _apply();
+    }
+
+    @SuppressWarnings("unchecked")
+    void keepMinWithin( Val<? extends Number> minSource ) {
+        _minSource = (Val<Number>) minSource;
+    }
+
+    @SuppressWarnings("unchecked")
+    void keepMaxWithin( Val<? extends Number> maxSource ) {
+        _maxSource = (Val<Number>) maxSource;
+    }
+
+    @SuppressWarnings("unchecked")
+    void writeUserChangesTo( Var<? extends Number> target ) {
+        _valueTarget = (Var<Number>) target;
+    }
+
+    private void _apply() {
+        SliderGrid grid = SliderGrid.of(_numberType, _min, _max, _ticks);
+        _grid = grid;
+        int step = grid.stepOf(_value);
+        _doWithoutChangeListeners(() -> {
+            BoundedRangeModel model = _slider.getModel();
+            if ( model.getMinimum() != grid.intMin() || model.getMaximum() != grid.intMax() || model.getValue() != step )
+                model.setRangeProperties(step, model.getExtent(), grid.intMin(), grid.intMax(), model.getValueIsAdjusting());
+        });
+        SliderTicks<?> ticks = _ticks;
+        if ( ticks != null && ( !ticks.equals(_installedTicks) || !grid.equals(_gridOfInstalledTicks) ) ) {
+            _installTicks(grid, ticks);
+            _installedTicks = ticks;
+            _gridOfInstalledTicks = grid;
+        }
+        _lastSeenStep = _slider.getValue();
+    }
+
+    private void _installTicks( SliderGrid grid, SliderTicks<?> ticks ) {
+        Hashtable<Integer, JComponent> labels = _labelsFor(grid, ticks);
+        if ( labels.isEmpty() ) {
+            _slider.setPaintLabels(false);
+            _slider.setLabelTable(labels);
+        } else {
+            _slider.setLabelTable(labels);
+            _slider.setPaintLabels(true);
+        }
+        _slider.setMajorTickSpacing(grid.majorSpacingInSteps());
+        _slider.setMinorTickSpacing(grid.minorSpacingInSteps());
+        _slider.setPaintTicks(ticks.hasVisibleTickMarks() && grid.majorSpacingInSteps() > 0);
+    }
+
+    @SuppressWarnings("JdkObsolete")
+    private <N extends Number> Hashtable<Integer, JComponent> _labelsFor( SliderGrid grid, SliderTicks<N> ticks ) {
+        Hashtable<Integer, JComponent> labels = new Hashtable<>();
+        if ( ticks.hasLabelsAtMajorTicks() ) {
+            int count = grid.majorTickCount();
+            Function<N, String> text = ticks.majorTickLabelText().orElse(null);
+            int decimals = text == null ? _decimalsToWriteExactly(grid, count) : 0;
+            for ( int index = 0; index < count; index++ ) {
+                BigDecimal number = grid.numberAtMajorTick(index);
+                String labelText = text == null
+                                    ? _numberText(number, decimals, ticks.labelLocale())
+                                    : _textOf(text, SliderGrid.convert(ticks.numberType(), number));
+                labels.put(grid.stepOfMajorTick(index), new TickLabel(_slider, labelText));
+            }
+        }
+        for ( N position : ticks.labelPositions() ) {
+            if ( !grid.isInRange(position) )
+                continue;
+            int step = grid.stepOf(position);
+            ticks.labelTextAt(position).ifPresent( text -> labels.put(step, new TickLabel(_slider, text)) );
+            ticks.labelIconAt(position).ifPresent( icon -> labels.put(step, new TickLabel(_slider, icon.find().orElse(null))) );
+        }
+        return labels;
+    }
+
+    private static int _decimalsToWriteExactly( SliderGrid grid, int count ) {
+        int decimals = 0;
+        for ( int index = 0; index < count; index++ )
+            decimals = Math.max(decimals, grid.numberAtMajorTick(index).stripTrailingZeros().scale());
+        return decimals;
+    }
+
+    private static String _numberText( BigDecimal number, int decimals, Locale locale ) {
+        BigDecimal rounded = number.setScale(decimals, RoundingMode.HALF_UP);
+        if ( Locale.ROOT.equals(locale) )
+            return rounded.toPlainString();
+        NumberFormat format = NumberFormat.getNumberInstance(locale);
+        format.setMinimumFractionDigits(decimals);
+        format.setMaximumFractionDigits(decimals);
+        return format.format(rounded);
+    }
+
+    private static <N extends Number> String _textOf( Function<N, String> text, N number ) {
+        try {
+            String result = text.apply(number);
+            return result == null ? "" : result;
+        } catch ( Exception e ) {
+            log.error(SwingTree.get().logMarker(), "Failed to compute the text of the slider label at {}.", number, e);
+            return "";
+        }
+    }
+
+    private void _onUserChange() {
+        int step = _slider.getValue();
+        int chosenStep = _chooseStepFor(step);
+        _lastSeenStep = step;
+        if ( chosenStep != step && !_slider.getValueIsAdjusting() ) {
+            _doWithoutChangeListeners(() -> _slider.setValue(chosenStep));
+            _lastSeenStep = chosenStep;
+        }
+        Number number = _grid.numberAt(chosenStep);
+        _value = number;
+        Var<Number> target = _valueTarget;
+        if ( target == null )
+            return;
+        Val<Number> minSource = _minSource;
+        Val<Number> maxSource = _maxSource;
+        _eventProcessor.registerAppEvent(() -> target.set(From.VIEW, _keepWithin(number, minSource, maxSource)));
+    }
+
+    private int _chooseStepFor( int step ) {
+        SliderTicks<?> ticks = _ticks;
+        if ( ticks == null || !ticks.isSnappingToTicks() )
+            return step;
+        if ( _slider.getValueIsAdjusting() || step == _lastSeenStep )
+            return _grid.nearestTick(step);
+        return _grid.nextTickTowards(step, _lastSeenStep);
+    }
+
+    private static Number _keepWithin( Number number, @Nullable Val<Number> minSource, @Nullable Val<Number> maxSource ) {
+        if ( minSource != null ) {
+            Number min = minSource.orElseNull();
+            if ( min != null && number.doubleValue() < min.doubleValue() )
+                return min;
+        }
+        if ( maxSource != null ) {
+            Number max = maxSource.orElseNull();
+            if ( max != null && number.doubleValue() > max.doubleValue() )
+                return max;
+        }
+        return number;
+    }
+
+    private void _doWithoutChangeListeners( Runnable task ) {
+        ChangeListener[] listeners = _slider.getChangeListeners();
+        for ( ChangeListener listener : listeners )
+            _slider.removeChangeListener(listener);
+        try {
+            task.run();
+        } finally {
+            for ( ChangeListener listener : listeners )
+                _slider.addChangeListener(listener);
+        }
+    }
+
+    private final class UserChangeListener implements ChangeListener {
+        @Override
+        public void stateChanged( ChangeEvent e ) {
+            _onUserChange();
+        }
+    }
+
+    private static final class TickLabel extends JLabel implements UIResource
+    {
+        private final @Nullable JSlider _owner;
+
+        TickLabel( JSlider owner, String text ) {
+            super(text, JLabel.CENTER);
+            _owner = owner;
+            setName("Slider.label");
+        }
+
+        TickLabel( JSlider owner, @Nullable Icon icon ) {
+            super(icon, JLabel.CENTER);
+            _owner = owner;
+            setName("Slider.label");
+        }
+
+        @Override
+        public Font getFont() {
+            Font font = super.getFont();
+            JSlider owner = _owner;
+            if ( owner == null || (font != null && !(font instanceof UIResource)) )
+                return font;
+            return owner.getFont();
+        }
+
+        @Override
+        public Color getForeground() {
+            Color foreground = super.getForeground();
+            JSlider owner = _owner;
+            if ( owner == null || (foreground != null && !(foreground instanceof UIResource)) )
+                return foreground;
+            Color ownerForeground = owner.getForeground();
+            if ( ownerForeground != null && !(ownerForeground instanceof UIResource) )
+                return ownerForeground;
+            return foreground;
+        }
+    }
+}

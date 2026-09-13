@@ -1342,6 +1342,11 @@ public final class ComponentBackend<C extends JComponent>
             hashCode = hashCode * 31 + slider.getMaximum();
             // alignment:
             hashCode = hashCode * 31 + (slider.getOrientation() == JSlider.HORIZONTAL ? 0 : 1);
+            hashCode = hashCode * 31 + slider.getMajorTickSpacing();
+            hashCode = hashCode * 31 + slider.getMinorTickSpacing();
+            hashCode = hashCode * 31 + (slider.getPaintTicks() ? 1 : 0);
+            hashCode = hashCode * 31 + (slider.getPaintLabels() ? 1 : 0);
+            hashCode = hashCode * 31 + System.identityHashCode(slider.getLabelTable());
         }
         if ( _owner instanceof JProgressBar ) {
             JProgressBar bar = (JProgressBar) _owner;
