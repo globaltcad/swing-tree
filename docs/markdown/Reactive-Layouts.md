@@ -103,9 +103,10 @@ recreated; only the layout rule changes.
 > **How it works under the hood**
 >
 > When you call `withLayout(Val<Layout>)`, SwingTree subscribes to the property on
-> your behalf. Every time the property fires a change event, the style engine
-> re-evaluates the style function `it -> it.layout(layout.get())` and calls
-> `Layout.installFor(panel)` on the result.
+> your behalf. Every time the property fires a change event, the new `Layout` object
+> travels to the UI thread as part of that event, the style engine re-evaluates the
+> style function `(l, it) -> it.layout(l)` with it, and calls `Layout.installFor(panel)`
+> on the result. The UI thread never reads the property itself.
 >
 > For `Layout.mig(...)` switching between two wrap counts, SwingTree recognises
 > that the same `MigLayout` type is already installed and updates its constraint
