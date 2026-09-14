@@ -7,6 +7,7 @@ import sprouts.Viewable;
 import swingtree.CellConf;
 import swingtree.UI;
 import swingtree.UIForAnySwing;
+import swingtree.api.model.SliderTicks;
 import swingtree.api.model.TableData;
 import swingtree.layout.FlowCell;
 import swingtree.style.ComponentStyleDelegate;
@@ -307,15 +308,33 @@ public final class BudgetView extends JPanel {
      *  colour, the caption, the sub-line and the progress bar are all read from the
      *  single merged {@link BudgetHealth} item, so they can never disagree with each
      *  other. The slider writes the budget, one of the composite's three inputs.
+     *  <p>
+     *  Its tick marks are a {@link SliderTicks} value in the slider's own {@code Double}s:
+     *  a labelled major tick mark every €2,500, written with the same {@link Budget#money(double)}
+     *  formatting as the rest of the card, and nine minor tick marks between them, which the
+     *  knob snaps to, so the user picks the budget in steps of €250. The labels take the font
+     *  of the slider, so styling the slider's font styles them. The slider has a row of
+     *  its own, because Swing does not thin out labels which overlap: three labels fit the card
+     *  at every width the grid gives it, a label every €1,000 would not.
      */
     private UIForAnySwing<?, ?> healthCard(Viewable<BudgetHealth> health) {
         return panel(FILL.and(WRAP(1)).and(INS(0))).withStyle(BudgetView::card)
             .add(GROW_X, cardHeader("Budget health", "Drag to set your monthly target."))
             .add(GROW_X,
-                box(FILL).withLayout("fill, ins 2 18 6 18, gap 10", "[][grow][70!]")
+                box(FILL).withLayout("fill, wrap 2, ins 2 18 6 18, gap 10", "[grow][]")
                 .add(label("Budget").withStyle(it -> it.componentFont(f -> f.family("SansSerif").size(12).weight(2f).color(SUBTEXT))))
-                .add(GROW_X, slider(UI.Axis.HORIZONTAL, 0.0, 5000.0, budget))
                 .add(label(budget.viewAsString(Budget::money)).withStyle(it -> it.componentFont(f -> f.family("SansSerif").size(13).weight(2f).color(INK))))
+                .add(GROW_X.and(SPAN).and("wmin 0"),
+                    slider(UI.Axis.HORIZONTAL, 0.0, 5000.0, budget)
+                    .withTicks(
+                        SliderTicks.of(Double.class)
+                        .withMajorSpacing(2500.0)
+                        .withMinorTicksBetween(9)
+                        .withSnapToTicks(true)
+                        .withLabelsAtMajorTicks(Budget::money)
+                    )
+                    .withStyle(it -> it.componentFont(f -> f.family("SansSerif").size(11).weight(2f)))
+                )
             )
             .add(GROW_X,
                 box(FILL.and(INS(0))).withLayout("fill, ins 0 14 14 14")

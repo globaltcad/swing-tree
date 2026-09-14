@@ -462,7 +462,7 @@ Pass the property to the factory and the binding is automatic and bidirectional:
 ```java
 textField(name)                 // user typing -> name.set(..); name.set(..) -> field text
 checkBox("Agree", ok)           // toggling <-> ok
-slider(Axis.HORIZONTAL, 0.0, 1.0, ratio)   // generic over Number: int OR double
+slider(Axis.HORIZONTAL, 0.0, 1.0, ratio)   // generic over Number: int OR double → UIForSlider<JSlider, Double>
 comboBox(selectedEnum, e -> prettyLabel(e)) // selection <-> Var<MyEnum>
 label(name)                     // one-way: label text follows name
 progressBar(Axis.HORIZONTAL, ratioVal)     // one-way Val<Double> 0..1
@@ -1202,7 +1202,7 @@ button.onClick(it -> { vm.update(BreathingViewModel::begin); UI.animate(vm, Brea
 
 ---
 
-## 10. Tables, lists, icons, dialogs
+## 10. Tables, trees, sliders, icons, dialogs
 
 ### Tables — model them as **data** (`TableData`), never as a `TableModel`
 
@@ -1385,6 +1385,62 @@ UI.trees(projects, conf -> conf                        // Var<Tuple<FsNode>>
 Full prose: [Growing-Trees.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Growing-Trees.md).
 Executable catalogue: `Tree_Binding_Spec`, `Tree_Update_Spec`, `Tree_Selection_And_Editing_Spec`,
 `Tree_Forest_Spec`.
+
+### Sliders — tick marks and labels as a value (`SliderTicks`)
+
+A slider is typed by its number: `slider(Axis, 0.0, 1.0, Var<Double>)` returns a
+`UIForSlider<JSlider, Double>`, and `withMin`/`withMax`/`withValue` take that type.
+Its tick marks, labels and snapping are **one immutable value**, `swingtree.api.model.SliderTicks<N>`,
+in the same number type:
+
+```java
+UI.slider(UI.Axis.HORIZONTAL, 0, 100, volume)
+.withTicks(
+    SliderTicks.of(Integer.class)          // no tick marks, no labels — every value starts here
+    .withMajorSpacing(25)                  // major tick marks at 0, 25, 50, 75, 100
+    .withMinorTicksBetween(4)              // 4 marks BETWEEN majors ⇒ one every 5 (counted, never spaced)
+    .withLabelsAtMajorTicks(v -> v + "%")  // or withLabelsAtMajorTicks() for number text
+);
+
+UI.slider(UI.Axis.HORIZONTAL, 0.0, 1.0, opacity)
+.withTicks(SliderTicks.of(Double.class).withMajorSpacing(0.25).withLabelsAtMajorTicks());  // "0.00" … "1.00"
+
+SliderTicks.of(Integer.class).withLabelAt(0, "Cold").withLabelAt(100, "Hot")   // labels at any number
+SliderTicks.of(Integer.class).withLabelAt(0, Icons.QUIET)                      // icon labels (IconDeclaration)
+SliderTicks.of(Double.class).withMajorSpacing(0.5).withTickMarksVisible(false).withSnapToTicks(true)  // a step size
+```
+
+| | |
+|---|---|
+| `SliderTicks` | `of(Class<N>)`, `classTyped(Class<N>)`, `withMajorSpacing(N)` (0 = none), `withMinorTicksBetween(int)`, `withTickMarksVisible(boolean)`, `withSnapToTicks(boolean)`, `withLabelsAtMajorTicks()` / `(Function<N,String>)` / `withoutLabelsAtMajorTicks()`, `withLabelLocale(Locale)`, `withLabelAt(N, String \| IconDeclaration)`, `withoutLabelAt(N)` + matching getters |
+| `UIForSlider<S, N>` | `withTicks(SliderTicks<N>)`, `withTicks(Val<SliderTicks<N>>)`, `withMin/withMax/withValue(N \| Val<N>)`, `withValue(Var<N>)`, `withOrientation(..)`, `onChange(..)` |
+
+**Non-obvious things that will bite you:**
+- **Spacings and positions are in the slider's own numbers, never in `JSlider` ints.** A fractional
+  slider maps onto whole numbers internally, chosen so every tick mark lands exactly; never read
+  `JSlider.getValue()` of a `Double` slider, and never `peek(s -> s.setLabelTable(..))` — Swing's own
+  label tables go stale when the spacing changes and clobber custom tables when the range changes.
+- **Tick marks count from the minimum** (`BasicSliderUI`, which every common LAF builds on, draws them so): 3..97 with spacing 25 ⇒ 3, 28, 53, 78.
+  Use `withLabelAt(..)` for a label anywhere else. A label outside the range is not shown; a label placed
+  with `withLabelAt` wins over the major-tick label at the same position.
+- **Number labels are locale independent by default** (`Locale.ROOT`: "1234.5"); opt in with
+  `withLabelLocale(Locale.getDefault())`. All number labels share the decimals needed to write them exactly.
+  A text function receives exact decimals (`0.3`, never `0.30000000000000004`) and ignores the locale.
+- **Snapping applies to user moves only**: dragging picks the nearest tick, releasing moves the knob
+  onto it, arrow keys jump to the next tick. A value your application sets between ticks is shown as-is and
+  never overwritten (unlike `JSlider.setSnapToTicks`, which moves the knob off your model's number).
+- **A property of it needs `classTyped`:** `flag.viewAs(SliderTicks.classTyped(Integer.class), f -> f ? a : b)`.
+  A capturing label lambda makes every derived value unequal ⇒ labels rebuilt on each change (cheap, but
+  prefer method references / non-capturing lambdas).
+- **Labels take the slider's font and foreground colour** — style the slider, not the labels
+  (but FlatLaf also paints the knob in the foreground colour).
+- **Swing never thins out overlapping labels.** A narrow slider with many labels becomes a smear:
+  label fewer tick marks, or give the slider a row of its own (convergence, §2c).
+- **Whole-number sliders need divisible minor ticks** (25 with 3 between ⇒ 6.25 ⇒ no minor ticks + a
+  logged warning); more than 100 000 tick marks ⇒ none + a warning.
+
+Full prose: [Slider-Ticks-And-Labels.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Slider-Ticks-And-Labels.md).
+Executable catalogue: `Slider_Ticks_Spec`.
 
 ### Icons & SVG (first-class, HiDPI-crisp)
 
@@ -1641,6 +1697,10 @@ painting, a peeked component, a third-party widget): `UI.scale(int|float|double)
     element, so `[]` means nothing is selected and `["root"]` means the root is. Get the node
     back with `conf.nodeAt(root, path)`.
 
+18. **Slider tick marks and labels are a `SliderTicks` value in the slider's own number type** —
+    `withTicks(SliderTicks.of(Double.class).withMajorSpacing(0.25)...)`. Never configure them through
+    `peek` on the `JSlider`: its spacings and label keys are internal whole numbers for a fractional
+    slider, and Swing's own label tables go stale or overwrite your labels when the range changes (§10).
 ---
 
 ## 15. Cheat sheet
@@ -1698,6 +1758,13 @@ UI.tree(Object.class, String.class, root, conf -> ..);    // heterogeneous: name
 UI.trees(roots, conf -> ..);   // Var<Tuple<N>>: no root at all; paths start at a top-level node
 // same conf binds both; node type read off Tuple.type(); withRootVisible(true) ignored + logged
 // depth counts VISIBLE levels, so call withInitialExpansionDepth AFTER withRootVisible(false)
+
+// sliders (§10) — typed by their number; ticks + labels + snapping are ONE value in that type
+UI.slider(Axis.HORIZONTAL, 0.0, 1.0, ratio)               // UIForSlider<JSlider, Double>
+.withTicks(SliderTicks.of(Double.class).withMajorSpacing(0.25).withMinorTicksBetween(4)
+           .withLabelsAtMajorTicks().withSnapToTicks(true));  // labels "0.00" … "1.00"; counts from the MIN
+SliderTicks.of(Integer.class).withLabelAt(0, "Cold").withLabelAt(100, "Hot")   // labels at any number
+.withTicks(flag.viewAs(SliderTicks.classTyped(Integer.class), f -> f ? a : b))  // bound; classTyped keeps <N>
 
 // events
 .onClick / .onMouseEnter / .onMouseClick / .onKeyPress / .onResize (it -> ...)
@@ -1769,8 +1836,8 @@ in the repo; the links below open each on GitHub.
 - [`team/mvi/TeamView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/team/mvi/TeamView.java) **vs** [`team/mvvm/TeamView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/team/mvvm/TeamView.java) — same UI, both architectures.
 - [`chat/mvi/ChatView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/chat/mvi/ChatView.java) (+ `ChatViewModel`, `Room`, `Message`, `ChatStyle`, `ChatArt`) — **the reference for `Tuple` + `addAll` + `HasId`**, inside a whole messenger: a room rail, a roster, message bubbles editable in place, and emoji reactions, all bound off one immutable root. Three less obvious ideas live here too: a **lens onto a *computed* projection** (`vm.zoomTo(ChatViewModel::visibleMessages, ChatViewModel::withVisibleMessages)` — the getter filters the selected room by the search box, the wither merges edits and deletions back by `id`, so one lens reacts to three inputs with zero listeners); **generated SVG as a value** (`ChatArt` builds the room sigils and a "conversation ribbon" as SVG *text*, fed to `withStyle(svgVal, (svg, it) -> it.image(img -> img.svg(svg)))`); and a hot-swapped `StyleSheet` whose row suppliers **re-enter the `UI.use(..)` scope** — the gotcha that otherwise leaves every dynamically added row unstyled (§5.2).
 - [`trains/mvi/TrainsView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/trains/mvi/TrainsView.java) (+ `TrainsViewModel`, `TransitClient`) — real-world MVI: `Tuple`-valued state, a Swing-free data layer doing blocking IO off the EDT, and Lombok `@With`/`@Getter` value objects (records-free, **Java 8**-clean).
-- [`budget/mvi/BudgetView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/budget/mvi/BudgetView.java) (+ `BudgetViewModel`, `Budget`, `BudgetHealth`) — **the reference for convergence (§2c/2d): four arrangements of three cards from one span table, with zero state.** It also showcases three other ideas at once: a **value-model table** bound with `UI.table(Var<TableData>)` (editable, edits flow back as a new value; a `withCellForColumn` renderer/editor euro-formats the Amount column yet commits back a `Double`), a **value-capturing SVG style** `withStyle(svgText, (svg, it) -> it.image(img -> img.svg(svg)))` driving a donut chart generated from the data, and a **composite view** `Viewable.of(seed, it -> it.join(a, ..).join(b, ..)…)` (Sprouts ≥2.7) merging three properties into one item for a single `withStyle`.
-- [`breathing/mvi/BreathingView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/breathing/mvi/BreathingView.java) (+ `BreathingViewModel`) — modelled animation, re-arming, the GC gotcha.
+- [`budget/mvi/BudgetView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/budget/mvi/BudgetView.java) (+ `BudgetViewModel`, `Budget`, `BudgetHealth`) — **the reference for convergence (§2c/2d): four arrangements of three cards from one span table, with zero state.** It also showcases three other ideas at once: a **value-model table** bound with `UI.table(Var<TableData>)` (editable, edits flow back as a new value; a `withCellForColumn` renderer/editor euro-formats the Amount column yet commits back a `Double`), a **value-capturing SVG style** `withStyle(svgText, (svg, it) -> it.image(img -> img.svg(svg)))` driving a donut chart generated from the data, a **composite view** `Viewable.of(seed, it -> it.join(a, ..).join(b, ..)…)` (Sprouts ≥2.7) merging three properties into one item for a single `withStyle`, and a budget slider whose `SliderTicks` label it with the view's own money formatting and snap it to steps of €250.
+- [`breathing/mvi/BreathingView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/breathing/mvi/BreathingView.java) (+ `BreathingViewModel`) — modelled animation, re-arming, the GC gotcha; its timing sliders use tick marks that are not drawn as a snapping step size.
 - [`animated/AnimatedView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/animated/AnimatedView.java) / [`TransitionalAnimation.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/animated/TransitionalAnimation.java) — the full animation primitive tour.
 - [`zen/ThemeGardenView.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/zen/ThemeGardenView.java) (+ `ThemedStyleSheet`) — style sheets, groups, runtime theme swap.
 - [`scribe/CelestialScribe.java`](https://github.com/globaltcad/swing-tree/blob/main/src/test/java/examples/scribe/CelestialScribe.java) — `Layout.none()` derived from data, styled text flowing around children.
@@ -1810,5 +1877,6 @@ For layout specifically:
 (grid mechanics, nesting rules, a debugging table) →
 [Reactive-Layouts.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Reactive-Layouts.md).
 For the data components:
-[Writing-Tables.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Writing-Tables.md) and
-[Growing-Trees.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Growing-Trees.md).
+[Writing-Tables.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Writing-Tables.md),
+[Growing-Trees.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Growing-Trees.md) and
+[Slider-Ticks-And-Labels.md](https://github.com/globaltcad/swing-tree/blob/main/docs/markdown/Slider-Ticks-And-Labels.md).

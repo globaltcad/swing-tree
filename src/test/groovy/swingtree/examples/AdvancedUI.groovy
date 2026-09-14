@@ -1,6 +1,7 @@
 package swingtree.examples
 import com.formdev.flatlaf.intellijthemes.FlatMaterialDesignDarkIJTheme
 import swingtree.UI
+import swingtree.api.model.SliderTicks
 
 import javax.swing.*
 import java.awt.*
@@ -45,14 +46,13 @@ class AdvancedUI {
                                .add(UI.editorPane().withForeground(Color.DARK_GRAY).withText((Data.explain.trim().replace("\n", " "))).isEditableIf(false)))
                         )
                         .add("width 480!, shrink, aligny bottom",
-                            UI.slider(UI.Axis.HORIZONTAL).peek({
-                                Hashtable labelTable = new Hashtable();
-                                9.times {level -> labelTable.put( level*12, new JLabel(String.valueOf(level)) )}
-                                it.setLabelTable( labelTable );
-                                it.setPaintLabels(true);it.setPaintTicks(true);
-                                it.setMajorTickSpacing(12);
-                                it.setMinorTickSpacing(6);
-                            })
+                            UI.slider(UI.Axis.HORIZONTAL)
+                            .withTicks(
+                                SliderTicks.of(Integer.class)
+                                .withMajorSpacing(12)
+                                .withMinorTicksBetween(1)
+                                .withLabelsAtMajorTicks({ value -> String.valueOf(value.intdiv(12)) })
+                            )
                             .onChange( s -> {
                                 s.find(JLabel,"APIC-label")
                                 .ifPresent(l->{
@@ -114,11 +114,13 @@ class AdvancedUI {
                             .add(UI.splitRadioItem("S-192.153.122.80"))
                         )
                         .add("alignx right, shrinkx, growy, pushy",
-                            UI.slider(UI.Axis.VERTICAL).peek({
-                                it.setPaintLabels(true);it.setPaintTicks(true);
-                                it.setMajorTickSpacing(10);
-                                it.setMinorTickSpacing(1);
-                            })
+                            UI.slider(UI.Axis.VERTICAL)
+                            .withTicks(
+                                SliderTicks.of(Integer.class)
+                                .withMajorSpacing(10)
+                                .withMinorTicksBetween(9)
+                                .withLabelsAtMajorTicks()
+                            )
                             .doUpdates(1250, it -> it.component.setValue(it.component.value + (new Random().nextInt()%5)-((it.component.value-40)/25) as int))
                         )
                         .add("alignx right, shrinkx, growy, pushy, wrap",

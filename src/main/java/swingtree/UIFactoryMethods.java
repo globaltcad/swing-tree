@@ -2835,9 +2835,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @return A builder instance for the provided {@link JSlider}, which enables fluent method chaining.
      * @throws IllegalArgumentException if {@code component} is {@code null}.
      */
-    public static <S extends JSlider> UIForSlider<S> of( S component ) {
+    public static <S extends JSlider> UIForSlider<S, Integer> of( S component ) {
         NullUtil.nullArgCheck(component, "component", JSlider.class);
-        return new UIForSlider<>(new BuilderState<>(component));
+        return new UIForSlider<>(new BuilderState<>(component), Integer.class);
     }
 
     /**
@@ -2851,9 +2851,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *
      * @see JSlider#setOrientation
      */
-    public static UIForSlider<JSlider> slider( UI.Axis axis ) {
+    public static UIForSlider<JSlider, Integer> slider( UI.Axis axis ) {
         NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
-        return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
+        return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new), Integer.class)
                 .withOrientation(axis);
     }
 
@@ -2868,9 +2868,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      *
      * @see JSlider#setOrientation
      */
-    public static UIForSlider<JSlider> slider( Val<UI.Axis> axis ) {
+    public static UIForSlider<JSlider, Integer> slider( Val<UI.Axis> axis ) {
         NullUtil.nullArgCheck( axis, "axis", Val.class );
-        return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
+        return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new), Integer.class)
                 .withOrientation(axis);
     }
 
@@ -2889,9 +2889,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @see JSlider#setMinimum
      * @see JSlider#setMaximum
      */
-    public static UIForSlider<JSlider> slider( UI.Axis axis, int min, int max ) {
+    public static UIForSlider<JSlider, Integer> slider( UI.Axis axis, int min, int max ) {
         NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
-        return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
+        return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new), Integer.class)
                 .withOrientation(axis)
                 .withMin(min)
                 .withMax(max)
@@ -2915,9 +2915,9 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @see JSlider#setMaximum
      * @see JSlider#setValue
      */
-    public static UIForSlider<JSlider> slider( UI.Axis axis, int min, int max, int value ) {
+    public static UIForSlider<JSlider, Integer> slider( UI.Axis axis, int min, int max, int value ) {
         NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
-        return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
+        return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new), Integer.class)
                 .withOrientation(axis)
                 .withMin(min)
                 .withMax(max)
@@ -2948,14 +2948,16 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @see JSlider#setMaximum
      * @see JSlider#setValue
      */
-    public static <N extends Number> UIForSlider<JSlider> slider( UI.Axis axis, N min, N max, Val<N> value ) {
+    public static <N extends Number> UIForSlider<JSlider, N> slider( UI.Axis axis, N min, N max, Val<N> value ) {
         NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
         NullUtil.nullPropertyCheck(value, "value", "The state of the slider should not be null!");
         Objects.requireNonNull(min, "The minimum value of the slider should not be null!");
         Objects.requireNonNull(max, "The maximum value of the slider should not be null!");
-        return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
+        return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new), value.type())
                 .withOrientation(axis)
-                ._withBinding(Val.of(min), Val.of(max), value, false);
+                .withMin(min)
+                .withMax(max)
+                .withValue(value);
     }
 
     /**
@@ -2980,14 +2982,16 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @see JSlider#setMaximum
      * @see JSlider#setValue
      */
-    public static <N extends Number> UIForSlider<JSlider> slider( UI.Axis axis, N min, N max, Var<N> value ) {
+    public static <N extends Number> UIForSlider<JSlider, N> slider( UI.Axis axis, N min, N max, Var<N> value ) {
         NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
         NullUtil.nullPropertyCheck(value, "value", "The state of the slider should not be null!");
         Objects.requireNonNull(min, "The minimum value of the slider should not be null!");
         Objects.requireNonNull(max, "The maximum value of the slider should not be null!");
-        return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
+        return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new), value.type())
                 .withOrientation(axis)
-                ._withBinding(Val.of(min), Val.of(max), value, true);
+                .withMin(min)
+                .withMax(max)
+                .withValue(value);
     }
 
     /**
@@ -3018,14 +3022,16 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @see JSlider#setMaximum
      * @see JSlider#setValue
      */
-    public static <N extends Number> UIForSlider<JSlider> slider( UI.Axis axis, Val<N> min, Val<N> max, Val<N> value ) {
+    public static <N extends Number> UIForSlider<JSlider, N> slider( UI.Axis axis, Val<N> min, Val<N> max, Val<N> value ) {
         NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
         NullUtil.nullPropertyCheck(min, "min", "The minimum value of the slider should not be null!");
         NullUtil.nullPropertyCheck(max, "max", "The maximum value of the slider should not be null!");
         NullUtil.nullPropertyCheck(value, "value", "The state of the slider should not be null!");
-        return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
+        return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new), value.type())
                 .withOrientation(axis)
-                ._withBinding(min, max, value, false);
+                .withMin(min)
+                .withMax(max)
+                .withValue(value);
     }
 
     /**
@@ -3057,14 +3063,16 @@ public abstract class UIFactoryMethods extends UILayoutConstants
      * @see JSlider#setMaximum
      * @see JSlider#setValue
      */
-    public static <N extends Number> UIForSlider<JSlider> slider( UI.Axis axis, Val<N> min, Val<N> max, Var<N> value ) {
+    public static <N extends Number> UIForSlider<JSlider, N> slider( UI.Axis axis, Val<N> min, Val<N> max, Var<N> value ) {
         NullUtil.nullArgCheck(axis, "axis", UI.Axis.class);
         NullUtil.nullPropertyCheck(min, "min", "The minimum value of the slider should not be null!");
         NullUtil.nullPropertyCheck(max, "max", "The maximum value of the slider should not be null!");
         NullUtil.nullPropertyCheck(value, "value", "The state of the slider should not be null!");
-        return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new))
+        return new UIForSlider<>(new BuilderState<>(JSlider.class, UI.Slider::new), value.type())
                 .withOrientation(axis)
-                ._withBinding(min, max, value, true);
+                .withMin(min)
+                .withMax(max)
+                .withValue(value);
     }
 
     /**
