@@ -481,6 +481,72 @@ class Slider_Ticks_Spec extends Specification
             10_000_000 | 1       | 0                 || 0                    | 0                    | "more than 100000 tick marks"
     }
 
+    def 'Moving the knob does not repeat the warning about tick marks which a slider cannot draw.'()
+    {
+        reportInfo """
+            When you ask a slider for tick marks which it cannot draw correctly, SwingTree
+            leaves them out and logs a warning, so that you find out why they are missing.
+            On a slider for whole numbers with major tick marks 25 apart, three minor tick
+            marks between them would sit 25 / 4 = 6.25 apart. That is not a whole number, so
+            SwingTree draws no minor tick marks and logs a warning saying so.
+
+            SwingTree logs that warning while it works out where the tick marks go. Moving
+            the knob does not change where the tick marks go, so moving the knob must not log
+            the warning again.
+
+            That matters more than it may seem, because the knob moves all the time. While
+            the user drags it, the slider reports a new number whenever the mouse has moved
+            far enough to reach one, and your application may set the value many times a
+            second too. A warning repeated at that rate buries every other message in the log
+            under copies of itself, and every copy costs time on the UI thread, which should
+            be busy painting the knob.
+
+            In this scenario the application sets the value three times, and the user drags
+            the knob across half of the slider, one step at a time. We play the user the way
+            the look and feel does, which is the part of Swing that draws the slider and
+            handles the mouse: it sets the flag `valueIsAdjusting` of the slider to `true` when
+            the user presses the mouse button on the knob, calls `setValue(..)` for every new
+            position, and sets the flag back to `false` when the user lets go.
+        """
+        given : 'A spy on the log.'
+            var log = LogSpy.attach()
+        and : 'A way of counting the warnings about the minor tick marks.'
+            var warningsAboutMinorTickMarks = { -> log.warnings().count { it.contains("cannot fit 3 minor tick marks") } }
+        and : 'A property holding 50, and a slider from 0 to 100 bound to it, with three minor tick marks between major tick marks 25 apart.'
+            var value = Var.of(50)
+            var slider =
+                    UI.slider(UI.Axis.HORIZONTAL, 0, 100, value)
+                    .withTicks(
+                        SliderTicks.of(Integer.class)
+                        .withMajorSpacing(25)
+                        .withMinorTicksBetween(3)
+                    )
+                    .get(JSlider)
+        expect : 'Building the slider logged the warning once.'
+            warningsAboutMinorTickMarks() == 1
+
+        when : 'The application sets the value to 10, then to 20, then to 30.'
+            UI.runNow({
+                value.set(10)
+                value.set(20)
+                value.set(30)
+            })
+        and : 'The user drags the knob from 30 to 80, one step at a time, and lets go.'
+            UI.runNow({
+                slider.valueIsAdjusting = true
+                (31..80).each { step -> slider.value = step }
+                slider.valueIsAdjusting = false
+            })
+        then : 'The knob and the property followed along.'
+            slider.value == 80
+            value.get() == 80
+        and : 'But the log still holds only the one warning from building the slider.'
+            warningsAboutMinorTickMarks() == 1
+
+        cleanup :
+            log?.detach()
+    }
+
     def 'Use `withSnapToTicks(true)` to let the knob snap to the tick marks when the user moves it.'()
     {
         reportInfo """
@@ -570,6 +636,215 @@ class Slider_Ticks_Spec extends Specification
             })
         then : 'The property holds exactly 0.3.'
             value.get() == 0.3d
+    }
+
+    def 'An arrow key never moves the knob of a snapping slider against the direction of the key.'()
+    {
+        reportInfo """
+            When a slider snaps to its tick marks, an arrow key moves the knob to the next
+            tick mark in the direction of the key. And when there is no tick mark left in that
+            direction, the knob stays where it is. A key which points to the right never moves
+            the knob to the left.
+
+            You may wonder how the knob could end up beyond the last tick mark in the first
+            place. Tick marks start at the minimum of the slider and repeat at their spacing,
+            so the last tick mark does not have to sit at the maximum. On a slider from 0 to
+            100 with a tick mark every 30, the tick marks sit at 0, 30, 60 and 90, and there is
+            none between 90 and 100. The user cannot pick 95 on such a slider, because the knob
+            only lands on tick marks when the user moves it. But your application can set the
+            value to 95, maybe because it restores the value the slider had the last time the
+            application ran. Snapping only applies to what the user does, so the knob then
+            sits at 95.
+
+            Now the user presses the right arrow key. The look and feel, which is the part of
+            Swing that draws the slider and handles the keyboard, does not know about tick
+            marks. It simply calls `setValue(96)`, one step to the right. SwingTree then
+            looks for the next tick mark to the right of 96, which would be at 120, beyond the
+            end of the slider. The nearest tick mark which does exist is the one at 90. It is
+            tempting to move the knob there, but 90 is to the left of 95, so the user would
+            press the right arrow key and watch the knob go left. That is why the knob stays
+            at 95.
+
+            A key can also ask for a bigger jump. The End key moves the knob to the maximum of
+            the slider, which the look and feel does by calling `setValue(100)`. From 60 there
+            is no tick mark at 100 either, but there is one at 90, and 90 is to the right of 60.
+            So the knob moves to 90, the last tick mark before the end of the slider.
+
+            This scenario plays the user by calling `setValue(..)` on the slider with the number
+            the look and feel would set for each key.
+        """
+        given : 'A property holding 0, and a slider from 0 to 100 bound to it, which snaps to tick marks every 30.'
+            var value = Var.of(0)
+            var slider =
+                    UI.slider(UI.Axis.HORIZONTAL, 0, 100, value)
+                    .withTicks(
+                        SliderTicks.of(Integer.class)
+                        .withMajorSpacing(30)
+                        .withSnapToTicks(true)
+                    )
+                    .get(JSlider)
+
+        when : 'The application restores the value 95, which lies beyond the last tick mark at 90.'
+            UI.runNow({ value.set(95) })
+        then : 'The knob sits at 95.'
+            slider.value == 95
+
+        when : 'The user presses the right arrow key, which moves the knob one step, to 96.'
+            UI.runNow({ slider.value = 96 })
+        then : 'There is no tick mark to the right of 95, so the knob stays at 95, and so does the property.'
+            slider.value == 95
+            value.get() == 95
+
+        when : 'The user presses the left arrow key, which moves the knob one step, to 94.'
+            UI.runNow({ slider.value = 94 })
+        then : 'The knob moves to the next tick mark to the left, at 90.'
+            slider.value == 90
+            value.get() == 90
+
+        when : 'The user presses the right arrow key, which moves the knob one step, to 91.'
+            UI.runNow({ slider.value = 91 })
+        then : 'The tick mark at 90 is the last one, so the knob stays at 90.'
+            slider.value == 90
+            value.get() == 90
+
+        when : 'The user presses the left arrow key, which moves the knob one step, to 89.'
+            UI.runNow({ slider.value = 89 })
+        then : 'The knob moves to the next tick mark to the left, at 60.'
+            slider.value == 60
+            value.get() == 60
+
+        when : 'The user presses the End key, which moves the knob to the maximum of the slider, 100.'
+            UI.runNow({ slider.value = 100 })
+        then : 'There is no tick mark at 100, but the one at 90 is to the right of 60, so the knob moves there.'
+            slider.value == 90
+            value.get() == 90
+    }
+
+    def 'Clicking the knob of a snapping slider without moving it keeps the number your application set.'()
+    {
+        reportInfo """
+            A slider which snaps to tick marks every 25 only lets the user pick 0, 25, 50, 75
+            and 100. Your application, however, may set any number, say 33. Snapping only
+            applies to what the user does, so the knob then sits at 33, between the tick marks
+            at 25 and 50, and your property holds 33.
+
+            Now the user presses the mouse button on the knob and releases it again, without
+            moving the mouse. Maybe they only wanted to give the slider the keyboard focus, or
+            they changed their mind. Either way the user did not choose a number, so nothing may
+            change: the knob stays at 33, and the property keeps 33.
+
+            This needs care, because a click on the knob is not silent. A `JSlider` has a flag
+            named `valueIsAdjusting`. The look and feel, which is the part of Swing that draws
+            the slider and handles the mouse, sets that flag to `true` when the user presses the
+            mouse button on the knob and back to `false` when they release it, so that listeners
+            can tell a drag in progress from a finished one. Every change of that flag
+            is reported to the change listeners of the slider, just like a change of its number.
+            So the click reports two changes, even though the number was 33 both times.
+
+            A slider which took every reported change for a move of the user would snap the 33 to
+            its nearest tick mark, which is 25, and write 25 into your property. The user would
+            see the knob jump away from where they clicked, and your application would receive a
+            number nobody chose.
+
+            This scenario plays the user by setting `valueIsAdjusting` to `true` and back to
+            `false`, exactly as the look and feel does for a click.
+        """
+        given : 'A property holding 50, and a slider from 0 to 100 bound to it, which snaps to tick marks every 25.'
+            var value = Var.of(50)
+            var slider =
+                    UI.slider(UI.Axis.HORIZONTAL, 0, 100, value)
+                    .withTicks(
+                        SliderTicks.of(Integer.class)
+                        .withMajorSpacing(25)
+                        .withSnapToTicks(true)
+                    )
+                    .get(JSlider)
+
+        when : 'The application sets the value to 33.'
+            UI.runNow({ value.set(33) })
+        then : 'The knob sits at 33, between the tick marks at 25 and 50.'
+            slider.value == 33
+
+        when : 'The user presses the mouse button on the knob.'
+            UI.runNow({ slider.valueIsAdjusting = true })
+        then : 'The knob is still at 33, and the property still holds 33.'
+            slider.value == 33
+            value.get() == 33
+
+        when : 'The user releases the mouse button, without having moved the mouse.'
+            UI.runNow({ slider.valueIsAdjusting = false })
+        then : 'The knob is still at 33, and the property still holds 33.'
+            slider.value == 33
+            value.get() == 33
+    }
+
+    def 'When the knob snaps to a tick mark, every `onChange` action runs once and reads the number at that tick mark.'()
+    {
+        reportInfo """
+            Imagine a slider from 0 to 100 which snaps to tick marks every 25, and a label
+            next to it which shows the number of the slider. You keep the label up to date
+            with an `onChange(..)` action, which reads the value of the slider. The knob sits
+            at 50, and the user presses the right arrow key. The knob lands on the tick mark
+            at 75, and your action must run once, and read 75.
+
+            That takes some care, because an arrow key does not know about tick marks. The
+            look and feel, which is the part of Swing that draws the slider and handles the
+            keyboard, handles the key by calling `setValue(51)` on the slider, one step to
+            the right. Only then does SwingTree see the 51, and move the knob on to the tick
+            mark at 75. So for a short moment the slider really holds 51, a number the user
+            did not choose and will never see.
+
+            A plain `JSlider` reports every change to each of its `ChangeListener`s in turn,
+            starting with the listener that was added last. If SwingTree snapped the knob in
+            one of these listeners, and ran your action in another one, what your action reads
+            would depend on the order of the two listeners. An action which runs before the
+            snapping reads 51, and an action which runs after it reads 75. A label reading 51
+            next to a knob at 75 is the kind of bug which is hard to track down, because it
+            depends on something nobody can see.
+
+            So SwingTree runs your `onChange(..)` actions itself, once the knob has snapped,
+            and in the order in which you added them. This scenario adds two actions to see
+            that order. The user presses the right arrow key twice, and between the two key
+            presses the application moves the knob back to 50 through the property. When the
+            application sets the property, SwingTree moves the knob for it, and that must not
+            disturb what your actions read the next time the user moves the knob.
+
+            This scenario plays the user by calling `setValue(51)` on the slider, which is
+            what the look and feel does when it handles the right arrow key.
+        """
+        given : 'A property holding 50, and a list for what the actions read.'
+            var value = Var.of(50)
+            var readings = []
+        and : 'A slider from 0 to 100 bound to the property, which snaps to tick marks every 25, with two `onChange` actions.'
+            var slider =
+                    UI.slider(UI.Axis.HORIZONTAL, 0, 100, value)
+                    .withTicks(
+                        SliderTicks.of(Integer.class)
+                        .withMajorSpacing(25)
+                        .withSnapToTicks(true)
+                    )
+                    .onChange( it -> readings << "first action read ${it.get().value}" )
+                    .onChange( it -> readings << "second action read ${it.get().value}" )
+                    .get(JSlider)
+
+        when : 'The user presses the right arrow key, which moves the knob one step, to 51.'
+            UI.runNow({ slider.value = 51 })
+        then : 'The knob snapped on to the tick mark at 75.'
+            slider.value == 75
+            value.get() == 75
+        and : 'Each action ran once, in the order in which they were added, and read 75.'
+            readings == ["first action read 75", "second action read 75"]
+
+        when : 'The application moves the knob back to 50 through the property, and we clear the readings.'
+            UI.runNow({ value.set(50) })
+            readings.clear()
+        and : 'The user presses the right arrow key again, which moves the knob to 51.'
+            UI.runNow({ slider.value = 51 })
+        then : 'The knob snapped on to the tick mark at 75 again.'
+            slider.value == 75
+            value.get() == 75
+        and : 'Each action ran once, in the order in which they were added, and read 75.'
+            readings == ["first action read 75", "second action read 75"]
     }
 
     def 'A `SliderTicks` is an immutable value.'()
