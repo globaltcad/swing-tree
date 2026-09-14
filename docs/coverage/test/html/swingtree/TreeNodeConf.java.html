@@ -1,0 +1,339 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>TreeNodeConf.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree</a> &gt; <span class="el_source">TreeNodeConf.java</span></div><h1>TreeNodeConf.java</h1><pre class="source lang-java linenums">package swingtree;
+
+import org.jspecify.annotations.Nullable;
+import sprouts.Lens;
+import sprouts.Tuple;
+import swingtree.api.IconDeclaration;
+
+import java.util.Objects;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+
+/**
+ *  Describes how the nodes of one particular type behave inside a
+ *  {@link javax.swing.JTree} built through {@link UI#tree(sprouts.Var, swingtree.api.Configurator)}.
+ *  You never create one of these yourself, instead you receive it inside the
+ *  {@link swingtree.api.Configurator} lambda passed to
+ *  {@link TreeConf#nodesOf(Class, swingtree.api.Configurator)}:
+ *  &lt;pre&gt;{@code
+ *  UI.tree(fileSystem, conf -&gt; conf
+ *      .nodesOf(Dir.class, dir -&gt; dir
+ *          .children(Dir::entries, Dir::withEntries)
+ *          .text(Dir::name, Dir::withName)
+ *          .icon(dir -&gt; Icons.FOLDER)
+ *      )
+ *      .nodesOf(Doc.class, doc -&gt; doc
+ *          .text(Doc::name)
+ *      )
+ *  );
+ *  }&lt;/pre&gt;
+ *  A configuration block like this is the tree's equivalent of one {@code case} in a
+ *  {@code switch} over a sealed type, which is why a sum type based tree usually has
+ *  exactly one {@code nodesOf(..)} block per permitted subtype.
+ *  &lt;p&gt;
+ *  &lt;b&gt;A getter alone is read only, a getter together with a wither is a lens and
+ *  therefore two way.&lt;/b&gt; This is the same rule the {@link sprouts.Var#zoomTo(Function, BiFunction)}
+ *  method follows, and it applies to every aspect declared here: {@link #children(Function)}
+ *  makes a branch the user cannot restructure, {@link #children(Function, BiFunction)} makes
+ *  one they can, {@link #text(Function)} renders a label and {@link #text(Function, BiFunction)}
+ *  additionally permits renaming the node in place.
+ *  &lt;p&gt;
+ *  Instances of this class are immutable values, so every method returns a new
+ *  instance instead of modifying the receiver.
+ *
+ * @param &lt;N&gt; The common node type of the tree this rule belongs to.
+ * @param &lt;B&gt; The concrete node type this rule applies to.
+ */
+public final class TreeNodeConf&lt;N, B extends N&gt;
+{
+    /*
+        The children rule is erased so the tree machinery can apply it without knowing the
+        concrete node type. What makes that sound: the tuple handed to a wither is always the
+        very tuple its own getter produced, with at most one entry exchanged.
+    */
+    private final Class&lt;B&gt;                                                    _type;
+    private final @Nullable Function&lt;Object, Tuple&lt;Object&gt;&gt;                   _childrenGetter;
+    private final @Nullable BiFunction&lt;Object, Tuple&lt;Object&gt;, Object&gt;         _childrenWither;
+    private final @Nullable Function&lt;B, String&gt;                               _textGetter;
+    private final @Nullable BiFunction&lt;B, String, B&gt;                          _textWither;
+    private final @Nullable Function&lt;B, IconDeclaration&gt;                      _iconGetter;
+    private final @Nullable Function&lt;B, String&gt;                               _toolTipGetter;
+    private final @Nullable Boolean                                           _isLeaf;
+
+    static &lt;N, B extends N&gt; TreeNodeConf&lt;N, B&gt; of( Class&lt;B&gt; type ) {
+<span class="fc" id="L64">        return new TreeNodeConf&lt;&gt;(type, null, null, null, null, null, null, null);</span>
+    }
+
+    private TreeNodeConf(
+        Class&lt;B&gt;                                            type,
+        @Nullable Function&lt;Object, Tuple&lt;Object&gt;&gt;           childrenGetter,
+        @Nullable BiFunction&lt;Object, Tuple&lt;Object&gt;, Object&gt; childrenWither,
+        @Nullable Function&lt;B, String&gt;                       textGetter,
+        @Nullable BiFunction&lt;B, String, B&gt;                  textWither,
+        @Nullable Function&lt;B, IconDeclaration&gt;              iconGetter,
+        @Nullable Function&lt;B, String&gt;                       toolTipGetter,
+        @Nullable Boolean                                   isLeaf
+<span class="fc" id="L76">    ) {</span>
+<span class="fc" id="L77">        _type           = Objects.requireNonNull(type);</span>
+<span class="fc" id="L78">        _childrenGetter = childrenGetter;</span>
+<span class="fc" id="L79">        _childrenWither = childrenWither;</span>
+<span class="fc" id="L80">        _textGetter     = textGetter;</span>
+<span class="fc" id="L81">        _textWither     = textWither;</span>
+<span class="fc" id="L82">        _iconGetter     = iconGetter;</span>
+<span class="fc" id="L83">        _toolTipGetter  = toolTipGetter;</span>
+<span class="fc" id="L84">        _isLeaf         = isLeaf;</span>
+<span class="fc" id="L85">    }</span>
+
+    /**
+     *  Declares that nodes of this type are branches whose children are read from the
+     *  supplied getter, and that the user may not restructure them.
+     *  &lt;pre&gt;{@code
+     *  .nodesOf(Dir.class, dir -&gt; dir.children(Dir::entries))
+     *  }&lt;/pre&gt;
+     *  Declaring a children rule is also what turns a node type into a branch: a type
+     *  without one is a leaf, and a branch stays a branch even while it happens to have
+     *  no children (see {@link TreeConf#leafWhenEmpty(boolean)}).
+     *
+     * @param getter Reads the children of a node of this type.
+     * @param &lt;C&gt; The type of the children, which must be assignable to the tree's node type.
+     * @return An updated configuration.
+     */
+    public &lt;C extends N&gt; TreeNodeConf&lt;N, B&gt; children( Function&lt;B, Tuple&lt;C&gt;&gt; getter ) {
+<span class="fc" id="L102">        Objects.requireNonNull(getter, &quot;getter&quot;);</span>
+<span class="fc" id="L103">        return new TreeNodeConf&lt;&gt;(</span>
+<span class="fc" id="L104">            _type, _erase(getter), null,</span>
+            _textGetter, _textWither, _iconGetter, _toolTipGetter, _isLeaf
+        );
+    }
+
+    /**
+     *  Declares that nodes of this type are branches whose children are read from the
+     *  supplied getter and written back through the supplied wither, which makes the
+     *  branch structure editable and gives every node below it a writable lens
+     *  reaching all the way up into the root property.
+     *  &lt;pre&gt;{@code
+     *  .nodesOf(Dir.class, dir -&gt; dir.children(Dir::entries, Dir::withEntries))
+     *  }&lt;/pre&gt;
+     *
+     * @param getter Reads the children of a node of this type.
+     * @param wither Returns a new node of this type with the given children.
+     * @param &lt;C&gt; The type of the children, which must be assignable to the tree's node type.
+     * @return An updated configuration.
+     */
+    public &lt;C extends N&gt; TreeNodeConf&lt;N, B&gt; children(
+        Function&lt;B, Tuple&lt;C&gt;&gt; getter,
+        BiFunction&lt;B, Tuple&lt;C&gt;, B&gt; wither
+    ) {
+<span class="fc" id="L127">        Objects.requireNonNull(getter, &quot;getter&quot;);</span>
+<span class="fc" id="L128">        Objects.requireNonNull(wither, &quot;wither&quot;);</span>
+<span class="fc" id="L129">        return new TreeNodeConf&lt;&gt;(</span>
+<span class="fc" id="L130">            _type, _erase(getter), _erase(wither),</span>
+            _textGetter, _textWither, _iconGetter, _toolTipGetter, _isLeaf
+        );
+    }
+
+    /**
+     *  Declares the children of this node type through a {@link Lens}, which is
+     *  equivalent to {@link #children(Function, BiFunction)} but lets you reuse a lens
+     *  you already have, or write one whose focus needs logic of its own.
+     *
+     * @param lens Focuses the children collection of a node of this type.
+     * @param &lt;C&gt; The type of the children, which must be assignable to the tree's node type.
+     * @return An updated configuration.
+     */
+    public &lt;C extends N&gt; TreeNodeConf&lt;N, B&gt; children( Lens&lt;B, Tuple&lt;C&gt;&gt; lens ) {
+<span class="nc" id="L145">        Objects.requireNonNull(lens, &quot;lens&quot;);</span>
+<span class="nc" id="L146">        return children(</span>
+            node -&gt; {
+                try {
+<span class="nc" id="L149">                    return lens.getter(node);</span>
+<span class="nc" id="L150">                } catch (Exception e) {</span>
+<span class="nc" id="L151">                    throw new IllegalStateException(e);</span>
+                }
+            },
+            (node, children) -&gt; {
+                try {
+<span class="nc" id="L156">                    return lens.wither(node, children);</span>
+<span class="nc" id="L157">                } catch (Exception e) {</span>
+<span class="nc" id="L158">                    throw new IllegalStateException(e);</span>
+                }
+            }
+        );
+    }
+
+    /**
+     *  Declares the label shown for nodes of this type. Without a text rule the tree falls
+     *  back to {@link Object#toString()}, which is rarely what a record should show.
+     *
+     * @param getter Produces the label of a node of this type.
+     * @return An updated configuration.
+     */
+    public TreeNodeConf&lt;N, B&gt; text( Function&lt;B, String&gt; getter ) {
+<span class="fc" id="L172">        Objects.requireNonNull(getter, &quot;getter&quot;);</span>
+<span class="fc" id="L173">        return new TreeNodeConf&lt;&gt;(</span>
+            _type, _childrenGetter, _childrenWither,
+            getter, null, _iconGetter, _toolTipGetter, _isLeaf
+        );
+    }
+
+    /**
+     *  Declares the label shown for nodes of this type together with a wither, which
+     *  additionally permits the user to rename the node in place. The edited text is
+     *  handed to the wither and the resulting node is written back into the root property.
+     *  &lt;pre&gt;{@code
+     *  .nodesOf(Dir.class, dir -&gt; dir.text(Dir::name, Dir::withName))
+     *  }&lt;/pre&gt;
+     *  Renaming additionally requires the tree to be bound to a mutable {@link sprouts.Var}
+     *  and every branch above the node to declare a children wither, because that is the
+     *  chain the new value has to travel back up.
+     *
+     * @param getter Produces the label of a node of this type.
+     * @param wither Returns a new node of this type carrying the edited label.
+     * @return An updated configuration.
+     */
+    public TreeNodeConf&lt;N, B&gt; text( Function&lt;B, String&gt; getter, BiFunction&lt;B, String, B&gt; wither ) {
+<span class="fc" id="L195">        Objects.requireNonNull(getter, &quot;getter&quot;);</span>
+<span class="fc" id="L196">        Objects.requireNonNull(wither, &quot;wither&quot;);</span>
+<span class="fc" id="L197">        return new TreeNodeConf&lt;&gt;(</span>
+            _type, _childrenGetter, _childrenWither,
+            getter, wither, _iconGetter, _toolTipGetter, _isLeaf
+        );
+    }
+
+    /**
+     *  Declares the icon shown next to nodes of this type. The returned
+     *  {@link IconDeclaration} is resolved through the regular SwingTree icon cache, so
+     *  SVG sources and HiDPI scaling work exactly as they do everywhere else.
+     *
+     * @param getter Produces the icon declaration of a node of this type.
+     * @return An updated configuration.
+     */
+    public TreeNodeConf&lt;N, B&gt; icon( Function&lt;B, IconDeclaration&gt; getter ) {
+<span class="fc" id="L212">        Objects.requireNonNull(getter, &quot;getter&quot;);</span>
+<span class="fc" id="L213">        return new TreeNodeConf&lt;&gt;(</span>
+            _type, _childrenGetter, _childrenWither,
+            _textGetter, _textWither, getter, _toolTipGetter, _isLeaf
+        );
+    }
+
+    /**
+     *  Declares the tool tip shown when the pointer rests on a node of this type.
+     *
+     * @param getter Produces the tool tip text of a node of this type.
+     * @return An updated configuration.
+     */
+    public TreeNodeConf&lt;N, B&gt; toolTip( Function&lt;B, String&gt; getter ) {
+<span class="fc" id="L226">        Objects.requireNonNull(getter, &quot;getter&quot;);</span>
+<span class="fc" id="L227">        return new TreeNodeConf&lt;&gt;(</span>
+            _type, _childrenGetter, _childrenWither,
+            _textGetter, _textWither, _iconGetter, getter, _isLeaf
+        );
+    }
+
+    /**
+     *  Overrides whether nodes of this type are leaves. By default a node type is a leaf
+     *  exactly when it declares no {@code children(..)} rule, which is the answer a sum
+     *  type based model wants. Override it when a node has no children &lt;i&gt;yet&lt;/i&gt; but must
+     *  still show a handle, because expanding it is what triggers the load:
+     *  &lt;pre&gt;{@code
+     *  .nodesOf(Pending.class, p -&gt; p.text(Pending::label).isLeaf(false))
+     *  }&lt;/pre&gt;
+     *
+     * @param isLeaf True to force nodes of this type to be leaves, false to force them to be branches.
+     * @return An updated configuration.
+     */
+    public TreeNodeConf&lt;N, B&gt; isLeaf( boolean isLeaf ) {
+<span class="fc" id="L246">        return new TreeNodeConf&lt;&gt;(</span>
+            _type, _childrenGetter, _childrenWither,
+<span class="fc" id="L248">            _textGetter, _textWither, _iconGetter, _toolTipGetter, isLeaf</span>
+        );
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private static &lt;B, C&gt; Function&lt;Object, Tuple&lt;Object&gt;&gt; _erase( Function&lt;B, Tuple&lt;C&gt;&gt; getter ) {
+<span class="fc" id="L254">        return node -&gt; (Tuple&lt;Object&gt;) (Tuple&lt;?&gt;) getter.apply((B) node);</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    private static &lt;B, C&gt; BiFunction&lt;Object, Tuple&lt;Object&gt;, Object&gt; _erase( BiFunction&lt;B, Tuple&lt;C&gt;, B&gt; wither ) {
+<span class="fc" id="L259">        return (node, children) -&gt; wither.apply((B) node, (Tuple&lt;C&gt;) (Tuple&lt;?&gt;) children);</span>
+    }
+
+    Class&lt;B&gt; type() {
+<span class="fc" id="L263">        return _type;</span>
+    }
+
+    boolean hasChildrenRule() {
+<span class="fc bfc" id="L267" title="All 2 branches covered.">        return _childrenGetter != null;</span>
+    }
+
+    boolean isStructurallyWritable() {
+<span class="fc bfc" id="L271" title="All 2 branches covered.">        return _childrenWither != null;</span>
+    }
+
+    Tuple&lt;Object&gt; childrenOf( Object node ) {
+<span class="fc" id="L275">        Function&lt;Object, Tuple&lt;Object&gt;&gt; getter = _childrenGetter;</span>
+<span class="pc bpc" id="L276" title="1 of 2 branches missed.">        if ( getter == null )</span>
+<span class="nc" id="L277">            return Tuple.of(Object.class);</span>
+<span class="fc" id="L278">        return getter.apply(node);</span>
+    }
+
+    Object withChildren( Object node, Tuple&lt;Object&gt; children ) {
+<span class="fc" id="L282">        BiFunction&lt;Object, Tuple&lt;Object&gt;, Object&gt; wither = _childrenWither;</span>
+<span class="pc bpc" id="L283" title="1 of 2 branches missed.">        if ( wither == null )</span>
+<span class="nc" id="L284">            return node;</span>
+<span class="fc" id="L285">        return wither.apply(node, children);</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Nullable String textOf( Object node ) {
+<span class="fc" id="L290">        Function&lt;B, String&gt; getter = _textGetter;</span>
+<span class="fc bfc" id="L291" title="All 2 branches covered.">        if ( getter == null )</span>
+<span class="fc" id="L292">            return null;</span>
+<span class="fc" id="L293">        return getter.apply((B) node);</span>
+    }
+
+    boolean isRenamable() {
+<span class="fc bfc" id="L297" title="All 2 branches covered.">        return _textWither != null;</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    Object withText( Object node, String text ) {
+<span class="fc" id="L302">        BiFunction&lt;B, String, B&gt; wither = _textWither;</span>
+<span class="pc bpc" id="L303" title="1 of 2 branches missed.">        if ( wither == null )</span>
+<span class="nc" id="L304">            return node;</span>
+<span class="fc" id="L305">        return wither.apply((B) node, text);</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Nullable IconDeclaration iconOf( Object node ) {
+<span class="fc" id="L310">        Function&lt;B, IconDeclaration&gt; getter = _iconGetter;</span>
+<span class="fc bfc" id="L311" title="All 2 branches covered.">        if ( getter == null )</span>
+<span class="fc" id="L312">            return null;</span>
+<span class="fc" id="L313">        return getter.apply((B) node);</span>
+    }
+
+    @SuppressWarnings(&quot;unchecked&quot;)
+    @Nullable String toolTipOf( Object node ) {
+<span class="fc" id="L318">        Function&lt;B, String&gt; getter = _toolTipGetter;</span>
+<span class="fc bfc" id="L319" title="All 2 branches covered.">        if ( getter == null )</span>
+<span class="fc" id="L320">            return null;</span>
+<span class="fc" id="L321">        return getter.apply((B) node);</span>
+    }
+
+    @Nullable Boolean declaredLeafState() {
+<span class="fc" id="L325">        return _isLeaf;</span>
+    }
+
+    @Override
+    public String toString() {
+<span class="nc" id="L330">        return this.getClass().getSimpleName() + &quot;[&quot; +</span>
+<span class="nc" id="L331">                    &quot;type=&quot;       + _type.getSimpleName() + &quot;, &quot; +</span>
+<span class="nc bnc" id="L332" title="All 4 branches missed.">                    &quot;children=&quot;   + ( _childrenGetter == null ? &quot;none&quot; : ( _childrenWither == null ? &quot;readOnly&quot; : &quot;writable&quot; ) ) + &quot;, &quot; +</span>
+<span class="nc bnc" id="L333" title="All 4 branches missed.">                    &quot;text=&quot;       + ( _textGetter == null ? &quot;none&quot; : ( _textWither == null ? &quot;readOnly&quot; : &quot;writable&quot; ) ) + &quot;, &quot; +</span>
+<span class="nc bnc" id="L334" title="All 2 branches missed.">                    &quot;icon=&quot;       + ( _iconGetter == null ? &quot;none&quot; : &quot;declared&quot; ) + &quot;, &quot; +</span>
+<span class="nc bnc" id="L335" title="All 2 branches missed.">                    &quot;isLeaf=&quot;     + ( _isLeaf == null ? &quot;derived&quot; : String.valueOf(_isLeaf) ) +</span>
+                &quot;]&quot;;
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
