@@ -304,7 +304,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided padding distances.
      */
     public ComponentStyleDelegate&lt;C&gt; margin( double top, double right, double bottom, double left ) {
-<span class="fc" id="L307">        return _withStyle(_styleConf._withBorder(_styleConf.border().withMargin(Outline.of(top, right, bottom, left))));</span>
+<span class="fc" id="L307">        return _withStyle(_styleConf._withBorder(_styleConf.border().withMargin(OptionalInsets.of(top, right, bottom, left))));</span>
     }
 
     /**
@@ -317,7 +317,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided margin distance.
      */
     public ComponentStyleDelegate&lt;C&gt; margin( double margin ) {
-<span class="fc" id="L320">        return _withStyle(_styleConf._withBorder(_styleConf.border().withMargin(Outline.of((float) margin))));</span>
+<span class="fc" id="L320">        return _withStyle(_styleConf._withBorder(_styleConf.border().withMargin(OptionalInsets.of((float) margin))));</span>
     }
 
     /**
@@ -411,7 +411,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided padding distances.
      */
     public ComponentStyleDelegate&lt;C&gt; padding( double top, double right, double bottom, double left ) {
-<span class="fc" id="L414">        return _withStyle(_styleConf._withBorder(_styleConf.border().withPadding(Outline.of(top, right, bottom, left))));</span>
+<span class="fc" id="L414">        return _withStyle(_styleConf._withBorder(_styleConf.border().withPadding(OptionalInsets.of(top, right, bottom, left))));</span>
     }
 
     /**
@@ -424,7 +424,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided padding distance.
      */
     public ComponentStyleDelegate&lt;C&gt; padding( double padding ) {
-<span class="fc" id="L427">        return _withStyle(_styleConf._withBorder(_styleConf.border().withPadding(Outline.of((float) padding))));</span>
+<span class="fc" id="L427">        return _withStyle(_styleConf._withBorder(_styleConf.border().withPadding(OptionalInsets.of((float) padding))));</span>
     }
 
     /**
@@ -545,7 +545,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @return A new {@link ComponentStyleDelegate} with the provided border widths and border color.
      */
     public ComponentStyleDelegate&lt;C&gt; border( double top, double right, double bottom, double left, Color color ) {
-<span class="fc" id="L548">        return _withStyle(_styleConf._withBorder(_styleConf.border().withWidths(Outline.of(top, right, bottom, left)).withColor(color)));</span>
+<span class="fc" id="L548">        return _withStyle(_styleConf._withBorder(_styleConf.border().withWidths(OptionalInsets.of(top, right, bottom, left)).withColor(color)));</span>
     }
 
     /**
@@ -726,7 +726,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @see #borderWidthAt(UI.Edge, double)
      */
     public ComponentStyleDelegate&lt;C&gt; borderWidths( double top, double right, double bottom, double left ) {
-<span class="fc" id="L729">        return _withStyle(_styleConf._withBorder(_styleConf.border().withWidths(Outline.of(top, right, bottom, left))));</span>
+<span class="fc" id="L729">        return _withStyle(_styleConf._withBorder(_styleConf.border().withWidths(OptionalInsets.of(top, right, bottom, left))));</span>
     }
 
     /**
@@ -748,7 +748,7 @@ public final class ComponentStyleDelegate&lt;C extends JComponent&gt;
      * @see #borderWidthAt(UI.Edge, double)
      */
     public ComponentStyleDelegate&lt;C&gt; borderWidths( double topBottom, double leftRight ) {
-<span class="nc" id="L751">        return _withStyle(_styleConf._withBorder(_styleConf.border().withWidths(Outline.of(topBottom, leftRight, topBottom, leftRight))));</span>
+<span class="nc" id="L751">        return _withStyle(_styleConf._withBorder(_styleConf.border().withWidths(OptionalInsets.of(topBottom, leftRight, topBottom, leftRight))));</span>
     }
 
     /**

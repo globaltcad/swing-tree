@@ -182,7 +182,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
                                                 UI.FitComponent.UNDEFINED,
 <span class="fc" id="L183">                                                Size.unknown(),</span>
                                                 1.0f,
-<span class="fc" id="L185">                                                Outline.none(),</span>
+<span class="fc" id="L185">                                                OptionalInsets.none(),</span>
 <span class="fc" id="L186">                                                Offset.none(),</span>
                                                 UI.ComponentArea.BODY
                                             );
@@ -198,7 +198,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
         UI.FitComponent      fitMode,
         Size                 size,
         float                opacity,
-        Outline              padding,
+        OptionalInsets       padding,
         Offset               offset,
         UI.ComponentArea     clipArea
     ) {
@@ -270,7 +270,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
     private final UI.FitComponent      _fitMode;
     private final Size                 _size;
     private final float                _opacity;
-    private final Outline              _padding;
+    private final OptionalInsets       _padding;
     private final Offset               _offset;
     private final UI.ComponentArea     _clipArea;
 
@@ -284,7 +284,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
         UI.FitComponent      fitMode,
         Size                 size,
         float                opacity,
-        Outline              padding,
+        OptionalInsets       padding,
         Offset               offset,
         UI.ComponentArea     clipArea
 <span class="fc" id="L290">    ) {</span>
@@ -329,7 +329,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
 
 <span class="fc" id="L330">    float opacity() { return _opacity; }</span>
 
-<span class="fc" id="L332">    Outline padding() { return _padding; }</span>
+<span class="fc" id="L332">    OptionalInsets padding() { return _padding; }</span>
     
 <span class="fc" id="L334">    int horizontalOffset() { return (int) _offset.x(); }</span>
     
@@ -734,7 +734,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      * @param padding The padding of the image.
      * @return A new {@link ImageConf} instance with the specified padding.
      */
-    ImageConf padding( Outline padding ) {
+    ImageConf padding( OptionalInsets padding ) {
 <span class="fc" id="L738">        return ImageConf.of(_primer, _payload, _placement, _placementBoundary, _repeat, _fitMode, _size, _opacity, padding, _offset, _clipArea);</span>
     }
 
@@ -750,7 +750,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      * @return A new {@link ImageConf} instance with the specified padding.
      */
     public ImageConf padding( int top, int right, int bottom, int left ) {
-<span class="fc" id="L753">        return padding(Outline.of(top, right, bottom, left));</span>
+<span class="fc" id="L753">        return padding(OptionalInsets.of(top, right, bottom, left));</span>
     }
 
     /**
@@ -763,7 +763,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      * @return A new {@link ImageConf} instance with the specified padding.
      */
     public ImageConf padding( int topBottom, int leftRight ) {
-<span class="fc" id="L766">        return padding(Outline.of(topBottom, leftRight, topBottom, leftRight));</span>
+<span class="fc" id="L766">        return padding(OptionalInsets.of(topBottom, leftRight, topBottom, leftRight));</span>
     }
 
     /**
@@ -775,7 +775,7 @@ public final class ImageConf implements Simplifiable&lt;ImageConf&gt;
      * @return A new {@link ImageConf} instance with the specified padding.
      */
     public ImageConf padding( int padding ) {
-<span class="fc" id="L778">        return padding(Outline.of(padding, padding, padding, padding));</span>
+<span class="fc" id="L778">        return padding(OptionalInsets.of(padding, padding, padding, padding));</span>
     }
 
     /**

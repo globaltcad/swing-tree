@@ -1109,7 +1109,7 @@ public final class SvgIcon extends ImageIcon
 <span class="fc" id="L1109">                    Offset.none(),</span>
                     UI.Placement.CENTER,
                     UI.FitComponent.WIDTH_AND_HEIGHT,
-<span class="fc" id="L1112">                    Outline.none()</span>
+<span class="fc" id="L1112">                    OptionalInsets.none()</span>
                 );
 <span class="fc" id="L1114">            g2d.dispose();</span>
         }
@@ -1200,12 +1200,12 @@ public final class SvgIcon extends ImageIcon
 <span class="fc" id="L1200">                g.drawImage(_cache, x, y, width, height, null);</span>
             else {
 <span class="fc" id="L1202">                _cache = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);</span>
-<span class="fc" id="L1203">                paintIcon(c, _cache.getGraphics(), Bounds.of(0, 0, width, height), Offset.none(), Outline.none() );</span>
+<span class="fc" id="L1203">                paintIcon(c, _cache.getGraphics(), Bounds.of(0, 0, width, height), Offset.none(), OptionalInsets.none() );</span>
 <span class="fc" id="L1204">                g.drawImage(_cache, x, y, width, height, null);</span>
             }
         }
         else
-<span class="fc" id="L1208">            _paintIcon( c, g, Bounds.of(x, y, width, height), Offset.of(0, 0), preferredPlacement, fitComponent, Outline.none() );</span>
+<span class="fc" id="L1208">            _paintIcon( c, g, Bounds.of(x, y, width, height), Offset.of(0, 0), preferredPlacement, fitComponent, OptionalInsets.none() );</span>
 <span class="fc" id="L1209">    }</span>
 
     @SuppressWarnings(&quot;DoNotCall&quot;)
@@ -1221,7 +1221,7 @@ public final class SvgIcon extends ImageIcon
         final Graphics g,
         final Bounds bounds,
         final Offset offset,
-        final Outline padding
+        final OptionalInsets padding
     ) {
 <span class="fc" id="L1226">        _paintIcon( c, g, bounds, offset, _preferredPlacement, _resolvedFitComponent(), padding);</span>
 <span class="fc" id="L1227">    }</span>
@@ -1268,7 +1268,7 @@ public final class SvgIcon extends ImageIcon
         final Offset offset,
         final UI.Placement preferredPlacement,
         final UI.FitComponent fitComponent,
-        final Outline padding
+        final OptionalInsets padding
     ) {
 <span class="pc bpc" id="L1273" title="1 of 4 branches missed.">        if ( _core.svgDocument == null || _opacity &lt;= 0 )</span>
 <span class="fc" id="L1274">            return;</span>

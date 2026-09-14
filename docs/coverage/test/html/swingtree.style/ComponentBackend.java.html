@@ -220,10 +220,16 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      *   &lt;li&gt;Invokes the supplied look and feel {@link Painter} for additional native component rendering&lt;/li&gt;
      *   &lt;li&gt;Handles buffering for components with parent filters&lt;/li&gt;
      * &lt;/ul&gt;
+     * &lt;p&gt;
+     * Pass {@link Painter#none()} when the inherited look and feel painting draws nothing,
+     * as {@code BasicPanelUI} does. The style is then painted exactly the same, but no clip
+     * is set up for a painter that would not use it. For a component with round corners that
+     * clip is not free: Java2D walks the rounded shape one scanline at a time to build it.
      *
      * @param graphics The graphics context to paint into
      * @param lookAndFeelPainting Callback that performs native Swing painting
-     *                            (will be clipped to the {@link UI.ComponentArea#BODY}, which is based on the current style)
+     *                            (will be clipped to the {@link UI.ComponentArea#BODY}, which is based on the current style),
+     *                            or {@link Painter#none()} if there is none
      * @throws ClassCastException if the provided {@code graphics} is not a {@link Graphics2D} instance
      *         (should never happen in standard Swing usage)
      *
@@ -233,8 +239,11 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      * @see StyleConf
      */
     public void paintBackground( Graphics graphics, Painter lookAndFeelPainting ) {
-<span class="pc" id="L236">        paintBackground(graphics, true, g2d-&gt;lookAndFeelPainting.paint((Graphics2D) g2d));</span>
-<span class="fc" id="L237">    }</span>
+<span class="fc bfc" id="L242" title="All 2 branches covered.">        if ( lookAndFeelPainting == Painter.none() )</span>
+<span class="fc" id="L243">            paintBackground(graphics, true, null);</span>
+        else
+<span class="fc" id="L245">            paintBackground(graphics, true, g2d-&gt;lookAndFeelPainting.paint((Graphics2D) g2d));</span>
+<span class="fc" id="L246">    }</span>
 
     /**
      *  Stores the given observable in the backend in order to ensure that
@@ -246,28 +255,28 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      *                   to ensure it is not garbage collected.
      */
     public void storeBoundObservable( Observable observable ) {
-<span class="fc" id="L249">        _boundProps.add(observable);</span>
-<span class="fc" id="L250">    }</span>
+<span class="fc" id="L258">        _boundProps.add(observable);</span>
+<span class="fc" id="L259">    }</span>
 
     /**
      *  Frees all bound observables from the backend.
      *  This is useful when the component is no longer needed and is about to be garbage collected.
      */
     public void freeBoundObservables() {
-<span class="nc" id="L257">        _boundProps.forEach(Observable::unsubscribeAll);</span>
-<span class="nc" id="L258">        _boundProps.clear();</span>
-<span class="nc" id="L259">    }</span>
+<span class="nc" id="L266">        _boundProps.forEach(Observable::unsubscribeAll);</span>
+<span class="nc" id="L267">        _boundProps.clear();</span>
+<span class="nc" id="L268">    }</span>
 
     BoxModelConf getBoxModelConf() {
-<span class="fc" id="L262">        return _styleEngine.getBoxModelConf();</span>
+<span class="fc" id="L271">        return _styleEngine.getBoxModelConf();</span>
     }
 
     void updateDynamicLookAndFeel( Configurator&lt;DynamicLaF&gt; updater ) {
-<span class="fc" id="L266">        _styleInstaller.updateDynamicLookAndFeel(updater);</span>
-<span class="fc" id="L267">    }</span>
+<span class="fc" id="L275">        _styleInstaller.updateDynamicLookAndFeel(updater);</span>
+<span class="fc" id="L276">    }</span>
 
     Optional&lt;BufferedImage&gt; getBufferedImage() {
-<span class="fc" id="L270">        return Optional.ofNullable(_bufferedImage);</span>
+<span class="fc" id="L279">        return Optional.ofNullable(_bufferedImage);</span>
     }
 
     /**
@@ -277,12 +286,12 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      *  @throws IllegalStateException If a drag away configurator has already been set.
      */
     public void addDragAwayConf( Function&lt;Position, DragAwayComponentConf&lt;C&gt;&gt; supplier ) {
-<span class="pc bpc" id="L280" title="1 of 2 branches missed.">        if ( _dragAwayConfigurator == null )</span>
-<span class="fc" id="L281">            _dragAwayConfigurator = supplier;</span>
+<span class="pc bpc" id="L289" title="1 of 2 branches missed.">        if ( _dragAwayConfigurator == null )</span>
+<span class="fc" id="L290">            _dragAwayConfigurator = supplier;</span>
         else {
-<span class="nc" id="L283">            throw new IllegalStateException(&quot;Drag away configurator already set!&quot;);</span>
+<span class="nc" id="L292">            throw new IllegalStateException(&quot;Drag away configurator already set!&quot;);</span>
         }
-<span class="fc" id="L285">    }</span>
+<span class="fc" id="L294">    }</span>
 
     /**
      *  If it exists, this method invokes the user internal configurator function previously
@@ -294,14 +303,14 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      * @return An optional of the resulting {@link DragAwayComponentConf} object.
      */
     public Optional&lt;DragAwayComponentConf&lt;C&gt;&gt; getDragAwayConf( Position mousePosition ) {
-<span class="nc bnc" id="L297" title="All 2 branches missed.">        if ( _dragAwayConfigurator == null )</span>
-<span class="nc" id="L298">            return Optional.empty();</span>
+<span class="nc bnc" id="L306" title="All 2 branches missed.">        if ( _dragAwayConfigurator == null )</span>
+<span class="nc" id="L307">            return Optional.empty();</span>
 
         try {
-<span class="nc" id="L301">            return Optional.of(_dragAwayConfigurator.apply(mousePosition));</span>
-<span class="nc" id="L302">        } catch ( Exception e ) {</span>
-<span class="nc" id="L303">            log.error(SwingTree.get().logMarker(), &quot;Error while configuring drag away component!&quot;, e);</span>
-<span class="nc" id="L304">            return Optional.empty();</span>
+<span class="nc" id="L310">            return Optional.of(_dragAwayConfigurator.apply(mousePosition));</span>
+<span class="nc" id="L311">        } catch ( Exception e ) {</span>
+<span class="nc" id="L312">            log.error(SwingTree.get().logMarker(), &quot;Error while configuring drag away component!&quot;, e);</span>
+<span class="nc" id="L313">            return Optional.empty();</span>
         }
     }
 
@@ -319,13 +328,13 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      * @param &lt;S&gt; The type of the extra state.
      */
     public &lt;S&gt; S getOrSet( Class&lt;S&gt; type, Supplier&lt;S&gt; fetcher ) {
-<span class="fc bfc" id="L322" title="All 2 branches covered.">        for ( Object extraState : _extraState )</span>
-<span class="pc bpc" id="L323" title="1 of 2 branches missed.">            if ( type.isInstance(extraState) )</span>
-<span class="fc" id="L324">                return (S) extraState;</span>
+<span class="fc bfc" id="L331" title="All 2 branches covered.">        for ( Object extraState : _extraState )</span>
+<span class="pc bpc" id="L332" title="1 of 2 branches missed.">            if ( type.isInstance(extraState) )</span>
+<span class="fc" id="L333">                return (S) extraState;</span>
 
-<span class="fc" id="L326">        S extraState = fetcher.get();</span>
-<span class="fc" id="L327">        _extraState.add(extraState);</span>
-<span class="fc" id="L328">        return extraState;</span>
+<span class="fc" id="L335">        S extraState = fetcher.get();</span>
+<span class="fc" id="L336">        _extraState.add(extraState);</span>
+<span class="fc" id="L337">        return extraState;</span>
     }
 
     /**
@@ -342,11 +351,11 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      * @param &lt;S&gt; The type of the extra state.
      */
     public &lt;S&gt; Optional&lt;S&gt; get( Class&lt;S&gt; type ) {
-<span class="nc bnc" id="L345" title="All 2 branches missed.">        for ( Object extraState : _extraState )</span>
-<span class="nc bnc" id="L346" title="All 2 branches missed.">            if ( type.isInstance(extraState) )</span>
-<span class="nc" id="L347">                return Optional.of(type.cast(extraState));</span>
+<span class="nc bnc" id="L354" title="All 2 branches missed.">        for ( Object extraState : _extraState )</span>
+<span class="nc bnc" id="L355" title="All 2 branches missed.">            if ( type.isInstance(extraState) )</span>
+<span class="nc" id="L356">                return Optional.of(type.cast(extraState));</span>
 
-<span class="nc" id="L349">        return Optional.empty();</span>
+<span class="nc" id="L358">        return Optional.empty();</span>
     }
 
     /**
@@ -362,16 +371,16 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      * @param groupTags An array of group tags.
      */
     public void setStyleGroups( String... groupTags ) {
-<span class="fc" id="L365">        Objects.requireNonNull(groupTags);</span>
-<span class="pc bpc" id="L366" title="1 of 2 branches missed.">        boolean alreadyHasGroupTags = !_styleGroups.isEmpty();</span>
-<span class="pc bpc" id="L367" title="1 of 2 branches missed.">        if ( alreadyHasGroupTags )</span>
-<span class="nc" id="L368">            _styleGroups.clear();</span>
+<span class="fc" id="L374">        Objects.requireNonNull(groupTags);</span>
+<span class="pc bpc" id="L375" title="1 of 2 branches missed.">        boolean alreadyHasGroupTags = !_styleGroups.isEmpty();</span>
+<span class="pc bpc" id="L376" title="1 of 2 branches missed.">        if ( alreadyHasGroupTags )</span>
+<span class="nc" id="L377">            _styleGroups.clear();</span>
 
-<span class="fc" id="L370">        _styleGroups.addAll( java.util.Arrays.asList(groupTags) );</span>
+<span class="fc" id="L379">        _styleGroups.addAll( java.util.Arrays.asList(groupTags) );</span>
 
-<span class="pc bpc" id="L372" title="1 of 2 branches missed.">        if ( alreadyHasGroupTags )</span>
-<span class="nc" id="L373">            gatherApplyAndInstallStyle(false);</span>
-<span class="fc" id="L374">    }</span>
+<span class="pc bpc" id="L381" title="1 of 2 branches missed.">        if ( alreadyHasGroupTags )</span>
+<span class="nc" id="L382">            gatherApplyAndInstallStyle(false);</span>
+<span class="fc" id="L383">    }</span>
 
     /**
      *   This method is used by {@link swingtree.UIForAnySwing#group(String...)}
@@ -388,14 +397,14 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      */
     @SafeVarargs
     public final &lt;E extends Enum&lt;E&gt;&gt; void setStyleGroups( E... groupTags ) {
-<span class="fc" id="L391">        String[] stringTags = new String[groupTags.length];</span>
-<span class="fc bfc" id="L392" title="All 2 branches covered.">        for ( int i = 0; i &lt; groupTags.length; i++ ) {</span>
-<span class="fc" id="L393">            E group = groupTags[i];</span>
-<span class="fc" id="L394">            Objects.requireNonNull(group);</span>
-<span class="fc" id="L395">            stringTags[i] = StyleUtil.toString(group);</span>
+<span class="fc" id="L400">        String[] stringTags = new String[groupTags.length];</span>
+<span class="fc bfc" id="L401" title="All 2 branches covered.">        for ( int i = 0; i &lt; groupTags.length; i++ ) {</span>
+<span class="fc" id="L402">            E group = groupTags[i];</span>
+<span class="fc" id="L403">            Objects.requireNonNull(group);</span>
+<span class="fc" id="L404">            stringTags[i] = StyleUtil.toString(group);</span>
         }
-<span class="fc" id="L397">        setStyleGroups(stringTags);</span>
-<span class="fc" id="L398">    }</span>
+<span class="fc" id="L406">        setStyleGroups(stringTags);</span>
+<span class="fc" id="L407">    }</span>
 
     /**
      *  Sets the id of the component.
@@ -407,8 +416,8 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      * @param id The id to set.
      */
     public void setId(String id) {
-<span class="fc" id="L410">        _owner.setName(id);</span>
-<span class="fc" id="L411">    }</span>
+<span class="fc" id="L419">        _owner.setName(id);</span>
+<span class="fc" id="L420">    }</span>
 
     /**
      *  Sets the id of the component based on an enum.
@@ -422,8 +431,8 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      * @param &lt;E&gt; The type of the enum.
      */
     public &lt;E extends Enum&lt;E&gt;&gt; void setId(E id) {
-<span class="fc" id="L425">        this.setId(StyleUtil.toString(id));</span>
-<span class="fc" id="L426">    }</span>
+<span class="fc" id="L434">        this.setId(StyleUtil.toString(id));</span>
+<span class="fc" id="L435">    }</span>
 
     /**
      *  Checks if the component has the given id.
@@ -432,7 +441,7 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      * @return {@code true} if the component has the given id.
      */
     public boolean hasId(String id) {
-<span class="fc" id="L435">        return Objects.equals(_owner.getName(), id);</span>
+<span class="fc" id="L444">        return Objects.equals(_owner.getName(), id);</span>
     }
 
     /**
@@ -442,36 +451,36 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      * @return {@code true} if the component has the given id.
      */
     public boolean hasId(Enum&lt;?&gt; id) {
-<span class="fc" id="L445">        return hasId(StyleUtil.toString(id));</span>
+<span class="fc" id="L454">        return hasId(StyleUtil.toString(id));</span>
     }
 
     UI.Placement preferredIconPlacement() {
-<span class="fc" id="L449">        UI.Placement preferredPlacement = UI.Placement.UNDEFINED;</span>
-<span class="fc bfc" id="L450" title="All 2 branches covered.">        if ( _hasText(_owner) )</span>
-<span class="fc" id="L451">            preferredPlacement = UI.Placement.LEFT;</span>
-<span class="fc bfc" id="L452" title="All 2 branches covered.">        if ( !Objects.equals(ComponentOrientation.UNKNOWN, _owner.getComponentOrientation()) ) {</span>
-<span class="fc bfc" id="L453" title="All 2 branches covered.">            if (  Objects.equals(ComponentOrientation.LEFT_TO_RIGHT, _owner.getComponentOrientation()) )</span>
-<span class="fc" id="L454">                preferredPlacement = UI.Placement.LEFT;</span>
-<span class="fc bfc" id="L455" title="All 2 branches covered.">            if (  Objects.equals(ComponentOrientation.RIGHT_TO_LEFT, _owner.getComponentOrientation()) )</span>
-<span class="fc" id="L456">                preferredPlacement = UI.Placement.RIGHT;</span>
+<span class="fc" id="L458">        UI.Placement preferredPlacement = UI.Placement.UNDEFINED;</span>
+<span class="fc bfc" id="L459" title="All 2 branches covered.">        if ( _hasText(_owner) )</span>
+<span class="fc" id="L460">            preferredPlacement = UI.Placement.LEFT;</span>
+<span class="fc bfc" id="L461" title="All 2 branches covered.">        if ( !Objects.equals(ComponentOrientation.UNKNOWN, _owner.getComponentOrientation()) ) {</span>
+<span class="fc bfc" id="L462" title="All 2 branches covered.">            if (  Objects.equals(ComponentOrientation.LEFT_TO_RIGHT, _owner.getComponentOrientation()) )</span>
+<span class="fc" id="L463">                preferredPlacement = UI.Placement.LEFT;</span>
+<span class="fc bfc" id="L464" title="All 2 branches covered.">            if (  Objects.equals(ComponentOrientation.RIGHT_TO_LEFT, _owner.getComponentOrientation()) )</span>
+<span class="fc" id="L465">                preferredPlacement = UI.Placement.RIGHT;</span>
         }
-<span class="fc" id="L458">        return preferredPlacement;</span>
+<span class="fc" id="L467">        return preferredPlacement;</span>
     }
 
     private boolean _hasText( Component component ) {
-<span class="fc bfc" id="L462" title="All 2 branches covered.">        return !Optional.ofNullable( _findTextOf(component) ).map( String::isEmpty ).orElse(true);</span>
+<span class="fc bfc" id="L471" title="All 2 branches covered.">        return !Optional.ofNullable( _findTextOf(component) ).map( String::isEmpty ).orElse(true);</span>
     }
 
     private String _findTextOf( Component component ) {
         // We go through all the components which can display text and return the first one we find:
-<span class="fc bfc" id="L467" title="All 2 branches covered.">        if ( component instanceof javax.swing.AbstractButton ) // Covers JButton, JToggleButton, JCheckBox, JRadioButton...</span>
-<span class="fc" id="L468">            return ((javax.swing.AbstractButton) component).getText();</span>
-<span class="fc bfc" id="L469" title="All 2 branches covered.">        if ( component instanceof javax.swing.JLabel )</span>
-<span class="fc" id="L470">            return ((javax.swing.JLabel) component).getText();</span>
-<span class="pc bpc" id="L471" title="1 of 2 branches missed.">        if ( component instanceof JTextComponent )</span>
-<span class="nc" id="L472">            return ((JTextComponent) component).getText();</span>
+<span class="fc bfc" id="L476" title="All 2 branches covered.">        if ( component instanceof javax.swing.AbstractButton ) // Covers JButton, JToggleButton, JCheckBox, JRadioButton...</span>
+<span class="fc" id="L477">            return ((javax.swing.AbstractButton) component).getText();</span>
+<span class="fc bfc" id="L478" title="All 2 branches covered.">        if ( component instanceof javax.swing.JLabel )</span>
+<span class="fc" id="L479">            return ((javax.swing.JLabel) component).getText();</span>
+<span class="pc bpc" id="L480" title="1 of 2 branches missed.">        if ( component instanceof JTextComponent )</span>
+<span class="nc" id="L481">            return ((JTextComponent) component).getText();</span>
 
-<span class="fc" id="L474">        return &quot;&quot;;</span>
+<span class="fc" id="L483">        return &quot;&quot;;</span>
     }
 
     /**
@@ -482,7 +491,7 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      * @return The group tags associated with the component
      *         in the form of an unmodifiable tuple of {@link String}s.
      */
-<span class="nc" id="L485">    public Tuple&lt;String&gt; getStyleGroups() { return Tuple.of(String.class, _styleGroups); }</span>
+<span class="nc" id="L494">    public Tuple&lt;String&gt; getStyleGroups() { return Tuple.of(String.class, _styleGroups); }</span>
 
     /**
      *  A style group is a tag which is used by the SwingTree style engine
@@ -492,7 +501,7 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      * @param group The group to check.
      * @return {@code true} if the component belongs to the given group.
      */
-<span class="fc" id="L495">    public boolean belongsToGroup( String group ) { return _styleGroups.contains(group); }</span>
+<span class="fc" id="L504">    public boolean belongsToGroup( String group ) { return _styleGroups.contains(group); }</span>
 
     /**
      *  A style group is a tag which is used by the SwingTree style engine
@@ -503,7 +512,7 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      * @return {@code true} if the component belongs to the given group.
      */
     public boolean belongsToGroup( Enum&lt;?&gt; group ) {
-<span class="fc" id="L506">        return belongsToGroup(StyleUtil.toString(group));</span>
+<span class="fc" id="L515">        return belongsToGroup(StyleUtil.toString(group));</span>
     }
 
     /**
@@ -514,10 +523,10 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      *         which is calculated based on the {@link Styler} lambdas
      *         associated with the component.
      */
-<span class="fc" id="L517">    public StyleConf getStyle() { return _styleEngine.getComponentConf().style(); }</span>
+<span class="fc" id="L526">    public StyleConf getStyle() { return _styleEngine.getComponentConf().style(); }</span>
 
     ComponentConf getConf() {
-<span class="fc" id="L520">        return _styleEngine.getComponentConf();</span>
+<span class="fc" id="L529">        return _styleEngine.getComponentConf();</span>
     }
 
     /**
@@ -570,22 +579,22 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      */
     @SuppressWarnings(&quot;EnumOrdinal&quot;) // Layer ordinals are used intentionally to index the per-layer cache array.
     public Tuple&lt;BufferedImage&gt; cachedRendering( UI.Layer layer ) {
-<span class="fc" id="L573">        Objects.requireNonNull(layer);</span>
-<span class="fc" id="L574">        StyleLayerCache[] caches = _styleEngine.getLayerCaches();</span>
-<span class="fc" id="L575">        return caches[layer.ordinal()].renderedImages()</span>
-<span class="fc" id="L576">                                      .mapTo(BufferedImage.class, ComponentBackend::_defensiveCopyOf);</span>
+<span class="fc" id="L582">        Objects.requireNonNull(layer);</span>
+<span class="fc" id="L583">        StyleLayerCache[] caches = _styleEngine.getLayerCaches();</span>
+<span class="fc" id="L584">        return caches[layer.ordinal()].renderedImages()</span>
+<span class="fc" id="L585">                                      .mapTo(BufferedImage.class, ComponentBackend::_defensiveCopyOf);</span>
     }
 
     private static BufferedImage _defensiveCopyOf( BufferedImage image ) {
-<span class="fc" id="L580">        BufferedImage copy = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);</span>
-<span class="fc" id="L581">        Graphics2D g = copy.createGraphics();</span>
+<span class="fc" id="L589">        BufferedImage copy = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_INT_ARGB);</span>
+<span class="fc" id="L590">        Graphics2D g = copy.createGraphics();</span>
         try {
-<span class="fc" id="L583">            g.setComposite(AlphaComposite.Src);</span>
-<span class="fc" id="L584">            g.drawImage(image, 0, 0, null);</span>
+<span class="fc" id="L592">            g.setComposite(AlphaComposite.Src);</span>
+<span class="fc" id="L593">            g.drawImage(image, 0, 0, null);</span>
         } finally {
-<span class="fc" id="L586">            g.dispose();</span>
+<span class="fc" id="L595">            g.dispose();</span>
         }
-<span class="fc" id="L588">        return copy;</span>
+<span class="fc" id="L597">        return copy;</span>
     }
 
     /**
@@ -616,9 +625,9 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      */
     @SuppressWarnings(&quot;EnumOrdinal&quot;) // Layer ordinals are used intentionally to index the per-layer cache array.
     public int cacheHitCount( UI.Layer layer ) {
-<span class="fc" id="L619">        Objects.requireNonNull(layer);</span>
-<span class="fc" id="L620">        StyleLayerCache[] caches = _styleEngine.getLayerCaches();</span>
-<span class="fc" id="L621">        return caches[layer.ordinal()].paintCacheHitCount();</span>
+<span class="fc" id="L628">        Objects.requireNonNull(layer);</span>
+<span class="fc" id="L629">        StyleLayerCache[] caches = _styleEngine.getLayerCaches();</span>
+<span class="fc" id="L630">        return caches[layer.ordinal()].paintCacheHitCount();</span>
     }
 
     /**
@@ -636,9 +645,9 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      */
     @SuppressWarnings(&quot;EnumOrdinal&quot;) // Layer ordinals are used intentionally to index the per-layer cache array.
     public int cacheMissCount( UI.Layer layer ) {
-<span class="fc" id="L639">        Objects.requireNonNull(layer);</span>
-<span class="fc" id="L640">        StyleLayerCache[] caches = _styleEngine.getLayerCaches();</span>
-<span class="fc" id="L641">        return caches[layer.ordinal()].paintCacheMissCount();</span>
+<span class="fc" id="L648">        Objects.requireNonNull(layer);</span>
+<span class="fc" id="L649">        StyleLayerCache[] caches = _styleEngine.getLayerCaches();</span>
+<span class="fc" id="L650">        return caches[layer.ordinal()].paintCacheMissCount();</span>
     }
 
     /**
@@ -652,11 +661,11 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      * @return An ordered association (immutable map) from cache display name to its live entry count.
      */
     public static Association&lt;String, Integer&gt; globalRenderCacheEntryCounts() {
-<span class="fc" id="L655">        return Association.betweenLinked(String.class, Integer.class)</span>
-<span class="fc" id="L656">                .put(&quot;style layers&quot;,     LayerPartitionCache.globalEntryCount())</span>
-<span class="fc" id="L657">                .put(&quot;text layouts&quot;,     TextLayoutEngine.globalEntryCount())</span>
-<span class="fc" id="L658">                .put(&quot;noise paints&quot;,     StyleRenderer.noisePaintCacheSize())</span>
-<span class="fc" id="L659">                .put(&quot;shadow gradients&quot;, StyleRenderer.shadowGradientCacheSize());</span>
+<span class="fc" id="L664">        return Association.betweenLinked(String.class, Integer.class)</span>
+<span class="fc" id="L665">                .put(&quot;style layers&quot;,     LayerPartitionCache.globalEntryCount())</span>
+<span class="fc" id="L666">                .put(&quot;text layouts&quot;,     TextLayoutEngine.globalEntryCount())</span>
+<span class="fc" id="L667">                .put(&quot;noise paints&quot;,     StyleRenderer.noisePaintCacheSize())</span>
+<span class="fc" id="L668">                .put(&quot;shadow gradients&quot;, StyleRenderer.shadowGradientCacheSize());</span>
     }
 
     /**
@@ -686,9 +695,9 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      * @return Bytes currently reserved by the global style layer render cache.
      */
     public static long globalStyleLayerCacheBytesReserved() {
-<span class="pc bpc" id="L689" title="1 of 2 branches missed.">        if ( !UI.thisIsUIThread() )</span>
-<span class="nc" id="L690">            throw new IllegalStateException(&quot;globalStyleLayerCacheBytesReserved() must be called on the UI thread.&quot;);</span>
-<span class="fc" id="L691">        return LayerPartitionCache.globalBytesReserved();</span>
+<span class="pc bpc" id="L698" title="1 of 2 branches missed.">        if ( !UI.thisIsUIThread() )</span>
+<span class="nc" id="L699">            throw new IllegalStateException(&quot;globalStyleLayerCacheBytesReserved() must be called on the UI thread.&quot;);</span>
+<span class="fc" id="L700">        return LayerPartitionCache.globalBytesReserved();</span>
     }
 
     /**
@@ -703,9 +712,9 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      * @return Bytes the global style layer render cache may retain at most, right now.
      */
     public static long globalStyleLayerCacheByteBudget() {
-<span class="nc bnc" id="L706" title="All 2 branches missed.">        if ( !UI.thisIsUIThread() )</span>
-<span class="nc" id="L707">            throw new IllegalStateException(&quot;globalStyleLayerCacheByteBudget() must be called on the UI thread.&quot;);</span>
-<span class="nc" id="L708">        return CacheBudget.bytesFor(CacheBudget.Kind.STYLE_LAYER);</span>
+<span class="nc bnc" id="L715" title="All 2 branches missed.">        if ( !UI.thisIsUIThread() )</span>
+<span class="nc" id="L716">            throw new IllegalStateException(&quot;globalStyleLayerCacheByteBudget() must be called on the UI thread.&quot;);</span>
+<span class="nc" id="L717">        return CacheBudget.bytesFor(CacheBudget.Kind.STYLE_LAYER);</span>
     }
 
     /**
@@ -731,11 +740,11 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      *  they do. Calling it from anywhere else races the next repaint.
      */
     public static void updateAllCachesFromLibraryConfig() {
-<span class="fc" id="L734">        CacheBudget.markUnresolved();</span>
-<span class="fc" id="L735">        LayerPartitionCache.clearGlobalCache();</span>
-<span class="fc" id="L736">        StyleRenderer.clearGlobalRenderCaches();</span>
-<span class="fc" id="L737">        TextLayoutEngine.clearGlobalCaches();</span>
-<span class="fc" id="L738">    }</span>
+<span class="fc" id="L743">        CacheBudget.markUnresolved();</span>
+<span class="fc" id="L744">        LayerPartitionCache.clearGlobalCache();</span>
+<span class="fc" id="L745">        StyleRenderer.clearGlobalRenderCaches();</span>
+<span class="fc" id="L746">        TextLayoutEngine.clearGlobalCaches();</span>
+<span class="fc" id="L747">    }</span>
 
     /**
      *  Allows for the retrieval of a specific {@link Shape} which represents
@@ -770,15 +779,15 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      *         is absent when neither a margin nor a corner radius is defined.
      */
     public Optional&lt;Shape&gt; getComponentArea( UI.ComponentArea area ) {
-<span class="fc" id="L773">        Optional&lt;Shape&gt; areaShape = _styleEngine.componentArea(area);</span>
-<span class="fc bfc" id="L774" title="All 2 branches covered.">        if ( !areaShape.isPresent() ) {</span>
-<span class="fc bfc" id="L775" title="All 2 branches covered.">            if ( area.isOneOf( UI.ComponentArea.BODY, UI.ComponentArea.ALL, UI.ComponentArea.INTERIOR) ) {</span>
-<span class="fc" id="L776">                return Optional.of(_owner.getBounds());</span>
-<span class="pc bpc" id="L777" title="1 of 2 branches missed.">            } else if ( area.isOneOf(UI.ComponentArea.EXTERIOR, UI.ComponentArea.BORDER) ) {</span>
-<span class="fc" id="L778">                return Optional.empty();</span>
+<span class="fc" id="L782">        Optional&lt;Shape&gt; areaShape = _styleEngine.componentArea(area);</span>
+<span class="fc bfc" id="L783" title="All 2 branches covered.">        if ( !areaShape.isPresent() ) {</span>
+<span class="fc bfc" id="L784" title="All 2 branches covered.">            if ( area.isOneOf( UI.ComponentArea.BODY, UI.ComponentArea.ALL, UI.ComponentArea.INTERIOR) ) {</span>
+<span class="fc" id="L785">                return Optional.of(_owner.getBounds());</span>
+<span class="pc bpc" id="L786" title="1 of 2 branches missed.">            } else if ( area.isOneOf(UI.ComponentArea.EXTERIOR, UI.ComponentArea.BORDER) ) {</span>
+<span class="fc" id="L787">                return Optional.empty();</span>
             }
         }
-<span class="fc" id="L781">        return areaShape;</span>
+<span class="fc" id="L790">        return areaShape;</span>
     }
 
     /**
@@ -787,8 +796,8 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      *  as well as {@link Styler} based animations.
      */
     public void clearAnimations() {
-<span class="fc" id="L790">        _styleSource = _styleSource.withoutAnimationStylers();</span>
-<span class="fc" id="L791">    }</span>
+<span class="fc" id="L799">        _styleSource = _styleSource.withoutAnimationStylers();</span>
+<span class="fc" id="L800">    }</span>
 
     /**
      *  Use this to add a {@link Painter} based animation to the component.
@@ -804,15 +813,15 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
         UI.ComponentArea      clipArea,
         swingtree.api.Painter painter
     ) {
-<span class="fc" id="L807">        _anonymousPainterCounter++;</span>
-<span class="fc" id="L808">        String painterName = &quot;anonymous-painter-&quot;+_anonymousPainterCounter;</span>
-<span class="fc" id="L809">        _styleSource = _styleSource.withAnimationStyler(status.lifeSpan(), it -&gt; it.painter(layer, clipArea, painterName, painter));</span>
-<span class="fc" id="L810">        _styleInstaller.installCustomBorderBasedStyleAndAnimationRenderer(_owner, _styleEngine.getComponentConf().style());</span>
-<span class="fc" id="L811">        _styleInstaller.recalculateInsets(_owner, _styleEngine.getComponentConf().style());</span>
+<span class="fc" id="L816">        _anonymousPainterCounter++;</span>
+<span class="fc" id="L817">        String painterName = &quot;anonymous-painter-&quot;+_anonymousPainterCounter;</span>
+<span class="fc" id="L818">        _styleSource = _styleSource.withAnimationStyler(status.lifeSpan(), it -&gt; it.painter(layer, clipArea, painterName, painter));</span>
+<span class="fc" id="L819">        _styleInstaller.installCustomBorderBasedStyleAndAnimationRenderer(_owner, _styleEngine.getComponentConf().style());</span>
+<span class="fc" id="L820">        _styleInstaller.recalculateInsets(_owner, _styleEngine.getComponentConf().style());</span>
         /*
             We need to install the custom SwingTree border which is used to render the animations!
         */
-<span class="fc" id="L815">    }</span>
+<span class="fc" id="L824">    }</span>
 
     /**
      *  Use this to add a {@link Styler} based animation to the component.
@@ -821,8 +830,8 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      * @param styler The {@link Styler} which defines how the style of the component is changed during the animation.
      */
     public void addAnimatedStyler( AnimationStatus state, Styler&lt;C&gt; styler ) {
-<span class="fc" id="L824">        _styleSource = _styleSource.withAnimationStyler(state.lifeSpan(), styler);</span>
-<span class="fc" id="L825">    }</span>
+<span class="fc" id="L833">        _styleSource = _styleSource.withAnimationStyler(state.lifeSpan(), styler);</span>
+<span class="fc" id="L834">    }</span>
 
     /**
      *  SwingTree overrides the default Swing look and feel
@@ -831,16 +840,16 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      *  for the component, if possible.
      */
     public void installCustomUIIfPossible() {
-<span class="fc" id="L834">        _styleInstaller.installCustomUIFor(_owner);</span>
-<span class="fc" id="L835">    }</span>
+<span class="fc" id="L843">        _styleInstaller.installCustomUIFor(_owner);</span>
+<span class="fc" id="L844">    }</span>
 
     Insets getMarginInsets() {
-<span class="fc bfc" id="L838" title="All 2 branches covered.">        if ( _owner.getBorder() instanceof StyleAndAnimationBorder ) {</span>
-<span class="fc" id="L839">            StyleAndAnimationBorder&lt;?&gt; styleBorder = (StyleAndAnimationBorder&lt;?&gt;) _owner.getBorder();</span>
-<span class="fc" id="L840">            return styleBorder.getMarginInsets();</span>
+<span class="fc bfc" id="L847" title="All 2 branches covered.">        if ( _owner.getBorder() instanceof StyleAndAnimationBorder ) {</span>
+<span class="fc" id="L848">            StyleAndAnimationBorder&lt;?&gt; styleBorder = (StyleAndAnimationBorder&lt;?&gt;) _owner.getBorder();</span>
+<span class="fc" id="L849">            return styleBorder.getMarginInsets();</span>
         }
         else
-<span class="fc" id="L843">            return new Insets(0,0,0,0);</span>
+<span class="fc" id="L852">            return new Insets(0,0,0,0);</span>
     }
 
     /**
@@ -850,10 +859,10 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      * @param styler The styler to add.
      */
     public void addStyler( Styler&lt;C&gt; styler ) {
-<span class="fc" id="L853">        Objects.requireNonNull(styler);</span>
-<span class="fc" id="L854">        _styleSource = _styleSource.withLocalStyler(styler);</span>
-<span class="fc" id="L855">        gatherApplyAndInstallStyle(false);</span>
-<span class="fc" id="L856">    }</span>
+<span class="fc" id="L862">        Objects.requireNonNull(styler);</span>
+<span class="fc" id="L863">        _styleSource = _styleSource.withLocalStyler(styler);</span>
+<span class="fc" id="L864">        gatherApplyAndInstallStyle(false);</span>
+<span class="fc" id="L865">    }</span>
 
     /**
      *  Calculates a new {@link StyleConf} object based on the {@link Styler} lambdas associated
@@ -862,7 +871,7 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      * @return A new immutable {@link StyleConf} configuration.
      */
     public StyleConf gatherStyle() {
-<span class="fc" id="L865">        return _styleSource.gatherStyleFor(_owner);</span>
+<span class="fc" id="L874">        return _styleSource.gatherStyleFor(_owner);</span>
     }
 
     /**
@@ -875,8 +884,8 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      * @param force If set to &lt;code&gt;true&lt;/code&gt;, the style will be applied even if it is the same as the current style.
      */
     public void gatherApplyAndInstallStyle( boolean force ) {
-<span class="fc" id="L878">        _applyStyleToComponentState(gatherStyle(), force);</span>
-<span class="fc" id="L879">    }</span>
+<span class="fc" id="L887">        _applyStyleToComponentState(gatherStyle(), force);</span>
+<span class="fc" id="L888">    }</span>
 
     /**
      *  Applies the given {@link StyleConf} to the component after which
@@ -888,66 +897,66 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      * @param force If set to &lt;code&gt;true&lt;/code&gt;, the style will be applied even if it is the same as the current style.
      */
     public void applyAndInstallStyle(StyleConf styleConf, boolean force ) {
-<span class="fc" id="L891">        _applyStyleToComponentState(styleConf, force);</span>
-<span class="fc" id="L892">    }</span>
+<span class="fc" id="L900">        _applyStyleToComponentState(styleConf, force);</span>
+<span class="fc" id="L901">    }</span>
 
     void gatherApplyAndInstallStyleConfig() {
-<span class="fc" id="L895">        _applyStyleToComponentState(gatherStyle(), false);</span>
-<span class="fc" id="L896">    }</span>
+<span class="fc" id="L904">        _applyStyleToComponentState(gatherStyle(), false);</span>
+<span class="fc" id="L905">    }</span>
 
     private void _applyStyleToComponentState( StyleConf newStyle, boolean force )
     {
-<span class="fc" id="L900">        Objects.requireNonNull(newStyle);</span>
-<span class="fc" id="L901">        _styleEngine = _styleInstaller.applyStyleToComponentState(</span>
+<span class="fc" id="L909">        Objects.requireNonNull(newStyle);</span>
+<span class="fc" id="L910">        _styleEngine = _styleInstaller.applyStyleToComponentState(</span>
                                     _owner,
                                     _styleEngine,
                                     _styleSource,
                                     newStyle,
                                     force
                                 );
-<span class="fc" id="L908">    }</span>
+<span class="fc" id="L917">    }</span>
 
     private void _doPaintStep(
         final PaintStep            step,
         final Graphics             graphics,
         final Consumer&lt;Graphics2D&gt; superPaint
     ) {
-<span class="fc" id="L915">        final int newStep  = step.getStepOrder();</span>
-<span class="fc" id="L916">        final int lastStep = _lastPaintStep.getStepOrder();</span>
-<span class="fc bfc" id="L917" title="All 2 branches covered.">        final boolean isNewPaintCycle = newStep &lt;= lastStep;</span>
-<span class="fc bfc" id="L918" title="All 2 branches covered.">        if ( isNewPaintCycle )</span>
-<span class="fc" id="L919">            gatherApplyAndInstallStyleConfig();</span>
+<span class="fc" id="L924">        final int newStep  = step.getStepOrder();</span>
+<span class="fc" id="L925">        final int lastStep = _lastPaintStep.getStepOrder();</span>
+<span class="fc bfc" id="L926" title="All 2 branches covered.">        final boolean isNewPaintCycle = newStep &lt;= lastStep;</span>
+<span class="fc bfc" id="L927" title="All 2 branches covered.">        if ( isNewPaintCycle )</span>
+<span class="fc" id="L928">            gatherApplyAndInstallStyleConfig();</span>
             /*
                 If the new step is less than or equal to the last step,
                 we consider it a new paint cycle and apply the style
             */
 
-<span class="fc" id="L925">        _lastPaintStep = step;</span>
+<span class="fc" id="L934">        _lastPaintStep = step;</span>
 
         try {
-<span class="fc bfc" id="L928" title="All 6 branches covered.">            if ( isNewPaintCycle &amp;&amp; step == PaintStep.BACKGROUND &amp;&amp; _hasChildWithParentFilter() ) {</span>
-<span class="fc" id="L929">                _bufferedImage = _bufferTheSizeOfThisComponent(_bufferedImage);</span>
-<span class="fc" id="L930">                _renderInto(_bufferedImage, step, graphics, superPaint, true, _aBorderPaintStepIsGuaranteed());</span>
-<span class="fc bfc" id="L931" title="All 4 branches covered.">            } else if ( _bufferedImage != null &amp;&amp; step == PaintStep.BORDER ) {</span>
-<span class="fc" id="L932">                _renderInto(_bufferedImage, step, graphics, superPaint, false, false);</span>
+<span class="fc bfc" id="L937" title="All 6 branches covered.">            if ( isNewPaintCycle &amp;&amp; step == PaintStep.BACKGROUND &amp;&amp; _hasChildWithParentFilter() ) {</span>
+<span class="fc" id="L938">                _bufferedImage = _bufferTheSizeOfThisComponent(_bufferedImage);</span>
+<span class="fc" id="L939">                _renderInto(_bufferedImage, step, graphics, superPaint, true, _aBorderPaintStepIsGuaranteed());</span>
+<span class="fc bfc" id="L940" title="All 4 branches covered.">            } else if ( _bufferedImage != null &amp;&amp; step == PaintStep.BORDER ) {</span>
+<span class="fc" id="L941">                _renderInto(_bufferedImage, step, graphics, superPaint, false, false);</span>
             } else {
-<span class="fc" id="L934">                superPaint.accept((Graphics2D) graphics);</span>
+<span class="fc" id="L943">                superPaint.accept((Graphics2D) graphics);</span>
             }
-<span class="nc" id="L936">        } catch ( Exception e ) {</span>
-<span class="nc" id="L937">            log.error(SwingTree.get().logMarker(), &quot;Error while painting step '{}'!&quot;, step, e);</span>
-<span class="fc" id="L938">        }</span>
-<span class="fc" id="L939">    }</span>
+<span class="nc" id="L945">        } catch ( Exception e ) {</span>
+<span class="nc" id="L946">            log.error(SwingTree.get().logMarker(), &quot;Error while painting step '{}'!&quot;, step, e);</span>
+<span class="fc" id="L947">        }</span>
+<span class="fc" id="L948">    }</span>
 
     /**
      *  Updates or creates the buffer a component's children read when applying a filter (like convolution).
      *  It is re-used if possible...
      */
     private BufferedImage _bufferTheSizeOfThisComponent( @Nullable BufferedImage existing ) {
-<span class="fc" id="L946">        int width  = _owner.getWidth();</span>
-<span class="fc" id="L947">        int height = _owner.getHeight();</span>
-<span class="pc bpc" id="L948" title="2 of 6 branches missed.">        if ( existing != null &amp;&amp; existing.getWidth() == width &amp;&amp; existing.getHeight() == height )</span>
-<span class="fc" id="L949">            return existing;</span>
-<span class="fc" id="L950">        BufferedImage buffer = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);</span>
+<span class="fc" id="L955">        int width  = _owner.getWidth();</span>
+<span class="fc" id="L956">        int height = _owner.getHeight();</span>
+<span class="pc bpc" id="L957" title="2 of 6 branches missed.">        if ( existing != null &amp;&amp; existing.getWidth() == width &amp;&amp; existing.getHeight() == height )</span>
+<span class="fc" id="L958">            return existing;</span>
+<span class="fc" id="L959">        BufferedImage buffer = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);</span>
         /*
             Java2D keeps a server side copy of an image it sees drawn repeatedly, which is a good
             bet for an image that never changes and a bad one here: this buffer is repainted every
@@ -955,8 +964,8 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
             maintaining it doubles what is uploaded. Telling Java2D not to bother leaves one
             upload per frame instead of two.
         */
-<span class="fc" id="L958">        buffer.setAccelerationPriority(0);</span>
-<span class="fc" id="L959">        return buffer;</span>
+<span class="fc" id="L967">        buffer.setAccelerationPriority(0);</span>
+<span class="fc" id="L968">        return buffer;</span>
     }
 
     /**
@@ -985,8 +994,8 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      *  {@code borderPainted} property is {@code false}.
      */
     private boolean _aBorderPaintStepIsGuaranteed() {
-<span class="fc bfc" id="L988" title="All 2 branches covered.">        return _owner.getBorder() instanceof StyleAndAnimationBorder</span>
-<span class="pc bpc" id="L989" title="1 of 2 branches missed.">            &amp;&amp; _LEAVES_BORDER_PAINTING_TO_JCOMPONENT.get(_owner.getClass());</span>
+<span class="fc bfc" id="L997" title="All 2 branches covered.">        return _owner.getBorder() instanceof StyleAndAnimationBorder</span>
+<span class="pc bpc" id="L998" title="1 of 2 branches missed.">            &amp;&amp; _LEAVES_BORDER_PAINTING_TO_JCOMPONENT.get(_owner.getClass());</span>
     }
 
     /**
@@ -998,25 +1007,25 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
         BufferedImage buffer, PaintStep step, Graphics graphics, Consumer&lt;Graphics2D&gt; superPaint,
         boolean startANewFrameByWipingBuffer, boolean skipRenderingIntoSuppliedGraphics
     ) {
-<span class="fc" id="L1001">        Graphics2D bufferGraphics = buffer.createGraphics();</span>
-<span class="fc" id="L1002">        StyleUtil.transferConfigurations((Graphics2D) graphics, bufferGraphics);</span>
-<span class="fc" id="L1003">        bufferGraphics.setClip(graphics.getClip());</span>
+<span class="fc" id="L1010">        Graphics2D bufferGraphics = buffer.createGraphics();</span>
+<span class="fc" id="L1011">        StyleUtil.transferConfigurations((Graphics2D) graphics, bufferGraphics);</span>
+<span class="fc" id="L1012">        bufferGraphics.setClip(graphics.getClip());</span>
         try {
-<span class="fc bfc" id="L1005" title="All 2 branches covered.">            if ( startANewFrameByWipingBuffer ) {</span>
+<span class="fc bfc" id="L1014" title="All 2 branches covered.">            if ( startANewFrameByWipingBuffer ) {</span>
                 // We re-use the parent buffer if possible, so we need to wipe it (mostly if the parent is non-opaque).
-<span class="fc" id="L1007">                Composite formerComposite = bufferGraphics.getComposite();</span>
-<span class="fc" id="L1008">                bufferGraphics.setComposite(AlphaComposite.Clear);</span>
-<span class="fc" id="L1009">                bufferGraphics.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());</span>
-<span class="fc" id="L1010">                bufferGraphics.setComposite(formerComposite);</span>
+<span class="fc" id="L1016">                Composite formerComposite = bufferGraphics.getComposite();</span>
+<span class="fc" id="L1017">                bufferGraphics.setComposite(AlphaComposite.Clear);</span>
+<span class="fc" id="L1018">                bufferGraphics.fillRect(0, 0, buffer.getWidth(), buffer.getHeight());</span>
+<span class="fc" id="L1019">                bufferGraphics.setComposite(formerComposite);</span>
             }
-<span class="fc" id="L1012">            superPaint.accept(bufferGraphics);</span>
-<span class="nc" id="L1013">        } catch ( Exception e ) {</span>
-<span class="nc" id="L1014">            log.error(SwingTree.get().logMarker(), &quot;Error while painting step '&quot;+step+&quot;' into component buffer!&quot;, e);</span>
+<span class="fc" id="L1021">            superPaint.accept(bufferGraphics);</span>
+<span class="nc" id="L1022">        } catch ( Exception e ) {</span>
+<span class="nc" id="L1023">            log.error(SwingTree.get().logMarker(), &quot;Error while painting step '&quot;+step+&quot;' into component buffer!&quot;, e);</span>
         } finally {
-<span class="fc" id="L1016">            bufferGraphics.dispose();</span>
+<span class="fc" id="L1025">            bufferGraphics.dispose();</span>
         }
-<span class="fc bfc" id="L1018" title="All 2 branches covered.">        if ( skipRenderingIntoSuppliedGraphics )</span>
-<span class="fc" id="L1019">            return;</span>
+<span class="fc bfc" id="L1027" title="All 2 branches covered.">        if ( skipRenderingIntoSuppliedGraphics )</span>
+<span class="fc" id="L1028">            return;</span>
 
         /*
             Only the part of the buffer which Swing asked to have repainted is drawn onto the
@@ -1025,35 +1034,35 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
             uploaded across that boundary - and the buffer of a scrolled component is as tall as
             its whole content, of which only a single viewport's worth is ever on screen.
         */
-<span class="fc" id="L1028">        Rectangle visible = new Rectangle(0, 0, buffer.getWidth(), buffer.getHeight());</span>
-<span class="fc" id="L1029">        Rectangle requested = graphics.getClipBounds();</span>
-<span class="pc bpc" id="L1030" title="1 of 2 branches missed.">        if ( requested != null )</span>
-<span class="fc" id="L1031">            visible = visible.intersection(requested);</span>
-<span class="pc bpc" id="L1032" title="1 of 2 branches missed.">        if ( !visible.isEmpty() )</span>
-<span class="fc" id="L1033">            graphics.drawImage(</span>
+<span class="fc" id="L1037">        Rectangle visible = new Rectangle(0, 0, buffer.getWidth(), buffer.getHeight());</span>
+<span class="fc" id="L1038">        Rectangle requested = graphics.getClipBounds();</span>
+<span class="pc bpc" id="L1039" title="1 of 2 branches missed.">        if ( requested != null )</span>
+<span class="fc" id="L1040">            visible = visible.intersection(requested);</span>
+<span class="pc bpc" id="L1041" title="1 of 2 branches missed.">        if ( !visible.isEmpty() )</span>
+<span class="fc" id="L1042">            graphics.drawImage(</span>
                     buffer,
                     visible.x, visible.y, visible.x + visible.width, visible.y + visible.height,
                     visible.x, visible.y, visible.x + visible.width, visible.y + visible.height,
                     null
                 );
-<span class="fc" id="L1039">    }</span>
+<span class="fc" id="L1048">    }</span>
 
     private boolean _hasChildWithParentFilter() {
-<span class="fc bfc" id="L1042" title="All 2 branches covered.">        for ( Component child : _owner.getComponents() ) {</span>
-<span class="fc bfc" id="L1043" title="All 4 branches covered.">            if ( !child.isOpaque() &amp;&amp; child instanceof JComponent ) {</span>
-<span class="fc bfc" id="L1044" title="All 2 branches covered.">                if ( _hasParentFilter((JComponent) child) )</span>
-<span class="fc" id="L1045">                    return true;</span>
+<span class="fc bfc" id="L1051" title="All 2 branches covered.">        for ( Component child : _owner.getComponents() ) {</span>
+<span class="fc bfc" id="L1052" title="All 4 branches covered.">            if ( !child.isOpaque() &amp;&amp; child instanceof JComponent ) {</span>
+<span class="fc bfc" id="L1053" title="All 2 branches covered.">                if ( _hasParentFilter((JComponent) child) )</span>
+<span class="fc" id="L1054">                    return true;</span>
             }
         }
-<span class="fc" id="L1048">        _bufferedImage = null;</span>
-<span class="fc" id="L1049">        return false;</span>
+<span class="fc" id="L1057">        _bufferedImage = null;</span>
+<span class="fc" id="L1058">        return false;</span>
     }
 
     private boolean _hasParentFilter( JComponent aComponent ) {
-<span class="fc" id="L1053">        return installedOn(aComponent)</span>
-<span class="fc" id="L1054">                .map( backend -&gt; backend.getConf().style().layers().filter() )</span>
-<span class="fc bfc" id="L1055" title="All 2 branches covered.">                .map( filter -&gt; !filter.equals(FilterConf.none()) )</span>
-<span class="fc" id="L1056">                .orElse(false);</span>
+<span class="fc" id="L1062">        return installedOn(aComponent)</span>
+<span class="fc" id="L1063">                .map( backend -&gt; backend.getConf().style().layers().filter() )</span>
+<span class="fc bfc" id="L1064" title="All 2 branches covered.">                .map( filter -&gt; !filter.equals(FilterConf.none()) )</span>
+<span class="fc" id="L1065">                .orElse(false);</span>
     }
 
     /**
@@ -1068,14 +1077,14 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      */
     void paintBackgroundIfNeeded( Graphics g, Consumer&lt;Graphics&gt; lookAndFeelPaint )
     {
-<span class="fc bfc" id="L1071" title="All 2 branches covered.">        if ( _styleInstaller.customLookAndFeelIsInstalled(_owner) ) {</span>
-<span class="pc bpc" id="L1072" title="1 of 2 branches missed.">            if ( lookAndFeelPaint != null )</span>
-<span class="fc" id="L1073">                lookAndFeelPaint.accept(g);</span>
-<span class="fc" id="L1074">            return; // We render ĥere through the custom installed UI!</span>
+<span class="fc bfc" id="L1080" title="All 2 branches covered.">        if ( _styleInstaller.customLookAndFeelIsInstalled(_owner) ) {</span>
+<span class="pc bpc" id="L1081" title="1 of 2 branches missed.">            if ( lookAndFeelPaint != null )</span>
+<span class="fc" id="L1082">                lookAndFeelPaint.accept(g);</span>
+<span class="fc" id="L1083">            return; // We render ĥere through the custom installed UI!</span>
             // So the method call below will be called within lookAndFeelPaint.run();
         }
-<span class="fc" id="L1077">        paintBackground(g, false, lookAndFeelPaint);</span>
-<span class="fc" id="L1078">    }</span>
+<span class="fc" id="L1086">        paintBackground(g, false, lookAndFeelPaint);</span>
+<span class="fc" id="L1087">    }</span>
 
     /**
      *  Does a SwingTree based background painting call with a call bck for look and feel based
@@ -1093,14 +1102,14 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      */
     void paintBackground( Graphics graphics, boolean needsCustomWipe, @Nullable Consumer&lt;Graphics&gt; lookAndFeelPainting )
     {
-<span class="fc" id="L1096">        _doPaintStep(PaintStep.BACKGROUND, graphics, internalGraphics -&gt; {</span>
-<span class="fc bfc" id="L1097" title="All 2 branches covered.">            if ( needsCustomWipe ) {</span>
-<span class="fc bfc" id="L1098" title="All 2 branches covered.">                if ( _owner.isOpaque() ) {</span>
-<span class="fc" id="L1099">                    Color background = findBackgroundColorForWiping(_owner, _styleEngine.getComponentConf());</span>
-<span class="fc" id="L1100">                    internalGraphics.setColor(background);</span>
-<span class="fc" id="L1101">                    int width = _owner.getWidth();</span>
-<span class="fc" id="L1102">                    int height = _owner.getHeight();</span>
-<span class="fc" id="L1103">                    internalGraphics.fillRect(0, 0, width, height);</span>
+<span class="fc" id="L1105">        _doPaintStep(PaintStep.BACKGROUND, graphics, internalGraphics -&gt; {</span>
+<span class="fc bfc" id="L1106" title="All 2 branches covered.">            if ( needsCustomWipe ) {</span>
+<span class="fc bfc" id="L1107" title="All 2 branches covered.">                if ( _owner.isOpaque() ) {</span>
+<span class="fc" id="L1108">                    Color background = findBackgroundColorForWiping(_owner, _styleEngine.getComponentConf());</span>
+<span class="fc" id="L1109">                    internalGraphics.setColor(background);</span>
+<span class="fc" id="L1110">                    int width = _owner.getWidth();</span>
+<span class="fc" id="L1111">                    int height = _owner.getHeight();</span>
+<span class="fc" id="L1112">                    internalGraphics.fillRect(0, 0, width, height);</span>
                     /*
                         If &quot;needsCustomWipe&quot; is true then this means there is no
                         native ComponentUI, instead it is up to SwingTree to override what was
@@ -1109,100 +1118,100 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
                 }
             }
 
-<span class="fc" id="L1112">            Shape baseClip = internalGraphics.getClip();</span>
-<span class="fc" id="L1113">            _outerBaseClip = baseClip;</span>
+<span class="fc" id="L1121">            Shape baseClip = internalGraphics.getClip();</span>
+<span class="fc" id="L1122">            _outerBaseClip = baseClip;</span>
 
-<span class="pc bpc" id="L1115" title="1 of 4 branches missed.">            if ( _outerBaseClip == null &amp;&amp; _owner.getParent() == null ) {</span>
+<span class="pc bpc" id="L1124" title="1 of 4 branches missed.">            if ( _outerBaseClip == null &amp;&amp; _owner.getParent() == null ) {</span>
                 // Happens when rendering individual components (usually unit tests)!
-<span class="fc" id="L1117">                int x = (int) internalGraphics.getTransform().getTranslateX();</span>
-<span class="fc" id="L1118">                int y = (int) internalGraphics.getTransform().getTranslateY();</span>
-<span class="fc" id="L1119">                int w = _owner.getWidth();</span>
-<span class="fc" id="L1120">                int h = _owner.getHeight();</span>
-<span class="fc" id="L1121">                _outerBaseClip = new Rectangle(x,y,w,h);</span>
+<span class="fc" id="L1126">                int x = (int) internalGraphics.getTransform().getTranslateX();</span>
+<span class="fc" id="L1127">                int y = (int) internalGraphics.getTransform().getTranslateY();</span>
+<span class="fc" id="L1128">                int w = _owner.getWidth();</span>
+<span class="fc" id="L1129">                int h = _owner.getHeight();</span>
+<span class="fc" id="L1130">                _outerBaseClip = new Rectangle(x,y,w,h);</span>
             }
 
-<span class="fc" id="L1124">            Font componentFont = _owner.getFont();</span>
-<span class="fc bfc" id="L1125" title="All 4 branches covered.">            if ( componentFont != null &amp;&amp; !componentFont.equals(internalGraphics.getFont()) )</span>
-<span class="fc" id="L1126">                internalGraphics.setFont( componentFont );</span>
+<span class="fc" id="L1133">            Font componentFont = _owner.getFont();</span>
+<span class="fc bfc" id="L1134" title="All 4 branches covered.">            if ( componentFont != null &amp;&amp; !componentFont.equals(internalGraphics.getFont()) )</span>
+<span class="fc" id="L1135">                internalGraphics.setFont( componentFont );</span>
 
             // Sometimes needed to render filtered backgrounds:
-<span class="fc" id="L1129">            BufferedImage parentRendering = Optional.ofNullable(_owner.getParent())</span>
-<span class="pc bpc" id="L1130" title="1 of 2 branches missed.">                                            .map( c -&gt; c instanceof JComponent ? (JComponent) c : null )</span>
-<span class="fc" id="L1131">                                            .flatMap(ComponentBackend::installedOn)</span>
-<span class="fc" id="L1132">                                            .map( backend -&gt; backend._bufferedImage )</span>
-<span class="fc" id="L1133">                                            .orElse(null);</span>
+<span class="fc" id="L1138">            BufferedImage parentRendering = Optional.ofNullable(_owner.getParent())</span>
+<span class="pc bpc" id="L1139" title="1 of 2 branches missed.">                                            .map( c -&gt; c instanceof JComponent ? (JComponent) c : null )</span>
+<span class="fc" id="L1140">                                            .flatMap(ComponentBackend::installedOn)</span>
+<span class="fc" id="L1141">                                            .map( backend -&gt; backend._bufferedImage )</span>
+<span class="fc" id="L1142">                                            .orElse(null);</span>
 
             // Location relative to the parent:
-<span class="fc" id="L1136">            _styleEngine.renderBackgroundStyle(internalGraphics, parentRendering, _owner.getX(), _owner.getY());</span>
+<span class="fc" id="L1145">            _styleEngine.renderBackgroundStyle(internalGraphics, parentRendering, _owner.getX(), _owner.getY());</span>
 
-<span class="fc bfc" id="L1138" title="All 2 branches covered.">            if ( lookAndFeelPainting != null ) {</span>
-<span class="fc" id="L1139">                Shape contentClip = _styleEngine.componentArea(UI.ComponentArea.BODY).orElse(null);</span>
+<span class="fc bfc" id="L1147" title="All 2 branches covered.">            if ( lookAndFeelPainting != null ) {</span>
+<span class="fc" id="L1148">                Shape contentClip = _styleEngine.componentArea(UI.ComponentArea.BODY).orElse(null);</span>
 
-<span class="fc" id="L1141">                contentClip = StyleUtil.intersect( contentClip, _outerBaseClip );</span>
+<span class="fc" id="L1150">                contentClip = StyleUtil.intersect( contentClip, _outerBaseClip );</span>
 
-<span class="fc" id="L1143">                final Consumer&lt;Graphics&gt; lafPaint = lookAndFeelPainting;</span>
-<span class="fc" id="L1144">                paintWithClip(internalGraphics, contentClip, () -&gt; {</span>
+<span class="fc" id="L1152">                final Consumer&lt;Graphics&gt; lafPaint = lookAndFeelPainting;</span>
+<span class="fc" id="L1153">                paintWithClip(internalGraphics, contentClip, () -&gt; {</span>
                     try {
-<span class="fc" id="L1146">                        lafPaint.accept(internalGraphics);</span>
+<span class="fc" id="L1155">                        lafPaint.accept(internalGraphics);</span>
 
-<span class="fc" id="L1148">                    } catch (Exception e) {</span>
-<span class="fc" id="L1149">                        _logLafPaintError(e);</span>
-<span class="fc" id="L1150">                    }</span>
-<span class="fc" id="L1151">                });</span>
+<span class="fc" id="L1157">                    } catch (Exception e) {</span>
+<span class="fc" id="L1158">                        _logLafPaintError(e);</span>
+<span class="fc" id="L1159">                    }</span>
+<span class="fc" id="L1160">                });</span>
             }
 
-<span class="fc" id="L1154">            internalGraphics.setClip(baseClip);</span>
-<span class="fc" id="L1155">        });</span>
-<span class="fc" id="L1156">    }</span>
+<span class="fc" id="L1163">            internalGraphics.setClip(baseClip);</span>
+<span class="fc" id="L1164">        });</span>
+<span class="fc" id="L1165">    }</span>
 
     private void _logLafPaintError(Exception e) {
-<span class="fc" id="L1159">        String componentAsString = &quot;?&quot;;</span>
+<span class="fc" id="L1168">        String componentAsString = &quot;?&quot;;</span>
         try {
             // Anything can happen in client code...
-<span class="fc" id="L1162">            componentAsString = _owner.toString();</span>
-<span class="nc" id="L1163">        } catch (Exception e2) {</span>
-<span class="nc" id="L1164">            log.error(SwingTree.get().logMarker(), &quot;Error while converting component to string!&quot;, e2);</span>
-<span class="fc" id="L1165">        }</span>
-<span class="fc" id="L1166">        log.error(SwingTree.get().logMarker(), &quot;Error while painting look and feel of component '&quot;+componentAsString+&quot;'!&quot;, e);</span>
-<span class="fc" id="L1167">    }</span>
+<span class="fc" id="L1171">            componentAsString = _owner.toString();</span>
+<span class="nc" id="L1172">        } catch (Exception e2) {</span>
+<span class="nc" id="L1173">            log.error(SwingTree.get().logMarker(), &quot;Error while converting component to string!&quot;, e2);</span>
+<span class="fc" id="L1174">        }</span>
+<span class="fc" id="L1175">        log.error(SwingTree.get().logMarker(), &quot;Error while painting look and feel of component '&quot;+componentAsString+&quot;'!&quot;, e);</span>
+<span class="fc" id="L1176">    }</span>
 
     private static Color findBackgroundColorForWiping(Container owner, ComponentConf componentConf) {
-<span class="fc" id="L1170">        Color background = owner.getBackground();</span>
-<span class="fc bfc" id="L1171" title="All 2 branches covered.">        if ( StyleUtil.isUndefinedColor(background) ) {</span>
-<span class="fc" id="L1172">            background = componentConf</span>
-<span class="fc" id="L1173">                        .style()</span>
-<span class="fc" id="L1174">                        .base()</span>
-<span class="fc" id="L1175">                        .backgroundColor()</span>
-<span class="fc" id="L1176">                        .orElseGet(()-&gt;</span>
-<span class="nc" id="L1177">                            Optional.ofNullable(owner.getParent())</span>
-<span class="nc" id="L1178">                            .map(Container::getBackground)</span>
-<span class="nc" id="L1179">                            .orElse(java.awt.Color.WHITE)</span>
+<span class="fc" id="L1179">        Color background = owner.getBackground();</span>
+<span class="fc bfc" id="L1180" title="All 2 branches covered.">        if ( StyleUtil.isUndefinedColor(background) ) {</span>
+<span class="fc" id="L1181">            background = componentConf</span>
+<span class="fc" id="L1182">                        .style()</span>
+<span class="fc" id="L1183">                        .base()</span>
+<span class="fc" id="L1184">                        .backgroundColor()</span>
+<span class="fc" id="L1185">                        .orElseGet(()-&gt;</span>
+<span class="nc" id="L1186">                            Optional.ofNullable(owner.getParent())</span>
+<span class="nc" id="L1187">                            .map(Container::getBackground)</span>
+<span class="nc" id="L1188">                            .orElse(java.awt.Color.WHITE)</span>
                         );
         }
-<span class="pc bpc" id="L1182" title="1 of 2 branches missed.">        if ( background.getAlpha() &lt; 255 ) {</span>
+<span class="pc bpc" id="L1191" title="1 of 2 branches missed.">        if ( background.getAlpha() &lt; 255 ) {</span>
             // If the background is not fully opaque, we need to fill with a fully opaque color to wipe the previous rendering
-<span class="nc" id="L1184">            background = new Color(background.getRed(), background.getGreen(), background.getBlue(), 255);</span>
+<span class="nc" id="L1193">            background = new Color(background.getRed(), background.getGreen(), background.getBlue(), 255);</span>
         }
-<span class="fc" id="L1186">        return background;</span>
+<span class="fc" id="L1195">        return background;</span>
     }
 
     void paintBorder( Graphics2D graphics, Consumer&lt;Graphics&gt; formerBorderPainter )
     {
-<span class="fc" id="L1191">        _doPaintStep(PaintStep.BORDER, graphics, internalGraphics -&gt; {</span>
-<span class="fc" id="L1192">            Shape former = internalGraphics.getClip();</span>
+<span class="fc" id="L1200">        _doPaintStep(PaintStep.BORDER, graphics, internalGraphics -&gt; {</span>
+<span class="fc" id="L1201">            Shape former = internalGraphics.getClip();</span>
                 try {
-<span class="fc bfc" id="L1194" title="All 2 branches covered.">                    if ( _outerBaseClip != null )</span>
-<span class="fc" id="L1195">                        internalGraphics.setClip(_outerBaseClip);</span>
+<span class="fc bfc" id="L1203" title="All 2 branches covered.">                    if ( _outerBaseClip != null )</span>
+<span class="fc" id="L1204">                        internalGraphics.setClip(_outerBaseClip);</span>
 
-<span class="fc" id="L1197">                    _styleEngine.paintBorder(internalGraphics, formerBorderPainter);</span>
-<span class="nc" id="L1198">                } catch (Exception e) {</span>
-<span class="nc" id="L1199">                    log.error(SwingTree.get().logMarker(), &quot;Error while painting border!&quot;, e);</span>
+<span class="fc" id="L1206">                    _styleEngine.paintBorder(internalGraphics, formerBorderPainter);</span>
+<span class="nc" id="L1207">                } catch (Exception e) {</span>
+<span class="nc" id="L1208">                    log.error(SwingTree.get().logMarker(), &quot;Error while painting border!&quot;, e);</span>
                 }
                 finally {
-<span class="fc" id="L1202">                    internalGraphics.setClip(former);</span>
+<span class="fc" id="L1211">                    internalGraphics.setClip(former);</span>
                 }
-<span class="fc" id="L1204">        });</span>
-<span class="fc" id="L1205">    }</span>
+<span class="fc" id="L1213">        });</span>
+<span class="fc" id="L1214">    }</span>
 
     /**
      *  This method is used to paint the foreground style of the component
@@ -1213,10 +1222,10 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      */
     void paintForeground( Graphics2D graphics, Consumer&lt;Graphics&gt; superPaint )
     {
-<span class="fc" id="L1216">        _doPaintStep(PaintStep.FOREGROUND, graphics, internalGraphics -&gt; {</span>
+<span class="fc" id="L1225">        _doPaintStep(PaintStep.FOREGROUND, graphics, internalGraphics -&gt; {</span>
             // We remember the clip:
-<span class="fc" id="L1218">            Shape formerClip = internalGraphics.getClip();</span>
-<span class="fc bfc" id="L1219" title="All 2 branches covered.">            if ( _owner instanceof JScrollPane) {</span>
+<span class="fc" id="L1227">            Shape formerClip = internalGraphics.getClip();</span>
+<span class="fc bfc" id="L1228" title="All 2 branches covered.">            if ( _owner instanceof JScrollPane) {</span>
                 /*
                     Scroll panes are not like other components, they have a viewport
                     which clips the children.
@@ -1224,59 +1233,69 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
                     children to be clipped by the round border (and the viewport).
                     So we use the inner component area as the clip for the children.
                 */
-<span class="fc" id="L1227">                Shape localClip = StyleUtil.intersect( _styleEngine.componentArea(UI.ComponentArea.BODY).orElse(formerClip), formerClip );</span>
-<span class="fc" id="L1228">                paintWithClip(internalGraphics, localClip, ()-&gt; superPaint.accept(internalGraphics));</span>
-<span class="fc" id="L1229">            }</span>
+<span class="fc" id="L1236">                Shape body = _styleEngine.componentArea(UI.ComponentArea.BODY).orElse(formerClip);</span>
+<span class="pc bpc" id="L1237" title="1 of 4 branches missed.">                if ( body != null &amp;&amp; _everyVisibleChildLiesWithin(body) )</span>
+<span class="fc" id="L1238">                    superPaint.accept(internalGraphics);</span>
+                else
+<span class="fc" id="L1240">                    paintWithClip(internalGraphics, StyleUtil.intersect( body, formerClip ), ()-&gt; superPaint.accept(internalGraphics));</span>
+<span class="fc" id="L1241">            }</span>
             else
-<span class="fc" id="L1231">                superPaint.accept(internalGraphics);</span>
+<span class="fc" id="L1243">                superPaint.accept(internalGraphics);</span>
 
-<span class="fc" id="L1233">            Font componentFont = _owner.getFont();</span>
-<span class="fc bfc" id="L1234" title="All 4 branches covered.">            if ( componentFont != null &amp;&amp; !componentFont.equals(internalGraphics.getFont()) )</span>
-<span class="fc" id="L1235">                internalGraphics.setFont( componentFont );</span>
+<span class="fc" id="L1245">            Font componentFont = _owner.getFont();</span>
+<span class="fc bfc" id="L1246" title="All 4 branches covered.">            if ( componentFont != null &amp;&amp; !componentFont.equals(internalGraphics.getFont()) )</span>
+<span class="fc" id="L1247">                internalGraphics.setFont( componentFont );</span>
 
-<span class="fc" id="L1237">            _styleEngine.paintForeground(internalGraphics);</span>
+<span class="fc" id="L1249">            _styleEngine.paintForeground(internalGraphics);</span>
 
             // We restore the clip:
-<span class="pc bpc" id="L1240" title="1 of 2 branches missed.">            if ( internalGraphics.getClip() != formerClip )</span>
-<span class="fc" id="L1241">                internalGraphics.setClip(formerClip);</span>
-<span class="fc" id="L1242">        });</span>
-<span class="fc" id="L1243">    }</span>
+<span class="pc bpc" id="L1252" title="1 of 2 branches missed.">            if ( internalGraphics.getClip() != formerClip )</span>
+<span class="fc" id="L1253">                internalGraphics.setClip(formerClip);</span>
+<span class="fc" id="L1254">        });</span>
+<span class="fc" id="L1255">    }</span>
+
+    private boolean _everyVisibleChildLiesWithin( Shape area ) {
+<span class="fc bfc" id="L1258" title="All 2 branches covered.">        for ( Component child : _owner.getComponents() )</span>
+<span class="fc bfc" id="L1259" title="All 4 branches covered.">            if ( child.isVisible() &amp;&amp; !area.contains(child.getX(), child.getY(), child.getWidth(), child.getHeight()) )</span>
+<span class="fc" id="L1260">                return false;</span>
+<span class="fc" id="L1261">        return true;</span>
+    }
 
     void gatherStyleAndPaintInScope( Graphics g, Runnable painter ) {
-<span class="fc" id="L1246">        gatherApplyAndInstallStyleConfig();</span>
-<span class="fc" id="L1247">        Shape oldClip = g.getClip();</span>
+<span class="fc" id="L1265">        gatherApplyAndInstallStyleConfig();</span>
+<span class="fc" id="L1266">        Shape oldClip = g.getClip();</span>
         try {
-<span class="fc" id="L1249">            painter.run();</span>
-<span class="fc" id="L1250">        } catch (Exception e) {</span>
-<span class="fc" id="L1251">            log.warn(SwingTree.get().logMarker(), &quot;Error while rendering component of type '&quot;+_owner.getClass().getName()+&quot;'.&quot;, e);</span>
-<span class="fc" id="L1252">        }</span>
-<span class="fc" id="L1253">        g.setClip(oldClip);</span>
-<span class="fc" id="L1254">    }</span>
+<span class="fc" id="L1268">            painter.run();</span>
+<span class="fc" id="L1269">        } catch (Exception e) {</span>
+<span class="fc" id="L1270">            log.warn(SwingTree.get().logMarker(), &quot;Error while rendering component of type '&quot;+_owner.getClass().getName()+&quot;'.&quot;, e);</span>
+<span class="fc" id="L1271">        }</span>
+<span class="fc" id="L1272">        g.setClip(oldClip);</span>
+<span class="fc" id="L1273">    }</span>
 
     static void paintWithClip( Graphics2D g2d, @Nullable Shape clip, Runnable paintTask ) {
-<span class="fc" id="L1257">        Shape formerClip = g2d.getClip();</span>
-<span class="fc" id="L1258">        g2d.setClip(clip);</span>
+<span class="fc" id="L1276">        Shape formerClip = g2d.getClip();</span>
+<span class="fc" id="L1277">        g2d.setClip(clip);</span>
         try {
-<span class="fc" id="L1260">            paintTask.run();</span>
-<span class="nc" id="L1261">        } catch (Exception e) {</span>
-<span class="nc" id="L1262">            log.error(SwingTree.get().logMarker(), &quot;Error during clipped painting task.&quot;, e);</span>
+<span class="fc" id="L1279">            paintTask.run();</span>
+<span class="nc" id="L1280">        } catch (Exception e) {</span>
+<span class="nc" id="L1281">            log.error(SwingTree.get().logMarker(), &quot;Error during clipped painting task.&quot;, e);</span>
         } finally {
-<span class="fc" id="L1264">            g2d.setClip(formerClip);</span>
+<span class="fc" id="L1283">            g2d.setClip(formerClip);</span>
         }
-<span class="fc" id="L1266">    }</span>
+<span class="fc" id="L1285">    }</span>
 
-<span class="fc" id="L1268">    private enum PaintStep</span>
+<span class="fc" id="L1287">    private enum PaintStep</span>
     {
-<span class="fc" id="L1270">        BACKGROUND, BORDER, FOREGROUND, UNDEFINED;</span>
+<span class="fc" id="L1289">        BACKGROUND, BORDER, FOREGROUND, UNDEFINED;</span>
 
 
         private int getStepOrder() {
-<span class="pc bpc" id="L1274" title="1 of 5 branches missed.">            switch ( this ) {</span>
-<span class="fc" id="L1275">                case BACKGROUND: return 0;</span>
-<span class="fc" id="L1276">                case BORDER:     return 1;</span>
-<span class="fc" id="L1277">                case FOREGROUND: return 2;</span>
-<span class="fc" id="L1278">                case UNDEFINED:  return 3;</span>
-<span class="nc" id="L1279">                default: return -1;</span>
+<span class="pc bpc" id="L1293" title="1 of 5 branches missed.">            switch ( this ) {</span>
+<span class="fc" id="L1294">                case BACKGROUND: return 0;</span>
+<span class="fc" id="L1295">                case BORDER:     return 1;</span>
+<span class="fc" id="L1296">                case FOREGROUND: return 2;</span>
+<span class="fc" id="L1297">                case UNDEFINED:  return 3;</span>
+<span class="nc" id="L1298">                default: return -1;</span>
             }
         }
 
@@ -1302,88 +1321,93 @@ public final class ComponentBackend&lt;C extends JComponent&gt;
      *          SwingTree style information, as well as component specific information.
      */
     public int viewStateHashCode() {
-<span class="fc bfc" id="L1305" title="All 2 branches covered.">        if ( _owner.getWidth() &lt;= 0 )</span>
-<span class="fc" id="L1306">            return 0;</span>
-<span class="fc bfc" id="L1307" title="All 2 branches covered.">        if ( _owner.getHeight() &lt;= 0 )</span>
-<span class="fc" id="L1308">            return 0;</span>
+<span class="fc bfc" id="L1324" title="All 2 branches covered.">        if ( _owner.getWidth() &lt;= 0 )</span>
+<span class="fc" id="L1325">            return 0;</span>
+<span class="fc bfc" id="L1326" title="All 2 branches covered.">        if ( _owner.getHeight() &lt;= 0 )</span>
+<span class="fc" id="L1327">            return 0;</span>
 
-<span class="fc" id="L1310">        int hashCode = _styleEngine.getComponentConf().hashCode();</span>
+<span class="fc" id="L1329">        int hashCode = _styleEngine.getComponentConf().hashCode();</span>
         // Common stuff:
-<span class="pc bpc" id="L1312" title="1 of 2 branches missed.">        hashCode = hashCode + ( _owner.isEnabled() ? 1 : 0 );</span>
-<span class="fc" id="L1313">        java.awt.Color background = _owner.getBackground();</span>
-<span class="fc" id="L1314">        java.awt.Color foreground = _owner.getForeground();</span>
-<span class="pc bpc" id="L1315" title="1 of 2 branches missed.">        hashCode = hashCode * 31 + (background == null ? -1 : background.hashCode());</span>
-<span class="pc bpc" id="L1316" title="1 of 2 branches missed.">        hashCode = hashCode * 31 + (foreground == null ? -1 : foreground.hashCode());</span>
+<span class="pc bpc" id="L1331" title="1 of 2 branches missed.">        hashCode = hashCode + ( _owner.isEnabled() ? 1 : 0 );</span>
+<span class="fc" id="L1332">        java.awt.Color background = _owner.getBackground();</span>
+<span class="fc" id="L1333">        java.awt.Color foreground = _owner.getForeground();</span>
+<span class="pc bpc" id="L1334" title="1 of 2 branches missed.">        hashCode = hashCode * 31 + (background == null ? -1 : background.hashCode());</span>
+<span class="pc bpc" id="L1335" title="1 of 2 branches missed.">        hashCode = hashCode * 31 + (foreground == null ? -1 : foreground.hashCode());</span>
 
         // Subtype component specific stuff:
-<span class="fc bfc" id="L1319" title="All 2 branches covered.">        if ( _owner instanceof JSlider ) {</span>
-<span class="fc" id="L1320">            JSlider slider = (JSlider) _owner;</span>
-<span class="fc" id="L1321">            hashCode = hashCode * 31 + slider.getValue();</span>
-<span class="fc" id="L1322">            hashCode = hashCode * 31 + slider.getMinimum();</span>
-<span class="fc" id="L1323">            hashCode = hashCode * 31 + slider.getMaximum();</span>
+<span class="fc bfc" id="L1338" title="All 2 branches covered.">        if ( _owner instanceof JSlider ) {</span>
+<span class="fc" id="L1339">            JSlider slider = (JSlider) _owner;</span>
+<span class="fc" id="L1340">            hashCode = hashCode * 31 + slider.getValue();</span>
+<span class="fc" id="L1341">            hashCode = hashCode * 31 + slider.getMinimum();</span>
+<span class="fc" id="L1342">            hashCode = hashCode * 31 + slider.getMaximum();</span>
             // alignment:
-<span class="fc bfc" id="L1325" title="All 2 branches covered.">            hashCode = hashCode * 31 + (slider.getOrientation() == JSlider.HORIZONTAL ? 0 : 1);</span>
+<span class="fc bfc" id="L1344" title="All 2 branches covered.">            hashCode = hashCode * 31 + (slider.getOrientation() == JSlider.HORIZONTAL ? 0 : 1);</span>
+<span class="fc" id="L1345">            hashCode = hashCode * 31 + slider.getMajorTickSpacing();</span>
+<span class="fc" id="L1346">            hashCode = hashCode * 31 + slider.getMinorTickSpacing();</span>
+<span class="pc bpc" id="L1347" title="1 of 2 branches missed.">            hashCode = hashCode * 31 + (slider.getPaintTicks() ? 1 : 0);</span>
+<span class="pc bpc" id="L1348" title="1 of 2 branches missed.">            hashCode = hashCode * 31 + (slider.getPaintLabels() ? 1 : 0);</span>
+<span class="fc" id="L1349">            hashCode = hashCode * 31 + System.identityHashCode(slider.getLabelTable());</span>
         }
-<span class="fc bfc" id="L1327" title="All 2 branches covered.">        if ( _owner instanceof JProgressBar ) {</span>
-<span class="fc" id="L1328">            JProgressBar bar = (JProgressBar) _owner;</span>
-<span class="fc" id="L1329">            hashCode = hashCode * 31 + bar.getValue();</span>
-<span class="fc" id="L1330">            hashCode = hashCode * 31 + bar.getMinimum();</span>
-<span class="fc" id="L1331">            hashCode = hashCode * 31 + bar.getMaximum();</span>
+<span class="fc bfc" id="L1351" title="All 2 branches covered.">        if ( _owner instanceof JProgressBar ) {</span>
+<span class="fc" id="L1352">            JProgressBar bar = (JProgressBar) _owner;</span>
+<span class="fc" id="L1353">            hashCode = hashCode * 31 + bar.getValue();</span>
+<span class="fc" id="L1354">            hashCode = hashCode * 31 + bar.getMinimum();</span>
+<span class="fc" id="L1355">            hashCode = hashCode * 31 + bar.getMaximum();</span>
         }
-<span class="fc bfc" id="L1333" title="All 2 branches covered.">        if ( _owner instanceof JTextComponent ) {</span>
-<span class="fc" id="L1334">            JTextComponent textComp = (JTextComponent) _owner;</span>
-<span class="fc" id="L1335">            String text = textComp.getText();</span>
-<span class="pc bpc" id="L1336" title="1 of 2 branches missed.">            hashCode = hashCode * 31 + (text == null ? -1 : text.hashCode());</span>
-<span class="fc" id="L1337">            hashCode = hashCode * 31 + textComp.getCaretPosition();</span>
+<span class="fc bfc" id="L1357" title="All 2 branches covered.">        if ( _owner instanceof JTextComponent ) {</span>
+<span class="fc" id="L1358">            JTextComponent textComp = (JTextComponent) _owner;</span>
+<span class="fc" id="L1359">            String text = textComp.getText();</span>
+<span class="pc bpc" id="L1360" title="1 of 2 branches missed.">            hashCode = hashCode * 31 + (text == null ? -1 : text.hashCode());</span>
+<span class="fc" id="L1361">            hashCode = hashCode * 31 + textComp.getCaretPosition();</span>
         }
-<span class="fc bfc" id="L1339" title="All 2 branches covered.">        if ( _owner instanceof AbstractButton ) {</span>
-<span class="fc" id="L1340">            AbstractButton button = (AbstractButton) _owner;</span>
-<span class="fc" id="L1341">            String text = button.getText();</span>
-<span class="fc bfc" id="L1342" title="All 2 branches covered.">            hashCode = hashCode * 31 + (button.isSelected() ? 1 : 0);</span>
-<span class="pc bpc" id="L1343" title="1 of 2 branches missed.">            hashCode = hashCode * 31 + (text == null ? -1 : text.hashCode());</span>
+<span class="fc bfc" id="L1363" title="All 2 branches covered.">        if ( _owner instanceof AbstractButton ) {</span>
+<span class="fc" id="L1364">            AbstractButton button = (AbstractButton) _owner;</span>
+<span class="fc" id="L1365">            String text = button.getText();</span>
+<span class="fc bfc" id="L1366" title="All 2 branches covered.">            hashCode = hashCode * 31 + (button.isSelected() ? 1 : 0);</span>
+<span class="pc bpc" id="L1367" title="1 of 2 branches missed.">            hashCode = hashCode * 31 + (text == null ? -1 : text.hashCode());</span>
         }
-<span class="fc bfc" id="L1345" title="All 2 branches covered.">        if ( _owner instanceof JList ) {</span>
-<span class="fc" id="L1346">            JList&lt;?&gt; list = (JList&lt;?&gt;) _owner;</span>
-<span class="fc" id="L1347">            hashCode = hashCode * 31 + list.getSelectedIndex();</span>
+<span class="fc bfc" id="L1369" title="All 2 branches covered.">        if ( _owner instanceof JList ) {</span>
+<span class="fc" id="L1370">            JList&lt;?&gt; list = (JList&lt;?&gt;) _owner;</span>
+<span class="fc" id="L1371">            hashCode = hashCode * 31 + list.getSelectedIndex();</span>
         }
-<span class="pc bpc" id="L1349" title="1 of 2 branches missed.">        if ( _owner instanceof JTabbedPane ) {</span>
-<span class="nc" id="L1350">            JTabbedPane tabbedPane = (JTabbedPane) _owner;</span>
-<span class="nc" id="L1351">            hashCode = hashCode * 31 + tabbedPane.getSelectedIndex();</span>
+<span class="pc bpc" id="L1373" title="1 of 2 branches missed.">        if ( _owner instanceof JTabbedPane ) {</span>
+<span class="nc" id="L1374">            JTabbedPane tabbedPane = (JTabbedPane) _owner;</span>
+<span class="nc" id="L1375">            hashCode = hashCode * 31 + tabbedPane.getSelectedIndex();</span>
         }
-<span class="pc bpc" id="L1353" title="1 of 2 branches missed.">        if ( _owner instanceof JTree ) {</span>
-<span class="nc" id="L1354">            JTree tree = (JTree) _owner;</span>
-<span class="nc" id="L1355">            hashCode = hashCode * 31 + tree.getSelectionCount();</span>
+<span class="pc bpc" id="L1377" title="1 of 2 branches missed.">        if ( _owner instanceof JTree ) {</span>
+<span class="nc" id="L1378">            JTree tree = (JTree) _owner;</span>
+<span class="nc" id="L1379">            hashCode = hashCode * 31 + tree.getSelectionCount();</span>
         }
-<span class="pc bpc" id="L1357" title="1 of 2 branches missed.">        if ( _owner instanceof JTable ) {</span>
-<span class="nc" id="L1358">            JTable table = (JTable) _owner;</span>
-<span class="nc" id="L1359">            hashCode = hashCode * 31 + table.getSelectedRow();</span>
-<span class="nc" id="L1360">            hashCode = hashCode * 31 + table.getSelectedColumn();</span>
+<span class="pc bpc" id="L1381" title="1 of 2 branches missed.">        if ( _owner instanceof JTable ) {</span>
+<span class="nc" id="L1382">            JTable table = (JTable) _owner;</span>
+<span class="nc" id="L1383">            hashCode = hashCode * 31 + table.getSelectedRow();</span>
+<span class="nc" id="L1384">            hashCode = hashCode * 31 + table.getSelectedColumn();</span>
         }
-<span class="fc bfc" id="L1362" title="All 2 branches covered.">        if ( _owner instanceof JSpinner ) {</span>
-<span class="fc" id="L1363">            JSpinner spinner = (JSpinner) _owner;</span>
-<span class="fc" id="L1364">            hashCode = hashCode * 31 + spinner.getValue().hashCode();</span>
+<span class="fc bfc" id="L1386" title="All 2 branches covered.">        if ( _owner instanceof JSpinner ) {</span>
+<span class="fc" id="L1387">            JSpinner spinner = (JSpinner) _owner;</span>
+<span class="fc" id="L1388">            hashCode = hashCode * 31 + spinner.getValue().hashCode();</span>
         }
-<span class="fc bfc" id="L1366" title="All 2 branches covered.">        if ( _owner instanceof JComboBox ) {</span>
-<span class="fc" id="L1367">            JComboBox&lt;?&gt; comboBox = (JComboBox&lt;?&gt;) _owner;</span>
-<span class="fc" id="L1368">            hashCode = hashCode * 31 + comboBox.getSelectedIndex();</span>
+<span class="fc bfc" id="L1390" title="All 2 branches covered.">        if ( _owner instanceof JComboBox ) {</span>
+<span class="fc" id="L1391">            JComboBox&lt;?&gt; comboBox = (JComboBox&lt;?&gt;) _owner;</span>
+<span class="fc" id="L1392">            hashCode = hashCode * 31 + comboBox.getSelectedIndex();</span>
         }
-<span class="fc bfc" id="L1370" title="All 2 branches covered.">        if ( _owner instanceof JCheckBox ) {</span>
-<span class="fc" id="L1371">            JCheckBox checkBox = (JCheckBox) _owner;</span>
-<span class="fc bfc" id="L1372" title="All 2 branches covered.">            hashCode = hashCode * 31 + (checkBox.isSelected() ? 1 : 0);</span>
+<span class="fc bfc" id="L1394" title="All 2 branches covered.">        if ( _owner instanceof JCheckBox ) {</span>
+<span class="fc" id="L1395">            JCheckBox checkBox = (JCheckBox) _owner;</span>
+<span class="fc bfc" id="L1396" title="All 2 branches covered.">            hashCode = hashCode * 31 + (checkBox.isSelected() ? 1 : 0);</span>
         }
 
         // Hashing the children recursively:
         try {
-<span class="fc bfc" id="L1377" title="All 2 branches covered.">            for ( Component child : _owner.getComponents() ) {</span>
-<span class="fc bfc" id="L1378" title="All 2 branches covered.">                if ( child instanceof JComponent ) {</span>
-<span class="fc" id="L1379">                    ComponentBackend&lt;?&gt; childBackend = powering((JComponent) child);</span>
-<span class="fc" id="L1380">                    hashCode = hashCode * 31 + childBackend.viewStateHashCode();</span>
+<span class="fc bfc" id="L1401" title="All 2 branches covered.">            for ( Component child : _owner.getComponents() ) {</span>
+<span class="fc bfc" id="L1402" title="All 2 branches covered.">                if ( child instanceof JComponent ) {</span>
+<span class="fc" id="L1403">                    ComponentBackend&lt;?&gt; childBackend = powering((JComponent) child);</span>
+<span class="fc" id="L1404">                    hashCode = hashCode * 31 + childBackend.viewStateHashCode();</span>
                 }
             }
-<span class="nc" id="L1383">        } catch ( Exception e ) {</span>
-<span class="nc" id="L1384">            log.error(SwingTree.get().logMarker(), &quot;Error while hashing children of component '&quot;+_owner+&quot;'.&quot;, e);</span>
-<span class="fc" id="L1385">        }</span>
-<span class="fc" id="L1386">        return hashCode;</span>
+<span class="nc" id="L1407">        } catch ( Exception e ) {</span>
+<span class="nc" id="L1408">            log.error(SwingTree.get().logMarker(), &quot;Error while hashing children of component '&quot;+_owner+&quot;'.&quot;, e);</span>
+<span class="fc" id="L1409">        }</span>
+<span class="fc" id="L1410">        return hashCode;</span>
     }
 
 }

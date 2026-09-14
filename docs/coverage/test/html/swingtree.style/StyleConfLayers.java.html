@@ -211,7 +211,7 @@ final class StyleConfLayers
 <span class="fc" id="L211">                    .map(NamedConf::style)</span>
 <span class="fc" id="L212">                    .filter(TextConf::autoPreferredHeight)</span>
 <span class="fc" id="L213">                    .mapToDouble( textConf -&gt; {</span>
-<span class="fc" id="L214">                        final Outline insets = predictedBoxModel.insetsFor(textConf.placementBoundary());</span>
+<span class="fc" id="L214">                        final OptionalInsets insets = predictedBoxModel.insetsFor(textConf.placementBoundary());</span>
 <span class="fc bfc" id="L215" title="All 2 branches covered.">                            if ( textConf.content().isEmpty() ) {</span>
 <span class="fc" id="L216">                                double totalHeight = 0;</span>
 <span class="fc" id="L217">                                totalHeight += insets.top().orElse(0f);</span>

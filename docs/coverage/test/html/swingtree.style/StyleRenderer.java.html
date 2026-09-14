@@ -117,7 +117,7 @@ final class StyleRenderer
     ) {
 <span class="fc bfc" id="L118" title="All 2 branches covered.">        final Color foundationColor = conf.baseColors().foundationColor().map( c -&gt; c.getAlpha() == 0 ? null : c ).orElse(UI.Color.UNDEFINED);</span>
 <span class="fc bfc" id="L119" title="All 2 branches covered.">        final Color backgroundColor = conf.baseColors().backgroundColor().map( c -&gt; c.getAlpha() == 0 ? null : c ).orElse(UI.Color.UNDEFINED);</span>
-<span class="fc bfc" id="L120" title="All 4 branches covered.">        final boolean borderIsOpaque = conf.boxModel().widths().equals(Outline.none()) || conf.baseColors().borderColor().isFullyOpaque();</span>
+<span class="fc bfc" id="L120" title="All 4 branches covered.">        final boolean borderIsOpaque = conf.boxModel().widths().equals(OptionalInsets.none()) || conf.baseColors().borderColor().isFullyOpaque();</span>
 <span class="fc bfc" id="L121" title="All 2 branches covered.">        final boolean bodyIsOpaque = backgroundColor.getAlpha() == 255;</span>
 <span class="fc bfc" id="L122" title="All 4 branches covered.">        if ( bodyIsOpaque &amp;&amp; borderIsOpaque ) {</span>
 <span class="fc" id="L123">            Shape fullArea = conf.areas().get(UI.ComponentArea.ALL);</span>
@@ -148,7 +148,7 @@ final class StyleRenderer
 <span class="fc bfc" id="L148" title="All 2 branches covered.">        if ( colors.equals(BorderColorsConf.none()) )</span>
 <span class="fc" id="L149">            return;</span>
 
-<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        if ( !Outline.none().equals(conf.boxModel().widths()) ) {</span>
+<span class="pc bpc" id="L151" title="1 of 2 branches missed.">        if ( !OptionalInsets.none().equals(conf.boxModel().widths()) ) {</span>
             try {
 <span class="fc" id="L153">                Shape borderArea = conf.areas().get(UI.ComponentArea.BORDER);</span>
 <span class="fc" id="L154">                Objects.requireNonNull(borderArea);</span>
@@ -782,12 +782,12 @@ final class StyleRenderer
         final GradientConf gradient
     ) {
 <span class="fc" id="L784">        final Size dimensions = boxModel.size();</span>
-        Outline insets;
+        OptionalInsets insets;
 <span class="fc bfc" id="L786" title="All 2 branches covered.">        if ( gradient.boundary() == UI.ComponentBoundary.CENTER_TO_CONTENT ) {</span>
-<span class="fc" id="L787">            final Outline contentIns = boxModel.insetsFor(UI.ComponentBoundary.INTERIOR_TO_CONTENT);</span>
+<span class="fc" id="L787">            final OptionalInsets contentIns = boxModel.insetsFor(UI.ComponentBoundary.INTERIOR_TO_CONTENT);</span>
 <span class="fc" id="L788">            final float verticalInset = dimensions.heightOrElse(0f) / 2f;</span>
 <span class="fc" id="L789">            final float horizontalInset = dimensions.widthOrElse(0f) / 2f;</span>
-<span class="fc" id="L790">            insets = Outline.of(verticalInset, horizontalInset);</span>
+<span class="fc" id="L790">            insets = OptionalInsets.of(verticalInset, horizontalInset);</span>
 <span class="pc bpc" id="L791" title="1 of 9 branches missed.">            switch ( gradient.span() ) {</span>
                 case TOP_TO_BOTTOM:
 <span class="fc" id="L793">                    insets = insets.withBottom(contentIns.bottom().orElse(0f));</span>
@@ -1258,8 +1258,8 @@ final class StyleRenderer
 <span class="fc" id="L1258">            final UI.FitComponent      fit               = style.fitMode();</span>
 <span class="fc" id="L1259">            final UI.Placement         placement         = style.placement();</span>
 <span class="fc" id="L1260">            final UI.ComponentBoundary placementBoundary = style.placementBoundary();</span>
-<span class="fc" id="L1261">            final Outline              insets            = conf.boxModel().insetsFor(placementBoundary);</span>
-<span class="fc" id="L1262">            final Outline      padding         = style.padding();</span>
+<span class="fc" id="L1261">            final OptionalInsets       insets            = conf.boxModel().insetsFor(placementBoundary);</span>
+<span class="fc" id="L1262">            final OptionalInsets       padding           = style.padding();</span>
 <span class="fc" id="L1263">            final int          componentWidth  = componentSize.width().orElse(0f).intValue() - (insets.left().orElse(0f).intValue() + insets.right().orElse(0f).intValue());</span>
 <span class="fc" id="L1264">            final int          componentHeight = componentSize.height().orElse(0f).intValue() - (insets.top().orElse(0f).intValue()  + insets.bottom().orElse(0f).intValue());</span>
 <span class="fc" id="L1265">            final int          iconBaseWidth   = imageIcon.getIconWidth();</span>
@@ -1455,7 +1455,7 @@ final class StyleRenderer
     static Bounds computeTextBounds(final TextConf text, final BoxModelConf boxModel) {
 <span class="fc" id="L1456">        final UI.ComponentBoundary placementBoundary = text.placementBoundary();</span>
 <span class="fc" id="L1457">        final Offset               offset            = text.offset();</span>
-<span class="fc" id="L1458">        final Outline              insets            = boxModel.insetsFor(placementBoundary);</span>
+<span class="fc" id="L1458">        final OptionalInsets       insets            = boxModel.insetsFor(placementBoundary);</span>
         // Computing the area available for text rendering after applying the offset and insets:
 <span class="fc" id="L1460">        final float insLeft   = insets.left().orElse(0f);</span>
 <span class="fc" id="L1461">        final float insTop    = insets.top().orElse(0f);</span>
@@ -2019,7 +2019,7 @@ final class StyleRenderer
 <span class="fc" id="L2019">                return;</span>
             }
 
-<span class="fc" id="L2022">            final Outline insets = boxModel.insetsFor(noise.get().boundary());</span>
+<span class="fc" id="L2022">            final OptionalInsets insets = boxModel.insetsFor(noise.get().boundary());</span>
 <span class="fc" id="L2023">            final Point2D.Float center = new Point2D.Float(</span>
 <span class="fc" id="L2024">                    insets.left().orElse(0f) + noise.get().offset().x(),</span>
 <span class="fc" id="L2025">                    insets.top().orElse(0f) + noise.get().offset().y()</span>
@@ -2138,7 +2138,7 @@ final class StyleRenderer
 <span class="pc bpc" id="L2138" title="1 of 2 branches missed.">            if ( colors.length == 1 ) {</span>
 <span class="nc" id="L2139">                return colors[0];</span>
             }
-<span class="fc" id="L2141">            final Outline insets = boxModel.insetsFor(noise.get().boundary());</span>
+<span class="fc" id="L2141">            final OptionalInsets insets = boxModel.insetsFor(noise.get().boundary());</span>
 <span class="fc" id="L2142">            final Point2D.Float center = new Point2D.Float(</span>
 <span class="fc" id="L2143">                    insets.left().orElse(0f) + noise.get().offset().x(),</span>
 <span class="fc" id="L2144">                    insets.top().orElse(0f) + noise.get().offset().y()</span>

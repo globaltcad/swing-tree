@@ -83,7 +83,7 @@ final class ComponentAreas
     }
 
     private static Area _produceContentArea( BoxModelConf boxModel, LazyRef&lt;Shape&gt; interiorArea ) {
-<span class="fc" id="L86">        Outline insets = boxModel.insetsFor(UI.ComponentBoundary.INTERIOR_TO_CONTENT);</span>
+<span class="fc" id="L86">        OptionalInsets insets = boxModel.insetsFor(UI.ComponentBoundary.INTERIOR_TO_CONTENT);</span>
 <span class="fc" id="L87">        Size size = boxModel.size();</span>
 <span class="fc" id="L88">        Area contentArea = new Area(new Rectangle2D.Float(</span>
 <span class="fc" id="L89">                insets.left().orElse(0f),</span>
@@ -131,7 +131,7 @@ final class ComponentAreas
     /**
      *  Tells whether the box model carves the given area out of the plain component bounds.
      *  A {@link UI.ComponentArea#BORDER} exists when a border width is positive, an
-     *  {@link UI.ComponentArea#EXTERIOR} when a margin, a base outline or a corner arc pushes
+     *  {@link UI.ComponentArea#EXTERIOR} when a margin, a base inset or a corner arc pushes
      *  the body inward, and an {@link UI.ComponentArea#INTERIOR} or {@link UI.ComponentArea#BODY}
      *  when either of the two does. The answer depends on the box model alone,
      *  never on which shapes have been built so far.
@@ -156,7 +156,7 @@ final class ComponentAreas
 
     private boolean _bodyIsInsetFromBounds() {
 <span class="fc bfc" id="L158" title="All 2 branches covered.">        return _boxModel.margin().isPositive()</span>
-<span class="pc bpc" id="L159" title="1 of 2 branches missed.">            || _boxModel.baseOutline().isPositive()</span>
+<span class="pc bpc" id="L159" title="1 of 2 branches missed.">            || _boxModel.baseInsets().isPositive()</span>
 <span class="fc bfc" id="L160" title="All 2 branches covered.">            || _boxModel.hasAnyNonZeroArcs();</span>
     }
 
@@ -178,7 +178,7 @@ final class ComponentAreas
     }
 
     private static Shape _produceInteriorArea(BoxModelConf currentState) {
-<span class="fc" id="L181">        Outline widths = currentState.widths();</span>
+<span class="fc" id="L181">        OptionalInsets widths = currentState.widths();</span>
 <span class="fc" id="L182">        float leftBorderWidth   = widths.left().orElse(0f);</span>
 <span class="fc" id="L183">        float topBorderWidth    = widths.top().orElse(0f);</span>
 <span class="fc" id="L184">        float rightBorderWidth  = widths.right().orElse(0f);</span>
@@ -212,12 +212,12 @@ final class ComponentAreas
         float insBottom,
         float insRight
     ) {
-<span class="fc" id="L215">        final Outline margin  = border.margin();</span>
-<span class="fc" id="L216">        final Size    size    = border.size();</span>
-<span class="fc" id="L217">        final Outline outline = border.baseOutline();</span>
+<span class="fc" id="L215">        final OptionalInsets margin     = border.margin();</span>
+<span class="fc" id="L216">        final Size           size       = border.size();</span>
+<span class="fc" id="L217">        final OptionalInsets baseInsets = border.baseInsets();</span>
 
 <span class="pc bpc" id="L219" title="1 of 2 branches missed.">        if ( BoxModelConf.none().equals(border) ) {</span>
-<span class="nc" id="L220">            Outline insets = outline.plus(margin).plus(Outline.of(insTop, insLeft, insBottom, insRight));</span>
+<span class="nc" id="L220">            OptionalInsets insets = baseInsets.plus(margin).plus(OptionalInsets.of(insTop, insLeft, insBottom, insRight));</span>
             // If there is no style, we just return the component's bounds:
 <span class="nc" id="L222">            float left   = insets.left().orElse(0f);</span>
 <span class="nc" id="L223">            float top    = insets.top().orElse(0f);</span>
@@ -228,10 +228,10 @@ final class ComponentAreas
 <span class="nc" id="L228">            return _rectangularShapeFrom(left, top, width, height);</span>
         }
 
-<span class="fc" id="L231">        insTop    += outline.top().orElse(0f);</span>
-<span class="fc" id="L232">        insLeft   += outline.left().orElse(0f);</span>
-<span class="fc" id="L233">        insBottom += outline.bottom().orElse(0f);</span>
-<span class="fc" id="L234">        insRight  += outline.right().orElse(0f);</span>
+<span class="fc" id="L231">        insTop    += baseInsets.top().orElse(0f);</span>
+<span class="fc" id="L232">        insLeft   += baseInsets.left().orElse(0f);</span>
+<span class="fc" id="L233">        insBottom += baseInsets.bottom().orElse(0f);</span>
+<span class="fc" id="L234">        insRight  += baseInsets.right().orElse(0f);</span>
 
         // The background box is calculated from the margins and border radius:
 <span class="fc" id="L237">        float left   = Math.max(margin.left().orElse(0f), 0)   + insLeft  ;</span>
@@ -437,8 +437,8 @@ final class ComponentAreas
      */
     private static Area[] calculateEdgeBorderAreas( BoxModelConf boxModel ) {
 <span class="fc" id="L439">        final Size    size   = boxModel.size();</span>
-<span class="fc" id="L440">        final Outline margin = boxModel.margin();</span>
-<span class="fc" id="L441">        final Outline widths = boxModel.widths();</span>
+<span class="fc" id="L440">        final OptionalInsets margin = boxModel.margin();</span>
+<span class="fc" id="L441">        final OptionalInsets widths = boxModel.widths();</span>
 
 <span class="fc" id="L443">        final double boxLeft   = Math.max(margin.left().orElse(0f), 0f);</span>
 <span class="fc" id="L444">        final double boxTop    = Math.max(margin.top().orElse(0f),  0f);</span>

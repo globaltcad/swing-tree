@@ -393,13 +393,13 @@ final class LayerPartitionCache
 <span class="fc" id="L393">        final boolean       isRounded  = boxModel.hasAnyNonZeroArcs();</span>
 
 <span class="fc bfc" id="L395" title="All 2 branches covered.">        if ( layer == UI.Layer.BORDER ) {</span>
-<span class="fc bfc" id="L396" title="All 2 branches covered.">            boolean hasWidth = !Outline.none().equals(boxModel.widths());</span>
+<span class="fc bfc" id="L396" title="All 2 branches covered.">            boolean hasWidth = !OptionalInsets.none().equals(boxModel.widths());</span>
 <span class="fc bfc" id="L397" title="All 2 branches covered.">            boolean hasColoring = !baseColors.borderColor().equals(BorderColorsConf.none());</span>
 <span class="pc bpc" id="L398" title="1 of 4 branches missed.">            if ( hasWidth &amp;&amp; hasColoring )</span>
 <span class="fc" id="L399">                heavyStyleCount++;</span>
         }
 <span class="fc bfc" id="L401" title="All 2 branches covered.">        if ( layer == UI.Layer.BACKGROUND ) {</span>
-<span class="fc bfc" id="L402" title="All 4 branches covered.">            boolean roundedOrHasMargin = isRounded || !boxModel.margin().equals(Outline.none());</span>
+<span class="fc bfc" id="L402" title="All 4 branches covered.">            boolean roundedOrHasMargin = isRounded || !boxModel.margin().equals(OptionalInsets.none());</span>
 <span class="fc bfc" id="L403" title="All 2 branches covered.">            if ( roundedOrHasMargin ) {</span>
 <span class="fc bfc" id="L404" title="All 4 branches covered.">                if ( baseColors.backgroundColor().filter( c -&gt; c.getAlpha() &gt; 0 ).isPresent() )</span>
 <span class="fc" id="L405">                    heavyStyleCount++;</span>
@@ -583,7 +583,7 @@ final class LayerPartitionCache
 <span class="pc bpc" id="L583" title="1 of 2 branches missed.">            if ( image == null )</span>
 <span class="nc" id="L584">                return; // Cannot happen (callers check `isRendered()` first), but let's be defensive.</span>
 
-<span class="fc" id="L586">            final Outline insets = canonicalConf.nineTileSliceInsets();</span>
+<span class="fc" id="L586">            final OptionalInsets insets = canonicalConf.nineTileSliceInsets();</span>
 <span class="fc" id="L587">            final LayerRenderConf.Compaction compaction =</span>
 <span class="fc" id="L588">                        LayerRenderConf.Compaction.between(canonicalConf.boxModel().size(), actualSize);</span>
 <span class="fc bfc" id="L589" title="All 2 branches covered.">            final int insetTop    = compaction.includesHeight() ? insets.top().orElse(0f).intValue()    : 0;</span>

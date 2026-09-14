@@ -45,7 +45,7 @@ final class LayerRenderConf
     private final BaseColorConf _baseColor;
     private final StyleConfLayer _layer;
     private final LazyRef&lt;LayerRenderConf&gt; _canonicalRepresentation;
-    private final LazyRef&lt;Outline&gt; _nineTileSliceInsets;
+    private final LazyRef&lt;OptionalInsets&gt; _nineTileSliceInsets;
 
     private LayerRenderConf(
         BoxModelConf   boxModelConf,
@@ -143,7 +143,7 @@ final class LayerRenderConf
 <span class="fc" id="L143">        return _canonicalRepresentation.get();</span>
     }
 
-    Outline nineTileSliceInsets() {
+    OptionalInsets nineTileSliceInsets() {
 <span class="fc" id="L147">        return _nineTileSliceInsets.get();</span>
     }
 
@@ -190,9 +190,9 @@ final class LayerRenderConf
 <span class="fc bfc" id="L190" title="All 2 branches covered.">        if ( compaction == Compaction.NONE )</span>
 <span class="fc" id="L191">            return conf;</span>
 
-<span class="fc" id="L193">        final Outline sliceInsets = conf.nineTileSliceInsets();</span>
-<span class="fc" id="L194">        final Size    exemplar    = _exemplarSize(sliceInsets);</span>
-<span class="fc" id="L195">        final Size    actual      = conf.boxModel().size();</span>
+<span class="fc" id="L193">        final OptionalInsets sliceInsets = conf.nineTileSliceInsets();</span>
+<span class="fc" id="L194">        final Size           exemplar    = _exemplarSize(sliceInsets);</span>
+<span class="fc" id="L195">        final Size           actual      = conf.boxModel().size();</span>
 
 <span class="fc bfc" id="L197" title="All 2 branches covered.">        if ( !_borderEdgeSeamsAreSizeIndependent(conf, sliceInsets, exemplar) )</span>
 <span class="fc" id="L198">            return conf;</span>
@@ -258,7 +258,7 @@ final class LayerRenderConf
      *  independent parts of the configuration, so the blit can recompute it and is guaranteed
      *  to agree with the canonicalization.
      */
-    private static Outline _compute9PatchSliceInsets(LayerRenderConf conf ) {
+    private static OptionalInsets _compute9PatchSliceInsets(LayerRenderConf conf ) {
 <span class="fc" id="L262">        final BoxModelConf box = conf.boxModel();</span>
 
 <span class="fc" id="L264">        final float marginTop    = _positive(box.margin().top());</span>
@@ -266,10 +266,10 @@ final class LayerRenderConf
 <span class="fc" id="L266">        final float marginBottom = _positive(box.margin().bottom());</span>
 <span class="fc" id="L267">        final float marginLeft   = _positive(box.margin().left());</span>
 
-<span class="fc" id="L269">        final float baseTop    = _positive(box.baseOutline().top());</span>
-<span class="fc" id="L270">        final float baseRight  = _positive(box.baseOutline().right());</span>
-<span class="fc" id="L271">        final float baseBottom = _positive(box.baseOutline().bottom());</span>
-<span class="fc" id="L272">        final float baseLeft   = _positive(box.baseOutline().left());</span>
+<span class="fc" id="L269">        final float baseTop    = _positive(box.baseInsets().top());</span>
+<span class="fc" id="L270">        final float baseRight  = _positive(box.baseInsets().right());</span>
+<span class="fc" id="L271">        final float baseBottom = _positive(box.baseInsets().bottom());</span>
+<span class="fc" id="L272">        final float baseLeft   = _positive(box.baseInsets().left());</span>
 
 <span class="fc" id="L274">        final float widthTop    = _positive(box.widths().top());</span>
 <span class="fc" id="L275">        final float widthRight  = _positive(box.widths().right());</span>
@@ -305,7 +305,7 @@ final class LayerRenderConf
 <span class="fc" id="L305">        final float bottom = marginBottom + baseBottom + widthBottom + arcBottom + shadowReachV + SAFETY_MARGIN;</span>
 <span class="fc" id="L306">        final float left   = marginLeft   + baseLeft   + widthLeft   + arcLeft   + shadowReachH + SAFETY_MARGIN;</span>
 
-<span class="fc" id="L308">        return Outline.of(</span>
+<span class="fc" id="L308">        return OptionalInsets.of(</span>
 <span class="fc" id="L309">                    (float) Math.ceil(top),</span>
 <span class="fc" id="L310">                    (float) Math.ceil(right),</span>
 <span class="fc" id="L311">                    (float) Math.ceil(bottom),</span>
@@ -385,7 +385,7 @@ final class LayerRenderConf
      */
     private static boolean _borderEdgeSeamsAreSizeIndependent(
         LayerRenderConf conf,
-        Outline         sliceInsets,
+        OptionalInsets  sliceInsets,
         Size            exemplar
     ) {
 <span class="fc" id="L391">        final BorderColorsConf borderColors = conf.baseColors().borderColor();</span>
@@ -394,19 +394,19 @@ final class LayerRenderConf
 <span class="fc bfc" id="L394" title="All 2 branches covered.">        if ( !conf.boxModel().hasAnyNonZeroArcs() )</span>
 <span class="fc" id="L395">            return true;</span>
 
-<span class="fc" id="L397">        final Outline widths = conf.boxModel().widths();</span>
-<span class="fc" id="L398">        final float   top    = _positive(widths.top());</span>
-<span class="fc" id="L399">        final float   right  = _positive(widths.right());</span>
-<span class="fc" id="L400">        final float   bottom = _positive(widths.bottom());</span>
-<span class="fc" id="L401">        final float   left   = _positive(widths.left());</span>
+<span class="fc" id="L397">        final OptionalInsets widths = conf.boxModel().widths();</span>
+<span class="fc" id="L398">        final float          top    = _positive(widths.top());</span>
+<span class="fc" id="L399">        final float          right  = _positive(widths.right());</span>
+<span class="fc" id="L400">        final float          bottom = _positive(widths.bottom());</span>
+<span class="fc" id="L401">        final float          left   = _positive(widths.left());</span>
 <span class="pc bpc" id="L402" title="4 of 8 branches missed.">        if ( top &lt;= 0 || right &lt;= 0 || bottom &lt;= 0 || left &lt;= 0 )</span>
 <span class="nc" id="L403">            return false;</span>
 
-<span class="fc" id="L405">        final Outline margin       = conf.boxModel().margin();</span>
-<span class="fc" id="L406">        final float   marginTop    = _positive(margin.top());</span>
-<span class="fc" id="L407">        final float   marginRight  = _positive(margin.right());</span>
-<span class="fc" id="L408">        final float   marginBottom = _positive(margin.bottom());</span>
-<span class="fc" id="L409">        final float   marginLeft   = _positive(margin.left());</span>
+<span class="fc" id="L405">        final OptionalInsets margin       = conf.boxModel().margin();</span>
+<span class="fc" id="L406">        final float          marginTop    = _positive(margin.top());</span>
+<span class="fc" id="L407">        final float          marginRight  = _positive(margin.right());</span>
+<span class="fc" id="L408">        final float          marginBottom = _positive(margin.bottom());</span>
+<span class="fc" id="L409">        final float          marginLeft   = _positive(margin.left());</span>
 
 <span class="fc" id="L411">        final float boxWidth  = exemplar.widthOrElse(0f)  - marginLeft - marginRight;</span>
 <span class="fc" id="L412">        final float boxHeight = exemplar.heightOrElse(0f) - marginTop  - marginBottom;</span>
@@ -427,7 +427,7 @@ final class LayerRenderConf
      *  into the repeating band, keeping those artifacts pixel-identical to a real rendering of
      *  any larger size.
      */
-    private static Size _exemplarSize( Outline sliceInsets ) {
+    private static Size _exemplarSize( final OptionalInsets sliceInsets ) {
 <span class="fc" id="L431">        final float maxHorizontal = Math.max(sliceInsets.left().orElse(0f), sliceInsets.right().orElse(0f));</span>
 <span class="fc" id="L432">        final float maxVertical   = Math.max(sliceInsets.top().orElse(0f),  sliceInsets.bottom().orElse(0f));</span>
 <span class="fc" id="L433">        return Size.of(</span>

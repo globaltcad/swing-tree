@@ -4,7 +4,7 @@
   "narrative":"Swing only knows one thread, the event dispatch thread (EDT),\n    which performs both the rendering of the UI as well as the event handling.\n    This is a problem for applications that need to perform long running\n    tasks in the background, because the EDT is blocked until a task\n    is complete, freezing the UI. The decoupled threading mode solves this\n    by dispatching your business logic to a custom application thread, while\n    ensuring that all UI related operations still happen on the EDT.\n    This specification demonstrates how this threading model interacts\n    with the MVVM pattern and the binding of properties to UI components.\n\n    The single most important boundary in a decoupled SwingTree application\n    is the one between your property based view models, which live on the\n    application thread, and the Swing components, which live on the UI thread.\n\n    Whenever a bound property changes, the new state has to travel from the\n    application thread to the UI thread, and whenever the user interacts\n    with a component, the event has to travel from the UI thread to the\n    application thread. Both directions cross a thread boundary,\n    which raises delicate questions:\n    Do updates get lost? Can a stale value overtake a newer one?\n    Which thread executes what?\n\n    This specification answers these questions. To keep the concurrency\n    easy to reason about, most tests use two simple tricks:\n    the test thread itself plays the role of the application thread\n    (by draining the application event queue on demand), and where\n    necessary the UI thread is temporarily parked behind a latch so that\n    in-flight updates can be observed before they are applied.\n    No mocks are involved, everything runs through the real\n    event processor, real components and real properties.",
   "subjects":["swingtree.UIForAnySwing","swingtree.UIForTabbedPane","swingtree.threading.EventProcessor"],
   "statistics":{
-    "runs":"32",
+    "runs":"37",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -815,6 +815,137 @@
         {"kind":"when","text":"This test thread, playing the application thread, processes the event queue.","code":["EventProcessor.DECOUPLED.joinUntilDoneOrException()"]},
 
         {"kind":"then","text":"Now the property holds the exact maximum of the bound range.","code":["current.is(3d)"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The tick marks and labels of a slider bound to a `SliderTicks` property change asynchronously, on the UI thread.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can bind the tick marks and labels of a slider to a property holding a\n            `SliderTicks` value with `withTicks(Val<SliderTicks>)`. In the decoupled mode\n            that property belongs to the application thread, so a new `SliderTicks` value\n            reaches the slider the same way every other property change does: as a change\n            event, which the UI thread processes when it gets around to it.\n\n            Since a `SliderTicks` is an immutable value, nothing about it can change while\n            it travels from one thread to the other, and the UI thread never has to read\n            the property itself.\n\n            In this scenario we park the UI thread, change the major spacing of the tick\n            marks from 50 to 25 on this thread, and look at the labels of the slider before\n            releasing the UI thread again.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding tick marks every 50 with a label at each of them.","code":["var ticks = Var.of(","                SliderTicks.classTyped(Integer.class),","                SliderTicks.of(Integer.class).withMajorSpacing(50).withLabelsAtMajorTicks()","            )"]},
+
+        {"kind":"and","text":"A slider built in the decoupled mode, with its tick marks bound to the property.","code":["var slider = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.slider(UI.Axis.HORIZONTAL, 0, 100, Var.of(0)).withTicks(ticks)","    ).get(JSlider)","})"]},
+
+        {"kind":"expect","text":"Initially, the slider has labels at 0, 50 and 100.","code":["UI.runAndGet({ slider.labelTable.keySet().sort() }) == [0, 50, 100]"]},
+
+        {"kind":"when","text":"We park the UI thread, change the major spacing to 25 from this thread, and look at the labels before releasing the UI thread.","code":["var gate = new CountDownLatch(1)","UI.run({ gate.await() })","var labelsWhileParked = null","try {","    ticks.set(ticks.get().withMajorSpacing(25))","    labelsWhileParked = slider.labelTable.keySet().sort()","} finally {","    gate.countDown()","}","UI.sync()"]},
+
+        {"kind":"then","text":"While the UI thread was parked, the labels had not changed yet...","code":["labelsWhileParked == [0, 50, 100]"]},
+
+        {"kind":"and","text":"...but once the UI thread processed the change event, there is a label every 25.","code":["UI.runAndGet({ slider.labelTable.keySet().sort() }) == [0, 25, 50, 75, 100]"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A value picked by the user just before a smaller maximum reaches the UI thread still ends up within that maximum.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A slider bound to a maximum property never writes a value larger than that\n            maximum into its value property. In the decoupled mode this needs a little care,\n            because the UI thread only learns about a new maximum when it processes the change\n            event, and the user can move the knob before that happens.\n\n            Imagine a slider from 0 to 10. The application lowers the maximum to 8, and in the\n            very same moment the user drags the knob to the end of the slider, which the UI\n            thread still believes to be at 10. The UI thread hands the 10 over to the\n            application thread, which owns the value property. By the time the application\n            thread writes it, the maximum is already 8, so writing 10 would put the value\n            outside of the range of its own slider.\n\n            That is why the application thread keeps the value within the minimum and maximum\n            properties which are current at the moment it writes the value. In this scenario we\n            arrange exactly that race by parking the UI thread.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"Properties for the maximum and the value, as they would live in a view model.","code":["var max = Var.of(10)","var value = Var.of(5)"]},
+
+        {"kind":"and","text":"A slider built in the decoupled mode, bound to both.","code":["var slider = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.slider(UI.Axis.HORIZONTAL, Val.of(0), max, value)","    ).get(JSlider)","})"]},
+
+        {"kind":"when","text":"We park the UI thread, and queue up the user dragging the knob to the end of the slider for when it is released.","code":["var gate = new CountDownLatch(1)","UI.run({","    gate.await()","    slider.value = slider.maximum","})"]},
+
+        {"kind":"and","text":"The application lowers the maximum to 8, which queues its change event behind the drag, and then the UI thread is released.","code":["try {","    max.set(8)","} finally {","    gate.countDown()","}","UI.sync()"]},
+
+        {"kind":"and","text":"This test thread, playing the application thread, processes the event queue, which contains the value of the drag.","code":["EventProcessor.DECOUPLED.joinUntilDoneOrException()","UI.sync()"]},
+
+        {"kind":"then","text":"The user dragged to 10, but the value was written as the current maximum of 8.","code":["value.get() == 8"]},
+
+        {"kind":"and","text":"The slider shows the knob at the end of its new range.","code":["UI.runAndGet({ slider.maximum == 8 && slider.value == 8 })"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"The number at which the user lets go of a slider knob ends up in its property, even when the application thread lags behind the drag.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When the user drags the knob of a slider and lets go of it, the number under the\n            knob is the number the user chose. That number must end up in the value property,\n            and the knob must stay where the user let go of it.\n\n            In the decoupled mode this takes some care, because the slider and its value\n            property belong to two different threads. The slider belongs to the UI thread,\n            which handles the mouse. The property belongs to the application thread, which\n            runs the logic of your application. So every time the knob moves during a drag,\n            the UI thread hands the new number over to the application thread, which writes it\n            into the property when it gets around to it. And every time the property changes,\n            the application thread hands the new number back to the UI thread, so that the\n            knob follows the changes your application makes to the property.\n\n            That second hand-over also happens for the numbers which the slider wrote itself,\n            and when the application thread is busy, it happens late. Picture the user dragging\n            the knob from 50 to 60, and on to 70. The application thread writes the 60 while\n            the mouse of the user is already at 70, and hands the 60 back to the UI thread. If\n            the slider moved its knob to that late 60, the knob would jump back under the mouse\n            of the user. And if the user let go in that moment, the slider would report 60 as\n            the number the user let go at, and write 60 into the property.\n\n            So while the user holds the knob, changes of the value property do not move it.\n            A `JSlider` knows when the user holds its knob through a flag named\n            `valueIsAdjusting`. The look and feel, which is the part of Swing that draws the\n            slider and handles the mouse, sets that flag to `true` when the user presses the\n            mouse button on the knob, and back to `false` when they release it. When the user\n            lets go, the slider writes the number under the knob into the property.\n\n            This scenario plays the user by setting that flag and the positions of the drag,\n            just like the look and feel does when it handles the mouse. To make the 60 arrive\n            late, it parks the UI thread behind a latch, with the drag on to 70 already waiting\n            for it. This test thread, which plays the application thread, then writes the 60\n            into the property and hands it to the UI thread, where the 60 has to wait behind the\n            drag on to 70. When we open the latch, the UI thread moves the knob to 70 first, and\n            receives the 60 after that.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding 50, as it would live in a view model.","code":["var value = Var.of(50)"]},
+
+        {"kind":"and","text":"A slider from 0 to 100, built in the decoupled mode and bound to the property.","code":["var slider = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.slider(UI.Axis.HORIZONTAL, 0, 100, value)","    ).get(JSlider)","})"]},
+
+        {"kind":"when","text":"The user presses the mouse button on the knob and drags it to 60.","code":["UI.runNow({","    slider.valueIsAdjusting = true","    slider.value = 60","})"]},
+
+        {"kind":"and","text":"We park the UI thread, with the drag on to 70 waiting for it.","code":["var gate = new CountDownLatch(1)","UI.run({","    gate.await()","    slider.value = 70","})"]},
+
+        {"kind":"and","text":"This test thread, playing the application thread, writes the 60 into the property, and the 60 is handed back to the UI thread.","code":["try {","    EventProcessor.DECOUPLED.joinUntilDoneOrException()","} finally {","    gate.countDown()","}"]},
+
+        {"kind":"and","text":"The UI thread is released. It moves the knob on to 70, and then receives the late 60.","code":["UI.sync()"]},
+
+        {"kind":"then","text":"The property holds the 60 which the application thread wrote...","code":["value.get() == 60"]},
+
+        {"kind":"and","text":"...but the knob is still at 70, where the user holds it.","code":["UI.runAndGet({ slider.value }) == 70"]},
+
+        {"kind":"when","text":"The user lets go of the knob, and the application thread catches up with its work.","code":["UI.runNow({ slider.valueIsAdjusting = false })","EventProcessor.DECOUPLED.joinUntilDoneOrException()","UI.sync()"]},
+
+        {"kind":"then","text":"The property holds 70, the number at which the user let go, and the knob is still there.","code":["value.get() == 70","UI.runAndGet({ slider.value }) == 70"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A slider knob stays where the user let go of it while the application thread catches up with the numbers of the drag.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When the user lets go of a slider knob, the knob stays where they let go of it.\n            It does not move again until something new happens, like your application setting\n            the value to another number.\n\n            In the decoupled mode that takes some care, because the slider and its value property\n            belong to two different threads. The slider belongs to the UI thread, which handles the\n            mouse. The property belongs to the application thread, which runs the logic of your\n            application. Every time the knob moves during a drag, the UI thread hands the new number\n            over to the application thread, which writes it into the property when it gets around to\n            it. And every time the property changes, the application thread hands the new number back\n            to the UI thread, so that the knob follows the changes your application makes.\n\n            That second hand-over also happens for the numbers the slider wrote itself. On a busy\n            application thread, those numbers can still be on their way when the user has long let go.\n            Picture the user dragging a knob from 50 to 60 and on to 70 and letting go, all before the\n            application thread has written a single one of those numbers. The application thread then\n            writes 60, and hands the 60 back to the UI thread, and then does the same with the 70. If the\n            slider moved its knob for every number that came back, the user would watch the knob jump back\n            to 60 after letting go of it at 70, and then jump forward to 70 again. On a slow machine, and\n            with a long drag, the knob would replay the whole drag in front of the user.\n\n            So a slider does not move its knob for numbers which it wrote itself and which are still on\n            their way back. Once the last of them has come back, it puts the knob at the number the\n            property holds at that moment, which here is the 70 the user let go at, so the knob does not\n            move at all.\n\n            This scenario plays the user by setting the flag `valueIsAdjusting` of the slider and the\n            positions of the drag, the way the look and feel, which is the part of Swing that draws the\n            slider and handles the mouse, does when the user drags the knob. It does the whole drag in one\n            task on the UI thread, so that the application thread cannot start on any of it before the user\n            has let go. To see every position the knob takes afterwards, it registers a plain Swing\n            `ChangeListener` on the slider, which Swing calls for every change of the knob, whoever makes it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding 50, as it would live in a view model.","code":["var value = Var.of(50)"]},
+
+        {"kind":"and","text":"A slider from 0 to 100, built in the decoupled mode and bound to the property.","code":["var slider = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.slider(UI.Axis.HORIZONTAL, 0, 100, value)","    ).get(JSlider)","})"]},
+
+        {"kind":"when","text":"The user presses the mouse button on the knob, drags it to 60 and on to 70, and lets go.","code":["UI.runNow({","    slider.valueIsAdjusting = true","    slider.value = 60","    slider.value = 70","    slider.valueIsAdjusting = false","})"]},
+
+        {"kind":"and","text":"From now on, we record every position the knob takes.","code":["var positions = new CopyOnWriteArrayList<Integer>()","UI.runNow({ slider.addChangeListener({ positions.add(slider.value) }) })"]},
+
+        {"kind":"and","text":"This test thread, playing the application thread, catches up with all the numbers of the drag, and the UI thread receives everything that is handed back to it.","code":["EventProcessor.DECOUPLED.joinUntilDoneOrException()","UI.sync()","EventProcessor.DECOUPLED.joinUntilDoneOrException()","UI.sync()"]},
+
+        {"kind":"then","text":"The property holds 70, the number at which the user let go.","code":["value.get() == 70"]},
+
+        {"kind":"and","text":"Every position the knob took in the meantime was 70, which includes the knob not moving at all. It never went back to 60.","code":["positions.every { it == 70 }"]},
+
+        {"kind":"and","text":"The knob is at 70.","code":["UI.runAndGet({ slider.value }) == 70"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A panel bound to a layout property only installs a new layout once the change reaches the UI thread.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            You can bind the layout of a panel to a property with `withLayout(Val<Layout>)`,\n            so that your view model decides how the panel arranges its children.\n            In the decoupled mode that property belongs to the application thread,\n            and a new layout must reach the panel the same way every other property\n            change does: as a change event, which the UI thread processes in the order\n            the changes were made.\n\n            That order matters, because a layout change rarely comes alone. A view\n            model which switches from one column to two columns might add a child and\n            give it a new constraint in the same breath. If the UI thread picked up the\n            new layout the moment it was written, it could install it before it has\n            processed the events which come before it, and arrange the panel for a\n            state that does not exist yet.\n\n            The UI thread picks up a layout whenever it paints the panel, because a\n            layout is part of the style of a component, and the style is re-evaluated\n            before painting. So in this scenario we park the UI thread, change the\n            layout from this thread, and let the UI thread paint the panel *before* it\n            gets to the change event. That early painting has to keep the layout from\n            before the change. Once the UI thread has caught up with its events, the\n            new layout is installed.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A layout property, as it would live in one of your view models, holding a MigLayout configuration.","code":["var layout = Var.of(Layout.class, Layout.mig(\"fill\"))"]},
+
+        {"kind":"and","text":"A panel built in the decoupled mode, with its layout bound to the property.","code":["var panel = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.panel().withLayout(layout)).get(JPanel)","})"]},
+
+        {"kind":"expect","text":"Initially, the panel uses a MigLayout.","code":["UI.runAndGet({ panel.layout instanceof MigLayout })"]},
+
+        {"kind":"when","text":"We park the UI thread behind a gate, and queue up a painting of the panel for when the gate opens.","code":["var gate = new CountDownLatch(1)","var layoutAfterEarlyPainting = new AtomicReference<LayoutManager>()","UI.run({","    gate.await()","    panel.setSize(120, 80)","    panel.paint(new BufferedImage(120, 80, BufferedImage.TYPE_INT_ARGB).createGraphics())","    layoutAfterEarlyPainting.set(panel.layout)","})"]},
+
+        {"kind":"and","text":"We switch the property to a BorderLayout from this thread, which queues its change event behind the painting, and then open the gate.","code":["try {","    layout.set(Layout.border())","} finally {","    gate.countDown()","}","UI.sync()"]},
+
+        {"kind":"then","text":"The painting ran before the change event reached the UI thread, so it kept the MigLayout...","code":["layoutAfterEarlyPainting.get() instanceof MigLayout"]},
+
+        {"kind":"and","text":"...and once the UI thread processed the change event, the panel switched to the BorderLayout.","code":["UI.runAndGet({ panel.layout instanceof BorderLayout })"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

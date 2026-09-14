@@ -107,8 +107,8 @@ import java.util.function.Predicate;
 
     StyleConf recalculateInsets( C owner, StyleConf styleConf ) {
 <span class="pc bpc" id="L109" title="1 of 2 branches missed.">        if ( owner.getBorder() instanceof StyleAndAnimationBorder ) {</span>
-<span class="fc" id="L110">            final Outline paddingCorrection = _formerBorderPaddingCorrection(owner, styleConf);</span>
-<span class="fc" id="L111">            final Outline adjustedPadding   = styleConf.border().padding().or(paddingCorrection);</span>
+<span class="fc" id="L110">            final OptionalInsets paddingCorrection = _formerBorderPaddingCorrection(owner, styleConf);</span>
+<span class="fc" id="L111">            final OptionalInsets adjustedPadding   = styleConf.border().padding().or(paddingCorrection);</span>
 <span class="fc" id="L112">            styleConf = styleConf._withBorder(styleConf.border().withPadding(adjustedPadding));</span>
 <span class="fc" id="L113">            StyleAndAnimationBorder&lt;?&gt; border = (StyleAndAnimationBorder&lt;?&gt;) owner.getBorder();</span>
 <span class="fc" id="L114">            border.recalculateInsets(styleConf);</span>
@@ -124,17 +124,17 @@ import java.util.function.Predicate;
 <span class="fc bfc" id="L124" title="All 4 branches covered.">        return _dynamicLaF.customLookAndFeelIsInstalled(owner) || _dynamicLaF.currentLookAndFeelSupportsSwingTree(owner);</span>
     }
 
-    static Outline _formerBorderMarginCorrection(JComponent owner) {
+    static OptionalInsets _formerBorderMarginCorrection(JComponent owner) {
 <span class="fc" id="L128">        Border border = owner.getBorder();</span>
 <span class="fc bfc" id="L129" title="All 2 branches covered.">        if ( border instanceof StyleAndAnimationBorder ) {</span>
 <span class="fc" id="L130">            return ((StyleAndAnimationBorder&lt;?&gt;) border).getDelegatedInsetsComponentAreaCorrection();</span>
         }
-<span class="fc" id="L132">        return Outline.none();</span>
+<span class="fc" id="L132">        return OptionalInsets.none();</span>
     }
 
-    Outline _formerBorderPaddingCorrection( C owner, StyleConf conf ) {
+    OptionalInsets _formerBorderPaddingCorrection( C owner, StyleConf conf ) {
 <span class="fc" id="L136">        Border border = owner.getBorder();</span>
-<span class="fc" id="L137">        Outline result = Outline.none();</span>
+<span class="fc" id="L137">        OptionalInsets result = OptionalInsets.none();</span>
 <span class="fc bfc" id="L138" title="All 2 branches covered.">        if ( border instanceof StyleAndAnimationBorder ) {</span>
 <span class="fc" id="L139">            result = ((StyleAndAnimationBorder&lt;?&gt;) border).getDelegatedInsets(conf);</span>
         }
@@ -220,8 +220,8 @@ import java.util.function.Predicate;
         }
 
 <span class="fc bfc" id="L222" title="All 2 branches covered.">        if ( !doInstallation ) {</span>
-<span class="fc" id="L223">            final Outline paddingCorrection = _formerBorderPaddingCorrection(owner, newStyle);</span>
-<span class="fc" id="L224">            final Outline adjustedPadding   = newStyle.border().padding().or(paddingCorrection);</span>
+<span class="fc" id="L223">            final OptionalInsets paddingCorrection = _formerBorderPaddingCorrection(owner, newStyle);</span>
+<span class="fc" id="L224">            final OptionalInsets adjustedPadding   = newStyle.border().padding().or(paddingCorrection);</span>
 <span class="fc" id="L225">            newStyle = newStyle._withBorder(newStyle.border().withPadding(adjustedPadding));</span>
 
 <span class="fc bfc" id="L227" title="All 2 branches covered.">            if ( owner.getBorder() instanceof StyleAndAnimationBorder&lt;?&gt; ) {</span>

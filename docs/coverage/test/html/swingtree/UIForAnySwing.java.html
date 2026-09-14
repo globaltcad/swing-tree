@@ -2098,24 +2098,25 @@ import java.util.function.Function;
      *  &lt;p&gt;
      *  This is the reactive counterpart to the various static {@code withLayout(...)}
      *  overloads: instead of fixing the layout at build time, you supply an observable
-     *  property whose current value is read on every style pass, allowing the layout
-     *  to change dynamically at runtime without any manual wiring.
+     *  property, allowing the layout to change dynamically at runtime without any manual wiring.
      *  &lt;p&gt;
      *  Internally this method is equivalent to:
      *  &lt;pre&gt;{@code
      *      UI.panel()
-     *      .withRepaintOn(layoutVar)
-     *      .withStyle( it -&gt; it
-     *          layout(layoutVar.get())
-     *      )
+     *      .withStyle( layoutVar, (layout, it) -&gt; it.layout(layout) )
      *  }&lt;/pre&gt;
-     *  The call to {@link #withRepaintOn(Observable)} ensures the component is
-     *  repainted (and its style — including the layout — re-evaluated) each time
-     *  {@code layout} emits a change event.  The {@link #withStyle(Styler)} call
-     *  registers a styler that reads the &lt;em&gt;current&lt;/em&gt; value of the property
-     *  and passes it to {@link swingtree.style.ComponentStyleDelegate#layout(Layout)},
+     *  The property driven {@link #withStyle(Val, ItemStyler)} call hands every new
+     *  layout to the style engine as a captured change event item, re-evaluates the style
+     *  and repaints the component. The layout then reaches
+     *  {@link swingtree.style.ComponentStyleDelegate#layout(Layout)},
      *  which in turn delegates to {@link Layout#installFor(javax.swing.JComponent)}
      *  whenever the layout object differs from the previously installed one.
+     *  &lt;p&gt;
+     *  Because the layout travels as a change event item, the UI thread never reads
+     *  the property itself, which belongs to the application thread when the
+     *  {@link swingtree.threading.EventProcessor#DECOUPLED} event processor is used.
+     *  A new layout is therefore installed in the same order as all other property
+     *  changes reaching the component, even if the component is painted in between.
      *  &lt;p&gt;
      *  A usage pattern may look something like this:
      *  &lt;pre&gt;{@code
@@ -2156,10 +2157,9 @@ import java.util.function.Function;
      * @throws IllegalArgumentException If the supplied property allows holding {@code null} values.
      */
     public final I withLayout( Val&lt;Layout&gt; layout ) {
-<span class="fc" id="L2159">        Objects.requireNonNull(layout);</span>
-<span class="fc" id="L2160">        NullUtil.nullPropertyCheck(layout, &quot;layout&quot;, &quot;Null is not allowed to model a layout!&quot;);</span>
-<span class="fc" id="L2161">        UIForAnySwing&lt;I,C&gt; withAutoRepaint = (UIForAnySwing) this.withRepaintOn(layout);</span>
-<span class="fc" id="L2162">        return withAutoRepaint.withStyle( it -&gt; it.layout(layout.get()) );</span>
+<span class="fc" id="L2160">        Objects.requireNonNull(layout);</span>
+<span class="fc" id="L2161">        NullUtil.nullPropertyCheck(layout, &quot;layout&quot;, &quot;Null is not allowed to model a layout!&quot;);</span>
+<span class="fc" id="L2162">        return withStyle( layout, (installer, it) -&gt; it.layout(installer) );</span>
     }
 
     /**

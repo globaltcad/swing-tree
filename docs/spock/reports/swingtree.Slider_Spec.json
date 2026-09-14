@@ -4,7 +4,7 @@
   "narrative":"Sliders are a common way to allow the user to select a value\n    within a range. Swing-Tree provides a way to create sliders\n    in a declarative way, allowing you to configure the slider\n    and then show it to the user.\n\n    Sliders can be vertical or horizontal, and can have a\n    minimum and maximum value, as well as a current value.\n    You can bind any of these values to properties in your\n    application, so that the slider can update itself\n    automatically when your application state changes.",
   "subjects":["swingtree.UIForSlider","swingtree.UI"],
   "statistics":{
-    "runs":"4",
+    "runs":"14",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -39,26 +39,26 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            You can use the `slider(Axis, N, N, Var<N>)` factory method\n            to bind a number based property to the slider's current value.\n            This includes floating point numbers, like `double` or `float`.\n\n            When the slider's value changes through user interaction,\n            the bound property will be updated\n            and conversely, when the property changes, the slider's \n            value will be updated.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            You can use the `slider(Axis, N, N, Var<N>)` factory method\n            to bind a number based property to the slider's current value.\n            This includes floating point numbers, like `double` or `float`.\n\n            When the slider's value changes through user interaction,\n            the bound property will be updated\n            and conversely, when the property changes, the slider's\n            value will be updated.\n\n            A `JSlider` only knows whole numbers, so SwingTree translates your\n            fractional numbers into a range of whole numbers behind the scenes.\n            Which whole numbers those are is SwingTree's own business, so this\n            scenario never looks at them. It only looks at where the knob sits\n            as a fraction of the way along the slider, which is what the user\n            actually sees on screen. The slider is roughly 256 whole numbers\n            long, so the knob may be up to 1/256 of the way away from the exact\n            position of a number.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a double based Sprouts property and a list for recording changes.","code":["var currentState = Var.of(0.42d)","var trace = []","currentState.onChange(From.ALL, it -> trace << \"property=${it.currentValue().orElseThrowUnchecked()}\" )"]},
 
-        {"kind":"and","text":"Then we build a declarative JSlider.","code":["var slider =","        UI.slider(UI.Axis.HORIZONTAL, -2d, 2d, currentState)","        .onChange( it -> trace << \"slider=${it.get().value}\" )","        .get(JSlider)"]},
+        {"kind":"and","text":"Then we build a declarative JSlider running from -2 to 2.","code":["var slider = UI.slider(UI.Axis.HORIZONTAL, -2d, 2d, currentState).get(JSlider)"]},
 
-        {"kind":"and","text":"We calculate the internal scale based on the min-max range","code":["var scale = UIForSlider.PREFERRED_STEPS / 4d"]},
+        {"kind":"when","text":"We measure how far along the slider the knob sits.","code":["var knobFraction = (slider.value - slider.minimum) / (double) (slider.maximum - slider.minimum)"]},
 
-        {"kind":"expect","text":"The slider has the correct initial state:","code":["slider.minimum == (int)(-2d * scale)","slider.maximum == (int)(2d * scale)","slider.value == (int)(0.42d * scale)"]},
+        {"kind":"then","text":"The value 0.42 is 2.42 away from -2, and the slider is 4 long, so the knob sits 2.42 / 4 = 60.5% of the way along.","code":["Math.abs(knobFraction - 0.605d) <= 1d / 256"]},
 
-        {"kind":"when","text":"We change the slider value","code":["UI.runNow({ slider.value = (int)(1.5d * scale) })"]},
+        {"kind":"when","text":"The user moves the knob 87.5% of the way along the slider.","code":["UI.runNow({ slider.value = slider.minimum + (int) ((slider.maximum - slider.minimum) * 0.875d) })"]},
 
-        {"kind":"then","text":"The property is updated","code":["trace == [\"slider=96\", \"property=1.5\"]"]},
+        {"kind":"then","text":"The property now holds the number at that point: -2 + 0.875 * 4 = 1.5.","code":["trace == [\"property=1.5\"]"]},
 
-        {"kind":"when","text":"We change the property value","code":["UI.runNow({","    currentState.set(0.75d)","})"]},
+        {"kind":"when","text":"The application changes the property to 0.75.","code":["UI.runNow({ currentState.set(0.75d) })","knobFraction = (slider.value - slider.minimum) / (double) (slider.maximum - slider.minimum)"]},
 
-        {"kind":"then","text":"The trace shows the property change.","code":["trace == [\"slider=96\", \"property=1.5\", \"property=0.75\"]"]},
+        {"kind":"then","text":"The trace shows the property change.","code":["trace == [\"property=1.5\", \"property=0.75\"]"]},
 
-        {"kind":"and","text":"The slider value is updated","code":["slider.value == (int)(0.75d * scale)"]}
+        {"kind":"and","text":"The knob follows it to 2.75 / 4 = 68.75% of the way along.","code":["Math.abs(knobFraction - 0.6875d) <= 1d / 256"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -68,38 +68,176 @@
       "result":"PASS",
       "duration":"?",
       "iterations":{
-      "tags":{},"see":[],"extraInfo":["\n            You can use the `slider(Axis, Val<N>, Val<N>, Var<N>)` factory method\n            to bind min, max and value properties to the slider's current state.\n            This works for any `Number` based property, including `double` or `float`.\n\n            When the slider's value changes through user interaction,\n            the bound property will be updated and conversely, when the property changes,\n            the slider's value will be updated.\n\n            The min and max range may not be updated by the user, but they can be\n            updated programmatically through the bound properties.\n        "]
+      "tags":{},"see":[],"extraInfo":["\n            You can use the `slider(Axis, Val<N>, Val<N>, Var<N>)` factory method\n            to bind min, max and value properties to the slider's current state.\n            This works for any `Number` based property, including `double` or `float`.\n\n            When the slider's value changes through user interaction,\n            the bound property will be updated and conversely, when the property changes,\n            the slider's value will be updated.\n\n            The min and max range may not be updated by the user, but they can be\n            updated programmatically through the bound properties.\n\n            A `JSlider` only knows whole numbers, so SwingTree translates your\n            fractional numbers into a range of whole numbers behind the scenes,\n            and it translates them again whenever the min or the max changes.\n            This scenario only looks at where the knob sits as a fraction of the\n            way along the slider, which is what the user sees on screen. The slider\n            is roughly 256 whole numbers long, so the knob may be up to 1/256 of\n            the way away from the exact position of a number, and a number written\n            back by the slider may be up to 1/256 of the slider's length away from\n            the number the user pointed at.\n        "]
       },
       "blocks":[
         {"kind":"given","text":"We create a double based Sprouts property and a list for recording changes.","code":["var currentState = Var.of(0.42d)","var trace = []","currentState.onChange(From.ALL, it -> trace << \"property=${it.currentValue().orElseThrowUnchecked()}\" )"]},
 
         {"kind":"and","text":"Two more properties for min and max","code":["var min = Var.of(-3d)","var max = Var.of(4d)","min.onChange(From.ALL, it -> trace << \"min=${it.currentValue().orElseThrowUnchecked()}\" )","max.onChange(From.ALL, it -> trace << \"max=${it.currentValue().orElseThrowUnchecked()}\" )"]},
 
-        {"kind":"and","text":"Then we build a declarative JSlider.","code":["var slider =","        UI.slider(UI.Axis.VERTICAL, min, max, currentState)","        .onChange( it -> trace << \"slider=${it.get().value}\" )","        .get(JSlider)"]},
+        {"kind":"and","text":"Then we build a declarative JSlider running from -3 to 4.","code":["var slider = UI.slider(UI.Axis.VERTICAL, min, max, currentState).get(JSlider)"]},
 
-        {"kind":"and","text":"We calculate the internal scale based on the min-max range","code":["var scale = UIForSlider.PREFERRED_STEPS / 7d"]},
+        {"kind":"when","text":"We measure how far along the slider the knob sits.","code":["var knobFraction = (slider.value - slider.minimum) / (double) (slider.maximum - slider.minimum)"]},
 
-        {"kind":"expect","text":"The slider has the correct initial state:","code":["slider.minimum == (int)(-3d * scale)","slider.maximum == (int)(4d * scale)","slider.value == (int)(0.42d * scale)"]},
+        {"kind":"then","text":"The value 0.42 is 3.42 away from -3, and the slider is 7 long, so the knob sits 3.42 / 7 = 48.86% of the way along.","code":["Math.abs(knobFraction - 3.42d / 7) <= 1d / 256"]},
 
-        {"kind":"when","text":"We change the slider value","code":["UI.runNow({ slider.value = (int)(2.5d * scale) })"]},
+        {"kind":"when","text":"The user moves the knob to where 2.5 is: 5.5 / 7 = 78.57% of the way along.","code":["UI.runNow({ slider.value = slider.minimum + Math.round((slider.maximum - slider.minimum) * 5.5d / 7) as int })"]},
 
-        {"kind":"then","text":"The property is updated","code":["trace == [\"slider=91\", \"property=2.48828125\"]"]},
+        {"kind":"then","text":"The property holds a number within 7 / 256 = 0.027 of 2.5.","code":["trace.size() == 1","Math.abs(currentState.get() - 2.5d) <= 7d / 256"]},
 
-        {"kind":"when","text":"We change the property value","code":["UI.runNow({","    currentState.set(0.75d)","})"]},
+        {"kind":"when","text":"The application changes the property to 0.75.","code":["trace.clear()","UI.runNow({ currentState.set(0.75d) })"]},
 
-        {"kind":"then","text":"The trace shows the property change.","code":["trace == [\"slider=91\", \"property=2.48828125\", \"property=0.75\"]"]},
+        {"kind":"then","text":"The trace shows the property change.","code":["trace == [\"property=0.75\"]"]},
 
-        {"kind":"when","text":"We change the min value and recalculate the scale.","code":["UI.runNow({","    min.set(-1d)","})","scale = UIForSlider.PREFERRED_STEPS / 5d"]},
+        {"kind":"when","text":"The application changes the min to -1, so the slider is now 5 long.","code":["UI.runNow({ min.set(-1d) })","knobFraction = (slider.value - slider.minimum) / (double) (slider.maximum - slider.minimum)"]},
 
-        {"kind":"then","text":"The trace shows the min change.","code":["trace == [\"slider=91\", \"property=2.48828125\", \"property=0.75\", \"min=-1.0\"]"]},
+        {"kind":"then","text":"The trace shows the min change, and nothing else: the value stays 0.75.","code":["trace == [\"property=0.75\", \"min=-1.0\"]"]},
 
-        {"kind":"and","text":"The sliders min value is updated","code":["slider.minimum == (int)(-1d * scale)"]},
+        {"kind":"and","text":"The knob moves to 1.75 / 5 = 35% of the way along.","code":["Math.abs(knobFraction - 0.35d) <= 1d / 256"]},
 
-        {"kind":"when","text":"We change the max value and recalculate the scale again.","code":["UI.runNow({","    max.set(2d)","})","scale = UIForSlider.PREFERRED_STEPS / 3d"]},
+        {"kind":"when","text":"The application changes the max to 2, so the slider is now 3 long.","code":["UI.runNow({ max.set(2d) })","knobFraction = (slider.value - slider.minimum) / (double) (slider.maximum - slider.minimum)"]},
 
-        {"kind":"then","text":"The trace shows the max change.","code":["trace == [\"slider=91\", \"property=2.48828125\", \"property=0.75\", \"min=-1.0\", \"max=2.0\"]"]},
+        {"kind":"then","text":"The trace shows the max change, and the value is still 0.75.","code":["trace == [\"property=0.75\", \"min=-1.0\", \"max=2.0\"]"]},
 
-        {"kind":"and","text":"The sliders max value is updated","code":["slider.maximum == (int)(2d * scale)"]}
+        {"kind":"and","text":"The knob moves to 1.75 / 3 = 58.33% of the way along.","code":["Math.abs(knobFraction - 1.75d / 3) <= 1d / 256"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A slider bound to a property writes numbers of the property's own type back into it. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `slider(Axis, N, N, Var<N>)` factory method accepts any of the number\n            types `Integer`, `Long`, `Short`, `Byte`, `Float` and `Double`.\n            Whatever type you choose for your property, the slider writes numbers of\n            exactly that type back into it. A `Var<Float>` which suddenly held a\n            `Double` would break the application code reading it with a\n            `ClassCastException`, far away from the slider that caused it.\n\n            In this scenario the user drags the knob to both ends of the slider,\n            and the property has to hold the exact minimum and maximum afterwards,\n            as numbers of its own type.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A slider bound to the property.","code":["var slider = UI.slider(UI.Axis.HORIZONTAL, min, max, value).get(JSlider)"]},
+
+        {"kind":"when","text":"The user drags the knob all the way to the end.","code":["UI.runNow({ slider.value = slider.maximum })"]},
+
+        {"kind":"then","text":"The property holds the maximum, as a number of its own type.","code":["value.get() == max","type.isInstance(value.get())"]},
+
+        {"kind":"when","text":"The user drags the knob all the way to the start.","code":["UI.runNow({ slider.value = slider.minimum })"]},
+
+        {"kind":"then","text":"The property holds the minimum, as a number of its own type.","code":["value.get() == min","type.isInstance(value.get())"]},
+
+        {"kind":"where","text":"","code":{"type":["Integer","Long","Short","Byte","Float","Double"],"value":["Var.of(5)","Var.of(5L)","Var.of((short) 5)","Var.of((byte) 5)","Var.of(0.5f)","Var.of(0.5d)"],"min":["0","0L","(short) 0","(byte) 0","0f","-0.25d"],"max":["10","10L","(short) 10","(byte) 10","1f","1.75d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A slider bound to a property writes numbers of the property's own type back into it. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `slider(Axis, N, N, Var<N>)` factory method accepts any of the number\n            types `Integer`, `Long`, `Short`, `Byte`, `Float` and `Double`.\n            Whatever type you choose for your property, the slider writes numbers of\n            exactly that type back into it. A `Var<Float>` which suddenly held a\n            `Double` would break the application code reading it with a\n            `ClassCastException`, far away from the slider that caused it.\n\n            In this scenario the user drags the knob to both ends of the slider,\n            and the property has to hold the exact minimum and maximum afterwards,\n            as numbers of its own type.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A slider bound to the property.","code":["var slider = UI.slider(UI.Axis.HORIZONTAL, min, max, value).get(JSlider)"]},
+
+        {"kind":"when","text":"The user drags the knob all the way to the end.","code":["UI.runNow({ slider.value = slider.maximum })"]},
+
+        {"kind":"then","text":"The property holds the maximum, as a number of its own type.","code":["value.get() == max","type.isInstance(value.get())"]},
+
+        {"kind":"when","text":"The user drags the knob all the way to the start.","code":["UI.runNow({ slider.value = slider.minimum })"]},
+
+        {"kind":"then","text":"The property holds the minimum, as a number of its own type.","code":["value.get() == min","type.isInstance(value.get())"]},
+
+        {"kind":"where","text":"","code":{"type":["Integer","Long","Short","Byte","Float","Double"],"value":["Var.of(5)","Var.of(5L)","Var.of((short) 5)","Var.of((byte) 5)","Var.of(0.5f)","Var.of(0.5d)"],"min":["0","0L","(short) 0","(byte) 0","0f","-0.25d"],"max":["10","10L","(short) 10","(byte) 10","1f","1.75d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A slider bound to a property writes numbers of the property's own type back into it. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `slider(Axis, N, N, Var<N>)` factory method accepts any of the number\n            types `Integer`, `Long`, `Short`, `Byte`, `Float` and `Double`.\n            Whatever type you choose for your property, the slider writes numbers of\n            exactly that type back into it. A `Var<Float>` which suddenly held a\n            `Double` would break the application code reading it with a\n            `ClassCastException`, far away from the slider that caused it.\n\n            In this scenario the user drags the knob to both ends of the slider,\n            and the property has to hold the exact minimum and maximum afterwards,\n            as numbers of its own type.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A slider bound to the property.","code":["var slider = UI.slider(UI.Axis.HORIZONTAL, min, max, value).get(JSlider)"]},
+
+        {"kind":"when","text":"The user drags the knob all the way to the end.","code":["UI.runNow({ slider.value = slider.maximum })"]},
+
+        {"kind":"then","text":"The property holds the maximum, as a number of its own type.","code":["value.get() == max","type.isInstance(value.get())"]},
+
+        {"kind":"when","text":"The user drags the knob all the way to the start.","code":["UI.runNow({ slider.value = slider.minimum })"]},
+
+        {"kind":"then","text":"The property holds the minimum, as a number of its own type.","code":["value.get() == min","type.isInstance(value.get())"]},
+
+        {"kind":"where","text":"","code":{"type":["Integer","Long","Short","Byte","Float","Double"],"value":["Var.of(5)","Var.of(5L)","Var.of((short) 5)","Var.of((byte) 5)","Var.of(0.5f)","Var.of(0.5d)"],"min":["0","0L","(short) 0","(byte) 0","0f","-0.25d"],"max":["10","10L","(short) 10","(byte) 10","1f","1.75d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A slider bound to a property writes numbers of the property's own type back into it. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `slider(Axis, N, N, Var<N>)` factory method accepts any of the number\n            types `Integer`, `Long`, `Short`, `Byte`, `Float` and `Double`.\n            Whatever type you choose for your property, the slider writes numbers of\n            exactly that type back into it. A `Var<Float>` which suddenly held a\n            `Double` would break the application code reading it with a\n            `ClassCastException`, far away from the slider that caused it.\n\n            In this scenario the user drags the knob to both ends of the slider,\n            and the property has to hold the exact minimum and maximum afterwards,\n            as numbers of its own type.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A slider bound to the property.","code":["var slider = UI.slider(UI.Axis.HORIZONTAL, min, max, value).get(JSlider)"]},
+
+        {"kind":"when","text":"The user drags the knob all the way to the end.","code":["UI.runNow({ slider.value = slider.maximum })"]},
+
+        {"kind":"then","text":"The property holds the maximum, as a number of its own type.","code":["value.get() == max","type.isInstance(value.get())"]},
+
+        {"kind":"when","text":"The user drags the knob all the way to the start.","code":["UI.runNow({ slider.value = slider.minimum })"]},
+
+        {"kind":"then","text":"The property holds the minimum, as a number of its own type.","code":["value.get() == min","type.isInstance(value.get())"]},
+
+        {"kind":"where","text":"","code":{"type":["Integer","Long","Short","Byte","Float","Double"],"value":["Var.of(5)","Var.of(5L)","Var.of((short) 5)","Var.of((byte) 5)","Var.of(0.5f)","Var.of(0.5d)"],"min":["0","0L","(short) 0","(byte) 0","0f","-0.25d"],"max":["10","10L","(short) 10","(byte) 10","1f","1.75d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A slider bound to a property writes numbers of the property's own type back into it. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `slider(Axis, N, N, Var<N>)` factory method accepts any of the number\n            types `Integer`, `Long`, `Short`, `Byte`, `Float` and `Double`.\n            Whatever type you choose for your property, the slider writes numbers of\n            exactly that type back into it. A `Var<Float>` which suddenly held a\n            `Double` would break the application code reading it with a\n            `ClassCastException`, far away from the slider that caused it.\n\n            In this scenario the user drags the knob to both ends of the slider,\n            and the property has to hold the exact minimum and maximum afterwards,\n            as numbers of its own type.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A slider bound to the property.","code":["var slider = UI.slider(UI.Axis.HORIZONTAL, min, max, value).get(JSlider)"]},
+
+        {"kind":"when","text":"The user drags the knob all the way to the end.","code":["UI.runNow({ slider.value = slider.maximum })"]},
+
+        {"kind":"then","text":"The property holds the maximum, as a number of its own type.","code":["value.get() == max","type.isInstance(value.get())"]},
+
+        {"kind":"when","text":"The user drags the knob all the way to the start.","code":["UI.runNow({ slider.value = slider.minimum })"]},
+
+        {"kind":"then","text":"The property holds the minimum, as a number of its own type.","code":["value.get() == min","type.isInstance(value.get())"]},
+
+        {"kind":"where","text":"","code":{"type":["Integer","Long","Short","Byte","Float","Double"],"value":["Var.of(5)","Var.of(5L)","Var.of((short) 5)","Var.of((byte) 5)","Var.of(0.5f)","Var.of(0.5d)"],"min":["0","0L","(short) 0","(byte) 0","0f","-0.25d"],"max":["10","10L","(short) 10","(byte) 10","1f","1.75d"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A slider bound to a property writes numbers of the property's own type back into it. [5]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The `slider(Axis, N, N, Var<N>)` factory method accepts any of the number\n            types `Integer`, `Long`, `Short`, `Byte`, `Float` and `Double`.\n            Whatever type you choose for your property, the slider writes numbers of\n            exactly that type back into it. A `Var<Float>` which suddenly held a\n            `Double` would break the application code reading it with a\n            `ClassCastException`, far away from the slider that caused it.\n\n            In this scenario the user drags the knob to both ends of the slider,\n            and the property has to hold the exact minimum and maximum afterwards,\n            as numbers of its own type.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A slider bound to the property.","code":["var slider = UI.slider(UI.Axis.HORIZONTAL, min, max, value).get(JSlider)"]},
+
+        {"kind":"when","text":"The user drags the knob all the way to the end.","code":["UI.runNow({ slider.value = slider.maximum })"]},
+
+        {"kind":"then","text":"The property holds the maximum, as a number of its own type.","code":["value.get() == max","type.isInstance(value.get())"]},
+
+        {"kind":"when","text":"The user drags the knob all the way to the start.","code":["UI.runNow({ slider.value = slider.minimum })"]},
+
+        {"kind":"then","text":"The property holds the minimum, as a number of its own type.","code":["value.get() == min","type.isInstance(value.get())"]},
+
+        {"kind":"where","text":"","code":{"type":["Integer","Long","Short","Byte","Float","Double"],"value":["Var.of(5)","Var.of(5L)","Var.of((short) 5)","Var.of((byte) 5)","Var.of(0.5f)","Var.of(0.5d)"],"min":["0","0L","(short) 0","(byte) 0","0f","-0.25d"],"max":["10","10L","(short) 10","(byte) 10","1f","1.75d"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     },
@@ -129,6 +267,124 @@
         {"kind":"when","text":"The user drags the slider knob all the way to the bottom.","code":["UI.runNow({ slider.value = slider.minimum })"]},
 
         {"kind":"then","text":"The bound value equals the user-defined minimum (within rounding).","code":["value.get() == min.get()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"While the user holds the knob of a slider, changes of its value property do not move the knob.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Think of the position slider of a video player. While the video plays, your\n            application moves the knob forward by setting the position property, many times\n            a second. When the user wants to watch another part of the video, they grab the\n            knob and drag it there. The video keeps playing during the drag, so your\n            application keeps setting the position property.\n\n            Those changes must not move the knob while the user holds it. The number under\n            the knob is the number the user is choosing, and when they let go, that number\n            has to end up in the property. After that, the slider follows the property again.\n\n            Here is what would go wrong otherwise. The user drags the knob from 10 to 70.\n            Meanwhile the video plays on, and your application sets the position to 11, then\n            to 12. If the slider took over the 12, it would report 12 when the user lets go,\n            because 12 is the number it holds at that moment, and it would write 12 into the\n            property. The video would carry on at 12 seconds, as if the user had never dragged\n            the knob at all.\n\n            A `JSlider` knows when the user holds its knob through a flag named\n            `valueIsAdjusting`. The look and feel, which is the part of Swing that draws the\n            slider and handles the mouse, sets that flag to `true` when the user presses the\n            mouse button on the knob, and back to `false` when they release it. This scenario plays the user by\n            setting that flag and the positions of the drag, just like the look and feel does\n            when it handles the mouse.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding the position in a video, in seconds.","code":["var position = Var.of(10)"]},
+
+        {"kind":"and","text":"A slider for a video which is 100 seconds long, bound to the property.","code":["var slider = UI.slider(UI.Axis.HORIZONTAL, 0, 100, position).get(JSlider)"]},
+
+        {"kind":"when","text":"The user grabs the knob and drags it to 70.","code":["UI.runNow({","    slider.valueIsAdjusting = true","    slider.value = 70","})"]},
+
+        {"kind":"then","text":"The property follows the knob.","code":["position.get() == 70"]},
+
+        {"kind":"when","text":"The video keeps playing, and the application sets the position to 11, and then to 12.","code":["UI.runNow({","    position.set(11)","    position.set(12)","})"]},
+
+        {"kind":"then","text":"The knob stays at 70, where the user holds it.","code":["slider.value == 70"]},
+
+        {"kind":"when","text":"The user lets go of the knob.","code":["UI.runNow({ slider.valueIsAdjusting = false })"]},
+
+        {"kind":"then","text":"The property holds 70, the position the user chose, and the knob is still there.","code":["position.get() == 70","slider.value == 70"]},
+
+        {"kind":"when","text":"The video plays on from there, and the application sets the position to 71.","code":["UI.runNow({ position.set(71) })"]},
+
+        {"kind":"then","text":"The knob follows the property again.","code":["slider.value == 71"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Clicking the knob of a slider for fractional numbers without moving it keeps the exact number in the property.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `JSlider` only knows whole numbers. So a slider for `Double` numbers maps its\n            numbers onto a range of whole numbers of its own choosing, and most of your numbers\n            fall between two of those whole numbers. Say a slider from 0.0 to 1.0 runs over the\n            whole numbers from 0 to 256. The number 0.42 then belongs at 0.42 * 256 = 107.52,\n            and the knob can only sit at the closest whole number, 108. Going back the other way,\n            the number at 108 is 108 / 256 = 0.421875.\n\n            That is fine for showing the knob, which sits less than one 256th of the length of\n            the slider away from where 0.42 belongs. But your property must keep 0.42 until the\n            user actually moves the knob, and when the user does move it, the property receives\n            the number at the new position of the knob.\n\n            A click on the knob is not a move. A `JSlider` has a flag named `valueIsAdjusting`.\n            The look and feel, which is the part of Swing that draws the slider and handles the\n            mouse, sets that flag to `true` when the user presses the mouse button on the knob,\n            and back to `false` when they release it. The slider reports each change of that\n            flag to its change listeners, just like a change of its number.\n            A slider which answered each of those two reports by writing the number at the knob\n            into your property would replace your 0.42 with 0.421875, although the user did\n            nothing but click.\n\n            This scenario plays the user by setting `valueIsAdjusting` and the value of the\n            slider, just like the look and feel does when it handles the mouse.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding 0.42, and a slider from 0.0 to 1.0 bound to it.","code":["var opacity = Var.of(0.42d)","var slider = UI.slider(UI.Axis.HORIZONTAL, 0.0d, 1.0d, opacity).get(JSlider)"]},
+
+        {"kind":"when","text":"The user presses the mouse button on the knob.","code":["UI.runNow({ slider.valueIsAdjusting = true })"]},
+
+        {"kind":"then","text":"The property still holds exactly 0.42.","code":["opacity.get() == 0.42d"]},
+
+        {"kind":"when","text":"The user releases the mouse button, without having moved the mouse.","code":["UI.runNow({ slider.valueIsAdjusting = false })"]},
+
+        {"kind":"then","text":"The property still holds exactly 0.42.","code":["opacity.get() == 0.42d"]},
+
+        {"kind":"when","text":"The user drags the knob by the smallest step there is, one whole number to the right.","code":["UI.runNow({","    slider.valueIsAdjusting = true","    slider.value = slider.value + 1","    slider.valueIsAdjusting = false","})"]},
+
+        {"kind":"then","text":"Now the property holds the number at the new position of the knob.","code":["opacity.get() == (slider.value - slider.minimum) / (double) (slider.maximum - slider.minimum)","opacity.get() > 0.42d"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A minimum or maximum set on the `JSlider` itself becomes the range of a slider for whole numbers.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            SwingTree builds a real `JSlider`, and that slider is yours to use. Maybe you hand\n            it to an older part of your application, which configures it the Swing way, through\n            `setMinimum(..)` and `setMaximum(..)`. On a slider for whole numbers, such as\n            `Integer` or `Long` numbers, those calls simply work. The new minimum or maximum\n            becomes the range of the slider, the tick marks and labels are laid out again for\n            that range, and the range stays until something changes it again.\n\n            When the new range no longer contains the number of the slider, the `JSlider` itself\n            moves the knob to the nearest end of the new range. The value property then receives\n            the number at the knob, just as if the user had moved the knob there, so that the\n            property and the knob agree.\n\n            This needs care, because SwingTree keeps its own copy of the minimum, the maximum\n            and the value of a slider. It lays out the tick marks from that copy, and whenever\n            your application changes the value, it writes the minimum, the maximum and the value\n            into the slider at once. If SwingTree did not notice a call to `setMaximum(200)`,\n            its copy would still say 100. The labels would stop at 100, and the next time the\n            application set the value, SwingTree would write its old maximum of 100 back into\n            the slider, and the 200 would be gone without a trace.\n\n            A slider for `Double` or `Float` numbers is different, because its whole numbers\n            are not numbers of your application, so there SwingTree undoes such a call.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding 50.","code":["var value = Var.of(50)"]},
+
+        {"kind":"and","text":"A slider from 0 to 100 bound to the property, with a label every 50.","code":["var slider =","        UI.slider(UI.Axis.HORIZONTAL, 0, 100, value)","        .withTicks(","            SliderTicks.of(Integer.class)","            .withMajorSpacing(50)","            .withLabelsAtMajorTicks()","        )","        .get(JSlider)"]},
+
+        {"kind":"expect","text":"The labels read 0, 50 and 100.","code":["slider.labelTable.collectEntries { number, label -> [number, label.text] } == [0: \"0\", 50: \"50\", 100: \"100\"]"]},
+
+        {"kind":"when","text":"Some Swing code sets the maximum of the `JSlider` to 200.","code":["UI.runNow({ slider.maximum = 200 })"]},
+
+        {"kind":"then","text":"The slider runs to 200, and the labels go on up to 200.","code":["slider.maximum == 200","slider.labelTable.collectEntries { number, label -> [number, label.text] } == [0: \"0\", 50: \"50\", 100: \"100\", 150: \"150\", 200: \"200\"]"]},
+
+        {"kind":"when","text":"The application sets the value to 150.","code":["UI.runNow({ value.set(150) })"]},
+
+        {"kind":"then","text":"The knob moves to 150, and the slider still runs to 200.","code":["slider.value == 150","slider.maximum == 200"]},
+
+        {"kind":"when","text":"Some Swing code sets the maximum to 120, below the knob.","code":["UI.runNow({ slider.maximum = 120 })"]},
+
+        {"kind":"then","text":"The `JSlider` moved the knob back to 120, and the property received the 120.","code":["slider.value == 120","value.get() == 120"]},
+
+        {"kind":"when","text":"Some Swing code sets the minimum to 20.","code":["UI.runNow({ slider.minimum = 20 })"]},
+
+        {"kind":"then","text":"Tick marks count from the minimum of a slider, so the labels now sit at 20, 70 and 120.","code":["slider.labelTable.collectEntries { number, label -> [number, label.text] } == [20: \"20\", 70: \"70\", 120: \"120\"]"]},
+
+        {"kind":"and","text":"The knob and the property stay at 120.","code":["slider.value == 120","value.get() == 120"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A slider for fractional numbers undoes a minimum or maximum set on its `JSlider` right away.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            A `JSlider` only knows whole numbers. So a slider for `Double` or `Float` numbers\n            maps its numbers onto a range of whole numbers of SwingTree's own choosing. Say\n            SwingTree lets a slider from 0.0 to 1.0 run over the whole numbers from 0 to 256.\n            Then the number 0.5 sits at the whole number 128, halfway along.\n\n            Those whole numbers are SwingTree's business, and they are not numbers of your\n            application. If some Swing code calls `setMaximum(512)` on such a slider, there is\n            nothing sensible the call could mean: the slider should not run to 512, because\n            512 is not a number of the slider, and it should not run to 2.0 either, because\n            nobody asked for 2.0. So SwingTree puts back the range of whole numbers it chose,\n            right away, and the slider keeps running from 0.0 to 1.0. You change the range of\n            such a slider through the numbers of your application instead, with `withMin(..)`\n            and `withMax(..)`, or with properties for the minimum and maximum.\n\n            It has to happen right away. If the doubled range stayed in the slider until the\n            next time your application sets the value, the knob for 0.5 would sit at 128 of\n            512 until then, a quarter of the way along the slider instead of halfway.\n\n            This scenario does not depend on which whole numbers SwingTree chose. It remembers\n            them before the Swing code changes the range, and compares against them afterwards.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property holding 0.5, and a slider from 0.0 to 1.0 bound to it.","code":["var opacity = Var.of(0.5d)","var slider = UI.slider(UI.Axis.HORIZONTAL, 0.0d, 1.0d, opacity).get(JSlider)"]},
+
+        {"kind":"and","text":"We remember the range of whole numbers which SwingTree chose for the slider.","code":["var minimum = slider.minimum","var maximum = slider.maximum"]},
+
+        {"kind":"when","text":"Some Swing code doubles the maximum of the `JSlider`.","code":["UI.runNow({ slider.maximum = maximum * 2 })"]},
+
+        {"kind":"then","text":"The slider runs over the whole numbers SwingTree chose, as before.","code":["slider.minimum == minimum","slider.maximum == maximum"]},
+
+        {"kind":"and","text":"The knob still sits halfway along the slider, and the property still holds 0.5.","code":["(slider.value - slider.minimum) / (double) (slider.maximum - slider.minimum) == 0.5d","opacity.get() == 0.5d"]},
+
+        {"kind":"when","text":"Some Swing code moves the minimum of the `JSlider` a quarter of the way along.","code":["UI.runNow({ slider.minimum = minimum + (maximum - minimum).intdiv(4) })"]},
+
+        {"kind":"then","text":"The slider runs over the whole numbers SwingTree chose, as before.","code":["slider.minimum == minimum","slider.maximum == maximum"]},
+
+        {"kind":"and","text":"The knob still sits halfway along the slider, and the property still holds 0.5.","code":["(slider.value - slider.minimum) / (double) (slider.maximum - slider.minimum) == 0.5d","opacity.get() == 0.5d"]}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

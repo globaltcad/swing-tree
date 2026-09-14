@@ -4,7 +4,7 @@
   "narrative":"SwingTree uses a custom `Border` implementation to support the styling\n    of components. This includes the definition of the border, margin, padding\n    dimensions which together form the whole border insets of a component.\n\n    The border insets are then used by Swing to determine the size of the component\n    and its children.\n\n    In this specification we will test the border insets of components\n    that are heavily styled through the SwingTree styling API.",
   "subjects":[],
   "statistics":{
-    "runs":"20",
+    "runs":"24",
     "successRate":"100.0%",
     "failures":"0",
     "errors":"0",
@@ -457,6 +457,90 @@
         {"kind":"and","text":"It has the expected border type:","code":["borderType.isAssignableFrom(border.getClass())"]},
 
         {"kind":"where","text":"","code":{"uiScale":["1","2","3","1","2","3","1","2","3","1","2","3","1","2"],"styler":["{ it -> it }","{ it -> it }","{ it -> it }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.foregroundColor(Color.BLUE) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.cursor(UI.Cursor.HAND) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.foundationColor(Color.BLUE) }","{ it -> it.painter(UI.Layer.BORDER,     g2d->{}) }","{ it -> it.painter(UI.Layer.CONTENT,    g2d->{}) }"],"borderType":["javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","javax.swing.plaf.synth.SynthBorder","swingtree.style.StyleAndAnimationBorder","swingtree.style.StyleAndAnimationBorder"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Fractional `padding`, `border` and `margin` widths are rounded up to whole pixel insets by growing the margin. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Swing measures the border of a component in whole pixels, because\n            `Border.getBorderInsets(Component)` returns an `Insets` object, and `Insets`\n            holds `int` values. The padding, border width and margin of a SwingTree style\n            are `double` values, and the UI scale factor multiplies all three of them.\n            So on one side of a component they can add up to a number like 9.75.\n            When that happens, SwingTree adds the missing fraction of a pixel to the\n            margin on that side, so that padding, border width and margin add up\n            to a whole number of pixels, and Swing and the style agree on where\n            the content of the component starts.\n\n            Take a padding of 6.25, a border width of 1.5 and a margin of 2 at a\n            UI scale factor of 1. Together they are 6.25 + 1.5 + 2 = 9.75 pixels.\n            The missing fraction is 1 - 0.75 = 0.25, so the margin becomes 2.25,\n            and the insets are 6.25 + 1.5 + 2.25 = 10 pixels on every side.\n            Without that correction, Swing would cut 9.75 down to 9 and lay the\n            content out 9 pixels in from the edge, while the style paints its\n            padding all the way to 9.75 pixels in.\n\n            The UI scale factor is applied before the fraction is measured.\n            At a factor of 1.25, a padding of 5, a border width of 1 and a margin of 1\n            become 6.25, 1.25 and 1.25, which add up to 8.75, so the margin grows by\n            0.25 and the insets are 9 pixels.\n\n            When the widths already add up to a whole number, nothing is added.\n            A padding of 6.5, a border width of 1 and a margin of 2.5 are exactly\n            10 pixels, and the insets stay at 10, not 11.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We set the UI scale factor that the widths are multiplied by:","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a panel whose padding, border width and margin are fractional:","code":["var ui =","        UI.panel()","        .withStyle( it -> it","            .padding(padding)","            .border(borderWidth, Color.BLACK)","            .margin(margin)","        )"]},
+
+        {"kind":"and","text":"We unpack the panel:","code":["var component = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The insets are the rounded up sum of padding, border width and margin on every side.","code":["component.getInsets() == new Insets(insets, insets, insets, insets)"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1.25","2"],"padding":["6.25","6.5","5","3.125"],"borderWidth":["1.5","1","1","0.5"],"margin":["2","2.5","1","1"],"insets":["10","10","9","10"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Fractional `padding`, `border` and `margin` widths are rounded up to whole pixel insets by growing the margin. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Swing measures the border of a component in whole pixels, because\n            `Border.getBorderInsets(Component)` returns an `Insets` object, and `Insets`\n            holds `int` values. The padding, border width and margin of a SwingTree style\n            are `double` values, and the UI scale factor multiplies all three of them.\n            So on one side of a component they can add up to a number like 9.75.\n            When that happens, SwingTree adds the missing fraction of a pixel to the\n            margin on that side, so that padding, border width and margin add up\n            to a whole number of pixels, and Swing and the style agree on where\n            the content of the component starts.\n\n            Take a padding of 6.25, a border width of 1.5 and a margin of 2 at a\n            UI scale factor of 1. Together they are 6.25 + 1.5 + 2 = 9.75 pixels.\n            The missing fraction is 1 - 0.75 = 0.25, so the margin becomes 2.25,\n            and the insets are 6.25 + 1.5 + 2.25 = 10 pixels on every side.\n            Without that correction, Swing would cut 9.75 down to 9 and lay the\n            content out 9 pixels in from the edge, while the style paints its\n            padding all the way to 9.75 pixels in.\n\n            The UI scale factor is applied before the fraction is measured.\n            At a factor of 1.25, a padding of 5, a border width of 1 and a margin of 1\n            become 6.25, 1.25 and 1.25, which add up to 8.75, so the margin grows by\n            0.25 and the insets are 9 pixels.\n\n            When the widths already add up to a whole number, nothing is added.\n            A padding of 6.5, a border width of 1 and a margin of 2.5 are exactly\n            10 pixels, and the insets stay at 10, not 11.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We set the UI scale factor that the widths are multiplied by:","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a panel whose padding, border width and margin are fractional:","code":["var ui =","        UI.panel()","        .withStyle( it -> it","            .padding(padding)","            .border(borderWidth, Color.BLACK)","            .margin(margin)","        )"]},
+
+        {"kind":"and","text":"We unpack the panel:","code":["var component = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The insets are the rounded up sum of padding, border width and margin on every side.","code":["component.getInsets() == new Insets(insets, insets, insets, insets)"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1.25","2"],"padding":["6.25","6.5","5","3.125"],"borderWidth":["1.5","1","1","0.5"],"margin":["2","2.5","1","1"],"insets":["10","10","9","10"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Fractional `padding`, `border` and `margin` widths are rounded up to whole pixel insets by growing the margin. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Swing measures the border of a component in whole pixels, because\n            `Border.getBorderInsets(Component)` returns an `Insets` object, and `Insets`\n            holds `int` values. The padding, border width and margin of a SwingTree style\n            are `double` values, and the UI scale factor multiplies all three of them.\n            So on one side of a component they can add up to a number like 9.75.\n            When that happens, SwingTree adds the missing fraction of a pixel to the\n            margin on that side, so that padding, border width and margin add up\n            to a whole number of pixels, and Swing and the style agree on where\n            the content of the component starts.\n\n            Take a padding of 6.25, a border width of 1.5 and a margin of 2 at a\n            UI scale factor of 1. Together they are 6.25 + 1.5 + 2 = 9.75 pixels.\n            The missing fraction is 1 - 0.75 = 0.25, so the margin becomes 2.25,\n            and the insets are 6.25 + 1.5 + 2.25 = 10 pixels on every side.\n            Without that correction, Swing would cut 9.75 down to 9 and lay the\n            content out 9 pixels in from the edge, while the style paints its\n            padding all the way to 9.75 pixels in.\n\n            The UI scale factor is applied before the fraction is measured.\n            At a factor of 1.25, a padding of 5, a border width of 1 and a margin of 1\n            become 6.25, 1.25 and 1.25, which add up to 8.75, so the margin grows by\n            0.25 and the insets are 9 pixels.\n\n            When the widths already add up to a whole number, nothing is added.\n            A padding of 6.5, a border width of 1 and a margin of 2.5 are exactly\n            10 pixels, and the insets stay at 10, not 11.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We set the UI scale factor that the widths are multiplied by:","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a panel whose padding, border width and margin are fractional:","code":["var ui =","        UI.panel()","        .withStyle( it -> it","            .padding(padding)","            .border(borderWidth, Color.BLACK)","            .margin(margin)","        )"]},
+
+        {"kind":"and","text":"We unpack the panel:","code":["var component = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The insets are the rounded up sum of padding, border width and margin on every side.","code":["component.getInsets() == new Insets(insets, insets, insets, insets)"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1.25","2"],"padding":["6.25","6.5","5","3.125"],"borderWidth":["1.5","1","1","0.5"],"margin":["2","2.5","1","1"],"insets":["10","10","9","10"]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Fractional `padding`, `border` and `margin` widths are rounded up to whole pixel insets by growing the margin. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Swing measures the border of a component in whole pixels, because\n            `Border.getBorderInsets(Component)` returns an `Insets` object, and `Insets`\n            holds `int` values. The padding, border width and margin of a SwingTree style\n            are `double` values, and the UI scale factor multiplies all three of them.\n            So on one side of a component they can add up to a number like 9.75.\n            When that happens, SwingTree adds the missing fraction of a pixel to the\n            margin on that side, so that padding, border width and margin add up\n            to a whole number of pixels, and Swing and the style agree on where\n            the content of the component starts.\n\n            Take a padding of 6.25, a border width of 1.5 and a margin of 2 at a\n            UI scale factor of 1. Together they are 6.25 + 1.5 + 2 = 9.75 pixels.\n            The missing fraction is 1 - 0.75 = 0.25, so the margin becomes 2.25,\n            and the insets are 6.25 + 1.5 + 2.25 = 10 pixels on every side.\n            Without that correction, Swing would cut 9.75 down to 9 and lay the\n            content out 9 pixels in from the edge, while the style paints its\n            padding all the way to 9.75 pixels in.\n\n            The UI scale factor is applied before the fraction is measured.\n            At a factor of 1.25, a padding of 5, a border width of 1 and a margin of 1\n            become 6.25, 1.25 and 1.25, which add up to 8.75, so the margin grows by\n            0.25 and the insets are 9 pixels.\n\n            When the widths already add up to a whole number, nothing is added.\n            A padding of 6.5, a border width of 1 and a margin of 2.5 are exactly\n            10 pixels, and the insets stay at 10, not 11.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"We set the UI scale factor that the widths are multiplied by:","code":["SwingTree.get().setUiScaleFactor(uiScale)"]},
+
+        {"kind":"and","text":"We create a panel whose padding, border width and margin are fractional:","code":["var ui =","        UI.panel()","        .withStyle( it -> it","            .padding(padding)","            .border(borderWidth, Color.BLACK)","            .margin(margin)","        )"]},
+
+        {"kind":"and","text":"We unpack the panel:","code":["var component = ui.get(JPanel)"]},
+
+        {"kind":"expect","text":"The insets are the rounded up sum of padding, border width and margin on every side.","code":["component.getInsets() == new Insets(insets, insets, insets, insets)"]},
+
+        {"kind":"where","text":"","code":{"uiScale":["1","1","1.25","2"],"padding":["6.25","6.5","5","3.125"],"borderWidth":["1.5","1","1","0.5"],"margin":["2","2.5","1","1"],"insets":["10","10","9","10"]}}
       ],
       "problems":{"dataValues":[], "errors":[]}
     }

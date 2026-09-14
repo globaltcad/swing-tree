@@ -18,16 +18,16 @@ final class ComponentConf
 <span class="fc" id="L18">    private static final ComponentConf _NONE = new ComponentConf(</span>
 <span class="fc" id="L19">                                                    StyleConf.none(),</span>
 <span class="fc" id="L20">                                                    Bounds.none(),</span>
-<span class="fc" id="L21">                                                    Outline.none()</span>
+<span class="fc" id="L21">                                                    OptionalInsets.none()</span>
                                                 );
 
     public static ComponentConf none() {
 <span class="fc" id="L25">        return _NONE;</span>
     }
 
-    private final StyleConf _styleConf;
-    private final Bounds    _currentBounds;
-    private final Outline   _marginCorrection;
+    private final StyleConf      _styleConf;
+    private final Bounds         _currentBounds;
+    private final OptionalInsets _marginCorrection;
     private final LazyRef&lt;RenderConf&gt; _renderConf; // Computed constant, used for rendering!
 
     /*
@@ -42,7 +42,7 @@ final class ComponentConf
     ComponentConf(
             StyleConf styleConf,
             Bounds currentBounds,
-            Outline marginCorrection
+            OptionalInsets marginCorrection
 <span class="fc" id="L46">    ) {</span>
 <span class="fc" id="L47">        _styleConf        = Objects.requireNonNull(styleConf);</span>
 <span class="fc" id="L48">        _currentBounds    = Objects.requireNonNull(currentBounds);</span>
@@ -54,7 +54,7 @@ final class ComponentConf
 
 <span class="fc" id="L55">    Bounds currentBounds() { return _currentBounds; }</span>
 
-<span class="fc" id="L57">    Outline areaMarginCorrection() { return _marginCorrection; }</span>
+<span class="fc" id="L57">    OptionalInsets areaMarginCorrection() { return _marginCorrection; }</span>
 
     ComponentConf withSize( int width, int height ) {
 <span class="nc" id="L60">        return new ComponentConf(</span>

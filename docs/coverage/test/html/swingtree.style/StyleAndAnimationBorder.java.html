@@ -159,21 +159,21 @@ final class StyleAndAnimationBorder&lt;C extends JComponent&gt; implements Borde
 <span class="fc" id="L159">        return false;</span>
     }
 
-    public Outline getDelegatedInsets( StyleConf conf )
+    public OptionalInsets getDelegatedInsets( StyleConf conf )
     {
 <span class="fc bfc" id="L164" title="All 2 branches covered.">        if ( _doesNotDelegateAdditionalInsets() )</span>
-<span class="fc" id="L165">            return Outline.of(0, 0, 0, 0);</span>
+<span class="fc" id="L165">            return OptionalInsets.of(0, 0, 0, 0);</span>
         else
         {
 <span class="fc" id="L168">            Insets formerInsets = _formerBorder.getBorderInsets(_compExt.getOwner());</span>
-<span class="fc" id="L169">            return conf.padding().map(v-&gt;0f).or(Outline.of(formerInsets));</span>
+<span class="fc" id="L169">            return conf.padding().map(v-&gt;0f).or(OptionalInsets.of(formerInsets));</span>
         }
     }
 
-    public Outline getDelegatedInsetsComponentAreaCorrection()
+    public OptionalInsets getDelegatedInsetsComponentAreaCorrection()
     {
 <span class="fc bfc" id="L175" title="All 2 branches covered.">        if ( _doesNotDelegateAdditionalInsets() )</span>
-<span class="fc" id="L176">            return Outline.of(0, 0, 0, 0);</span>
+<span class="fc" id="L176">            return OptionalInsets.of(0, 0, 0, 0);</span>
         else
         {
             if (
@@ -185,10 +185,10 @@ final class StyleAndAnimationBorder&lt;C extends JComponent&gt; implements Borde
 <span class="nc" id="L185">                int top    = formerInsets.top    / 2;</span>
 <span class="nc" id="L186">                int right  = formerInsets.right  / 2;</span>
 <span class="nc" id="L187">                int bottom = formerInsets.bottom / 2;</span>
-<span class="nc" id="L188">                return Outline.of(top, right, bottom, left);</span>
+<span class="nc" id="L188">                return OptionalInsets.of(top, right, bottom, left);</span>
             }
 
-<span class="fc" id="L191">            return Outline.of(0, 0, 0, 0);</span>
+<span class="fc" id="L191">            return OptionalInsets.of(0, 0, 0, 0);</span>
         }
     }
 
