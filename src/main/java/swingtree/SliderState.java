@@ -52,6 +52,7 @@ final class SliderState
     private @Nullable Val<Number>        _minSource;
     private @Nullable Val<Number>        _maxSource;
     private int                          _lastSeenStep;
+    private int                          _writesStillOnTheirWay;
     private boolean                      _isChangingTheSliderItself;
 
     private SliderState( JSlider slider, Class<? extends Number> numberType, EventProcessor eventProcessor ) {
@@ -78,7 +79,7 @@ final class SliderState
     }
 
     void setValue( Number value ) {
-        if ( _slider.getValueIsAdjusting() )
+        if ( _slider.getValueIsAdjusting() || _writesStillOnTheirWay > 0 )
             return;
         _value = SliderGrid.convert(_numberType, value);
         _placeKnob();
@@ -233,7 +234,18 @@ final class SliderState
             return;
         Val<Number> minSource = _minSource;
         Val<Number> maxSource = _maxSource;
-        _eventProcessor.registerAppEvent(() -> target.set(From.VIEW, _keepWithin(number, minSource, maxSource)));
+        _writesStillOnTheirWay++;
+        _eventProcessor.registerAppEvent(() -> {
+            target.set(From.VIEW, _keepWithin(number, minSource, maxSource));
+            Number settled = target.get();
+            _eventProcessor.registerUIEvent(() -> _acknowledgeWrite(settled));
+        });
+    }
+
+    private void _acknowledgeWrite( Number settled ) {
+        _writesStillOnTheirWay--;
+        if ( _writesStillOnTheirWay == 0 )
+            setValue(settled);
     }
 
     private int _chooseStepFor( int step ) {
