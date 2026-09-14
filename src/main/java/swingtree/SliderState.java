@@ -23,7 +23,9 @@ import java.awt.Font;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
 
@@ -39,18 +41,18 @@ final class SliderState
     private final JSlider                 _slider;
     private final Class<? extends Number> _numberType;
     private final EventProcessor          _eventProcessor;
+    private final List<ChangeListener>    _changeActions = new ArrayList<>();
 
     private Number                       _min;
     private Number                       _max;
     private Number                       _value;
     private @Nullable SliderTicks<?>     _ticks;
     private SliderGrid                   _grid;
-    private @Nullable SliderGrid         _gridOfInstalledTicks;
-    private @Nullable SliderTicks<?>     _installedTicks;
     private @Nullable Var<Number>        _valueTarget;
     private @Nullable Val<Number>        _minSource;
     private @Nullable Val<Number>        _maxSource;
     private int                          _lastSeenStep;
+    private boolean                      _isChangingTheSliderItself;
 
     private SliderState( JSlider slider, Class<? extends Number> numberType, EventProcessor eventProcessor ) {
         _slider         = slider;
@@ -62,27 +64,37 @@ final class SliderState
         _value = SliderGrid.convert(numberType, model.getValue());
         _grid  = SliderGrid.of(numberType, _min, _max, null);
         _lastSeenStep = model.getValue();
-        slider.addChangeListener(new UserChangeListener());
+        slider.addChangeListener(new SliderChangeListener());
     }
 
     void setMin( Number min ) {
         _min = SliderGrid.convert(_numberType, min);
-        _apply();
+        _layOutForNewRange();
     }
 
     void setMax( Number max ) {
         _max = SliderGrid.convert(_numberType, max);
-        _apply();
+        _layOutForNewRange();
     }
 
     void setValue( Number value ) {
+        if ( _slider.getValueIsAdjusting() )
+            return;
         _value = SliderGrid.convert(_numberType, value);
-        _apply();
+        _placeKnob();
     }
 
     void setTicks( SliderTicks<?> ticks ) {
+        if ( ticks.equals(_ticks) )
+            return;
         _ticks = ticks;
-        _apply();
+        _grid = SliderGrid.of(_numberType, _min, _max, ticks);
+        _placeKnob();
+        _installTicks(_grid, ticks);
+    }
+
+    void onChange( ChangeListener action ) {
+        _changeActions.add(action);
     }
 
     @SuppressWarnings("unchecked")
@@ -100,22 +112,23 @@ final class SliderState
         _valueTarget = (Var<Number>) target;
     }
 
-    private void _apply() {
+    private void _layOutForNewRange() {
         SliderGrid grid = SliderGrid.of(_numberType, _min, _max, _ticks);
+        boolean gridChanged = !grid.equals(_grid);
         _grid = grid;
-        int step = grid.stepOf(_value);
-        _doWithoutChangeListeners(() -> {
-            BoundedRangeModel model = _slider.getModel();
-            if ( model.getMinimum() != grid.intMin() || model.getMaximum() != grid.intMax() || model.getValue() != step )
-                model.setRangeProperties(step, model.getExtent(), grid.intMin(), grid.intMax(), model.getValueIsAdjusting());
-        });
+        _placeKnob();
         SliderTicks<?> ticks = _ticks;
-        if ( ticks != null && ( !ticks.equals(_installedTicks) || !grid.equals(_gridOfInstalledTicks) ) ) {
+        if ( ticks != null && gridChanged )
             _installTicks(grid, ticks);
-            _installedTicks = ticks;
-            _gridOfInstalledTicks = grid;
-        }
-        _lastSeenStep = _slider.getValue();
+    }
+
+    private void _placeKnob() {
+        SliderGrid grid = _grid;
+        int step = grid.stepOf(_value);
+        BoundedRangeModel model = _slider.getModel();
+        if ( model.getMinimum() != grid.intMin() || model.getMaximum() != grid.intMax() || model.getValue() != step )
+            _changeTheSliderItself(() -> model.setRangeProperties(step, model.getExtent(), grid.intMin(), grid.intMax(), model.getValueIsAdjusting()));
+        _lastSeenStep = model.getValue();
     }
 
     private void _installTicks( SliderGrid grid, SliderTicks<?> ticks ) {
@@ -184,15 +197,36 @@ final class SliderState
         }
     }
 
+    private void _onSliderChange( ChangeEvent event ) {
+        if ( _isChangingTheSliderItself )
+            return;
+        BoundedRangeModel model = _slider.getModel();
+        if ( model.getMinimum() != _grid.intMin() || model.getMaximum() != _grid.intMax() )
+            _followRangeSetOnTheSlider(model);
+        _onUserChange();
+        for ( ChangeListener action : _changeActions )
+            action.stateChanged(event);
+    }
+
+    private void _followRangeSetOnTheSlider( BoundedRangeModel model ) {
+        if ( SliderGrid.isWholeNumberType(_numberType) ) {
+            _min = SliderGrid.convert(_numberType, model.getMinimum());
+            _max = SliderGrid.convert(_numberType, model.getMaximum());
+            _layOutForNewRange();
+        }
+        else
+            _placeKnob();
+    }
+
     private void _onUserChange() {
         int step = _slider.getValue();
         int chosenStep = _chooseStepFor(step);
         _lastSeenStep = step;
         if ( chosenStep != step && !_slider.getValueIsAdjusting() ) {
-            _doWithoutChangeListeners(() -> _slider.setValue(chosenStep));
+            _changeTheSliderItself(() -> _slider.setValue(chosenStep));
             _lastSeenStep = chosenStep;
         }
-        Number number = _grid.numberAt(chosenStep);
+        Number number = _isStepOfTheValue(chosenStep) ? _value : _grid.numberAt(chosenStep);
         _value = number;
         Var<Number> target = _valueTarget;
         if ( target == null )
@@ -204,11 +238,15 @@ final class SliderState
 
     private int _chooseStepFor( int step ) {
         SliderTicks<?> ticks = _ticks;
-        if ( ticks == null || !ticks.isSnappingToTicks() )
+        if ( ticks == null || !ticks.isSnappingToTicks() || _isStepOfTheValue(step) )
             return step;
         if ( _slider.getValueIsAdjusting() || step == _lastSeenStep )
             return _grid.nearestTick(step);
         return _grid.nextTickTowards(step, _lastSeenStep);
+    }
+
+    private boolean _isStepOfTheValue( int step ) {
+        return _grid.isInRange(_value) && _grid.stepOf(_value) == step;
     }
 
     private static Number _keepWithin( Number number, @Nullable Val<Number> minSource, @Nullable Val<Number> maxSource ) {
@@ -225,22 +263,20 @@ final class SliderState
         return number;
     }
 
-    private void _doWithoutChangeListeners( Runnable task ) {
-        ChangeListener[] listeners = _slider.getChangeListeners();
-        for ( ChangeListener listener : listeners )
-            _slider.removeChangeListener(listener);
+    private void _changeTheSliderItself( Runnable change ) {
+        boolean wasChangingTheSliderItself = _isChangingTheSliderItself;
+        _isChangingTheSliderItself = true;
         try {
-            task.run();
+            change.run();
         } finally {
-            for ( ChangeListener listener : listeners )
-                _slider.addChangeListener(listener);
+            _isChangingTheSliderItself = wasChangingTheSliderItself;
         }
     }
 
-    private final class UserChangeListener implements ChangeListener {
+    private final class SliderChangeListener implements ChangeListener {
         @Override
-        public void stateChanged( ChangeEvent e ) {
-            _onUserChange();
+        public void stateChanged( ChangeEvent event ) {
+            _onSliderChange(event);
         }
     }
 

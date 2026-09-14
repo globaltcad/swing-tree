@@ -23,6 +23,12 @@ import java.util.Objects;
  *  {@link UI#slider(UI.Axis, Number, Number, Var)} with a {@code Var<Double>}.
  *  The minimum, the maximum, the value and the tick marks of the slider are all
  *  expressed in that type, even though a plain {@link JSlider} only knows whole numbers.
+ *  <p>
+ *  On a slider for whole numbers, a minimum or maximum set directly through
+ *  {@link JSlider#setMinimum(int)} or {@link JSlider#setMaximum(int)} becomes the range
+ *  of the slider, and its tick marks and labels are laid out again for that range.
+ *  On a slider for {@link Float} or {@link Double} numbers, the whole numbers of the
+ *  {@link JSlider} are an internal detail, so such a call is undone right away.
  *
  * @param <S> The type of {@link JSlider} that this {@link UIForSlider} is configuring.
  * @param <N> The type of the numbers the slider works with.
@@ -90,10 +96,14 @@ public final class UIForSlider<S extends JSlider, N extends Number> extends UIFo
     }
 
     /**
-     * Adds an {@link Action} to the underlying {@link JSlider}
-     * through an {@link javax.swing.event.ChangeListener},
-     * which will be called when the state of the slider changes.
-     * For more information see {@link JSlider#addChangeListener(javax.swing.event.ChangeListener)}.
+     *  Adds an {@link Action} which is called when the user changes the state of the slider,
+     *  for example by moving its knob, or by pressing or releasing the mouse button on it.
+     *  Changes which your application makes through the properties or values given to this
+     *  builder do not call the action.
+     *  <p>
+     *  Every change calls each action once, in the order in which the actions were added.
+     *  When the knob snaps to a tick mark (see {@link SliderTicks#withSnapToTicks(boolean)}),
+     *  the actions are called after the knob has snapped, so they read the number at that tick mark.
      *
      * @param action The {@link Action} that will be called through the underlying change event.
      * @return This very instance, which enables builder-style method chaining.
@@ -102,7 +112,7 @@ public final class UIForSlider<S extends JSlider, N extends Number> extends UIFo
     public final UIForSlider<S, N> onChange( Action<ComponentDelegate<JSlider, ChangeEvent>> action ) {
         NullUtil.nullArgCheck( action, "action", Action.class );
         return _with( thisComponent -> {
-                    thisComponent.addChangeListener(
+                    _sliderStateOf(thisComponent).onChange(
                         e -> _runInApp(()->{
                             try {
                                 action.accept(new ComponentDelegate<>(thisComponent, e));
@@ -217,6 +227,8 @@ public final class UIForSlider<S extends JSlider, N extends Number> extends UIFo
      *  But note that the supplied property is a read only, so when the user moves
      *  the knob, the property will not be updated.
      *  Use {@link #withValue(Var)} if you want to bind a property bidirectionally.
+     *  <p>
+     *  While the user holds the knob with the mouse, changes of the property do not move it.
      *
      * @param value A property used to dynamically update the value of the slider.
      * @return This very instance, which enables builder-style method chaining.
@@ -243,6 +255,11 @@ public final class UIForSlider<S extends JSlider, N extends Number> extends UIFo
      *  The number written into the property is of the property's own type, and it is the number
      *  at the position of the knob, or, if the knob snaps to tick marks
      *  (see {@link SliderTicks#withSnapToTicks(boolean)}), the number at the tick mark it snaps to.
+     *  A click on the knob which does not move it writes nothing new, so the property keeps
+     *  exactly the number your application set.
+     *  <p>
+     *  While the user holds the knob with the mouse, changes of the property do not move it,
+     *  and when the user lets go, the number under the knob is written into the property.
      *
      * @param value A property holding the value of the slider.
      * @return This very instance, which enables builder-style method chaining.

@@ -194,8 +194,10 @@ final class SliderGrid
         if ( spacing <= 0 || step == from )
             return nearestTick(step);
         double ticks = (step - (long) _intMin) / (double) spacing;
-        long tick = step > from ? (long) Math.ceil(ticks) : (long) Math.floor(ticks);
-        return _tickWithinRange(tick);
+        boolean towardsTheMaximum = step > from;
+        int tick = _tickWithinRange(towardsTheMaximum ? (long) Math.ceil(ticks) : (long) Math.floor(ticks));
+        boolean tickLiesBehindTheStart = towardsTheMaximum ? tick < from : tick > from;
+        return tickLiesBehindTheStart ? from : tick;
     }
 
     private int _finestSpacingInSteps() {
