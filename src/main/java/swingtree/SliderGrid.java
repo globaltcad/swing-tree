@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import swingtree.api.model.SliderTicks;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.Objects;
 
@@ -42,6 +43,39 @@ final class SliderGrid
             return _wholeNumberGrid(numberType, minimum, maximum, majorSpacing, minorTicksBetween);
         else
             return _fractionalGrid(numberType, minimum, maximum, range, majorSpacing, minorTicksBetween);
+    }
+
+    static SliderGrid ofFractionalTickSpacings(
+        Class<? extends Number> numberType,
+        Number                  min,
+        Number                  max,
+        @Nullable Number        majorTickSpacing,
+        @Nullable Number        minorTickSpacing
+    ) {
+        BigDecimal minimum = decimalOf(min);
+        BigDecimal maximum = decimalOf(max).max(minimum);
+        BigDecimal range = maximum.subtract(minimum);
+        @Nullable BigDecimal majorSpacing = _positiveDecimalOrNull(majorTickSpacing);
+        @Nullable BigDecimal minorSpacing = _positiveDecimalOrNull(minorTickSpacing);
+        @Nullable BigDecimal commonDivisor = _largestCommonDivisor(majorSpacing, minorSpacing);
+        if ( range.signum() <= 0 || commonDivisor == null )
+            return _fractionalGrid(numberType, minimum, maximum, range, null, 0);
+
+        double partsInRange = range.divide(commonDivisor, MathContext.DECIMAL64).doubleValue();
+        if ( partsInRange > MAX_TICK_MARKS ) {
+            log.warn(SwingTree.get().logMarker(),
+                    "A slider from {} to {} can only place major tick marks every {} and minor tick marks every {} exactly " +
+                    "by dividing its range into parts of {}, which are more than {} parts. No tick marks are drawn.",
+                    minimum.toPlainString(), maximum.toPlainString(), _plainOrZero(majorSpacing), _plainOrZero(minorSpacing),
+                    commonDivisor.toPlainString(), MAX_TICK_MARKS
+                );
+            return _fractionalGrid(numberType, minimum, maximum, range, null, 0);
+        }
+        long stepsPerPart = Math.max(1, (long) Math.ceil(PREFERRED_STEPS / partsInRange));
+        int intMax = _clampToInt(Math.round(partsInRange * stepsPerPart));
+        int majorSteps = _clampToInt(_partsIn(majorSpacing, commonDivisor) * stepsPerPart);
+        int minorSteps = _clampToInt(_partsIn(minorSpacing, commonDivisor) * stepsPerPart);
+        return new SliderGrid(numberType, minimum, maximum, 0, intMax, commonDivisor, stepsPerPart, majorSteps, minorSteps, majorSpacing);
     }
 
     private static SliderGrid _wholeNumberGrid(
@@ -236,6 +270,31 @@ final class SliderGrid
         if ( numberType == Float.class   ) return (N) Float.valueOf(number.floatValue());
         if ( numberType == Double.class  ) return (N) Double.valueOf(number.doubleValue());
         throw new IllegalArgumentException("Unsupported number type: " + numberType);
+    }
+
+    private static @Nullable BigDecimal _positiveDecimalOrNull( @Nullable Number number ) {
+        if ( number == null )
+            return null;
+        BigDecimal decimal = decimalOf(number);
+        return decimal.signum() > 0 ? decimal : null;
+    }
+
+    private static @Nullable BigDecimal _largestCommonDivisor( @Nullable BigDecimal a, @Nullable BigDecimal b ) {
+        if ( a == null )
+            return b;
+        if ( b == null )
+            return a;
+        int scale = Math.max(0, Math.max(a.stripTrailingZeros().scale(), b.stripTrailingZeros().scale()));
+        BigInteger divisor = a.setScale(scale).unscaledValue().gcd(b.setScale(scale).unscaledValue());
+        return new BigDecimal(divisor, scale);
+    }
+
+    private static long _partsIn( @Nullable BigDecimal spacing, BigDecimal part ) {
+        return spacing == null ? 0 : spacing.divide(part, MathContext.DECIMAL64).longValue();
+    }
+
+    private static String _plainOrZero( @Nullable BigDecimal decimal ) {
+        return decimal == null ? "0" : decimal.toPlainString();
     }
 
     private static boolean _isWholeNumber( BigDecimal decimal ) {

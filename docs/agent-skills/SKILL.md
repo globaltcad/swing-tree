@@ -1413,7 +1413,7 @@ SliderTicks.of(Double.class).withMajorSpacing(0.5).withTickMarksVisible(false).w
 | | |
 |---|---|
 | `SliderTicks` | `of(Class<N>)`, `classTyped(Class<N>)`, `withMajorSpacing(N)` (0 = none), `withMinorTicksBetween(int)`, `withTickMarksVisible(boolean)`, `withSnapToTicks(boolean)`, `withLabelsAtMajorTicks()` / `(Function<N,String>)` / `withoutLabelsAtMajorTicks()`, `withLabelLocale(Locale)`, `withLabelAt(N, String \| IconDeclaration)`, `withoutLabelAt(N)` + matching getters |
-| `UIForSlider<S, N>` | `withTicks(SliderTicks<N>)`, `withTicks(Val<SliderTicks<N>>)`, `withMin/withMax/withValue(N \| Val<N>)`, `withValue(Var<N>)`, `withOrientation(..)`, `onChange(..)` |
+| `UIForSlider<S, N>` | `withTicks(SliderTicks<N>)`, `withTicks(Val<SliderTicks<N>>)`, `withMajorTickSpacing/withMinorTickSpacing(N \| Val<N>)` (spacing only, like `JSlider`; ignored once a `SliderTicks` is set), `withMin/withMax/withValue(N \| Val<N>)`, `withValue(Var<N>)`, `withOrientation(..)`, `onChange(..)` |
 
 **Non-obvious things that will bite you:**
 - **Spacings and positions are in the slider's own numbers, never in `JSlider` ints.** A fractional
