@@ -1,6 +1,7 @@
 package swingtree
 
 import spock.lang.Narrative
+import spock.lang.PendingFeature
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
@@ -507,6 +508,11 @@ class Scroll_Pane_Spec extends Specification
     }
 
 
+    @PendingFeature(reason = """
+        SwingTree hands a component implementing `Scrollable` directly to the viewport and does not
+        apply its layout constraint, because Swing's own `Scrollable` components (like `JTextPane`,
+        `JList` and `JTable`) only size themselves correctly when their parent is a `JViewport`.
+    """)
     def 'The layout constraints of a custom ´Scrollable´ component are actually applied to it.'()
     {
         reportInfo """
