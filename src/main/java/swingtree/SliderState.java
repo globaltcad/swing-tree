@@ -47,6 +47,8 @@ final class SliderState
     private Number                       _max;
     private Number                       _value;
     private @Nullable SliderTicks<?>     _ticks;
+    private @Nullable Number             _fractionalMajorTickSpacing;
+    private @Nullable Number             _fractionalMinorTickSpacing;
     private SliderGrid                   _grid;
     private @Nullable Var<Number>        _valueTarget;
     private @Nullable Val<Number>        _minSource;
@@ -94,6 +96,28 @@ final class SliderState
         _installTicks(_grid, ticks);
     }
 
+    void setMajorTickSpacing( Number spacing ) {
+        if ( _ticks != null )
+            return;
+        if ( SliderGrid.isWholeNumberType(_numberType) ) {
+            _slider.setMajorTickSpacing(spacing.intValue());
+        } else {
+            _fractionalMajorTickSpacing = SliderGrid.convert(_numberType, spacing);
+            _layOutForNewFractionalTickSpacing();
+        }
+    }
+
+    void setMinorTickSpacing( Number spacing ) {
+        if ( _ticks != null )
+            return;
+        if ( SliderGrid.isWholeNumberType(_numberType) ) {
+            _slider.setMinorTickSpacing(spacing.intValue());
+        } else {
+            _fractionalMinorTickSpacing = SliderGrid.convert(_numberType, spacing);
+            _layOutForNewFractionalTickSpacing();
+        }
+    }
+
     void onChange( ChangeListener action ) {
         _changeActions.add(action);
     }
@@ -114,13 +138,35 @@ final class SliderState
     }
 
     private void _layOutForNewRange() {
-        SliderGrid grid = SliderGrid.of(_numberType, _min, _max, _ticks);
+        SliderGrid grid = _gridForRangeAndTicks();
         boolean gridChanged = !grid.equals(_grid);
         _grid = grid;
         _placeKnob();
         SliderTicks<?> ticks = _ticks;
         if ( ticks != null && gridChanged )
             _installTicks(grid, ticks);
+        else if ( gridChanged )
+            _installFractionalTickSpacings(grid);
+    }
+
+    private void _layOutForNewFractionalTickSpacing() {
+        _grid = _gridForRangeAndTicks();
+        _placeKnob();
+        _installFractionalTickSpacings(_grid);
+    }
+
+    private SliderGrid _gridForRangeAndTicks() {
+        boolean hasFractionalTickSpacings = _fractionalMajorTickSpacing != null || _fractionalMinorTickSpacing != null;
+        if ( _ticks == null && hasFractionalTickSpacings )
+            return SliderGrid.ofFractionalTickSpacings(_numberType, _min, _max, _fractionalMajorTickSpacing, _fractionalMinorTickSpacing);
+        return SliderGrid.of(_numberType, _min, _max, _ticks);
+    }
+
+    private void _installFractionalTickSpacings( SliderGrid grid ) {
+        if ( _fractionalMajorTickSpacing != null )
+            _slider.setMajorTickSpacing(grid.majorSpacingInSteps());
+        if ( _fractionalMinorTickSpacing != null )
+            _slider.setMinorTickSpacing(grid.minorSpacingInSteps());
     }
 
     private void _placeKnob() {

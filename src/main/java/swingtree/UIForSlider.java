@@ -280,6 +280,123 @@ public final class UIForSlider<S extends JSlider, N extends Number> extends UIFo
     }
 
     /**
+     *  Sets how far apart the major tick marks of the slider are, in the numbers of the slider.
+     *  The major tick marks count from the minimum of the slider, so a spacing of 25 on a slider
+     *  running from 0 to 100 puts a major tick mark at 0, 25, 50, 75 and 100.
+     *  A spacing of zero or less removes the major tick marks.
+     *  <p>
+     *  Like {@link JSlider#setMajorTickSpacing(int)}, this method only sets where the major tick
+     *  marks are. The slider draws them once {@link JSlider#setPaintTicks(boolean)} was called with
+     *  {@code true}, for example through {@code peek( s -> s.setPaintTicks(true) )}.
+     *  Unlike {@link JSlider#setMajorTickSpacing(int)}, the spacing is a number of the slider's own type,
+     *  so a slider for a {@code Double} property can have a major tick mark every {@code 0.25}.
+     *  <p>
+     *  To describe tick marks, labels and snapping together, use {@link #withTicks(SliderTicks)} instead.
+     *  A slider which has been given a {@link SliderTicks} value takes its tick marks from that value
+     *  and ignores the spacing given to this method, no matter in which order the two methods are called.
+     *
+     * @param spacing The distance between two neighbouring major tick marks, in the numbers of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code spacing} is {@code null}.
+     */
+    public final UIForSlider<S, N> withMajorTickSpacing( N spacing ) {
+        NullUtil.nullArgCheck( spacing, "spacing", Number.class );
+        return _with( thisComponent -> {
+                    _sliderStateOf(thisComponent).setMajorTickSpacing(spacing);
+                })
+                ._this();
+    }
+
+    /**
+     *  Binds the supplied {@link Val} property to the spacing of the major tick marks of the slider,
+     *  so that the major tick marks move whenever the item of the property changes.
+     *  The spacing is a number of the slider's own type, and the major tick marks count from the
+     *  minimum of the slider, so a spacing of 25 on a slider running from 0 to 100 puts a major
+     *  tick mark at 0, 25, 50, 75 and 100. A spacing of zero or less removes the major tick marks.
+     *  <p>
+     *  Like {@link JSlider#setMajorTickSpacing(int)}, the property only decides where the major tick
+     *  marks are. The slider draws them once {@link JSlider#setPaintTicks(boolean)} was called with {@code true}.
+     *  A slider which has been given a {@link SliderTicks} value through {@link #withTicks(SliderTicks)}
+     *  or {@link #withTicks(Val)} takes its tick marks from that value and ignores this property.
+     *
+     * @param spacing A property holding the distance between two neighbouring major tick marks, in the numbers of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code spacing} is {@code null} or allows {@code null} items.
+     */
+    public final UIForSlider<S, N> withMajorTickSpacing( Val<N> spacing ) {
+        NullUtil.nullArgCheck( spacing, "spacing", Val.class );
+        NullUtil.nullPropertyCheck( spacing, "spacing", "The major tick spacing of a slider must not be null!" );
+        return _withOnShow( spacing, (thisComponent,v) -> {
+                    _sliderStateOf(thisComponent).setMajorTickSpacing(v);
+                })
+                ._with( thisComponent -> {
+                    _sliderStateOf(thisComponent).setMajorTickSpacing(spacing.orElseThrowUnchecked());
+                })
+                ._this();
+    }
+
+    /**
+     *  Sets how far apart the minor tick marks of the slider are, in the numbers of the slider.
+     *  The minor tick marks count from the minimum of the slider, so a spacing of 5 on a slider
+     *  running from 0 to 100 puts a minor tick mark at 0, 5, 10 and so on up to 100.
+     *  A spacing of zero or less removes the minor tick marks.
+     *  <p>
+     *  Like {@link JSlider#setMinorTickSpacing(int)}, this method only sets where the minor tick
+     *  marks are. The slider draws them once {@link JSlider#setPaintTicks(boolean)} was called with
+     *  {@code true}, for example through {@code peek( s -> s.setPaintTicks(true) )}.
+     *  Unlike {@link JSlider#setMinorTickSpacing(int)}, the spacing is a number of the slider's own type,
+     *  so a slider for a {@code Double} property can have a minor tick mark every {@code 0.05}.
+     *  <p>
+     *  The minor tick marks do not depend on the major tick marks. With a major spacing of 25 and
+     *  a minor spacing of 10, the minor tick marks sit at 0, 10, 20, 30 and 40, while the major tick
+     *  marks sit at 0, 25 and 50, so the minor tick marks do not divide the gaps between the major
+     *  ones evenly. {@link SliderTicks#withMinorTicksBetween(int)} counts the minor tick marks
+     *  between two major tick marks instead, which always divides the gaps evenly.
+     *  A slider which has been given a {@link SliderTicks} value through {@link #withTicks(SliderTicks)}
+     *  takes its tick marks from that value and ignores the spacing given to this method,
+     *  no matter in which order the two methods are called.
+     *
+     * @param spacing The distance between two neighbouring minor tick marks, in the numbers of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code spacing} is {@code null}.
+     */
+    public final UIForSlider<S, N> withMinorTickSpacing( N spacing ) {
+        NullUtil.nullArgCheck( spacing, "spacing", Number.class );
+        return _with( thisComponent -> {
+                    _sliderStateOf(thisComponent).setMinorTickSpacing(spacing);
+                })
+                ._this();
+    }
+
+    /**
+     *  Binds the supplied {@link Val} property to the spacing of the minor tick marks of the slider,
+     *  so that the minor tick marks move whenever the item of the property changes.
+     *  The spacing is a number of the slider's own type, and the minor tick marks count from the
+     *  minimum of the slider, so a spacing of 5 on a slider running from 0 to 100 puts a minor
+     *  tick mark at 0, 5, 10 and so on up to 100. A spacing of zero or less removes the minor tick marks.
+     *  <p>
+     *  Like {@link JSlider#setMinorTickSpacing(int)}, the property only decides where the minor tick
+     *  marks are. The slider draws them once {@link JSlider#setPaintTicks(boolean)} was called with {@code true}.
+     *  A slider which has been given a {@link SliderTicks} value through {@link #withTicks(SliderTicks)}
+     *  or {@link #withTicks(Val)} takes its tick marks from that value and ignores this property.
+     *
+     * @param spacing A property holding the distance between two neighbouring minor tick marks, in the numbers of the slider.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException if {@code spacing} is {@code null} or allows {@code null} items.
+     */
+    public final UIForSlider<S, N> withMinorTickSpacing( Val<N> spacing ) {
+        NullUtil.nullArgCheck( spacing, "spacing", Val.class );
+        NullUtil.nullPropertyCheck( spacing, "spacing", "The minor tick spacing of a slider must not be null!" );
+        return _withOnShow( spacing, (thisComponent,v) -> {
+                    _sliderStateOf(thisComponent).setMinorTickSpacing(v);
+                })
+                ._with( thisComponent -> {
+                    _sliderStateOf(thisComponent).setMinorTickSpacing(spacing.orElseThrowUnchecked());
+                })
+                ._this();
+    }
+
+    /**
      *  Configures the tick marks and labels along the slider through the supplied
      *  {@link SliderTicks} value, which describes where the major and minor tick marks are,
      *  whether they are drawn, whether the knob snaps to them and which labels are shown:
