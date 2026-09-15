@@ -130,15 +130,16 @@ public final class Workbench
         return
             "Var<Layout> layout = Var.of(Layout.class,\n" +
             "    Layout.grid(\n" +
-            "        UniformGridLayout.Mode." + mode.name() + ",\n" +
-            "        UniformGridLayout.CollapseEmpty." + collapseEmpty.name() + ",\n" +
-            "        " + rows + ", " + columns + ",   // rows, columns\n" +
-            "        " + gap + ", " + gap + "    // horizontal and vertical gap\n" +
+            "        Mode." + mode.name() + ",\n" +
+            "        CollapseEmpty." + collapseEmpty.name() + ",\n" +
+            "        " + rows + ", " + columns + ",  // rows, columns\n" +
+            "        " + gap + ", " + gap + "   // gaps\n" +
             "    )\n" +
             ");\n" +
-            "UI.panel(layout)" +
-            ( rightToLeft ? "\n.withStyle(it -> it\n    .orientation(UI.ComponentOrientation.RIGHT_TO_LEFT)\n)" : "" ) +
-            "\n.add(...);   // " + tiles(tiles.size());
+            "UI.panel(layout)\n" +
+            ( rightToLeft ? ".withStyle(it -> it.orientation(\n    UI.ComponentOrientation.RIGHT_TO_LEFT\n))\n" : "" ) +
+            ".add(...);  // " + tiles(tiles.size()) + "\n" +
+            "// both enums are nested in UniformGridLayout";
     }
 
     private static String tiles( int count ) {
