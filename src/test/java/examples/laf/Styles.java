@@ -3089,33 +3089,28 @@ final class Styles
 
     /**
      *  <b>Nimbus</b>: the look and feel Sun shipped with Java 6 update 10, rebuilt on the style
-     *  engine. Every raised thing is one piece of moulded plastic under one overhead light: bright
-     *  along the top edge, dimming about two thirds of the way down, catching the light again on the
-     *  bottom lip, and closed off underneath by a line much darker than the rest of its outline. A
-     *  button, a combo box, a table heading, a tab, a check box and a scroll-bar thumb differ only in
-     *  the colour that curve is laid over and in how they are outlined, so the curve is written once
-     *  in {@link NimbusRelief} and most of the rules here only say which tone a control is cast in.
+     *  engine from the painters the JDK generates for it.
      *  <p>
-     *  Two of its habits are easy to get wrong. Pressing something moves the colour down and leaves
-     *  the light where it was, so a pressed button looks pushed into the panel rather than lit from
-     *  below. Disabling something flattens the curve instead of greying it, because a control that
-     *  cannot be used is one nothing is shining on.
+     *  Nothing here was measured off a screenshot. Every shape, every gradient stop and every colour
+     *  was read out of Nimbus's own painters, so a button is filled exactly as Nimbus fills one: a
+     *  lip one pixel below it, an edge filling its whole shape and a face one pixel in from that,
+     *  which leaves the edge as an outline. Those three are a {@link NimbusMould}, and the style
+     *  engine paints them as two gradients, one clipped to the body and one to the interior, with
+     *  the lip or the focus ring in the two pixel margin around them.
      *  <p>
-     *  No colour here is written down. Each one is a named palette colour that has been moved:
-     *  {@link LafUtilities#shiftHsb} where the distance is fixed, and {@link LafUtilities#wash} where
-     *  it has to be measured against the ground the colour will be seen on. The difference decides
-     *  whether the theme survives a palette it was not designed for. A fixed brightness offset
-     *  reproduces the original exactly and then turns
-     *  {@link SwingTreeLookAndFeel.PalettePreset#MIDNIGHT}'s already bright accent white, taking every
-     *  label on top of it. Washing a colour towards the surface it will be seen against is the same
-     *  instruction on a light palette and on a dark one.
+     *  Nimbus writes each colour as an offset from one of a few named colours, and so does this
+     *  preset: {@link NimbusScheme} reads {@code nimbusBase}, {@code nimbusBlueGrey},
+     *  {@code control} and the rest from {@link UIManager}, where an application re-tints Nimbus,
+     *  and takes whatever it does not find there from the installed palette. The keys Nimbus is laid
+     *  out through - the room around a table heading, a list cell or a tab, a titled border's title
+     *  above its line - are installed as {@link UIManager} defaults too, see {@link #installDefaults}.
      *  <p>
-     *  One colour would not fit. Nimbus writes a tool tip on a pale yellow it calls {@code info},
-     *  deliberately not a shade of anything else and therefore not derivable from the palette either.
-     *  There is no palette slot for a notice colour, so it is carried in the two grain slots, which a
-     *  theme with no grain has spare - the same room {@link Palettes#AURORA} borrows for its blooms.
-     *  Nothing here knows whether that colour came out light or dark, so the ink on it is picked by
-     *  {@link LafUtilities#readableOn} rather than named.
+     *  Two things are this preset's own, because Nimbus has nothing to say about them. A
+     *  {@link SwingTreeLookAndFeel.Variant#PRIMARY primary} or {@link SwingTreeLookAndFeel.Variant#DANGER
+     *  dangerous} button is a Nimbus button whose background is {@code nimbusOrange} or
+     *  {@code nimbusRed}, which is how Nimbus paints a button an application has given a background.
+     *  And a {@link SwingTreeLookAndFeel.Surface#CARD card} is lifted off the window by a paler
+     *  ground and a soft outline.
      *
      *  @see SwingTreeLookAndFeel.StylePreset#NIMBUS
      */
@@ -3128,33 +3123,82 @@ final class Styles
          *  curve rather than squared off across it. */
         static final int RADIUS = 5;
 
-        /**
-         *  The room kept outside a control's outline for the ring it wears while focused. Nimbus
-         *  paints a control right out to its own bounds, so every pixel spent here is a pixel of
-         *  the control that is not painted: one is what the ring needs and therefore all it gets.
-         */
-        private static final int MARGIN = 1;
+        /** How round a button's edge is, as the width of the arc its corners are cut along: nine
+         *  pixels, which is what Nimbus fills it with and what the style engine's border radius
+         *  means. */
+        private static final double BUTTON_ARC = 9;
+
+        /** A button on a tool bar is rounder than one on a form, and less round again while it is
+         *  switched on. */
+        private static final double TOOL_ARC          = 12;
+        private static final double TOOL_SELECTED_ARC = 10;
+
+        /** What a tool bar button keeps between its label and its edge, from Nimbus's
+         *  {@code ToolBar:Button.contentMargins} of four all round, less the margin and the edge. */
+        private static final int TOOL_PAD = 4 - 2 - 1;
 
         /**
-         *  What a button keeps between its label and its outline, vertically and then horizontally.
+         *  The room kept outside a control's edge. Nimbus draws its focus ring from six tenths of a
+         *  pixel inside the component's bounds to the edge two pixels in, and the shadow a raised
+         *  control casts in the row under the edge, so both live in these two pixels.
+         */
+        private static final int MARGIN = 2;
+
+        /**
+         *  What a button keeps between its label and its edge, vertically and then horizontally.
          *  Nimbus lays a button out to its {@code Button.contentMargins} of six by fourteen, which
-         *  is measured from the component's edge and therefore has to lose the {@link #MARGIN} and
-         *  the pixel of outline that stand outside the padding here.
+         *  is measured from the component's bounds and therefore has to lose the {@link #MARGIN} and
+         *  the pixel of edge that stand outside the padding here.
          */
         private static final int PAD_Y = 6 - MARGIN - 1;
         private static final int PAD_X = 14 - MARGIN - 1;
 
-        /** What a button on a tool bar keeps beside its label instead, which is a good deal less.
-         *  Nimbus sets a row of tool bar buttons close enough together to read as one strip, where
-         *  the same buttons on a form read as separate things. */
-        private static final int TOOL_PAD_X = 5;
+        /** What anything you can type into keeps between its text and its bounds: Nimbus's
+         *  {@code TextField.contentMargins} of six all round. An editor pane and a text pane keep
+         *  four above and below instead. */
+        private static final int FIELD_PAD_Y = 6;
+        private static final int FIELD_PAD_X = 6;
+        private static final int PAGE_PAD_Y  = 4;
 
-        /** What anything you can type into keeps between its text and its outline, from Nimbus's
-         *  {@code TextField.contentMargins} of six all round, measured the same way. */
-        private static final int FIELD_PAD = 6 - MARGIN - 1;
+        /** How round a combo box is, as the width of the arc its corners are cut along. */
+        private static final double COMBO_ARC = 10;
 
-        /** The same for a combo box, which Nimbus lays out two pixels shorter than a text field. */
-        private static final int COMBO_PAD = 4 - MARGIN - 1;
+        /** What a combo box keeps around the label showing its value, inside its edge. The label
+         *  brings a pixel of its own, and Nimbus puts the text seven pixels in from the left and
+         *  five down from the top. */
+        private static final int COMBO_PAD_Y = 1;
+        private static final int COMBO_PAD_X = 3;
+
+        // The colours of a text field, from TextFieldPainter.
+        private static final NimbusScheme.Gradient FIELD_EDGE_TOP = NimbusScheme.gradient(new double[]{ 0.1, 0.5, 0.9 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.027777791, -0.0965403, -0.18431371), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.055555582, -0.1048766, -0.05098039));
+        private static final NimbusScheme.Gradient FIELD_SHADE = NimbusScheme.gradient(new double[]{ 0.1, 0.5, 0.9 },
+                NimbusScheme.shade(NimbusScheme.Key.LIGHT_BACKGROUND, 0.6666667, 0.004901961, -0.19999999), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.LIGHT_BACKGROUND, 0, 0, 0));
+        private static final NimbusScheme.Shade FIELD_SIDE   = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.055555582, -0.10512091, -0.019607842);
+        private static final NimbusScheme.Shade FIELD_BOTTOM = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.055555582, -0.105344966, 0.011764705);
+        private static final NimbusScheme.Shade FIELD_DISABLED = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.015872955, -0.07995863, 0.15294117);
+        private static final NimbusScheme.Gradient FIELD_DISABLED_EDGE_TOP = NimbusScheme.gradient(new double[]{ 0, 0.5, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.006944418, -0.07187897, 0.06666666), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.007936537, -0.07826825, 0.10588235));
+        private static final NimbusScheme.Gradient FIELD_DISABLED_SHADE = NimbusScheme.gradient(new double[]{ 0, 0.5, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.007936537, -0.07856284, 0.11372548), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.015872955, -0.07995863, 0.15294117));
+        private static final NimbusScheme.Shade FIELD_DISABLED_LEFT  = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.007936537, -0.07796818, 0.09803921);
+        private static final NimbusScheme.Shade FIELD_DISABLED_RIGHT = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.007936537, -0.07826825, 0.10588235);
+
+        // The text field of a spinner or of an editable combo box, from SpinnerPanelSpinnerFormattedTextFieldPainter.
+        private static final NimbusScheme.Gradient OPEN_FIELD_EDGE_TOP = NimbusScheme.gradient(new double[]{ 0, 0.496, 0.991 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.027777791, -0.0965403, -0.18431371), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.055555582, -0.1048766, -0.08));
+        private static final NimbusScheme.Gradient SPINNER_FIELD_SHADE = NimbusScheme.gradient(new double[]{ 0, 0.168, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.055555582, -0.105624355, 0.054901958), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.110526316, 0.25490195));
+        private static final NimbusScheme.Shade OPEN_FIELD_EDGE = FIELD_BOTTOM;
+        private static final NimbusScheme.Shade OPEN_FIELD_LIP  = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.6111111, -0.110526316, -0.74509805, -237);
+        private static final NimbusScheme.Shade OPEN_FIELD_DISABLED_EDGE = NimbusScheme.shade(NimbusScheme.Key.BASE, 0.040395975, -0.60315615, 0.29411763);
+        private static final NimbusScheme.Shade OPEN_FIELD_DISABLED_FACE = NimbusScheme.shade(NimbusScheme.Key.BASE, 0.016586483, -0.6051466, 0.3490196);
 
         private static final Tuple<StyleRule> RULES = Tuple.of(
             StyleRule.of(JPanel.class,         Nimbus::panel),
@@ -3166,7 +3210,7 @@ final class Styles
             StyleRule.of(JPopupMenu.class,     Nimbus::popupMenu),
             StyleRule.of(JLabel.class,         Nimbus::label),
             StyleRule.of(JTextField.class,     Nimbus::field),
-            StyleRule.of(JTextArea.class,      Nimbus::page),
+            StyleRule.of(JTextArea.class,      Nimbus::area),
             StyleRule.of(JEditorPane.class,    Nimbus::page),
             StyleRule.of(JSeparator.class,     Nimbus::separator),
             StyleRule.of(JToolTip.class,       Nimbus::toolTip),
@@ -3187,137 +3231,6 @@ final class Styles
         );
 
         static Tuple<StyleRule> rules() { return RULES; }
-
-        // ── The light ────────────────────────────────────────────────────────
-
-        /**
-         *  The colour a control would be with no light on it, which is the colour the middle of its
-         *  relief reproduces. Everything else about how it looks follows from this and from
-         *  {@link #surfaceEdge}.
-         */
-        private static Color tone(
-                SwingTreeLookAndFeel.Palette p, SwingTreeLookAndFeel.Variant variant, boolean enabled, boolean sunken, boolean rollover, boolean isDefault
-        ) {
-            if ( !enabled )
-                return p.surfaceDisabled();
-            switch ( variant ) {
-                case PRIMARY: return sunken ? p.primaryPressed() : rollover ? p.primaryHover() : p.primary();
-                case DANGER:  return sunken ? p.dangerPressed()  : rollover ? p.dangerHover()  : p.danger();
-                default:
-                    if ( isDefault )
-                        return accentedTone(p, sunken, rollover);
-                    return surfaceTone(p, enabled, sunken, rollover);
-            }
-        }
-
-        /**
-         *  The unlit colour of an ordinary control, which {@link Symbols.Nimbus} reads as well: a
-         *  check box has the same four states a button has and is made of the same material, so
-         *  neither keeps an idea of its own about what a pressed control looks like.
-         *
-         * @param p the palette in force
-         * @param enabled whether the control can be used
-         * @param sunken whether it is held down or selected
-         * @param rollover whether the pointer is over it
-         * @return the colour the middle of its relief reproduces
-         */
-        static Color surfaceTone(SwingTreeLookAndFeel.Palette p, boolean enabled, boolean sunken, boolean rollover ) {
-            if ( !enabled )
-                return p.surfaceDisabled();
-            return sunken ? p.surfacePressed() : rollover ? p.surfaceHover() : p.surface();
-        }
-
-        /**
-         *  Which of the mouldings lights a control, given what it is cast in.
-         *
-         * @param enabled whether the control can be used
-         * @param accented whether it is made of the accented material rather than the neutral chrome
-         * @return the relief to lay over its tone
-         */
-        static NimbusRelief relief( boolean enabled, boolean accented ) {
-            if ( !enabled )
-                return NimbusRelief.UNLIT;
-            return accented ? NimbusRelief.LIT_ACCENTED : NimbusRelief.LIT;
-        }
-
-        /**
-         *  The material anything that is <i>on</i> is made of: the default button, a ticked check box,
-         *  a filled radio, a selected tab, and the actuator a combo box or a spinner is worked by.
-         *  Nimbus gives all five the same washed out accent rather than a colour each.
-         *  <p>
-         *  It is washed towards the palette's own surface instead of simply lightened, so that it
-         *  comes out dark on a dark palette. Lightening it there would leave the label on top of it
-         *  unreadable, and this method does not choose the label.
-         *
-         * @param p the palette in force
-         * @param sunken whether the control is held down or selected
-         * @param rollover whether the pointer is over it
-         * @return the colour the middle of its relief reproduces
-         */
-        static Color accentedTone(SwingTreeLookAndFeel.Palette p, boolean sunken, boolean rollover ) {
-            double towardsGround = sunken ? 0.640 : rollover ? 0.900 : 0.807;
-            return LafUtilities.wash(p.accent(), p.surface(), 0.307, towardsGround);
-        }
-
-        /**
-         *  The bottom of an outline, which Nimbus draws much darker than the rest of it: the line
-         *  where a raised thing meets what it stands on is in its own shadow. One edge, and the most
-         *  reliable single difference between a control that looks moulded and one that looks printed.
-         *
-         * @param edge the colour the rest of the outline is drawn in
-         * @return the colour for its bottom edge
-         */
-        static Color contactEdge( Color edge ) {
-            return LafUtilities.shiftHsb(edge, +0.050, -0.262);
-        }
-
-        /**
-         *  The outline the accented material wears: the accent again, lightened just enough to read
-         *  as an edge rather than as a shadow.
-         *
-         * @param p the palette in force
-         * @return the colour to outline an accented control with
-         */
-        static Color accentedEdge( SwingTreeLookAndFeel.Palette p ) {
-            return LafUtilities.wash(p.accent(), p.surface(), 0.456, -0.025);
-        }
-
-        /**
-         *  The outline. Nimbus does not keep one border colour and tint the fill under it: the outline
-         *  darkens as the pointer arrives and goes nearly black while the control is held down, which
-         *  is most of what makes a pressed button read as pressed at all.
-         *
-         * @param p the palette in force
-         * @param enabled whether the control can be used
-         * @param sunken whether it is held down or selected
-         * @param rollover whether the pointer is over it
-         * @return the colour to outline it with
-         */
-        static Color surfaceEdge(SwingTreeLookAndFeel.Palette p, boolean enabled, boolean sunken, boolean rollover ) {
-            if ( !enabled )
-                return LafUtilities.shiftHsb(p.border(), 0, +0.200);
-            if ( sunken )
-                return LafUtilities.shiftHsb(p.border(), +0.050, -0.600);
-            return rollover ? LafUtilities.shiftHsb(p.border(), 0, -0.100) : p.border();
-        }
-
-        /** The pale ring a focused control wears outside its outline. */
-        private static Color focusRing( SwingTreeLookAndFeel.Palette p ) {
-            return LafUtilities.shiftHsb(p.accent(), -0.186, +0.271);
-        }
-
-        /**
-         *  Adds that ring. It is painted as a hard-edged shadow rather than as a thicker border so
-         *  that focus costs no layout: the ring grows outwards into the margin every control already
-         *  keeps, instead of pushing the label around inside it.
-         */
-        private static <C extends JComponent> ComponentStyleDelegate<C> focused(
-                ComponentStyleDelegate<C> it, SwingTreeLookAndFeel.Palette p, boolean focused
-        ) {
-            if ( !focused )
-                return it;
-            return it.shadow("focus", s -> s.color(focusRing(p)).blurRadius(0).spreadRadius(MARGIN).isInset(false));
-        }
 
         // ── Surfaces ─────────────────────────────────────────────────────────
 
@@ -3349,25 +3262,40 @@ final class Styles
             }
         }
 
+        /**
+         *  A scroll pane: a square one pixel outline two pixels inside its bounds, which is the box of
+         *  whatever it scrolls, and the focus ring around it while a text component inside it has
+         *  the focus.
+         */
         @SuppressWarnings("deprecation")
         private static ComponentStyleDelegate<JScrollPane> scrollPane( ComponentStyleDelegate<JScrollPane> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
-            it = it.foregroundColor(p.text());
-            if ( SwingTreeLookAndFeel.Surface.of(it.component()) == SwingTreeLookAndFeel.Surface.TRANSPARENT )
-                return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).borderWidth(0).borderRadius(0).padding(0);
+            NimbusScheme s    = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+            JScrollPane  pane = it.component();
+            it = it.foregroundColor(s.get(NimbusScheme.Key.TEXT));
+            if ( SwingTreeLookAndFeel.Surface.of(pane) == SwingTreeLookAndFeel.Surface.TRANSPARENT )
+                return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).margin(0).borderWidth(0).borderRadius(0).padding(0);
+            Component view    = pane.getViewport() == null ? null : pane.getViewport().getView();
+            boolean   focused = view instanceof JTextComponent && view.isFocusOwner();
             return it
-                    .backgroundColor(p.surfaceField())
-                    .border(1, p.border())
-                    .borderRadius(RADIUS)
-                    .padding(2);
+                    .margin(2)
+                    .padding(0)
+                    .borderRadius(0)
+                    .border(1, s.get(NimbusScheme.Key.BORDER))
+                    .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
+                    .painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, "ring", NimbusRing.of(
+                        pane, focused ? s.get(NimbusScheme.Key.FOCUS) : SwingTreeLookAndFeel.Palette.TRANSPARENT,
+                        new float[]{ 0.6f, 0.6f, 0.6f, 0.6f, 0 }, new float[]{ 2, 2, 2, 2, 0 }
+                    ));
         }
 
         @SuppressWarnings("deprecation")
         private static ComponentStyleDelegate<JViewport> viewport( ComponentStyleDelegate<JViewport> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
-            it = it.foregroundColor(p.text());
-            return it.backgroundColor(
-                        SwingTreeLookAndFeel.Surface.of(it.component()) == SwingTreeLookAndFeel.Surface.TRANSPARENT ? SwingTreeLookAndFeel.Palette.TRANSPARENT : p.surfaceField()
+            NimbusScheme s = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+            return it
+                    .foregroundColor(s.get(NimbusScheme.Key.TEXT))
+                    .backgroundColor(
+                        SwingTreeLookAndFeel.Surface.of(it.component()) == SwingTreeLookAndFeel.Surface.TRANSPARENT
+                            ? SwingTreeLookAndFeel.Palette.TRANSPARENT : s.get(NimbusScheme.Key.CONTROL)
                     );
         }
 
@@ -3379,216 +3307,320 @@ final class Styles
 
         // ── Controls ─────────────────────────────────────────────────────────
 
+        /**
+         *  A button, a toggle button, or either of them on a tool bar.
+         *  <p>
+         *  Nimbus has no filled buttons, only the one blue default button and buttons whose
+         *  background the application has set, which it paints in the same light over that
+         *  colour. So a {@link SwingTreeLookAndFeel.Variant#PRIMARY primary} button is a Nimbus
+         *  button laid over {@code nimbusOrange} and a {@link SwingTreeLookAndFeel.Variant#DANGER
+         *  dangerous} one a Nimbus button laid over {@code nimbusRed}, and a
+         *  {@link SwingTreeLookAndFeel.Variant#QUIET quiet} one is painted the way Nimbus paints
+         *  every button on a tool bar: not at all until the pointer arrives.
+         */
         @SuppressWarnings("deprecation")
         private static ComponentStyleDelegate<AbstractButton> button( ComponentStyleDelegate<AbstractButton> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+            NimbusScheme   s = NimbusScheme.of(SwingTreeLookAndFeel.palette());
             AbstractButton b = it.component();
             ButtonModel    m = b.getModel();
 
             boolean enabled   = b.isEnabled();
-            boolean sunken    = enabled && ( ( m.isArmed() && m.isPressed() ) || m.isSelected() );
-            boolean rollover  = enabled && m.isRollover() && !sunken;
+            boolean pressed   = enabled && m.isArmed() && m.isPressed();
+            boolean selected  = m.isSelected();
+            boolean rollover  = enabled && m.isRollover();
             boolean focused   = enabled && b.isFocusOwner();
             boolean isDefault = b instanceof JButton && ((JButton) b).isDefaultButton();
 
             SwingTreeLookAndFeel.Variant variant = SwingTreeLookAndFeel.Variant.of(b);
-            // Nimbus leaves a tool bar's buttons unpainted until the pointer is on one, which is
-            // what the quiet variant already means, so a tool bar makes its buttons quiet.
             boolean onToolBar = b.getParent() instanceof JToolBar;
-            if ( variant == SwingTreeLookAndFeel.Variant.NEUTRAL && onToolBar )
-                variant = SwingTreeLookAndFeel.Variant.QUIET;
-            int padX = onToolBar ? TOOL_PAD_X : PAD_X;
-            if ( variant == SwingTreeLookAndFeel.Variant.QUIET && !sunken && !rollover )
-                return focused(it
+            boolean quiet     = onToolBar || variant == SwingTreeLookAndFeel.Variant.QUIET;
+            Color   tint      = variant == SwingTreeLookAndFeel.Variant.PRIMARY ? s.get(NimbusScheme.Key.ORANGE)
+                              : variant == SwingTreeLookAndFeel.Variant.DANGER  ? s.get(NimbusScheme.Key.RED)
+                              : null;
+
+            it = it.foregroundColor(ink(s, enabled, isDefault && pressed));
+            it = onToolBar ? it.padding(TOOL_PAD, TOOL_PAD, TOOL_PAD, TOOL_PAD)
+                           : it.padding(PAD_Y, PAD_X, PAD_Y, PAD_X);
+
+            NimbusMould mould = selected ? ( !enabled ? NimbusMould.TOGGLE_SELECTED_DISABLED
+                                           : pressed  ? NimbusMould.TOGGLE_SELECTED_PRESSED
+                                           : rollover ? NimbusMould.TOGGLE_SELECTED_MOUSE_OVER
+                                           :            NimbusMould.TOGGLE_SELECTED )
+                              : quiet    ? ( pressed  ? NimbusMould.TOOL_BAR_BUTTON_PRESSED
+                                           : rollover ? NimbusMould.TOOL_BAR_BUTTON_MOUSE_OVER
+                                           :            null )
+                              : !enabled ? NimbusMould.BUTTON_DISABLED
+                              : b instanceof JToggleButton && pressed ? NimbusMould.TOGGLE_SELECTED_MOUSE_OVER
+                              : isDefault ? ( pressed  ? NimbusMould.DEFAULT_BUTTON_PRESSED
+                                            : rollover ? NimbusMould.DEFAULT_BUTTON_MOUSE_OVER
+                                            :            NimbusMould.DEFAULT_BUTTON )
+                              : pressed  ? NimbusMould.BUTTON_PRESSED
+                              : rollover ? NimbusMould.BUTTON_MOUSE_OVER
+                              :            NimbusMould.BUTTON;
+
+            double arc = !onToolBar ? BUTTON_ARC : selected ? TOOL_SELECTED_ARC : TOOL_ARC;
+            if ( mould == null )
+                return it
                         .margin(MARGIN)
-                        .padding(PAD_Y, padX, PAD_Y, padX)
-                        .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
-                        // The edge the loud states draw is reserved here too, and left unpainted,
-                        // so a tool bar button keeps its size when the pointer arrives.
+                        .borderRadius(arc)
                         .border(1, SwingTreeLookAndFeel.Palette.TRANSPARENT)
-                        .foregroundColor(enabled ? p.text() : p.textDisabled()), p, focused);
+                        .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
+                        .painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, "ring", NimbusRing.aroundEdge(
+                            b, focused ? s.get(NimbusScheme.Key.FOCUS) : SwingTreeLookAndFeel.Palette.TRANSPARENT, (float) arc
+                        ));
 
-            Color        tone   = tone(p, variant, enabled, sunken, rollover, isDefault);
-            NimbusRelief relief = relief(enabled, isDefault || variant.isFilled());
-
-            Color edge = isDefault && enabled ? accentedEdge(p)
-                                              : surfaceEdge(p, enabled, sunken, rollover);
-            it = it
-                    .margin(MARGIN)
-                    .padding(PAD_Y, padX, PAD_Y, padX)
-                    .borderRadius(RADIUS)
-                    .border(1, edge)
-                    .borderAt(UI.Edge.BOTTOM, 1, enabled ? contactEdge(edge) : edge)
-                    .backgroundColor(tone)
-                    .gradient("relief", g -> relief.over(g, tone))
-                    .foregroundColor(ink(p, variant, enabled));
-
-            return focused(it, p, focused);
-        }
-
-        private static Color ink(SwingTreeLookAndFeel.Palette p, SwingTreeLookAndFeel.Variant variant, boolean enabled ) {
-            if ( !enabled )
-                return p.textDisabled();
-            return variant.isFilled() ? p.onFilled() : p.text();
+            return mould.style(it, s, arc, tint, focused);
         }
 
         /**
-         *  A check box or a radio button. The box itself is a symbol rather than a style, so all that
+         *  The ink of a button's label. Nimbus writes black on every button, including a blue or a
+         *  tinted one, and only turns it white on the default button while it is held down, where
+         *  the face goes to the full base colour.
+         */
+        private static Color ink( NimbusScheme s, boolean enabled, boolean onPressedDefault ) {
+            if ( !enabled )
+                return s.get(NimbusScheme.Key.DISABLED_TEXT);
+            return s.get(onPressedDefault ? NimbusScheme.Key.SELECTED_TEXT : NimbusScheme.Key.TEXT);
+        }
+
+        /**
+         *  A check box or a radio button. The box itself is a symbol rather than a style, and so is
+         *  its focus ring, which Nimbus draws around the box and not around the label, so all that
          *  is left here is to keep the label's own ground out of the way of the panel behind it.
          */
         @SuppressWarnings("deprecation")
         private static <C extends AbstractButton> ComponentStyleDelegate<C> tickable( ComponentStyleDelegate<C> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
-            C       b = it.component();
-            return focused(it, p, b.isEnabled() && b.isFocusOwner())
+            NimbusScheme s = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+            return it
                     .margin(0)
                     .padding(0)
-                    .borderRadius(RADIUS)
                     .borderWidth(0)
                     .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
-                    .foregroundColor(b.isEnabled() ? p.text() : p.textDisabled());
-        }
-
-        @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JComboBox> comboBox( ComponentStyleDelegate<JComboBox> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
-            JComboBox<?> combo   = it.component();
-            boolean      enabled = combo.isEnabled();
-            boolean      focused = enabled && LafUtilities.hasFocus(combo);
-
-            if ( combo.isEditable() )
-                return inset(it, p, enabled, focused).padding(0);
-
-            Color        tone   = LafUtilities.underPointer(
-                                        p, enabled ? p.surface() : p.surfaceDisabled(), combo);
-            NimbusRelief relief = relief(enabled, false);
-            Color        edge   = surfaceEdge(p, enabled, false, LafUtilities.isUnderPointer(combo));
-            // No padding on the right: the actuator is laid out inside the padding and Nimbus runs
-            // it right up to the outline.
-            return focused(it
-                    .margin(MARGIN)
-                    .padding(COMBO_PAD, 0, COMBO_PAD, FIELD_PAD)
-                    .borderRadius(RADIUS)
-                    .border(1, edge)
-                    .borderAt(UI.Edge.BOTTOM, 1, enabled ? contactEdge(edge) : edge)
-                    .backgroundColor(tone)
-                    .gradient("relief", g -> relief.over(g, tone))
-                    .foregroundColor(enabled ? p.text() : p.textDisabled()), p, focused);
-        }
-
-        @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JSpinner> spinner( ComponentStyleDelegate<JSpinner> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
-            JSpinner spinner = it.component();
-            boolean  enabled = spinner.isEnabled();
-            return inset(it, p, enabled, enabled && LafUtilities.hasFocus(spinner)).padding(0);
+                    .foregroundColor(s.get(it.component().isEnabled() ? NimbusScheme.Key.TEXT : NimbusScheme.Key.DISABLED_TEXT));
         }
 
         // ── Inputs ───────────────────────────────────────────────────────────
 
+        /**
+         *  A combo box. One that cannot be edited is a raised control like a button, whose blue end
+         *  {@link Symbols.Nimbus#paintComboArrow} draws over the combo box's own edge. One that can
+         *  be edited is a text field and that blue end side by side, and paints nothing itself.
+         */
+        @SuppressWarnings("deprecation")
+        private static ComponentStyleDelegate<JComboBox> comboBox( ComponentStyleDelegate<JComboBox> it ) {
+            NimbusScheme s       = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+            JComboBox<?> combo   = it.component();
+            boolean      enabled = combo.isEnabled();
+            it = it.foregroundColor(s.get(enabled ? NimbusScheme.Key.TEXT : NimbusScheme.Key.DISABLED_TEXT));
+            if ( combo.isEditable() )
+                return it.margin(0).padding(0).borderWidth(0).backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT);
+            NimbusMould mould = !enabled                           ? NimbusMould.COMBO_BOX_DISABLED
+                              : combo.isPopupVisible()             ? NimbusMould.COMBO_BOX_PRESSED
+                              : LafUtilities.isUnderPointer(combo) ? NimbusMould.COMBO_BOX_MOUSE_OVER
+                              :                                      NimbusMould.COMBO_BOX;
+            return mould.style(it, s, COMBO_ARC, null, enabled && LafUtilities.hasFocus(combo))
+                        .padding(COMBO_PAD_Y, 0, COMBO_PAD_Y, COMBO_PAD_X);
+        }
+
+        /** A spinner paints nothing: its text field is the box, and its two buttons stand beside it. */
+        private static ComponentStyleDelegate<JSpinner> spinner( ComponentStyleDelegate<JSpinner> it ) {
+            return it.margin(0).padding(0).borderWidth(0).backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT);
+        }
+
         @SuppressWarnings("deprecation")
         private static ComponentStyleDelegate<JTextField> field( ComponentStyleDelegate<JTextField> it ) {
-            return input(it, it.component());
+            return input(it, it.component(), FIELD_PAD_Y, FIELD_PAD_X);
         }
 
         @SuppressWarnings("deprecation")
-        private static <C extends JTextComponent> ComponentStyleDelegate<C> page( ComponentStyleDelegate<C> it ) {
-            return input(it, it.component());
+        private static ComponentStyleDelegate<JTextArea> area( ComponentStyleDelegate<JTextArea> it ) {
+            return input(it, it.component(), FIELD_PAD_Y, FIELD_PAD_X);
         }
 
-        private static <C extends JComponent> ComponentStyleDelegate<C> input(
-            ComponentStyleDelegate<C> it, JTextComponent text
-        ) {
-            SwingTreeLookAndFeel.Palette p  = SwingTreeLookAndFeel.palette();
-            boolean on = text.isEnabled() && text.isEditable();
-            // Inside a scroll pane or a spinner the cut has already been made around it.
-            if ( LafUtilities.isInsideAnotherControl(text) )
-                return it
-                        .margin(0).padding(2, 6, 2, 6).borderWidth(0)
-                        .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
-                        .foregroundColor(text.isEnabled() ? p.text() : p.textDisabled());
-            return inset(it, p, on, on && text.isFocusOwner()).padding(FIELD_PAD, FIELD_PAD, FIELD_PAD, FIELD_PAD);
+        /** An editor pane or a text pane, which Nimbus keeps two pixels tighter above and below. */
+        @SuppressWarnings("deprecation")
+        private static <C extends JTextComponent> ComponentStyleDelegate<C> page( ComponentStyleDelegate<C> it ) {
+            return input(it, it.component(), PAGE_PAD_Y, FIELD_PAD_X);
         }
 
         /**
-         *  Anything you can type into: a white sheet cut into the panel rather than standing on it. The
-         *  relief is therefore upside down - a shade along the top edge where the wall of the cut
-         *  catches no light - and it is an inset shadow rather than a gradient so that it stays one
-         *  pixel deep however tall the field is.
+         *  Anything you can type into. Nimbus draws four kinds of box for it, all square: a text field
+         *  on its own, cut into the panel with a dark top edge and a soft shade under it; the same box
+         *  open on its right where a spinner's or an editable combo box's buttons continue it; no box at
+         *  all inside a scroll pane, whose own outline is the box; and the ground behind a text
+         *  component that stands inside some other control, which is none of the above.
          */
-        private static <C extends JComponent> ComponentStyleDelegate<C> inset(
-                ComponentStyleDelegate<C> it, SwingTreeLookAndFeel.Palette p, boolean enabled, boolean focused
+        private static <C extends JComponent> ComponentStyleDelegate<C> input(
+            ComponentStyleDelegate<C> it, JTextComponent text, int padY, int padX
         ) {
-            return focused(it
-                    .margin(MARGIN)
-                    .borderRadius(RADIUS)
-                    .border(1, enabled ? p.border() : LafUtilities.shiftHsb(p.border(), 0, +0.200))
-                    .backgroundColor(enabled ? p.surfaceField() : p.surfaceDisabled())
-                    .foregroundColor(enabled ? p.text() : p.textDisabled())
-                    .shadow("cut", s -> s.color(LafUtilities.withOpacity(p.border(), enabled ? 150 : 60))
-                                         .offset(0, 1).blurRadius(2)
-                                         .falloff(UI.ShadowFalloff.PENUMBRA).isInset(true)), p, focused);
+            NimbusScheme s       = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+            boolean      enabled = text.isEnabled();
+            it = it.foregroundColor(s.get(enabled ? NimbusScheme.Key.TEXT : NimbusScheme.Key.DISABLED_TEXT));
+            Color page = enabled ? s.get(NimbusScheme.Key.LIGHT_BACKGROUND) : FIELD_DISABLED.in(s);
+            if ( text.getParent() instanceof JViewport )
+                return it.margin(0).padding(padY, padX, padY, padX).borderWidth(0).backgroundColor(page);
+            boolean inSpinner = SwingUtilities.getAncestorOfClass(JSpinner.class, text) != null;
+            boolean inCombo   = !inSpinner && SwingUtilities.getAncestorOfClass(JComboBox.class, text) != null;
+            if ( inSpinner || inCombo )
+                return openField(it, s, text, enabled, page, inSpinner);
+
+            boolean focused = enabled && text.isFocusOwner();
+            return it
+                    .margin(2)
+                    .padding(padY - 3, padX - 3, padY - 3, padX - 3)
+                    .border(1, SwingTreeLookAndFeel.Palette.TRANSPARENT)
+                    .borderColors(
+                        enabled ? topEdge(s, FIELD_EDGE_TOP, 0.1f, 0.5f) : topEdge(s, FIELD_DISABLED_EDGE_TOP, 0f, 0.5f),
+                        ( enabled ? FIELD_SIDE : FIELD_DISABLED_RIGHT ).in(s),
+                        enabled ? FIELD_BOTTOM.in(s) : page,
+                        ( enabled ? FIELD_SIDE : FIELD_DISABLED_LEFT ).in(s)
+                    )
+                    .backgroundColor(page)
+                    .gradient(UI.Layer.BACKGROUND, "shade", g -> innerShade(g, text, enabled ? FIELD_SHADE : FIELD_DISABLED_SHADE, s,
+                                                                            enabled ? 0.1f : 0f, enabled ? 0.9f : 1f))
+                    .painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, "ring", NimbusRing.of(
+                        text, focused ? s.get(NimbusScheme.Key.FOCUS) : SwingTreeLookAndFeel.Palette.TRANSPARENT,
+                        new float[]{ 0.6f, 0.6f, 0.6f, 0.6f, 0 }, new float[]{ 2, 2, 2, 2, 0 }
+                    ));
+        }
+
+        /**
+         *  The text field of a spinner or of an editable combo box: Nimbus's text field without its
+         *  right edge, so that the buttons beside it close the box, and with a faint lip under it
+         *  that the buttons continue.
+         */
+        private static <C extends JComponent> ComponentStyleDelegate<C> openField(
+            ComponentStyleDelegate<C> it, NimbusScheme s, JTextComponent text, boolean enabled, Color page, boolean inSpinner
+        ) {
+            boolean   focused = enabled && text.isFocusOwner();
+            Color     edge    = ( enabled ? OPEN_FIELD_EDGE : OPEN_FIELD_DISABLED_EDGE ).in(s);
+            Color     ground  = enabled ? page : OPEN_FIELD_DISABLED_FACE.in(s);
+            NimbusScheme.Gradient top = enabled ? OPEN_FIELD_EDGE_TOP : FIELD_DISABLED_EDGE_TOP;
+            Color     lip     = focused ? s.get(NimbusScheme.Key.FOCUS) : OPEN_FIELD_LIP.in(s);
+            float[]   outer   = focused ? new float[]{ 0.67f, 0.67f, 0, 0.75f, 0 } : new float[]{ 2, 3, 0, 1, 0 };
+            return it
+                    .margin(2, 0, 2, 2)
+                    .padding(inSpinner ? 3 : 2, inSpinner ? 6 : 3, 2, 3)
+                    .borderWidths(1, 0, 1, 1)
+                    .borderColors(topEdge(s, top, 0f, enabled ? 0.496f : 0.5f), edge, edge, edge)
+                    .backgroundColor(ground)
+                    .gradient(UI.Layer.BACKGROUND, "shade", g -> enabled && inSpinner
+                                    ? innerShade(g, text, SPINNER_FIELD_SHADE, s, 0f, 1f).fractions(0, 0.168 * shadeFraction(text), shadeFraction(text))
+                                    : innerShade(g, text, enabled ? FIELD_SHADE : FIELD_DISABLED_SHADE, s, enabled ? 0.1f : 0f, enabled ? 0.9f : 1f))
+                    .painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, "ring",
+                             NimbusRing.of(text, lip, outer, new float[]{ 2, 2, 0, 2, 0 }));
+        }
+
+        /**
+         *  The colour of the top row of a text field's edge. Nimbus fills the top three pixels of the
+         *  box with one gradient and lets the face cover all of it but the outermost row and the two
+         *  side columns, so the row is that gradient sampled half a pixel down.
+         */
+        private static Color topEdge( NimbusScheme s, NimbusScheme.Gradient gradient, float first, float middle ) {
+            Color[] stops = gradient.colors(s);
+            float   t     = ( 0.5f / 3f - first ) / ( middle - first );
+            return NimbusScheme.mix(stops[0], stops[1], Math.max(0, Math.min(1, t)));
+        }
+
+        /**
+         *  The soft shade along the top of a text field's face, two pixels deep whatever the height of
+         *  the field, which is why its stops are worked out from the height rather than written down.
+         */
+        private static swingtree.style.GradientConf innerShade(
+            swingtree.style.GradientConf g, JComponent c, NimbusScheme.Gradient shade, NimbusScheme s, float first, float last
+        ) {
+            float depth = shadeFraction(c);
+            return g.colors(shade.colors(s))
+                    .fractions(first * depth, 0.5 * depth, last * depth)
+                    .span(UI.Span.TOP_TO_BOTTOM)
+                    .boundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)
+                    .clipTo(UI.ComponentArea.INTERIOR);
+        }
+
+        /** Two pixels as a fraction of the height of a text field's face. */
+        private static float shadeFraction( JComponent c ) {
+            float inner = c.getHeight() / UI.scale() - 6;
+            return inner > 2 ? 2f / inner : 1f;
         }
 
         // ── Menus ────────────────────────────────────────────────────────────
 
+        /**
+         *  A menu on a menu bar or an item in a popup: nothing at all at rest, and a flat band of
+         *  {@code nimbusSelection} with white ink while it is armed. Nimbus writes a menu's label
+         *  in a grey only just off black.
+         */
         @SuppressWarnings("deprecation")
         private static ComponentStyleDelegate<JMenuItem> menuItem( ComponentStyleDelegate<JMenuItem> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
-            JMenuItem   item    = it.component();
-            ButtonModel m       = item.getModel();
-            boolean     enabled = item.isEnabled();
-            boolean     armed   = enabled && ( m.isArmed() || m.isSelected() );
-            Color       tone    = p.accent();
-            // A menu on the bar is laid out much tighter than an entry in one: it has no room to
-            // leave for a tick, an accelerator or a submenu arrow.
-            boolean onBar = item.getParent() instanceof JMenuBar;
+            NimbusScheme s       = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+            JMenuItem    item    = it.component();
+            ButtonModel  m       = item.getModel();
+            boolean      enabled = item.isEnabled();
+            boolean      armed   = enabled && ( m.isArmed() || ( item instanceof JMenu && m.isSelected() ) );
+            boolean      onBar   = item.getParent() instanceof JMenuBar;
+            Color        ink     = !enabled ? s.get(NimbusScheme.Key.DISABLED_TEXT)
+                                 : armed    ? s.get(NimbusScheme.Key.SELECTED_TEXT)
+                                 :            MENU_TEXT.in(s);
             return it
                     .padding(1, onBar ? 4 : item instanceof JMenu ? 5 : 13, 2, onBar ? 4 : 12)
                     .borderRadius(0)
                     .borderWidth(0)
-                    .backgroundColor(armed ? tone : SwingTreeLookAndFeel.Palette.TRANSPARENT)
-                    .gradient("relief", g -> armed ? NimbusRelief.LIT.over(g, tone) : g)
-                    .foregroundColor(!enabled ? p.textDisabled() : armed ? p.onFilled() : p.text());
+                    .backgroundColor(armed ? s.get(NimbusScheme.Key.SELECTION) : SwingTreeLookAndFeel.Palette.TRANSPARENT)
+                    .foregroundColor(ink);
         }
 
+        /** A menu bar: the control colour with a white sheen fading out down its top quarter, and a rule under it. */
         private static ComponentStyleDelegate<JMenuBar> menuBar( ComponentStyleDelegate<JMenuBar> it ) {
-            SwingTreeLookAndFeel.Palette p    = SwingTreeLookAndFeel.palette();
-            Color   tone = p.surface();
+            NimbusScheme s = NimbusScheme.of(SwingTreeLookAndFeel.palette());
             return it
-                    .padding(2, 6, 2, 6)
-                    .borderWidth(0)
-                    .borderAt(UI.Edge.BOTTOM, 1, p.border())
-                    .backgroundColor(tone)
-                    .gradient("relief", g -> NimbusRelief.STRIP.over(g, tone))
-                    .foregroundColor(p.text());
+                    .padding(2, 6, 1, 6)
+                    .borderWidths(0, 0, 1, 0)
+                    .borderColor(s.get(NimbusScheme.Key.BORDER))
+                    .backgroundColor(s.get(NimbusScheme.Key.CONTROL))
+                    .gradient(UI.Layer.BACKGROUND, "sheen", g -> MENU_BAR_SHEEN.over(g, s, null).clipTo(UI.ComponentArea.BODY))
+                    .foregroundColor(MENU_TEXT.in(s));
         }
 
+        /** A popup menu: a square grey outline around a sheet shading from white at its ends to the pale {@code menu} colour. */
         private static ComponentStyleDelegate<JPopupMenu> popupMenu( ComponentStyleDelegate<JPopupMenu> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+            NimbusScheme s = NimbusScheme.of(SwingTreeLookAndFeel.palette());
             return it
-                    .margin(3)
-                    .padding(6, 1, 6, 1)
-                    .borderRadius(RADIUS)
-                    .border(1, p.border())
-                    .backgroundColor(p.surfaceDisabled())
-                    .foregroundColor(p.text())
-                    .shadow("lift", s -> s.color(LafUtilities.withOpacity(p.border(), 110))
-                                          .offset(0, 2).blurRadius(4).isInset(false));
+                    .margin(0)
+                    .padding(5, 0, 5, 0)
+                    .borderRadius(0)
+                    .border(1, POPUP_OUTLINE.in(s))
+                    .backgroundColor(s.get(NimbusScheme.Key.LIGHT_BACKGROUND))
+                    .gradient(UI.Layer.BACKGROUND, "sheet", g -> POPUP_SHEET.over(g, s, null)
+                                                                    .boundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)
+                                                                    .clipTo(UI.ComponentArea.INTERIOR))
+                    .foregroundColor(MENU_TEXT.in(s));
         }
 
+        /** A tool tip: {@code info} in a square outline of {@code nimbusBorder}. */
         private static ComponentStyleDelegate<JToolTip> toolTip( ComponentStyleDelegate<JToolTip> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+            NimbusScheme s = NimbusScheme.of(SwingTreeLookAndFeel.palette());
             return it
                     .margin(0)
                     .padding(3, 3, 3, 3)
                     .borderRadius(0)
-                    .border(1, p.textureDark())
-                    .backgroundColor(p.textureLight())
-                    // The notice colour is chosen, not derived, so nothing here knows whether it came
-                    // out light or dark.
-                    .foregroundColor(LafUtilities.readableOn(p.textureLight(), p.text(), p.onFilled()));
+                    .border(1, s.get(NimbusScheme.Key.BORDER))
+                    .backgroundColor(s.get(NimbusScheme.Key.INFO))
+                    .foregroundColor(s.get(NimbusScheme.Key.TEXT));
         }
+
+        /** The ink of a menu's label, which Nimbus writes down as a value rather than deriving it. */
+        private static final NimbusScheme.Shade MENU_TEXT = NimbusScheme.constant(35, 35, 36, 255);
+
+        private static final NimbusScheme.Gradient MENU_BAR_SHEEN = NimbusScheme.gradient(new double[]{ 0, 0.015, 0.03, 0.234, 0.757 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.027777791, -0.10255819, 0.23921567), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.111111104, -0.10654225, 0.23921567, -29), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.110526316, 0.25490195, -255));
+        private static final NimbusScheme.Shade POPUP_OUTLINE = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.6111111, -0.110526316, -0.39607844);
+        private static final NimbusScheme.Gradient POPUP_SHEET = NimbusScheme.gradient(new double[]{ 0, 0.003, 0.02, 0.5, 0.98, 0.996, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0, -0.6357143, 0.45098037), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.021348298, -0.6150531, 0.39999998), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.021348298, -0.6150531, 0.39999998), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0, -0.6357143, 0.45098037));
 
         // ── The rest ─────────────────────────────────────────────────────────
 
@@ -3606,38 +3638,121 @@ final class Styles
         }
 
         /**
-         *  The trough a progress bar fills. The bar itself is a symbol, because its gloss has to be
-         *  clipped to however much of the trough has been filled rather than to the component.
+         *  The trough a progress bar fills: a square sunk channel two pixels inside the bar's bounds.
+         *  The bar itself is a symbol, because it runs over the trough's edge and its glow reaches
+         *  the bounds.
          */
         private static ComponentStyleDelegate<JProgressBar> progressBar( ComponentStyleDelegate<JProgressBar> it ) {
-            SwingTreeLookAndFeel.Palette p    = SwingTreeLookAndFeel.palette();
-            Color   tone = LafUtilities.shiftHsb(p.surface(), 0, -0.030);
+            NimbusScheme s = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+            boolean enabled = it.component().isEnabled();
+            NimbusScheme.Gradient edge = enabled ? TROUGH_EDGE : TROUGH_EDGE_DISABLED;
+            NimbusScheme.Gradient face = enabled ? TROUGH_FACE : TROUGH_FACE_DISABLED;
             return it
-                    .margin(MARGIN)
-                    .borderRadius(3)
-                    .border(1, p.border())
-                    .backgroundColor(tone)
-                    .gradient("trough", g -> NimbusRelief.TUBE.over(g, tone))
-                    .foregroundColor(p.primary());
+                    .margin(2)
+                    .borderRadius(0)
+                    .border(1, SwingTreeLookAndFeel.Palette.TRANSPARENT)
+                    .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
+                    .gradient(UI.Layer.BACKGROUND, "edge", g -> edge.over(g, s, null)
+                                                                   .boundary(UI.ComponentBoundary.EXTERIOR_TO_BORDER)
+                                                                   .clipTo(UI.ComponentArea.BODY))
+                    .gradient(UI.Layer.BACKGROUND, "face", g -> face.over(g, s, null)
+                                                                   .boundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)
+                                                                   .clipTo(UI.ComponentArea.INTERIOR))
+                    .painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, "glow", new ProgressGlow(it.component()))
+                    .foregroundColor(s.get(NimbusScheme.Key.TEXT));
         }
+
+        /**
+         *  The glow around the filled part of a progress bar, which lies in the bar's margin, outside
+         *  the area the look and feel paints the bar itself into. It is a value holding the fill it was
+         *  made for, so that the style changes, and the bar repaints, when the fill does.
+         */
+        private static final class ProgressGlow implements Painter
+        {
+            private final JProgressBar _bar;
+            private final double       _ratio;
+            private final boolean      _horizontal;
+            private final boolean      _enabled;
+
+            ProgressGlow( JProgressBar bar ) {
+                _bar        = bar;
+                int range   = Math.max(1, bar.getMaximum() - bar.getMinimum());
+                _ratio      = bar.isIndeterminate() ? 0 : Math.max(0, Math.min(1, ( bar.getValue() - bar.getMinimum() ) / (double) range));
+                _horizontal = bar.getOrientation() == SwingConstants.HORIZONTAL;
+                _enabled    = bar.isEnabled();
+            }
+
+            @Override
+            public void paint( Graphics2D g ) {
+                float scale = UI.scale();
+                Symbols.Nimbus.paintProgressGlow(g, SwingTreeLookAndFeel.palette(),
+                        Math.round(_bar.getWidth() / scale), Math.round(_bar.getHeight() / scale), _ratio, _horizontal, _enabled);
+            }
+
+            @Override
+            public boolean equals( Object other ) {
+                if ( !(other instanceof ProgressGlow) ) return false;
+                ProgressGlow that = (ProgressGlow) other;
+                return _bar == that._bar && _ratio == that._ratio && _horizontal == that._horizontal && _enabled == that._enabled;
+            }
+
+            @Override
+            public int hashCode() { return Objects.hash(System.identityHashCode(_bar), _ratio, _horizontal, _enabled); }
+        }
+
+        private static final NimbusScheme.Gradient TROUGH_EDGE = NimbusScheme.gradient(new double[]{ 0, 0.5, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.04845735, -0.17647058), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.061345987, -0.027450979));
+        private static final NimbusScheme.Gradient TROUGH_FACE = NimbusScheme.gradient(new double[]{ 0.039, 0.06, 0.081, 0.237, 0.394, 0.416, 0.439, 0.674, 0.91, 0.915, 0.919 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.110526316, 0.25490195), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.097921275, 0.18823528), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.0138888955, -0.0925083, 0.12549019), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.08222443, 0.086274505), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.08477524, 0.16862744), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.086996906, 0.25490195));
+        private static final NimbusScheme.Gradient TROUGH_EDGE_DISABLED = NimbusScheme.gradient(new double[]{ 0.055, 0.503, 0.952 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.061613273, -0.02352941), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.01111114, -0.061265234, 0.05098039));
+        private static final NimbusScheme.Gradient TROUGH_FACE_DISABLED = NimbusScheme.gradient(new double[]{ 0.039, 0.06, 0.081, 0.237, 0.394, 0.416, 0.439, 0.674, 0.91, 0.916, 0.923 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.0138888955, -0.09378991, 0.19215685), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.08455229, 0.1607843), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.027777791, -0.08362049, 0.12941176), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.007936537, -0.07826825, 0.10588235), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.007936537, -0.07982456, 0.1490196), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.007936537, -0.08099045, 0.18431371));
 
         private static ComponentStyleDelegate<JSlider> slider( ComponentStyleDelegate<JSlider> it ) {
             SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
             return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(p.text());
         }
 
+        /**
+         *  The groove of a scroll bar, shading across the bar from dark along the side next to what
+         *  it scrolls. Its buttons reach eight pixels into it, see {@link #installDefaults}.
+         */
         @SuppressWarnings("deprecation")
         private static ComponentStyleDelegate<JScrollBar> scrollBar( ComponentStyleDelegate<JScrollBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
-            // The groove runs across the bar rather than along it, so a vertical bar is cut from
-            // its left edge and a horizontal one from its top.
-            UI.Span span = it.component().getOrientation() == JScrollBar.VERTICAL
-                                ? UI.Span.LEFT_TO_RIGHT : UI.Span.TOP_TO_BOTTOM;
+            NimbusScheme s   = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+            JScrollBar   bar = it.component();
+            UI.Span span = bar.getOrientation() == JScrollBar.VERTICAL ? UI.Span.LEFT_TO_RIGHT : UI.Span.TOP_TO_BOTTOM;
+            NimbusScheme.Gradient groove = bar.isEnabled() ? GROOVE : GROOVE_DISABLED;
             return it
-                    .backgroundColor(p.surface())
-                    .foregroundColor(p.border())
-                    .gradient("groove", g -> NimbusRelief.GROOVE.over(g, p.border()).span(span));
+                    .backgroundColor(s.get(NimbusScheme.Key.CONTROL))
+                    .foregroundColor(s.get(NimbusScheme.Key.TEXT))
+                    .gradient(UI.Layer.BACKGROUND, "groove", g -> groove.over(g, s, null).span(span));
         }
+
+        private static final NimbusScheme.Gradient GROOVE = NimbusScheme.gradient(new double[]{ 0, 0.031, 0.061, 0.097, 0.132, 0.221, 0.31, 0.474, 0.823 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.02222228, -0.06465475, -0.31764707), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.06766917, -0.19607842), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.006944418, -0.0655825, -0.04705882), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.0138888955, -0.071117446, 0.05098039), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.07016757, 0.12941176));
+        private static final NimbusScheme.Gradient GROOVE_DISABLED = NimbusScheme.gradient(new double[]{ 0.016, 0.039, 0.061, 0.161, 0.265, 0.438, 0.884 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.027777791, -0.10016362, 0.011764705), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.027777791, -0.100476064, 0.035294116), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.055555582, -0.10606203, 0.13333333), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.6111111, -0.110526316, 0.24705881));
 
         private static ComponentStyleDelegate<JTabbedPane> tabbedPane( ComponentStyleDelegate<JTabbedPane> it ) {
             SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
@@ -3649,29 +3764,89 @@ final class Styles
             return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(p.text());
         }
 
+        /**
+         *  The heading row of a table: one lit strip with a dark rule under it. The rules between the
+         *  headings are {@link Symbols.Nimbus#tableHeaderDivider}, and the room around each heading's
+         *  text is Nimbus's own renderer margin, see {@link #installDefaults}.
+         */
         private static ComponentStyleDelegate<JTableHeader> tableHeader( ComponentStyleDelegate<JTableHeader> it ) {
-            SwingTreeLookAndFeel.Palette p    = SwingTreeLookAndFeel.palette();
-            Color   tone = p.surface();
+            NimbusScheme s = NimbusScheme.of(SwingTreeLookAndFeel.palette());
             return it
-                    .padding(2, 5, 4, 5)
-                    .backgroundColor(tone)
-                    .gradient("relief", g -> NimbusRelief.LIT.over(g, tone))
-                    .foregroundColor(p.text())
-                    .borderAt(UI.Edge.BOTTOM, 1, LafUtilities.shiftHsb(p.border(), 0, -0.130));
+                    .padding(0)
+                    .borderWidths(0, 0, 1, 0)
+                    .borderColor(HEADER_RULE.in(s))
+                    .backgroundColor(s.get(NimbusScheme.Key.CONTROL))
+                    .gradient(UI.Layer.BACKGROUND, "face", g -> HEADER_FACE.over(g, s, null)
+                                                                    .boundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)
+                                                                    .clipTo(UI.ComponentArea.INTERIOR))
+                    .foregroundColor(s.get(NimbusScheme.Key.TEXT));
         }
 
+        private static final NimbusScheme.Gradient HEADER_FACE = NimbusScheme.gradient(new double[]{ 0, 0.071, 0.289, 0.549, 0.704, 0.852, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.055555582, -0.10655806, 0.24313724), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.08455229, 0.1607843), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.07016757, 0.12941176), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.07466974, 0.23921567));
+        private static final NimbusScheme.Shade HEADER_RULE = NimbusScheme.shade(NimbusScheme.Key.BORDER, -0.013888836, 0.0005823001, -0.12941176);
+
+        /**
+         *  The {@link UIManager} keys Nimbus is read through beyond its colours: the room around the
+         *  text of a list cell, a table cell and a table heading, a combo box that looks held down
+         *  while its list is open, and a titled border's title above its line rather than on it.
+         *
+         * @param table the defaults of the look and feel being installed
+         * @param palette its palette
+         */
+        static void installDefaults( UIDefaults table, SwingTreeLookAndFeel.Palette palette ) {
+            NimbusScheme.install(table, palette);
+            table.put("ComboBox.pressedWhenPopupVisible", Boolean.TRUE);
+            table.put("TableHeader:\"TableHeader.renderer\".contentMargins", new javax.swing.plaf.InsetsUIResource(2, 5, 4, 5));
+            javax.swing.border.Border cell = new javax.swing.plaf.BorderUIResource(
+                    BorderFactory.createEmptyBorder(UI.scale(2), UI.scale(5), UI.scale(2), UI.scale(5)));
+            table.put("List.cellNoFocusBorder",        cell);
+            table.put("List.focusCellHighlightBorder", cell);
+            table.put("Table.cellNoFocusBorder",        cell);
+            table.put("Table.focusCellHighlightBorder", cell);
+            table.put("TitledBorder.position", "ABOVE_TOP");
+            table.put("TitledBorder.border", new NimbusLoweredBorder());
+            table.put("TitledBorder.titleColor", new javax.swing.plaf.ColorUIResource(
+                    NimbusScheme.derive(NimbusScheme.of(palette).get(NimbusScheme.Key.TEXT), 0f, 0f, 0.23f, 0)));
+            java.awt.Font font = swingtree.SwingTree.get().getScaledDefaultFont();
+            table.put("TitledBorder.font", new javax.swing.plaf.FontUIResource(font.deriveFont(java.awt.Font.BOLD)));
+            table.put("Slider.tickColor", new javax.swing.plaf.ColorUIResource(35, 40, 48));
+            table.put("ScrollBar.incrementButtonGap", UI.scale(-8));
+            table.put("ScrollBar.decrementButtonGap", UI.scale(-8));
+            table.put("TabbedPane.selectedTabPadInsets", new javax.swing.plaf.InsetsUIResource(0, 0, 0, 0));
+            table.put("TabbedPane.labelShift", 0);
+            table.put("TabbedPane.selectedLabelShift", 0);
+            table.put("TabbedPane:TabbedPaneTab.contentMargins", new javax.swing.plaf.InsetsUIResource(2, 8, 3, 8));
+            table.put("TabbedPane:TabbedPaneTabArea.contentMargins", new javax.swing.plaf.InsetsUIResource(3, 10, 4, 10));
+            // A plain menu item reserves no column for a tick nor room for a submenu arrow in Nimbus.
+            table.remove("MenuItem.checkIcon");
+            table.remove("MenuItem.arrowIcon");
+            for ( String menu : new String[]{ "Menu", "MenuItem", "CheckBoxMenuItem", "RadioButtonMenuItem" } )
+                table.put(menu + ".textIconGap", 5);
+            table.put("Tree.leftChildIndent",  12);
+            table.put("Tree.rightChildIndent", 4);
+        }
+
+        /**
+         *  A tool bar: the control colour with a rule under it, and room on its left for the handle
+         *  {@link Symbols.Nimbus#paintDragHandle} draws, which is eleven pixels wide.
+         */
         @SuppressWarnings("deprecation")
         private static ComponentStyleDelegate<JToolBar> toolBar( ComponentStyleDelegate<JToolBar> it ) {
-            SwingTreeLookAndFeel.Palette p    = SwingTreeLookAndFeel.palette();
-            Color   tone = p.surface();
+            NimbusScheme s   = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+            JToolBar     bar = it.component();
+            int handle = bar.isFloatable() ? 11 : 0;
+            it = bar.getOrientation() == JToolBar.HORIZONTAL
+                    ? it.padding(2, 2, 1, 2 + handle).borderWidths(0, 0, 1, 0)
+                    : it.padding(2 + handle, 1, 2, 2).borderWidths(0, 1, 0, 0);
             return it
-                    .padding(2, 2, 2, 10)
-                    .borderWidth(0)
-                    .borderAt(UI.Edge.BOTTOM, 1, p.border())
-                    .backgroundColor(tone)
-                    .gradient("relief", g -> NimbusRelief.STRIP.over(g, tone))
-                    .foregroundColor(p.text())
-                    .painter(UI.Layer.CONTENT, new DragHandlePainter(it.component()));
+                    .borderColor(s.get(NimbusScheme.Key.BORDER))
+                    .backgroundColor(s.get(NimbusScheme.Key.CONTROL))
+                    .foregroundColor(s.get(NimbusScheme.Key.TEXT))
+                    .painter(UI.Layer.CONTENT, new DragHandlePainter(bar));
         }
     }
 

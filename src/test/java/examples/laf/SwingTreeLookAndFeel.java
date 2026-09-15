@@ -584,8 +584,8 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         // basic defaults, so a symbol set that draws no chrome keeps them.
         table.put("CheckBox.icon",                 GlyphIcons.checkBox());
         table.put("RadioButton.icon",              GlyphIcons.radio());
-        table.put("CheckBoxMenuItem.checkIcon",    GlyphIcons.checkBox());
-        table.put("RadioButtonMenuItem.checkIcon", GlyphIcons.radio());
+        table.put("CheckBoxMenuItem.checkIcon",    GlyphIcons.menuCheck());
+        table.put("RadioButtonMenuItem.checkIcon", GlyphIcons.menuRadio());
         if ( s.drawsItsOwnChrome() ) {
             table.put("Tree.expandedIcon",  GlyphIcons.treeExpanded());
             table.put("Tree.collapsedIcon", GlyphIcons.treeCollapsed());
@@ -610,6 +610,8 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         table.put("TabbedPane.shadow",                ui(p.border()));
         table.put("TabbedPane.focus",                 ui(p.accent()));
         table.put("TabbedPane.font",                  baseFont);
+
+        _conf.stylePreset().installDefaults(table, p);
     }
 
     private static ColorUIResource ui( Color c ) { return new ColorUIResource(c); }
@@ -813,6 +815,8 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         // ── read back by the look and feel and its delegates ──────────────
 
         PopupWindowMode popupWindowMode() { return _popupWindowMode; }
+
+        StylePreset stylePreset() { return _stylePreset; }
 
         Palette palette() {
             if ( _palette != null )
@@ -1032,21 +1036,21 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          * @return a palette with all twenty-two slots filled from those five
          */
         public static Palette nimbus( Color base, Color chrome, Color positive, Color negative, Color notice ) {
-            Color ground = LafUtilities.shiftHsb(chrome, -0.070, +0.129);
+            Color ground = NimbusScheme.derive(chrome, 0f, -0.07016757f, 0.12941176f, 0);
             return neutral()
                     .background     (ground)
                     .surface        (ground)
-                    .surfaceHover   (LafUtilities.shiftHsb(chrome, -0.073, +0.204))
-                    .surfacePressed (LafUtilities.shiftHsb(chrome, -0.002, -0.024))
+                    .surfaceHover   (NimbusScheme.derive(chrome, 0f, -0.07333623f, 0.20392156f, 0))
+                    .surfacePressed (NimbusScheme.derive(chrome, -0.0027777553f, -0.0018306673f, -0.02352941f, 0))
                     .surfaceDisabled(LafUtilities.shiftHsb(chrome, -0.090, +0.204))
-                    .surfaceField   (LafUtilities.shiftHsb(chrome, -0.111, +0.255))
-                    .border         (LafUtilities.shiftHsb(chrome, -0.017, -0.114))
-                    .borderSoft     (LafUtilities.shiftHsb(chrome, -0.034, +0.071))
-                    .text           (LafUtilities.shiftHsb(chrome, -0.111, -0.745))
+                    .surfaceField   (NimbusScheme.derive(chrome, 0f, -0.110526316f, 0.25490195f, 0))
+                    .border         (NimbusScheme.derive(chrome, 0f, -0.017358616f, -0.11372548f, 0))
+                    .borderSoft     (NimbusScheme.derive(chrome, -0.008547008f, -0.03830409f, -0.039215684f, 0))
+                    .text           (NimbusScheme.derive(chrome, 0f, -0.110526316f, -0.74509805f, 0))
                     .textMuted      (LafUtilities.shiftHsb(chrome, +0.029, -0.408))
-                    .textDisabled   (LafUtilities.shiftHsb(chrome, -0.090, -0.177))
+                    .textDisabled   (NimbusScheme.derive(chrome, 0f, -0.089836657f, -0.176470578f, 0))
                     .accent         (base)
-                    .accentSoft     (LafUtilities.shiftHsb(base,   -0.049, -0.008))
+                    .accentSoft     (NimbusScheme.derive(base, -0.010750473f, -0.04875779f, -0.007843137f, 0))
                     .textureLight   (notice)
                     .textureDark    (LafUtilities.shiftHsb(notice, +0.180, -0.245))
                     .primary        (positive)
@@ -1055,7 +1059,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
                     .danger         (negative)
                     .dangerHover    (LafUtilities.shiftHsb(negative, -0.060, +0.078))
                     .dangerPressed  (LafUtilities.shiftHsb(negative, +0.040, -0.086))
-                    .onFilled       (LafUtilities.shiftHsb(chrome, -0.111, +0.255));
+                    .onFilled       (NimbusScheme.derive(chrome, 0f, -0.110526316f, 0.25490195f, 0));
         }
 
         /** @param alpha how opaque the returned accent should be, 0 to 255
@@ -1186,6 +1190,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.NIMBUS; }
             @Override public PalettePreset preferredPalette() { return PalettePreset.NIMBUS; }
             @Override String               displayName()      { return "Nimbus"; }
+            @Override void installDefaults( UIDefaults table, Palette palette ) { Styles.Nimbus.installDefaults(table, palette); }
         },
         /**
          *  Polymorphism: a theme with no fixed appearance, only rules for arriving at one. It
@@ -1224,6 +1229,17 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
 
         /** @return the name the look and feel reports to {@link UIManager}. */
         abstract String displayName();
+
+        /**
+         *  Puts whatever the rules expect to find in {@link UIManager} into the look and feel's
+         *  defaults, after every default the look and feel installs for all presets. Most presets
+         *  expect nothing. One that reproduces an existing look and feel installs the keys that
+         *  look and feel is read through, so that an application written against it finds them.
+         *
+         * @param table the defaults being built
+         * @param palette the palette of the configuration being installed
+         */
+        void installDefaults( UIDefaults table, Palette palette ) {}
 
         @Override public String toString() { return displayName(); }
     }

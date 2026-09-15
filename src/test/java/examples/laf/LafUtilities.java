@@ -93,7 +93,6 @@ final class LafUtilities
      *  The same colour with its saturation and brightness moved by fixed amounts, both on the
      *  0-to-1 scale {@link Color#RGBtoHSB} reports and both clamped at the ends.
      *  <p>
-     *  This is how {@link NimbusRelief} keeps its light the same light in every palette.
      *  {@link #shadeTowardsWhite} washes the hue out as it goes, so a stack of mixed shades drifts
      *  towards grey. Moving the brightness leaves the hue alone, so a red base yields light reds
      *  and a blue base light blues, and one set of offsets describes the same relief on either.
@@ -271,6 +270,30 @@ final class LafUtilities
         Container parent = c.getParent();
         if ( wasOpaque && !c.isOpaque() && parent != null )
             parent.repaint(c.getX(), c.getY(), c.getWidth(), c.getHeight());
+    }
+
+    /**
+     *  Paints a component's style and then its inherited painting on top of it, without the clip to
+     *  the component's body the style engine would put around that painting. Only for a component
+     *  whose inherited painting draws nothing a rounded body would have to cut off - a label, an
+     *  icon - since the point of leaving the clip out is that the text keeps the desktop's subpixel
+     *  antialiasing, which Java2D drops under any clip that is not a list of rectangles.
+     *
+     * @param g the context the component is being painted on
+     * @param c the component
+     * @param inheritedPainting the {@code Basic*UI} painting to run over the style
+     */
+    static void paintStyledUnderInheritedPainting( Graphics g, JComponent c, Painter inheritedPainting ) {
+        paintStyled(g, c, Painter.none());
+        Graphics2D g2 = (Graphics2D) g.create();
+        try {
+            applyDesktopTextHints(g2);
+            g2.setColor(c.getForeground());
+            g2.setFont(c.getFont());
+            inheritedPainting.paint(g2);
+        } finally {
+            g2.dispose();
+        }
     }
 
     /**

@@ -9,6 +9,7 @@ import javax.swing.JComponent;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicTabbedPaneUI;
 import java.awt.Color;
@@ -21,7 +22,6 @@ import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.LayoutManager;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
 
 /**
  *  The {@link JTabbedPane} UI delegate. The symbol set draws the tab surfaces and the accent on
@@ -54,10 +54,21 @@ public final class SwingTreeTabbedPaneUI
 
     // ── Insets and spacing ───────────────────────────────────────────────
 
+    /** The key Nimbus files the room around a tab's label under, which a look and feel that lays
+     *  its tabs out the Nimbus way puts into its defaults. */
+    private static final String TAB_MARGINS = "TabbedPane:TabbedPaneTab.contentMargins";
+
+    /** The same for the room around the whole row of tabs, whose bottom Nimbus fills with the edge
+     *  along the page. */
+    private static final String TAB_AREA_MARGINS = "TabbedPane:TabbedPaneTabArea.contentMargins";
+
     @Override
     protected Insets getTabInsets( int tabPlacement, int tabIndex ) {
         if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
             return super.getTabInsets(tabPlacement, tabIndex);
+        Insets margins = UIManager.getInsets(TAB_MARGINS);
+        if ( margins != null )
+            return new Insets(UI.scale(margins.top), UI.scale(margins.left), UI.scale(margins.bottom), UI.scale(margins.right));
         Symbols symbols = SwingTreeLookAndFeel.symbols();
         int     v       = UI.scale(symbols.tabPaddingVertical());
         int     h       = UI.scale(symbols.tabPaddingHorizontal());
@@ -83,14 +94,30 @@ public final class SwingTreeTabbedPaneUI
     protected Insets getTabAreaInsets( int tabPlacement ) {
         if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
             return super.getTabAreaInsets(tabPlacement);
+        Insets margins = UIManager.getInsets(TAB_AREA_MARGINS);
+        if ( margins != null ) {
+            // The edge along the page is drawn inside these margins, reaching one row up under the
+            // tabs, so the area itself stops that far short of them.
+            int edge = SwingTreeLookAndFeel.symbols().tabEdgeThickness();
+            return new Insets(UI.scale(margins.top), UI.scale(margins.left), UI.scale(margins.bottom - edge), UI.scale(margins.right));
+        }
         int gap = UI.scale(SwingTreeLookAndFeel.symbols().tabAreaGap());
         return new Insets(gap, gap, 0, gap);
+    }
+
+    /** Swing adds three pixels to every tab beyond its label and its insets. A tab laid out to
+     *  Nimbus's margins is exactly its label and its margins wide. */
+    @Override
+    protected int calculateTabWidth( int tabPlacement, int tabIndex, FontMetrics metrics ) {
+        int basic = super.calculateTabWidth(tabPlacement, tabIndex, metrics);
+        return SwingTreeLookAndFeel.drawsOwnChrome() && UIManager.getInsets(TAB_MARGINS) != null ? basic - 3 : basic;
     }
 
     @Override
     protected int calculateTabAreaHeight( int tabPlacement, int horizRunCount, int maxTabHeight ) {
         int basic = super.calculateTabAreaHeight(tabPlacement, horizRunCount, maxTabHeight);
-        return SwingTreeLookAndFeel.drawsOwnChrome() ? basic + UI.scale(2) : basic;
+        boolean laidOutByMargins = UIManager.getInsets(TAB_AREA_MARGINS) != null;
+        return SwingTreeLookAndFeel.drawsOwnChrome() && !laidOutByMargins ? basic + UI.scale(2) : basic;
     }
 
     // ── Sizing ───────────────────────────────────────────────────────────
@@ -221,15 +248,12 @@ public final class SwingTreeTabbedPaneUI
             super.paintText(g, tabPlacement, font, metrics, tabIndex, title, textRect, isSelected);
             return;
         }
-        SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
-        Color colour;
-        if ( !tabPane.isEnabledAt(tabIndex) ) colour = p.textDisabled();
-        else if ( isSelected )                colour = p.text();
-        else                                  colour = p.textMuted();
+        Color colour = SwingTreeLookAndFeel.symbols().tabText(
+                            SwingTreeLookAndFeel.palette(), isSelected, tabPane.isEnabledAt(tabIndex)
+                        );
 
         Graphics2D g2 = (Graphics2D) g.create();
         try {
-            g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
             g2.setFont(font);
             g2.setColor(colour);
             g2.drawString(title, textRect.x, textRect.y + metrics.getAscent());

@@ -8,6 +8,7 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.UIResource;
@@ -20,6 +21,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Insets;
+import java.awt.Paint;
 
 /**
  *  The {@link JTableHeader} UI delegate. It installs a default cell renderer, so that a heading is
@@ -65,13 +68,13 @@ public final class SwingTreeTableHeaderUI
      *  own vertical grid.
      */
     private static void paintColumnDividers( Graphics2D g, JTableHeader header ) {
-        Color line = SwingTreeLookAndFeel.symbols().tableHeaderDivider(SwingTreeLookAndFeel.palette());
+        Paint line = SwingTreeLookAndFeel.symbols().tableHeaderDivider(SwingTreeLookAndFeel.palette(), header.getHeight());
         if ( line == null )
             return;
         TableColumnModel columns = header.getColumnModel();
         int thickness = Math.max(1, UI.scale(1));
         int x = 0;
-        g.setColor(line);
+        g.setPaint(line);
         for ( int column = 0; column < columns.getColumnCount() - 1; column++ ) {
             x += columns.getColumn(column).getWidth();
             g.fillRect(x - thickness, 0, thickness, header.getHeight());
@@ -96,6 +99,11 @@ public final class SwingTreeTableHeaderUI
      */
     private static final class HeaderRenderer extends DefaultTableCellRenderer implements UIResource
     {
+        /** The key Nimbus files the room around a heading's text under, which a look and feel that
+         *  keeps different room puts into its defaults. */
+        private static final String CONTENT_MARGINS = "TableHeader:\"TableHeader.renderer\".contentMargins";
+        private static final Insets DEFAULT_MARGINS = new Insets(4, 10, 4, 10);
+
         HeaderRenderer() { setHorizontalAlignment(SwingConstants.LEADING); }
 
         @Override
@@ -107,7 +115,10 @@ public final class SwingTreeTableHeaderUI
             label.setForeground(header == null ? SwingTreeLookAndFeel.palette().textMuted() : header.getForeground());
             label.setBackground(SwingTreeLookAndFeel.Palette.TRANSPARENT);
             label.setOpaque(false);
-            label.setBorder(new EmptyBorder(UI.scale(4), UI.scale(10), UI.scale(4), UI.scale(10)));
+            Insets margins = UIManager.getInsets(CONTENT_MARGINS);
+            if ( margins == null )
+                margins = DEFAULT_MARGINS;
+            label.setBorder(new EmptyBorder(UI.scale(margins.top), UI.scale(margins.left), UI.scale(margins.bottom), UI.scale(margins.right)));
             return label;
         }
     }

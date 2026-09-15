@@ -46,6 +46,15 @@ interface Symbols
 
     int arrowGlyphSize();
 
+    /**
+     *  How large the icon a tree's disclosure handle is drawn in is, in developer pixels. The handle
+     *  is laid out centred on the tree's indent, so a set that draws its wedge at the edge of a
+     *  wider icon moves it along the row.
+     *
+     * @return the side of the square the handle is drawn in
+     */
+    default int disclosureGlyphSize() { return arrowGlyphSize(); }
+
     int comboArrowButtonSize();
 
     int spinnerButtonWidth();
@@ -100,6 +109,36 @@ interface Symbols
     /** Draws the arrow at the right edge of a menu entry that opens a submenu. */
     void paintSubmenuArrow( Graphics2D g, Palette p, int x, int y, int w, int h, boolean enabled );
 
+    /**
+     *  Draws the same arrow on an entry that may be armed, which is to say lying on the selection
+     *  band. A set whose arrow reads on the band as well as off it draws the one arrow for both.
+     *
+     * @param armed whether the entry is armed
+     */
+    default void paintSubmenuArrow( Graphics2D g, Palette p, int x, int y, int w, int h, boolean enabled, boolean armed ) {
+        paintSubmenuArrow(g, p, x, y, w, h, enabled);
+    }
+
+    /**
+     *  Draws the tick of a check box menu item or the mark of a radio button menu item. A set that
+     *  marks menu entries the way it marks check boxes and radio buttons draws those glyphs.
+     *
+     * @param radio whether it marks a radio button menu item rather than a check box menu item
+     * @param armed whether the entry lies on the selection band
+     */
+    default void paintMenuMark(
+        Graphics2D g, Palette p, int x, int y, int w, int h, boolean radio,
+        boolean enabled, boolean focused, boolean rollover, boolean pressed, boolean selected, boolean armed
+    ) {
+        if ( radio )
+            paintRadioGlyph(g, p, x, y, w, h, enabled, focused, rollover, pressed, selected);
+        else
+            paintCheckGlyph(g, p, x, y, w, h, enabled, focused, rollover, pressed, selected);
+    }
+
+    /** @return the side of the square a menu entry's tick or mark is drawn in, in developer pixels */
+    default int menuMarkSize() { return checkGlyphSize(); }
+
     /** Draws the arrow on a combo box's drop-down button. */
     void paintComboArrow(
         Graphics2D g, Palette p, int w, int h, boolean enabled, boolean rollover, boolean pressed
@@ -143,6 +182,19 @@ interface Symbols
     void paintProgressFill(
         Graphics2D g, Palette p, int w, int h, double ratio, boolean horizontal, boolean enabled
     );
+
+    /**
+     *  The ink a tab's label is written in. Most sets mute the tabs whose pages are hidden, so that
+     *  the one whose page shows stands out by its label as well as by its surface.
+     *
+     * @param p the palette in force
+     * @param selected whether this is the tab whose page shows
+     * @param enabled whether the tab can be chosen
+     * @return the ink for the label
+     */
+    default Color tabText( Palette p, boolean selected, boolean enabled ) {
+        return !enabled ? p.textDisabled() : selected ? p.text() : p.textMuted();
+    }
 
     /** Draws what lies behind one tab's label. */
     void paintTabSurface(
@@ -194,7 +246,25 @@ interface Symbols
      *
      * @return whether {@link #paintScrollStepper} should be asked for those two buttons
      */
+    /**
+     *  Whether the button of a combo box stands at the very end of the combo box and spans its
+     *  whole height, over the combo box's margin and edge, instead of inside its insets. A set
+     *  whose actuators carry an outline of their own, rather than sitting inside the control's
+     *  outline, answers {@code true} and draws that outline two pixels in from the button's bounds.
+     *
+     * @return whether a combo box's button reaches its bounds
+     */
+    default boolean actuatorReachesBounds() { return false; }
+
     default boolean scrollBarHasSteppers() { return false; }
+
+    /**
+     *  How long a scroll bar's stepper button is along the bar, in developer pixels. A set whose
+     *  steppers are square answers the bar's thickness.
+     *
+     * @return the length of a stepper button
+     */
+    default int scrollStepperLength() { return scrollBarThickness(); }
 
     /**
      *  Draws one of them.
@@ -215,12 +285,14 @@ interface Symbols
 
     /**
      *  What the line between two column headings is drawn in. A set that rules its headings apart
-     *  names a colour; one that draws the heading row as a single strip says nothing.
+     *  names a paint, which may shade along the line; one that draws the heading row as a single
+     *  strip says nothing.
      *
      * @param p the palette in force
-     * @return that colour, or {@code null} for a heading row with no lines in it
+     * @param height how tall the heading row is, in component pixels, for a paint that shades along it
+     * @return that paint, or {@code null} for a heading row with no lines in it
      */
-    default @Nullable Color tableHeaderDivider( Palette p ) { return null; }
+    default @Nullable Paint tableHeaderDivider( Palette p, int height ) { return null; }
 
     /**
      *  What every second row of a table is tinted with, so that a wide row can be followed across
@@ -2424,17 +2496,15 @@ interface Symbols
     }
 
     /**
-     *  Symbols for {@link SwingTreeLookAndFeel.StylePreset#NIMBUS}: the same moulded plastic the style
-     *  rules paint, cut into the shapes no style rule can express. A check box is a small rounded
-     *  square, a radio a small circle, a slider handle a round knob and a scroll thumb a pill, and
-     *  every one is the surface colour under {@link NimbusRelief#LIT} inside the outline a button
-     *  wears, so all of them follow the palette without being told about it. The arrows are solid
-     *  triangles in the text colour, which is what the original draws.
+     *  Symbols for {@link SwingTreeLookAndFeel.StylePreset#NIMBUS}: the shapes no style rule can
+     *  express, redrawn from the painters the JDK generates for Nimbus. Each is drawn in the fixed
+     *  square or strip Nimbus designs it in and scaled to the box it is handed, and each takes its
+     *  colours from a {@link NimbusScheme}, so it follows a re-tinted {@code nimbusBase} the way the
+     *  style rules do.
      *  <p>
-     *  Two things here differ from every other symbol set. A slider's track is not filled up to the
-     *  handle, because the original leaves it unfilled and a filled track would say the value twice.
-     *  And a progress bar's fill is the one place {@link NimbusRelief#GLOSS} is used, because that
-     *  bar is the one wet thing in a dry theme.
+     *  Where Nimbus draws a control partly with a style and partly with a glyph, the glyph reaches as
+     *  far as Nimbus's painter does: a combo box's blue end covers the combo box's own edge, and a
+     *  scroll bar's buttons curve down into its groove.
      *
      *  @see SwingTreeLookAndFeel.SymbolPreset#NIMBUS
      */
@@ -2444,15 +2514,7 @@ interface Symbols
 
         private Nimbus() {}
 
-        /** The corner radius of the small rounded squares, in developer pixels. */
-        private static final float GLYPH_ARC = 4f;
 
-        /**
-         *  How far inside its 18-pixel icon the box of a check box or a radio button is drawn.
-         *  Nimbus lays both out to an 18-pixel icon and paints a 14-pixel box in the middle of it,
-         *  which is what leaves a check box the same height as the label beside it.
-         */
-        private static final int GLYPH_INSET = 2;
 
         @Override public boolean drawsItsOwnChrome() { return true; }
 
@@ -2460,8 +2522,8 @@ interface Symbols
         @Override public int checkGlyphSize()        { return 18; }
         @Override public int arrowGlyphSize()        { return 12; }
         @Override public int comboArrowButtonSize()  { return 19; }
-        @Override public int spinnerButtonWidth()    { return 18; }
-        @Override public int spinnerButtonHeight()   { return 11; }
+        @Override public int spinnerButtonWidth()    { return 20; }
+        @Override public int spinnerButtonHeight()   { return 14; }
         @Override public int sliderThumbDiameter()   { return 17; }
         @Override public int sliderTrackThickness()  { return  5; }
         @Override public int scrollBarThickness()    { return 15; }
@@ -2476,373 +2538,1033 @@ interface Symbols
 
         // ── Glyphs in front of a label ───────────────────────────────────────
 
+        /**
+         *  Nimbus's check box: a rounded box laid out in an eighteen pixel square and filled the
+         *  way a button is, with a heavy black tick cut as one shape rather than stroked.
+         */
         @Override
         public void paintCheckGlyph(
             Graphics2D g, Palette p, int x, int y, int w, int h,
             boolean enabled, boolean focused, boolean rollover, boolean pressed, boolean selected
         ) {
-            int   pad = UI.scale(GLYPH_INSET);
-            float arc = UI.scale(GLYPH_ARC);
-            int   bx  = x + pad, by = y + pad, bw = w - 2 * pad, bh = h - 2 * pad;
-            mould(g, p, new RoundRectangle2D.Float(bx + 0.5f, by + 0.5f, bw - 1, bh - 1, arc, arc),
-                  by, bh, enabled, selected, pressed, rollover);
-            if ( !selected )
-                return;
-            g.setColor(enabled ? p.text() : p.textDisabled());
-            g.setStroke(new BasicStroke(Math.max(1.4f, UI.scale(1.8f)), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-            float inset = bw * 0.22f;
-            g.draw(LafUtilities.tickShape(bx + inset, by + inset, bw - 2 * inset, bh - 2 * inset));
+            NimbusScheme s = NimbusScheme.of(p);
+            Glyph glyph = !enabled ? ( selected ? Glyph.CHECK_DISABLED_SELECTED : Glyph.CHECK_DISABLED )
+                        : pressed  ? ( selected ? Glyph.CHECK_PRESSED_SELECTED  : Glyph.CHECK_PRESSED )
+                        : rollover ? ( selected ? Glyph.CHECK_MOUSE_OVER_SELECTED : Glyph.CHECK_MOUSE_OVER )
+                        :            ( selected ? Glyph.CHECK_SELECTED : Glyph.CHECK );
+            inGlyphSquare(g, x, y, w, h);
+            if ( enabled && focused )
+                fill(g, new RoundRectangle2D.Float(0.6f, 0.6f, 16.8f, 16.8f, 8, 8), s.get(NimbusScheme.Key.FOCUS));
+            else if ( glyph.lip != null )
+                fill(g, new RoundRectangle2D.Float(2, 11, 14, 6, 5.2f, 5.2f), glyph.lip.in(s));
+            g.setPaint(glyph.edge.paint(s, 5.5f, 2, 5.53f, 15.94f));
+            g.fill(new RoundRectangle2D.Float(2, 2, 14, 14, 3.7f, 3.7f));
+            g.setPaint(glyph.face.paint(s, 3, 14.97f));
+            g.fill(new RoundRectangle2D.Float(3, 3, 12, 12, 3.8f, 3.8f));
+            if ( glyph.mark != null )
+                fill(g, TICK, glyph.mark.in(s));
         }
 
+        /** A round button with a dark dot, the dot shaded like a bead rather than filled flat. */
         @Override
         public void paintRadioGlyph(
             Graphics2D g, Palette p, int x, int y, int w, int h,
             boolean enabled, boolean focused, boolean rollover, boolean pressed, boolean selected
         ) {
-            int pad = UI.scale(GLYPH_INSET);
-            int bx  = x + pad, by = y + pad, bw = w - 2 * pad, bh = h - 2 * pad;
-            mould(g, p, new Ellipse2D.Float(bx + 0.5f, by + 0.5f, bw - 1, bh - 1),
-                  by, bh, enabled, selected, pressed, rollover);
-            if ( !selected )
-                return;
-            float dot = bw * 0.29f;
-            g.setColor(enabled ? p.text() : p.textDisabled());
-            g.fill(new Ellipse2D.Float(bx + dot, by + dot, bw - 2 * dot, bh - 2 * dot));
+            NimbusScheme s = NimbusScheme.of(p);
+            Glyph glyph = !enabled ? ( selected ? Glyph.RADIO_DISABLED_SELECTED : Glyph.RADIO_DISABLED )
+                        : pressed  ? ( selected ? Glyph.RADIO_PRESSED_SELECTED  : Glyph.RADIO_PRESSED )
+                        : rollover ? ( selected ? Glyph.RADIO_MOUSE_OVER_SELECTED : Glyph.RADIO_MOUSE_OVER )
+                        :            ( selected ? Glyph.RADIO_SELECTED : Glyph.RADIO );
+            inGlyphSquare(g, x, y, w, h);
+            if ( enabled && focused )
+                fill(g, new Ellipse2D.Float(0.6f, 0.6f, 16.8f, 16.8f), s.get(NimbusScheme.Key.FOCUS));
+            else if ( glyph.lip != null )
+                fill(g, new Ellipse2D.Float(2, 3, 14, 14), glyph.lip.in(s));
+            g.setPaint(glyph.edge.paint(s, 8.97f, 1.94f, 9, 15.97f));
+            g.fill(new Ellipse2D.Float(2, 2, 14, 14));
+            g.setPaint(glyph.face.paint(s, 8.97f, 3.06f, 9.09f, 15));
+            g.fill(new Ellipse2D.Float(3, 3, 12, 12));
+            if ( glyph.mark != null ) {
+                g.setPaint(glyph.mark.paint(s, 9.03f, 6, 8.97f, 12));
+                g.fill(new Ellipse2D.Float(6, 6, 6, 6));
+            }
+        }
+
+        /** The tick Nimbus cuts out of a check box, in the eighteen pixel square it is drawn in. */
+        private static final Shape TICK = polygon(5.03f, 8.06f, 7.03f, 8.06f, 8.44f, 11.06f, 11.59f, 3.12f,
+                                                  14.00f, 3.09f, 8.94f, 13.03f, 8.06f, 13.03f);
+
+        /** Moves and scales a context so that the painting after it can be written in the eighteen
+         *  pixel square Nimbus lays a check box and a radio button out in. */
+        private static void inGlyphSquare( Graphics2D g, int x, int y, int w, int h ) {
+            LafUtilities.antialiasShapes(g);
+            g.translate(x, y);
+            g.scale(w / 18.0, h / 18.0);
+        }
+
+        private static void fill( Graphics2D g, Shape shape, Color color ) {
+            g.setColor(color);
+            g.fill(shape);
+        }
+
+        private static Shape polygon( float... xy ) {
+            Path2D.Float path = new Path2D.Float();
+            path.moveTo(xy[0], xy[1]);
+            for ( int i = 2; i < xy.length; i += 2 )
+                path.lineTo(xy[i], xy[i + 1]);
+            path.closePath();
+            return path;
+        }
+
+        /**
+         *  One state of a check box or a radio button as Nimbus fills it: the lip under the box, its
+         *  edge, its face, and the mark on it. The mark is a single colour for a tick and a gradient
+         *  for a radio dot, so a check box's {@code mark} holds a {@link NimbusScheme.Shade} and a
+         *  radio button's a {@link NimbusScheme.Gradient}.
+         */
+        private static final class Glyph
+        {
+            final NimbusScheme.@Nullable Shade lip;
+            final NimbusScheme.Gradient        edge;
+            final NimbusScheme.Gradient        face;
+            final @Nullable Mark               mark;
+
+            private Glyph( NimbusScheme.@Nullable Shade lip, NimbusScheme.Gradient edge, NimbusScheme.Gradient face, @Nullable Mark mark ) {
+                this.lip = lip; this.edge = edge; this.face = face; this.mark = mark;
+            }
+
+            /** A tick in one colour, or a dot in a gradient. */
+            private static final class Mark
+            {
+                private final NimbusScheme.@Nullable Shade    _shade;
+                private final NimbusScheme.@Nullable Gradient _gradient;
+
+                Mark( NimbusScheme.@Nullable Shade shade, NimbusScheme.@Nullable Gradient gradient ) {
+                    _shade = shade; _gradient = gradient;
+                }
+
+                Color in( NimbusScheme s ) { return java.util.Objects.requireNonNull(_shade).in(s); }
+
+                Paint paint( NimbusScheme s, float x1, float y1, float x2, float y2 ) {
+                    return java.util.Objects.requireNonNull(_gradient).paint(s, x1, y1, x2, y2);
+                }
+            }
+
+            private static NimbusScheme.Shade bg( double h, double s, double b ) { return NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, h, s, b); }
+            private static NimbusScheme.Shade base( double h, double s, double b ) { return NimbusScheme.shade(NimbusScheme.Key.BASE, h, s, b); }
+            private static NimbusScheme.Gradient three( NimbusScheme.Shade top, NimbusScheme.Shade bottom ) {
+                return NimbusScheme.gradient(new double[]{ 0, 0.5, 1 }, top, NimbusScheme.MID, bottom);
+            }
+            private static NimbusScheme.Gradient five( double[] fractions, NimbusScheme.Shade a, NimbusScheme.Shade b, NimbusScheme.Shade c ) {
+                return NimbusScheme.gradient(fractions, a, NimbusScheme.MID, b, NimbusScheme.MID, c);
+            }
+            private static Mark tick( NimbusScheme.Shade shade ) { return new Mark(shade, null); }
+            private static Mark dot( NimbusScheme.Shade top, NimbusScheme.Shade middle, NimbusScheme.Shade bottom ) {
+                return new Mark(null, five(new double[]{ 0, 0.232, 0.464, 0.732, 1 }, top, middle, bottom));
+            }
+
+            private static final double[] BOX_FACE = { 0, 0.322, 0.645, 0.822, 1 };
+            private static final NimbusScheme.Shade BOX_LIP   = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, 0, 0, -89);
+            private static final NimbusScheme.Shade RADIO_LIP = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, 0, 0, -112);
+            private static final NimbusScheme.Shade PRESSED_LIP = bg(0, -0.110526316, 0.25490195);
+            private static final Mark BLACK_TICK = tick(base(-0.57865167, -0.6357143, -0.54901963));
+            private static final Mark BEAD = dot(bg(-0.027777791, -0.07243107, -0.33333334), bg(-0.6111111, -0.110526316, -0.74509805), bg(-0.027777791, 0.07129187, -0.6156863));
+
+            static final Glyph CHECK = new Glyph(BOX_LIP,
+                    three(bg(0, -0.05356429, -0.12549019), bg(0, -0.015789472, -0.37254903)),
+                    five(BOX_FACE, base(0.08801502, -0.63174605, 0.43921566), base(0.032459438, -0.5953556, 0.32549018), base(0.032459438, -0.59942394, 0.4235294)), null);
+            static final Glyph CHECK_MOUSE_OVER = new Glyph(BOX_LIP,
+                    three(bg(0, -0.020974077, -0.21960783), bg(0.01010108, 0.08947369, -0.5294118)),
+                    five(BOX_FACE, base(0.08801502, -0.6317773, 0.4470588), base(0.032459438, -0.5985242, 0.39999998), base(0, -0.6357143, 0.45098037)), null);
+            static final Glyph CHECK_PRESSED = new Glyph(BOX_LIP,
+                    three(bg(0.055555582, 0.8894737, -0.7176471), bg(0, 0.0016232133, -0.3254902)),
+                    five(BOX_FACE, base(0.027408898, -0.5847884, 0.2980392), base(0.029681683, -0.52701867, 0.17254901), base(0.029681683, -0.5376751, 0.25098038)), null);
+            static final Glyph CHECK_DISABLED = new Glyph(null,
+                    three(bg(0, -0.06766917, 0.07843137), bg(0, -0.06484103, 0.027450979)),
+                    five(BOX_FACE, base(0.032459438, -0.60996324, 0.36470586), base(0.02551502, -0.5996783, 0.3215686), base(0.032459438, -0.59624064, 0.34509802)), null);
+            static final Glyph CHECK_SELECTED = new Glyph(BOX_LIP,
+                    three(base(0.00051498413, -0.34585923, -0.007843137), base(0.00051498413, -0.10238093, -0.25490198)),
+                    five(BOX_FACE, base(0.004681647, -0.6197143, 0.43137252), base(0.00051498413, -0.44153953, 0.2588235), base(0.00051498413, -0.4602757, 0.34509802)), BLACK_TICK);
+            static final Glyph CHECK_MOUSE_OVER_SELECTED = new Glyph(BOX_LIP,
+                    three(base(0.0013483167, -0.1769987, -0.12156865), base(0.05468172, 0.3642857, -0.43137258)),
+                    five(BOX_FACE, base(0.004681647, -0.6198413, 0.43921566), base(0.00051498413, -0.4555341, 0.3215686), base(0.00051498413, -0.47377098, 0.41960782)), BLACK_TICK);
+            static final Glyph CHECK_PRESSED_SELECTED = new Glyph(PRESSED_LIP,
+                    three(base(-0.57865167, -0.6357143, -0.54901963), base(-0.0000352859, 0.026785731, -0.23529413)),
+                    NimbusScheme.gradient(new double[]{ 0, 0.058, 0.116, 0.38, 0.645, 0.822, 1 },
+                            base(-0.00042033195, -0.38050595, 0.20392156), NimbusScheme.MID, base(-0.0021489263, -0.2891234, 0.14117646), NimbusScheme.MID,
+                            base(-0.006362498, -0.016311288, -0.02352941), NimbusScheme.MID, base(0, -0.17930403, 0.21568626)), BLACK_TICK);
+            static final Glyph CHECK_DISABLED_SELECTED = new Glyph(null,
+                    three(bg(-0.01111114, -0.03771078, 0.062745094), bg(-0.02222222, -0.032806106, 0.011764705)),
+                    five(BOX_FACE, base(0.021348298, -0.59223604, 0.35294116), base(0.021348298, -0.56722116, 0.3098039), base(0.021348298, -0.56875, 0.32941175)),
+                    tick(base(0.027408898, -0.5735674, 0.14509803)));
+
+            static final Glyph RADIO = new Glyph(RADIO_LIP,
+                    three(bg(0, -0.053201474, -0.12941176), bg(0, 0.006356798, -0.44313726)),
+                    NimbusScheme.gradient(new double[]{ 0.063, 0.25, 0.437, 0.48, 0.524, 0.705, 0.886 },
+                            bg(0.055555582, -0.10654225, 0.23921567), NimbusScheme.MID, bg(0, -0.07016757, 0.12941176), NimbusScheme.MID,
+                            bg(0, -0.07016757, 0.12941176), NimbusScheme.MID, bg(0, -0.07206477, 0.17254901)), null);
+            static final Glyph RADIO_MOUSE_OVER = new Glyph(RADIO_LIP,
+                    three(bg(-0.00505054, -0.027819552, -0.2235294), bg(0, 0.24241486, -0.6117647)),
+                    NimbusScheme.gradient(new double[]{ 0.063, 0.216, 0.369, 0.548, 0.728, 0.775, 0.822, 0.911, 1 },
+                            bg(-0.111111104, -0.10655806, 0.24313724), NimbusScheme.MID, bg(0, -0.07333623, 0.20392156), NimbusScheme.MID,
+                            bg(0, -0.07333623, 0.20392156), NimbusScheme.MID, bg(0.08585858, -0.067389056, 0.25490195), NimbusScheme.MID,
+                            bg(-0.111111104, -0.10628903, 0.18039215)), null);
+            static final Glyph RADIO_PRESSED = new Glyph(PRESSED_LIP,
+                    three(bg(0.055555582, 0.23947367, -0.6666667), bg(-0.0777778, -0.06815343, -0.28235295)),
+                    NimbusScheme.gradient(new double[]{ 0.063, 0.208, 0.352, 0.45, 0.548, 0.748, 0.949 },
+                            bg(0, -0.06866585, 0.09803921), NimbusScheme.MID, bg(-0.0027777553, -0.0018306673, -0.02352941), NimbusScheme.MID,
+                            bg(-0.0027777553, -0.0018306673, -0.02352941), NimbusScheme.MID, bg(0.002924025, -0.02047892, 0.082352936)), null);
+            static final Glyph RADIO_DISABLED = new Glyph(null,
+                    three(bg(0, -0.06766917, 0.07843137), bg(0, -0.06413457, 0.015686274)),
+                    NimbusScheme.gradient(new double[]{ 0.063, 0.216, 0.369, 0.548, 0.728, 0.775, 0.822, 0.911, 1 },
+                            bg(0, -0.08466425, 0.16470587), NimbusScheme.MID, bg(0, -0.07016757, 0.12941176), NimbusScheme.MID,
+                            bg(0, -0.07016757, 0.12941176), NimbusScheme.MID, bg(0, -0.070703305, 0.14117646), NimbusScheme.MID,
+                            bg(0, -0.07052632, 0.1372549)), null);
+            static final Glyph RADIO_SELECTED = new Glyph(RADIO_LIP,
+                    three(base(0.00029569864, -0.36035198, -0.007843137), base(0.00029569864, 0.019458115, -0.32156867)),
+                    NimbusScheme.gradient(new double[]{ 0.081, 0.101, 0.12, 0.289, 0.458, 0.616, 0.774, 0.83, 0.886 },
+                            base(0.004681647, -0.6195853, 0.4235294), NimbusScheme.MID, base(0.004681647, -0.56704473, 0.36470586), NimbusScheme.MID,
+                            base(0.00051498413, -0.43866998, 0.24705881), NimbusScheme.MID, base(0.00051498413, -0.43866998, 0.24705881), NimbusScheme.MID,
+                            base(0.00051498413, -0.44879842, 0.29019606)), BEAD);
+            static final Glyph RADIO_MOUSE_OVER_SELECTED = new Glyph(RADIO_LIP,
+                    three(base(-0.0006374717, -0.20452163, -0.12156865), base(-0.57865167, -0.6357143, -0.5058824)),
+                    NimbusScheme.gradient(new double[]{ 0.081, 0.101, 0.12, 0.202, 0.283, 0.492, 0.702, 0.756, 0.81, 0.848, 0.886 },
+                            base(-0.011985004, -0.6157143, 0.43137252), NimbusScheme.MID, base(0.004681647, -0.56932425, 0.3960784), NimbusScheme.MID,
+                            base(0.00051498413, -0.4555341, 0.3215686), NimbusScheme.MID, base(0.00051498413, -0.4555341, 0.3215686), NimbusScheme.MID,
+                            base(0.00051498413, -0.46550155, 0.372549), NimbusScheme.MID, base(0.0024294257, -0.47271872, 0.34117645)), BEAD);
+            static final Glyph RADIO_PRESSED_SELECTED = new Glyph(PRESSED_LIP,
+                    three(base(-0.57865167, -0.6357143, -0.49803925), base(0.00029569864, 0.019458115, -0.32156867)),
+                    NimbusScheme.gradient(new double[]{ 0.039, 0.078, 0.117, 0.288, 0.458, 0.562, 0.666, 0.776, 0.886 },
+                            base(-0.0017285943, -0.4367347, 0.21960783), NimbusScheme.MID, base(-0.0010654926, -0.31349206, 0.15686274), NimbusScheme.MID,
+                            base(0, 0, 0), NimbusScheme.MID, base(0, 0, 0), NimbusScheme.MID, base(0.000805676, -0.12380952, 0.109803915)),
+                    dot(bg(-0.027777791, -0.080223285, -0.4862745), bg(-0.6111111, -0.110526316, -0.74509805), bg(-0.027777791, 0.07129187, -0.6156863)));
+            static final Glyph RADIO_DISABLED_SELECTED = new Glyph(null,
+                    three(base(0.010237217, -0.56289876, 0.2588235), base(0.016586483, -0.5620301, 0.19607842)),
+                    five(new double[]{ 0.081, 0.27, 0.458, 0.672, 0.886 }, base(0.027408898, -0.5878882, 0.35294116), base(0.021348298, -0.56722116, 0.3098039), base(0.021348298, -0.567841, 0.31764704)),
+                    dot(bg(-0.01111114, -0.058170296, 0.0039215684), bg(-0.013888836, -0.04195489, -0.058823526), bg(0.009259284, -0.0147816315, -0.007843137)));
         }
 
         // ── Arrows ───────────────────────────────────────────────────────────
 
+        /**
+         *  A small solid wedge in a grey taken from the blue-grey, pointing right at a closed node and
+         *  down at an open one. Nimbus lays it out at the left of an eighteen pixel wide icon, which
+         *  is what puts it where it is relative to the node's own icon.
+         */
         @Override
         public void paintDisclosure(
             Graphics2D g, Palette p, int x, int y, int w, int h, boolean expanded, boolean enabled
         ) {
-            wedge(g, p, x + w / 2f, y + h / 2f, UI.scale(3.6f),
-                  expanded ? LafUtilities.Direction.DOWN : LafUtilities.Direction.RIGHT, enabled);
+            LafUtilities.antialiasShapes(g);
+            float scale = w / (float) disclosureGlyphSize();
+            g.translate(x, y + h / 2f - 3.5f * scale);
+            g.scale(scale, scale);
+            g.setColor(DISCLOSURE.in(NimbusScheme.of(p)));
+            g.fill(expanded ? polygon(0, 0, 7, 0, 3.54f, 6.95f) : polygon(0, 0, 6.92f, 3.51f, 0, 7));
         }
+
+        @Override public int disclosureGlyphSize() { return 18; }
+
+        private static final NimbusScheme.Shade DISCLOSURE = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.6111111, -0.110526316, -0.34509805);
 
         @Override
         public void paintSubmenuArrow( Graphics2D g, Palette p, int x, int y, int w, int h, boolean enabled ) {
-            wedge(g, p, x + w / 2f, y + h / 2f, UI.scale(3.2f), LafUtilities.Direction.RIGHT, enabled);
+            paintSubmenuArrow(g, p, x, y, w, h, enabled, false);
         }
 
+        /** A solid wedge in the nine by ten pixel square Nimbus lays a menu's arrow out in, white on the selection band. */
+        @Override
+        public void paintSubmenuArrow( Graphics2D g, Palette p, int x, int y, int w, int h, boolean enabled, boolean armed ) {
+            NimbusScheme s = NimbusScheme.of(p);
+            inMenuMarkSquare(g, x, y, w, h);
+            fill(g, polygon(0, 1, 7.76f, 5.51f, 0, 10), ( !enabled ? MENU_MARK_DISABLED : armed ? MENU_MARK_ARMED : MENU_ARROW ).in(s));
+        }
+
+        /** A plain tick, or a diamond for a radio button menu item, and nothing at all for an entry that is off. */
+        @Override
+        public void paintMenuMark(
+            Graphics2D g, Palette p, int x, int y, int w, int h, boolean radio,
+            boolean enabled, boolean focused, boolean rollover, boolean pressed, boolean selected, boolean armed
+        ) {
+            if ( !selected )
+                return;
+            NimbusScheme s = NimbusScheme.of(p);
+            inMenuMarkSquare(g, x, y, w, h);
+            Shape mark = radio ? polygon(0.01f, 5.49f, 4.55f, 1.01f, 9, 5.51f, 4.54f, 10)
+                               : polygon(0, 5, 2.15f, 5, 3.56f, 7.39f, 6.96f, 0, 9, 0, 9, 1, 8.16f, 1.98f, 4, 10, 2.87f, 10);
+            NimbusScheme.Shade ink = !enabled ? MENU_MARK_DISABLED : armed ? MENU_MARK_ARMED : radio ? MENU_ARROW : MENU_TICK;
+            fill(g, mark, ink.in(s));
+        }
+
+        @Override public int menuMarkSize() { return 10; }
+
+        /** Moves and scales a context into the nine by ten pixel box Nimbus draws a menu's marks in, centred in the square it is given. */
+        private static void inMenuMarkSquare( Graphics2D g, int x, int y, int w, int h ) {
+            LafUtilities.antialiasShapes(g);
+            float scale = w / 10f;
+            g.translate(x + scale / 2f, y);
+            g.scale(scale, h / 10f);
+        }
+
+        private static final NimbusScheme.Shade MENU_ARROW         = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.055555582, -0.09663743, -0.4627451);
+        private static final NimbusScheme.Shade MENU_TICK          = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.055555582, -0.096827686, -0.45882353);
+        private static final NimbusScheme.Shade MENU_MARK_DISABLED = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.08983666, -0.17647058);
+        private static final NimbusScheme.Shade MENU_MARK_ARMED    = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.110526316, 0.25490195);
+
+        /**
+         *  The blue end of a combo box: the default button's material, square on its left where it
+         *  meets the value and rounded on its right, with a small dark wedge on it. The button it is
+         *  drawn on reaches over the combo box's edge and margin, see {@link #actuatorReachesBounds()}, so
+         *  its shape stops two pixels short of the button's right, top and bottom.
+         */
         @Override
         public void paintComboArrow(
             Graphics2D g, Palette p, int w, int h, boolean enabled, boolean rollover, boolean pressed
         ) {
-            stepper(g, p, w, h, enabled, rollover, pressed, true, true);
-            wedge(g, p, w / 2f, h / 2f, UI.scale(3.6f), LafUtilities.Direction.DOWN, enabled);
+            NimbusScheme s = NimbusScheme.of(p);
+            NimbusMould mould = !enabled ? NimbusMould.COMBO_BOX_ACTUATOR_DISABLED
+                              : pressed  ? NimbusMould.COMBO_BOX_ACTUATOR_PRESSED
+                              : rollover ? NimbusMould.COMBO_BOX_ACTUATOR_MOUSE_OVER
+                              :            NimbusMould.COMBO_BOX_ACTUATOR;
+            float scale = UI.scale();
+            float bw    = w / scale;
+            float bh    = h / scale;
+            LafUtilities.antialiasShapes(g);
+            g.scale(scale, scale);
+            g.setPaint(mould.edge().paint(s, 2, bh - 2));
+            g.fill(roundedOnTheRight(0, 2, bw - 2, bh - 4, 10, true, true));
+            g.setPaint(mould.face().paint(s, 3, bh - 3));
+            g.fill(roundedOnTheRight(0.25f, 3, bw - 3.25f, bh - 6, 8, true, true));
+            float top = bh / 2f - 1.92f;
+            Shape wedge = polygon(5, top, 12, top, 8.53f, top + 5);
+            if ( !enabled )
+                g.setColor(COMBO_WEDGE_DISABLED.in(s));
+            else if ( pressed )
+                g.setColor(WEDGE_ON_PRESSED.in(s));
+            else
+                g.setPaint(COMBO_WEDGE.paint(s, top, top + 5));
+            g.fill(wedge);
         }
 
+        /**
+         *  One of a spinner's two buttons, stacked at its right: the upper one rounded at its top
+         *  right, the lower at its bottom right, with a rule between them and the lip of the spinner
+         *  under the lower one.
+         */
         @Override
         public void paintSpinnerArrow(
             Graphics2D g, Palette p, int w, int h, boolean up,
             boolean enabled, boolean rollover, boolean pressed
         ) {
-            stepper(g, p, w, h, enabled, rollover, pressed, up, !up);
-            wedge(g, p, w / 2f, h / 2f, UI.scale(2.8f),
-                  up ? LafUtilities.Direction.UP : LafUtilities.Direction.DOWN, enabled);
-        }
-
-        /**
-         *  The small button a drop-down arrow or a stepper arrow stands on, with a divider down its
-         *  left edge separating it from the value. It is drawn here rather than by a style rule
-         *  because the rule governs the whole combo box or spinner, and a second styled surface
-         *  inside the first would draw a box around the arrow.
-         */
-        private static void stepper(
-            Graphics2D g, Palette p, int w, int h, boolean enabled, boolean rollover, boolean pressed,
-            boolean roundTopRight, boolean roundBottomRight
-        ) {
+            NimbusScheme s = NimbusScheme.of(p);
+            Stepper stepper = up ? ( !enabled ? Stepper.NEXT_DISABLED : pressed ? Stepper.NEXT_PRESSED : rollover ? Stepper.NEXT_MOUSE_OVER : Stepper.NEXT )
+                                 : ( !enabled ? Stepper.PREVIOUS_DISABLED : pressed ? Stepper.PREVIOUS_PRESSED : rollover ? Stepper.PREVIOUS_MOUSE_OVER : Stepper.PREVIOUS );
+            float scale = UI.scale();
+            float bw    = w / scale;
+            float bh    = h / scale;
             LafUtilities.antialiasShapes(g);
-            Color tone = enabled ? Styles.Nimbus.accentedTone(p, pressed, rollover) : p.surfaceDisabled();
-            g.setPaint(Styles.Nimbus.relief(enabled, true).paint(0, h, tone));
-            g.fill(rightRounded(w, h, roundTopRight, roundBottomRight));
-            g.setColor(enabled ? Styles.Nimbus.accentedEdge(p) : Styles.Nimbus.surfaceEdge(p, false, false, false));
-            g.fillRect(0, 0, 1, h);
+            g.scale(scale, scale);
+            if ( up ) {
+                g.setPaint(stepper.edge.paint(s, 2, bh));
+                g.fill(roundedOnTheRight(0, 2, bw - 2, bh - 2, 10, true, false));
+                g.setPaint(stepper.face.paint(s, 3, bh - 1));
+                g.fill(roundedOnTheRight(1, 3, bw - 4, bh - 4, 8, true, false));
+                if ( stepper.rule != null )
+                    fill(g, new java.awt.geom.Rectangle2D.Float(1, bh - 1, bw - 4, 1), stepper.rule.in(s));
+                float bottom = bh - 3.75f;
+                g.setPaint(stepper.arrow.paint(s, bottom - 3.89f, bottom));
+                g.fill(polygon(6, bottom, 8.45f, bottom - 3.89f, 11, bottom));
+            } else {
+                if ( stepper.lip != null )
+                    fill(g, roundedOnTheRight(0, bh - 3, bw - 2, 2, 10, false, true), stepper.lip.in(s));
+                g.setPaint(stepper.edge.paint(s, 0, bh - 2));
+                g.fill(roundedOnTheRight(0, 0, bw - 2, bh - 2, 10, false, true));
+                g.setPaint(stepper.face.paint(s, 0, bh - 3));
+                g.fill(roundedOnTheRight(1, 0, bw - 4, bh - 3, 8, false, true));
+                g.setPaint(stepper.arrow.paint(s, 3.75f, 7.73f));
+                g.fill(polygon(6, 3.75f, 8.52f, 7.73f, 11, 3.75f));
+            }
         }
 
         /**
-         *  The actuator's own outline: square where it meets the value it works, and cut to the
-         *  control's own corner radius where it meets the outline at the right.
-         *
-         * @param w how wide the actuator is, in component pixels
-         * @param h how tall it is
-         * @param topRight whether its top right corner meets a corner of the control
-         * @param bottomRight whether its bottom right corner does
-         * @return the shape to fill
+         *  A combo box's button reaches over the combo box's edge and margin to its bounds, which is
+         *  how Nimbus lays it out, so that the blue end of the control has an outline of its own
+         *  rather than sitting inside the grey one.
          */
-        private static Shape rightRounded( int w, int h, boolean topRight, boolean bottomRight ) {
-            float arc = UI.scale(Styles.Nimbus.RADIUS - 1);
-            Path2D.Float shape = new Path2D.Float();
-            shape.moveTo(0, 0);
-            if ( topRight ) {
-                shape.lineTo(w - arc, 0);
-                shape.quadTo(w, 0, w, arc);
-            } else
-                shape.lineTo(w, 0);
-            if ( bottomRight ) {
-                shape.lineTo(w, h - arc);
-                shape.quadTo(w, h, w - arc, h);
-            } else
-                shape.lineTo(w, h);
-            shape.lineTo(0, h);
-            shape.closePath();
+        @Override public boolean actuatorReachesBounds() { return true; }
+
+        /** A rectangle rounded on its right-hand corners only, as the end of a control is. */
+        private static Shape roundedOnTheRight( float x, float y, float w, float h, float arc, boolean top, boolean bottom ) {
+            java.awt.geom.Area shape = new java.awt.geom.Area(new RoundRectangle2D.Float(x - arc, y, w + arc, h, arc, arc));
+            shape.intersect(new java.awt.geom.Area(new java.awt.geom.Rectangle2D.Float(x, y, w, h)));
+            if ( !top )
+                shape.add(new java.awt.geom.Area(new java.awt.geom.Rectangle2D.Float(x, y, w, h / 2f)));
+            if ( !bottom )
+                shape.add(new java.awt.geom.Area(new java.awt.geom.Rectangle2D.Float(x, y + h / 2f, w, h / 2f)));
             return shape;
         }
 
+        private static final NimbusScheme.Gradient COMBO_WEDGE = NimbusScheme.gradient(new double[]{ 0, 0.5, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BASE, -0.57865167, -0.6357143, -0.37254906), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BASE, -0.57865167, -0.6357143, -0.5254902));
+        private static final NimbusScheme.Shade COMBO_WEDGE_DISABLED = NimbusScheme.shade(NimbusScheme.Key.BASE, 0.027408898, -0.57391655, 0.1490196);
+        private static final NimbusScheme.Shade WEDGE_ON_PRESSED     = NimbusScheme.shade(NimbusScheme.Key.BASE, 0, -0.6357143, 0.45098037);
+
+        /** One state of one of a spinner's buttons, from SpinnerNextButtonPainter and SpinnerPreviousButtonPainter. */
+        private enum Stepper
+        {
+            NEXT( null, three(base(0.00051498413, -0.34585923, -0.007843137), base(0.00051498413, -0.27207792, -0.11764708)),
+                  NimbusScheme.gradient(new double[]{ 0, 0.365, 0.73, 0.865, 1 }, base(0.004681647, -0.6197143, 0.43137252), NimbusScheme.MID,
+                                        base(-0.0012707114, -0.5078604, 0.3098039), NimbusScheme.MID, base(-0.0028941035, -0.4800539, 0.28235292)),
+                  base(0.0023007393, -0.3622768, -0.04705882), UP_WEDGE ),
+            NEXT_MOUSE_OVER( null, three(base(0.0013483167, -0.1769987, -0.12156865), base(0.0013483167, 0.039961398, -0.25882354)),
+                  NimbusScheme.gradient(new double[]{ 0, 0.397, 0.794, 0.897, 1 }, base(0.004681647, -0.6198413, 0.43921566), NimbusScheme.MID,
+                                        base(-0.0012707114, -0.51502466, 0.3607843), NimbusScheme.MID, base(0.0021564364, -0.49097747, 0.34509802)),
+                  base(0.0000520349, -0.38743842, 0.019607842), UP_WEDGE ),
+            NEXT_PRESSED( null, three(base(-0.57865167, -0.6357143, -0.54901963), base(0.08801502, 0.3642857, -0.454902)),
+                  NimbusScheme.gradient(new double[]{ 0, 0.432, 0.864, 0.932, 1 }, base(-0.00042033195, -0.38050595, 0.20392156), NimbusScheme.MID,
+                                        base(0.00029569864, -0.15470162, 0.07058823), NimbusScheme.MID, base(-0.00046235323, -0.09571427, 0.039215684)),
+                  base(0.018363237, 0.18135887, -0.227451), flat(WEDGE_ON_PRESSED) ),
+            NEXT_DISABLED( null, three(base(0.021348298, -0.56289876, 0.2588235), base(0.010237217, -0.5607143, 0.2352941)),
+                  three(base(0.021348298, -0.59223604, 0.35294116), base(0.016586483, -0.5723659, 0.31764704)),
+                  base(0.021348298, -0.56182265, 0.24705881), flat(base(0.021348298, -0.58106947, 0.16862744)) ),
+            PREVIOUS( NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.0033834577, -0.30588236, -148),
+                  three(base(0.00051498413, -0.2583558, -0.13333336), base(0.00051498413, -0.095173776, -0.25882354)),
+                  sevenStops(base(0.004681647, -0.5383692, 0.33725488), base(-0.0017285943, -0.44453782, 0.25098038),
+                             base(0.00051498413, -0.43866998, 0.24705881), base(0.00051498413, -0.4625541, 0.35686272)),
+                  null, flat(base(-0.57865167, -0.6357143, -0.54901963)) ),
+            PREVIOUS_MOUSE_OVER( NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.6111111, -0.110526316, -0.63529414, -179),
+                  three(base(0.0013483167, 0.088923395, -0.2784314), base(0.059279382, 0.3642857, -0.43529415)),
+                  sevenStops(base(0.0010585189, -0.541452, 0.4078431), base(0.00254488, -0.4608264, 0.32549018),
+                             base(0.00051498413, -0.4555341, 0.3215686), base(0.00051498413, -0.4757143, 0.43137252)),
+                  null, flat(base(-0.57865167, -0.6357143, -0.54901963)) ),
+            PREVIOUS_PRESSED( NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.110526316, 0.25490195, -186),
+                  three(base(0.061133325, 0.3642857, -0.427451), base(-0.0000352859, 0.018606722, -0.23137257)),
+                  sevenStops(base(0.0008354783, -0.2578073, 0.12549019), base(0.00089377165, -0.01599598, 0.007843137),
+                             base(0, -0.00895375, 0.007843137), base(0.00089377165, -0.13853917, 0.14509803)),
+                  null, flat(WEDGE_ON_PRESSED) ),
+            PREVIOUS_DISABLED( null,
+                  three(base(0.015098333, -0.5557143, 0.2352941), base(0.010237217, -0.55799407, 0.20784312)),
+                  NimbusScheme.gradient(new double[]{ 0, 0.057, 0.115, 0.557, 1 }, base(0.018570602, -0.5821429, 0.32941175), NimbusScheme.MID,
+                                        base(0.021348298, -0.56722116, 0.3098039), NimbusScheme.MID, base(0.021348298, -0.567841, 0.31764704)),
+                  null, flat(base(0.018570602, -0.56714284, 0.1372549)) );
+
+            final NimbusScheme.@Nullable Shade lip;
+            final NimbusScheme.Gradient        edge;
+            final NimbusScheme.Gradient        face;
+            final NimbusScheme.@Nullable Shade rule;
+            final NimbusScheme.Gradient        arrow;
+
+            Stepper( NimbusScheme.@Nullable Shade lip, NimbusScheme.Gradient edge, NimbusScheme.Gradient face,
+                     NimbusScheme.@Nullable Shade rule, NimbusScheme.Gradient arrow ) {
+                this.lip = lip; this.edge = edge; this.face = face; this.rule = rule; this.arrow = arrow;
+            }
+
+            private static NimbusScheme.Shade base( double h, double s, double b ) { return NimbusScheme.shade(NimbusScheme.Key.BASE, h, s, b); }
+
+            private static NimbusScheme.Gradient three( NimbusScheme.Shade top, NimbusScheme.Shade bottom ) {
+                return NimbusScheme.gradient(new double[]{ 0, 0.5, 1 }, top, NimbusScheme.MID, bottom);
+            }
+
+            private static NimbusScheme.Gradient sevenStops( NimbusScheme.Shade a, NimbusScheme.Shade b, NimbusScheme.Shade c, NimbusScheme.Shade d ) {
+                return NimbusScheme.gradient(new double[]{ 0, 0.057, 0.115, 0.242, 0.369, 0.684, 1 },
+                                             a, NimbusScheme.MID, b, NimbusScheme.MID, c, NimbusScheme.MID, d);
+            }
+
+            /** A gradient that is one colour, so that every arrow can be painted the same way. */
+            private static NimbusScheme.Gradient flat( NimbusScheme.Shade colour ) {
+                return NimbusScheme.gradient(new double[]{ 0, 1 }, colour, colour);
+            }
+        }
+
+        private static final NimbusScheme.Gradient UP_WEDGE = NimbusScheme.gradient(new double[]{ 0, 0.5, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BASE, -0.57865167, -0.6357143, -0.043137252), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BASE, -0.57865167, -0.6357143, -0.24313727));
+
         // ── Chrome ───────────────────────────────────────────────────────────
 
-        /** A groove cut across the slider, one colour the whole way along. The handle already says
-         *  where the value is, and a coloured run behind it would make a slider look like a progress
-         *  bar. */
+        /**
+         *  The groove a slider's knob runs along: five pixels deep, dark along its top, with a pale
+         *  lip under it, the whole way across the slider and not only along the knob's travel. It carries no colour where the value is:
+         *  the knob already says that.
+         */
         @Override
         public void paintSliderTrack(
             Graphics2D g, Palette p, Rectangle track, int thumbCentre,
             boolean horizontal, boolean inverted, boolean enabled
         ) {
+            NimbusScheme s = NimbusScheme.of(p);
+            float scale  = UI.scale();
+            // Nimbus runs the groove on past both ends of the knob's travel, to the slider's bounds.
+            float reach  = sliderThumbDiameter() / 2f + 1.5f;
+            float length = ( horizontal ? track.width : track.height ) / scale + 2 * reach;
+            float across = ( horizontal ? track.height : track.width ) / scale;
             LafUtilities.antialiasShapes(g);
-            int   t    = Math.max(3, UI.scale(sliderTrackThickness()));
-            Color tone = enabled ? p.border() : LafUtilities.shiftHsb(p.border(), 0, +0.200);
-            float arc  = t;
-            Shape groove = horizontal
-                    ? new RoundRectangle2D.Float(track.x, track.y + (track.height - t) / 2f, track.width, t, arc, arc)
-                    : new RoundRectangle2D.Float(track.x + (track.width - t) / 2f, track.y, t, track.height, arc, arc);
-            java.awt.geom.Rectangle2D span = groove.getBounds2D();
-            g.setPaint(NimbusRelief.CUT.paint((float) span.getY(), (float) span.getHeight(), tone));
-            g.fill(groove);
+            g.translate(track.x, track.y);
+            g.scale(scale, scale);
+            if ( !horizontal )
+                g.transform(new java.awt.geom.AffineTransform(0, 1, 1, 0, 0, 0));
+            g.translate(-reach, 0);
+            float top = across / 2f - 2.5f;
+            fill(g, new RoundRectangle2D.Float(1, top + 3, length - 2, enabled ? 3 : 7, 8.7f, 8.7f), ( enabled ? TRACK_LIP : TRACK_LIP_DISABLED ).in(s));
+            g.setPaint(( enabled ? TRACK_EDGE : TRACK_EDGE_DISABLED ).paint(s, top + 0.38f, top + 4.56f));
+            g.fill(new RoundRectangle2D.Float(0, top, length, 5, 4.9f, 4.9f));
+            g.setPaint(( enabled ? TRACK_FACE : TRACK_FACE_DISABLED ).paint(s, top + 1, top + 5));
+            g.fill(new RoundRectangle2D.Float(1.44f, top + 1, length - 2.88f, 4, 4, 4));
         }
 
-        /**
-         *  A knob of the accented material, two pixels inside the box the slider lays out for it,
-         *  the way a check box's box sits inside its icon. Nimbus makes the one part of a slider
-         *  you can take hold of the only coloured thing on it.
-         */
+        /** A small round knob of the default button's blue, in the seventeen pixel square Nimbus lays it out in. */
         @Override
         public void paintSliderThumb(
             Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused, boolean rollover
         ) {
-            int   pad  = UI.scale(GLYPH_INSET);
-            int   d    = Math.min(r.width, r.height) - 2 * pad;
-            Shape knob = new Ellipse2D.Float(r.x + pad + 0.5f, r.y + pad + 0.5f, d - 1, d - 1);
-            mould(g, p, knob, r.y + pad, d, enabled, true, false, focused || rollover);
+            NimbusScheme s = NimbusScheme.of(p);
+            Knob knob = !enabled ? Knob.DISABLED : rollover ? Knob.MOUSE_OVER : Knob.ENABLED;
+            LafUtilities.antialiasShapes(g);
+            g.translate(r.x, r.y);
+            g.scale(r.width / 17.0, r.height / 17.0);
+            if ( enabled && focused )
+                fill(g, new Ellipse2D.Float(0.6f, 0.6f, 15.8f, 15.8f), s.get(NimbusScheme.Key.FOCUS));
+            else if ( knob.lip != null )
+                fill(g, new Ellipse2D.Float(2, 3, 13, 13), knob.lip.in(s));
+            g.setPaint(knob.edge.paint(s, 8.63f, 2, 8.63f, 15.05f));
+            g.fill(new Ellipse2D.Float(2, 2, 13, 13));
+            g.setPaint(knob.face.paint(s, 8.5f, 3.02f, 8.5f, 14));
+            g.fill(new Ellipse2D.Float(3, 3, 11, 11));
+        }
+
+        private static final NimbusScheme.Shade TRACK_LIP          = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.110526316, 0.25490195, -111);
+        private static final NimbusScheme.Shade TRACK_LIP_DISABLED = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.110526316, 0.25490195, -245);
+        private static final NimbusScheme.Gradient TRACK_EDGE = NimbusScheme.gradient(new double[]{ 0, 0.5, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.034093194, -0.12941176), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.01111114, -0.023821115, -0.06666666));
+        private static final NimbusScheme.Gradient TRACK_FACE = NimbusScheme.gradient(new double[]{ 0, 0.138, 0.275, 0.491, 0.706 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.008547008, -0.03314536, -0.086274505), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.004273474, -0.040256046, -0.019607842), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.03626889, 0.04705882));
+        private static final NimbusScheme.Gradient TRACK_EDGE_DISABLED = NimbusScheme.gradient(new double[]{ 0, 0.5, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.0055555105, -0.061265234, 0.05098039), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.01010108, -0.059835073, 0.10588235));
+        private static final NimbusScheme.Gradient TRACK_FACE_DISABLED = NimbusScheme.gradient(new double[]{ 0, 0.138, 0.275, 0.638, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.01111114, -0.061982628, 0.062745094), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.00505054, -0.058639523, 0.086274505), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.01010108, -0.059835073, 0.10588235));
+
+        /** One state of a slider's knob, from SliderThumbPainter. */
+        private enum Knob
+        {
+            ENABLED( NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.003968239, 0.0014736876, -0.25490198, -156),
+                     three(base(0.00051498413, -0.34585923, -0.007843137), base(-0.0017285943, -0.11571431, -0.25490198)),
+                     NimbusScheme.gradient(new double[]{ 0, 0.213, 0.425, 0.561, 0.698, 0.849, 1 },
+                             base(-0.023096085, -0.6238095, 0.43921566), NimbusScheme.MID, base(0.00051498413, -0.43866998, 0.24705881), NimbusScheme.MID,
+                             base(0.00051498413, -0.43866998, 0.24705881), NimbusScheme.MID, base(0.00051498413, -0.45714286, 0.32941175)) ),
+            MOUSE_OVER( NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.003968239, 0.0014736876, -0.25490198, -156),
+                     three(base(-0.0038217902, -0.15532213, -0.14901963), base(-0.57865167, -0.6357143, -0.54509807)),
+                     NimbusScheme.gradient(new double[]{ 0, 0.213, 0.425, 0.561, 0.698, 0.849, 1 },
+                             base(0.004681647, -0.62780917, 0.44313723), NimbusScheme.MID, base(0.00029569864, -0.4653107, 0.32549018), NimbusScheme.MID,
+                             base(0.00051498413, -0.4563421, 0.32549018), NimbusScheme.MID, base(-0.0017285943, -0.4732143, 0.39215684)) ),
+            DISABLED( null,
+                     three(base(0.021348298, -0.5625436, 0.25490195), base(0.015098333, -0.55105823, 0.19215685)),
+                     NimbusScheme.gradient(new double[]{ 0, 0.213, 0.425, 0.713, 1 },
+                             base(0.021348298, -0.5924243, 0.35686272), NimbusScheme.MID, base(0.021348298, -0.56722116, 0.3098039), NimbusScheme.MID,
+                             base(0.021348298, -0.56844974, 0.32549018)) );
+
+            final NimbusScheme.@Nullable Shade lip;
+            final NimbusScheme.Gradient        edge;
+            final NimbusScheme.Gradient        face;
+
+            Knob( NimbusScheme.@Nullable Shade lip, NimbusScheme.Gradient edge, NimbusScheme.Gradient face ) {
+                this.lip = lip; this.edge = edge; this.face = face;
+            }
+
+            private static NimbusScheme.Shade base( double h, double s, double b ) { return NimbusScheme.shade(NimbusScheme.Key.BASE, h, s, b); }
+
+            private static NimbusScheme.Gradient three( NimbusScheme.Shade top, NimbusScheme.Shade bottom ) {
+                return NimbusScheme.gradient(new double[]{ 0, 0.5, 1 }, top, NimbusScheme.MID, bottom);
+            }
         }
 
         @Override public boolean scrollBarHasSteppers() { return true; }
 
-        @Override public @Nullable Color tableHeaderDivider( Palette p ) { return p.border(); }
+        /** A rule shading from light at its ends to dark in its middle, so that it fades into the
+         *  highlight along the top of the heading row and the shadow along its bottom. */
+        @Override public @Nullable Paint tableHeaderDivider( Palette p, int height ) {
+            return HEADER_DIVIDER.paint(NimbusScheme.of(p), 0, height - UI.scale(1));
+        }
 
-        /** The sheet itself, moved a little of the way towards the chrome. Nimbus's stripe is very
-         *  nearly white, which the surface colour is not. */
+        private static final NimbusScheme.Gradient HEADER_DIVIDER = NimbusScheme.gradient(new double[]{ 0, 0.144, 0.437, 0.594, 0.752, 0.876, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.01111114, -0.08625447, 0.062745094), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.013888836, -0.028334536, -0.17254901), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.013888836, -0.029445238, -0.16470587), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.02020204, -0.053531498, 0.011764705));
+
+        /** Nimbus's {@code Table.alternateRowColor}: the page, one step darker. */
         @Override public @Nullable Color tableRowStripe( Palette p ) {
-            return LafUtilities.wash(p.surfaceField(), p.surface(), 1.0, 0.30);
+            return NimbusScheme.derive(NimbusScheme.of(p).get(NimbusScheme.Key.LIGHT_BACKGROUND), 0, 0, -0.05098039f, 0);
         }
 
         @Override public int treeNodeGlyphSize() { return 16; }
 
         /**
-         *  A folder for a node that can hold others and a sheet of paper for one that cannot, both
-         *  cast in the same two materials as the rest of the theme: the folder in the accented one
-         *  a selected tab is made of, the sheet in the white a text field is cut into.
+         *  Nimbus's own tree icons, redrawn from its painters: a pale blue sheet of paper with its
+         *  corner turned down for a leaf, and a blue folder for a node that holds others, its front
+         *  dropped open for an expanded one.
          */
         @Override
         public void paintTreeNode(
             Graphics2D g, Palette p, int x, int y, int w, int h,
             boolean leaf, boolean expanded, boolean enabled
         ) {
+            NimbusScheme s = NimbusScheme.of(p);
             LafUtilities.antialiasShapes(g);
-            g.setStroke(new BasicStroke(1f));
+            g.translate(x, y);
+            g.scale(w / 16.0, h / 16.0);
             if ( leaf )
-                sheet(g, p, x, y, w, h, enabled);
+                paintPage(g, s);
             else
-                folder(g, p, x, y, w, h, expanded, enabled);
+                paintFolder(g, s, expanded);
         }
 
-        /** A page with its top corner turned back, which is the corner that says it is a page. */
-        private static void sheet( Graphics2D g, Palette p, int x, int y, int w, int h, boolean enabled ) {
-            float pw   = UI.scale(11f);
-            float ph   = UI.scale(14f);
-            float fold = UI.scale(4f);
-            float left = x + ( w - pw ) / 2f + 0.5f;
-            float top  = y + ( h - ph ) / 2f + 0.5f;
-            Path2D.Float page = new Path2D.Float();
-            page.moveTo(left, top);
-            page.lineTo(left + pw - fold, top);
-            page.lineTo(left + pw, top + fold);
-            page.lineTo(left + pw, top + ph);
-            page.lineTo(left, top + ph);
-            page.closePath();
-            g.setColor(enabled ? p.surfaceField() : p.surfaceDisabled());
-            g.fill(page);
-            g.setColor(Styles.Nimbus.surfaceEdge(p, enabled, false, false));
-            g.draw(page);
-            g.draw(new java.awt.geom.Line2D.Float(left + pw - fold, top, left + pw - fold, top + fold));
-            g.draw(new java.awt.geom.Line2D.Float(left + pw - fold, top + fold, left + pw, top + fold));
+        private static void paintPage( Graphics2D g, NimbusScheme s ) {
+            fill(g, polygon(1, 0, 1, 16, 2, 16, 2, 1, 10.52f, 1, 14, 4.5f, 14, 16, 15, 16, 15, 4.44f, 10.72f, 0), PAGE_OUTLINE.in(s));
+            fill(g, new java.awt.geom.Rectangle2D.Float(2, 15, 12, 1), PAGE_FOOT.in(s));
+            g.setPaint(PAGE_CORNER.paint(s, 10.19f, 4.87f, 11.94f, 3.13f));
+            g.fill(polygon(10, 1, 10, 5, 14, 5));
+            g.setPaint(PAGE_SHEET.paint(s, 8, 1, 8, 15));
+            g.fill(polygon(10, 1, 2, 1, 2, 15, 14, 15, 14, 5, 10, 5));
+            fill(g, polygon(10, 1, 8.74f, 1, 8.78f, 6.22f, 14, 6.2f, 14, 5, 10, 5), PAGE_FOLD_SHADOW.in(s));
+            fill(g, polygon(10, 2, 10, 1, 2, 1, 2, 15, 14, 15, 14, 5, 13, 5, 13, 14, 3, 14, 3, 2), PAGE_INNER_LIGHT.in(s));
         }
 
-        /** A folder, with its front flap standing away from the back when it is open. */
-        private static void folder(
-            Graphics2D g, Palette p, int x, int y, int w, int h, boolean expanded, boolean enabled
-        ) {
-            float fw   = UI.scale(14f);
-            float fh   = UI.scale(11f);
-            float tab  = UI.scale(3f);
-            float left = x + ( w - fw ) / 2f + 0.5f;
-            float top  = y + ( h - fh ) / 2f + 0.5f;
-            Color tone = enabled ? Styles.Nimbus.accentedTone(p, false, false) : p.surfaceDisabled();
-            Color edge = enabled ? LafUtilities.wash(p.accent(), p.text(), 0.766, 0.443)
-                                 : Styles.Nimbus.surfaceEdge(p, false, false, false);
-            Path2D.Float body = new Path2D.Float();
-            body.moveTo(left, top + fh);
-            body.lineTo(left, top + tab);
-            body.lineTo(left + fw * 0.42f, top + tab);
-            body.lineTo(left + fw * 0.55f, top);
-            body.lineTo(left + fw, top);
-            body.lineTo(left + fw, top + fh);
-            body.closePath();
-            g.setPaint(Styles.Nimbus.relief(enabled, enabled).paint(top, fh, tone));
-            g.fill(body);
-            g.setColor(edge);
-            g.draw(body);
-            if ( !expanded )
-                return;
-            // The flap, leaning out to the right, is the whole of the difference an open folder makes.
-            Path2D.Float flap = new Path2D.Float();
-            flap.moveTo(left, top + fh);
-            flap.lineTo(left + fw * 0.16f, top + fh * 0.45f);
-            flap.lineTo(left + fw, top + fh * 0.45f);
-            flap.lineTo(left + fw * 0.84f, top + fh);
-            flap.closePath();
-            g.setPaint(Styles.Nimbus.relief(enabled, enabled)
-                                    .paint(top + fh * 0.45f, fh * 0.55f, LafUtilities.shiftHsb(tone, -0.030, +0.080)));
-            g.fill(flap);
-            g.setColor(edge);
-            g.draw(flap);
+        private static void paintFolder( Graphics2D g, NimbusScheme s, boolean open ) {
+            fill(g, polygon(0, 13, 0, 14, 1, 16, 14, 16, 15, 14, 15, 13), FOLDER_SHADOW.in(s));
+            float lid = open ? 7 : 5;
+            g.setPaint(FOLDER_FRONT.paint(s, 9, lid, 9, 14));
+            g.fill(open ? polygon(3, 14, 3, 12, 4, 7, 15, 7, 15, 9, 14, 14)
+                        : polygon(3, 14, 3.02f, 10.06f, 4, 5, 15, 5, 15, 7, 14, 14));
+            g.setPaint(FOLDER_BACK.paint(s, 7, 1, 7, 14));
+            g.fill(open ? polygon(1, 14, 2, 14, 2, 11, 4, 6, 13, 6, 13, 3, 8, 3, 7, 2, 7, 1, 3, 1, 3, 2, 2, 3, 1, 3)
+                        : polygon(1, 14, 2, 14, 2.04f, 10.19f, 3.98f, 4, 13, 4, 13, 3, 8, 3, 7, 2, 7, 1, 3, 1, 3, 2, 2, 3, 1, 3));
+            fill(g, new java.awt.geom.Rectangle2D.Float(1, 3, 1, 1), FOLDER_GLINT_1.in(s));
+            fill(g, new java.awt.geom.Rectangle2D.Float(3, 1, 4, 1), FOLDER_GLINT_2.in(s));
+            fill(g, new java.awt.geom.Rectangle2D.Float(8, 3, 5, 1), FOLDER_GLINT_3.in(s));
+            g.setPaint(FOLDER_OUTLINE.paint(s, 8, 0, 8, 15));
+            g.fill(open ? polygon(16, 6, 16, 7, 13, 7, 13, 3, 8, 3, 7, 2, 7, 1, 2.94f, 1.02f, 2.98f, 1.74f, 1.74f, 3, 1, 3, 1, 14, 14, 14, 14, 11,
+                                  14, 10, 15.58f, 7.12f, 15.9f, 7.26f, 15, 10, 15, 11, 15, 14, 14, 15, 1, 15, 0, 14, 0, 3.26f, 3.19f, 0,
+                                  7, 0, 8.56f, 2, 13, 2, 14, 3, 14, 6)
+                        : polygon(16, 4, 16, 5, 13, 5, 13, 3, 8, 3, 7, 2, 7, 1, 2.94f, 1.02f, 2.98f, 1.74f, 1.74f, 3, 1, 3, 1, 14, 14, 14, 14, 7,
+                                  14.87f, 5.96f, 15, 5, 16, 5, 15.46f, 6.13f, 15, 7, 15, 14, 14, 15, 1, 15, 0, 14, 0, 3.26f, 3.19f, 0,
+                                  7, 0, 8.56f, 2, 13, 2, 14, 3, 14, 4));
+            if ( open ) {
+                g.setPaint(OPEN_FOLDER_RIM.paint(s, 7.5f, 6, 7.5f, 14));
+                g.fill(polygon(13, 7, 13, 6, 3.7f, 6, 2, 11, 2, 14, 3, 14, 2.96f, 12.13f, 4, 7));
+            } else {
+                g.setPaint(CLOSED_FOLDER_RIM.paint(s, 7.5f, 4, 7.5f, 14));
+                g.fill(polygon(13, 5, 13, 4, 3.74f, 4, 2.02f, 10.06f, 2, 14, 3, 14, 2.96f, 12.13f, 4.58f, 4.98f));
+            }
         }
+
+        private static final NimbusScheme.Shade PAGE_OUTLINE     = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.007936537, -0.065654516, -0.13333333);
+        private static final NimbusScheme.Shade PAGE_FOOT        = NimbusScheme.constant(97, 98, 102, 255);
+        private static final NimbusScheme.Gradient PAGE_CORNER   = NimbusScheme.gradient(new double[]{ 0, 0.5, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.032679737, -0.043332636, 0.24705881), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.110526316, 0.25490195));
+        private static final NimbusScheme.Gradient PAGE_SHEET    = NimbusScheme.gradient(new double[]{ 0, 0.5, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.0077680945, -0.51781034, 0.3490196), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.013940871, -0.599277, 0.41960782));
+        private static final NimbusScheme.Shade PAGE_FOLD_SHADOW = NimbusScheme.shade(NimbusScheme.Key.BASE, 0.004681647, -0.4198052, 0.14117646);
+        private static final NimbusScheme.Shade PAGE_INNER_LIGHT = NimbusScheme.shade(NimbusScheme.Key.BASE, 0, -0.6357143, 0.45098037, -127);
+        private static final NimbusScheme.Shade FOLDER_SHADOW    = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, 0, -0.21, -99);
+        private static final NimbusScheme.Gradient FOLDER_FRONT  = NimbusScheme.gradient(new double[]{ 0.042, 0.103, 0.165, 0.246, 0.326, 0.663, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.00029569864, -0.45978838, 0.2980392), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.0015952587, -0.34848025, 0.18823528), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.0015952587, -0.30844158, 0.09803921), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.0015952587, -0.27329817, 0.035294116));
+        private static final NimbusScheme.Gradient FOLDER_BACK   = NimbusScheme.gradient(new double[]{ 0, 0.5, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.0077680945, -0.51781034, 0.3490196), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.004681647, -0.6198413, 0.43921566));
+        private static final NimbusScheme.Shade FOLDER_GLINT_1   = NimbusScheme.shade(NimbusScheme.Key.BASE, 0, -0.6357143, 0.45098037, -125);
+        private static final NimbusScheme.Shade FOLDER_GLINT_2   = NimbusScheme.shade(NimbusScheme.Key.BASE, 0, -0.6357143, 0.45098037, -50);
+        private static final NimbusScheme.Shade FOLDER_GLINT_3   = NimbusScheme.shade(NimbusScheme.Key.BASE, 0, -0.6357143, 0.45098037, -100);
+        private static final NimbusScheme.Gradient FOLDER_OUTLINE = NimbusScheme.gradient(new double[]{ 0, 0.5, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.0012094378, -0.23571429, -0.0784314), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.00029569864, -0.115166366, -0.2627451));
+        private static final NimbusScheme.Gradient CLOSED_FOLDER_RIM = NimbusScheme.gradient(new double[]{ 0, 0.127, 0.254, 0.627, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.0027436614, -0.335015, 0.011764705), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.0024294257, -0.3857143, 0.031372547), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.0018081069, -0.3595238, -0.13725492));
+        private static final NimbusScheme.Gradient OPEN_FOLDER_RIM = NimbusScheme.gradient(new double[]{ 0, 0.5, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.004681647, -0.33496243, -0.027450979), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.0019934773, -0.361378, -0.10588238));
 
         /**
-         *  The same moulding a button is made of, filling the whole end of the bar. It carries no
-         *  outline of its own: the groove beside it already ends in one.
+         *  One end of a scroll bar: a moulding twenty five pixels long whose inner end sweeps down
+         *  into the groove in a curve, with a wedge pointing out of the bar. It is drawn the way
+         *  Nimbus draws it, for the button at the left end of a horizontal bar, and turned for the
+         *  other three.
          */
         @Override
         public void paintScrollStepper(
             Graphics2D g, Palette p, int w, int h, LafUtilities.Direction direction,
             boolean enabled, boolean rollover, boolean pressed
         ) {
-            Color tone = Styles.Nimbus.surfaceTone(p, enabled, pressed, rollover);
-            g.setPaint(Styles.Nimbus.relief(enabled, false).paint(0, h, tone));
-            g.fillRect(0, 0, w, h);
-            wedge(g, p, w / 2f, h / 2f, UI.scale(3.2f), direction, enabled);
+            if ( !enabled )
+                return;
+            NimbusScheme s = NimbusScheme.of(p);
+            ScrollEnd end = pressed ? ScrollEnd.PRESSED : rollover ? ScrollEnd.MOUSE_OVER : ScrollEnd.ENABLED;
+            float scale = UI.scale();
+            LafUtilities.antialiasShapes(g);
+            g.scale(scale, scale);
+            float length = scrollStepperLength();
+            switch ( direction ) {
+                case RIGHT: g.transform(new java.awt.geom.AffineTransform(-1, 0, 0, 1, length, 0)); break;
+                case UP:    g.transform(new java.awt.geom.AffineTransform(0, 1, 1, 0, 0, 0)); break;
+                case DOWN:  g.transform(new java.awt.geom.AffineTransform(0, -1, 1, 0, 0, length)); break;
+                default: break;
+            }
+            g.setPaint(end.body.paint(s, 12.5f, 0, 12.5f, 15));
+            g.fill(SCROLL_END_BODY);
+            g.setPaint(end.shade.paint(s, 0, 8.01f, 1.11f, 8.01f));
+            g.fill(SCROLL_END_SHADE);
+            if ( end.arrow != null ) {
+                g.setPaint(end.arrow.paint(s, 11.47f, 10.5f, 11.47f, 4.03f));
+                g.fill(polygon(12, 4, 12, 11, 4.94f, 7.5f));
+            } else
+                fill(g, polygon(12, 4, 12, 11, 4.94f, 7.5f), SCROLL_END_ARROW_PRESSED.in(s));
+            fill(g, SCROLL_END_GLINT, SCROLL_END_GLINT_COLOR.in(s));
         }
 
+        @Override public int scrollStepperLength() { return 25; }
+
+        /**
+         *  The thumb: square along the side of the bar next to what it scrolls, and rounded off at
+         *  both ends along the other side, in the default button's blue with a glint in each corner.
+         */
         @Override
         public void paintScrollThumb( Graphics2D g, Palette p, Rectangle r, boolean active ) {
+            NimbusScheme s = NimbusScheme.of(p);
+            float   scale    = UI.scale();
+            boolean vertical = r.height >= r.width;
+            float   length   = ( vertical ? r.height : r.width ) / scale;
             LafUtilities.antialiasShapes(g);
-            // No room left around it: Nimbus's thumb fills the groove from wall to wall, which is
-            // what makes the groove read as a channel the thumb runs in rather than a strip it
-            // floats over.
-            int   pad  = 0;
-            float arc  = Math.min(r.width, r.height) - 2 * pad;
-            Shape pill = new RoundRectangle2D.Float(
-                                r.x + pad + 0.5f, r.y + pad + 0.5f,
-                                r.width - 2 * pad - 1, r.height - 2 * pad - 1, arc, arc
-                            );
-            Color tone = Styles.Nimbus.accentedTone(p, active, false);
-            g.setPaint(NimbusRelief.LIT_ACCENTED.paint(r.y + pad, r.height - 2f * pad, tone));
-            g.fill(pill);
-            g.setColor(Styles.Nimbus.accentedEdge(p));
-            g.setStroke(new BasicStroke(1f));
-            g.draw(pill);
+            g.translate(r.x, r.y);
+            g.scale(scale, scale);
+            if ( vertical )
+                g.transform(new java.awt.geom.AffineTransform(0, 1, 1, 0, 0, 0));
+            NimbusScheme.Gradient[] thumb = active ? THUMB_MOUSE_OVER : THUMB;
+            float l = length;
+            Path2D.Float outer = new Path2D.Float();
+            outer.moveTo(0, 0); outer.lineTo(0, 1); outer.curveTo(0, 7, 5, 15, 15, 15); outer.lineTo(l - 15, 15);
+            outer.curveTo(l - 5, 15, l, 7, l, 1); outer.lineTo(l, 0); outer.closePath();
+            g.setPaint(thumb[0].paint(s, 0, 15));
+            g.fill(outer);
+            Path2D.Float inner = new Path2D.Float();
+            inner.moveTo(1, 0); inner.lineTo(1, 1); inner.curveTo(0.95f, 9.45f, 9.14f, 14, 15, 14); inner.lineTo(l - 15, 14);
+            inner.curveTo(l - 9.09f, 14, l - 1.05f, 9.36f, l - 1, 1); inner.lineTo(l - 1, 0); inner.closePath();
+            g.setPaint(thumb[1].paint(s, 0, 14));
+            g.fill(inner);
+            Path2D.Float glint = new Path2D.Float();
+            glint.moveTo(6, 0); glint.lineTo(1, 0); glint.lineTo(2.41f, 7.64f); glint.curveTo(2.41f, 7.64f, 2.05f, 3.59f, 3, 2.05f);
+            glint.curveTo(3.95f, 0.5f, 6, 0, 6, 0); glint.closePath();
+            g.setPaint(THUMB_GLINT_LEFT.paint(s, 1.34f, -0.05f, 2.84f, 1.83f));
+            g.fill(glint);
+            Path2D.Float otherGlint = new Path2D.Float();
+            otherGlint.moveTo(l - 0.95f, 0); otherGlint.lineTo(l - 5.95f, 0);
+            otherGlint.curveTo(l - 5.95f, 0, l - 4, 0.77f, l - 3.32f, 2);
+            otherGlint.curveTo(l - 2.64f, 3.23f, l - 2.41f, 7.59f, l - 2.41f, 7.59f); otherGlint.closePath();
+            g.setPaint(THUMB_GLINT_RIGHT.paint(s, l - 1.25f, 0.27f, l - 2.98f, 2));
+            g.fill(otherGlint);
         }
 
+        private static final Shape SCROLL_END_BODY;
+        private static final Shape SCROLL_END_GLINT;
+        private static final Shape SCROLL_END_SHADE = polygon(0, 1.03f, 0.97f, 1.5f, 1.94f, 2.03f, 1.94f, 15, 0, 15);
+
+        static {
+            Path2D.Float body = new Path2D.Float();
+            body.moveTo(0, 0); body.lineTo(17, 0); body.curveTo(17, 0, 16.29f, 1.97f, 17, 5);
+            body.curveTo(17.71f, 8.03f, 18, 9.06f, 20, 11); body.curveTo(22, 12.94f, 25, 14, 25, 14);
+            body.lineTo(25, 15); body.lineTo(0, 15); body.closePath();
+            SCROLL_END_BODY = body;
+            Path2D.Float glint = new Path2D.Float();
+            glint.moveTo(16.44f, 2); glint.curveTo(17.18f, 2, 16.62f, 4.12f, 17.53f, 6.32f);
+            glint.curveTo(18.44f, 8.53f, 18.06f, 9.47f, 20.41f, 11.32f); glint.curveTo(22.76f, 13.18f, 24.5f, 14.24f, 24.5f, 14.24f);
+            glint.lineTo(24.35f, 14.82f); glint.curveTo(24.35f, 14.82f, 21.38f, 13.35f, 19.82f, 11.97f);
+            glint.curveTo(18.26f, 10.59f, 17.76f, 9.29f, 16.97f, 7.29f); glint.curveTo(16.18f, 5.29f, 15.71f, 2, 16.44f, 2);
+            glint.closePath();
+            SCROLL_END_GLINT = glint;
+        }
+
+        private static final NimbusScheme.Shade SCROLL_END_GLINT_COLOR   = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.110526316, 0.25490195, -165);
+        private static final NimbusScheme.Shade SCROLL_END_ARROW_PRESSED = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.6111111, -0.110526316, -0.74509805);
+
+        /** One state of the end of a scroll bar, from ScrollBarButtonPainter. */
+        private enum ScrollEnd
+        {
+            ENABLED( body(bg(-0.01111114, -0.07763158, -0.1490196), bg(-0.111111104, -0.10580933, 0.086274505), bg(-0.027777791, -0.102261856, 0.20392156),
+                          bg(-0.039682567, -0.079276316, 0.13333333), bg(-0.027777791, -0.07382907, 0.109803915), bg(-0.039682567, -0.08241387, 0.23137254)),
+                     NimbusScheme.gradient(new double[]{ 0, 0.5, 1 }, bg(-0.055555522, -0.08443936, -0.29411766, -136), NimbusScheme.MID, bg(-0.055555522, -0.09876161, 0.25490195, -178)),
+                     arrow(bg(0.055555582, -0.08878718, -0.5647059), bg(-0.027777791, -0.080223285, -0.4862745), bg(-0.111111104, -0.09525914, -0.23137254)) ),
+            MOUSE_OVER( body(bg(-0.04444444, -0.080223285, -0.09803921), bg(-0.6111111, -0.110526316, 0.10588235), bg(0, -0.110526316, 0.25490195),
+                             bg(-0.039682567, -0.081719734, 0.20784312), bg(-0.027777791, -0.07677104, 0.18431371), bg(0, -0.110526316, 0.25490195)),
+                     NimbusScheme.gradient(new double[]{ 0.195, 0.598, 1 }, bg(-0.04444444, -0.080223285, -0.09803921, -69), NimbusScheme.MID, bg(-0.055555522, -0.09876161, 0.25490195, -39)),
+                     arrow(bg(0.055555582, -0.0951417, -0.49019608), bg(-0.027777791, -0.086996906, -0.4117647), bg(-0.111111104, -0.09719298, -0.15686274)) ),
+            PRESSED( body(bg(-0.037037015, -0.043859646, -0.21568626), bg(-0.06349206, -0.07309316, -0.011764705), bg(-0.048611104, -0.07296763, 0.09019607),
+                          bg(-0.03535354, -0.05497076, 0.031372547), bg(-0.034188032, -0.043168806, 0.011764705), bg(-0.03535354, -0.0600676, 0.109803915)),
+                     NimbusScheme.gradient(new double[]{ 0, 0.5, 1 }, bg(-0.037037015, -0.043859646, -0.21568626, -44), NimbusScheme.MID, bg(-0.055555522, -0.09876161, 0.25490195, -178)),
+                     null );
+
+            final NimbusScheme.Gradient body;
+            final NimbusScheme.Gradient shade;
+            final NimbusScheme.@Nullable Gradient arrow;
+
+            ScrollEnd( NimbusScheme.Gradient body, NimbusScheme.Gradient shade, NimbusScheme.@Nullable Gradient arrow ) {
+                this.body = body; this.shade = shade; this.arrow = arrow;
+            }
+
+            private static NimbusScheme.Shade bg( double h, double s, double b ) { return NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, h, s, b); }
+            private static NimbusScheme.Shade bg( double h, double s, double b, int a ) { return NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, h, s, b, a); }
+
+            private static NimbusScheme.Gradient body( NimbusScheme.Shade a, NimbusScheme.Shade b, NimbusScheme.Shade c, NimbusScheme.Shade d, NimbusScheme.Shade e, NimbusScheme.Shade f ) {
+                return NimbusScheme.gradient(new double[]{ 0, 0.033, 0.066, 0.09, 0.114, 0.231, 0.347, 0.494, 0.641, 0.784, 0.928 },
+                                             a, NimbusScheme.MID, b, NimbusScheme.MID, c, NimbusScheme.MID, d, NimbusScheme.MID, e, NimbusScheme.MID, f);
+            }
+
+            private static NimbusScheme.Gradient arrow( NimbusScheme.Shade a, NimbusScheme.Shade b, NimbusScheme.Shade c ) {
+                return NimbusScheme.gradient(new double[]{ 0, 0.296, 0.593, 0.793, 0.994 }, a, NimbusScheme.MID, b, NimbusScheme.MID, c);
+            }
+        }
+
+        private static final NimbusScheme.Gradient[] THUMB = thumb(
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.00051498413, 0.18061227, -0.35686278), NimbusScheme.shade(NimbusScheme.Key.BASE, 0.00051498413, -0.21018237, -0.18039218),
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.000713408, -0.53277314, 0.25098038), NimbusScheme.shade(NimbusScheme.Key.BASE, -0.07865167, -0.6317617, 0.44313723),
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.00051498413, -0.44340658, 0.26666665), NimbusScheme.shade(NimbusScheme.Key.BASE, 0.00051498413, -0.4669379, 0.38039213),
+                NimbusScheme.shade(NimbusScheme.Key.BASE, -0.07865167, -0.56512606, 0.45098037));
+        private static final NimbusScheme.Gradient[] THUMB_MOUSE_OVER = thumb(
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.00051498413, 0.18061227, -0.35686278), NimbusScheme.shade(NimbusScheme.Key.BASE, 0.00051498413, -0.21018237, -0.18039218),
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.010237217, -0.5621849, 0.25098038), NimbusScheme.shade(NimbusScheme.Key.BASE, 0.08801502, -0.6317773, 0.4470588),
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.00051498413, -0.45950285, 0.34117645), NimbusScheme.shade(NimbusScheme.Key.BASE, -0.0017285943, -0.48277313, 0.45098037),
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0, -0.6357143, 0.45098037));
+        private static final NimbusScheme.Gradient THUMB_GLINT_LEFT = NimbusScheme.gradient(new double[]{ 0, 0.5, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BASE, -0.0017285943, -0.362987, 0.011764705), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BASE, 0.0000520349, -0.41753247, 0.09803921, -222));
+        private static final NimbusScheme.Gradient THUMB_GLINT_RIGHT = NimbusScheme.gradient(new double[]{ 0, 0.5, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BASE, -0.0017285943, -0.362987, 0.011764705), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BASE, -0.0017285943, -0.362987, 0.011764705, -255));
+
+        /** The outline and the face of a scroll thumb, in that order. */
+        private static NimbusScheme.Gradient[] thumb(
+            NimbusScheme.Shade edgeTop, NimbusScheme.Shade edgeBottom,
+            NimbusScheme.Shade a, NimbusScheme.Shade b, NimbusScheme.Shade c, NimbusScheme.Shade d, NimbusScheme.Shade e
+        ) {
+            return new NimbusScheme.Gradient[]{
+                NimbusScheme.gradient(new double[]{ 0, 0.5, 1 }, edgeTop, NimbusScheme.MID, edgeBottom),
+                NimbusScheme.gradient(new double[]{ 0.039, 0.051, 0.063, 0.196, 0.329, 0.49, 0.65, 0.825, 1 },
+                                      a, NimbusScheme.MID, b, NimbusScheme.MID, c, NimbusScheme.MID, d, NimbusScheme.MID, e)
+            };
+        }
+
+        /**
+         *  A split pane's divider: a dark rule along both of its sides with a highlight just inside
+         *  each, and a small rounded grip in its middle.
+         */
         @Override
         public void paintSplitGrip( Graphics2D g, Palette p, int w, int h, boolean horizontalSplit, boolean enabled ) {
-            g.setColor(p.borderSoft());
+            NimbusScheme s = NimbusScheme.of(p);
+            float scale = UI.scale();
+            // Nimbus draws the divider of a split stacked top and bottom, and turns it for the other.
+            float length = ( horizontalSplit ? h : w ) / scale;
+            float across = ( horizontalSplit ? w : h ) / scale;
+            LafUtilities.antialiasShapes(g);
+            g.scale(scale, scale);
             if ( horizontalSplit )
-                g.fillRect(w / 2, 0, Math.max(1, UI.scale(1)), h);
-            else
-                g.fillRect(0, h / 2, w, Math.max(1, UI.scale(1)));
-            dots(g, p, w, h, horizontalSplit, UI.scale(4));
+                g.transform(new java.awt.geom.AffineTransform(0, 1, 1, 0, 0, 0));
+            g.setPaint(DIVIDER.paint(s, 0, across));
+            g.fill(new java.awt.geom.Rectangle2D.Float(0, 0, length, across));
+            float middle = length / 2f;
+            if ( horizontalSplit ) {
+                g.setPaint(GRIP_EDGE_ACROSS.paint(s, middle - 9.5f, across / 2f - 2, middle + 9.5f, across / 2f));
+                g.fill(new RoundRectangle2D.Float(middle - 9.5f, across / 2f - 2, 19, 4, 4, 4));
+                g.setPaint(GRIP_FACE_ACROSS.paint(s, middle - 8.5f, 0, middle + 8, 0));
+                g.fill(new java.awt.geom.Rectangle2D.Float(middle - 8.5f, across / 2f - 1, 16.5f, 2));
+            } else {
+                g.setPaint(GRIP_EDGE.paint(s, across / 2f - 2, across / 2f + 3));
+                g.fill(new RoundRectangle2D.Float(middle - 9, across / 2f - 2, 18, 5, 3.7f, 3.7f));
+                g.setPaint(GRIP_FACE.paint(s, across / 2f - 1, across / 2f + 2));
+                g.fill(new RoundRectangle2D.Float(middle - 8, across / 2f - 1, 16, 3, 4, 4));
+            }
         }
 
-        /** A pale rounded bar laid against the near edge of the tool bar, rather than a column of
-         *  bumps: Nimbus grips everything by a moulding and this is the smallest one it has. */
+        private static final NimbusScheme.Gradient DIVIDER = NimbusScheme.gradient(new double[]{ 0.058, 0.081, 0.103, 0.116, 0.129, 0.434, 0.739, 0.779, 0.819, 0.858, 0.897 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.017358616, -0.11372548), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.055555582, -0.102396235, 0.21960783), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.07016757, 0.12941176), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.07016757, 0.12941176), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.055555582, -0.102396235, 0.21960783), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.017358616, -0.11372548));
+        private static final NimbusScheme.Gradient GRIP_EDGE = NimbusScheme.gradient(new double[]{ 0.206, 0.5, 0.794 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.017358616, -0.11372548), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.110526316, 0.25490195));
+        private static final NimbusScheme.Gradient GRIP_FACE = NimbusScheme.gradient(new double[]{ 0.09, 0.295, 0.5, 0.582, 0.665 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.048026316, 0.007843137), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.0055555105, -0.06970999, 0.21568626), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.06704806, 0.06666666));
+        private static final NimbusScheme.Gradient GRIP_EDGE_ACROSS = NimbusScheme.gradient(new double[]{ 0, 0.421, 0.842, 0.895, 0.948 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.019617222, -0.09803921), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.004273474, -0.03790062, -0.043137252), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.111111104, -0.106573746, 0.24705881));
+        private static final NimbusScheme.Gradient GRIP_FACE_ACROSS = NimbusScheme.gradient(new double[]{ 0, 0.081, 0.161, 0.513, 0.865, 0.885, 0.906 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.049301825, 0.02352941), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.006944418, -0.07399663, 0.11372548), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.018518567, -0.06998578, 0.12549019), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.050526317, 0.039215684));
+
+        /**
+         *  The handle a floatable tool bar is dragged by: a strip ten pixels wide shading from white
+         *  into the control colour, closed by a rule, with its two outer corners nicked.
+         */
         @Override
         public void paintDragHandle( Graphics2D g, Palette p, int w, int h, boolean horizontal ) {
+            NimbusScheme s = NimbusScheme.of(p);
+            float scale = UI.scale();
+            float along = ( horizontal ? h : w ) / scale;
             LafUtilities.antialiasShapes(g);
-            float thick = UI.scale(4f);
-            float inset = UI.scale(3f);
-            float along = ( horizontal ? h : w ) - 2 * inset;
-            Shape grip  = horizontal
-                    ? new RoundRectangle2D.Float(inset, inset, thick, along, thick, thick)
-                    : new RoundRectangle2D.Float(inset, inset, along, thick, thick, thick);
-            java.awt.geom.Rectangle2D span = grip.getBounds2D();
-            g.setPaint(NimbusRelief.LIT.paint((float) span.getY(), (float) span.getHeight(), p.surfaceHover()));
-            g.fill(grip);
-            g.setColor(p.borderSoft());
-            g.setStroke(new BasicStroke(1f));
-            g.draw(grip);
+            g.scale(scale, scale);
+            if ( !horizontal )
+                g.transform(new java.awt.geom.AffineTransform(0, 1, 1, 0, 0, 0));
+            g.setPaint(HANDLE.paint(s, 0, 0, 10, 0));
+            g.fill(new java.awt.geom.Rectangle2D.Float(0, 0, 10, along));
+            fill(g, new java.awt.geom.Rectangle2D.Float(10, 0, 1, along), HANDLE_RULE.in(s));
+            fill(g, polygon(0, 0, 0, 2, 2, 0), HANDLE_CORNER.in(s));
+            fill(g, polygon(0, along, 0, along - 2, 2, along), HANDLE_CORNER.in(s));
         }
 
-        /** The one wet thing in the theme: a saturated bar under a hard sheen, closed top and bottom
-         *  by a darkened line of its own colour, so it reads as a filled tube. */
+        private static final NimbusScheme.Gradient HANDLE = NimbusScheme.gradient(new double[]{ 0, 0.5, 1 },
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0, -0.110526316, 0.25490195), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.006944418, -0.07399663, 0.11372548));
+        private static final NimbusScheme.Shade HANDLE_RULE   = NimbusScheme.shade(NimbusScheme.Key.BORDER, 0, -0.029675633, 0.109803915);
+        private static final NimbusScheme.Shade HANDLE_CORNER = NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.008547008, -0.03494492, -0.07058823);
+
+        /**
+         *  The filled part of a progress bar: a bar of {@code nimbusOrange} under a hard sheen, laid
+         *  over the trough's own edge, which is how Nimbus draws it. The soft glow around it lies in
+         *  the bar's margin, where the look and feel's painting is clipped away, so the style rule
+         *  paints that, see {@link #paintProgressGlow}.
+         */
         @Override
         public void paintProgressFill(
             Graphics2D g, Palette p, int w, int h, double ratio, boolean horizontal, boolean enabled
         ) {
             if ( ratio <= 0 )
                 return;
+            NimbusScheme s = NimbusScheme.of(p);
+            float scale  = UI.scale();
+            float length = ( horizontal ? w : h ) / scale;
+            float across = ( horizontal ? h : w ) / scale;
+            float end    = ratio >= 1 ? Math.round(length * ratio) - 2 : Math.round(length * ratio);
             LafUtilities.antialiasShapes(g);
-            Color tone = enabled ? p.primary() : p.surfaceDisabled();
-            int   fillW = horizontal ? (int) Math.round(w * ratio) : w;
-            int   fillH = horizontal ? h : (int) Math.round(h * ratio);
-            int   fillY = horizontal ? 0 : h - fillH;
-            g.setPaint(NimbusRelief.GLOSS.paint(fillY, fillH, tone));
-            OptimizedShapeRendering.fill(g, new Rectangle(0, fillY, fillW, fillH));
-            // Closed on all four sides, so that a bar part way along still ends in an edge rather
-            // than fading into the trough.
-            g.setColor(LafUtilities.shiftHsb(tone, 0, -0.153));
-            OptimizedShapeRendering.fill(g, new Rectangle(0, fillY, fillW, 1));
-            OptimizedShapeRendering.fill(g, new Rectangle(0, fillY, 1, fillH));
-            OptimizedShapeRendering.fill(g, new Rectangle(fillW - 1, fillY, 1, fillH));
-            g.setColor(LafUtilities.shiftHsb(tone, -0.082, -0.224));
-            OptimizedShapeRendering.fill(g, new Rectangle(0, fillY + fillH - 1, fillW, 1));
+            g.scale(scale, scale);
+            if ( !horizontal )
+                g.transform(new java.awt.geom.AffineTransform(0, -1, 1, 0, 0, length));
+            g.setPaint(( enabled ? FILL_EDGE : FILL_EDGE_DISABLED ).paint(s, 2, across - 2));
+            OptimizedShapeRendering.fill(g, new java.awt.geom.Rectangle2D.Float(2, 2, end - 2, across - 4));
+            g.setPaint(( enabled ? FILL_FACE : FILL_FACE_DISABLED ).paint(s, 3, across - 3));
+            OptimizedShapeRendering.fill(g, new java.awt.geom.Rectangle2D.Float(3, 3, end - 4, across - 6));
         }
 
+        /**
+         *  The glow around the filled part of a progress bar: a ring from six tenths of a pixel inside
+         *  the bar's bounds to its trough's edge, rounded at the start, open at the moving end until
+         *  the bar is full.
+         *
+         * @param g the context, in component pixels
+         * @param p the palette in force
+         * @param w the width of the bar
+         * @param h its height
+         * @param ratio how much of it is filled
+         * @param horizontal whether it fills from left to right rather than from bottom to top
+         * @param enabled whether it is enabled
+         */
+        static void paintProgressGlow(
+            Graphics2D g, Palette p, int w, int h, double ratio, boolean horizontal, boolean enabled
+        ) {
+            if ( ratio <= 0 )
+                return;
+            NimbusScheme s = NimbusScheme.of(p);
+            float   scale    = UI.scale();
+            float   length   = ( horizontal ? w : h ) / scale;
+            float   across   = ( horizontal ? h : w ) / scale;
+            float   filled   = Math.round(length * ratio);
+            boolean finished = ratio >= 1;
+            LafUtilities.antialiasShapes(g);
+            if ( !horizontal )
+                g.transform(new java.awt.geom.AffineTransform(0, -1, 1, 0, 0, length));
+            java.awt.geom.Area glow = new java.awt.geom.Area(new RoundRectangle2D.Float(
+                    0.63f, 0.63f, finished ? filled - 1.27f : filled + 5, across - 1.26f, 4.7f, 4.7f));
+            if ( !finished )
+                glow.intersect(new java.awt.geom.Area(new java.awt.geom.Rectangle2D.Float(0, 0, filled, across)));
+            glow.subtract(new java.awt.geom.Area(new java.awt.geom.Rectangle2D.Float(2, 2, finished ? filled - 4 : filled, across - 4)));
+            fill(g, glow, ( enabled ? FILL_GLOW : FILL_GLOW_DISABLED ).in(s));
+        }
+
+        private static final NimbusScheme.Shade FILL_GLOW          = NimbusScheme.shade(NimbusScheme.Key.ORANGE, 0, 0, 0, -156);
+        private static final NimbusScheme.Shade FILL_GLOW_DISABLED = NimbusScheme.shade(NimbusScheme.Key.ORANGE, 0.024554357, -0.8873145, 0.10588235, -156);
+        private static final NimbusScheme.Gradient FILL_EDGE = NimbusScheme.gradient(new double[]{ 0.039, 0.055, 0.071, 0.281, 0.49, 0.697, 0.903, 0.924, 0.945 },
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, -0.015796512, 0.02094239, -0.15294117), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, -0.004321605, 0.02094239, -0.0745098), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, -0.008021399, 0.02094239, -0.10196078), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, -0.011706904, -0.1790576, -0.02352941), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, -0.048691254, 0.02094239, -0.3019608));
+        private static final NimbusScheme.Gradient FILL_FACE = NimbusScheme.gradient(new double[]{ 0.039, 0.061, 0.084, 0.273, 0.461, 0.49, 0.519, 0.718, 0.916, 0.924, 0.932 },
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, 0.003940329, -0.7375322, 0.17647058), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, 0.005506739, -0.46764207, 0.109803915), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, 0.0042127445, -0.18595415, 0.04705882), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, 0.0047626942, 0.02094239, 0.0039215684), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, 0.0047626942, -0.15147138, 0.1607843), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, 0.010665476, -0.27317524, 0.25098038));
+        private static final NimbusScheme.Gradient FILL_EDGE_DISABLED = NimbusScheme.gradient(new double[]{ 0.039, 0.055, 0.071, 0.281, 0.49, 0.697, 0.903, 0.924, 0.945 },
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, -0.023593787, -0.7963165, 0.02352941), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, -0.010608241, -0.7760873, 0.043137252), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, -0.015402906, -0.7840576, 0.035294116), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, -0.017112307, -0.8091547, 0.058823526), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, -0.07044564, -0.844649, -0.019607842));
+        private static final NimbusScheme.Gradient FILL_FACE_DISABLED = NimbusScheme.gradient(new double[]{ 0.039, 0.061, 0.084, 0.273, 0.461, 0.49, 0.519, 0.718, 0.916, 0.924, 0.932 },
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, -0.009704903, -0.9381485, 0.11372548), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, -0.00044563413, -0.86742973, 0.09411764), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, -0.00044563413, -0.79896283, 0.07843137), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, 0.0013274103, -0.7530961, 0.06666666), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, 0.0013274103, -0.7644457, 0.109803915), NimbusScheme.MID,
+                NimbusScheme.shade(NimbusScheme.Key.ORANGE, 0.009244293, -0.78794646, 0.13333333));
+
+        /**
+         *  A tab: rounded at its top corners, outlined in a dark blue and filled pale, and filled with
+         *  the default button's blue when it is the one whose page shows. The tab whose page shows has
+         *  no outline along its bottom, so its face runs into {@link #paintTabEdge}'s band.
+         */
         @Override
         public void paintTabSurface(
             Graphics2D g, Palette p, int x, int y, int w, int h, boolean selected, boolean rollover
         ) {
+            NimbusScheme s = NimbusScheme.of(p);
+            TabLook look = selected ? ( rollover ? TabLook.MOUSE_OVER_SELECTED : TabLook.SELECTED )
+                                    : ( rollover ? TabLook.MOUSE_OVER : TabLook.ENABLED );
+            float scale = UI.scale();
+            float tw = w / scale, th = h / scale;
             LafUtilities.antialiasShapes(g);
-            float arc = UI.scale(4f);
-            // Rounded at the top only: the bottom edge has to meet the page squarely, or the tab and
-            // the page it belongs to read as two separate things. The part of the shape below the
-            // tab is what squares that edge off, and is clipped away rather than drawn on the page.
-            Shape tab = new RoundRectangle2D.Float(x + 0.5f, y + 0.5f, w - 1, h - 1 + arc, arc, arc);
-            Color tone = selected ? Styles.Nimbus.accentedTone(p, false, false)
-                                  : rollover ? p.surfaceHover() : p.surface();
-            Shape clip = g.getClip();
-            g.clipRect(x, y, w, h);
-            // A tab that is not the one you are on has no bottom lip to catch the light: it runs under
-            // the page rather than standing beside it.
-            g.setPaint(( selected ? NimbusRelief.LIT_ACCENTED : NimbusRelief.STRIP ).paint(y, h, tone));
-            g.fill(tab);
-            g.setColor(tabEdge(p, selected));
-            g.setStroke(new BasicStroke(1f));
-            g.draw(tab);
-            g.setClip(clip);
-        }
-
-        /**
-         *  What a tab is outlined in: much darker than the outline of a button, and darker still,
-         *  and in the accent's own hue, for the tab you are on.
-         *
-         * @param p the palette in force
-         * @param selected whether this is the tab whose page is showing
-         * @return the colour to outline it with
-         */
-        private static Color tabEdge( Palette p, boolean selected ) {
-            return selected ? LafUtilities.wash(p.accent(), p.text(), 0.766, 0.443)
-                            : LafUtilities.wash(p.border(), p.text(), 1.000, 0.620);
+            g.translate(x, y);
+            g.scale(scale, scale);
+            Path2D.Float edge = new Path2D.Float();
+            edge.moveTo(0, 5); edge.curveTo(0, 2, 2, 0, 5, 0); edge.lineTo(tw - 5, 0); edge.curveTo(tw - 2, 0, tw, 2, tw, 5);
+            edge.lineTo(tw, th); edge.lineTo(0, th); edge.closePath();
+            g.setPaint(look.edge.paint(s, 0, th));
+            g.fill(edge);
+            float bottom = selected ? th : th - 1;
+            Path2D.Float face = new Path2D.Float();
+            face.moveTo(1, bottom); face.lineTo(1, 6); face.curveTo(1, 2.44f, 2.56f, 1, 6, 1); face.lineTo(tw - 6, 1);
+            face.curveTo(tw - 2.67f, 1, tw - 1, 2.72f, tw - 1, 6); face.lineTo(tw - 1, bottom); face.closePath();
+            g.setPaint(look.face.paint(s, 1, bottom));
+            g.fill(face);
         }
 
         /** Nothing: the selected tab is already the only one whose colour runs on into
@@ -2856,32 +3578,76 @@ interface Symbols
         @Override public int tabEdgeThickness() { return 5; }
 
         /**
-         *  A rule, a band of the selected tab's own colour, and a second rule. The band is what the
-         *  selected tab's bottom lip runs into, and the first rule is left out along the width of
-         *  that tab, so the tab and the page it belongs to are one shape and every other tab stops
-         *  at a line.
+         *  A dark rule, three pixels of pale blue shading darker away from the tabs, and a second
+         *  dark rule. Along the tab whose page shows, the first rule is that tab's face instead, so
+         *  the tab and its page read as one shape and every other tab stops at a line.
          */
         @Override
         public void paintTabEdge(
             Graphics2D g, Palette p, Rectangle edge, @Nullable Rectangle selectedTab, int tabPlacement
         ) {
-            int   rule = Math.max(1, UI.scale(1));
-            Color ink  = p.text();
-            Color band = NimbusRelief.LIT_ACCENTED.bottom(Styles.Nimbus.accentedTone(p, false, false));
-            boolean vertical = tabPlacement == SwingConstants.LEFT || tabPlacement == SwingConstants.RIGHT;
-            // The depth axis runs from the tabs towards the page, whichever side they are on.
+            NimbusScheme s = NimbusScheme.of(p);
+            boolean vertical  = tabPlacement == SwingConstants.LEFT || tabPlacement == SwingConstants.RIGHT;
             boolean fromStart = tabPlacement == SwingConstants.TOP || tabPlacement == SwingConstants.LEFT;
             int     depth     = vertical ? edge.width : edge.height;
-
-            g.setColor(band);
-            g.fillRect(edge.x, edge.y, edge.width, edge.height);
-            g.setColor(ink);
-            fillAcross(g, edge, vertical, fromStart ? 0 : depth - rule, rule);
-            fillAcross(g, edge, vertical, fromStart ? depth - rule : 0, rule);
+            Color   rule      = TAB_EDGE_RULE.in(s);
+            Color   upper     = TAB_EDGE_UPPER.in(s);
+            Color   lower     = TAB_EDGE_LOWER.in(s);
+            Color[] rows      = { rule, upper, NimbusScheme.midpoint(upper, lower), lower, rule };
+            for ( int i = 0; i < rows.length; i++ ) {
+                int from = depth * i / rows.length;
+                int to   = depth * ( i + 1 ) / rows.length;
+                g.setColor(rows[fromStart ? i : rows.length - 1 - i]);
+                fillAcross(g, edge, vertical, from, to - from);
+            }
             if ( selectedTab == null )
                 return;
-            g.setColor(band);
-            fillUnder(g, edge, selectedTab, vertical, fromStart ? 0 : depth - rule, rule);
+            int first = depth / rows.length;
+            g.setColor(TabLook.SELECTED.face.colors(s)[TabLook.SELECTED.face.fractions().length - 1]);
+            fillUnder(g, edge, selectedTab, vertical, fromStart ? 0 : depth - first, first);
+        }
+
+        /** Nimbus writes every tab's label in the ordinary ink, whichever tab is selected. */
+        @Override
+        public Color tabText( Palette p, boolean selected, boolean enabled ) {
+            NimbusScheme s = NimbusScheme.of(p);
+            return s.get(enabled ? NimbusScheme.Key.TEXT : NimbusScheme.Key.DISABLED_TEXT);
+        }
+
+        private static final NimbusScheme.Shade TAB_EDGE_RULE  = NimbusScheme.shade(NimbusScheme.Key.BASE, 0.08801502, 0.3642857, -0.4784314);
+        private static final NimbusScheme.Shade TAB_EDGE_UPPER = NimbusScheme.shade(NimbusScheme.Key.BASE, 0.00051498413, -0.45471883, 0.31764704);
+        private static final NimbusScheme.Shade TAB_EDGE_LOWER = NimbusScheme.shade(NimbusScheme.Key.BASE, 0.00051498413, -0.4633005, 0.3607843);
+
+        /** One state of a tab, from TabbedPaneTabPainter. */
+        private enum TabLook
+        {
+            ENABLED( three(base(0.032459438, -0.55535716, -0.109803945), base(0.08801502, 0.3642857, -0.4784314)),
+                     NimbusScheme.gradient(new double[]{ 0, 0.1, 0.2, 0.6, 1 }, base(0.08801502, -0.63174605, 0.43921566), NimbusScheme.MID,
+                                           base(0.05468172, -0.6145278, 0.37647057), NimbusScheme.MID, base(0.032459438, -0.5953556, 0.32549018)) ),
+            MOUSE_OVER( three(base(0.032459438, -0.54616207, -0.02352941), base(0.08801502, 0.3642857, -0.4784314)),
+                     NimbusScheme.gradient(new double[]{ 0, 0.1, 0.2, 0.6, 1 }, base(0.08801502, -0.6317773, 0.4470588), NimbusScheme.MID,
+                                           base(0.021348298, -0.61547136, 0.41960782), NimbusScheme.MID, base(0.032459438, -0.5985242, 0.39999998)) ),
+            SELECTED( three(base(0.00051498413, -0.08776909, -0.2627451), base(0.08801502, 0.3642857, -0.4784314)),
+                     NimbusScheme.gradient(new double[]{ 0, 0.124, 0.248, 0.426, 0.603, 0.685, 0.768, 0.884, 1 },
+                                           base(0.004681647, -0.6197143, 0.43137252), NimbusScheme.MID, base(0.000713408, -0.543609, 0.34509802), NimbusScheme.MID,
+                                           base(-0.0020751357, -0.45610264, 0.2588235), NimbusScheme.MID, base(0.00051498413, -0.43866998, 0.24705881), NimbusScheme.MID,
+                                           base(0.00051498413, -0.44879842, 0.29019606)) ),
+            MOUSE_OVER_SELECTED( three(base(0.06332368, 0.3642857, -0.4431373), base(0.08801502, 0.3642857, -0.4784314)),
+                     NimbusScheme.gradient(new double[]{ 0, 0.124, 0.248, 0.426, 0.603, 0.685, 0.768, 0.868, 0.968 },
+                                           base(0.004681647, -0.6198413, 0.43921566), NimbusScheme.MID, base(-0.0022627711, -0.5335866, 0.372549), NimbusScheme.MID,
+                                           base(-0.0017285943, -0.4608264, 0.32549018), NimbusScheme.MID, base(0.00051498413, -0.4555341, 0.3215686), NimbusScheme.MID,
+                                           base(0.00051498413, -0.46404046, 0.36470586)) );
+
+            final NimbusScheme.Gradient edge;
+            final NimbusScheme.Gradient face;
+
+            TabLook( NimbusScheme.Gradient edge, NimbusScheme.Gradient face ) { this.edge = edge; this.face = face; }
+
+            private static NimbusScheme.Shade base( double h, double s, double b ) { return NimbusScheme.shade(NimbusScheme.Key.BASE, h, s, b); }
+
+            private static NimbusScheme.Gradient three( NimbusScheme.Shade top, NimbusScheme.Shade bottom ) {
+                return NimbusScheme.gradient(new double[]{ 0, 0.5, 1 }, top, NimbusScheme.MID, bottom);
+            }
         }
 
         /** Fills a slice of the edge the whole way along it, {@code depth} pixels in from the edge's
@@ -2901,64 +3667,6 @@ interface Symbols
                 g.fillRect(edge.x + depth, tab.y, thickness, tab.height);
             else
                 g.fillRect(tab.x, edge.y + depth, tab.width, thickness);
-        }
-
-        // ── Internals ────────────────────────────────────────────────────────
-
-        /**
-         *  Fills a shape the way the style rules fill a button, the relief over the state's own colour
-         *  inside the state's own outline, so that a check box and the button beside it are visibly
-         *  the same material.
-         *
-         * @param on whether the control is ticked, filled or otherwise affirmative, which is what
-         *           moves it onto the accented material
-         * @param y the top of the shape, which the relief has to be anchored to rather than to the
-         *          component, since a glyph sits somewhere inside a taller row
-         * @param h how tall the shape is
-         */
-        private static void mould(
-            Graphics2D g, Palette p, Shape shape, int y, int h,
-            boolean enabled, boolean on, boolean pressed, boolean rollover
-        ) {
-            LafUtilities.antialiasShapes(g);
-            boolean accented = enabled && on;
-            Color   tone     = accented ? Styles.Nimbus.accentedTone(p, pressed, rollover)
-                                        : Styles.Nimbus.surfaceTone(p, enabled, pressed, rollover);
-            g.setPaint(Styles.Nimbus.relief(enabled, accented).paint(y, h, tone));
-            g.fill(shape);
-            Color edge = accented ? Styles.Nimbus.accentedEdge(p)
-                                  : Styles.Nimbus.surfaceEdge(p, enabled, pressed, rollover);
-            g.setStroke(new BasicStroke(1f));
-            g.setColor(edge);
-            g.draw(shape);
-            if ( !enabled )
-                return;
-            // The bottom of the outline again, darker, clipped to the lower third so that the sides
-            // keep the colour they had. Drawing it as an arc instead would have to know the shape.
-            Rectangle bounds = shape.getBounds();
-            Shape     clip   = g.getClip();
-            g.clipRect(bounds.x, y + h - Math.max(1, h / 3), bounds.width + 1, h);
-            g.setColor(Styles.Nimbus.contactEdge(edge));
-            g.draw(shape);
-            g.setClip(clip);
-        }
-
-        private static void wedge(
-            Graphics2D g, Palette p, float cx, float cy, float size, LafUtilities.Direction direction, boolean enabled
-        ) {
-            LafUtilities.antialiasShapes(g);
-            g.setColor(enabled ? p.text() : p.textDisabled());
-            g.fill(LafUtilities.arrowShape(cx, cy, size, size * 0.6f, direction));
-        }
-
-        private static void dots( Graphics2D g, Palette p, int w, int h, boolean vertical, int step ) {
-            int size = Math.max(2, UI.scale(2));
-            g.setColor(p.border());
-            for ( int i = 0; i < 3; i++ ) {
-                int x = vertical ? w / 2 - size / 2                   : w / 2 - step + i * step - size / 2;
-                int y = vertical ? h / 2 - step + i * step - size / 2 : h / 2 - size / 2;
-                g.fillRect(x, y, size, size);
-            }
         }
     }
 
@@ -3006,9 +3714,14 @@ interface Symbols
         @Override public void paintCheckGlyph( Graphics2D g, Palette p, int x, int y, int w, int h, boolean enabled, boolean focused, boolean rollover, boolean pressed, boolean selected ) { chosen().paintCheckGlyph(g, p, x, y, w, h, enabled, focused, rollover, pressed, selected); }
         @Override public void paintRadioGlyph( Graphics2D g, Palette p, int x, int y, int w, int h, boolean enabled, boolean focused, boolean rollover, boolean pressed, boolean selected ) { chosen().paintRadioGlyph(g, p, x, y, w, h, enabled, focused, rollover, pressed, selected); }
         @Override public void paintDisclosure( Graphics2D g, Palette p, int x, int y, int w, int h, boolean expanded, boolean enabled ) { chosen().paintDisclosure(g, p, x, y, w, h, expanded, enabled); }
+        @Override public int disclosureGlyphSize() { return chosen().disclosureGlyphSize(); }
         @Override public void paintSubmenuArrow( Graphics2D g, Palette p, int x, int y, int w, int h, boolean enabled ) { chosen().paintSubmenuArrow(g, p, x, y, w, h, enabled); }
+        @Override public void paintSubmenuArrow( Graphics2D g, Palette p, int x, int y, int w, int h, boolean enabled, boolean armed ) { chosen().paintSubmenuArrow(g, p, x, y, w, h, enabled, armed); }
+        @Override public void paintMenuMark( Graphics2D g, Palette p, int x, int y, int w, int h, boolean radio, boolean enabled, boolean focused, boolean rollover, boolean pressed, boolean selected, boolean armed ) { chosen().paintMenuMark(g, p, x, y, w, h, radio, enabled, focused, rollover, pressed, selected, armed); }
+        @Override public int menuMarkSize() { return chosen().menuMarkSize(); }
         @Override public void paintComboArrow( Graphics2D g, Palette p, int w, int h, boolean enabled, boolean rollover, boolean pressed ) { chosen().paintComboArrow(g, p, w, h, enabled, rollover, pressed); }
         @Override public void paintSpinnerArrow( Graphics2D g, Palette p, int w, int h, boolean up, boolean enabled, boolean rollover, boolean pressed ) { chosen().paintSpinnerArrow(g, p, w, h, up, enabled, rollover, pressed); }
+        @Override public boolean actuatorReachesBounds() { return chosen().actuatorReachesBounds(); }
         @Override public void paintSliderTrack( Graphics2D g, Palette p, Rectangle track, int thumbCentre, boolean horizontal, boolean inverted, boolean enabled ) { chosen().paintSliderTrack(g, p, track, thumbCentre, horizontal, inverted, enabled); }
         @Override public void paintSliderThumb( Graphics2D g, Palette p, Rectangle thumb, boolean enabled, boolean focused, boolean rollover ) { chosen().paintSliderThumb(g, p, thumb, enabled, focused, rollover); }
         @Override public void paintScrollThumb( Graphics2D g, Palette p, Rectangle thumb, boolean active ) { chosen().paintScrollThumb(g, p, thumb, active); }
@@ -3018,12 +3731,14 @@ interface Symbols
         @Override public void paintTabSurface( Graphics2D g, Palette p, int x, int y, int w, int h, boolean selected, boolean rollover ) { chosen().paintTabSurface(g, p, x, y, w, h, selected, rollover); }
         @Override public void paintTabAccent( Graphics2D g, Palette p, int x, int y, int w, int h, int tabPlacement, boolean enabled ) { chosen().paintTabAccent(g, p, x, y, w, h, tabPlacement, enabled); }
         @Override public boolean scrollBarHasSteppers() { return chosen().scrollBarHasSteppers(); }
-        @Override public @Nullable Color tableHeaderDivider( Palette p ) { return chosen().tableHeaderDivider(p); }
+        @Override public int scrollStepperLength() { return chosen().scrollStepperLength(); }
+        @Override public @Nullable Paint tableHeaderDivider( Palette p, int height ) { return chosen().tableHeaderDivider(p, height); }
         @Override public @Nullable Color tableRowStripe( Palette p ) { return chosen().tableRowStripe(p); }
         @Override public int treeNodeGlyphSize() { return chosen().treeNodeGlyphSize(); }
         @Override public void paintTreeNode( Graphics2D g, Palette p, int x, int y, int w, int h, boolean leaf, boolean expanded, boolean enabled ) { chosen().paintTreeNode(g, p, x, y, w, h, leaf, expanded, enabled); }
         @Override public void paintScrollStepper( Graphics2D g, Palette p, int w, int h, LafUtilities.Direction direction, boolean enabled, boolean rollover, boolean pressed ) { chosen().paintScrollStepper(g, p, w, h, direction, enabled, rollover, pressed); }
         @Override public int tabEdgeThickness() { return chosen().tabEdgeThickness(); }
+        @Override public Color tabText( Palette p, boolean selected, boolean enabled ) { return chosen().tabText(p, selected, enabled); }
         @Override public void paintTabEdge( Graphics2D g, Palette p, Rectangle edge, @Nullable Rectangle selectedTab, int tabPlacement ) { chosen().paintTabEdge(g, p, edge, selectedTab, tabPlacement); }
     }
 }

@@ -7,6 +7,7 @@ import swingtree.style.ComponentStyleDelegate;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JScrollBar;
+import javax.swing.SwingConstants;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicScrollBarUI;
 import java.awt.Dimension;
@@ -58,24 +59,33 @@ public final class SwingTreeScrollBarUI
 
     @Override
     protected JButton createDecreaseButton( int orientation ) {
-        return endButton(orientation, false, () -> super.createDecreaseButton(orientation));
+        return endButton(orientation, () -> super.createDecreaseButton(orientation));
     }
 
     @Override
     protected JButton createIncreaseButton( int orientation ) {
-        return endButton(orientation, true, () -> super.createIncreaseButton(orientation));
+        return endButton(orientation, () -> super.createIncreaseButton(orientation));
     }
 
-    /** @return the button for one end of the bar: Swing's own when nothing here draws chrome, a
-     *          stepper when the symbol set has them, and otherwise one taking up no space. */
-    private JButton endButton( int orientation, boolean forward, Supplier<JButton> basic ) {
+    /**
+     * @param direction the way the button's arrow points, one of {@link SwingConstants#NORTH},
+     *                  {@link SwingConstants#SOUTH}, {@link SwingConstants#EAST} and
+     *                  {@link SwingConstants#WEST}, which is what Swing hands the two factory
+     *                  methods rather than the bar's orientation
+     * @return the button for one end of the bar: Swing's own when nothing here draws chrome, a
+     *         stepper when the symbol set has them, and otherwise one taking up no space
+     */
+    private JButton endButton( int direction, Supplier<JButton> basic ) {
         if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
             return basic.get();
         if ( !SwingTreeLookAndFeel.symbols().scrollBarHasSteppers() )
             return zeroButton();
-        boolean vertical = orientation == JScrollBar.VERTICAL;
-        return new StepperButton(vertical ? ( forward ? LafUtilities.Direction.DOWN : LafUtilities.Direction.UP )
-                                          : ( forward ? LafUtilities.Direction.RIGHT : LafUtilities.Direction.LEFT ));
+        switch ( direction ) {
+            case SwingConstants.NORTH: return new StepperButton(LafUtilities.Direction.UP);
+            case SwingConstants.SOUTH: return new StepperButton(LafUtilities.Direction.DOWN);
+            case SwingConstants.WEST:  return new StepperButton(LafUtilities.Direction.LEFT);
+            default:                   return new StepperButton(LafUtilities.Direction.RIGHT);
+        }
     }
 
     /**
@@ -118,8 +128,11 @@ public final class SwingTreeScrollBarUI
         StepperButton( LafUtilities.Direction direction ) { _direction = direction; }
 
         @Override public Dimension getPreferredSize() {
-            int side = UI.scale(SwingTreeLookAndFeel.symbols().scrollBarThickness());
-            return new Dimension(side, side);
+            Symbols symbols   = SwingTreeLookAndFeel.symbols();
+            int     thickness = UI.scale(symbols.scrollBarThickness());
+            int     length    = UI.scale(symbols.scrollStepperLength());
+            boolean vertical  = _direction == LafUtilities.Direction.UP || _direction == LafUtilities.Direction.DOWN;
+            return vertical ? new Dimension(thickness, length) : new Dimension(length, thickness);
         }
 
         @Override

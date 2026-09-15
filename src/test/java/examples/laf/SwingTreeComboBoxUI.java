@@ -10,9 +10,12 @@ import javax.swing.ComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicComboBoxUI;
+import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.LayoutManager;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -41,6 +44,19 @@ public final class SwingTreeComboBoxUI
         if ( combo.getEditor() != null )
             LafUtilities.repaintOnFocusChange(combo, combo.getEditor().getEditorComponent());
         LafUtilities.repaintOnPointerChange(combo);
+    }
+
+    /**
+     *  An editable combo box's text field is styled when its own delegate is installed, before the
+     *  combo box takes it in, so a rule asking whether it sits inside a combo box gets the wrong
+     *  answer until the field first paints, and a layout measuring the combo box before that keeps
+     *  the height of a free standing text field.
+     */
+    @Override
+    protected void configureEditor() {
+        super.configureEditor();
+        if ( editor instanceof JComponent && ((JComponent) editor).getUI() instanceof SwingTreeStyledComponentUI )
+            SwingTreeLookAndFeel.installStyleOn((JComponent) editor);
     }
 
     @Override
@@ -186,6 +202,41 @@ public final class SwingTreeComboBoxUI
             super.paintCurrentValueBackground(g, bounds, hasFocus);
     }
 
+    /**
+     *  Lays the combo box out as Swing does, then, for a symbol set whose actuator reaches the
+     *  bounds, moves the button to the very end of the combo box and stretches it over the whole
+     *  height, and lets the value run up to it.
+     */
+    @Override
+    protected LayoutManager createLayoutManager() {
+        return new ComboBoxLayoutManager() {
+            @Override
+            public void layoutContainer( Container parent ) {
+                super.layoutContainer(parent);
+                if ( arrowButton == null || !SwingTreeLookAndFeel.symbols().actuatorReachesBounds() )
+                    return;
+                int width = arrowButton.getPreferredSize().width;
+                boolean leftToRight = comboBox.getComponentOrientation().isLeftToRight();
+                arrowButton.setBounds(leftToRight ? comboBox.getWidth() - width : 0, 0, width, comboBox.getHeight());
+                if ( editor != null )
+                    editor.setBounds(rectangleForCurrentValue());
+            }
+        };
+    }
+
+    @Override
+    protected Rectangle rectangleForCurrentValue() {
+        Rectangle value = super.rectangleForCurrentValue();
+        if ( arrowButton == null || !SwingTreeLookAndFeel.symbols().actuatorReachesBounds() )
+            return value;
+        Insets  insets      = comboBox.getInsets();
+        int     width       = arrowButton.getPreferredSize().width;
+        boolean leftToRight = comboBox.getComponentOrientation().isLeftToRight();
+        value.x     = leftToRight ? insets.left : width;
+        value.width = comboBox.getWidth() - width - ( leftToRight ? insets.left : insets.right );
+        return value;
+    }
+
     @Override
     protected JButton createArrowButton() {
         return SwingTreeLookAndFeel.drawsOwnChrome() ? new ArrowButton() : super.createArrowButton();
@@ -206,11 +257,15 @@ public final class SwingTreeComboBoxUI
 
         @Override
         void paintActuator( Graphics2D g, Symbols symbols, SwingTreeLookAndFeel.Palette palette ) {
-            ButtonModel model = getModel();
-            symbols.paintComboArrow(
-                    g, palette, getWidth(), getHeight(),
-                    isEnabled(), model.isRollover(), model.isPressed()
-            );
+            ButtonModel model   = getModel();
+            boolean     pressed = model.isPressed();
+            boolean     over    = model.isRollover();
+            if ( getParent() instanceof JComboBox ) {
+                JComboBox<?> combo = (JComboBox<?>) getParent();
+                pressed = pressed || ( combo.isPopupVisible() && UIManager.getBoolean("ComboBox.pressedWhenPopupVisible") );
+                over    = over || LafUtilities.isUnderPointer(combo);
+            }
+            symbols.paintComboArrow(g, palette, getWidth(), getHeight(), isEnabled(), over, pressed);
         }
     }
 }

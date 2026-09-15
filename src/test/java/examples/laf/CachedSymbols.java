@@ -104,7 +104,7 @@ final class CachedSymbols implements Symbols
     /** Which piece of geometry a tile holds, so that two of them are never mistaken for each other. */
     private enum Symbol
     {
-        CHECK, RADIO, DISCLOSURE, SUBMENU_ARROW, COMBO_ARROW, SPINNER_ARROW,
+        CHECK, RADIO, MENU_MARK, DISCLOSURE, SUBMENU_ARROW, COMBO_ARROW, SPINNER_ARROW,
         SLIDER_THUMB, SCROLL_THUMB, SCROLL_STEPPER, SPLIT_GRIP, DRAG_HANDLE, TREE_NODE,
         TAB_SURFACE, TAB_ACCENT
     }
@@ -135,6 +135,7 @@ final class CachedSymbols implements Symbols
 
     @Override public int checkGlyphSize()        { return _symbols.checkGlyphSize(); }
     @Override public int arrowGlyphSize()        { return _symbols.arrowGlyphSize(); }
+    @Override public int disclosureGlyphSize()   { return _symbols.disclosureGlyphSize(); }
     @Override public int comboArrowButtonSize()  { return _symbols.comboArrowButtonSize(); }
     @Override public int spinnerButtonWidth()    { return _symbols.spinnerButtonWidth(); }
     @Override public int spinnerButtonHeight()   { return _symbols.spinnerButtonHeight(); }
@@ -187,6 +188,23 @@ final class CachedSymbols implements Symbols
         _paint(g, p, Symbol.SUBMENU_ARROW, _bits(enabled), x, y, w, h,
                (tile, tx, ty) -> _symbols.paintSubmenuArrow(tile, p, tx, ty, w, h, enabled));
     }
+
+    @Override
+    public void paintSubmenuArrow( Graphics2D g, Palette p, int x, int y, int w, int h, boolean enabled, boolean armed ) {
+        _paint(g, p, Symbol.SUBMENU_ARROW, _bits(enabled, armed, true), x, y, w, h,
+               (tile, tx, ty) -> _symbols.paintSubmenuArrow(tile, p, tx, ty, w, h, enabled, armed));
+    }
+
+    @Override
+    public void paintMenuMark(
+        Graphics2D g, Palette p, int x, int y, int w, int h, boolean radio,
+        boolean enabled, boolean focused, boolean rollover, boolean pressed, boolean selected, boolean armed
+    ) {
+        _paint(g, p, Symbol.MENU_MARK, _bits(radio, enabled, focused, rollover, pressed, selected, armed), x, y, w, h,
+               (tile, tx, ty) -> _symbols.paintMenuMark(tile, p, tx, ty, w, h, radio, enabled, focused, rollover, pressed, selected, armed));
+    }
+
+    @Override public int menuMarkSize() { return _symbols.menuMarkSize(); }
 
     @Override
     public void paintComboArrow(
@@ -271,10 +289,14 @@ final class CachedSymbols implements Symbols
                (tile, tx, ty) -> _symbols.paintTabAccent(tile, p, tx, ty, w, h, tabPlacement, enabled));
     }
 
+    @Override public boolean actuatorReachesBounds() { return _symbols.actuatorReachesBounds(); }
+
     @Override public boolean scrollBarHasSteppers() { return _symbols.scrollBarHasSteppers(); }
 
+    @Override public int scrollStepperLength() { return _symbols.scrollStepperLength(); }
+
     @Override
-    public @Nullable Color tableHeaderDivider( Palette p ) { return _symbols.tableHeaderDivider(p); }
+    public java.awt.@Nullable Paint tableHeaderDivider( Palette p, int height ) { return _symbols.tableHeaderDivider(p, height); }
 
     @Override
     public @Nullable Color tableRowStripe( Palette p ) { return _symbols.tableRowStripe(p); }
@@ -309,6 +331,8 @@ final class CachedSymbols implements Symbols
     }
 
     @Override public int tabEdgeThickness() { return _symbols.tabEdgeThickness(); }
+
+    @Override public Color tabText( Palette p, boolean selected, boolean enabled ) { return _symbols.tabText(p, selected, enabled); }
 
     /** Never stored: like {@link #paintSliderTrack}, it is handed a position rather than a state,
      *  and one entry per pane width would be an entry used once. */

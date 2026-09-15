@@ -35,9 +35,20 @@ public final class SwingTreeButtonUI
         SwingTreeLookAndFeel.installStyleOn(c);
     }
 
+    /**
+     *  Paints the style, then the label over it. The label is drawn outside the style engine's clip
+     *  when this look and feel fills the button, because that clip follows the button's rounded
+     *  corners and Java2D gives up subpixel text antialiasing under any clip that is not made of
+     *  rectangles: every rounded button on the desktop would write its label in grey where the
+     *  rest of the window writes in colour. With the content area left unfilled nothing the label
+     *  painting draws reaches outside the button's body anyway.
+     */
     @Override
     public void paint( Graphics g, JComponent c ) {
-        LafUtilities.paintStyled(g, c, g2 -> super.paint(g2, c));
+        if ( ((AbstractButton) c).isContentAreaFilled() )
+            LafUtilities.paintStyled(g, c, g2 -> super.paint(g2, c));
+        else
+            LafUtilities.paintStyledUnderInheritedPainting(g, c, g2 -> super.paint(g2, c));
     }
 
     @Override

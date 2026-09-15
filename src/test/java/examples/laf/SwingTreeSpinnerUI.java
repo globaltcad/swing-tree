@@ -32,8 +32,28 @@ public final class SwingTreeSpinnerUI
         // spinner's own border is what has to change when it does.
         JSpinner  spinner = (JSpinner) c;
         Component editor  = spinner.getEditor();
-        if ( editor instanceof JSpinner.DefaultEditor )
+        if ( editor instanceof JSpinner.DefaultEditor ) {
             LafUtilities.repaintOnFocusChange(spinner, ((JSpinner.DefaultEditor) editor).getTextField());
+            restyleInPlace(((JSpinner.DefaultEditor) editor).getTextField());
+        }
+    }
+
+    /**
+     *  A spinner's text field is styled when its own delegate is installed, which is before the
+     *  spinner puts it inside itself, so a rule asking whether it sits inside a spinner gets the
+     *  wrong answer until the field first paints. A layout that measures the spinner before that
+     *  paint then gives it the height of a free standing text field, and keeps it.
+     */
+    @Override
+    protected void replaceEditor( JComponent oldEditor, JComponent newEditor ) {
+        super.replaceEditor(oldEditor, newEditor);
+        if ( newEditor instanceof JSpinner.DefaultEditor )
+            restyleInPlace(((JSpinner.DefaultEditor) newEditor).getTextField());
+    }
+
+    private static void restyleInPlace( JComponent inner ) {
+        if ( inner.getUI() instanceof SwingTreeStyledComponentUI )
+            SwingTreeLookAndFeel.installStyleOn(inner);
     }
 
     @Override
