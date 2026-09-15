@@ -1,11 +1,11 @@
 package swingtree
 
 import spock.lang.Narrative
-import spock.lang.PendingFeature
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
 import swingtree.threading.EventProcessor
+import utility.LogSpy
 import utility.SwingTreeTestConfigurator
 import utility.Utility
 
@@ -508,29 +508,43 @@ class Scroll_Pane_Spec extends Specification
     }
 
 
-    @PendingFeature(reason = """
-        SwingTree hands a component implementing `Scrollable` directly to the viewport and does not
-        apply its layout constraint, because Swing's own `Scrollable` components (like `JTextPane`,
-        `JList` and `JTable`) only size themselves correctly when their parent is a `JViewport`.
-    """)
-    def 'The layout constraints of a custom ´Scrollable´ component are actually applied to it.'()
+    def 'When you add a `Scrollable` component to a scroll pane with a layout constraint, SwingTree ignores the constraint and logs a warning.'()
     {
         reportInfo """
-            Adding a component to a scroll pane together with layout constraints is something
-            regular Swing has no answer for, because a viewport holds exactly one view and no
-            layout manager to interpret a constraint with. SwingTree supplies the missing
-            layout manager by slipping a thin box in between, and this has to happen for a
-            content component implementing `Scrollable` just as much as for any other one --
-            the box then simply passes the scroll behaviour of its child on to the scroll pane,
-            so that nothing is lost by the indirection.
+            When you add a component to a scroll pane together with a layout constraint, like
+            `add("width 250px", UI.panel())`, SwingTree places a small panel with a `MigLayout`
+            between the viewport and your component, and that panel applies the constraint.
+            Plain Swing has no such feature, because a viewport holds exactly one component and
+            has no layout manager which could read a constraint.
 
-            Here we give the very same custom `Scrollable` component to two scroll panes, one
-            of them with a size constraint, and then check that the constraint made a
-            difference. Note that the component in question reports that it wants to track the
-            width of its viewport, so without the box in between it would be stretched to the
-            full viewport width and the constraint would simply evaporate.
+            For a component which implements `Scrollable`, SwingTree does not do this. It adds
+            the component directly to the viewport, does not apply the constraint, and logs a
+            warning which tells you so. In this scenario we add the same kind of custom
+            `Scrollable` component to two scroll panes, one of them with the constraint
+            `width 250px`, and we check that both components end up exactly as wide as their
+            viewport. So this scenario asserts on purpose that the constraint has no effect.
+
+            You may wonder why SwingTree does not simply apply the constraint. Swing's own
+            `Scrollable` components, like `JTextPane`, `JList`, `JTree` and `JTable`, only
+            behave correctly when their parent is the viewport. Before a `JTextPane` answers
+            `getScrollableTracksViewportWidth()` with `true`, it checks that
+            `SwingUtilities.getUnwrappedParent(this)` is a `JViewport`, and a `JTable` makes the
+            same check before it installs its column header into the scroll pane. With a panel
+            between the viewport and such a component, the text of a text pane would stop
+            wrapping, a list would no longer fill the viewport, and a table would have no header.
+
+            A `JLayer` between the viewport and the component would keep the viewport visible to
+            these checks, because `SwingUtilities.getUnwrappedParent` looks through a `JLayer`.
+            But a `JLayer` passes every `Scrollable` question on to the component unchanged. The
+            `visibleRect` given to `getScrollableUnitIncrement(..)` is measured from the top left
+            corner of the `JLayer`, not from the top left corner of the component. As soon as a
+            constraint moves the component inside the `JLayer`, for example with a gap above it,
+            the component would compute its scroll steps from the wrong position, and a `JList`
+            would scroll by the wrong amount and no longer stop at the start of a row.
         """
-        given : 'Two scroll panes with the same custom `Scrollable` content, one of them constrained.'
+        given : 'A log spy, which records every message logged from here on.'
+            var logSpy = LogSpy.attach()
+        and : 'Two scroll panes with the same kind of custom `Scrollable` component, one of them added with the constraint `width 250px`.'
             var ui =
                 UI.frame("Scrollable Constraints Test")
                 .peek(it -> it.setPreferredSize(new Dimension(600, 400)))
@@ -560,20 +574,25 @@ class Scroll_Pane_Spec extends Specification
             var unconstrainedContent = new Utility.Query(frame).find(JPanel, "content-unconstrained").orElseThrow(NoSuchElementException::new)
             var constrainedContent   = new Utility.Query(frame).find(JPanel, "content-constrained").orElseThrow(NoSuchElementException::new)
 
-        expect : 'The unconstrained content does what its own `Scrollable` implementation asks for.'
+        expect : 'The component added without a constraint is as wide as its viewport, because its own `Scrollable` implementation asks for that.'
             unconstrainedContent.getWidth() == unconstrainedScroll.getViewport().getWidth()
-        and : 'The constrained content has the width we demanded of it instead.'
-            constrainedContent.getWidth()  == 250
-        and : 'Its viewport is in fact wider than that, which is what makes the constraint visible at all.'
+        and : 'The component added with `width 250px` is not 250 pixels wide, but exactly as wide as its viewport as well.'
+            constrainedContent.getWidth() == constrainedScroll.getViewport().getWidth()
+        and : 'That viewport is wider than 250 pixels, so an applied constraint would have made a visible difference.'
             constrainedScroll.getViewport().getWidth() > 250
-        and : """
-            The scroll behaviour of the content survived the indirection: the view of the
-            constrained scroll pane answers the very same questions its content would.
-        """
+        and : 'The component is the view of the viewport, so the viewport asks the component itself how to scroll it.'
+            UI.runAndGet( () -> constrainedScroll.getViewport().getView() ) == constrainedContent
             UI.runAndGet( () -> constrainedScroll.getViewport().getView().getScrollableTracksViewportWidth()  ) == true
             UI.runAndGet( () -> constrainedScroll.getViewport().getView().getScrollableTracksViewportHeight() ) == false
             UI.runAndGet( () -> constrainedScroll.getViewport().getView().getScrollableUnitIncrement(null, SwingConstants.VERTICAL, 1) ) == 10
             UI.runAndGet( () -> constrainedScroll.getViewport().getView().getScrollableBlockIncrement(null, SwingConstants.VERTICAL, 1) ) == 10
+        and : 'SwingTree logged exactly one warning about it, which names the ignored constraint and the type of the component.'
+            var warningsAboutTheConstraint = logSpy.warnings().findAll { it.contains(CustomScrollablePanel.name) }
+            warningsAboutTheConstraint.size() == 1
+            warningsAboutTheConstraint[0].contains("width 250px")
+
+        cleanup :
+            logSpy?.detach()
     }
 
     def 'A text pane added to a scroll pane together with a layout constraint wraps its text at the width of the viewport.'()
