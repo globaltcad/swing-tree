@@ -17,9 +17,9 @@ import java.util.Objects;
  *  whatever size it would prefer.
  *  <p>
  *  In a SwingTree UI declaration, you install it through
- *  {@link swingtree.UIForAnySwing#withLayout(LayoutManager)}:
+ *  {@link swingtree.UIForAnySwing#withGridLayout(int, int, int, int)}:
  *  <pre>{@code
- *  UI.panel().withLayout(new UniformGridLayout(2, 3, 5, 5))
+ *  UI.panel().withGridLayout(2, 3, 5, 5)
  *  .add(UI.button("1")).add(UI.button("2")).add(UI.button("3"))
  *  .add(UI.button("4")).add(UI.button("5"))
  *  }</pre>
@@ -29,8 +29,13 @@ import java.util.Objects;
  *  cell of the bottom row stays empty. If the panel only held the buttons 1 and 2,
  *  they would sit side by side in a single row of 2 columns, as high as the whole
  *  panel, because by default the rows and columns which no component occupies are
- *  left out of the grid. Outside of a SwingTree UI declaration, you install it like
- *  any other layout manager: {@code panel.setLayout(new UniformGridLayout(2, 3, 5, 5))}.
+ *  left out of the grid.
+ *  <p>
+ *  In the style API and in a reactive {@code Var<Layout>}, {@link swingtree.api.Layout#grid(int, int, int, int)}
+ *  installs the same layout manager, and both {@code withGridLayout(..)} and {@code Layout.grid(..)}
+ *  accept a {@link Mode} and a {@link CollapseEmpty} setting in front of the numbers of rows and
+ *  columns. Outside of a SwingTree UI declaration, you install it like any other layout manager:
+ *  {@code panel.setLayout(new UniformGridLayout(2, 3, 5, 5))}.
  *
  *  <h2>The mode and the empty rows and columns</h2>
  *
