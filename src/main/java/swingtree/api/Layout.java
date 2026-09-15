@@ -10,6 +10,7 @@ import swingtree.layout.FlowCellConf;
 import swingtree.layout.LayoutConstraint;
 import swingtree.layout.MigAddConstraint;
 import swingtree.layout.ResponsiveGridFlowLayout;
+import swingtree.layout.UniformGridLayout;
 import swingtree.style.ComponentBackend;
 import swingtree.style.ComponentStyleDelegate;
 import swingtree.style.StyleConf;
@@ -424,30 +425,101 @@ public interface Layout
     }
 
     /**
-     * A factory method for creating a layout that installs the {@link GridLayout}
-     * onto a component based on the supplied parameters.
+     *  A factory method for a {@link ForGridLayout} which installs a {@link UniformGridLayout}
+     *  with the given numbers of rows and columns and the given gaps onto a component.
+     *  The grid is built in the mode {@link UniformGridLayout.Mode#WRAP_AFTER_COLUMNS} and
+     *  leaves out the rows and columns which no child occupies
+     *  ({@link UniformGridLayout.CollapseEmpty#ROWS_AND_COLUMNS}).
+     *  <p>
+     *  So in a style like {@code it.layout(Layout.grid(2, 5, 5, 5))}, 8 children are laid out in
+     *  2 rows of 5 columns, and 3 children share the whole component in a single row of 3 columns.
+     *  A number of rows or columns of 0 means "as many as the children need", and the gaps are
+     *  scaled by the UI scale factor every time the component is laid out.
+     *  Use {@link #grid(UniformGridLayout.Mode, UniformGridLayout.CollapseEmpty, int, int, int, int)}
+     *  to choose other settings.
      *
-     * @param rows The number of rows for the layout.
-     * @param cols The number of columns for the layout.
-     * @param horizontalGap The horizontal gap for the layout.
-     * @param verticalGap The vertical gap for the layout.
-     * @return A layout that installs the {@link GridLayout} onto a component.
+     * @param rows The number of rows, or 0 for as many rows as the children need.
+     * @param cols The number of columns, or 0 for as many columns as the children need.
+     * @param horizontalGap The space between neighbouring columns, in pixels at a UI scale factor of 1.
+     * @param verticalGap The space between neighbouring rows, in pixels at a UI scale factor of 1.
+     * @return A {@link ForGridLayout} which installs a {@link UniformGridLayout} onto a component.
      */
-    static Layout grid( int rows, int cols, int horizontalGap, int verticalGap ) {
-        return new GridLayoutInstaller( rows, cols, horizontalGap, verticalGap );
+    static ForGridLayout grid( int rows, int cols, int horizontalGap, int verticalGap ) {
+        return new ForGridLayout(
+                    UniformGridLayout.Mode.WRAP_AFTER_COLUMNS,
+                    UniformGridLayout.CollapseEmpty.ROWS_AND_COLUMNS,
+                    rows, cols, horizontalGap, verticalGap
+                );
     }
 
     /**
-     * A factory method for creating a layout that installs the {@link GridLayout}
-     * onto a component based on the supplied parameters.
-     * The installed layout will have a default gap of 0 pixels.
+     *  A factory method for a {@link ForGridLayout} which installs a {@link UniformGridLayout}
+     *  with the given numbers of rows and columns and no gaps onto a component.
+     *  The grid is built in the mode {@link UniformGridLayout.Mode#WRAP_AFTER_COLUMNS} and
+     *  leaves out the rows and columns which no child occupies
+     *  ({@link UniformGridLayout.CollapseEmpty#ROWS_AND_COLUMNS}).
+     *  See {@link #grid(int, int, int, int)} for an example.
      *
-     * @param rows The number of rows for the layout.
-     * @param cols The number of columns for the layout.
-     * @return A layout that installs the {@link GridLayout} onto a component.
+     * @param rows The number of rows, or 0 for as many rows as the children need.
+     * @param cols The number of columns, or 0 for as many columns as the children need.
+     * @return A {@link ForGridLayout} which installs a {@link UniformGridLayout} onto a component.
      */
-    static Layout grid( int rows, int cols ) {
-        return new GridLayoutInstaller( rows, cols, 0, 0 );
+    static ForGridLayout grid( int rows, int cols ) {
+        return grid( rows, cols, 0, 0 );
+    }
+
+    /**
+     *  A factory method for a {@link ForGridLayout} which installs a {@link UniformGridLayout}
+     *  with the given settings, numbers of rows and columns and gaps onto a component.
+     *  <p>
+     *  The {@code mode} decides how the grid is built from the numbers of rows and columns,
+     *  and {@code collapseEmpty} decides which of the rows and columns that no child occupies
+     *  are left out. So in a style like
+     *  {@code it.layout(Layout.grid(Mode.SPREAD_OVER_ROWS, CollapseEmpty.NONE, 2, 5, 5, 5))},
+     *  the children are laid out exactly like a {@link GridLayout} with 2 rows, 5 columns and
+     *  gaps of 5 pixels lays them out at a UI scale factor of 1, and with
+     *  {@code Layout.grid(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.NONE, 2, 5, 5, 5)}, 3 children
+     *  take the first 3 cells of a grid of 2 rows and 5 columns. See {@link UniformGridLayout.Mode}
+     *  and {@link UniformGridLayout.CollapseEmpty} for what each setting does.
+     *
+     * @param mode How the grid is built from the numbers of rows and columns.
+     * @param collapseEmpty Which of the rows and columns that no child occupies are left out.
+     * @param rows The number of rows, or 0 for as many rows as the children need.
+     * @param cols The number of columns, or 0 for as many columns as the children need.
+     * @param horizontalGap The space between neighbouring columns, in pixels at a UI scale factor of 1.
+     * @param verticalGap The space between neighbouring rows, in pixels at a UI scale factor of 1.
+     * @return A {@link ForGridLayout} which installs a {@link UniformGridLayout} onto a component.
+     */
+    static ForGridLayout grid(
+        UniformGridLayout.Mode          mode,
+        UniformGridLayout.CollapseEmpty collapseEmpty,
+        int rows,
+        int cols,
+        int horizontalGap,
+        int verticalGap
+    ) {
+        return new ForGridLayout( mode, collapseEmpty, rows, cols, horizontalGap, verticalGap );
+    }
+
+    /**
+     *  A factory method for a {@link ForGridLayout} which installs a {@link UniformGridLayout}
+     *  with the given settings and numbers of rows and columns, and no gaps, onto a component.
+     *  See {@link #grid(UniformGridLayout.Mode, UniformGridLayout.CollapseEmpty, int, int, int, int)}
+     *  for what the settings do.
+     *
+     * @param mode How the grid is built from the numbers of rows and columns.
+     * @param collapseEmpty Which of the rows and columns that no child occupies are left out.
+     * @param rows The number of rows, or 0 for as many rows as the children need.
+     * @param cols The number of columns, or 0 for as many columns as the children need.
+     * @return A {@link ForGridLayout} which installs a {@link UniformGridLayout} onto a component.
+     */
+    static ForGridLayout grid(
+        UniformGridLayout.Mode          mode,
+        UniformGridLayout.CollapseEmpty collapseEmpty,
+        int rows,
+        int cols
+    ) {
+        return grid( mode, collapseEmpty, rows, cols, 0, 0 );
     }
 
     /**
@@ -1544,79 +1616,133 @@ public interface Layout
     }
 
     /**
-     *  The {@link GridLayoutInstaller} layout is a layout that represents
-     *  a {@link GridLayout} layout configuration for a component,
-     *  which consists of the number of rows, number of columns, horizontal gap and vertical gap. <br>
-     *  Whenever this layout configuration changes,
-     *  it will create and re-install a new {@link GridLayout} onto the component
-     *  based on the new configuration.
+     *  A {@link Layout} which installs a {@link UniformGridLayout} onto a component, created
+     *  through one of the {@link Layout#grid(int, int)} factory methods. It consists of the
+     *  mode of the grid, which of its empty rows and columns are left out, the numbers of rows
+     *  and columns, and the horizontal and vertical gaps.
+     *  <p>
+     *  When the component already has a {@link UniformGridLayout}, for example one installed through
+     *  {@link swingtree.UIForAnySwing#withGridLayout(int, int)} or by an earlier {@link ForGridLayout},
+     *  that layout manager is updated in place instead of being replaced.
      */
     @Immutable
-    final class GridLayoutInstaller implements Layout
+    final class ForGridLayout implements Layout
     {
+        private final UniformGridLayout.Mode          _mode;
+        private final UniformGridLayout.CollapseEmpty _collapseEmpty;
         private final int _rows;
         private final int _cols;
         private final int _hgap;
         private final int _vgap;
 
-        GridLayoutInstaller( int rows, int cols, int hgap, int vgap ) {
+        ForGridLayout(
+            UniformGridLayout.Mode          mode,
+            UniformGridLayout.CollapseEmpty collapseEmpty,
+            int rows,
+            int cols,
+            int hgap,
+            int vgap
+        ) {
+            _mode          = Objects.requireNonNull(mode);
+            _collapseEmpty = Objects.requireNonNull(collapseEmpty);
             _rows = rows;
             _cols = cols;
             _hgap = hgap;
             _vgap = vgap;
         }
 
-        @Override public int hashCode() { return Objects.hash(_rows, _cols, _hgap, _vgap); }
+        /**
+         *  Returns a new {@link ForGridLayout} with the given mode and all other properties copied
+         *  unchanged. The mode decides how the grid is built from the numbers of rows and columns:
+         *  {@link UniformGridLayout.Mode#WRAP_AFTER_COLUMNS} starts a new row after every declared number
+         *  of columns, and {@link UniformGridLayout.Mode#SPREAD_OVER_ROWS} spreads the children over the
+         *  declared rows, like a {@link GridLayout}.
+         *
+         * @param mode How the grid is built from the numbers of rows and columns.
+         * @return A new {@link ForGridLayout} with the given mode.
+         */
+        public ForGridLayout withMode( UniformGridLayout.Mode mode ) {
+            return new ForGridLayout( mode, _collapseEmpty, _rows, _cols, _hgap, _vgap );
+        }
+
+        /**
+         *  Returns a new {@link ForGridLayout} which leaves out the given empty rows and columns, with
+         *  all other properties copied unchanged. For example, with
+         *  {@link UniformGridLayout.CollapseEmpty#NONE}, 3 children of a grid of 2 rows and 5 columns
+         *  take the first 3 cells of all 10, and with {@link UniformGridLayout.CollapseEmpty#ROWS_AND_COLUMNS}
+         *  they share the whole component in a single row of 3 columns.
+         *
+         * @param collapseEmpty Which of the rows and columns that no child occupies are left out.
+         * @return A new {@link ForGridLayout} with the given setting.
+         */
+        public ForGridLayout withCollapseEmpty( UniformGridLayout.CollapseEmpty collapseEmpty ) {
+            return new ForGridLayout( _mode, collapseEmpty, _rows, _cols, _hgap, _vgap );
+        }
+
+        @Override public int hashCode() { return Objects.hash(_mode, _collapseEmpty, _rows, _cols, _hgap, _vgap); }
 
         @Override
         public boolean equals(Object o) {
             if ( o == null ) return false;
             if ( o == this ) return true;
             if ( o.getClass() != getClass() ) return false;
-            GridLayoutInstaller other = (GridLayoutInstaller) o;
-            return _rows == other._rows && _cols == other._cols && _hgap == other._hgap && _vgap == other._vgap;
+            ForGridLayout other = (ForGridLayout) o;
+            return _mode == other._mode && _collapseEmpty == other._collapseEmpty &&
+                   _rows == other._rows && _cols == other._cols && _hgap == other._hgap && _vgap == other._vgap;
         }
 
         /**
-         *  Installs a {@link GridLayout} onto the supplied component using the row count,
-         *  column count, and gap sizes stored in this configuration. If a {@link GridLayout}
-         *  is already installed, only the properties that have changed are updated and
-         *  {@link JComponent#revalidate()} is called to trigger a layout refresh.
+         *  Installs a {@link UniformGridLayout} with the settings, the numbers of rows and columns and
+         *  the gaps of this configuration onto the supplied component. If the component already has a
+         *  {@link UniformGridLayout}, only the properties that differ are updated, and
+         *  {@link JComponent#revalidate()} is called to lay out the component again.
          *
-         * @param component The component to install the {@link GridLayout} for.
+         * @param component The component to install the {@link UniformGridLayout} for.
          */
         @Override
         public void installFor( JComponent component ) {
             LayoutManager currentLayout = component.getLayout();
-            if ( !(currentLayout instanceof GridLayout) ) {
-                // We need to replace the current layout with a GridLayout:
-                GridLayout newLayout = new GridLayout(_rows, _cols, _hgap, _vgap);
+            if ( !(currentLayout instanceof UniformGridLayout) ) {
+                UniformGridLayout newLayout = new UniformGridLayout(_rows, _cols, _hgap, _vgap);
+                newLayout.setMode(_mode);
+                newLayout.setCollapseEmpty(_collapseEmpty);
                 component.setLayout(newLayout);
                 component.revalidate();
                 return;
             }
-            GridLayout gridLayout = (GridLayout) currentLayout;
-            int rows          = _rows;
-            int cols          = _cols;
-            int horizontalGap = _hgap;
-            int verticalGap   = _vgap;
+            UniformGridLayout gridLayout = (UniformGridLayout) currentLayout;
 
-            boolean rowsChanged = rows != gridLayout.getRows();
-            boolean colsChanged = cols != gridLayout.getColumns();
-            boolean horizontalGapChanged = horizontalGap != gridLayout.getHgap();
-            boolean verticalGapChanged   = verticalGap   != gridLayout.getVgap();
+            boolean modeChanged          = _mode          != gridLayout.getMode();
+            boolean collapseEmptyChanged = _collapseEmpty != gridLayout.getCollapseEmpty();
+            boolean rowsChanged          = _rows != gridLayout.getRows();
+            boolean colsChanged          = _cols != gridLayout.getColumns();
+            boolean horizontalGapChanged = _hgap != gridLayout.getHgap();
+            boolean verticalGapChanged   = _vgap != gridLayout.getVgap();
 
-            if ( rowsChanged || colsChanged || horizontalGapChanged || verticalGapChanged ) {
-                gridLayout.setRows(rows);
-                gridLayout.setColumns(cols);
-                gridLayout.setHgap(horizontalGap);
-                gridLayout.setVgap(verticalGap);
+            if ( modeChanged || collapseEmptyChanged || rowsChanged || colsChanged || horizontalGapChanged || verticalGapChanged ) {
+                gridLayout.setMode(_mode);
+                gridLayout.setCollapseEmpty(_collapseEmpty);
+                _setCountsWithoutEverZeroingBoth(gridLayout);
+                gridLayout.setHgap(_hgap);
+                gridLayout.setVgap(_vgap);
                 component.revalidate();
+            }
+        }
+
+        private void _setCountsWithoutEverZeroingBoth( UniformGridLayout gridLayout ) {
+            if ( _rows == 0 ) {
+                gridLayout.setColumns(_cols);
+                gridLayout.setRows(_rows);
+            } else {
+                gridLayout.setRows(_rows);
+                gridLayout.setColumns(_cols);
             }
         }
 
         @Override public String toString() {
             return getClass().getSimpleName() + "[" +
+                        "mode=" + _mode + ", " +
+                        "collapseEmpty=" + _collapseEmpty + ", " +
                         "rows=" + _rows + ", " +
                         "cols=" + _cols + ", " +
                         "hgap=" + _hgap + ", " +

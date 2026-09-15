@@ -193,7 +193,7 @@ SwingTree replaces the old manager with the new one automatically.
 | `Layout.mig("fill, wrap 2")` | `MigLayout` with the given constraints |
 | `Layout.flow()` | `ResponsiveGridFlowLayout` (see below) |
 | `Layout.border()` | `java.awt.BorderLayout` |
-| `Layout.grid(rows, cols)` | `java.awt.GridLayout` |
+| `Layout.grid(rows, cols)` | `UniformGridLayout`, which fills equal cells row by row and leaves out empty rows and columns |
 | `Layout.box(UI.Axis.HORIZONTAL)` | `javax.swing.BoxLayout` along the horizontal axis |
 | `Layout.unspecific()` | No-op — current manager is untouched |
 | `Layout.none()` | Removes the manager (`setLayout(null)`) |
