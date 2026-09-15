@@ -31,8 +31,17 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
     protected void _addComponentTo(P thisComponent, JComponent addedComponent, @Nullable AddConstraint constraints) {
         if ( constraints != null ) {
             if ( addedComponent instanceof Scrollable ) {
-                ThinScrollableDelegateBox thinDelegationBox = new ThinScrollableDelegateBox((Scrollable) addedComponent);
-                thinDelegationBox.add(addedComponent, constraints.toConstraintForLayoutManager());
+                log.warn(SwingTree.get().logMarker(),
+                    "The layout constraint '{}' is ignored, because the component of type '{}' implements 'Scrollable'. " +
+                    "SwingTree adds a 'Scrollable' component directly to the viewport of a scroll pane, instead of " +
+                    "wrapping it in a panel which could apply the constraint, because Swing's own 'Scrollable' components " +
+                    "(like 'JTextPane', 'JList', 'JTree' and 'JTable') only size themselves correctly, and a 'JTable' " +
+                    "only installs its column header, when their parent is the viewport. " +
+                    "Add the component without a layout constraint to avoid this warning.",
+                    constraints.toConstraintForLayoutManager(),
+                    addedComponent.getClass().getName(),
+                    new Throwable("Stack trace for debugging purposes.")
+                );
             } else {
                 // The user wants to add a component to the scroll pane with a specific constraint.
                 // Swing does not support any constraints for scroll panes, but we are not Swing, we are SwingTree!
@@ -42,6 +51,9 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
                 //  ^ So we improve this situation by wrapping the component in a mig layout panel, supporting constraints.
 
                 // Let's strip it of any visible properties, since it should serve merely as a container.
+                // Note that a JViewport only scrolls by copying the pixels it has already painted when its view
+                // is opaque (see JViewport.isBlitting), so this transparent box makes every scroll step repaint
+                // the whole visible area of the viewport.
                 addedComponent.setBorder(null);
                 addedComponent.setOpaque(false);
                 addedComponent.setBackground(null);
@@ -409,42 +421,6 @@ public abstract class UIForAnyScrollPane<I, P extends JScrollPane> extends UIFor
                 this.setMaximumSize(maxChildSize);
             }
             return maxChildSize;
-        }
-    }
-
-    private static final class ThinScrollableDelegateBox extends ThinDelegationBox implements Scrollable {
-
-        private final Scrollable _scrollable;
-
-
-        ThinScrollableDelegateBox( Scrollable child ) {
-            super((JComponent) child);
-            _scrollable = child;
-        }
-
-        @Override
-        public Dimension getPreferredScrollableViewportSize() {
-            return _scrollable.getPreferredScrollableViewportSize();
-        }
-
-        @Override
-        public int getScrollableUnitIncrement( Rectangle visibleRect, int orientation, int direction ) {
-            return _scrollable.getScrollableUnitIncrement(visibleRect, orientation, direction);
-        }
-
-        @Override
-        public int getScrollableBlockIncrement( Rectangle visibleRect, int orientation, int direction ) {
-            return _scrollable.getScrollableBlockIncrement(visibleRect, orientation, direction);
-        }
-
-        @Override
-        public boolean getScrollableTracksViewportWidth() {
-            return _scrollable.getScrollableTracksViewportWidth();
-        }
-
-        @Override
-        public boolean getScrollableTracksViewportHeight() {
-            return _scrollable.getScrollableTracksViewportHeight();
         }
     }
 }
