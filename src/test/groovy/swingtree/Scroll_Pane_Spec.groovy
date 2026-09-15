@@ -1,6 +1,7 @@
 package swingtree
 
 import spock.lang.Narrative
+import spock.lang.PendingFeature
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Title
@@ -11,7 +12,12 @@ import utility.Utility
 import javax.swing.JFrame
 import javax.swing.JLabel
 import javax.swing.JPanel
+import javax.swing.JList
 import javax.swing.JScrollPane
+import javax.swing.JTable
+import javax.swing.JTextArea
+import javax.swing.JTextPane
+import javax.swing.JTree
 import javax.swing.SwingConstants
 import java.awt.Dimension
 import java.awt.Font
@@ -502,6 +508,11 @@ class Scroll_Pane_Spec extends Specification
     }
 
 
+    @PendingFeature(reason = """
+        SwingTree hands a component implementing `Scrollable` directly to the viewport and does not
+        apply its layout constraint, because Swing's own `Scrollable` components (like `JTextPane`,
+        `JList` and `JTable`) only size themselves correctly when their parent is a `JViewport`.
+    """)
     def 'The layout constraints of a custom ´Scrollable´ component are actually applied to it.'()
     {
         reportInfo """
@@ -563,6 +574,183 @@ class Scroll_Pane_Spec extends Specification
             UI.runAndGet( () -> constrainedScroll.getViewport().getView().getScrollableTracksViewportHeight() ) == false
             UI.runAndGet( () -> constrainedScroll.getViewport().getView().getScrollableUnitIncrement(null, SwingConstants.VERTICAL, 1) ) == 10
             UI.runAndGet( () -> constrainedScroll.getViewport().getView().getScrollableBlockIncrement(null, SwingConstants.VERTICAL, 1) ) == 10
+    }
+
+    def 'A text pane added to a scroll pane together with a layout constraint wraps its text at the width of the viewport.'()
+    {
+        reportInfo """
+            When you put a `JTextPane` showing a long paragraph into a scroll pane, you expect
+            the viewport to decide how wide the text may be. The text pane is exactly as wide
+            as the viewport, every line breaks where the viewport ends, and you never see a
+            horizontal scroll bar. This scenario makes sure that all of this keeps working when
+            you add the text pane through `add(GROW_Y, UI.of(textPane))` instead of
+            `add(UI.of(textPane))`.
+
+            To see how a layout constraint could break it, let's look at how Swing decides the
+            width of the text pane. On every layout pass the `ViewportLayout` of the viewport asks its
+            view `getScrollableTracksViewportWidth()`. If the answer is `true`, the view gets
+            the width of the viewport. If it is `false`, the view gets its own preferred width,
+            which for a text pane is the width of the whole paragraph written on a single line.
+            A `JTextPane` answers `true` only after it has checked that its parent, as returned
+            by `SwingUtilities.getUnwrappedParent(this)`, is a `JViewport`.
+
+            So if SwingTree put a panel between the viewport and the text pane, to have a layout
+            manager for the constraint, the text pane would find that panel instead of the
+            viewport and answer `false`. You would then see a paragraph that runs past the right
+            edge of the viewport, with no line breaks, and a horizontal scroll bar under it.
+            This is why SwingTree hands a component implementing `Scrollable` directly to the
+            viewport and does not apply a layout constraint to it.
+        """
+        given : 'A text pane showing a paragraph that is much wider than 250 pixels on a single line.'
+            var textPane = new JTextPane()
+            textPane.setContentType("text/html")
+            textPane.setText(
+                "<html><p>Here you can edit the simulator setup in detail. Please be careful, " +
+                "because wrong or inconsistent settings may break your configuration file!</p></html>"
+            )
+        and : 'A frame 250 pixels wide, with a scroll pane to which we add the text pane with a constraint.'
+            var ui =
+                UI.frame("Text Pane Wrapping Test")
+                .peek(it -> it.setPreferredSize(new Dimension(250, 300)))
+                .add(
+                    UI.panel("fill, ins 0").withPrefSize(250, 300)
+                    .add(UILayoutConstants.GROW,
+                        UI.scrollPane().id("scroll")
+                        .add(constraint, UI.of(textPane))
+                    )
+                )
+            var frame = ui.get(JFrame)
+        and : 'Before any layout pass the text pane has no size yet, so it measures the paragraph on a single line.'
+            var widthOfTheParagraphOnASingleLine = UI.runAndGet( () -> textPane.getPreferredSize().width )
+
+        when : 'We let the frame lay itself out.'
+            UI.runNow( () -> frame.pack() )
+            var scrollPane = new Utility.Query(frame).find(JScrollPane, "scroll").orElseThrow(NoSuchElementException::new)
+            var viewportWidth = UI.runAndGet( () -> scrollPane.getViewport().getWidth() )
+
+        then : 'The viewport really is too narrow for the paragraph on a single line, so the text has to wrap.'
+            viewportWidth < widthOfTheParagraphOnASingleLine
+        and : 'The text pane is exactly as wide as the viewport.'
+            UI.runAndGet( () -> textPane.getWidth() ) == viewportWidth
+        and : 'There is no horizontal scroll bar.'
+            UI.runAndGet( () -> scrollPane.getHorizontalScrollBar().isVisible() ) == false
+        and : 'The text pane is the view of the viewport, with no panel in between.'
+            UI.runAndGet( () -> scrollPane.getViewport().getView() ) == textPane
+
+        where : 'We use constraints which only ask the text pane to grow, so none of them has a width to impose.'
+            constraint << [UILayoutConstants.GROW_Y, UILayoutConstants.GROW, "grow, push"]
+    }
+
+    def 'Swing components implementing `Scrollable` fill the viewport of a scroll pane even when they are added with a layout constraint.'()
+    {
+        reportInfo """
+            A `JList` with only two entries, placed into a much larger scroll pane, covers the
+            whole viewport. Its background fills the viewport, and when your users click into
+            the empty area below the last entry, the click still lands on the list. A `JTree`
+            and a `JTextArea` behave in the same way, and so does a `JTable` for which you
+            called `setFillsViewportHeight(true)`. This scenario makes sure that this keeps
+            working when you add the component with a layout constraint, like
+            `add("grow", UI.of(list))`.
+
+            Each of these components implements the `Scrollable` methods
+            `getScrollableTracksViewportWidth()` and `getScrollableTracksViewportHeight()`,
+            and answers `true` when the viewport is larger than the preferred size of the
+            component. The `ViewportLayout` of the viewport reads those answers, and stretches
+            the component to the size of the viewport for every `true` it receives.
+
+            But before any of these components compares sizes, it checks that its parent,
+            as returned by `SwingUtilities.getUnwrappedParent(this)`, is a `JViewport`. If it
+            is not, the answer is `false`, whatever the sizes are. So if SwingTree placed a
+            panel between the viewport and the component, to have a layout manager for the
+            constraint, the component would stay at its preferred size. You would see a small
+            list in the top left corner of an otherwise empty viewport, and a click next to it
+            would reach nothing.
+        """
+        given : 'A frame with a scroll pane of about 300 by 200 pixels, to which we add a small component with a constraint.'
+            var ui =
+                UI.frame("Scrollable Filling Test")
+                .peek(it -> it.setPreferredSize(new Dimension(300, 200)))
+                .add(
+                    UI.panel("fill, ins 0").withPrefSize(300, 200)
+                    .add(UILayoutConstants.GROW,
+                        UI.scrollPane().id("scroll")
+                        .add("grow", UI.of(component))
+                    )
+                )
+            var frame = ui.get(JFrame)
+
+        when : 'We let the frame lay itself out.'
+            UI.runNow( () -> frame.pack() )
+            var scrollPane = new Utility.Query(frame).find(JScrollPane, "scroll").orElseThrow(NoSuchElementException::new)
+            var viewportSize = UI.runAndGet( () -> scrollPane.getViewport().getSize() )
+            var preferredSize = UI.runAndGet( () -> component.getPreferredSize() )
+
+        then : 'The component wants less space than the viewport has, in both directions.'
+            preferredSize.width  < viewportSize.width
+            preferredSize.height < viewportSize.height
+        and : 'It is nevertheless exactly as large as the viewport.'
+            UI.runAndGet( () -> component.getSize() ) == viewportSize
+        and : 'The component is the view of the viewport, with no panel in between.'
+            UI.runAndGet( () -> scrollPane.getViewport().getView() ) == component
+
+        where : 'We use a component of each kind of Swing `Scrollable` which checks its parent.'
+            component << [
+                new JTextArea("Hello"),
+                new JList<String>(["Hello", "World"] as String[]),
+                new JTree(),
+                new JTable([["Hello", "World"]] as Object[][], ["A", "B"] as Object[]).tap { it.setFillsViewportHeight(true) }
+            ]
+    }
+
+    def 'A table added to a scroll pane together with a layout constraint still shows its column header.'()
+    {
+        reportInfo """
+            The column names of a `JTable` are not painted by the table itself. They are painted
+            by a separate `JTableHeader` component, which lives in the column header area of the
+            `JScrollPane`, above the viewport, so that the names stay visible while your users
+            scroll through the rows. This scenario makes sure that you get this header whether
+            you add the table through `add(UI.of(table))` or through `add("grow", UI.of(table))`,
+            and whether you configured the scroll pane through `UI.scrollPane()` or
+            `UI.scrollPane(Configurator)`.
+
+            Swing puts the header there without you asking. When the table becomes part of a
+            displayable window, `JTable.addNotify()` calls `configureEnclosingScrollPane()`, and
+            that method calls `scrollPane.setColumnHeaderView(getTableHeader())`.
+
+            It does so only if the parent of the table, as returned by
+            `SwingUtilities.getUnwrappedParent(this)`, is a `JViewport`, and the parent of that
+            viewport is a `JScrollPane`. So if SwingTree placed a panel between the viewport and
+            the table, to have a layout manager for the constraint, the table would quietly skip
+            installing its header. You would see the rows of the table without any column names
+            above them, and nothing would be logged.
+        """
+        given : 'A table with two named columns.'
+            var table = new JTable([["Hello", "World"]] as Object[][], ["A", "B"] as Object[])
+        and : 'A frame with a scroll pane to which we add the table with a constraint.'
+            var ui =
+                UI.frame("Table Header Test")
+                .peek(it -> it.setPreferredSize(new Dimension(300, 200)))
+                .add(
+                    UI.panel("fill, ins 0").withPrefSize(300, 200)
+                    .add(UILayoutConstants.GROW,
+                        scrollPane.id("scroll")
+                        .add("grow", UI.of(table))
+                    )
+                )
+            var frame = ui.get(JFrame)
+
+        when : 'We let the frame lay itself out.'
+            UI.runNow( () -> frame.pack() )
+            var scroll = new Utility.Query(frame).find(JScrollPane, "scroll").orElseThrow(NoSuchElementException::new)
+
+        then : 'The header of the table sits in the column header area of the scroll pane.'
+            UI.runAndGet( () -> scroll.getColumnHeader()?.getView() ) == table.getTableHeader()
+
+        where : 'We use a plain scroll pane as well as one configured through a configurator lambda.'
+            scrollPane << [
+                UI.scrollPane(),
+                UI.scrollPane( conf -> conf.fitWidth(true) )
+            ]
     }
 
     /**
