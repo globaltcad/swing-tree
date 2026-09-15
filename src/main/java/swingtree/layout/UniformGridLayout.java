@@ -1,10 +1,13 @@
 package swingtree.layout;
 
+import swingtree.UI;
+
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Insets;
 import java.awt.LayoutManager;
+import java.util.Objects;
 
 /**
  * The {@code UniformGridLayout} class is a layout manager that
@@ -37,19 +40,118 @@ import java.awt.LayoutManager;
  * If the container's {@code ComponentOrientation} property is horizontal
  * and right-to-left, every row is mirrored: 2 then 1, 4 then 3, 6 then 5.
  * <p>
- * When both the number of rows and the number of columns have
- * been set to non-zero values, either by a constructor or
- * by the {@code setRows} and {@code setColumns} methods, the number of
- * columns specified is ignored.  Instead, the number of
- * columns is determined from the specified number of rows
- * and the total number of components in the layout. So, for
- * example, if three rows and two columns have been specified
- * and nine components are added to the layout, they will
- * be displayed as three rows of three columns.  Specifying
- * the number of columns affects the layout only when the
- * number of rows is set to zero.
+ * The {@link Mode} of the layout decides how the grid is built from the
+ * number of rows and the number of columns. In the default mode,
+ * {@link Mode#WRAP_AFTER_COLUMNS}, a new row starts after every specified
+ * number of columns, so if three rows and two columns have been specified
+ * and nine components are added to the layout, they will be displayed as
+ * five rows of two columns. In the mode {@link Mode#SPREAD_OVER_ROWS}, the
+ * components are spread over the specified number of rows, and the number of
+ * columns is ignored whenever the number of rows is non-zero, which is the
+ * behaviour of the {@link java.awt.GridLayout} of the JDK. A number of rows
+ * or columns set to zero means "as many as the components need".
+ * <p>
+ * The {@link CollapseEmpty} setting of the layout then decides whether the rows
+ * and the columns which no component occupies are left out of the grid. By
+ * default, both are left out, so a single component takes up the whole
+ * container, whatever number of rows and columns have been specified.
+ * <p>
+ * The horizontal and vertical gaps are scaled by the UI scale factor of
+ * SwingTree (see {@link UI#scale(int)}) every time the container is laid
+ * out or measured.
  */
 public final class UniformGridLayout implements LayoutManager {
+
+    /**
+     * Decides how the grid of a {@link UniformGridLayout} is built from the
+     * declared number of rows, the declared number of columns and the number
+     * of components in the container.
+     * <p>
+     * In both modes, the grid is filled row by row, and a count of zero means
+     * "as many as the components need". Here is how each mode lays out a grid
+     * declared with 2 rows and 5 columns, written as rows x columns, before
+     * {@link CollapseEmpty} leaves out any empty rows or columns:
+     * <ul>
+     *     <li>3 components: {@link #WRAP_AFTER_COLUMNS} 2 x 5, {@link #SPREAD_OVER_ROWS} 2 x 2</li>
+     *     <li>8 components: {@link #WRAP_AFTER_COLUMNS} 2 x 5, {@link #SPREAD_OVER_ROWS} 2 x 4</li>
+     *     <li>11 components: {@link #WRAP_AFTER_COLUMNS} 3 x 5, {@link #SPREAD_OVER_ROWS} 2 x 6</li>
+     * </ul>
+     *
+     * @see UniformGridLayout#setMode(Mode)
+     */
+    public enum Mode {
+        /**
+         * A new row starts after every declared number of columns, so the grid has
+         * the declared number of columns, and at least the declared number of rows.
+         * When there are more components than cells, rows are added.
+         * <p>
+         * A grid of 2 rows and 5 columns lays out 8 components in 2 rows of 5 columns,
+         * and 11 components in 3 rows of 5 columns. The component at index {@code i}
+         * is always in row {@code i / columns} and column {@code i % columns}.
+         * <p>
+         * If the declared number of columns is zero, the grid gets as many columns as
+         * it takes to fit the components into the declared number of rows.
+         * <p>
+         * This is the default mode.
+         */
+        WRAP_AFTER_COLUMNS,
+        /**
+         * The components are spread over the declared number of rows, and the declared
+         * number of columns is ignored whenever the number of rows is not zero. The grid
+         * gets as many columns as it takes to fit all components into those rows.
+         * <p>
+         * A grid of 2 rows and 5 columns lays out 3 components in 2 columns,
+         * 8 components in 4 columns and 11 components in 6 columns.
+         * <p>
+         * This is how the {@link java.awt.GridLayout} of the JDK lays out its
+         * components, so a {@code UniformGridLayout} in this mode, with
+         * {@link CollapseEmpty#NONE}, can replace a {@code GridLayout} without
+         * changing where any component ends up.
+         */
+        SPREAD_OVER_ROWS
+    }
+
+    /**
+     * Decides whether a {@link UniformGridLayout} leaves the rows and the columns
+     * which no component occupies out of its grid, so that the components share
+     * the space those rows and columns would take up.
+     * <p>
+     * The grid is filled row by row, so a column stays empty when there are fewer
+     * components than columns, and a row stays empty when the components fill fewer
+     * rows than the grid has. Here is how a grid declared with 2 rows and 5 columns,
+     * in the mode {@link Mode#WRAP_AFTER_COLUMNS}, lays out 3 components, written as
+     * rows x columns: {@link #NONE} 2 x 5, {@link #COLUMNS} 2 x 3, {@link #ROWS} 1 x 5,
+     * {@link #ROWS_AND_COLUMNS} 1 x 3.
+     *
+     * @see UniformGridLayout#setCollapseEmpty(CollapseEmpty)
+     */
+    public enum CollapseEmpty {
+        /**
+         * Rows and columns are kept even when no component occupies them, so the cells
+         * of a grid keep their size while components are added, until the grid is full.
+         */
+        NONE,
+        /**
+         * The columns which no component occupies are left out, so the grid never has
+         * more columns than components. A grid of 2 rows and 5 columns lays out
+         * 3 components in 2 rows of 3 columns.
+         */
+        COLUMNS,
+        /**
+         * The rows which no component occupies are left out, so the grid only has as
+         * many rows as the components fill. A grid of 2 rows and 5 columns lays out
+         * 3 components in 1 row of 5 columns.
+         */
+        ROWS,
+        /**
+         * The rows and the columns which no component occupies are left out, so no row
+         * and no column of the grid is ever empty. A grid of 2 rows and 5 columns lays out
+         * 3 components in 1 row of 3 columns, and 8 components in 2 rows of 5 columns.
+         * <p>
+         * This is the default.
+         */
+        ROWS_AND_COLUMNS
+    }
 
     /**
      * This is the horizontal gap (in pixels) which specifies the space
@@ -91,6 +193,10 @@ public final class UniformGridLayout implements LayoutManager {
      * @see #setColumns(int)
      */
     int cols;
+
+    Mode mode = Mode.WRAP_AFTER_COLUMNS;
+
+    CollapseEmpty collapseEmpty = CollapseEmpty.ROWS_AND_COLUMNS;
 
     /**
      * Creates a grid layout with a default of one column per component,
@@ -181,11 +287,10 @@ public final class UniformGridLayout implements LayoutManager {
 
     /**
      * Sets the number of columns in this layout to the specified value.
-     * Setting the number of columns has no affect on the layout
-     * if the number of rows specified by a constructor or by
-     * the {@code setRows} method is non-zero. In that case, the number
-     * of columns displayed in the layout is determined by the total
-     * number of components and the number of rows specified.
+     * The number of columns is ignored while the number of rows is
+     * non-zero and the mode is {@link Mode#SPREAD_OVER_ROWS}.
+     * In that case, the number of columns displayed in the layout is
+     * determined by the total number of components and the number of rows.
      * @param        cols   the number of columns in this layout
      * @throws    IllegalArgumentException  if the value of both
      *               {@code rows} and {@code cols} is set to zero
@@ -198,7 +303,80 @@ public final class UniformGridLayout implements LayoutManager {
     }
 
     /**
-     * Gets the horizontal gap between components.
+     * Gets the mode of this layout, which decides how the grid is built
+     * from the number of rows and the number of columns.
+     * @return the mode of this layout, {@link Mode#WRAP_AFTER_COLUMNS} unless it was changed
+     */
+    public Mode getMode() {
+        return mode;
+    }
+
+    /**
+     * Sets the mode of this layout, which decides how the grid is built
+     * from the number of rows and the number of columns.
+     * See {@link Mode} for what each mode does.
+     * The new mode takes effect the next time the container is laid out.
+     * @param mode the mode of this layout
+     * @throws NullPointerException if {@code mode} is {@code null}
+     */
+    public void setMode(Mode mode) {
+        this.mode = Objects.requireNonNull(mode);
+    }
+
+    /**
+     * Gets which of the rows and columns that no component occupies
+     * are left out of the grid.
+     * @return the setting of this layout, {@link CollapseEmpty#ROWS_AND_COLUMNS} unless it was changed
+     */
+    public CollapseEmpty getCollapseEmpty() {
+        return collapseEmpty;
+    }
+
+    /**
+     * Sets which of the rows and columns that no component occupies
+     * are left out of the grid.
+     * See {@link CollapseEmpty} for what each setting does.
+     * The new setting takes effect the next time the container is laid out.
+     * @param collapseEmpty the setting of this layout
+     * @throws NullPointerException if {@code collapseEmpty} is {@code null}
+     */
+    public void setCollapseEmpty(CollapseEmpty collapseEmpty) {
+        this.collapseEmpty = Objects.requireNonNull(collapseEmpty);
+    }
+
+    private boolean collapsesEmptyColumns() {
+        return collapseEmpty == CollapseEmpty.COLUMNS || collapseEmpty == CollapseEmpty.ROWS_AND_COLUMNS;
+    }
+
+    private boolean collapsesEmptyRows() {
+        return collapseEmpty == CollapseEmpty.ROWS || collapseEmpty == CollapseEmpty.ROWS_AND_COLUMNS;
+    }
+
+    private int columnsFor(int ncomponents) {
+        int ncols = cols;
+        if (rows > 0 && (mode == Mode.SPREAD_OVER_ROWS || cols <= 0)) {
+            ncols = (ncomponents + rows - 1) / rows;
+        }
+        if (collapsesEmptyColumns()) {
+            return Math.max(Math.min(ncols, ncomponents), 1);
+        }
+        return ncols;
+    }
+
+    private int rowsFor(int ncomponents) {
+        int ncols = columnsFor(ncomponents);
+        if (collapsesEmptyRows()) {
+            return ncols > 0 ? Math.max((ncomponents + ncols - 1) / ncols, 1) : 1;
+        }
+        if (rows > 0 && (ncols <= 0 || (long) rows * ncols >= ncomponents)) {
+            return rows;
+        }
+        return (ncomponents + ncols - 1) / ncols;
+    }
+
+    /**
+     * Gets the horizontal gap between components, as it was set,
+     * before it is scaled by the UI scale factor.
      * @return       the horizontal gap between components
      */
     public int getHgap() {
@@ -206,7 +384,8 @@ public final class UniformGridLayout implements LayoutManager {
     }
 
     /**
-     * Sets the horizontal gap between components to the specified value.
+     * Sets the horizontal gap between components to the specified value,
+     * which is scaled by the UI scale factor when the container is laid out.
      * @param        hgap   the horizontal gap between components
      */
     public void setHgap(int hgap) {
@@ -214,7 +393,8 @@ public final class UniformGridLayout implements LayoutManager {
     }
 
     /**
-     * Gets the vertical gap between components.
+     * Gets the vertical gap between components, as it was set,
+     * before it is scaled by the UI scale factor.
      * @return       the vertical gap between components
      */
     public int getVgap() {
@@ -222,7 +402,8 @@ public final class UniformGridLayout implements LayoutManager {
     }
 
     /**
-     * Sets the vertical gap between components to the specified value.
+     * Sets the vertical gap between components to the specified value,
+     * which is scaled by the UI scale factor when the container is laid out.
      * @param         vgap  the vertical gap between components
      */
     public void setVgap(int vgap) {
@@ -271,14 +452,10 @@ public final class UniformGridLayout implements LayoutManager {
       synchronized (parent.getTreeLock()) {
         Insets insets = parent.getInsets();
         int ncomponents = parent.getComponentCount();
-        int nrows = rows;
-        int ncols = cols;
-
-        if (nrows > 0) {
-            ncols = (ncomponents + nrows - 1) / nrows;
-        } else {
-            nrows = (ncomponents + ncols - 1) / ncols;
-        }
+        int nrows = rowsFor(ncomponents);
+        int ncols = columnsFor(ncomponents);
+        int horizontalGap = UI.scale(hgap);
+        int verticalGap = UI.scale(vgap);
         int w = 0;
         int h = 0;
         for (int i = 0 ; i < ncomponents ; i++) {
@@ -291,8 +468,8 @@ public final class UniformGridLayout implements LayoutManager {
                 h = d.height;
             }
         }
-        return new Dimension(insets.left + insets.right + ncols*w + (ncols-1)*hgap,
-                             insets.top + insets.bottom + nrows*h + (nrows-1)*vgap);
+        return new Dimension(insets.left + insets.right + ncols*w + (ncols-1)*horizontalGap,
+                             insets.top + insets.bottom + nrows*h + (nrows-1)*verticalGap);
       }
     }
 
@@ -321,14 +498,10 @@ public final class UniformGridLayout implements LayoutManager {
       synchronized (parent.getTreeLock()) {
         Insets insets = parent.getInsets();
         int ncomponents = parent.getComponentCount();
-        int nrows = rows;
-        int ncols = cols;
-
-        if (nrows > 0) {
-            ncols = (ncomponents + nrows - 1) / nrows;
-        } else {
-            nrows = (ncomponents + ncols - 1) / ncols;
-        }
+        int nrows = rowsFor(ncomponents);
+        int ncols = columnsFor(ncomponents);
+        int horizontalGap = UI.scale(hgap);
+        int verticalGap = UI.scale(vgap);
         int w = 0;
         int h = 0;
         for (int i = 0 ; i < ncomponents ; i++) {
@@ -341,8 +514,8 @@ public final class UniformGridLayout implements LayoutManager {
                 h = d.height;
             }
         }
-        return new Dimension(insets.left + insets.right + ncols*w + (ncols-1)*hgap,
-                             insets.top + insets.bottom + nrows*h + (nrows-1)*vgap);
+        return new Dimension(insets.left + insets.right + ncols*w + (ncols-1)*horizontalGap,
+                             insets.top + insets.bottom + nrows*h + (nrows-1)*verticalGap);
       }
     }
 
@@ -369,35 +542,32 @@ public final class UniformGridLayout implements LayoutManager {
       synchronized (parent.getTreeLock()) {
         Insets insets = parent.getInsets();
         int ncomponents = parent.getComponentCount();
-        int nrows = rows;
-        int ncols = cols;
         boolean ltr = parent.getComponentOrientation().isLeftToRight();
 
         if (ncomponents == 0) {
             return;
         }
-        if (nrows > 0) {
-            ncols = (ncomponents + nrows - 1) / nrows;
-        } else {
-            nrows = (ncomponents + ncols - 1) / ncols;
-        }
+        int nrows = rowsFor(ncomponents);
+        int ncols = columnsFor(ncomponents);
+        int horizontalGap = UI.scale(hgap);
+        int verticalGap = UI.scale(vgap);
         // 4370316. To position components in the center we should:
         // 1. get an amount of extra space within Container
         // 2. incorporate half of that value to the left/top position
         // Note that we use trancating division for widthOnComponent
         // The reminder goes to extraWidthAvailable
-        int totalGapsWidth = (ncols - 1) * hgap;
+        int totalGapsWidth = (ncols - 1) * horizontalGap;
         int widthWOInsets = parent.getWidth() - (insets.left + insets.right);
         int widthOnComponent = (widthWOInsets - totalGapsWidth) / ncols;
         int extraWidthAvailable = (widthWOInsets - (widthOnComponent * ncols + totalGapsWidth)) / 2;
 
-        int totalGapsHeight = (nrows - 1) * vgap;
+        int totalGapsHeight = (nrows - 1) * verticalGap;
         int heightWOInsets = parent.getHeight() - (insets.top + insets.bottom);
         int heightOnComponent = (heightWOInsets - totalGapsHeight) / nrows;
         int extraHeightAvailable = (heightWOInsets - (heightOnComponent * nrows + totalGapsHeight)) / 2;
         if (ltr) {
-            for (int c = 0, x = insets.left + extraWidthAvailable; c < ncols ; c++, x += widthOnComponent + hgap) {
-                for (int r = 0, y = insets.top + extraHeightAvailable; r < nrows ; r++, y += heightOnComponent + vgap) {
+            for (int c = 0, x = insets.left + extraWidthAvailable; c < ncols ; c++, x += widthOnComponent + horizontalGap) {
+                for (int r = 0, y = insets.top + extraHeightAvailable; r < nrows ; r++, y += heightOnComponent + verticalGap) {
                     int i = r * ncols + c;
                     if (i < ncomponents) {
                         parent.getComponent(i).setBounds(x, y, widthOnComponent, heightOnComponent);
@@ -405,8 +575,8 @@ public final class UniformGridLayout implements LayoutManager {
                 }
             }
         } else {
-            for (int c = 0, x = (parent.getWidth() - insets.right - widthOnComponent) - extraWidthAvailable; c < ncols ; c++, x -= widthOnComponent + hgap) {
-                for (int r = 0, y = insets.top + extraHeightAvailable; r < nrows ; r++, y += heightOnComponent + vgap) {
+            for (int c = 0, x = (parent.getWidth() - insets.right - widthOnComponent) - extraWidthAvailable; c < ncols ; c++, x -= widthOnComponent + horizontalGap) {
+                for (int r = 0, y = insets.top + extraHeightAvailable; r < nrows ; r++, y += heightOnComponent + verticalGap) {
                     int i = r * ncols + c;
                     if (i < ncomponents) {
                         parent.getComponent(i).setBounds(x, y, widthOnComponent, heightOnComponent);
@@ -424,6 +594,7 @@ public final class UniformGridLayout implements LayoutManager {
     @Override
     public String toString() {
         return getClass().getName() + "[hgap=" + hgap + ",vgap=" + vgap +
-                                       ",rows=" + rows + ",cols=" + cols + "]";
+                                       ",rows=" + rows + ",cols=" + cols +
+                                       ",mode=" + mode + ",collapseEmpty=" + collapseEmpty + "]";
     }
 }

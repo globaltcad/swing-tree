@@ -20,16 +20,27 @@ import java.awt.Insets
 
     The `UniformGridLayout` is SwingTree's own version of the `GridLayout` of
     the JDK. Both divide a container into cells of equal size and place one
-    component into each cell, filling the grid row by row. A hard requirement
-    follows from that: **a `UniformGridLayout` must behave exactly like a
-    `GridLayout`**. Anybody replacing the one with the other should not be able
-    to tell the difference.
+    component into each cell, filling the grid row by row.
+
+    They differ in how the grid is built. A `GridLayout` ignores its column
+    count whenever its row count is not zero, and spreads the components over
+    its rows instead. A `UniformGridLayout` starts a new row after the column
+    count you give it, and leaves out the rows and columns which no component
+    occupies. You can switch it to the behaviour of a `GridLayout` with the
+    mode `UniformGridLayout.Mode.SPREAD_OVER_ROWS` and the setting
+    `UniformGridLayout.CollapseEmpty.NONE`. A hard requirement follows from
+    that: **a `UniformGridLayout` which spreads its components over its rows
+    and collapses nothing must behave exactly like a `GridLayout`**. Anybody
+    replacing the one with the other should not be able to tell the difference.
 
     This specification pins that equivalence down across row counts, column
     counts, component counts, gap sizes, container sizes, component orientations,
     container insets, hidden children, preferred and minimum sizes, and the
     argument checks of the constructors and setters. Every feature builds the
     same UI twice, once with each layout manager, and then compares the results.
+
+    A `UniformGridLayout` scales its gaps by the UI scale factor of SwingTree, and
+    a `GridLayout` does not, so this specification runs at a scale factor of 1.
 
 ''')
 @Subject([UniformGridLayout])
@@ -60,10 +71,14 @@ class Grid_Layout_Invariance_Spec extends Specification
             evenly, both layout managers centre the grid and leave the few pixels
             that are left over as a margin around it.
         """
-        given : 'Two panels with the same number of children, one per layout manager.'
+        given : 'A uniform grid layout which spreads its components over its rows and collapses nothing, like a `GridLayout` does.'
+            var ourLayout = new UniformGridLayout(rows, cols, horizontalGap, verticalGap)
+            ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)
+            ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)
+        and : 'Two panels with the same number of children, one per layout manager.'
             var ours =
                     UI.panel()
-                    .withLayout(new UniformGridLayout(rows, cols, horizontalGap, verticalGap))
+                    .withLayout(ourLayout)
                     .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })
                     .get(JPanel)
             var awts =
@@ -111,10 +126,14 @@ class Grid_Layout_Invariance_Spec extends Specification
             evenly into cells, so the left over pixels have to end up on the same side
             under both layout managers as well.
         """
-        given : 'Two panels with the same component orientation, one per layout manager.'
+        given : 'A uniform grid layout which spreads its components over its rows and collapses nothing, like a `GridLayout` does.'
+            var ourLayout = new UniformGridLayout(rows, cols, 5, 5)
+            ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)
+            ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)
+        and : 'Two panels with the same component orientation, one per layout manager.'
             var ours =
                     UI.panel()
-                    .withLayout(new UniformGridLayout(rows, cols, 5, 5))
+                    .withLayout(ourLayout)
                     .peek({ it.setComponentOrientation(orientation) })
                     .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })
                     .get(JPanel)
@@ -162,10 +181,14 @@ class Grid_Layout_Invariance_Spec extends Specification
             cells for most of the grids in the table, so the pixels left over by rounding
             the cell size down have to end up on the same side under both layout managers.
         """
-        given : 'Two panels carrying the same asymmetric border, one per layout manager.'
+        given : 'A uniform grid layout which spreads its components over its rows and collapses nothing, like a `GridLayout` does.'
+            var ourLayout = new UniformGridLayout(rows, cols, 3, 4)
+            ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)
+            ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)
+        and : 'Two panels carrying the same asymmetric border, one per layout manager.'
             var ours =
                     UI.panel()
-                    .withLayout(new UniformGridLayout(rows, cols, 3, 4))
+                    .withLayout(ourLayout)
                     .peek({ it.setBorder(BorderFactory.createEmptyBorder(4, 6, 8, 10)) })
                     .peek({ it.setComponentOrientation(orientation) })
                     .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })
@@ -221,10 +244,14 @@ class Grid_Layout_Invariance_Spec extends Specification
             tallest member, so that a layout manager which picks both values from
             the same child would show.
         """
-        given : 'Two panels with the same children and the same border, one per layout manager.'
+        given : 'A uniform grid layout which spreads its components over its rows and collapses nothing, like a `GridLayout` does.'
+            var ourLayout = new UniformGridLayout(rows, cols, 5, 3)
+            ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)
+            ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)
+        and : 'Two panels with the same children and the same border, one per layout manager.'
             var ours =
                     UI.panel()
-                    .withLayout(new UniformGridLayout(rows, cols, 5, 3))
+                    .withLayout(ourLayout)
                     .peek({ it.setBorder(BorderFactory.createEmptyBorder(1, 2, 3, 4)) })
                     .apply({ ui ->
                         preferredSizes.eachWithIndex { size, i ->
@@ -281,8 +308,12 @@ class Grid_Layout_Invariance_Spec extends Specification
             columns, and reports a negative width. The `UniformGridLayout` reports exactly
             the same, down to the negative number.
         """
-        given : 'Two empty panels with gaps of 5 horizontally and 3 vertically, one per layout manager.'
-            var ours = UI.panel().withLayout(new UniformGridLayout(rows, cols, 5, 3)).get(JPanel)
+        given : 'A uniform grid layout which spreads its components over its rows and collapses nothing, like a `GridLayout` does.'
+            var ourLayout = new UniformGridLayout(rows, cols, 5, 3)
+            ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)
+            ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)
+        and : 'Two empty panels with gaps of 5 horizontally and 3 vertically, one per layout manager.'
+            var ours = UI.panel().withLayout(ourLayout).get(JPanel)
             var awts = UI.panel().withLayout(new GridLayout(rows, cols, 5, 3)).get(JPanel)
         expect : 'Both panels really are empty.'
             ours.getComponentCount() == 0
@@ -311,10 +342,14 @@ class Grid_Layout_Invariance_Spec extends Specification
             it still has to be the same, because a container passes through such sizes
             while a window is being shrunk.
         """
-        given : 'Two panels holding a 2 by 3 grid with gaps of 5, one per layout manager.'
+        given : 'A uniform grid layout which spreads its components over its rows and collapses nothing, like a `GridLayout` does.'
+            var ourLayout = new UniformGridLayout(2, 3, 5, 5)
+            ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)
+            ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)
+        and : 'Two panels holding a 2 by 3 grid with gaps of 5, one per layout manager.'
             var ours =
                     UI.panel()
-                    .withLayout(new UniformGridLayout(2, 3, 5, 5))
+                    .withLayout(ourLayout)
                     .apply({ ui -> (0..<6).each { ui.add(UI.box().withPrefSize(30, 20)) } })
                     .get(JPanel)
             var awts =
@@ -351,10 +386,14 @@ class Grid_Layout_Invariance_Spec extends Specification
             keep that behaviour, because a grid in which components move around when
             one of them is hidden would be a different layout altogether.
         """
-        given : 'Two panels with five children, the second of which is hidden, one per layout manager.'
+        given : 'A uniform grid layout which spreads its components over its rows and collapses nothing, like a `GridLayout` does.'
+            var ourLayout = new UniformGridLayout(2, 3, 5, 5)
+            ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)
+            ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)
+        and : 'Two panels with five children, the second of which is hidden, one per layout manager.'
             var ours =
                     UI.panel()
-                    .withLayout(new UniformGridLayout(2, 3, 5, 5))
+                    .withLayout(ourLayout)
                     .add(UI.box().withPrefSize(30, 20))
                     .add(UI.box().withPrefSize(30, 20).isVisibleIf(false))
                     .add(UI.box().withPrefSize(30, 20))
@@ -394,9 +433,12 @@ class Grid_Layout_Invariance_Spec extends Specification
             uses the new values. Both layout managers start from their default here:
             a single row with a cell for every component and no gaps.
         """
-        given : 'Two panels with seven children, each using its layout manager in its default configuration.'
+        given : 'A uniform grid layout which spreads its components over its rows and collapses nothing, and a JDK grid layout, both otherwise in their default configuration.'
             var ourLayout = new UniformGridLayout()
+            ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)
+            ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)
             var awtLayout = new GridLayout()
+        and : 'Two panels with seven children, one per layout manager.'
             var ours =
                     UI.panel()
                     .withLayout(ourLayout)
