@@ -10,12 +10,12 @@ import swingtree.api.Layout
 import swingtree.layout.AddConstraint
 import swingtree.layout.MigAddConstraint
 import swingtree.layout.ResponsiveGridFlowLayout
+import swingtree.layout.UniformGridLayout
 import swingtree.components.JBox
 import swingtree.layout.LayoutConstraint
 import swingtree.threading.EventProcessor
 
 import java.awt.BorderLayout
-import java.awt.GridLayout
 import javax.swing.BoxLayout
 import javax.swing.JPanel
 import swingtree.layout.Bounds
@@ -934,13 +934,14 @@ class Reactive_Layout_Spec extends Specification
         reportInfo """
             SwingTree's reactive layout system is not limited to MigLayout and
             `ResponsiveGridFlowLayout`. `Layout.grid(rows, cols)` installs a
-            `java.awt.GridLayout`, and `Layout.box(UI.Axis)` installs a
+            `UniformGridLayout`, and `Layout.box(UI.Axis)` installs a
             `javax.swing.BoxLayout`. Both are installed or replaced exactly like
             any other `Layout` implementation — just call `Var.set(...)` with the
             desired value.
 
-            `GridLayout` exposes setters for all of its properties (rows, columns, and
-            both gap sizes), so SwingTree can update an existing `GridLayout` instance
+            `UniformGridLayout` exposes setters for all of its properties (rows, columns,
+            both gap sizes, its mode and which empty rows and columns it leaves out), so
+            SwingTree can update an existing `UniformGridLayout` instance
             in-place when the layout type hasn't changed. The identity of the manager
             object is preserved across such constraint-only updates.
 
@@ -958,20 +959,20 @@ class Reactive_Layout_Spec extends Specification
         expect: 'The panel starts with a MigLayout:'
             (panel.getLayout() instanceof MigLayout)
 
-        when: 'We switch to a 2-row, 3-column GridLayout:'
+        when: 'We switch to a 2-row, 3-column UniformGridLayout:'
             layout.set(Layout.grid(2, 3))
-        then: 'A GridLayout is installed with exactly those dimensions:'
-            panel.getLayout() instanceof GridLayout
-            ((GridLayout) panel.getLayout()).getRows() == 2
-            ((GridLayout) panel.getLayout()).getColumns() == 3
+        then: 'A UniformGridLayout is installed with exactly those dimensions:'
+            panel.getLayout() instanceof UniformGridLayout
+            ((UniformGridLayout) panel.getLayout()).getRows() == 2
+            ((UniformGridLayout) panel.getLayout()).getColumns() == 3
 
-        when: 'We update the GridLayout to different dimensions — the type stays the same:'
+        when: 'We update the UniformGridLayout to different dimensions — the type stays the same:'
             def firstGridLayout = panel.getLayout()
             layout.set(Layout.grid(3, 2))
-        then: 'The row/column counts are updated in-place on the existing GridLayout instance:'
+        then: 'The row/column counts are updated in-place on the existing UniformGridLayout instance:'
             panel.getLayout().is(firstGridLayout)
-            ((GridLayout) panel.getLayout()).getRows() == 3
-            ((GridLayout) panel.getLayout()).getColumns() == 2
+            ((UniformGridLayout) panel.getLayout()).getRows() == 3
+            ((UniformGridLayout) panel.getLayout()).getColumns() == 2
 
         when: 'We switch to a horizontal BoxLayout:'
             layout.set(Layout.box(UI.Axis.HORIZONTAL))
