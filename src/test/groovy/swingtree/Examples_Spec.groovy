@@ -840,4 +840,20 @@ class Examples_Spec extends Specification
             noExceptionThrown()
     }
 
+    def 'The tile workshop, an interactive guide to grid layouts, can be created error free.'() {
+        reportInfo """
+            The ${Utility.link('tile workshop', examples.grids.TileWorkshopView)} is a small
+            application for testing <code>withGridLayout(..)</code> and <code>Layout.grid(..)</code>
+            by hand. Each of its tabs lays out numbered tiles in one or more grids, explains
+            what the grids show, and offers a slider which adds or removes tiles. Its last tab
+            binds a grid to a <code>Val&lt;Layout&gt;</code> whose mode, empty rows and columns,
+            numbers of rows and columns and gaps can all be chosen, optionally next to a
+            <code>java.awt.GridLayout</code> with the same numbers.
+        """
+        when :
+            new examples.grids.TileWorkshopView(Var.of(examples.grids.TileWorkshopViewModel.initial()))
+        then :
+            noExceptionThrown()
+    }
+
 }
