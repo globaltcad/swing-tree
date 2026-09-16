@@ -448,6 +448,7 @@ public interface Layout
         return new ForGridLayout(
                     UniformGridLayout.Mode.WRAP_AFTER_COLUMNS,
                     UniformGridLayout.CollapseEmpty.ROWS_AND_COLUMNS,
+                    UniformGridLayout.OverflowGrowth.ADD_ROWS,
                     rows, cols, horizontalGap, verticalGap
                 );
     }
@@ -476,11 +477,14 @@ public interface Layout
      *  and {@code collapseEmpty} decides which of the rows and columns that no child occupies
      *  are left out. So in a style like
      *  {@code it.layout(Layout.grid(Mode.SPREAD_OVER_ROWS, CollapseEmpty.NONE, 2, 5, 5, 5))},
-     *  the children are laid out exactly like a {@link GridLayout} with 2 rows, 5 columns and
-     *  gaps of 5 pixels lays them out at a UI scale factor of 1, and with
+     *  the children are spread over 2 rows with every empty cell kept, and with
      *  {@code Layout.grid(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.NONE, 2, 5, 5, 5)}, 3 children
-     *  take the first 3 cells of a grid of 2 rows and 5 columns. See {@link UniformGridLayout.Mode}
-     *  and {@link UniformGridLayout.CollapseEmpty} for what each setting does.
+     *  take the first 3 cells of a grid of 2 rows and 5 columns. To lay children out exactly like a
+     *  {@link GridLayout}, add {@code OverflowGrowth.ADD_COLUMNS} through
+     *  {@link #grid(UniformGridLayout.Mode, UniformGridLayout.CollapseEmpty, UniformGridLayout.OverflowGrowth, int, int, int, int)},
+     *  which is the growth policy that makes room the way a {@code GridLayout} makes room. See
+     *  {@link UniformGridLayout.Mode} and {@link UniformGridLayout.CollapseEmpty} for what each
+     *  setting does.
      *
      * @param mode How the grid is built from the numbers of rows and columns.
      * @param collapseEmpty Which of the rows and columns that no child occupies are left out.
@@ -498,7 +502,11 @@ public interface Layout
         int horizontalGap,
         int verticalGap
     ) {
-        return new ForGridLayout( mode, collapseEmpty, rows, cols, horizontalGap, verticalGap );
+        return new ForGridLayout(
+                    mode, collapseEmpty,
+                    UniformGridLayout.OverflowGrowth.ADD_ROWS,
+                    rows, cols, horizontalGap, verticalGap
+                );
     }
 
     /**
@@ -520,6 +528,64 @@ public interface Layout
         int cols
     ) {
         return grid( mode, collapseEmpty, rows, cols, 0, 0 );
+    }
+
+    /**
+     *  A factory method for a {@link ForGridLayout} which installs a {@link UniformGridLayout}
+     *  with every one of its settings, the given numbers of rows and columns and the given gaps
+     *  onto a component.
+     *  <p>
+     *  On top of {@link #grid(UniformGridLayout.Mode, UniformGridLayout.CollapseEmpty, int, int, int, int)},
+     *  {@code overflowGrowth} decides how the grid grows when it holds more children than cells. So in a
+     *  style like
+     *  {@code it.layout(Layout.grid(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.NONE, OverflowGrowth.ADD_ROWS_AND_COLUMNS, 2, 5, 5, 5))},
+     *  13 children are laid out in 3 rows of 6 columns, because growing both numbers keeps the grid
+     *  closer to the declared ratio of 2 rows to 5 columns than a third row alone would.
+     *  See {@link UniformGridLayout.OverflowGrowth} for what each setting does.
+     *
+     * @param mode How the grid is built from the numbers of rows and columns.
+     * @param collapseEmpty Which of the rows and columns that no child occupies are left out.
+     * @param overflowGrowth How the grid grows when it holds more children than cells.
+     * @param rows The number of rows, or 0 for as many rows as the children need.
+     * @param cols The number of columns, or 0 for as many columns as the children need.
+     * @param horizontalGap The space between neighbouring columns, in pixels at a UI scale factor of 1.
+     * @param verticalGap The space between neighbouring rows, in pixels at a UI scale factor of 1.
+     * @return A {@link ForGridLayout} which installs a {@link UniformGridLayout} onto a component.
+     */
+    static ForGridLayout grid(
+        UniformGridLayout.Mode           mode,
+        UniformGridLayout.CollapseEmpty  collapseEmpty,
+        UniformGridLayout.OverflowGrowth overflowGrowth,
+        int rows,
+        int cols,
+        int horizontalGap,
+        int verticalGap
+    ) {
+        return new ForGridLayout( mode, collapseEmpty, overflowGrowth, rows, cols, horizontalGap, verticalGap );
+    }
+
+    /**
+     *  A factory method for a {@link ForGridLayout} which installs a {@link UniformGridLayout}
+     *  with every one of its settings and the given numbers of rows and columns, and no gaps,
+     *  onto a component.
+     *  See {@link #grid(UniformGridLayout.Mode, UniformGridLayout.CollapseEmpty, UniformGridLayout.OverflowGrowth, int, int, int, int)}
+     *  for what the settings do.
+     *
+     * @param mode How the grid is built from the numbers of rows and columns.
+     * @param collapseEmpty Which of the rows and columns that no child occupies are left out.
+     * @param overflowGrowth How the grid grows when it holds more children than cells.
+     * @param rows The number of rows, or 0 for as many rows as the children need.
+     * @param cols The number of columns, or 0 for as many columns as the children need.
+     * @return A {@link ForGridLayout} which installs a {@link UniformGridLayout} onto a component.
+     */
+    static ForGridLayout grid(
+        UniformGridLayout.Mode           mode,
+        UniformGridLayout.CollapseEmpty  collapseEmpty,
+        UniformGridLayout.OverflowGrowth overflowGrowth,
+        int rows,
+        int cols
+    ) {
+        return grid( mode, collapseEmpty, overflowGrowth, rows, cols, 0, 0 );
     }
 
     /**
@@ -1618,8 +1684,9 @@ public interface Layout
     /**
      *  A {@link Layout} which installs a {@link UniformGridLayout} onto a component, created
      *  through one of the {@link Layout#grid(int, int)} factory methods. It consists of the
-     *  mode of the grid, which of its empty rows and columns are left out, the numbers of rows
-     *  and columns, and the horizontal and vertical gaps.
+     *  mode of the grid, which of its empty rows and columns are left out, how it grows when it
+     *  holds more children than cells, the numbers of rows and columns, and the horizontal and
+     *  vertical gaps.
      *  <p>
      *  When the component already has a {@link UniformGridLayout}, for example one installed through
      *  {@link swingtree.UIForAnySwing#withGridLayout(int, int)} or by an earlier {@link ForGridLayout},
@@ -1628,23 +1695,26 @@ public interface Layout
     @Immutable
     final class ForGridLayout implements Layout
     {
-        private final UniformGridLayout.Mode          _mode;
-        private final UniformGridLayout.CollapseEmpty _collapseEmpty;
+        private final UniformGridLayout.Mode           _mode;
+        private final UniformGridLayout.CollapseEmpty  _collapseEmpty;
+        private final UniformGridLayout.OverflowGrowth _overflowGrowth;
         private final int _rows;
         private final int _cols;
         private final int _hgap;
         private final int _vgap;
 
         ForGridLayout(
-            UniformGridLayout.Mode          mode,
-            UniformGridLayout.CollapseEmpty collapseEmpty,
+            UniformGridLayout.Mode           mode,
+            UniformGridLayout.CollapseEmpty  collapseEmpty,
+            UniformGridLayout.OverflowGrowth overflowGrowth,
             int rows,
             int cols,
             int hgap,
             int vgap
         ) {
-            _mode          = Objects.requireNonNull(mode);
-            _collapseEmpty = Objects.requireNonNull(collapseEmpty);
+            _mode           = Objects.requireNonNull(mode);
+            _collapseEmpty  = Objects.requireNonNull(collapseEmpty);
+            _overflowGrowth = Objects.requireNonNull(overflowGrowth);
             _rows = rows;
             _cols = cols;
             _hgap = hgap;
@@ -1662,7 +1732,7 @@ public interface Layout
          * @return A new {@link ForGridLayout} with the given mode.
          */
         public ForGridLayout withMode( UniformGridLayout.Mode mode ) {
-            return new ForGridLayout( mode, _collapseEmpty, _rows, _cols, _hgap, _vgap );
+            return new ForGridLayout( mode, _collapseEmpty, _overflowGrowth, _rows, _cols, _hgap, _vgap );
         }
 
         /**
@@ -1676,10 +1746,26 @@ public interface Layout
          * @return A new {@link ForGridLayout} with the given setting.
          */
         public ForGridLayout withCollapseEmpty( UniformGridLayout.CollapseEmpty collapseEmpty ) {
-            return new ForGridLayout( _mode, collapseEmpty, _rows, _cols, _hgap, _vgap );
+            return new ForGridLayout( _mode, collapseEmpty, _overflowGrowth, _rows, _cols, _hgap, _vgap );
         }
 
-        @Override public int hashCode() { return Objects.hash(_mode, _collapseEmpty, _rows, _cols, _hgap, _vgap); }
+        /**
+         *  Returns a new {@link ForGridLayout} which grows an overflowing grid in the given way, with
+         *  all other properties copied unchanged. A grid overflows when it holds more children than
+         *  its number of rows times its number of columns: with
+         *  {@link UniformGridLayout.OverflowGrowth#ADD_ROWS}, 13 children of a grid of 2 rows and
+         *  5 columns are laid out in 3 rows of 5 columns, with
+         *  {@link UniformGridLayout.OverflowGrowth#ADD_COLUMNS} in 2 rows of 7 columns, and with
+         *  {@link UniformGridLayout.OverflowGrowth#ADD_ROWS_AND_COLUMNS} in 3 rows of 6 columns.
+         *
+         * @param overflowGrowth How the grid grows when it holds more children than cells.
+         * @return A new {@link ForGridLayout} with the given setting.
+         */
+        public ForGridLayout withOverflowGrowth( UniformGridLayout.OverflowGrowth overflowGrowth ) {
+            return new ForGridLayout( _mode, _collapseEmpty, overflowGrowth, _rows, _cols, _hgap, _vgap );
+        }
+
+        @Override public int hashCode() { return Objects.hash(_mode, _collapseEmpty, _overflowGrowth, _rows, _cols, _hgap, _vgap); }
 
         @Override
         public boolean equals(Object o) {
@@ -1688,6 +1774,7 @@ public interface Layout
             if ( o.getClass() != getClass() ) return false;
             ForGridLayout other = (ForGridLayout) o;
             return _mode == other._mode && _collapseEmpty == other._collapseEmpty &&
+                   _overflowGrowth == other._overflowGrowth &&
                    _rows == other._rows && _cols == other._cols && _hgap == other._hgap && _vgap == other._vgap;
         }
 
@@ -1703,25 +1790,24 @@ public interface Layout
         public void installFor( JComponent component ) {
             LayoutManager currentLayout = component.getLayout();
             if ( !(currentLayout instanceof UniformGridLayout) ) {
-                UniformGridLayout newLayout = new UniformGridLayout(_rows, _cols, _hgap, _vgap);
-                newLayout.setMode(_mode);
-                newLayout.setCollapseEmpty(_collapseEmpty);
-                component.setLayout(newLayout);
+                component.setLayout(new UniformGridLayout(_mode, _collapseEmpty, _overflowGrowth, _rows, _cols, _hgap, _vgap));
                 component.revalidate();
                 return;
             }
             UniformGridLayout gridLayout = (UniformGridLayout) currentLayout;
 
-            boolean modeChanged          = _mode          != gridLayout.getMode();
-            boolean collapseEmptyChanged = _collapseEmpty != gridLayout.getCollapseEmpty();
-            boolean rowsChanged          = _rows != gridLayout.getRows();
-            boolean colsChanged          = _cols != gridLayout.getColumns();
-            boolean horizontalGapChanged = _hgap != gridLayout.getHgap();
-            boolean verticalGapChanged   = _vgap != gridLayout.getVgap();
+            boolean modeChanged           = _mode           != gridLayout.getMode();
+            boolean collapseEmptyChanged  = _collapseEmpty  != gridLayout.getCollapseEmpty();
+            boolean overflowGrowthChanged = _overflowGrowth != gridLayout.getOverflowGrowth();
+            boolean rowsChanged           = _rows != gridLayout.getRows();
+            boolean colsChanged           = _cols != gridLayout.getColumns();
+            boolean horizontalGapChanged  = _hgap != gridLayout.getHgap();
+            boolean verticalGapChanged    = _vgap != gridLayout.getVgap();
 
-            if ( modeChanged || collapseEmptyChanged || rowsChanged || colsChanged || horizontalGapChanged || verticalGapChanged ) {
+            if ( modeChanged || collapseEmptyChanged || overflowGrowthChanged || rowsChanged || colsChanged || horizontalGapChanged || verticalGapChanged ) {
                 gridLayout.setMode(_mode);
                 gridLayout.setCollapseEmpty(_collapseEmpty);
+                gridLayout.setOverflowGrowth(_overflowGrowth);
                 _setCountsWithoutEverZeroingBoth(gridLayout);
                 gridLayout.setHgap(_hgap);
                 gridLayout.setVgap(_vgap);
@@ -1743,6 +1829,7 @@ public interface Layout
             return getClass().getSimpleName() + "[" +
                         "mode=" + _mode + ", " +
                         "collapseEmpty=" + _collapseEmpty + ", " +
+                        "overflowGrowth=" + _overflowGrowth + ", " +
                         "rows=" + _rows + ", " +
                         "cols=" + _cols + ", " +
                         "hgap=" + _hgap + ", " +

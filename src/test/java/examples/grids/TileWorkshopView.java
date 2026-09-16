@@ -15,6 +15,7 @@ import swingtree.api.model.SliderTicks;
 import swingtree.components.JBox;
 import swingtree.layout.FlowCell;
 import swingtree.layout.UniformGridLayout.CollapseEmpty;
+import swingtree.layout.UniformGridLayout.OverflowGrowth;
 import swingtree.layout.UniformGridLayout.Mode;
 import swingtree.threading.EventProcessor;
 
@@ -41,8 +42,9 @@ import static swingtree.UI.*;
  *      <li><b>Like GridLayout</b> — the settings which lay out tiles exactly like a
  *          {@link GridLayout}, next to one.</li>
  *      <li><b>Open counts</b> — a row or column count of 0.</li>
- *      <li><b>Workbench</b> — every setting chosen by hand, bound through a {@code Val<Layout>},
- *          optionally next to a {@link GridLayout} with the same counts.</li>
+ *      <li><b>Workbench</b> — every setting chosen by hand, including how the grid grows when
+ *          it holds more tiles than cells, bound through a {@code Val<Layout>}, optionally next
+ *          to a {@link GridLayout} with the same counts.</li>
  *  </ol>
  *  The numbers on the tiles are the order in which they were added, which makes the
  *  order in which a grid fills its cells visible. Run {@link #main(String...)} to open it.
@@ -301,6 +303,7 @@ public final class TileWorkshopView extends JPanel
         Var<Integer>        tileCount     = bench.zoomTo(Workbench::tileCount,              Workbench::withTileCount);
         Var<Mode>           mode          = bench.zoomTo(Workbench::mode,                   Workbench::withMode);
         Var<CollapseEmpty>  collapseEmpty = bench.zoomTo(Workbench::collapseEmpty,          Workbench::withCollapseEmpty);
+        Var<OverflowGrowth> growth        = bench.zoomTo(Workbench::overflowGrowth,         Workbench::withOverflowGrowth);
         Var<Integer>        rows          = bench.zoomTo(Workbench::rows,                   Workbench::withDeclaredRows);
         Var<Integer>        columns       = bench.zoomTo(Workbench::columns,                Workbench::withDeclaredColumns);
         Var<Integer>        gap           = bench.zoomTo(Workbench::gap,                    Workbench::withGap);
@@ -308,11 +311,12 @@ public final class TileWorkshopView extends JPanel
         Var<Boolean>        compared      = bench.zoomTo(Workbench::comparedWithGridLayout, Workbench::withComparedWithGridLayout);
 
         Val<Layout> uniformLayout = bench.viewAs(Layout.class, b ->
-                                        Layout.grid(b.mode(), b.collapseEmpty(), b.rows(), b.columns(), b.gap(), b.gap())
+                                        Layout.grid(b.mode(), b.collapseEmpty(), b.overflowGrowth(), b.rows(), b.columns(), b.gap(), b.gap())
                                     );
         Val<Layout> awtLayout     = bench.viewAs(Layout.class, b -> new AwtGridLayout(b.rows(), b.columns(), b.gap()));
         Val<String> uniformTitle  = bench.viewAsString( b ->
                                         "Layout.grid(" + b.mode().name() + ", " + b.collapseEmpty().name() + ", " +
+                                        b.overflowGrowth().name() + ", " +
                                         b.rows() + ", " + b.columns() + ", " + b.gap() + ", " + b.gap() + ")"
                                     );
         Val<String> awtTitle      = awtLayout.viewAsString(Object::toString);
@@ -333,6 +337,11 @@ public final class TileWorkshopView extends JPanel
                 .add(FIELD_SPAN,
                     field("CollapseEmpty",
                         comboBox(collapseEmpty).withTooltip("Which rows and columns without a tile are left out")
+                    )
+                )
+                .add(FIELD_SPAN,
+                    field("OverflowGrowth",
+                        comboBox(growth).withTooltip("How the grid grows when there are more tiles than cells")
                     )
                 )
                 .add(FIELD_SPAN, field("Gaps", slider(UI.Axis.HORIZONTAL, 0, 24, gap).withTicks(GAP_TICKS)))
@@ -367,6 +376,11 @@ public final class TileWorkshopView extends JPanel
                             button("Like java.awt.GridLayout")
                             .withTooltip("SPREAD_OVER_ROWS and NONE")
                             .onClick( it -> bench.update(Workbench::withGridLayoutSettings) )
+                        )
+                        .add("wmin 0",
+                            button("Overflowing grid")
+                            .withTooltip("16 tiles in a declared grid of 1 row and 4 columns, which has only 4 cells")
+                            .onClick( it -> bench.update(Workbench::withOverflowShowcase) )
                         )
                     )
                 )

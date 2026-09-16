@@ -7,6 +7,7 @@ import spock.lang.Title
 import swingtree.layout.UniformGridLayout
 import swingtree.layout.UniformGridLayout.CollapseEmpty
 import swingtree.layout.UniformGridLayout.Mode
+import swingtree.layout.UniformGridLayout.OverflowGrowth
 import swingtree.threading.EventProcessor
 import utility.SwingTreeTestConfigurator
 
@@ -43,6 +44,16 @@ import java.awt.Rectangle
     leaves out the 2 empty columns, `ROWS` leaves out the empty row, and
     `ROWS_AND_COLUMNS`, the default, leaves out both, so the 3 components fill a
     single row of 3 columns.
+
+    The `UniformGridLayout.OverflowGrowth` setting decides how the grid grows when
+    it holds more components than its row count times its column count. For 13
+    components in a grid of 2 rows and 5 columns, which has 10 cells, `ADD_ROWS`,
+    the default, keeps the 5 columns and adds a third row, `ADD_COLUMNS` keeps the
+    2 rows and widens the grid to 7 columns, and `ADD_ROWS_AND_COLUMNS` adds a row
+    or a column at a time, each time the one which keeps the ratio of rows to
+    columns closest to the declared 2 : 5, which gives 3 rows of 6 columns. Only a
+    grid in the mode `WRAP_AFTER_COLUMNS` whose row and column counts are both
+    greater than zero can overflow at all.
 
     A row or column count of zero means "as many as the components need". The
     "Grid Layout Invariance" specification shows that a `UniformGridLayout` with
@@ -195,6 +206,13 @@ class Uniform_Grid_Layout_Spec extends Specification
             builds its grid: 3 components in a grid of 2 rows and 5 columns get 2 columns,
             8 components get 4 and 11 components get 6.
 
+            The column count is not ignored entirely: together with the row count it says
+            how many cells the grid has, and once there are more components than that, the
+            `OverflowGrowth` setting decides on which axis the grid makes room. This feature
+            is about the spreading itself, so it uses `ADD_COLUMNS`, the policy which keeps
+            widening the grid the way a `GridLayout` does. The feature after the next one
+            shows what the other two policies do instead.
+
             Spreading the components like that never leaves a column empty, so collapsing
             empty columns changes nothing in this mode. It can leave rows empty, though:
             2 components in a grid of 3 rows get a single column, and only reach 2 of the
@@ -208,10 +226,11 @@ class Uniform_Grid_Layout_Spec extends Specification
         given : 'A container exactly large enough for the expected grid of 40 by 20 pixel cells.'
             var width  = columnsLaidOut * 40 + (columnsLaidOut - 1) * 5
             var height = rowsLaidOut * 20 + (rowsLaidOut - 1) * 5
-        and : 'A panel with a uniform grid layout which spreads its components over its rows, and collapses what the table says.'
+        and : 'A panel with a uniform grid layout which spreads its components over its rows, grows by columns, and collapses what the table says.'
             var layout = new UniformGridLayout(rows, cols, 5, 5)
             layout.setMode(Mode.SPREAD_OVER_ROWS)
             layout.setCollapseEmpty(collapseEmpty)
+            layout.setOverflowGrowth(OverflowGrowth.ADD_COLUMNS)
             var panel =
                     UI.panel()
                     .withLayout(layout)
@@ -415,7 +434,8 @@ class Uniform_Grid_Layout_Spec extends Specification
     }
 
     def 'The preferred and minimum size of a `UniformGridLayout` fit the grid it lays out.'(
-        Mode mode, CollapseEmpty collapseEmpty, int rows, int cols, int components, Dimension preferredSize, Dimension minimumSize
+        Mode mode, CollapseEmpty collapseEmpty, OverflowGrowth overflowGrowth,
+        int rows, int cols, int components, Dimension preferredSize, Dimension minimumSize
     ) {
         reportInfo """
             A `UniformGridLayout` works out the number of rows and columns in the same
@@ -431,6 +451,12 @@ class Uniform_Grid_Layout_Spec extends Specification
             5 columns, and in the mode `SPREAD_OVER_ROWS`, they prefer the size of 2 rows
             and 2 columns.
 
+            Once a grid holds more components than its declared numbers multiply to, the
+            growth policy decides the shape it is measured against, in both modes: 11
+            components in a grid of 2 rows and 5 columns are measured as 3 rows of 5 columns
+            under `ADD_ROWS` and as 2 rows of 6 columns under `ADD_COLUMNS`, whichever mode
+            built the grid.
+
             That is also why a grid laid out at its own preferred size gives every
             child exactly its preferred size.
         """
@@ -438,6 +464,7 @@ class Uniform_Grid_Layout_Spec extends Specification
             var layout = new UniformGridLayout(rows, cols, 5, 5)
             layout.setMode(mode)
             layout.setCollapseEmpty(collapseEmpty)
+            layout.setOverflowGrowth(overflowGrowth)
         and : 'A panel whose children prefer 30 by 20 pixels and need at least 10 by 5 pixels.'
             var panel =
                     UI.panel()
@@ -460,19 +487,21 @@ class Uniform_Grid_Layout_Spec extends Specification
             sizes.every { it == new Dimension(30, 20) }
 
         where :
-            mode                    | collapseEmpty                  | rows | cols | components | preferredSize          | minimumSize
-            Mode.WRAP_AFTER_COLUMNS | CollapseEmpty.ROWS_AND_COLUMNS | 2    | 5    | 8          | new Dimension(170, 45) | new Dimension(70, 15)
-            Mode.WRAP_AFTER_COLUMNS | CollapseEmpty.ROWS_AND_COLUMNS | 2    | 5    | 3          | new Dimension(100, 20) | new Dimension(40, 5)
-            Mode.WRAP_AFTER_COLUMNS | CollapseEmpty.ROWS_AND_COLUMNS | 2    | 5    | 11         | new Dimension(170, 70) | new Dimension(70, 25)
-            Mode.WRAP_AFTER_COLUMNS | CollapseEmpty.ROWS_AND_COLUMNS | 3    | 3    | 4          | new Dimension(100, 45) | new Dimension(40, 15)
-            Mode.WRAP_AFTER_COLUMNS | CollapseEmpty.ROWS_AND_COLUMNS | 0    | 4    | 6          | new Dimension(135, 45) | new Dimension(55, 15)
-            Mode.WRAP_AFTER_COLUMNS | CollapseEmpty.NONE             | 2    | 5    | 3          | new Dimension(170, 45) | new Dimension(70, 15)
-            Mode.WRAP_AFTER_COLUMNS | CollapseEmpty.COLUMNS          | 2    | 5    | 3          | new Dimension(100, 45) | new Dimension(40, 15)
-            Mode.WRAP_AFTER_COLUMNS | CollapseEmpty.ROWS             | 2    | 5    | 3          | new Dimension(170, 20) | new Dimension(70, 5)
-            Mode.SPREAD_OVER_ROWS   | CollapseEmpty.NONE             | 2    | 5    | 3          | new Dimension(65, 45)  | new Dimension(25, 15)
-            Mode.SPREAD_OVER_ROWS   | CollapseEmpty.NONE             | 2    | 5    | 11         | new Dimension(205, 45) | new Dimension(85, 15)
-            Mode.SPREAD_OVER_ROWS   | CollapseEmpty.NONE             | 3    | 0    | 2          | new Dimension(30, 70)  | new Dimension(10, 25)
-            Mode.SPREAD_OVER_ROWS   | CollapseEmpty.ROWS             | 3    | 0    | 2          | new Dimension(30, 45)  | new Dimension(10, 15)
+            mode                    | collapseEmpty                  | overflowGrowth             | rows | cols | components | preferredSize          | minimumSize
+            Mode.WRAP_AFTER_COLUMNS | CollapseEmpty.ROWS_AND_COLUMNS | OverflowGrowth.ADD_ROWS    | 2    | 5    | 8          | new Dimension(170, 45) | new Dimension(70, 15)
+            Mode.WRAP_AFTER_COLUMNS | CollapseEmpty.ROWS_AND_COLUMNS | OverflowGrowth.ADD_ROWS    | 2    | 5    | 3          | new Dimension(100, 20) | new Dimension(40, 5)
+            Mode.WRAP_AFTER_COLUMNS | CollapseEmpty.ROWS_AND_COLUMNS | OverflowGrowth.ADD_ROWS    | 2    | 5    | 11         | new Dimension(170, 70) | new Dimension(70, 25)
+            Mode.WRAP_AFTER_COLUMNS | CollapseEmpty.ROWS_AND_COLUMNS | OverflowGrowth.ADD_COLUMNS | 2    | 5    | 11         | new Dimension(205, 45) | new Dimension(85, 15)
+            Mode.WRAP_AFTER_COLUMNS | CollapseEmpty.ROWS_AND_COLUMNS | OverflowGrowth.ADD_ROWS    | 3    | 3    | 4          | new Dimension(100, 45) | new Dimension(40, 15)
+            Mode.WRAP_AFTER_COLUMNS | CollapseEmpty.ROWS_AND_COLUMNS | OverflowGrowth.ADD_ROWS    | 0    | 4    | 6          | new Dimension(135, 45) | new Dimension(55, 15)
+            Mode.WRAP_AFTER_COLUMNS | CollapseEmpty.NONE             | OverflowGrowth.ADD_ROWS    | 2    | 5    | 3          | new Dimension(170, 45) | new Dimension(70, 15)
+            Mode.WRAP_AFTER_COLUMNS | CollapseEmpty.COLUMNS          | OverflowGrowth.ADD_ROWS    | 2    | 5    | 3          | new Dimension(100, 45) | new Dimension(40, 15)
+            Mode.WRAP_AFTER_COLUMNS | CollapseEmpty.ROWS             | OverflowGrowth.ADD_ROWS    | 2    | 5    | 3          | new Dimension(170, 20) | new Dimension(70, 5)
+            Mode.SPREAD_OVER_ROWS   | CollapseEmpty.NONE             | OverflowGrowth.ADD_ROWS    | 2    | 5    | 3          | new Dimension(65, 45)  | new Dimension(25, 15)
+            Mode.SPREAD_OVER_ROWS   | CollapseEmpty.NONE             | OverflowGrowth.ADD_COLUMNS | 2    | 5    | 11         | new Dimension(205, 45) | new Dimension(85, 15)
+            Mode.SPREAD_OVER_ROWS   | CollapseEmpty.NONE             | OverflowGrowth.ADD_ROWS    | 2    | 5    | 11         | new Dimension(170, 70) | new Dimension(70, 25)
+            Mode.SPREAD_OVER_ROWS   | CollapseEmpty.NONE             | OverflowGrowth.ADD_ROWS    | 3    | 0    | 2          | new Dimension(30, 70)  | new Dimension(10, 25)
+            Mode.SPREAD_OVER_ROWS   | CollapseEmpty.ROWS             | OverflowGrowth.ADD_ROWS    | 3    | 0    | 2          | new Dimension(30, 45)  | new Dimension(10, 15)
     }
 
     def 'Use `setMode(Mode)` to change how an installed `UniformGridLayout` builds its grid.'()
@@ -820,5 +849,186 @@ class Uniform_Grid_Layout_Spec extends Specification
             Mode.SPREAD_OVER_ROWS   | CollapseEmpty.COLUMNS          | 2    | 0
             Mode.SPREAD_OVER_ROWS   | CollapseEmpty.NONE             | 0    | 5
             Mode.SPREAD_OVER_ROWS   | CollapseEmpty.NONE             | 2    | 0
+    }
+
+    def 'Use `OverflowGrowth` to decide how a `UniformGridLayout` grows when it holds more components than cells.'(
+        OverflowGrowth overflowGrowth, int rows, int cols, int components, int rowsLaidOut, int columnsLaidOut
+    ) {
+        reportInfo """
+            A grid which is too small for its components has to grow, and in the mode
+            `WRAP_AFTER_COLUMNS` the `OverflowGrowth` setting decides in which direction:
+
+              - `ADD_ROWS`, the default, keeps the column count you declared and adds rows
+                below the grid,
+              - `ADD_COLUMNS` keeps the row count you declared and adds columns to the right,
+              - `ADD_ROWS_AND_COLUMNS` adds a row or a column at a time, each time the one
+                which keeps the ratio of rows to columns closest to the ratio you declared.
+
+            Whichever direction the grid grows in, it is still filled row by row, so the
+            component at index `i` sits in row `i / columnsLaidOut` and column
+            `i % columnsLaidOut` of the grid it grew into. Only `ADD_ROWS` keeps the column
+            count you declared, so only under `ADD_ROWS` does a component keep its cell
+            while further components are added.
+
+            A grid which is too small has no empty rows or columns, so every `CollapseEmpty`
+            setting gives the same result and the table leaves the default in place. Every
+            container in this table is exactly large enough for cells of 40 by 20 pixels with
+            gaps of 5 pixels, in the grid the declared one grows into.
+        """
+        given : 'A container exactly large enough for the grown grid of 40 by 20 pixel cells.'
+            var width  = columnsLaidOut * 40 + (columnsLaidOut - 1) * 5
+            var height = rowsLaidOut * 20 + (rowsLaidOut - 1) * 5
+        and : 'A panel with more children than its declared grid has cells, growing the way the table says.'
+            var layout = new UniformGridLayout(rows, cols, 5, 5)
+            layout.setOverflowGrowth(overflowGrowth)
+            var panel =
+                    UI.panel()
+                    .withLayout(layout)
+                    .apply({ ui -> (0..<components).each { ui.add(UI.box()) } })
+                    .get(JPanel)
+        expect : 'The declared grid really is too small, and the grown one really does hold every component.'
+            rows * cols < components
+            rowsLaidOut * columnsLaidOut >= components
+        and : 'The grown grid is never smaller than the declared one in either direction.'
+            rowsLaidOut >= rows
+            columnsLaidOut >= cols
+
+        when : 'The panel is laid out at that size,'
+            panel.setSize(width, height)
+            panel.doLayout()
+            var bounds = (0..<components).collect { panel.getComponent(it).getBounds() }
+        then : 'the component at index `i` sits in row `i / columnsLaidOut` and column `i % columnsLaidOut` of the grown grid.'
+            bounds == (0..<components).collect { i -> new Rectangle((i % columnsLaidOut) * 45, i.intdiv(columnsLaidOut) * 25, 40, 20) }
+
+        where :
+            overflowGrowth                      | rows | cols | components || rowsLaidOut | columnsLaidOut
+            OverflowGrowth.ADD_ROWS             | 2    | 5    | 11         || 3           | 5
+            OverflowGrowth.ADD_ROWS             | 2    | 5    | 13         || 3           | 5
+            OverflowGrowth.ADD_ROWS             | 3    | 4    | 13         || 4           | 4
+            OverflowGrowth.ADD_ROWS             | 2    | 2    | 5          || 3           | 2
+            OverflowGrowth.ADD_ROWS             | 1    | 3    | 7          || 3           | 3
+            OverflowGrowth.ADD_COLUMNS          | 2    | 5    | 11         || 2           | 6
+            OverflowGrowth.ADD_COLUMNS          | 2    | 5    | 13         || 2           | 7
+            OverflowGrowth.ADD_COLUMNS          | 3    | 4    | 13         || 3           | 5
+            OverflowGrowth.ADD_COLUMNS          | 2    | 2    | 5          || 2           | 3
+            OverflowGrowth.ADD_COLUMNS          | 1    | 3    | 7          || 1           | 7
+            OverflowGrowth.ADD_ROWS_AND_COLUMNS | 2    | 5    | 11         || 2           | 6
+            OverflowGrowth.ADD_ROWS_AND_COLUMNS | 2    | 5    | 13         || 3           | 6
+            OverflowGrowth.ADD_ROWS_AND_COLUMNS | 3    | 4    | 13         || 3           | 5
+            OverflowGrowth.ADD_ROWS_AND_COLUMNS | 2    | 2    | 5          || 2           | 3
+            OverflowGrowth.ADD_ROWS_AND_COLUMNS | 1    | 3    | 7          || 2           | 5
+    }
+
+    def 'A grid growing by rows and columns keeps the shape of its cells.'(
+        int rows, int cols, int factor
+    ) {
+        reportInfo """
+            A container does not change size because the grid inside it grows, so a cell of a
+            grid of `r` rows and `c` columns in a container `width` by `height` large is
+            `width / c` by `height / r` large. Holding the ratio of rows to columns therefore
+            holds the shape of every cell as well, and that is what `ADD_ROWS_AND_COLUMNS`
+            aims for.
+
+            Whenever a container holds exactly `factor * factor` times as many components as
+            the declared grid has cells, the declared ratio can be met exactly: the grid becomes
+            exactly `factor` times as high and `factor` times as wide, no cell is left over, and
+            every cell has exactly the shape the declared cells had. A grid of 1 row and 4
+            columns holding 400 components, which is 100 times its 4 cells, is laid out in
+            exactly 10 rows of 40 columns.
+
+            This feature lays out the declared number of components and the grown number of
+            components in the very same container of 720 by 720 pixels, and compares the two
+            cell shapes as a ratio of width to height.
+        """
+        given : 'Two panels growing by rows and columns at once, one holding the components the declared grid has cells for, the other holding the grown number.'
+            var declared = panelWithGrowingGrid(rows, cols, rows * cols)
+            var grown    = panelWithGrowingGrid(rows, cols, rows * cols * factor * factor)
+
+        when : 'Both are laid out in a container of exactly the same size,'
+            declared.setSize(720, 720)
+            declared.doLayout()
+            grown.setSize(720, 720)
+            grown.doLayout()
+            var declaredCell = declared.getComponent(0).getBounds()
+            var grownCell    = grown.getComponent(0).getBounds()
+        then : 'the grown grid is exactly the declared grid scaled up by the factor,'
+            grown.getComponentCount() == rows * factor * cols * factor
+            grownCell.@width  == declaredCell.@width.intdiv(factor)
+            grownCell.@height == declaredCell.@height.intdiv(factor)
+        and : 'so a cell of the grown grid has exactly the shape of a cell of the declared grid.'
+            grownCell.@width * declaredCell.@height == declaredCell.@width * grownCell.@height
+
+        where :
+            rows | cols | factor
+            1    | 4    | 10
+            1    | 4    | 2
+            2    | 5    | 2
+            3    | 3    | 4
+            4    | 3    | 3
+    }
+
+    def 'Use `setOverflowGrowth(OverflowGrowth)` to change how an installed `UniformGridLayout` grows.'()
+    {
+        reportInfo """
+            A `UniformGridLayout` reads its growth setting every time it lays out its container,
+            so changing the setting on a layout manager which is already installed changes the
+            grid at the next layout pass. Like the other setters, `setOverflowGrowth(..)` does
+            not lay the container out again by itself.
+
+            The panel in this feature holds 13 children in a grid of 2 rows and 5 columns, which
+            has only 10 cells, in a container of 600 by 300 pixels.
+        """
+        given : 'A panel with a grid of 2 rows and 5 columns, holding 13 children.'
+            var layout = new UniformGridLayout(2, 5)
+            var panel =
+                    UI.panel()
+                    .withLayout(layout)
+                    .apply({ ui -> (0..<13).each { ui.add(UI.box()) } })
+                    .get(JPanel)
+        expect : 'A grid grows by rows unless you say otherwise.'
+            layout.getOverflowGrowth() == OverflowGrowth.ADD_ROWS
+
+        when : 'The panel is laid out at 600 by 300 pixels,'
+            panel.setSize(600, 300)
+            panel.doLayout()
+        then : 'the 13 children fill 3 rows of the 5 declared columns, in cells 120 by 100 pixels large.'
+            panel.getComponent(0).getBounds() == new Rectangle(0, 0, 120, 100)
+            panel.getComponent(5).getBounds() == new Rectangle(0, 100, 120, 100)
+
+        when : 'We tell the layout manager to grow by columns instead, and lay the panel out again,'
+            layout.setOverflowGrowth(OverflowGrowth.ADD_COLUMNS)
+            panel.doLayout()
+        then : 'the grid keeps its 2 declared rows and widens to 7 columns, in cells 85 by 150 pixels large.'
+            panel.getComponent(0).getBounds() == new Rectangle(2, 0, 85, 150)
+            panel.getComponent(7).getBounds() == new Rectangle(2, 150, 85, 150)
+
+        when : 'We tell it to grow by rows and columns at once, and lay the panel out again,'
+            layout.setOverflowGrowth(OverflowGrowth.ADD_ROWS_AND_COLUMNS)
+            panel.doLayout()
+        then : 'the grid grows to 3 rows of 6 columns, in cells 100 by 100 pixels large.'
+            panel.getComponent(0).getBounds() == new Rectangle(0, 0, 100, 100)
+            panel.getComponent(6).getBounds() == new Rectangle(0, 100, 100, 100)
+
+        when : 'We take the growth setting away,'
+            layout.setOverflowGrowth(null)
+        then : 'the layout manager rejects that and keeps the setting it had.'
+            thrown(NullPointerException)
+            layout.getOverflowGrowth() == OverflowGrowth.ADD_ROWS_AND_COLUMNS
+    }
+
+    /**
+     *  Builds a panel whose grid has the given numbers of rows and columns, grows by rows and
+     *  columns at once, keeps every row and column, and holds the given number of children.
+     */
+    private static JPanel panelWithGrowingGrid( int rows, int cols, int children ) {
+        var layout = new UniformGridLayout(
+                            Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.NONE,
+                            OverflowGrowth.ADD_ROWS_AND_COLUMNS,
+                            rows, cols, 0, 0
+                        )
+        return UI.panel()
+               .withLayout(layout)
+               .apply({ ui -> (0..<children).each { ui.add(UI.box()) } })
+               .get(JPanel)
     }
 }

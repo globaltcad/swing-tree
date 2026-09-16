@@ -1829,10 +1829,14 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
      *      UI.panel()
      *      .withGridLayout(UniformGridLayout.Mode.SPREAD_OVER_ROWS, UniformGridLayout.CollapseEmpty.NONE, 2, 5)
      *  }</pre>
-     *  This panel lays out its children exactly like a {@link GridLayout} with 2 rows and 5 columns
-     *  does, and with {@code UniformGridLayout.Mode.WRAP_AFTER_COLUMNS} instead, 3 children would take
-     *  the first 3 cells of a grid of 2 rows and 5 columns. See {@link UniformGridLayout.Mode} and
-     *  {@link UniformGridLayout.CollapseEmpty} for what each setting does.
+     *  This panel spreads its children over 2 rows and keeps every empty cell, and with
+     *  {@code UniformGridLayout.Mode.WRAP_AFTER_COLUMNS} instead, 3 children would take the first 3
+     *  cells of a grid of 2 rows and 5 columns. To lay children out exactly like a {@link GridLayout},
+     *  add {@code UniformGridLayout.OverflowGrowth.ADD_COLUMNS} through
+     *  {@link #withGridLayout(UniformGridLayout.Mode, UniformGridLayout.CollapseEmpty, UniformGridLayout.OverflowGrowth, int, int)},
+     *  which is the growth policy that makes room the way a {@code GridLayout} makes room. See
+     *  {@link UniformGridLayout.Mode} and {@link UniformGridLayout.CollapseEmpty} for what each
+     *  setting does.
      *
      * @param mode How the grid is built from the numbers of rows and columns.
      * @param collapseEmpty Which of the rows and columns that no child occupies are left out.
@@ -1888,6 +1892,81 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
         layout.setMode(mode);
         layout.setCollapseEmpty(collapseEmpty);
         return this.withLayout(layout);
+    }
+
+    /**
+     *  Use this to set a {@link UniformGridLayout} with the given settings and numbers of rows and
+     *  columns, and no gaps, for the component wrapped by this builder. <br>
+     *  On top of {@link #withGridLayout(UniformGridLayout.Mode, UniformGridLayout.CollapseEmpty, int, int)},
+     *  {@code overflowGrowth} decides how the grid grows when it holds more children than cells:
+     *  <pre>{@code
+     *      UI.panel()
+     *      .withGridLayout(UniformGridLayout.Mode.WRAP_AFTER_COLUMNS, UniformGridLayout.CollapseEmpty.NONE,
+     *                      UniformGridLayout.OverflowGrowth.ADD_COLUMNS, 2, 5)
+     *  }</pre>
+     *  This panel keeps all 10 cells of a grid of 2 rows and 5 columns for 3 children, and widens the
+     *  grid to 2 rows of 7 columns for 13 children, instead of adding a third row.
+     *  See {@link UniformGridLayout.OverflowGrowth} for what each setting does.
+     *
+     * @param mode How the grid is built from the numbers of rows and columns.
+     * @param collapseEmpty Which of the rows and columns that no child occupies are left out.
+     * @param overflowGrowth How the grid grows when it holds more children than cells.
+     * @param rows The number of rows, or 0 for as many rows as the children need.
+     * @param cols The number of columns, or 0 for as many columns as the children need.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException If {@code mode}, {@code collapseEmpty} or {@code overflowGrowth} is {@code null}.
+     */
+    public final I withGridLayout(
+        UniformGridLayout.Mode           mode,
+        UniformGridLayout.CollapseEmpty  collapseEmpty,
+        UniformGridLayout.OverflowGrowth overflowGrowth,
+        int rows,
+        int cols
+    ) {
+        return withGridLayout(mode, collapseEmpty, overflowGrowth, rows, cols, 0, 0);
+    }
+
+    /**
+     *  Use this to set a {@link UniformGridLayout} with every one of its settings, the given numbers
+     *  of rows and columns and the given gaps for the component wrapped by this builder. <br>
+     *  The {@code mode} decides how the grid is built from the numbers of rows and columns,
+     *  {@code collapseEmpty} decides which of the rows and columns that no child occupies are left out,
+     *  and {@code overflowGrowth} decides how the grid grows when it holds more children than cells:
+     *  <pre>{@code
+     *      UI.panel()
+     *      .withGridLayout(UniformGridLayout.Mode.WRAP_AFTER_COLUMNS, UniformGridLayout.CollapseEmpty.NONE,
+     *                      UniformGridLayout.OverflowGrowth.ADD_ROWS_AND_COLUMNS, 2, 5, 5, 5)
+     *  }</pre>
+     *  This panel lays out 13 children in 3 rows of 6 columns, because growing both numbers keeps the
+     *  grid closer to the declared ratio of 2 rows to 5 columns than a third row alone would.
+     *  The gaps are declared for a UI scale factor of 1 and scaled by the current UI scale factor every
+     *  time the component is laid out. See {@link UniformGridLayout.Mode},
+     *  {@link UniformGridLayout.CollapseEmpty} and {@link UniformGridLayout.OverflowGrowth} for what
+     *  each setting does.
+     *
+     * @param mode How the grid is built from the numbers of rows and columns.
+     * @param collapseEmpty Which of the rows and columns that no child occupies are left out.
+     * @param overflowGrowth How the grid grows when it holds more children than cells.
+     * @param rows The number of rows, or 0 for as many rows as the children need.
+     * @param cols The number of columns, or 0 for as many columns as the children need.
+     * @param hgap The space between neighbouring columns, in pixels at a UI scale factor of 1.
+     * @param vgap The space between neighbouring rows, in pixels at a UI scale factor of 1.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException If {@code mode}, {@code collapseEmpty} or {@code overflowGrowth} is {@code null}.
+     */
+    public final I withGridLayout(
+        UniformGridLayout.Mode           mode,
+        UniformGridLayout.CollapseEmpty  collapseEmpty,
+        UniformGridLayout.OverflowGrowth overflowGrowth,
+        int rows,
+        int cols,
+        int hgap,
+        int vgap
+    ) {
+        NullUtil.nullArgCheck( mode, "mode", UniformGridLayout.Mode.class );
+        NullUtil.nullArgCheck( collapseEmpty, "collapseEmpty", UniformGridLayout.CollapseEmpty.class );
+        NullUtil.nullArgCheck( overflowGrowth, "overflowGrowth", UniformGridLayout.OverflowGrowth.class );
+        return this.withLayout(new UniformGridLayout(mode, collapseEmpty, overflowGrowth, rows, cols, hgap, vgap));
     }
 
     /**
