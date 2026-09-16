@@ -1,0 +1,386 @@
+{
+  "className":"swingtree.Table_Threading_Spec",
+  "title":"Tables Across Threads",
+  "narrative":"SwingTree tables must be thread safe under the decoupled threading mode:\n    the UI thread (the AWT Event Dispatch Thread) must never read the\n    application thread owned data source of a table directly, and it must never\n    block waiting for the application thread. Conversely, the application thread\n    must be able to update the table data at any time without waiting for the UI\n    thread.\n\n    This is achieved through the same snapshot protocol the combo box models\n    use: the UI thread reads an immutable, UI thread owned `TableData`, which\n    is refreshed by the application thread and published across the thread\n    boundary. For the `Tuple` based reactive table model, the immutable tuple\n    *is* the snapshot, and its change diff is used to sync row insertions,\n    removals and updates to the table incrementally.\n\n    Every feature runs under a timeout, so a blocking handover between the two\n    threads that ever sneaks back into the table machinery fails this\n    specification loudly instead of hanging the build.\n\n    Some of the features below park the UI thread behind a latch, and then peek\n    at the table from this thread before releasing it. This needs no handshake\n    to be deterministic: the UI thread works off its tasks in the order they were\n    handed to it, so a table update published after the latch task can never run\n    before it, no matter how the threads are scheduled.",
+  "subjects":["swingtree.UIForTable","swingtree.AbstractSnapshotTableModel","swingtree.threading.EventProcessor"],
+  "statistics":{
+    "runs":"16",
+    "successRate":"100.0%",
+    "failures":"0",
+    "errors":"0",
+    "skipped":"0",
+    "duration":"?"
+  },
+  "headers":[],"tags":{},"see":[],
+  "features":[ 
+    {
+      "id":"Updating a `Tuple` based table from the application thread never waits for the UI thread.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The application thread must be able to update the rows of a table at\n            any time, even while the UI thread is completely unresponsive. We\n            park the UI thread behind a latch and add a row from this thread:\n            the mutation must return immediately (if it secretly waited for the\n            UI thread, this feature would hang and trip its timeout), and the\n            table must keep offering its old snapshot of the rows until the UI\n            thread is released and catches up.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property of rows and a table built in decoupled mode.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"Alice\", \"30\"),","                    Tuple.of(\"Bob\",   \"42\")","                ))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)","})"]},
+
+        {"kind":"expect","text":"The table offers the two initial rows.","code":["table.rowCount == 2"]},
+
+        {"kind":"when","text":"We park the UI thread and add a row from this thread, peeking at the table before releasing the UI thread.","code":["var gate = new CountDownLatch(1)","UI.run({ gate.await() })","var rowCountWhileParked = -1","try {","    rows.update({ it.add(Tuple.of(\"Carol\", \"27\")) })","    rowCountWhileParked = table.rowCount","} finally {","    gate.countDown()","}","UI.sync()"]},
+
+        {"kind":"then","text":"The mutation returned while the UI thread was still parked, and the table still offered the old rows...","code":["rowCountWhileParked == 2"]},
+
+        {"kind":"and","text":"...but once the UI thread caught up, the new row appeared.","code":["table.rowCount == 3","table.getValueAt(2, 0) == \"Carol\"","table.getValueAt(2, 1) == \"27\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Rendering a `Tuple` based table always sees a consistent snapshot, even during a row mutation storm.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Swing consults `getRowCount()` and `getValueAt(r, c)` whenever it\n            paints a table, at any time. With the snapshot protocol, all reads\n            within one UI thread task are served from a single immutable\n            snapshot. This feature hammers the rows from this thread while the UI\n            thread continuously reads the model like a renderer would, and\n            asserts that not a single read round ever observes an inconsistency\n            (a phantom null or a row that is shorter than the column count).\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A log spy, so that silently logged errors fail this test.","code":["var log = LogSpy.attach()"]},
+
+        {"kind":"and","text":"A `Tuple` based table under mutation pressure, in decoupled mode.","code":["var rows = Var.of(Tuple.of(Tuple.of(\"A\", \"1\"), Tuple.of(\"B\", \"2\")))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)","})"]},
+
+        {"kind":"and","text":"A list collecting every inconsistency a render pass may observe.","code":["var violations = new CopyOnWriteArrayList<String>()"]},
+
+        {"kind":"when","text":"We fire 60 mutation steps from this thread, each followed by a full renderer style read pass on the UI thread.","code":["60.times { step ->","    if ( rows.get().size() < 6 )","        rows.update({ it.add(Tuple.of(\"row-$step\".toString(), step.toString())) })","    else","        rows.update({ it.removeFirst(3) })","    UI.runNow({","        int count = table.rowCount","        int columns = table.columnCount","        for ( int r = 0; r < count; r++ ) {","            for ( int c = 0; c < columns; c++ ) {","                if ( table.getValueAt(r, c) == null )","                    violations.add(\"Phantom null at ($r,$c) of ($count,$columns) in step $step!\".toString())","            }","        }","    })","}","UI.sync()"]},
+
+        {"kind":"then","text":"Not a single render pass observed a torn snapshot.","code":["violations.isEmpty()"]},
+
+        {"kind":"and","text":"No exception was silently logged along the way.","code":["log.errors().isEmpty()"]},
+
+        {"kind":"and","text":"After everything settled, the table agrees with the final row count of the property.","code":["table.rowCount == rows.get().size()"]},
+
+        {"kind":"cleanup","text":"","code":["log.detach()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A `Tuple` based table syncs row mutations from the application thread incrementally.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            Because a `Tuple` carries a description of how it changed, the table\n            model does not blindly rebuild itself whenever the application thread\n            hands it a new tuple. It translates a row insertion into a targeted\n            `fireTableRowsInserted` instead, even across the thread boundary,\n            which is what keeps updates to large tables cheap. (Which kind of\n            change maps onto which events is specified exhaustively in the\n            `Declarative_Tables_Spec`, here we merely make sure that the diff\n            survives the trip from the application thread to the UI thread.)\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property of rows and a table built in decoupled mode.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"A\", \"1\"),","                    Tuple.of(\"B\", \"2\"),","                    Tuple.of(\"C\", \"3\")","                ))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)","})"]},
+
+        {"kind":"and","text":"A listener recording the raw table model events.","code":["var events = new CopyOnWriteArrayList<TableModelEvent>()","table.getModel().addTableModelListener({ TableModelEvent e -> events << e } as TableModelListener)"]},
+
+        {"kind":"when","text":"We insert a row in the middle from this thread, and let the UI thread catch up.","code":["rows.update({ it.addAt(1, Tuple.of(\"X\", \"9\")) })","UI.sync()"]},
+
+        {"kind":"then","text":"Exactly one targeted row insertion event reached the UI thread.","code":["events.size() == 1","events[0].type == TableModelEvent.INSERT","events[0].firstRow == 1","events[0].lastRow == 1"]},
+
+        {"kind":"and","text":"The table reflects the inserted row.","code":["table.rowCount == 4","table.getValueAt(1, 0) == \"X\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A lambda based table bound with `updateOn` is thread safe under the decoupled protocol.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The classic lambda based table model reads its data source live under\n            the coupled mode, but under the decoupled mode it must keep a UI\n            thread owned snapshot instead, refreshed on the application thread\n            when the bound `updateOn` event fires. We park the UI thread, mutate\n            the backing list and fire the event from this thread: the table must\n            keep serving its old snapshot until the UI thread catches up.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A mutable list, an update event, and a lambda based table in decoupled mode.","code":["var data = new CopyOnWriteArrayList<Integer>([1, 2, 3])","var update = Event.create()","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.table().withModel( m -> m","            .colNames(\"V\")","            .rowCount( () -> data.size() )","            .getsEntryAt( (r, c) -> data.get(r) )","            .updateOn(update)","        )","    ).get(JTable)","})"]},
+
+        {"kind":"expect","text":"The table starts with the three initial values from its snapshot.","code":["table.rowCount == 3","table.getValueAt(0, 0) == 1"]},
+
+        {"kind":"when","text":"We park the UI thread, grow the data and fire the update from this thread.","code":["var gate = new CountDownLatch(1)","UI.run({ gate.await() })","var rowCountWhileParked = -1","try {","    data.addAll([4, 5])","    update.fire()","    rowCountWhileParked = table.rowCount","} finally {","    gate.countDown()","}","UI.sync()"]},
+
+        {"kind":"then","text":"The table kept its old snapshot while the UI thread was parked...","code":["rowCountWhileParked == 3"]},
+
+        {"kind":"and","text":"...and reflects the new data once the UI thread caught up.","code":["table.rowCount == 5","table.getValueAt(4, 0) == 5"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grown row major list based table snapshots its new rows, not phantom nulls, under the decoupled protocol.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The older list based data source is snapshotted on the application\n            thread when its update signal fires, while the previous snapshot is\n            still installed for the UI thread. That snapshot must bound-check the\n            live rows against the *live* list, not against the stale snapshot\n            dimensions. Otherwise a grown table would snapshot its freshly added\n            rows as phantom nulls.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A mutable row major matrix and a list based table in decoupled mode.","code":["var data = new CopyOnWriteArrayList<List<String>>([['a', '1'], ['b', '2']])","var update = Event.create()","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.table(UI.CellOrder.ROW_MAJOR, { data } as swingtree.api.model.TableListDataSource)","            .updateTableOn((sprouts.Observable) update)","    ).get(JTable)","})"]},
+
+        {"kind":"expect","text":"The table starts with the two initial rows.","code":["table.rowCount == 2","table.getValueAt(1, 0) == 'b'"]},
+
+        {"kind":"when","text":"We grow the matrix by two rows and fire the update from this thread.","code":["data.add(['c', '3'])","data.add(['d', '4'])","update.fire()","letBothWorldsSettle()"]},
+
+        {"kind":"then","text":"The new rows carry their real values, not phantom nulls.","code":["table.rowCount == 4","table.getValueAt(2, 0) == 'c'","table.getValueAt(3, 0) == 'd'"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grown column major list based table snapshots its new column, not phantom nulls, under the decoupled protocol.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The same bound-checking flaw would bite the column major flavour of the\n            list based model when a column is added: the new column must be\n            snapshotted from the live data, not rejected because it lies beyond the\n            column count of the stale snapshot.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A mutable column major matrix (two columns) and a table in decoupled mode.","code":["var data = new CopyOnWriteArrayList<List<String>>([['a', 'b'], ['1', '2']])","var update = Event.create()","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.table(UI.CellOrder.COLUMN_MAJOR, { data } as swingtree.api.model.TableListDataSource)","            .updateTableOn((sprouts.Observable) update)","    ).get(JTable)","})"]},
+
+        {"kind":"expect","text":"The table starts as a two column, two row table.","code":["table.columnCount == 2","table.rowCount == 2"]},
+
+        {"kind":"when","text":"We add a third column and fire the update from this thread.","code":["data.add(['x', 'y'])","update.fire()","letBothWorldsSettle()"]},
+
+        {"kind":"then","text":"The new column carries its real values, not phantom nulls.","code":["table.columnCount == 3","table.getValueAt(0, 2) == 'x'","table.getValueAt(1, 2) == 'y'"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A grown map based table snapshots its new rows, not phantom nulls, under the decoupled protocol.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The map based (column major) model shares the same snapshot aware bounds\n            helper, so a column that grows past the previous row count would have its\n            new rows snapshotted as phantom nulls. The live snapshot must read the\n            live map instead.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A mutable, order preserving map of two columns, and a table in decoupled mode.","code":["var data = new LinkedHashMap<String, List<String>>()","data.put('X', new ArrayList<String>(['a', 'b']))","data.put('Y', new ArrayList<String>(['1', '2']))","var update = Event.create()","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.table(UI.Editability.READ_ONLY, { data } as swingtree.api.model.TableMapDataSource)","            .updateTableOn((sprouts.Observable) update)","    ).get(JTable)","})"]},
+
+        {"kind":"expect","text":"The table starts as a two column, two row table.","code":["table.columnCount == 2","table.rowCount == 2"]},
+
+        {"kind":"when","text":"We grow both columns by one row and fire the update from this thread.","code":["data.get('X').add('c')","data.get('Y').add('3')","update.fire()","letBothWorldsSettle()"]},
+
+        {"kind":"then","text":"The new row carries its real values, not phantom nulls.","code":["table.rowCount == 3","table.getValueAt(2, 0) == 'c'","table.getValueAt(2, 1) == '3'"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A user edit of a `Tuple` based table is applied to the UI right away and written back on the application thread.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            When the user edits a cell of an editable `Tuple` based table, the UI\n            thread must not reach into the application thread owned property to\n            store the edit. Instead the edit is applied to the UI thread owned\n            snapshot immediately (so the table never flickers back to the old\n            value), and the write-back into the property is handed to the\n            application thread, where it happens when that thread gets to it.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property of rows and an editable table built in decoupled mode.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"Alice\", \"30\"),","                    Tuple.of(\"Bob\",   \"42\")","                ))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.table(UI.CellOrder.ROW_MAJOR, UI.Editability.EDITABLE, rows)","    ).get(JTable)","})"]},
+
+        {"kind":"expect","text":"The table considers its cells editable.","code":["UI.runAndGet({ table.isCellEditable(0, 0) })"]},
+
+        {"kind":"when","text":"The user edits a cell on the UI thread, without the application thread running.","code":["UI.runNow({ table.setValueAt(\"31\", 0, 1) })"]},
+
+        {"kind":"then","text":"The table displays the edit immediately...","code":["table.getValueAt(0, 1) == \"31\""]},
+
+        {"kind":"and","text":"...but the application thread owned property has not been touched yet.","code":["rows.get().get(0).get(1) == \"30\""]},
+
+        {"kind":"when","text":"We let the application thread work off the write-back, and both worlds settle.","code":["letBothWorldsSettle()"]},
+
+        {"kind":"then","text":"The edit arrived in the property, and the table still displays it.","code":["rows.get() == Tuple.of(Tuple.of(\"Alice\", \"31\"), Tuple.of(\"Bob\", \"42\"))","table.getValueAt(0, 1) == \"31\""]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A write to a read only `Tuple` based table does not leave a phantom edit in the UI.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The UI thread owned snapshot of a table must never show something the\n            data source never accepted. So when a write reaches a read only model\n            (which the user cannot trigger, but application code may), the model\n            must not apply it to its snapshot optimistically, because the data\n            source will drop it and nothing would ever correct the table again.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A property of rows and a read only table built in decoupled mode.","code":["var rows = Var.of(Tuple.of(","                    Tuple.of(\"Alice\", \"30\"),","                    Tuple.of(\"Bob\",   \"42\")","                ))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)","})"]},
+
+        {"kind":"expect","text":"The table is read only, because we did not ask for an editable table.","code":["UI.runAndGet({ !table.isCellEditable(0, 1) })"]},
+
+        {"kind":"when","text":"A write sneaks into the model through the model API on the UI thread anyway...","code":["UI.runNow({ table.getModel().setValueAt(\"31\", 0, 1) })","letBothWorldsSettle()"]},
+
+        {"kind":"then","text":"...it left no trace, neither in the table nor in the property.","code":["table.getValueAt(0, 1) == \"30\"","rows.get() == Tuple.of(Tuple.of(\"Alice\", \"30\"), Tuple.of(\"Bob\", \"42\"))"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A refresh triggered from the UI thread does not read the data source on the UI thread.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            An update signal may well be raised in UI code, which means a table\n            model can be asked to refresh itself while it is on the UI thread.\n            Even then it must not touch the application thread owned data source\n            from that thread: the snapshot is taken on the application thread\n            first, and only the finished snapshot travels back to the UI thread.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A mutable list, an update event, and a record of every thread reading the list.","code":["var data = new CopyOnWriteArrayList<Integer>([1, 2, 3])","var update = Event.create()","var uiThreadReads = new CopyOnWriteArrayList<String>()","Closure<Integer> readRowCount = {","    if ( UI.thisIsUIThread() )","        uiThreadReads.add(\"Row count read on the UI thread!\")","    return data.size()","}"]},
+
+        {"kind":"and","text":"A lambda based table in decoupled mode, reading the list through that record.","code":["var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()->","        UI.table().withModel( m -> m","            .colNames(\"V\")","            .rowCount( () -> readRowCount() )","            .getsEntryAt( (r, c) -> data.get(r) )","            .updateOn(update)","        )","    ).get(JTable)","})"]},
+
+        {"kind":"and","text":"We forget the reads of the declaration itself, which legitimately happen at build time.","code":["uiThreadReads.clear()"]},
+
+        {"kind":"when","text":"We grow the data and fire the update event from the UI thread...","code":["data.addAll([4, 5])","UI.runNow({ update.fire() })","letBothWorldsSettle()"]},
+
+        {"kind":"then","text":"...the table caught up with the new data...","code":["table.rowCount == 5","table.getValueAt(4, 0) == 5"]},
+
+        {"kind":"and","text":"...without ever reading the application thread owned list on the UI thread.","code":["uiThreadReads.isEmpty()"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Row mutations racing from the application thread while the UI thread reads always converge. [0]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The final exam for the `Tuple` based table: a continuously draining\n            application thread works off a stream of row mutations while the UI\n            thread reads the table like a renderer at the same time. No matter\n            how the threads interleave, once all queues have run dry, the table\n            must agree with the final state of the row property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A log spy and a continuously draining application thread.","code":["var log = LogSpy.attach()","var app = ApplicationThread.startDraining()"]},
+
+        {"kind":"and","text":"A property of rows and a table in decoupled mode.","code":["var rows = Var.of(Tuple.of(Tuple.of(\"start\", \"0\")))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)","})"]},
+
+        {"kind":"when","text":"We enqueue 100 row mutations for the application thread, while the UI thread performs 50 renderer style read passes.","code":["100.times { step ->","    EventProcessor.DECOUPLED.registerAppEvent({","        if ( step % 2 == 0 )","            rows.update({ it.add(Tuple.of(\"row-$step\".toString(), step.toString())) })","        else if ( rows.get().size() > 1 )","            rows.update({ it.removeFirst() })","    })","}","50.times { step ->","    UI.runNow({","        int count = table.rowCount","        for ( int r = 0; r < count; r++ )","            table.getValueAt(r, 0)","    })","}"]},
+
+        {"kind":"and","text":"We wait for the application thread to work off the queue, and let both worlds settle.","code":["app.awaitAllProcessed()","letBothWorldsSettle()"]},
+
+        {"kind":"then","text":"The table offers exactly the final rows of the property.","code":["table.rowCount == rows.get().size()","(0..<table.rowCount).collect({ table.getValueAt(it, 0) }) == rows.get().collect({ it.get(0) })"]},
+
+        {"kind":"and","text":"No event task failed and nothing was silently logged as an error.","code":["app.failures().isEmpty()","log.errors().isEmpty()"]},
+
+        {"kind":"cleanup","text":"","code":["app.stop()","log.detach()"]},
+
+        {"kind":"where","text":"We repeat this race a few times to explore different thread interleavings.","code":{"run":[]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Row mutations racing from the application thread while the UI thread reads always converge. [1]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The final exam for the `Tuple` based table: a continuously draining\n            application thread works off a stream of row mutations while the UI\n            thread reads the table like a renderer at the same time. No matter\n            how the threads interleave, once all queues have run dry, the table\n            must agree with the final state of the row property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A log spy and a continuously draining application thread.","code":["var log = LogSpy.attach()","var app = ApplicationThread.startDraining()"]},
+
+        {"kind":"and","text":"A property of rows and a table in decoupled mode.","code":["var rows = Var.of(Tuple.of(Tuple.of(\"start\", \"0\")))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)","})"]},
+
+        {"kind":"when","text":"We enqueue 100 row mutations for the application thread, while the UI thread performs 50 renderer style read passes.","code":["100.times { step ->","    EventProcessor.DECOUPLED.registerAppEvent({","        if ( step % 2 == 0 )","            rows.update({ it.add(Tuple.of(\"row-$step\".toString(), step.toString())) })","        else if ( rows.get().size() > 1 )","            rows.update({ it.removeFirst() })","    })","}","50.times { step ->","    UI.runNow({","        int count = table.rowCount","        for ( int r = 0; r < count; r++ )","            table.getValueAt(r, 0)","    })","}"]},
+
+        {"kind":"and","text":"We wait for the application thread to work off the queue, and let both worlds settle.","code":["app.awaitAllProcessed()","letBothWorldsSettle()"]},
+
+        {"kind":"then","text":"The table offers exactly the final rows of the property.","code":["table.rowCount == rows.get().size()","(0..<table.rowCount).collect({ table.getValueAt(it, 0) }) == rows.get().collect({ it.get(0) })"]},
+
+        {"kind":"and","text":"No event task failed and nothing was silently logged as an error.","code":["app.failures().isEmpty()","log.errors().isEmpty()"]},
+
+        {"kind":"cleanup","text":"","code":["app.stop()","log.detach()"]},
+
+        {"kind":"where","text":"We repeat this race a few times to explore different thread interleavings.","code":{"run":[]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Row mutations racing from the application thread while the UI thread reads always converge. [2]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The final exam for the `Tuple` based table: a continuously draining\n            application thread works off a stream of row mutations while the UI\n            thread reads the table like a renderer at the same time. No matter\n            how the threads interleave, once all queues have run dry, the table\n            must agree with the final state of the row property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A log spy and a continuously draining application thread.","code":["var log = LogSpy.attach()","var app = ApplicationThread.startDraining()"]},
+
+        {"kind":"and","text":"A property of rows and a table in decoupled mode.","code":["var rows = Var.of(Tuple.of(Tuple.of(\"start\", \"0\")))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)","})"]},
+
+        {"kind":"when","text":"We enqueue 100 row mutations for the application thread, while the UI thread performs 50 renderer style read passes.","code":["100.times { step ->","    EventProcessor.DECOUPLED.registerAppEvent({","        if ( step % 2 == 0 )","            rows.update({ it.add(Tuple.of(\"row-$step\".toString(), step.toString())) })","        else if ( rows.get().size() > 1 )","            rows.update({ it.removeFirst() })","    })","}","50.times { step ->","    UI.runNow({","        int count = table.rowCount","        for ( int r = 0; r < count; r++ )","            table.getValueAt(r, 0)","    })","}"]},
+
+        {"kind":"and","text":"We wait for the application thread to work off the queue, and let both worlds settle.","code":["app.awaitAllProcessed()","letBothWorldsSettle()"]},
+
+        {"kind":"then","text":"The table offers exactly the final rows of the property.","code":["table.rowCount == rows.get().size()","(0..<table.rowCount).collect({ table.getValueAt(it, 0) }) == rows.get().collect({ it.get(0) })"]},
+
+        {"kind":"and","text":"No event task failed and nothing was silently logged as an error.","code":["app.failures().isEmpty()","log.errors().isEmpty()"]},
+
+        {"kind":"cleanup","text":"","code":["app.stop()","log.detach()"]},
+
+        {"kind":"where","text":"We repeat this race a few times to explore different thread interleavings.","code":{"run":[]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Row mutations racing from the application thread while the UI thread reads always converge. [3]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The final exam for the `Tuple` based table: a continuously draining\n            application thread works off a stream of row mutations while the UI\n            thread reads the table like a renderer at the same time. No matter\n            how the threads interleave, once all queues have run dry, the table\n            must agree with the final state of the row property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A log spy and a continuously draining application thread.","code":["var log = LogSpy.attach()","var app = ApplicationThread.startDraining()"]},
+
+        {"kind":"and","text":"A property of rows and a table in decoupled mode.","code":["var rows = Var.of(Tuple.of(Tuple.of(\"start\", \"0\")))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)","})"]},
+
+        {"kind":"when","text":"We enqueue 100 row mutations for the application thread, while the UI thread performs 50 renderer style read passes.","code":["100.times { step ->","    EventProcessor.DECOUPLED.registerAppEvent({","        if ( step % 2 == 0 )","            rows.update({ it.add(Tuple.of(\"row-$step\".toString(), step.toString())) })","        else if ( rows.get().size() > 1 )","            rows.update({ it.removeFirst() })","    })","}","50.times { step ->","    UI.runNow({","        int count = table.rowCount","        for ( int r = 0; r < count; r++ )","            table.getValueAt(r, 0)","    })","}"]},
+
+        {"kind":"and","text":"We wait for the application thread to work off the queue, and let both worlds settle.","code":["app.awaitAllProcessed()","letBothWorldsSettle()"]},
+
+        {"kind":"then","text":"The table offers exactly the final rows of the property.","code":["table.rowCount == rows.get().size()","(0..<table.rowCount).collect({ table.getValueAt(it, 0) }) == rows.get().collect({ it.get(0) })"]},
+
+        {"kind":"and","text":"No event task failed and nothing was silently logged as an error.","code":["app.failures().isEmpty()","log.errors().isEmpty()"]},
+
+        {"kind":"cleanup","text":"","code":["app.stop()","log.detach()"]},
+
+        {"kind":"where","text":"We repeat this race a few times to explore different thread interleavings.","code":{"run":[]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"Row mutations racing from the application thread while the UI thread reads always converge. [4]",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The final exam for the `Tuple` based table: a continuously draining\n            application thread works off a stream of row mutations while the UI\n            thread reads the table like a renderer at the same time. No matter\n            how the threads interleave, once all queues have run dry, the table\n            must agree with the final state of the row property.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"A log spy and a continuously draining application thread.","code":["var log = LogSpy.attach()","var app = ApplicationThread.startDraining()"]},
+
+        {"kind":"and","text":"A property of rows and a table in decoupled mode.","code":["var rows = Var.of(Tuple.of(Tuple.of(\"start\", \"0\")))","var table = UI.runAndGet({","    UI.use(EventProcessor.DECOUPLED, ()-> UI.table(UI.CellOrder.ROW_MAJOR, rows)).get(JTable)","})"]},
+
+        {"kind":"when","text":"We enqueue 100 row mutations for the application thread, while the UI thread performs 50 renderer style read passes.","code":["100.times { step ->","    EventProcessor.DECOUPLED.registerAppEvent({","        if ( step % 2 == 0 )","            rows.update({ it.add(Tuple.of(\"row-$step\".toString(), step.toString())) })","        else if ( rows.get().size() > 1 )","            rows.update({ it.removeFirst() })","    })","}","50.times { step ->","    UI.runNow({","        int count = table.rowCount","        for ( int r = 0; r < count; r++ )","            table.getValueAt(r, 0)","    })","}"]},
+
+        {"kind":"and","text":"We wait for the application thread to work off the queue, and let both worlds settle.","code":["app.awaitAllProcessed()","letBothWorldsSettle()"]},
+
+        {"kind":"then","text":"The table offers exactly the final rows of the property.","code":["table.rowCount == rows.get().size()","(0..<table.rowCount).collect({ table.getValueAt(it, 0) }) == rows.get().collect({ it.get(0) })"]},
+
+        {"kind":"and","text":"No event task failed and nothing was silently logged as an error.","code":["app.failures().isEmpty()","log.errors().isEmpty()"]},
+
+        {"kind":"cleanup","text":"","code":["app.stop()","log.detach()"]},
+
+        {"kind":"where","text":"We repeat this race a few times to explore different thread interleavings.","code":{"run":[]}}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    },
+  
+    {
+      "id":"A builder model update event fired away from the UI thread still fires its table events on the UI thread.",
+      "result":"PASS",
+      "duration":"?",
+      "iterations":{
+      "tags":{},"see":[],"extraInfo":["\n            The lenient `COUPLED` processor runs tasks in place, on whatever thread\n            hands them in. Swing table events however are only safe on the UI thread\n            (the AWT Event Dispatch Thread), which is why a table model refresh\n            marshals the actual event firing over to the UI thread instead of\n            firing wherever the update signal happened to be raised.\n        "]
+      },
+      "blocks":[
+        {"kind":"given","text":"An update event and a lambda based table built around it with the coupled processor.","code":["var update = Event.create()","var data = [[1], [2]]","var table =","        UI.use(EventProcessor.COUPLED, () ->","            UI.table().withModel( m -> m","                .colCount( () -> 1 )","                .rowCount( () -> data.size() )","                .getsEntryAt( (r, c) -> data[r][c] )","                .updateOn(update)","            )","        ).get(JTable)"]},
+
+        {"kind":"and","text":"A listener recording, for every table event, whether it arrived on the UI thread.","code":["var arrivedOnUIThread = new CopyOnWriteArrayList<Boolean>()","table.getModel().addTableModelListener({ TableModelEvent e ->","    arrivedOnUIThread << UI.thisIsUIThread()","} as TableModelListener)"]},
+
+        {"kind":"when","text":"We fire the update from this thread, which is not the UI thread...","code":["assert !UI.thisIsUIThread()","update.fire()","UI.sync()"]},
+
+        {"kind":"then","text":"...the table heard about the change, and every event arrived on the UI thread.","code":["!arrivedOnUIThread.isEmpty()","arrivedOnUIThread.every( { it } )"]}
+      ],
+      "problems":{"dataValues":[], "errors":[]}
+    }
+  
+  ],
+  "generator":"https://github.com/renatoathaydes/spock-reports"
+}

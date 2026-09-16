@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="en"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>AnimatedItemStyler.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">swing-tree</a> &gt; <a href="index.source.html" class="el_package">swingtree.api</a> &gt; <span class="el_source">AnimatedItemStyler.java</span></div><h1>AnimatedItemStyler.java</h1><pre class="source lang-java linenums">package swingtree.api;
+
+import swingtree.animation.AnimationStatus;
+import swingtree.style.ComponentStyleDelegate;
+
+import javax.swing.JComponent;
+import java.util.Objects;
+
+/**
+ * An {@link AnimatedItemStyler} is conceptually a union of the {@link ItemStyler}
+ * and {@link AnimatedStyler} functions, which is to say that it takes the current item
+ * of a bound {@link sprouts.Val} property, an {@link AnimationStatus} and a
+ * {@link ComponentStyleDelegate} to produce a new {@link ComponentStyleDelegate}
+ * with some style properties applied to it (usually based on both the item and the
+ * animation progress). &lt;br&gt;
+ * All parameters are immutable value oriented objects, so the function is pure and
+ * does not modify any of them. &lt;br&gt;
+ * &lt;p&gt;
+ * This interface is used by {@link swingtree.UIForAnySwing#withStyle(sprouts.Val, swingtree.animation.LifeTime, AnimatedItemStyler)},
+ * where every change of the bound property item restarts a transition animation whose
+ * {@link AnimationStatus#progress()} runs from {@code 0} to {@code 1} over the given
+ * {@link swingtree.animation.LifeTime}. This allows a style to not only follow the
+ * application state, but to &lt;i&gt;animate towards&lt;/i&gt; it. &lt;br&gt;
+ * Like the {@link ItemStyler}, this function receives the property item as an explicit
+ * argument, captured from the property change event on the property's owning thread,
+ * which is what makes it safe to evaluate on the UI thread in the decoupled threading
+ * mode (see {@link swingtree.threading.EventProcessor#DECOUPLED}). Never read the
+ * property itself inside this function!
+ * &lt;p&gt;
+ * When a single {@link AnimatedItemStyler} should follow &lt;b&gt;several&lt;/b&gt; properties at once, merge them
+ * into one record with the composite view builder
+ * {@link sprouts.Viewable#of(Object, java.util.function.Function)} (requires Sprouts 2.7.0 or above) and
+ * bind that one merged property, so that any of its inputs changing restarts the transition towards the
+ * newly merged item.
+ *
+ * @param &lt;T&gt; the type of the item of the bound property, supplied to this function as the first argument.
+ * @param &lt;C&gt; the type of the {@link JComponent} that the {@link ComponentStyleDelegate} is delegating to.
+ * @see swingtree.UIForAnySwing#withStyle(sprouts.Val, swingtree.animation.LifeTime, AnimatedItemStyler) The builder method consuming this function.
+ * @see ItemStyler The non animated counterpart which follows a property item without a transition.
+ * @see AnimatedStyler The animation status driven styler used for transitional and transitory styles.
+ * @see Styler The plain, non property driven and non animated styler.
+ */
+@FunctionalInterface
+public interface AnimatedItemStyler&lt;T, C extends JComponent&gt;
+{
+    /**
+     * An {@link AnimatedItemStyler} that does nothing, meaning it simply returns the given
+     * {@link ComponentStyleDelegate} without applying any style to it.
+     * Conceptually speaking, this returns the null object of the {@link AnimatedItemStyler} type.
+     *
+     * @param &lt;T&gt; The type of the item of the bound property.
+     * @param &lt;C&gt; The type of the {@link JComponent} that the {@link ComponentStyleDelegate} is delegating to.
+     * @return An {@link AnimatedItemStyler} that does nothing.
+     */
+    static &lt;T, C extends JComponent&gt; AnimatedItemStyler&lt;T, C&gt; none() {
+<span class="nc" id="L56">        return (AnimatedItemStyler&lt;T, C&gt;) Constants.ANIMATED_ITEM_STYLER_NONE;</span>
+    }
+
+    /**
+     * Applies some style to the given {@link ComponentStyleDelegate}, usually based on the
+     * supplied property item and the progress of the supplied {@link AnimationStatus},
+     * and returns a new {@link ComponentStyleDelegate} that has the style applied (if any). &lt;br&gt;
+     * Note that this method deliberately requires the handling of checked exceptions
+     * at its invocation sites because there may be any number of implementations
+     * hiding behind this interface and so it is unwise to assume that
+     * all of them will be able to execute gracefully without throwing exceptions.
+     *
+     * @param item The current item of the bound property, captured from the property change
+     *             event on the property's owning thread. Style based on this argument only,
+     *             never on the property itself!
+     * @param status The {@link AnimationStatus} of the transition towards the supplied item,
+     *               whose {@link AnimationStatus#progress()} runs from {@code 0} to {@code 1}.
+     * @param delegate The {@link ComponentStyleDelegate} to apply the style to.
+     * @return A new {@link ComponentStyleDelegate} that has the style applied.
+     * @throws Exception if the style could not be applied by the client code.
+     */
+    ComponentStyleDelegate&lt;C&gt; style( T item, AnimationStatus status, ComponentStyleDelegate&lt;C&gt; delegate ) throws Exception;
+
+    /**
+     * Returns a new {@link AnimatedItemStyler} that applies the style of this {@link AnimatedItemStyler}
+     * and then applies the style of the given {@link AnimatedItemStyler}.
+     *
+     * @param other the {@link AnimatedItemStyler} to apply after this one.
+     * @return a new {@link AnimatedItemStyler} that applies the style of this and then the given one.
+     */
+    default AnimatedItemStyler&lt;T, C&gt; andThen( AnimatedItemStyler&lt;T, C&gt; other ) {
+<span class="nc" id="L87">        Objects.requireNonNull(other);</span>
+<span class="nc bnc" id="L88" title="All 2 branches missed.">        if ( this == none() )</span>
+<span class="nc" id="L89">            return other;</span>
+<span class="nc bnc" id="L90" title="All 2 branches missed.">        if ( other == none() )</span>
+<span class="nc" id="L91">            return this;</span>
+
+<span class="nc" id="L93">        return ( item, status, delegate ) -&gt; {</span>
+<span class="nc" id="L94">            ComponentStyleDelegate&lt;C&gt; result = delegate;</span>
+            try {
+<span class="nc" id="L96">                result = style( item, status, delegate );</span>
+<span class="nc" id="L97">            } catch ( Exception e ) {</span>
+                // Exceptions inside a styler should not be fatal.
+<span class="nc" id="L99">                Constants.LOG.error(</span>
+                    &quot;Error trying to run '&quot;+delegate+&quot;' through animated item styler '&quot;+this+&quot;'.&quot;,
+                    e
+                );
+<span class="nc" id="L103">            }</span>
+<span class="nc" id="L104">            return other.style( item, status, result );</span>
+        };
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.13.202504020838</span></div></body></html>
