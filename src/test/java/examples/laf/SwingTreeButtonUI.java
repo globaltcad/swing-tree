@@ -31,7 +31,8 @@ public final class SwingTreeButtonUI
         // A style rule shows the pointer, so the model has to track it. Installed rather than set,
         // so that the next look and feel can take it back and one the application set stands.
         LookAndFeel.installProperty(c, "rolloverEnabled", _theme.styles(c.getClass()));
-        _theme.installStyleOn(c);
+        String prefix = getPropertyPrefix();
+        _theme.installStyleOn(c, prefix.substring(0, prefix.length() - 1));
     }
 
     /**

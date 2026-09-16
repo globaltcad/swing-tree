@@ -23,6 +23,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.border.Border;
 import javax.swing.plaf.ColorUIResource;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.UIResource;
@@ -897,25 +898,51 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *  fall back on wherever a rule leaves its own invisible, so under a theme without outlines they
          *  would surface as a two-tone frame around every control. Only a border Swing itself put there
          *  is dropped, so one the application set survives.
+         *  <p>
+         *  That border has to be handed back once nothing styles the component any more. The
+         *  {@code Basic*UI} of the next look and feel cannot do it: it installs its defaults before
+         *  the style engine lets go of the component, so it finds the engine's border, which it
+         *  must not replace, and the engine then gives back the empty border it displaced. So the
+         *  default border is installed again exactly when the engine lets go of a border here, and
+         *  not when a container merely restyles a part of itself it has already set up.
          *
          * @param c the component the delegate is being installed on
          */
-        void installStyleOn( JComponent c ) {
-            if ( !styles(c.getClass()) )
-                _restoreDefaultColours(c);
+        void installStyleOn( JComponent c ) { installStyleOn(c, _defaultsPrefixOf(c)); }
+
+        /**
+         *  The same, for a delegate that reads its defaults under another prefix than the one its
+         *  component's UI class ID implies: {@code SwingTreeButtonUI} serves toggle buttons too, and
+         *  installs them from the {@code Button.*} keys.
+         *
+         * @param c the component the delegate is being installed on
+         * @param defaultsPrefix the prefix the delegate's defaults are filed under, "Button" for {@code Button.border}
+         */
+        void installStyleOn( JComponent c, String defaultsPrefix ) {
+            boolean styled = styles(c.getClass());
+            if ( !styled )
+                _restoreDefaultColours(c, defaultsPrefix);
             else if ( c.getBorder() instanceof UIResource )
                 c.setBorder(null);
+            Border held = c.getBorder();
             ComponentBackend.powering(c).gatherApplyAndInstallStyle(true);
+            boolean engineLetGo = c.getBorder() != held;
+            if ( !styled && engineLetGo )
+                LookAndFeel.installBorder(c, defaultsPrefix + ".border");
         }
 
         /** Re-reads the two colour defaults of a component's own UI class, e.g. "Button.background". */
-        private static void _restoreDefaultColours( JComponent c ) {
-            String id     = c.getUIClassID();
-            String prefix = id.endsWith("UI") ? id.substring(0, id.length() - 2) : id;
-            Color  bg     = UIManager.getColor(prefix + ".background");
-            Color  fg     = UIManager.getColor(prefix + ".foreground");
+        private static void _restoreDefaultColours( JComponent c, String prefix ) {
+            Color bg = UIManager.getColor(prefix + ".background");
+            Color fg = UIManager.getColor(prefix + ".foreground");
             if ( bg != null ) c.setBackground(bg);
             if ( fg != null ) c.setForeground(fg);
+        }
+
+        /** @return the prefix of a component's {@link UIDefaults} keys, "Button" for a {@code JButton} */
+        private static String _defaultsPrefixOf( JComponent c ) {
+            String id = c.getUIClassID();
+            return id.endsWith("UI") ? id.substring(0, id.length() - 2) : id;
         }
 
         /** Runs the configured style rules of the component being styled. Every UI delegate's

@@ -8,7 +8,10 @@ import org.jspecify.annotations.Nullable;
 
 import javax.swing.JComponent;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JViewport;
+import javax.swing.LookAndFeel;
+import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicScrollPaneUI;
 import java.awt.Component;
@@ -49,6 +52,21 @@ public final class SwingTreeScrollPaneUI
         if ( viewport != null )
             viewport.addContainerListener(_viewTracker);
         trackView();
+        installTableBorder();
+    }
+
+    /**
+     *  Gives a scroll pane around a table the border {@link JTable} gives it. The table does that
+     *  itself when it is added and when its own delegate is installed, but a theme switch installs
+     *  the table's delegate before this one, whose defaults then replace that border with the
+     *  plain scroll pane border. A scroll pane a style rule governs has no Swing border to replace.
+     */
+    private void installTableBorder() {
+        JViewport viewport = scrollpane.getViewport();
+        if ( _theme.styles(scrollpane.getClass()) || viewport == null || !(viewport.getView() instanceof JTable) )
+            return;
+        if ( UIManager.getBorder("Table.scrollPaneBorder") != null )
+            LookAndFeel.installBorder(scrollpane, "Table.scrollPaneBorder");
     }
 
     @Override
