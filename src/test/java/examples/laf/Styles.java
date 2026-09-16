@@ -1,9 +1,10 @@
 package examples.laf;
 
+import examples.laf.SwingTreeLookAndFeel.Theme;
+import examples.laf.SwingTreeLookAndFeel.ThemedStyler;
 import sprouts.Tuple;
 import swingtree.UI;
 import swingtree.api.Painter;
-import swingtree.api.Styler;
 import swingtree.style.ComponentStyleDelegate;
 import swingtree.style.GradientConf;
 
@@ -17,9 +18,9 @@ import java.util.Objects;
  *  The tables of style rules behind {@link SwingTreeLookAndFeel.StylePreset}, one nested class per
  *  preset and one rule per component family.
  *  <p>
- *  No rule anywhere here names a colour. Every one reads {@link SwingTreeLookAndFeel#palette()}
- *  while it runs, which is on every paint, so pairing a preset with a palette it was not designed
- *  against re-tints the whole preset instead of half of it.
+ *  No rule anywhere here names a colour. Every one is a {@link ThemedStyler} and takes its colours
+ *  from the palette of the {@link Theme} it is handed, so pairing a preset with a palette it was
+ *  not designed against re-tints the whole preset instead of half of it.
  */
 final class Styles
 {
@@ -40,11 +41,13 @@ final class Styles
      */
     private static final class DragHandlePainter implements Painter
     {
+        private final Theme    _theme;
         private final JToolBar _bar;
         private final boolean  _floatable;
         private final int      _orientation;
 
-        DragHandlePainter( JToolBar bar ) {
+        DragHandlePainter( Theme theme, JToolBar bar ) {
+            _theme       = theme;
             _bar         = bar;
             _floatable   = bar.isFloatable();
             _orientation = bar.getOrientation();
@@ -58,8 +61,8 @@ final class Styles
             try {
                 boolean horizontal = _orientation == JToolBar.HORIZONTAL;
                 Insets  insets     = _bar.getInsets();
-                SwingTreeLookAndFeel.symbols().paintDragHandle(
-                        scratch, SwingTreeLookAndFeel.palette(),
+                _theme.symbols().paintDragHandle(
+                        scratch, _theme.palette(),
                         horizontal ? insets.left : _bar.getWidth(),
                         horizontal ? _bar.getHeight() : insets.top,
                         horizontal
@@ -74,14 +77,15 @@ final class Styles
             if ( this == other ) return true;
             if ( !(other instanceof DragHandlePainter) ) return false;
             DragHandlePainter that = (DragHandlePainter) other;
-            return this._bar == that._bar
+            return this._theme == that._theme
+                && this._bar == that._bar
                 && this._floatable == that._floatable
                 && this._orientation == that._orientation;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(System.identityHashCode(_bar), _floatable, _orientation);
+            return Objects.hash(System.identityHashCode(_theme), System.identityHashCode(_bar), _floatable, _orientation);
         }
 
         @Override
@@ -145,7 +149,7 @@ final class Styles
             );
         }
 
-        private static <C extends JComponent> StyleRule rule( Class<C> type, Styler<C> styler ) {
+        private static <C extends JComponent> StyleRule rule( Class<C> type, ThemedStyler<C> styler ) {
             return new StyleRule(type, styler);
         }
 
@@ -157,8 +161,8 @@ final class Styles
          *  decided here; padding, spacing and per-edge accents stay free for the application.
          */
         @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
-        private static ComponentStyleDelegate<JPanel> panel(ComponentStyleDelegate<JPanel> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JPanel> panel( Theme theme, ComponentStyleDelegate<JPanel> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 case CARD:
@@ -188,8 +192,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JScrollPane> scrollPane( ComponentStyleDelegate<JScrollPane> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JScrollPane> scrollPane( Theme theme, ComponentStyleDelegate<JScrollPane> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 case TRANSPARENT:
@@ -225,8 +229,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JViewport> viewport( ComponentStyleDelegate<JViewport> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JViewport> viewport( Theme theme, ComponentStyleDelegate<JViewport> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 case TRANSPARENT: return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT);
@@ -246,8 +250,8 @@ final class Styles
          *  that grows while the margin shrinks to absorb it are shared across all of them.
          */
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<AbstractButton> button( ComponentStyleDelegate<AbstractButton> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<AbstractButton> button( Theme theme, ComponentStyleDelegate<AbstractButton> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             AbstractButton b = it.component();
             ButtonModel    m = b.getModel();
 
@@ -306,8 +310,8 @@ final class Styles
          *  transparent so the parent's texture shows through unbroken.
          */
         @SuppressWarnings("deprecation")
-        private static <C extends AbstractButton> ComponentStyleDelegate<C> tickable( ComponentStyleDelegate<C> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static <C extends AbstractButton> ComponentStyleDelegate<C> tickable( Theme theme, ComponentStyleDelegate<C> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
                     .foregroundColor(it.component().isEnabled() ? p.text() : p.textDisabled())
@@ -321,8 +325,8 @@ final class Styles
          *  transparent row that picks up the popup's fill, and a soft accent pill once it is armed.
          */
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JMenuItem> menuItem( ComponentStyleDelegate<JMenuItem> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JMenuItem> menuItem( Theme theme, ComponentStyleDelegate<JMenuItem> it ) {
+            SwingTreeLookAndFeel.Palette p       = theme.palette();
             JMenuItem   item    = it.component();
             ButtonModel m       = item.getModel();
             boolean     enabled = item.isEnabled();
@@ -336,8 +340,8 @@ final class Styles
                     .foregroundColor(enabled ? p.text() : p.textDisabled());
         }
 
-        private static ComponentStyleDelegate<JMenuBar> menuBar( ComponentStyleDelegate<JMenuBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JMenuBar> menuBar( Theme theme, ComponentStyleDelegate<JMenuBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(p.surface())
                     .foregroundColor(p.text())
@@ -345,8 +349,8 @@ final class Styles
                     .borderAt(UI.Edge.BOTTOM, 1, p.borderSoft());
         }
 
-        private static ComponentStyleDelegate<JPopupMenu> popupMenu( ComponentStyleDelegate<JPopupMenu> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JPopupMenu> popupMenu( Theme theme, ComponentStyleDelegate<JPopupMenu> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(p.surfaceField())
                     .foregroundColor(p.text())
@@ -364,8 +368,8 @@ final class Styles
         // ── Text ─────────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JLabel> label( ComponentStyleDelegate<JLabel> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JLabel> label( Theme theme, ComponentStyleDelegate<JLabel> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.foregroundColor(it.component().isEnabled() ? p.text() : p.textDisabled());
         }
 
@@ -374,8 +378,8 @@ final class Styles
          *  under a faint accent-tinted glow that marks the active field without being noisy.
          */
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JTextField> field( ComponentStyleDelegate<JTextField> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JTextField> field( Theme theme, ComponentStyleDelegate<JTextField> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             JTextField f = it.component();
 
             boolean focused = isEditable(f) && f.isFocusOwner();
@@ -392,8 +396,8 @@ final class Styles
 
         /** A multi-line input: the same field, with a little more room around the text and no glow. */
         @SuppressWarnings("deprecation")
-        private static <C extends JTextComponent> ComponentStyleDelegate<C> page(ComponentStyleDelegate<C> it ) {
-            return textSurface(it, SwingTreeLookAndFeel.palette(), it.component(), 6, 9);
+        private static <C extends JTextComponent> ComponentStyleDelegate<C> page( Theme theme, ComponentStyleDelegate<C> it ) {
+            return textSurface(it, theme.palette(), it.component(), 6, 9);
         }
 
         private static <C extends JComponent> ComponentStyleDelegate<C> textSurface(
@@ -417,8 +421,8 @@ final class Styles
             return text.isEnabled() && text.isEditable();
         }
 
-        private static ComponentStyleDelegate<JToolTip> toolTip( ComponentStyleDelegate<JToolTip> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JToolTip> toolTip( Theme theme, ComponentStyleDelegate<JToolTip> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .padding(4, 10, 4, 10)
                     .borderRadius(6)
@@ -435,8 +439,8 @@ final class Styles
         // ── Value pickers ────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JComboBox> comboBox( ComponentStyleDelegate<JComboBox> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JComboBox> comboBox( Theme theme, ComponentStyleDelegate<JComboBox> it ) {
+            SwingTreeLookAndFeel.Palette p       = theme.palette();
             JComboBox<?> combo   = it.component();
             boolean      enabled = combo.isEnabled();
             boolean      focused = enabled && LafUtilities.hasFocus(combo);
@@ -453,8 +457,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JSpinner> spinner( ComponentStyleDelegate<JSpinner> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSpinner> spinner( Theme theme, ComponentStyleDelegate<JSpinner> it ) {
+            SwingTreeLookAndFeel.Palette p       = theme.palette();
             JSpinner spinner = it.component();
             boolean  enabled = spinner.isEnabled();
             boolean  focused = enabled && LafUtilities.hasFocus(spinner);
@@ -469,14 +473,14 @@ final class Styles
                     .foregroundColor(enabled ? p.text() : p.textDisabled());
         }
 
-        private static ComponentStyleDelegate<JSlider> slider( ComponentStyleDelegate<JSlider> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSlider> slider( Theme theme, ComponentStyleDelegate<JSlider> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.background()).foregroundColor(p.text());
         }
 
         /** The trough of a progress bar; the {@linkplain Symbols symbol set} fills it. */
-        private static ComponentStyleDelegate<JProgressBar> progressBar( ComponentStyleDelegate<JProgressBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JProgressBar> progressBar( Theme theme, ComponentStyleDelegate<JProgressBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .borderRadius(7)
                     .borderWidth(1)
@@ -487,8 +491,8 @@ final class Styles
 
         // ── Structure ────────────────────────────────────────────────────────
 
-        private static ComponentStyleDelegate<JSeparator> separator( ComponentStyleDelegate<JSeparator> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSeparator> separator( Theme theme, ComponentStyleDelegate<JSeparator> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.borderSoft()).foregroundColor(p.borderSoft());
         }
 
@@ -498,24 +502,24 @@ final class Styles
          *  symbol keeps it a flat fill the render cache can blit, instead of a rounded rectangle the
          *  rasterizer has to antialias the height of the window on every frame.
          */
-        private static ComponentStyleDelegate<JScrollBar> scrollBar( ComponentStyleDelegate<JScrollBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JScrollBar> scrollBar( Theme theme, ComponentStyleDelegate<JScrollBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.surfaceDisabled()).foregroundColor(p.border());
         }
 
-        private static ComponentStyleDelegate<JTabbedPane> tabbedPane( ComponentStyleDelegate<JTabbedPane> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JTabbedPane> tabbedPane( Theme theme, ComponentStyleDelegate<JTabbedPane> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.background()).foregroundColor(p.text());
         }
 
-        private static ComponentStyleDelegate<JSplitPane> splitPane( ComponentStyleDelegate<JSplitPane> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSplitPane> splitPane( Theme theme, ComponentStyleDelegate<JSplitPane> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.background()).foregroundColor(p.text());
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JToolBar> toolBar( ComponentStyleDelegate<JToolBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JToolBar> toolBar( Theme theme, ComponentStyleDelegate<JToolBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(p.surface())
                     .foregroundColor(p.text())
@@ -523,29 +527,29 @@ final class Styles
                     .borderRadius(6)
                     .borderWidth(1)
                     .borderColor(p.borderSoft())
-                    .painter(UI.Layer.CONTENT, new DragHandlePainter(it.component()));
+                    .painter(UI.Layer.CONTENT, new DragHandlePainter(theme, it.component()));
         }
 
-        private static ComponentStyleDelegate<JList> list( ComponentStyleDelegate<JList> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JList> list( Theme theme, ComponentStyleDelegate<JList> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.surfaceField()).foregroundColor(p.text());
         }
 
-        private static ComponentStyleDelegate<JTable> table( ComponentStyleDelegate<JTable> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JTable> table( Theme theme, ComponentStyleDelegate<JTable> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.surfaceField()).foregroundColor(p.text());
         }
 
-        private static ComponentStyleDelegate<JTableHeader> tableHeader( ComponentStyleDelegate<JTableHeader> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JTableHeader> tableHeader( Theme theme, ComponentStyleDelegate<JTableHeader> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(p.surface())
                     .foregroundColor(p.textMuted())
                     .borderAt(UI.Edge.BOTTOM, 1, p.borderSoft());
         }
 
-        private static ComponentStyleDelegate<JTree> tree( ComponentStyleDelegate<JTree> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JTree> tree( Theme theme, ComponentStyleDelegate<JTree> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.surfaceField()).foregroundColor(p.text());
         }
 
@@ -781,8 +785,8 @@ final class Styles
         // ── Surfaces ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
-        private static ComponentStyleDelegate<JPanel> panel( ComponentStyleDelegate<JPanel> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JPanel> panel( Theme theme, ComponentStyleDelegate<JPanel> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 case CARD:
@@ -799,8 +803,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JScrollPane> scrollPane( ComponentStyleDelegate<JScrollPane> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JScrollPane> scrollPane( Theme theme, ComponentStyleDelegate<JScrollPane> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 case TRANSPARENT:
@@ -821,15 +825,15 @@ final class Styles
          *  surface, and in the sunken case the groove pressed into that surface as well - a viewport
          *  filling the same colour over the top would erase exactly the edges the groove is made of.
          */
-        private static ComponentStyleDelegate<JViewport> viewport( ComponentStyleDelegate<JViewport> it ) {
-            return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(SwingTreeLookAndFeel.palette().text());
+        private static ComponentStyleDelegate<JViewport> viewport( Theme theme, ComponentStyleDelegate<JViewport> it ) {
+            return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(theme.palette().text());
         }
 
         // ── Controls ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<AbstractButton> button( ComponentStyleDelegate<AbstractButton> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<AbstractButton> button( Theme theme, ComponentStyleDelegate<AbstractButton> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             AbstractButton b = it.component();
             ButtonModel    m = b.getModel();
 
@@ -867,8 +871,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static <C extends AbstractButton> ComponentStyleDelegate<C> tickable( ComponentStyleDelegate<C> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static <C extends AbstractButton> ComponentStyleDelegate<C> tickable( Theme theme, ComponentStyleDelegate<C> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
                     .foregroundColor(it.component().isEnabled() ? p.text() : p.textDisabled())
@@ -876,8 +880,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JComboBox> comboBox( ComponentStyleDelegate<JComboBox> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JComboBox> comboBox( Theme theme, ComponentStyleDelegate<JComboBox> it ) {
+            SwingTreeLookAndFeel.Palette p       = theme.palette();
             JComboBox<?> combo   = it.component();
             boolean      enabled = combo.isEnabled();
             boolean      focused = enabled && LafUtilities.hasFocus(combo);
@@ -898,8 +902,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JSpinner> spinner( ComponentStyleDelegate<JSpinner> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSpinner> spinner( Theme theme, ComponentStyleDelegate<JSpinner> it ) {
+            SwingTreeLookAndFeel.Palette p       = theme.palette();
             JSpinner spinner = it.component();
             boolean  enabled = spinner.isEnabled();
             boolean  focused = enabled && LafUtilities.hasFocus(spinner);
@@ -920,13 +924,13 @@ final class Styles
         // ── Inputs ───────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JTextField> field( ComponentStyleDelegate<JTextField> it ) {
-            return input(it, it.component(), 7, 14);
+        private static ComponentStyleDelegate<JTextField> field( Theme theme, ComponentStyleDelegate<JTextField> it ) {
+            return input(theme, it, it.component(), 7, 14);
         }
 
         @SuppressWarnings("deprecation")
-        private static <C extends JTextComponent> ComponentStyleDelegate<C> page( ComponentStyleDelegate<C> it ) {
-            return input(it, it.component(), 9, 14);
+        private static <C extends JTextComponent> ComponentStyleDelegate<C> page( Theme theme, ComponentStyleDelegate<C> it ) {
+            return input(theme, it, it.component(), 9, 14);
         }
 
         /**
@@ -937,9 +941,9 @@ final class Styles
          *  pane just pressed into its own surface, and leave the document sitting on a hard edge.
          */
         private static <C extends JComponent> ComponentStyleDelegate<C> input(
-            ComponentStyleDelegate<C> it, JTextComponent text, int padY, int padX
+            Theme theme, ComponentStyleDelegate<C> it, JTextComponent text, int padY, int padX
         ) {
-            SwingTreeLookAndFeel.Palette p        = SwingTreeLookAndFeel.palette();
+            SwingTreeLookAndFeel.Palette p        = theme.palette();
             boolean editable = text.isEnabled() && text.isEditable();
             boolean focused  = editable && text.isFocusOwner();
 
@@ -965,14 +969,14 @@ final class Styles
         // ── The rest ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JLabel> label( ComponentStyleDelegate<JLabel> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JLabel> label( Theme theme, ComponentStyleDelegate<JLabel> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.foregroundColor(it.component().isEnabled() ? p.text() : p.textDisabled());
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JMenuItem> menuItem( ComponentStyleDelegate<JMenuItem> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JMenuItem> menuItem( Theme theme, ComponentStyleDelegate<JMenuItem> it ) {
+            SwingTreeLookAndFeel.Palette p       = theme.palette();
             JMenuItem   item    = it.component();
             ButtonModel m       = item.getModel();
             boolean     enabled = item.isEnabled();
@@ -985,13 +989,13 @@ final class Styles
                     .foregroundColor(enabled ? p.text() : p.textDisabled());
         }
 
-        private static ComponentStyleDelegate<JMenuBar> menuBar( ComponentStyleDelegate<JMenuBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JMenuBar> menuBar( Theme theme, ComponentStyleDelegate<JMenuBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.background()).foregroundColor(p.text()).padding(3, 6, 3, 6).borderWidth(0);
         }
 
-        private static ComponentStyleDelegate<JPopupMenu> popupMenu( ComponentStyleDelegate<JPopupMenu> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JPopupMenu> popupMenu( Theme theme, ComponentStyleDelegate<JPopupMenu> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return raised(curved(it
                     .backgroundColor(p.surface())
                     .foregroundColor(p.text())
@@ -1001,8 +1005,8 @@ final class Styles
                     .borderWidth(0), p.surface(), false), p, 6);
         }
 
-        private static ComponentStyleDelegate<JToolTip> toolTip( ComponentStyleDelegate<JToolTip> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JToolTip> toolTip( Theme theme, ComponentStyleDelegate<JToolTip> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return raised(curved(it
                     .margin(5)
                     .padding(5, 12, 5, 12)
@@ -1012,14 +1016,14 @@ final class Styles
                     .foregroundColor(p.text()), p.surface(), false), p, 5);
         }
 
-        private static ComponentStyleDelegate<JSeparator> separator( ComponentStyleDelegate<JSeparator> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSeparator> separator( Theme theme, ComponentStyleDelegate<JSeparator> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.borderSoft()).foregroundColor(p.borderSoft());
         }
 
         /** The trough is a groove pressed into the panel; the symbol set fills it. */
-        private static ComponentStyleDelegate<JProgressBar> progressBar( ComponentStyleDelegate<JProgressBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JProgressBar> progressBar( Theme theme, ComponentStyleDelegate<JProgressBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return sunken(it
                     .margin(3)
                     .borderRadius(8)
@@ -1028,23 +1032,23 @@ final class Styles
                     .foregroundColor(p.accent()), p, 3);
         }
 
-        private static ComponentStyleDelegate<JSlider> slider( ComponentStyleDelegate<JSlider> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSlider> slider( Theme theme, ComponentStyleDelegate<JSlider> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(p.text());
         }
 
-        private static ComponentStyleDelegate<JScrollBar> scrollBar( ComponentStyleDelegate<JScrollBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JScrollBar> scrollBar( Theme theme, ComponentStyleDelegate<JScrollBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.background()).foregroundColor(p.border());
         }
 
-        private static ComponentStyleDelegate<JTabbedPane> tabbedPane( ComponentStyleDelegate<JTabbedPane> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JTabbedPane> tabbedPane( Theme theme, ComponentStyleDelegate<JTabbedPane> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.background()).foregroundColor(p.text());
         }
 
-        private static ComponentStyleDelegate<JSplitPane> splitPane( ComponentStyleDelegate<JSplitPane> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSplitPane> splitPane( Theme theme, ComponentStyleDelegate<JSplitPane> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(p.text());
         }
 
@@ -1052,17 +1056,17 @@ final class Styles
          *  A list, table or tree is the content of a hole, not a surface of its own: it lets the
          *  scroll pane's field colour and groove through and paints only its rows.
          */
-        private static <C extends JComponent> ComponentStyleDelegate<C> flatField( ComponentStyleDelegate<C> it ) {
-            return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(SwingTreeLookAndFeel.palette().text());
+        private static <C extends JComponent> ComponentStyleDelegate<C> flatField( Theme theme, ComponentStyleDelegate<C> it ) {
+            return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(theme.palette().text());
         }
 
-        private static ComponentStyleDelegate<JTableHeader> tableHeader( ComponentStyleDelegate<JTableHeader> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JTableHeader> tableHeader( Theme theme, ComponentStyleDelegate<JTableHeader> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.surface()).foregroundColor(p.textMuted());
         }
 
-        private static ComponentStyleDelegate<JToolBar> toolBar( ComponentStyleDelegate<JToolBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JToolBar> toolBar( Theme theme, ComponentStyleDelegate<JToolBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return raised(curved(it
                     .backgroundColor(p.surface())
                     .foregroundColor(p.text())
@@ -1195,8 +1199,8 @@ final class Styles
         // ── Surfaces ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
-        private static ComponentStyleDelegate<JPanel> panel( ComponentStyleDelegate<JPanel> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JPanel> panel( Theme theme, ComponentStyleDelegate<JPanel> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 case CARD:
@@ -1221,8 +1225,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JScrollPane> scrollPane( ComponentStyleDelegate<JScrollPane> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JScrollPane> scrollPane( Theme theme, ComponentStyleDelegate<JScrollPane> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 case TRANSPARENT:
@@ -1246,8 +1250,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JViewport> viewport( ComponentStyleDelegate<JViewport> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JViewport> viewport( Theme theme, ComponentStyleDelegate<JViewport> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 case TRANSPARENT: return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT);
@@ -1261,8 +1265,8 @@ final class Styles
         // ── Controls ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<AbstractButton> button( ComponentStyleDelegate<AbstractButton> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<AbstractButton> button( Theme theme, ComponentStyleDelegate<AbstractButton> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             AbstractButton b = it.component();
             ButtonModel    m = b.getModel();
 
@@ -1300,8 +1304,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static <C extends AbstractButton> ComponentStyleDelegate<C> tickable( ComponentStyleDelegate<C> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static <C extends AbstractButton> ComponentStyleDelegate<C> tickable( Theme theme, ComponentStyleDelegate<C> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
                     .foregroundColor(it.component().isEnabled() ? p.text() : p.textDisabled())
@@ -1309,8 +1313,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JComboBox> comboBox( ComponentStyleDelegate<JComboBox> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JComboBox> comboBox( Theme theme, ComponentStyleDelegate<JComboBox> it ) {
+            SwingTreeLookAndFeel.Palette p       = theme.palette();
             JComboBox<?> combo   = it.component();
             boolean      enabled = combo.isEnabled();
             boolean      focused = enabled && LafUtilities.hasFocus(combo);
@@ -1328,8 +1332,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JSpinner> spinner( ComponentStyleDelegate<JSpinner> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSpinner> spinner( Theme theme, ComponentStyleDelegate<JSpinner> it ) {
+            SwingTreeLookAndFeel.Palette p       = theme.palette();
             JSpinner spinner = it.component();
             boolean  enabled = spinner.isEnabled();
             boolean  focused = enabled && LafUtilities.hasFocus(spinner);
@@ -1348,21 +1352,21 @@ final class Styles
         // ── Inputs ───────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JTextField> field( ComponentStyleDelegate<JTextField> it ) {
-            return input(it, it.component(), 5, 9);
+        private static ComponentStyleDelegate<JTextField> field( Theme theme, ComponentStyleDelegate<JTextField> it ) {
+            return input(theme, it, it.component(), 5, 9);
         }
 
         @SuppressWarnings("deprecation")
-        private static <C extends JTextComponent> ComponentStyleDelegate<C> page( ComponentStyleDelegate<C> it ) {
-            return input(it, it.component(), 7, 9);
+        private static <C extends JTextComponent> ComponentStyleDelegate<C> page( Theme theme, ComponentStyleDelegate<C> it ) {
+            return input(theme, it, it.component(), 7, 9);
         }
 
         /** An input is clear glass over white: no gloss on the fill, a shadow cast inward from the
          *  top edge, and an accent ring the moment it takes focus. */
         private static <C extends JComponent> ComponentStyleDelegate<C> input(
-            ComponentStyleDelegate<C> it, JTextComponent text, int padY, int padX
+            Theme theme, ComponentStyleDelegate<C> it, JTextComponent text, int padY, int padX
         ) {
-            SwingTreeLookAndFeel.Palette p        = SwingTreeLookAndFeel.palette();
+            SwingTreeLookAndFeel.Palette p        = theme.palette();
             boolean editable = text.isEnabled() && text.isEditable();
             boolean focused  = editable && text.isFocusOwner();
             it = it
@@ -1382,14 +1386,14 @@ final class Styles
         // ── The rest ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JLabel> label( ComponentStyleDelegate<JLabel> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JLabel> label( Theme theme, ComponentStyleDelegate<JLabel> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.foregroundColor(it.component().isEnabled() ? p.text() : p.textDisabled());
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JMenuItem> menuItem( ComponentStyleDelegate<JMenuItem> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JMenuItem> menuItem( Theme theme, ComponentStyleDelegate<JMenuItem> it ) {
+            SwingTreeLookAndFeel.Palette p       = theme.palette();
             JMenuItem   item    = it.component();
             ButtonModel m       = item.getModel();
             boolean     enabled = item.isEnabled();
@@ -1403,8 +1407,8 @@ final class Styles
             return armed ? it.gradient(g -> gloss(g, p.accent())) : it;
         }
 
-        private static ComponentStyleDelegate<JMenuBar> menuBar( ComponentStyleDelegate<JMenuBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JMenuBar> menuBar( Theme theme, ComponentStyleDelegate<JMenuBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(p.surface())
                     .foregroundColor(p.text())
@@ -1413,8 +1417,8 @@ final class Styles
                     .borderAt(UI.Edge.BOTTOM, 1, p.border());
         }
 
-        private static ComponentStyleDelegate<JPopupMenu> popupMenu( ComponentStyleDelegate<JPopupMenu> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JPopupMenu> popupMenu( Theme theme, ComponentStyleDelegate<JPopupMenu> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return lifted(it
                     .backgroundColor(p.surfaceField())
                     .foregroundColor(p.text())
@@ -1424,8 +1428,8 @@ final class Styles
                     .border(1, p.border()), 12, 90);
         }
 
-        private static ComponentStyleDelegate<JToolTip> toolTip( ComponentStyleDelegate<JToolTip> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JToolTip> toolTip( Theme theme, ComponentStyleDelegate<JToolTip> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return lifted(it
                     .margin(3)
                     .padding(4, 10, 4, 10)
@@ -1436,13 +1440,13 @@ final class Styles
                     .gradient(g -> gloss(g, p.surfaceField())), 8, 80);
         }
 
-        private static ComponentStyleDelegate<JSeparator> separator( ComponentStyleDelegate<JSeparator> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSeparator> separator( Theme theme, ComponentStyleDelegate<JSeparator> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.borderSoft()).foregroundColor(p.borderSoft());
         }
 
-        private static ComponentStyleDelegate<JProgressBar> progressBar( ComponentStyleDelegate<JProgressBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JProgressBar> progressBar( Theme theme, ComponentStyleDelegate<JProgressBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .borderRadius(8)
                     .border(1, p.border())
@@ -1454,33 +1458,33 @@ final class Styles
                     .shadowIsInset(true);
         }
 
-        private static ComponentStyleDelegate<JSlider> slider( ComponentStyleDelegate<JSlider> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSlider> slider( Theme theme, ComponentStyleDelegate<JSlider> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(p.text());
         }
 
-        private static ComponentStyleDelegate<JScrollBar> scrollBar( ComponentStyleDelegate<JScrollBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JScrollBar> scrollBar( Theme theme, ComponentStyleDelegate<JScrollBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.surfaceDisabled()).foregroundColor(p.border());
         }
 
-        private static ComponentStyleDelegate<JTabbedPane> tabbedPane( ComponentStyleDelegate<JTabbedPane> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JTabbedPane> tabbedPane( Theme theme, ComponentStyleDelegate<JTabbedPane> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.background()).foregroundColor(p.text());
         }
 
-        private static ComponentStyleDelegate<JSplitPane> splitPane( ComponentStyleDelegate<JSplitPane> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSplitPane> splitPane( Theme theme, ComponentStyleDelegate<JSplitPane> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(p.text());
         }
 
-        private static <C extends JComponent> ComponentStyleDelegate<C> flatField( ComponentStyleDelegate<C> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static <C extends JComponent> ComponentStyleDelegate<C> flatField( Theme theme, ComponentStyleDelegate<C> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.surfaceField()).foregroundColor(p.text());
         }
 
-        private static ComponentStyleDelegate<JTableHeader> tableHeader( ComponentStyleDelegate<JTableHeader> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JTableHeader> tableHeader( Theme theme, ComponentStyleDelegate<JTableHeader> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(p.surface())
                     .foregroundColor(p.textMuted())
@@ -1488,8 +1492,8 @@ final class Styles
                     .borderAt(UI.Edge.BOTTOM, 1, p.border());
         }
 
-        private static ComponentStyleDelegate<JToolBar> toolBar( ComponentStyleDelegate<JToolBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JToolBar> toolBar( Theme theme, ComponentStyleDelegate<JToolBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(p.surface())
                     .foregroundColor(p.text())
@@ -1602,8 +1606,8 @@ final class Styles
         // ── Surfaces ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
-        private static ComponentStyleDelegate<JPanel> panel( ComponentStyleDelegate<JPanel> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JPanel> panel( Theme theme, ComponentStyleDelegate<JPanel> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 case CARD:
@@ -1619,8 +1623,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JScrollPane> scrollPane( ComponentStyleDelegate<JScrollPane> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JScrollPane> scrollPane( Theme theme, ComponentStyleDelegate<JScrollPane> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 case TRANSPARENT:
@@ -1640,8 +1644,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JViewport> viewport( ComponentStyleDelegate<JViewport> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JViewport> viewport( Theme theme, ComponentStyleDelegate<JViewport> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 case TRANSPARENT: return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT);
@@ -1660,8 +1664,8 @@ final class Styles
          *  outlined for everything else.
          */
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<AbstractButton> button( ComponentStyleDelegate<AbstractButton> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<AbstractButton> button( Theme theme, ComponentStyleDelegate<AbstractButton> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             AbstractButton b = it.component();
             ButtonModel    m = b.getModel();
 
@@ -1694,8 +1698,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static <C extends AbstractButton> ComponentStyleDelegate<C> tickable( ComponentStyleDelegate<C> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static <C extends AbstractButton> ComponentStyleDelegate<C> tickable( Theme theme, ComponentStyleDelegate<C> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
                     .foregroundColor(it.component().isEnabled() ? p.text() : p.textDisabled())
@@ -1703,8 +1707,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JComboBox> comboBox( ComponentStyleDelegate<JComboBox> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JComboBox> comboBox( Theme theme, ComponentStyleDelegate<JComboBox> it ) {
+            SwingTreeLookAndFeel.Palette p       = theme.palette();
             JComboBox<?> combo   = it.component();
             boolean      enabled = combo.isEnabled();
             boolean      focused = enabled && LafUtilities.hasFocus(combo);
@@ -1712,8 +1716,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JSpinner> spinner( ComponentStyleDelegate<JSpinner> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSpinner> spinner( Theme theme, ComponentStyleDelegate<JSpinner> it ) {
+            SwingTreeLookAndFeel.Palette p       = theme.palette();
             JSpinner spinner = it.component();
             boolean  enabled = spinner.isEnabled();
             boolean  focused = enabled && LafUtilities.hasFocus(spinner);
@@ -1723,21 +1727,21 @@ final class Styles
         // ── Inputs ───────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JTextField> field( ComponentStyleDelegate<JTextField> it ) {
+        private static ComponentStyleDelegate<JTextField> field( Theme theme, ComponentStyleDelegate<JTextField> it ) {
             JTextField f        = it.component();
             boolean    editable = f.isEnabled() && f.isEditable();
-            return underlined(it, SwingTreeLookAndFeel.palette(), editable, editable && f.isFocusOwner(), 8, 12, 12)
-                    .foregroundColor(f.isEnabled() ? SwingTreeLookAndFeel.palette().text()
-                                                   : SwingTreeLookAndFeel.palette().textDisabled());
+            return underlined(it, theme.palette(), editable, editable && f.isFocusOwner(), 8, 12, 12)
+                    .foregroundColor(f.isEnabled() ? theme.palette().text()
+                                                   : theme.palette().textDisabled());
         }
 
         @SuppressWarnings("deprecation")
-        private static <C extends JTextComponent> ComponentStyleDelegate<C> page( ComponentStyleDelegate<C> it ) {
+        private static <C extends JTextComponent> ComponentStyleDelegate<C> page( Theme theme, ComponentStyleDelegate<C> it ) {
             JTextComponent t        = it.component();
             boolean        editable = t.isEnabled() && t.isEditable();
-            return underlined(it, SwingTreeLookAndFeel.palette(), editable, editable && t.isFocusOwner(), 9, 12, 12)
-                    .foregroundColor(t.isEnabled() ? SwingTreeLookAndFeel.palette().text()
-                                                   : SwingTreeLookAndFeel.palette().textDisabled());
+            return underlined(it, theme.palette(), editable, editable && t.isFocusOwner(), 9, 12, 12)
+                    .foregroundColor(t.isEnabled() ? theme.palette().text()
+                                                   : theme.palette().textDisabled());
         }
 
         /**
@@ -1764,14 +1768,14 @@ final class Styles
         // ── The rest ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JLabel> label( ComponentStyleDelegate<JLabel> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JLabel> label( Theme theme, ComponentStyleDelegate<JLabel> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.foregroundColor(it.component().isEnabled() ? p.text() : p.textDisabled());
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JMenuItem> menuItem( ComponentStyleDelegate<JMenuItem> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JMenuItem> menuItem( Theme theme, ComponentStyleDelegate<JMenuItem> it ) {
+            SwingTreeLookAndFeel.Palette p       = theme.palette();
             JMenuItem   item    = it.component();
             ButtonModel m       = item.getModel();
             boolean     enabled = item.isEnabled();
@@ -1784,8 +1788,8 @@ final class Styles
                     .foregroundColor(enabled ? p.text() : p.textDisabled());
         }
 
-        private static ComponentStyleDelegate<JMenuBar> menuBar( ComponentStyleDelegate<JMenuBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JMenuBar> menuBar( Theme theme, ComponentStyleDelegate<JMenuBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return elevation(it
                     .backgroundColor(p.surface())
                     .foregroundColor(p.text())
@@ -1793,8 +1797,8 @@ final class Styles
                     .borderWidth(0), 1);
         }
 
-        private static ComponentStyleDelegate<JPopupMenu> popupMenu( ComponentStyleDelegate<JPopupMenu> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JPopupMenu> popupMenu( Theme theme, ComponentStyleDelegate<JPopupMenu> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return elevation(it
                     .backgroundColor(p.surface())
                     .foregroundColor(p.text())
@@ -1804,8 +1808,8 @@ final class Styles
                     .borderWidth(0), 4);
         }
 
-        private static ComponentStyleDelegate<JToolTip> toolTip( ComponentStyleDelegate<JToolTip> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JToolTip> toolTip( Theme theme, ComponentStyleDelegate<JToolTip> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .padding(6, 10, 6, 10)
                     .borderRadius(RADIUS)
@@ -1814,13 +1818,13 @@ final class Styles
                     .foregroundColor(p.onFilled());
         }
 
-        private static ComponentStyleDelegate<JSeparator> separator( ComponentStyleDelegate<JSeparator> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSeparator> separator( Theme theme, ComponentStyleDelegate<JSeparator> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.borderSoft()).foregroundColor(p.borderSoft());
         }
 
-        private static ComponentStyleDelegate<JProgressBar> progressBar( ComponentStyleDelegate<JProgressBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JProgressBar> progressBar( Theme theme, ComponentStyleDelegate<JProgressBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .borderRadius(3)
                     .borderWidth(0)
@@ -1828,41 +1832,41 @@ final class Styles
                     .foregroundColor(p.accent());
         }
 
-        private static ComponentStyleDelegate<JSlider> slider( ComponentStyleDelegate<JSlider> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSlider> slider( Theme theme, ComponentStyleDelegate<JSlider> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(p.text());
         }
 
-        private static ComponentStyleDelegate<JScrollBar> scrollBar( ComponentStyleDelegate<JScrollBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JScrollBar> scrollBar( Theme theme, ComponentStyleDelegate<JScrollBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.background()).foregroundColor(p.border());
         }
 
-        private static ComponentStyleDelegate<JTabbedPane> tabbedPane( ComponentStyleDelegate<JTabbedPane> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JTabbedPane> tabbedPane( Theme theme, ComponentStyleDelegate<JTabbedPane> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.background()).foregroundColor(p.text());
         }
 
-        private static ComponentStyleDelegate<JSplitPane> splitPane( ComponentStyleDelegate<JSplitPane> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSplitPane> splitPane( Theme theme, ComponentStyleDelegate<JSplitPane> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(p.text());
         }
 
-        private static <C extends JComponent> ComponentStyleDelegate<C> flatField( ComponentStyleDelegate<C> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static <C extends JComponent> ComponentStyleDelegate<C> flatField( Theme theme, ComponentStyleDelegate<C> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.surface()).foregroundColor(p.text());
         }
 
-        private static ComponentStyleDelegate<JTableHeader> tableHeader( ComponentStyleDelegate<JTableHeader> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JTableHeader> tableHeader( Theme theme, ComponentStyleDelegate<JTableHeader> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(p.surface())
                     .foregroundColor(p.textMuted())
                     .borderAt(UI.Edge.BOTTOM, 1, p.borderSoft());
         }
 
-        private static ComponentStyleDelegate<JToolBar> toolBar( ComponentStyleDelegate<JToolBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JToolBar> toolBar( Theme theme, ComponentStyleDelegate<JToolBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return elevation(it
                     .backgroundColor(p.surface())
                     .foregroundColor(p.text())
@@ -1950,8 +1954,8 @@ final class Styles
         // ── Surfaces ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
-        private static ComponentStyleDelegate<JPanel> panel( ComponentStyleDelegate<JPanel> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JPanel> panel( Theme theme, ComponentStyleDelegate<JPanel> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 // A card is told from the ground by the gap of ground left around it, since there is
@@ -1967,8 +1971,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JScrollPane> scrollPane( ComponentStyleDelegate<JScrollPane> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JScrollPane> scrollPane( Theme theme, ComponentStyleDelegate<JScrollPane> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.foregroundColor(p.text()).borderRadius(0);
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 case TRANSPARENT: return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).borderWidth(0).padding(0);
@@ -1980,8 +1984,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JViewport> viewport( ComponentStyleDelegate<JViewport> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JViewport> viewport( Theme theme, ComponentStyleDelegate<JViewport> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 case TRANSPARENT: return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT);
@@ -1995,8 +1999,8 @@ final class Styles
         // ── Controls ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<AbstractButton> button( ComponentStyleDelegate<AbstractButton> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<AbstractButton> button( Theme theme, ComponentStyleDelegate<AbstractButton> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             AbstractButton b = it.component();
             ButtonModel    m = b.getModel();
 
@@ -2020,8 +2024,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static <C extends AbstractButton> ComponentStyleDelegate<C> tickable( ComponentStyleDelegate<C> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static <C extends AbstractButton> ComponentStyleDelegate<C> tickable( Theme theme, ComponentStyleDelegate<C> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
                     .foregroundColor(it.component().isEnabled() ? p.text() : p.textDisabled())
@@ -2029,35 +2033,35 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JComboBox> comboBox( ComponentStyleDelegate<JComboBox> it ) {
+        private static ComponentStyleDelegate<JComboBox> comboBox( Theme theme, ComponentStyleDelegate<JComboBox> it ) {
             JComboBox<?> combo   = it.component();
             boolean      enabled = combo.isEnabled();
-            return ruled(it, enabled, enabled && LafUtilities.hasFocus(combo), 6, 10, 4);
+            return ruled(theme, it, enabled, enabled && LafUtilities.hasFocus(combo), 6, 10, 4);
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JSpinner> spinner( ComponentStyleDelegate<JSpinner> it ) {
+        private static ComponentStyleDelegate<JSpinner> spinner( Theme theme, ComponentStyleDelegate<JSpinner> it ) {
             JSpinner spinner = it.component();
             boolean  enabled = spinner.isEnabled();
-            return ruled(it, enabled, enabled && LafUtilities.hasFocus(spinner), 4, 6, 4);
+            return ruled(theme, it, enabled, enabled && LafUtilities.hasFocus(spinner), 4, 6, 4);
         }
 
         // ── Inputs ───────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JTextField> field( ComponentStyleDelegate<JTextField> it ) {
-            return input(it, it.component(), 7, 10);
+        private static ComponentStyleDelegate<JTextField> field( Theme theme, ComponentStyleDelegate<JTextField> it ) {
+            return input(theme, it, it.component(), 7, 10);
         }
 
         @SuppressWarnings("deprecation")
-        private static <C extends JTextComponent> ComponentStyleDelegate<C> page( ComponentStyleDelegate<C> it ) {
-            return input(it, it.component(), 8, 10);
+        private static <C extends JTextComponent> ComponentStyleDelegate<C> page( Theme theme, ComponentStyleDelegate<C> it ) {
+            return input(theme, it, it.component(), 8, 10);
         }
 
         private static <C extends JComponent> ComponentStyleDelegate<C> input(
-            ComponentStyleDelegate<C> it, JTextComponent text, int padY, int padX
+            Theme theme, ComponentStyleDelegate<C> it, JTextComponent text, int padY, int padX
         ) {
-            SwingTreeLookAndFeel.Palette p        = SwingTreeLookAndFeel.palette();
+            SwingTreeLookAndFeel.Palette p        = theme.palette();
             boolean editable = text.isEnabled() && text.isEditable();
             // Inside a scroll pane or a spinner the box has already been drawn around it.
             if ( LafUtilities.isInsideAnotherControl(text) )
@@ -2065,7 +2069,7 @@ final class Styles
                         .margin(0).padding(padY, padX, padY, padX).borderWidth(0)
                         .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
                         .foregroundColor(text.isEnabled() ? p.text() : p.textDisabled());
-            return ruled(it, editable, editable && text.isFocusOwner(), padY, padX, padX)
+            return ruled(theme, it, editable, editable && text.isFocusOwner(), padY, padX, padX)
                     .foregroundColor(text.isEnabled() ? p.text() : p.textDisabled());
         }
 
@@ -2075,9 +2079,9 @@ final class Styles
          */
         @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
         private static <C extends JComponent> ComponentStyleDelegate<C> ruled(
-            ComponentStyleDelegate<C> it, boolean enabled, boolean focused, int padY, int padX, int padRight
+            Theme theme, ComponentStyleDelegate<C> it, boolean enabled, boolean focused, int padY, int padX, int padRight
         ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             Color resting = enabled ? p.surfaceField() : p.surfaceDisabled();
             return it
                     .margin(focused ? 0 : 1)
@@ -2091,14 +2095,14 @@ final class Styles
         // ── The rest ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JLabel> label( ComponentStyleDelegate<JLabel> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JLabel> label( Theme theme, ComponentStyleDelegate<JLabel> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.foregroundColor(it.component().isEnabled() ? p.text() : p.textDisabled());
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JMenuItem> menuItem( ComponentStyleDelegate<JMenuItem> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JMenuItem> menuItem( Theme theme, ComponentStyleDelegate<JMenuItem> it ) {
+            SwingTreeLookAndFeel.Palette p       = theme.palette();
             JMenuItem   item    = it.component();
             ButtonModel m       = item.getModel();
             boolean     enabled = item.isEnabled();
@@ -2111,8 +2115,8 @@ final class Styles
                     .foregroundColor(!enabled ? p.textDisabled() : armed ? p.onFilled() : p.text());
         }
 
-        private static ComponentStyleDelegate<JMenuBar> menuBar( ComponentStyleDelegate<JMenuBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JMenuBar> menuBar( Theme theme, ComponentStyleDelegate<JMenuBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(p.surface())
                     .foregroundColor(p.text())
@@ -2120,8 +2124,8 @@ final class Styles
                     .borderAt(UI.Edge.BOTTOM, 1, p.borderSoft());
         }
 
-        private static ComponentStyleDelegate<JPopupMenu> popupMenu( ComponentStyleDelegate<JPopupMenu> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JPopupMenu> popupMenu( Theme theme, ComponentStyleDelegate<JPopupMenu> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(p.surface())
                     .foregroundColor(p.text())
@@ -2130,8 +2134,8 @@ final class Styles
                     .border(1, p.borderSoft());
         }
 
-        private static ComponentStyleDelegate<JToolTip> toolTip( ComponentStyleDelegate<JToolTip> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JToolTip> toolTip( Theme theme, ComponentStyleDelegate<JToolTip> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .padding(5, 9, 5, 9)
                     .borderRadius(0)
@@ -2141,13 +2145,13 @@ final class Styles
         }
 
         /** The delegate draws the hairline itself, so the rule leaves the rest of the strip alone. */
-        private static ComponentStyleDelegate<JSeparator> separator( ComponentStyleDelegate<JSeparator> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSeparator> separator( Theme theme, ComponentStyleDelegate<JSeparator> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(p.borderSoft());
         }
 
-        private static ComponentStyleDelegate<JProgressBar> progressBar( ComponentStyleDelegate<JProgressBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JProgressBar> progressBar( Theme theme, ComponentStyleDelegate<JProgressBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .borderRadius(0)
                     .borderWidth(0)
@@ -2155,26 +2159,26 @@ final class Styles
                     .foregroundColor(p.accent());
         }
 
-        private static ComponentStyleDelegate<JScrollBar> scrollBar( ComponentStyleDelegate<JScrollBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JScrollBar> scrollBar( Theme theme, ComponentStyleDelegate<JScrollBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.background()).foregroundColor(p.border());
         }
 
-        private static ComponentStyleDelegate<JTabbedPane> tabbedPane( ComponentStyleDelegate<JTabbedPane> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JTabbedPane> tabbedPane( Theme theme, ComponentStyleDelegate<JTabbedPane> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.background()).foregroundColor(p.text());
         }
 
-        private static ComponentStyleDelegate<JTableHeader> tableHeader( ComponentStyleDelegate<JTableHeader> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JTableHeader> tableHeader( Theme theme, ComponentStyleDelegate<JTableHeader> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(p.surface())
                     .foregroundColor(p.textMuted())
                     .borderAt(UI.Edge.BOTTOM, 1, p.border());
         }
 
-        private static ComponentStyleDelegate<JToolBar> toolBar( ComponentStyleDelegate<JToolBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JToolBar> toolBar( Theme theme, ComponentStyleDelegate<JToolBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(p.surface())
                     .foregroundColor(p.text())
@@ -2184,13 +2188,13 @@ final class Styles
         }
 
         /** A list, table or tree is the content of the box around it, so it fills nothing itself. */
-        private static <C extends JComponent> ComponentStyleDelegate<C> content( ComponentStyleDelegate<C> it ) {
-            return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(SwingTreeLookAndFeel.palette().text());
+        private static <C extends JComponent> ComponentStyleDelegate<C> content( Theme theme, ComponentStyleDelegate<C> it ) {
+            return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(theme.palette().text());
         }
 
         /** Structure with nothing of its own to paint: the symbol set draws all of it. */
-        private static <C extends JComponent> ComponentStyleDelegate<C> bare( ComponentStyleDelegate<C> it ) {
-            return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(SwingTreeLookAndFeel.palette().text());
+        private static <C extends JComponent> ComponentStyleDelegate<C> bare( Theme theme, ComponentStyleDelegate<C> it ) {
+            return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(theme.palette().text());
         }
 
         // ── Variant colours ──────────────────────────────────────────────────
@@ -2342,8 +2346,8 @@ final class Styles
         // ── Surfaces ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
-        private static ComponentStyleDelegate<JPanel> panel( ComponentStyleDelegate<JPanel> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JPanel> panel( Theme theme, ComponentStyleDelegate<JPanel> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 case CARD:        return sheet(it, p).margin(5).padding(2);
@@ -2357,8 +2361,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JScrollPane> scrollPane( ComponentStyleDelegate<JScrollPane> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JScrollPane> scrollPane( Theme theme, ComponentStyleDelegate<JScrollPane> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 case TRANSPARENT: return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).borderWidth(0).borderRadius(0).padding(0);
@@ -2376,8 +2380,8 @@ final class Styles
         }
 
         /** A viewport paints nothing: the well around it has already been milled into the card. */
-        private static ComponentStyleDelegate<JViewport> viewport( ComponentStyleDelegate<JViewport> it ) {
-            return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(SwingTreeLookAndFeel.palette().text());
+        private static ComponentStyleDelegate<JViewport> viewport( Theme theme, ComponentStyleDelegate<JViewport> it ) {
+            return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(theme.palette().text());
         }
 
         /** A sheet of paper: its own grain, a hairline edge and a shadow where it lifts off the bench. */
@@ -2411,8 +2415,8 @@ final class Styles
         // ── Controls ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<AbstractButton> button( ComponentStyleDelegate<AbstractButton> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<AbstractButton> button( Theme theme, ComponentStyleDelegate<AbstractButton> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             AbstractButton b = it.component();
             ButtonModel    m = b.getModel();
 
@@ -2445,8 +2449,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static <C extends AbstractButton> ComponentStyleDelegate<C> tickable( ComponentStyleDelegate<C> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static <C extends AbstractButton> ComponentStyleDelegate<C> tickable( Theme theme, ComponentStyleDelegate<C> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
                     .foregroundColor(it.component().isEnabled() ? p.text() : p.textDisabled())
@@ -2454,15 +2458,15 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JComboBox> comboBox( ComponentStyleDelegate<JComboBox> it ) {
-            SwingTreeLookAndFeel.Palette p     = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JComboBox> comboBox( Theme theme, ComponentStyleDelegate<JComboBox> it ) {
+            SwingTreeLookAndFeel.Palette p     = theme.palette();
             JComboBox<?> combo = it.component();
             return machined(it, p, combo.isEnabled(), LafUtilities.hasFocus(combo), 5, 10, 4);
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JSpinner> spinner( ComponentStyleDelegate<JSpinner> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSpinner> spinner( Theme theme, ComponentStyleDelegate<JSpinner> it ) {
+            SwingTreeLookAndFeel.Palette p       = theme.palette();
             JSpinner spinner = it.component();
             return machined(it, p, spinner.isEnabled(), LafUtilities.hasFocus(spinner), 3, 6, 3);
         }
@@ -2493,19 +2497,19 @@ final class Styles
         // ── Inputs ───────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JTextField> field( ComponentStyleDelegate<JTextField> it ) {
-            return input(it, it.component(), 6, 10);
+        private static ComponentStyleDelegate<JTextField> field( Theme theme, ComponentStyleDelegate<JTextField> it ) {
+            return input(theme, it, it.component(), 6, 10);
         }
 
         @SuppressWarnings("deprecation")
-        private static <C extends JTextComponent> ComponentStyleDelegate<C> page( ComponentStyleDelegate<C> it ) {
-            return input(it, it.component(), 8, 10);
+        private static <C extends JTextComponent> ComponentStyleDelegate<C> page( Theme theme, ComponentStyleDelegate<C> it ) {
+            return input(theme, it, it.component(), 8, 10);
         }
 
         private static <C extends JComponent> ComponentStyleDelegate<C> input(
-            ComponentStyleDelegate<C> it, JTextComponent text, int padY, int padX
+            Theme theme, ComponentStyleDelegate<C> it, JTextComponent text, int padY, int padX
         ) {
-            SwingTreeLookAndFeel.Palette p        = SwingTreeLookAndFeel.palette();
+            SwingTreeLookAndFeel.Palette p        = theme.palette();
             boolean editable = text.isEnabled() && text.isEditable();
             boolean focused  = editable && text.isFocusOwner();
             // Inside a scroll pane or a picker the hole has already been milled around it.
@@ -2527,14 +2531,14 @@ final class Styles
         // ── The rest ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JLabel> label( ComponentStyleDelegate<JLabel> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JLabel> label( Theme theme, ComponentStyleDelegate<JLabel> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.foregroundColor(it.component().isEnabled() ? p.text() : p.textDisabled());
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JMenuItem> menuItem( ComponentStyleDelegate<JMenuItem> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JMenuItem> menuItem( Theme theme, ComponentStyleDelegate<JMenuItem> it ) {
+            SwingTreeLookAndFeel.Palette p       = theme.palette();
             JMenuItem   item    = it.component();
             ButtonModel m       = item.getModel();
             boolean     enabled = item.isEnabled();
@@ -2548,8 +2552,8 @@ final class Styles
             return armed ? plate(it, p.accent(), false) : it;
         }
 
-        private static ComponentStyleDelegate<JMenuBar> menuBar( ComponentStyleDelegate<JMenuBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JMenuBar> menuBar( Theme theme, ComponentStyleDelegate<JMenuBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return plate(it
                     .foregroundColor(p.text())
                     .padding(2, 4, 2, 4)
@@ -2557,16 +2561,16 @@ final class Styles
                     .borderWidth(1), p.surface(), false);
         }
 
-        private static ComponentStyleDelegate<JPopupMenu> popupMenu( ComponentStyleDelegate<JPopupMenu> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JPopupMenu> popupMenu( Theme theme, ComponentStyleDelegate<JPopupMenu> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return sheet(it
                     .foregroundColor(p.text())
                     .margin(5)
                     .padding(4, 0, 4, 0), p);
         }
 
-        private static ComponentStyleDelegate<JToolTip> toolTip( ComponentStyleDelegate<JToolTip> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JToolTip> toolTip( Theme theme, ComponentStyleDelegate<JToolTip> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return sheet(it
                     .foregroundColor(p.text())
                     .margin(4)
@@ -2578,8 +2582,8 @@ final class Styles
          *  light just below it - and the rest of the strip is left alone, or a separator laid out
          *  taller than its hairline would come out as a solid brown band.
          */
-        private static ComponentStyleDelegate<JSeparator> separator( ComponentStyleDelegate<JSeparator> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSeparator> separator( Theme theme, ComponentStyleDelegate<JSeparator> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
                     .foregroundColor(p.border())
@@ -2587,8 +2591,8 @@ final class Styles
                                          .offset(0, 1).blurRadius(0).isInset(false));
         }
 
-        private static ComponentStyleDelegate<JProgressBar> progressBar( ComponentStyleDelegate<JProgressBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JProgressBar> progressBar( Theme theme, ComponentStyleDelegate<JProgressBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return well(it
                     .margin(2)
                     .borderRadius(6)
@@ -2597,28 +2601,28 @@ final class Styles
                     .foregroundColor(p.accent()), 2);
         }
 
-        private static ComponentStyleDelegate<JScrollBar> scrollBar( ComponentStyleDelegate<JScrollBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JScrollBar> scrollBar( Theme theme, ComponentStyleDelegate<JScrollBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return well(it
                     .backgroundColor(p.surfaceDisabled())
                     .foregroundColor(p.border()), 2);
         }
 
-        private static ComponentStyleDelegate<JTabbedPane> tabbedPane( ComponentStyleDelegate<JTabbedPane> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JTabbedPane> tabbedPane( Theme theme, ComponentStyleDelegate<JTabbedPane> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(p.text());
         }
 
-        private static ComponentStyleDelegate<JTableHeader> tableHeader( ComponentStyleDelegate<JTableHeader> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JTableHeader> tableHeader( Theme theme, ComponentStyleDelegate<JTableHeader> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return plate(it
                     .foregroundColor(p.textMuted())
                     .borderRadius(0)
                     .borderWidth(1), p.surface(), false);
         }
 
-        private static ComponentStyleDelegate<JToolBar> toolBar( ComponentStyleDelegate<JToolBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JToolBar> toolBar( Theme theme, ComponentStyleDelegate<JToolBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return plate(it
                     .foregroundColor(p.text())
                     .margin(4)
@@ -2628,13 +2632,13 @@ final class Styles
         }
 
         /** A list, table or tree lies on the floor of the well the scroll pane milled for it. */
-        private static <C extends JComponent> ComponentStyleDelegate<C> content( ComponentStyleDelegate<C> it ) {
-            return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(SwingTreeLookAndFeel.palette().text());
+        private static <C extends JComponent> ComponentStyleDelegate<C> content( Theme theme, ComponentStyleDelegate<C> it ) {
+            return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(theme.palette().text());
         }
 
         /** Structure with nothing of its own to paint: the symbol set draws all of it. */
-        private static <C extends JComponent> ComponentStyleDelegate<C> bare( ComponentStyleDelegate<C> it ) {
-            return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(SwingTreeLookAndFeel.palette().text());
+        private static <C extends JComponent> ComponentStyleDelegate<C> bare( Theme theme, ComponentStyleDelegate<C> it ) {
+            return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(theme.palette().text());
         }
 
         // ── Variant colours ──────────────────────────────────────────────────
@@ -2737,9 +2741,9 @@ final class Styles
          * @return the styled delegate
          */
         private static <C extends JComponent> ComponentStyleDelegate<C> pane(
-            ComponentStyleDelegate<C> it, int wash, int lift
+            Theme theme, ComponentStyleDelegate<C> it, int wash, int lift
         ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(LafUtilities.withOpacity(p.surface(), wash))
                     .parentFilter(f -> f.blur(FROST).area(UI.ComponentArea.BODY))
@@ -2760,12 +2764,12 @@ final class Styles
         // ── Surfaces ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
-        private static ComponentStyleDelegate<JPanel> panel( ComponentStyleDelegate<JPanel> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JPanel> panel( Theme theme, ComponentStyleDelegate<JPanel> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
-                case CARD:        return pane(it.borderRadius(RADIUS).borderWidth(1).margin(7).padding(2), PANE, 6);
-                case RAIL:        return pane(it.borderRadius(0).borderWidth(0), PANE / 2, 3);
+                case CARD:        return pane(theme, it.borderRadius(RADIUS).borderWidth(1).margin(7).padding(2), PANE, 6);
+                case RAIL:        return pane(theme, it.borderRadius(0).borderWidth(0), PANE / 2, 3);
                 case TRANSPARENT: return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT);
                 case WINDOW:
                 default:          return LafUtilities.isControlInternal(it.component()) || _standsOnTheGround(it.component())
@@ -2815,23 +2819,23 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JScrollPane> scrollPane( ComponentStyleDelegate<JScrollPane> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JScrollPane> scrollPane( Theme theme, ComponentStyleDelegate<JScrollPane> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 case TRANSPARENT: return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).borderWidth(0).borderRadius(0).padding(0);
-                case CARD:        return pane(it.borderRadius(RADIUS).borderWidth(1).margin(7).padding(3), PANE, 6);
+                case CARD:        return pane(theme, it.borderRadius(RADIUS).borderWidth(1).margin(7).padding(3), PANE, 6);
                 case RAIL:        return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).borderWidth(0).borderRadius(0).padding(0);
                 case WINDOW:
-                default:          return pane(it.borderRadius(RADIUS - 4).borderWidth(1).margin(4).padding(3), WELL, 3);
+                default:          return pane(theme, it.borderRadius(RADIUS - 4).borderWidth(1).margin(4).padding(3), WELL, 3);
             }
         }
 
         // ── Controls ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<AbstractButton> button( ComponentStyleDelegate<AbstractButton> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<AbstractButton> button( Theme theme, ComponentStyleDelegate<AbstractButton> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             AbstractButton b = it.component();
             ButtonModel    m = b.getModel();
 
@@ -2855,16 +2859,16 @@ final class Styles
             if ( variant.isFilled() )
                 // A tinted pane rather than a white one: the colour is what says which button this is,
                 // and it still has to let the ground through or it stops being glass.
-                return pane(it, PANE, sunken ? 2 : 5)
+                return pane(theme, it, PANE, sunken ? 2 : 5)
                         .backgroundColor(LafUtilities.withOpacity(tint(variant, p, sunken, rollover), 150));
             if ( variant == SwingTreeLookAndFeel.Variant.QUIET && !sunken && !rollover )
                 return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).borderColor(SwingTreeLookAndFeel.Palette.TRANSPARENT);
-            return pane(it, sunken ? WELL : rollover ? PANE + 22 : PANE, sunken ? 2 : 5);
+            return pane(theme, it, sunken ? WELL : rollover ? PANE + 22 : PANE, sunken ? 2 : 5);
         }
 
         @SuppressWarnings("deprecation")
-        private static <C extends AbstractButton> ComponentStyleDelegate<C> tickable( ComponentStyleDelegate<C> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static <C extends AbstractButton> ComponentStyleDelegate<C> tickable( Theme theme, ComponentStyleDelegate<C> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
                     .foregroundColor(it.component().isEnabled() ? p.text() : p.textDisabled())
@@ -2872,33 +2876,33 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JComboBox> comboBox( ComponentStyleDelegate<JComboBox> it ) {
+        private static ComponentStyleDelegate<JComboBox> comboBox( Theme theme, ComponentStyleDelegate<JComboBox> it ) {
             JComboBox<?> combo = it.component();
-            return frosted(it, combo.isEnabled(), LafUtilities.hasFocus(combo), 6, 10, 4);
+            return frosted(theme, it, combo.isEnabled(), LafUtilities.hasFocus(combo), 6, 10, 4);
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JSpinner> spinner( ComponentStyleDelegate<JSpinner> it ) {
+        private static ComponentStyleDelegate<JSpinner> spinner( Theme theme, ComponentStyleDelegate<JSpinner> it ) {
             JSpinner spinner = it.component();
-            return frosted(it, spinner.isEnabled(), LafUtilities.hasFocus(spinner), 4, 6, 4);
+            return frosted(theme, it, spinner.isEnabled(), LafUtilities.hasFocus(spinner), 4, 6, 4);
         }
 
         // ── Inputs ───────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JTextField> field( ComponentStyleDelegate<JTextField> it ) {
-            return input(it, it.component(), 7, 12);
+        private static ComponentStyleDelegate<JTextField> field( Theme theme, ComponentStyleDelegate<JTextField> it ) {
+            return input(theme, it, it.component(), 7, 12);
         }
 
         @SuppressWarnings("deprecation")
-        private static <C extends JTextComponent> ComponentStyleDelegate<C> page( ComponentStyleDelegate<C> it ) {
-            return input(it, it.component(), 8, 12);
+        private static <C extends JTextComponent> ComponentStyleDelegate<C> page( Theme theme, ComponentStyleDelegate<C> it ) {
+            return input(theme, it, it.component(), 8, 12);
         }
 
         private static <C extends JComponent> ComponentStyleDelegate<C> input(
-            ComponentStyleDelegate<C> it, JTextComponent text, int padY, int padX
+            Theme theme, ComponentStyleDelegate<C> it, JTextComponent text, int padY, int padX
         ) {
-            SwingTreeLookAndFeel.Palette p        = SwingTreeLookAndFeel.palette();
+            SwingTreeLookAndFeel.Palette p        = theme.palette();
             boolean editable = text.isEnabled() && text.isEditable();
             // Inside a scroll pane or a picker the pane has already been cut around it.
             if ( LafUtilities.isInsideAnotherControl(text) )
@@ -2906,16 +2910,16 @@ final class Styles
                         .margin(0).padding(padY, padX, padY, padX).borderWidth(0)
                         .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
                         .foregroundColor(text.isEnabled() ? p.text() : p.textDisabled());
-            return frosted(it, editable, editable && text.isFocusOwner(), padY, padX, padX)
+            return frosted(theme, it, editable, editable && text.isFocusOwner(), padY, padX, padX)
                     .foregroundColor(text.isEnabled() ? p.text() : p.textDisabled());
         }
 
         /** A pane you reach into: darker than the ones you only look at, so text stands off it. */
         @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
         private static <C extends JComponent> ComponentStyleDelegate<C> frosted(
-            ComponentStyleDelegate<C> it, boolean enabled, boolean focused, int padY, int padX, int padRight
+            Theme theme, ComponentStyleDelegate<C> it, boolean enabled, boolean focused, int padY, int padX, int padRight
         ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it
                     // The thicker focused edge is taken out of the margin, so a field keeps its
                     // footprint when you click into it.
@@ -2930,7 +2934,7 @@ final class Styles
             // This idiom answers the pointer the way its buttons do, by letting more of the surface
             // through the glass rather than by moving the colour behind it.
             int veil = WELL + 40 + ( LafUtilities.isUnderPointer(it.component()) ? 22 : 0 );
-            return pane(it, WELL, 2)
+            return pane(theme, it, WELL, 2)
                     .backgroundColor(LafUtilities.withOpacity(p.surfaceField(), veil))
                     .borderColor(LafUtilities.withOpacity(focused ? p.accent() : p.border(), focused ? 220 : RIM));
         }
@@ -2938,14 +2942,14 @@ final class Styles
         // ── The rest ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JLabel> label( ComponentStyleDelegate<JLabel> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JLabel> label( Theme theme, ComponentStyleDelegate<JLabel> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.foregroundColor(it.component().isEnabled() ? p.text() : p.textDisabled());
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JMenuItem> menuItem( ComponentStyleDelegate<JMenuItem> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JMenuItem> menuItem( Theme theme, ComponentStyleDelegate<JMenuItem> it ) {
+            SwingTreeLookAndFeel.Palette p       = theme.palette();
             JMenuItem   item    = it.component();
             ButtonModel m       = item.getModel();
             boolean     enabled = item.isEnabled();
@@ -2958,9 +2962,9 @@ final class Styles
                     .foregroundColor(enabled ? p.text() : p.textDisabled());
         }
 
-        private static ComponentStyleDelegate<JMenuBar> menuBar( ComponentStyleDelegate<JMenuBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
-            return pane(it
+        private static ComponentStyleDelegate<JMenuBar> menuBar( Theme theme, ComponentStyleDelegate<JMenuBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
+            return pane(theme, it
                     .foregroundColor(p.text())
                     .padding(2, 4, 2, 4)
                     .borderRadius(0)
@@ -2968,9 +2972,9 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
-        private static ComponentStyleDelegate<JPopupMenu> popupMenu( ComponentStyleDelegate<JPopupMenu> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
-            return groundIfUnfrosted(pane(it
+        private static ComponentStyleDelegate<JPopupMenu> popupMenu( Theme theme, ComponentStyleDelegate<JPopupMenu> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
+            return groundIfUnfrosted(theme, pane(theme, it
                     .foregroundColor(p.text())
                     .margin(7)
                     .padding(5, 0, 5, 0)
@@ -2979,9 +2983,9 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
-        private static ComponentStyleDelegate<JToolTip> toolTip( ComponentStyleDelegate<JToolTip> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
-            return groundIfUnfrosted(pane(it
+        private static ComponentStyleDelegate<JToolTip> toolTip( Theme theme, ComponentStyleDelegate<JToolTip> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
+            return groundIfUnfrosted(theme, pane(theme, it
                     .foregroundColor(p.text())
                     .margin(5)
                     .padding(5, 10, 5, 10)
@@ -3016,24 +3020,24 @@ final class Styles
          * @return the delegate, repainted only for a popup which cannot be frosted
          */
         private static <C extends JComponent> ComponentStyleDelegate<C> groundIfUnfrosted(
-            ComponentStyleDelegate<C> it, C popup, int wash
+            Theme theme, ComponentStyleDelegate<C> it, C popup, int wash
         ) {
             if ( SwingTreeLookAndFeel.popupWindowModeOf(popup) != SwingTreeLookAndFeel.PopupWindowMode.TRANSLUCENT )
                 return it;
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             Color grounded = LafUtilities.shadeTowards(p.background(), p.surface(), wash / 255.0);
             return it.backgroundColor(LafUtilities.withOpacity(grounded, UNFROSTED_PANE));
         }
 
         /** The delegate draws the hairline itself, so the rule leaves the rest of the strip alone. */
-        private static ComponentStyleDelegate<JSeparator> separator( ComponentStyleDelegate<JSeparator> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSeparator> separator( Theme theme, ComponentStyleDelegate<JSeparator> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
                      .foregroundColor(LafUtilities.withOpacity(p.border(), 60));
         }
 
-        private static ComponentStyleDelegate<JProgressBar> progressBar( ComponentStyleDelegate<JProgressBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JProgressBar> progressBar( Theme theme, ComponentStyleDelegate<JProgressBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .margin(2)
                     .borderRadius(6)
@@ -3042,22 +3046,22 @@ final class Styles
                     .foregroundColor(p.accent());
         }
 
-        private static ComponentStyleDelegate<JScrollBar> scrollBar( ComponentStyleDelegate<JScrollBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JScrollBar> scrollBar( Theme theme, ComponentStyleDelegate<JScrollBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(p.border());
         }
 
-        private static ComponentStyleDelegate<JTableHeader> tableHeader( ComponentStyleDelegate<JTableHeader> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JTableHeader> tableHeader( Theme theme, ComponentStyleDelegate<JTableHeader> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(LafUtilities.withOpacity(p.surface(), 26))
                     .foregroundColor(p.textMuted())
                     .borderAt(UI.Edge.BOTTOM, 1, LafUtilities.withOpacity(p.border(), 60));
         }
 
-        private static ComponentStyleDelegate<JToolBar> toolBar( ComponentStyleDelegate<JToolBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
-            return pane(it
+        private static ComponentStyleDelegate<JToolBar> toolBar( Theme theme, ComponentStyleDelegate<JToolBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
+            return pane(theme, it
                     .foregroundColor(p.text())
                     .margin(6)
                     .padding(4, 8, 4, 8)
@@ -3066,8 +3070,8 @@ final class Styles
         }
 
         /** Everything that is only the contents of a pane somebody else already cut. */
-        private static <C extends JComponent> ComponentStyleDelegate<C> bare( ComponentStyleDelegate<C> it ) {
-            return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(SwingTreeLookAndFeel.palette().text());
+        private static <C extends JComponent> ComponentStyleDelegate<C> bare( Theme theme, ComponentStyleDelegate<C> it ) {
+            return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(theme.palette().text());
         }
 
         // ── Variant colours ──────────────────────────────────────────────────
@@ -3235,8 +3239,8 @@ final class Styles
         // ── Surfaces ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
-        private static ComponentStyleDelegate<JPanel> panel( ComponentStyleDelegate<JPanel> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JPanel> panel( Theme theme, ComponentStyleDelegate<JPanel> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(it.component()) ) {
                 case CARD:
@@ -3268,8 +3272,8 @@ final class Styles
          *  the focus.
          */
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JScrollPane> scrollPane( ComponentStyleDelegate<JScrollPane> it ) {
-            NimbusScheme s    = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+        private static ComponentStyleDelegate<JScrollPane> scrollPane( Theme theme, ComponentStyleDelegate<JScrollPane> it ) {
+            NimbusScheme s    = NimbusScheme.of(theme.palette());
             JScrollPane  pane = it.component();
             it = it.foregroundColor(s.get(NimbusScheme.Key.TEXT));
             if ( SwingTreeLookAndFeel.Surface.of(pane) == SwingTreeLookAndFeel.Surface.TRANSPARENT )
@@ -3289,8 +3293,8 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JViewport> viewport( ComponentStyleDelegate<JViewport> it ) {
-            NimbusScheme s = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+        private static ComponentStyleDelegate<JViewport> viewport( Theme theme, ComponentStyleDelegate<JViewport> it ) {
+            NimbusScheme s = NimbusScheme.of(theme.palette());
             return it
                     .foregroundColor(s.get(NimbusScheme.Key.TEXT))
                     .backgroundColor(
@@ -3300,8 +3304,8 @@ final class Styles
         }
 
         /** A list, a table or a tree: a plain white page, because the scroll pane around it is the frame. */
-        private static <C extends JComponent> ComponentStyleDelegate<C> sheet( ComponentStyleDelegate<C> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static <C extends JComponent> ComponentStyleDelegate<C> sheet( Theme theme, ComponentStyleDelegate<C> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.surfaceField()).foregroundColor(p.text()).borderWidth(0);
         }
 
@@ -3319,8 +3323,8 @@ final class Styles
          *  every button on a tool bar: not at all until the pointer arrives.
          */
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<AbstractButton> button( ComponentStyleDelegate<AbstractButton> it ) {
-            NimbusScheme   s = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+        private static ComponentStyleDelegate<AbstractButton> button( Theme theme, ComponentStyleDelegate<AbstractButton> it ) {
+            NimbusScheme   s = NimbusScheme.of(theme.palette());
             AbstractButton b = it.component();
             ButtonModel    m = b.getModel();
 
@@ -3389,8 +3393,8 @@ final class Styles
          *  is left here is to keep the label's own ground out of the way of the panel behind it.
          */
         @SuppressWarnings("deprecation")
-        private static <C extends AbstractButton> ComponentStyleDelegate<C> tickable( ComponentStyleDelegate<C> it ) {
-            NimbusScheme s = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+        private static <C extends AbstractButton> ComponentStyleDelegate<C> tickable( Theme theme, ComponentStyleDelegate<C> it ) {
+            NimbusScheme s = NimbusScheme.of(theme.palette());
             return it
                     .margin(0)
                     .padding(0)
@@ -3407,8 +3411,8 @@ final class Styles
          *  be edited is a text field and that blue end side by side, and paints nothing itself.
          */
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JComboBox> comboBox( ComponentStyleDelegate<JComboBox> it ) {
-            NimbusScheme s       = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+        private static ComponentStyleDelegate<JComboBox> comboBox( Theme theme, ComponentStyleDelegate<JComboBox> it ) {
+            NimbusScheme s       = NimbusScheme.of(theme.palette());
             JComboBox<?> combo   = it.component();
             boolean      enabled = combo.isEnabled();
             it = it.foregroundColor(s.get(enabled ? NimbusScheme.Key.TEXT : NimbusScheme.Key.DISABLED_TEXT));
@@ -3423,24 +3427,24 @@ final class Styles
         }
 
         /** A spinner paints nothing: its text field is the box, and its two buttons stand beside it. */
-        private static ComponentStyleDelegate<JSpinner> spinner( ComponentStyleDelegate<JSpinner> it ) {
+        private static ComponentStyleDelegate<JSpinner> spinner( Theme theme, ComponentStyleDelegate<JSpinner> it ) {
             return it.margin(0).padding(0).borderWidth(0).backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT);
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JTextField> field( ComponentStyleDelegate<JTextField> it ) {
-            return input(it, it.component(), FIELD_PAD_Y, FIELD_PAD_X);
+        private static ComponentStyleDelegate<JTextField> field( Theme theme, ComponentStyleDelegate<JTextField> it ) {
+            return input(theme, it, it.component(), FIELD_PAD_Y, FIELD_PAD_X);
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JTextArea> area( ComponentStyleDelegate<JTextArea> it ) {
-            return input(it, it.component(), FIELD_PAD_Y, FIELD_PAD_X);
+        private static ComponentStyleDelegate<JTextArea> area( Theme theme, ComponentStyleDelegate<JTextArea> it ) {
+            return input(theme, it, it.component(), FIELD_PAD_Y, FIELD_PAD_X);
         }
 
         /** An editor pane or a text pane, which Nimbus keeps two pixels tighter above and below. */
         @SuppressWarnings("deprecation")
-        private static <C extends JTextComponent> ComponentStyleDelegate<C> page( ComponentStyleDelegate<C> it ) {
-            return input(it, it.component(), PAGE_PAD_Y, FIELD_PAD_X);
+        private static <C extends JTextComponent> ComponentStyleDelegate<C> page( Theme theme, ComponentStyleDelegate<C> it ) {
+            return input(theme, it, it.component(), PAGE_PAD_Y, FIELD_PAD_X);
         }
 
         /**
@@ -3451,9 +3455,9 @@ final class Styles
          *  component that stands inside some other control, which is none of the above.
          */
         private static <C extends JComponent> ComponentStyleDelegate<C> input(
-            ComponentStyleDelegate<C> it, JTextComponent text, int padY, int padX
+            Theme theme, ComponentStyleDelegate<C> it, JTextComponent text, int padY, int padX
         ) {
-            NimbusScheme s       = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+            NimbusScheme s       = NimbusScheme.of(theme.palette());
             boolean      enabled = text.isEnabled();
             it = it.foregroundColor(s.get(enabled ? NimbusScheme.Key.TEXT : NimbusScheme.Key.DISABLED_TEXT));
             Color page = enabled ? s.get(NimbusScheme.Key.LIGHT_BACKGROUND) : FIELD_DISABLED.in(s);
@@ -3551,8 +3555,8 @@ final class Styles
          *  in a grey only just off black.
          */
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JMenuItem> menuItem( ComponentStyleDelegate<JMenuItem> it ) {
-            NimbusScheme s       = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+        private static ComponentStyleDelegate<JMenuItem> menuItem( Theme theme, ComponentStyleDelegate<JMenuItem> it ) {
+            NimbusScheme s       = NimbusScheme.of(theme.palette());
             JMenuItem    item    = it.component();
             ButtonModel  m       = item.getModel();
             boolean      enabled = item.isEnabled();
@@ -3570,8 +3574,8 @@ final class Styles
         }
 
         /** A menu bar: the control colour with a white sheen fading out down its top quarter, and a rule under it. */
-        private static ComponentStyleDelegate<JMenuBar> menuBar( ComponentStyleDelegate<JMenuBar> it ) {
-            NimbusScheme s = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+        private static ComponentStyleDelegate<JMenuBar> menuBar( Theme theme, ComponentStyleDelegate<JMenuBar> it ) {
+            NimbusScheme s = NimbusScheme.of(theme.palette());
             return it
                     .padding(2, 6, 1, 6)
                     .borderWidths(0, 0, 1, 0)
@@ -3582,8 +3586,8 @@ final class Styles
         }
 
         /** A popup menu: a square grey outline around a sheet shading from white at its ends to the pale {@code menu} colour. */
-        private static ComponentStyleDelegate<JPopupMenu> popupMenu( ComponentStyleDelegate<JPopupMenu> it ) {
-            NimbusScheme s = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+        private static ComponentStyleDelegate<JPopupMenu> popupMenu( Theme theme, ComponentStyleDelegate<JPopupMenu> it ) {
+            NimbusScheme s = NimbusScheme.of(theme.palette());
             return it
                     .margin(0)
                     .padding(5, 0, 5, 0)
@@ -3597,8 +3601,8 @@ final class Styles
         }
 
         /** A tool tip: {@code info} in a square outline of {@code nimbusBorder}. */
-        private static ComponentStyleDelegate<JToolTip> toolTip( ComponentStyleDelegate<JToolTip> it ) {
-            NimbusScheme s = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+        private static ComponentStyleDelegate<JToolTip> toolTip( Theme theme, ComponentStyleDelegate<JToolTip> it ) {
+            NimbusScheme s = NimbusScheme.of(theme.palette());
             return it
                     .margin(0)
                     .padding(3, 3, 3, 3)
@@ -3625,15 +3629,15 @@ final class Styles
         // ── The rest ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JLabel> label( ComponentStyleDelegate<JLabel> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JLabel> label( Theme theme, ComponentStyleDelegate<JLabel> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.foregroundColor(it.component().isEnabled() ? p.text() : p.textDisabled());
         }
 
         /** A hairline the delegate draws across the middle: a ground would make it a bar as tall
          *  as whatever box a layout gave it. */
-        private static ComponentStyleDelegate<JSeparator> separator( ComponentStyleDelegate<JSeparator> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSeparator> separator( Theme theme, ComponentStyleDelegate<JSeparator> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(p.borderSoft());
         }
 
@@ -3642,8 +3646,8 @@ final class Styles
          *  The bar itself is a symbol, because it runs over the trough's edge and its glow reaches
          *  the bounds.
          */
-        private static ComponentStyleDelegate<JProgressBar> progressBar( ComponentStyleDelegate<JProgressBar> it ) {
-            NimbusScheme s = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+        private static ComponentStyleDelegate<JProgressBar> progressBar( Theme theme, ComponentStyleDelegate<JProgressBar> it ) {
+            NimbusScheme s = NimbusScheme.of(theme.palette());
             boolean enabled = it.component().isEnabled();
             NimbusScheme.Gradient edge = enabled ? TROUGH_EDGE : TROUGH_EDGE_DISABLED;
             NimbusScheme.Gradient face = enabled ? TROUGH_FACE : TROUGH_FACE_DISABLED;
@@ -3658,23 +3662,26 @@ final class Styles
                     .gradient(UI.Layer.BACKGROUND, "face", g -> face.over(g, s, null)
                                                                    .boundary(UI.ComponentBoundary.BORDER_TO_INTERIOR)
                                                                    .clipTo(UI.ComponentArea.INTERIOR))
-                    .painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, "glow", new ProgressGlow(it.component()))
+                    .painter(UI.Layer.BACKGROUND, UI.ComponentArea.ALL, "glow", new ProgressGlow(theme, it.component()))
                     .foregroundColor(s.get(NimbusScheme.Key.TEXT));
         }
 
         /**
          *  The glow around the filled part of a progress bar, which lies in the bar's margin, outside
          *  the area the look and feel paints the bar itself into. It is a value holding the fill it was
-         *  made for, so that the style changes, and the bar repaints, when the fill does.
+         *  made for and the theme it is drawn in, so that the style changes, and the bar repaints,
+         *  when either does.
          */
         private static final class ProgressGlow implements Painter
         {
+            private final Theme        _theme;
             private final JProgressBar _bar;
             private final double       _ratio;
             private final boolean      _horizontal;
             private final boolean      _enabled;
 
-            ProgressGlow( JProgressBar bar ) {
+            ProgressGlow( Theme theme, JProgressBar bar ) {
+                _theme      = theme;
                 _bar        = bar;
                 int range   = Math.max(1, bar.getMaximum() - bar.getMinimum());
                 _ratio      = bar.isIndeterminate() ? 0 : Math.max(0, Math.min(1, ( bar.getValue() - bar.getMinimum() ) / (double) range));
@@ -3685,7 +3692,7 @@ final class Styles
             @Override
             public void paint( Graphics2D g ) {
                 float scale = UI.scale();
-                Symbols.Nimbus.paintProgressGlow(g, SwingTreeLookAndFeel.palette(),
+                Symbols.Nimbus.paintProgressGlow(g, _theme.palette(),
                         Math.round(_bar.getWidth() / scale), Math.round(_bar.getHeight() / scale), _ratio, _horizontal, _enabled);
             }
 
@@ -3693,11 +3700,14 @@ final class Styles
             public boolean equals( Object other ) {
                 if ( !(other instanceof ProgressGlow) ) return false;
                 ProgressGlow that = (ProgressGlow) other;
-                return _bar == that._bar && _ratio == that._ratio && _horizontal == that._horizontal && _enabled == that._enabled;
+                return _theme == that._theme && _bar == that._bar && _ratio == that._ratio
+                    && _horizontal == that._horizontal && _enabled == that._enabled;
             }
 
             @Override
-            public int hashCode() { return Objects.hash(System.identityHashCode(_bar), _ratio, _horizontal, _enabled); }
+            public int hashCode() {
+                return Objects.hash(System.identityHashCode(_theme), System.identityHashCode(_bar), _ratio, _horizontal, _enabled);
+            }
         }
 
         private static final NimbusScheme.Gradient TROUGH_EDGE = NimbusScheme.gradient(new double[]{ 0, 0.5, 1 },
@@ -3721,8 +3731,8 @@ final class Styles
                 NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.007936537, -0.07982456, 0.1490196), NimbusScheme.MID,
                 NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.007936537, -0.08099045, 0.18431371));
 
-        private static ComponentStyleDelegate<JSlider> slider( ComponentStyleDelegate<JSlider> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSlider> slider( Theme theme, ComponentStyleDelegate<JSlider> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(p.text());
         }
 
@@ -3731,8 +3741,8 @@ final class Styles
          *  it scrolls. Its buttons reach eight pixels into it, see {@link #installDefaults}.
          */
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JScrollBar> scrollBar( ComponentStyleDelegate<JScrollBar> it ) {
-            NimbusScheme s   = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+        private static ComponentStyleDelegate<JScrollBar> scrollBar( Theme theme, ComponentStyleDelegate<JScrollBar> it ) {
+            NimbusScheme s   = NimbusScheme.of(theme.palette());
             JScrollBar   bar = it.component();
             UI.Span span = bar.getOrientation() == JScrollBar.VERTICAL ? UI.Span.LEFT_TO_RIGHT : UI.Span.TOP_TO_BOTTOM;
             NimbusScheme.Gradient groove = bar.isEnabled() ? GROOVE : GROOVE_DISABLED;
@@ -3754,13 +3764,13 @@ final class Styles
                 NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, 0.055555582, -0.10606203, 0.13333333), NimbusScheme.MID,
                 NimbusScheme.shade(NimbusScheme.Key.BLUE_GREY, -0.6111111, -0.110526316, 0.24705881));
 
-        private static ComponentStyleDelegate<JTabbedPane> tabbedPane( ComponentStyleDelegate<JTabbedPane> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JTabbedPane> tabbedPane( Theme theme, ComponentStyleDelegate<JTabbedPane> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.background()).foregroundColor(p.text());
         }
 
-        private static ComponentStyleDelegate<JSplitPane> splitPane( ComponentStyleDelegate<JSplitPane> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSplitPane> splitPane( Theme theme, ComponentStyleDelegate<JSplitPane> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(p.text());
         }
 
@@ -3769,8 +3779,8 @@ final class Styles
          *  headings are {@link Symbols.Nimbus#tableHeaderDivider}, and the room around each heading's
          *  text is Nimbus's own renderer margin, see {@link #installDefaults}.
          */
-        private static ComponentStyleDelegate<JTableHeader> tableHeader( ComponentStyleDelegate<JTableHeader> it ) {
-            NimbusScheme s = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+        private static ComponentStyleDelegate<JTableHeader> tableHeader( Theme theme, ComponentStyleDelegate<JTableHeader> it ) {
+            NimbusScheme s = NimbusScheme.of(theme.palette());
             return it
                     .padding(0)
                     .borderWidths(0, 0, 1, 0)
@@ -3835,8 +3845,8 @@ final class Styles
          *  {@link Symbols.Nimbus#paintDragHandle} draws, which is eleven pixels wide.
          */
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JToolBar> toolBar( ComponentStyleDelegate<JToolBar> it ) {
-            NimbusScheme s   = NimbusScheme.of(SwingTreeLookAndFeel.palette());
+        private static ComponentStyleDelegate<JToolBar> toolBar( Theme theme, ComponentStyleDelegate<JToolBar> it ) {
+            NimbusScheme s   = NimbusScheme.of(theme.palette());
             JToolBar     bar = it.component();
             int handle = bar.isFloatable() ? 11 : 0;
             it = bar.getOrientation() == JToolBar.HORIZONTAL
@@ -3846,7 +3856,7 @@ final class Styles
                     .borderColor(s.get(NimbusScheme.Key.BORDER))
                     .backgroundColor(s.get(NimbusScheme.Key.CONTROL))
                     .foregroundColor(s.get(NimbusScheme.Key.TEXT))
-                    .painter(UI.Layer.CONTENT, new DragHandlePainter(bar));
+                    .painter(UI.Layer.CONTENT, new DragHandlePainter(theme, bar));
         }
     }
 
@@ -3953,9 +3963,9 @@ final class Styles
          * @return the styled delegate
          */
         private static <C extends JComponent> ComponentStyleDelegate<C> lift(
-            ComponentStyleDelegate<C> it, Color fill, int radius, int lift
+            Theme theme, ComponentStyleDelegate<C> it, Color fill, int radius, int lift
         ) {
-            SwingTreeLookAndFeel.Palette p   = SwingTreeLookAndFeel.palette();
+            SwingTreeLookAndFeel.Palette p   = theme.palette();
             int     off = Math.max(1, lift / 2);
             it = it.backgroundColor(fill).borderRadius(radius);
             switch ( Mood.of(p) ) {
@@ -3986,9 +3996,9 @@ final class Styles
 
         /** The same three answers for a surface that has to read as something you reach into. */
         private static <C extends JComponent> ComponentStyleDelegate<C> recess(
-            ComponentStyleDelegate<C> it, Color fill, int radius
+            Theme theme, ComponentStyleDelegate<C> it, Color fill, int radius
         ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             it = it.backgroundColor(fill).borderRadius(radius);
             if ( Mood.of(p) == Mood.RELIEF )
                 return it
@@ -4019,14 +4029,14 @@ final class Styles
         // ── Surfaces ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation") // component() is the documented hook for LAF state reads
-        private static ComponentStyleDelegate<JPanel> panel( ComponentStyleDelegate<JPanel> it ) {
-            SwingTreeLookAndFeel.Palette p     = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JPanel> panel( Theme theme, ComponentStyleDelegate<JPanel> it ) {
+            SwingTreeLookAndFeel.Palette p     = theme.palette();
             JPanel  panel = it.component();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(panel) ) {
                 case CARD: {
                     int lift = STEP + STEP * depthOf(panel);
-                    return lift(it.margin(lift).padding(2), p.surface(), MAX_RADIUS, lift);
+                    return lift(theme, it.margin(lift).padding(2), p.surface(), MAX_RADIUS, lift);
                 }
                 case RAIL:        return it.backgroundColor(p.surface()).borderWidth(0);
                 case TRANSPARENT: return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT);
@@ -4038,27 +4048,27 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JScrollPane> scrollPane( ComponentStyleDelegate<JScrollPane> it ) {
-            SwingTreeLookAndFeel.Palette p    = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JScrollPane> scrollPane( Theme theme, ComponentStyleDelegate<JScrollPane> it ) {
+            SwingTreeLookAndFeel.Palette p    = theme.palette();
             JScrollPane pane = it.component();
             it = it.foregroundColor(p.text());
             switch ( SwingTreeLookAndFeel.Surface.of(pane) ) {
                 case TRANSPARENT: return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).borderWidth(0).borderRadius(0).padding(0);
                 case CARD: {
                     int lift = STEP + STEP * depthOf(pane);
-                    return lift(it.margin(lift).padding(3), p.surface(), MAX_RADIUS, lift);
+                    return lift(theme, it.margin(lift).padding(3), p.surface(), MAX_RADIUS, lift);
                 }
                 case RAIL:        return it.backgroundColor(p.surface()).borderWidth(0).borderRadius(0).padding(0);
                 case WINDOW:
-                default:          return recess(it.margin(3).padding(3), p.surfaceField(), MAX_RADIUS - 4);
+                default:          return recess(theme, it.margin(3).padding(3), p.surfaceField(), MAX_RADIUS - 4);
             }
         }
 
         // ── Controls ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<AbstractButton> button( ComponentStyleDelegate<AbstractButton> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<AbstractButton> button( Theme theme, ComponentStyleDelegate<AbstractButton> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             AbstractButton b = it.component();
             ButtonModel    m = b.getModel();
 
@@ -4083,13 +4093,13 @@ final class Styles
             if ( !enabled || ( variant == SwingTreeLookAndFeel.Variant.QUIET && !sunken && !rollover ) )
                 return it;
             if ( sunken )
-                return recess(it, fill, radius);
-            return lift(it, fill, radius, rollover ? STEP + 2 : STEP);
+                return recess(theme, it, fill, radius);
+            return lift(theme, it, fill, radius, rollover ? STEP + 2 : STEP);
         }
 
         @SuppressWarnings("deprecation")
-        private static <C extends AbstractButton> ComponentStyleDelegate<C> tickable( ComponentStyleDelegate<C> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static <C extends AbstractButton> ComponentStyleDelegate<C> tickable( Theme theme, ComponentStyleDelegate<C> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
                     .foregroundColor(it.component().isEnabled() ? p.text() : p.textDisabled())
@@ -4097,43 +4107,43 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JComboBox> comboBox( ComponentStyleDelegate<JComboBox> it ) {
-            SwingTreeLookAndFeel.Palette p     = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JComboBox> comboBox( Theme theme, ComponentStyleDelegate<JComboBox> it ) {
+            SwingTreeLookAndFeel.Palette p     = theme.palette();
             JComboBox<?> combo = it.component();
             boolean      on    = combo.isEnabled();
             it = it.margin(4).padding(6, 4, 6, 10)
                    .foregroundColor(on ? p.text() : p.textDisabled());
             Color fill = LafUtilities.underPointer(p, on ? p.surface() : p.surfaceDisabled(), combo);
-            return lift(it, fill, radiusOf(combo), STEP);
+            return lift(theme, it, fill, radiusOf(combo), STEP);
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JSpinner> spinner( ComponentStyleDelegate<JSpinner> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSpinner> spinner( Theme theme, ComponentStyleDelegate<JSpinner> it ) {
+            SwingTreeLookAndFeel.Palette p       = theme.palette();
             JSpinner spinner = it.component();
             boolean  on      = spinner.isEnabled();
             it = it.margin(4).padding(4)
                    .foregroundColor(on ? p.text() : p.textDisabled());
             Color fill = on ? p.surface() : p.surfaceDisabled();
-            return lift(it.borderWidth(0), fill, radiusOf(spinner), STEP);
+            return lift(theme, it.borderWidth(0), fill, radiusOf(spinner), STEP);
         }
 
         // ── Inputs ───────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JTextField> field( ComponentStyleDelegate<JTextField> it ) {
-            return input(it, it.component(), 7, 12);
+        private static ComponentStyleDelegate<JTextField> field( Theme theme, ComponentStyleDelegate<JTextField> it ) {
+            return input(theme, it, it.component(), 7, 12);
         }
 
         @SuppressWarnings("deprecation")
-        private static <C extends JTextComponent> ComponentStyleDelegate<C> page( ComponentStyleDelegate<C> it ) {
-            return input(it, it.component(), 8, 12);
+        private static <C extends JTextComponent> ComponentStyleDelegate<C> page( Theme theme, ComponentStyleDelegate<C> it ) {
+            return input(theme, it, it.component(), 8, 12);
         }
 
         private static <C extends JComponent> ComponentStyleDelegate<C> input(
-            ComponentStyleDelegate<C> it, JTextComponent text, int padY, int padX
+            Theme theme, ComponentStyleDelegate<C> it, JTextComponent text, int padY, int padX
         ) {
-            SwingTreeLookAndFeel.Palette p        = SwingTreeLookAndFeel.palette();
+            SwingTreeLookAndFeel.Palette p        = theme.palette();
             boolean editable = text.isEnabled() && text.isEditable();
             // Inside a scroll pane or a picker, whatever that made of itself is the surface here.
             if ( LafUtilities.isInsideAnotherControl(text) )
@@ -4143,21 +4153,21 @@ final class Styles
                         .foregroundColor(text.isEnabled() ? p.text() : p.textDisabled());
             it = it.margin(4).padding(padY, padX, padY, padX)
                    .foregroundColor(text.isEnabled() ? p.text() : p.textDisabled());
-            return focused(recess(it, editable ? p.surfaceField() : p.surfaceDisabled(), radiusOf(text)),
+            return focused(recess(theme, it, editable ? p.surfaceField() : p.surfaceDisabled(), radiusOf(text)),
                            p, editable && text.isFocusOwner());
         }
 
         // ── The rest ─────────────────────────────────────────────────────────
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JLabel> label( ComponentStyleDelegate<JLabel> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JLabel> label( Theme theme, ComponentStyleDelegate<JLabel> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.foregroundColor(it.component().isEnabled() ? p.text() : p.textDisabled());
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JMenuItem> menuItem( ComponentStyleDelegate<JMenuItem> it ) {
-            SwingTreeLookAndFeel.Palette p       = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JMenuItem> menuItem( Theme theme, ComponentStyleDelegate<JMenuItem> it ) {
+            SwingTreeLookAndFeel.Palette p       = theme.palette();
             JMenuItem   item    = it.component();
             ButtonModel m       = item.getModel();
             boolean     enabled = item.isEnabled();
@@ -4170,46 +4180,46 @@ final class Styles
                     .foregroundColor(enabled ? p.text() : p.textDisabled());
         }
 
-        private static ComponentStyleDelegate<JMenuBar> menuBar( ComponentStyleDelegate<JMenuBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JMenuBar> menuBar( Theme theme, ComponentStyleDelegate<JMenuBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.background()).foregroundColor(p.text()).padding(2, 4, 2, 4).borderWidth(0);
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JPopupMenu> popupMenu( ComponentStyleDelegate<JPopupMenu> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
-            return lift(it.foregroundColor(p.text()).margin(5).padding(5, 0, 5, 0),
+        private static ComponentStyleDelegate<JPopupMenu> popupMenu( Theme theme, ComponentStyleDelegate<JPopupMenu> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
+            return lift(theme, it.foregroundColor(p.text()).margin(5).padding(5, 0, 5, 0),
                         p.surface(), MAX_RADIUS - 4, STEP + 3);
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JToolTip> toolTip( ComponentStyleDelegate<JToolTip> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
-            return lift(it.foregroundColor(p.text()).margin(4).padding(5, 10, 5, 10),
+        private static ComponentStyleDelegate<JToolTip> toolTip( Theme theme, ComponentStyleDelegate<JToolTip> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
+            return lift(theme, it.foregroundColor(p.text()).margin(4).padding(5, 10, 5, 10),
                         p.surface(), radiusOf(it.component()), STEP + 2);
         }
 
         /** The delegate draws the hairline itself, so the rule leaves the rest of the strip alone. */
-        private static ComponentStyleDelegate<JSeparator> separator( ComponentStyleDelegate<JSeparator> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JSeparator> separator( Theme theme, ComponentStyleDelegate<JSeparator> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(p.borderSoft());
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JProgressBar> progressBar( ComponentStyleDelegate<JProgressBar> it ) {
-            SwingTreeLookAndFeel.Palette p   = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JProgressBar> progressBar( Theme theme, ComponentStyleDelegate<JProgressBar> it ) {
+            SwingTreeLookAndFeel.Palette p   = theme.palette();
             JProgressBar bar = it.component();
-            return recess(it.margin(2).foregroundColor(p.accent()),
+            return recess(theme, it.margin(2).foregroundColor(p.accent()),
                           Mood.of(p) == Mood.RELIEF ? p.background() : p.accentSoft(), radiusOf(bar));
         }
 
-        private static ComponentStyleDelegate<JScrollBar> scrollBar( ComponentStyleDelegate<JScrollBar> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JScrollBar> scrollBar( Theme theme, ComponentStyleDelegate<JScrollBar> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it.backgroundColor(p.background()).foregroundColor(p.border());
         }
 
-        private static ComponentStyleDelegate<JTableHeader> tableHeader( ComponentStyleDelegate<JTableHeader> it ) {
-            SwingTreeLookAndFeel.Palette p = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JTableHeader> tableHeader( Theme theme, ComponentStyleDelegate<JTableHeader> it ) {
+            SwingTreeLookAndFeel.Palette p = theme.palette();
             return it
                     .backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT)
                     .foregroundColor(p.textMuted())
@@ -4217,16 +4227,16 @@ final class Styles
         }
 
         @SuppressWarnings("deprecation")
-        private static ComponentStyleDelegate<JToolBar> toolBar( ComponentStyleDelegate<JToolBar> it ) {
-            SwingTreeLookAndFeel.Palette p   = SwingTreeLookAndFeel.palette();
+        private static ComponentStyleDelegate<JToolBar> toolBar( Theme theme, ComponentStyleDelegate<JToolBar> it ) {
+            SwingTreeLookAndFeel.Palette p   = theme.palette();
             JToolBar  bar = it.component();
-            return lift(it.foregroundColor(p.text()).margin(5).padding(4, 8, 4, 8),
+            return lift(theme, it.foregroundColor(p.text()).margin(5).padding(4, 8, 4, 8),
                         p.surface(), MAX_RADIUS, STEP + STEP * depthOf(bar));
         }
 
         /** Everything that is only the contents of a surface somebody else already made. */
-        private static <C extends JComponent> ComponentStyleDelegate<C> bare( ComponentStyleDelegate<C> it ) {
-            return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(SwingTreeLookAndFeel.palette().text());
+        private static <C extends JComponent> ComponentStyleDelegate<C> bare( Theme theme, ComponentStyleDelegate<C> it ) {
+            return it.backgroundColor(SwingTreeLookAndFeel.Palette.TRANSPARENT).foregroundColor(theme.palette().text());
         }
 
         // ── Variant colours ──────────────────────────────────────────────────

@@ -43,14 +43,16 @@ import java.util.concurrent.ConcurrentHashMap;
  *  A configurable Swing <i>Look and Feel</i> which paints every component through the
  *  {@linkplain ComponentBackend SwingTree style engine} rather than through
  *  hand written {@link java.awt.Graphics} code. Its appearance is data instead of code: a
- *  {@link Palette} of named colours, a {@link StylePreset} of {@link Styler} rules keyed by
+ *  {@link Palette} of named colours, a {@link StylePreset} of {@link ThemedStyler} rules keyed by
  *  component type, and a {@link SymbolPreset} drawing the small geometry no rule can express.
  *  <pre>{@code
  *    SwingTreeLookAndFeel.initializeUsing( it -> it
  *        .stylePreset(SwingTreeLookAndFeel.StylePreset.LINEN)
  *        .symbolPreset(SwingTreeLookAndFeel.SymbolPreset.LINEN)
- *        .overrideStyle(JButton.class, s -> s.borderRadius(2))       // replaces the preset rule
- *        .addStyle(JTextField.class, s -> s.backgroundColor("blue")) // applied on top of it
+ *        .overrideStyle(JButton.class, (theme, s) -> s.borderRadius(2))  // replaces the preset rule
+ *        .addStyle(JTextField.class, (theme, s) ->                       // applied on top of it
+ *            s.backgroundColor(theme.palette().accentSoft())
+ *        )
  *    );
  *  }</pre>
  *  {@link #initializeUsing(Configurator)} refreshes every window that is already open, so it is
@@ -59,9 +61,9 @@ import java.util.concurrent.ConcurrentHashMap;
  *  <p>
  *  A rule is registered against a component type and applies to that type and every subtype of it,
  *  the most specific match winning, which is how {@code JCheckBox} is styled differently from the
- *  {@code AbstractButton} rule it would otherwise take. A {@link Conf#overrideStyle(Class, Styler)}
+ *  {@code AbstractButton} rule it would otherwise take. A {@link Conf#overrideStyle(Class, ThemedStyler)}
  *  rule replaces the preset's rule for everything it matches, every matching
- *  {@link Conf#addStyle(Class, Styler)} rule is applied over the result in registration order, and
+ *  {@link Conf#addStyle(Class, ThemedStyler)} rule is applied over the result in registration order, and
  *  between two rules for one type the later one wins.
  *  <p>
  *  This cascade is the second of SwingTree's three style layers: it runs after an application's
@@ -614,7 +616,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
      *  <pre>{@code
      *    it -> it.stylePreset(StylePreset.LINEN)
      *            .palette(p -> p.accent(new Color(0x2E, 0x5A, 0x88)))
-     *            .addStyle(JButton.class, s -> s.borderRadius(2))
+     *            .addStyle(JButton.class, (theme, s) -> s.borderRadius(2))
      *  }</pre>
      */
     public static final class Conf
@@ -714,14 +716,14 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         /**
          *  Replaces the preset's rule for {@code type} and every subtype of it. Use it when the
          *  preset's idea of how a component looks is wrong for the application, and
-         *  {@link #addStyle(Class, Styler)} when it is merely incomplete.
+         *  {@link #addStyle(Class, ThemedStyler)} when it is merely incomplete.
          *
          * @param type   the component type the rule applies to, subtypes included
          * @param styler the replacement style rule
          * @param <C> the component type
          * @return a new configuration carrying the rule
          */
-        public <C extends JComponent> Conf overrideStyle( Class<C> type, Styler<C> styler ) {
+        public <C extends JComponent> Conf overrideStyle( Class<C> type, ThemedStyler<C> styler ) {
             return new Conf(_stylePreset, _symbolPreset, _palettePreset, _palette,
                             _overrides.add(new StyleRule(type, styler)), _additions, _popupWindowMode);
         }
@@ -736,7 +738,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          * @param <C> the component type
          * @return a new configuration carrying the rule
          */
-        public <C extends JComponent> Conf addStyle( Class<C> type, Styler<C> styler ) {
+        public <C extends JComponent> Conf addStyle( Class<C> type, ThemedStyler<C> styler ) {
             return new Conf(_stylePreset, _symbolPreset, _palettePreset, _palette,
                             _overrides, _additions.add(new StyleRule(type, styler)), _popupWindowMode);
         }
@@ -819,7 +821,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
 
         /**
          *  Folds the preset rule, the overriding rule and every addition applying to
-         *  {@code componentType} into one {@link Styler}.
+         *  {@code componentType} into one {@link Styler}, each of them handed this theme.
          *
          * @param componentType the runtime class of the component being styled
          * @return the style rule governing that class, never {@code null}
@@ -829,16 +831,20 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             Styler<?> memoised = _resolved.get(componentType);
             if ( memoised != null )
                 return memoised;
-            Styler resolved = _mostSpecific(_overrides, componentType);
-            if ( resolved == null )
-                resolved = _mostSpecific(_stylePreset.rules(), componentType);
-            if ( resolved == null )
-                resolved = Styler.none();
-            for ( StyleRule rule : _additions )
-                if ( rule.appliesTo(componentType) )
-                    resolved = resolved.andThen(rule.styler());
+            ThemedStyler rule = _mostSpecific(_overrides, componentType);
+            if ( rule == null )
+                rule = _mostSpecific(_stylePreset.rules(), componentType);
+            Styler resolved = rule == null ? Styler.none() : _handedThisTheme(rule);
+            for ( StyleRule addition : _additions )
+                if ( addition.appliesTo(componentType) )
+                    resolved = resolved.andThen(_handedThisTheme(addition.styler()));
             _resolved.put(componentType, resolved);
             return resolved;
+        }
+
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        private Styler _handedThisTheme( ThemedStyler rule ) {
+            return delegate -> rule.style(this, delegate);
         }
 
         /**
@@ -853,7 +859,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         boolean styles( Class<?> componentType ) { return stylerFor(componentType) != Styler.none(); }
 
         /** @return the rule of the most derived matching type, the last registered one winning ties. */
-        private static Styler<?> _mostSpecific( Tuple<StyleRule> rules, Class<?> componentType ) {
+        private static ThemedStyler<?> _mostSpecific( Tuple<StyleRule> rules, Class<?> componentType ) {
             StyleRule best = null;
             for ( StyleRule rule : rules ) {
                 if ( !rule.appliesTo(componentType) )
@@ -910,6 +916,28 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             Styler styler = stylerFor(delegate.component().getClass());
             return (ComponentStyleDelegate<C>) styler.style((ComponentStyleDelegate) delegate);
         }
+    }
+
+    /**
+     *  A style rule of this look and feel: a {@link Styler} which is also handed the {@link Theme} it
+     *  is styling for, so that it takes its colours from its arguments rather than from whichever
+     *  look and feel happens to be installed while it runs.
+     *  <pre>{@code
+     *    it -> it.addStyle(JButton.class, (theme, s) -> s.borderColor(theme.palette().accent()))
+     *  }</pre>
+     *
+     * @param <C> the type of component the rule styles
+     */
+    @FunctionalInterface
+    public interface ThemedStyler<C extends JComponent>
+    {
+        /**
+         * @param theme    the theme of the look and feel the component is being styled by
+         * @param delegate the style of the component so far
+         * @return the style with this rule applied
+         * @throws Exception if the rule fails, which the style engine logs rather than rethrows
+         */
+        ComponentStyleDelegate<C> style( Theme theme, ComponentStyleDelegate<C> delegate ) throws Exception;
     }
 
     /**
@@ -1106,7 +1134,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
     }
 
     /**
-     *  The tables of {@link Styler} rules a {@link SwingTreeLookAndFeel} can be built from. Each
+     *  The tables of {@link ThemedStyler} rules a {@link SwingTreeLookAndFeel} can be built from. Each
      *  preset also names the {@link SymbolPreset} and {@link PalettePreset} it was designed
      *  against, which a {@link Conf} uses when the application chooses neither.
      */
@@ -1118,7 +1146,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *  its own content-area fill, a scroll pane its own border and a table Swing's row height.
          *  With {@link SymbolPreset#BLANK}, which it asks for by default, this look and feel paints
          *  nothing at all, which is where an application starts that means to build its whole
-         *  appearance out of {@link Conf#addStyle(Class, Styler)} rules.
+         *  appearance out of {@link Conf#addStyle(Class, ThemedStyler)} rules.
          */
         BLANK {
             @Override Tuple<StyleRule>     rules()            { return Tuple.of(StyleRule.class); }
