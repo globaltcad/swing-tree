@@ -34,10 +34,24 @@ public final class SwingTreeTabbedPaneUI
         implements SwingTreeStyledComponentUI<JTabbedPane>
 {
     private final SwingTreeLookAndFeel.Theme _theme;
+    private final @Nullable Insets           _tabMargins;
+    private final @Nullable Insets           _tabAreaMargins;
 
-    SwingTreeTabbedPaneUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+    SwingTreeTabbedPaneUI(
+        SwingTreeLookAndFeel.Theme theme, @Nullable Insets tabMargins, @Nullable Insets tabAreaMargins
+    ) {
+        _theme          = theme;
+        _tabMargins     = tabMargins;
+        _tabAreaMargins = tabAreaMargins;
+    }
 
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeTabbedPaneUI(SwingTreeLookAndFeel.installedTheme()); }
+    public static ComponentUI createUI( JComponent c ) {
+        return new SwingTreeTabbedPaneUI(
+                    SwingTreeLookAndFeel.installedTheme(),
+                    UIManager.getInsets(TAB_MARGINS),
+                    UIManager.getInsets(TAB_AREA_MARGINS)
+                );
+    }
 
     @Override
     public void installUI( JComponent c ) {
@@ -70,7 +84,7 @@ public final class SwingTreeTabbedPaneUI
     protected Insets getTabInsets( int tabPlacement, int tabIndex ) {
         if ( !_theme.symbols().drawsItsOwnChrome() )
             return super.getTabInsets(tabPlacement, tabIndex);
-        Insets margins = UIManager.getInsets(TAB_MARGINS);
+        Insets margins = _tabMargins;
         if ( margins != null )
             return new Insets(UI.scale(margins.top), UI.scale(margins.left), UI.scale(margins.bottom), UI.scale(margins.right));
         Symbols symbols = _theme.symbols();
@@ -98,7 +112,7 @@ public final class SwingTreeTabbedPaneUI
     protected Insets getTabAreaInsets( int tabPlacement ) {
         if ( !_theme.symbols().drawsItsOwnChrome() )
             return super.getTabAreaInsets(tabPlacement);
-        Insets margins = UIManager.getInsets(TAB_AREA_MARGINS);
+        Insets margins = _tabAreaMargins;
         if ( margins != null ) {
             // The edge along the page is drawn inside these margins, reaching one row up under the
             // tabs, so the area itself stops that far short of them.
@@ -114,14 +128,13 @@ public final class SwingTreeTabbedPaneUI
     @Override
     protected int calculateTabWidth( int tabPlacement, int tabIndex, FontMetrics metrics ) {
         int basic = super.calculateTabWidth(tabPlacement, tabIndex, metrics);
-        return _theme.symbols().drawsItsOwnChrome() && UIManager.getInsets(TAB_MARGINS) != null ? basic - 3 : basic;
+        return _theme.symbols().drawsItsOwnChrome() && _tabMargins != null ? basic - 3 : basic;
     }
 
     @Override
     protected int calculateTabAreaHeight( int tabPlacement, int horizRunCount, int maxTabHeight ) {
         int basic = super.calculateTabAreaHeight(tabPlacement, horizRunCount, maxTabHeight);
-        boolean laidOutByMargins = UIManager.getInsets(TAB_AREA_MARGINS) != null;
-        return _theme.symbols().drawsItsOwnChrome() && !laidOutByMargins ? basic + UI.scale(2) : basic;
+        return _theme.symbols().drawsItsOwnChrome() && _tabAreaMargins == null ? basic + UI.scale(2) : basic;
     }
 
     // ── Sizing ───────────────────────────────────────────────────────────

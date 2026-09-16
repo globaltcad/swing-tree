@@ -1,5 +1,6 @@
 package examples.laf;
 
+import org.jspecify.annotations.Nullable;
 import swingtree.UI;
 import swingtree.api.laf.SwingTreeStyledComponentUI;
 import swingtree.style.ComponentStyleDelegate;
@@ -24,10 +25,16 @@ public final class SwingTreeTableUI
         implements SwingTreeStyledComponentUI<JTable>
 {
     private final SwingTreeLookAndFeel.Theme _theme;
+    private final @Nullable Color            _stripe;
 
-    SwingTreeTableUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+    SwingTreeTableUI( SwingTreeLookAndFeel.Theme theme, @Nullable Color stripe ) {
+        _theme  = theme;
+        _stripe = stripe;
+    }
 
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeTableUI(SwingTreeLookAndFeel.installedTheme()); }
+    public static ComponentUI createUI( JComponent c ) {
+        return new SwingTreeTableUI(SwingTreeLookAndFeel.installedTheme(), UIManager.getColor("Table.alternateRowColor"));
+    }
 
     @Override
     public void installUI( JComponent c ) {
@@ -72,7 +79,7 @@ public final class SwingTreeTableUI
     private void paintStripes( Graphics2D g, JTable table ) {
         if ( !_theme.symbols().drawsItsOwnChrome() )
             return;
-        Color stripe = UIManager.getColor("Table.alternateRowColor");
+        Color stripe = _stripe;
         if ( stripe == null || stripe.equals(table.getBackground()) )
             return;
         Rectangle clip = g.getClipBounds();

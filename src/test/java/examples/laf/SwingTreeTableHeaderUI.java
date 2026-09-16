@@ -32,11 +32,26 @@ public final class SwingTreeTableHeaderUI
         extends    BasicTableHeaderUI
         implements SwingTreeStyledComponentUI<JTableHeader>
 {
+    /** The key Nimbus files the room around a heading's text under, which a look and feel that
+     *  keeps different room puts into its defaults. */
+    private static final String CONTENT_MARGINS = "TableHeader:\"TableHeader.renderer\".contentMargins";
+    private static final Insets DEFAULT_MARGINS = new Insets(4, 10, 4, 10);
+
     private final SwingTreeLookAndFeel.Theme _theme;
+    private final Insets                     _headingMargins;
 
-    SwingTreeTableHeaderUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+    SwingTreeTableHeaderUI( SwingTreeLookAndFeel.Theme theme, Insets headingMargins ) {
+        _theme          = theme;
+        _headingMargins = headingMargins;
+    }
 
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeTableHeaderUI(SwingTreeLookAndFeel.installedTheme()); }
+    public static ComponentUI createUI( JComponent c ) {
+        Insets headingMargins = UIManager.getInsets(CONTENT_MARGINS);
+        return new SwingTreeTableHeaderUI(
+                    SwingTreeLookAndFeel.installedTheme(),
+                    headingMargins == null ? DEFAULT_MARGINS : headingMargins
+                );
+    }
 
     @Override
     public void installUI( JComponent c ) {
@@ -46,7 +61,7 @@ public final class SwingTreeTableHeaderUI
         // back to the header default, and one installed per column would outlive this look and
         // feel: other look and feels replace the header default but never clear per-column ones.
         if ( _theme.symbols().drawsItsOwnChrome() && isReplaceableLafDefault(header.getDefaultRenderer()) )
-            header.setDefaultRenderer(new HeaderRenderer(_theme));
+            header.setDefaultRenderer(new HeaderRenderer(_theme, _headingMargins));
         _theme.installStyleOn(c);
     }
 
@@ -103,15 +118,12 @@ public final class SwingTreeTableHeaderUI
      */
     private static final class HeaderRenderer extends DefaultTableCellRenderer implements UIResource
     {
-        /** The key Nimbus files the room around a heading's text under, which a look and feel that
-         *  keeps different room puts into its defaults. */
-        private static final String CONTENT_MARGINS = "TableHeader:\"TableHeader.renderer\".contentMargins";
-        private static final Insets DEFAULT_MARGINS = new Insets(4, 10, 4, 10);
-
         private final SwingTreeLookAndFeel.Theme _theme;
+        private final Insets                     _margins;
 
-        HeaderRenderer( SwingTreeLookAndFeel.Theme theme ) {
-            _theme = theme;
+        HeaderRenderer( SwingTreeLookAndFeel.Theme theme, Insets margins ) {
+            _theme   = theme;
+            _margins = margins;
             setHorizontalAlignment(SwingConstants.LEADING);
         }
 
@@ -124,9 +136,7 @@ public final class SwingTreeTableHeaderUI
             label.setForeground(header == null ? _theme.palette().textMuted() : header.getForeground());
             label.setBackground(SwingTreeLookAndFeel.Palette.TRANSPARENT);
             label.setOpaque(false);
-            Insets margins = UIManager.getInsets(CONTENT_MARGINS);
-            if ( margins == null )
-                margins = DEFAULT_MARGINS;
+            Insets margins = _margins;
             label.setBorder(new EmptyBorder(UI.scale(margins.top), UI.scale(margins.left), UI.scale(margins.bottom), UI.scale(margins.right)));
             return label;
         }

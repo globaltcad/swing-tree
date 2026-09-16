@@ -33,10 +33,19 @@ public final class SwingTreeComboBoxUI
         implements SwingTreeStyledComponentUI<JComboBox<?>>
 {
     private final SwingTreeLookAndFeel.Theme _theme;
+    private final boolean                    _pressedWhilePopupVisible;
 
-    SwingTreeComboBoxUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+    SwingTreeComboBoxUI( SwingTreeLookAndFeel.Theme theme, boolean pressedWhilePopupVisible ) {
+        _theme                    = theme;
+        _pressedWhilePopupVisible = pressedWhilePopupVisible;
+    }
 
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeComboBoxUI(SwingTreeLookAndFeel.installedTheme()); }
+    public static ComponentUI createUI( JComponent c ) {
+        return new SwingTreeComboBoxUI(
+                    SwingTreeLookAndFeel.installedTheme(),
+                    UIManager.getBoolean("ComboBox.pressedWhenPopupVisible")
+                );
+    }
 
     @Override
     public void installUI( JComponent c ) {
@@ -243,7 +252,7 @@ public final class SwingTreeComboBoxUI
 
     @Override
     protected JButton createArrowButton() {
-        return _theme.symbols().drawsItsOwnChrome() ? new ArrowButton(_theme) : super.createArrowButton();
+        return _theme.symbols().drawsItsOwnChrome() ? new ArrowButton(_theme, _pressedWhilePopupVisible) : super.createArrowButton();
     }
 
     @Override
@@ -254,7 +263,12 @@ public final class SwingTreeComboBoxUI
     /** The button carrying the symbol set's drop-down arrow. */
     private static final class ArrowButton extends ActuatorButton
     {
-        ArrowButton( SwingTreeLookAndFeel.Theme theme ) { super(theme); }
+        private final boolean _pressedWhilePopupVisible;
+
+        ArrowButton( SwingTreeLookAndFeel.Theme theme, boolean pressedWhilePopupVisible ) {
+            super(theme);
+            _pressedWhilePopupVisible = pressedWhilePopupVisible;
+        }
 
         @Override public Dimension getPreferredSize() {
             int side = UI.scale(theme().symbols().comboArrowButtonSize());
@@ -268,7 +282,7 @@ public final class SwingTreeComboBoxUI
             boolean     over    = model.isRollover();
             if ( getParent() instanceof JComboBox ) {
                 JComboBox<?> combo = (JComboBox<?>) getParent();
-                pressed = pressed || ( combo.isPopupVisible() && UIManager.getBoolean("ComboBox.pressedWhenPopupVisible") );
+                pressed = pressed || ( combo.isPopupVisible() && _pressedWhilePopupVisible );
                 over    = over || LafUtilities.isUnderPointer(combo);
             }
             symbols.paintComboArrow(g, palette, getWidth(), getHeight(), isEnabled(), over, pressed);

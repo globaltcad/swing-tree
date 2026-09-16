@@ -23,10 +23,22 @@ public final class SwingTreeTreeUI
         implements SwingTreeStyledComponentUI<JTree>
 {
     private final SwingTreeLookAndFeel.Theme _theme;
+    private final int                        _leftChildIndent;
+    private final int                        _rightChildIndent;
 
-    SwingTreeTreeUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+    SwingTreeTreeUI( SwingTreeLookAndFeel.Theme theme, int leftChildIndent, int rightChildIndent ) {
+        _theme            = theme;
+        _leftChildIndent  = leftChildIndent;
+        _rightChildIndent = rightChildIndent;
+    }
 
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeTreeUI(SwingTreeLookAndFeel.installedTheme()); }
+    public static ComponentUI createUI( JComponent c ) {
+        return new SwingTreeTreeUI(
+                    SwingTreeLookAndFeel.installedTheme(),
+                    UIManager.getInt("Tree.leftChildIndent"),
+                    UIManager.getInt("Tree.rightChildIndent")
+                );
+    }
 
     @Override
     public void installUI( JComponent c ) {
@@ -62,8 +74,8 @@ public final class SwingTreeTreeUI
             int size = font == null ? UI.scale(13) : Math.round(font.getSize2D());
             tree.setRowHeight(Math.round(size * 1.75f));
         }
-        setLeftChildIndent(UI.scale(UIManager.getInt("Tree.leftChildIndent")));
-        setRightChildIndent(UI.scale(UIManager.getInt("Tree.rightChildIndent")));
+        setLeftChildIndent(UI.scale(_leftChildIndent));
+        setRightChildIndent(UI.scale(_rightChildIndent));
     }
 
     @Override

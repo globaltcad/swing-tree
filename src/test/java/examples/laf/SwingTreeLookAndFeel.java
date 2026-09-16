@@ -238,11 +238,6 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         return recorded instanceof PopupWindowMode ? (PopupWindowMode) recorded : PopupWindowMode.IN_FRAME;
     }
 
-    /** Remembered because the screen device would otherwise be asked once per popup, and a
-     *  display's translucency support does not change while the application runs. Two threads
-     *  arriving at once compute the same answer. */
-    private static volatile PopupWindowMode _detectedPopupWindowMode = null;
-
     /**
      *  Which dressing the platform can actually carry.
      *  <p>
@@ -259,22 +254,16 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
      *  {@link Conf#popupWindowMode(PopupWindowMode)}.
      */
     private static PopupWindowMode _detectedPopupWindowMode() {
-        PopupWindowMode detected = _detectedPopupWindowMode;
-        if ( detected != null )
-            return detected;
         if ( GraphicsEnvironment.isHeadless() )
             return PopupWindowMode.OPAQUE;
         GraphicsDevice screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice();
         String os = System.getProperty("os.name", "").toLowerCase(Locale.ROOT);
         boolean alwaysComposites = os.contains("mac") || os.contains("darwin") || os.contains("windows");
         if ( alwaysComposites && screen.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSLUCENT) )
-            detected = PopupWindowMode.TRANSLUCENT;
-        else if ( screen.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSPARENT) )
-            detected = PopupWindowMode.SHAPED;
-        else
-            detected = PopupWindowMode.OPAQUE;
-        _detectedPopupWindowMode = detected;
-        return detected;
+            return PopupWindowMode.TRANSLUCENT;
+        if ( screen.isWindowTranslucencySupported(GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSPARENT) )
+            return PopupWindowMode.SHAPED;
+        return PopupWindowMode.OPAQUE;
     }
 
     // ── UIDefaults ───────────────────────────────────────────────────────
