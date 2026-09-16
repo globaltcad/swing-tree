@@ -78,6 +78,7 @@ final class StyleInstaller<C extends JComponent>
     private @Nullable Font    _initialFont               = null;
     private @Nullable Color   _initialForeground         = null; // set when a solid font color is routed through the foreground channel (see _applyFontStyleTo)
     private @Nullable Color   _initialViewportBackground = null; // set when the styled background is handed down to a scroll pane viewport (see _restoreViewportBackgroundOf)
+    private @Nullable Color   _handedDownViewportBackground = null; // the color the style engine gave the viewport, so it only takes that one back (see _restoreViewportBackgroundOf)
     private @Nullable Boolean _initialViewportOpaque     = null; // set when the opaqueness is taken from a scroll pane viewport (see _updateViewportOpaquenessOf)
     // Remember the component's minimum/maximum size from before the style engine overrode them, so
     // that they can be restored once a (possibly animated/transitional) style stops specifying them.
@@ -371,6 +372,7 @@ final class StyleInstaller<C extends JComponent>
                         if ( !Objects.equals( viewport.getBackground(), newColor ) ) {
                             if ( _initialViewportBackground == null )
                                 _initialViewportBackground = viewport.getBackground();
+                            _handedDownViewportBackground = newColor;
                             viewport.setBackground( newColor );
                         }
                     }
@@ -647,10 +649,16 @@ final class StyleInstaller<C extends JComponent>
             return;
 
         JViewport viewport = ((JScrollPane) owner).getViewport();
-        if ( viewport != null && !Objects.equals( viewport.getBackground(), _initialViewportBackground ) )
+        if (
+            viewport != null &&
+            Objects.equals( viewport.getBackground(), _handedDownViewportBackground ) &&
+            !Objects.equals( viewport.getBackground(), _initialViewportBackground )
+        ) {
             viewport.setBackground(_initialViewportBackground);
+        }
 
         _initialViewportBackground = null;
+        _handedDownViewportBackground = null;
     }
 
     @SuppressWarnings("ReferenceEquality")
