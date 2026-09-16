@@ -11,6 +11,7 @@ import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
+import javax.swing.JMenu;
 import javax.swing.JLayeredPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
@@ -27,6 +28,7 @@ import javax.swing.plaf.FontUIResource;
 import javax.swing.plaf.UIResource;
 import javax.swing.plaf.basic.BasicLookAndFeel;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
@@ -124,7 +126,48 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             throw new IllegalStateException("Failed to install the SwingTree look and feel.", e);
         }
         for ( Window window : Window.getWindows() )
-            SwingUtilities.updateComponentTreeUI(window);
+            updateComponentTreeUI(window);
+    }
+
+    /**
+     *  Gives every component of a tree a fresh UI delegate from the installed look and feel, like
+     *  {@link SwingUtilities#updateComponentTreeUI(Component)} does, but children before their
+     *  parent.
+     *  <p>
+     *  The order is what a freshly built tree was installed in, and Swing's own parent-first walk
+     *  breaks it in two ways. A parent's new delegate makes new children of its own - a spinner's
+     *  arrow buttons, a combo box's editor - and the walk then reaches those and installs a second
+     *  delegate on them, which re-installs defaults the parent had just replaced: a spinner's arrow
+     *  button ends up wearing {@code Button.border}. And a component that owns a child it did not
+     *  make - a spinner its editor, a scroll pane its viewport - is installed while that child still
+     *  has the delegate of the previous look and feel, so anything the parent asks of the child
+     *  is answered by the old theme.
+     *
+     * @param root the window, or any other component, whose tree to update
+     */
+    public static void updateComponentTreeUI( Component root ) {
+        _updateChildrenThenSelf(root);
+        root.invalidate();
+        root.validate();
+        root.repaint();
+    }
+
+    private static void _updateChildrenThenSelf( Component c ) {
+        Component[] children = null;
+        if ( c instanceof JMenu )
+            children = ((JMenu) c).getMenuComponents();
+        else if ( c instanceof Container )
+            children = ((Container) c).getComponents();
+        if ( children != null )
+            for ( Component child : children )
+                _updateChildrenThenSelf(child);
+        if ( c instanceof JComponent ) {
+            JComponent component = (JComponent) c;
+            component.updateUI();
+            JPopupMenu popup = component.getComponentPopupMenu();
+            if ( popup != null )
+                updateComponentTreeUI(popup);
+        }
     }
 
     /** Creates the look and feel with its default configuration. */
@@ -563,7 +606,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         for ( String key : FONT_KEYS )
             UIManager.put(key, font);
         for ( Window w : Window.getWindows() )
-            SwingUtilities.updateComponentTreeUI(w);
+            updateComponentTreeUI(w);
     }
 
 
