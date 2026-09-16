@@ -55,6 +55,11 @@ final class StyleAndAnimationBorder<C extends JComponent> implements Border
 
     Border getFormerBorder() { return _formerBorder; }
 
+    void restoreBorderPaintedFlagOfOwner() {
+        if ( _borderWasNotPainted && _compExt.getOwner() instanceof AbstractButton )
+            ((AbstractButton) _compExt.getOwner()).setBorderPainted(false);
+    }
+
     Insets getMarginInsets() { return _marginInsets; }
 
     Insets getPaddingInsets() { return _paddingInsets; }

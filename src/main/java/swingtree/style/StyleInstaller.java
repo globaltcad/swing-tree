@@ -1029,6 +1029,7 @@ final class StyleInstaller<C extends JComponent>
         if ( currentBorder instanceof StyleAndAnimationBorder) {
             StyleAndAnimationBorder<?> border = (StyleAndAnimationBorder<?>) currentBorder;
             owner.setBorder(border.getFormerBorder());
+            border.restoreBorderPaintedFlagOfOwner();
         }
     }
 
