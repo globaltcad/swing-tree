@@ -28,7 +28,7 @@ import java.util.Objects;
  *  which every symbol set scales its geometry through, and the two axes of the {@link Graphics2D}
  *  transform, because a screen at 200% has to be handed twice the pixels rather than the same ones
  *  enlarged. The palette is the fourth, and is handled by lifetime instead of by key:
- *  {@link SwingTreeLookAndFeel.Conf} builds this wrapper against its own palette, so re-initialising
+ *  {@link SwingTreeLookAndFeel.Theme} builds this wrapper against its own palette, so re-initialising
  *  the look and feel starts from an empty cache and drops the previous theme's tiles. A call
  *  arriving with a different palette is drawn straight through.
  *  <p>
