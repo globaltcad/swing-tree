@@ -122,9 +122,12 @@ final class DynamicLaF
                 boolean hasMargin       = styleConf.margin().isPositive();
 
                 owner.setOpaque(!hasBorderRadius && !hasMargin && !foundationIsTransparent);
-                JScrollPane scrollPane = (JScrollPane) owner;
-                if ( scrollPane.getViewport() != null )
-                    scrollPane.getViewport().setOpaque(owner.isOpaque());
+                /*
+                    The viewport of the scroll pane is deliberately left alone here.
+                    It covers only the interior, which a margin or a translucent
+                    foundation does not reach, so it answers a narrower question than
+                    the scroll pane does and StyleInstaller answers it on its own.
+                 */
             }
             /* ^
                 If our style reveals what is behind it, then we need

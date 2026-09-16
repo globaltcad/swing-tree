@@ -78,6 +78,7 @@ final class StyleInstaller<C extends JComponent>
     private @Nullable Font    _initialFont               = null;
     private @Nullable Color   _initialForeground         = null; // set when a solid font color is routed through the foreground channel (see _applyFontStyleTo)
     private @Nullable Color   _initialViewportBackground = null; // set when the styled background is handed down to a scroll pane viewport (see _restoreViewportBackgroundOf)
+    private @Nullable Boolean _initialViewportOpaque     = null; // set when the opaqueness is taken from a scroll pane viewport (see _updateViewportOpaquenessOf)
     // Remember the component's minimum/maximum size from before the style engine overrode them, so
     // that they can be restored once a (possibly animated/transitional) style stops specifying them.
     // A 'true' ownership flag means the style engine currently holds an explicit override;
@@ -553,23 +554,22 @@ final class StyleInstaller<C extends JComponent>
      *  which makes the renderings of successive paints pile up into ever growing artifacts.
      *  This is especially noticeable when there are animations inside the scroll pane.
      *  <p>
-     *  So a viewport may never claim to be opaque when the scroll pane behind it does not,
-     *  or when the color it would fill its bounds with is not fully opaque.
-     *  The reverse is just as important though: as soon as the style of the scroll pane
-     *  turns opaque again, the viewport has to reclaim its opaqueness, or else Swing's
+     *  The reverse is just as important though: as soon as nothing needs to show through
+     *  the viewport anymore, it has to reclaim its opaqueness, or else Swing's
      *  repaint manager keeps climbing past it to find an opaque ancestor, and every
      *  little repaint inside the scroll pane costs more than it should, forever.
      *  <p>
-     *  There is a third party in this though, namely the style engine itself:
-     *  Everything it renders for a scroll pane, be it an inset shadow, a gradient
-     *  or a rounded background, is painted before the children of the scroll pane,
-     *  which means the viewport lies on top of all of it.
-     *  An opaque viewport would simply wipe these renderings away with its flat
-     *  background color, so it may only make its promise when the style engine
-     *  has nothing to show underneath it.
+     *  Note that the opaqueness of the scroll pane itself answers a different question
+     *  than the one asked here, so it must not be used as the signal:
+     *  a scroll pane reports whether it fills every pixel of its own bounds, which a
+     *  margin or a translucent border is enough to deny, even though both of them lie
+     *  outside the viewport and leave the interior a single flat color.
+     *  A look and feel may also hand out non-opaque scroll panes of its own accord
+     *  (Nimbus does), and the style engine must not read that as a reason to take
+     *  a flag it was never given.
      *
      * @param owner The component whose viewport should be synchronized, only scroll panes have one.
-     * @param style The style of the owner, which tells us if the style engine paints below the viewport.
+     * @param style The style of the owner, which tells us what an opaque viewport would break.
      */
     private void _updateViewportOpaquenessOf( final C owner, final StyleConf style ) {
         if ( !(owner instanceof JScrollPane) )
@@ -581,33 +581,55 @@ final class StyleInstaller<C extends JComponent>
 
         Color   viewportBackground   = viewport.getBackground();
         boolean viewportFillsItsArea = viewportBackground != null && viewportBackground.getAlpha() == 255;
-        boolean shouldBeOpaque       = owner.isOpaque() && viewportFillsItsArea && !_stylePaintsBelowViewportOf(style);
+        boolean mayBeOpaque          = viewportFillsItsArea && !_anOpaqueViewportWouldBreak(style);
         /*
             Note that a viewport without its own background color inherits the one of
             the scroll pane, which the style engine may well have set to the fully
             transparent 'UI.Color.UNDEFINED' so that it can paint the background itself.
             The viewport cannot do that painting, so it also cannot claim to be opaque.
         */
-        if ( viewport.isOpaque() != shouldBeOpaque )
-            viewport.setOpaque(shouldBeOpaque);
+        if ( !mayBeOpaque ) {
+            if ( _initialViewportOpaque == null )
+                _initialViewportOpaque = viewport.isOpaque();
+            if ( viewport.isOpaque() )
+                viewport.setOpaque(false);
+        }
+        else if ( _initialViewportOpaque != null ) {
+            if ( viewport.isOpaque() != _initialViewportOpaque )
+                viewport.setOpaque(_initialViewportOpaque);
+            _initialViewportOpaque = null;
+        }
+        /*
+            The style engine only gives back what it took: a viewport whose opaqueness
+            was never taken away is left alone entirely, so that a look and feel, or the
+            user, stays in charge of a scroll pane which has nothing to show through it.
+        */
     }
 
     /**
-     *  Determines if the supplied style makes the style engine render anything
-     *  in the area which the viewport of a scroll pane covers.
-     *  This is the case for all layers except the foreground layer, because they
-     *  are all painted before the children of a component, and it is also the case
-     *  for a border radius, whose rounded corners reach into the rectangular
-     *  bounds of the viewport.
+     *  Determines if an opaque viewport would keep the supplied style from reaching the screen.
+     *  <p>
+     *  A viewport can only ever fill its bounds with a single flat color, and it is painted
+     *  after the background, content and border layers of its scroll pane, so anything those
+     *  layers draw would be covered. A border radius counts as well, because its rounded
+     *  corners reach into the rectangular bounds of the viewport, and so does a filter on the
+     *  parent, whose result is rendered into the background of the scroll pane.
+     *  <p>
+     *  The foreground layer is painted on top of the viewport and can therefore not be
+     *  covered by it. It is still listed below, because an opaque viewport ends Swing's
+     *  search for an ancestor to repaint, which would leave the foreground painting
+     *  of the scroll pane stale as soon as a component inside the viewport repaints itself.
      *
      * @param style The style of a scroll pane.
-     * @return {@code true} if the style engine paints something below the viewport.
+     * @return {@code true} if an opaque viewport would hide the style or stop it from being refreshed.
      */
-    private static boolean _stylePaintsBelowViewportOf( final StyleConf style ) {
+    private static boolean _anOpaqueViewportWouldBreak( final StyleConf style ) {
         return style.border().hasAnyNonZeroArcs()
+            || !style.layers().filter().equals(FilterConf.none())
             || !style.layer(UI.Layer.BACKGROUND).isNone()
             || !style.layer(UI.Layer.CONTENT).isNone()
-            || !style.layer(UI.Layer.BORDER).isNone();
+            || !style.layer(UI.Layer.BORDER).isNone()
+            || !style.layer(UI.Layer.FOREGROUND).isNone();
     }
 
     /**
