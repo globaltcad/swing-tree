@@ -3273,7 +3273,7 @@ final class Styles
          */
         @SuppressWarnings("deprecation")
         private static ComponentStyleDelegate<JScrollPane> scrollPane( Theme theme, ComponentStyleDelegate<JScrollPane> it ) {
-            NimbusScheme s    = NimbusScheme.of(theme.palette());
+            NimbusScheme s    = theme.nimbusScheme();
             JScrollPane  pane = it.component();
             it = it.foregroundColor(s.get(NimbusScheme.Key.TEXT));
             if ( SwingTreeLookAndFeel.Surface.of(pane) == SwingTreeLookAndFeel.Surface.TRANSPARENT )
@@ -3294,7 +3294,7 @@ final class Styles
 
         @SuppressWarnings("deprecation")
         private static ComponentStyleDelegate<JViewport> viewport( Theme theme, ComponentStyleDelegate<JViewport> it ) {
-            NimbusScheme s = NimbusScheme.of(theme.palette());
+            NimbusScheme s = theme.nimbusScheme();
             return it
                     .foregroundColor(s.get(NimbusScheme.Key.TEXT))
                     .backgroundColor(
@@ -3324,7 +3324,7 @@ final class Styles
          */
         @SuppressWarnings("deprecation")
         private static ComponentStyleDelegate<AbstractButton> button( Theme theme, ComponentStyleDelegate<AbstractButton> it ) {
-            NimbusScheme   s = NimbusScheme.of(theme.palette());
+            NimbusScheme   s = theme.nimbusScheme();
             AbstractButton b = it.component();
             ButtonModel    m = b.getModel();
 
@@ -3394,7 +3394,7 @@ final class Styles
          */
         @SuppressWarnings("deprecation")
         private static <C extends AbstractButton> ComponentStyleDelegate<C> tickable( Theme theme, ComponentStyleDelegate<C> it ) {
-            NimbusScheme s = NimbusScheme.of(theme.palette());
+            NimbusScheme s = theme.nimbusScheme();
             return it
                     .margin(0)
                     .padding(0)
@@ -3412,7 +3412,7 @@ final class Styles
          */
         @SuppressWarnings("deprecation")
         private static ComponentStyleDelegate<JComboBox> comboBox( Theme theme, ComponentStyleDelegate<JComboBox> it ) {
-            NimbusScheme s       = NimbusScheme.of(theme.palette());
+            NimbusScheme s       = theme.nimbusScheme();
             JComboBox<?> combo   = it.component();
             boolean      enabled = combo.isEnabled();
             it = it.foregroundColor(s.get(enabled ? NimbusScheme.Key.TEXT : NimbusScheme.Key.DISABLED_TEXT));
@@ -3457,7 +3457,7 @@ final class Styles
         private static <C extends JComponent> ComponentStyleDelegate<C> input(
             Theme theme, ComponentStyleDelegate<C> it, JTextComponent text, int padY, int padX
         ) {
-            NimbusScheme s       = NimbusScheme.of(theme.palette());
+            NimbusScheme s       = theme.nimbusScheme();
             boolean      enabled = text.isEnabled();
             it = it.foregroundColor(s.get(enabled ? NimbusScheme.Key.TEXT : NimbusScheme.Key.DISABLED_TEXT));
             Color page = enabled ? s.get(NimbusScheme.Key.LIGHT_BACKGROUND) : FIELD_DISABLED.in(s);
@@ -3556,7 +3556,7 @@ final class Styles
          */
         @SuppressWarnings("deprecation")
         private static ComponentStyleDelegate<JMenuItem> menuItem( Theme theme, ComponentStyleDelegate<JMenuItem> it ) {
-            NimbusScheme s       = NimbusScheme.of(theme.palette());
+            NimbusScheme s       = theme.nimbusScheme();
             JMenuItem    item    = it.component();
             ButtonModel  m       = item.getModel();
             boolean      enabled = item.isEnabled();
@@ -3575,7 +3575,7 @@ final class Styles
 
         /** A menu bar: the control colour with a white sheen fading out down its top quarter, and a rule under it. */
         private static ComponentStyleDelegate<JMenuBar> menuBar( Theme theme, ComponentStyleDelegate<JMenuBar> it ) {
-            NimbusScheme s = NimbusScheme.of(theme.palette());
+            NimbusScheme s = theme.nimbusScheme();
             return it
                     .padding(2, 6, 1, 6)
                     .borderWidths(0, 0, 1, 0)
@@ -3587,7 +3587,7 @@ final class Styles
 
         /** A popup menu: a square grey outline around a sheet shading from white at its ends to the pale {@code menu} colour. */
         private static ComponentStyleDelegate<JPopupMenu> popupMenu( Theme theme, ComponentStyleDelegate<JPopupMenu> it ) {
-            NimbusScheme s = NimbusScheme.of(theme.palette());
+            NimbusScheme s = theme.nimbusScheme();
             return it
                     .margin(0)
                     .padding(5, 0, 5, 0)
@@ -3602,7 +3602,7 @@ final class Styles
 
         /** A tool tip: {@code info} in a square outline of {@code nimbusBorder}. */
         private static ComponentStyleDelegate<JToolTip> toolTip( Theme theme, ComponentStyleDelegate<JToolTip> it ) {
-            NimbusScheme s = NimbusScheme.of(theme.palette());
+            NimbusScheme s = theme.nimbusScheme();
             return it
                     .margin(0)
                     .padding(3, 3, 3, 3)
@@ -3647,7 +3647,7 @@ final class Styles
          *  the bounds.
          */
         private static ComponentStyleDelegate<JProgressBar> progressBar( Theme theme, ComponentStyleDelegate<JProgressBar> it ) {
-            NimbusScheme s = NimbusScheme.of(theme.palette());
+            NimbusScheme s = theme.nimbusScheme();
             boolean enabled = it.component().isEnabled();
             NimbusScheme.Gradient edge = enabled ? TROUGH_EDGE : TROUGH_EDGE_DISABLED;
             NimbusScheme.Gradient face = enabled ? TROUGH_FACE : TROUGH_FACE_DISABLED;
@@ -3692,7 +3692,7 @@ final class Styles
             @Override
             public void paint( Graphics2D g ) {
                 float scale = UI.scale();
-                Symbols.Nimbus.paintProgressGlow(g, _theme.palette(),
+                Symbols.Nimbus.paintProgressGlow(g, _theme.nimbusScheme(),
                         Math.round(_bar.getWidth() / scale), Math.round(_bar.getHeight() / scale), _ratio, _horizontal, _enabled);
             }
 
@@ -3742,7 +3742,7 @@ final class Styles
          */
         @SuppressWarnings("deprecation")
         private static ComponentStyleDelegate<JScrollBar> scrollBar( Theme theme, ComponentStyleDelegate<JScrollBar> it ) {
-            NimbusScheme s   = NimbusScheme.of(theme.palette());
+            NimbusScheme s   = theme.nimbusScheme();
             JScrollBar   bar = it.component();
             UI.Span span = bar.getOrientation() == JScrollBar.VERTICAL ? UI.Span.LEFT_TO_RIGHT : UI.Span.TOP_TO_BOTTOM;
             NimbusScheme.Gradient groove = bar.isEnabled() ? GROOVE : GROOVE_DISABLED;
@@ -3780,7 +3780,7 @@ final class Styles
          *  text is Nimbus's own renderer margin, see {@link #installDefaults}.
          */
         private static ComponentStyleDelegate<JTableHeader> tableHeader( Theme theme, ComponentStyleDelegate<JTableHeader> it ) {
-            NimbusScheme s = NimbusScheme.of(theme.palette());
+            NimbusScheme s = theme.nimbusScheme();
             return it
                     .padding(0)
                     .borderWidths(0, 0, 1, 0)
@@ -3807,8 +3807,8 @@ final class Styles
          * @param table the defaults of the look and feel being installed
          * @param palette its palette
          */
-        static void installDefaults( UIDefaults table, SwingTreeLookAndFeel.Palette palette ) {
-            NimbusScheme.install(table, palette);
+        static void installDefaults( UIDefaults table, Theme theme ) {
+            NimbusScheme.install(table, theme.palette());
             table.put("ComboBox.pressedWhenPopupVisible", Boolean.TRUE);
             table.put("TableHeader:\"TableHeader.renderer\".contentMargins", new javax.swing.plaf.InsetsUIResource(2, 5, 4, 5));
             javax.swing.border.Border cell = new javax.swing.plaf.BorderUIResource(
@@ -3820,7 +3820,7 @@ final class Styles
             table.put("TitledBorder.position", "ABOVE_TOP");
             table.put("TitledBorder.border", new NimbusLoweredBorder());
             table.put("TitledBorder.titleColor", new javax.swing.plaf.ColorUIResource(
-                    NimbusScheme.derive(NimbusScheme.of(palette).get(NimbusScheme.Key.TEXT), 0f, 0f, 0.23f, 0)));
+                    NimbusScheme.derive(theme.nimbusScheme().get(NimbusScheme.Key.TEXT), 0f, 0f, 0.23f, 0)));
             java.awt.Font font = swingtree.SwingTree.get().getScaledDefaultFont();
             table.put("TitledBorder.font", new javax.swing.plaf.FontUIResource(font.deriveFont(java.awt.Font.BOLD)));
             table.put("Slider.tickColor", new javax.swing.plaf.ColorUIResource(35, 40, 48));
@@ -3846,7 +3846,7 @@ final class Styles
          */
         @SuppressWarnings("deprecation")
         private static ComponentStyleDelegate<JToolBar> toolBar( Theme theme, ComponentStyleDelegate<JToolBar> it ) {
-            NimbusScheme s   = NimbusScheme.of(theme.palette());
+            NimbusScheme s   = theme.nimbusScheme();
             JToolBar     bar = it.component();
             int handle = bar.isFloatable() ? 11 : 0;
             it = bar.getOrientation() == JToolBar.HORIZONTAL

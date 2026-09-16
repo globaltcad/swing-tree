@@ -13,7 +13,8 @@ import java.awt.LinearGradientPaint;
 import java.awt.MultipleGradientPaint;
 import java.awt.Paint;
 import java.awt.geom.Point2D;
-import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -25,14 +26,16 @@ import java.util.Objects;
  *  writes every other colour it paints as an offset from one of them: "{@code nimbusBlueGrey},
  *  with 0.07 less saturation and 0.13 more brightness". So an application re-tints the whole of
  *  Nimbus by putting a new {@code nimbusBase} into {@link UIManager}, and it re-tints this preset
- *  the same way. Each of those keys is looked up in {@link UIManager} first, where an application's
- *  own {@code UIManager.put(..)} wins, and only then taken from the installed {@link Palette}, so
- *  the palette presets re-tint Nimbus too.
+ *  the same way, as long as it does so before it installs the look and feel: a scheme is worked
+ *  out once, by {@link #readFor(Palette)} when a {@link SwingTreeLookAndFeel.Theme} is built,
+ *  and never looks at {@link UIManager} again. A key an application has not put there is taken
+ *  from the {@link Palette}, so the palette presets re-tint Nimbus too.
  *  <p>
  *  A {@link Shade} is one such offset and a {@link Gradient} is a row of them. Both were copied
  *  out of the painters the JDK generates for Nimbus, so the default palette reproduces Nimbus to
- *  the byte, and both remember what they resolved to, so that a style rule reading forty of them
- *  on every repaint pays for the colour arithmetic once per scheme.
+ *  the byte, and both remember what they resolved to in the last scheme they were asked about,
+ *  so that a style rule reading forty of them on every repaint pays for the colour arithmetic
+ *  once per theme.
  */
 final class NimbusScheme
 {
@@ -100,55 +103,46 @@ final class NimbusScheme
      *  the focus ring with it. */
     private static final float[] FOCUS_FROM_BASE = { 0.00113559f, -0.18595353f, 0.27058822f };
 
-    private static volatile @Nullable NimbusScheme _last = null;
+    private final Palette             _palette;
+    private final EnumMap<Key, Color> _overrides;
+    private final Color[]             _colors;
 
-    /** Moves on whenever something is put into {@link UIManager} or a look and feel is installed,
-     *  which is the only way an application reaches the keys this scheme reads. */
-    private static volatile int _generation = 0;
-
-    static {
-        UIManager.getDefaults().addPropertyChangeListener(event -> _generation++);
-        UIManager.addPropertyChangeListener(event -> _generation++);
-    }
-
-    private final Palette _palette;
-    private final int     _generationSeen;
-    private final Color[] _colors;
-
-    private NimbusScheme( Palette palette, int generation, Color[] colors ) {
-        _palette        = palette;
-        _generationSeen = generation;
-        _colors         = colors;
+    private NimbusScheme( Palette palette, EnumMap<Key, Color> overrides ) {
+        _palette   = palette;
+        _overrides = overrides;
+        _colors    = resolve(palette, overrides);
     }
 
     /**
-     *  The scheme in force for a palette. It is the same instance for as long as neither the palette
-     *  nor any of the {@link Key} colours in {@link UIManager} changes, which is what lets a
-     *  {@link Shade} remember what it resolved to.
+     *  Works out the scheme for a palette under whichever {@link Key} colours an application has put
+     *  into {@link UIManager} by now. This is the one place {@link UIManager} is read.
      *
-     * @param palette the palette of the installed look and feel
+     * @param palette the palette of the theme being built
      * @return the colours Nimbus would paint with
      */
-    static NimbusScheme of( Palette palette ) {
-        NimbusScheme last       = _last;
-        int          generation = _generation;
-        if ( last != null && last._palette == palette && last._generationSeen == generation )
-            return last;
-        Color[] colors = resolve(palette, true);
-        // Equal colours are kept as the same array, which is what a cached shade is checked against.
-        if ( last != null && Arrays.equals(last._colors, colors) )
-            colors = last._colors;
-        NimbusScheme scheme = new NimbusScheme(palette, generation, colors);
-        _last = scheme;
-        return scheme;
+    static NimbusScheme readFor( Palette palette ) {
+        EnumMap<Key, Color> overrides = new EnumMap<>(Key.class);
+        for ( Key key : Key.values() ) {
+            Color override = overrideOf(key);
+            if ( override != null )
+                overrides.put(key, override);
+        }
+        return new NimbusScheme(palette, overrides);
     }
+
+    /**
+     * @param palette another palette
+     * @return the scheme that palette gives under the same {@link UIManager} colours as this one
+     */
+    NimbusScheme withPalette( Palette palette ) {
+        return palette == _palette ? this : new NimbusScheme(palette, _overrides);
+    }
+
+    /** @return the palette every colour not put into {@link UIManager} was taken from */
+    Palette palette() { return _palette; }
 
     /** @return one of the named colours */
     Color get( Key key ) { return _colors[key.ordinal()]; }
-
-    /** @return whether two schemes resolve every colour identically, so that a colour cached for
-     *          one is right for the other */
-    boolean isSameAs( NimbusScheme other ) { return other._colors == _colors; }
 
     /**
      *  Puts every {@link Key} colour the palette implies into a look and feel's defaults, together
@@ -161,7 +155,7 @@ final class NimbusScheme
      * @param palette its palette
      */
     static void install( UIDefaults table, Palette palette ) {
-        Color[] colors = resolve(palette, false);
+        Color[] colors = resolve(palette, new EnumMap<>(Key.class));
         for ( Key key : Key.values() )
             table.put(key.uiKey(), new ColorUIResource(colors[key.ordinal()]));
         Color text     = colors[Key.TEXT.ordinal()];
@@ -195,21 +189,21 @@ final class NimbusScheme
      *  Works out every {@link Key} colour in order.
      *
      * @param palette where a colour comes from that {@link UIManager} does not override
-     * @param readOverrides whether to look in {@link UIManager} at all; installing the defaults
-     *                      must not, or an override would be copied into the defaults it shadows
+     * @param overrides the colours an application put into {@link UIManager}; installing the
+     *                  defaults passes none, or an override would be copied into the defaults it shadows
      * @return the colours, indexed by {@link Key#ordinal()}
      */
-    private static Color[] resolve( Palette palette, boolean readOverrides ) {
+    private static Color[] resolve( Palette palette, Map<Key, Color> overrides ) {
         Key[]   keys   = Key.values();
         Color[] colors = new Color[keys.length];
         for ( Key key : keys ) {
-            Color override = readOverrides ? overrideOf(key) : null;
-            colors[key.ordinal()] = override != null ? override : fromPalette(key, palette, colors, readOverrides);
+            Color override = overrides.get(key);
+            colors[key.ordinal()] = override != null ? override : fromPalette(key, palette, colors, overrides);
         }
         return colors;
     }
 
-    private static Color fromPalette( Key key, Palette p, Color[] resolved, boolean readOverrides ) {
+    private static Color fromPalette( Key key, Palette p, Color[] resolved, Map<Key, Color> overrides ) {
         switch ( key ) {
             case TEXT:                 return p.text();
             case CONTROL:              return p.background();
@@ -218,7 +212,7 @@ final class NimbusScheme
                 // Nimbus derives the blue-grey from the base, so an application that re-tints only
                 // the base expects the greys to follow it. Otherwise the palette's own surface says
                 // what the greys are.
-                if ( readOverrides && overrideOf(Key.BASE) != null )
+                if ( overrides.containsKey(Key.BASE) )
                     return derive(resolved[Key.BASE.ordinal()], BLUE_GREY_FROM_BASE);
                 return derive(p.surface(), BLUE_GREY_FROM_SURFACE);
             case BORDER:               return derive(resolved[Key.BLUE_GREY.ordinal()], 0f, -0.017358616f, -0.11372548f, 0);
@@ -385,7 +379,7 @@ final class NimbusScheme
             if ( _constant != null || _key == null )
                 return Objects.requireNonNull(_constant);
             Resolved resolved = _resolved;
-            if ( resolved != null && resolved.scheme.isSameAs(scheme) )
+            if ( resolved != null && resolved.scheme == scheme )
                 return resolved.colors[0];
             Color color = derive(scheme.get(_key), _hue, _saturation, _brightness, _alpha);
             _resolved = new Resolved(scheme, new Color[]{ color });
@@ -431,7 +425,7 @@ final class NimbusScheme
          */
         Color[] colors( NimbusScheme scheme ) {
             Resolved resolved = _resolved;
-            if ( resolved == null || !resolved.scheme.isSameAs(scheme) ) {
+            if ( resolved == null || resolved.scheme != scheme ) {
                 resolved = new Resolved(scheme, _resolve(scheme, null));
                 _resolved = resolved;
             }

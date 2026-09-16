@@ -545,7 +545,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         table.put("TabbedPane.focus",                 ui(p.accent()));
         table.put("TabbedPane.font",                  baseFont);
 
-        _theme.stylePreset().installDefaults(table, p);
+        _theme.stylePreset().installDefaults(table, _theme);
     }
 
     private static ColorUIResource ui( Color c ) { return new ColorUIResource(c); }
@@ -756,6 +756,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
     {
         private final StylePreset      _stylePreset;
         private final Palette          _palette;
+        private final NimbusScheme     _nimbusScheme;
         private final Symbols          _symbols;
         private final PopupWindowMode  _popupWindowMode;
         private final Tuple<StyleRule> _overrides;
@@ -769,7 +770,8 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             SymbolPreset symbols = conf._symbolPreset != null ? conf._symbolPreset : conf._stylePreset.preferredSymbols();
             _stylePreset     = conf._stylePreset;
             _palette         = conf.palette();
-            _symbols         = new CachedSymbols(symbols.symbolsFor(_palette), _palette);
+            _nimbusScheme    = NimbusScheme.readFor(_palette);
+            _symbols         = new CachedSymbols(symbols.symbolsFor(_palette, _nimbusScheme), _palette);
             _popupWindowMode = conf._popupWindowMode == PopupWindowMode.AUTO
                                    ? _detectedPopupWindowMode()
                                    : conf._popupWindowMode;
@@ -783,6 +785,10 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         /** @return the symbol set chosen for this theme's palette, rasterizing through a cache that
          *          belongs to this theme */
         Symbols symbols() { return _symbols; }
+
+        /** @return the colours Nimbus derives from this theme's palette and from the Nimbus keys an
+         *          application had put into {@link UIManager} when the theme was built */
+        NimbusScheme nimbusScheme() { return _nimbusScheme; }
 
         StylePreset stylePreset() { return _stylePreset; }
 
@@ -1224,7 +1230,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             @Override public SymbolPreset  preferredSymbols() { return SymbolPreset.NIMBUS; }
             @Override public PalettePreset preferredPalette() { return PalettePreset.NIMBUS; }
             @Override String               displayName()      { return "Nimbus"; }
-            @Override void installDefaults( UIDefaults table, Palette palette ) { Styles.Nimbus.installDefaults(table, palette); }
+            @Override void installDefaults( UIDefaults table, Theme theme ) { Styles.Nimbus.installDefaults(table, theme); }
         },
         /**
          *  Polymorphism: a theme with no fixed appearance, only rules for arriving at one. It
@@ -1271,9 +1277,9 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *  look and feel is read through, so that an application written against it finds them.
          *
          * @param table the defaults being built
-         * @param palette the palette of the configuration being installed
+         * @param theme the theme of the look and feel being installed
          */
-        void installDefaults( UIDefaults table, Palette palette ) {}
+        void installDefaults( UIDefaults table, Theme theme ) {}
 
         @Override public String toString() { return displayName(); }
     }
@@ -1289,55 +1295,55 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         /** No symbols: every delegate falls through to the painting and the sizing of the
          *  {@code Basic*UI} it extends, so the marks, arrows, thumbs and grips are Swing's own. */
         BLANK {
-            @Override Symbols symbolsFor( Palette palette ) { return Symbols.Blank.INSTANCE; }
+            @Override Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme ) { return Symbols.Blank.INSTANCE; }
             @Override String  displayName() { return "Blank"; }
         },
         /** Thin strokes, round caps, round dots and almost no fills: drawn the way a pen draws. */
         LINEN {
-            @Override Symbols symbolsFor( Palette palette ) { return Symbols.Linen.INSTANCE; }
+            @Override Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme ) { return Symbols.Linen.INSTANCE; }
             @Override String  displayName() { return "Linen"; }
         },
         /** Extruded: every glyph is the surface colour, lit from the top left and shadowed at the
          *  bottom right, so it reads as pressed out of the panel rather than drawn onto it. */
         SOFT {
-            @Override Symbols symbolsFor( Palette palette ) { return Symbols.Soft.INSTANCE; }
+            @Override Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme ) { return Symbols.Soft.INSTANCE; }
             @Override String  displayName() { return "Soft"; }
         },
         /** Glass: saturated fills under a hard gloss that breaks across the middle, with a crisp
          *  outline and a highlight along the top edge. */
         GLOSSY {
-            @Override Symbols symbolsFor( Palette palette ) { return Symbols.Glossy.INSTANCE; }
+            @Override Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme ) { return Symbols.Glossy.INSTANCE; }
             @Override String  displayName() { return "Glossy"; }
         },
         /** Bold and geometric: filled shapes rather than outlined ones, solid triangles for arrows,
          *  and thick strokes that stay legible at a glance. */
         MATERIAL {
-            @Override Symbols symbolsFor( Palette palette ) { return Symbols.Material.INSTANCE; }
+            @Override Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme ) { return Symbols.Material.INSTANCE; }
             @Override String  displayName() { return "Material"; }
         },
         /** Rectangles and solid triangles: no radius, no rim, no halo and no shade, so a control
          *  that is on is the same shape as one that is off, filled. */
         FLAT {
-            @Override Symbols symbolsFor( Palette palette ) { return Symbols.Flat.INSTANCE; }
+            @Override Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme ) { return Symbols.Flat.INSTANCE; }
             @Override String  displayName() { return "Flat"; }
         },
         /** Cut into the surface or screwed onto it: every mark is drawn twice, dark on the line
          *  and light one pixel below it, where the far wall of the groove catches the light. */
         CARVED {
-            @Override Symbols symbolsFor( Palette palette ) { return Symbols.Carved.INSTANCE; }
+            @Override Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme ) { return Symbols.Carved.INSTANCE; }
             @Override String  displayName() { return "Carved"; }
         },
         /** Cut from the same glass as everything else: a shape that is off is a wash you can see
          *  the ground through, one that is on is the accent behind a brighter rim. */
         GLASS {
-            @Override Symbols symbolsFor( Palette palette ) { return Symbols.Glass.INSTANCE; }
+            @Override Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme ) { return Symbols.Glass.INSTANCE; }
             @Override String  displayName() { return "Glass"; }
         },
         /** Moulded from the same plastic as the surfaces around them: a small rounded square, a
          *  small circle, a round knob and a pill, each lit by the one overhead light the Nimbus
          *  style preset uses, inside the outline a button of the same state wears. */
         NIMBUS {
-            @Override Symbols symbolsFor( Palette palette ) { return Symbols.Nimbus.INSTANCE; }
+            @Override Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme ) { return new Symbols.Nimbus(nimbusScheme); }
             @Override String  displayName() { return "Nimbus"; }
         },
         /** Not a set of its own but a choice between three of the others, made from what the
@@ -1345,7 +1351,7 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
          *  {@link StylePreset#POLYMORPHIC} decides everything else: {@link #SOFT} when only light
          *  can, {@link #GLASS} on a dark ground, and {@link #MATERIAL} otherwise. */
         ADAPTIVE {
-            @Override Symbols symbolsFor( Palette palette ) {
+            @Override Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme ) {
                 switch ( Mood.of(palette) ) {
                     case RELIEF:   return Symbols.Soft.INSTANCE;
                     case LUMINOUS: return Symbols.Glass.INSTANCE;
@@ -1357,10 +1363,11 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         };
 
         /**
-         * @param palette the palette the symbols will be drawn with
+         * @param palette      the palette the symbols will be drawn with
+         * @param nimbusScheme the Nimbus colours worked out from that palette
          * @return the symbol painter this preset stands for under that palette
          */
-        abstract Symbols symbolsFor( Palette palette );
+        abstract Symbols symbolsFor( Palette palette, NimbusScheme nimbusScheme );
 
         /** @return the name to show a user choosing between presets. */
         abstract String displayName();

@@ -2510,9 +2510,14 @@ interface Symbols
      */
     final class Nimbus implements Symbols
     {
-        static final Symbols INSTANCE = new Nimbus();
+        private final NimbusScheme _scheme;
 
-        private Nimbus() {}
+        /** @param scheme the Nimbus colours of the palette this set will be drawn with */
+        Nimbus( NimbusScheme scheme ) { _scheme = scheme; }
+
+        /** @return the Nimbus colours of {@code p}, which are this set's own unless it is handed a
+         *          palette other than the one it was made for */
+        private NimbusScheme schemeOf( Palette p ) { return _scheme.withPalette(p); }
 
 
 
@@ -2547,7 +2552,7 @@ interface Symbols
             Graphics2D g, Palette p, int x, int y, int w, int h,
             boolean enabled, boolean focused, boolean rollover, boolean pressed, boolean selected
         ) {
-            NimbusScheme s = NimbusScheme.of(p);
+            NimbusScheme s = schemeOf(p);
             Glyph glyph = !enabled ? ( selected ? Glyph.CHECK_DISABLED_SELECTED : Glyph.CHECK_DISABLED )
                         : pressed  ? ( selected ? Glyph.CHECK_PRESSED_SELECTED  : Glyph.CHECK_PRESSED )
                         : rollover ? ( selected ? Glyph.CHECK_MOUSE_OVER_SELECTED : Glyph.CHECK_MOUSE_OVER )
@@ -2571,7 +2576,7 @@ interface Symbols
             Graphics2D g, Palette p, int x, int y, int w, int h,
             boolean enabled, boolean focused, boolean rollover, boolean pressed, boolean selected
         ) {
-            NimbusScheme s = NimbusScheme.of(p);
+            NimbusScheme s = schemeOf(p);
             Glyph glyph = !enabled ? ( selected ? Glyph.RADIO_DISABLED_SELECTED : Glyph.RADIO_DISABLED )
                         : pressed  ? ( selected ? Glyph.RADIO_PRESSED_SELECTED  : Glyph.RADIO_PRESSED )
                         : rollover ? ( selected ? Glyph.RADIO_MOUSE_OVER_SELECTED : Glyph.RADIO_MOUSE_OVER )
@@ -2760,7 +2765,7 @@ interface Symbols
             float scale = w / (float) disclosureGlyphSize();
             g.translate(x, y + h / 2f - 3.5f * scale);
             g.scale(scale, scale);
-            g.setColor(DISCLOSURE.in(NimbusScheme.of(p)));
+            g.setColor(DISCLOSURE.in(schemeOf(p)));
             g.fill(expanded ? polygon(0, 0, 7, 0, 3.54f, 6.95f) : polygon(0, 0, 6.92f, 3.51f, 0, 7));
         }
 
@@ -2776,7 +2781,7 @@ interface Symbols
         /** A solid wedge in the nine by ten pixel square Nimbus lays a menu's arrow out in, white on the selection band. */
         @Override
         public void paintSubmenuArrow( Graphics2D g, Palette p, int x, int y, int w, int h, boolean enabled, boolean armed ) {
-            NimbusScheme s = NimbusScheme.of(p);
+            NimbusScheme s = schemeOf(p);
             inMenuMarkSquare(g, x, y, w, h);
             fill(g, polygon(0, 1, 7.76f, 5.51f, 0, 10), ( !enabled ? MENU_MARK_DISABLED : armed ? MENU_MARK_ARMED : MENU_ARROW ).in(s));
         }
@@ -2789,7 +2794,7 @@ interface Symbols
         ) {
             if ( !selected )
                 return;
-            NimbusScheme s = NimbusScheme.of(p);
+            NimbusScheme s = schemeOf(p);
             inMenuMarkSquare(g, x, y, w, h);
             Shape mark = radio ? polygon(0.01f, 5.49f, 4.55f, 1.01f, 9, 5.51f, 4.54f, 10)
                                : polygon(0, 5, 2.15f, 5, 3.56f, 7.39f, 6.96f, 0, 9, 0, 9, 1, 8.16f, 1.98f, 4, 10, 2.87f, 10);
@@ -2822,7 +2827,7 @@ interface Symbols
         public void paintComboArrow(
             Graphics2D g, Palette p, int w, int h, boolean enabled, boolean rollover, boolean pressed
         ) {
-            NimbusScheme s = NimbusScheme.of(p);
+            NimbusScheme s = schemeOf(p);
             NimbusMould mould = !enabled ? NimbusMould.COMBO_BOX_ACTUATOR_DISABLED
                               : pressed  ? NimbusMould.COMBO_BOX_ACTUATOR_PRESSED
                               : rollover ? NimbusMould.COMBO_BOX_ACTUATOR_MOUSE_OVER
@@ -2857,7 +2862,7 @@ interface Symbols
             Graphics2D g, Palette p, int w, int h, boolean up,
             boolean enabled, boolean rollover, boolean pressed
         ) {
-            NimbusScheme s = NimbusScheme.of(p);
+            NimbusScheme s = schemeOf(p);
             Stepper stepper = up ? ( !enabled ? Stepper.NEXT_DISABLED : pressed ? Stepper.NEXT_PRESSED : rollover ? Stepper.NEXT_MOUSE_OVER : Stepper.NEXT )
                                  : ( !enabled ? Stepper.PREVIOUS_DISABLED : pressed ? Stepper.PREVIOUS_PRESSED : rollover ? Stepper.PREVIOUS_MOUSE_OVER : Stepper.PREVIOUS );
             float scale = UI.scale();
@@ -2994,7 +2999,7 @@ interface Symbols
             Graphics2D g, Palette p, Rectangle track, int thumbCentre,
             boolean horizontal, boolean inverted, boolean enabled
         ) {
-            NimbusScheme s = NimbusScheme.of(p);
+            NimbusScheme s = schemeOf(p);
             float scale  = UI.scale();
             // Nimbus runs the groove on past both ends of the knob's travel, to the slider's bounds.
             float reach  = sliderThumbDiameter() / 2f + 1.5f;
@@ -3019,7 +3024,7 @@ interface Symbols
         public void paintSliderThumb(
             Graphics2D g, Palette p, Rectangle r, boolean enabled, boolean focused, boolean rollover
         ) {
-            NimbusScheme s = NimbusScheme.of(p);
+            NimbusScheme s = schemeOf(p);
             Knob knob = !enabled ? Knob.DISABLED : rollover ? Knob.MOUSE_OVER : Knob.ENABLED;
             LafUtilities.antialiasShapes(g);
             g.translate(r.x, r.y);
@@ -3090,7 +3095,7 @@ interface Symbols
         /** A rule shading from light at its ends to dark in its middle, so that it fades into the
          *  highlight along the top of the heading row and the shadow along its bottom. */
         @Override public @Nullable Paint tableHeaderDivider( Palette p, int height ) {
-            return HEADER_DIVIDER.paint(NimbusScheme.of(p), 0, height - UI.scale(1));
+            return HEADER_DIVIDER.paint(schemeOf(p), 0, height - UI.scale(1));
         }
 
         private static final NimbusScheme.Gradient HEADER_DIVIDER = NimbusScheme.gradient(new double[]{ 0, 0.144, 0.437, 0.594, 0.752, 0.876, 1 },
@@ -3101,7 +3106,7 @@ interface Symbols
 
         /** Nimbus's {@code Table.alternateRowColor}: the page, one step darker. */
         @Override public @Nullable Color tableRowStripe( Palette p ) {
-            return NimbusScheme.derive(NimbusScheme.of(p).get(NimbusScheme.Key.LIGHT_BACKGROUND), 0, 0, -0.05098039f, 0);
+            return NimbusScheme.derive(schemeOf(p).get(NimbusScheme.Key.LIGHT_BACKGROUND), 0, 0, -0.05098039f, 0);
         }
 
         @Override public int treeNodeGlyphSize() { return 16; }
@@ -3116,7 +3121,7 @@ interface Symbols
             Graphics2D g, Palette p, int x, int y, int w, int h,
             boolean leaf, boolean expanded, boolean enabled
         ) {
-            NimbusScheme s = NimbusScheme.of(p);
+            NimbusScheme s = schemeOf(p);
             LafUtilities.antialiasShapes(g);
             g.translate(x, y);
             g.scale(w / 16.0, h / 16.0);
@@ -3211,7 +3216,7 @@ interface Symbols
         ) {
             if ( !enabled )
                 return;
-            NimbusScheme s = NimbusScheme.of(p);
+            NimbusScheme s = schemeOf(p);
             ScrollEnd end = pressed ? ScrollEnd.PRESSED : rollover ? ScrollEnd.MOUSE_OVER : ScrollEnd.ENABLED;
             float scale = UI.scale();
             LafUtilities.antialiasShapes(g);
@@ -3243,7 +3248,7 @@ interface Symbols
          */
         @Override
         public void paintScrollThumb( Graphics2D g, Palette p, Rectangle r, boolean active ) {
-            NimbusScheme s = NimbusScheme.of(p);
+            NimbusScheme s = schemeOf(p);
             float   scale    = UI.scale();
             boolean vertical = r.height >= r.width;
             float   length   = ( vertical ? r.height : r.width ) / scale;
@@ -3371,7 +3376,7 @@ interface Symbols
          */
         @Override
         public void paintSplitGrip( Graphics2D g, Palette p, int w, int h, boolean horizontalSplit, boolean enabled ) {
-            NimbusScheme s = NimbusScheme.of(p);
+            NimbusScheme s = schemeOf(p);
             float scale = UI.scale();
             // Nimbus draws the divider of a split stacked top and bottom, and turns it for the other.
             float length = ( horizontalSplit ? h : w ) / scale;
@@ -3426,7 +3431,7 @@ interface Symbols
          */
         @Override
         public void paintDragHandle( Graphics2D g, Palette p, int w, int h, boolean horizontal ) {
-            NimbusScheme s = NimbusScheme.of(p);
+            NimbusScheme s = schemeOf(p);
             float scale = UI.scale();
             float along = ( horizontal ? h : w ) / scale;
             LafUtilities.antialiasShapes(g);
@@ -3458,7 +3463,7 @@ interface Symbols
         ) {
             if ( ratio <= 0 )
                 return;
-            NimbusScheme s = NimbusScheme.of(p);
+            NimbusScheme s = schemeOf(p);
             float scale  = UI.scale();
             float length = ( horizontal ? w : h ) / scale;
             float across = ( horizontal ? h : w ) / scale;
@@ -3479,7 +3484,7 @@ interface Symbols
          *  the bar is full.
          *
          * @param g the context, in component pixels
-         * @param p the palette in force
+         * @param s the Nimbus colours in force
          * @param w the width of the bar
          * @param h its height
          * @param ratio how much of it is filled
@@ -3487,11 +3492,10 @@ interface Symbols
          * @param enabled whether it is enabled
          */
         static void paintProgressGlow(
-            Graphics2D g, Palette p, int w, int h, double ratio, boolean horizontal, boolean enabled
+            Graphics2D g, NimbusScheme s, int w, int h, double ratio, boolean horizontal, boolean enabled
         ) {
             if ( ratio <= 0 )
                 return;
-            NimbusScheme s = NimbusScheme.of(p);
             float   scale    = UI.scale();
             float   length   = ( horizontal ? w : h ) / scale;
             float   across   = ( horizontal ? h : w ) / scale;
@@ -3546,7 +3550,7 @@ interface Symbols
         public void paintTabSurface(
             Graphics2D g, Palette p, int x, int y, int w, int h, boolean selected, boolean rollover
         ) {
-            NimbusScheme s = NimbusScheme.of(p);
+            NimbusScheme s = schemeOf(p);
             TabLook look = selected ? ( rollover ? TabLook.MOUSE_OVER_SELECTED : TabLook.SELECTED )
                                     : ( rollover ? TabLook.MOUSE_OVER : TabLook.ENABLED );
             float scale = UI.scale();
@@ -3586,7 +3590,7 @@ interface Symbols
         public void paintTabEdge(
             Graphics2D g, Palette p, Rectangle edge, @Nullable Rectangle selectedTab, int tabPlacement
         ) {
-            NimbusScheme s = NimbusScheme.of(p);
+            NimbusScheme s = schemeOf(p);
             boolean vertical  = tabPlacement == SwingConstants.LEFT || tabPlacement == SwingConstants.RIGHT;
             boolean fromStart = tabPlacement == SwingConstants.TOP || tabPlacement == SwingConstants.LEFT;
             int     depth     = vertical ? edge.width : edge.height;
@@ -3610,7 +3614,7 @@ interface Symbols
         /** Nimbus writes every tab's label in the ordinary ink, whichever tab is selected. */
         @Override
         public Color tabText( Palette p, boolean selected, boolean enabled ) {
-            NimbusScheme s = NimbusScheme.of(p);
+            NimbusScheme s = schemeOf(p);
             return s.get(enabled ? NimbusScheme.Key.TEXT : NimbusScheme.Key.DISABLED_TEXT);
         }
 
