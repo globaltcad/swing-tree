@@ -1070,4 +1070,40 @@ class Style_Installation_Spec extends Specification
             'shadow and border'  | { it.border(2, Color.BLACK).shadow(UI.Layer.BACKGROUND, "s", c->c.color("black").blurRadius(6)) }
     }
 
+    def 'A button whose border was not painted gets that flag back when the style engine removes its border.'()
+    {
+        reportInfo """
+            To draw a styled border around a button, the style engine installs a border of its own,
+            and a button only paints its border while `AbstractButton.isBorderPainted()` is `true`.
+            So the engine switches that flag on for a button that had it off - a menu item, or a
+            button made plain through `makePlain()`.
+
+            It has to switch the flag off again once it takes its border away. Otherwise the button
+            keeps painting whatever border it is given afterwards: a look and feel that is switched to
+            at runtime, for example, would draw its own border around every menu item.
+        """
+        given: 'A button without a painted border, which is styled with a border only sometimes:'
+            var styled = false
+            var button =
+                    UI.button("Plain")
+                    .isBorderPaintedIf(false)
+                    .withSize(120, 40)
+                    .withStyle( it -> styled ? it.border(2, Color.RED) : it )
+                    .get(JButton)
+        expect: 'The border is not painted to begin with:'
+            !button.isBorderPainted()
+
+        when: 'We activate the border style and paint:'
+            styled = true
+            Utility.paintWithoutWindow(button, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+        then: 'The border is painted, because the style engine has to draw it:'
+            button.isBorderPainted()
+
+        when: 'We remove the style again and paint:'
+            styled = false
+            Utility.paintWithoutWindow(button, new BufferedImage(1, 1, BufferedImage.TYPE_INT_ARGB).createGraphics())
+        then: 'The button is back to not painting its border:'
+            !button.isBorderPainted()
+    }
+
 }
