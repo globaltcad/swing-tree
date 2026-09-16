@@ -7,6 +7,7 @@ import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.JComponent;
 import javax.swing.JTable;
+import javax.swing.LookAndFeel;
 import javax.swing.UIManager;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicTableUI;
@@ -49,13 +50,14 @@ public final class SwingTreeTableUI
             _displacedGrid = new Grid(table);
             table.setShowGrid(false);
             table.setIntercellSpacing(new Dimension(0, 0));
-            table.setRowHeight(UI.scale(_theme.symbols().tableRowHeight()));
-        } else {
-            // The table's constructor sets a fixed 16 pixels, which is shorter than the font
-            // this look and feel installs once the UI scale factor is above one.
-            table.setRowHeight(rowHeightFor(table));
         }
         _theme.installStyleOn(c);
+        // Installed rather than set, so that a row height the application chose stands. Without a
+        // symbol set's own height, the table's constructor leaves a fixed 16 pixels, which is
+        // shorter than the font this look and feel installs once the UI scale factor is above one.
+        LookAndFeel.installProperty(table, "rowHeight", _theme.symbols().drawsItsOwnChrome()
+                                                        ? UI.scale(_theme.symbols().tableRowHeight())
+                                                        : rowHeightFor(table));
     }
 
     @Override

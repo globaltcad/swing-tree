@@ -69,13 +69,14 @@ public final class SwingTreeTreeUI
      *  clips off the bottom of every label it has.
      */
     private void applyScaledMetrics( JTree tree ) {
+        // Installed rather than set, so that a row height the application chose stands.
         if ( _theme.symbols().drawsItsOwnChrome() )
-            tree.setRowHeight(UI.scale(_theme.symbols().treeRowHeight()));
+            LookAndFeel.installProperty(tree, "rowHeight", UI.scale(_theme.symbols().treeRowHeight()));
         else {
             // A row shorter than the font in it is unreadable rather than merely plain.
             java.awt.Font font = tree.getFont();
             int size = font == null ? UI.scale(13) : Math.round(font.getSize2D());
-            tree.setRowHeight(Math.round(size * 1.75f));
+            LookAndFeel.installProperty(tree, "rowHeight", Math.round(size * 1.75f));
         }
         setLeftChildIndent(UI.scale(_leftChildIndent));
         setRightChildIndent(UI.scale(_rightChildIndent));
