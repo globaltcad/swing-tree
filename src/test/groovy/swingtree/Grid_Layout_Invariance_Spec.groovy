@@ -26,12 +26,14 @@ import java.awt.Insets
     count whenever its row count is not zero, and spreads the components over
     its rows instead. A `UniformGridLayout` starts a new row after the column
     count you give it, and leaves out the rows and columns which no component
-    occupies. You can switch it to the behaviour of a `GridLayout` with the
-    mode `UniformGridLayout.Mode.SPREAD_OVER_ROWS` and the setting
-    `UniformGridLayout.CollapseEmpty.NONE`. A hard requirement follows from
-    that: **a `UniformGridLayout` which spreads its components over its rows
-    and collapses nothing must behave exactly like a `GridLayout`**. Anybody
-    replacing the one with the other should not be able to tell the difference.
+    occupies. You switch it to the behaviour of a `GridLayout` with three
+    settings: the mode `UniformGridLayout.Mode.SPREAD_OVER_ROWS`, the setting
+    `UniformGridLayout.CollapseEmpty.NONE`, and the growth policy
+    `UniformGridLayout.OverflowGrowth.ADD_COLUMNS`. A hard requirement follows
+    from that: **a `UniformGridLayout` which spreads its components over its
+    rows, collapses nothing and grows by columns must behave exactly like a
+    `GridLayout`**. Anybody replacing the one with the other should not be able
+    to tell the difference.
 
     This specification pins that equivalence down across row counts, column
     counts, component counts, gap sizes, container sizes, component orientations,
@@ -41,6 +43,14 @@ import java.awt.Insets
 
     A `UniformGridLayout` scales its gaps by the UI scale factor of SwingTree, and
     a `GridLayout` does not, so this specification runs at a scale factor of 1.
+
+    The growth policy has to be named because a `GridLayout` answers the question
+    it asks in exactly one way. Once a grid holds more components than its declared
+    row count times its declared column count, `ADD_COLUMNS` is the policy which
+    keeps widening the grid the way a `GridLayout` does, while `ADD_ROWS` and
+    `ADD_ROWS_AND_COLUMNS` deliberately make room on the other axis instead. The
+    last feature of this specification pins that difference down, so that the one
+    policy which does match cannot start matching by accident.
 
 ''')
 @Subject([UniformGridLayout])
@@ -71,10 +81,11 @@ class Grid_Layout_Invariance_Spec extends Specification
             evenly, both layout managers centre the grid and leave the few pixels
             that are left over as a margin around it.
         """
-        given : 'A uniform grid layout which spreads its components over its rows and collapses nothing, like a `GridLayout` does.'
+        given : 'A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.'
             var ourLayout = new UniformGridLayout(rows, cols, horizontalGap, verticalGap)
             ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)
             ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)
+            ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)
         and : 'Two panels with the same number of children, one per layout manager.'
             var ours =
                     UI.panel()
@@ -126,10 +137,11 @@ class Grid_Layout_Invariance_Spec extends Specification
             evenly into cells, so the left over pixels have to end up on the same side
             under both layout managers as well.
         """
-        given : 'A uniform grid layout which spreads its components over its rows and collapses nothing, like a `GridLayout` does.'
+        given : 'A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.'
             var ourLayout = new UniformGridLayout(rows, cols, 5, 5)
             ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)
             ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)
+            ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)
         and : 'Two panels with the same component orientation, one per layout manager.'
             var ours =
                     UI.panel()
@@ -181,10 +193,11 @@ class Grid_Layout_Invariance_Spec extends Specification
             cells for most of the grids in the table, so the pixels left over by rounding
             the cell size down have to end up on the same side under both layout managers.
         """
-        given : 'A uniform grid layout which spreads its components over its rows and collapses nothing, like a `GridLayout` does.'
+        given : 'A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.'
             var ourLayout = new UniformGridLayout(rows, cols, 3, 4)
             ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)
             ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)
+            ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)
         and : 'Two panels carrying the same asymmetric border, one per layout manager.'
             var ours =
                     UI.panel()
@@ -244,10 +257,11 @@ class Grid_Layout_Invariance_Spec extends Specification
             tallest member, so that a layout manager which picks both values from
             the same child would show.
         """
-        given : 'A uniform grid layout which spreads its components over its rows and collapses nothing, like a `GridLayout` does.'
+        given : 'A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.'
             var ourLayout = new UniformGridLayout(rows, cols, 5, 3)
             ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)
             ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)
+            ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)
         and : 'Two panels with the same children and the same border, one per layout manager.'
             var ours =
                     UI.panel()
@@ -308,10 +322,11 @@ class Grid_Layout_Invariance_Spec extends Specification
             columns, and reports a negative width. The `UniformGridLayout` reports exactly
             the same, down to the negative number.
         """
-        given : 'A uniform grid layout which spreads its components over its rows and collapses nothing, like a `GridLayout` does.'
+        given : 'A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.'
             var ourLayout = new UniformGridLayout(rows, cols, 5, 3)
             ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)
             ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)
+            ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)
         and : 'Two empty panels with gaps of 5 horizontally and 3 vertically, one per layout manager.'
             var ours = UI.panel().withLayout(ourLayout).get(JPanel)
             var awts = UI.panel().withLayout(new GridLayout(rows, cols, 5, 3)).get(JPanel)
@@ -342,10 +357,11 @@ class Grid_Layout_Invariance_Spec extends Specification
             it still has to be the same, because a container passes through such sizes
             while a window is being shrunk.
         """
-        given : 'A uniform grid layout which spreads its components over its rows and collapses nothing, like a `GridLayout` does.'
+        given : 'A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.'
             var ourLayout = new UniformGridLayout(2, 3, 5, 5)
             ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)
             ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)
+            ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)
         and : 'Two panels holding a 2 by 3 grid with gaps of 5, one per layout manager.'
             var ours =
                     UI.panel()
@@ -386,10 +402,11 @@ class Grid_Layout_Invariance_Spec extends Specification
             keep that behaviour, because a grid in which components move around when
             one of them is hidden would be a different layout altogether.
         """
-        given : 'A uniform grid layout which spreads its components over its rows and collapses nothing, like a `GridLayout` does.'
+        given : 'A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, like a `GridLayout` does.'
             var ourLayout = new UniformGridLayout(2, 3, 5, 5)
             ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)
             ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)
+            ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)
         and : 'Two panels with five children, the second of which is hidden, one per layout manager.'
             var ours =
                     UI.panel()
@@ -433,10 +450,11 @@ class Grid_Layout_Invariance_Spec extends Specification
             uses the new values. Both layout managers start from their default here:
             a single row with a cell for every component and no gaps.
         """
-        given : 'A uniform grid layout which spreads its components over its rows and collapses nothing, and a JDK grid layout, both otherwise in their default configuration.'
+        given : 'A uniform grid layout which spreads its components over its rows, collapses nothing and grows by columns, and a JDK grid layout, both otherwise in their default configuration.'
             var ourLayout = new UniformGridLayout()
             ourLayout.setMode(UniformGridLayout.Mode.SPREAD_OVER_ROWS)
             ourLayout.setCollapseEmpty(UniformGridLayout.CollapseEmpty.NONE)
+            ourLayout.setOverflowGrowth(UniformGridLayout.OverflowGrowth.ADD_COLUMNS)
             var awtLayout = new GridLayout()
         and : 'Two panels with seven children, one per layout manager.'
             var ours =
@@ -521,5 +539,75 @@ class Grid_Layout_Invariance_Spec extends Specification
         then : 'it is rejected as well, with the same message.'
             var awtColumnsFailure = thrown(IllegalArgumentException)
             ourColumnsFailure.message == awtColumnsFailure.message
+    }
+
+    def 'Only `OverflowGrowth.ADD_COLUMNS` keeps an overflowing grid equivalent to a `GridLayout`.'(
+        UniformGridLayout.OverflowGrowth overflowGrowth, int rows, int cols, int components,
+        int rowsLaidOut, int columnsLaidOut, boolean matchesGridLayout
+    ) {
+        reportInfo """
+            Once a grid holds more components than its declared row count times its declared
+            column count, it has to make room, and a `GridLayout` only ever makes room in one
+            direction: it keeps its rows and widens itself. `ADD_COLUMNS` is the growth policy
+            which says exactly that, so it is the third setting the equivalence needs.
+
+            The other two policies are asked to make room on the other axis, and they do, which
+            means they part company with a `GridLayout` at the very component that overflows the
+            declared grid. That is not a defect of the equivalence but the point of the policy:
+            a grid of 3 rows and 2 columns holding 20 components stays 3 rows high and grows to
+            7 columns under `ADD_COLUMNS`, becomes 10 rows of 2 columns under `ADD_ROWS`, and
+            5 rows of 4 columns under `ADD_ROWS_AND_COLUMNS`.
+
+            The table therefore runs all three policies over grids which hold far more components
+            than the declared counts multiply to, and checks both directions: that `ADD_COLUMNS`
+            matches a `GridLayout` down to the last pixel, and that the other two really do differ.
+        """
+        given : 'A uniform grid layout which spreads its components over its rows, collapses nothing, and grows in the way the table asks for.'
+            var ourLayout = new UniformGridLayout(
+                                    UniformGridLayout.Mode.SPREAD_OVER_ROWS,
+                                    UniformGridLayout.CollapseEmpty.NONE,
+                                    overflowGrowth,
+                                    rows, cols, 5, 5
+                                )
+        and : 'Two panels with the same number of children, one per layout manager.'
+            var ours =
+                    UI.panel()
+                    .withLayout(ourLayout)
+                    .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })
+                    .get(JPanel)
+            var awts =
+                    UI.panel()
+                    .withLayout(new GridLayout(rows, cols, 5, 5))
+                    .apply({ ui -> (0..<components).each { ui.add(UI.box().withPrefSize(30, 20)) } })
+                    .get(JPanel)
+        expect : 'The uniform grid really does carry the growth setting from the table.'
+            ourLayout.getOverflowGrowth() == overflowGrowth
+        and : 'The panels really do hold more components than the declared numbers of rows and columns multiply to.'
+            components > rows * cols
+
+        when : 'Both are laid out at the same size,'
+            ours.setSize(230, 70)
+            ours.doLayout()
+            awts.setSize(230, 70)
+            awts.doLayout()
+            var ourBounds = (0..<components).collect { ours.getComponent(it).getBounds() }
+            var awtBounds = (0..<components).collect { awts.getComponent(it).getBounds() }
+        then : 'the grown grid is the one the table expects.'
+            [ourBounds.collect({ it.@y }).unique().size(), ourBounds.collect({ it.@x }).unique().size()] == [rowsLaidOut, columnsLaidOut]
+
+        and : 'only the policy which makes room the way a `GridLayout` makes room places every child where the JDK grid places it.'
+            (ourBounds == awtBounds) == matchesGridLayout
+        and : 'and only that policy asks for the same preferred and minimum size.'
+            (ours.getLayout().preferredLayoutSize(ours) == awts.getLayout().preferredLayoutSize(awts)) == matchesGridLayout
+            (ours.getLayout().minimumLayoutSize(ours) == awts.getLayout().minimumLayoutSize(awts)) == matchesGridLayout
+
+        where :
+            overflowGrowth                                        | rows | cols | components || rowsLaidOut | columnsLaidOut | matchesGridLayout
+            UniformGridLayout.OverflowGrowth.ADD_COLUMNS          | 2    | 5    | 13         || 2           | 7              | true
+            UniformGridLayout.OverflowGrowth.ADD_ROWS             | 2    | 5    | 13         || 3           | 5              | false
+            UniformGridLayout.OverflowGrowth.ADD_ROWS_AND_COLUMNS | 2    | 5    | 13         || 3           | 6              | false
+            UniformGridLayout.OverflowGrowth.ADD_COLUMNS          | 3    | 2    | 20         || 3           | 7              | true
+            UniformGridLayout.OverflowGrowth.ADD_ROWS             | 3    | 2    | 20         || 10          | 2              | false
+            UniformGridLayout.OverflowGrowth.ADD_ROWS_AND_COLUMNS | 3    | 2    | 20         || 5           | 4              | false
     }
 }

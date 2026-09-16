@@ -33,25 +33,32 @@ import java.util.Objects;
  *  <p>
  *  In the style API and in a reactive {@code Var<Layout>}, {@link swingtree.api.Layout#grid(int, int, int, int)}
  *  installs the same layout manager, and both {@code withGridLayout(..)} and {@code Layout.grid(..)}
- *  accept a {@link Mode} and a {@link CollapseEmpty} setting in front of the numbers of rows and
- *  columns. Outside of a SwingTree UI declaration, you install it like any other layout manager:
- *  {@code panel.setLayout(new UniformGridLayout(2, 3, 5, 5))}.
+ *  accept a {@link Mode}, a {@link CollapseEmpty} and an {@link OverflowGrowth} setting in front of
+ *  the numbers of rows and columns. Outside of a SwingTree UI declaration, you install it like any
+ *  other layout manager: {@code panel.setLayout(new UniformGridLayout(2, 3, 5, 5))}, or with every
+ *  setting spelled out through
+ *  {@link #UniformGridLayout(Mode, CollapseEmpty, OverflowGrowth, int, int, int, int)}.
  *
- *  <h2>The mode and the empty rows and columns</h2>
+ *  <h2>How the grid is built</h2>
  *
- *  You declare a number of rows and a number of columns, and two settings decide what
+ *  You declare a number of rows and a number of columns, and three settings decide what
  *  the layout makes of them:
  *  <ul>
  *      <li>
- *          The {@link Mode} decides how the grid is built. In the default mode,
- *          {@link Mode#WRAP_AFTER_COLUMNS}, a new row starts after every declared number of
- *          columns, and rows are added at the bottom when there are more components than cells:
- *          7 components in a grid of 2 rows and 3 columns are laid out in 3 rows. As long as the
- *          declared number of columns is greater than 0, the component at index {@code i} is
- *          therefore always in row {@code i / columns} and column {@code i % columns}, and adding
- *          a component never moves one of the components before it into another row or column.
- *          In the mode {@link Mode#SPREAD_OVER_ROWS}, the components are spread over the declared
- *          rows and the declared columns are ignored, which is what a {@link java.awt.GridLayout} does.
+ *          The {@link Mode} decides the shape of the grid while it still has a cell for every
+ *          component. In the default mode, {@link Mode#WRAP_AFTER_COLUMNS}, a new row starts after
+ *          every declared number of columns: 7 components in a grid of 2 rows and 3 columns are laid
+ *          out in 3 rows. In the mode {@link Mode#SPREAD_OVER_ROWS}, the components are spread over
+ *          the declared rows in as many columns as they need, which is what a
+ *          {@link java.awt.GridLayout} does.
+ *      </li>
+ *      <li>
+ *          The {@link OverflowGrowth} setting takes over once there are more components than the
+ *          declared number of rows times the declared number of columns, and decides on which axis
+ *          the grid makes room. By default, {@link OverflowGrowth#ADD_ROWS} adds rows at the bottom
+ *          and keeps the declared number of columns. Both modes cap a grid as soon as both declared
+ *          numbers are greater than 0, so this setting matters in both of them; only a number of 0
+ *          leaves an axis which grows as far as the components need and therefore never overflows.
  *      </li>
  *      <li>
  *          The {@link CollapseEmpty} setting decides which of the rows and columns that no component
@@ -64,7 +71,8 @@ import java.util.Objects;
  *  4 columns are laid out in 3 rows, and 10 components in a grid of 2 rows and 0 columns are laid
  *  out in 5 columns. The two numbers cannot both be 0, and negative numbers are not supported.
  *  <p>
- *  This is how a grid which is declared with 2 rows and 5 columns lays out 3, 8 and 11 components:
+ *  This is how a grid which is declared with 2 rows and 5 columns lays out 3, 8 and 11 components,
+ *  with the default {@link OverflowGrowth#ADD_ROWS}:
  *  <table class="striped">
  *    <caption>Rows × columns laid out for a grid declared with 2 rows and 5 columns</caption>
  *    <tr><th>Mode</th><th>CollapseEmpty</th><th>3 components</th><th>8 components</th><th>11 components</th></tr>
@@ -72,7 +80,19 @@ import java.util.Objects;
  *    <tr><td>{@code WRAP_AFTER_COLUMNS}</td><td>{@code COLUMNS}</td>         <td>2 × 3</td><td>2 × 5</td><td>3 × 5</td></tr>
  *    <tr><td>{@code WRAP_AFTER_COLUMNS}</td><td>{@code ROWS}</td>            <td>1 × 5</td><td>2 × 5</td><td>3 × 5</td></tr>
  *    <tr><td>{@code WRAP_AFTER_COLUMNS}</td><td>{@code NONE}</td>            <td>2 × 5</td><td>2 × 5</td><td>3 × 5</td></tr>
- *    <tr><td>{@code SPREAD_OVER_ROWS}</td>  <td>any of them</td>             <td>2 × 2</td><td>2 × 4</td><td>2 × 6</td></tr>
+ *    <tr><td>{@code SPREAD_OVER_ROWS}</td>  <td>any of them</td>             <td>2 × 2</td><td>2 × 4</td><td>3 × 5</td></tr>
+ *  </table>
+ *  Only the last column of that table holds more components than the declared 10 cells, so only
+ *  there does the {@link OverflowGrowth} setting make a difference, and there it makes the same
+ *  difference in both modes: once a grid overflows, the mode has nothing left to say and the growth
+ *  policy alone decides the shape. This is how the same grid of 2 rows and 5 columns grows for 11,
+ *  13, 20 and 30 components, in either mode and whichever rows and columns it collapses:
+ *  <table class="striped">
+ *    <caption>Rows × columns laid out for an overflowing grid declared with 2 rows and 5 columns</caption>
+ *    <tr><th>OverflowGrowth</th><th>11 components</th><th>13 components</th><th>20 components</th><th>30 components</th></tr>
+ *    <tr><td>{@code ADD_ROWS}</td>            <td>3 × 5</td><td>3 × 5</td><td>4 × 5</td> <td>6 × 5</td></tr>
+ *    <tr><td>{@code ADD_COLUMNS}</td>         <td>2 × 6</td><td>2 × 7</td><td>2 × 10</td><td>2 × 15</td></tr>
+ *    <tr><td>{@code ADD_ROWS_AND_COLUMNS}</td><td>2 × 6</td><td>3 × 6</td><td>3 × 7</td> <td>4 × 9</td></tr>
  *  </table>
  *  <ul>
  *      <li>
@@ -94,12 +114,13 @@ import java.util.Objects;
  *          cell. This mode never leaves a column empty, so collapsing empty columns moves no component,
  *          but it can leave rows empty: 2 components in a grid of 3 rows get 1 column and only fill
  *          2 of the 3 rows, and {@link CollapseEmpty#ROWS} leaves out the third one. At a UI scale
- *          factor of 1, a {@code UniformGridLayout} in this mode with {@link CollapseEmpty#NONE} lays out
- *          and measures a container exactly like a {@link java.awt.GridLayout} with the same numbers
- *          of rows and columns and the same gaps.
+ *          factor of 1, a {@code UniformGridLayout} in this mode, with {@link CollapseEmpty#NONE} and
+ *          {@link OverflowGrowth#ADD_COLUMNS}, lays out and measures a container exactly like a
+ *          {@link java.awt.GridLayout} with the same numbers of rows and columns and the same gaps.
  *      </li>
  *  </ul>
- *  You choose the settings with {@link #setMode(Mode)} and {@link #setCollapseEmpty(CollapseEmpty)}.
+ *  You choose the settings with {@link #setMode(Mode)}, {@link #setCollapseEmpty(CollapseEmpty)}
+ *  and {@link #setOverflowGrowth(OverflowGrowth)}.
  *
  *  <h2>The size of the cells</h2>
  *
@@ -160,47 +181,56 @@ public final class UniformGridLayout implements LayoutManager {
      *  Decides how the grid of a {@link UniformGridLayout} is built from the declared number of
      *  rows, the declared number of columns and the number of components in the container.
      *  In both modes, the grid is filled row by row, and a number of rows or columns of 0 means
-     *  "as many as the components need". The {@link CollapseEmpty} setting then decides which of
-     *  the rows and columns that no component occupies are left out.
+     *  "as many as the components need". The mode only shapes a grid which still has a cell for
+     *  every component; once there are more components than the declared numbers multiply to, the
+     *  {@link OverflowGrowth} setting decides the shape instead. The {@link CollapseEmpty} setting
+     *  then decides which of the rows and columns that no component occupies are left out.
      *  <p>
      *  This is how each mode builds a grid declared with 2 rows and 5 columns, as rows × columns,
      *  before any empty rows or columns are left out:
      *  <ul>
      *      <li>3 components: {@link #WRAP_AFTER_COLUMNS} 2 × 5, {@link #SPREAD_OVER_ROWS} 2 × 2</li>
      *      <li>8 components: {@link #WRAP_AFTER_COLUMNS} 2 × 5, {@link #SPREAD_OVER_ROWS} 2 × 4</li>
-     *      <li>11 components: {@link #WRAP_AFTER_COLUMNS} 3 × 5, {@link #SPREAD_OVER_ROWS} 2 × 6</li>
+     *      <li>11 components: both modes 3 × 5, because 11 components overflow the declared 10
+     *          cells and the default {@link OverflowGrowth#ADD_ROWS} takes the decision</li>
      *  </ul>
      *
      * @see UniformGridLayout#setMode(Mode)
      */
     public enum Mode {
         /**
-         *  A new row starts after every declared number of columns. The grid has the declared number
-         *  of columns and at least the declared number of rows, and rows are added at the bottom when
-         *  there are more components than cells. This is the default mode.
+         *  A new row starts after every declared number of columns, so the grid has the declared
+         *  number of columns and at least the declared number of rows. When there are more components
+         *  than cells, the {@link OverflowGrowth} setting decides whether the grid grows by rows,
+         *  by columns or by both. This is the default mode.
          *  <p>
-         *  A grid of 2 rows and 5 columns builds 2 rows of 5 columns for 8 components, and 3 rows of
-         *  5 columns for 11 components. As long as the declared number of columns is greater than 0,
-         *  the component at index {@code i} is always in row {@code i / columns} and column
-         *  {@code i % columns}, so adding a component never moves one of the components before it
-         *  into another row or column.
+         *  A grid of 2 rows and 5 columns builds 2 rows of 5 columns for 8 components, and, with the
+         *  default {@link OverflowGrowth#ADD_ROWS}, 3 rows of 5 columns for 11 components. While the
+         *  grid keeps its declared number of columns, the component at index {@code i} is always in
+         *  row {@code i / columns} and column {@code i % columns}, so adding a component never moves
+         *  one of the components before it into another row or column.
          *  <p>
          *  If the declared number of columns is 0, the grid gets as many columns as it takes to fit
-         *  the components into the declared number of rows.
+         *  the components into the declared number of rows, and can never overflow.
          */
         WRAP_AFTER_COLUMNS,
         /**
-         *  The components are spread over the declared number of rows, and the declared number of
-         *  columns is ignored whenever the number of rows is greater than 0. The grid gets as many
-         *  columns as it takes to fit all components into those rows.
+         *  The components are spread over the declared number of rows in as many columns as they
+         *  need, so the declared number of columns does not shape the grid. It still counts the
+         *  cells: once there are more components than the declared rows times the declared columns,
+         *  the {@link OverflowGrowth} setting decides whether the grid makes room by rows, by
+         *  columns or by both, exactly as it does in {@link #WRAP_AFTER_COLUMNS}.
          *  <p>
-         *  A grid of 2 rows and 5 columns builds 2 columns for 3 components, 4 columns for 8 components
-         *  and 6 columns for 11 components. A grid of 0 rows builds its declared number of columns, and
-         *  as many rows as its components need.
+         *  A grid of 2 rows and 5 columns builds 2 columns for 3 components and 4 columns for 8
+         *  components. Its 11th component overflows the declared 10 cells, and from there the growth
+         *  policy answers: 6 columns under {@link OverflowGrowth#ADD_COLUMNS}, a third row under the
+         *  default {@link OverflowGrowth#ADD_ROWS}. A grid of 0 rows builds its declared number of
+         *  columns, and as many rows as its components need.
          *  <p>
-         *  This is how the {@link java.awt.GridLayout} of the JDK lays out its components, so a
-         *  {@code UniformGridLayout} in this mode, with {@link CollapseEmpty#NONE}, can replace a
-         *  {@code GridLayout} without changing where any component ends up.
+         *  {@link OverflowGrowth#ADD_COLUMNS} is the policy which keeps widening the grid the way the
+         *  {@link java.awt.GridLayout} of the JDK does, so a {@code UniformGridLayout} in this mode,
+         *  with {@link CollapseEmpty#NONE} and that growth policy, can replace a {@code GridLayout}
+         *  without changing where any component ends up.
          */
         SPREAD_OVER_ROWS
     }
@@ -249,6 +279,71 @@ public final class UniformGridLayout implements LayoutManager {
         ROWS_AND_COLUMNS
     }
 
+    /**
+     *  Decides how the grid of a {@link UniformGridLayout} grows when a container holds more
+     *  components than the declared number of rows times the declared number of columns, so that
+     *  every component still gets a cell of its own.
+     *  <p>
+     *  A grid can overflow whenever its declared number of rows and its declared number of columns
+     *  are both greater than 0, in either {@link Mode}: both modes then have a fixed number of cells
+     *  to run out of. A number of rows or columns of 0 means "as many as the components need", which
+     *  leaves that axis free to grow on its own, so such a grid never overflows and this setting
+     *  never changes it.
+     *  <p>
+     *  The {@link Mode} shapes the grid up to that point and this setting shapes it from there on, so
+     *  two grids which differ only in their mode are laid out alike once both have overflowed. This is
+     *  how a grid declared with 2 rows and 5 columns, which has 10 cells, grows for 13 components, as
+     *  rows × columns: {@link #ADD_ROWS} 3 × 5, {@link #ADD_COLUMNS} 2 × 7 and
+     *  {@link #ADD_ROWS_AND_COLUMNS} 3 × 6. The grid grows before the {@link CollapseEmpty} setting
+     *  leaves out the rows and columns which no component occupies.
+     *
+     * @see UniformGridLayout#setOverflowGrowth(OverflowGrowth)
+     */
+    public enum OverflowGrowth {
+        /**
+         *  Rows are added at the bottom until every component has a cell, and the grid keeps its
+         *  declared number of columns. A grid of 2 rows and 5 columns lays out 13 components in
+         *  3 rows of 5 columns, and 30 components in 6 rows of 5 columns. This is the default.
+         *  <p>
+         *  In the mode {@link Mode#WRAP_AFTER_COLUMNS}, this is the only setting under which the
+         *  component at index {@code i} stays in row {@code i / columns} and column {@code i % columns}
+         *  however many components there are, so it is the only one under which adding a component
+         *  never moves one of the components before it into another row or column.
+         */
+        ADD_ROWS,
+        /**
+         *  Columns are added at the right until every component has a cell, and the grid keeps its
+         *  declared number of rows. A grid of 2 rows and 5 columns lays out 13 components in 2 rows
+         *  of 7 columns, and 30 components in 2 rows of 15 columns.
+         *  <p>
+         *  This is the one policy which keeps making room the way a {@link java.awt.GridLayout} makes
+         *  room, so it is the growth policy the mode {@link Mode#SPREAD_OVER_ROWS} needs, alongside
+         *  {@link CollapseEmpty#NONE}, to lay out components exactly like one. The mode still decides
+         *  the grid below the declared number of cells: with {@link Mode#WRAP_AFTER_COLUMNS} a grid of
+         *  2 rows and 5 columns lays out 3 components in 5 columns, and with
+         *  {@link Mode#SPREAD_OVER_ROWS} it lays them out in 2.
+         */
+        ADD_COLUMNS,
+        /**
+         *  Rows and columns are added one at a time, each time the one which keeps the ratio of rows
+         *  to columns closest to the declared ratio, until every component has a cell. The grid
+         *  therefore keeps its shape as closely as whole rows and columns allow, and so do its cells:
+         *  the container does not change size while the grid grows, so a cell of a grid of {@code r}
+         *  rows and {@code c} columns is {@code width / c} by {@code height / r} large, and holding
+         *  {@code r / c} at the declared ratio holds the shape of every cell as well.
+         *  <p>
+         *  A grid of 2 rows and 5 columns lays out 13 components in 3 rows of 6 columns, and 30
+         *  components in 4 rows of 9 columns. When the declared numbers scale up evenly, the ratio is
+         *  kept exactly and no cell is left over: a grid of 1 row and 4 columns lays out 400
+         *  components, 100 times its 4 cells, in exactly 10 rows of 40 columns.
+         *  <p>
+         *  Growing both numbers can leave more empty cells behind than {@link #ADD_ROWS} or
+         *  {@link #ADD_COLUMNS} do, because the last row of the grid is the one which absorbs the
+         *  difference: 13 components in 3 rows of 6 columns leave 5 cells of the last row empty.
+         */
+        ADD_ROWS_AND_COLUMNS
+    }
+
     int hgap;
     int vgap;
     int rows;
@@ -257,6 +352,8 @@ public final class UniformGridLayout implements LayoutManager {
     Mode mode = Mode.WRAP_AFTER_COLUMNS;
 
     CollapseEmpty collapseEmpty = CollapseEmpty.ROWS_AND_COLUMNS;
+
+    OverflowGrowth overflowGrowth = OverflowGrowth.ADD_ROWS;
 
     /**
      *  Creates a grid layout with a single row, a column for every component and no gaps,
@@ -305,6 +402,44 @@ public final class UniformGridLayout implements LayoutManager {
         this.cols = cols;
         this.hgap = hgap;
         this.vgap = vgap;
+    }
+
+    /**
+     *  Creates a grid layout with every one of its settings spelled out: how the grid is built from
+     *  the given numbers of rows and columns, how it grows when it holds more components than cells,
+     *  which of its empty rows and columns it leaves out, and the gaps between neighbouring cells.
+     *  The other constructors leave the three settings at {@link Mode#WRAP_AFTER_COLUMNS},
+     *  {@link CollapseEmpty#ROWS_AND_COLUMNS} and {@link OverflowGrowth#ADD_ROWS}.
+     *  <p>
+     *  For example,
+     *  {@code new UniformGridLayout(Mode.WRAP_AFTER_COLUMNS, CollapseEmpty.NONE, OverflowGrowth.ADD_COLUMNS, 2, 5, 5, 5)}
+     *  keeps all 10 cells of a grid of 2 rows and 5 columns for 3 components, and widens the grid to
+     *  2 rows of 7 columns for 13 components, with 5 pixels between neighbouring cells at a UI scale
+     *  factor of 1.
+     *
+     * @param mode How the grid is built from the numbers of rows and columns.
+     * @param collapseEmpty Which of the rows and columns that no component occupies are left out.
+     * @param overflowGrowth How the grid grows when it holds more components than cells.
+     * @param rows The number of rows, or 0 for as many rows as the components need.
+     * @param cols The number of columns, or 0 for as many columns as the components need.
+     * @param hgap The space between two neighbouring columns, in pixels at a UI scale factor of 1.
+     * @param vgap The space between two neighbouring rows, in pixels at a UI scale factor of 1.
+     * @throws IllegalArgumentException If both {@code rows} and {@code cols} are 0.
+     * @throws NullPointerException If {@code mode}, {@code collapseEmpty} or {@code overflowGrowth} is {@code null}.
+     */
+    public UniformGridLayout(
+        Mode           mode,
+        CollapseEmpty  collapseEmpty,
+        OverflowGrowth overflowGrowth,
+        int rows,
+        int cols,
+        int hgap,
+        int vgap
+    ) {
+        this(rows, cols, hgap, vgap);
+        this.mode           = Objects.requireNonNull(mode);
+        this.collapseEmpty  = Objects.requireNonNull(collapseEmpty);
+        this.overflowGrowth = Objects.requireNonNull(overflowGrowth);
     }
 
     /**
@@ -392,16 +527,18 @@ public final class UniformGridLayout implements LayoutManager {
     }
 
     /**
-     *  Sets the mode which decides how the grid is built from the declared numbers of rows and columns:
+     *  Sets the mode which decides how the grid is built from the declared numbers of rows and columns,
+     *  for as long as it still has a cell for every component:
      *  <ul>
-     *      <li>{@link Mode#WRAP_AFTER_COLUMNS}, the default, starts a new row after every declared number
-     *          of columns, and adds rows when there are more components than cells.</li>
-     *      <li>{@link Mode#SPREAD_OVER_ROWS} spreads the components over the declared rows, and ignores
-     *          the declared columns while the number of rows is greater than 0, like a
-     *          {@link java.awt.GridLayout}.</li>
+     *      <li>{@link Mode#WRAP_AFTER_COLUMNS}, the default, starts a new row after every declared
+     *          number of columns.</li>
+     *      <li>{@link Mode#SPREAD_OVER_ROWS} spreads the components over the declared rows in as many
+     *          columns as they need, like a {@link java.awt.GridLayout}.</li>
      *  </ul>
      *  A grid of 2 rows and 5 columns builds 2 rows of 5 columns for 8 components in the first mode,
-     *  and 2 rows of 4 columns in the second. The layout manager reads the mode every time it lays out
+     *  and 2 rows of 4 columns in the second. Once a grid holds more components than its declared
+     *  numbers multiply to, the mode no longer decides its shape and
+     *  {@link #setOverflowGrowth(OverflowGrowth)} does. The layout manager reads the mode every time it lays out
      *  or measures the container, but this method does not lay out the container again. Call
      *  {@link java.awt.Component#revalidate()} on the container to apply the new mode.
      *
@@ -440,6 +577,40 @@ public final class UniformGridLayout implements LayoutManager {
         this.collapseEmpty = Objects.requireNonNull(collapseEmpty);
     }
 
+    /**
+     *  Returns the setting which decides how the grid grows when the container holds more components
+     *  than cells. See {@link OverflowGrowth} for what each setting does, and for the grids which
+     *  can overflow at all.
+     *
+     * @return The setting of this layout, which is {@link OverflowGrowth#ADD_ROWS} unless you changed it.
+     */
+    public OverflowGrowth getOverflowGrowth() {
+        return overflowGrowth;
+    }
+
+    /**
+     *  Sets how the grid grows when the container holds more components than the declared number of
+     *  rows times the declared number of columns: {@link OverflowGrowth#ADD_ROWS}, which is the default,
+     *  {@link OverflowGrowth#ADD_COLUMNS}, or {@link OverflowGrowth#ADD_ROWS_AND_COLUMNS}, which keeps
+     *  the ratio of rows to columns as close to the declared ratio as whole rows and columns allow.
+     *  A grid of 2 rows and 5 columns lays out 13 components in 3 × 5, 2 × 7 and 3 × 6 rows × columns
+     *  with these settings.
+     *  <p>
+     *  This setting makes a difference in both modes, but only while the declared numbers of rows and
+     *  columns are both greater than 0, because a grid with a number of 0 grows that axis as far as the
+     *  components need and can therefore never hold more components than it has cells.
+     *  <p>
+     *  The layout manager reads the setting every time it lays out or measures the container, but
+     *  this method does not lay out the container again. Call {@link java.awt.Component#revalidate()}
+     *  on the container to apply the new setting.
+     *
+     * @param overflowGrowth How this layout grows a grid which holds more components than cells.
+     * @throws NullPointerException If {@code overflowGrowth} is {@code null}, in which case the setting stays as it was.
+     */
+    public void setOverflowGrowth(OverflowGrowth overflowGrowth) {
+        this.overflowGrowth = Objects.requireNonNull(overflowGrowth);
+    }
+
     private boolean collapsesEmptyColumns() {
         return collapseEmpty == CollapseEmpty.COLUMNS || collapseEmpty == CollapseEmpty.ROWS_AND_COLUMNS;
     }
@@ -448,26 +619,50 @@ public final class UniformGridLayout implements LayoutManager {
         return collapseEmpty == CollapseEmpty.ROWS || collapseEmpty == CollapseEmpty.ROWS_AND_COLUMNS;
     }
 
-    private int columnsFor(int ncomponents) {
+    private static final int ROW_COUNT    = 0;
+    private static final int COLUMN_COUNT = 1;
+
+    private int[] gridFor(int ncomponents) {
+        int nrows = rows;
         int ncols = cols;
-        if (rows > 0 && (mode == Mode.SPREAD_OVER_ROWS || cols <= 0)) {
+        if (rows > 0 && cols > 0) {
+            if ((long) rows * cols < ncomponents) {
+                switch (overflowGrowth) {
+                    case ADD_COLUMNS:
+                        ncols = (ncomponents + rows - 1) / rows;
+                        break;
+                    case ADD_ROWS_AND_COLUMNS:
+                        while ((long) nrows * ncols < ncomponents) {
+                            long withOneMoreRow    = Math.abs((long) (nrows + 1) * cols - (long) rows * ncols) * (ncols + 1);
+                            long withOneMoreColumn = Math.abs((long) nrows * cols - (long) rows * (ncols + 1)) * ncols;
+                            if (withOneMoreRow <= withOneMoreColumn) {
+                                nrows++;
+                            } else {
+                                ncols++;
+                            }
+                        }
+                        break;
+                    default:
+                        nrows = (ncomponents + cols - 1) / cols;
+                }
+            } else if (mode == Mode.SPREAD_OVER_ROWS) {
+                ncols = (ncomponents + rows - 1) / rows;
+            }
+        } else if (rows > 0) {
             ncols = (ncomponents + rows - 1) / rows;
+        } else {
+            nrows = ncols > 0 ? (ncomponents + ncols - 1) / ncols : 0;
         }
         if (collapsesEmptyColumns()) {
-            return Math.max(Math.min(ncols, ncomponents), 1);
+            ncols = Math.max(Math.min(ncols, ncomponents), 1);
         }
-        return ncols;
-    }
-
-    private int rowsFor(int ncomponents) {
-        int ncols = columnsFor(ncomponents);
         if (collapsesEmptyRows()) {
-            return ncols > 0 ? Math.max((ncomponents + ncols - 1) / ncols, 1) : 1;
+            nrows = ncols > 0 ? Math.max((ncomponents + ncols - 1) / ncols, 1) : 1;
         }
-        if (rows > 0 && (ncols <= 0 || (long) rows * ncols >= ncomponents)) {
-            return rows;
-        }
-        return (ncomponents + ncols - 1) / ncols;
+        int[] grid = new int[2];
+        grid[ROW_COUNT]    = nrows;
+        grid[COLUMN_COUNT] = ncols;
+        return grid;
     }
 
     /**
@@ -582,8 +777,9 @@ public final class UniformGridLayout implements LayoutManager {
       synchronized (parent.getTreeLock()) {
         Insets insets = parent.getInsets();
         int ncomponents = parent.getComponentCount();
-        int nrows = rowsFor(ncomponents);
-        int ncols = columnsFor(ncomponents);
+        int[] grid = gridFor(ncomponents);
+        int nrows = grid[ROW_COUNT];
+        int ncols = grid[COLUMN_COUNT];
         int horizontalGap = UI.scale(hgap);
         int verticalGap = UI.scale(vgap);
         int w = 0;
@@ -627,8 +823,9 @@ public final class UniformGridLayout implements LayoutManager {
       synchronized (parent.getTreeLock()) {
         Insets insets = parent.getInsets();
         int ncomponents = parent.getComponentCount();
-        int nrows = rowsFor(ncomponents);
-        int ncols = columnsFor(ncomponents);
+        int[] grid = gridFor(ncomponents);
+        int nrows = grid[ROW_COUNT];
+        int ncols = grid[COLUMN_COUNT];
         int horizontalGap = UI.scale(hgap);
         int verticalGap = UI.scale(vgap);
         int w = 0;
@@ -654,10 +851,11 @@ public final class UniformGridLayout implements LayoutManager {
      *  The grid has the declared numbers of rows and columns, with these exceptions:
      *  <ul>
      *      <li>A number of rows or columns of 0 is worked out from the number of components.</li>
-     *      <li>In the mode {@link Mode#WRAP_AFTER_COLUMNS}, rows are added until all components have
-     *          a cell, when there are more components than cells.</li>
      *      <li>In the mode {@link Mode#SPREAD_OVER_ROWS}, while the number of rows is greater than 0,
      *          the number of columns is worked out from the number of rows and the number of components.</li>
+     *      <li>When there are more components than the declared number of rows times the declared
+     *          number of columns, the grid grows on the axis the {@link OverflowGrowth} setting names,
+     *          in either mode.</li>
      *      <li>The rows and columns which no component occupies are then left out, as far as the
      *          {@link CollapseEmpty} setting says so.</li>
      *  </ul>
@@ -683,8 +881,9 @@ public final class UniformGridLayout implements LayoutManager {
         if (ncomponents == 0) {
             return;
         }
-        int nrows = rowsFor(ncomponents);
-        int ncols = columnsFor(ncomponents);
+        int[] grid = gridFor(ncomponents);
+        int nrows = grid[ROW_COUNT];
+        int ncols = grid[COLUMN_COUNT];
         int horizontalGap = UI.scale(hgap);
         int verticalGap = UI.scale(vgap);
         // 4370316. To position components in the center we should:
@@ -725,16 +924,17 @@ public final class UniformGridLayout implements LayoutManager {
 
     /**
      *  Returns the declared settings of this layout manager in a line of text, for example
-     *  {@code swingtree.layout.UniformGridLayout[hgap=5,vgap=5,rows=2,cols=5,mode=WRAP_AFTER_COLUMNS,collapseEmpty=ROWS_AND_COLUMNS]}.
+     *  {@code swingtree.layout.UniformGridLayout[hgap=5,vgap=5,rows=2,cols=5,mode=WRAP_AFTER_COLUMNS,collapseEmpty=ROWS_AND_COLUMNS,overflowGrowth=ADD_ROWS]}.
      *  The gaps in it are the declared gaps, not the scaled ones.
      *
-     * @return A text with the class name, the gaps, the numbers of rows and columns, the mode and
-     *         which empty rows and columns are left out.
+     * @return A text with the class name, the gaps, the numbers of rows and columns, the mode,
+     *         which empty rows and columns are left out, and how the grid grows when it overflows.
      */
     @Override
     public String toString() {
         return getClass().getName() + "[hgap=" + hgap + ",vgap=" + vgap +
                                        ",rows=" + rows + ",cols=" + cols +
-                                       ",mode=" + mode + ",collapseEmpty=" + collapseEmpty + "]";
+                                       ",mode=" + mode + ",collapseEmpty=" + collapseEmpty +
+                                       ",overflowGrowth=" + overflowGrowth + "]";
     }
 }
