@@ -1738,17 +1738,18 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     }
 
     /**
-     *  Use this to set a {@link GridLayout} for the component wrapped by this builder. <br>
-     *  This is in essence a more convenient way than the alternative usage pattern involving
-     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
+     *  Use this to set a {@link UniformGridLayout} with a single row and no gaps for the component
+     *  wrapped by this builder, which places all children side by side in cells of equal width: <br>
      *  <pre>{@code
-     *      UI.panel()
-     *      .peek( panel -> panel.setLayout(new GridLayout()) );
+     *      UI.panel().withGridLayout()
+     *      .add(UI.button("Back")).add(UI.button("Next")).add(UI.button("Finish"))
      *  }</pre>
+     *  Here, each of the three buttons gets a third of the width of the panel, and its full height.
+     *  This is the same as {@code withGridLayout(1, 0)}.
      *
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withGridLayout() { return this.withLayout(new GridLayout()); }
+    public final I withGridLayout() { return this.withLayout(new UniformGridLayout()); }
 
     /**
      *  Use this to set a new {@link GridBagLayout} for the component wrapped by this builder. <br>
@@ -1768,37 +1769,125 @@ public abstract class UIForAnySwing<I, C extends JComponent> extends UIForAnythi
     public final I withGridBagLayout() { return this.withLayout(new GridBagLayout()); }
 
     /**
-     *  Use this to set a {@link GridLayout} for the component wrapped by this builder. <br>
-     *  This is in essence a more convenient way than the alternative usage pattern involving
-     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
+     *  Use this to set a {@link UniformGridLayout} with the given numbers of rows and columns and no gaps
+     *  for the component wrapped by this builder. It divides the component into cells of equal size and
+     *  fills them with the children row by row: <br>
      *  <pre>{@code
-     *      UI.panel()
-     *      .peek( panel -> panel.setLayout(new GridLayout(rows, cols)) );
+     *      UI.panel().withGridLayout(2, 3)
+     *      .add(UI.button("1")).add(UI.button("2")).add(UI.button("3"))
+     *      .add(UI.button("4"))
      *  }</pre>
+     *  Here, the buttons 1, 2 and 3 fill the top row and the button 4 starts the bottom row.
+     *  <p>
+     *  A new row starts after every {@code cols} children, and rows are added when there are more
+     *  children than cells. The rows and columns which no child occupies are left out, so the
+     *  children share the whole component: with only the buttons 1 and 2, the panel shows them side by
+     *  side, each half as wide as the panel and as high as the whole panel. Because of that, {@code rows} only makes a
+     *  difference while {@code cols} is 0. A number of 0 means "as many as the children need".
+     *  Use {@link #withGridLayout(UniformGridLayout.Mode, UniformGridLayout.CollapseEmpty, int, int)}
+     *  to choose other settings, for example the behaviour of a {@link GridLayout}.
      *
-     * @param rows The number of rows in the grid.
-     * @param cols The number of columns in the grid.
+     * @param rows The number of rows, or 0 for as many rows as the children need.
+     * @param cols The number of columns, or 0 for as many columns as the children need.
      * @return This very instance, which enables builder-style method chaining.
      */
-    public final I withGridLayout( int rows, int cols ) { return this.withLayout(new GridLayout(rows, cols)); }
+    public final I withGridLayout( int rows, int cols ) { return this.withLayout(new UniformGridLayout(rows, cols)); }
 
     /**
-     *  Use this to set a {@link GridLayout} for the component wrapped by this builder. <br>
-     *  This is in essence a more convenient way than the alternative usage pattern involving
-     *  the {@link #peek(Peeker)} method to peek into the builder's component like so: <br>
+     *  Use this to set a {@link UniformGridLayout} with the given numbers of rows and columns and the
+     *  given gaps between neighbouring cells for the component wrapped by this builder. <br>
      *  <pre>{@code
-     *      UI.panel()
-     *      .peek( panel -> panel.setLayout(new GridLayout(rows, cols, hgap, vgap)) );
+     *      UI.panel().withGridLayout(2, 3, 12, 8)
+     *      .add(UI.button("1")).add(UI.button("2")).add(UI.button("3"))
+     *      .add(UI.button("4"))
      *  }</pre>
+     *  Here, the buttons 1, 2 and 3 fill the top row with 12 pixels between neighbouring buttons,
+     *  and the button 4 starts the bottom row, 8 pixels below the button 1.
+     *  <p>
+     *  The gaps are declared for a UI scale factor of 1, and scaled by the current UI scale factor
+     *  every time the component is laid out, so the 12 pixels above become 24 pixels at a scale factor
+     *  of 2. The grid is built like the one of {@link #withGridLayout(int, int)}.
+     *  Use {@link #withGridLayout(UniformGridLayout.Mode, UniformGridLayout.CollapseEmpty, int, int, int, int)}
+     *  to choose other settings.
      *
-     * @param rows The number of rows in the grid.
-     * @param cols The number of columns in the grid.
-     * @param hgap The horizontal gap between cells.
-     * @param vgap The vertical gap between cells.
+     * @param rows The number of rows, or 0 for as many rows as the children need.
+     * @param cols The number of columns, or 0 for as many columns as the children need.
+     * @param hgap The space between neighbouring columns, in pixels at a UI scale factor of 1.
+     * @param vgap The space between neighbouring rows, in pixels at a UI scale factor of 1.
      * @return This very instance, which enables builder-style method chaining.
      */
     public final I withGridLayout( int rows, int cols, int hgap, int vgap ) {
-        return this.withLayout(new GridLayout(rows, cols, hgap, vgap));
+        return this.withLayout(new UniformGridLayout(rows, cols, hgap, vgap));
+    }
+
+    /**
+     *  Use this to set a {@link UniformGridLayout} with the given settings and numbers of rows and
+     *  columns, and no gaps, for the component wrapped by this builder. <br>
+     *  The {@code mode} decides how the grid is built from the numbers of rows and columns, and
+     *  {@code collapseEmpty} decides which of the rows and columns that no child occupies are left out:
+     *  <pre>{@code
+     *      UI.panel()
+     *      .withGridLayout(UniformGridLayout.Mode.SPREAD_OVER_ROWS, UniformGridLayout.CollapseEmpty.NONE, 2, 5)
+     *  }</pre>
+     *  This panel lays out its children exactly like a {@link GridLayout} with 2 rows and 5 columns
+     *  does, and with {@code UniformGridLayout.Mode.WRAP_AFTER_COLUMNS} instead, 3 children would take
+     *  the first 3 cells of a grid of 2 rows and 5 columns. See {@link UniformGridLayout.Mode} and
+     *  {@link UniformGridLayout.CollapseEmpty} for what each setting does.
+     *
+     * @param mode How the grid is built from the numbers of rows and columns.
+     * @param collapseEmpty Which of the rows and columns that no child occupies are left out.
+     * @param rows The number of rows, or 0 for as many rows as the children need.
+     * @param cols The number of columns, or 0 for as many columns as the children need.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException If {@code mode} or {@code collapseEmpty} is {@code null}.
+     */
+    public final I withGridLayout(
+        UniformGridLayout.Mode          mode,
+        UniformGridLayout.CollapseEmpty collapseEmpty,
+        int rows,
+        int cols
+    ) {
+        return withGridLayout(mode, collapseEmpty, rows, cols, 0, 0);
+    }
+
+    /**
+     *  Use this to set a {@link UniformGridLayout} with the given settings, numbers of rows and columns
+     *  and gaps for the component wrapped by this builder. <br>
+     *  The {@code mode} decides how the grid is built from the numbers of rows and columns, and
+     *  {@code collapseEmpty} decides which of the rows and columns that no child occupies are left out:
+     *  <pre>{@code
+     *      UI.panel()
+     *      .withGridLayout(UniformGridLayout.Mode.WRAP_AFTER_COLUMNS, UniformGridLayout.CollapseEmpty.ROWS, 0, 4, 5, 5)
+     *  }</pre>
+     *  This panel starts a new row after every 4 children, keeps 4 columns of the same width even for
+     *  fewer children, and is only as many rows high as its children fill. The gaps are declared for a
+     *  UI scale factor of 1 and scaled by the current UI scale factor every time the component is laid out.
+     *  See {@link UniformGridLayout.Mode} and {@link UniformGridLayout.CollapseEmpty} for what each
+     *  setting does.
+     *
+     * @param mode How the grid is built from the numbers of rows and columns.
+     * @param collapseEmpty Which of the rows and columns that no child occupies are left out.
+     * @param rows The number of rows, or 0 for as many rows as the children need.
+     * @param cols The number of columns, or 0 for as many columns as the children need.
+     * @param hgap The space between neighbouring columns, in pixels at a UI scale factor of 1.
+     * @param vgap The space between neighbouring rows, in pixels at a UI scale factor of 1.
+     * @return This very instance, which enables builder-style method chaining.
+     * @throws IllegalArgumentException If {@code mode} or {@code collapseEmpty} is {@code null}.
+     */
+    public final I withGridLayout(
+        UniformGridLayout.Mode          mode,
+        UniformGridLayout.CollapseEmpty collapseEmpty,
+        int rows,
+        int cols,
+        int hgap,
+        int vgap
+    ) {
+        NullUtil.nullArgCheck( mode, "mode", UniformGridLayout.Mode.class );
+        NullUtil.nullArgCheck( collapseEmpty, "collapseEmpty", UniformGridLayout.CollapseEmpty.class );
+        UniformGridLayout layout = new UniformGridLayout(rows, cols, hgap, vgap);
+        layout.setMode(mode);
+        layout.setCollapseEmpty(collapseEmpty);
+        return this.withLayout(layout);
     }
 
     /**
