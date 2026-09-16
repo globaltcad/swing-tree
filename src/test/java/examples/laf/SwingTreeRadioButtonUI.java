@@ -4,6 +4,7 @@ import swingtree.api.laf.SwingTreeStyledComponentUI;
 import swingtree.style.ComponentStyleDelegate;
 
 import javax.swing.JComponent;
+import javax.swing.LookAndFeel;
 import javax.swing.AbstractButton;
 import javax.swing.plaf.ComponentUI;
 import javax.swing.plaf.basic.BasicRadioButtonUI;
@@ -27,14 +28,9 @@ public final class SwingTreeRadioButtonUI
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        // Swing's own fill has to go only when a style rule paints one in its place, or it would
-        // show through the rounded corners and the grain of that rule. A blank preset paints none.
-        if ( _theme.styles(c.getClass()) ) {
-            AbstractButton b = (AbstractButton) c;
-            b.setContentAreaFilled(false);
-            b.setRolloverEnabled(true);
-            b.setFocusPainted(false);
-        }
+        // A style rule shows the pointer, so the model has to track it. Installed rather than set,
+        // so that the next look and feel can take it back and one the application set stands.
+        LookAndFeel.installProperty(c, "rolloverEnabled", _theme.styles(c.getClass()));
         _theme.installStyleOn(c);
     }
 
