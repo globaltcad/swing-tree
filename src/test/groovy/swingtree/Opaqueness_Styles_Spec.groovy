@@ -1821,6 +1821,227 @@ class Opaqueness_Styles_Spec extends Specification
             scrollPane.getViewport().isOpaque() == true
     }
 
+    def 'A scroll pane without a style paints the same borders as a plain Swing scroll pane.'()
+    {
+        reportInfo """
+
+            The opaqueness of a viewport is not merely a repaint optimization.
+            Under some look and feels it decides whether a scroll pane is drawn
+            with one border or with two.
+
+            Nimbus turns every scroll pane it creates non-opaque while keeping the
+            viewport inside it opaque. A style engine which read the opaqueness of a
+            scroll pane as permission to take the flag away from its viewport would
+            therefore change how every scroll pane looks, including the ones
+            carrying no style at all.
+
+            Nimbus draws two borders around the contents of a scroll pane: the border of
+            the scroll pane itself, and a second one which `JScrollPane` paints around the
+            viewport before the viewport gets to paint. In Nimbus that second border is
+            drawn with zero insets, which means it occupies exactly the pixels the viewport
+            then covers again. An opaque viewport therefore paints the second border away,
+            and the user only ever sees one.
+
+            A viewport which loses its opaqueness stops covering those pixels, and the
+            second border becomes visible as a thin frame a few pixels inside the first one.
+            So a scroll pane without a style has to paint exactly the borders
+            a plain Swing scroll pane paints, no more.
+
+        """
+        given : """
+            We first create some helper closures to scan rendered pixels:
+            
+            The 'luminanceOf' determines the perceived brightness of a packed RGB pixel, on the same 0 to 255 scale as
+            its color channels. The weights are the usual ones for converting color to gray.
+            
+            This is used by 'verticalLinesCrossedAtTheMiddleOf', which
+            counts how many separate vertical lines a horizontal scan through the middle of the
+            given image crosses, where a line is an uninterrupted run of pixels which are clearly
+            darker than the brightest pixel of that same scan row.
+            A border drawn around a rectangular component contributes one line on the left
+            and one on the right, so a single border yields a count of two.
+        """
+            var luminanceOf = ( int rgb )->{
+                int red   = ( rgb >> 16 ) & 0xFF
+                int green = ( rgb >>  8 ) & 0xFF
+                int blue  =   rgb         & 0xFF
+                return Math.round(( red * 299 + green * 587 + blue * 114 ) / 1000)
+            }
+            var verticalLinesCrossedAtTheMiddleOf = ( BufferedImage image )->{
+                int y = (int) ( image.getHeight() / 2 )
+                int brightest = 0
+                for ( int x = 0; x < image.getWidth(); x++ )
+                    brightest = Math.max(brightest, luminanceOf(image.getRGB(x, y)))
+                int lines = 0
+                boolean insideLine = false
+                for ( int x = 0; x < image.getWidth(); x++ ) {
+                    boolean isDark = luminanceOf(image.getRGB(x, y)) < brightest - 40
+                    if ( isDark && !insideLine )
+                        lines += 1
+                    insideLine = isDark
+                }
+                return lines
+            }
+        and : 'We switch to the Nimbus look and feel:'
+            UI.runNow(()->{
+                for ( UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels() )
+                    if ( "Nimbus" == info.getName() )
+                        UIManager.setLookAndFeel(info.getClassName())
+            })
+            UI.sync()
+        and : 'A panel holding an unstyled SwingTree scroll pane:'
+            var declaredPage =
+                    UI.panel("fill, insets 10").withPrefSize(200, 120)
+                    .add("grow", UI.scrollPane())
+                    .get(JPanel)
+        and : 'A plain Swing panel holding a plain Swing scroll pane, built to look the same:'
+            var plainSwingPage = UI.runAndGet(()->{
+                var page = new JPanel(new BorderLayout())
+                page.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10))
+                page.add(new JScrollPane(), BorderLayout.CENTER)
+                return page
+            })
+
+        when : 'We give both pages the same size and lay them out, just like a window would:'
+            UI.runNow({
+                declaredPage.setSize(200, 120)
+                plainSwingPage.setSize(200, 120)
+                layOutRecursively(declaredPage)
+                layOutRecursively(plainSwingPage)
+            })
+        and : """
+                We paint both of them onto a white canvas and count how many separate
+                vertical lines a horizontal scan through the middle of each page crosses.
+                Every border around the scroll pane contributes one line on the left
+                and one on the right.
+        """
+            var declaredBorderLines = verticalLinesCrossedAtTheMiddleOf(paintOnto(declaredPage, Color.WHITE))
+            var plainSwingBorderLines = verticalLinesCrossedAtTheMiddleOf(paintOnto(plainSwingPage, Color.WHITE))
+
+        then : 'Plain Swing shows a single border, so the scan crosses one line on each side:'
+            plainSwingBorderLines == 2
+        and : """
+                And the declared scroll pane shows the very same thing.
+                A count of 4 here means the viewport border resurfaced
+                and the user sees a second border inside the first one.
+        """
+            declaredBorderLines == plainSwingBorderLines
+    }
+
+    def 'What a scroll pane style paints decides if the viewport may stay opaque.'(
+        boolean scrollPaneIsOpaque, boolean viewportIsOpaque, Styler<JScrollPane> styler
+    ) {
+        reportInfo """
+
+            A scroll pane is not a single component, it is two of them.
+            There is the scroll pane, which draws the frame and the scroll bars,
+            and inside it there is a viewport, a second component which holds your
+            content and covers the entire interior of the scroll pane.
+            Whatever the style of the scroll pane paints in that interior is painted
+            first, and the viewport is painted on top of it afterwards.
+
+            Both of these components carry an opaqueness flag, and in Swing that flag
+            is a promise: flagging a component as opaque states that it fills every
+            single pixel of its own bounds with something solid. Swing relies on that
+            promise in two separate ways, and each of them can go wrong.
+
+            The first way is visual. A viewport fills its bounds with one flat
+            background color and nothing else. So when the style of the scroll pane
+            paints a gradient, a noise, an image, a shadow or a custom painting into
+            the interior, an opaque viewport covers all of it with that flat color,
+            and none of it ever reaches the screen. Rounded corners disappear the same
+            way, because the viewport is a rectangle and its corners extend past the
+            rounded edge of the interior. A filter applied to the parent disappears
+            too, because its blurred result is drawn into the background of the scroll
+            pane, which is once again underneath the viewport.
+
+            The second way is performance, and it pulls in the opposite direction.
+            Whenever a component repaints itself, Swing walks up the component
+            hierarchy until it finds the nearest ancestor flagged as opaque, and then
+            repaints everything from there downwards. An opaque viewport ends that
+            walk immediately, so a small change inside the scroll pane stays a small
+            repaint. If the viewport is not flagged as opaque, the walk continues past
+            it into the scroll pane and possibly beyond, and every single change inside
+            the scroll pane costs more to draw than it needs to. This is why the flag
+            should be kept whenever keeping it is safe.
+
+            That second way is also what the rows with a foreground painting are about.
+            Painting on the foreground layer happens after the viewport has been drawn,
+            so an opaque viewport cannot cover it up. It can still freeze it though:
+            because the repaint walk stops at the viewport, the scroll pane is never
+            asked to paint again, and the foreground painting stays on screen exactly
+            as it was while the content underneath it scrolls and changes. So the
+            viewport must not be flagged as opaque in this case either.
+
+            Putting all of this together explains why the two flags in the table below
+            are not copies of one another: the two components cover different areas.
+            The scroll pane is flagged as opaque only when it fills all of its own
+            bounds, and a margin or a translucent border is enough to break that.
+            Neither of those two reaches the interior though, so the interior remains a
+            single flat color and the viewport on top of it can stay opaque. A scroll
+            pane with a margin is therefore not opaque while its viewport still is.
+            A fully opaque gradient is the reverse case: the scroll pane does fill every
+            pixel it owns and stays opaque, and yet the flag has to be taken from the
+            viewport, because otherwise the gradient underneath it would not be visible.
+
+        """
+        given : 'A scroll pane styled by the supplied styler:'
+            var scrollPane =
+                    UI.scrollPane()
+                    .withStyle(styler)
+                    .add(UI.panel())
+                    .get(JScrollPane)
+        and : """
+            We add it to a panel, because a component is first handed to the
+            style engine when it becomes part of a larger declaration.
+        """
+            UI.panel("fill, insets 10").add("grow", UI.of(scrollPane)).get(JPanel)
+
+        expect : 'The scroll pane is opaque only if it fills every pixel of its own bounds:'
+            scrollPane.isOpaque() == scrollPaneIsOpaque
+        and : """
+                And the viewport is opaque only if filling the interior with one flat
+                color produces the same picture as letting the style paint it.
+        """
+            scrollPane.getViewport().isOpaque() == viewportIsOpaque
+
+        where : 'We use the following styles and expected opaqueness flags:'
+            scrollPaneIsOpaque | viewportIsOpaque | styler
+
+            // Nothing at all, and plain flat background colors:
+            true               | true             | {it}
+            true               | true             | {it.backgroundColor(new Color(20, 200, 100, 255))}
+            false              | false            | {it.backgroundColor(new Color(20, 200, 100, 128))}
+            false              | false            | {it.backgroundColor(UI.Color.TRANSPARENT)}
+
+            // Space given away around the interior, which the viewport never covers:
+            true               | true             | {it.padding(10).backgroundColor(new Color(20, 200, 100, 255))}
+            false              | true             | {it.margin(10).backgroundColor(new Color(20, 200, 100, 255))}
+            false              | true             | {it.margin(10)}
+            true               | true             | {it.foundationColor(Color.ORANGE)}
+
+            // Borders, which live outside the viewport unless they round the corners off:
+            true               | true             | {it.border(3, Color.BLACK)}
+            false              | true             | {it.border(3, new Color(0, 0, 0, 100))}
+            false              | false            | {it.borderRadius(24)}
+            false              | false            | {it.borderRadius(24).backgroundColor(new Color(20, 200, 100, 255))}
+
+            // Everything the style paints underneath the children of the scroll pane:
+            true               | false            | {it.gradient(g -> g.colors(Color.BLUE, Color.GREEN))}
+            true               | false            | {it.gradient(g -> g.colors(Color.BLUE, new Color(0, 0, 0, 0)))}
+            true               | false            | {it.noise(n -> n.function(UI.NoiseType.STOCHASTIC).colors(Color.RED, Color.BLUE))}
+            true               | false            | {it.image(i -> i.primer(Color.PINK))}
+            true               | false            | {it.painter(UI.Layer.BACKGROUND, g -> g.fillRect(0, 0, 10, 10))}
+            true               | false            | {it.painter(UI.Layer.CONTENT, g -> g.fillRect(0, 0, 10, 10))}
+            true               | false            | {it.shadow("dark", s -> s.color(new Color(0, 0.1f, 0.2f, 0.15f)).offset(4)).shadowBlurRadius(13).shadowIsInset(true)}
+            true               | false            | {it.shadow("dark", s -> s.color(new Color(0, 0, 0, 80)).offset(6)).shadowBlurRadius(8)}
+            true               | false            | {it.parentFilter(f -> f.blur(8))}
+
+            // And everything it paints on top of them, which an opaque viewport would keep Swing from refreshing:
+            false              | false            | {it.painter(UI.Layer.FOREGROUND, g -> g.fillRect(0, 0, 10, 10))}
+            true               | false            | {it.gradient(UI.Layer.FOREGROUND, "fg", g -> g.colors(Color.RED, Color.BLUE))}
+    }
+
     def 'A component which reports itself as opaque, paints every single one of its pixels.'()
     {
         reportInfo """
