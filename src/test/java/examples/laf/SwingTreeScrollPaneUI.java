@@ -25,7 +25,11 @@ public final class SwingTreeScrollPaneUI
         extends    BasicScrollPaneUI
         implements SwingTreeStyledComponentUI<JScrollPane>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeScrollPaneUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeScrollPaneUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeScrollPaneUI(SwingTreeLookAndFeel.installedTheme()); }
 
     /** The component this scroll pane scrolls, whose focus it repaints on, or null before it has one. */
     private @Nullable Component _trackedView = null;
@@ -40,7 +44,7 @@ public final class SwingTreeScrollPaneUI
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
         JViewport viewport = scrollpane.getViewport();
         if ( viewport != null )
             viewport.addContainerListener(_viewTracker);
@@ -88,6 +92,6 @@ public final class SwingTreeScrollPaneUI
 
     @Override
     public ComponentStyleDelegate<JScrollPane> style( ComponentStyleDelegate<JScrollPane> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 }

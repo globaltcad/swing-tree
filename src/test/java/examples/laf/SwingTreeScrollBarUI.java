@@ -28,19 +28,23 @@ public final class SwingTreeScrollBarUI
         extends    BasicScrollBarUI
         implements SwingTreeStyledComponentUI<JScrollBar>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeScrollBarUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeScrollBarUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeScrollBarUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
     }
 
     @Override
     public Dimension getPreferredSize( JComponent c ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             return super.getPreferredSize(c);
-        int t = UI.scale(SwingTreeLookAndFeel.symbols().scrollBarThickness());
+        int t = UI.scale(_theme.symbols().scrollBarThickness());
         return scrollbar.getOrientation() == JScrollBar.VERTICAL
                 ? new Dimension(t, t * 4)
                 : new Dimension(t * 4, t);
@@ -76,15 +80,15 @@ public final class SwingTreeScrollBarUI
      *         stepper when the symbol set has them, and otherwise one taking up no space
      */
     private JButton endButton( int direction, Supplier<JButton> basic ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             return basic.get();
-        if ( !SwingTreeLookAndFeel.symbols().scrollBarHasSteppers() )
+        if ( !_theme.symbols().scrollBarHasSteppers() )
             return zeroButton();
         switch ( direction ) {
-            case SwingConstants.NORTH: return new StepperButton(LafUtilities.Direction.UP);
-            case SwingConstants.SOUTH: return new StepperButton(LafUtilities.Direction.DOWN);
-            case SwingConstants.WEST:  return new StepperButton(LafUtilities.Direction.LEFT);
-            default:                   return new StepperButton(LafUtilities.Direction.RIGHT);
+            case SwingConstants.NORTH: return new StepperButton(_theme, LafUtilities.Direction.UP);
+            case SwingConstants.SOUTH: return new StepperButton(_theme, LafUtilities.Direction.DOWN);
+            case SwingConstants.WEST:  return new StepperButton(_theme, LafUtilities.Direction.LEFT);
+            default:                   return new StepperButton(_theme, LafUtilities.Direction.RIGHT);
         }
     }
 
@@ -96,19 +100,19 @@ public final class SwingTreeScrollBarUI
      */
     @Override
     protected void paintTrack( Graphics g, JComponent c, Rectangle r ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             super.paintTrack(g, c, r);
     }
 
     @Override
     protected void paintThumb( Graphics g, JComponent c, Rectangle r ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() ) { super.paintThumb(g, c, r); return; }
+        if ( !_theme.symbols().drawsItsOwnChrome() ) { super.paintThumb(g, c, r); return; }
         if ( r.width <= 0 || r.height <= 0 )
             return;
         Graphics2D g2 = (Graphics2D) g.create();
         try {
-            SwingTreeLookAndFeel.symbols().paintScrollThumb(
-                    g2, SwingTreeLookAndFeel.palette(), r, isThumbRollover() || isDragging
+            _theme.symbols().paintScrollThumb(
+                    g2, _theme.palette(), r, isThumbRollover() || isDragging
             );
         } finally {
             g2.dispose();
@@ -117,7 +121,7 @@ public final class SwingTreeScrollBarUI
 
     @Override
     public ComponentStyleDelegate<JScrollBar> style( ComponentStyleDelegate<JScrollBar> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 
     /** The button at one end of the bar, carrying the symbol set's stepper. */
@@ -125,10 +129,13 @@ public final class SwingTreeScrollBarUI
     {
         private final LafUtilities.Direction _direction;
 
-        StepperButton( LafUtilities.Direction direction ) { _direction = direction; }
+        StepperButton( SwingTreeLookAndFeel.Theme theme, LafUtilities.Direction direction ) {
+            super(theme);
+            _direction = direction;
+        }
 
         @Override public Dimension getPreferredSize() {
-            Symbols symbols   = SwingTreeLookAndFeel.symbols();
+            Symbols symbols   = theme().symbols();
             int     thickness = UI.scale(symbols.scrollBarThickness());
             int     length    = UI.scale(symbols.scrollStepperLength());
             boolean vertical  = _direction == LafUtilities.Direction.UP || _direction == LafUtilities.Direction.DOWN;

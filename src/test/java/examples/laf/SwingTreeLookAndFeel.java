@@ -16,6 +16,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JToolTip;
 import javax.swing.JViewport;
+import javax.swing.LookAndFeel;
 import javax.swing.PopupFactory;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
@@ -77,13 +78,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class SwingTreeLookAndFeel extends BasicLookAndFeel
 {
-    /**
-     *  The configuration the UI delegates read from. Swing builds them reflectively through
-     *  {@link UIDefaults}, so there is no constructor to hand it to them; the installed look and
-     *  feel publishes it here instead. Swing allows one installed look and feel per process.
-     */
-    private static volatile SwingTreeLookAndFeel _active = null;
-
     /** Where the UI delegate classes live, for the {@link UIDefaults} class-name entries. */
     private static final String PKG = "examples.laf.";
 
@@ -169,7 +163,6 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
      */
     @Override
     public void initialize() {
-        _active = this;
         super.initialize();
         _installPopupFactory();
         _fontView = SwingTree.get().getScaledDefaultFontView();
@@ -182,8 +175,6 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
     public void uninitialize() {
         _uninstallPopupFactory();
         _fontView = null;
-        if ( _active == this )
-            _active = null;
         super.uninitialize();
     }
 
@@ -203,38 +194,35 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             PopupFactory.setSharedInstance(((SwingTreePopupFactory) current).replaced());
     }
 
-    @Override
-    public UIDefaults getDefaults() {
-        _active = this;
-        return super.getDefaults();
-    }
+    // ── The installed theme ──────────────────────────────────────────────
 
-    // ── The delegates' view of the installed configuration ────────────────
-
-    /** @return the theme of the installed look and feel, or one built from the default configuration. */
-    static Theme theme() {
-        SwingTreeLookAndFeel active = _active;
-        return active == null ? new Theme(Conf.DEFAULT) : active._theme;
+    /**
+     *  The theme a UI delegate is made for. Swing builds a delegate reflectively, through the
+     *  static {@code createUI} method a {@link UIDefaults} entry names, so there is no constructor
+     *  of Swing's to hand the theme through. Each {@code createUI} asks here once and passes the
+     *  answer to the delegate it makes, and switching theme installs a fresh delegate everywhere.
+     *
+     * @return the theme of the installed look and feel, or one built from the default
+     *         configuration if a SwingTree delegate is made while another look and feel is installed
+     */
+    static Theme installedTheme() {
+        LookAndFeel installed = UIManager.getLookAndFeel();
+        return installed instanceof SwingTreeLookAndFeel
+                ? ((SwingTreeLookAndFeel) installed)._theme
+                : new Theme(Conf.DEFAULT);
     }
 
     /**
      *  The colours the installed look and feel paints with, or the default palette if none is
-     *  installed. An application that styles something of its own reads them from here, so that a
-     *  re-tinted palette reaches its work too.
+     *  installed. An application that styles something of its own outside this look and feel's
+     *  rules reads them from here, so that a re-tinted palette reaches its work too.
      */
     public static Palette palette() {
-        SwingTreeLookAndFeel active = _active;
-        return active == null ? Conf.DEFAULT.palette() : active._theme.palette();
+        LookAndFeel installed = UIManager.getLookAndFeel();
+        return installed instanceof SwingTreeLookAndFeel
+                ? ((SwingTreeLookAndFeel) installed)._theme.palette()
+                : Conf.DEFAULT.palette();
     }
-
-    /**
-     *  How {@link SwingTreePopupFactory} dresses the window of a popup that does not fit inside the
-     *  application window, with {@link PopupWindowMode#AUTO} already resolved against the platform.
-     *
-     * @return the mode a popup needing a window of its own is given; never
-     *         {@link PopupWindowMode#AUTO} and never {@link PopupWindowMode#IN_FRAME}
-     */
-    public static PopupWindowMode popupWindowMode() { return theme().popupWindowMode(); }
 
     /**
      *  What a popup being styled right now is painting into. {@link Styles.Glassmorphic} asks
@@ -287,24 +275,6 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
             detected = PopupWindowMode.OPAQUE;
         _detectedPopupWindowMode = detected;
         return detected;
-    }
-
-    /** @return the symbol set of the installed look and feel. */
-    static Symbols symbols() { return theme().symbols(); }
-
-    /**
-     *  Whether the installed symbol set draws chrome of its own. When it does not, every delegate
-     *  falls through to the painting and the sizing of the {@code Basic*UI} it extends, which
-     *  leaves plain Swing with the style engine wired in and nothing else.
-     */
-    static boolean drawsOwnChrome() { return theme().symbols().drawsItsOwnChrome(); }
-
-    static boolean styles( Class<?> componentType ) { return theme().styles(componentType); }
-
-    static void installStyleOn( JComponent c ) { theme().installStyleOn(c); }
-
-    static <C extends JComponent> ComponentStyleDelegate<C> applyStyle( ComponentStyleDelegate<C> delegate ) throws Exception {
-        return theme().applyStyle(delegate);
     }
 
     // ── UIDefaults ───────────────────────────────────────────────────────

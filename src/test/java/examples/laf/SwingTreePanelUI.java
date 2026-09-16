@@ -15,12 +15,16 @@ public final class SwingTreePanelUI
         extends    BasicPanelUI
         implements SwingTreeStyledComponentUI<JPanel>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreePanelUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreePanelUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreePanelUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
     }
 
     @Override
@@ -36,6 +40,6 @@ public final class SwingTreePanelUI
 
     @Override
     public ComponentStyleDelegate<JPanel> style( ComponentStyleDelegate<JPanel> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 }

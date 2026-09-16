@@ -18,21 +18,25 @@ public final class SwingTreeButtonUI
         extends    BasicButtonUI
         implements SwingTreeStyledComponentUI<AbstractButton>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeButtonUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeButtonUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeButtonUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
         // Swing's own fill has to go only when a style rule paints one in its place, or it would
         // show through the rounded corners and the grain of that rule. A blank preset paints none.
-        if ( SwingTreeLookAndFeel.styles(c.getClass()) ) {
+        if ( _theme.styles(c.getClass()) ) {
             AbstractButton b = (AbstractButton) c;
             b.setContentAreaFilled(false);
             b.setBorderPainted(true);
             b.setRolloverEnabled(true);
             b.setFocusPainted(false);
         }
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
     }
 
     /**
@@ -58,7 +62,7 @@ public final class SwingTreeButtonUI
      *  button, so the label is written in the ink the style rule chose instead. */
     @Override
     protected void paintText( Graphics g, AbstractButton b, Rectangle textRect, String text ) {
-        if ( b.getModel().isEnabled() || !SwingTreeLookAndFeel.styles(b.getClass()) )
+        if ( b.getModel().isEnabled() || !_theme.styles(b.getClass()) )
             super.paintText(g, b, textRect, text);
         else
             LafUtilities.paintDisabledText(g, b, textRect, text);
@@ -69,6 +73,6 @@ public final class SwingTreeButtonUI
 
     @Override
     public ComponentStyleDelegate<AbstractButton> style( ComponentStyleDelegate<AbstractButton> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 }

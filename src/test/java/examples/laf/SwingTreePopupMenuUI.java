@@ -15,12 +15,16 @@ public final class SwingTreePopupMenuUI
         extends    BasicPopupMenuUI
         implements SwingTreeStyledComponentUI<JPopupMenu>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreePopupMenuUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreePopupMenuUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreePopupMenuUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
     }
 
     @Override
@@ -36,6 +40,6 @@ public final class SwingTreePopupMenuUI
 
     @Override
     public ComponentStyleDelegate<JPopupMenu> style( ComponentStyleDelegate<JPopupMenu> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 }

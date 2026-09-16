@@ -32,12 +32,16 @@ public final class SwingTreeComboBoxUI
         extends    BasicComboBoxUI
         implements SwingTreeStyledComponentUI<JComboBox<?>>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeComboBoxUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeComboBoxUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeComboBoxUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
         // Focus on an editable combo box lands on its editor, and BasicComboBoxUI repaints the
         // combo box only for focus that lands on the combo box itself.
         JComboBox<?> combo = (JComboBox<?>) c;
@@ -56,7 +60,7 @@ public final class SwingTreeComboBoxUI
     protected void configureEditor() {
         super.configureEditor();
         if ( editor instanceof JComponent && ((JComponent) editor).getUI() instanceof SwingTreeStyledComponentUI )
-            SwingTreeLookAndFeel.installStyleOn((JComponent) editor);
+            _theme.installStyleOn((JComponent) editor);
     }
 
     @Override
@@ -198,7 +202,7 @@ public final class SwingTreeComboBoxUI
      */
     @Override
     public void paintCurrentValueBackground( Graphics g, Rectangle bounds, boolean hasFocus ) {
-        if ( !SwingTreeLookAndFeel.styles(comboBox.getClass()) )
+        if ( !_theme.styles(comboBox.getClass()) )
             super.paintCurrentValueBackground(g, bounds, hasFocus);
     }
 
@@ -213,7 +217,7 @@ public final class SwingTreeComboBoxUI
             @Override
             public void layoutContainer( Container parent ) {
                 super.layoutContainer(parent);
-                if ( arrowButton == null || !SwingTreeLookAndFeel.symbols().actuatorReachesBounds() )
+                if ( arrowButton == null || !_theme.symbols().actuatorReachesBounds() )
                     return;
                 int width = arrowButton.getPreferredSize().width;
                 boolean leftToRight = comboBox.getComponentOrientation().isLeftToRight();
@@ -227,7 +231,7 @@ public final class SwingTreeComboBoxUI
     @Override
     protected Rectangle rectangleForCurrentValue() {
         Rectangle value = super.rectangleForCurrentValue();
-        if ( arrowButton == null || !SwingTreeLookAndFeel.symbols().actuatorReachesBounds() )
+        if ( arrowButton == null || !_theme.symbols().actuatorReachesBounds() )
             return value;
         Insets  insets      = comboBox.getInsets();
         int     width       = arrowButton.getPreferredSize().width;
@@ -239,19 +243,21 @@ public final class SwingTreeComboBoxUI
 
     @Override
     protected JButton createArrowButton() {
-        return SwingTreeLookAndFeel.drawsOwnChrome() ? new ArrowButton() : super.createArrowButton();
+        return _theme.symbols().drawsItsOwnChrome() ? new ArrowButton(_theme) : super.createArrowButton();
     }
 
     @Override
     public ComponentStyleDelegate<JComboBox<?>> style( ComponentStyleDelegate<JComboBox<?>> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 
     /** The button carrying the symbol set's drop-down arrow. */
     private static final class ArrowButton extends ActuatorButton
     {
+        ArrowButton( SwingTreeLookAndFeel.Theme theme ) { super(theme); }
+
         @Override public Dimension getPreferredSize() {
-            int side = UI.scale(SwingTreeLookAndFeel.symbols().comboArrowButtonSize());
+            int side = UI.scale(theme().symbols().comboArrowButtonSize());
             return new Dimension(side, side);
         }
 

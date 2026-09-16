@@ -16,12 +16,16 @@ public final class SwingTreeListUI
         extends    BasicListUI
         implements SwingTreeStyledComponentUI<JList<?>>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeListUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeListUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeListUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
     }
 
     @Override
@@ -41,13 +45,13 @@ public final class SwingTreeListUI
      *  entry is painted next. The list knows which entries are selected and is painted once, so
      *  the band is filled here and the renderers, which are not opaque, are painted over it.
      */
-    private static void paintSelectionBands( Graphics2D g, JList<?> list ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+    private void paintSelectionBands( Graphics2D g, JList<?> list ) {
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             return; // Swing's own renderer is carrying the selection colour
         int[] selected = list.getSelectedIndices();
         if ( selected.length == 0 )
             return;
-        g.setColor(SwingTreeLookAndFeel.palette().accentSoft());
+        g.setColor(_theme.palette().accentSoft());
         for ( int index : selected ) {
             Rectangle band = list.getCellBounds(index, index);
             if ( band != null )
@@ -63,6 +67,6 @@ public final class SwingTreeListUI
 
     @Override
     public ComponentStyleDelegate<JList<?>> style( ComponentStyleDelegate<JList<?>> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 }

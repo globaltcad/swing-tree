@@ -35,7 +35,11 @@ public final class SwingTreeLabelUI
      */
     private static final int REMEMBERED_PLACEMENTS = 3;
 
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeLabelUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeLabelUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeLabelUI(SwingTreeLookAndFeel.installedTheme()); }
 
     private final Placement[] _placements = new Placement[REMEMBERED_PLACEMENTS];
     private int               _nextSlot   = 0;
@@ -43,7 +47,7 @@ public final class SwingTreeLabelUI
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
     }
 
     @Override
@@ -222,7 +226,7 @@ public final class SwingTreeLabelUI
 
     @Override
     public ComponentStyleDelegate<JLabel> style( ComponentStyleDelegate<JLabel> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 
     /**

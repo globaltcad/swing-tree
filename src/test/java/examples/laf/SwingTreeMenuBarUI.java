@@ -15,12 +15,16 @@ public final class SwingTreeMenuBarUI
         extends    BasicMenuBarUI
         implements SwingTreeStyledComponentUI<JMenuBar>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeMenuBarUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeMenuBarUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeMenuBarUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
     }
 
     @Override
@@ -36,6 +40,6 @@ public final class SwingTreeMenuBarUI
 
     @Override
     public ComponentStyleDelegate<JMenuBar> style( ComponentStyleDelegate<JMenuBar> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 }

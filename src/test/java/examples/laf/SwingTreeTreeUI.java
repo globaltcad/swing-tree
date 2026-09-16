@@ -22,19 +22,23 @@ public final class SwingTreeTreeUI
         extends    BasicTreeUI
         implements SwingTreeStyledComponentUI<JTree>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeTreeUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeTreeUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeTreeUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
         JTree tree = (JTree) c;
-        if ( SwingTreeLookAndFeel.drawsOwnChrome() ) {
+        if ( _theme.symbols().drawsItsOwnChrome() ) {
             tree.setShowsRootHandles(true);
-            setExpandedIcon(GlyphIcons.treeExpanded(SwingTreeLookAndFeel.theme()));
-            setCollapsedIcon(GlyphIcons.treeCollapsed(SwingTreeLookAndFeel.theme()));
+            setExpandedIcon(GlyphIcons.treeExpanded(_theme));
+            setCollapsedIcon(GlyphIcons.treeCollapsed(_theme));
         }
         LafUtilities.rescaleOnUiScaleChange(tree, () -> applyScaledMetrics(tree));
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
     }
 
     @Override
@@ -50,8 +54,8 @@ public final class SwingTreeTreeUI
      *  clips off the bottom of every label it has.
      */
     private void applyScaledMetrics( JTree tree ) {
-        if ( SwingTreeLookAndFeel.drawsOwnChrome() )
-            tree.setRowHeight(UI.scale(SwingTreeLookAndFeel.symbols().treeRowHeight()));
+        if ( _theme.symbols().drawsItsOwnChrome() )
+            tree.setRowHeight(UI.scale(_theme.symbols().treeRowHeight()));
         else {
             // A row shorter than the font in it is unreadable rather than merely plain.
             java.awt.Font font = tree.getFont();
@@ -78,13 +82,13 @@ public final class SwingTreeTreeUI
      *  rows are selected and is painted once, so the band is filled here and the renderers, which
      *  are not opaque, are painted over it.
      */
-    private static void paintSelectionBands( Graphics2D g, JTree tree ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+    private void paintSelectionBands( Graphics2D g, JTree tree ) {
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             return; // Swing's own renderer is carrying the selection colour
         int[] selected = tree.getSelectionRows();
         if ( selected == null )
             return;
-        g.setColor(SwingTreeLookAndFeel.palette().accentSoft());
+        g.setColor(_theme.palette().accentSoft());
         for ( int row : selected ) {
             Rectangle band = tree.getRowBounds(row);
             if ( band != null )
@@ -101,19 +105,19 @@ public final class SwingTreeTreeUI
     /** No vertical guide line between siblings, unless the symbol set draws no chrome. */
     @Override
     protected void paintVerticalLine( Graphics g, JComponent c, int x, int top, int bottom ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             super.paintVerticalLine(g, c, x, top, bottom);
     }
 
     /** No horizontal guide line into a child, unless the symbol set draws no chrome. */
     @Override
     protected void paintHorizontalLine( Graphics g, JComponent c, int y, int left, int right ) {
-        if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+        if ( !_theme.symbols().drawsItsOwnChrome() )
             super.paintHorizontalLine(g, c, y, left, right);
     }
 
     @Override
     public ComponentStyleDelegate<JTree> style( ComponentStyleDelegate<JTree> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 }

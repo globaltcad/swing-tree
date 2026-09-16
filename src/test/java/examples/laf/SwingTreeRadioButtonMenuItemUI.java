@@ -14,12 +14,16 @@ public final class SwingTreeRadioButtonMenuItemUI
         extends    BasicRadioButtonMenuItemUI
         implements SwingTreeStyledComponentUI<JRadioButtonMenuItem>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeRadioButtonMenuItemUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeRadioButtonMenuItemUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeRadioButtonMenuItemUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
     }
 
     @Override
@@ -35,6 +39,6 @@ public final class SwingTreeRadioButtonMenuItemUI
 
     @Override
     public ComponentStyleDelegate<JRadioButtonMenuItem> style( ComponentStyleDelegate<JRadioButtonMenuItem> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 }

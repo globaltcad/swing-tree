@@ -21,7 +21,11 @@ public final class SwingTreeSplitPaneUI
         extends    BasicSplitPaneUI
         implements SwingTreeStyledComponentUI<JSplitPane>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeSplitPaneUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeSplitPaneUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeSplitPaneUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
@@ -29,15 +33,15 @@ public final class SwingTreeSplitPaneUI
         JSplitPane pane = (JSplitPane) c;
         // The style engine draws the frame. Only a border Swing itself installed is dropped, so
         // that one the application set survives.
-        if ( SwingTreeLookAndFeel.drawsOwnChrome() ) {
+        if ( _theme.symbols().drawsItsOwnChrome() ) {
             if ( pane.getBorder() instanceof UIResource )
                 pane.setBorder(null);
-            pane.setDividerSize(UI.scale(SwingTreeLookAndFeel.symbols().splitDividerThickness()));
+            pane.setDividerSize(UI.scale(_theme.symbols().splitDividerThickness()));
             // BasicSplitPaneUI starts with continuousLayout off, which draws a marker line while
             // the divider is dragged and moves the split only when the mouse is released.
             pane.setContinuousLayout(true);
         }
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
     }
 
     @Override
@@ -52,29 +56,34 @@ public final class SwingTreeSplitPaneUI
     public boolean canForwardPaintingToSwingTree() { return true; }
 
     @Override
-    public BasicSplitPaneDivider createDefaultDivider() { return new Divider(this); }
+    public BasicSplitPaneDivider createDefaultDivider() { return new Divider(this, _theme); }
 
     @Override
     public ComponentStyleDelegate<JSplitPane> style( ComponentStyleDelegate<JSplitPane> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 
     /** The strip between the two panes, decorated by the symbol set. */
     private static final class Divider extends BasicSplitPaneDivider
     {
-        Divider( BasicSplitPaneUI ui ) { super(ui); }
+        private final SwingTreeLookAndFeel.Theme _theme;
+
+        Divider( BasicSplitPaneUI ui, SwingTreeLookAndFeel.Theme theme ) {
+            super(ui);
+            _theme = theme;
+        }
 
         @Override
         public void paint( Graphics g ) {
             // BasicSplitPaneDivider.paint fills the divider background and lays out the child
             // components, so anything drawn before it would be filled over.
             super.paint(g);
-            if ( !SwingTreeLookAndFeel.drawsOwnChrome() )
+            if ( !_theme.symbols().drawsItsOwnChrome() )
                 return;
             Graphics2D g2 = (Graphics2D) g.create();
             try {
-                SwingTreeLookAndFeel.symbols().paintSplitGrip(
-                        g2, SwingTreeLookAndFeel.palette(), getWidth(), getHeight(),
+                _theme.symbols().paintSplitGrip(
+                        g2, _theme.palette(), getWidth(), getHeight(),
                         orientation == JSplitPane.HORIZONTAL_SPLIT,
                         splitPane != null && splitPane.isEnabled()
                 );

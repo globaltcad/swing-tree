@@ -14,12 +14,16 @@ public final class SwingTreeCheckBoxMenuItemUI
         extends    BasicCheckBoxMenuItemUI
         implements SwingTreeStyledComponentUI<JCheckBoxMenuItem>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeCheckBoxMenuItemUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeCheckBoxMenuItemUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeCheckBoxMenuItemUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
         super.installUI(c);
-        SwingTreeLookAndFeel.installStyleOn(c);
+        _theme.installStyleOn(c);
     }
 
     @Override
@@ -35,6 +39,6 @@ public final class SwingTreeCheckBoxMenuItemUI
 
     @Override
     public ComponentStyleDelegate<JCheckBoxMenuItem> style( ComponentStyleDelegate<JCheckBoxMenuItem> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 }

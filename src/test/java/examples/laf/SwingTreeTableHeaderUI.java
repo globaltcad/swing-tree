@@ -32,7 +32,11 @@ public final class SwingTreeTableHeaderUI
         extends    BasicTableHeaderUI
         implements SwingTreeStyledComponentUI<JTableHeader>
 {
-    public static ComponentUI createUI( JComponent c ) { return new SwingTreeTableHeaderUI(); }
+    private final SwingTreeLookAndFeel.Theme _theme;
+
+    SwingTreeTableHeaderUI( SwingTreeLookAndFeel.Theme theme ) { _theme = theme; }
+
+    public static ComponentUI createUI( JComponent c ) { return new SwingTreeTableHeaderUI(SwingTreeLookAndFeel.installedTheme()); }
 
     @Override
     public void installUI( JComponent c ) {
@@ -41,9 +45,9 @@ public final class SwingTreeTableHeaderUI
         // A per-column header renderer is left alone. A column with none of its own already falls
         // back to the header default, and one installed per column would outlive this look and
         // feel: other look and feels replace the header default but never clear per-column ones.
-        if ( SwingTreeLookAndFeel.drawsOwnChrome() && isReplaceableLafDefault(header.getDefaultRenderer()) )
-            header.setDefaultRenderer(new HeaderRenderer());
-        SwingTreeLookAndFeel.installStyleOn(c);
+        if ( _theme.symbols().drawsItsOwnChrome() && isReplaceableLafDefault(header.getDefaultRenderer()) )
+            header.setDefaultRenderer(new HeaderRenderer(_theme));
+        _theme.installStyleOn(c);
     }
 
     /** @return {@code true} for a renderer the next look and feel is allowed to overwrite, which
@@ -67,8 +71,8 @@ public final class SwingTreeTableHeaderUI
      *  lines are drawn here from the column model rather than left to {@link javax.swing.JTable}'s
      *  own vertical grid.
      */
-    private static void paintColumnDividers( Graphics2D g, JTableHeader header ) {
-        Paint line = SwingTreeLookAndFeel.symbols().tableHeaderDivider(SwingTreeLookAndFeel.palette(), header.getHeight());
+    private void paintColumnDividers( Graphics2D g, JTableHeader header ) {
+        Paint line = _theme.symbols().tableHeaderDivider(_theme.palette(), header.getHeight());
         if ( line == null )
             return;
         TableColumnModel columns = header.getColumnModel();
@@ -89,7 +93,7 @@ public final class SwingTreeTableHeaderUI
 
     @Override
     public ComponentStyleDelegate<JTableHeader> style( ComponentStyleDelegate<JTableHeader> it ) throws Exception {
-        return SwingTreeLookAndFeel.applyStyle(it);
+        return _theme.applyStyle(it);
     }
 
     /**
@@ -104,7 +108,12 @@ public final class SwingTreeTableHeaderUI
         private static final String CONTENT_MARGINS = "TableHeader:\"TableHeader.renderer\".contentMargins";
         private static final Insets DEFAULT_MARGINS = new Insets(4, 10, 4, 10);
 
-        HeaderRenderer() { setHorizontalAlignment(SwingConstants.LEADING); }
+        private final SwingTreeLookAndFeel.Theme _theme;
+
+        HeaderRenderer( SwingTreeLookAndFeel.Theme theme ) {
+            _theme = theme;
+            setHorizontalAlignment(SwingConstants.LEADING);
+        }
 
         @Override
         public Component getTableCellRendererComponent(
@@ -112,7 +121,7 @@ public final class SwingTreeTableHeaderUI
         ) {
             JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             JTableHeader header = table == null ? null : table.getTableHeader();
-            label.setForeground(header == null ? SwingTreeLookAndFeel.palette().textMuted() : header.getForeground());
+            label.setForeground(header == null ? _theme.palette().textMuted() : header.getForeground());
             label.setBackground(SwingTreeLookAndFeel.Palette.TRANSPARENT);
             label.setOpaque(false);
             Insets margins = UIManager.getInsets(CONTENT_MARGINS);
