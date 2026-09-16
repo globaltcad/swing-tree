@@ -187,13 +187,14 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         super.uninitialize();
     }
 
-    /** Puts the popup factory in front of whichever one is installed, unless it is already there.
-     *  Switching presets re-installs the look and feel, and a factory stacked on itself would
-     *  dress every popup once per switch. */
-    private static void _installPopupFactory() {
+    /** Puts a popup factory dressing popups in this look and feel's theme in front of whichever one
+     *  is installed. One an earlier theme left there is replaced rather than stacked on, which
+     *  would dress every popup once per switch. */
+    private void _installPopupFactory() {
         PopupFactory current = PopupFactory.getSharedInstance();
-        if ( !(current instanceof SwingTreePopupFactory) )
-            PopupFactory.setSharedInstance(new SwingTreePopupFactory(current));
+        if ( current instanceof SwingTreePopupFactory )
+            current = ((SwingTreePopupFactory) current).replaced();
+        PopupFactory.setSharedInstance(new SwingTreePopupFactory(current, _theme));
     }
 
     private static void _uninstallPopupFactory() {
@@ -545,21 +546,21 @@ public final class SwingTreeLookAndFeel extends BasicLookAndFeel
         // The check and the radio mark are installed whatever the symbol set says, because
         // BasicLookAndFeel's own versions of those two are empty stubs. The rest have working
         // basic defaults, so a symbol set that draws no chrome keeps them.
-        table.put("CheckBox.icon",                 GlyphIcons.checkBox());
-        table.put("RadioButton.icon",              GlyphIcons.radio());
-        table.put("CheckBoxMenuItem.checkIcon",    GlyphIcons.menuCheck());
-        table.put("RadioButtonMenuItem.checkIcon", GlyphIcons.menuRadio());
+        table.put("CheckBox.icon",                 GlyphIcons.checkBox(_theme));
+        table.put("RadioButton.icon",              GlyphIcons.radio(_theme));
+        table.put("CheckBoxMenuItem.checkIcon",    GlyphIcons.menuCheck(_theme));
+        table.put("RadioButtonMenuItem.checkIcon", GlyphIcons.menuRadio(_theme));
         if ( s.drawsItsOwnChrome() ) {
-            table.put("Tree.expandedIcon",  GlyphIcons.treeExpanded());
-            table.put("Tree.collapsedIcon", GlyphIcons.treeCollapsed());
-            table.put("Menu.arrowIcon",     GlyphIcons.submenuArrow());
+            table.put("Tree.expandedIcon",  GlyphIcons.treeExpanded(_theme));
+            table.put("Tree.collapsedIcon", GlyphIcons.treeCollapsed(_theme));
+            table.put("Menu.arrowIcon",     GlyphIcons.submenuArrow(_theme));
         }
         // A set with no icon for a node leaves these empty, and a tree then indents its labels by
         // the disclosure handle alone rather than by the width of an icon that draws nothing.
         if ( s.treeNodeGlyphSize() > 0 ) {
-            table.put("Tree.leafIcon",   GlyphIcons.treeLeaf());
-            table.put("Tree.closedIcon", GlyphIcons.treeClosed());
-            table.put("Tree.openIcon",   GlyphIcons.treeOpen());
+            table.put("Tree.leafIcon",   GlyphIcons.treeLeaf(_theme));
+            table.put("Tree.closedIcon", GlyphIcons.treeClosed(_theme));
+            table.put("Tree.openIcon",   GlyphIcons.treeOpen(_theme));
         }
 
         table.put("TabbedPane.background",            ui(p.background()));

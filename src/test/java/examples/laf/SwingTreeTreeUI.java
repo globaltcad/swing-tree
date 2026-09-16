@@ -30,8 +30,8 @@ public final class SwingTreeTreeUI
         JTree tree = (JTree) c;
         if ( SwingTreeLookAndFeel.drawsOwnChrome() ) {
             tree.setShowsRootHandles(true);
-            setExpandedIcon(GlyphIcons.treeExpanded());
-            setCollapsedIcon(GlyphIcons.treeCollapsed());
+            setExpandedIcon(GlyphIcons.treeExpanded(SwingTreeLookAndFeel.theme()));
+            setCollapsedIcon(GlyphIcons.treeCollapsed(SwingTreeLookAndFeel.theme()));
         }
         LafUtilities.rescaleOnUiScaleChange(tree, () -> applyScaledMetrics(tree));
         SwingTreeLookAndFeel.installStyleOn(c);

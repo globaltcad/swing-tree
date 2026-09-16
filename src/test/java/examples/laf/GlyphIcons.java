@@ -1,5 +1,6 @@
 package examples.laf;
 
+import examples.laf.SwingTreeLookAndFeel.Theme;
 import swingtree.UI;
 
 import javax.swing.AbstractButton;
@@ -15,54 +16,44 @@ import java.awt.Graphics2D;
  *  draws through an icon instead of through a UI delegate: the check and radio marks, the tree's
  *  disclosure handles and the submenu arrow.
  *  <p>
- *  Each icon reads the symbol set and the palette when it paints and captures neither, so the
- *  icons installed under one preset go on working after the look and feel is re-initialised under
- *  another. Each is a {@link UIResource} so that the next look and feel replaces it.
+ *  Each icon draws with the symbol set and the palette of the {@link Theme} it was made for, which
+ *  is the theme of the look and feel whose defaults it was installed into. Each is a
+ *  {@link UIResource}, so that the next look and feel, or the same one re-initialised under another
+ *  theme, replaces it along with the UI delegates that read it.
  */
 final class GlyphIcons
 {
     private GlyphIcons() {}
 
-    private static final Icon CHECK_BOX     = new GlyphIcon(Shape.CHECK);
-    private static final Icon RADIO         = new GlyphIcon(Shape.RADIO);
-    private static final Icon MENU_CHECK    = new GlyphIcon(Shape.MENU_CHECK);
-    private static final Icon MENU_RADIO    = new GlyphIcon(Shape.MENU_RADIO);
-    private static final Icon TREE_EXPANDED = new GlyphIcon(Shape.TREE_EXPANDED);
-    private static final Icon TREE_COLLAPSED= new GlyphIcon(Shape.TREE_COLLAPSED);
-    private static final Icon SUBMENU_ARROW = new GlyphIcon(Shape.SUBMENU_ARROW);
-    private static final Icon TREE_LEAF     = new GlyphIcon(Shape.TREE_LEAF);
-    private static final Icon TREE_CLOSED   = new GlyphIcon(Shape.TREE_CLOSED);
-    private static final Icon TREE_OPEN     = new GlyphIcon(Shape.TREE_OPEN);
-
     /** @return the glyph in front of a check box and a check-box menu item. */
-    static Icon checkBox() { return CHECK_BOX; }
+    static Icon checkBox( Theme theme ) { return new GlyphIcon(theme, Shape.CHECK); }
 
     /** @return the glyph in front of a radio button and a radio menu item. */
-    static Icon radio() { return RADIO; }
+    static Icon radio( Theme theme ) { return new GlyphIcon(theme, Shape.RADIO); }
 
     /** @return the tick of a check box menu item */
-    static Icon menuCheck() { return MENU_CHECK; }
+    static Icon menuCheck( Theme theme ) { return new GlyphIcon(theme, Shape.MENU_CHECK); }
 
     /** @return the mark of a radio button menu item */
-    static Icon menuRadio() { return MENU_RADIO; }
+    static Icon menuRadio( Theme theme ) { return new GlyphIcon(theme, Shape.MENU_RADIO); }
 
     /** @return the disclosure handle of a tree node whose children are showing. */
-    static Icon treeExpanded() { return TREE_EXPANDED; }
+    static Icon treeExpanded( Theme theme ) { return new GlyphIcon(theme, Shape.TREE_EXPANDED); }
 
     /** @return the disclosure handle of a tree node whose children are hidden. */
-    static Icon treeCollapsed() { return TREE_COLLAPSED; }
+    static Icon treeCollapsed( Theme theme ) { return new GlyphIcon(theme, Shape.TREE_COLLAPSED); }
 
     /** @return the arrow at the right edge of a menu entry that opens a submenu. */
-    static Icon submenuArrow() { return SUBMENU_ARROW; }
+    static Icon submenuArrow( Theme theme ) { return new GlyphIcon(theme, Shape.SUBMENU_ARROW); }
 
     /** @return the icon in front of a tree node that can have no children. */
-    static Icon treeLeaf() { return TREE_LEAF; }
+    static Icon treeLeaf( Theme theme ) { return new GlyphIcon(theme, Shape.TREE_LEAF); }
 
     /** @return the icon in front of a tree node whose children are hidden. */
-    static Icon treeClosed() { return TREE_CLOSED; }
+    static Icon treeClosed( Theme theme ) { return new GlyphIcon(theme, Shape.TREE_CLOSED); }
 
     /** @return the icon in front of a tree node whose children are showing. */
-    static Icon treeOpen() { return TREE_OPEN; }
+    static Icon treeOpen( Theme theme ) { return new GlyphIcon(theme, Shape.TREE_OPEN); }
 
     /** Which of the symbol set's glyph methods an icon stands for. */
     private enum Shape {
@@ -72,15 +63,19 @@ final class GlyphIcons
 
     private static final class GlyphIcon implements Icon, UIResource
     {
+        private final Theme _theme;
         private final Shape _shape;
 
-        GlyphIcon( Shape shape ) { _shape = shape; }
+        GlyphIcon( Theme theme, Shape shape ) {
+            _theme = theme;
+            _shape = shape;
+        }
 
         @Override public int getIconWidth()  { return UI.scale(side()); }
         @Override public int getIconHeight() { return UI.scale(side()); }
 
         private int side() {
-            Symbols symbols = SwingTreeLookAndFeel.symbols();
+            Symbols symbols = _theme.symbols();
             switch ( _shape ) {
                 case CHECK:
                 case RADIO:       return symbols.checkGlyphSize();
@@ -97,8 +92,8 @@ final class GlyphIcons
 
         @Override
         public void paintIcon( Component c, Graphics g, int x, int y ) {
-            Symbols                      symbols = SwingTreeLookAndFeel.symbols();
-            SwingTreeLookAndFeel.Palette palette = SwingTreeLookAndFeel.palette();
+            Symbols                      symbols = _theme.symbols();
+            SwingTreeLookAndFeel.Palette palette = _theme.palette();
             int     w        = getIconWidth();
             int     h        = getIconHeight();
             boolean enabled  = c == null || c.isEnabled();
